@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.22.2
+   STARSHIP CADET: CSV Wren                            build 0.22.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3254,11 +3254,11 @@ DECKS[4] = {
     // ---- Deck 4, junior wing ----
     const night = [[M.plum, M.plum], [M.slate, M.plum], [M.plum, M.slate]];
     const bunkText = {
-      a: ['Tomas has taped a star map to the underside of the top bunk.', 'Your bunk. You lost the coin toss for the bottom one.', 'Two empty berths. The quiet ones, for now.'],
-      b: ['Pell sleeps on top and talks in his sleep. Mostly about engines.', 'Rina\'s bunk. A stack of medical journals doubles as a pillow.', 'Two spare berths, made up and waiting.'],
+      a: ['Tomas has taped a star map to the underside of the top bunk.', 'Your bunk. You lost the coin toss for the bottom one.', 'Lukas\'s bunk, and the empty berth above it: the only spare bed on the ship.'],
+      b: ['Pell sleeps on top and talks in his sleep. Mostly about engines.', 'Rina\'s bunk. A stack of medical journals doubles as a pillow.', 'Both berths made up tight, two pairs of boots lined up underneath.'],
       c: ['Someone has hung a tiny paper lantern from the top rail.'],
       d: ['A guitar case under the bottom bunk. Nobody has heard it played.'],
-      h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Empty, blackout blind down.'],
+      h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Blackout blind down. Both berths belong to the night shift.'],
     };
     for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)) });
     furnish('p', 'washroom'); furnish('q', 'washroom');
@@ -5456,7 +5456,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.22.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.22.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5501,7 +5501,8 @@ function tickShip(dt) {
 // ---- saving: { v, build, time, player: { deck, tile, facing }, ship: { decks: { n: { open } } }, crew: {} } ----
 const SAVE_KEY = 'starship-cadet-save', SAVE_V = 1;
 const URL_FLAGS = new URLSearchParams(location.search);
-const NOSAVE = URL_FLAGS.has('nosave'), DEBUG = URL_FLAGS.has('debug');
+const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd'),   // the crowd demo (section 8b) never touches the save
+      DEBUG = URL_FLAGS.has('debug');
 function saveGame() {
   if (NOSAVE) return;
   try {
@@ -5556,14 +5557,14 @@ newBtn.onclick = () => {
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
-// Going to sleep: tap your own bunk (PLAYER_BED, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
+// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
-const PLAYER_BED = '4-B1-2', WAKE_AT = 6 * 60;
+const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
-  const bed = (DECKS[4].places || []).find(p => p.id === PLAYER_BED) || { at: [7, 1] };
-  if (deckDef.num !== deckOf(PLAYER_BED) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
+  if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
   document.getElementById('sleepX').textContent = clockText() + '. Sleep until ' + hhmm(WAKE_AT) + '?';
   sleepEl.hidden = false; toastEl.classList.remove('show'); document.getElementById('sleepYes').focus();
@@ -5635,7 +5636,7 @@ let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
   const people = ROSTER.concat(ROSTER_GUESTS)
-    .filter(p => !p.player && p.bed !== PLAYER_BED);     // you live your own day
+    .filter(p => !p.player);                             // you live your own day
   const places = [];
   for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) places.push({ ...p, deck: n });
   const byId = new Map(places.map(p => [p.id, p]));
@@ -6578,44 +6579,36 @@ const crowd = {
   },
 };
 
-// ---- crowd demo: ?crowd=40 in the address puts 40 made-up crew in Deck 3's mess hall at dinner, and starts
-// you there by the lift. Without the flag none of this exists. The looks and the spots are plain data, so the
-// real roster and the mess hall's places can replace them: looks() and spots() are the only two to swap. ----
+// ---- crowd demo: ?crowd=40 in the address (any number up to 76) puts that many of the real crew in Deck 3 at dinner,
+// and starts you there by the lift at 18:30. The demo never touches your save: ?crowd works as ?nosave does (section 13).
+// Who: ROSTER (section 9) through rosterSpec, leaving out Rina and Brennan, who are already on Deck 3 as full rigs.
+// Where: Deck 3's own places, in this order: the servery queue, the grab shelf, two galley stations, three people
+// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches. Without the flag none of this exists. ----
 const CROWD_DEMO = (() => {
   const m = /[?&]crowd=(\d+)/.exec(location.search); if (!m) return null;
-  const want = Math.min(+m[1], 54);
+  const want = Math.min(+m[1], 76);
   let sd = 4242; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-  const pick = (list, w) => { let x = rnd() * w.reduce((a, b) => a + b, 0); for (let i = 0; i < list.length; i++) if ((x -= w[i]) <= 0) return list[i]; return list[0]; };
-  // made-up looks for now: the roster's `looks`, plus dept and rank for the uniform
-  function looks(n) {
-    const out = [];
-    for (let i = 0; i < n; i++) {
-      const hair = pick(HAIR_STYLES, [3, 4, 2, 2, 2, 2, 1]), acc = [];
-      for (const [a, p] of [['glasses', .2], ['earrings', .18], ['beard', .14], ['moustache', .06], ['headband', .06]]) if (rnd() < p) acc.push(a);
-      out.push({ dept: pick(['command', 'works', 'watch', 'survey', 'infirmary'], [2, 4, 2, 3, 2]), rank: pick([0, 1, 2], [7, 3, 1]),
-        skin: Math.floor(rnd() * SKIN.length), hair, hairColor: pick(Object.keys(HAIR), [4, 4, 4, 2, 2, 1.5, 1, .5]),
-        height: Math.round((.9 + rnd() * .2) * 100) / 100, build: pick(['slim', 'average', 'broad'], [3, 4, 2]), acc });
-    }
-    return out;
-  }
-  // where they go: from the deck's places list once the mess hall has one, else worked out from the furniture
+  const shuffle = a => { for (let i = 0; i < a.length; i++) { const j = i + Math.floor(rnd() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // real crew, day shift first; read when the demo starts, since the roster is defined after this section
+  const looks = () => shuffle(ROSTER.filter(p => !['rina', 'brennan'].includes(p.id)))
+    .sort((a, b) => (a.shift === 'night') - (b.shift === 'night')).map(rosterSpec);
   const FACE = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+  const SEAT_Y = { 'mess-seat': .475, bench: .48 };      // seat tops (the round tables' chairs are .495)
   function spots() {
-    const pl = (deckDef.places || []).filter(p => ['mess-seat', 'servery-queue'].includes(p.type));
-    if (pl.length) return pl.map(p => { const c = cellPos(...p.at); return { x: c.x, z: c.z, face: FACE[p.face] || 0, pose: p.pose }; });
-    const b = ROOM_BOX.M, x0 = X0(b.i0), z0 = Z0(b.j0), seats = [], other = [];
-    for (const [cx, cz] of [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]])      // long tables: four a side on the benches
-      for (const sx of [-1.3, -.43, .43, 1.3]) for (const sz of [-1, 1]) seats.push({ x: x0 + cx + sx, z: z0 + cz + sz * .68, face: sz < 0 ? 0 : Math.PI, pose: 'sit', y: .475 });
-    [[2.0, 6.9], [5.2, 6.9], [8.4, 6.9]].forEach(([cx, cz], k) => {               // round tables: four chairs, the table turned k * .3
-      for (let j = 0; j < 4; j++) { const a = j * Math.PI / 2 + Math.PI / 4 + k * .3; seats.push({ x: x0 + cx + Math.sin(a) * .84, z: z0 + cz + Math.cos(a) * .84, face: a + Math.PI, pose: 'sit', y: .495 }); }
-    });
-    for (let i = 0; i < seats.length; i++) { const j = i + Math.floor(rnd() * (seats.length - i)); [seats[i], seats[j]] = [seats[j], seats[i]]; }
-    for (const z of [.6, 1.4]) other.push({ x: x0 + 10.9, z: z0 + z, face: Math.PI / 2, pose: 'work' });           // at the drinks station
-    for (let i = 0; i < 3; i++) other.push({ loop: i / 3, pose: 'walk' });                                           // walking the aisles
-    for (let i = 0; i < 5; i++) other.push({ x: x0 + 10.4, z: z0 + 3.3 + i * .75, face: .35, pose: 'stand' });      // in the servery line
-    return other.concat(seats);
+    const P = DECKS[3].places || [], of = (t, n) => P.filter(p => p.type === t).slice(0, n);
+    const b = ROOM_BOX.M, rounds = [[2.0, 6.9], [5.2, 6.9], [8.4, 6.9]].map(([x, z]) => [b.i0 + x, b.j0 + z]);   // round tables, in tiles
+    const at = p => {
+      const [x, z] = p.xy || [p.at[0] + .5, p.at[1] + .5];
+      let face = FACE[p.face] || 0, y = SEAT_Y[p.type] || 0;
+      const r = p.type === 'mess-seat' && rounds.find(([cx, cz]) => Math.hypot(cx - x, cz - z) < 1.1);
+      if (r) { face = Math.atan2(r[0] - x, r[1] - z); y = .495; }   // a round table's chair faces the table, not a compass point
+      return { x: x - OX, z: z - OZ, face, pose: p.pose, y };
+    };
+    return [...of('servery-queue'), ...of('grab-shelf'), ...of('work:galley', 2)].map(at)
+      .concat([0, 1, 2].map(i => ({ loop: i / 3, pose: 'walk' })))
+      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at));
   }
-  // the walkers' loop round the aisles, in room tiles
+  // the walkers' loop round the mess hall's aisles, in room tiles
   const LOOP = [[.5, 2.5], [9.6, 2.5], [9.6, 5.3], [.5, 5.3]];
   function onLoop(u) {
     const b = ROOM_BOX.M, x0 = X0(b.i0), z0 = Z0(b.j0), seg = LOOP.map((p, i) => { const q = LOOP[(i + 1) % LOOP.length]; return Math.hypot(q[0] - p[0], q[1] - p[1]); });
@@ -6625,20 +6618,19 @@ const CROWD_DEMO = (() => {
       d -= seg[i];
     }
   }
-  const LOOK = looks(want);
-  let here = [], started = false, hud = null, ft = 16.7, last = performance.now();
+  let LOOK = null, here = [], started = false, hud = null, ft = 16.7, last = performance.now();
   return {
     tick(dt, t) {
-      if (!started) {                                    // start on Deck 3 at dinner, by the lift
-        started = true;
+      if (!started) {                                    // start on Deck 3 at 18:30, by the lift
+        started = true; LOOK = looks();
         if (deckDef.num !== 3) goToDeck(3);
-        try { gameMin = 18 * 60 + 30; updateClock(); } catch (e) {}
-        toast('Crowd demo', `${want} crew at dinner in the mess hall, to the north-east of the lift. The line at the top shows the draw calls and the frame time.`);
+        setShipNow((SHIP.time.day - 1) * 1440 + 18 * 60 + 30); nightT = nightAt(); updateClock();
+        toast('Crowd demo', `${want} of the crew on Deck 3 at dinner: the mess hall is to the north-east of the lift. The line at the top shows the draw calls and the frame time. This demo doesn't touch your save.`);
         hud = document.createElement('div'); hud.className = 'clock'; document.querySelector('.hud').appendChild(hud);
       }
       const on = deckDef.num === 3;
       if (on && !here.length) {
-        here = spots().slice(0, want).map((s, i) => ({ s, h: crowd.add(LOOK[i]) }));
+        here = spots().slice(0, want).map((s, i) => ({ s, h: crowd.add(LOOK[i % LOOK.length]) }));
       } else if (!on && here.length) { for (const e of here) crowd.remove(e.h); here = []; }
       crowd.visible = typeof crewOn === 'undefined' || crewOn;
       for (const e of here) {
@@ -6676,7 +6668,7 @@ const CREW = [
 // nine walkers (section 10) and stays as it is until the schedules take over; ROSTER is data only, read by the
 // schedule engine and the crowd. Story crew keep CREW's looks and bios exactly. ROSTER_GUESTS holds people who
 // live aboard but aren't crew (Envoy Saruth); they aren't in the 75. The player is one of the 75 (one of the 47
-// juniors) but isn't scheduled, so ROSTER holds the other 74 and ROSTER_PLAYER holds your entry (bed 4-B1-2).
+// juniors) but isn't scheduled, so ROSTER holds the other 74 and ROSTER_PLAYER holds your entry (bed 4-B1-4).
 // HABITS is the shared habit vocabulary, with what each does to a day.
 // dept is the job's department (command, helm, comms, works, watch, survey, infirmary, galley); uniform is the
 // uniform it wears (makeCharacter's DEPT key). Nothing here calls R().
@@ -6736,7 +6728,7 @@ const ROSTER = [
   {"id": "bakshi-sol", "name": "Sol Bakshi", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-1", "work": {"deck": 1, "place": "work:helm"}, "habits": ["lounge-regular", "common-room", "early-riser"], "traits": ["easygoing", "gentle"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "dark", "height": 1.01, "build": "average", "acc": []}, "bio": "Plots courses for fun on rest days.", "life": ["Paints tiny portraits of the crew.", "Grew up on Lisk, and misses the rain."], "seed": 224075},
   {"id": "strand-erik", "name": "Erik Strand", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-6", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "garden-lover", "quiet-corner"], "traits": ["optimistic", "restless"], "looks": {"skin": 3, "hair": "buzz", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["beard", "glasses"]}, "bio": "Learning the helm one watch at a time.", "life": ["Paints tiny portraits of the crew.", "Writes poetry and shows nobody."], "seed": 513721},
   {"id": "santos-zofia", "name": "Zofia Santos", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-3", "work": {"deck": 2, "place": "work:comms"}, "habits": ["skips-breakfast"], "traits": ["easygoing", "ambitious"], "looks": {"skin": 0, "hair": "short", "hairColor": "auburn", "height": 0.97, "build": "slim", "acc": []}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Ran a market stall on Hesper Dock before joining up.", "Is training for the gym's rowing leaderboard."], "seed": 768544},
-  {"id": "tran-chloe", "name": "Chloe Tran", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B1-4", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed", "lingers-at-meals"], "traits": ["reliable", "dry humour"], "looks": {"skin": 2, "hair": "short", "hairColor": "brown", "height": 0.99, "build": "average", "acc": ["beard", "headband"]}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Bakes on rest days, if Brennan allows it.", "Is quietly in charge of the lost-property box."], "seed": 955723},
+  {"id": "tran-chloe", "name": "Chloe Tran", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B1-2", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed", "lingers-at-meals"], "traits": ["reliable", "dry humour"], "looks": {"skin": 2, "hair": "short", "hairColor": "brown", "height": 0.99, "build": "average", "acc": ["beard", "headband"]}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Bakes on rest days, if Brennan allows it.", "Is quietly in charge of the lost-property box."], "seed": 955723},
   {"id": "silva-bea", "name": "Bea Silva", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser"], "traits": ["dreamy", "reliable"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Grew up on Coriel, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 740803},
   {"id": "teague-theo", "name": "Theo Teague", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break"], "traits": ["restless", "blunt"], "looks": {"skin": 5, "hair": "long", "hairColor": "brown", "height": 1.09, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Draws comics about life aboard and pins them in the common room.", "Makes a playlist for every week of the tour."], "seed": 660843},
   {"id": "rossi-femi", "name": "Femi Rossi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B7-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "calls-home", "early-to-bed"], "traits": ["optimistic", "competitive"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "auburn", "height": 0.91, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Brought a telescope from home.", "Is learning Veyli from a phrasebook."], "seed": 211718},
@@ -6780,7 +6772,7 @@ const ROSTER = [
 const ROSTER_GUESTS = [
   {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695},
 ];
-const ROSTER_PLAYER = {"id": "you", "name": "You", "player": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician (you)", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-2", "work": {"deck": 5, "place": "work:works"}, "habits": [], "traits": [], "looks": {"skin": 2, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}, "bio": "New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.", "life": [], "seed": 554340};
+const ROSTER_PLAYER = {"id": "you", "name": "You", "player": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician (you)", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-4", "work": {"deck": 5, "place": "work:works"}, "habits": [], "traits": [], "looks": {"skin": 2, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}, "bio": "New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.", "life": [], "seed": 554340};
 // ---- END ROSTER ----
 // a roster entry as makeCharacter takes it
 const ROSTER_RANK = { junior: 0, officer: 1, senior: 1, chief: 2, xo: 3, captain: 4, guest: 0 };
@@ -6934,6 +6926,9 @@ target.copy(player.obj.position).setY(.7);
 const CREW_SPEED = 1.15;                                 // tiles per real second
 const _cp = new THREE.Vector3();
 const FACE_ANGLE = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+// seat and mattress tops (the performance engineer's measurements): a place's own `y` wins, then beds (upper
+// berths, the even ones, at 1.6), then these by type; 0 is the crowd's default (0.475 to sit, 0.5 to lie)
+const SEAT_Y = { 'mess-seat': .475, bench: .48, 'lounge-seat': .44, 'common-room': .44 };
 const idHash = s => { let h = 7; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 let SPOT_OF = new Map(), PLACE_OF = new Map();          // this deck's places, and where each one is (made per deck)
 const edgeTiles = k => { const [o, i, j] = k.split(','); return o === 'v' ? [[+i - 1, +j], [+i, +j]] : [[+i, +j - 1], [+i, +j]]; };
@@ -6957,7 +6952,8 @@ function placeSpot(id) {
       walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms)) || opts[0] || nearestOpen(x, z, null);
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
-    s = { id, walk, x, z, y: berth && +berth[1] % 2 === 0 ? 1.6 : 0, face: FACE_ANGLE[pl.face] || 0,
+    const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
+    s = { id, walk, x, z, y, face: FACE_ANGLE[pl.face] || 0,
       pose: pl.type === 'bed' ? 'lie' : pl.pose, room: pl.room, onTile: free(...pl.at) };
   }
   SPOT_OF.set(id, s); return s;
@@ -7112,7 +7108,9 @@ function crewNearDoor(d) {
 function crewAtScreen(cx, cy) {
   if (!crowd.visible) return null;
   let best = null, bd = 26 * Math.max(.8, camera.zoom);
-  for (const a of DECK_CREW) for (const hy of a.pose === 'lie' ? [.15] : a.pose === 'sit' ? [.5, .9] : [.5, 1.0, 1.4]) {
+  const mine = PLACE_OF.get(playerBed()), myBunk = mine && placeSpot(mine.id);   // a tap on your own bunk is for you,
+  for (const a of DECK_CREW) for (const hy of a.pose === 'lie' && myBunk && Math.hypot(a.x - myBunk.x, a.z - myBunk.z) < .6 ? [] :   // not your bunkmate below
+    a.pose === 'lie' ? [.15] : a.pose === 'sit' ? [.5, .9] : [.5, 1.0, 1.4]) {
     _cp.set(a.x, a.y + hy, a.z).project(camera);
     const d = Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy);
     if (d < bd) { bd = d; best = a; }

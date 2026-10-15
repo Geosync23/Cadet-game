@@ -145,7 +145,7 @@ STORY = [
 ]
 
 # the player: one of the 75 (a Works junior), kept apart from ROSTER because the player isn't scheduled
-PLAYER = dict(id='you', name='You', player=True, rank='junior', dept='works', role='Works technician (you)', shift='day', bed='4-B1-2', job='works',
+PLAYER = dict(id='you', name='You', player=True, rank='junior', dept='works', role='Works technician (you)', shift='day', bed='4-B1-4', job='works',
               rota={'offDays': [5, 6]}, looks=dict(skin=2, hair='short', hairColor='dark', height=1.05, build='average', acc=[]),
               bio='New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.', habits=[], traits=[], life=[])
 
@@ -290,6 +290,10 @@ def main():
     crew.remove(drop); DROPPED.append(drop['name'])
     for p in crew:
         if p['bed'] == '4-B1-6': p['bed'] = drop['bed']
+    # Bunk 1's furniture text puts you in the top berth of the second bunk (4-B1-4: you lost the coin toss), so whoever
+    # was given that berth moves to 4-B1-2, the top berth of the first bunk, above Tomas and under his star map
+    for p in crew:
+        if p['bed'] == '4-B1-4': p['bed'] = '4-B1-2'
     # ---- work places, seeds, uniform
     out = []
     for p in crew + GUESTS + [PLAYER]:
