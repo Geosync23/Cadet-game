@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.6.8
+   STARSHIP CADET: CSV Wren                            build 0.6.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -440,6 +440,7 @@ function finishRun(r) {
 //   planter: a low planter wall, planted along its top
 // Tiles whose centres lie close to the line are blocked, and walkers are pushed off the line itself.
 let CURVES = [], CURVE_SEGS = [];
+let SNUG = new Map();                                    // tile -> the true footprint of a snug piece on it: paths still avoid the tile, but you can walk right up to the piece
 const curveWallMat = (() => { const t = wallTex.clone(); t.wrapS = THREE.RepeatWrapping; t.needsUpdate = true; return new THREE.MeshStandardMaterial({ map: t, roughness: .85, metalness: .05 }); })();
 const CURVE_MAT = {
   planter: std('#4a3a2e', .7), soil: std('#2c2219', 1), leaf: [std('#4c8a57', .7), std('#6ba86a', .7), std('#3f7a4f', .7)],
@@ -1610,29 +1611,24 @@ const KIT = {
     return { w: 1.15, d: 1.3 };
   },
   // ---- the promenade ----
-  planterIsland(g, o = {}) {                             // a planter down the middle of the promenade: a tree, flowers, a bench
-    const cl = PROM.clad, L = GD.leaves, fl = o.flowers || 0;   // facing each lane, lamps at the ends, a warm strip under the seats
-    box(2.2, .5, .9, cl, 0, .25, 0, g); box(2.3, .06, 1.0, PROM.rim, 0, .53, 0, g); box(2.1, .03, .8, GD.soil, 0, .555, 0, g);
+  planterIsland(g, o = {}) {                             // a planter down the middle of the promenade: a tree, flowers,
+    const cl = PROM.clad, L = GD.leaves, fl = o.flowers || 0;   // a bench facing each lane, a warm strip under the seats
+    box(1.5, .42, .66, cl, 0, .21, 0, g); box(1.58, .05, .74, PROM.rim, 0, .445, 0, g); box(1.42, .03, .58, GD.soil, 0, .465, 0, g);
     for (const sz of [-1, 1]) {
-      box(2.0, .06, .36, M.wood, 0, .45, sz * .69, g);
-      for (const x of [-.9, .9]) box(.06, .42, .3, PROM.frame, x, .21, sz * .69, g);
-      const st = box(1.9, .02, .04, GD.ledW, 0, .06, sz * .52, g); st.castShadow = false;
+      box(1.4, .05, .3, M.wood, 0, .42, sz * .52, g);
+      for (const x of [-.62, .62]) box(.05, .4, .26, PROM.frame, x, .2, sz * .52, g);
+      const st = box(1.3, .02, .03, GD.ledW, 0, .05, sz * .38, g); st.castShadow = false;
     }
-    cyl(.07, .1, 1.6, GD.post, 0, 1.3, 0, g, 8);         // the tree: a slim trunk and a round crown
-    for (let k = 0; k < 13; k++) { const a = k * 2.4, r = k ? .2 + (k % 3) * .17 : 0; leaf(L[1 + k % 2], Math.sin(a) * r, 2.25 + (k % 4) * .11 - r * .25, Math.cos(a) * r * .8, .36, .3, .32, g); }
-    if (o.fruit) for (let k = 0; k < 7; k++) { const a = k * 1.7 + .4; soft(GD.lemon, Math.sin(a) * .48, 2.05 + (k % 3) * .14, Math.cos(a) * .4, .05, .05, .05, g); }
-    for (let k = 0; k < 14; k++) {                       // flowers and greenery round the trunk
-      const x = -.92 + (k >> 1) * .27 + (k % 2) * .1, z = k % 2 ? .24 : -.24;
-      if (Math.abs(x) < .2) continue;
-      leaf(L[1 + k % 2], x, .63, z, .13, .1, .13, g);
-      leaf(PROM.bloom[fl + k % 2], x + .03, .72, z, .05, .045, .05, g);
+    cyl(.05, .08, 1.3, GD.post, 0, 1.1, 0, g, 8);         // the tree: a slim trunk and a round crown
+    for (let k = 0; k < 11; k++) { const a = k * 2.4, r = k ? .15 + (k % 3) * .13 : 0; leaf(L[1 + k % 2], Math.sin(a) * r, 1.85 + (k % 4) * .09 - r * .25, Math.cos(a) * r * .8, .28, .24, .25, g); }
+    if (o.fruit) for (let k = 0; k < 6; k++) { const a = k * 1.7 + .4; soft(GD.lemon, Math.sin(a) * .36, 1.7 + (k % 3) * .11, Math.cos(a) * .3, .04, .04, .04, g); }
+    for (let k = 0; k < 10; k++) {                       // flowers and greenery round the trunk
+      const x = -.6 + (k >> 1) * .3, z = k % 2 ? .16 : -.16;
+      if (Math.abs(x) < .15) continue;
+      leaf(L[1 + k % 2], x, .53, z, .1, .08, .1, g);
+      leaf(PROM.bloom[fl + k % 2], x + .02, .6, z, .04, .035, .04, g);
     }
-    for (const x of [-1.28, 1.28]) {                     // lamp posts at the ends
-      cyl(.09, .11, .06, PROM.frame, x, .03, 0, g, 12); cyl(.03, .03, 2.1, PROM.frame, x, 1.08, 0, g, 8);
-      cyl(.09, .05, .05, PROM.frame, x, 2.14, 0, g, 12);
-      const gb = soft(GD.ledW, x, 2.24, 0, .1, .1, .1, g); gb.castShadow = false; glow('#fff1d0', .8, x, 2.24, 0, g, .45);
-    }
-    return { w: 2.8, d: 1.74, tall: true };
+    return { w: 1.58, d: 1.34, tall: true };
   },
   routeKiosk(g) {                                        // a two-sided screen on a post: the Wren's route across the frontier
     const t = tex(256, 340, (c, w, h) => {
@@ -2077,9 +2073,13 @@ function place(roomKey, kind, lx, lz, back = 'n', o = {}) {
   // block the tiles under the footprint
   const sw = (back === 'w' || back === 'e') ? fp.d : fp.w, sd = (back === 'w' || back === 'e') ? fp.w : fp.d;
   if (!fp.noBlock && !o.noBlock) {
+    const box = o.snug && [g.position.x - sw / 2, g.position.x + sw / 2, g.position.z - sd / 2, g.position.z + sd / 2];
     for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
       const cx = X0(i) + .5, cz = Z0(j) + .5;
-      if (Math.abs(cx - g.position.x) <= sw / 2 + .08 && Math.abs(cz - g.position.z) <= sd / 2 + .08) BLOCKED.add(i + ',' + j);
+      if (Math.abs(cx - g.position.x) <= sw / 2 + .08 && Math.abs(cz - g.position.z) <= sd / 2 + .08) {
+        BLOCKED.add(i + ',' + j);
+        if (box) { const k = i + ',' + j; SNUG.set(k, (SNUG.get(k) || []).concat([box])); }
+      }
     }
   }
   for (const k of (o.block || [])) BLOCKED.add((b.i0 + k[0]) + ',' + (b.j0 + k[1]));
@@ -2713,7 +2713,7 @@ function buildDeck(def) {
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -3012,9 +3012,9 @@ DECKS[4] = {
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
     place('Z', 'harnessRack', 1, 2.3, 'n');
     // the lobbies either side of the lift: somewhere to sit, a plant, a directory
-    place('+', 'bench', .3, 3.0, 'w', { it: IT('Bench', 'For waiting for the lift, or pretending to while someone finishes in the washroom.') });
+    place('+', 'bench', .3, 3.0, 'w', { snug: true, it: IT('Bench', 'For waiting for the lift, or pretending to while someone finishes in the washroom.') });
     place('+', 'plant', .45, 9.55, 'w', { band: '#5fd6c6' });
-    place('+', 'bench', 5.7, 3.0, 'e', { it: IT('Bench', 'Officers wait here. They wait more upright than the juniors do.') });
+    place('+', 'bench', 5.7, 3.0, 'e', { snug: true, it: IT('Bench', 'Officers wait here. They wait more upright than the juniors do.') });
     place('+', 'plant', 5.55, 9.55, 'e', { band: '#c45a3f' });
     placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Quarters.') });
   },
@@ -3290,18 +3290,18 @@ DECKS[3] = {
     NO_FADE.add('Z');
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
     // the plaza: somewhere to wait, and plants at the corners
-    place('+', 'bench', 5.7, 8.5, 'e', { it: IT('Bench', 'Where people wait for whoever is always last to breakfast.') });
-    place('+', 'bench', .3, 1.5, 'w', { it: IT('Bench', 'Facing the infirmary doors, which makes it the worried-friend bench.') });
+    place('+', 'bench', 5.7, 8.5, 'e', { snug: true, it: IT('Bench', 'Where people wait for whoever is always last to breakfast.') });
+    place('+', 'bench', .3, 1.5, 'w', { snug: true, it: IT('Bench', 'Facing the infirmary doors, which makes it the worried-friend bench.') });
     for (const [x, z, band] of [[.45, 9.55, '#5fd6c6'], [5.55, .45, '#d9a441'], [5.55, 9.55, '#c45a3f']]) place('+', 'plant', x, z, 'n', { band, big: true });
     // the promenade: big plants by the garden doors and the lounge doors
     for (const [x, z] of [[.45, .45], [.45, 3.55], [28.55, .45], [28.55, 3.55]]) place('=', 'plant', x, z, 'n', { big: true, band: '#5fd6c6' });
-    // planter islands down the middle (rows 10-11), between the doorways, so every door keeps a straight way across;
+    // planter islands down the middle (rows 10-11, two columns each), between the doorways, so every door keeps a straight way across;
     // the route kiosk where the promenade leaves the plaza; benches either side of the garden doors
-    place('=', 'planterIsland', 17.5, 2, 'n', { fadeGroup: '=:a', fruit: true, flowers: 2, it: IT('Lemon tree', 'A little lemon tree in a planter, with a bench on each side. The gardeners water it from a can, because it is not technically the garden.') });
-    place('=', 'planterIsland', 23.5, 2, 'n', { fadeGroup: '=:b', it: IT('Planter', 'Marigolds this month, after a vote at the mess hall. The losing side wanted cacti, and has not let it go.') });
+    place('=', 'planterIsland', 18, 2, 'n', { snug: true, fadeGroup: '=:a', fruit: true, flowers: 2, it: IT('Lemon tree', 'A little lemon tree in a planter, with a bench on each side. The gardeners water it from a can, because it is not technically the garden.') });
+    place('=', 'planterIsland', 24, 2, 'n', { snug: true, fadeGroup: '=:b', it: IT('Planter', 'Marigolds this month, after a vote at the mess hall. The losing side wanted cacti, and has not let it go.') });
     place('=', 'routeKiosk', 12.5, 2, 'w', { block: [[12, 1], [12, 2]], it: IT('Route map', 'The Wren\'s tour, drawn as a dotted line across the frontier. Three survey stops done, four to go. The little ship on the map is smudged where people keep touching it.') });
-    place('=', 'bench', 2.6, .32, 'n', { it: IT('Bench', 'By the garden doors. It smells of tomatoes and wet soil here, which some people like a lot.') });
-    place('=', 'bench', 2.6, 3.68, 's');
+    place('=', 'bench', 2.6, .32, 'n', { snug: true, it: IT('Bench', 'By the garden doors. It smells of tomatoes and wet soil here, which some people like a lot.') });
+    place('=', 'bench', 2.6, 3.68, 's', { snug: true });
     for (const [x, z, band] of [[1.3, .4, '#d9a441'], [3.9, .4, '#c45a3f'], [1.3, 3.6, '#c45a3f'], [3.9, 3.6, '#d9a441']]) place('=', 'plant', x, z, 'n', { band });
 
     // ---- mess hall: four long tables of eight under the port windows, three round tables of four by the promenade.
@@ -3596,7 +3596,11 @@ function collide(p, r) {
   for (let pass = 0; pass < 2; pass++) {
     const ci = Math.floor(p.x + OX), cj = Math.floor(p.z + OZ);
     for (let j = cj - 1; j <= cj + 2; j++) for (let i = ci - 1; i <= ci + 2; i++) {
-      if (j <= cj + 1 && i <= ci + 1 && solidTile(i, j)) pushOutBox(p, X0(i), X0(i + 1), Z0(j), Z0(j + 1), r);
+      if (j <= cj + 1 && i <= ci + 1 && solidTile(i, j)) {
+        const sn = SNUG.get(i + ',' + j);                 // snug pieces push you off their own outline, not the whole tile
+        if (sn) for (const b of sn) pushOutBox(p, b[0], b[1], b[2], b[3], r);
+        else pushOutBox(p, X0(i), X0(i + 1), Z0(j), Z0(j + 1), r);
+      }
       if (i <= ci + 1 && innerBlocks(EDGES.get(`h,${i},${j}`))) pushOutBox(p, X0(i), X0(i + 1), Z0(j) - T / 2, Z0(j) + T / 2, r);
       if (j <= cj + 1 && innerBlocks(EDGES.get(`v,${i},${j}`))) pushOutBox(p, X0(i) - T / 2, X0(i) + T / 2, Z0(j), Z0(j + 1), r);
       const touch = [`h,${i - 1},${j}`, `h,${i},${j}`, `v,${i},${j - 1}`, `v,${i},${j}`].map(k => EDGES.get(k));
@@ -4347,12 +4351,13 @@ function loop() {
   }
 
   if (ride) updateRide(dt);
-  // doors slide open for anyone nearby (lift doors only when a ride opens them)
+  // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
   for (const d of DOOR_OBJS) {
     if (!d.passable && d.force === undefined && d.open < 1e-4) continue;
     const near = d.force !== undefined ? d.force > 0 : d.passable && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : 8));
-    d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
+    if (d.e.type === 'lift') d.leaves.forEach(l => { l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; });   // lift doors sink into the floor
+    else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
   }
 
   nightT += (nightTarget - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
