@@ -35,6 +35,20 @@ The project lead session keeps this file current. A new lead session reads it fi
 1. **Build the ship (DEV_NOTES 6e):** Deck 6, then 1, then 2, with a review after each. Deck architect only. Shell, rooms and furniture; no crew or machines.
 2. **Then:** crew on the new decks, and step 7 (machines, supplies, job list).
 
+## Overnight plan (agreed with the user, 2026-10-15)
+
+When the user approves the Deck 2 plan, the lead does this without waiting for them:
+
+1. The Deck 6 architect finishes T4 and its review package, then waits for the user's review in the morning.
+2. The lead hires two new architect sessions, both starting from the Deck 6 branch (`claude/deck-architect` after T4) so all three decks share one base:
+   - **Bridge architect:** Deck 1, branch `claude/deck1-bridge`, builds 0.8.x.
+   - **Command architect:** Deck 2, branch `claude/deck2-command`, builds 0.9.x.
+   - Each has a separate range of build numbers so their version bumps never clash.
+3. Each architect only edits its own deck's parts of `starship-cadet.html` (its `DECKS[n]`, its dress code, new kit for it). They tell the lead before touching anything shared.
+4. Each runs every turn of its deck, then stops with a review package and waits. No new deck starts without the user's review.
+5. The lead checks in on a timer through the night, steers anything stuck, and builds `claude/ship-integration` with all three decks merged and tested. In the morning the user can play one build with Decks 6, 1 and 2.
+6. If the user doesn't answer the Deck 2 plan's open questions: the six invented officers stay as placeholders, and the 15th room stays a visitors' cabin.
+
 ## Queue
 
 - Design doc updates listed at the top of DEV_NOTES.
