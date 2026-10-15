@@ -110,6 +110,11 @@ with sync_playwright() as pw:
         if o['missing']: fail(f"deck {n}: someone due on the deck wasn't there ({o['missing']} person-minutes)")
         if peak > BUDGET: fail(f"deck {n}: {peak} draw calls")
 
+    # jobs (section 17): the machine panels and other places the crew's jobs took them to, from the day just run
+    jv = g.ev("typeof jobVisits === 'function' ? jobVisits() : null")
+    if jv is not None:
+        print('Job visits (jobs on the books after the day):', ', '.join(f"{x['k']}: {x['visits']} at {x['places']}" for x in jv) or 'none')
+
     # 4. the same day twice on the crew's own deck (both runs without drawing: a drawn frame also runs the game's loop)
     o1 = g.page.evaluate(f"s => window.__sc(s)({{ n: 4, day: {DAY}, step: {STEP}, draw: false }})", SIM)
     o2 = g.page.evaluate(f"s => window.__sc(s)({{ n: 4, day: {DAY}, step: {STEP}, draw: false }})", SIM)

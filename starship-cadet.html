@@ -3854,6 +3854,13 @@ DECKS[5] = {
     { id: '5-shop-3', type: 'work:works', at: [26, 11], face: 'e', pose: 'work', room: 'f' },
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
+    // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
+    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
+    { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-2', type: 'work:works', at: [7, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-3', type: 'work:works', at: [2, 4], face: 'w', pose: 'work', room: 'S' },
@@ -6927,6 +6934,20 @@ function roomsInUse(d0, days = 7) {
   return Object.entries(T).sort().map(([k, t]) => ({ k, places: t.places, used: t.used.size, uses: t.uses, hours: Math.round(t.min / 60), people: t.people.size }));
 }
 
+// the places the crew's jobs (section 17) took them to: per 'deck type', visits and different places, from the jobs
+// on the books now (claimed or done in the last two days); null before there are any
+function jobVisits() {
+  if (typeof SHIP === 'undefined' || !Array.isArray(SHIP.jobs)) return null;
+  const S = schedData(), byId = new Map(); for (const n in DECKS) for (const p of DECKS[n].places || []) byId.set(p.id, { ...p, deck: +n });
+  const T = {};
+  for (const j of SHIP.jobs) for (const s of j.segs || []) if (s.placeId) {
+    const pl = S.byId.get(s.placeId) || byId.get(s.placeId); if (!pl) continue;
+    const t = T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] || (T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] = { visits: 0, places: new Set() });
+    t.visits++; t.places.add(pl.id);
+  }
+  return Object.entries(T).sort().map(([k, t]) => ({ k, visits: t.visits, places: t.places.size }));
+}
+
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
@@ -6953,14 +6974,11 @@ function shipDay(d) {
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
 // whereIs: where someone is at ship minute t. A job they've claimed (section 17's jobWhere: to the parts shelf, the
 // machine's panel and back) is laid over their plan; otherwise it's the plan (planWhere). Anything that needs the
-// plan alone (section 17's jobRun, which fits jobs into it) calls planWhere. The flag stops a jobWhere that brings the
-// machines up to date from reaching jobWhere again through whereIs.
-// Until section 17's jobRun reads planWhere (agreed with the systems engineer), jobs stay off: jobRun calling
-// whereIs from inside machinesNow would run an hour's jobs twice. jobsSafe() checks that once, then remembers.
-let JOB_WHERE_BUSY = false, JOBS_SAFE = null;
-const jobsSafe = () => JOBS_SAFE !== null ? JOBS_SAFE : (JOBS_SAFE = typeof jobRun !== 'function' || !/\bwhereIs\(/.test(String(jobRun)));
+// plan alone (section 17's jobRun, which fits jobs into it) calls planWhere, never whereIs: whereIs from inside
+// machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
+let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
-  if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY && jobsSafe()) {
+  if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
     JOB_WHERE_BUSY = true; let j;
     try { j = jobWhere(person, t); } finally { JOB_WHERE_BUSY = false; }
     if (j) return j;
