@@ -5559,7 +5559,7 @@ newBtn.onclick = () => {
 };
 // Going to sleep: tap your own bunk (PLAYER_BED, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
-const PLAYER_BED = '4-B1-2', WAKE_AT = 6 * 60;
+const PLAYER_BED = '4-B1-4', WAKE_AT = 6 * 60;
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
@@ -6668,7 +6668,7 @@ const CREW = [
 // nine walkers (section 10) and stays as it is until the schedules take over; ROSTER is data only, read by the
 // schedule engine and the crowd. Story crew keep CREW's looks and bios exactly. ROSTER_GUESTS holds people who
 // live aboard but aren't crew (Envoy Saruth); they aren't in the 75. The player is one of the 75 (one of the 47
-// juniors) but isn't scheduled, so ROSTER holds the other 74 and ROSTER_PLAYER holds your entry (bed 4-B1-2).
+// juniors) but isn't scheduled, so ROSTER holds the other 74 and ROSTER_PLAYER holds your entry (bed 4-B1-4).
 // HABITS is the shared habit vocabulary, with what each does to a day.
 // dept is the job's department (command, helm, comms, works, watch, survey, infirmary, galley); uniform is the
 // uniform it wears (makeCharacter's DEPT key). Nothing here calls R().
