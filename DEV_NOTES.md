@@ -101,6 +101,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.29.3 | Cook time from section 17's `shipEffectsAt(3, m)` (pure, safe in a replay). `FOOD.restock` switch (`'rule'` now, `'carts'` for B3), so only one of the 10:30 top-up and the carts brings food. |
 | 0.29.4 | 0.29.3 merged with ship integration 0.40.0 (sections 16 and 17 both after 14, galley first). `galleyShift` removed: section 14 reads `galleyDay` from 0.26.2, and until then the galley staff keep the normal day. |
 | 0.29.5 | 0.29.4 merged with ship integration 0.40.1. |
+| 0.29.6 | `galleyJoin` and `galleyTurn`: the player can queue for the servery behind the crew (for the player engineer). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -785,6 +786,7 @@ Pillar 2, workstream A4: the galley really cooks. Section 16 sits after section 
     - **Menus (`MENU`).** One breakfast and one dinner per weekday; `servery.dish` names what's on.
 - **For other sections.**
     - `takePortion(who)`: the player eats. A hot portion and a plate if the servery has one, else a grab item; true or false.
+    - `galleyJoin(who)` and `galleyTurn(who)`: the player queues. Join gives `{ at: [33, 2], xy, face: 's', ahead, turnAt }`: stand at the back of the line by the tray return (a tile that's no one's place; the crew hold the four queue places). It's your turn a minute from now plus about 45 seconds for each crew member in the line or waiting. `galleyTurn` is true from then while there's food; `takePortion` serves you and ends it.
     - `galleyHold(person, t)`: for section 10. The queue place someone is waiting at (or null to stand), else undefined.
     - `galleySave()` and `galleyLoad(obj)`: SHIP.galley as plain data for the save, and back (anything malformed means a fresh start). When section 13 has `SAVE_EXTRA` (the systems engineer's), section 16 adds `save.galley` through it and loads `SAVED.galley` at start; both are guarded by typeof, so they're inert until it's merged.
     - `galleyCooks(t)`: how many are cooking or baking at absolute minute t, for oven wear (section 17). `shipEffectsAt(3, m).cook` (section 17's pure, recorded version, safe in a replay), when it exists, scales each new pot's cook time (`galleyCookT`). The rota and `galleyCooks` must never read the effects, because wear reads them and the effects read wear: that would be a loop.
