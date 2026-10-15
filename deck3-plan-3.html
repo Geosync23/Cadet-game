@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: Deck 3 plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.room:focus-visible{outline:none}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.room.sealed{opacity:.38}
+.room.newroom rect{stroke:rgba(233,196,106,.0)}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck 3: Commons</h1>
+  <div class="sub">Sketch 1. Bow points forward, port side is on the left when facing it. Everyone comes here to eat. A wide promenade runs stern to bow down the middle of the ship, with the lift standing in a plaza halfway along: the garden at one end, the bow lounge at the other, and every room opening off it. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+  <button id="turns" aria-pressed="false">Build turns</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>Deck 3 at a glance</b><span>The mess hall and galley (with a walk-in cold store) along the port side, the bow lounge with its bar filling the whole bow, the infirmary just aft of the lift, and the hydroponics garden across the stern. Washrooms off the plaza. Along the starboard side, three new ideas: a gym, a crew store and call-home booths. The water recycler and the garden's irrigation room sit sealed beside the garden.</span><span class="meta">52 × 22 tiles, the widest deck: one row wider on each side than Deck 4, and a longer, rounder bow. The lift lines up with Decks 4 and 5. No freight lift: supplies come up the main lift on hover carts.</span></div></div>
+<div class="legend" id="legend"></div>
+<script>
+// =====================================================================
+// DECK 3 DATA, in the game's format: no margin rows, so this map, DOORS3
+// and HULL3 can go straight into DECKS[3]. '.' is outside the hull.
+// Halls (= promenade, + plaza) join each other with no wall.
+// Alignment: the game lift is [20, 11], which sits at world (-4, 0) like
+// Decks 4 and 5. The car is 2 x 3 (rows 9-11), big enough for a hover cart,
+// with the ladder row Z below it, as on every deck. The trunks run behind
+// the car's back wall.
+// =====================================================================
+const DECK3_MAP = [
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMCCCCggLLLL.......',
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMCCCCggLLLLLL.....',
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMCCCCggLLLLLLL....',
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMKKKKKKLLLLLLLL...',
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMKKKKKKLLLLLLLLL..',
+  '..GGGGGGGGGGIIIIIIIIIIIMMMMMMMMMMMMKKKKKKLLLLLLLLLL.',
+  '..GGGGGGGGGGXXXXX++++++MMMMMMMMMMMMKKKKKKLLLLLLLLLL.',
+  '..GGGGGGGGGGXXXXX++++++MMMMMMMMMMMMKKKKKKLLLLLLLLLL.',
+  '..GGGGGGGGGGXXXXX++++++MMMMMMMMMMMMKKKKKKLLLLLLLLLLL',
+  '..GGGGGGGGGG=====++@@++==================LLLLLLLLLLL',
+  '..GGGGGGGGGG=====++@@++==================LLLLLLLLLLL',
+  '..GGGGGGGGGG=====++@@++==================LLLLLLLLLLL',
+  '..GGGGGGGGGG=====++ZZ++==================LLLLLLLLLLL',
+  '..GGGGGGGGGGRRRRR++++++FFFFFFFFFSSSSBBBBBLLLLLLLLLLL',
+  '..GGGGGGGGGGRRRRR++++++FFFFFFFFFSSSSBBBBBLLLLLLLLLL.',
+  '..GGGGGGGGGGRRRRR++++++FFFFFFFFFSSSSBBBBBLLLLLLLLLL.',
+  '..GGGGGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLLLLLLLL.',
+  '..iiiiGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLLLLLLL..',
+  '..iiiiGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLLLLLL...',
+  '..iiiiGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLLLLL....',
+  '..iiiiGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLLLL.....',
+  '..iiiiGGGGGGRRRRRwwwwwwFFFFFFFFFSSSSBBBBBLLLL.......'
+];
+const W = 52, D = 22;
+const HULL3 = { sternX: 2, stern: 2, bowFrom: 40, bowLen: 11.6 };   // same meaning as the game's hull
+// doors, in game edge keys. door: open to all. closed: shut for now. hatch: service access. glass: inner window.
+// lift: the main lift (one wide door each side). pass: the galley's serving counter, an opening at counter height (new).
+const DOORS3 = {
+  'v,19,9': 'lift', 'v,19,10': 'lift', 'v,19,11': 'lift', 'v,21,9': 'lift', 'v,21,10': 'lift', 'v,21,11': 'lift',   // one wide door each side
+  'h,19,13': 'glass', 'h,20,13': 'hatch', 'v,19,12': 'glass', 'v,21,12': 'glass',      // the ladder, with its hatch
+  'v,12,10': 'door', 'v,12,11': 'door', 'v,12,9': 'glass', 'v,12,12': 'glass',        // into the garden: glass doors at the promenade's aft end
+  'h,19,6': 'door', 'h,20,6': 'door', 'h,18,6': 'glass', 'h,21,6': 'glass',          // infirmary: wide doors off the plaza, for stretchers
+  'h,14,6': 'door',                                                                     // ward to exam room
+  'v,23,7': 'door',                                                                     // mess hall from the plaza
+  'h,25,9': 'door', 'h,26,9': 'door', 'h,31,9': 'door', 'h,32,9': 'door',             // mess hall onto the promenade...
+  'h,24,9': 'glass', 'h,27,9': 'glass', 'h,28,9': 'glass', 'h,29,9': 'glass', 'h,30,9': 'glass', 'h,33,9': 'glass', 'h,34,9': 'glass',   // ...glass between
+  'v,35,4': 'pass', 'v,35,5': 'pass', 'v,35,6': 'pass', 'v,35,8': 'door',             // the serving counter and the staff door
+  'h,38,9': 'door',                                                                     // galley's back door: carts come in from the lift this way
+  'h,36,3': 'door', 'h,39,3': 'hatch',                                                  // walk-in cold store; galley plant
+  'v,41,6': 'door',                                                                     // galley to the back of the bar
+  'v,41,10': 'door', 'v,41,11': 'door', 'v,41,9': 'glass', 'v,41,12': 'glass',        // lounge doors at the promenade's bow end
+  'h,27,13': 'door', 'h,24,13': 'glass', 'h,25,13': 'glass', 'h,29,13': 'glass', 'h,30,13': 'glass',   // gym, with windows on the promenade
+  'h,33,13': 'door', 'h,34,13': 'glass',                                                // crew store and its shop window
+  'h,38,13': 'door',                                                                    // call-home booths
+  'h,20,16': 'door',                                                                    // washrooms
+  'v,17,14': 'hatch', 'h,3,17': 'hatch',                                                // recycler from the plaza; irrigation from the garden
+};
+const KIND = {
+  food:   { c: '#8a5a3a', name: 'Mess and galley' },
+  lounge: { c: '#5c4a6e', name: 'Lounge' },
+  garden: { c: '#4f6e45', name: 'Garden' },
+  med:    { c: '#6f8f96', name: 'Infirmary' },
+  rec:    { c: '#7a6a3f', name: 'Gym, store and booths' },
+  wash:   { c: '#8ea2a3', name: 'Washrooms' },
+  cold:   { c: '#6a8aa6', name: 'Cold store' },
+  corr:   { c: '#4c555f', name: 'Promenade' },
+  lobby:  { c: '#4f6466', name: 'Lift plaza' },
+  core:   { c: '#1d252d', name: 'Spine' },
+  serv:   { c: '#2e373c', name: 'Service space' },
+};
+const CORR = new Set(['=', '+']);
+// turn: which build turn makes it (1 shell, 2 mess and galley, 3 lounge, 4 infirmary and garden and the rest). Sealed rooms have none.
+const ROOMS = {
+  '=': { kind: 'corr', name: 'Promenade', turn: 1, x: 'The main street. Four tiles wide, warm plank floor with inlaid light strips, planters and benches along the walls. Through the mess hall\'s glass you see who\'s eating; through the gym\'s, who\'s suffering. Garden at the aft end, lounge doors at the bow end.' },
+  '+': { kind: 'lobby', name: 'Lift plaza', turn: 1, x: 'The lift stands in the middle of the promenade, with its trunks and ladder behind glass. Step out either side and you\'re on the main street. The deck directory, a notice board and the morning rush.' },
+  '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, big enough for a hover cart, with one wide door on each side facing stern and bow. The deck panel is on its back wall.' },
+  'Z': { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The maintenance ladder, behind glass, with a hatch for tier 2.' },
+  M: { kind: 'food', name: 'Mess hall', label: 'Mess hall', turn: 2, win: true, x: 'The biggest room on the ship. Long tables and a few round ones, a drinks station, a tray return, a menu board, and hull windows all along the port side. The serving counter opens through to the galley, with a grab-and-go shelf for anyone running late. About 44 seats: four long tables of eight and three round tables of four. Two meals a day, served over a window rather than at a set time: breakfast 06:00 to 08:00, dinner 17:00 to 20:30. The busiest stretch is 07:15 to 07:50.' },
+  K: { kind: 'food', name: 'Galley', label: 'Galley', turn: 2, x: 'Chef Brennan\'s kingdom: ranges, ovens, a big prep table, the dish pit and a pot rack. Serving counter to the mess, a back door to the promenade for carts from the lift, the cold store behind, and a door through to the back of the lounge bar.' },
+  C: { kind: 'cold', name: 'Cold store', label: 'Cold', turn: 2, x: 'A walk-in: frosted steel shelving, crates and a chest freezer, breath in the air. Stocked by hover cart from Deck 5\'s cargo hold. Its own room off the galley, not connected to the cargo hold.' },
+  g: { kind: 'serv', name: 'Galley plant', label: 'Plant', x: 'Extractor fans, the dishwasher pumps and the cold store\'s chillers. Through a hatch in the galley. Tier 1.' },
+  L: { kind: 'lounge', name: 'Bow lounge', label: 'Bow lounge', turn: 3, win: true, x: 'The whole bow, on one floor, with curved windows sweeping from side to side. A long bar against the aft wall (stocked from the galley behind it), booths along the sides, soft seating and low tables facing the view. Zoned so it never feels like one empty hall: a lively bar end and a quiet window end.' },
+  I: { kind: 'med', name: 'Infirmary', label: 'Infirmary', turn: 4, win: true, x: 'Just aft of the lift, on the quiet side, away from the mess. A front desk by the wide doors, four curtained beds along the port windows, a medicine cabinet and a supplies wall. Rina works here.' },
+  X: { kind: 'med', name: 'Exam room', label: 'Exam', turn: 4, x: 'A small private room off the ward: an exam bed, a scanner arm and a desk. Where the doctor checks on whoever is run-down.' },
+  G: { kind: 'garden', name: 'Hydroponics garden', label: 'Hydroponics garden', turn: 4, win: true, x: 'Across the whole stern, under grow lights and the stern windows. Rows of planters and climbing frames, a herb wall for the galley, a winding path and a bench or two. Glass doors at the end of the promenade, so you see green as soon as you step out of the lift.' },
+  i: { kind: 'serv', name: 'Irrigation room', label: 'Irrigation', x: 'Nutrient tanks and pumps for the garden, through a hatch in the corner. Tier 2.' },
+  R: { kind: 'serv', name: 'Water recycler', label: 'Recycler', x: 'Every deck\'s water comes back here, gets cleaned and goes out again. When it struggles, the showers on Deck 4 run weak. Through a hatch off the plaza. Tier 2.' },
+  w: { kind: 'wash', name: 'Washrooms', label: 'Wash', turn: 4, x: 'Public washrooms for the mess and the lounge, off the plaza.' },
+  F: { kind: 'rec', name: 'Gym', label: 'Gym', turn: 4, win: true, isNew: true, x: 'New idea. Treadmills facing the starboard windows, a rowing machine, weights and a mat corner. Glass onto the promenade. A place crew go to burn off a bad shift, and a natural spot for small rivalries.' },
+  S: { kind: 'rec', name: 'Crew store', label: 'Store', turn: 4, isNew: true, x: 'New idea. A tiny shop with a counter and a shop window: snacks, toothpaste, socks, birthday cards. Somewhere to send a character on an errand, and a hook for small story moments.' },
+  B: { kind: 'rec', name: 'Call-home booths', label: 'Booths', turn: 4, win: true, isNew: true, x: 'New idea. A row of small booths with screens for calls home, each with a stool and a little window onto the stars. Long delays, so calls are recorded messages. A quiet, emotional room, unlike anything else on the ship.' },
+};
+
+// ---- hull, as in the game: stern flat with rounded corners, bow an ellipse ----
+const hullL = y => { const d = Math.min(y, D - y), r = HULL3.stern; return HULL3.sternX + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+const hullR = y => { const v = (y - D / 2) / (D / 2); return HULL3.bowFrom + HULL3.bowLen * Math.sqrt(Math.max(0, 1 - v * v)); };
+
+const S = 20;
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : DECK3_MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const SPINE = new Set(['@', 'Z']);
+const open = (a, b) => (CORR.has(a) && CORR.has(b)) || (a === '@' && b === '@');
+
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+const pts = [];
+for (let y = 0; y <= D + .001; y += .1) pts.push([hullR(Math.min(y, D)), Math.min(y, D)]);
+for (let y = D; y >= -.001; y -= .1) pts.push([hullL(Math.max(y, 0)), Math.max(y, 0)]);
+const hullD = 'M' + pts.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+const deco = (t, a) => el(t, { 'pointer-events': 'none', ...a }, floorG);
+// the promenade's light strips, planters and benches
+for (const y of [9.12, 12.88]) { deco('rect', { x: 12 * S, y: y * S - 1, width: 5 * S, height: 2, fill: 'rgba(95,214,198,.4)' }); deco('rect', { x: 23 * S, y: y * S - 1, width: 18 * S, height: 2, fill: 'rgba(95,214,198,.4)' }); }
+for (const x of [28.5, 36.5]) { deco('rect', { x: x * S, y: 10.55 * S, width: 1.6 * S, height: .9 * S, rx: 6, fill: '#3f6a43', stroke: '#8a6a45', 'stroke-width': 2 }); }
+for (const x of [24.5, 32.5]) deco('rect', { x: x * S, y: 10.75 * S, width: 1.6 * S, height: .5 * S, rx: 2, fill: '#9a7a52' });
+// lift car, ladder rungs, trunk circles
+deco('rect', { x: 19 * S + 4, y: 9 * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5 });
+for (let y = 12.15; y < 12.95; y += .3) deco('rect', { x: 19.25 * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)' });
+// mess hall: long tables, round tables, drinks station
+for (const y of [2, 4.6]) for (const x0 of [24, 29.5]) deco('rect', { x: x0 * S, y: y * S, width: 4.2 * S, height: .8 * S, rx: 3, fill: '#c9a46c', opacity: .85 });
+for (const x of [25.5, 28.5, 31.5]) deco('circle', { cx: x * S, cy: 7.3 * S, r: .55 * S, fill: '#c9a46c', opacity: .85 });
+deco('rect', { x: 34.3 * S, y: 3.8 * S, width: .5 * S, height: 3.4 * S, fill: '#e2d3b5' });   // the counter, mess side
+// galley: ranges along the hull, prep island
+deco('rect', { x: 35.3 * S, y: 3.2 * S, width: 5.4 * S, height: .6 * S, fill: '#4a5258' });
+deco('rect', { x: 37 * S, y: 5.2 * S, width: 2.4 * S, height: 1.3 * S, rx: 2, fill: '#b9c2c6' });
+// cold store frost
+for (let x = 35.4; x < 38.8; x += .7) deco('rect', { x: x * S, y: .3 * S, width: .45 * S, height: 2.2 * S, fill: 'rgba(220,240,255,.25)' });
+// lounge: the bar along its aft wall, booths, soft seating facing the windows
+deco('path', { d: `M${41.6 * S},${2.2 * S} Q${43.4 * S},${11 * S} ${41.6 * S},${19.8 * S}`, fill: 'none', stroke: '#c58b4a', 'stroke-width': 9, 'stroke-linecap': 'round' });
+for (const [x, y] of [[44.5, 2.2], [44.5, 19.2]]) deco('rect', { x: x * S, y: (y - .4) * S, width: 2.4 * S, height: .9 * S, rx: 6, fill: '#7c5a8e' });
+for (const [x, y] of [[47.2, 8.4], [47.2, 13.6], [49.2, 11]]) { deco('circle', { cx: x * S, cy: y * S, r: .5 * S, fill: '#d9c79a', opacity: .9 }); deco('path', { d: `M${(x - .9) * S},${(y - .9) * S} a${1.2 * S},${1.2 * S} 0 0 0 0,${1.8 * S}`, fill: 'none', stroke: '#2a9d8f', 'stroke-width': 6, 'stroke-linecap': 'round' }); }
+// garden beds and the path
+for (let x = 3.6; x < 11; x += 2.3) for (const [y0, h] of [[1.2, 6.6], [14.4, 2.2]]) deco('rect', { x: x * S, y: y0 * S, width: 1.2 * S, height: h * S, rx: 4, fill: '#6fa35a', opacity: .9 });
+deco('path', { d: `M${12 * S},${10.5 * S} C${8 * S},${10.5 * S} ${7 * S},${12.8 * S} ${3.5 * S},${11.6 * S}`, fill: 'none', stroke: 'rgba(230,214,170,.5)', 'stroke-width': 10, 'stroke-linecap': 'round' });
+deco('circle', { cx: 6.6 * S, cy: 9.6 * S, r: .9 * S, fill: 'rgba(159,227,255,.35)', stroke: '#9fe3ff', 'stroke-width': 1.5 });
+// infirmary beds
+for (const x of [13.5, 15.8, 18.1, 20.4]) deco('rect', { x: x * S, y: .4 * S, width: 1.2 * S, height: 2 * S, rx: 3, fill: '#e9efef', opacity: .85 });
+// gym machines, booths
+for (const x of [24, 26, 28]) deco('rect', { x: x * S, y: 19.6 * S, width: 1.2 * S, height: 1.8 * S, rx: 2, fill: '#2b3238', stroke: '#e9c46a', 'stroke-width': 1 });
+for (let k = 0; k < 4; k++) deco('rect', { x: (36.2 + k * 1.15) * S, y: 18.6 * S, width: 1 * S, height: 2.6 * S, fill: 'none', stroke: 'rgba(240,226,190,.7)', 'stroke-width': 1.5 });
+// new-idea rooms get a dashed gold ring
+for (const [k, R_] of Object.entries(ROOMS)) if (R_.isNew) {
+  const b = BOX[k]; deco('rect', { x: b.i0 * S + 3, y: b.j0 * S + 3, width: (b.i1 - b.i0 + 1) * S - 6, height: (b.j1 - b.j0 + 1) * S - 6, rx: 6, fill: 'none', stroke: 'rgba(233,196,106,.85)', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' });
+}
+
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff', DOORC = { door: 'rgba(95,214,198,.85)', closed: '#c9b98a', lift: '#e8c06a' };
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b || a === '.' || b === '.' || open(a, b)) return;
+  const type = DOORS3[key], hz = y1 === y2;
+  if (type === 'door' || type === 'closed' || type === 'lift') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, g = type === 'lift' ? 9 : 6;
+    seg(x1, y1, hz ? mx - g : x1, hz ? y1 : my - g, WALL, 2.6);
+    seg(hz ? mx + g : x2, hz ? y2 : my + g, x2, y2, WALL, 2.6);
+    seg(hz ? mx - g : x1, hz ? y1 : my - g, hz ? mx + g : x2, hz ? y2 : my + g, DOORC[type], type === 'lift' ? 3 : 1.6);
+    return;
+  }
+  if (type === 'pass') { seg(x1, y1, x2, y2, '#c58b4a', 4); return; }
+  if (type === 'hatch') { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (hz ? 5 : 0), y1 + (hz ? 0 : 5), x2 - (hz ? 5 : 0), y2 - (hz ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  if (type === 'glass') { seg(x1, y1, x2, y2, '#56646b', 3.4); seg(x1 + (hz ? 2 : 0), y1 + (hz ? 0 : 2), x2 - (hz ? 2 : 0), y2 - (hz ? 0 : 2), WINC, 2); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+{
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    const r = ROOMS[at(Math.floor(mx - dy / l * .6), Math.floor(my + dx / l * .6))];
+    if (r && r.win) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+
+const lblG = el('g', {});
+const SMALL = new Set(['X', 'C', 'g', 'w', 'S', 'B', 'i', 'Z']);
+const POS = { M: [29, 6.3], K: [38, 7.4], L: [46.5, 4.6], G: [7, 4.6], I: [17.5, 3.4], R: [14.5, 17.5], i: [3.8, 19.5], F: [27, 16.2], S: [34, 17.4], B: [38.5, 16.2], '@': [20, 10.5], Z: [20, 12.5], w: [20, 19], C: [37, 1.4], g: [40, 1.4], X: [14.5, 7.5] };
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (CORR.has(k)) continue;
+  const [px, py] = POS[k] || [b.sx / b.n + .5, b.sy / b.n + .5];
+  const [tx, ty] = T(px * S, py * S), t = el('text', { x: tx, y: ty, class: 'lbl' + (SMALL.has(k) ? ' sm' : '') }, lblG);
+  t.textContent = R_.label || R_.name;
+}
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+note(31 * S, 10.15 * S, 'Promenade', 10, 'rgba(225,240,238,.75)', true);
+note(14.5 * S, 10.15 * S, 'Promenade', 9, 'rgba(225,240,238,.6)', true);
+note(20 * S, 7 * S, 'Plaza', 9, 'rgba(225,240,238,.7)');
+note(20 * S, 14.6 * S, 'Plaza', 9, 'rgba(225,240,238,.7)');
+note(33.6 * S, 3.3 * S, 'counter', 7, 'rgba(240,210,170,.85)');
+note(42.4 * S, 15.6 * S, 'bar', 8, 'rgba(240,210,170,.9)');
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 12, 11 * S, 'Bow', 11, '#93a6ae');
+{ const [x, y] = T(-13, 11 * S), t = el('text', { x, y, ...(PORTRAIT ? {} : { transform: `rotate(-90 ${x} ${y})` }), 'font-size': 11, fill: '#93a6ae', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = 'Stern'; }
+
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+const TURN = { 1: 'Turn 1, the shell.', 2: 'Turn 2, with the mess hall and galley.', 3: 'Turn 3, with the lounge.', 4: 'Turn 4, with the infirmary, garden and the rest.' };
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  const when = R_.turn ? 'Built in ' + TURN[R_.turn].toLowerCase() : (SPINE.has(k) ? 'Built with the shell in turn 1.' : 'Sealed until its milestone.');
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}. ${when}</span>`;
+}
+
+const lg = document.getElementById('legend');
+for (const k of ['food', 'cold', 'lounge', 'med', 'garden', 'rec', 'wash', 'corr', 'serv']) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t] of [[WINC, 'Window or glass wall'], [DOORC.door, 'Door'], [DOORC.lift, 'Lift doors'], ['#c58b4a', 'Serving counter'], ['#e9c46a', 'Service hatch']]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+{ const s = document.createElement('span'); s.innerHTML = '<i style="border:1.5px dashed #e9c46a;background:none"></i>New idea'; lg.appendChild(s); }
+
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+// build turns: step through which rooms each turn adds
+const tb = document.getElementById('turns'); let step = 0;
+tb.onclick = () => {
+  step = (step + 1) % 5; tb.setAttribute('aria-pressed', step > 0); tb.textContent = step ? `Turn ${step} of 4` : 'Build turns';
+  for (const [k, g] of Object.entries(roomEls)) { const t = ROOMS[k].turn || (SPINE.has(k) ? 1 : 9); g.classList.toggle('sealed', step > 0 && t > step); }
+};
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+</body>
+</html>

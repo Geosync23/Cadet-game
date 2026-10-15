@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: Deck 4 plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.lbl.dim{fill:#c9b98a}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck 4: Quarters</h1>
+  <div class="sub">Sketch 2, updated to build 0.6.6. Bow points forward, port side is on the left when facing it. The junior wing sits aft, the officers' corridor runs forward of the lift, and promotion moves you down the deck toward the bow. Tap any room.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>Deck 4 at a glance</b><span>8 bunk rooms with 48 berths, 24 officer cabins, 2 washrooms, a laundry and the junior common room. Behind the walls: the deck's air scrubbers, the heating plant and two utility closets.</span><span class="meta">50 × 22 tiles. 12 cabins have windows, 12 are inner cabins.</span></div></div>
+<div class="legend" id="legend"></div>
+<script>
+// =====================================================================
+// DECK 4 DATA (same text-map format as the game's DECK_MAP)
+// '.' outside the hull. Corridors (=, -, +) join each other with no wall.
+// =====================================================================
+const DECK4_MAP = [
+  '..................................................',
+  '...pppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxx......',
+  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxx....',
+  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxx...',
+  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxx...',
+  '..================++++++--------------------nnnn..',
+  '..================++++++--------------------nnnnn.',
+  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnn.',
+  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnn.',
+  '..================++++++--------------------nnnnn.',
+  '..================++++++--------------------nnnn..',
+  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyy...',
+  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyy...',
+  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyy....',
+  '...qqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyy......',
+  '..................................................',
+];
+const W = 50, D = 22;
+const KIND = {
+  bunk:   { c: '#78828a', name: 'Bunk room' },
+  cabin:  { c: '#8c7a69', name: 'Officer cabin' },
+  common: { c: '#83593b', name: 'Lounge space' },
+  wash:   { c: '#8ea2a3', name: 'Washroom and laundry' },
+  jcorr:  { c: '#4c555f', name: 'Junior corridor' },
+  ocorr:  { c: '#5c5672', name: "Officers' corridor (carpet)" },
+  lobby:  { c: '#4f6466', name: 'Lift lobby' },
+  core:   { c: '#1d252d', name: 'Spine' },
+  serv:   { c: '#2e373c', name: 'Service space' },
+};
+const CORR = new Set(['=', '-', '+']);
+const ROOMS = {
+  '=': { kind: 'jcorr', name: 'Junior corridor', x: 'Plate floor, bright work lights, a chore rota on every door. It is always a little loud.' },
+  '-': { kind: 'ocorr', name: "Officers' corridor", x: 'Carpet, warm lamps, and quiet after 23:00. Walking it for the first time with your own key is the moment of promotion.' },
+  '+': { kind: 'lobby', name: 'Lift lobby', x: 'Where the two wings meet. Notices, a water fountain, and the crew who wait for the lift together every morning.' },
+  '#': { kind: 'core', name: 'Spine', label: 'Lift', x: 'The main lift (a 2 × 3 car, big enough for a hover cart, with one wide door each side), the maintenance ladder below it, and the power and air trunks above it, running through all six decks.' },
+  j: { kind: 'common', name: 'Junior common room', x: 'Stern windows, a sagging sofa, a Tiles table and a kettle that never fully cools. Juniors gather here; officers are welcome but rarely stay.', win: true, doors: 2 },
+  p: { kind: 'wash', name: 'Port washroom', label: 'Wash', x: 'Showers, basins and toilets for the junior wing. Water pressure drops when the recycler on Deck 3 falters.' },
+  q: { kind: 'wash', name: 'Starboard washroom', label: 'Wash', x: 'The second junior washroom. Someone is usually singing.' },
+  l: { kind: 'wash', name: 'Laundry', x: 'Four washers and a folding bench. The machines wear fast and are classic tier 1 jobs.' },
+  u: { kind: 'serv', name: 'Junior stores', label: 'Stores', x: 'Linen, spare bedding, cleaning supplies. Low stock here turns into restock jobs.', hatch: false },
+  k: { kind: 'serv', name: 'Utility closet', label: 'Util', x: 'The junior wing\'s power junction and light relays. Tier 1 access.', hatch: true },
+  s: { kind: 'serv', name: 'Air scrubbers', label: 'Scrubbers', x: 'The two scrubbers that keep Deck 4 breathable. Let them fail and the whole deck gets stuffy and short-tempered. Tier 2.', hatch: true },
+  t: { kind: 'serv', name: 'Heating plant', label: 'Heat', x: 'The deck\'s heat exchanger and pumps. Cold cabins mean grumbling crew. Tier 2.', hatch: true },
+  x: { kind: 'serv', name: 'Port supply closet', label: 'Supply', x: 'Bulbs, filters and cleaning kit for the officers\' wing.', hatch: true },
+  y: { kind: 'serv', name: 'Starboard utility closet', label: 'Util', x: 'Power junction and light relays for the officers\' wing. Tier 1 access.', hatch: true },
+  n: { kind: 'common', name: 'Music room', label: 'Music', doors: 2, x: 'Soundproofed, so the officers\' corridor stays quiet after 23:00. A stage follows the curve of the bow windows, with drums, guitars, amps and a mic; a grand piano, beanbags, a record cabinet and a rail of instruments to borrow. The Captain plays the piano late on Thursdays.', win: true },
+};
+// bunk rooms: outer ones have windows, inner ones don't. h is the night-shift room.
+'abcdefgh'.split('').forEach((k, n) => {
+  const outer = 'abcd'.includes(k);
+  ROOMS[k] = { kind: 'bunk', name: 'Bunk room ' + (n + 1), label: 'Bunk ' + (n + 1), win: outer,
+    x: (k === 'h' ? 'The night-shift bunk room. Inner, windowless and kept dark and hushed at midday. ' : '') +
+       'Three double bunks, six footlockers, one table. ' + (outer ? 'A window, which makes it the room everyone wants.' : 'No window; the wall screen shows the stars instead.') };
+});
+ROOMS.h.night = true;
+// officer cabins: A..X, laid out in columns of four (outer port, inner port, inner starboard, outer starboard)
+// numbering: even on the port side, odd on starboard, counting forward from the lift
+'ABCDEFGHIJKLMNOPQRSTUVWX'.split('').forEach((k, n) => {
+  const col = Math.floor(n / 4), row = n % 4, port = row < 2, outer = row === 0 || row === 3;
+  const num = port ? 2 + col * 4 + (row === 0 ? 0 : 2) : 1 + col * 4 + (row === 3 ? 0 : 2);
+  const spare = k === 'V' || k === 'W';
+  ROOMS[k] = { kind: 'cabin', name: 'Cabin 4-' + String(num).padStart(2, '0') + (spare ? ' (spare)' : ''), label: '4-' + String(num).padStart(2, '0'),
+    win: outer, spare,
+    x: (outer ? 'Window cabin. These go by seniority, so a newly promoted officer usually starts inside.' : 'Inner cabin: snug, windowless, and completely yours.') +
+       ' A bed, a desk, a locker and a tiny washroom.' + (spare ? ' Kept empty for transfers and guests.' : '') };
+});
+
+// ---- hull: stern flat with rounded corners, bow an ellipse from x = 40 ----
+const hullR = y => { const v = (y - 11) / 10; return 40 + 9.6 * Math.sqrt(Math.max(0, 1 - v * v)); };
+const hullL = y => { const d = Math.min(y - 1, 21 - y), r = 4.5; return 1.6 + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+
+// ---- geometry helpers ----
+const S = 20;   // svg units per tile
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : DECK4_MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const open = (a, b) => CORR.has(a) && CORR.has(b);   // the music room (n) has its own doors since 0.5.9
+
+// doors: each room gets one (or two) openings onto a corridor, picked near the middle of its corridor side
+const DOORS = new Set(), HATCH = new Set();
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (!R_ || CORR.has(k)) continue;
+  const cand = [];
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    for (const [di, dj] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      const o = at(i + di, j + dj); if (!CORR.has(o)) continue;
+      const key = dj ? `h,${i},${j + (dj > 0 ? 1 : 0)}` : `v,${i + (di > 0 ? 1 : 0)},${j}`;
+      cand.push({ key, side: `${di},${dj}`, d: Math.hypot(i + .5 - (b.sx / b.n + .5), j + .5 - (b.sy / b.n + .5)) });
+    }
+  }
+  const bySide = {};
+  for (const c of cand) (bySide[c.side] = bySide[c.side] || []).push(c);
+  const sides = Object.values(bySide).sort((a, b) => b.length - a.length);
+  const want = k === '#' ? 2 : (R_.doors || 1);
+  for (const list of sides.slice(0, want)) {
+    list.sort((a, b) => a.d - b.d);
+    const pick = k === '#' ? list.slice(0, 2) : [list[0]];   // lift doors are two tiles wide
+    for (const c of pick) (R_.hatch ? HATCH : DOORS).add(c.key);
+  }
+}
+
+// ---- draw ----
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+// hull path
+const pts = [];
+for (let y = 1; y <= 21.001; y += .1) pts.push([hullR(y), y]);
+for (let y = 21; y >= .999; y -= .1) pts.push([hullL(y), y]);
+const hullD = 'M' + pts.filter(p => p[0] < hullR(p[1]) + .01 || true).map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+// corridor guide stripes (teal in the junior corridor, amber in the officers')
+for (const [j, k, c] of [[5, '=', 'rgba(95,214,198,.5)'], [16, '=', 'rgba(95,214,198,.5)'], [5, '-', 'rgba(233,196,106,.45)'], [16, '-', 'rgba(233,196,106,.45)']]) {
+  let i0 = null;
+  for (let i = 0; i <= W; i++) { const on = at(i, j) === k; if (on && i0 === null) i0 = i; if (!on && i0 !== null) { el('rect', { x: i0 * S, y: j * S + (j === 5 ? 3 : S - 5), width: (i - i0) * S, height: 2, fill: c, 'pointer-events': 'none' }, floorG); i0 = null; } }
+}
+// lift car in the spine
+el('rect', { x: 20 * S + 4, y: 9.5 * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5, 'pointer-events': 'none' }, floorG);
+for (let y = 7.3; y < 9.2; y += .35) el('rect', { x: 20.25 * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)', 'pointer-events': 'none' }, floorG);   // ladder rungs
+el('circle', { cx: 21 * S, cy: 13.5 * S, r: 9, fill: 'none', stroke: 'rgba(95,214,198,.55)', 'stroke-width': 2, 'pointer-events': 'none' }, floorG);   // air trunk
+
+// grid (toggle)
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+
+// walls, windows, doors
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff';
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b) return;
+  if (a === '.' && b === '.') return;
+  if (open(a, b)) return;
+  const outside = a === '.' || b === '.';
+  if (outside) return;
+  if (DOORS.has(key)) {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, hz = y1 === y2;
+    seg(x1, y1, hz ? mx - 6 : x1, hz ? y1 : my - 6, WALL, 2.6);
+    seg(hz ? mx + 6 : x2, hz ? y2 : my + 6, x2, y2, WALL, 2.6);
+    seg(hz ? mx - 6 : x1, hz ? y1 : my - 6, hz ? mx + 6 : x2, hz ? y2 : my + 6, 'rgba(95,214,198,.8)', 1.4);
+    return;
+  }
+  if (HATCH.has(key)) { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (y1 === y2 ? 5 : 0), y1 + (y1 === y2 ? 0 : 5), x2 - (y1 === y2 ? 5 : 0), y2 - (y1 === y2 ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+// lift doors: draw explicitly on both faces of the spine
+for (const x of [20, 22]) el('line', { x1: x * S, y1: 10 * S + 3, x2: x * S, y2: 12 * S - 3, stroke: '#e8c06a', 'stroke-width': 3 }, wallG);
+
+// hull outline, windows painted along the curve where window rooms meet it
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+function hullWindows() {
+  // walk the hull outline; where the room just inside it has windows, paint glass
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {   // subdivide the long flat top and bottom runs
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    // inward normal (path runs clockwise in screen space: down the bow, up the stern)
+    const ix = mx - dy / l * .6, iy = my + dx / l * .6;
+    const r = ROOMS[at(Math.floor(ix), Math.floor(iy))];
+    if (r && r.win) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+hullWindows();
+
+// labels
+const lblG = el('g', {});
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (CORR.has(k)) continue;
+  const lab = R_.label || R_.name, cx = (b.sx / b.n + .5) * S, cy = (b.sy / b.n + .5) * S;
+  const [tx, ty] = T(cx, cy), t = el('text', { x: tx, y: ty, class: 'lbl' + (R_.kind === 'cabin' ? ' sm' : '') + (R_.spare ? ' dim' : '') }, lblG);
+  t.textContent = k === 'j' ? 'Common room' : lab;
+  if (R_.night) { const t2 = el('text', { x: tx, y: ty + 11, class: 'lbl sm' }, lblG); t2.textContent = 'night shift'; }
+}
+// corridor names and orientation
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+note(10 * S, 6 * S, 'Junior wing', 9, 'rgba(225,240,238,.55)', true);
+note(33 * S, 6 * S, "Officers' corridor", 9, 'rgba(240,226,190,.6)', true);
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 10, 11 * S, 'Bow', 11, '#93a6ae');
+note(-12, 11 * S, 'Aft', 11, '#93a6ae');
+
+// ---- selection ----
+let sel = null;
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  sel = k;
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles of corridor` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}.</span>`;
+}
+
+// legend
+const lg = document.getElementById('legend');
+for (const k of ['bunk', 'cabin', 'common', 'wash', 'jcorr', 'ocorr', 'serv']) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t, dash] of [[WINC, 'Window'], ['#5fd6c6', 'Door'], ['#e9c46a', 'Service hatch']]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+
+// zoom
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+</body>
+</html>

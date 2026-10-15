@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: Deck 5 plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.lbl.dim{fill:#c9b98a}
+.room.sealed{opacity:.38}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck 5: Operations</h1>
+  <div class="sub">Sketch 3, updated to build 0.6.6. Bow points forward, port side is on the left when facing it. The working deck: you arrive by shuttle at the stern, step through the haulway to the lift, and the Works bay is right beside it, with a window onto the shuttle pad. Tap any room.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+  <button id="first" aria-pressed="false">Built first</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>Deck 5 at a glance</b><span>The Works complex: the bay with its job board and the Chief's glass office, a tea corner, a washroom, main storage and the machine shop. Aft, the shuttle bay with its door gear, and the cargo hold. Forward, the ship's machinery: the air plant, the fan hall and the manifold room, plus a sealed battery room, joined by pipe galleries along both hull sides.</span><span class="meta">44 × 16 tiles, narrower than Deck 4. The lift lines up with Deck 4's. Built first (step 6c): the Works bay, tea corner, washroom, storage, machine shop, lobby, corridors and the shuttle bay floor. The fan hall can be watched through the window at the end of the corridor from day one.</span></div></div>
+<div class="legend" id="legend"></div>
+<script>
+// =====================================================================
+// DECK 5 DATA, in the game's format: no margin rows, so this map, DOORS5
+// and HULL5 can go straight into DECKS[5]. '.' is outside the hull.
+// Halls (_ haulway, + lobby, = corridor) join each other with no wall.
+// Alignment: the lift car's centre is tile edge (18, 8), which sits at
+// world (-4, 0) like Deck 4's (game lift: [18, 8]). The car is 2 x 3
+// (rows 6-8), big enough for a hover cart, with the ladder in row 9.
+// No freight lift: supplies go up the main lift on hover carts.
+// =====================================================================
+const DECK5_MAP = [
+  '.SSSSSSSSSooowwwwwwwwtttggggggggggaaaaaaaaaa',
+  '.SSSSSSSSSooowwwwwwwwtttrrrrrrrrrraaaaaaaaaa',
+  '.SSSSSSSSSooowwwwwwwwtttrrrrrrrrrraaaaaaaaaa',
+  '.SSSSSSSSSwwwwwwwwwwwqqqrrrrrrrrrraaaaaaaaaa',
+  '.SSSSSSSSSwwwwwwwwwwwqqqrrrrrrrrrraaaaaaaaaa',
+  '.SSSSSSSSSwwwwwwwwwwwqqqrrrrrrrrrrFFFFFFFFFF',
+  '.SSSSSSSSS_____++##++qqqrrrrrrrrrrFFFFFFFFFF',
+  '.SSSSSSSSS_____++##++=============FFFFFFFFFF',
+  '.SSSSSSSSS_____++##++=============FFFFFFFFFF',
+  '.SSSSSSSSS_____++##++fffffffyyyyyyFFFFFFFFFF',
+  '.SSSSSSSSScccccccccuufffffffyyyyyyFFFFFFFFFF',
+  '.SSSSSSSSScccccccccuufffffffyyyyyynnnnnnnnnn',
+  '.dddSSSSSScccccccccmmfffffffyyyyyynnnnnnnnnn',
+  '.dddSSSSbbcccccccccmmfffffffyyyyyynnnnnnnnnn',
+  '.dddSSSSbbcccccccccmmfffffffyyyyyynnnnnnnnnn',
+  '.dddSSSSbbcccccccccmmhhhhhhhhhhhhhnnnnnnnnnn',
+];
+const W = 44, D = 16;
+const HULL5 = { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6 };   // same meaning as the game's hull
+// doors, in game edge keys. door: open to all. closed: shut for now, with tap text. hatch: service access.
+// glass: an inner window (new in 6c: the game only has hull windows today). lift: the main lift.
+const DOORS5 = {
+  'v,17,6': 'lift', 'v,17,7': 'lift', 'v,17,8': 'lift', 'v,19,6': 'lift', 'v,19,7': 'lift', 'v,19,8': 'lift',   // one wide door each side
+  'h,16,6': 'door', 'h,19,6': 'door',                         // lobby into the Works bay, one beside each lift door
+  'v,10,7': 'door', 'v,10,8': 'door',                         // haulway onto the shuttle pad: the way in when you arrive
+  'v,21,1': 'door', 'h,22,7': 'door', 'h,26,7': 'door', 'h,24,9': 'door',   // tea corner (from the bay), washroom, storage, machine shop
+  'v,13,1': 'closed', 'h,30,9': 'closed', 'h,12,10': 'closed', 'v,10,12': 'closed', 'h,8,13': 'closed',
+  'v,34,7': 'closed', 'h,38,5': 'closed', 'h,38,11': 'closed',                        // the machine rooms in the bow
+  'h,19,10': 'hatch', 'v,19,13': 'hatch', 'h,2,12': 'hatch', 'h,32,1': 'hatch', 'v,34,0': 'hatch', 'h,25,15': 'hatch', 'v,34,15': 'hatch',
+  'v,10,3': 'glass', 'v,10,4': 'glass', 'v,10,5': 'glass',   // the Works bay window onto the shuttle pad
+  'v,10,0': 'glass', 'v,10,1': 'glass', 'v,10,2': 'glass',   // the Chief's office sees the pad too...
+  'h,10,3': 'glass', 'h,11,3': 'glass', 'h,12,3': 'glass', 'v,13,0': 'glass', 'v,13,2': 'glass',   // ...and the bay floor
+  'v,8,13': 'glass', 'v,8,14': 'glass', 'v,8,15': 'glass', 'h,9,13': 'glass',                      // the control booth over the pad
+  'v,4,13': 'glass', 'v,4,14': 'glass',                       // watch the door gear turn
+  'v,34,8': 'glass',                                          // the fan hall window at the end of the main corridor
+};
+const KIND = {
+  works:  { c: '#7d6a43', name: 'Works' },
+  store:  { c: '#5d6a63', name: 'Storage' },
+  hangar: { c: '#3d4850', name: 'Shuttle bay' },
+  cargo:  { c: '#5e5446', name: 'Cargo' },
+  common: { c: '#83593b', name: 'Tea corner' },
+  wash:   { c: '#8ea2a3', name: 'Washroom' },
+  corr:   { c: '#4c555f', name: 'Corridor and haulway' },
+  lobby:  { c: '#4f6466', name: 'Lift lobby' },
+  core:   { c: '#1d252d', name: 'Spine' },
+  mech:   { c: '#33474d', name: 'Machine room' },
+  serv:   { c: '#2e373c', name: 'Service space' },
+};
+const CORR = new Set(['=', '_', '+']);
+// built: part of the first build (step 6c). Everything else is sealed, with tap text, until its milestone.
+const ROOMS = {
+  '_': { kind: 'corr', name: 'Haulway', built: true, x: 'A broad deck between the shuttle pad and the lift, wide enough for cargo trolleys, with painted lanes and gold hazard stripes. Your first steps on the Wren are across it.' },
+  '=': { kind: 'corr', name: 'Main corridor', built: true, x: 'Plate floor and work lights, running forward to the life support plant. Pipe galleries run behind both walls.' },
+  '+': { kind: 'lobby', name: 'Lift lobby', built: true, x: 'Step out of the lift and the Works bay doors are right there, one beside each lift door. The day shift gathers here at 07:50.' },
+  '#': { kind: 'core', name: 'Spine', label: 'Lift', x: 'The main lift: a 2 × 3 car, big enough for a hover cart, with one wide door each side, lined up with Deck 4\'s. The maintenance ladder is below it; the power and air trunks run up behind its back wall.' },
+  S: { kind: 'hangar', name: 'Shuttle bay', label: 'Shuttle bay', built: true, x: 'Where you first step aboard the Wren. One small shuttle on the pad; the stern hull is the bay doors. The floor is open to walk; the launch machinery stays locked.' },
+  d: { kind: 'mech', name: 'Bay door gear', label: 'Door gear', x: 'Giant gears and hydraulic rams. When the bay opens, the doors slide sideways into a pocket here. A window lets you watch the gears turn.' },
+  b: { kind: 'hangar', name: 'Bay control booth', label: 'Booth', win: true, x: 'A glass booth over the pad, with the launch and landing controls. Watch staff only, for now.' },
+  w: { kind: 'works', name: 'Works bay', label: 'Works bay', built: true, doors: 2, x: 'Your workplace. The big job board, workbenches, a tool wall, parts racks and kit lockers. A long window looks aft onto the shuttle pad. Everyone on the Works crew starts their shift here.' },
+  o: { kind: 'works', name: 'Works Chief\'s office', label: 'Chief', win: true, x: 'Glass on two sides, so the Chief can see the whole bay and the shuttle pad. Who the Chief is, is still an open question. Locked.' },
+  t: { kind: 'common', name: 'Tea corner', label: 'Tea', built: true, win: true, x: 'Behind the parts racks, through a door you only notice once someone shows you. A kettle, three mismatched chairs, one warm lamp and a little porthole. Off-duty Works crew hide here.' },
+  q: { kind: 'wash', name: 'Works washroom', label: 'Wash', built: true, x: 'Deep sinks for greasy hands, two toilets and a shower. Hooks of spare coveralls by the door.' },
+  r: { kind: 'store', name: 'Main storage', label: 'Storage', built: true, x: 'Aisles of shelving sorted by system: lights, filters, plumbing, galley parts. A check-out counter by the door. You carry two items at a time, so knowing the aisles saves real time. The dusty back corner holds things nobody remembers ordering.' },
+  f: { kind: 'works', name: 'Machine shop', label: 'Machine shop', built: true, x: 'A lathe, a parts fabricator and a welding bench. When storage runs out of a part, make one: slower than fetching, but it saves the shift. Part of the Works complex, open from tier 1.' },
+  y: { kind: 'mech', name: 'Battery room', label: 'Batteries', x: 'Rows of big cells with glowing charge bars, cooling fans, and a sign about tools in pockets. Batteries are tier 3, so this stays sealed and mysterious for a long time.' },
+  c: { kind: 'cargo', name: 'Cargo hold', label: 'Cargo hold', x: 'Crates off the shuttles, and the big spares: scrubber cartridges, recycler membranes, coil housings. Everything leaves here on a hover cart, up the main lift. Where supplies enter the ship in step 7.' },
+  m: { kind: 'serv', name: 'Cart bay', label: 'Carts', x: 'Hover hand carts, docked and charging between runs. One has a sticker that says I BRAKE FOR NOBODY. Opens once supplies start moving.' },
+  u: { kind: 'serv', name: 'Utility closet', label: 'Util', x: 'Deck 5\'s power junction and light relays. Tier 1 access.' },
+  g: { kind: 'serv', name: 'Port pipe gallery', x: 'A narrow crawl of pipes along the hull, from storage to the air plant. Tier 2: a shortcut, and part of tracing connected faults.' },
+  h: { kind: 'serv', name: 'Starboard pipe gallery', x: 'The second gallery, from the machine shop to the manifold room. Tier 2.' },
+  a: { kind: 'mech', name: 'Air plant', label: 'Air plant', x: 'Tall oxygen cells bubbling in glass columns, and the main scrubber stacks. The air every deck breathes starts here. Tier 2.' },
+  F: { kind: 'mech', name: 'Fan hall', label: 'Fan hall', x: 'The ship\'s lungs. One huge fan turning slowly under a floor grate, pushing air through a duct beneath the main corridor and up the spine trunk to every deck. You hear it before you see it, and you can watch it through the window at the end of the corridor. When it wobbles, the whole ship gets stuffy. Tier 2.' },
+  n: { kind: 'mech', name: 'Manifold room', label: 'Manifold', x: 'Where the ship\'s pipes meet: a wall of colour-coded pipes and valves serving every deck, and a big status panel. The starboard gallery comes in here. Tier 2 fault tracing starts at this wall.' },
+};
+
+// ---- hull, as in the game: stern flat with rounded corners, bow an ellipse ----
+const hullL = y => { const d = Math.min(y, D - y), r = HULL5.stern; return HULL5.sternX + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+const hullR = y => { const v = (y - D / 2) / (D / 2); return HULL5.bowFrom + HULL5.bowLen * Math.sqrt(Math.max(0, 1 - v * v)); };
+
+// ---- geometry helpers ----
+const S = 20;   // svg units per tile
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : DECK5_MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const open = (a, b) => CORR.has(a) && CORR.has(b);
+
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+// hull path
+const pts = [];
+for (let y = 0; y <= D + .001; y += .1) pts.push([hullR(Math.min(y, D)), Math.min(y, D)]);
+for (let y = D; y >= -.001; y -= .1) pts.push([hullL(Math.max(y, 0)), Math.max(y, 0)]);
+const hullD = 'M' + pts.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+const deco = (t, a) => el(t, { 'pointer-events': 'none', ...a }, floorG);
+// gold hazard lanes down the haulway, and the guide stripes along the corridor
+for (const y of [6.15, 9.85]) deco('rect', { x: 10 * S, y: y * S - 1, width: 5 * S, height: 2, fill: 'rgba(233,196,106,.55)' });
+for (const y of [7.15, 8.85]) deco('rect', { x: 21 * S, y: y * S - 1, width: 13 * S, height: 2, fill: 'rgba(95,214,198,.45)' });
+// the shuttle on its pad, nose to the bay doors
+deco('circle', { cx: 5.2 * S, cy: 8 * S, r: 3.4 * S, fill: 'none', stroke: 'rgba(233,196,106,.45)', 'stroke-width': 2, 'stroke-dasharray': '6 5' });
+deco('path', { d: `M${2.3 * S},${8 * S} L${3.6 * S},${6.6 * S} L${7.4 * S},${6.7 * S} L${8.2 * S},${7.2 * S} L${8.2 * S},${8.8 * S} L${7.4 * S},${9.3 * S} L${3.6 * S},${9.4 * S} Z`, fill: '#c9d1d3', stroke: '#2a3037', 'stroke-width': 1.5 });
+deco('rect', { x: 2.9 * S, y: 7.55 * S, width: .6 * S, height: .9 * S, rx: 3, fill: '#4cc3b5' });
+deco('rect', { x: 7.5 * S, y: 9.2 * S, width: .7 * S, height: .5 * S, fill: '#9aa6ab' });   // the ramp, on the side facing the haulway
+// lift car, ladder rungs and air trunk in the spine
+deco('rect', { x: 17 * S + 4, y: 6 * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5 });
+for (let y = 9.15; y < 9.95; y += .3) deco('rect', { x: 17.25 * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)' });
+// the job board on the Works bay's back wall
+deco('rect', { x: 15.2 * S, y: 0 * S + 3, width: 3.6 * S, height: 5, rx: 2, fill: '#5fd6c6' });
+// the fan, and its duct under the main corridor to the spine trunk
+deco('polyline', { points: `${34 * S},${8 * S} ${19.6 * S},${8 * S} ${18.4 * S},${9.3 * S}`, fill: 'none', stroke: 'rgba(95,214,198,.28)', 'stroke-width': 7, 'stroke-dasharray': '3 4' });
+deco('circle', { cx: 38.6 * S, cy: 8.15 * S, r: 2.3 * S, fill: '#27363b', stroke: 'rgba(200,215,218,.55)', 'stroke-width': 2 });
+for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5; deco('path', { d: `M${38.6 * S},${8 * S} q${Math.cos(a + .6) * 30},${Math.sin(a + .6) * 30} ${Math.cos(a) * 2.2 * S},${Math.sin(a) * 2.2 * S}`, fill: 'none', stroke: 'rgba(200,215,218,.7)', 'stroke-width': 5, 'stroke-linecap': 'round' }); }
+deco('circle', { cx: 38.6 * S, cy: 8 * S, r: 6, fill: '#e8c06a' });
+// oxygen columns in the air plant, the manifold's pipe wall, battery cells, the machine shop's lathe and fabricator, the door gear
+for (let k = 0; k < 4; k++) deco('circle', { cx: (36.4 + k * 1.5) * S, cy: 3.2 * S, r: 11, fill: 'rgba(159,227,255,.25)', stroke: '#9fe3ff', 'stroke-width': 1.5 });
+[['#c86b4a', 12.2], ['#4cc3b5', 12.6], ['#e9c46a', 13.0], ['#7a8fd0', 13.4]].forEach(([c, y]) => deco('rect', { x: 34.6 * S, y: y * S, width: 6.4 * S, height: 4, fill: c, opacity: .75 }));
+for (let k = 0; k < 4; k++) for (let j = 0; j < 2; j++) { deco('rect', { x: (28.5 + k * 1.3) * S, y: (10.3 + j * 2.4) * S, width: .9 * S, height: 1.3 * S, rx: 2, fill: '#26323a', stroke: '#56646b' }); deco('rect', { x: (28.62 + k * 1.3) * S, y: (11.25 + j * 2.4) * S, width: .66 * S, height: 3, fill: '#7dffb0' }); }
+deco('rect', { x: 21.5 * S, y: 13.2 * S, width: 2.6 * S, height: .7 * S, rx: 3, fill: '#8a949a' }); deco('rect', { x: 25.4 * S, y: 12.6 * S, width: 1.4 * S, height: 1.4 * S, rx: 3, fill: '#5b6770', stroke: '#e9c46a', 'stroke-width': 1.5 });
+deco('circle', { cx: 2.3 * S, cy: 13.8 * S, r: 18, fill: 'none', stroke: '#c9b98a', 'stroke-width': 5, 'stroke-dasharray': '4 3' }); deco('circle', { cx: 2.3 * S, cy: 13.8 * S, r: 5, fill: '#c9b98a' });
+
+// grid (toggle)
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+
+// walls, inner windows, doors
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff', DOORC = { door: 'rgba(95,214,198,.85)', closed: '#c9b98a', lift: '#e8c06a' };
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b || a === '.' || b === '.' || open(a, b)) return;
+  const type = DOORS5[key], hz = y1 === y2;
+  if (type === 'door' || type === 'closed' || type === 'lift') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    seg(x1, y1, hz ? mx - 6 : x1, hz ? y1 : my - 6, WALL, 2.6);
+    seg(hz ? mx + 6 : x2, hz ? y2 : my + 6, x2, y2, WALL, 2.6);
+    seg(hz ? mx - 6 : x1, hz ? y1 : my - 6, hz ? mx + 6 : x2, hz ? y2 : my + 6, DOORC[type], type === 'lift' ? 3 : 1.6);
+    return;
+  }
+  if (type === 'hatch') { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (hz ? 5 : 0), y1 + (hz ? 0 : 5), x2 - (hz ? 5 : 0), y2 - (hz ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  if (type === 'glass') { seg(x1, y1, x2, y2, '#56646b', 3.4); seg(x1 + (hz ? 2 : 0), y1 + (hz ? 0 : 2), x2 - (hz ? 2 : 0), y2 - (hz ? 0 : 2), WINC, 2); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+
+// hull outline, windows painted along the curve where window rooms meet it, and the bay doors in the stern
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+function hullWindows() {
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    const ix = mx - dy / l * .6, iy = my + dx / l * .6;
+    const r = ROOMS[at(Math.floor(ix), Math.floor(iy))];
+    if (r && r.win) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+hullWindows();
+el('line', { x1: HULL5.sternX * S, y1: (HULL5.stern + .4) * S, x2: HULL5.sternX * S, y2: (D - HULL5.stern - .4) * S, stroke: '#e9c46a', 'stroke-width': 5, 'stroke-dasharray': '10 4', 'pointer-events': 'none' }, mainG);
+
+// labels
+const lblG = el('g', {});
+const SMALL = new Set(['b', 'o', 't', 'q', 'u', 'm', 'd']);
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (CORR.has(k) || k === 'g' || k === 'h') continue;
+  let cx = (b.sx / b.n + .5) * S, cy = (b.sy / b.n + .5) * S;
+  if (k === 'S') cy = 2.2 * S; if (k === 'F') { cx = 38.6 * S; cy = 5.42 * S; } if (k === 'a') cy = 1.4 * S; if (k === 'n') cy = 14.6 * S; if (k === 'y') cy = 9.6 * S; if (k === 'f') cy = 10.4 * S; if (k === 'd') cy = 12.6 * S; if (k === 'w') { cx = 15 * S; cy = 3.4 * S; } if (k === '#') { cx = 18 * S; cy = 8 * S; }
+  const [tx, ty] = T(cx, cy), t = el('text', { x: tx, y: ty, class: 'lbl' + (SMALL.has(k) || R_.kind === 'serv' && k !== 'L' ? ' sm' : '') }, lblG);
+  t.textContent = R_.label || R_.name;
+}
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+note(12.5 * S, 8 * S, 'Haulway', 9, 'rgba(240,226,190,.7)', true);
+note(29 * S, .5 * S, 'Port pipe gallery', 8.5, '#eef3f1', true);
+note(27.5 * S, 15.5 * S, 'Starboard pipe gallery', 8.5, '#eef3f1', true);
+note(27 * S, 7.5 * S, 'duct to the spine below the floor', 7, 'rgba(159,227,255,.6)', true);
+note(27 * S, 8.45 * S, 'Main corridor', 9, 'rgba(225,240,238,.6)', true);
+note(5.2 * S, 11 * S, 'Shuttle', 8.5, 'rgba(225,240,238,.7)');
+{ const [x, y] = T(-12, 8 * S), t = el('text', { x, y, ...(PORTRAIT ? {} : { transform: `rotate(-90 ${x} ${y})` }), 'font-size': 9, fill: '#e9c46a', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = 'Bay doors'; }
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 10, 8 * S, 'Bow', 11, '#93a6ae');
+
+// ---- selection ----
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  const when = R_.built ? 'Built first, in step 6c.' : (k === '#' ? 'Built with the lift in 6c.' : 'Sealed until its milestone.');
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}. ${when}</span>`;
+}
+
+// legend
+const lg = document.getElementById('legend');
+for (const k of ['works', 'store', 'hangar', 'cargo', 'mech', 'common', 'wash', 'corr', 'serv']) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t] of [[WINC, 'Window or glass wall'], [DOORC.door, 'Door'], [DOORC.closed, 'Shut for now'], ['#e9c46a', 'Service hatch']]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+
+// zoom, grid, built-first
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+const fb = document.getElementById('first');
+fb.onclick = () => { const on = fb.getAttribute('aria-pressed') !== 'true'; fb.setAttribute('aria-pressed', on);
+  for (const [k, g] of Object.entries(roomEls)) g.classList.toggle('sealed', on && !ROOMS[k].built && k !== '#'); };
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+</body>
+</html>
