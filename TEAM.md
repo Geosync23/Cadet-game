@@ -21,20 +21,21 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Roster
 
-Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with.
+Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with. Pillar 1 (done, 0.25.2) roles are in git history.
 
 | Session | Job | Branch it pushes to | Builds | Status |
 | --- | --- | --- | --- | --- |
-| session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.23.0+ (combined) | Active |
-| session_01JScnVG158eYAHYvKDz3jZG | Crew designer (was the deck planner): workstream 2, the 75-person roster and `plans/crew-roster.html` | `claude/deck-plans-1-2-6` | 0.16.x | Workstream 2 done (0.16.2, 7487fad; checked by the lead): 74 crew plus the player in ROSTER_PLAYER, Saruth in ROSTER_GUESTS. Roster page: https://claude.ai/artifact/H8h77xpeMD9vewewVvuCgB. Waiting for the check-in |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link. Also: bigger bunk rooms on Deck 4 (6 berths each; the user's decision), plan sketch first, then build after the user's OK | `claude/deck-architect` | 0.17.x | Workstream 3a done. Bigger bunk rooms built (0.17.1, 1bf1598): signed off by the lead as the new Deck 4 baseline; only the junior wing changed, using the inert `floorSeeds` hook. Waiting to republish the playable link from 0.23.x |
-| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Workstream 3b done (0.18.3, 6fb0abe; checked by the lead): Deck 1 31 places, Deck 3 173, ready-room chair added. Waiting |
-| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Workstream 3c done (0.19.2, af0b74f + 4294ab2; checked by the lead): 159 places, furniture nudges in cabins S, R, X, the Captain's wardrobe and the public washroom; the window seat stays. Waiting |
-| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1, 4, 6 | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | All three done (0.22.2, 62f530e; merged into 0.25.0). Small 0.22.3 requested: overflow skips locked or private rooms, PLAYER_BED from ROSTER_PLAYER |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Workstream 5 done (0.20.1, ad2e4c4; checked): demo with real crew on real seats, no saving under ?crowd. 70 on Deck 3 = 331 draw calls by the lift. Demo: https://claude.ai/artifact/DpVKqTdA1Fci6PzYaWw69t. Waiting (phone ms check at the check-in; shadow and LOD levers approved if needed) |
-| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived: all its work is merged |
-
-Earlier status of the inherited helpers: all idle at hand-over, all decks built and merged (0.14.0 in `main`).
+| session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.40.0+ (combined) | Active |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: A1, every room in use (crew free time across the ship, crew needs, activity choice, galley-rota hook) | `claude/sim-engineer` | 0.26.x | Briefed |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: A2, activity poses and props (run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk) | `claude/crowd-render` | 0.27.x | Briefed |
+| session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer (new): A3, player needs (fitness and energy slow you), activities, placeholder device, save v2 | `claude/player-needs` | 0.28.x | Hired |
+| session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer (new): A4, food and cooking (chef from 04:30, batches, servery, shelf, dish pit) | `claude/galley-food` | 0.29.x | Hired |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: A5a, the gym treadmill, then utility rooms on Decks 4, 5 and 6 (plan sketch first). Owns the playable link | `claude/deck-architect` | 0.30.x | Briefed |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: A5b, Deck 3 activity furniture (weights, till, baskets, anim on places), then utility rooms on Decks 1 and 3 (sketch first) | `claude/deck1-scale` | 0.31.x | Briefed |
+| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c, Deck 2 activity places, then its utility rooms (sketch first) | `claude/deck2-command` | 0.32.x | Briefed |
+| session_01JScnVG158eYAHYvKDz3jZG | Crew designer: A6, galley staff shifts and habits for the new activities | `claude/deck-plans-1-2-6` | 0.16.x | Briefed |
+| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer (new): B1 now (machines, wear, systems, consequences, machine_check; no drawing), B2 and B3 later | `claude/ship-systems` | 0.33.x | Hired |
+| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived |
 
 ## Context check (2026-10-15, 17:10)
 
