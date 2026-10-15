@@ -66,6 +66,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.20.0 | Crowd rendering, workstream 5 (the performance engineer, from 0.14.0). New section 8b `crowd`: many crew drawn as a few skinned meshes, poses walk, stand, sit, lie and work, two levels of detail. `?crowd=40` demo: 40 made-up crew at dinner in Deck 3's mess hall. Section 8: `makeCharacter(spec, finish)` and `animateRig(..., rnd)` take optional extras (defaults unchanged); an unknown `dept` falls back to the Survey uniform. Main loop: `crowd.update(dt, t)`. The 9 crew stay on full rigs. Deck 4 ALL IDENTICAL against 0.14.0; Decks 1–6 pixel-identical; deck_check OK, same draw calls. See "Crowd rendering (0.20.x)". |
 | 0.21.1 | Pillar 1, workstream 4: the schedule engine (the sim engineer). New section 14 (after 13): `planDay(person, day)` and `whereIs(person, t)` per the plan's format, `shipDay(day)` planning everyone's day at once so no place is ever held twice, fixed work stations per person and shift, `peopleOn(deck, t)`, and `runDay` / `dayReport` to step a whole day with no drawing (about 30 ms a day). Reads `ROSTER` and `DECKS[n].places` when they're there, otherwise `STUB_ROSTER` and `stubPlaces(n)`. Sleeping (`sleepUntil`) plans the day you wake into. Nothing draws from it yet: cadet_test ALL IDENTICAL to 0.15.1 (renderer noise only), deck_check OK. With the real roster and the places pushed so far (a scratch build), 28 days check clean: everyone sleeps 6 hours or more in their own bed, eats twice and works their whole shift, no place double-booked, no gaps. |
 | 0.23.0 | Pillar 1, first combined build (the lead, on `claude/ship-integration`): ship time and saving (0.15.1), the crew roster (0.16.2), places on every deck (0.17.0, 0.18.3, 0.19.2), Deck 4's bigger bunk rooms (0.17.1), crowd rendering with the `?crowd=40` demo (0.20.0) and the schedule engine (0.21.1). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. Nothing draws the schedules yet (workstream 6). |
+| 0.20.1 | The crowd demo with the real crew (the performance engineer, from 0.23.0). `?crowd=N` (up to 76) takes looks from `ROSTER` through `rosterSpec` (not Rina or Brennan, who are on Deck 3 as full rigs) and Deck 3's own places: servery queue, grab shelf, two galley stations, three walkers, the 44 mess seats, then the 22 benches. It sets 18:30 with `setShipNow`, and `?crowd` counts as `?nosave` (one change to `NOSAVE` in section 13). Round-table chairs face their table. `GAME_BUILD` and the header say 0.20.1. Deck 4 ALL IDENTICAL against 0.23.0, Decks 1–6 pixel-identical, deck_check OK with the same draw calls. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -403,7 +404,7 @@ Section 8b, by the performance engineer (Pillar 1, workstream 5). The player and
 - Sitting puts the hips just above the seat and the feet on the floor by leg IK, forearms on the table, a fork to the mouth now and then. Working: hands busy at bench height, head down. Lying: on the back, arms by the sides, centred on `pos`.
 - Crowd people don't block walking. Who stands where is the sim's job (workstream 6).
 
-**The demo.** `?crowd=40` in the address (any number up to 54) starts you on Deck 3 by the lift at 18:30, and puts made-up crew in the mess hall: walkers in the aisles, two at the drinks station (`work`), five in the servery line (`stand`), the rest seated at the long and round tables (44 seats). A line under the clock shows the crowd, draw calls and frame time. They leave when you leave the deck and come back when you return; the Crew button hides them. `CROWD_DEMO.looks()` and `spots()` are the two to swap: `spots()` already reads `deckDef.places` (`mess-seat`, `servery-queue`) once Deck 3 has them. Without the flag, `CROWD_DEMO` is `null` and nothing of the demo exists.
+**The demo.** `?crowd=40` in the address (any number up to 76) starts you on Deck 3 by the lift at 18:30 and puts that many of the real crew (from `ROSTER`, day shift first, not Rina or Brennan) on Deck 3's own places: the servery queue (stand), the grab shelf, two galley stations (work), three people walking the mess hall's aisles, the 44 mess seats, then the 22 benches. A line under the clock shows the crowd, draw calls and frame time. They leave when you leave the deck and come back when you return; the Crew button hides them. `?crowd` works as `?nosave`, so the demo never touches a save. Without the flag, `CROWD_DEMO` is `null` and nothing of the demo exists.
 
 **Numbers** (headless, SwiftShader; frame times there aren't meaningful, so the demo's line is the one to read on a phone):
 
@@ -413,6 +414,19 @@ Section 8b, by the performance engineer (Pillar 1, workstream 5). The player and
 | By the lift, 40 crowd | 329 | 364,000 | about 2 ms |
 | In the mess hall, no crowd | 242 | 240,000 | |
 | In the mess hall, 40 crowd | 246 | 401,000 | about 2 ms |
+
+With the real crew and places (0.20.1, on 0.23.0):
+
+| Deck 3 | Draw calls | Triangles drawn (both passes) | Crowd JS a frame |
+| --- | --- | --- | --- |
+| By the lift, no crowd | 326 | 285,000 | |
+| By the lift, 40 | 328 | 345,000 | about 1.2 ms |
+| By the lift, 70 | 331 | 443,000 | about 1.8 ms |
+| In the mess hall, no crowd | 242 | 240,000 | |
+| In the mess hall, 40 | 246 | 391,000 | about 0.8 ms |
+| In the mess hall, 70 | 248 | 486,000 | about 0.8 ms |
+
+Each group of 12 adds at most two draw calls, so the count isn't the limit; triangles are. Seat and bed heights for the sim: see the rule sent to the sim engineer (bunks: odd berths 0.5, even 1.6; mess seats 0.475; benches 0.48; lounge seats vary, so places may carry a `y`).
 
 For comparison, 40 full rigs would add about 1,300 draw calls and 600,000 triangles. Memory is flat over Deck 3 and 4 round trips with the demo on (the four groups' bone textures stay, like kit).
 
