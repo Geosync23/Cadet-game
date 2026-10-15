@@ -278,6 +278,7 @@ Extrude geometry:
   `CADET_WORK` (default `/tmp/cadet-work`) sets where three.js and the test copies live. `CADET_CHROME` points at a Chromium binary when Playwright's own browser isn't installed (in Claude Code cloud sessions, `/opt/pw-browsers/chromium`).
 
 - **Run:** `CADET_CHROME=/opt/pw-browsers/chromium python3 cadet_test.py OLD.html NEW.html` from a scratch folder (screenshots land in the current folder). It takes about a minute. The old build comes from git, for example `git show HEAD~1:starship-cadet.html > old.html`.
+- **Screenshot noise (0.7.0).** In cloud containers the software renderer sometimes rounds a few dozen pixels one colour level differently between runs, even comparing a build with itself. The test treats a difference of at most 1 as noise and says so ("apart from renderer noise"); anything bigger fails. It also keeps toasts out of screenshots (they fade on real-time timers) and turns off CSS transitions; toast text is still compared.
 - **When crew changes are expected,** compare the crew-hidden shot, or make a test copy with the crew change reverted and expect ALL IDENTICAL. That's how Pell's move was proven.
 
 Deck 5 and the lift were tested with small ad-hoc scripts that reuse cadet_test.py's `Game` class:

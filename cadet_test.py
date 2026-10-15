@@ -44,6 +44,9 @@ class Game:
         tmp = WORK / 'test' / ('_run_' + pathlib.Path(path).name)
         tmp.write_text(html)
         self.page.goto('file://' + str(tmp))
+        # toasts fade on real-time timers and CSS transitions, not the virtual clock: keep them out of screenshots
+        # (their text is still read from the DOM) so shots don't depend on how fast the machine runs
+        self.page.add_style_tag(content='#toast{opacity:0!important} *,*::before,*::after{transition:none!important;animation:none!important}')
         try:
             self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         except Exception:
@@ -133,7 +136,7 @@ def run(path, tag):
 
 a, shots = run(sys.argv[1], 'A')
 b, _ = run(sys.argv[2], 'B')
-ok = True
+ok = True; noise = False
 for k in a:
     if k == 'errors': continue
     same = json.dumps(a[k], sort_keys=True) == json.dumps(b[k], sort_keys=True)
@@ -147,7 +150,10 @@ for s in shots:
     A = np.array(Image.open(f'A_{s}.png').convert('RGB')).astype(int); B = np.array(Image.open(f'B_{s}.png').convert('RGB')).astype(int)
     d = np.abs(A - B).max(axis=2); n = int((d > 0).sum())
     print(f'{s:14s} differing px {n:6d}  max {int(d.max())}')
-    if n: ok = False
+    # the software renderer in cloud containers (SwiftShader) sometimes rounds a few dozen pixels one level
+    # differently from run to run, even for the same build: a difference of at most 1 is that, not a change
+    if d.max() > 1: ok = False
+    elif n: noise = True
 print('errors A', a['errors'][:3], 'errors B', b['errors'][:3])
 print('taps', [a[f'tap{k}'][0] for k in range(5)])
-print('ALL IDENTICAL' if ok else 'DIFFERENCES FOUND')
+print(('ALL IDENTICAL' + (' (apart from renderer noise: some pixels 1 level off)' if noise else '')) if ok else 'DIFFERENCES FOUND')
