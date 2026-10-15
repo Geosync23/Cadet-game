@@ -6373,6 +6373,7 @@ const MACHINE_KINDS = {
   heater:      { name: 'Heating plant',     sys: 'heat',       life: 18, time: .6, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'valve' },
   recycler:    { name: 'Water recycler',    sys: 'water',      life: 14, time: .3, use: 'water',  scope: 'ship', w: 3, tier: 2, part: 'membrane' },
   filter:      { name: 'Water filter bank', sys: 'water',      life: 9,  time: .3, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'cartridge' },
+  heatpump:    { name: 'Heating pumps',     sys: 'heat',       life: 18, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'pump' },
   pump:        { name: 'Circulation pumps', sys: 'water',      life: 18, time: .5, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'pump' },
   uv:          { name: 'UV steriliser',     sys: 'water',      life: 20, time: .5, use: 'water',  scope: 'ship', w: 1, tier: 2, part: 'uv lamp' },
   irrigation:  { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'pump' },
@@ -6595,6 +6596,7 @@ const MACHINE_FX = {
   recycler:    { restore: { hygiene: .4 }, mood: 4, text: 'Showers run weak' },
   filter:      { restore: { hygiene: .2 }, mood: 2, text: 'The water runs cloudy' },
   pump:        { restore: { hygiene: .4 }, mood: 3, text: 'Showers run weak' },
+  heatpump:    { restore: { energy: .15 }, mood: 2, text: 'The radiators run lukewarm' },
   uv:          { mood: 2, text: 'The water tastes of chlorine' },
   irrigation:  { mood: 2, text: 'The garden droops' },
   nutrient:    { mood: 2, text: 'The garden wilts' },
@@ -6697,6 +6699,8 @@ const STOCK = { element: 6, 'fan belt': 4, compressor: 2, pump: 4, relay: 6, fil
 const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'control rod']);
 const DELIVERY = { day: 2, hour: 10, meals: 1050 };     // weekday (0 = Monday), hour; a week of meals for the cold store
 const MEALS_LOW = 150, CART_MEALS = 150;                // a cart run when the cold store is under this; meals a cart carries
+// food comes by cart only once the galley says so (section 16's FOOD.restock: 'rule' is its own 10:30 top-up, 'carts' is ours)
+const cartsCarryFood = () => typeof FOOD !== 'undefined' && FOOD.restock === 'carts' && !!(SHIP.galley && SHIP.galley.cold);
 SHIP.jobs = []; SHIP.stores = {}; SHIP.hold = {};
 let JOBS_ON = true;                                     // machine_check turns the crew's jobs off to see the ship unrepaired
 function jobsReset() { SHIP.jobs = []; SHIP.stores = { ...STOCK }; SHIP.hold = {}; }
@@ -6730,7 +6734,7 @@ function jobFinish(j, t, by) {
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
   } else if (j.cargo === 'meals') {
     const n = Math.min(SHIP.hold.meals || 0, CART_MEALS); SHIP.hold.meals -= n;
-    if (SHIP.galley && SHIP.galley.cold) SHIP.galley.cold.meals += n;
+    if (cartsCarryFood()) SHIP.galley.cold.meals += n;
   } else {
     for (const k in SHIP.hold) if (k !== 'meals') { SHIP.stores[k] = (SHIP.stores[k] || 0) + SHIP.hold[k]; delete SHIP.hold[k]; }
   }
@@ -6743,7 +6747,7 @@ function jobsHour(h) {
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
-    if (SHIP.galley && SHIP.galley.cold) SHIP.hold.meals = (SHIP.hold.meals || 0) + DELIVERY.meals;
+    if (cartsCarryFood()) SHIP.hold.meals = (SHIP.hold.meals || 0) + DELIVERY.meals;
   }
   // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
   const open = new Map(); for (const j of jobs) if (j.status !== 'done') open.set(j.machine || 'restock:' + j.cargo, j);
@@ -6761,7 +6765,7 @@ function jobsHour(h) {
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
-  if (SHIP.galley && SHIP.galley.cold && SHIP.galley.cold.meals < MEALS_LOW && SHIP.hold.meals > 0) restock('meals', 3);
+  if (cartsCarryFood() && SHIP.galley.cold.meals < MEALS_LOW && SHIP.hold.meals > 0) restock('meals', 3);
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
