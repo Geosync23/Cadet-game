@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.5
+   STARSHIP CADET: CSV Wren                            build 0.26.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -405,6 +405,7 @@ let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [];
 let staticRoot = null, BLOCKED = new Set(), ITEMS = [], WALL_DECOR = [], SPOTS = [];
 let TALL = [], TALL_BY_ROOM = {}, NO_FADE = new Set();   // tall furniture fades a room at a time; locked rooms stay solid
 let LAMPS = [], STEAM = [], DUST = [], SPINS = [];   // SPINS: parts that turn (fan rotors, gears): { o, ax, w }
+let MOVERS = [];                                       // parts that move only while their place is in use (Pillar 2): { place, tick(dt, on) }
 let PULSES = [];                                       // glow that breathes (drive coils): { m, key, base, amp, w, ph }, m[key] = base + amp * (0..1)
 
 // =====================================================================
@@ -1589,18 +1590,38 @@ const KIT = {
     return { w: 1.9, d: .7 };
   },
   // ---- the gym ----
-  treadmill(g) {
-    box(.8, .14, 1.8, GYM.frame, 0, .07, 0, g); box(.6, .02, 1.6, GYM.rubber, 0, .15, .05, g);
+  treadmill(g, o = {}) {
+    box(.8, .14, 1.8, GYM.frame, 0, .07, 0, g); const belt = box(.6, .02, 1.6, GYM.rubber, 0, .15, .05, g);
     for (const x of [-.36, .36]) box(.05, 1.15, .06, GYM.frame, x, .65, -.82, g);
-    box(.76, .32, .14, GYM.frame, 0, 1.25, -.8, g); box(.5, .2, .02, MED.screen, 0, 1.28, -.72, g);
+    box(.76, .32, .14, GYM.frame, 0, 1.25, -.8, g); const scr = box(.5, .2, .02, MED.screen, 0, 1.28, -.72, g);
     for (const x of [-.36, .36]) box(.04, .04, .5, GYM.chrome, x, 1.0, -.6, g);
+    if (o.place) {                                       // Pillar 2: the belt runs and the console brightens while someone is on it (MOVERS)
+      const bt = beltTex.clone(); bt.needsUpdate = true;
+      belt.material = new THREE.MeshStandardMaterial({ map: bt, roughness: .9 }); belt.userData.noMerge = true;
+      const sm = MED.screen.clone(); scr.material = sm; scr.userData.noMerge = true;
+      let v = 0;
+      MOVERS.push({ place: o.place, tick(dt, on) {
+        if (!on && v === 0) return;
+        v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) v = 0;
+        bt.offset.y = (bt.offset.y + dt * v * 2.4) % 1; sm.emissiveIntensity = 1 + v * 1.4;
+      } });
+    }
     return { w: .8, d: 1.9 };
   },
-  rower(g) {
+  rower(g, o = {}) {
     box(.16, .08, 2.1, GYM.chrome, 0, .3, 0, g); box(.4, .1, .4, GYM.frame, 0, .26, .95, g);
-    cyl(.24, .24, .16, GYM.frame, 0, .42, -.92, g, 20).rotation.z = Math.PI / 2; box(.3, .06, .3, GYM.rubber, 0, .4, .2, g);
+    cyl(.24, .24, .16, GYM.frame, 0, .42, -.92, g, 20).rotation.z = Math.PI / 2; const seat = box(.3, .06, .3, GYM.rubber, 0, .4, .2, g);
     for (const x of [-.18, .18]) box(.12, .03, .2, GYM.frame, x, .3, -.55, g);
     box(.5, .03, .03, GYM.accent, 0, .55, -.7, g);
+    if (o.place) {                                       // Pillar 2: the seat slides while someone rows (MOVERS)
+      seat.userData.noMerge = true;
+      let v = 0, ph = 0;
+      MOVERS.push({ place: o.place, tick(dt, on) {
+        if (!on && v === 0) return;
+        v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) v = 0;
+        ph += dt * 3.2; seat.position.z = .2 + Math.sin(ph) * .32 * v;
+      } });
+    }
     return { w: .6, d: 2.2 };
   },
   weightRack(g) {                                        // dumbbells on two rails, plates on the side
@@ -2345,6 +2366,8 @@ const MED = {
   curtain: std('#9fcfd6', .8, 0, { transparent: true, opacity: .8, side: THREE.DoubleSide }), cross: std('#c8463c', .5),
   screen: std('#9ff3e6', .3, 0, { emissive: col('#4fd8c4'), emissiveIntensity: 1.0 }), paper: std('#f4f1e8', .9),
 };
+// a treadmill belt: dark rubber with lighter slats, so you can see it run (made at load, no R())
+const beltTex = tex(32, 64, (g, w, h) => { g.fillStyle = '#1d2226'; g.fillRect(0, 0, w, h); g.fillStyle = '#353d43'; for (let y = 0; y < h; y += 8) g.fillRect(0, y, w, 2); }, 1, 4);
 const GYM = {
   rubber: std('#1d2226', .9), frame: std('#2b343b', .5, .4), accent: std('#e9c46a', .5), teal: std('#2a9d8f', .6),
   mat: ['#2a9d8f', '#7a5aa8', '#d96a2e'].map(c => std(c, .9)), plate: std('#22282d', .5, .3), chrome: std('#c7cfd3', .25, .8),
@@ -2932,7 +2955,7 @@ function buildDeck(def) {
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -3022,7 +3045,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -3787,8 +3810,8 @@ DECKS[5] = {
     { id: '5-o2-1', kind: 'o2cell', at: [35, 0], room: 'a', face: 's', panel: [35, 1] },
     { id: '5-o2-2', kind: 'o2cell', at: [37, 0], room: 'a', face: 's', panel: [37, 1] },
     { id: '5-electrolyser-1', kind: 'electrolyser', at: [35, 2], room: 'a', face: 'e', panel: [36, 2] },
-    { id: '5-scrubber-1', kind: 'scrubber', at: [39, 4], room: 'a', face: 'n', panel: [39, 3] },
-    { id: '5-scrubber-2', kind: 'scrubber', at: [40, 4], room: 'a', face: 'n', panel: [40, 3] },
+    { id: '5-scrubber-1', kind: 'airplant', at: [39, 4], room: 'a', face: 'n', panel: [39, 3] },
+    { id: '5-scrubber-2', kind: 'airplant', at: [40, 4], room: 'a', face: 'n', panel: [40, 3] },
     { id: '5-manifold-1', kind: 'manifold', at: [36, 15], room: 'n', face: 'n', panel: [36, 14] },
     { id: '5-pump-1', kind: 'pump', at: [34, 11], room: 'n', face: 'e', panel: [35, 11] },
     { id: '5-pump-2', kind: 'pump', at: [34, 12], room: 'n', face: 'e', panel: [35, 12] },
@@ -3797,7 +3820,7 @@ DECKS[5] = {
     { id: '5-battery-3', kind: 'battery', at: [28, 13], room: 'y', face: 's', panel: [28, 14] },
     { id: '5-battery-4', kind: 'battery', at: [33, 13], room: 'y', face: 's', panel: [33, 14] },
     { id: '5-inverter-1', kind: 'inverter', at: [33, 9], room: 'y', face: 's', panel: [33, 10] },
-    { id: '5-junction-1', kind: 'junction', at: [20, 11], room: 'u', face: 'w', panel: [19, 11] },
+    { id: '5-junction-1', kind: 'lights', at: [20, 11], room: 'u', face: 'w', panel: [19, 11] },
     { id: '5-cartdock-1', kind: 'cartdock', at: [20, 12], room: 'm', face: 'w', panel: [19, 12] },
     { id: '5-cartdock-2', kind: 'cartdock', at: [20, 15], room: 'm', face: 'w', panel: [19, 15] },
     { id: '5-valve-1', kind: 'valve', at: [28, 0], room: 'g', face: 's', panel: [28, 0] },
@@ -4579,8 +4602,9 @@ DECKS[3] = {
     furnish('w', 'washroom', { toilets: true });
 
     // ---- gym: treadmills and the rower facing the starboard windows, weights by the store wall, mats in the corner ----
-    [1.5, 3.5, 5.5].forEach((x, k) => place('F', 'treadmill', x, 7.55, 's', { it: k === 1 ? IT('Treadmills', 'Facing the windows, so you can run towards the stars and never get any closer.') : undefined }));
-    place('F', 'rower', 7.6, 7.4, 's', { it: IT('Rowing machine', 'The ship\'s most argued-over leaderboard is taped to it. Vance is top. Vance taped it there.') });
+    // (Pillar 2, the Deck 6 architect: `place` names the place on each machine, so its belt or seat moves while someone uses it)
+    [1.5, 3.5, 5.5].forEach((x, k) => place('F', 'treadmill', x, 7.55, 's', { place: '3-gym-' + (k + 1), it: k === 1 ? IT('Treadmills', 'Facing the windows, so you can run towards the stars and never get any closer.') : undefined }));
+    place('F', 'rower', 7.6, 7.4, 's', { place: '3-gym-4', it: IT('Rowing machine', 'The ship\'s most argued-over leaderboard is taped to it. Vance is top. Vance taped it there.') });
     place('F', 'weightRack', 8.62, 2.6, 'e', { it: IT('Weights', 'Dumbbells from light to ridiculous. The ridiculous ones have never been moved.') });
     place('F', 'weightBench', 6.4, 3.0, 'w');
     place('F', 'gymMats', 1.6, 2.6, 'n', { it: IT('Stretching mats', 'Three mats, a ball and a roller. Mostly used for lying down and calling it stretching.') });
@@ -5695,7 +5719,7 @@ DECKS[6] = {
   closedDoors: {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
-  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6, byFace: true },   // flat stern with tight corners for the drive, a short blunt bow; one hull piece per facing (0.27.3: was 234 pieces)
   // service hatches into the utility rooms (0.30.4): the player and Works crew pass (see hatchPassable)
   service: ['h,17,1', 'h,17,11', 'v,22,2', 'v,24,9'],
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
@@ -6261,7 +6285,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.5';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.6';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6902,6 +6926,20 @@ function roomsInUse(d0, days = 7) {
   return Object.entries(T).sort().map(([k, t]) => ({ k, places: t.places, used: t.used.size, uses: t.uses, hours: Math.round(t.min / 60), people: t.people.size }));
 }
 
+// the places the crew's jobs (section 17) took them to: per 'deck type', visits and different places, from the jobs
+// on the books now (claimed or done in the last two days); null before there are any
+function jobVisits() {
+  if (typeof SHIP === 'undefined' || !Array.isArray(SHIP.jobs)) return null;
+  const S = schedData(), byId = new Map(); for (const n in DECKS) for (const p of DECKS[n].places || []) byId.set(p.id, { ...p, deck: +n });
+  const T = {};
+  for (const j of SHIP.jobs) for (const s of j.segs || []) if (s.placeId) {
+    const pl = S.byId.get(s.placeId) || byId.get(s.placeId); if (!pl) continue;
+    const t = T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] || (T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] = { visits: 0, places: new Set() });
+    t.visits++; t.places.add(pl.id);
+  }
+  return Object.entries(T).sort().map(([k, t]) => ({ k, visits: t.visits, places: t.places.size }));
+}
+
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
@@ -6928,14 +6966,11 @@ function shipDay(d) {
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
 // whereIs: where someone is at ship minute t. A job they've claimed (section 17's jobWhere: to the parts shelf, the
 // machine's panel and back) is laid over their plan; otherwise it's the plan (planWhere). Anything that needs the
-// plan alone (section 17's jobRun, which fits jobs into it) calls planWhere. The flag stops a jobWhere that brings the
-// machines up to date from reaching jobWhere again through whereIs.
-// Until section 17's jobRun reads planWhere (agreed with the systems engineer), jobs stay off: jobRun calling
-// whereIs from inside machinesNow would run an hour's jobs twice. jobsSafe() checks that once, then remembers.
-let JOB_WHERE_BUSY = false, JOBS_SAFE = null;
-const jobsSafe = () => JOBS_SAFE !== null ? JOBS_SAFE : (JOBS_SAFE = typeof jobRun !== 'function' || !/\bwhereIs\(/.test(String(jobRun)));
+// plan alone (section 17's jobRun, which fits jobs into it) calls planWhere, never whereIs: whereIs from inside
+// machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
+let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
-  if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY && jobsSafe()) {
+  if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
     JOB_WHERE_BUSY = true; let j;
     try { j = jobWhere(person, t); } finally { JOB_WHERE_BUSY = false; }
     if (j) return j;
@@ -7038,7 +7073,7 @@ function needsLoad(s) {                                  // from the save (secti
   return out;
 }
 SHIP.player = { needs: needsLoad(SAVED) };
-SAVE_EXTRA.push(s => { s.player.needs = { ...SHIP.player.needs }; });   // into the save (section 13)
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).needs = { ...SHIP.player.needs }; });   // into the save (section 13)
 // the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
 // restore and drain multiply ours (a failing recycler, weaker showers). walk is left out: the user's rule is that
 // only low fitness and energy slow you. Read at most once a ship minute; all 1s until section 17 is there.
@@ -7272,7 +7307,9 @@ function playerUpdate(dt, t) {
 // otherwise awake. Any activity stops.
 SIM_ADVANCE.push((from, to) => {
   actEnd(true);
-  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, playerFx());
+  const d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;   // a replay: section 17's pure record, never the live machines
+  let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, from) : null; } catch (e) { fx = null; }
+  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
@@ -7599,9 +7636,14 @@ function galleyTurn(who = 'player') {
   const S = galleyAdvance(shipNow()); return shipNow() >= j.turnAt && (S.servery.portions > 0 || S.grab.items > 0);
 }
 // someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
+// Each waiter gets their own spot: the queue places in line order (the first to wait at the front), then null.
+// The galley is brought up to t first, so a stepped test sees the same waits as the game.
+const GALLEY_QUEUE = ['3-queue-1', '3-queue-2', '3-queue-3', '3-queue-4'];
 function galleyHold(person, t) {
-  const S = SHIP.galley; if (!S || !S.wait.length) return undefined;
-  const x = S.wait.find(w => w[0] === person.id); return x ? x[4] : undefined;
+  let S = SHIP.galley; if (!S) return undefined;
+  if (t !== undefined && S.at <= Math.floor(t)) S = galleyAdvance(t);
+  if (!S.wait.length) return undefined;
+  const k = S.wait.findIndex(w => w[0] === person.id); return k < 0 ? undefined : GALLEY_QUEUE[k] || null;
 }
 // the save: SHIP.galley as plain data, and back (anything malformed means a fresh start from the plans)
 function galleySave() { return SHIP.galley ? JSON.parse(JSON.stringify(SHIP.galley)) : null; }
@@ -7892,6 +7934,8 @@ function machinesReset(hour) {
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
 // A clock earlier than the machines' (New game) starts afresh
 function machinesNow() {
+  const t = shipNow();
+  if (MACH_HOUR !== null && t >= MACH_SEEN && MACH_HOUR * 60 > t) { MACH_SEEN = t; return SHIP.machines; }   // up to date: the common case
   const now = Math.floor(shipNow() / 60), start = Math.floor(((SHIP_START.day - 1) * 1440 + SHIP_START.min) / 60);
   if (MACH_HOUR === null || shipNow() < MACH_SEEN) machinesReset(Math.min(start, now));
   MACH_SEEN = shipNow();
@@ -8098,8 +8142,9 @@ function panelPlace(id) {
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
+// the plan alone, without jobs, is planWhere (section 14): whereIs lays the jobs over it, so claiming must not ask whereIs
 function jobRun(p, j, t, makeMin) {
-  const w = whereIs(p, t);
+  const w = planWhere(p, t);
   if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
   const home = w.deck, segs = []; let c = t, dk = home;
   const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
@@ -8180,10 +8225,12 @@ function jobsHour(h) {
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
-// where a job puts someone at minute t, shaped like whereIs (plus `job`), or null: lay it over whereIs to see the
-// crew go about their jobs. Not wired into whereIs yet: that waits for the utility rooms' panel places.
+// where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
+// first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
+// test copies that want the plain plans.
 let JOB_IDX = null, JOB_IDX_REV = -1;
 function jobWhere(person, t) {
+  if (!jobWhere.on) return null;
   machinesNow();
   if (JOB_IDX_REV !== MACH_REV) {
     JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
@@ -8240,6 +8287,7 @@ function machinesLoad(s) {
   return true;
 }
 machinesLoad(SAVED);
+jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // =====================================================================
 // 6. CAMERA
@@ -10037,6 +10085,7 @@ function loop() {
     D_.geo.attributes.position.needsUpdate = true;
   }
   for (const sp of SPINS) sp.o.rotation[sp.ax] += sp.w * dt;
+  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (const b of MOVERS) b.tick(dt, !!(pb && pb(b.place))); }   // section 10's placeBusy
   for (const p of PULSES) p.m[p.key] = p.base + p.amp * (.5 + .5 * Math.sin(t * p.w + p.ph));
   for (const s of STEAM) { const k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);

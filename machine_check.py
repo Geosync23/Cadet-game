@@ -90,7 +90,7 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   for (const j of J) if (j.segs && j.claimedBy !== 'you') {
     (byWho[j.claimedBy] = byWho[j.claimedBy] || []).push([j.start, j.end]);
     const p = ppl.get(j.claimedBy);
-    for (let m = j.start; m < j.end; m += 5) { const w = whereIs(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
+    for (let m = j.start; m < j.end; m += 5) { const w = planWhere(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
   }
   for (const who in byWho) { const v = byWho[who].sort((a, b) => a[0] - b[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) out.overlap.push(who); }
   // the overlay: someone mid-job is where the job says
