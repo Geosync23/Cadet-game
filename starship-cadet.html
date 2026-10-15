@@ -5695,7 +5695,7 @@ DECKS[6] = {
   closedDoors: {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
-  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6, byFace: true },   // flat stern with tight corners for the drive, a short blunt bow; one hull piece per facing (0.27.3: was 234 pieces)
   // service hatches into the utility rooms (0.30.4): the player and Works crew pass (see hatchPassable)
   service: ['h,17,1', 'h,17,11', 'v,22,2', 'v,24,9'],
   // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
