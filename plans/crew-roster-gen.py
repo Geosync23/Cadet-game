@@ -252,6 +252,9 @@ P2_LIKES = {'runner': ['gym-regular', 'early-riser'], 'shopper': ['calls-home', 
             'gardener': ['garden-lover', 'early-riser'], 'musician': ['music', 'night-owl'], 'stargazer': ['quiet-corner', 'window-seat']}
 P2_DISLIKES = {'bar-regular': ['early-to-bed'], 'stargazer': ['early-to-bed'], 'runner': ['late-sleeper']}
 NEW_R = random.Random(20261016)
+# the galley staff: team and days off (0 = Monday)
+GALLEY_TEAMS = {'brennan': ('chef', [4, 5]), 'varga-tariq': ('early', [0, 1]), 'haddad-tamsin': ('early', [2, 3]),
+                'dlamini-lukas': ('early', [1, 2]), 'walsh-esme': ('late', [5, 6]), 'madsen-ivo': ('late', [0, 1])}
 # the storekeepers: work hours ([start, end] in ship minutes; they replace the shift's), days off, bio
 STOREKEEPERS = [([[480, 870]], [0, 1], 'Opens the crew store in the morning and knows who has run out of what.'),
                 ([[870, 1260]], [3, 4], 'Keeps the crew store open into the evening, and the ledger in perfect order.')]
@@ -335,6 +338,17 @@ def main():
     for p, (hours, off, bio) in zip([p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-2:], STOREKEEPERS):
         p.update(dept='store', role='Storekeeper', job='store', bio=bio)
         p['rota'] = {'offDays': off, 'hours': hours}
+    # ---- the galley staff's teams, agreed with the galley engineer (section 16 owns their hours, in GALLEY_SHIFTS; shift
+    # stays 'day'). Days off give a chef and at least one early and one late hand every day; Lukas Dlamini, an early
+    # hand, works the chef's shift on Brennan's days off (Fri and Sat)
+    for p in crew:
+        if p['dept'] == 'galley':
+            team, off = GALLEY_TEAMS[p['id']]
+            p['rota'] = dict(p['rota'], offDays=off, team=team)
+            if p['id'] == 'dlamini-lukas': p['rota']['cover'] = {'for': 'brennan', 'days': [4, 5]}
+    for d in range(7):
+        on = [p['rota']['team'] for p in crew if p['dept'] == 'galley' and d not in p['rota']['offDays'] and d not in p['rota'].get('cover', {}).get('days', [])]
+        assert 'early' in on and 'late' in on, d
     # ---- work places, seeds, uniform
     out = []
     for p in crew + GUESTS + [PLAYER]:
@@ -443,6 +457,9 @@ q.addEventListener('input', filt); nights.addEventListener('change', filt);
 </html>
 '''
 
+# the galley teams in words; their hours are the galley engineer's (GALLEY_SHIFTS, section 16), so none are copied here
+GALLEY_WORDS = {'chef': 'Galley chef: cooks before breakfast and again before dinner', 'early': 'Galley, early team: before breakfast to early afternoon',
+                'late': 'Galley, late team: early afternoon through dinner'}
 # habits in plain words, for the page
 HABIT_WORDS = {'early-riser': 'early riser', 'late-sleeper': 'late sleeper', 'early-to-bed': 'early to bed', 'night-owl': 'night owl',
                'skips-breakfast': 'skips breakfast', 'late-diner': 'late diner', 'lingers-at-meals': 'lingers at meals',
@@ -476,7 +493,8 @@ def page(entries):
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
-            shift = ('Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00') if not x['rota'].get('hours') else \
+            shift = GALLEY_WORDS[x['rota']['team']] if x['rota'].get('team') else \
+                    ('Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00') if not x['rota'].get('hours') else \
                     ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in x['rota']['hours'])
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
@@ -484,7 +502,7 @@ def page(entries):
                        '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
-                          e(x['role']), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
+                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
