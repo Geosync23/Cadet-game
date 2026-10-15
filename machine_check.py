@@ -232,11 +232,17 @@ with sync_playwright() as pw:
       let lapse = null, oneAtATime = null;
       if (k) { claimJob(k.id); const k2 = jobsBoard().find(x => !x.claimedBy && x.id !== k.id && jobTier(x) <= PLAYER_TIER); oneAtATime = !k2 || !claimJob(k2.id);
                setShipNow(shipNow() + 13 * 60); machinesNow(); const back = SHIP.jobs.find(x => x.id === k.id); lapse = !back || back.claimedBy !== 'you'; }
-      return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse };
+      // progress keeps it yours: touched 10 hours in, it's still yours 13 hours after the claim
+      let kept = null;
+      const k3 = jobsBoard().find(x => !x.claimedBy && jobTier(x) <= PLAYER_TIER && x.machine && !ENGINE_KINDS.has(machineById(x.machine).kind));
+      if (k3 && claimJob(k3.id)) { setShipNow(shipNow() + 600); touchJob(k3.id); setShipNow(shipNow() + 180); machinesNow(); const b = SHIP.jobs.find(x => x.id === k3.id); kept = !!b && b.claimedBy === 'you'; dropJob(k3.id); }
+      const s0 = SHIP.stores.relay || 0, ret = returnPart('relay') && SHIP.stores.relay === s0 + 1;
+      return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse, kept, ret };
     })()""")
     print(f"Your job: {y}")
     if y.get('none') or not (y['claimed'] and y['mine'] and y['fin'] and y['after'] >= 90): fail('claiming and finishing a job yourself')
     if y.get('oneAtATime') is False or y.get('lapse') is False: fail('one job at a time, and a job left 12 hours goes back')
+    if y.get('kept') is False or not y.get('ret'): fail('touchJob keeps a job in progress yours; returnPart puts a part back')
 
     # 6. the save
     rt = g.ev("""(() => {
