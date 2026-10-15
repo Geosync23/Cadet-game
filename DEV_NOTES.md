@@ -82,6 +82,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.25.1 | 0.25.0 plus 0.22.3 (the lead): the player's bed read from `ROSTER_PLAYER` (`playerBed()`), seat and mattress heights by place type (upper bunks at 1.6 m), and the fix for a sleeping bunkmate catching the tap on your bunk. Merge fixes only. |
 | 0.25.2 | 0.25.1 plus 0.22.4 (overflow work stations skip locked or private rooms) and 0.18.4 (two more Deck 3 infirmary places, so Rina works in the infirmary), merged by the lead. Merge fixes only. |
 | 0.27.0 | Pillar 2, workstream A2: activity animations (the performance engineer, from 0.25.2). Thirteen activities as poses for the crowd, full rigs and Walkers: run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk, with seated variants and props (dumbbells, receiver, basket, card, guitar, watering can, spoon and pan, sponge and plate, cloth, glass, book). `poseOf(place)` and `animateActivity()` in 8b; crowd props ride three prop bones inside the crowd's meshes. Section 10: `placeSpot` takes its pose from `poseOf(pl)` (one line). See "Activities (0.27.x)". |
+| 0.27.1 | A2: `row` for the gym's rower (legs drive on the footrests, the seat slides, the body swings back, the arms pull in last; always seated; a seated `gym` place with no `anim` rows). `CROWD_ANIMS`, the set of activities drawn, for the schedules to check before sending one. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -494,6 +495,8 @@ Section 8b, Pillar 2 workstream A2, by the performance engineer.
 - **Seated and lying forms** are written out: `'sit:call'` in a booth, `'sit:play'` at the piano (keys; standing `play` is a guitar), `'lie:lift'` on the weight bench (a press), `'sit:lift'` on the rower.
 - **Standing on something:** a standing pose with `pos.y` under 0.3 stands on a floor that high (a stage, the treadmill's belt, 0.16).
 - **Unknown poses** stand.
+- **`row`** (the rower) always sits. A seated `gym` place with no `anim` rows.
+- **`CROWD_ANIMS`** is the set of activities drawn. The schedules can check it before sending one.
 - **`poseOf(place)`** gives a place's pose from `anim`, or from its type (the plan's table: `gym` lift, `callhome` call, `shop` browse, `music` play, `garden` water, `laundry` fold, `work:galley` cook), on its base pose. By type alone, seated places stay plain `sit` except booths (`sit:call`) and the gym (`sit:lift`, `lie:lift` on the bench); a place with its own `anim` (the piano bench: `anim: 'play'`) gets it seated too. Section 10's `placeSpot` uses it, so crew at those places now do the activity.
 
 **Cost (0.27.0 against 0.25.2):** draw calls identical on every deck in day_check (peaks 370, 373, 415, 412, 377, 321). Props add a few hundred triangles (Deck 3 at 18:20: 475,711 against 475,163, with 67 crew). cadet_test ALL IDENTICAL against 0.25.2, also with the `placeSpot` hook reverted (the refactor alone changes nothing).
