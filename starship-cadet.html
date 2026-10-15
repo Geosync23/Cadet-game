@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.22.0
+   STARSHIP CADET: CSV Wren                            build 0.22.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5456,7 +5456,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.22.0';                             // keep in step with the header's build line
+const GAME_BUILD = '0.22.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5602,8 +5602,8 @@ if (!DEBUG) document.getElementById('light').style.display = 'none';
 // places always give the same day. Variety, in layers: the rota and days off; the shape of the weekday
 // (WEEK_SHAPE); seeded jitter (waking 5-25 minutes either way, meal lengths, lingering); habits (HABITS in
 // section 9); and choices weighted by need (gym, calls home, laundry).
-// It reads ROSTER (+ ROSTER_GUESTS) from section 9 and each deck's places from DECKS[n].places. Until those
-// exist it uses STUB_ROSTER and stubPlaces(n), in the same formats. Nothing here calls R() or draws anything.
+// It reads ROSTER (+ ROSTER_GUESTS) from section 9 and each deck's places from DECKS[n].places. Nothing here
+// calls R() or draws anything.
 // =====================================================================
 const SCHED_COMMUTE = 2;                                 // a lift ride, ship minutes; you're on the new deck after it
 const MEALS = { breakfast: [360, 480], dinner: [1020, 1230] };
@@ -5624,54 +5624,20 @@ const HABIT_LEISURE = {
   'garden-lover': [[3, 'garden', 8]], 'lounge-regular': [[3, 'lounge-seat', 8]], 'common-room': [[4, 'common-room', 8, 'junior']],
   'music': [[4, 'music', 8]], 'quiet-corner': [[3, 'lounge-seat', 4], [1, 'common-room', 3], [2, 'common-room', 3]],
 };
+// the most people Deck 3 holds in the evening (17:00-24:00) before leisure goes elsewhere; meals aren't capped.
+// Infinity: no cap (about 64-73 at the peak). Set it to what the crowd can draw there.
+const DECK3_EVENING_MAX = Infinity;
 const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'tea']);   // short stops that never stretch to fill time
 const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest'];
-
-// ---- stand-in data, used only until the real roster and places are in (same formats) ----
-const STUB_ROSTER = [
-  ['pell', 'junior', 'works', 'day', [1, 2], '4-B2-2', 5, 'work:works', ['late-sleeper', 'tea-break', 'gym-regular']],
-  ['rina', 'junior', 'infirmary', 'day', [6, 0], '4-B2-3', 3, 'work:infirmary', ['common-room', 'calls-home']],
-  ['tomas', 'junior', 'watch', 'day', [4, 5], '4-B1-1', 2, 'work:watch', ['common-room', 'window-seat']],
-  ['brennan', 'officer', 'galley', 'day', [4, 5], '4-05', 3, 'work:galley', ['early-riser', 'early-to-bed']],
-  ['marrow', 'captain', 'command', 'day', [0, 1], '2-C', 1, 'work:command', ['early-riser', 'music']],
-  ['vance', 'xo', 'command', 'day', [1, 2], '2-X', 1, 'work:command', ['workaholic', 'gym-regular']],
-  ['sato', 'chief', 'survey', 'day', [1, 2], '2-V', 2, 'work:survey', ['workaholic', 'quiet-corner', 'tea-break']],
-  ['holt', 'chief', 'watch', 'day', [3, 4], '2-T', 2, 'work:watch', ['early-riser', 'late-diner']],
-  ['kowalczyk', 'senior', 'command', 'night', [2, 3], '2-S', 1, 'work:command', ['night-owl', 'quiet-corner']],
-  ['stub-eng1', 'junior', 'engine', 'night', [5, 6], '4-B3-1', 6, 'work:engine', ['evening-shower', 'skips-breakfast']],
-  ['stub-eng2', 'junior', 'engine', 'day', [2, 3], '4-B3-2', 6, 'work:engine', ['garden-lover', 'lingers-at-meals']],
-  ['stub-works', 'junior', 'works', 'day', [5, 6], '4-B3-3', 5, 'work:works', ['late-diner', 'lounge-regular', 'skips-breakfast']],
-].map(([id, rank, dept, shift, offDays, bed, wd, wp, habits], i) =>
-  ({ id, name: id, rank, dept, shift, rota: { offDays }, bed, work: { deck: wd, place: wp }, habits, seed: 1000 + i * 7919 }));
-// a deck with no `places` yet gets these, named as the plan names real ones
-function stubPlaces(n) {
-  const out = [], add = (type, k, name = type, extra = {}) => { for (let i = 1; i <= k; i++) out.push({ id: `${n}-${name}-${i}`, type, stub: true, ...extra }); };
-  if (n === 1) { add('work:command', 3); add('work:helm', 3); add('work:ops', 1); add('work:comms', 1); add('common-room', 8); }
-  if (n === 2) {
-    add('work:survey', 12); add('work:watch', 8); add('work:comms', 4); add('common-room', 4);
-    for (const r of 'ABCDEFGHINORSTVX') out.push({ id: `2-${r}`, type: 'bed', stub: true }, { id: `2-${r}-wash`, type: 'shower', stub: true });
-  }
-  if (n === 3) {
-    add('mess-seat', 40); add('servery-queue', 4); add('grab-shelf', 1); add('lounge-seat', 20); add('garden', 12); add('bench', 8);
-    add('gym', 8); add('callhome', 4); add('work:galley', 8); add('work:infirmary', 4);
-  }
-  if (n === 4) {
-    add('shower', 4); add('basin', 4); add('common-room', 10); add('music', 5); add('laundry', 6); add('bench', 4);
-    for (let c = 1; c <= 24; c++) { const id = '4-' + String(c).padStart(2, '0'); out.push({ id, type: 'bed', stub: true }, { id: id + '-wash', type: 'shower', stub: true }); }
-  }
-  if (n === 5) { add('work:works', 19); add('lounge-seat', 3, 'tea'); }
-  if (n === 6) { add('work:engine', 7); add('bench', 3); }
-  return out;
-}
 
 // ---- data access (read at call time, so section 9's ROSTER and every deck's places are in by then) ----
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = (typeof ROSTER !== 'undefined' ? ROSTER : STUB_ROSTER).concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : [])
+  const people = ROSTER.concat(ROSTER_GUESTS)
     .filter(p => !p.player && p.bed !== PLAYER_BED);     // you live your own day
   const places = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || stubPlaces(n))) places.push({ ...p, deck: n });
+  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) places.push({ ...p, deck: n });
   const byId = new Map(places.map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
@@ -5749,6 +5715,7 @@ function schedBuild(p, d, occ, S) {
   const F = schedFrame(p, d), P = schedFrame(p, d - 1), U = F.U, H = F.H, B = (d - 1) * 1440, C = SCHED_COMMUTE;
   const bedDeck = deckOf(p.bed), desk = S.desks.get(p.id) || null, wd = p.work && p.work.deck;
   const segs = []; let t = 0, deck = bedDeck;
+  const deck3Full = (a, b) => { const h = occ.heads; for (let m = Math.max(a, 1020); m < Math.min(b, 1440); m++) if (h[m] >= DECK3_EVENING_MAX) return true; return false; };
   const isFree = (id, a, b) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y);
   const hold = (id, a, b) => { if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b]); };
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
@@ -5767,6 +5734,7 @@ function schedBuild(p, d, occ, S) {
   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
   const take = (act, opts, dur, o = {}) => {
     for (const [dk, type] of opts) {
+      if (dk === 3 && act === 'leisure' && DECK3_EVENING_MAX < Infinity && deck3Full(t + (deck !== 3 ? C : 0), o.by !== undefined ? o.by : t + dur)) continue;
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
@@ -5930,7 +5898,11 @@ function shipDay(d) {
   const S = schedData(), occ = new Map(), plans = new Map();
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
   const order = S.people.slice().sort((a, b) => wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
-  for (const p of order) plans.set(p.id, schedBuild(p, d, occ, S));
+  occ.heads = new Int16Array(1440);                      // how many the plans so far put on Deck 3, minute by minute
+  for (const p of order) {
+    const plan = schedBuild(p, d, occ, S); plans.set(p.id, plan);
+    for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
+  }
   const day = { d, plans, occ };
   SHIP_DAYS.set(d, day);
   for (const k of SHIP_DAYS.keys()) if (k < d - 2 || k > d + 2) SHIP_DAYS.delete(k);
@@ -5942,7 +5914,7 @@ function whereIs(person, t) {
   let a = 0, b = segs.length - 1;
   while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
   const s = segs[a];
-  return s ? { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, until: s.to, tag: s.tag } : null;
+  return s ? { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag } : null;
 }
 const schedPeople = () => schedData().people;
 const peopleOn = (deck, t) => schedPeople().map(p => ({ p, w: whereIs(p, t) })).filter(x => x.w && x.w.deck === deck);
@@ -6823,11 +6795,13 @@ const rosterSpec = p => Object.assign({ name: p.name, dept: p.uniform || 'comman
 buildDeck(DECKS[START.deck]); indexRoomTiles();
 
 const walkers = [];
+const DECK_CREW = [];                                    // the scheduled crew on this deck (CrewAgent, below)
 const cellAt = (x, z) => [Math.floor(x + OX), Math.floor(z + OZ)];
 const K = c => c[0] + ',' + c[1];
 function occupiedBy(except) {                 // cells other people stand in, or are heading to
   const s = new Set();
   for (const o of walkers) if (o !== except && o.active) { s.add(K(o.here())); if (o.goal) s.add(K(o.goal)); }
+  for (const a of DECK_CREW) if (a.settled && a.spot && a.spot.onTile) s.add(K(a.spot.walk));   // crew standing at their place
   return s;
 }
 function nearestOpen(x, z, who) {
@@ -6877,6 +6851,11 @@ class Walker {
         if (o === this || !o.active) continue;
         const qx = pos.x - o.obj.position.x, qz = pos.z - o.obj.position.z, qd = Math.hypot(qx, qz);
         if (qd < .42 && qd > 1e-4) { pos.x = o.obj.position.x + qx / qd * .42; pos.z = o.obj.position.z + qz / qd * .42; }
+      }
+      for (const a of DECK_CREW) {                       // nor through crew on their feet
+        if (a.pose === 'sit' || a.pose === 'lie') continue;
+        const qx = pos.x - a.x, qz = pos.z - a.z, qd = Math.hypot(qx, qz);
+        if (qd < .42 && qd > 1e-4) { pos.x = a.x + qx / qd * .42; pos.z = a.z + qz / qd * .42; }
       }
       collide(pos, BODY_R);
       moved = Math.hypot(pos.x - ox, pos.z - oz);
@@ -6930,37 +6909,6 @@ class Walker {
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
     animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
-    if (!this.isPlayer) this.think(dt);
-  }
-  // crew brain (placeholder until the schedule sim): pick a room they like, wander there, linger, face company
-  think(dt) {
-    if (this.talking > 0) { this.talking -= dt; return; }
-    if (this.path.length) return;
-    this.rest -= dt; if (this.rest > 0) return;
-    const s = this.spec, taken = occupiedBy(this);
-    const weights = Object.assign({ j: 3, '=': 1, '+': 1 }, s.haunts || {});
-    if (s.home) weights[s.home] = (weights[s.home] || 0) + 2;
-    for (let tries = 0; tries < 5; tries++) {
-      let pickTile = null;
-      if (s.spots && R() < .7) {
-        const opts = s.spots.filter(c => free(...c) && !taken.has(K(c)));
-        if (opts.length) pickTile = opts[Math.floor(R() * opts.length)];
-      }
-      if (!pickTile) {
-        let roll = R() * Object.values(weights).reduce((a, b) => a + b, 0), room = '=';
-        for (const [r, w] of Object.entries(weights)) { roll -= w; if (roll <= 0) { room = r; break; } }
-        const opts = (ROOM_TILES[room] || []).filter(c => !taken.has(K(c)));
-        if (opts.length) pickTile = opts[Math.floor(R() * opts.length)];
-      }
-      if (pickTile && this.goTo(pickTile, () => this.arrive())) return;
-    }
-    this.rest = 1.5;
-  }
-  arrive() {
-    this.rest = 4 + R() * 9;
-    let near = null, nd = 2.3;
-    for (const o of walkers) { if (o === this || !o.active) continue; const d = o.obj.position.distanceTo(this.obj.position); if (d < nd) { nd = d; near = o; } }
-    if (near) this.faceToward(near); else this.face += (R() - .5) * 2;
   }
   setActive(on) {
     this.active = on; this.obj.visible = on; this.stop();
@@ -6970,8 +6918,180 @@ class Walker {
 
 const player = new Walker({ ...PLAYER_SPEC, deck: START.deck }, START.tile || PLAYER_SPEC.start, true);
 if (SAVED) player.face = player.obj.rotation.y = START.face;
-const crew = CREW.map(spec => new Walker(spec, spec.start));
+// The nine placeholder walkers are gone (0.22.1): the crew are the scheduled CrewAgents now. CREW (section 9)
+// stays as data; `crew` stays, empty, for the code that still loops over it.
+const crew = [];
 target.copy(player.obj.position).setY(.7);
+
+// ---- the crew on this deck (Pillar 1, workstream 6) ----
+// Everyone whereIs (section 14) puts on the deck you're on is a CrewAgent here: they walk the tile grid to their
+// place, settle into its pose (sit, stand, lie, work), and walk on when their schedule moves them. They are drawn
+// by the crowd (section 8b). When you arrive on a deck they're already mid-activity: at their place, or partway
+// there if they set off only a little while ago. They arrive and leave by the lift car. A 'closed' door is open
+// to someone whose own bed, or whose destination, is in the room behind it (crewPath). After a time skip (sleep)
+// everyone is placed afresh. Crew don't block each other; you can't walk through anyone standing still.
+// Nothing here calls R(): any choice comes from the person's id.
+const CREW_SPEED = 1.15;                                 // tiles per real second
+const _cp = new THREE.Vector3();
+const FACE_ANGLE = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+const idHash = s => { let h = 7; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
+let SPOT_OF = new Map(), PLACE_OF = new Map();          // this deck's places, and where each one is (made per deck)
+const edgeTiles = k => { const [o, i, j] = k.split(','); return o === 'v' ? [[+i - 1, +j], [+i, +j]] : [[+i, +j - 1], [+i, +j]]; };
+// where a place is: the tile to walk to, the exact spot, the height (an upper bunk is high), the pose and facing
+function placeSpot(id) {
+  if (SPOT_OF.has(id)) return SPOT_OF.get(id);
+  const pl = PLACE_OF.get(id); let s = null;
+  if (pl) {
+    const c = cellPos(...pl.at); let x = pl.xy ? pl.xy[0] - OX : c.x, z = pl.xy ? pl.xy[1] - OZ : c.z;
+    if (pl.type === 'bed' && !pl.xy) {                   // a bed is longer than a tile: lie on the middle of the bed itself
+      let best = null, bd = 1.3;
+      for (const it of ITEMS) if (/bunk|bed|futon/i.test(it.t)) { it.hit.getWorldPosition(_cp); const d = Math.hypot(_cp.x - c.x, _cp.z - c.z); if (d < bd) { bd = d; best = [_cp.x, _cp.z]; } }
+      if (best) [x, z] = best;
+    }
+    let walk = pl.walk || (free(...pl.at) ? pl.at : null);
+    if (!walk) {                                         // a seat or bed: the open tile beside it, nearest the spot
+      const [a, b] = pl.at, opts = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]].map(([di, dj]) => [a + di, b + dj])
+        .filter(n => free(...n) && (n[0] === a || n[1] === b ? edgeOpen(a, b, ...n) || !free(a, b) : true))
+        .sort((m, n) => cellPos(...m).distanceTo(new THREE.Vector3(x, 0, z)) - cellPos(...n).distanceTo(new THREE.Vector3(x, 0, z)));
+      walk = opts[0] || nearestOpen(x, z, null);
+    }
+    const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
+    s = { id, walk, x, z, y: berth && +berth[1] % 2 === 0 ? 1.6 : 0, face: FACE_ANGLE[pl.face] || 0,
+      pose: pl.type === 'bed' ? 'lie' : pl.pose, room: pl.room, onTile: free(...pl.at) };
+  }
+  SPOT_OF.set(id, s); return s;
+}
+// findPath, with the 'closed' doors into `rooms` open for the moment
+function crewPath(s, g, rooms) {
+  const opened = [];
+  for (const k in CLOSED_DOORS) {
+    const e = EDGES.get(k);
+    if (e && e.type === 'closed' && edgeTiles(k).some(c => rooms.has(roomAt(...c)))) { e.type = 'door'; opened.push(e); }
+  }
+  try { return findPath(s, g); } finally { for (const e of opened) e.type = 'closed'; }
+}
+const liftTiles = () => (ROOM_TILES['@'] || []).slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+class CrewAgent {
+  constructor(p, cell) {
+    this.p = p; this.h = crowd.add(rosterSpec(p));
+    const c = cellPos(...cell); this.x = c.x; this.z = c.z; this.y = 0;
+    this.face = idHash(p.id) % 628 / 100; this.pose = 'stand';
+    this.path = []; this.spot = null; this.goalId = undefined; this.settled = false; this.talking = 0;
+    this.stuck = 0; this.stuckMax = 0; this.lastX = this.x; this.lastZ = this.z; this.noPath = 0;
+    const bed = PLACE_OF.get(p.bed); this.bedRooms = bed ? [bed.room] : []; this.rooms = new Set(this.bedRooms);
+    this.liftCell = (() => { const l = liftTiles(); return l.length ? l[idHash(p.id) % l.length] : cell; })();
+  }
+  here() { return cellAt(this.x, this.z); }
+  // head for a place (an id), the lift ('@lift'), or nowhere in particular (null: stay on an open tile)
+  retarget(goalId) {
+    this.goalId = goalId; this.path = [];
+    const from = this.settled && this.spot ? this.spot.walk : this.here();
+    if (this.settled && this.spot && !this.spot.onTile) { const w = cellPos(...this.spot.walk); this.x = w.x; this.z = w.z; }   // up from the seat
+    this.settled = false; this.spot = null;
+    let goal = null;
+    if (goalId === '@lift') goal = this.liftCell;
+    else if (goalId) { this.spot = placeSpot(goalId); goal = this.spot && this.spot.walk; if (this.spot) this.rooms = new Set(this.bedRooms.concat(this.spot.room)); }
+    if (!goal) { goal = free(...from) ? from : nearestOpen(this.x, this.z, null); if (!goal) return; }
+    const path = crewPath(from, goal, this.rooms);
+    if (path) this.path = path;
+    else { this.noPath++; const c = cellPos(...goal); this.x = c.x; this.z = c.z; }   // no way there: they're simply there
+  }
+  update(dt, now, N) {
+    const w = whereIs(this.p, now);
+    if (this.talking > 0) {                              // stopped for a word with you
+      this.talking -= dt;
+      if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
+      this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, this.pose); return true;
+    }
+    let goalId;
+    if (w.deck !== N) goalId = '@lift';
+    else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
+    else goalId = w.placeId || null;
+    if (goalId !== this.goalId) this.retarget(goalId);
+    const ox = this.x, oz = this.z;
+    if (this.path.length) {
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); }
+      else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      this.pose = 'walk'; this.y = 0;
+    } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
+      const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
+      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = this.spot.pose; this.face = this.spot.face; this.y = this.spot.y; }
+      else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); this.pose = 'walk'; }
+    } else if (this.goalId === '@lift') return false;    // in the car: gone to another deck
+    else if (!this.spot) this.pose = 'stand';
+    // stuck: meant to be going somewhere and not getting there (in ship minutes)
+    const going = this.path.length > 0 || (this.spot && !this.settled);
+    if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
+    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, this.pose);
+    return true;
+  }
+  remove() { crowd.remove(this.h); }
+}
+let crewCheckT = 0;
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; }
+// everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
+function deckCrewFill() {
+  deckCrewClear();
+  PLACE_OF = new Map((deckDef.places || []).map(p => [p.id, p])); SPOT_OF = new Map();
+  const now = shipNow(), N = deckDef.num;
+  for (const p of schedPeople()) { const w = whereIs(p, now); if (w.deck === N) crewArrive(p, w, now, true); }
+}
+function crewArrive(p, w, now, mid) {
+  const N = deckDef.num, lift = liftTiles();
+  if (w.act === 'commute') {                             // riding in: step out of the car when the ride's done
+    if (now < w.until - .5) return;
+    const a = new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null)); DECK_CREW.push(a); return;
+  }
+  const spot = w.placeId && placeSpot(w.placeId);
+  const prev = whereIs(p, w.from - .01);
+  const prevSpot = prev && prev.deck === N && prev.placeId && placeSpot(prev.placeId);
+  const start = prevSpot ? prevSpot.walk : lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
+  const a = new CrewAgent(p, start); DECK_CREW.push(a);
+  a.retarget(w.placeId || null);
+  if (!mid || !spot || !a.path.length) return;
+  const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
+  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.pose = spot.pose; a.face = spot.face; a.y = spot.y; }
+  else if (done > 0) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
+}
+// once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
+function updateDeckCrew(dt) {
+  const now = shipNow(), N = deckDef.num;
+  for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
+  if ((crewCheckT -= dt) > 0) return;
+  crewCheckT = .25;
+  const here = new Set(DECK_CREW.map(a => a.p.id));
+  for (const p of schedPeople()) if (!here.has(p.id)) { const w = whereIs(p, now); if (w.deck === N) crewArrive(p, w, now, false); }
+}
+// doors open for crew walking through them; a 'closed' one only for those whose rooms are behind it
+function crewNearDoor(d) {
+  const r = 1.15 + (d.span - SEG) / 2;
+  if (!d.rooms) d.rooms = edgeTiles(d.e.key).map(c => roomAt(...c));
+  for (const a of DECK_CREW) {
+    if (a.settled || Math.abs(a.x - d.cx) > r || Math.abs(a.z - d.cz) > r || Math.hypot(a.x - d.cx, a.z - d.cz) > r) continue;
+    if (d.passable || d.rooms.some(rm => a.rooms.has(rm))) return true;
+  }
+  return false;
+}
+// a tap on someone: the nearest crew member whose body is under the finger, by screen distance
+function crewAtScreen(cx, cy) {
+  if (!crowd.visible) return null;
+  let best = null, bd = 26 * Math.max(.8, camera.zoom);
+  for (const a of DECK_CREW) for (const hy of a.pose === 'lie' ? [.15] : a.pose === 'sit' ? [.5, .9] : [.5, 1.0, 1.4]) {
+    _cp.set(a.x, a.y + hy, a.z).project(camera);
+    const d = Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy);
+    if (d < bd) { bd = d; best = a; }
+  }
+  return best;
+}
+function tapCrew(cx, cy) {
+  const a = crewAtScreen(cx, cy); if (!a) return false;
+  a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  toast(a.p.name, a.p.role + '. ' + a.p.bio);
+  return true;
+}
+SIM_ADVANCE.push(() => { if (typeof deckDef !== 'undefined' && deckDef) deckCrewFill(); });   // after a sleep, everyone where they now are
+deckCrewFill();
 
 // =====================================================================
 // 11. INTERACTION & UI
@@ -7021,6 +7141,7 @@ function reachableSide(e) {
 function tap(cx, cy) {
   if (ride) return;
   if (!liftEl.hidden) { closeLiftPanel(); return; }       // a tap outside the panel puts it away
+  if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
   if (ud.walker && ud.walker.active) {
@@ -7098,7 +7219,7 @@ shadBtn.onclick = () => {
   toggle(shadBtn, renderer.shadowMap.enabled);
 };
 const crewBtn = document.getElementById('crew'); let crewOn = true;
-crewBtn.onclick = () => { crewOn = !crewOn; crew.forEach(c => c.setActive(crewOn && c.deck === deckDef.num)); toggle(crewBtn, crewOn); };
+crewBtn.onclick = () => { crewOn = !crewOn; crew.forEach(c => c.setActive(crewOn && c.deck === deckDef.num)); crowd.visible = crewOn; toggle(crewBtn, crewOn); };
 // inner walls: 'auto' drops the ones in your way, 'down' lowers them all, 'up' keeps them all up. The hull has its own rule.
 let wallsMode = 'auto', wallsLow = false;
 const wallsBtn = document.getElementById('walls');
@@ -7125,12 +7246,14 @@ const deckEl = document.getElementById('deck');
 function goToDeck(n, at) {
   endSteer(); player.stop();
   for (const c of crew) c.setActive(false);
+  deckCrewClear();
   unloadDeck(); buildDeck(DECKS[n]); indexRoomTiles();
   player.deck = n;
   // at: where you stood in the lift car on the old deck. Decks line up, so it's the same spot in this deck's car.
   if (at && free(...cellAt(at.x, at.z))) player.obj.position.set(at.x, 0, at.z);
   else { const c = nearestOpen(LIFT_AT[0], LIFT_AT[1], player); if (c) player.obj.position.copy(cellPos(c[0], c[1])); }
   for (const w of crew) if (w.deck === n && crewOn) w.setActive(true);
+  deckCrewFill();                                        // section 10: the scheduled crew on this deck
   target.copy(player.obj.position).setY(.7);
   refreshPickables(); deckEl.textContent = 'Deck ' + n + ', CSV Wren'; lastRoom = null;
   marker.material.opacity = 0; applyLight(nightT);
@@ -7216,6 +7339,7 @@ function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   updateSteer();
   for (const w of walkers) if (w.active) w.update(dt, t);
+  updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
 
   // camera follows you
@@ -7260,8 +7384,9 @@ function loop() {
   if (ride) updateRide(dt);
   // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
   for (const d of DOOR_OBJS) {
-    if (!d.passable && d.force === undefined && d.open < 1e-4) continue;
-    const near = d.force !== undefined ? d.force > 0 : d.passable && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
+    const crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
+    if (!d.passable && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
+    const near = d.force !== undefined ? d.force > 0 : crewAt || d.passable && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : 8));
     if (d.e.type === 'lift') d.leaves.forEach(l => { l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; });   // lift doors sink into the floor
     else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
