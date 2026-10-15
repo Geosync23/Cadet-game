@@ -591,5 +591,8 @@ Done so far:
 - Decks 6 and 1 are reachable by lift from day one; locking by tier or story comes later.
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.
+- The game starts on Day 1, a Monday, at 06:00, with the player in Bunk 1 (agreed 2026-10-15).
+- Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15).
+- The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15).
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
 - Deck 4's guest cabins are the six nearest the lift: 4-01, 4-02, 4-03 and 4-04 (the first column, two with windows) and the inner pair 4-07 and 4-08, so guests don't walk the corridor and officers keep 10 of the 12 window cabins. The two spares are 4-23 and 4-24, the inner pair at the music-room end. Guest cabins never use bunks (built in 0.14.0).

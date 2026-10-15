@@ -7,7 +7,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 ## Rules for helper sessions
 
 - One job per session, one branch per job. Touch only the files the brief names.
-- `starship-cadet.html` (the build) has one writer at a time, and the lead says who. Right now that's the deck architect (Decks 6, 1, 2).
+- `starship-cadet.html` has several writers in Pillar 1, each limited to its own sections (see `plans/pillar1-plan.md`). The lead merges.
 - Follow CLAUDE.md "How we work". Plan pages live in `plans/`.
 - Report to the lead with `send_message` after each push: files, what changed, open questions.
 - The user sends every request through the lead, and the lead hands out the work.
@@ -17,7 +17,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 | Session | Job | Branch | Status |
 | --- | --- | --- | --- |
-| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
+| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | Archived: all its work is merged |
 | session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 plan agreed at Sketch 8 (71642e6); all three plans done |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Review fixes done: 0.11.0 (b670ca2) on `claude/deck-architect`, a fast-forward of 0.10.1. Engine room opened up, watch room moved to the overlook's south end at 4 × 4. Idle |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Deck 1 done (0.8.4, a11f001), waiting on the user's review. Review build: https://claude.ai/artifact/LSfXFx2jDcjPJRjCr7o67v. Scale-up done: 0.12.1 (953d3be) on `claude/deck1-scale`. 22 × 12, bridge +57%, ready room moved aft to port. Idle |
@@ -25,6 +25,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Done
 
+- **PR #1 merged into `main`** (707b696): all six decks (0.14.0), design-doc.md, team setup. Fully approved by the user. The lead branch was restarted from `main` afterwards.
 - **Deck 4 guest cabins, build 0.14.0** (2c47c50, now also the head of `claude/ship-integration`): six guest cabins by the lift, two spares, plan page updated. Crew routes unchanged; Decks 1, 2, 3, 5 and 6 pixel-identical; deck_check OK. Waiting on the user's sign-off along with 0.13.0.
 - Decided: six senior officers confirmed on Deck 2; six of Deck 4's officer cabins become guest cabins (design-doc.md updated).
 
@@ -65,4 +66,4 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 
 ## Queue
 
-- Pillar 1 of the Living Ship: plan it with the user, then build.
+- **Pillar 1 of the Living Ship:** the plan is agreed in `plans/pillar1-plan.md`. Hire and start the workstreams (no cap on parallel sessions).
