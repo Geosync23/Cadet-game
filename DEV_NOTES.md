@@ -81,6 +81,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.25.0 | Fourth combined build (the lead): 0.24.1 plus 0.22.2 (full rigs for the 3 story crew nearest you, walk-to tiles inside each place's room, two crew fixes, new `day_check.py`). Workstream 6 done. Merge fixes only: the HUD build line, `GAME_BUILD` and this table. |
 | 0.25.1 | 0.25.0 plus 0.22.3 (the lead): the player's bed read from `ROSTER_PLAYER` (`playerBed()`), seat and mattress heights by place type (upper bunks at 1.6 m), and the fix for a sleeping bunkmate catching the tap on your bunk. Merge fixes only. |
 | 0.25.2 | 0.25.1 plus 0.22.4 (overflow work stations skip locked or private rooms) and 0.18.4 (two more Deck 3 infirmary places, so Rina works in the infirmary), merged by the lead. Merge fixes only. |
+| 0.27.0 | Pillar 2, workstream A2: activity animations (the performance engineer, from 0.25.2). Thirteen activities as poses for the crowd, full rigs and Walkers: run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk, with seated variants and props (dumbbells, receiver, basket, card, guitar, watering can, spoon and pan, sponge and plate, cloth, glass, book). `poseOf(place)` and `animateActivity()` in 8b; crowd props ride three prop bones inside the crowd's meshes. Section 10: `placeSpot` takes its pose from `poseOf(pl)` (one line). See "Activities (0.27.x)". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -481,6 +482,43 @@ Each group of 12 adds at most two draw calls, so the count isn't the limit; tria
 For comparison, 40 full rigs would add about 1,300 draw calls and 600,000 triangles. Memory is flat over Deck 3 and 4 round trips with the demo on (the four groups' bone textures stay, like kit).
 
 **Testing a crowd turn:** cadet_test and deck_check as usual (the crowd is empty in both). For the demo, open the build with `?crowd=40`; the Game class in cadet_test.py loads `file://` paths, so a script that adds the query to the `goto` is enough.
+
+## Activities (0.27.x)
+
+Section 8b, Pillar 2 workstream A2, by the performance engineer.
+
+**Poses.** `handle.set(pos, face, pose)` takes a base (`walk`, `stand`, `sit`, `lie`, `work`), an activity, or both as `'base:activity'`:
+
+- **Activities:** `run`, `lift`, `call`, `browse`, `pay`, `play`, `water`, `cook`, `wash`, `fold`, `drink`, `read`, `talk`.
+- **An activity alone** stands. The exception: `call`, `read`, `drink`, `talk`, `play` and `lift` sit when `pos.y` is 0.3 or more (y is then the seat).
+- **Seated and lying forms** are written out: `'sit:call'` in a booth, `'sit:play'` at the piano (keys; standing `play` is a guitar), `'lie:lift'` on the weight bench (a press), `'sit:lift'` on the rower.
+- **Standing on something:** a standing pose with `pos.y` under 0.3 stands on a floor that high (a stage, the treadmill's belt, 0.16).
+- **Unknown poses** stand.
+- **`poseOf(place)`** gives a place's pose from `anim`, or from its type (the plan's table: `gym` lift, `callhome` call, `shop` browse, `music` play, `garden` water, `laundry` fold, `work:galley` cook), on its base pose. By type alone, seated places stay plain `sit` except booths (`sit:call`) and the gym (`sit:lift`, `lie:lift` on the bench); a place with its own `anim` (the piano bench: `anim: 'play'`) gets it seated too. Section 10's `placeSpot` uses it, so crew at those places now do the activity.
+
+**Cost (0.27.0 against 0.25.2):** draw calls identical on every deck in day_check (peaks 370, 373, 415, 412, 377, 321). Props add a few hundred triangles (Deck 3 at 18:20: 475,711 against 475,163, with 67 crew). cadet_test ALL IDENTICAL against 0.25.2, also with the `placeSpot` hook reverted (the refactor alone changes nothing).
+
+**How it's drawn.**
+
+- `animateActivity(o, pose, dt, t, sk, y)` does a rig's whole frame: the gait (`animateRig`), the base pose's overlay (sit, work, lie, as before), the activity's overlay, and props. It works on a `CrowdPerson`, a `FullPerson` (which borrows `CrowdPerson.prototype.update`) or a `Walker`.
+- Each activity is an entry in `ACTS`: the props it holds, and a function that moves the arms, head and torso with a blend weight. Blends take about half a second, like the bases.
+- `run` drives the gait in place (the legs cycle at a jog with no movement).
+- **Props** are made from the character kit's primitives, on first use (`PROP_KIT`, no `R()`, colours through `col()`).
+  - **On a crowd person** they ride three prop bones (right hand, left hand, chest: `CROWD_BONES` is now 20, joints 0–16, props 17–19), inside the group's skinned mesh. Picking one up rebuilds that group's geometry, so props cost no draw calls.
+  - **On a full rig or Walker** each prop is a small mesh on the hand or chest (`rigProps`), its own copy of the geometry so the rig can dispose it.
+  - Props appear once the activity is more than halfway blended in.
+
+**For the player (A3).** In `Walker.update`, replace
+
+    animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
+
+with
+
+    animateActivity(this, this.act || 'stand', dt, t + g.t0, Math.min(1, this.vel / this.maxV));
+
+- Set `player.act` to an activity (`'run'`, `'lift'`, `'call'`, `'browse'`, `'pay'`, or any other) while the player does it, and back to `null` after.
+- With `act` null this is exactly `animateRig` (same `R()` draws, no props), so nothing changes until an activity is set.
+- Standing on the treadmill: raise `player.obj.position.y` to the belt (0.16) yourself; the Walker's root isn't moved by `animateActivity`.
 
 
 ## Rules that keep it working

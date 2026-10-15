@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.25.2
+   STARSHIP CADET: CSV Wren                            build 0.27.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5458,7 +5458,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.25.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.0';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6385,7 +6385,7 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 // A person further than CROWD_FAR tiles from the camera's target, or everyone when zoomed far out, is
 // drawn with even fewer polygons. Nothing here calls R(): each person has their own random stream.
 // =====================================================================
-const CROWD_BONES = 17;                                  // joints per person: hips, legs 6, torso, chest, head, arms 6, ponytail
+const CROWD_JOINTS = 17, CROWD_BONES = 20;               // per person: 17 joints (hips, legs 6, torso, chest, head, arms 6, ponytail), then 3 prop bones
 const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] }];
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
@@ -6419,6 +6419,245 @@ function crowdPack(joints, lod) {
   }
   return { P, N, C, B, I, nv, ni };
 }
+// ---- activities (Pillar 2, workstream A2): what people do at a place, drawn on any rig ----
+// A pose is a base (walk, stand, sit, lie, work) or an activity, or both as 'base:activity' ('sit:call', 'lie:lift').
+// An activity alone stands, except that call, read, drink, talk, play and lift sit when y is 0.3 or more (a seat).
+// For a standing pose, a y under 0.3 is the floor it stands on (a stage, the treadmill's belt). Unknown poses stand.
+// Activities move the arms, head and torso over what the legs are doing, blend in and out like the bases, and may hold
+// a prop. Crowd people carry their props inside the crowd's meshes (three prop bones, on each hand and the chest),
+// so props cost no draw calls; full rigs get a small mesh on the hand. poseOf(place) gives a place's pose (plan,
+// "Activities on places"). animateActivity(o, pose, dt, t, sk, y) poses any rig: the crowd, a FullPerson, or a Walker.
+const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
+const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift']);
+const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work']);
+function poseOf(pl) {
+  const act = pl.anim || ACT_OF_TYPE[pl.type], base = pl.type === 'bed' ? 'lie' : pl.pose || 'stand';
+  if (!act || !ACTS[act]) return base;
+  if (base === 'stand' || base === 'work') return act;
+  if (base === 'sit' && !pl.anim && pl.type !== 'callhome' && pl.type !== 'gym') return base;   // by type, only booths and the gym are busy sitting (the music room's beanbags listen)
+  if (base === 'sit' && ACT_SEATED.has(act)) return 'sit:' + act;
+  if (base === 'lie' && act === 'lift') return 'lie:lift';
+  return base;
+}
+const _parsed = new Map();
+function parsePose(pose = 'stand', y = 0) {
+  const k = pose + (y >= .3 ? '+' : ''); let r = _parsed.get(k); if (r) return r;
+  const i = pose.indexOf(':'); let base = i < 0 ? pose : pose.slice(0, i), act = i < 0 ? null : pose.slice(i + 1);
+  if (i < 0 && ACTS[base]) { act = base; base = y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
+  if (!BASES.has(base)) base = 'stand';
+  if (act && !ACTS[act]) act = null;
+  _parsed.set(k, r = { base, act }); return r;
+}
+// an arm toward a target: shoulder forward (x, negative is forward), elbow bend, shoulder out (z, toward its own side)
+const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
+  a.sh.rotation.x = L(a.sh.rotation.x, sx, s); a.el.rotation.x = L(a.el.rotation.x, ex, s);
+  a.sh.rotation.z = L(a.sh.rotation.z, a.side * sz, s); a.hand.rotation.x = L(a.hand.rotation.x, hx, s);
+};
+const pulse = (t, period, len, ph = 0) => { const u = ((t + ph) % period) / len; return u < 1 ? Math.sin(Math.PI * u) : 0; };   // a bump of len seconds every period
+// each activity: the props it holds (R right hand, L left hand, C chest) and how it moves. s is its blend weight,
+// a.side is 1 for the left arm and -1 for the right. b is the base ('stand', 'sit' or 'lie'); ph is the person's phase.
+const ACTS = {
+  run: { f(r, s, t) {                                    // the legs run in place (the gait, in animateActivity); arms bent and pumping
+    for (const a of r.arms) { a.el.rotation.x = L(a.el.rotation.x, -1.5, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
+    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  lift: { props: { R: 'dumbbell', L: 'dumbbell' }, f(r, s, t, b, ph) {
+    for (const a of r.arms) {
+      const c = .5 - .5 * Math.cos(t * 2.4 + ph + (a.side > 0 ? Math.PI : 0));
+      if (b === 'lie') armTo(a, s, L(-.7, -1.5, c), L(-1.5, -.05, c), .25, .2);   // a press, straight up from the bench
+      else armTo(a, s, -.12, L(-.25, -2.3, c), .14, .2);                            // curls, one arm then the other
+    }
+  } },
+  call: { props: { R: 'receiver' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], g = pulse(t, 7, 2.2, ph);
+    armTo(R_, s, -.75, -2.45, .55, .3);                   // the receiver to the ear
+    armTo(L_, s, L(-.1, -.7, g) + Math.sin(t * 3) * .1 * g, L(-.2, -1.3, g), .12);   // and a gesture now and then
+    r.head.rotation.z = L(r.head.rotation.z, -.12, s); r.head.rotation.x = L(r.head.rotation.x, .08, s);
+  } },
+  browse: { props: { L: 'basket' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], reach = pulse(t, 6, 2.4, ph);
+    armTo(L_, s, -.05, -.2, .22);                         // the basket on a hanging arm
+    armTo(R_, s, L(-.15, -1.35, reach), L(-.25, -.35, reach), .1, L(0, .4, reach));   // reaching to a shelf
+    r.head.rotation.y = L(r.head.rotation.y, Math.sin(t * .5 + ph) * .55, s);         // looking along the shelves
+    r.head.rotation.x = L(r.head.rotation.x, .05 - .2 * reach, s);
+  } },
+  pay: { props: { R: 'card', L: 'basket' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], tap = pulse(t, 3, .6, ph);
+    armTo(L_, s, -.05, -.2, .22);
+    armTo(R_, s, -.85 - .15 * tap, -.75 + .25 * tap, .02, .3);
+    r.head.rotation.x = L(r.head.rotation.x, .3, s);
+  } },
+  play: { props: { C: 'guitar' }, seatedProps: {}, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)];
+    if (b === 'sit') {                                    // keys: both hands forward, moving along the keyboard
+      for (const a of r.arms) armTo(a, s, -.75, -.85, .06 + .1 * Math.sin(t * 1.1 + a.side + ph), .35 + .12 * Math.sin(t * 9 + a.side * 2));
+      r.head.rotation.x = L(r.head.rotation.x, .25 + .05 * Math.sin(t * 2), s); r.torso.rotation.x = L(r.torso.rotation.x, .06 + .04 * Math.sin(t * 1.3), s);
+    } else {                                              // a guitar: left hand up the neck, right hand strumming
+      armTo(L_, s, -.85, -1.05, .45, .2);
+      armTo(R_, s, -.35, -1.55 + .22 * Math.sin(t * 8 + ph), -.05, .1);
+      r.head.rotation.x = L(r.head.rotation.x, .2, s); r.head.rotation.y = L(r.head.rotation.y, .35, s);
+    }
+  } },
+  water: { props: { R: 'can' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)];
+    armTo(R_, s, -.75, -.35, .1 + .2 * Math.sin(t * .7 + ph), -.45);   // the can held out and tipped, swept slowly along the bed
+    armTo(L_, s, -.1, -.3, .12);
+    r.head.rotation.x = L(r.head.rotation.x, .4, s); r.torso.rotation.x = L(r.torso.rotation.x, .12, s);
+  } },
+  cook: { props: { R: 'spoon', L: 'pan' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], chop = ((t + ph) % 12) > 8;
+    if (chop) armTo(R_, s, -.75, -.95 + .4 * Math.abs(Math.sin(t * 9)), .05, .2);   // chopping
+    else armTo(R_, s, -.7 + .12 * Math.cos(t * 3.2), -1.0, .08 + .14 * Math.sin(t * 3.2), .2);   // stirring
+    armTo(L_, s, -.6, -.95, .16, .1);                     // a hand on the pan
+    r.head.rotation.x = L(r.head.rotation.x, .35, s); r.torso.rotation.x = L(r.torso.rotation.x, .08, s);
+  } },
+  wash: { props: { R: 'sponge', L: 'plate' }, f(r, s, t, b, ph) {
+    for (const a of r.arms) armTo(a, s, -.6 + .07 * Math.cos(t * 5 + a.side), -.95, .04 + .07 * Math.sin(t * 5 + a.side), .25);
+    r.head.rotation.x = L(r.head.rotation.x, .4, s); r.torso.rotation.x = L(r.torso.rotation.x, .14, s);
+  } },
+  fold: { props: { R: 'cloth' }, f(r, s, t, b, ph) {
+    const u = pulse(t, 4, 2, ph);                         // lift, bring together, lay down
+    for (const a of r.arms) armTo(a, s, L(-.7, -1.0, u), L(-.8, -1.4, u), L(.12, -.12, u), .3);
+    r.head.rotation.x = L(r.head.rotation.x, .32, s); r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  drink: { props: { R: 'glass' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], sip = pulse(t, 8, 1.8, ph);
+    armTo(R_, s, L(-.5, -.8, sip), L(-1.3, -2.15, sip), .14, .25);
+    armTo(L_, s, b === 'sit' ? -.5 : -.15, b === 'sit' ? -1.2 : -.3, .14);
+    r.head.rotation.x = L(r.head.rotation.x, -.1 * sip, s);
+  } },
+  read: { props: { R: 'book' }, f(r, s, t, b, ph) {
+    const turn = pulse(t, 14, .8, ph);
+    for (const a of r.arms) armTo(a, s, -.55, -1.7 + (a.side > 0 ? .3 * turn : 0), -.14, .35);
+    r.head.rotation.x = L(r.head.rotation.x, .45, s);
+  } },
+  talk: { f(r, s, t, b, ph) {
+    for (const a of r.arms) {
+      const g = pulse(t, 5 + a.side, 1.6, ph + a.side * 1.7);
+      armTo(a, s, L(b === 'sit' ? -.5 : -.08, -.75, g) + .1 * g * Math.sin(t * 4), L(b === 'sit' ? -1.2 : -.25, -1.3, g), L(.12, .3, g), L(0, -.3, g));
+    }
+    r.head.rotation.x = L(r.head.rotation.x, .05 * Math.sin(t * 2.3 + ph), s);
+    r.head.rotation.y = L(r.head.rotation.y, .2 * Math.sin(t * .4 + ph), s);
+  } },
+};
+// props, in their bone's own space (a hand: the wrist at 0, fingers toward -y; the chest: its base at 0, front +z).
+// Built the first time they're needed, from the character kit's primitives; colours through col(); no R().
+const PROP_BONE = { R: 0, L: 1, C: 2 };
+const PROP_KIT = {
+  dumbbell(p) { part(p, cylG(.012, .012, .17, 8), '#a4aeb4', 0, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); for (const x of [-.07, .07]) part(p, cylG(.04, .04, .035, 10), '#2b2f33', x, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); },
+  receiver(p) { part(p, GEO.box, '#2b2f33', 0, -.07, .045, .04, .17, .045, .3); part(p, GEO.sph, '#2b2f33', 0, -.15, .07, .03, .025, .03); },
+  basket(p) { part(p, GEO.box, '#2a9d8f', 0, -.2, .02, .24, .12, .16); part(p, GEO.box, '#1f6f66', 0, -.11, .02, .015, .1, .015); },
+  card(p) { part(p, GEO.box, '#e8c06a', 0, -.1, .035, .055, .08, .006); },
+  guitar(p) {
+    part(p, GEO.sph, '#d9a35b', -.05, .02, .23, .17, .19, .055); part(p, GEO.sph, '#d9a35b', .07, .12, .22, .12, .12, .05);
+    part(p, cylG(.04, .04, .012, 12), '#3a2820', -.03, .05, .278, 1, 1, 1, Math.PI / 2);
+    part(p, GEO.box, '#5a3424', .27, .22, .23, .42, .045, .025, 0, 0, .38);
+  },
+  can(p) { part(p, cylG(.07, .08, .15, 10), '#3f7a5a', 0, -.14, .06); part(p, GEO.box, '#3f7a5a', 0, -.11, .19, .025, .025, .2, .6); part(p, GEO.box, '#2f5e46', 0, -.05, .06, .015, .06, .1); },
+  spoon(p) { part(p, GEO.box, '#a4aeb4', 0, -.06, -.08, .016, .016, .2); part(p, GEO.sph, '#a4aeb4', 0, -.06, -.18, .03, .03, .02); },
+  pan(p) { part(p, GEO.box, '#2b2f33', 0, -.12, 0, .025, .17, .025); part(p, cylG(.12, .1, .05, 14), '#3a3f44', 0, -.31, -.02, 1, 1, 1, Math.PI / 2); },
+  sponge(p) { part(p, GEO.box, '#e9c46a', 0, -.08, .03, .07, .035, .05); },
+  plate(p) { part(p, cylG(.11, .11, .014, 14), '#e8ebe8', 0, -.09, .07, 1, 1, 1, Math.PI / 2); },
+  cloth(p) { part(p, GEO.box, '#e9e1d0', .08, -.12, .02, .26, .18, .006); },
+  glass(p) { part(p, cylG(.033, .028, .1, 10), '#f0a640', 0, -.07, .06, 1, 1, 1, -Math.PI / 2); },
+  book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
+};
+const _propParts = {}, _propPacks = {}, _propGeos = {};
+function propParts(kind) {
+  if (_propParts[kind]) return _propParts[kind];
+  const g = new THREE.Group(); PROP_KIT[kind](g); return (_propParts[kind] = g.userData.parts);
+}
+function propPack(kind, lod, bone) {                    // for the crowd: packed like a body part, on prop bone `bone`
+  const k = kind + lod + bone; if (_propPacks[k]) return _propPacks[k];
+  const j = new THREE.Group(); j.userData.parts = propParts(kind);
+  const q = crowdPack([j], lod); q.B.fill(CROWD_JOINTS + bone); return (_propPacks[k] = q);
+}
+function propGeo(kind) {                                 // for full rigs: a plain vertex-coloured geometry
+  if (_propGeos[kind]) return _propGeos[kind];
+  const j = new THREE.Group(); j.userData.parts = propParts(kind); const q = crowdPack([j], 0), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(q.P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(q.N, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(q.C, 3)); geo.setIndex(new THREE.BufferAttribute(q.I, 1)); geo.computeBoundingSphere();
+  return (_propGeos[kind] = geo);
+}
+// the props someone holds now: a key like 'R:dumbbell L:dumbbell', or ''
+function propKeyOf(act, base) {
+  const A = act && ACTS[act], P = A && (base === 'sit' && A.seatedProps || A.props);
+  return P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '';
+}
+const _propList = new Map();
+const propList = key => _propList.get(key) || (_propList.set(key, key ? key.split(' ').map(s => { const [b, k] = s.split(':'); return [PROP_BONE[b], k]; }) : []), _propList.get(key));
+// full rigs and Walkers: small meshes on the hand or chest (each its own copy, so the rig can dispose it)
+function rigProps(o, key) {
+  for (const m of o.propMeshes || []) { m.parent.remove(m); m.geometry.dispose(); }
+  o.propMeshes = [];
+  const R_ = o.rig.arms.find(a => a.side < 0).hand, L_ = o.rig.arms.find(a => a.side > 0).hand, at = [R_, L_, o.rig.chest];
+  for (const [b, kind] of propList(key)) {
+    const m = new THREE.Mesh(propGeo(kind).clone(), CHAR_MAT); m.castShadow = m.receiveShadow = true;
+    if (o.obj) m.userData.walker = o;                   // a Walker's prop taps as the Walker
+    at[b].add(m); o.propMeshes.push(m);
+  }
+}
+// pose a rig for one frame: the gait (animateRig), the base pose, the activity and its props.
+// o: a CrowdPerson, a FullPerson or a Walker (anything with rig, g and h). t already includes the person's own offset.
+// sk: walking speed 0..1, as animateRig takes. y: the seat (sit, lie) or the floor (standing) height, as for set().
+// With pose 'stand' or 'walk' it does exactly what animateRig alone does, so a Walker can call it in animateRig's place.
+function animateActivity(o, pose, dt, t, sk, y = 0) {
+  const rig = o.rig, g = o.g, h = o.h, { base, act } = parsePose(pose, y);
+  const rnd = o.rnd || o.prnd || (o.prnd = (() => { let sd = 7907; return () => (sd = (sd * 16807) % 2147483647) / 2147483647; })());
+  const k = o.k || (o.k = {}), ph = o.ph !== undefined ? o.ph : (o.ph = (g.t0 || 0) * 3.7 % 10);
+  if (act === 'run') {                                   // running in place: the gait at a run, with nowhere to go
+    g.w = o.fresh ? 1 : g.w + (1 - g.w) * Math.min(1, dt * 6); g.p += dt * 1.9; sk = 1;
+  }
+  animateRig(rig, g, dt, t, sk, o.rnd || R);
+  for (const key of [base, act]) if (key && k[key] === undefined) k[key] = 0;
+  for (const key in k) k[key] = o.fresh ? +(key === base || key === act) : k[key] + (+(key === base || key === act) - k[key]) * Math.min(1, dt * 5);
+  const seat = base === 'sit' || base === 'lie' ? (y > 0 ? y : CROWD_SEAT[base]) : 0;
+  if (k.sit > .001) {                                    // on a bench or chair: feet on the floor, forearms on the table, eating now and then
+    const s = ss(k.sit), sy = seat || CROWD_SEAT.sit, hy = Math.max(sy / h + .09, HIP_OFF + .45);
+    rig.hips.position.y = L(rig.hips.position.y, hy, s); rig.hips.position.x *= 1 - s;
+    rig.hips.rotation.y *= 1 - s; rig.hips.rotation.z *= 1 - s;
+    for (const leg of rig.legs) {
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
+      const ang = legIK(leg, ANK - (hy - HIP_OFF), .3);
+      leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
+      leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
+    }
+    rig.torso.rotation.x = L(rig.torso.rotation.x, .02, s); rig.chest.rotation.y *= 1 - s; rig.chest.rotation.z *= 1 - s;
+    if (o.eatT === undefined) { o.eat = 0; o.eatT = 2 + rnd() * 6; }
+    o.eatT -= dt; if (o.eatT < 0) { o.eat += dt / 1.6; if (o.eat >= 1) { o.eat = 0; o.eatT = 3 + rnd() * 7; } }
+    const lift = Math.sin(Math.PI * o.eat) * s;
+    for (const a of rig.arms) {
+      a.sh.rotation.x = L(a.sh.rotation.x, -.55, s); a.el.rotation.x = L(a.el.rotation.x, -1.25, s);
+      a.sh.rotation.z = L(a.sh.rotation.z, a.side * .14, s); a.hand.rotation.x = L(a.hand.rotation.x, .2, s);
+      if (a.side < 0 && lift > 0) { a.sh.rotation.x = L(a.sh.rotation.x, -.75, lift); a.el.rotation.x = L(a.el.rotation.x, -2.1, lift); }
+    }
+    rig.head.rotation.x = L(rig.head.rotation.x, .12 - lift * .1, s);
+  }
+  if (k.work > .001) {                                   // hands busy at a bench or counter, head down
+    const s = ss(k.work);
+    for (const a of rig.arms) {
+      a.sh.rotation.x = L(a.sh.rotation.x, -.85 + Math.sin(t * 2.1 + a.side * 1.7) * .07, s);
+      a.el.rotation.x = L(a.el.rotation.x, -.8 + Math.sin(t * 2.9 + a.side) * .12, s);
+      a.sh.rotation.z = L(a.sh.rotation.z, a.side * -.04, s); a.hand.rotation.x = L(a.hand.rotation.x, .25, s);
+    }
+    rig.torso.rotation.x = L(rig.torso.rotation.x, .1, s); rig.head.rotation.x = L(rig.head.rotation.x, .3, s);
+  }
+  if (k.lie > .001) {                                    // on the back, legs straight, arms by the sides
+    const s = ss(k.lie);
+    rig.hips.position.y = L(rig.hips.position.y, HIP_Y, s);
+    for (const leg of rig.legs) for (const j of [leg.thigh, leg.knee, leg.ankle]) j.rotation.x *= 1 - s;
+    for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
+    rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
+  }
+  for (const key in k) if (ACTS[key] && k[key] > .001) ACTS[key].f(rig, ss(k[key]), t, base, ph);
+  const key = act && k[act] > .5 ? propKeyOf(act, base) : '';   // props appear halfway into the activity
+  if (key !== (o.propKey || '')) {
+    o.propKey = key;
+    if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
+    else rigProps(o, key);
+  }
+  return { base, act, seat };
+}
 class CrowdPerson {
   constructor(spec, n) {
     let root = null;
@@ -6427,6 +6666,8 @@ class CrowdPerson {
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
     this.geo = [0, 1].map(l => crowdPack(this.joints, l));
     for (const j of this.joints) delete j.userData.parts;
+    const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
+    this.propBones = [hand(-1), hand(1), this.rig.chest].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
     let sd = 7919 * (n + 1) % 2147483647;
     this.rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
     this.g = { p: 0, w: 0, turn: 0, look: 0, lookT: this.rnd() * 3, tail: 0, tailV: 0, lean: 0, t0: this.rnd() * 20 };
@@ -6439,57 +6680,19 @@ class CrowdPerson {
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
   }
   update(dt, t) {
-    const g = this.g, rig = this.rig, walking = this.pose === 'walk', h = this.h, TAU = Math.PI * 2;
+    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk';
     const prev = this.rot; let df = this.face - this.rot; df = Math.atan2(Math.sin(df), Math.cos(df));
     this.rot = this.fresh ? this.face : this.rot + df * Math.min(1, dt * 8);
     g.turn += ((this.rot - prev) / Math.max(dt, 1e-3) - g.turn) * Math.min(1, dt * 10);
     const sk = walking ? (this.phase !== undefined ? 1 : Math.min(1, this.moved / Math.max(dt, 1e-3) / (1.2 * Math.sqrt(h)))) : 0;
-    if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && g.w < .02) g.p = 0; }
+    if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && act !== 'run' && g.w < .02) g.p = 0; }
     this.moved = 0;
-    g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
-    animateRig(rig, g, dt, t + g.t0, sk, this.rnd);
-    const k = this.k;
-    for (const key in k) k[key] = this.fresh ? +(this.pose === key) : k[key] + (+(this.pose === key) - k[key]) * Math.min(1, dt * 5);
-    const seat = this.pos.y > 0 ? this.pos.y : CROWD_SEAT[this.pose] || CROWD_SEAT.sit;
-    if (k.sit > .001) {                                  // on a bench or chair: feet on the floor, forearms on the table, eating now and then
-      const s = ss(k.sit), hy = Math.max(seat / h + .09, HIP_OFF + .45);
-      rig.hips.position.y = L(rig.hips.position.y, hy, s); rig.hips.position.x *= 1 - s;
-      rig.hips.rotation.y *= 1 - s; rig.hips.rotation.z *= 1 - s;
-      for (const leg of rig.legs) {
-        const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
-        const ang = legIK(leg, ANK - (hy - HIP_OFF), .3);
-        leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
-        leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
-      }
-      rig.torso.rotation.x = L(rig.torso.rotation.x, .02, s); rig.chest.rotation.y *= 1 - s; rig.chest.rotation.z *= 1 - s;
-      this.eatT -= dt; if (this.eatT < 0) { this.eat += dt / 1.6; if (this.eat >= 1) { this.eat = 0; this.eatT = 3 + this.rnd() * 7; } }
-      const lift = Math.sin(Math.PI * this.eat) * s;
-      for (const a of rig.arms) {
-        a.sh.rotation.x = L(a.sh.rotation.x, -.55, s); a.el.rotation.x = L(a.el.rotation.x, -1.25, s);
-        a.sh.rotation.z = L(a.sh.rotation.z, a.side * .14, s); a.hand.rotation.x = L(a.hand.rotation.x, .2, s);
-        if (a.side < 0 && lift > 0) { a.sh.rotation.x = L(a.sh.rotation.x, -.75, lift); a.el.rotation.x = L(a.el.rotation.x, -2.1, lift); }
-      }
-      rig.head.rotation.x = L(rig.head.rotation.x, .12 - lift * .1, s);
-    }
-    if (k.work > .001) {                                 // hands busy at a bench or counter, head down
-      const s = ss(k.work);
-      for (const a of rig.arms) {
-        a.sh.rotation.x = L(a.sh.rotation.x, -.85 + Math.sin(t * 2.1 + a.side * 1.7 + g.t0) * .07, s);
-        a.el.rotation.x = L(a.el.rotation.x, -.8 + Math.sin(t * 2.9 + a.side + g.t0) * .12, s);
-        a.sh.rotation.z = L(a.sh.rotation.z, a.side * -.04, s); a.hand.rotation.x = L(a.hand.rotation.x, .25, s);
-      }
-      rig.torso.rotation.x = L(rig.torso.rotation.x, .1, s); rig.head.rotation.x = L(rig.head.rotation.x, .3, s);
-    }
-    if (k.lie > .001) {                                  // on the back, legs straight, arms by the sides
-      const s = ss(k.lie);
-      rig.hips.position.y = L(rig.hips.position.y, HIP_Y, s);
-      for (const leg of rig.legs) for (const j of [leg.thigh, leg.knee, leg.ankle]) j.rotation.x *= 1 - s;
-      for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
-      rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
-    }
-    const lie = ss(k.lie), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
+    if (act !== 'run') g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
+    animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
+    const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
+    const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
     const root = rig.root;
-    root.position.set(this.pos.x + fx * off, L(0, seat + .17 * h, lie), this.pos.z + fz * off);
+    root.position.set(this.pos.x + fx * off, L(floor, (this.pos.y > 0 ? this.pos.y : CROWD_SEAT[base] || CROWD_SEAT.sit) + .17 * h, lie), this.pos.z + fz * off);   // as before 0.27.0, getting out of bed
     root.rotation.set(-Math.PI / 2 * lie, this.rot, 0);
     root.updateMatrixWorld(true);
     this.fresh = false;
@@ -6507,28 +6710,31 @@ class CrowdChunk {
   }
   put(p, i) {
     this.slots[i] = p; p.chunk = this; p.slot = i; this.dirty = true;
-    for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[i * CROWD_BONES + b] = p.joints[b] || CROWD_REST;
+    for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[i * CROWD_BONES + b] = (b < CROWD_JOINTS ? p.joints[b] : p.propBones[b - CROWD_JOINTS]) || CROWD_REST;
   }
   take(p) {
     this.slots[p.slot] = null; this.dirty = true;
     for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[p.slot * CROWD_BONES + b] = CROWD_REST;
     p.chunk = null; p.slot = -1;
   }
-  rebuild() {                                            // only when someone joins, leaves or changes detail
+  rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
     this.dirty = false;
     const old = this.mesh.geometry; let nv = 0, ni = 0;
-    for (const p of this.slots) if (p) { nv += p.geo[p.lod].nv; ni += p.geo[p.lod].ni; }
+    const packs = p => [p.geo[p.lod], ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
+    for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
     if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
     const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
     const SI = new Uint16Array(nv * 4), SW = new Uint8Array(nv * 4), I = nv > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
     let o = 0, oi = 0;
     this.slots.forEach((p, s) => {
       if (!p) return;
-      const q = p.geo[p.lod], b0 = s * CROWD_BONES;
-      P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
-      for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
-      for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
-      o += q.nv;
+      const b0 = s * CROWD_BONES;
+      for (const q of packs(p)) {
+        P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
+        for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
+        for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
+        o += q.nv;
+      }
     });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
@@ -6963,7 +7169,7 @@ function placeSpot(id) {
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
     const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
     s = { id, walk, x, z, y, face: FACE_ANGLE[pl.face] || 0,
-      pose: pl.type === 'bed' ? 'lie' : pl.pose, room: pl.room, onTile: free(...pl.at) };
+      pose: poseOf(pl), room: pl.room, onTile: free(...pl.at) };
   }
   SPOT_OF.set(id, s); return s;
 }
