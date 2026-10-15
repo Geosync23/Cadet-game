@@ -29,10 +29,10 @@ def check(cond, msg):
 # a week of days on paper, with the game's own rates (needsDrain) and each activity's gain spread over its minutes
 PAPER = r"""(({ normal }) => {
   const n = SHIP.player.needs; Object.assign(n, NEEDS_FRESH);
-  let lo = {}, hi = {}, slowMins = 0; for (const k of NEEDS) { lo[k] = 100; hi[k] = 0; }
-  const look = () => { for (const k of NEEDS) { lo[k] = Math.min(lo[k], n[k]); hi[k] = Math.max(hi[k], n[k]); } };
+  let lo = {}, hi = {}, slowMins = 0; for (const k of NEED_KEYS) { lo[k] = 100; hi[k] = 0; }
+  const look = () => { for (const k of NEED_KEYS) { lo[k] = Math.min(lo[k], n[k]); hi[k] = Math.max(hi[k], n[k]); } };
   const awake = mins => { for (let m = 0; m < mins; m++) { needsDrain(1, false); if (playerSpeed() < 1) slowMins++; look(); } };
-  const act = kind => { const d = ACTS[kind]; for (let m = 0; m < d.mins; m++) { needsDrain(1, false);
+  const act = kind => { const d = PLAYER_ACTS[kind]; for (let m = 0; m < d.mins; m++) { needsDrain(1, false);
     if (d.need) n[d.need] = needClamp(n[d.need] + d.gain / d.mins + NEED_DRAIN[d.need][0] / 60); look(); } };
   const sleep = mins => { needsDrain(mins, true); look(); };
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
@@ -46,8 +46,8 @@ PAPER = r"""(({ normal }) => {
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
   const r = x => Math.round(x * 10) / 10;
-  for (const k of NEEDS) { lo[k] = r(lo[k]); hi[k] = r(hi[k]); }
-  return { lo, hi, slowMins, end: Object.fromEntries(NEEDS.map(k => [k, r(n[k])])) };
+  for (const k of NEED_KEYS) { lo[k] = r(lo[k]); hi[k] = r(hi[k]); }
+  return { lo, hi, slowMins, end: Object.fromEntries(NEED_KEYS.map(k => [k, r(n[k])])) };
 })"""
 
 # tap a thing on the current deck by its title (and, if several, the one nearest a tile), as section 11 would
@@ -60,7 +60,7 @@ TAP = r"""(({ title, near }) => {
   return done;
 })"""
 STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10],
-  needs: Object.fromEntries(NEEDS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
+  needs: Object.fromEntries(NEED_KEYS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
   visible: player.obj.visible, toast: document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent,
   time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num })"""
 
@@ -174,6 +174,30 @@ with sync_playwright() as pw:
     g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3); s = state(g)
     print('  walked away after 5 min:', s['act'], 'visible', s['visible'], 'fitness', f0, '->', s['needs']['fitness'])
     check(not s['act'] and s['visible'] and s['needs']['fitness'] >= f0 - .5, 'walking away should stop the workout and keep the gain')
+    print('Stand-ins for sections 16 and 17 (the galley and the machines), as their engineers describe them:')
+    st = g.ev(r"""(() => {
+      eval("window.shipEffects = function (d) { return { deck: d, restore: { hunger: 1, energy: 1, hygiene: .5, fitness: 1, social: 1 }, drain: { hunger: 2, energy: 1, hygiene: 1, fitness: 1, social: 1 }, walk: .5, notes: [{ text: 'The showers are running weak' }] }; }");
+      window.portions = 1; window.grab = 0;
+      eval("window.takePortion = function () { if (portions > 0) { portions--; return true; } if (grab > 0) { grab--; return true; } return false; }");
+      eval("window.galleyText = function (w) { return w === 'grab' ? (grab ? grab + ' on the shelf.' : 'The shelf is empty.') : portions ? 'Serving: Fish pie. ' + portions + ' portions in the pans.' : 'The pans are empty. The next pot is on its way.'; }");
+      const n = SHIP.player.needs; Object.assign(n, { hunger: 50, hygiene: 50 }); FX_MIN = -1;
+      needsDrain(60, false, playerFx()); const h1 = n.hunger, y1 = n.hygiene;
+      const out = { drainHungerX2: Math.round((50 - h1) * 10) / 10, hygieneDrain: Math.round((50 - y1) * 10) / 10, speed: playerSpeed() };
+      out.peek = foodFrom('servery', true).ok; out.take = foodFrom('servery'); out.peekEmpty = foodFrom('grab', true); out.takeEmpty = foodFrom('grab').ok;
+      device.open(); out.note = document.getElementById('devBody').textContent.includes('showers are running weak'); device.close();
+      delete window.shipEffects; delete window.takePortion; delete window.galleyText; FX_MIN = -1;
+      return out; })()""")
+    print(' ', st)
+    check(st['drainHungerX2'] == 8 and st['hygieneDrain'] == 2.5, 'drain multipliers from shipEffects')
+    check(st['speed'] == 1, "shipEffects' walk must not slow the player (the user's rule)")
+    check(st['peek'] is True and st['take'].get('dish') == 'fish pie' and st['peekEmpty']['ok'] is False and st['takeEmpty'] is False, f'galley stand-in: {st}')
+    check(st['note'], 'the ship notes should show on the device')
+    shw = g.ev(r"""(() => { eval("window.shipEffects = function (d) { return { deck: d, restore: { hygiene: .5 }, drain: {}, notes: [] }; }"); FX_MIN = -1;
+      const n = SHIP.player.needs; n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+      needsT = shipNow() - PLAYER_ACTS.shower.mins; playerUpdate(0, 0); const h = n.hygiene; ACT = null;
+      delete window.shipEffects; FX_MIN = -1; return Math.round(h); })()""")
+    print('  a shower with the recycler failing (restore x0.5):', shw)
+    check(shw == 50, f'a weak shower should give half: {shw}')
     errors = g.errors
     g.close()
 
@@ -205,7 +229,7 @@ with sync_playwright() as pw:
     check(bad == {'hunger': 80, 'energy': 100, 'hygiene': 80, 'fitness': 80, 'social': 80}, 'junk needs should be clamped or filled at 80')
     raw0 = ev("localStorage.getItem(SAVE_KEY)")
     ev = load('?nosave')
-    ns = json.loads(ev("const n0 = NEEDS.map(k => SHIP.player.needs[k]); SHIP.player.needs.hunger = 1; saveGame(); JSON.stringify([n0, localStorage.getItem(SAVE_KEY)])"))
+    ns = json.loads(ev("const n0 = NEED_KEYS.map(k => SHIP.player.needs[k]); SHIP.player.needs.hunger = 1; saveGame(); JSON.stringify([n0, localStorage.getItem(SAVE_KEY)])"))
     print('  ?nosave:', ns[0])
     check(ns[0] == [60, 100, 60, 70, 70], f'?nosave should start fresh: {ns[0]}')
     check(ns[1] == raw0, '?nosave should not write the save')

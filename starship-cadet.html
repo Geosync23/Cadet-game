@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.1
+   STARSHIP CADET: CSV Wren                            build 0.28.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5476,7 +5476,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5519,8 +5519,9 @@ function tickShip(dt) {
 }
 
 // ---- saving: { v, build, time, player: { deck, tile, facing, needs }, ship: { decks: { n: { open } } }, crew: {} } ----
-// v 2 (0.28.1) adds player.needs (section 15); a v 1 save still loads, with needs at 80
+// v 2 (0.28.1) adds player.needs (section 15, through SAVE_EXTRA); a v 1 save still loads, with needs at 80
 const SAVE_KEY = 'starship-cadet-save', SAVE_V = 2;
+const SAVE_EXTRA = [];                                   // other sections add their part: f(save) just before it's written (17: machines)
 const URL_FLAGS = new URLSearchParams(location.search);
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd'),   // the crowd demo (section 8b) never touches the save
       DEBUG = URL_FLAGS.has('debug');
@@ -5529,10 +5530,12 @@ function saveGame() {
   try {
     const decks = {};
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
+    const save = {
       v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
-      player: { deck: player.deck, tile: player.here(), facing: player.face, needs: SHIP.player && SHIP.player.needs }, ship: { decks }, crew: {},
-    }));
+      player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
+    };
+    for (const f of SAVE_EXTRA) f(save);
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save));
   } catch (e) { /* no storage, or full: the game carries on unsaved */ }
 }
 function loadGame() {
@@ -6016,7 +6019,7 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // Hooks elsewhere: the save (13: v 2, needs, New game), the item tap (11),
 // playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
-const NEEDS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];
+const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
 const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
 // drain per ship hour: [awake, asleep]. A normal day (breakfast, dinner, a shower, 8 hours' sleep) keeps every
 // need above 40; the gym every two or three days keeps fitness up; a call home every two days keeps social up.
@@ -6028,14 +6031,30 @@ const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy un
 const needClamp = v => Math.max(0, Math.min(100, v));
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
   const src = s && s.v >= 2 && s.player && s.player.needs, out = {};
-  for (const k of NEEDS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
+  for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
   return out;
 }
 SHIP.player = { needs: needsLoad(SAVED) };
-function needsDrain(mins, asleep) {
+SAVE_EXTRA.push(s => { s.player.needs = { ...SHIP.player.needs }; });   // into the save (section 13)
+// the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
+// restore and drain multiply ours (a failing recycler, weaker showers). walk is left out: the user's rule is that
+// only low fitness and energy slow you. Read at most once a ship minute; all 1s until section 17 is there.
+let FX_MIN = -1, FX_NOW = null;
+function playerFx() {
+  const m = Math.floor(shipNow()), d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;
+  if (m !== FX_MIN || !FX_NOW || FX_NOW.deck !== d) {
+    FX_MIN = m; FX_NOW = null;
+    try { if (typeof shipEffects === 'function' && d) FX_NOW = shipEffects(d); } catch (e) { FX_NOW = null; }
+    if (!FX_NOW) FX_NOW = { deck: d, restore: {}, drain: {}, notes: [] };
+  }
+  return FX_NOW;
+}
+const fxR = (fx, k) => fx && fx.restore && isFinite(fx.restore[k]) ? fx.restore[k] : 1;
+const fxD = (fx, k) => fx && fx.drain && isFinite(fx.drain[k]) ? fx.drain[k] : 1;
+function needsDrain(mins, asleep, fx, except) {          // except: the need an activity is restoring (it doesn't drain meanwhile)
   const n = SHIP.player.needs, h = mins / 60;
-  for (const k of NEEDS) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * h);
-  if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * h);
+  for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * h);
+  if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
 }
 // walking speed: 1, or SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy
 const playerSpeed = (n = SHIP.player.needs) => (n.fitness < SLOW_BELOW ? SLOW_SPEED : 1) * (n.energy < SLOW_BELOW ? SLOW_SPEED : 1);
@@ -6048,13 +6067,13 @@ const NEED_SAY = {
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
 };
 function needsLine() {
-  const n = SHIP.player.needs, k = NEEDS.slice().sort((a, b) => n[a] - n[b])[0];
+  const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
   return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
 }
 
 // ---- activities: tap the thing. ACT_TAP picks the activity by what you tapped, then the nearest free place of
 // its types (on this deck, within ACT_NEAR m of the thing). Without a place nearby the tap does what it always did. ----
-const ACTS = {   // need and gain over mins ship minutes; pose: the crowd's (anim names fall back to stand until 8b has them)
+const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd's (anim names fall back to stand until 8b has them)
   gym:    { need: 'fitness', gain: 30, mins: 30, title: 'Working out', done: 'Workout done. You feel loose and warm.' },
   call:   { need: 'social', gain: 40, mins: 15, pose: 'call', title: 'Calling home', done: 'You say goodbye and send it off. It\'ll be days getting there.' },
   browse: { mins: 8, pose: 'browse', title: 'Browsing', done: 'You\'ve picked out a few things. Pay at the counter.' },
@@ -6088,6 +6107,17 @@ function privatePlace(pl) {                              // someone's own: named
 // meal windows, the shelf always.
 function foodFrom(where, peek) {
   if (typeof galleyServe === 'function') return galleyServe(where, peek);
+  if (typeof takePortion === 'function') {               // section 16 as built (0.29.0): takePortion gives a hot portion, else
+    const sv = typeof galleyText === 'function' ? galleyText('servery') : '', gr = typeof galleyText === 'function' ? galleyText('grab') : '';
+    const hot = /^(Serving|Ready): ([^.]+)\./.exec(sv);   // something from the grab shelf, else false; galleyText says what's on
+    if (peek) {
+      if (where === 'servery' && /^Closed/.test(sv)) return { ok: false, why: sv + ' The grab-and-go shelf usually has something.' };
+      if (!hot && /empty/i.test(gr)) return { ok: false, why: 'Nothing to eat just now. ' + sv + ' ' + gr };
+      return { ok: true };
+    }
+    if (!takePortion('player')) return { ok: false, why: 'Nothing to eat just now. ' + sv + ' ' + gr };
+    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2].toLowerCase() : 'something from the grab shelf' };
+  }
   if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
   const m = SHIP.time.min;
   if (m >= 360 && m < 480) return { ok: true, dish: 'breakfast' };
@@ -6117,8 +6147,9 @@ function playerTap(it, at, point) {
     return true;
   }
   const [pl, spot] = free;
-  const pose = kind === 'gym' ? pl.anim || (/treadmill/i.test(it.t) ? 'run' : pl.pose === 'stand' ? 'lift' : pl.pose)
-    : kind === 'call' ? pl.anim || 'call' : kind === 'eat' ? spot.pose : pl.anim || ACTS[kind].pose;
+  const crowdPose = typeof poseOf === 'function' ? poseOf(pl) : null;   // section 8b's pose for a place (with A2), as the crew use
+  const pose = kind === 'eat' ? spot.pose : kind === 'gym' && !pl.anim && /treadmill/i.test(it.t) ? 'run'
+    : crowdPose || (kind === 'gym' ? pl.anim || (pl.pose === 'stand' ? 'lift' : pl.pose) : kind === 'call' ? pl.anim || 'call' : pl.anim || PLAYER_ACTS[kind].pose);
   actStart(kind, pl.id, { pose, title: it.t, flavour: it.x });
   return true;
 }
@@ -6126,11 +6157,11 @@ function playerTap(it, at, point) {
 function actStart(kind, placeId, o = {}) {
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : null, here = player.here();
-  ACT = { kind, def: ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
+  ACT = { kind, def: PLAYER_ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
   if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
-  if (!playerGo(spot.walk, ACT.cb)) { ACT = null; toast(o.title || ACTS[kind].title, 'You can\'t get there just now: someone\'s in the way.'); }
+  if (!playerGo(spot.walk, ACT.cb)) { ACT = null; toast(o.title || PLAYER_ACTS[kind].title, 'You can\'t get there just now: someone\'s in the way.'); }
 }
 function actBegin() {
   const A = ACT; if (!A) return;
@@ -6203,11 +6234,11 @@ function playerUpdate(dt, t) {
   if (needsT === null || now < needsT) needsT = now;
   const dm = now - needsT;
   if (dm > 0) {
-    needsT = now; needsDrain(dm, false);
-    const A = ACT;
+    const A = ACT, fx = playerFx(), doing = A && A.phase === 'do' && A.done < A.def.mins && A.def.need;
+    needsT = now; needsDrain(dm, false, fx, doing || null);
     if (A && A.phase === 'do') {
       const m = Math.max(0, Math.min(dm, A.def.mins - A.done)); A.done += dm;
-      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + (A.def.gain / A.def.mins + NEED_DRAIN[A.def.need][0] / 60) * m);
+      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
@@ -6225,7 +6256,7 @@ function playerUpdate(dt, t) {
 // otherwise awake. Any activity stops.
 SIM_ADVANCE.push((from, to) => {
   actEnd(true);
-  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5);
+  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, playerFx());
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
@@ -6244,7 +6275,7 @@ const device = (() => {
     get isOpen() { return !el.hidden; },
     refresh() {
       const n = SHIP.player.needs;
-      btn.classList.toggle('low', NEEDS.some(k => n[k] < SLOW_BELOW));
+      btn.classList.toggle('low', NEED_KEYS.some(k => n[k] < SLOW_BELOW));
       if (el.hidden) return;
       body.textContent = '';
       for (const s of sections) {
@@ -6264,10 +6295,11 @@ device.addSection('now', 'Now', el => {
   p.className = 'devtime'; p.textContent = clockText();
   q.textContent = ACT && ACT.phase !== 'walk' ? (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
+  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
 device.addSection('needs', 'Needs', el => {
   const n = SHIP.player.needs;
-  for (const k of NEEDS) {
+  for (const k of NEED_KEYS) {
     const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
     row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
     lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
