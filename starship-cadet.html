@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.8.2
+   STARSHIP CADET: CSV Wren                            build 0.8.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3750,7 +3750,32 @@ const BRG = {
     c.strokeStyle = 'rgba(95,214,198,.18)'; c.lineWidth = 1; for (let y = 0; y < h; y += 4) { c.beginPath(); c.moveTo(0, y + .5); c.lineTo(w, y + .5); c.stroke(); }   // faint scan lines
   }) }),
   bezel: std('#1e252c', .45, .35),
+  // the command ring and stations
+  leather: std('#8e2f2c', .5, .05), leatherDark: std('#3a3f48', .55, .05), frame: std('#2a3138', .4, .55), console: std('#252d35', .5, .35),
+  brass: std('#c9a24a', .35, .75), stepGlow: std('#9ff3e6', .4, 0, { emissive: col('#5fd6c6'), emissiveIntensity: 1.1 }),
 };
+// station screens, drawn at load from fixed numbers (no R()): a title bar in the station's colour over a readout
+function stationScreen(title, hue, kind) {
+  return new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(256, 160, (c, w, h) => {
+    c.fillStyle = '#0b141b'; c.fillRect(0, 0, w, h);
+    c.fillStyle = hue; c.fillRect(0, 0, w, 24); c.fillStyle = '#0b141b'; c.font = '700 15px system-ui,sans-serif'; c.fillText(title, 10, 17);
+    c.strokeStyle = hue; c.fillStyle = hue; c.lineWidth = 2;
+    if (kind === 'helm') {                               // the course: range rings, a heading line and the next waypoint
+      for (const r of [22, 44, 66]) { c.beginPath(); c.arc(128, 150, r * 1.5, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); }
+      c.beginPath(); c.moveTo(128, 150); c.lineTo(150, 40); c.stroke(); c.beginPath(); c.arc(150, 40, 5, 0, Math.PI * 2); c.fill();
+    } else if (kind === 'bars') {                        // levels: power, air, water, comms
+      [.82, .64, .9, .45, .7, .58].forEach((v, k) => { c.globalAlpha = .85; c.fillRect(16 + k * 38, 140 - v * 100, 24, v * 100); });
+    } else if (kind === 'wave') {                        // a signal trace
+      c.beginPath(); for (let x = 0; x < w; x += 4) { const y = 92 + Math.sin(x * .09) * 22 * Math.sin(x * .013 + 1); x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
+    } else {                                             // lines of a list, one highlighted
+      for (let k = 0; k < 6; k++) { c.globalAlpha = k === 2 ? 1 : .5; c.fillRect(12, 36 + k * 20, [180, 140, 200, 120, 160, 90][k], 8); }
+    }
+    c.globalAlpha = 1;
+  }, 1, 1) });
+}
+BRG.helm = stationScreen('HELM', '#5fd6c6', 'helm'); BRG.ops = stationScreen('OPS', '#e9c46a', 'bars');
+BRG.watch = stationScreen('WATCH', '#9fb8ff', 'list'); BRG.survey = stationScreen('SURVEY', '#8fd18a', 'wave');
+BRG.works = stationScreen('WORKS', '#f0a640', 'bars'); BRG.comms = stationScreen('COMMS', '#d98ad1', 'wave');
 // The bridge viewscreen: a strip just inside the bow hull, following its curve between bearings a0 and a1 (degrees on
 // the bow ellipse, 0 dead ahead), over the hull pieces of room rk only. Each piece's share is added to that hull piece,
 // so it drops with it for the cutaway and shows as a lit band at knee height.
@@ -3778,6 +3803,40 @@ function bridgeViewscreen(rk, a0, a1, y0 = .55, y1 = 2.35) {
 }
 Object.assign(KIT, {
   tapSpot() { return { w: .6, d: .6, noBlock: true }; },     // nothing to see: a tap target for something built elsewhere (the viewscreen)
+  // the Captain's chair: red leather, a high back, armrests with small panels. o.small: a plainer seat for the others
+  commandChair(g, o = {}) {
+    const s = o.small, lth = s ? BRG.leatherDark : BRG.leather;
+    cyl(.26, .3, .06, BRG.frame, 0, .03, 0, g, 18); cyl(.06, .06, .36, BRG.frame, 0, .24, 0, g, 10);
+    box(s ? .54 : .62, .12, s ? .5 : .58, lth, 0, .48, 0, g);
+    box(s ? .52 : .6, s ? .55 : .8, .12, lth, 0, s ? .82 : .95, -.26, g).rotation.x = -.1;
+    if (!s) box(.4, .18, .13, lth, 0, 1.42, -.31, g).rotation.x = -.1;
+    for (const x of [-1, 1]) {
+      box(.08, .07, s ? .4 : .5, BRG.frame, x * (s ? .3 : .35), .68, .02, g);
+      if (!s) box(.07, .02, .2, x < 0 ? WM.screen : WM.screenAmber, x * .35, .72, .1, g);
+    }
+    return { w: s ? .6 : .75, d: s ? .55 : .65, noBlock: o.noBlock };
+  },
+  // helm and ops: a free-standing desk, its screen sloped toward whoever sits behind it (front, +z)
+  bridgeConsole(g, o = {}) {
+    box(.86, .68, .48, BRG.console, 0, .34, -.02, g);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(.9, .05, .56), [BRG.frame, BRG.frame, o.screen, BRG.frame, BRG.frame, BRG.frame]);
+    top.position.set(0, .74, 0); top.rotation.x = .32; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(.9, .04, .06, BRG.brass, 0, .66, .26, g);
+    for (let k = 0; k < 4; k++) box(.06, .025, .05, k % 2 ? WM.navGreen : WM.red, -.18 + k * .12, .7, .17, g).rotation.x = .32;
+    return { w: .9, d: .6 };
+  },
+  // a rear station against a wall: a sloped desk with a screen, and an upright screen above it
+  rearStation(g, o = {}) {
+    const w = o.w || 1.0;
+    box(w, .72, .55, BRG.console, 0, .36, 0, g);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(w, .05, .5), [BRG.frame, BRG.frame, o.screen, BRG.frame, BRG.frame, BRG.frame]);
+    top.position.set(0, .79, .02); top.rotation.x = .3; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(w, .62, .08, BRG.frame, 0, 1.18, -.23, g);
+    const up = new THREE.Mesh(new THREE.BoxGeometry(w - .16, .46, .02), [BRG.frame, BRG.frame, BRG.frame, BRG.frame, o.screen, BRG.frame]);
+    up.position.set(0, 1.2, -.185); g.add(up);
+    box(w, .03, .04, BRG.brass, 0, .74, .27, g);
+    return { w, d: .6 };
+  },
   trunkHead(g) {                                         // where the trunks end: a manifold across both ducts under the ceiling, its plate facing the lobby glass
     box(1.8, .5, .72, BRG.duct, 0, 2.38, 0, g);
     for (const x of [-.5, .5]) cyl(.37, .37, .08, WM.paintDark, x, 2.1, 0, g, 24);
@@ -3849,6 +3908,10 @@ DECKS[1] = {
   // the command ring, inlaid in the carpet (the ring is faked: no sunken floor). A darker well, shaded under its edge,
   // a brass step edge with a teal light line outside it, and a faint inner circle round the Captain's chair.
   ring: [15.4, 5, 2.0],
+  // the command rail: a curved rail in dark wood behind the ring, open at both sides and forward
+  curves: [
+    { kind: 'bar', arc: [15.4, 5, 2.2, 140, 220], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
+  ],
   floorArt(g, PX) {
     const [i, j, r0] = this.ring, cx = i * PX, cy = j * PX, r = r0 * PX, arc = (rr) => { g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); };
     g.fillStyle = 'rgba(8,12,22,.32)'; arc(r); g.fill();
@@ -3857,7 +3920,13 @@ DECKS[1] = {
     g.strokeStyle = 'rgba(255,236,190,.35)'; g.lineWidth = 2; arc(r + 4); g.stroke();
     g.strokeStyle = 'rgba(95,214,198,.6)'; g.lineWidth = 3; arc(r + 12); g.stroke();
     g.strokeStyle = 'rgba(184,145,62,.35)'; g.lineWidth = 2; arc(r * .42); g.stroke();
+    // the floor hatch down into the sub-floor crawl, beside the Works station: a plate with hazard edges and a recessed handle
+    const [hi, hj] = this.floorHatch, hx = hi * PX + 12, hy = hj * PX + 10, hw = PX - 22;
+    g.fillStyle = '#2c333a'; g.fillRect(hx, hy, hw, hw);
+    hazardBand(g, hx, hy, hw, 6, true); hazardBand(g, hx, hy + hw - 6, hw, 6, true); hazardBand(g, hx, hy, 6, hw, false); hazardBand(g, hx + hw - 6, hy, 6, hw, false);
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(hx + hw / 2 - 9, hy + hw / 2 - 3, 18, 6); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(hx + 7, hy + 7, hw - 14, 1);
   },
+  floorHatch: [13, 8],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,7,6', 'w'], ['v,9,6', 'e']]) placeOnEdge('liftPanel', key, tw);
@@ -3868,6 +3937,30 @@ DECKS[1] = {
     place('Y', 'trunkHead', 1, .5, 'n');
     // the viewscreen across the bow, and something to tap in front of it
     bridgeViewscreen('B', -60, 60);
+    // the command ring: the Captain's chair with a seat either side, helm and ops just forward, and a brass step edge
+    // with a light line round the well (the ring is faked: the floor stays flat). Ring centre: tile (15.4, 5); B starts at col 10.
+    const ring = curvePoints({ arc: [d.ring[0], d.ring[1], d.ring[2], -180, 180] });
+    staticRoot.add(curveStrip(ring, -.01, .03, -.05, .05, [BRG.brass, BRG.brass, BRG.brass]));
+    const lit = curveStrip(ring, -.01, .012, .06, .085, [BRG.stepGlow, BRG.stepGlow, BRG.stepGlow]); lit.castShadow = false; staticRoot.add(lit);
+    place('B', 'commandChair', 5.2, 5, 'w', { block: [[5, 4], [5, 5]], it: IT('The Captain\'s chair', 'Red leather, worn pale on the right armrest where the Captain drums her fingers. Nobody else sits in it. Not even for a photo.') });
+    for (const [z, t, x] of [[3.85, 'First officer\'s seat', 'The Commander\'s seat, at the Captain\'s left. A tablet is tucked down the side cushion.'], [6.15, 'Guest seat', 'The seat at the Captain\'s right, for whoever has been invited up. Today, nobody.']])
+      place('B', 'commandChair', 5.2, z, 'w', { small: true, block: [[5, z < 5 ? 3 : 6]], it: IT(t, x) });
+    for (const [z, scr, t, x] of [[4.45, BRG.helm, 'Helm', 'The helm: course, speed and the next waypoint, plotted in teal. The heading hasn\'t changed in three days.'], [5.55, BRG.ops, 'Ops', 'Operations: power, air, water and comms, all on one desk. Every bar in the green, for once.']]) {
+      place('B', 'bridgeConsole', 7.45, z, 'e', { screen: scr, it: IT(t, x) });
+      place('B', 'commandChair', 6.55, z, 'w', { small: true, block: [[6, z < 5 ? 4 : 5]] });
+    }
+    // the rear stations: Watch and Survey along the ready room wall (its door between them stays clear), Comms along the
+    // washroom wall, Works against the washroom's far side, beside the floor hatch. Each has a seat facing it.
+    for (const [x, z, back, scr, t, txt] of [
+      [1.45, 3.4, 'n', BRG.watch, 'Watch station', 'The watch officer\'s board: who\'s on shift, where, and what\'s due. Your name is on it, in the Works column.'],
+      [3.45, 3.4, 'n', BRG.survey, 'Survey station', 'Sensor returns from the array on Deck 2. A long, slow wave that the survey team calls "the ship breathing".'],
+      [1.45, 6.6, 's', BRG.comms, 'Comms station', 'Incoming and outgoing traffic. A queue of call-home messages from Deck 3, waiting for the next relay window.'],
+      [2.4, 8.5, 'w', BRG.works, 'Works station', 'The Works board, mirrored from the job list on Deck 5. Bridge jobs are marked in gold; the sub-floor hatch is right beside it.'],
+    ]) {
+      place('B', 'rearStation', x, z, back, { screen: scr, w: back === 'w' ? .88 : 1.0, it: IT(t, txt) });
+      const o = { n: [0, .7, 's'], s: [0, -.7, 'n'], w: [.52, 0, 'e'] }[back];
+      place('B', 'commandChair', x + o[0], z + o[1], o[2], { small: true, noBlock: true });
+    }
     place('B', 'tapSpot', 8.6, 5, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
   },
