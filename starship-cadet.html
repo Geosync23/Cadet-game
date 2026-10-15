@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.17.0
+   STARSHIP CADET: CSV Wren                            build 0.17.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2556,6 +2556,7 @@ function buildDeck(def) {
     g.fillStyle = '#1c2128'; g.fillRect(0, 0, FTW, FTH);
     for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
       const r = roomAt(i, j), x = i * PX, y = j * PX, st = ROOMS[r];
+      if (def.floorSeeds && i === def.floorSeeds.col && j < def.floorSeeds.rows.length) seed = def.floorSeeds.rows[j];   // a deck whose floor changed west of this column keeps its old grain (and its later random sequence) east of it
       if (!r) continue;
       if (st.void) { g.fillStyle = '#23272d'; g.fillRect(x, y, PX, PX); continue; }
       const v = st.floor === 'lift' || st.spine ? 0 : (R() - .5) * 8;   // the lift car draws nothing from the deck's random sequence, so the rest of the deck is unchanged
@@ -2997,26 +2998,26 @@ DECKS[4] = {
   blurb: 'Bunks, cabins, washrooms', arrive: 'Junior wing aft, officers\' corridor forward. Your bunk is in Bunk 1.',
   lift: [21, 10],                                  // the lift car's centre in tile units: lines the deck up with the others
   map: [
-    '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxx......',
-    '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxx....',
-    '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxx...',
-    '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxxx..',
+    '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxx......',
+    '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxx....',
+    '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxxx...',
+    '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxxxx..',
     '..================++++++--------------------nnnnn.',
     '..================++++++--------------------nnnnn.',
-    '..jjjjjjeeeeggggkk++YY++BBBFFFJJJNNNRRRVVV--nnnnn.',
-    '..jjjjjjeeeeggggkk++YY++BBBFFFJJJNNNRRRVVV--nnnnnn',
-    '..jjjjjjeeeeggggkk++@@++BBBFFFJJJNNNRRRVVV--nnnnnn',
-    '..jjjjjjeeeeggggkk++@@++BBBFFFJJJNNNRRRVVV--nnnnnn',
-    '..jjjjjjffffhhhhkk++@@++CCCGGGKKKOOOSSSWWW--nnnnnn',
-    '..jjjjjjffffhhhhkk++ZZ++CCCGGGKKKOOOSSSWWW--nnnnnn',
-    '..jjjjjjffffhhhhkk++ZZ++CCCGGGKKKOOOSSSWWW--nnnnnn',
-    '..jjjjjjffffhhhhkk++ZZ++CCCGGGKKKOOOSSSWWW--nnnnn.',
+    '..jjjjjjeeeeeggggg++YY++BBBFFFJJJNNNRRRVVV--nnnnn.',
+    '..jjjjjjeeeeeggggg++YY++BBBFFFJJJNNNRRRVVV--nnnnnn',
+    '..jjjjjjeeeeeggggg++@@++BBBFFFJJJNNNRRRVVV--nnnnnn',
+    '..jjjjjjeeeeeggggg++@@++BBBFFFJJJNNNRRRVVV--nnnnnn',
+    '..jjjjjjfffffhhhhh++@@++CCCGGGKKKOOOSSSWWW--nnnnnn',
+    '..jjjjjjfffffhhhhh++ZZ++CCCGGGKKKOOOSSSWWW--nnnnnn',
+    '..jjjjjjfffffhhhhh++ZZ++CCCGGGKKKOOOSSSWWW--nnnnnn',
+    '..jjjjjjfffffhhhhh++ZZ++CCCGGGKKKOOOSSSWWW--nnnnn.',
     '..================++++++--------------------nnnnn.',
     '..================++++++--------------------nnnnn.',
-    '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyyy..',
-    '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyy...',
-    '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyy....',
-    '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyy......',
+    '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyyyy..',
+    '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyyy...',
+    '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyy....',
+    '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyy......',
   ],
   // doors: generated from the Deck 4 plan. 'closed' doors stay shut and say why (closedDoors); 'lift' is the main lift
   doors: {
@@ -3024,10 +3025,10 @@ DECKS[4] = {
     'h,28,6': 'closed', 'h,28,14': 'closed', 'h,28,16': 'closed', 'h,31,4': 'closed', 'h,31,6': 'closed',
     'h,31,14': 'closed', 'h,31,16': 'closed', 'h,34,4': 'closed', 'h,34,6': 'closed', 'h,34,14': 'closed',
     'h,34,16': 'closed', 'h,37,4': 'closed', 'h,37,6': 'closed', 'h,37,14': 'closed', 'h,37,16': 'closed',
-    'h,40,4': 'closed', 'h,40,6': 'closed', 'h,40,14': 'closed', 'h,40,16': 'closed', 'h,7,4': 'door',
-    'h,11,4': 'door', 'h,15,4': 'door', 'h,7,16': 'door', 'h,10,6': 'door', 'h,10,14': 'door', 'h,13,6': 'door',
-    'h,13,14': 'door', 'h,4,14': 'door', 'h,4,6': 'door', 'v,18,10': 'closed', 'h,11,16': 'door', 'h,3,4': 'door',
-    'h,3,16': 'door', 'h,20,4': 'closed', 'h,20,16': 'closed', 'h,15,16': 'closed', 'h,43,4': 'closed',
+    'h,40,4': 'closed', 'h,40,6': 'closed', 'h,40,14': 'closed', 'h,40,16': 'closed', 'h,8,4': 'door',
+    'h,13,4': 'door', 'h,17,4': 'door', 'h,8,16': 'door', 'h,10,6': 'door', 'h,10,14': 'door', 'h,15,6': 'door',
+    'h,15,14': 'door', 'h,4,14': 'door', 'h,4,6': 'door', 'h,18,16': 'closed', 'h,12,16': 'door', 'h,3,4': 'door',
+    'h,3,16': 'door', 'h,21,4': 'closed', 'h,20,16': 'closed', 'h,15,16': 'closed', 'h,43,4': 'closed',
     'h,43,16': 'closed', 'v,44,9': 'door', 'v,44,10': 'door', 'v,20,10': 'lift', 'v,20,9': 'lift', 'v,20,8': 'lift', 'v,22,10': 'lift', 'v,22,9': 'lift', 'v,22,8': 'lift',
     // the spine: glass onto the air and power trunks above the car and the ladder well below it; a hatch down the ladder
     'v,20,6': 'glass', 'v,22,6': 'glass', 'h,20,6': 'glass', 'h,21,6': 'glass',
@@ -3035,20 +3036,20 @@ DECKS[4] = {
   },
   // door plates [edge, the side the corridor is on, text]
   plates: [
-    ['h,4,4', 's', 'Washroom'], ['h,8,4', 's', 'Bunk 1'], ['h,12,4', 's', 'Bunk 2'], ['h,16,4', 's', 'Bunk 3'],
-    ['h,21,4', 's', 'Scrubbers'], ['h,26,4', 's', 'Guest 4-02'], ['h,29,4', 's', '4-06'], ['h,32,4', 's', '4-10'],
+    ['h,4,4', 's', 'Washroom'], ['h,9,4', 's', 'Bunk 1'], ['h,14,4', 's', 'Bunk 2'], ['h,16,4', 's', 'Bunk 3'],
+    ['h,23,4', 's', 'Scrubbers'], ['h,26,4', 's', 'Guest 4-02'], ['h,29,4', 's', '4-06'], ['h,32,4', 's', '4-10'],
     ['h,35,4', 's', '4-14'], ['h,38,4', 's', '4-18'], ['h,41,4', 's', '4-22'], ['h,42,4', 's', 'Supply'],
     ['h,5,6', 'n', 'Common room'], ['h,5,14', 's', 'Common room'], ['h,11,6', 'n', 'Bunk 5'],
-    ['h,14,6', 'n', 'Bunk 7'], ['v,18,11', 'e', 'Utility'], ['h,26,6', 'n', 'Guest 4-04'], ['h,29,6', 'n', 'Guest 4-08'],
+    ['h,14,6', 'n', 'Bunk 7'], ['h,19,16', 'n', 'Utility'], ['h,26,6', 'n', 'Guest 4-04'], ['h,29,6', 'n', 'Guest 4-08'],
     ['h,32,6', 'n', '4-12'], ['h,35,6', 'n', '4-16'], ['h,38,6', 'n', '4-20'], ['h,41,6', 'n', 'Spare 4-24'],
     ['h,11,14', 's', 'Bunk 6'], ['h,14,14', 's', 'Bunk 8'], ['h,26,14', 's', 'Guest 4-03'], ['h,29,14', 's', 'Guest 4-07'],
     ['h,32,14', 's', '4-11'], ['h,35,14', 's', '4-15'], ['h,38,14', 's', '4-19'], ['h,41,14', 's', 'Spare 4-23'],
-    ['h,4,16', 'n', 'Washroom'], ['h,8,16', 'n', 'Bunk 4'], ['h,12,16', 'n', 'Laundry'], ['h,16,16', 'n', 'Stores'],
+    ['h,4,16', 'n', 'Washroom'], ['h,9,16', 'n', 'Bunk 4'], ['h,13,16', 'n', 'Laundry'], ['h,16,16', 'n', 'Stores'],
     ['h,21,16', 'n', 'Heating'], ['h,26,16', 'n', 'Guest 4-01'], ['h,29,16', 'n', '4-05'], ['h,32,16', 'n', '4-09'],
     ['h,35,16', 'n', '4-13'], ['h,38,16', 'n', '4-17'], ['h,41,16', 'n', '4-21'], ['h,42,16', 'n', 'Utility'],
     ['v,44,8', 'w', 'Music room'],
   ],
-  sconces: [['h,19,4', 's'], ['h,23,4', 's'], ['h,27,4', 's'], ['h,36,4', 's'], ['h,39,4', 's'], ['h,44,4', 's'], ['h,19,16', 'n'], ['h,23,16', 'n'], ['h,27,16', 'n'], ['h,36,16', 'n'], ['h,39,16', 'n'], ['h,44,16', 'n']],
+  sconces: [['h,19,4', 's'], ['h,20,4', 's'], ['h,27,4', 's'], ['h,36,4', 's'], ['h,39,4', 's'], ['h,44,4', 's'], ['h,19,16', 'n'], ['h,23,16', 'n'], ['h,27,16', 'n'], ['h,36,16', 'n'], ['h,39,16', 'n'], ['h,44,16', 'n']],
   // six guest cabins nearest the lift (the first column, and the inner pair of the second): guests come and go, so they
   // don't walk the corridor's length. Two spares at the quiet music-room end. The other sixteen are officers'.
   guests: {
@@ -3079,54 +3080,75 @@ DECKS[4] = {
   windows: ['j', 'a', 'b', 'c', 'd', 'n', 'A', 'D', 'E', 'H', 'I', 'L', 'M', 'P', 'Q', 'T', 'U', 'X'].map(room => ({ room })),
   // doors that stay shut, and what they say when you tap them (locked rooms are filled in by lockedRoom)
   closedDoors: {
-    'h,20,4': { t: 'Air scrubbers', x: 'The two scrubbers that keep Deck 4 breathable. Tier 2 access, and you are not cleared yet.' },
+    'h,21,4': { t: 'Air scrubbers', x: 'The two scrubbers that keep Deck 4 breathable. Tier 2 access, and you are not cleared yet.' },
     'h,20,16': { t: 'Heating plant', x: 'The deck\'s heat exchanger and pumps. Tier 2 access.' },
-    'v,18,10': { t: 'Utility closet', x: 'Power junction and light relays for the junior wing. Tier 1 access, once the job list is running.' },
+    'h,18,16': { t: 'Utility closet', x: 'Power junction and light relays for the junior wing. Tier 1 access, once the job list is running.' },
     'h,20,14': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
     'h,15,16': { t: 'Junior stores', x: 'Linen, spare bedding and cleaning supplies. Locked until restock jobs arrive.' },
     'h,43,4': { t: 'Port supply closet', x: 'Bulbs, filters and cleaning kit for the officers\' wing.' },
     'h,43,16': { t: 'Starboard utility closet', x: 'Power and lights for the officers\' wing.' },
   },
   hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6 },   // stern line, stern corner radius, where the bow curve starts, how far it reaches
+  // 0.17.1: the bunk rooms grew, so the floor painter draws a different count of random numbers west of column 21. At column 21
+  // of each row it picks up the value 0.17.0 had there, so the officers' wing floor, and everything built after the floor
+  // (windows, furniture), come out exactly as before.
+  floorSeeds: { col: 21, rows: [711683755, 1759808167, 1216786317, 1518978406, 1394564237, 428409510, 1513525194, 1949355503, 2060744245, 1234811932,
+    1316166146, 2027868013, 1757106567, 84604698, 286774954, 2116181630, 1012310116, 1910995577, 818977669, 1104626985] },
   // what a locked room's door says when you tap it
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
   // face is the way the person faces there. deck_check.py checks every place can be reached.
-  // Beds: 4-B<room>-<berth> for the junior bunks (two berths per bunk, both on the bunk's tile), 4-01..4-24 for the cabins
+  // Beds: 4-B<room>-<berth> (1-6) for the junior bunks (two berths per bunk, both on the bunk's tile), 4-01..4-24 for the cabins
   // (guest and spare cabins too, though the roster won't use them). Every cabin's wash pod is a shower place, 4-xx-wash.
   places: [
-    { id: '4-B1-1', type: 'bed', at: [7, 1], face: 's', pose: 'lie', room: 'a' },
-    { id: '4-B1-2', type: 'bed', at: [7, 1], face: 's', pose: 'lie', room: 'a' },
-    { id: '4-B1-3', type: 'bed', at: [9, 1], face: 's', pose: 'lie', room: 'a' },
-    { id: '4-B1-4', type: 'bed', at: [9, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-1', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-2', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-3', type: 'bed', at: [8, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-4', type: 'bed', at: [8, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-5', type: 'bed', at: [10, 1], face: 's', pose: 'lie', room: 'a' },
+    { id: '4-B1-6', type: 'bed', at: [10, 1], face: 's', pose: 'lie', room: 'a' },
     { id: '4-B2-1', type: 'bed', at: [11, 1], face: 's', pose: 'lie', room: 'b' },
     { id: '4-B2-2', type: 'bed', at: [11, 1], face: 's', pose: 'lie', room: 'b' },
     { id: '4-B2-3', type: 'bed', at: [13, 1], face: 's', pose: 'lie', room: 'b' },
     { id: '4-B2-4', type: 'bed', at: [13, 1], face: 's', pose: 'lie', room: 'b' },
-    { id: '4-B3-1', type: 'bed', at: [15, 1], face: 's', pose: 'lie', room: 'c' },
-    { id: '4-B3-2', type: 'bed', at: [15, 1], face: 's', pose: 'lie', room: 'c' },
-    { id: '4-B3-3', type: 'bed', at: [17, 1], face: 's', pose: 'lie', room: 'c' },
-    { id: '4-B3-4', type: 'bed', at: [17, 1], face: 's', pose: 'lie', room: 'c' },
-    { id: '4-B4-1', type: 'bed', at: [7, 18], face: 'n', pose: 'lie', room: 'd' },
-    { id: '4-B4-2', type: 'bed', at: [7, 18], face: 'n', pose: 'lie', room: 'd' },
-    { id: '4-B4-3', type: 'bed', at: [9, 18], face: 'n', pose: 'lie', room: 'd' },
-    { id: '4-B4-4', type: 'bed', at: [9, 18], face: 'n', pose: 'lie', room: 'd' },
-    { id: '4-B5-1', type: 'bed', at: [9, 8], face: 'n', pose: 'lie', room: 'e' },
-    { id: '4-B5-2', type: 'bed', at: [9, 8], face: 'n', pose: 'lie', room: 'e' },
-    { id: '4-B5-3', type: 'bed', at: [11, 8], face: 'n', pose: 'lie', room: 'e' },
-    { id: '4-B5-4', type: 'bed', at: [11, 8], face: 'n', pose: 'lie', room: 'e' },
-    { id: '4-B6-1', type: 'bed', at: [9, 11], face: 's', pose: 'lie', room: 'f' },
-    { id: '4-B6-2', type: 'bed', at: [9, 11], face: 's', pose: 'lie', room: 'f' },
-    { id: '4-B6-3', type: 'bed', at: [11, 11], face: 's', pose: 'lie', room: 'f' },
-    { id: '4-B6-4', type: 'bed', at: [11, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B2-5', type: 'bed', at: [15, 1], face: 's', pose: 'lie', room: 'b' },
+    { id: '4-B2-6', type: 'bed', at: [15, 1], face: 's', pose: 'lie', room: 'b' },
+    { id: '4-B3-1', type: 'bed', at: [16, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B3-2', type: 'bed', at: [16, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B3-3', type: 'bed', at: [18, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B3-4', type: 'bed', at: [18, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B3-5', type: 'bed', at: [20, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B3-6', type: 'bed', at: [20, 1], face: 's', pose: 'lie', room: 'c' },
+    { id: '4-B4-1', type: 'bed', at: [6, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B4-2', type: 'bed', at: [6, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B4-3', type: 'bed', at: [8, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B4-4', type: 'bed', at: [8, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B4-5', type: 'bed', at: [10, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B4-6', type: 'bed', at: [10, 18], face: 'n', pose: 'lie', room: 'd' },
+    { id: '4-B5-1', type: 'bed', at: [8, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B5-2', type: 'bed', at: [8, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B5-3', type: 'bed', at: [10, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B5-4', type: 'bed', at: [10, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B5-5', type: 'bed', at: [12, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B5-6', type: 'bed', at: [12, 8], face: 'n', pose: 'lie', room: 'e' },
+    { id: '4-B6-1', type: 'bed', at: [8, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B6-2', type: 'bed', at: [8, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B6-3', type: 'bed', at: [10, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B6-4', type: 'bed', at: [10, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B6-5', type: 'bed', at: [12, 11], face: 's', pose: 'lie', room: 'f' },
+    { id: '4-B6-6', type: 'bed', at: [12, 11], face: 's', pose: 'lie', room: 'f' },
     { id: '4-B7-1', type: 'bed', at: [13, 8], face: 'n', pose: 'lie', room: 'g' },
     { id: '4-B7-2', type: 'bed', at: [13, 8], face: 'n', pose: 'lie', room: 'g' },
     { id: '4-B7-3', type: 'bed', at: [15, 8], face: 'n', pose: 'lie', room: 'g' },
     { id: '4-B7-4', type: 'bed', at: [15, 8], face: 'n', pose: 'lie', room: 'g' },
+    { id: '4-B7-5', type: 'bed', at: [17, 8], face: 'n', pose: 'lie', room: 'g' },
+    { id: '4-B7-6', type: 'bed', at: [17, 8], face: 'n', pose: 'lie', room: 'g' },
     { id: '4-B8-1', type: 'bed', at: [13, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-B8-2', type: 'bed', at: [13, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-B8-3', type: 'bed', at: [15, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-B8-4', type: 'bed', at: [15, 11], face: 's', pose: 'lie', room: 'h' },
+    { id: '4-B8-5', type: 'bed', at: [17, 11], face: 's', pose: 'lie', room: 'h' },
+    { id: '4-B8-6', type: 'bed', at: [17, 11], face: 's', pose: 'lie', room: 'h' },
     { id: '4-02', type: 'bed', at: [24, 1], face: 'e', pose: 'lie', room: 'A' },
     { id: '4-04', type: 'bed', at: [24, 7], face: 'e', pose: 'lie', room: 'B' },
     { id: '4-03', type: 'bed', at: [24, 11], face: 'e', pose: 'lie', room: 'C' },
@@ -3185,12 +3207,12 @@ DECKS[4] = {
     { id: '4-basin-p2', type: 'basin', at: [3, 3], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-q1', type: 'basin', at: [4, 16], face: 'e', pose: 'stand', room: 'q' },
     { id: '4-basin-q2', type: 'basin', at: [4, 17], face: 'e', pose: 'stand', room: 'q' },
-    { id: '4-laundry-1', type: 'laundry', at: [13, 18], face: 's', pose: 'stand', room: 'l' },
-    { id: '4-laundry-2', type: 'laundry', at: [12, 18], face: 's', pose: 'stand', room: 'l' },
-    { id: '4-laundry-3', type: 'laundry', at: [11, 18], face: 's', pose: 'stand', room: 'l' },
-    { id: '4-laundry-4', type: 'laundry', at: [10, 18], face: 's', pose: 'stand', room: 'l' },
-    { id: '4-laundry-5', type: 'laundry', at: [12, 17], face: 'e', pose: 'stand', room: 'l' },
-    { id: '4-laundry-6', type: 'laundry', at: [11, 16], face: 'w', pose: 'stand', room: 'l' },
+    { id: '4-laundry-1', type: 'laundry', at: [14, 18], face: 's', pose: 'stand', room: 'l' },
+    { id: '4-laundry-2', type: 'laundry', at: [13, 18], face: 's', pose: 'stand', room: 'l' },
+    { id: '4-laundry-3', type: 'laundry', at: [12, 18], face: 's', pose: 'stand', room: 'l' },
+    { id: '4-laundry-4', type: 'laundry', at: [11, 18], face: 's', pose: 'stand', room: 'l' },
+    { id: '4-laundry-5', type: 'laundry', at: [13, 17], face: 'e', pose: 'stand', room: 'l' },
+    { id: '4-laundry-6', type: 'laundry', at: [12, 17], face: 'w', pose: 'stand', room: 'l' },
     { id: '4-common-1', type: 'common-room', at: [2, 9], face: 'e', pose: 'sit', room: 'j' },
     { id: '4-common-2', type: 'common-room', at: [2, 10], face: 'e', pose: 'sit', room: 'j' },
     { id: '4-common-3', type: 'common-room', at: [2, 11], face: 'e', pose: 'sit', room: 'j' },
