@@ -4467,6 +4467,8 @@ DECKS[3] = {
     { id: '3-queue-3', type: 'servery-queue', at: [33, 5], xy: [33.55, 5.5], walk: [33, 5], face: 'e', pose: 'stand', room: 'M' },
     { id: '3-queue-4', type: 'servery-queue', at: [33, 6], xy: [33.55, 6.5], walk: [33, 6], face: 'e', pose: 'stand', room: 'M' },
     { id: '3-galley-pass', type: 'work:galley', at: [35, 5], xy: [35.5, 5.5], walk: [35, 5], face: 'w', pose: 'work', room: 'K' },
+    { id: '3-cold-1', type: 'storage', anim: 'browse', at: [36, 1], face: 'n', pose: 'stand', room: 'C' },   // unloading a cart onto the cold shelves (B3)
+    { id: '3-cold-2', type: 'storage', anim: 'browse', at: [37, 1], face: 'n', pose: 'stand', room: 'C' },
   ],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
