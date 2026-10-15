@@ -1,5 +1,6 @@
 # Starship Cadet: machine check (keep in the repo, next to day_check.py)
 # Runs the ship's machines (section 17) on paper for DAYS ship days with ?nosave and checks, deterministically:
+#   every machine in DECKS[n].machines is of a kind section 17 knows
 #   with no repairs: conditions only ever fall; nothing is faulty in the first two days; some machines are broken
 #   by the end, but the slow ones (reactor, hull, array) are not; ship health falls but stays above 0; every
 #   machine's effects stay in range (multipliers, mood)
@@ -13,8 +14,8 @@
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
-#   nothing runs unless asked: a game left running with ?nosave never touches the machines, and shipEffectsAt
-#   then says everything is as new; shipEffectsAt gives back what shipEffects said over the last 7 days, and reading
+#   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
+#   reading shipEffects is cheap; shipEffectsAt gives back what shipEffects said over the last 7 days, and reading
 #   it changes nothing
 # Setup and environment as for cadet_test.py.
 # Run:  python3 machine_check.py BUILD.html [DAYS]     (DAYS defaults to 14)
@@ -109,13 +110,27 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     # 0. nothing runs unless asked: a while of play with ?nosave leaves the machines untouched
     g.step(60)
-    inert = g.ev("(() => { const f = shipEffectsAt(4, shipNow()); return MACH_HOUR === null && f.mood === 0 && f.restore.hygiene === 1; })()")
-    print('Untouched by play (?nosave):', inert)
-    if not inert: fail('the machines ran without being asked')
+    # since 0.40.2 the player's needs read shipEffects every ship minute, so play runs the machines; they must
+    # never run ahead of the clock, and a read in the same hour must be cheap
+    st = g.ev("""(() => {
+      const nowH = Math.floor(shipNow() / 60), ran = MACH_HOUR !== null;
+      return { ran, upToDate: !ran || MACH_HOUR === nowH + 1, nowH, hour: MACH_HOUR };
+    })()""")
+    import time as _t
+    t = _t.time(); g.ev("(() => { for (let k = 0; k < 2000; k++) shipEffects(4); return 1; })()"); same_hour_us = (_t.time() - t) / 2000 * 1e6
+    t = _t.time(); g.ev("(() => { setShipNow(shipNow() + 60); shipEffects(4); return 1; })()"); new_hour_ms = (_t.time() - t) * 1000
+    print(f"Play ran the machines: {st['ran']}, never ahead of the clock: {st['upToDate']}; shipEffects in the same hour about {same_hour_us:.0f} us, at a new hour {new_hour_ms:.0f} ms")
+    if not st['upToDate']: fail(f"machines ran ahead of the clock: hour {st['hour']} at {st['nowH']}")
+    pure = g.ev("(() => { const r = MACH_REV, h = MACH_HOUR; for (let d = 1; d <= 6; d++) shipEffectsAt(d, shipNow() - 500); return MACH_REV === r && MACH_HOUR === h; })()")
+    if not pure: fail('shipEffectsAt changed the machines')
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
+    unknown = g.ev("Object.keys(DECKS).flatMap(n => (DECKS[n].machines || []).filter(m => !MACHINE_KINDS[m.kind]).map(m => m.id + ' (' + m.kind + ')'))")
+    if unknown: fail(f"machines of kinds section 17 doesn't know (they'd be left out): {unknown}")
+    noPanel = g.ev("machineList().filter(m => !m.stub && !panelPlace(m.id)).map(m => m.id)")
+    if noPanel: print('  real machines with no panel place yet:', noPanel)
     n = g.ev("machineList().length")
     stubs = g.ev("machineList().filter(m => m.stub).length")
-    print(f"{n} machines ({stubs} stand-ins), {DAYS} days")
+    print(f"{n} machines ({n - stubs} from the decks, {stubs} stand-ins), {DAYS} days")
 
     run = lambda **o: g.page.evaluate("([s, o]) => window.__sc(s)(o)", [RUN, {'days': DAYS, 'mode': 'hour', 'crew': False, 'perHour': CREW_PER_HOUR, **o}])
 
@@ -158,7 +173,7 @@ with sync_playwright() as pw:
     b = run()
     j = run(mode='jump')
     o = run(mode='odd')
-    c = g.ev("(() => { SHIP_DAYS.clear(); MACH_USE.clear(); MACH_NORM = null; return 1; })()") and run()
+    c = g.ev("(() => { SHIP_DAYS.clear(); MACH_USE.clear(); MACH_NORM = null; MACH_NORM_PART = null; return 1; })()") and run()
     same = lambda x, y: all(abs(x['final'][i] - y['final'][i]) < 1e-9 for i in x['final'])
     print('The same twice:', same(a, b), '| one jump:', same(a, j), '| odd minutes:', same(a, o), '| caches cleared:', same(a, c))
     for name, x in (('twice', b), ('jump', j), ('odd minutes', o), ('caches cleared', c)):
@@ -220,7 +235,7 @@ with sync_playwright() as pw:
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
-      const s = { ship: {} }; SAVE_EXTRA.forEach(f => f(s));
+      const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
       const all = () => JSON.stringify([machinesNow(), SHIP.jobs, SHIP.stores, SHIP.hold]);
       const before = all();
       const back = () => JSON.parse(JSON.stringify(s)); MACH_HOUR = null;
