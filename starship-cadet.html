@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.2
+   STARSHIP CADET: CSV Wren                            build 0.28.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5476,7 +5476,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6080,6 +6080,10 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   pay:    { mins: 2, pose: 'pay', title: 'Paying', done: 'Paid. Nothing to carry yet: the shop\'s goods come later.' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
+  queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
+    if (!galleyTurn('player')) return false;
+    const f = foodFrom('servery'); A.o.dish = f.ok ? f.dish : null; A.o.why = f.why; return true;
+  } },
   eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
   grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
 };
@@ -6116,7 +6120,7 @@ function foodFrom(where, peek) {
       return { ok: true };
     }
     if (!takePortion('player')) return { ok: false, why: 'Nothing to eat just now. ' + sv + ' ' + gr };
-    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2].toLowerCase() : 'something from the grab shelf' };
+    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2] : 'something from the grab shelf' };
   }
   if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
   const m = SHIP.time.min;
@@ -6139,6 +6143,12 @@ function playerTap(it, at, point) {
     return true;
   }
   if ((kind === 'tray' || kind === 'eat') && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
+    const j = galleyJoin('player');
+    actStart('queue', null, { title: it.t, ahead: j.ahead, turnAt: j.turnAt,
+      spot: { id: null, walk: j.at, x: j.xy[0] - OX, z: j.xy[1] - OZ, y: 0, face: FACE_ANGLE[j.face] || 0, pose: 'stand' } });
+    return true;
+  }
   if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) {
@@ -6156,7 +6166,7 @@ function playerTap(it, at, point) {
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
   actEnd(true);
-  const spot = placeId ? placeSpot(placeId) : null, here = player.here();
+  const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: PLAYER_ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
@@ -6178,11 +6188,12 @@ function actBegin() {
     if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
     A.o.dish = f.dish;
   }
+  if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt; }   // your place in line from when you reach it
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
-  const what = A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
+  const what = A.kind === 'queue' ? 'You join the queue' + (A.o.ahead ? ': ' + A.o.ahead + ' ahead of you.' : '.') : A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + A.def.mins + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
 }
@@ -6195,7 +6206,9 @@ function actEnd(abort) {
   if (A.def.done) toast(A.def.title, A.def.done + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') basket = true;
   if (A.kind === 'pay') basket = false;
-  if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
+  if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
+  if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
+  if (A.kind === 'tray' || A.kind === 'queue') {         // tray in hand: the nearest free mess seat
     const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
       .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
     const o = { title: 'Mess hall', fed: true, dish: A.o.dish };
@@ -6218,7 +6231,7 @@ function actUpdate(dt, t) {
   if (A.phase === 'in') {
     if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = 'walk';
   } else if (A.phase === 'do') {
-    if (A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
+    if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
   }
   if (A.phase === 'out') {
     const p = player.obj.position;
@@ -6293,7 +6306,8 @@ const device = (() => {
 device.addSection('now', 'Now', el => {
   const p = document.createElement('p'), q = document.createElement('p');
   p.className = 'devtime'; p.textContent = clockText();
-  q.textContent = ACT && ACT.phase !== 'walk' ? (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
+  q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
