@@ -3753,6 +3753,139 @@ Object.assign(KIT, {
     return { w: .45, d: .34 };
   },
 });
+// ---- utility rooms on Decks 1 and 3 (A5b; made at load, no R()). Only materials these decks already draw, so the
+// rooms add few draw calls. Every piece's back is local -z (against a wall); its front, where someone works, is +z.
+const pipeX = (r, len, m, x, y, z, g) => { const p = cyl(r, r, len, m, x, y, z, g, 10); p.rotation.z = Math.PI / 2; return p; };
+const pipeZ = (r, len, m, x, y, z, g) => { const p = cyl(r, r, len, m, x, y, z, g, 10); p.rotation.x = Math.PI / 2; return p; };
+const statusLights = (g, x0, y, z, n, k0 = 0) => { for (let k = 0; k < n; k++) box(.05, .05, .02, (k + k0) % 4 === 3 ? WM.screenAmber : WM.screen, x0 + k * .09, y, z, g); };
+Object.assign(KIT, {
+  recyclerTanks(g) {                                     // the water recycler: two settling tanks with sight glasses, a control head between
+    for (const x of [-.7, .7]) {
+      box(1.1, .08, 1.1, M.slateDark, x, .04, -.05, g);
+      cyl(.5, .5, 2.05, WM.steel, x, 1.1, -.05, g, 20);
+      for (const y of [.45, 1.15, 1.85]) cyl(.53, .53, .06, M.slateDark, x, y, -.05, g, 20);
+      soft(WM.steelTop, x, 2.12, -.05, .5, .16, .5, g);
+      box(.08, 1.1, .04, GD.water, x, 1.15, .46, g);   // the sight glass, sunk into the tank wall
+    }
+    box(.42, .95, .3, WM.paintDark, 0, 1.05, .3, g); box(.34, .22, .02, MED.screen, 0, 1.3, .455, g);
+    statusLights(g, -.13, 1.05, .455, 4);
+    pipeX(.08, 1.5, M.metal, 0, 1.95, -.05, g);
+    return { w: 2.6, d: 1.4, tall: true };
+  },
+  filterBank(g) {                                        // the filter bank: white cartridges between two steel headers
+    box(1.9, 1.6, .06, M.slateDark, 0, .85, -.4, g);
+    for (const y of [.24, 1.5]) box(1.9, .14, .6, WM.steel, 0, y, -.08, g);
+    for (let k = 0; k < 6; k++) cyl(.1, .1, 1.16, M.ceramic, -.75 + k * .3, .87, -.04, g, 12);
+    cyl(.08, .08, .03, M.trim, .82, 1.72, .2, g, 14).rotation.x = Math.PI / 2;
+    return { w: 1.9, d: .9 };
+  },
+  pumpSkid(g) {                                          // two circulation pumps on one skid, their outlets rising to a header
+    box(1.8, .12, 1.1, M.slateDark, 0, .06, 0, g);
+    for (const x of [-.45, .45]) {
+      pipeZ(.22, .6, WM.paintDark, x, .45, .15, g); pipeZ(.28, .22, WM.steel, x, .45, -.28, g);
+      cyl(.07, .07, 1.65, M.metal, x, 1.35, -.32, g, 10);
+    }
+    pipeX(.08, 1.3, M.metal, 0, 2.18, -.32, g);
+    box(.3, .3, .04, WM.paintDark, 0, 1.05, .25, g); statusLights(g, -.09, 1.1, .275, 3);
+    return { w: 1.8, d: 1.2 };
+  },
+  uvUnit(g) {                                            // the UV steriliser: a lamp tube in a steel sleeve, glowing through a slot
+    pipeX(.19, 1.6, WM.steel, 0, 1.1, 0, g);
+    box(.7, .07, .03, MED.screen, 0, 1.1, .185, g);
+    for (const x of [-.6, .6]) box(.07, 1.05, .32, M.slateDark, x, .52, -.06, g);
+    box(.42, .3, .2, WM.paintDark, 0, .56, -.12, g);
+    return { w: 1.8, d: .7 };
+  },
+  cleanTank(g) {                                         // the clean-water tank, with a level gauge and a manway on top
+    box(2.4, 1.6, 1.2, WM.steel, 0, .82, 0, g);
+    for (const y of [.42, 1.3]) box(2.44, .06, 1.24, M.slateDark, 0, y, 0, g);
+    box(.08, 1.2, .03, GD.water, .9, .85, .61, g);
+    cyl(.26, .26, .06, M.slateDark, 0, 1.64, 0, g, 18);
+    return { w: 2.6, d: 1.4 };
+  },
+  risers(g) {                                            // two water risers, floor to deckhead, up the spine
+    for (const x of [-.45, .45]) {
+      cyl(.13, .13, 2.74, M.metal, x, 1.37, 0, g, 12);
+      for (const y of [.6, 1.6, 2.5]) cyl(.18, .18, .06, M.slateDark, x, y, 0, g, 12);
+    }
+    const w = new THREE.Mesh(new THREE.TorusGeometry(.14, .025, 6, 16), WM.red); w.position.set(.45, 1.15, .17); g.add(w);
+    return { w: 1.8, d: .5 };
+  },
+  sump(g) {                                              // the drain sump: a low grated pit with a little pump
+    box(1.8, .06, .8, M.slateDark, 0, .03, 0, g);
+    for (let k = 0; k < 7; k++) box(1.6, .03, .04, M.metal, 0, .075, -.3 + k * .1, g);
+    cyl(.12, .12, .3, WM.paintDark, .6, .2, 0, g, 12);
+    return { w: 1.8, d: .8 };
+  },
+  extractorUnit(g) {                                     // the galley plant: the hood ducts' fan, its motor and the grease filters
+    pipeZ(.4, .5, WM.steel, -.4, 1.5, 0, g);
+    box(.6, .85, .5, WM.steel, -.4, 2.3, -.1, g);
+    box(.7, .5, .08, M.metal, .5, 1.45, .25, g);
+    box(.4, .45, .4, WM.paintDark, .5, .62, 0, g); box(1.9, .1, .7, M.slateDark, 0, .05, 0, g);
+    statusLights(g, .4, .8, .205, 3);
+    return { w: 1.9, d: .8 };
+  },
+  chillerUnit(g) {                                       // the cold store's chiller, with the dishwasher pumps beside it
+    box(.8, .7, .6, WM.paintDark, -.45, .35, 0, g); box(.24, .14, .02, WM.screen, -.45, .55, .31, g);
+    box(.9, 1.25, .3, M.metal, .42, .9, -.15, g);
+    for (let k = 0; k < 6; k++) box(.86, .02, .04, M.slateDark, .42, .4 + k * .2, .02, g);
+    for (const x of [-.65, -.3]) cyl(.13, .13, .32, WM.steel, x, .88, .05, g, 12);
+    return { w: 1.9, d: .8 };
+  },
+  nutrientTanks(g) {                                     // two nutrient tanks and the dosing unit that mixes the garden's feed
+    for (const x of [-.45, .45]) {
+      cyl(.38, .38, 1.3, WM.steel, x, .7, -.05, g, 18); cyl(.4, .4, .06, M.slateDark, x, 1.0, -.05, g, 18);
+      box(.06, .8, .02, GD.water, x, .72, .34, g);
+    }
+    box(.36, .5, .24, WM.paintDark, 0, 1.15, .32, g); statusLights(g, -.09, 1.25, .445, 3);
+    return { w: 1.9, d: 1.2 };
+  },
+  irrigationPump(g) {                                    // the garden's pump and the valve manifold out to the beds and racks
+    box(1.5, .12, .9, M.slateDark, 0, .06, 0, g);
+    pipeZ(.2, .55, WM.paintDark, -.35, .42, .1, g); pipeZ(.25, .2, WM.steel, -.35, .42, -.25, g);
+    pipeX(.07, 1.4, M.metal, 0, .95, -.3, g);
+    for (let k = 0; k < 4; k++) { const v = new THREE.Mesh(new THREE.TorusGeometry(.07, .015, 6, 12), WM.red); v.position.set(-.45 + k * .3, 1.1, -.3); v.rotation.x = Math.PI / 2; g.add(v); cyl(.02, .02, .14, M.metal, -.45 + k * .3, 1.02, -.3, g, 6); }
+    return { w: 1.6, d: 1.0 };
+  },
+  headerPipes(g) {                                       // three header pipes along a wall, on brackets
+    for (const y of [.5, .9, 1.3]) pipeX(.07, 2.6, M.metal, 0, y, 0, g);
+    for (const x of [-1.1, 0, 1.1]) box(.06, 1.5, .22, M.slateDark, x, .75, -.06, g);
+    return { w: 2.6, d: .4 };
+  },
+  relayRack(g, o = {}) {                                 // a bank of relay cabinets with blue status lights; o.w wide
+    const w = o.w || 2.8;
+    box(w, 2.0, .6, M.slateDark, 0, 1.0, 0, g);
+    for (let x = -w / 2 + .32; x < w / 2 - .2; x += .62) { box(.56, 1.8, .02, WM.paintDark, x, 1.0, .31, g); statusLights(g, x - .2, 1.72, .325, 5, Math.round(x * 10)); statusLights(g, x - .2, 1.6, .325, 5, Math.round(x * 7) + 1); }
+    return { w, d: .6, tall: true };
+  },
+  cabinet(g, o = {}) {                                   // a wall cabinet: breakers (o.breakers) or relay lights
+    box(1.8, 1.8, .5, M.slateDark, 0, .9, 0, g); box(1.7, 1.6, .02, WM.paintDark, 0, .95, .26, g);
+    if (o.breakers) for (const y of [.65, .9, 1.15, 1.4]) box(1.4, .1, .03, M.metal, 0, y, .27, g);
+    else for (const y of [.8, 1.0, 1.2, 1.4]) statusLights(g, -.6, y, .275, 14, Math.round(y * 10));
+    box(.4, .12, .02, WM.paintGold, 0, 1.62, .275, g);
+    return { w: 1.8, d: .5, tall: true };
+  },
+  dataBus(g) {                                           // the bridge data bus: a low junction box where every station's cables meet
+    box(1.6, .6, .5, M.slateDark, 0, .3, 0, g); box(1.5, .5, .02, WM.paintDark, 0, .32, .26, g);
+    for (let k = 0; k < 6; k++) cyl(.03, .03, .1, M.metal, -.6 + k * .24, .55, .26, g, 8).rotation.x = Math.PI / 2;
+    statusLights(g, -.3, .2, .275, 8);
+    [WM.paintGold, WM.paintDark].forEach((m, k) => pipeX(.04, 1.8, m, 0, .64, -.12 + k * .17, g));   // cables out to the trays
+    return { w: 1.8, d: .6 };
+  },
+  cableTray(g) {                                         // a cable tray on legs, bundles of cable along it
+    box(1.8, .05, .45, M.metal, 0, .3, 0, g);
+    for (const x of [-.8, .8]) box(.05, .28, .4, M.slateDark, x, .14, 0, g);
+    [WM.paintGold, WM.red, WM.paintDark].forEach((m, k) => pipeX(.035, 1.8, m, 0, .36, -.12 + k * .12, g));
+    return { w: 1.8, d: .5 };
+  },
+});
+Object.assign(WALL_KIT, {
+  relayBox(g) {                                          // a wall-mounted light relay box, its conduit running up to the deckhead
+    box(.6, .5, .16, WM.paintDark, 0, 1.5, .08, g); statusLights(g, -.18, 1.6, .17, 5);
+    box(.3, .06, .02, WM.paintGold, 0, 1.38, .17, g);
+    cyl(.035, .035, 1.05, M.metal, 0, 2.27, .08, g, 8);
+  },
+});
 
 // =====================================================================
 // DECK 3: COMMONS (step 6d, turn 1: the shell)
@@ -3809,6 +3942,9 @@ DECKS[3] = {
     'v,17,14': 'hatch', 'h,3,17': 'hatch',                                                  // recycler from the plaza; irrigation from the garden
   },
   sealed: { 'h,39,3': 'g', 'v,17,14': 'R', 'h,3,17': 'i' },
+  // Pillar 2 A5b: the three utility rooms are built (plans/deck3-plan.html, "Utility rooms"). Their hatches are service hatches:
+  // the player and Works crew pass, everyone else doesn't (see hatchPassable).
+  service: ['h,39,3', 'v,17,14', 'h,3,17'],
   plates: [
     ['h,17,6', 's', 'Infirmary'], ['h,23,9', 's', 'Mess hall'], ['h,37,9', 's', 'Galley'], ['h,26,13', 'n', 'Gym'],
     ['h,32,13', 'n', 'Store'], ['h,37,13', 'n', 'Call booths'], ['h,21,16', 'n', 'Washrooms'], ['h,19,9', 'n', 'Lift'],
@@ -3830,9 +3966,9 @@ DECKS[3] = {
     S: { name: 'Crew store', floor: 'warm' },
     B: { name: 'Call-home booths', floor: 'warm' },
     // sealed until their tier
-    g: { name: 'Galley plant', void: true, tap: 'Extractor fans, the dishwasher pumps and the cold store\'s chillers. Tier 1 access, once the job list is running.' },
-    R: { name: 'Water recycler', void: true, tap: 'Every deck\'s water comes back here, gets cleaned and goes out again. When it struggles, the showers on Deck 4 run weak. Tier 2 access.' },
-    i: { name: 'Irrigation room', void: true, tap: 'Nutrient tanks and pumps for the garden. Tier 2 access.' },
+    g: { name: 'Galley plant', floor: 'grate', still: true, tap: 'Extractor fans, the dishwasher pumps and the cold store\'s chillers. Tier 1 access, once the job list is running.' },
+    R: { name: 'Water recycler', floor: 'steel', still: true, tap: 'Every deck\'s water comes back here, gets cleaned and goes out again. When it struggles, the showers on Deck 4 run weak. Tier 2 access.' },
+    i: { name: 'Irrigation room', floor: 'steel', still: true, tap: 'Nutrient tanks and pumps for the garden. Tier 2 access.' },
   },
   windows: ['M', 'L', 'I', 'G', 'F', 'B'].map(room => ({ room })),
   closedDoors: {
@@ -3850,6 +3986,21 @@ DECKS[3] = {
   // plan's format, plus two fields: xy, the exact spot in tile units (a seat can sit off its tile's centre, and a tile can
   // hold two seats), and walk, the tile a person walks to first (the place's own tile when it's walkable, otherwise the
   // nearest reachable tile in the same room, within 2.5 m). Generated from the furniture's own positions, then kept as fixed data.
+  // the machines in Deck 3's utility rooms and galley (Pillar 2 plan, "Machines and jobs"); each has a work:works place on its panel tile
+  machines: [
+    { id: '3-oven-1', kind: 'oven', at: [37, 3], room: 'K', face: 'n', panel: [37, 4] },
+    { id: '3-oven-2', kind: 'oven', at: [38, 3], room: 'K', face: 'n', panel: [38, 4] },
+    { id: '3-range-1', kind: 'range', at: [40, 4], room: 'K', face: 'e', panel: [39, 4] },
+    { id: '3-galleyplant-1', kind: 'galleyplant', at: [39, 0], room: 'g', face: 'n', panel: [39, 1] },
+    { id: '3-chiller-1', kind: 'chiller', at: [40, 1], room: 'g', face: 'e', panel: [39, 2] },
+    { id: '3-recycler-1', kind: 'recycler', at: [12, 15], room: 'R', face: 'w', panel: [14, 16] },
+    { id: '3-filter-1', kind: 'filter', at: [12, 19], room: 'R', face: 'w', panel: [13, 19] },
+    { id: '3-pump-1', kind: 'pump', at: [16, 16], room: 'R', face: 'e', panel: [15, 17] },
+    { id: '3-uv-1', kind: 'uv', at: [12, 13], room: 'R', face: 'n', panel: [14, 13] },
+    { id: '3-lights-1', kind: 'lights', at: [16, 15], room: 'R', face: 'e', panel: [16, 15] },
+    { id: '3-nutrient-1', kind: 'nutrient', at: [5, 18], room: 'i', face: 'e', panel: [4, 18] },
+    { id: '3-irrigation-1', kind: 'irrigation', at: [5, 20], room: 'i', face: 'e', panel: [4, 20] },
+  ],
   places: [
     { id: '3-bench-1', type: 'bench', at: [22, 14], xy: [22.7, 14.15], walk: [22, 13], face: 'w', pose: 'sit', room: '+' },
     { id: '3-bench-2', type: 'bench', at: [22, 14], xy: [22.7, 14.85], walk: [21, 14], face: 'w', pose: 'sit', room: '+' },
@@ -3993,9 +4144,9 @@ DECKS[3] = {
     { id: '3-basin-2', type: 'basin', at: [21, 17], xy: [21.93, 17.7], walk: [21, 17], face: 'e', pose: 'stand', room: 'w' },
     { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', room: 'w' },
     { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', room: 'w' },
-    { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
-    { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
-    { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
+    { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', room: 'F' },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
     { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', room: 'F' },
@@ -4012,6 +4163,19 @@ DECKS[3] = {
     { id: '3-shop-7', type: 'shop', at: [34, 14], xy: [34.15, 14.85], walk: [34, 14], face: 'e', pose: 'stand', anim: 'pay', room: 'S' },   // paying at the till (A5b)
     { id: '3-shop-8', type: 'shop', at: [32, 14], xy: [32.4, 14.25], walk: [32, 14], face: 'n', pose: 'stand', anim: 'browse', room: 'S' },   // taking a basket by the door
     { id: '3-gym-10', type: 'gym', at: [31, 14], xy: [31.5, 14.05], walk: [31, 14], face: 'n', pose: 'stand', anim: 'drink', room: 'F' },   // the water dispenser
+    // the machines' panels: where a Works tech stands to service each one (A5b)
+    { id: '3-oven-1-panel', type: 'work:works', at: [37, 4], xy: [37.5, 4.3], walk: [37, 4], face: 'n', pose: 'work', machine: '3-oven-1', room: 'K' },
+    { id: '3-oven-2-panel', type: 'work:works', at: [38, 4], xy: [38.5, 4.3], walk: [38, 4], face: 'n', pose: 'work', machine: '3-oven-2', room: 'K' },
+    { id: '3-range-1-panel', type: 'work:works', at: [39, 4], xy: [39.7, 4.5], walk: [39, 4], face: 'e', pose: 'work', machine: '3-range-1', room: 'K' },
+    { id: '3-galleyplant-1-panel', type: 'work:works', at: [39, 1], xy: [39.5, 1.3], walk: [39, 1], face: 'n', pose: 'work', machine: '3-galleyplant-1', room: 'g' },
+    { id: '3-chiller-1-panel', type: 'work:works', at: [39, 2], xy: [39.7, 2.5], walk: [39, 2], face: 'e', pose: 'work', machine: '3-chiller-1', room: 'g' },
+    { id: '3-recycler-1-panel', type: 'work:works', at: [14, 16], xy: [14.3, 16.5], walk: [14, 16], face: 'w', pose: 'work', machine: '3-recycler-1', room: 'R' },
+    { id: '3-filter-1-panel', type: 'work:works', at: [13, 19], xy: [13.3, 19.5], walk: [13, 19], face: 'w', pose: 'work', machine: '3-filter-1', room: 'R' },
+    { id: '3-pump-1-panel', type: 'work:works', at: [15, 17], xy: [15.7, 17.5], walk: [15, 17], face: 'e', pose: 'work', machine: '3-pump-1', room: 'R' },
+    { id: '3-uv-1-panel', type: 'work:works', at: [14, 13], xy: [14.5, 13.3], walk: [14, 13], face: 'n', pose: 'work', machine: '3-uv-1', room: 'R' },
+    { id: '3-lights-1-panel', type: 'work:works', at: [16, 15], xy: [16.7, 15.5], walk: [16, 15], face: 'e', pose: 'work', machine: '3-lights-1', room: 'R' },
+    { id: '3-nutrient-1-panel', type: 'work:works', at: [4, 18], xy: [4.7, 18.5], walk: [4, 18], face: 'e', pose: 'work', machine: '3-nutrient-1', room: 'i' },
+    { id: '3-irrigation-1-panel', type: 'work:works', at: [4, 20], xy: [4.7, 20.5], walk: [4, 20], face: 'e', pose: 'work', machine: '3-irrigation-1', room: 'i' },
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', anim: 'call', room: 'B' },
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', anim: 'call', room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', anim: 'call', room: 'B' },
@@ -4196,6 +4360,21 @@ DECKS[3] = {
     place('S', 'counter', 2.85, 2.5, 'e', { it: IT('Counter', 'Whoever\'s on the counter scans your badge. The honesty box is for the hours nobody is.') });
     place('S', 'till', 2.85, 1.85, 'e', { it: IT('Till', 'The storekeeper taps your badge on the pad and the screen thanks you by name. It has never once been wrong about the price of socks.') });   // A5b
     place('S', 'basketStack', .4, .5, 'n', { it: IT('Baskets', 'Wire baskets in department colours. Take one, fill it, pay at the till.') });
+    // ---- the utility rooms (A5b; plans/deck3-plan.html "Utility rooms"). Water recycler R starts at (12, 13), galley plant g at
+    // (39, 0), irrigation room i at (2, 17). A walkway runs from each hatch past every machine's panel.
+    place('R', 'recyclerTanks', 1.0, 3.5, 'w', { it: IT('Water recycler', 'Two settling tanks, a control head between them, and a sight glass you can watch the water level in. Every deck\'s water comes through here.') });
+    place('R', 'filterBank', .55, 6.95, 'w', { it: IT('Filter bank', 'Six cartridges in a rack. Swapping them is the job everyone learns first and nobody likes.') });
+    place('R', 'pumpSkid', 4.3, 4.0, 'e', { it: IT('Circulation pumps', 'Two pumps on one skid, pushing clean water up the spine to every deck. You can feel them through the floor.') });
+    place('R', 'uvUnit', 1.0, .4, 'n', { it: IT('UV steriliser', 'A lamp tube in a steel sleeve, glowing blue through the slot. The last step before the tanks.') });
+    place('R', 'cleanTank', 4.2, 7.5, 'e', { it: IT('Clean-water tank', 'Full to the line on the gauge. Everything the ship drinks and washes in waits here first.') });
+    place('R', 'risers', 4.0, .3, 'n', { it: IT('Risers', 'Clean water up, used water down, through the spine to every deck.') });
+    place('R', 'sump', 1.0, 8.55, 's');
+    placeWall('R', 'relayBox', 'e', 2.5, { it: IT('Light relays', 'Deck 3\'s light relays: every lamp from the garden to the lounge runs through this box.') });
+    place('g', 'extractorUnit', 1.0, .45, 'n', { it: IT('Extractor fans', 'The galley hoods\' fan, its motor and the grease filters. It hums all day and roars at mealtimes.') });
+    place('g', 'chillerUnit', 1.55, 2.0, 'e', { it: IT('Chiller', 'The cold store\'s chiller, with the dishwasher pumps tucked in beside it.') });
+    place('i', 'nutrientTanks', 3.3, 2.0, 'e', { it: IT('Nutrient tanks', 'Two tanks of garden feed and the dosing unit that mixes them. It smells faintly of tomato leaves.') });
+    place('i', 'irrigationPump', 3.4, 3.9, 'e', { it: IT('Irrigation pump', 'The pump and a row of valves, one for each part of the garden.') });
+    place('i', 'headerPipes', .25, 1.5, 'w');
     place('S', 'drinksFridge', 2.0, 8.55, 's', { it: IT('Drinks fridge', 'Fizzy drinks in colours not found in nature. The orange one sells out first.') });
     place('S', 'shopDisplay', 2.5, .5, 'n', { it: IT('Window display', 'This week: new socks in department colours, and a single, expensive jar of real honey.') });
 
@@ -5475,9 +5654,12 @@ DECKS[1] = {
     'v,10,8': 'door',                                         // bridge washroom, from the lobby
     'h,6,2': 'hatch', 'h,9,9': 'hatch',                       // utility closet; relay room
     'h,14,10': 'hatch',                                       // floor hatch by the Works station, down into the sub-floor crawl
+    'v,10,10': 'hatch',                                       // relay room into the sub-floor crawl (A5b)
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'h,11,4': 'R', 'h,6,2': 'k', 'h,9,9': 'u', 'h,14,10': 'c' },
+  sealed: { 'h,11,4': 'R', 'h,6,2': 'k', 'h,9,9': 'u', 'h,14,10': 'c', 'v,10,10': 'c' },
+  // Pillar 2 A5b: the utility spaces are built (plans/deck1-plan.html, "Utility rooms"); their hatches are service hatches
+  service: ['h,6,2', 'h,9,9', 'h,14,10', 'v,10,10'],
   plates: [['v,10,3', 'w', 'Bridge'], ['v,6,3', 'e', 'Observation'], ['h,12,4', 's', 'Ready room']],
   rooms: {
     '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
@@ -5489,9 +5671,9 @@ DECKS[1] = {
     // locked, not yours
     R: { name: 'Ready room', floor: 'wood', tap: 'The Captain\'s ready room. The door is shut, and you have not been sent for.' },
     // sealed until their tier
-    k: { name: 'Utility closet', void: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
-    u: { name: 'Relay room', void: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
-    c: { name: 'Sub-floor crawl', void: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
+    k: { name: 'Utility closet', floor: 'grate', still: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
+    u: { name: 'Relay room', floor: 'grate', still: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
+    c: { name: 'Sub-floor crawl', floor: 'grate', still: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
   },
   windows: ['O', 'R'].map(room => ({ room })),
   closedDoors: {
@@ -5525,6 +5707,14 @@ DECKS[1] = {
   // plan's format, plus two fields: xy, the exact spot in tile units (a seat can sit off its tile's centre, and a tile can
   // hold two seats), and walk, the tile a person walks to first (the place's own tile when it's walkable, otherwise the
   // nearest reachable tile in the same room, within 2.5 m). Generated from the furniture's own positions, then kept as fixed data.
+  // the machines in Deck 1's utility spaces (Pillar 2 plan, "Machines and jobs"); each has a work:works place on its panel tile
+  machines: [
+    { id: '1-relay-1', kind: 'relay', at: [6, 9], room: 'u', face: 'n', panel: [7, 10] },
+    { id: '1-relay-2', kind: 'relay', at: [6, 11], room: 'u', face: 's', panel: [8, 10] },
+    { id: '1-junction-1', kind: 'junction', at: [8, 0], room: 'k', face: 'n', panel: [8, 1] },
+    { id: '1-lights-1', kind: 'lights', at: [6, 0], room: 'k', face: 'n', panel: [7, 1] },
+    { id: '1-databus-1', kind: 'databus', at: [12, 11], room: 'c', face: 's', panel: [12, 10] },
+  ],
   places: [
     { id: '1-command-1', type: 'work:command', at: [16, 6], xy: [16.8, 6], walk: [17, 5], face: 'e', pose: 'sit', room: 'B' },
     { id: '1-command-2', type: 'work:command', at: [16, 4], xy: [16.8, 4.85], walk: [17, 4], face: 'e', pose: 'sit', room: 'B' },
@@ -5557,6 +5747,12 @@ DECKS[1] = {
     { id: '1-lift-3', type: 'lift-wait', at: [6, 8], xy: [6.5, 8.5], walk: [6, 8], face: 'n', pose: 'stand', room: '+' },
     { id: '1-lift-4', type: 'lift-wait', at: [7, 8], xy: [7.5, 8.5], walk: [7, 8], face: 'n', pose: 'stand', room: '+' },
     { id: '1-ready-1', type: 'work:command', at: [11, 1], xy: [11.5, 1.3], walk: [10, 1], face: 's', pose: 'sit', anim: 'read', room: 'R' },   // the Captain's desk chair: the ready room's door is a closed door, which crew open
+    // the machines' panels (A5b)
+    { id: '1-relay-1-panel', type: 'work:works', at: [7, 10], xy: [7.5, 10.3], walk: [7, 10], face: 'n', pose: 'work', machine: '1-relay-1', room: 'u' },
+    { id: '1-relay-2-panel', type: 'work:works', at: [8, 10], xy: [8.5, 10.7], walk: [8, 10], face: 's', pose: 'work', machine: '1-relay-2', room: 'u' },
+    { id: '1-junction-1-panel', type: 'work:works', at: [8, 1], xy: [8.5, 1.3], walk: [8, 1], face: 'n', pose: 'work', machine: '1-junction-1', room: 'k' },
+    { id: '1-lights-1-panel', type: 'work:works', at: [7, 1], xy: [7.5, 1.3], walk: [7, 1], face: 'n', pose: 'work', machine: '1-lights-1', room: 'k' },
+    { id: '1-databus-1-panel', type: 'work:works', at: [12, 10], xy: [12.5, 10.7], walk: [12, 10], face: 's', pose: 'work', machine: '1-databus-1', room: 'c' },
   ],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
@@ -5613,6 +5809,14 @@ DECKS[1] = {
     place('w', 'smallBasin', 2.5, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
     place('B', 'tapSpot', 10.4, 6, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    // ---- the utility spaces (A5b; plans/deck1-plan.html "Utility rooms"): closet k from (6, 0), relay room u from (6, 9),
+    // sub-floor crawl c from (10, 10). A walkway runs from each hatch past every machine's panel.
+    place('u', 'relayRack', 1.5, .35, 'n', { w: 2.8, it: IT('Relay racks', 'The helm and ops circuits, clicking softly under blue status lights.') });
+    place('u', 'relayRack', 2.0, 2.65, 's', { w: 3.8, it: IT('Relay racks', 'The viewscreen, comms and the rear stations. One light has blinked amber since before anyone can remember.') });
+    place('k', 'cabinet', 1.0, .3, 'n', { it: IT('Light relays', 'Every lamp and light strip on Deck 1, the bridge\'s mood light included.') });
+    place('k', 'cabinet', 3.0, .3, 'n', { breakers: true, it: IT('Power junction', 'Deck 1\'s breakers, fed from the trunk head next door.') });
+    place('c', 'dataBus', 3.0, 1.65, 's', { it: IT('Data bus', 'Where every bridge station\'s cables meet. Mind your head.') });
+    place('c', 'cableTray', 1.0, 1.7, 's'); place('c', 'cableTray', 5.0, 1.7, 's');
   },
 };
 for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
@@ -5862,7 +6066,7 @@ function schedData() {
   const people = ROSTER.concat(ROSTER_GUESTS)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) places.push({ ...p, deck: n });
+  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine) places.push({ ...p, deck: n });   // a machine's panel place isn't handed out as a desk (A5b)
   const byId = new Map(places.map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
