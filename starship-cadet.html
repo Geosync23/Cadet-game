@@ -7318,7 +7318,7 @@ function playerUpdate(dt, t) {
   }
   if (ACT) actUpdate(dt, t);
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; jobNotice(); device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); device.refresh(); }
 }
 // a time skip: asleep if you chose Sleep (section 13), or for the debug Day button (a skip from the night);
 // otherwise awake. Any activity stops.
@@ -7345,6 +7345,12 @@ function jobPlaceNear(type, room, at) {
     .sort((m, n) => Math.hypot(m[1].x - at.x, m[1].z - at.z) - Math.hypot(n[1].x - at.x, n[1].z - at.z)).map(m => m[0])[0] || null;
 }
 // the wrist comm: a job you could take is posted (checked each ship minute; not for jobs posted while you slept)
+// progress on your job keeps it yours (section 17's touchJob: the 12-hour lapse counts from the last progress):
+// parts fitted, and each ship minute of repairing or making a part for it
+function jobTouch(now) {
+  if (typeof touchJob !== 'function' || !SHIP.player.work) return;
+  if (now || ACT && ACT.phase === 'do' && (ACT.kind === 'job' && ACT.o.repair || ACT.kind === 'make')) touchJob(SHIP.player.work.job);
+}
 let JOB_SEEN = null;
 function jobNotice() {
   if (!jobsOn() || typeof jobsBoard !== 'function') return;
@@ -7421,6 +7427,7 @@ function jobBegin(A) {
   const mw = myWork(); if (!mw || A.placeId !== panelPlace(mw.j.machine)) { ACT = null; toast(A.o.title, 'You don\'t have a job here any more.'); return false; }
   const P = SHIP.player, { j, w } = mw, fit = [];
   for (const p of P.carry.slice()) if (jobNeeds(j, w).includes(p)) { w.fitted.push(p); fit.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
+  if (fit.length) jobTouch(true);
   const need = jobNeeds(j, w), name = machineName(machineById(j.machine)), fitted = fit.length ? 'You fit ' + partList(fit) + '. ' : '';
   if (!need.length) {
     const left = Math.max(1, jobMins(j) - w.done);
