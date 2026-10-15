@@ -82,6 +82,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.25.1 | 0.25.0 plus 0.22.3 (the lead): the player's bed read from `ROSTER_PLAYER` (`playerBed()`), seat and mattress heights by place type (upper bunks at 1.6 m), and the fix for a sleeping bunkmate catching the tap on your bunk. Merge fixes only. |
 | 0.25.2 | 0.25.1 plus 0.22.4 (overflow work stations skip locked or private rooms) and 0.18.4 (two more Deck 3 infirmary places, so Rina works in the infirmary), merged by the lead. Merge fixes only. |
 | 0.29.0 | Pillar 2, A4 (the galley engineer): section 16, the galley. The rota (`galleyDay`: Brennan up about 04:30 and cooking from 04:50, her deputy on her days off, early and late hands), the food worked out minute by minute on paper (`SHIP.galley`: cold store, pots, servery, grab shelf, plates, waits), food in the servery's pans and dirty plates in the dish pit on Deck 3, `takePortion`, `galleySave`/`galleyLoad`, food_check.py. One hook: `galleyTick()` in the main loop. |
+| 0.29.1 | The grab shelf's rolls and wraps drawn from the stock, through `galleyShelfRows` (the hook in the bridge architect's 0.31.2 shelf kit). Inert without that kit. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -588,7 +589,7 @@ Pillar 2, workstream A4: the galley really cooks. Section 16 sits after section 
     - food in the servery's five pans, rising with the portions;
     - steel covers over the pans when the servery is empty;
     - dirty plates stacking in the dish pit's sink (one for every 3, up to 24);
-    - the grab shelf's rolls and wraps, one for every 2 items. This one waits for the shelf kit to leave those two rows to us (its group's `userData.live`; asked of the bridge architect through the lead).
+    - the grab shelf's rolls and wraps, one for every 2 items. The shelf kit (the bridge architect's 0.31.2) calls `galleyShelfRows(g, ys)` instead of drawing those two rows, when its place has `live` and the function exists. It's a function declaration, so it's there when the first deck is built at load. It marks the group, and `galleyVisuals` puts the items on the shelves at `ys`. Their material joins the shelf's fade list, so they fade with it.
 
   Each mesh is at most 1 draw call.
 - **Numbers (days 1–7, before the schedules use the rota).** About 150 people come to eat each day: about 140 hot portions and 7–14 grab items. 30 portions are ready at 06:00 and 40–50 at 17:00. Nobody waits. Cooked 150–160, wasted 0–9. The cold store dips to about 140. All plates are washed by 21:15.
