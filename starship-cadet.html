@@ -46,7 +46,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <div class="hud">
   <div class="room" id="room">Bunk 1</div>
   <div class="sub" id="deck">Deck 4, CSV Wren</div>
-  <div class="clock" id="clock">Ship time 07:40</div>
+  <div class="clock" id="clock">Day 1, Monday 06:00</div>
 </div>
 <div class="controls">
   <button id="rot" aria-label="Rotate view"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>Rotate</button>
@@ -54,6 +54,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <button id="walls" aria-label="Walls: auto. Tap for all walls down"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-6h5v6"/><path d="M14 20V8h5v12"/></svg><span>Walls</span></button>
   <button id="crew" aria-pressed="true" aria-label="Show or hide visiting crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.5 6-5.5s5.2 1.9 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/></svg><span>Crew</span></button>
   <button id="light" aria-label="Switch to night lighting"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Night</span></button>
+  <button id="newgame" aria-label="New game: tap twice to start again"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New game</span></button>
 </div>
 <div class="toast" id="toast"><b id="tt"></b><span id="tx"></span></div>
 <div class="lift" id="lift" role="dialog" aria-modal="true" aria-labelledby="liftT" hidden>
@@ -67,7 +68,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.14.0
+   STARSHIP CADET: CSV Wren                            build 0.15.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -83,6 +84,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    10. WALKERS          movement, yielding, room-based crew brain
    11. INTERACTION/UI   tapping, toasts, buttons
    12. MAIN LOOP
+   13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -4877,7 +4879,7 @@ function placeSun(p) {
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
 const NIGHT = { sky: col('#6d7ca3'), gnd: col('#2a1f18'), hemi: .32, sun: col('#ffb371'), sunI: .5, exp: 1.0, bg: new THREE.Color('#0a0e17') };
-let nightT = 0, nightTarget = 0;
+let nightT = 0;                                          // 0 day ... 1 night; follows the clock (section 13)
 function applyLight(k) {
   const lerp = THREE.MathUtils.lerp;
   hemi.color.copy(DAY.sky).lerp(NIGHT.sky, k); hemi.groundColor.copy(DAY.gnd).lerp(NIGHT.gnd, k);
@@ -4890,6 +4892,127 @@ function applyLight(k) {
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
   SKY.mat.uniforms.uK.value = lerp(.8, 1.15, k);
 }
+
+// =====================================================================
+// 13. SHIP TIME & SAVE
+// Sits here, after lighting and before the first deck is built (section 10):
+// the clock drives the light, and the save decides where you wake.
+// The ship day lasts 30 real minutes. SHIP.time is the ship's clock: day 1 is
+// a Monday, min counts ship minutes since midnight. It only runs while the
+// game is on screen; the ship doesn't run while the game is closed.
+// The game saves itself in the browser (localStorage, one save per device):
+// every ship hour, on every deck change, and when the page is hidden or
+// closed. Every read and write is in try/catch: no storage means a fresh
+// start each time. URL flags: ?nosave turns saving and loading off (the tests
+// use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
+// Nothing here calls R().
+// =====================================================================
+const GAME_BUILD = '0.15.1';                             // keep in step with the header's build line
+const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
+const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
+SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const shipNow = () => (SHIP.time.day - 1) * 1440 + SHIP.time.min;    // absolute ship minutes
+const weekday = day => ((day - 1) % 7 + 7) % 7;                         // 0 = Monday ... 6 = Sunday
+const hhmm = min => { const m = Math.floor(min); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+const clockText = () => 'Day ' + SHIP.time.day + ', ' + WEEKDAYS[weekday(SHIP.time.day)] + ' ' + hhmm(SHIP.time.min);
+function setShipNow(abs) { SHIP.time.day = Math.floor(abs / 1440) + 1; SHIP.time.min = abs - (SHIP.time.day - 1) * 1440; }
+// how dark the ship is at a time of day, 0 (day) to 1 (night): night from 21:00 to 06:00, with an hour of
+// dusk (20:30-21:30) and of dawn (05:30-06:30) centred on them. The light eases toward this (main loop).
+function nightAt(min = SHIP.time.min) {
+  const s = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+  return Math.max(1 - s((min - 330) / 60), s((min - 1230) / 60));
+}
+
+// Time jumps. Anything that simulates the ship registers a function here, SIM_ADVANCE.push((from, to) => ...),
+// called with absolute ship minutes whenever time skips forward (sleep, the debug skip). It must be fast and draw
+// nothing. Nothing is registered yet: the schedules (section 14) will advance everyone's state through it.
+const SIM_ADVANCE = [];
+function skipTo(abs) {
+  const from = shipNow(); if (!(abs > from)) return;
+  setShipNow(abs);
+  for (const f of SIM_ADVANCE) f(from, abs);
+  updateClock(); saveGame();
+}
+// the player sleeps: time skips to `min` (ship minutes since midnight) the next time it comes round
+function sleepUntil(min) {
+  const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + min;
+  skipTo(today > now ? today : today + 1440);
+}
+// the clock's frame step (main loop): the HUD clock each ship minute, a save each ship hour
+function tickShip(dt) {
+  if (document.hidden) return;                           // time never runs while the tab is hidden
+  const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
+  SHIP.time.min += dt * SHIP_RATE;
+  if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
+  if (Math.floor(SHIP.time.min) !== m) updateClock();
+  if (Math.floor(shipNow() / 60) !== h) saveGame();
+}
+
+// ---- saving: { v, build, time, player: { deck, tile, facing }, ship: { decks: { n: { open } } }, crew: {} } ----
+const SAVE_KEY = 'starship-cadet-save', SAVE_V = 1;
+const URL_FLAGS = new URLSearchParams(location.search);
+const NOSAVE = URL_FLAGS.has('nosave'), DEBUG = URL_FLAGS.has('debug');
+function saveGame() {
+  if (NOSAVE) return;
+  try {
+    const decks = {};
+    for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
+      player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
+    }));
+  } catch (e) { /* no storage, or full: the game carries on unsaved */ }
+}
+function loadGame() {
+  if (NOSAVE) return null;
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!s || s.v !== SAVE_V) return null;               // no save, or one this build doesn't know: start fresh
+    const t = s.time, p = s.player, tile = p && p.tile;
+    if (!t || !(t.day >= 1 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !DECKS[p.deck]) return null;
+    if (!Array.isArray(tile) || tile.length !== 2 || !tile.every(Number.isInteger) || !isFinite(p.facing)) return null;
+    return s;
+  } catch (e) { return null; }
+}
+const SAVED = loadGame();
+// where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
+const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };
+if (SAVED) {
+  SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
+  const decks = (SAVED.ship && SAVED.ship.decks) || {};
+  for (const n in decks) if (DECKS[n] && Array.isArray(decks[n].open)) shipDeck(+n).open = new Set(decks[n].open);
+}
+nightT = nightAt();                                      // wake to the right light, not a fade into it
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+addEventListener('pagehide', saveGame);
+const welcomeBack = () => 'Welcome back. ' + clockText() + '.';
+
+// New game: the first tap asks, a second within 4 seconds clears the save and starts again in Bunk 1 at 06:00
+const newBtn = document.getElementById('newgame'); let newAsk = 0;
+newBtn.onclick = () => {
+  const span = newBtn.querySelector('span');
+  if (!newAsk) { span.textContent = 'Tap again'; newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; }, 4000); return; }
+  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game';
+  if (ride) return;                                      // not mid-ride
+  try { if (!NOSAVE) localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  for (const n in SHIP.decks) delete SHIP.decks[n];
+  SHIP.time.day = SHIP_START.day; SHIP.time.min = SHIP_START.min; nightT = nightAt();
+  if (!liftEl.hidden) closeLiftPanel();
+  goToDeck(SHIP_START.deck);
+  let c = PLAYER_SPEC.start;
+  if (!free(...c)) { const p = cellPos(...c); c = nearestOpen(p.x, p.z, player) || c; }
+  player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = Math.PI;
+  target.copy(player.obj.position).setY(.7); lastRoom = null;
+  updateClock(); saveGame();
+  toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
+};
+// the Night/Day button is a debug control now: Night skips to 21:40, Day sleeps until 07:40
+function debugSkip() {
+  if (nightAt() > .5) sleepUntil(7 * 60 + 40);
+  else skipTo((SHIP.time.day - 1) * 1440 + 21 * 60 + 40);
+}
+if (!DEBUG) document.getElementById('light').style.display = 'none';
 
 // =====================================================================
 // 6. CAMERA
@@ -5306,8 +5429,8 @@ const CREW = [
 // Movement shared by you and the crew: paths on the tile grid, gentle
 // steering, simple yielding when someone is in the way, and the gait.
 // =====================================================================
-// the deck you start on: built before anyone is placed on it
-buildDeck(DECKS[4]); indexRoomTiles();
+// the deck you start on: built before anyone is placed on it (Deck 4, or the save's: section 13)
+buildDeck(DECKS[START.deck]); indexRoomTiles();
 
 const walkers = [];
 const cellAt = (x, z) => [Math.floor(x + OX), Math.floor(z + OZ)];
@@ -5455,7 +5578,8 @@ class Walker {
   }
 }
 
-const player = new Walker(PLAYER_SPEC, PLAYER_SPEC.start, true);
+const player = new Walker({ ...PLAYER_SPEC, deck: START.deck }, START.tile || PLAYER_SPEC.start, true);
+if (SAVED) player.face = player.obj.rotation.y = START.face;
 const crew = CREW.map(spec => new Walker(spec, spec.start));
 target.copy(player.obj.position).setY(.7);
 
@@ -5472,7 +5596,8 @@ function toast(t, x) {
   toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600);
 }
 document.getElementById('deck').textContent = 'Deck ' + deckDef.num + ', CSV Wren';
-toast('Deck 4, CSV Wren', 'You wake in Bunk 1, in the junior wing. Tap to walk somewhere, or press and hold to walk toward your finger. Tap anything or anyone to look closer.');
+if (SAVED) toast('Deck ' + deckDef.num + ', CSV Wren', welcomeBack());
+else toast('Deck 4, CSV Wren', 'You wake in Bunk 1, in the junior wing. Tap to walk somewhere, or press and hold to walk toward your finger. Tap anything or anyone to look closer.');
 
 const marker = new THREE.Mesh(new THREE.RingGeometry(.22, .28, 32), new THREE.MeshBasicMaterial({ color: col('#5fd6c6'), transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
 marker.rotation.x = -Math.PI / 2; marker.position.y = .06; scene.add(marker);
@@ -5594,17 +5719,13 @@ wallsBtn.onclick = () => {
 };
 document.getElementById('rot').onclick = () => { azT += Math.PI / 2; };
 const lightBtn = document.getElementById('light');
-let gameMin = 7 * 60 + 40;
-lightBtn.onclick = () => {
-  nightTarget = nightTarget ? 0 : 1;
-  lightBtn.querySelector('span').textContent = nightTarget ? 'Day' : 'Night';
-  lightBtn.setAttribute('aria-label', nightTarget ? 'Switch to day lighting' : 'Switch to night lighting');
-  gameMin = nightTarget ? 21 * 60 + 40 : 7 * 60 + 40; updateClock();
-};
+lightBtn.onclick = debugSkip;                            // a debug control (?debug): section 13
 const clockEl = document.getElementById('clock'), roomEl = document.getElementById('room');
 function updateClock() {
-  const h = Math.floor(gameMin / 60) % 24, m = Math.floor(gameMin % 60), s = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-  clockEl.textContent = 'Ship time ' + s; drawClock(s);
+  const night = nightAt() > .5;
+  clockEl.textContent = clockText(); drawClock(hhmm(SHIP.time.min));
+  lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
+  lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
 updateClock();
 let lastRoom = null;
@@ -5623,6 +5744,7 @@ function goToDeck(n, at) {
   target.copy(player.obj.position).setY(.7);
   refreshPickables(); deckEl.textContent = 'Deck ' + n + ', CSV Wren'; lastRoom = null;
   marker.material.opacity = 0; applyLight(nightT);
+  saveGame();                                            // section 13: save on every deck change
 }
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
@@ -5699,7 +5821,7 @@ function updateRide(dt) {
 // =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
-const clock = new THREE.Clock(); let scrT = 0, lastMin = Math.floor(gameMin);
+const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   updateSteer();
@@ -5754,7 +5876,7 @@ function loop() {
     else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
   }
 
-  nightT += (nightTarget - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
+  nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
 
   // ambient life
   // stars outside: the sky drifts aft across the screen, with a touch of parallax as the camera follows you.
@@ -5777,7 +5899,7 @@ function loop() {
   for (const s of STEAM) { const k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
-  gameMin += dt; if (Math.floor(gameMin) !== lastMin) { lastMin = Math.floor(gameMin); updateClock(); }
+  tickShip(dt);                                          // section 13: the ship's clock
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);

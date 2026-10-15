@@ -43,7 +43,9 @@ class Game:
         html = instrument(pathlib.Path(path).read_text())
         tmp = WORK / 'test' / ('_run_' + pathlib.Path(path).name)
         tmp.write_text(html)
-        self.page.goto('file://' + str(tmp))
+        # ?nosave: tests never read or write a save (0.15.1). ?debug: shows the Night/Day button the shots use.
+        # Builds before 0.15.1 ignore both.
+        self.page.goto('file://' + str(tmp) + '?nosave&debug')
         # toasts fade on real-time timers and CSS transitions, not the virtual clock: keep them out of screenshots
         # (their text is still read from the DOM) so shots don't depend on how fast the machine runs
         self.page.add_style_tag(content='#toast{opacity:0!important} *,*::before,*::after{transition:none!important;animation:none!important}')

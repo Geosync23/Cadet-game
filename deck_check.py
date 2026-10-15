@@ -6,6 +6,7 @@
 #   the crew who belong there are active, and draw calls from a fixed view.
 # Then rides 4 -> n -> 4 three times and checks Deck 4's memory comes back to the same counts.
 # Setup and environment as for cadet_test.py.
+# The game loads with ?nosave&debug (cadet_test.py's Game class), so a save never changes what it checks.
 # Run:  python3 deck_check.py BUILD.html
 import sys
 exec(open(__file__.replace('deck_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
