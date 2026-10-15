@@ -31,12 +31,14 @@ Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the works
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Workstream 3b done (0.18.3, 6fb0abe; checked by the lead): Deck 1 31 places, Deck 3 173, ready-room chair added. Waiting |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Workstream 3c done (0.19.2, af0b74f + 4294ab2; checked by the lead): 159 places, furniture nudges in cabins S, R, X, the Captain's wardrobe and the public washroom; the window seat stays. Waiting |
 | session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1 (time and saving), then 4 (schedules), then 6 (crew on the deck, day_check) | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | 1 done (0.15.1). 4 done (0.21.1, 9e34078; checked by the lead: section 14 only, Deck 3 peaks at 64–73 people in the evening). Given the go on 6 |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Hired and briefed 2026-10-15 (includes a `?crowd=40` mess-hall demo for the check-in) |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | 0.20.0 done (135c082; checked, merged). Doing 0.20.1: the demo with real crew on real seats, ship clock, no saving, measured at 40 and 70. Preview: https://claude.ai/artifact/DpVKqTdA1Fci6PzYaWw69t |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived: all its work is merged |
 
 Earlier status of the inherited helpers: all idle at hand-over, all decks built and merged (0.14.0 in `main`).
 
 ## Done
+
+- **Ship integration 0.23.0** on `claude/ship-integration` (c0b9ac9): Pillar 1 workstreams 1–5 combined (0.15.1, 0.16.2, 0.17.0 + 0.17.1, 0.18.3, 0.19.2, 0.20.0, 0.21.1). deck_check OK on all six decks; cadet_test ALL IDENTICAL against 0.21.1 + 0.17.1 alone, so roster, places and crowd are inert. Not yet published to the playable link.
 
 - **PR #1 merged into `main`** (707b696): all six decks (0.14.0), design-doc.md, team setup. Fully approved by the user. The lead branch was restarted from `main` afterwards.
 - **Deck 4 guest cabins, build 0.14.0** (2c47c50, now also the head of `claude/ship-integration`): six guest cabins by the lift, two spares, plan page updated. Crew routes unchanged; Decks 1, 2, 3, 5 and 6 pixel-identical; deck_check OK. Waiting on the user's sign-off along with 0.13.0.
