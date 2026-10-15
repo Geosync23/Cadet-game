@@ -134,6 +134,10 @@ places: [
   - `gym`, `lounge-seat`, `garden`, `callhome`, `music`, `bench`, `common-room`, `laundry`
   - `lift-wait`
 - **Poses:** `sit`, `stand`, `lie` or `work`.
+- **Optional fields (added 2026-10-15):**
+  - `xy: [x, z]`: the exact spot in tile units, when a seat sits off its tile's centre or one tile holds two seats. Default: the tile centre.
+  - `walk: [c, r]`: the tile a person walks to before taking the place. Default: `at` if walkable, else the walk-to tile beside it. When given, it must be walkable, in the same room, reachable from the lift, and equal to `at` or within 2.5 m of the spot.
+- **More types (added 2026-10-15):** `shop` (browsing the crew store), and any `work:<dept>` such as `work:command`, `work:store` and `work:engine`.
 - **Rules:**
   - A place tile must be walkable, or be a seat or bed that the walk-to tile beside it reaches.
   - `deck_check.py` gains a check that every place can be reached.
