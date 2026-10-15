@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.25.2
+   STARSHIP CADET: CSV Wren                            build 0.30.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -420,7 +420,15 @@ function roomLocked(rk) {
   }
   return true;
 }
-const edgeBlocks = e => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift';
+// who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
+const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who));
+// Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
+// The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
+// crewPath (section 10) asks this for each person; tier locks will plug in here later.
+function hatchPassable(key, who) {
+  const e = EDGES.get(key); if (!e || !e.service || !who) return false;
+  return who === 'player' || !!who.isPlayer || (who.p || who).dept === 'works';
+}
 // the corner between two lift edges in a line: the middle of one wide lift doorway
 const liftJoint = touch => touch.length === 2 && touch.every(t => t.type === 'lift') && touch[0].horiz === touch[1].horiz;
 const wallE = key => { const e = EDGES.get(key); return e && e.type !== 'hull' ? e : null; };   // inner walls only
@@ -2542,7 +2550,7 @@ function buildDeck(def) {
   STAND = new Set();         // tiles whose centre sits well inside the hull, where people can stand
   for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (hullDist(i + .5, j + .5) > .45) STAND.add(i + ',' + j);
   for (const [key, type] of Object.entries(DOORS)) {          // locked rooms say what they are
-    if ((type !== 'closed' && type !== 'hatch') || CLOSED_DOORS[key] || !def.lockedRoom) continue;
+    if ((type !== 'closed' && type !== 'hatch') || CLOSED_DOORS[key] || !def.lockedRoom || (def.service || []).includes(key)) continue;
     const [k, a, b] = key.split(','), i = +a, j = +b, r = (k === 'h' ? [roomAt(i, j - 1), roomAt(i, j)] : [roomAt(i - 1, j), roomAt(i, j)]).find(r => r && !ROOMS[r].hall);
     if (r) CLOSED_DOORS[key] = def.lockedRoom(r);
   }
@@ -2557,6 +2565,7 @@ function buildDeck(def) {
   EDGES = new Map();
   for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) addEdge(`h,${i},${j}`, true, i, j, roomAt(i, j - 1), roomAt(i, j));
   for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) addEdge(`v,${i},${j}`, false, i, j, roomAt(i - 1, j), roomAt(i, j));
+  for (const key of def.service || []) { const e = EDGES.get(key); if (e && e.type === 'hatch') { e.service = true; delete CLOSED_DOORS[key]; } }   // service hatches (see hatchPassable)
 
   // ---- floor: one texture for the whole deck, with wall shading baked in ----
   const PX = 64;
@@ -2568,7 +2577,7 @@ function buildDeck(def) {
       if (def.floorSeeds && i === def.floorSeeds.col && j < def.floorSeeds.rows.length) seed = def.floorSeeds.rows[j];   // a deck whose floor changed west of this column keeps its old grain (and its later random sequence) east of it
       if (!r) continue;
       if (st.void) { g.fillStyle = '#23272d'; g.fillRect(x, y, PX, PX); continue; }
-      const v = st.floor === 'lift' || st.spine ? 0 : (R() - .5) * 8;   // the lift car draws nothing from the deck's random sequence, so the rest of the deck is unchanged
+      const v = st.floor === 'lift' || st.spine || st.still ? 0 : (R() - .5) * 8;   // the lift car (and `still` floors, such as utility rooms built later) draw nothing from the deck's random sequence, so the rest of the deck is unchanged
       if (st.floor === 'warm') {
         if ((i % 2 === 0) && (j % 2 === 0)) { g.fillStyle = '#4a413a'; g.fillRect(x, y, PX * 2, PX * 2); }
         g.fillStyle = `rgb(${132 + v},${118 + v},${104 + v})`; g.fillRect(x + (i % 2 ? 0 : 2), y + (j % 2 ? 0 : 2), PX - 2, PX - 2);
@@ -2786,7 +2795,7 @@ function buildDeck(def) {
     const hit = new THREE.Mesh(new THREE.BoxGeometry(span, 2.2, .3), new THREE.MeshBasicMaterial({ visible: false })); hit.position.y = 1.1; g.add(hit);
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
-    DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', cx, cz, span });
+    DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
   }
 
   // ---- the hull wall: a thick ribbon along the outline, split into runs by the room inside it ----
@@ -5458,7 +5467,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.25.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6013,16 +6022,16 @@ addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); fr
 // =====================================================================
 const cellPos = (i, j) => new THREE.Vector3(X0(i) + .5, 0, Z0(j) + .5);
 const free = (i, j) => i >= 0 && j >= 0 && i < W && j < D && !isVoid(i, j) && !BLOCKED.has(i + ',' + j);
-function edgeOpen(i, j, i2, j2) {
+function edgeOpen(i, j, i2, j2, who) {
   const key = i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`;
-  return !edgeBlocks(EDGES.get(key));
+  return !edgeBlocks(EDGES.get(key), who);
 }
 let ROOM_TILES = {};                                     // per room: the tiles people can stand on (the crew brain picks from these)
 function indexRoomTiles() {
   ROOM_TILES = {};
   for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (free(i, j)) (ROOM_TILES[roomAt(i, j)] || (ROOM_TILES[roomAt(i, j)] = [])).push([i, j]);
 }
-function findPath(s, g, avoid) {
+function findPath(s, g, avoid, who) {
   const key = (i, j) => i + ',' + j, dist = new Map([[key(...s), 0]]), prev = new Map(), open = [s], closed = new Set();
   const hx = (a) => Math.hypot(a[0] - g[0], a[1] - g[1]);
   while (open.length) {
@@ -6036,9 +6045,9 @@ function findPath(s, g, avoid) {
       if (!free(...n) || (avoid && avoid.has(nk)) || closed.has(nk)) continue;
       if (di && dj) {
         if (!free(c[0] + di, c[1]) || !free(c[0], c[1] + dj)) continue;
-        if (!edgeOpen(c[0], c[1], c[0] + di, c[1]) || !edgeOpen(c[0] + di, c[1], n[0], n[1]) ||
-            !edgeOpen(c[0], c[1], c[0], c[1] + dj) || !edgeOpen(c[0], c[1] + dj, n[0], n[1])) continue;
-      } else if (!edgeOpen(c[0], c[1], n[0], n[1])) continue;
+        if (!edgeOpen(c[0], c[1], c[0] + di, c[1], who) || !edgeOpen(c[0] + di, c[1], n[0], n[1], who) ||
+            !edgeOpen(c[0], c[1], c[0], c[1] + dj, who) || !edgeOpen(c[0], c[1] + dj, n[0], n[1], who)) continue;
+      } else if (!edgeOpen(c[0], c[1], n[0], n[1], who)) continue;
       const nd = dist.get(ck) + (di && dj ? 1.414 : 1);
       if (!dist.has(nk) || nd < dist.get(nk)) { dist.set(nk, nd); prev.set(nk, c); open.push(n); }
     }
@@ -6064,7 +6073,7 @@ function pushOutBox(p, minx, maxx, minz, maxz, r) {
 const wallish = e => e && e.type !== 'open' && e.type !== 'hull';
 // furniture and closed-off areas block as squares; tiles the hull only clips are left to pushOutHull
 const solidTile = (i, j) => { const r = roomAt(i, j); return !r || !!ROOMS[r].void || BLOCKED.has(i + ',' + j); };
-const innerBlocks = e => edgeBlocks(e) && e.type !== 'hull';
+const innerBlocks = (e, who) => edgeBlocks(e, who) && e.type !== 'hull';
 function pushOutHull(p, r) {                             // keep a body inside the hull wall's inner face
   const need = r + T / 2;
   for (const s of HULL_SEGS) {
@@ -6074,7 +6083,7 @@ function pushOutHull(p, r) {                             // keep a body inside t
     if (d < need && d > -1) { p.x += s.nx * (need - d); p.z += s.nz * (need - d); }
   }
 }
-function collide(p, r) {
+function collide(p, r, who) {
   for (let pass = 0; pass < 2; pass++) {
     const ci = Math.floor(p.x + OX), cj = Math.floor(p.z + OZ);
     for (let j = cj - 1; j <= cj + 2; j++) for (let i = ci - 1; i <= ci + 2; i++) {
@@ -6083,8 +6092,8 @@ function collide(p, r) {
         if (sn) for (const b of sn) pushOutBox(p, b[0], b[1], b[2], b[3], r);
         else pushOutBox(p, X0(i), X0(i + 1), Z0(j), Z0(j + 1), r);
       }
-      if (i <= ci + 1 && innerBlocks(EDGES.get(`h,${i},${j}`))) pushOutBox(p, X0(i), X0(i + 1), Z0(j) - T / 2, Z0(j) + T / 2, r);
-      if (j <= cj + 1 && innerBlocks(EDGES.get(`v,${i},${j}`))) pushOutBox(p, X0(i) - T / 2, X0(i) + T / 2, Z0(j), Z0(j + 1), r);
+      if (i <= ci + 1 && innerBlocks(EDGES.get(`h,${i},${j}`), who)) pushOutBox(p, X0(i), X0(i + 1), Z0(j) - T / 2, Z0(j) + T / 2, r);
+      if (j <= cj + 1 && innerBlocks(EDGES.get(`v,${i},${j}`), who)) pushOutBox(p, X0(i) - T / 2, X0(i) + T / 2, Z0(j), Z0(j + 1), r);
       const touch = [`h,${i - 1},${j}`, `h,${i},${j}`, `v,${i},${j - 1}`, `v,${i},${j}`].map(k => EDGES.get(k));
       if (touch.some(wallish) && !liftJoint(touch.filter(Boolean))) { const c = (1 - SEG) / 2 + .02; pushOutBox(p, X0(i) - c, X0(i) + c, Z0(j) - c, Z0(j) + c, r); }
     }
@@ -6836,7 +6845,7 @@ class Walker {
   goTo(goal, cb, extraAvoid) {
     const avoid = occupiedBy(this); if (extraAvoid) avoid.add(K(extraAvoid));
     if (!goal || !free(...goal) || avoid.has(K(goal))) return false;
-    const p = findPath(this.here(), goal, avoid); if (!p) return false;
+    const p = findPath(this.here(), goal, avoid, this); if (!p) return false;
     this.path = p.length ? p : [goal]; this.goal = goal; this.onArrive = cb || null;
     return true;
   }
@@ -6858,7 +6867,7 @@ class Walker {
         const qx = pos.x - a.x, qz = pos.z - a.z, qd = Math.hypot(qx, qz);
         if (qd < .42 && qd > 1e-4) { pos.x = a.x + qx / qd * .42; pos.z = a.z + qz / qd * .42; }
       }
-      collide(pos, BODY_R);
+      collide(pos, BODY_R, this);
       moved = Math.hypot(pos.x - ox, pos.z - oz);
       if (s.k > .02) this.face = Math.atan2(s.x, s.z);
     } else if (this.path.length) {
@@ -7178,7 +7187,7 @@ const doorSides = e => e.horiz ? [[e.i, e.j - 1, Math.PI], [e.i, e.j, 0]] : [[e.
 // stand on whichever side of a door you can reach (north or west first)
 function reachableSide(e) {
   const sides = doorSides(e), here = player.here();
-  return sides.find(([i, j]) => free(i, j) && (K([i, j]) === K(here) || !!findPath(here, [i, j]))) || sides[0];
+  return sides.find(([i, j]) => free(i, j) && (K([i, j]) === K(here) || !!findPath(here, [i, j], null, player))) || sides[0];
 }
 function tap(cx, cy) {
   if (ride) return;
@@ -7317,9 +7326,9 @@ function toPanel(done) {
   const here = player.here(), pt = panelTile(); if (!pt) return;
   const at = () => { facePanel(); done(); };
   if (K(pt) === K(here) && !player.path.length) { at(); return; }
-  if (free(...pt) && !occupiedBy(player).has(K(pt)) && findPath(here, pt)) { playerGo(pt, at); return; }
+  if (free(...pt) && !occupiedBy(player).has(K(pt)) && findPath(here, pt, null, player)) { playerGo(pt, at); return; }
   // someone's at the panel: nearest free car tile, and reach from there
-  const tiles = (ROOM_TILES['@'] || []).filter(c => K(c) === K(here) || findPath(here, c));
+  const tiles = (ROOM_TILES['@'] || []).filter(c => K(c) === K(here) || findPath(here, c, null, player));
   if (!tiles.length) return;
   const goal = tiles.sort((a, b) => Math.hypot(a[0] - pt[0], a[1] - pt[1]) - Math.hypot(b[0] - pt[0], b[1] - pt[1]))[0];
   if (K(goal) === K(here) && !player.path.length) at(); else playerGo(goal, at);
@@ -7427,9 +7436,9 @@ function loop() {
   // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
   for (const d of DOOR_OBJS) {
     const crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
-    if (!d.passable && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    const near = d.force !== undefined ? d.force > 0 : crewAt || d.passable && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
-    d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : 8));
+    if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
+    const near = d.force !== undefined ? d.force > 0 : crewAt || (d.passable || d.svc) && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
+    d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
     if (d.e.type === 'lift') d.leaves.forEach(l => { l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; });   // lift doors sink into the floor
     else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
   }
