@@ -64,6 +64,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.18.3 | The 14 held-back Deck 3 places restored (the lead made `xy`, `walk` and `shop` official, and `deck_check` now applies the walk rule), plus the Captain's desk chair in the ready room (`1-ready-1`, `work:command`: its door is a closed door, which crew open). Deck 1: 31 places, Deck 3: 173. Every deck pixel-identical, Deck 4 ALL IDENTICAL. |
 | 0.19.1 | Pillar 1, workstream 3c (the command architect, branch `claude/deck2-command`): `DECKS[2].places`, 162 places on Deck 2's furniture (plans/pillar1-plan.md, "Places"): 15 beds (`2-<room letter>`), a shower, basin and toilet in every bedroom's en-suite, the public washroom, 44 lounge seats (armchairs, desk chairs, the Captain's table, cushions, window seats, beanbags), 24 `work:survey`, 10 `work:comms`, 8 `work:watch`, 1 `work:command`, 5 benches, 6 lift-wait. Data only: every deck pixel-identical, Deck 4 ALL IDENTICAL. Some places are boxed in by furniture until a layout fix (see the Deck 2 notes). |
 | 0.19.2 | Deck 2 layout fixes so every place can be reached (agreed with the lead): S's and R's armchair 0.2 m further from the door; Vance's wardrobe 1 m along the wall and his chairs and coffee table 0.45 m toward the windows; the Captain's wardrobe moved to the stern wall, which opens her en-suite; the public washroom laid out by hand (two stalls and a basin along the far wall, no bench; the shared `washroom` template is unchanged). The Captain's window seat stays, and the two table seats it blocks are left out of `places` (6 table places). 159 places, all reachable (the place check in `claude/deck-architect` 06ec42e: OK). Only those rooms change on screen; Decks 1, 3, 4, 5 and 6 pixel-identical, Deck 4 ALL IDENTICAL. |
+| 0.20.0 | Crowd rendering, workstream 5 (the performance engineer, from 0.14.0). New section 8b `crowd`: many crew drawn as a few skinned meshes, poses walk, stand, sit, lie and work, two levels of detail. `?crowd=40` demo: 40 made-up crew at dinner in Deck 3's mess hall. Section 8: `makeCharacter(spec, finish)` and `animateRig(..., rnd)` take optional extras (defaults unchanged); an unknown `dept` falls back to the Survey uniform. Main loop: `crowd.update(dt, t)`. The 9 crew stay on full rigs. Deck 4 ALL IDENTICAL against 0.14.0; Decks 1–6 pixel-identical; deck_check OK, same draw calls. See "Crowd rendering (0.20.x)". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -376,6 +377,45 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 - **Chef Brennan and Rina are `deck: 3`** (0.6.7). Rina keeps her bunk on Deck 4 in the story, but has no `home` until shifts move people between decks. 0.6.7 against 0.6.6: Deck 4's crew paths and crew screenshots differ as expected; the crew-hidden shot differs only by a door still closing behind crew who had just walked past.
 - **Pell is `deck: 5`** with Works haunts and favourite spots (benches, job board, tea corner, lathe, storage counter). The game still starts with you on Deck 4, where seven crew wander.
 - **The room brain adds `j`, `=` and `+` weights on every deck.** On Deck 5 there's no `j`, which is harmless (that pick just fails and retries). Room letters are per-deck, so `home` and `haunts` only make sense for the walker's own deck.
+
+
+## Crowd rendering (0.20.x)
+
+Section 8b, by the performance engineer (Pillar 1, workstream 5). The player and close crew keep full `makeCharacter` rigs (16–17 meshes, about 15,000 triangles and 32 draw calls each with shadows). Everyone else goes through `crowd`.
+
+**How it works.**
+
+- `crowd.add(spec)` calls `makeCharacter(spec, finish)` with a `finish` that keeps the queued parts instead of baking meshes. The rig's joints stay ordinary Groups, kept out of the scene, and `animateRig` drives them exactly as it drives a full rig.
+- Each person's parts are rebuilt at lower detail (`CROWD_DETAIL`: spheres, caps, cylinders and rings with fewer segments; boxes as they are) and packed once, in their joints' own space, at two levels: near (about 4,100 triangles) and far (about 2,100).
+- Up to `CROWD_PER` people (12) share one `SkinnedMesh`. Their joints are its bones (17 slots a person); every vertex follows one bone, and the bone inverses are identity, so a bone's matrix is just the joint's world matrix. One material, `CROWD_MAT` (as `CHAR_MAT`, with `skinning: true`, which r128 still needs). So 40 people are 4 meshes: at most 8 draw calls with the shadow pass.
+- A group's geometry is rebuilt only when someone joins, leaves or changes detail. Its bounding sphere is refitted every frame round its members, so a group off screen isn't drawn.
+- Far detail: anyone more than `CROWD_FAR` (9) tiles from the camera's target, or everyone when zoomed out past `CROWD_FAR_ZOOM` (0.75), with half a tile of hysteresis.
+- Without float vertex textures (rare on phones now), `CROWD_PER` shrinks so a group's bones fit the shader's uniforms.
+- Nothing in the crowd calls `R()`: each person has their own random stream (`animateRig`'s new `rnd` argument), so adding crowd never shifts anything else. `CROWD_MAT` and the empty geometry are made on the first `add`, so a game with no crowd has none of it.
+
+**Interface** (for the sim engineer):
+
+- `const h = crowd.add(spec)`: `spec` is the roster's `looks` plus `dept` and `rank` (for the uniform).
+- `h.set(pos, face, pose, walkPhase)`: `pos` is a world `{x, y, z}`; for `sit` and `lie`, `y` is the seat or mattress top (0 means a usual chair, 0.475, or bunk, 0.5). `face` is an angle like `Walker.face` (0 looks toward +z); for `lie` it's the way from head to feet. `pose` is `walk`, `stand`, `sit`, `lie` or `work`; changes blend over about half a second, except the first `set`, which snaps. `walkPhase` (gait cycles) is optional: leave it out and the gait follows how far `pos` moves each frame.
+- `crowd.remove(h)`, `crowd.clear()`, `crowd.near(x, z, r)` (who's at a spot, for taps; the meshes themselves are never hit by the tap raycast), `crowd.visible`, `crowd.stats()`.
+- `crowd.update(dt, t)` runs once a frame from the main loop, after the walkers.
+- Sitting puts the hips just above the seat and the feet on the floor by leg IK, forearms on the table, a fork to the mouth now and then. Working: hands busy at bench height, head down. Lying: on the back, arms by the sides, centred on `pos`.
+- Crowd people don't block walking. Who stands where is the sim's job (workstream 6).
+
+**The demo.** `?crowd=40` in the address (any number up to 54) starts you on Deck 3 by the lift at 18:30, and puts made-up crew in the mess hall: walkers in the aisles, two at the drinks station (`work`), five in the servery line (`stand`), the rest seated at the long and round tables (44 seats). A line under the clock shows the crowd, draw calls and frame time. They leave when you leave the deck and come back when you return; the Crew button hides them. `CROWD_DEMO.looks()` and `spots()` are the two to swap: `spots()` already reads `deckDef.places` (`mess-seat`, `servery-queue`) once Deck 3 has them. Without the flag, `CROWD_DEMO` is `null` and nothing of the demo exists.
+
+**Numbers** (headless, SwiftShader; frame times there aren't meaningful, so the demo's line is the one to read on a phone):
+
+| Deck 3 | Draw calls | Triangles drawn (both passes) | Crowd JS a frame |
+| --- | --- | --- | --- |
+| By the lift, no crowd | 326 | 285,000 | |
+| By the lift, 40 crowd | 329 | 364,000 | about 2 ms |
+| In the mess hall, no crowd | 242 | 240,000 | |
+| In the mess hall, 40 crowd | 246 | 401,000 | about 2 ms |
+
+For comparison, 40 full rigs would add about 1,300 draw calls and 600,000 triangles. Memory is flat over Deck 3 and 4 round trips with the demo on (the four groups' bone textures stay, like kit).
+
+**Testing a crowd turn:** cadet_test and deck_check as usual (the crowd is empty in both). For the demo, open the build with `?crowd=40`; the Game class in cadet_test.py loads `file://` paths, so a script that adds the query to the `goto` is enough.
 
 
 ## Rules that keep it working
