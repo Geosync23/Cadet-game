@@ -88,7 +88,7 @@ def run_activity(g, title, near=None, limit=4000, label=None):
     return tapped, before, seen, end, peak
 
 def body_check(name, need, gain, before, end, seen, pose):
-    if pose: check(any(a[2] == 'do' and a[3] == pose for a in seen), f'{name}: pose {pose} not taken ({sorted(set(str(a[3]) for a in seen))})')
+    if pose: check(any(a[2] == 'do' and a[3] in ((pose,) if isinstance(pose, str) else pose) for a in seen), f'{name}: pose {pose} not taken ({sorted(set(str(a[3]) for a in seen))})')
     if need: check(end['needs'][need] >= min(100, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
     check(end['visible'] and not end['act'], f'{name}: not back on your feet ({end})')
 
@@ -139,7 +139,7 @@ with sync_playwright() as pw:
     tp, b, seen, e, pk = run_activity(g, 'Grab and go'); peak = max(peak, pk); body_check('grab', 'hunger', 25, b, e, seen, None)
     tp, b, seen, e, pk = run_activity(g, 'Treadmills'); peak = max(peak, pk); body_check('treadmill', 'fitness', 30, b, e, seen, 'run')
     tp, b, seen, e, pk = run_activity(g, 'Weights'); peak = max(peak, pk); body_check('weights', 'fitness', 30, b, e, seen, 'lift')
-    tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, 'call')
+    tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, ('call', 'sit:call'))
     check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
     t = g.ev(f"({TAP})({json.dumps({'title': 'Counter'})})"); g.step(60)
     check(t is False and not state(g)['act'], 'the counter with nothing picked out should just show its text')
@@ -154,27 +154,37 @@ with sync_playwright() as pw:
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'servery: should sit at a mess seat to eat')
     body_check('eat', 'hunger', 55, b, e, seen, None)
     check(peak < BUDGET, f'draw calls {peak} over {BUDGET}')
-    # the galley's queue (section 16, 0.29.6): galleyJoin gives the back of the line and your turn; stand-ins shaped like it
-    g.ev(r"""(() => { window.portions = 30;
-      window.takePortion = () => { delete window.joined; if (window.portions > 0) { window.portions--; return true; } return false; };
-      window.galleyText = w => w === 'grab' ? '5 on the shelf.' : 'Serving: Fish pie. ' + window.portions + ' portions in the pans.';
-      window.galleyJoin = () => (window.joined = { at: [33, 2], xy: [33.55, 2.5], face: 's', ahead: 3, turnAt: shipNow() + 3.25 });
-      window.galleyTurn = () => !!window.joined && shipNow() >= window.joined.turnAt && window.portions > 0;
-      SHIP.player.needs.hunger = 20; })()""")
+    # the galley's queue (section 16, 0.29.6): galleyJoin gives the back of the line and your turn. The real galley when the
+    # build has it (a combined build), else stand-ins shaped like it
+    real = g.ev("[typeof takePortion === 'function', typeof galleyJoin === 'function', typeof shipEffects === 'function']")
+    print('  the real galley and machines in this build:', dict(zip(['takePortion', 'galleyJoin', 'shipEffects'], real)))
+    if not real[1]:
+        g.ev(r"""(() => { window.portions = 30;
+          window.takePortion = () => { delete window.joined; if (window.portions > 0) { window.portions--; return true; } return false; };
+          window.galleyText = w => w === 'grab' ? '5 on the shelf.' : 'Serving: Fish pie. ' + window.portions + ' portions in the pans.';
+          window.galleyJoin = () => (window.joined = { at: [33, 2], xy: [33.55, 2.5], face: 's', ahead: 3, turnAt: shipNow() + 3.25 });
+          window.galleyTurn = () => !!window.joined && shipNow() >= window.joined.turnAt && window.portions > 0; })()""")
+    g.ev("SHIP.player.needs.hunger = 20")
     tp, b, seen, e, pk = run_activity(g, 'Servery', label='The queue, then a seat')
     kinds = [a[0] for a in seen]
     check(tp is True and 'queue' in kinds and 'eat' in kinds and 'tray' not in kinds, f'queue: {sorted(set(kinds))}')
-    check(any(a[0] == 'queue' and a[1] is None and a[2] == 'do' for a in seen), 'queue: should wait at the back of the line')
-    waited = sum(1 for a in seen if a[0] == 'queue' and a[2] == 'do')
-    check(waited >= 3, f'queue: should wait about 3 ship minutes for the turn ({waited} checks)')
+    waited = sum(1 for a in seen if a[0] == 'queue' and a[1] is None and a[2] == 'do')
+    check(waited >= (1 if real[1] else 3), f'queue: should wait at the back of the line for the turn ({waited} checks)')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'queue: then sit at a mess seat to eat')
     body_check('queue and eat', 'hunger', 55, b, e, seen, None)
-    left = g.ev("[window.portions, !!window.joined]"); print('  portions left, still joined:', left)
-    check(left == [29, False], 'queue: one portion taken, and the join cleared')
-    g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
+    if real[1]:
+        joined = g.ev("GALLEY_JOINED.has('player')"); print('  still in the galley\'s line after eating:', joined)
+        check(joined is False, 'queue: takePortion should clear the join')
+    elif real[0]:                                     # the real galley's food but not yet its queue (before 0.29.6): the stand-in queue fed you from the real pans
+        print('  (stand-in queue, real food: served from the real galley)')
+        g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
+    else:
+        left = g.ev("[window.portions, !!window.joined]"); print('  portions left, still joined:', left)
+        check(left == [29, False], 'queue: one portion taken, and the join cleared')
+        g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
 
     print('Places held by crew, closed servery, walking away:')
-    held = g.ev(r"""(() => { const a = DECK_CREW[0], old = a.goalId; const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
+    held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
       const fake = ids.map(id => ({ goalId: id, p: { name: 'Test ' + id } })); DECK_CREW.push(...fake);
       const it = ITEMS.find(i => i.t === 'Booth 2'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
       DECK_CREW.splice(DECK_CREW.length - 4, 4); return [r, !!ACT, document.getElementById('tx').textContent]; })()""")
@@ -183,7 +193,7 @@ with sync_playwright() as pw:
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 12 * 60); needsT = null"); g.step(2)
     t = g.ev(f"({TAP})({json.dumps({'title': 'Servery'})})"); g.step(2); s = state(g)
     print('  servery at 12:00 the next day:', s['toast'][:70])
-    check(t is True and not s['act'] and 'closed' in s['toast'], 'the servery should be closed at 12:00')
+    check(t is True and not s['act'] and 'closed' in s['toast'].lower(), 'the servery should be closed at 12:00')
     g.ev(f"({TAP})({json.dumps({'title': 'Treadmills'})})")
     for k in range(40):
         g.step(30)
@@ -192,30 +202,36 @@ with sync_playwright() as pw:
     g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3); s = state(g)
     print('  walked away after 5 min:', s['act'], 'visible', s['visible'], 'fitness', f0, '->', s['needs']['fitness'])
     check(not s['act'] and s['visible'] and s['needs']['fitness'] >= f0 - .5, 'walking away should stop the workout and keep the gain')
-    print('Stand-ins for sections 16 and 17 (the galley and the machines), as their engineers describe them:')
-    st = g.ev(r"""(() => {
-      eval("window.shipEffects = function (d) { return { deck: d, restore: { hunger: 1, energy: 1, hygiene: .5, fitness: 1, social: 1 }, drain: { hunger: 2, energy: 1, hygiene: 1, fitness: 1, social: 1 }, walk: .5, notes: [{ text: 'The showers are running weak' }] }; }");
-      window.portions = 1; window.grab = 0;
-      eval("window.takePortion = function () { if (portions > 0) { portions--; return true; } if (grab > 0) { grab--; return true; } return false; }");
-      eval("window.galleyText = function (w) { return w === 'grab' ? (grab ? grab + ' on the shelf.' : 'The shelf is empty.') : portions ? 'Serving: Fish pie. ' + portions + ' portions in the pans.' : 'The pans are empty. The next pot is on its way.'; }");
-      const n = SHIP.player.needs; Object.assign(n, { hunger: 50, hygiene: 50 }); FX_MIN = -1;
-      needsDrain(60, false, playerFx()); const h1 = n.hunger, y1 = n.hygiene;
-      const out = { drainHungerX2: Math.round((50 - h1) * 10) / 10, hygieneDrain: Math.round((50 - y1) * 10) / 10, speed: playerSpeed() };
-      out.peek = foodFrom('servery', true).ok; out.take = foodFrom('servery'); out.peekEmpty = foodFrom('grab', true); out.takeEmpty = foodFrom('grab').ok;
+
+    # the ship's effects (section 17): a known shipEffects result put in playerFx's once-a-minute cache, so the wiring is
+    # tested the same with or without section 17
+    print('The ship\'s effects on needs (a set shipEffects reading):')
+    FX = "FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: { hunger: 1, energy: 1, hygiene: .5, fitness: 1, social: 1 }, drain: { hunger: 2, energy: 1, hygiene: 1, fitness: 1, social: 1 }, walk: .5, notes: [{ text: 'The showers are running weak' }] };"
+    st = g.ev(r"""(() => { """ + FX + r"""
+      const n = SHIP.player.needs; Object.assign(n, { hunger: 50, hygiene: 50 });
+      needsDrain(60, false, playerFx()); const out = { drainHungerX2: Math.round((50 - n.hunger) * 10) / 10, hygieneDrain: Math.round((50 - n.hygiene) * 10) / 10 };
+      playerUpdate(0, 0); out.speed = playerSpeed(); out.maxV = player.maxV / PLAYER_V0;
       device.open(); out.note = document.getElementById('devBody').textContent.includes('showers are running weak'); device.close();
-      delete window.shipEffects; delete window.takePortion; delete window.galleyText; FX_MIN = -1;
+      n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+      needsT = shipNow() - PLAYER_ACTS.shower.mins; """ + FX + r""" playerUpdate(0, 0); out.shower = Math.round(n.hygiene); ACT = null; FX_MIN = -1;
       return out; })()""")
     print(' ', st)
     check(st['drainHungerX2'] == 8 and st['hygieneDrain'] == 2.5, 'drain multipliers from shipEffects')
-    check(st['speed'] == 1, "shipEffects' walk must not slow the player (the user's rule)")
-    check(st['peek'] is True and st['take'].get('dish') == 'Fish pie' and st['peekEmpty']['ok'] is False and st['takeEmpty'] is False, f'galley stand-in: {st}')
+    check(st['speed'] == 1 and abs(st['maxV'] - 1) < 1e-9, "shipEffects' walk must not slow the player (the user's rule)")
     check(st['note'], 'the ship notes should show on the device')
-    shw = g.ev(r"""(() => { eval("window.shipEffects = function (d) { return { deck: d, restore: { hygiene: .5 }, drain: {}, notes: [] }; }"); FX_MIN = -1;
-      const n = SHIP.player.needs; n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
-      needsT = shipNow() - PLAYER_ACTS.shower.mins; playerUpdate(0, 0); const h = n.hygiene; ACT = null;
-      delete window.shipEffects; FX_MIN = -1; return Math.round(h); })()""")
-    print('  a shower with the recycler failing (restore x0.5):', shw)
-    check(shw == 50, f'a weak shower should give half: {shw}')
+    check(st['shower'] == 50, f"a weak shower (restore x0.5) should give half: 10 -> {st['shower']}")
+    if real[2]:
+        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => isFinite(f.restore[k]) && isFinite(f.drain[k])); })()")
+        print('  playerFx is the real shipEffects for this deck:', live)
+        check(live, 'playerFx should read the real shipEffects')
+    if not real[0]:                                   # the galley's food on its own, with stand-ins (a combined build tests the real one above)
+        fd = g.ev(r"""(() => { window.portions = 1; window.grab = 0;
+          window.takePortion = () => { if (portions > 0) { portions--; return true; } if (grab > 0) { grab--; return true; } return false; };
+          window.galleyText = w => w === 'grab' ? (grab ? grab + ' on the shelf.' : 'The shelf is empty.') : portions ? 'Serving: Fish pie. ' + portions + ' portions in the pans.' : 'The pans are empty. The next pot is on its way.';
+          const out = { peek: foodFrom('servery', true).ok, take: foodFrom('servery'), peekEmpty: foodFrom('grab', true), takeEmpty: foodFrom('grab').ok };
+          delete window.takePortion; delete window.galleyText; delete window.portions; delete window.grab; return out; })()""")
+        print('  galley stand-in:', fd)
+        check(fd['peek'] is True and fd['take'].get('dish') == 'Fish pie' and fd['peekEmpty']['ok'] is False and fd['takeEmpty'] is False, f'galley stand-in: {fd}')
     errors = g.errors
     g.close()
 

@@ -326,5 +326,61 @@ tb.onclick = () => {
 };
 addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
 </script>
+<!-- ===== Utility rooms (Pillar 2, workstream A5b, the bridge architect): proposed, for the lead's review ===== -->
+<style>
+.util{max-width:1100px;margin:0 auto 32px;padding:0 16px;font-size:12.5px;color:#93a6ae;line-height:1.5}
+.util h2{font-size:16px;font-weight:600;color:#e8eef0;margin:8px 0 4px}
+.util>p{margin:0 0 10px;max-width:760px}
+.util .rooms{display:flex;flex-wrap:wrap;gap:14px}
+.util .rc{background:rgba(13,21,33,.78);border:1px solid rgba(150,200,196,.22);border-radius:14px;padding:12px 14px;flex:1 1 300px;min-width:0}
+.util .rc b{display:block;font-size:14px;color:#bdeee6;font-weight:600}
+.util .rc .why{color:#cfd9dc;margin:2px 0 8px}
+.util svg{display:block;max-width:100%;height:auto;margin:4px 0 8px}
+.util table{border-collapse:collapse;width:100%;font-size:11.5px}
+.util td,.util th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+.util th{color:#cfd9dc;font-weight:600}
+.util code{font-size:11px;color:#bdeee6}
+.util .key{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 12px}
+.util .key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+<section class="util" id="utility">
+<h2>Utility rooms (built in 0.31.3)</h2>
+<p>Deck 3's three sealed service rooms get their insides, with nothing moved or resized: machines, pipes, a floor to stand and work on, and the hatch as the way in. Every machine has a <code>machines</code> entry (Pillar 2 plan, "Machines and jobs"), a panel tile beside it and a <code>work:works</code> place on that tile. Works crew and the player can pass the hatches; tier locks come later. Machine kinds are proposals for the systems engineer.</p>
+<div class="key"><span><i style="background:#56656e"></i>Floor to stand and work on</span><span><i style="background:#2f6f86"></i>Machine (in the registry)</span><span><i style="background:#3a4248"></i>Pipes and fittings (scenery)</span><span><i style="border:2px solid #e9c46a;background:none"></i>Panel tile: a <code>work:works</code> place</span><span><i style="background:#e9c46a"></i>Hatch, the way in</span><span><i style="background:#1d252d"></i>Outside the hull</span></div>
+<div class="rooms" id="utilRooms"></div>
+</section>
+<script>
+(() => {
+  const UTIL = [{"key": "R", "name": "Water recycler", "i0": 12, "j0": 13, "w": 5, "h": 9, "stand": ["#####", "#####", "#####", "#####", "#####", "#####", "#####", "#####", "#####"], "why": "Every deck's water comes back here, is cleaned and goes out again. When it struggles, Deck 4's showers run weak. In from the lift plaza through the hatch at <code>v,17,14</code>.", "hatches": [{"i": 16, "j": 14, "side": "e"}], "machines": [{"id": "3-recycler-1", "kind": "recycler", "label": "The recycler: two tall settling tanks with sight glasses and a control head", "tiles": [[12, 15], [13, 15], [12, 16], [13, 16], [12, 17], [13, 17]], "panel": [14, 16], "face": "w"}, {"id": "3-filter-1", "kind": "filter", "label": "Filter bank: cartridges in a rack, the part that needs swapping most often", "tiles": [[12, 19], [13, 19], [12, 20], [13, 20]], "panel": [13, 19], "face": "w"}, {"id": "3-pump-1", "kind": "pump", "label": "Circulation pumps, a pair on one skid, pushing clean water up the spine", "tiles": [[16, 16], [16, 17]], "panel": [15, 17], "face": "e"}, {"id": "3-uv-1", "kind": "uv", "label": "UV steriliser: a lamp tube in a steel sleeve, the last step before the tanks", "tiles": [[12, 13], [13, 13]], "panel": [14, 13], "face": "w"}, {"id": "3-lights-1", "kind": "lights", "label": "Light relay box on the wall: every lamp on Deck 3", "tiles": [[16, 15]], "panel": [16, 15], "face": "e"}], "decor": [{"label": "clean-water tank", "tiles": [[15, 19], [16, 19], [15, 20], [16, 20], [15, 21], [16, 21]]}, {"label": "risers to the spine", "tiles": [[15, 13], [16, 13]]}, {"label": "drain sump", "tiles": [[12, 21], [13, 21]]}], "notes": "Floor: <code>steel</code>. A walkway runs down column 14 from the hatch row (14) to the far end, with pipework overhead. The clean-water tank, the risers and the drain sump are scenery."}, {"key": "g", "name": "Galley plant", "i0": 39, "j0": 0, "w": 2, "h": 3, "stand": ["##", "##", "##"], "why": "Extractor fans over the ranges, the cold store's chiller and the dishwasher pumps. In from the galley through the hatch at <code>h,39,3</code>.", "hatches": [{"i": 39, "j": 2, "side": "s"}], "machines": [{"id": "3-galleyplant-1", "kind": "galleyplant", "label": "Extractor fan unit: ducts from the galley hoods, a fan and grease filters", "tiles": [[39, 0], [40, 0]], "panel": [39, 1], "face": "n"}, {"id": "3-chiller-1", "kind": "chiller", "label": "The cold store's chiller: a compressor and condenser coil, with the dishwasher pumps beside it", "tiles": [[40, 1], [40, 2]], "panel": [39, 2], "face": "e"}], "decor": [], "notes": "Floor: <code>grate</code>. Only two tiles to stand on, so both are panel tiles. A tight room, as the plan always had it. The extractor keeps the systems engineer's id <code>3-galleyplant-1</code>. The galley itself also lists its machines: <code>3-oven-1</code> and <code>3-oven-2</code> (panels in front of the ovens, [37,4] and [38,4]) and <code>3-range-1</code> (panel [39,4])."}, {"key": "i", "name": "Irrigation room", "i0": 2, "j0": 17, "w": 4, "h": 5, "stand": ["####", "####", "####", "~###", "~~##"], "why": "Nutrient tanks and the pumps that water the garden. In from the garden through the hatch at <code>h,3,17</code>.", "hatches": [{"i": 3, "j": 17, "side": "n"}], "machines": [{"id": "3-nutrient-1", "kind": "nutrient", "label": "Nutrient tanks and the dosing unit that mixes the feed", "tiles": [[5, 18], [5, 19]], "panel": [4, 18], "face": "e"}, {"id": "3-irrigation-1", "kind": "irrigation", "label": "Irrigation pump and the valve manifold out to the garden beds and racks", "tiles": [[5, 20], [5, 21]], "panel": [4, 20], "face": "e"}], "decor": [{"label": "header pipes to the garden", "tiles": [[2, 17], [2, 18], [2, 19]]}], "notes": "Floor: <code>steel</code>. Walk in down column 3 or 4 from the hatch; the stern corner (bottom left) is outside the hull."}];
+  const S = 34, el = (t, a, p) => { const e = document.createElementNS('http://www.w3.org/2000/svg', t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+  const host = document.getElementById('utilRooms');
+  for (const U of UTIL) {
+    const card = document.createElement('div'); card.className = 'rc'; host.appendChild(card);
+    card.innerHTML = `<b>${U.name} <span style="color:#93a6ae;font-weight:400">(${U.key}, ${U.w} × ${U.h}, columns ${U.i0}–${U.i0 + U.w - 1}, rows ${U.j0}–${U.j0 + U.h - 1})</span></b><div class="why">${U.why}</div>`;
+    const pad = 14, svg = el('svg', { viewBox: `${-pad} ${-pad} ${U.w * S + pad * 2} ${U.h * S + pad * 2}`, width: U.w * S + pad * 2, role: 'img', 'aria-label': U.name + ' sketch' }, card);
+    const T = (i, j) => [(i - U.i0) * S, (j - U.j0) * S];
+    for (let j = 0; j < U.h; j++) for (let i = 0; i < U.w; i++) {
+      const out = U.stand[j][i] !== '#';
+      el('rect', { x: i * S, y: j * S, width: S, height: S, fill: out ? '#1d252d' : '#56656e', stroke: 'rgba(255,255,255,.08)' }, svg);
+    }
+    for (const d of U.decor || []) for (const [i, j] of d.tiles) { const [x, y] = T(i, j); el('rect', { x: x + 3, y: y + 3, width: S - 6, height: S - 6, rx: 4, fill: '#3a4248' }, svg); }
+    U.machines.forEach((m, k) => {
+      for (const [i, j] of m.tiles) { const [x, y] = T(i, j); el('rect', { x: x + 2, y: y + 2, width: S - 4, height: S - 4, rx: 5, fill: '#2f6f86', stroke: '#5fd6c6', 'stroke-width': 1 }, svg); }
+      const [i, j] = m.tiles[0], [x, y] = T(i, j); const t = el('text', { x: x + S / 2, y: y + S / 2 + 4, 'text-anchor': 'middle', 'font-size': 12, fill: '#e8eef0', 'font-weight': 600 }, svg); t.textContent = k + 1;
+      const [px, py] = T(...m.panel); el('rect', { x: px + 4, y: py + 4, width: S - 8, height: S - 8, rx: 4, fill: 'none', stroke: '#e9c46a', 'stroke-width': 2.5 }, svg);
+      const pt = el('text', { x: px + S / 2, y: py + S / 2 + 4, 'text-anchor': 'middle', 'font-size': 10, fill: '#e9c46a' }, svg); pt.textContent = k + 1;
+    });
+    for (const h of U.hatches) {
+      const [x, y] = T(h.i, h.j), L = 6;
+      const r = h.side === 'n' ? { x: x + 4, y: y - L / 2, width: S - 8, height: L } : h.side === 's' ? { x: x + 4, y: y + S - L / 2, width: S - 8, height: L }
+        : h.side === 'w' ? { x: x - L / 2, y: y + 4, width: L, height: S - 8 } : { x: x + S - L / 2, y: y + 4, width: L, height: S - 8 };
+      el('rect', { ...r, fill: '#e9c46a', rx: 2 }, svg);
+    }
+    const rows = U.machines.map((m, k) => `<tr><td>${k + 1}</td><td><code>${m.id}</code></td><td><code>${m.kind}</code></td><td>${m.label}</td><td><code>at [${m.tiles[0]}]</code>, panel <code>[${m.panel}]</code>, facing ${m.face}</td></tr>`).join('');
+    card.insertAdjacentHTML('beforeend', `<table><tr><th>#</th><th>id</th><th>kind</th><th>What it is</th><th>Where</th></tr>${rows}</table><div style="margin-top:6px">${U.notes}</div>`);
+  }
+})();
+</script>
+
 </body>
 </html>
