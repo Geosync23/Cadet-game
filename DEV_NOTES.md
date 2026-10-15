@@ -82,6 +82,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.25.1 | 0.25.0 plus 0.22.3 (the lead): the player's bed read from `ROSTER_PLAYER` (`playerBed()`), seat and mattress heights by place type (upper bunks at 1.6 m), and the fix for a sleeping bunkmate catching the tap on your bunk. Merge fixes only. |
 | 0.25.2 | 0.25.1 plus 0.22.4 (overflow work stations skip locked or private rooms) and 0.18.4 (two more Deck 3 infirmary places, so Rina works in the infirmary), merged by the lead. Merge fixes only. |
 | 0.30.1 | Pillar 2, A5a, shared and inert (the Deck 6 architect): **service hatches**: a deck's `service` list names hatches into built utility rooms; `hatchPassable(edgeKey, who)` is true there for the player and Works crew (`who.dept` or `who.p.dept` 'works'), false for everyone else and every other hatch. `edgeBlocks`, `edgeOpen`, `findPath`, `innerBlocks` and `collide` take an optional `who` (the player's walker passes itself); without it nothing changes. Service hatches open (a little slower) for the player, have no locked-door tap, and open for crew whose rooms are behind them. **`still: true` floors** draw no random numbers, like the lift. **deck_check:** rooms and items checked as the player walks; work:works places reachable through service hatches; `machines` checked (unique ids, `at` in its room, a walkable panel tile with a work:works place). No deck uses any of it yet: cadet_test identical (renderer noise only), all six decks pixel-identical with crew hidden and crew door-opening off, deck_check output unchanged, day_check OK. |
+| 0.26.1 | Pillar 2, A1 turn 1: every room in use (the sim engineer, from 0.25.2). New activities: toilet visits (morning, a break mid-shift, now and then in leisure, before bed) with hands at a basin; a tea break for about a third of the crew on any work day (the habit always); shopping at the crew store (browse a `shop` place, then pay at a till, any place with `anim: 'pay'`, once one exists); a minute by the lift before a ride (`lift-wait`); Deck 1's and Deck 2's lounges for officers and Deck 2's staff; benches on Decks 2 and 4; Works crew wash up after the shift; the gym before or after dinner. Stand-ins: each station no one on the day shift has gets someone from its department each day (Deck 1's survey and Works stations, Deck 5's Watch post). Needs on paper (`crewNeeds`, `needsEst`) steer the gym, calls home and resting. Activities carry `anim` (place, or default by type) into the plans and to the crowd, once the crowd lists the pose in `CROWD_ANIMS`. The galley rota hook (`galleyShift`, section 16) with split shifts and staff meals. `roomsInUse`, and day_check's rooms-in-use and needs summaries. 54 of 57 place types used over a week (was 37). With crew off, cadet_test ALL IDENTICAL to 0.25.2; deck_check OK; day_check days 1 and 7 OK (peak 413). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -193,6 +194,49 @@ Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each 
 - **Fixes found by day_check (0.22.2):**
     - Someone told to stand anywhere while still sliding into a seat set off from the seat's furniture tile into the next room. Agents now always set off from the place's walk-to tile.
     - Someone at an overflow desk in the locked ready room couldn't get out. Agents can always pass the doors of the room they're in.
+
+## Every room in use (sections 14 and 10, the sim engineer, 0.26.x)
+
+Pillar 2, workstream A1 (plans/pillar2-plan.md).
+
+- **Rooms in use.** `roomsInUse(d0, days)` gives, per deck and place type, how many places there are, how many were used, the uses, hours and different people over those days. day_check prints a week's summary from its day: the types nobody used and those fewer than 3 people used.
+    - Before A1: 37 of 57 types used.
+    - 0.26.1: 54 of 57 used. Still unused:
+        - Deck 2's `work:command` desk, which is in a locked room;
+        - the store's `work:store` counter, until someone staffs it (asked the lead);
+        - Deck 6's `lift-wait` places, because the engine crew leave Deck 6 only at the end of a shift, and the lift wait never cuts into work.
+- **New activities (0.26.1).**
+    - **Toilet** (`wash` with tag `toilet`, then `hands` at a basin, with no waiting for the basin): half the crew in the morning, most mid-shift, 12% of leisure blocks, 40% before bed. On the deck they're on; their own en-suite if they're on their bed deck.
+    - **Tea break:** the habit, or 35% of work days, 15 minutes at a `lounge-seat` or `bench` on the work deck.
+    - **Shopping:** 10% of work days, 45% of days off. Browse a `shop` place for 10–22 minutes, then pay at a till for 2 minutes. A till is any place with `anim: 'pay'`, listed under the pseudo-type `pay` so browsers don't stop at it.
+    - **Waiting for the lift:** a minute at a free `lift-wait` place, taken off the end of the activity before a ride (leisure, meals, the gym, calls, off), so no timing moves.
+    - **Works crew wash up** after the shift: a basin, or 30% of the time a shower, on the work deck.
+    - **Lounges:** Deck 1's `lounge-seat` for officers; Deck 2's `lounge-seat` and `bench` for officers and anyone who works on Deck 2; Deck 4's `bench`.
+    - **The gym** goes after dinner half the time, to spread the 17:00 rush.
+    - **Night shift** always showers after the night's work.
+    - Shift breaks (tags `tea`, `toilet`, `hands`) and galley staff meals (`staff`) count as work in `dayReport`.
+- **Stand-ins (`occ.rot`).** `schedData().spare` lists the stations nobody on the day shift holds, outside locked rooms. Each day, `shipDay` picks one person from each such station's department (day shift, working that day, not galley) to work there all shift; their own station is free that day. Today: Deck 1's `work:survey` and `work:works` stations, and Deck 5's `work:watch`.
+- **Needs (0.26.1).** `NEEDS = ['hunger', 'energy', 'hygiene', 'fitness', 'social']`, 0–100.
+    - **`crewNeeds(p, t)`** reads them off the person's plans over the week before t. Each starts at 70 a week earlier.
+        - Hunger: −5.5 an hour; a sit-down meal sets 100, grab-and-go 50.
+        - Energy: +14 an hour asleep, −3.8 awake.
+        - Hygiene: −2.1 an hour; a shower sets 100, a basin +15, the gym −10.
+        - Fitness: −0.35 an hour; the gym +35 (+15 if under 24 minutes).
+        - Social: +15 an hour in company (`SOCIAL_TYPES`, or at work), a call home +35, −2.5 an hour alone.
+    - **Steering the plans.** The day's choices use `needsEst(p, d)`, a start-of-day estimate read from the habit-only ("base") choices of the days before. That way planning a day looks back a fixed week and never all the way to day 1.
+        - Fitness: 105 − 9 per day since the last base gym visit.
+        - Social: 100 − 9 per day since the last base call home.
+        - Energy: last night's sleep against 8 hours.
+        These steer the gym (base + (100 − fitness)/100 × 0.9), a call home (base + (100 − social)/100 × 0.6), and leisure. Tired people rest twice as much, lonely ones half as much.
+    - **Numbers, day 1:** lowest/middle at 23:00 are hunger 71/75, energy 35/45, hygiene 51/88, fitness 3/90 and social 94/99. One person's fitness stays low: of the gym visits her plans want, 2 in 5 happen, because the gym is full or the evening runs out.
+    - The ship-day cache keeps 10 days back, for `crewNeeds`.
+- **Activities as poses.** A segment carries `anim`: the place's `anim`, or by type (`PLACE_ANIM`: gym `lift`, callhome `call`, shop `browse`, music `play`, laundry `fold`, work:galley `cook`; a standing garden place `water`). `whereIs` returns it. Section 10's `crewPose(spot)` sends it as the pose only when section 8b's `CROWD_ANIMS` lists it; otherwise the place's own pose, so a seated pianist stays seated until 'play' exists. Collision and taps read the place's plain pose.
+- **The galley rota hook.** `galleyBlocks(p, d)` calls `galleyShift(p, d)` from section 16 when it exists, for galley staff on day-shift work days. It returns work blocks `[[from, to], ...]` in minutes from midnight. A galley day then goes:
+    1. Up 35 minutes before the first block.
+    2. Between blocks: free time, and a meal in the mess if its window has 20 minutes free in the gap.
+    3. A meal window covered by work: a staff meal at the station (tag `staff`) from 30 to 10 minutes before the window ends.
+    4. After the last block, the usual evening.
+    `schedFrame` pulls the previous bedtime earlier for an early start. Tested with a stand-in rota (Brennan 04:30–08:10 and 15:30–20:30, hands 05:30–08:30 and 16:00–20:30): 28 days of dayReport clean.
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 
