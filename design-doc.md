@@ -599,6 +599,7 @@ Done so far:
 - Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15). Built in 0.15.1: the game saves every ship hour, on deck change and when it's hidden or closed; New game (tap twice) starts again.
 - Night runs 21:00–06:00, with an hour of dusk and of dawn centred on those times, so the game opens at first light. The old Night/Day button is now a debug control (built in 0.15.1).
 - Going to sleep: tap your own bunk to sleep until morning (to be built with the schedules).
+- Each weekday has a shape (provisional, from the schedule engine in 0.21.1): a Monday briefing, a Wednesday afternoon drill, a Thursday bunk inspection, later nights on Friday and Saturday, and a Sunday lie-in. Two meals a day, no lunch; the tea break counts as work.
 - The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15). Chosen: Works Chief Ines Calder, Infirmary Chief Priya Nandakumar, and the six senior officers named in "Crew and rooms" (build 0.16.1).
 - Envoy Saruth is a guest, not one of the 75 crew.
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
