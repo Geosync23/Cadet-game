@@ -265,6 +265,7 @@ Food is simulated from store to plate (agreed 2026-10-15):
 - **The galley really cooks.** Chef Brennan (and her galley hands, when on shift) wakes early and starts cooking before breakfast opens, so food is ready when the window starts; the same before dinner. You can see her at the ranges, ovens and prep island, even when she works alone.
 - **Food flows:** stores from the Deck 5 hold, by hover cart and lift, to the cold store; from the cold store to the galley; cooked in batches; served at the servery; dishes back to the dish pit. The grab-and-go shelf is stocked from the same cooking.
 - **What runs out shows:** a late batch makes a queue, an empty shelf stays empty until restocked, low stores turn into restock jobs.
+- **The galley's day:** Chef Brennan rises about 04:30 and cooks from 04:50 for breakfast at 06:00, and from 14:30 for dinner at 17:00; her deputy cooks on her days off. Early hands (05:30–13:30) bake for the grab shelf, serve, wash up and prep; late hands (13:00–21:15) prep, cook, serve and clean down. The staff eat at 08:00 and 16:30. The cooks cook to the numbers expected, so a queue means something has gone wrong (a slow oven, an empty cold store). The cold store holds under two days' food (built in 0.29.0).
 - **Machines matter here too:** the ovens and ranges wear with use (see "Machines").
 
 ### Supplies
