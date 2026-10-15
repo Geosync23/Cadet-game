@@ -43,6 +43,8 @@ How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 
 
 ## Done
 
+- **Ship integration 0.40.1** (32c8aee): 0.30.2 (Deck 4 utility rooms), 0.27.0 (activity poses), 0.16.5 (storekeepers, galley roles), 0.31.2, 0.33.1–0.33.2 (jobs and supplies on paper, retuned wear). Lead fixes: Deck 4 panel places carry `machine`; schedDesks and stand-ins skip machine panels. deck_check, day_check and machine_check OK. Still to come: the sim engineer's 0.26.2 (galleyDay reader, poseOf wiring, crewPath `who`), then the galley.
+
 - **Ship integration 0.40.0** (4ac34a3): first Pillar 2 combined build. It merges 0.30.1, 0.26.1, 0.16.4 and the storekeepers (WIP bbede16), 0.31.1, 0.32.1 and 0.33.0. deck_check and day_check OK. machine_check flags the recycler wearing too fast; the systems engineer is retuning it. The galley (0.29.0) is held back: combined with 0.26.1, galley staff miss dinner and the rota doesn't match the plans. The sim engineer is fixing that in 0.26.2 on top of both. A local attempt is kept on branch `lead-wip-0401` (not pushed).
 
 - **Ship integration 0.25.2**: 0.25.1 plus 0.22.4 (overflow skips locked or private rooms) and 0.18.4 (two more infirmary places; Rina works in the infirmary). deck_check and day_check OK. All Pillar 1 work done; every helper idle. Next: talk with the user about what's next (Pillar 2, a pull request of the milestone to main, retiring the bridge and command architects).

@@ -248,7 +248,7 @@ Every machine aboard has a condition that wears down with use and time, and wear
 
 Each machine is a real object in a room, with a condition from 100% to 0%, a wear rate and the effect it has on the ship when it falters. Wear depends on use: the galley oven wears fastest around mealtimes, the laundry washers on the morning after a busy shift, the lift whenever people ride it.
 
-Condition bands: healthy 75–100, worn 50–75, faulty 25–50, failing 10–25, broken under 10. A fresh ship starts every machine at 70–100. Ship health measures how well things work, so a well-kept ship reads close to 100 (agreed 2026-10-15).
+Wear is measured against an average day, so the ship's machines last the same whatever the crew's routines; busy days wear them faster and quiet days slower. Condition bands: healthy 75–100, worn 50–75, faulty 25–50, failing 10–25, broken under 10. A fresh ship starts every machine at 70–100. Ship health measures how well things work, so a well-kept ship reads close to 100 (agreed 2026-10-15).
 
 A machine's life runs through five states:
 
@@ -616,6 +616,7 @@ Done so far:
 - Should one of Deck 6's power junctions open at tier 2 rather than tier 3?
 
 - The personal device: how it looks and works as the main interface (the user is designing it).
+- How often should the player meet a real fault? Today the Works crew catch almost everything at the service stage (decide when the job loop is playable).
 
 **Answered:**
 
