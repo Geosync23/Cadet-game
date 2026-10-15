@@ -326,7 +326,7 @@ On duty, crew claim jobs from the job list that match their department and skill
 
 Off duty, each person picks what to do by scoring their options against their needs and traits: eat, sleep, wash, socialise, relax in a favourite spot, a hobby.
 
-**Needs.** Hunger, energy, social, hygiene and fitness, from 0 to 100. Fitness (agreed 2026-10-15) drops slowly and is restored at the gym. Showers restore hygiene, which gives the washrooms a morning rush. Mood comes from needs, the state of the ship and the people around them.
+**Needs.** Hunger, energy, social, hygiene and fitness, from 0 to 100. Fitness (agreed 2026-10-15) drops slowly and is restored at the gym. Being fit gains nothing; below a certain level of fitness you walk slower, and the same goes for energy if you don't sleep enough. Showers restore hygiene, which gives the washrooms a morning rush. Mood comes from needs, the state of the ship and the people around them.
 
 **Skill.** Each crew member has a skill level in their department. Skilled crew work faster and cause fewer follow-up faults.
 
@@ -410,7 +410,9 @@ What makes it interesting:
 
 **No hard failure.** If you slack, other Works crew pick up jobs, but more slowly, and your supervisor notices. The ship never dies because of you, but it gets visibly worse.
 
-**Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Needs never punish you hard; they nudge your mood and the crew notice (no fail state).
+**Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Fitness gains you nothing, but let it (or your sleep) fall too low and you walk slower. Needs never punish you harder than that (no fail state).
+
+**Your personal device** is the game's main interface (agreed 2026-10-15): your needs, the time, and later your jobs show on it. Its design is still to come from the user; until then the game uses a plain placeholder.
 
 **Off shift**, you are free: eat, wash, socialise, explore, sleep, work out, call home, shop. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
 
@@ -566,9 +568,8 @@ Done so far:
    - the 75-crew roster as data;
    - crew moving through their schedules on decks the player isn't on;
    - crew drawn on the current deck walking their real schedule, with daily variety;
-   - watch tools: time speed, crew panel, systems panel.
    - Test: watch a full ship day and check it feels alive.
-2. **Ship systems and jobs** (the breakdown is in `plans/pillar2-plan.md` once agreed):
+2. **Ship systems and jobs** (agreed 2026-10-15; the breakdown is in `plans/pillar2-plan.md`):
    - every room in use by crew and player, and the utility rooms built inside;
    - player needs (hunger, energy, hygiene, fitness) and activities: working out, calling home, shopping;
    - food and cooking simulated, with the chef cooking ahead of each meal;
@@ -609,11 +610,13 @@ Done so far:
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 - Should one of Deck 6's power junctions open at tier 2 rather than tier 3?
 
-- What does fitness do, beyond the gym restoring it? A small boost to energy and mood when high, or nothing more than crew remarks? Keep it gentle (no fail state).
-- Which of your needs show on screen, and how: bars, an icon, or only through mood and remarks?
-- The Pillar 1 watch tools (time speed, a crew panel, a systems panel) weren't built. Build them in Pillar 2, or drop them?
+- The personal device: how it looks and works as the main interface (the user is designing it).
 
 **Answered:**
+
+- Fitness gains nothing; low fitness or low energy (too little sleep) makes you walk slower (agreed 2026-10-15).
+- Your needs show on your personal device, the main interface; a placeholder until its design is done (agreed 2026-10-15).
+- No time controls (time speed, crew and systems panels): dropped for now (agreed 2026-10-15).
 
 - The player starts in Bunk 1 with Tomas, and Pell and Rina are in Bunk 2 (answered since v3).
 - A ship day lasts 30 real minutes (the old guess was 10, and a working shift needed more). This sets every wear rate.
