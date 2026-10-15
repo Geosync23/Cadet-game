@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.7
+   STARSHIP CADET: CSV Wren                            build 0.40.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6261,7 +6261,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.40.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7023,7 +7023,7 @@ function needsLoad(s) {                                  // from the save (secti
   return out;
 }
 SHIP.player = { needs: needsLoad(SAVED) };
-SAVE_EXTRA.push(s => { s.player.needs = { ...SHIP.player.needs }; });   // into the save (section 13)
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).needs = { ...SHIP.player.needs }; });   // into the save (section 13)
 // the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
 // restore and drain multiply ours (a failing recycler, weaker showers). walk is left out: the user's rule is that
 // only low fitness and energy slow you. Read at most once a ship minute; all 1s until section 17 is there.
@@ -7257,7 +7257,9 @@ function playerUpdate(dt, t) {
 // otherwise awake. Any activity stops.
 SIM_ADVANCE.push((from, to) => {
   actEnd(true);
-  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, playerFx());
+  const d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;   // a replay: section 17's pure record, never the live machines
+  let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, from) : null; } catch (e) { fx = null; }
+  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
