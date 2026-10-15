@@ -36,6 +36,10 @@ Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the works
 
 Earlier status of the inherited helpers: all idle at hand-over, all decks built and merged (0.14.0 in `main`).
 
+## Context check (2026-10-15, 17:10)
+
+How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 6 architect 199k (both already compacted), bridge architect 570k, command architect 525k, performance engineer 510k; sim engineer not reported while working. Sessions compact themselves automatically, but lose detail when they do. Plan: no new hires for the end of Pillar 1. For Pillar 2, give big new jobs to fresh sessions, and retire the bridge and command architects (idle, work merged) once the user agrees, after the usual idle check.
+
 ## Done
 
 - **Ship integration 0.24.1** (a881bc3): 0.24.0 plus 0.17.2 (bunk texts), 0.21.2 (sleeping) and 0.22.1 (crew follow their schedules on every deck, drawn by the crowd). Merge fix: PLAYER_BED 4-B1-4. deck_check OK. Being republished to the playable link for the user's check-in.
