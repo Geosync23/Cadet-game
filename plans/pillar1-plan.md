@@ -14,7 +14,8 @@ Out of scope: ship systems, jobs, relationships, events (Pillars 2–4). The pla
 - **The game starts on Day 1, a Monday, at 06:00,** with the player in Bunk 1 on Deck 4.
 - **Saving:** automatic, in the browser, per device. The game resumes exactly where it was. The ship doesn't run while the game is closed.
 - **Sleeping skips time to morning.**
-- **All 75 crew from the start:** 60 on days, 15 on nights.
+- **All 75 crew from the start:** 60 on days, 15 on nights. The player is one of them (one of the 47 juniors).
+- **Bigger bunk rooms:** the built bunk rooms hold 4; they are enlarged to hold three bunk beds (6 berths) each, giving 48. Guest cabins may be released for the space. A Deck 4 plan sketch comes first (Deck 6 architect).
 - **Names:** the crew designer picks names for the Works Chief and the six senior officers. They are provisional and can be changed later.
 - **Reviews:** one check-in partway through (the roster and a crowd demo), and one at the end of the pillar.
 - **No cap on parallel sessions.**
