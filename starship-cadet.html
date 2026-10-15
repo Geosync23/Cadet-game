@@ -38,6 +38,17 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .deckbtn.here{opacity:1;border-color:var(--teal)}
 .lift .deckbtn.here i{background:#2a9d8f;color:#08201d;border-color:#2a9d8f}
 .lift .stay{margin:10px auto 0;padding:7px 16px}
+.devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
+.devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
+.device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
+.device .devtime{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
+.device .need{display:grid;grid-template-columns:64px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
+.device .need i{height:8px;border-radius:4px;background:#26343a;overflow:hidden}
+.device .need b{display:block;height:100%;background:var(--teal)}
+.device .need.mid b{background:#d9b25a}
+.device .need.low b{background:#e07a5f}
+.device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -67,13 +78,19 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <div class="decks"><button class="deckbtn" id="sleepYes">Sleep until 06:00</button></div>
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
+<button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span></button>
+<div class="lift device" id="device" role="dialog" aria-labelledby="devT" hidden>
+  <h2 id="devT">Your device</h2><p>A placeholder: the real device is still being designed.</p>
+  <div id="devBody"></div>
+  <button class="stay" id="devClose">Close</button>
+</div>
 <div id="fade"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.25.2
+   STARSHIP CADET: CSV Wren                            build 0.28.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -92,6 +109,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    12. MAIN LOOP
    13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
    14. SCHEDULES        planDay, whereIs: where all the crew are (after 13)
+   15. PLAYER NEEDS     needs, activities, walking speed, the device (after 14)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -5458,7 +5476,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.25.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5500,8 +5518,9 @@ function tickShip(dt) {
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
-// ---- saving: { v, build, time, player: { deck, tile, facing }, ship: { decks: { n: { open } } }, crew: {} } ----
-const SAVE_KEY = 'starship-cadet-save', SAVE_V = 1;
+// ---- saving: { v, build, time, player: { deck, tile, facing, needs }, ship: { decks: { n: { open } } }, crew: {} } ----
+// v 2 (0.28.1) adds player.needs (section 15); a v 1 save still loads, with needs at 80
+const SAVE_KEY = 'starship-cadet-save', SAVE_V = 2;
 const URL_FLAGS = new URLSearchParams(location.search);
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd'),   // the crowd demo (section 8b) never touches the save
       DEBUG = URL_FLAGS.has('debug');
@@ -5512,7 +5531,7 @@ function saveGame() {
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
-      player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
+      player: { deck: player.deck, tile: player.here(), facing: player.face, needs: SHIP.player && SHIP.player.needs }, ship: { decks }, crew: {},
     }));
   } catch (e) { /* no storage, or full: the game carries on unsaved */ }
 }
@@ -5520,7 +5539,7 @@ function loadGame() {
   if (NOSAVE) return null;
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (!s || s.v !== SAVE_V) return null;               // no save, or one this build doesn't know: start fresh
+    if (!s || !(s.v === 1 || s.v === SAVE_V)) return null;   // no save, or one this build doesn't know: start fresh
     const t = s.time, p = s.player, tile = p && p.tile;
     if (!t || !(t.day >= 1 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !DECKS[p.deck]) return null;
     if (!Array.isArray(tile) || tile.length !== 2 || !tile.every(Number.isInteger) || !isFinite(p.facing)) return null;
@@ -5556,6 +5575,7 @@ newBtn.onclick = () => {
   if (!free(...c)) { const p = cellPos(...c); c = nearestOpen(p.x, p.z, player) || c; }
   player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = Math.PI;
   target.copy(player.obj.position).setY(.7); lastRoom = null;
+  playerNew();                                           // section 15: fresh needs
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
@@ -5978,6 +5998,286 @@ function dayReport(day) {
 }
 // sleeping (sleepUntil) and other jumps: plan the days you skip into, so arriving anywhere is instant
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
+
+// =====================================================================
+// 15. PLAYER NEEDS & DEVICE
+// Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
+// met) in SHIP.player.needs. They drain with ship time and come back by
+// doing things: eat (the servery, a mess seat, the grab shelf), sleep (your
+// bunk, section 13), shower, work out (treadmill, weights), call home (a
+// booth). Tap the thing to do it: you walk there, take the pose, time runs,
+// the need rises; walk away to stop. Places crew hold are left alone.
+// Fitness gains you nothing, but below SLOW_BELOW of fitness, or of energy,
+// you walk slower. Nothing else is punished; there is no fail state.
+// The device is a PLACEHOLDER for the user's design: a button opens a plain
+// panel of sections, added with device.addSection(id, title, render).
+// Sits after 14 like 13 and 14 do; it only touches the player, the deck and
+// the HUD at run time (section 10 and on). Nothing here calls R().
+// Hooks elsewhere: the save (13: v 2, needs, New game), the item tap (11),
+// playerUpdate in the main loop (12), the device's HTML and CSS.
+// =====================================================================
+const NEEDS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];
+const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
+// drain per ship hour: [awake, asleep]. A normal day (breakfast, dinner, a shower, 8 hours' sleep) keeps every
+// need above 40; the gym every two or three days keeps fitness up; a call home every two days keeps social up.
+const NEED_DRAIN = { hunger: [4, 2], energy: [3.75, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
+const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
+const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
+const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
+const needClamp = v => Math.max(0, Math.min(100, v));
+function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
+  const src = s && s.v >= 2 && s.player && s.player.needs, out = {};
+  for (const k of NEEDS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
+  return out;
+}
+SHIP.player = { needs: needsLoad(SAVED) };
+function needsDrain(mins, asleep) {
+  const n = SHIP.player.needs, h = mins / 60;
+  for (const k of NEEDS) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * h);
+  if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * h);
+}
+// walking speed: 1, or SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy
+const playerSpeed = (n = SHIP.player.needs) => (n.fitness < SLOW_BELOW ? SLOW_SPEED : 1) * (n.energy < SLOW_BELOW ? SLOW_SPEED : 1);
+// the line on the device: the lowest need under 50 says something, else all's well
+const NEED_SAY = {
+  energy: ['You feel sluggish: get some sleep. Your bunk is in Bunk 1 on Deck 4.', 'You\'re getting tired.'],
+  fitness: ['You\'re out of shape and slow on your feet: work out at the gym on Deck 3.', 'You could do with some exercise.'],
+  hunger: ['You\'re hungry. The mess serves breakfast 06:00-08:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
+  hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
+  social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
+};
+function needsLine() {
+  const n = SHIP.player.needs, k = NEEDS.slice().sort((a, b) => n[a] - n[b])[0];
+  return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
+}
+
+// ---- activities: tap the thing. ACT_TAP picks the activity by what you tapped, then the nearest free place of
+// its types (on this deck, within ACT_NEAR m of the thing). Without a place nearby the tap does what it always did. ----
+const ACTS = {   // need and gain over mins ship minutes; pose: the crowd's (anim names fall back to stand until 8b has them)
+  gym:    { need: 'fitness', gain: 30, mins: 30, title: 'Working out', done: 'Workout done. You feel loose and warm.' },
+  call:   { need: 'social', gain: 40, mins: 15, pose: 'call', title: 'Calling home', done: 'You say goodbye and send it off. It\'ll be days getting there.' },
+  browse: { mins: 8, pose: 'browse', title: 'Browsing', done: 'You\'ve picked out a few things. Pay at the counter.' },
+  pay:    { mins: 2, pose: 'pay', title: 'Paying', done: 'Paid. Nothing to carry yet: the shop\'s goods come later.' },
+  shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
+  tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
+  eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
+  grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
+};
+const ACT_TAP = [   // what you tapped (its title), the place types it leads to, the activity
+  [/treadmill|rowing|weights|mats/i, ['gym'], 'gym'],
+  [/^booth/i, ['callhome'], 'call'],
+  [/^shelves$|drinks fridge|window display/i, ['shop'], 'browse'],
+  [/^counter$/i, ['work:store'], 'pay'],
+  [/^servery$/i, ['servery-queue'], 'tray'],
+  [/^grab and go$/i, ['grab-shelf'], 'grab'],
+  [/table/i, ['mess-seat'], 'eat'],
+  [/^shower$/i, ['shower'], 'shower'],
+];
+const ACT_NEAR = 2.4;
+let ACT = null, basket = false, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
+const heldBy = id => DECK_CREW.find(a => a.goalId === id);       // crew at a place, or on their way to it
+const playerHolds = () => ACT && ACT.placeId || null;             // the place you're using (for the schedules, later)
+function privatePlace(pl) {                              // someone's own: named after a bed, or in a room with a bed
+  const mine = playerBed();
+  for (const q of PLACE_OF.values()) if (q.type === 'bed' && q.id !== mine && (q.room === pl.room || pl.id.startsWith(q.id + '-'))) return true;
+  return false;
+}
+// food comes from the galley (section 16, the galley engineer): galleyServe(where, peek) with where 'servery' or
+// 'grab' gives { ok, dish } or { ok: false, why }; peek only asks. Until it's there: the servery is open in the
+// meal windows, the shelf always.
+function foodFrom(where, peek) {
+  if (typeof galleyServe === 'function') return galleyServe(where, peek);
+  if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
+  const m = SHIP.time.min;
+  if (m >= 360 && m < 480) return { ok: true, dish: 'breakfast' };
+  if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
+  return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 08:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
+}
+// an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
+function playerTap(it, at, point) {
+  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
+  const [, types, kind] = rule;
+  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
+    .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
+    .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
+  if (!near.length) return false;
+  if (kind === 'pay') {                                  // the counter: pay for what you've picked out, standing at it
+    if (!basket) return false;
+    const clerk = heldBy(near[0][0].id);
+    approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
+    return true;
+  }
+  if ((kind === 'tray' || kind === 'eat') && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
+  const free = near.find(([pl]) => !heldBy(pl.id));
+  if (!free) {
+    const a = heldBy(near[0][0].id);
+    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
+    return true;
+  }
+  const [pl, spot] = free;
+  const pose = kind === 'gym' ? pl.anim || (/treadmill/i.test(it.t) ? 'run' : pl.pose === 'stand' ? 'lift' : pl.pose)
+    : kind === 'call' ? pl.anim || 'call' : kind === 'eat' ? spot.pose : pl.anim || ACTS[kind].pose;
+  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x });
+  return true;
+}
+// head for a place (or, with no place, do it where you stand) and do the activity there
+function actStart(kind, placeId, o = {}) {
+  actEnd(true);
+  const spot = placeId ? placeSpot(placeId) : null, here = player.here();
+  ACT = { kind, def: ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
+  if (!spot) { actBegin(); return; }
+  ACT.cb = () => actBegin();
+  if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
+  if (!playerGo(spot.walk, ACT.cb)) { ACT = null; toast(o.title || ACTS[kind].title, 'You can\'t get there just now: someone\'s in the way.'); }
+}
+function actBegin() {
+  const A = ACT; if (!A) return;
+  const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && heldBy(pl.id);
+  if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
+    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(q.type === 'shower' && privatePlace(q)))
+      .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
+      .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
+    if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
+    ACT = null; toast(A.o.title, 'In use: ' + who.p.name + ' got there first.'); return;
+  }
+  if (A.kind === 'tray' || A.kind === 'eat' && !A.o.fed || A.kind === 'grab') {   // take the food now
+    const f = foodFrom(A.kind === 'grab' ? 'grab' : 'servery');
+    if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
+    A.o.dish = f.dish;
+  }
+  const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
+  A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
+  A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
+  A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
+  const what = A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
+    : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
+  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + A.def.mins + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+}
+// stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
+function actEnd(abort) {
+  const A = ACT; if (!A) return; ACT = null;
+  if (A.body) { A.body.dispose(); player.obj.visible = true; }
+  if (abort) return;
+  player.face = player.obj.rotation.y = A.face;
+  if (A.def.done) toast(A.def.title, A.def.done + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
+  if (A.kind === 'browse') basket = true;
+  if (A.kind === 'pay') basket = false;
+  if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
+    const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
+      .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
+    const o = { title: 'Mess hall', fed: true, dish: A.o.dish };
+    if (seat) actStart('eat', seat[0].id, { ...o, pose: seat[1].pose });
+    else { actStart('eat', null, o); toast('Mess hall', 'Every seat\'s taken, so you eat standing up.'); }
+  }
+}
+// once a frame: the walk there, sliding into the place, the time it takes, and stepping back out
+function actUpdate(dt, t) {
+  const A = ACT;
+  if (A.deck !== deckDef) { actEnd(true); return; }
+  if (A.phase === 'walk') { if (player.onArrive !== A.cb) ACT = null; return; }   // you went somewhere else
+  if (player.path.length || player.steer) { actEnd(true); return; }               // walked away: stop
+  const go = (x, z) => {                                 // glide toward x, z; true when there
+    const dx = x - A.x, dz = z - A.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
+    if (d <= st) { A.x = x; A.z = z; return true; }
+    A.x += dx / d * st; A.z += dz / d * st; A.face = Math.atan2(dx, dz); return false;
+  };
+  let pose = A.pose;
+  if (A.phase === 'in') {
+    if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = 'walk';
+  } else if (A.phase === 'do') {
+    if (A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
+  }
+  if (A.phase === 'out') {
+    const p = player.obj.position;
+    if (go(p.x, p.z)) { actEnd(false); return; }
+    pose = 'walk';
+  }
+  A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
+  A.body.update(dt, t);
+}
+// once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
+function playerUpdate(dt, t) {
+  const now = shipNow(), n = SHIP.player.needs;
+  if (needsT === null || now < needsT) needsT = now;
+  const dm = now - needsT;
+  if (dm > 0) {
+    needsT = now; needsDrain(dm, false);
+    const A = ACT;
+    if (A && A.phase === 'do') {
+      const m = Math.max(0, Math.min(dm, A.def.mins - A.done)); A.done += dm;
+      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + (A.def.gain / A.def.mins + NEED_DRAIN[A.def.need][0] / 60) * m);
+    }
+  }
+  if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
+  player.maxV = PLAYER_V0 * playerSpeed();
+  for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
+    const slow = n[k] < SLOW_BELOW;
+    if (slow && slowWas[k] === false) toast('Your device', NEED_SAY[k][0]);
+    slowWas[k] = slow;
+  }
+  if (ACT) actUpdate(dt, t);
+  const m = Math.floor(now);
+  if (m !== devMin) { devMin = m; device.refresh(); }
+}
+// a time skip: asleep if you chose Sleep (section 13), or for the debug Day button (a skip from the night);
+// otherwise awake. Any activity stops.
+SIM_ADVANCE.push((from, to) => {
+  actEnd(true);
+  needsDrain(to - from, sleeping || nightAt(from % 1440) > .5);
+  needsT = to;
+});
+// New game (section 13): fresh needs, nothing in hand
+function playerNew() { actEnd(true); basket = false; SHIP.player.needs = needsLoad(null); needsT = null; slowWas = {}; device.refresh(); }
+
+// ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
+// device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
+// jobs live in their own data; this only shows them. ----
+const device = (() => {
+  const el = document.getElementById('device'), body = document.getElementById('devBody'), btn = document.getElementById('devBtn'), sections = [];
+  let back = null;
+  const api = {
+    addSection(id, title, render) { const i = sections.findIndex(s => s.id === id); const s = { id, title, render }; if (i < 0) sections.push(s); else sections[i] = s; api.refresh(); },
+    open() { back = document.activeElement; el.hidden = false; api.refresh(); document.getElementById('devClose').focus(); },
+    close() { el.hidden = true; if (back && back.focus) back.focus(); },
+    get isOpen() { return !el.hidden; },
+    refresh() {
+      const n = SHIP.player.needs;
+      btn.classList.toggle('low', NEEDS.some(k => n[k] < SLOW_BELOW));
+      if (el.hidden) return;
+      body.textContent = '';
+      for (const s of sections) {
+        const box = document.createElement('section'), h = document.createElement('h3'), inner = document.createElement('div');
+        h.textContent = s.title; box.append(h, inner); body.appendChild(box);
+        try { s.render(inner); } catch (e) { inner.textContent = '(this section failed to draw)'; }
+      }
+    },
+  };
+  btn.onclick = () => (el.hidden ? api.open() : api.close());
+  document.getElementById('devClose').onclick = api.close;
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) api.close(); });
+  return api;
+})();
+device.addSection('now', 'Now', el => {
+  const p = document.createElement('p'), q = document.createElement('p');
+  p.className = 'devtime'; p.textContent = clockText();
+  q.textContent = ACT && ACT.phase !== 'walk' ? (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
+  el.append(p, q);
+});
+device.addSection('needs', 'Needs', el => {
+  const n = SHIP.player.needs;
+  for (const k of NEEDS) {
+    const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
+    row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
+    lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
+    row.setAttribute('role', 'meter'); row.setAttribute('aria-label', NEED_LABEL[k]); row.setAttribute('aria-valuenow', Math.round(n[k]));
+    row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
+    bar.appendChild(fill); row.append(lab, bar, num); el.appendChild(row);
+  }
+  const sp = playerSpeed();
+  if (sp < 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
+});
 
 // =====================================================================
 // 6. CAMERA
@@ -7196,6 +7496,7 @@ function tap(cx, cy) {
   if (ud.item && ud.item.see) { toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to
   if (ud.item) {
     const it = ud.item; it.hit.getWorldPosition(_wp);
+    if (playerTap(it, _wp.clone(), h.point)) return;     // section 15: eat, shower, work out, call home, shop
     approach(_wp.clone(), it.front, it.depth, () => { if (!offerSleep(_wp)) toast(it.t, it.x); });   // offerSleep: section 13
     return;
   }
@@ -7381,6 +7682,7 @@ function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   updateSteer();
   for (const w of walkers) if (w.active) w.update(dt, t);
+  playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
 
