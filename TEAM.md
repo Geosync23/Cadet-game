@@ -19,8 +19,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 | --- | --- | --- | --- |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
 | session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 plan agreed at Sketch 8 (71642e6); all three plans done |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Idle, kept for review fixes |
-| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Deck 1 done (0.8.4, a11f001), waiting on the user's review. Review build: https://claude.ai/artifact/LSfXFx2jDcjPJRjCr7o67v. Idle |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Working on the user's review fixes: back-room access, watch room re-sited and bigger. Branch `claude/deck6-fixes`, builds 0.11.x, from 0.10.1 |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Deck 1 done (0.8.4, a11f001), waiting on the user's review. Review build: https://claude.ai/artifact/LSfXFx2jDcjPJRjCr7o67v. Working: scaling up Deck 1 and moving the ready room. Branch `claude/deck1-scale`, builds 0.12.x, from 0.10.1 |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect (Deck 2) | `claude/deck2-command` (builds 0.9.x) | Deck 2 done (0.9.5, 1021921), waiting on the user's review. Review build: https://claude.ai/artifact/4hCG96ZNMSxK4q7m4zqk2P. Idle |
 
 ## Done
@@ -52,6 +52,10 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 4. Each runs every turn of its deck, then stops with a review package and waits. No new deck starts without the user's review.
 5. The lead checks in on a timer through the night, steers anything stuck, and builds `claude/ship-integration` with all three decks merged and tested. In the morning the user can play one build with Decks 6, 1 and 2.
 6. If the user doesn't answer the Deck 2 plan's open questions: the six invented officers stay as placeholders, and the 15th room stays a visitors' cabin.
+
+## Meeting brief
+
+- "Starship Cadet: Progress and Next Steps": https://claude.ai/code/artifact/d55752dc-5931-4657-8e28-308bd35c22ba (2026-10-15).
 
 ## Queue
 
