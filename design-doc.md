@@ -236,7 +236,7 @@ Every machine aboard has a condition that wears down with use and time, and wear
 
 ### The ship's systems
 
-- **Systems:** air, water, power, heat, food, waste and laundry, hull, comms and sensors, and propulsion.
+- **Systems:** air, water, power, heat, food, waste and laundry, hull, comms and sensors, propulsion, and transport (the lift and doors, added 2026-10-15).
 - **Condition:** each system has a score from 0 to 100 that wears down with use and time. Each is made of parts that can fail, such as filters, pumps, relays and seals.
 - **Dependencies:**
   - Power feeds everything.
@@ -247,6 +247,8 @@ Every machine aboard has a condition that wears down with use and time, and wear
 ### Machines
 
 Each machine is a real object in a room, with a condition from 100% to 0%, a wear rate and the effect it has on the ship when it falters. Wear depends on use: the galley oven wears fastest around mealtimes, the laundry washers on the morning after a busy shift, the lift whenever people ride it.
+
+Condition bands: healthy 75–100, worn 50–75, faulty 25–50, failing 10–25, broken under 10. A fresh ship starts every machine at 70–100. Ship health measures how well things work, so a well-kept ship reads close to 100 (agreed 2026-10-15).
 
 A machine's life runs through five states:
 

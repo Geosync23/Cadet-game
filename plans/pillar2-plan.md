@@ -121,6 +121,9 @@ JOBS: [{ id, machine, kind, urgency, posted, claimedBy, parts: ['filter'], statu
 - **Wear** runs on paper and is deterministic from the seed and use. For example, the oven wears at mealtimes, the washers after busy shifts, and the lift with every ride.
 - **Effects** come in the staged consequences from the design doc.
 - **Saving:** `SHIP.machines` and `JOBS` are saved.
+- **Panel places** carry `machine: '<id>'`, so the schedules never hand them out as desks; they're used only for servicing and repairs.
+- **One save hook for everyone:** `SAVE_EXTRA` (section 13, from the systems engineer) is a list of `f(save)` run before writing. Needs, the galley and machines all add their part through it.
+- **Effects:** `shipEffects(deck)` (section 17) returns multipliers for need restore and drain, walking, cooking and the lift, plus mood and notes. The player engineer, the sim engineer and the galley engineer apply them.
 
 ## The utility rooms (A5)
 
