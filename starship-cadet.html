@@ -7610,9 +7610,14 @@ function galleyTurn(who = 'player') {
   const S = galleyAdvance(shipNow()); return shipNow() >= j.turnAt && (S.servery.portions > 0 || S.grab.items > 0);
 }
 // someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
+// Each waiter gets their own spot: the queue places in line order (the first to wait at the front), then null.
+// The galley is brought up to t first, so a stepped test sees the same waits as the game.
+const GALLEY_QUEUE = ['3-queue-1', '3-queue-2', '3-queue-3', '3-queue-4'];
 function galleyHold(person, t) {
-  const S = SHIP.galley; if (!S || !S.wait.length) return undefined;
-  const x = S.wait.find(w => w[0] === person.id); return x ? x[4] : undefined;
+  let S = SHIP.galley; if (!S) return undefined;
+  if (t !== undefined && S.at <= Math.floor(t)) S = galleyAdvance(t);
+  if (!S.wait.length) return undefined;
+  const k = S.wait.findIndex(w => w[0] === person.id); return k < 0 ? undefined : GALLEY_QUEUE[k] || null;
 }
 // the save: SHIP.galley as plain data, and back (anything malformed means a fresh start from the plans)
 function galleySave() { return SHIP.galley ? JSON.parse(JSON.stringify(SHIP.galley)) : null; }
