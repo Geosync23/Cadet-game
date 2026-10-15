@@ -6192,13 +6192,14 @@ const WEEK_SHAPE = [
 // where leisure happens: [deck, place type, weight]. Habits add their favourites; options with no places are skipped
 // who: 'junior', 'officer' (anyone above junior) or 'deck2' (officers, and anyone who works on Deck 2)
 const LEISURE = [[3, 'lounge-seat', 3], [3, 'garden', 2], [3, 'bench', 2], [4, 'common-room', 2, 'junior'], [4, 'music', 1], [4, 'bench', .5],
-  [1, 'common-room', 1, 'officer'], [1, 'lounge-seat', .5, 'officer'], [2, 'lounge-seat', 1.5, 'deck2'], [2, 'bench', .5, 'deck2']];
+  [1, 'common-room', 1, 'officer'], [1, 'lounge-seat', .5, 'officer'], [2, 'lounge-seat', 1.5, 'deck2'], [2, 'bench', .5, 'deck2'], [2, 'common-room', 1.5, 'deck2']];
 const HABIT_LEISURE = {
   'garden-lover': [[3, 'garden', 8]], 'lounge-regular': [[3, 'lounge-seat', 8]], 'common-room': [[4, 'common-room', 8, 'junior']],
   'music': [[4, 'music', 8]], 'quiet-corner': [[3, 'lounge-seat', 4], [1, 'common-room', 3], [2, 'lounge-seat', 4]],
 };
 // what someone does at a place (plans/pillar2-plan.md, "Activities on places"): the place's `anim`, else by type
-const PLACE_ANIM = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', laundry: 'fold', 'work:galley': 'cook' };
+// (the music room is listening unless someone plays: the musician habit sets 'play'; poseOf in 8b agrees)
+const PLACE_ANIM = { gym: 'lift', callhome: 'call', shop: 'browse', laundry: 'fold', 'work:galley': 'cook' };
 const placeAnim = pl => pl ? pl.anim || PLACE_ANIM[pl.type] || (pl.type === 'garden' && pl.pose === 'stand' ? 'water' : null) : null;
 // needs, 0-100, 100 = fully met (the plan's "Needs"). Crew needs are on paper: crewNeeds(person, t) reads them off
 // the plans, and needsEst(person, day) is the start-of-day estimate that steers the day's choices (below)
@@ -6410,7 +6411,7 @@ function schedBuild(p, d, occ, S) {
           if (!mine && !isFree(pl.id, s, end)) continue;
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
-          const an = placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
+          const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
           seg(act, end, pl.type, pl.id, ex);
           return pl.id;
         }
@@ -6509,9 +6510,9 @@ function schedBuild(p, d, occ, S) {
     // room's instruments, tending the garden, a drink at the bar, the observatory
     const wk = F.works;
     if (H.has('runner') && U(100) < (wk ? .7 : .6)) out.unshift(() => take('gym', [[3, 'gym-run'], [3, 'gym']], 25 + Math.round(15 * U(101)), { wait: 10, min: 15, tag: 'run' }));
-    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play' }));
+    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play', anim: 'play' }));
     if (H.has('gardener') && U(104) < .6) out.push(() => take('leisure', [[3, 'garden-tend'], [3, 'garden']], 30 + Math.round(30 * U(105)), { wait: 5, min: 20, tag: 'tend' }));
-    if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar' }));
+    if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar', anim: 'drink' }));
     if (H.has('stargazer') && U(108) < .5) out.push(() => take('leisure', [[2, 'observatory'], [2, 'lounge-seat']], 45 + Math.round(45 * U(109)), { wait: 5, min: 25, tag: 'stars' }));
     return out;
   };
@@ -9207,7 +9208,24 @@ function placeSpot(id) {
 // the pose at a place: its activity (run, lift, call, play...) once the crowd can show it (section 8b lists those in
 // CROWD_ANIMS), else the place's plain pose, so a seated pianist stays seated until 'play' exists
 // (the activity comes from the plan's segment, which knows the task: tea on the galley stool is the stool's own pose)
-const crewPose = (sp, an) => (an = an === undefined ? sp.anim : an) && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has(an) ? an : sp.pose;
+// The pose string the crowd takes (8b): 'base:activity' when seated or lying ('sit:play', 'lie:lift'), the
+// activity alone when standing ('browse', 'run'), else the plain pose. What the plan says they're doing comes first
+// (TAG_ACT: a musician plays, a bar regular drinks, the dish pit washes, tea on the galley stool just sits); then
+// someone sitting about in a lounge, common room or on a bench reads, talks or has a drink (seeded per person, place
+// and day); then the place itself (poseOf, 8b). Collisions and taps use the place's plain pose (spot.pose).
+const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null };
+const SIT_ABOUT = new Set(['lounge-seat', 'common-room', 'bench']);
+function crewPose(a) {
+  const sp = a.spot, pl = PLACE_OF.get(sp.id), base = sp.pose;
+  if (typeof CROWD_ANIMS === 'undefined') return base;
+  const ok = x => x && CROWD_ANIMS.has(x), comp = x => base === 'sit' || base === 'lie' ? base + ':' + x : base === 'stand' || base === 'work' ? x : base;
+  if (a.tag in TAG_ACT) { const x = TAG_ACT[a.tag]; return ok(x) ? comp(x) : base; }
+  if (base === 'sit' && pl && SIT_ABOUT.has(pl.type) && !pl.anim) {
+    const u = idHash(a.p.id + '|' + sp.id + '|' + SHIP.time.day) % 100, x = u < 45 ? 'read' : u < 80 || pl.type !== 'lounge-seat' ? 'talk' : 'drink';
+    if (ok(x)) return 'sit:' + x;
+  }
+  return typeof poseOf === 'function' && pl ? poseOf(pl) : base;
+}
 // findPath, with the 'closed' doors into `rooms` open for the moment; `who` (a CrewAgent or roster person) is passed
 // on so service hatches open for Works crew (hatchPassable, section 4)
 function crewPath(s, g, rooms, who) {
@@ -9258,7 +9276,8 @@ class CrewAgent {
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || null;
-    this.anim = w.placeId === goalId ? w.anim || null : null;   // what they'll do there
+    this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
+    if (goalId && goalId === PLAYER_PLACE) goalId = null;  // you're using it (section 15): they wait nearby
     if (typeof galleyHold === 'function') {                // section 16: waiting for food, at a queue spot nobody else is heading for
       const h = galleyHold(this.p, now);
       if (h !== undefined) goalId = h && DECK_CREW.some(o => o !== this && o.goalId === h) ? null : h;
@@ -9272,7 +9291,7 @@ class CrewAgent {
       this.pose = 'walk'; this.y = 0;
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
       const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
-      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this.spot, this.anim); this.face = this.spot.face; this.y = this.spot.y; }
+      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this); this.face = this.spot.face; this.y = this.spot.y; }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); this.pose = 'walk'; }
     } else if (this.goalId === '@lift') return false;    // in the car: gone to another deck
     else if (!this.spot) this.pose = 'stand';
@@ -9341,7 +9360,7 @@ function crewArrive(p, w, now, mid) {
   a.retarget(w.placeId || null);
   if (!mid || !spot || !a.path.length) return;
   const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
-  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.pose = crewPose(spot, w.anim || null); a.face = spot.face; a.y = spot.y; }
+  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.tag = w.tag || null; a.pose = crewPose(a); a.face = spot.face; a.y = spot.y; }
   else if (done > 0) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
 }
 // once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
@@ -9350,6 +9369,7 @@ function updateDeckCrew(dt) {
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
   for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
   BUSY.clear(); for (const a of DECK_CREW) if (a.settled && a.spot) BUSY.add(a.spot.id);
+  PLAYER_PLACE = typeof playerHolds === 'function' ? playerHolds() : null;
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
   crewDetail();
