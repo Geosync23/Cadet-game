@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.0
+   STARSHIP CADET: CSV Wren                            build 0.7.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3461,6 +3461,84 @@ DECKS[3] = {
 
 };
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
+
+// =====================================================================
+// DECK 6: ENGINEERING (step 6e, turn 1: the shell)
+// From plans/deck6-plan.html. The bottom of the ship: the engine room fills the flat stern, the reactor the bow,
+// with the foot of the spine, the overlook, engine control and the watch room between. No windows anywhere.
+// Engine room, engine control and the reactor are locked rooms you look into through glass.
+// =====================================================================
+DECKS[6] = {
+  num: 6, name: 'Engineering', seed: 60661, hazard: true,
+  blurb: 'Engine room, reactor, power junctions', arrive: 'The overlook is aft, onto the engine room. Engine control and the reactor are forward. Mind the heat.',
+  lift: [19, 6],
+  // car rows 4-6, trunks row 3 above it, ladder row 7: the same world spot as every deck. The spine ends here.
+  map: [
+    '..EEEEEEEEEEcccccccccccccccRRRRR....',
+    '..EEEEEEEEEEOOOO++++++jjjjjRRRRRRR..',
+    '..EEEEEEEEEEOOOO++++++jjjjjRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++YY+++++++RRRRRRRR.',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++ZZ++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRR..',
+    '..EEEEEEEEEECCCCCCCCCCCCCCCRRRRR....',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,18,4': 'lift', 'v,18,5': 'lift', 'v,18,6': 'lift', 'v,20,4': 'lift', 'v,20,5': 'lift', 'v,20,6': 'lift',   // one wide door each side
+    'h,18,3': 'glass', 'h,19,3': 'glass',                     // the foot of the trunks, behind glass above the car
+    'h,18,8': 'hatch', 'h,19,8': 'glass',                     // the bottom of the ladder, with its hatch
+    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass', 'v,16,7': 'glass',   // onto the overlook
+    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass',  // the overlook's long window onto the engine room...
+    'v,12,5': 'closed',                                                          // ...the stair door down to the coil floor...
+    'v,12,6': 'glass', 'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and the rest of the window
+    'v,22,5': 'closed', 'v,22,4': 'glass', 'v,22,6': 'glass', // engine control, glass onto the lobby
+    'v,27,4': 'glass', 'v,27,5': 'glass', 'v,27,6': 'glass', 'v,27,7': 'glass', // engine control's window onto the reactor
+    'v,27,3': 'closed',                                       // the reactor's shielded door, at the end of the lobby's alcove
+    'v,22,9': 'door',                                         // the watch room
+    'h,17,1': 'hatch', 'h,17,11': 'hatch',                    // down into the port and starboard crawlways
+    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // port power junction from the lobby; starboard from the watch room
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: { 'v,12,5': 'E', 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
+  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,22,8', 'w', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
+  rooms: {
+    '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    O: { name: 'Engine overlook', floor: 'steel' },
+    S: { name: 'Engine watch room', floor: 'wood' },
+    // locked, but seen through glass
+    E: { name: 'Engine room', floor: 'grate', tap: 'The stair down to the engine room floor: the drive coils and the drive itself. Tier 4 access. Watch them through the glass.' },
+    K: { name: 'Engine control', floor: 'plate', tap: 'Engine control. Tier 3 access, once power work opens. You can see the board through the glass.' },
+    R: { name: 'Reactor', floor: 'grate', tap: 'The reactor\'s shielded door, with radiation trefoils painted either side. Tier 4 access, and only on a team job.' },
+    // sealed until their tier
+    c: { name: 'Port crawlway', void: true, tap: 'The lowest crawlway on the ship, along the port hull from the engine room to the reactor. Tier 3 access.' },
+    C: { name: 'Starboard crawlway', void: true, tap: 'The lowest crawlway on the starboard side, from the engine room to the reactor. Tier 3 access.' },
+    j: { name: 'Port power junction', void: true, tap: 'Breaker cabinets and the main junction, where the reactor\'s power splits for the decks above. Tier 3 access.' },
+    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, behind the watch room\'s kettle. Tier 3 access.' },
+  },
+  windows: [],
+  closedDoors: {
+    'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
+  },
+  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  dress(d) {
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw] of [['v,18,7', 'w'], ['v,20,7', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Engineering, the bottom of the line.') });
+    // the foot of the spine: the trunks start behind glass above the car, the ladder ends behind glass below it
+    for (const r of ['Y', 'Z', 'E', 'K', 'R']) NO_FADE.add(r);        // the locked rooms behind glass stay solid
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
+    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+  },
+};
+for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
 
 // =====================================================================
 // 5. LIGHTING
