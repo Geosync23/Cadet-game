@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.8
+   STARSHIP CADET: CSV Wren                            build 0.33.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6262,7 +6262,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8063,6 +8063,7 @@ const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
+const YOU_KEEP = 720;                                   // a job you take goes back on the board if it isn't done in 12 ship hours
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
 // make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
@@ -8127,8 +8128,9 @@ function jobFinish(j, t, by) {
 const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
 function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
-  // 1. finished jobs (the crew's; yours finish when you finish them)
+  // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - j.start >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
@@ -8196,7 +8198,7 @@ function jobWhere(person, t) {
 function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++; return true;
 }
 function dropJob(id) {
@@ -8209,6 +8211,34 @@ function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
 }
+
+// ---- the device's jobs section (0.33.9): the board in your pocket. The device itself is section 15's placeholder
+// (device.addSection); this only lists jobs and lets you claim or drop one. Doing it, at the machine's panel,
+// comes with the player engineer's repair activity (finishJob). ----
+function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed') || null; }
+function jobsSection(el) {
+  const line = (txt, cls) => { const p = document.createElement('p'); p.textContent = txt; if (cls) p.className = cls; el.appendChild(p); return p; };
+  const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
+  const board = jobsBoard(), mine = myJob();
+  if (mine) {
+    const [title, where, state] = jobCard(mine), m = mine.machine && machineById(mine.machine);
+    line('Yours: ' + title + ', ' + where + '.', 'devtime');
+    if (m) {
+      const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+    } else line('Hover cart from the cargo hold, Deck 5.');
+    button('Drop it', () => dropJob(mine.id));
+  }
+  const open = board.filter(j => !j.claimedBy);
+  if (!open.length && !mine) line('Nothing on the board. Enjoy it while it lasts.');
+  for (const j of open.slice(0, 5)) {
+    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+    const p = line((pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > PLAYER_TIER ? ' (tier ' + jobTier(j) + ')' : ''));
+    if (canTake) button('Take it', () => claimJob(j.id));
+  }
+  if (open.length > 5) line('And ' + (open.length - 5) + ' more on the board in the Works bay.');
+}
+if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs', 'Jobs', jobsSection);
 
 // ---- the Works bay job board (Deck 5), live (0.33.8) ----
 // The jobBoard kit (section 4b) hands its canvas texture to jobBoardLive as the deck is built (one inert line);
