@@ -10,6 +10,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 ## Files
 - `starship-cadet.html`: the game (one file; three.js r128 from cdnjs).
 - `cadet_test.py`: the regression test (compares two builds; see DEV_NOTES "Testing").
+- `deck_check.py`: visits every built deck and checks reachability, crew, draw calls and memory.
 - `plans/`: deck plan pages.
 
 ## How we work

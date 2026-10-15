@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.6.7
+   STARSHIP CADET: CSV Wren                            build 0.6.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1609,6 +1609,57 @@ const KIT = {
     const hp = new THREE.Mesh(new THREE.TorusGeometry(.08, .012, 6, 14, Math.PI), M.slateDark); hp.position.set(-.3, .95, -.4); g.add(hp);
     return { w: 1.15, d: 1.3 };
   },
+  // ---- the promenade ----
+  planterIsland(g, o = {}) {                             // a planter down the middle of the promenade: a tree, flowers, a bench
+    const cl = PROM.clad, L = GD.leaves, fl = o.flowers || 0;   // facing each lane, lamps at the ends, a warm strip under the seats
+    box(2.2, .5, .9, cl, 0, .25, 0, g); box(2.3, .06, 1.0, PROM.rim, 0, .53, 0, g); box(2.1, .03, .8, GD.soil, 0, .555, 0, g);
+    for (const sz of [-1, 1]) {
+      box(2.0, .06, .36, M.wood, 0, .45, sz * .69, g);
+      for (const x of [-.9, .9]) box(.06, .42, .3, PROM.frame, x, .21, sz * .69, g);
+      const st = box(1.9, .02, .04, GD.ledW, 0, .06, sz * .52, g); st.castShadow = false;
+    }
+    cyl(.07, .1, 1.6, GD.post, 0, 1.3, 0, g, 8);         // the tree: a slim trunk and a round crown
+    for (let k = 0; k < 13; k++) { const a = k * 2.4, r = k ? .2 + (k % 3) * .17 : 0; leaf(L[1 + k % 2], Math.sin(a) * r, 2.25 + (k % 4) * .11 - r * .25, Math.cos(a) * r * .8, .36, .3, .32, g); }
+    if (o.fruit) for (let k = 0; k < 7; k++) { const a = k * 1.7 + .4; soft(GD.lemon, Math.sin(a) * .48, 2.05 + (k % 3) * .14, Math.cos(a) * .4, .05, .05, .05, g); }
+    for (let k = 0; k < 14; k++) {                       // flowers and greenery round the trunk
+      const x = -.92 + (k >> 1) * .27 + (k % 2) * .1, z = k % 2 ? .24 : -.24;
+      if (Math.abs(x) < .2) continue;
+      leaf(L[1 + k % 2], x, .63, z, .13, .1, .13, g);
+      leaf(PROM.bloom[fl + k % 2], x + .03, .72, z, .05, .045, .05, g);
+    }
+    for (const x of [-1.28, 1.28]) {                     // lamp posts at the ends
+      cyl(.09, .11, .06, PROM.frame, x, .03, 0, g, 12); cyl(.03, .03, 2.1, PROM.frame, x, 1.08, 0, g, 8);
+      cyl(.09, .05, .05, PROM.frame, x, 2.14, 0, g, 12);
+      const gb = soft(GD.ledW, x, 2.24, 0, .1, .1, .1, g); gb.castShadow = false; glow('#fff1d0', .8, x, 2.24, 0, g, .45);
+    }
+    return { w: 2.8, d: 1.74, tall: true };
+  },
+  routeKiosk(g) {                                        // a two-sided screen on a post: the Wren's route across the frontier
+    const t = tex(256, 340, (c, w, h) => {
+      c.fillStyle = '#0b1424'; c.fillRect(0, 0, w, h);
+      for (let k = 0; k < 90; k++) {                     // stars from a fixed hash, so the deck's random sequence is untouched
+        const hx = Math.abs(Math.sin(k * 12.9898) * 43758.5453) % 1, hy = Math.abs(Math.sin(k * 78.233) * 12543.123) % 1;
+        c.fillStyle = `rgba(230,240,255,${.25 + (k % 5) * .12})`; c.fillRect(hx * w, 40 + hy * 220, 1.6, 1.6);
+      }
+      const veyli = c.createRadialGradient(205, 120, 5, 205, 120, 90); veyli.addColorStop(0, 'rgba(201,120,214,.35)'); veyli.addColorStop(1, 'rgba(201,120,214,0)');
+      c.fillStyle = veyli; c.fillRect(0, 30, w, 240);
+      c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('THE TOUR', 16, 30);
+      const P = [[30, 230], [70, 200], [96, 150], [140, 160], [168, 112], [205, 96], [226, 60]];
+      c.setLineDash([5, 5]); c.strokeStyle = 'rgba(95,214,198,.55)'; c.lineWidth = 2; c.beginPath(); P.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
+      c.setLineDash([]); c.strokeStyle = '#5fd6c6'; c.lineWidth = 3; c.beginPath(); P.slice(0, 4).forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
+      for (const [x, y] of P) { c.fillStyle = '#a9c4bf'; c.beginPath(); c.arc(x, y, 3.5, 0, 6.29); c.fill(); }
+      c.fillStyle = '#f2c94c'; c.beginPath(); c.arc(140, 160, 7, 0, 6.29); c.fill();
+      c.font = '600 12px system-ui,sans-serif'; c.fillStyle = '#f2c94c'; c.fillText('WREN', 150, 178);
+      c.fillStyle = '#7fa9a3'; c.fillText('Concord space', 14, 258); c.fillStyle = '#c99ad6'; c.fillText('Veyli reaches', 160, 40 + 14);
+      c.fillStyle = '#a9c4bf'; c.font = '500 13px system-ui,sans-serif'; c.fillText('Survey stops: 3 of 7', 16, h - 44);
+      c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('Next: the Harrow drift', 16, h - 22);
+    });
+    const sm = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
+    box(.12, 1.0, .12, PROM.frame, 0, .5, 0, g); box(.5, .05, .34, PROM.frame, 0, .025, 0, g);
+    box(.72, .92, .1, PROM.frame, 0, 1.45, 0, g); box(.76, .04, .14, PROM.brass, 0, 1.93, 0, g);
+    for (const sz of [-1, 1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(.62, .82), sm); p.position.set(0, 1.45, sz * .056); if (sz < 0) p.rotation.y = Math.PI; g.add(p); }
+    return { w: .76, d: .4 };
+  },
   // ---- Deck 3 bow lounge ----
   booth(g, o = {}) {                                     // two high-backed benches facing across a table, against a wall
     const f = o.fab || LNG.navy;
@@ -2118,6 +2169,10 @@ const GYM = {
   rubber: std('#1d2226', .9), frame: std('#2b343b', .5, .4), accent: std('#e9c46a', .5), teal: std('#2a9d8f', .6),
   mat: ['#2a9d8f', '#7a5aa8', '#d96a2e'].map(c => std(c, .9)), plate: std('#22282d', .5, .3), chrome: std('#c7cfd3', .25, .8),
   mirror: std('#a9c3c9', .08, .4, { emissive: col('#2c4048'), emissiveIntensity: .35 }),
+};
+const PROM = {                                             // the promenade's planters and kiosk
+  clad: std('#8a6446', .75), rim: std('#d4c7a8', .6), frame: std('#2b343b', .5, .35), brass: std('#c9a24a', .35, .7),
+  bloom: ['#f2c94c', '#ef7f45', '#e86a9a', '#f4f1e8'].map(c => std(c, .6)),
 };
 const SHOP = { goods: ['#e86a9a', '#f2c94c', '#2a9d8f', '#d96a2e', '#7a5aa8', '#e9e1d0', '#5f9e3a', '#c8463c'].map(c => std(c, .6)), glowW: std('#f4fbff', .3, 0, { emissive: col('#dff2ff'), emissiveIntensity: .8 }) };
 function makePollen(w, d, n = 40) {                        // drifting motes over the beds
@@ -3240,6 +3295,14 @@ DECKS[3] = {
     for (const [x, z, band] of [[.45, 9.55, '#5fd6c6'], [5.55, .45, '#d9a441'], [5.55, 9.55, '#c45a3f']]) place('+', 'plant', x, z, 'n', { band, big: true });
     // the promenade: big plants by the garden doors and the lounge doors
     for (const [x, z] of [[.45, .45], [.45, 3.55], [28.55, .45], [28.55, 3.55]]) place('=', 'plant', x, z, 'n', { big: true, band: '#5fd6c6' });
+    // planter islands down the middle (rows 10-11), between the doorways, so every door keeps a straight way across;
+    // the route kiosk where the promenade leaves the plaza; benches either side of the garden doors
+    place('=', 'planterIsland', 17.5, 2, 'n', { fadeGroup: '=:a', fruit: true, flowers: 2, it: IT('Lemon tree', 'A little lemon tree in a planter, with a bench on each side. The gardeners water it from a can, because it is not technically the garden.') });
+    place('=', 'planterIsland', 23.5, 2, 'n', { fadeGroup: '=:b', it: IT('Planter', 'Marigolds this month, after a vote at the mess hall. The losing side wanted cacti, and has not let it go.') });
+    place('=', 'routeKiosk', 12.5, 2, 'w', { block: [[12, 1], [12, 2]], it: IT('Route map', 'The Wren\'s tour, drawn as a dotted line across the frontier. Three survey stops done, four to go. The little ship on the map is smudged where people keep touching it.') });
+    place('=', 'bench', 2.6, .32, 'n', { it: IT('Bench', 'By the garden doors. It smells of tomatoes and wet soil here, which some people like a lot.') });
+    place('=', 'bench', 2.6, 3.68, 's');
+    for (const [x, z, band] of [[1.3, .4, '#d9a441'], [3.9, .4, '#c45a3f'], [1.3, 3.6, '#c45a3f'], [3.9, 3.6, '#d9a441']]) place('=', 'plant', x, z, 'n', { band });
 
     // ---- mess hall: four long tables of eight under the port windows, three round tables of four by the promenade.
     // The line runs down the galley wall: trays, the servery, grab-and-go. Drinks and tray return at the far end. 44 seats.
