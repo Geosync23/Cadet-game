@@ -5761,15 +5761,17 @@ function schedRoomLocked(n, room) {
 // work deck; when those run out, any other workstation on the deck nobody on that shift has, outside locked
 // rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
-  const desks = new Map(), used = new Set();
+  const desks = new Map(), used = new Map();
   const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley')).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = (pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room)))
       .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));   // machine panels are for servicing (B2); the galley books its own
-    const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
-    if (d) used.add(p.shift + '|' + d.id);
+    // a desk is taken for a shift, or, for people with rota.hours, only for those hours (the storekeepers share the till)
+    const hrs = p.rota && p.rota.hours, clash = (a, b) => !a || !b || a.some(([x, y]) => b.some(([u, v]) => x < v && u < y));
+    const d = pool.find(pl => !(used.get(p.shift + '|' + pl.id) || []).some(h => clash(h, hrs)));
+    if (d) (used.get(p.shift + '|' + d.id) || used.set(p.shift + '|' + d.id, []).get(p.shift + '|' + d.id)).push(hrs || null);
     desks.set(p.id, d ? d.id : null);
   }
   return desks;
@@ -5788,8 +5790,15 @@ const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).incl
 // stints make one stretch of work; a given meal is a normal meal (queue, then a seat) between those times; a meal
 // not given is the normal one in its window; bedBy caps that night's bedtime. If only the older galleyShift(person,
 // day) -> [[from, to, placeId?, task?], ...] exists, that's used instead. Consulted only for day-shift galley staff.
-function galleyPlan(p, d) {
-  if (p.dept !== 'galley' || p.shift === 'night') return null;
+// A work day in blocks, for anyone whose hours aren't the plain shift: galley staff (their rota), and anyone with
+// rota.hours ([[from, to], ...] in minutes from midnight, on their work days, at their own desk: the storekeepers)
+function shiftBlocks(p, d) {
+  if (p.shift === 'night') return null;
+  const hrs = p.rota && p.rota.hours;
+  if (p.dept !== 'galley' || !(typeof galleyDay === 'function' || typeof galleyShift === 'function')) {
+    if (!Array.isArray(hrs) || !hrs.length || !isWorkDay(p, d)) return null;
+    return { blocks: hrs.filter(x => x[1] > x[0]).map(x => [x[0], x[1], null, null]).sort((x, y) => x[0] - y[0]), wake: null, bedBy: null, meals: null, desk: true };
+  }
   if (typeof galleyDay === 'function') {
     const g = galleyDay(p, d); if (!g) return null;
     const blocks = g.role && Array.isArray(g.blocks) ? g.blocks.filter(x => x.to > x.from).map(x => [x.from, x.to, x.placeId || null, x.task || null]) : [];
@@ -5805,13 +5814,13 @@ const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley book
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
 function schedFrame(p, d) {
   const U = k => schedU(p.seed, d, k), H = new Set(p.habits || []), shape = WEEK_SHAPE[weekday(d)];
-  const gp = galleyPlan(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
+  const gp = shiftBlocks(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
   let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
-  const next = galleyPlan(p, d + 1);                      // an early galley start tomorrow means an early night
+  const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
   if (gp && gp.bedBy != null) bed = Math.min(bed, gp.bedBy);
   if (next && next.blocks) bed = Math.min(bed, (next.wake != null ? next.wake : next.blocks[0][0] - 35) - 410 + 1440);
   bed = Math.round(Math.min(1430, bed));
@@ -5905,8 +5914,10 @@ function schedBuild(p, d, occ, S) {
   };
   const work = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
   const workAt = (pid, task, to) => {                    // a galley stint: its own station and task
-    const pl = pid && S.byId.get(pid), ex = { anim: placeAnim(pl) || 'cook' }; if (task) ex.tag = task;
-    seg('work', to, pl ? pl.type : 'work:galley', pid, ex);
+    const pl = pid && S.byId.get(pid);                   // tea on the stool takes the stool's own pose; the dish pit is 'wash'
+    const an = pl && pl.anim || (task === 'tea' ? null : task === 'wash' ? 'wash' : placeAnim(pl) || (p.dept === 'galley' ? 'cook' : null)), ex = {};
+    if (an) ex.anim = an; if (task) ex.tag = task;
+    seg('work', to, pl ? pl.type : wtype, pid, ex);
   };
   const toilet = k => {                                  // a toilet on the deck you're on, then hands at a basin; nothing if they're busy
     if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2 })) return false;
@@ -6027,16 +6038,17 @@ function schedBuild(p, d, occ, S) {
     meal('breakfast', k + 5, by);
   };
 
-  const GP = !F.night && galleyPlan(p, d), GB = GP && GP.blocks;
+  const GP = !F.night && shiftBlocks(p, d), GB = GP && GP.blocks;
   if (GB) {
     // the galley rota: stints at the galley's stations (each its own place and task), free time between, meals at
     // the times the rota gives (or in their window, around the work), and a staff meal at the station only when
     // the work covers a whole window and the rota gives no time for it
-    const early = GB[0][0] < 600;
+    const early = GB[0][0] < 420;
     seg('sleep', Math.max(GP.wake != null ? GP.wake : early ? GB[0][0] - 35 : F.wake, P.bed + 410 - 1440), 'bed', p.bed);
     if (early) wash(20); else morning(20, Math.min(MEALS.breakfast[1], GB[0][0] - C));
     const ate = { breakfast: !early }, given = GP.meals || {};
     GB.forEach(([a, b, pid, task], i) => {
+      if (!pid && GP.desk) pid = desk;
       if (t < a) {                                        // a gap before this stint
         for (const m of ['breakfast', 'dinner']) {
           if (ate[m]) continue;
@@ -6049,7 +6061,7 @@ function schedBuild(p, d, occ, S) {
       go(wd); linger(a);                                 // early: wait for the stint (someone else may be at that station)
       if (!given.breakfast && !given.dinner) for (const m of ['breakfast', 'dinner']) {   // no time given and none free: eat at the station
         const [, w1] = MEALS[m];
-        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, 'work:galley', pid, { tag: 'staff' }); ate[m] = true; }
+        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
       }
       workAt(pid, task, Math.min(b, 1440));
     });
@@ -6115,14 +6127,18 @@ function crewNeeds(p, t) {
   for (let d = d1 - 7; d <= d1; d++) for (const s of planDay(p, d)) {
     if (s.from >= t) break;
     const h = (Math.min(s.to, t) - s.from) / 60, type = s.type, tag = s.tag;
-    n.hunger = cl(n.hunger - 5.5 * h); n.fitness = cl(n.fitness - .35 * h);
-    if (s.act === 'sleep') n.energy = cl(n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h);
-    n.hygiene = cl(n.hygiene - 2.1 * h);
-    if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') n.hunger = cl(Math.max(n.hunger, tag === 'grab' ? 50 : 100));
-    if (s.act === 'wash') n.hygiene = cl(type === 'shower' ? 100 : n.hygiene + (tag === 'toilet' ? 0 : 15));
-    if (s.act === 'gym') { n.fitness = cl(n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
-    if (s.act === 'callhome') n.social = cl(n.social + 35);
-    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) n.social = cl(n.social + 15 * h); else n.social = cl(n.social - 2.5 * h);
+    // the ship's state where they were (section 17): drains run faster, restores give back less, e.g. a weak shower
+    const fx = typeof shipEffectsAt === 'function' ? shipEffectsAt(s.deck, s.from) : null;
+    const dr = k => fx && fx.drain && fx.drain[k] || 1, rs = k => fx && fx.restore && fx.restore[k] !== undefined ? fx.restore[k] : 1;
+    const up = (k, to) => { n[k] = cl(n[k] + Math.max(0, to - n[k]) * rs(k)); };   // restore toward `to`, scaled
+    n.hunger = cl(n.hunger - 5.5 * h * dr('hunger')); n.fitness = cl(n.fitness - .35 * h * dr('fitness'));
+    if (s.act === 'sleep') up('energy', n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
+    n.hygiene = cl(n.hygiene - 2.1 * h * dr('hygiene'));
+    if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') up('hunger', tag === 'grab' ? 50 : 100);
+    if (s.act === 'wash' && tag !== 'toilet') up('hygiene', type === 'shower' ? 100 : n.hygiene + 15);
+    if (s.act === 'gym') { up('fitness', n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
+    if (s.act === 'callhome') up('social', n.social + 35);
+    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social'));
   }
   for (const k of NEEDS) n[k] = Math.round(n[k]);
   return n;
@@ -6147,7 +6163,7 @@ function shipDay(d) {
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
   S.spare.forEach((pl, i) => {
-    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !galleyPlan(p, d));
+    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
@@ -6189,7 +6205,7 @@ function dayReport(day) {
     const today = planDay(p, day);
     const meals = new Set(today.filter(s => s.act === 'breakfast' || s.act === 'dinner').map(s => s.act));
     if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
-    const gp = galleyPlan(p, day), gb = gp && gp.blocks;
+    const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
       const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff'].includes(s.tag));
@@ -7873,7 +7889,8 @@ function placeSpot(id) {
         .filter(n => free(...n) && roomAt(...n) === pl.room && (n[0] === a || n[1] === b ? edgeOpen(a, b, ...n) : true))   // never through a wall
         .sort((m, n) => cellPos(...m).distanceTo(new THREE.Vector3(x, 0, z)) - cellPos(...n).distanceTo(new THREE.Vector3(x, 0, z)));
       const lift = liftTiles()[0], rooms = new Set([pl.room]);   // the nearest one you can actually get to from the lift
-      walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms)) || opts[0] || nearestOpen(x, z, null);
+      const who = /^work:works/.test(pl.type) ? { dept: 'works' } : undefined;   // a Works place behind a service hatch
+      walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms, who)) || opts[0] || nearestOpen(x, z, null);
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
     const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
@@ -7884,15 +7901,17 @@ function placeSpot(id) {
 }
 // the pose at a place: its activity (run, lift, call, play...) once the crowd can show it (section 8b lists those in
 // CROWD_ANIMS), else the place's plain pose, so a seated pianist stays seated until 'play' exists
-const crewPose = sp => sp.anim && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has(sp.anim) ? sp.anim : sp.pose;
-// findPath, with the 'closed' doors into `rooms` open for the moment
-function crewPath(s, g, rooms) {
+// (the activity comes from the plan's segment, which knows the task: tea on the galley stool is the stool's own pose)
+const crewPose = (sp, an) => (an = an === undefined ? sp.anim : an) && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has(an) ? an : sp.pose;
+// findPath, with the 'closed' doors into `rooms` open for the moment; `who` (a CrewAgent or roster person) is passed
+// on so service hatches open for Works crew (hatchPassable, section 4)
+function crewPath(s, g, rooms, who) {
   const opened = [];
   for (const k in CLOSED_DOORS) {
     const e = EDGES.get(k);
     if (e && e.type === 'closed' && edgeTiles(k).some(c => rooms.has(roomAt(...c)))) { e.type = 'door'; opened.push(e); }
   }
-  try { return findPath(s, g); } finally { for (const e of opened) e.type = 'closed'; }
+  try { return findPath(s, g, undefined, who); } finally { for (const e of opened) e.type = 'closed'; }
 }
 const liftTiles = () => (ROOM_TILES['@'] || []).slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 class CrewAgent {
@@ -7919,7 +7938,7 @@ class CrewAgent {
     if (goalId === '@lift') goal = this.liftCell;
     else if (goalId) { this.spot = placeSpot(goalId); goal = this.spot && this.spot.walk; if (this.spot) this.rooms = new Set(this.bedRooms.concat(this.spot.room)); }
     if (!goal) { goal = free(...from) ? from : nearestOpen(this.x, this.z, null); if (!goal) return; }
-    const path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from)]));   // you can always leave the room you're in
+    const path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from)]), this);   // you can always leave the room you're in
     if (path) this.path = path;
     else { this.noPath++; this.lost = { from, goal, goalId, at: hhmm(SHIP.time.min) }; const c = cellPos(...goal); this.x = c.x; this.z = c.z; }   // no way there: they're simply there
   }
@@ -7934,7 +7953,11 @@ class CrewAgent {
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || null;
-    if (typeof galleyHold === 'function') { const h = galleyHold(this.p, now); if (h !== undefined) goalId = h; }   // section 16: waiting for food
+    this.anim = w.placeId === goalId ? w.anim || null : null;   // what they'll do there
+    if (typeof galleyHold === 'function') {                // section 16: waiting for food, at a queue spot nobody else is heading for
+      const h = galleyHold(this.p, now);
+      if (h !== undefined) goalId = h && DECK_CREW.some(o => o !== this && o.goalId === h) ? null : h;
+    }
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -7944,7 +7967,7 @@ class CrewAgent {
       this.pose = 'walk'; this.y = 0;
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
       const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
-      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this.spot); this.face = this.spot.face; this.y = this.spot.y; }
+      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this.spot, this.anim); this.face = this.spot.face; this.y = this.spot.y; }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); this.pose = 'walk'; }
     } else if (this.goalId === '@lift') return false;    // in the car: gone to another deck
     else if (!this.spot) this.pose = 'stand';
@@ -8013,7 +8036,7 @@ function crewArrive(p, w, now, mid) {
   a.retarget(w.placeId || null);
   if (!mid || !spot || !a.path.length) return;
   const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
-  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.pose = crewPose(spot); a.face = spot.face; a.y = spot.y; }
+  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.pose = crewPose(spot, w.anim || null); a.face = spot.face; a.y = spot.y; }
   else if (done > 0) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
 }
 // once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
