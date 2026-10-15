@@ -27,7 +27,7 @@ Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the works
 | --- | --- | --- | --- | --- |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.23.0+ (combined) | Active |
 | session_01JScnVG158eYAHYvKDz3jZG | Crew designer (was the deck planner): workstream 2, the 75-person roster and `plans/crew-roster.html` | `claude/deck-plans-1-2-6` | 0.16.x | Briefed 2026-10-15 |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link | `claude/deck-architect` | 0.17.x | Briefed 2026-10-15 |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link. Also: bigger bunk rooms on Deck 4 (6 berths each; the user's decision), plan sketch first, then build after the user's OK | `claude/deck-architect` | 0.17.x | Briefed 2026-10-15; bunk-room sketch requested |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Briefed 2026-10-15 |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Briefed 2026-10-15 |
 | session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1 (time and saving), then 4 (schedules), then 6 (crew on the deck, day_check) | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | Hired and briefed 2026-10-15: workstream 1 first |
