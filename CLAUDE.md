@@ -6,6 +6,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 1. `DEV_NOTES.md`: how the build works, the rules, testing, and what's next. Its "Next" section names the current job.
 2. `design-doc-v4.pdf`: what the game is. The dev notes list small updates the doc hasn't caught up with yet; the notes win where they differ.
 3. `plans/deckN-plan.html`: the agreed layout of each deck. A deck is only built from an agreed plan.
+4. `TEAM.md`: who's working on what. Several sessions work in parallel under a lead session; stay inside the files your brief names.
 
 ## Files
 - `starship-cadet.html`: the game (one file; three.js r128 from cdnjs).
