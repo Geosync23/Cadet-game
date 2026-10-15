@@ -18,12 +18,13 @@ The project lead session keeps this file current. A new lead session reads it fi
 | Session | Job | Branch | Status |
 | --- | --- | --- | --- |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
-| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 Sketch 7 merged; waiting on the user's review |
+| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 plan agreed at Sketch 8 (71642e6); all three plans done |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Idle, kept for review fixes |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Building Deck 1 T1–T4 from ed1da74 |
 
 ## Done
 
+- Deck 2 plan agreed at Sketch 8 (71642e6): array 106, Captain 60, science trimmed. The lead approved it on the user's instruction.
 - Deck 2 plan Sketch 7 (df8de84) merged: 52 × 22 on Deck 3's outline, lift [20, 11], looped senior corridor, sensor array cut to 48 tiles, Captain 60. Earlier: Sketch 6 (cd73525). Earlier: Sketch 5 (67b3f8f): 52 × 20, lift [21, 10], 15 bedrooms aft of the lift, science forward.
 - Deck 2 plan Sketch 4 (589505e) merged: 12 crew bedrooms plus 2 visitor rooms to port, science to starboard, 50 × 18, lift [21, 9].
 - Deck 3 signed off by the user at 0.7.0 ("ok for now").
