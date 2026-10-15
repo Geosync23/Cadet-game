@@ -23,12 +23,12 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Done
 
+- Deck 3 signed off by the user at 0.7.0 ("ok for now").
 - Merged the deck plans through 355648a (Decks 1, 2 Sketch 3, 6) into the lead branch, then moved them into `plans/`.
 - Merged the Deck 3 builder's branch: Deck 3 turn 5 (crew, 0.6.7), promenade dressing and fixes (0.6.8–0.7.0), the repo tidy (stable file names, `plans/`, CLAUDE.md, deck_check.py).
 - Plans for Decks 1, 2 and 6: Sketch 1 (36cce9d, 09f1feb, 68a8bc8); Deck 2 Sketch 2 (b4cfbc6); Deck 2 Sketch 3, 50 × 18 with the Captain's quarters as the biggest room (4fe97c4); Deck 6 reactor door off the lobby (355648a).
 
 ## Queue (needs the user's go-ahead)
 
-- Deck 3 review and sign-off from the user (CLAUDE.md: one deck at a time, then review).
 - Step 7: machines, supplies and the shared job list.
 - Design doc updates listed at the top of DEV_NOTES.

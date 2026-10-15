@@ -4,7 +4,7 @@ Read this first in any new session, together with **design-doc-v4.pdf** and **st
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
-**Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and waiting for sign-off.** After sign-off, the next deck is the user's choice: 2, 1 or 6, each starting with a plan page (see "Next" below).
+**Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and signed off ("ok for now").** Plan pages for Decks 1, 2 and 6 are in `plans/` (Deck 2 is being reworked). Building them falls to the deck architect when the lead says go; see TEAM.md.
 
 Nine small updates for the design doc when it's next edited:
 
