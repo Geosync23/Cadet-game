@@ -68,7 +68,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.24.0
+   STARSHIP CADET: CSV Wren                            build 0.24.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3249,11 +3249,11 @@ DECKS[4] = {
     // ---- Deck 4, junior wing ----
     const night = [[M.plum, M.plum], [M.slate, M.plum], [M.plum, M.slate]];
     const bunkText = {
-      a: ['Tomas has taped a star map to the underside of the top bunk.', 'Your bunk. You lost the coin toss for the bottom one.', 'Two empty berths. The quiet ones, for now.'],
-      b: ['Pell sleeps on top and talks in his sleep. Mostly about engines.', 'Rina\'s bunk. A stack of medical journals doubles as a pillow.', 'Two spare berths, made up and waiting.'],
+      a: ['Tomas has taped a star map to the underside of the top bunk.', 'Your bunk. You lost the coin toss for the bottom one.', 'Lukas\'s bunk, and the empty berth above it: the only spare bed on the ship.'],
+      b: ['Pell sleeps on top and talks in his sleep. Mostly about engines.', 'Rina\'s bunk. A stack of medical journals doubles as a pillow.', 'Both berths made up tight, two pairs of boots lined up underneath.'],
       c: ['Someone has hung a tiny paper lantern from the top rail.'],
       d: ['A guitar case under the bottom bunk. Nobody has heard it played.'],
-      h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Empty, blackout blind down.'],
+      h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Blackout blind down. Both berths belong to the night shift.'],
     };
     for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)) });
     furnish('p', 'washroom'); furnish('q', 'washroom');
