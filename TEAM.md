@@ -18,12 +18,12 @@ The project lead session keeps this file current. A new lead session reads it fi
 | Session | Job | Branch | Status |
 | --- | --- | --- | --- |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
-| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 Sketch 5 merged; waiting on the user's review |
+| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 Sketch 6 merged; waiting on the user's review |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck architect: build Decks 6, 1 and 2 into the game | `claude/deck-architect` | Building Deck 6: T1 done (0.7.1, 36ad9b7), T2 in progress |
 
 ## Done
 
-- Deck 2 plan Sketch 5 (67b3f8f) merged: 52 × 20, lift [21, 10], 15 bedrooms aft of the lift, science forward.
+- Deck 2 plan Sketch 6 (cd73525) merged: 52 × 22 on Deck 3's outline, lift [20, 11], looped senior corridor. Earlier: Sketch 5 (67b3f8f): 52 × 20, lift [21, 10], 15 bedrooms aft of the lift, science forward.
 - Deck 2 plan Sketch 4 (589505e) merged: 12 crew bedrooms plus 2 visitor rooms to port, science to starboard, 50 × 18, lift [21, 9].
 - Deck 3 signed off by the user at 0.7.0 ("ok for now").
 - Merged the deck plans through 355648a (Decks 1, 2 Sketch 3, 6) into the lead branch, then moved them into `plans/`.
