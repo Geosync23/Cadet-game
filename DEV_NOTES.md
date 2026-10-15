@@ -108,6 +108,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.29.3 | Cook time from section 17's `shipEffectsAt(3, m)` (pure, safe in a replay). `FOOD.restock` switch (`'rule'` now, `'carts'` for B3), so only one of the 10:30 top-up and the carts brings food. |
 | 0.29.4 | 0.29.3 merged with ship integration 0.40.0 (sections 16 and 17 both after 14, galley first). `galleyShift` removed: section 14 reads `galleyDay` from 0.26.2, and until then the galley staff keep the normal day. |
 | 0.29.5 | 0.29.4 merged with ship integration 0.40.1. |
+| 0.26.2 | A1 turn 2 (the sim engineer). The galley rota: `galleyDay(person, day)` from section 16 (agreed with the galley engineer) drives galley staff: wake and bedtime, each stint at its own station with its task as the tag, the rota's meal times, free time between, days off; `galleyHold` (waiting at the servery) hooked into the crew on the deck. The six new habits (crew designer, 0.16.4): runner (treadmill, `gym` with `anim: 'run'`), shopper, musician, gardener (the garden's standing places), bar-regular (`lounge-seat` with `anim: 'drink'`), stargazer (Deck 2's observatory). `placeBusy(id)` for kit that moves while in use (the treadmill). Machine panels (`machine`) are never anyone's desk or stand-in station. dayReport checks work stations by overlapping times. Tested with the real habits and rota on a scratch merge: 28 days clean. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -363,6 +364,26 @@ The lead's go (2026-10-15): on paper only. There's no board drawing and no devic
 - the player's loop (inspect at the panel, carry two, hold to repair);
 - visible faults from `shipEffects` notes (cheap flickers and emissive changes, no new draw calls);
 - carts as props on the crowd.
+
+- **The galley rota (0.26.2).** Agreed with the galley engineer: `galleyDay(person, day)` → null | { role, wake, bedBy, blocks: [{ from, to, placeId, task }], meals: { breakfast: [from, to], dinner: [from, to] } }, in minutes from midnight (section 16). `galleyPlan(p, d)` reads it for day-shift galley staff, or falls back to the older `galleyShift`.
+    - **Days off:** role null is a day off. The rota decides galley staff's days off (`schedFrame`'s `works`), not `rota.offDays`.
+    - **Wake and bedtime:** `wake` is used as given (else 35 minutes before an early first block). `bedBy` caps that night's bedtime, and tomorrow's early start pulls tonight's bedtime earlier too.
+    - **Stints:** each block is its own work segment at its station (`workAt`), with the task as the tag and anim `cook` unless the place has one. Someone early waits for their stint, since the station may still be in use.
+    - **Meals:** a meal the rota gives is a normal meal (queue, then a seat) at those times, even outside the window. A meal it doesn't give is the normal one, in its window, around the work. A late hand has a normal morning.
+    - **Between stints:** free time, ending a lift ride before the next stint.
+    - **Desks and stand-ins:** under the rota, galley staff have no desk and galley stations aren't offered to stand-ins (`galleyRotaOn()`).
+    - **Queue hook:** `galleyHold(person, t)` (section 16) can hold a crew member at the servery queue while it's empty. It's read in `CrewAgent.update` after the goal is worked out; undefined means no change.
+- **Habits for the rooms (0.26.2).** The crew designer's six (0.16.4), as `specials`:
+    - runner: before dinner, 25–40 minutes on a treadmill (`gym-run`: gym places with `anim: 'run'`), else any gym place; tag `run`.
+    - shopper: shopping on 35% of work days and 80% of days off.
+    - musician: 55% of evenings, the music room (tag `play`); the Captain every Thursday.
+    - gardener: 60%, the garden's standing places (`garden-tend`); tag `tend`.
+    - bar-regular: 75%, after dinner, the bar (`bar`: `lounge-seat` with `anim: 'drink'`), else the lounge; tag `bar`.
+    - stargazer: 50%, Deck 2's observatory (`observatory`: seats in a room named Observatory); juniors too.
+    These pseudo-types are extra lists in `schedData().shared` and don't change `roomsInUse`.
+- **`placeBusy(id)` (0.26.2).** True while a crew member is settled at that place on the current deck, or the player is using it (`PLAYER_PLACE`, for section 15). A Set rebuilt once a frame in `updateDeckCrew`. The Deck 6 architect's treadmill and rower read it.
+- **Machine panels.** Places with `machine` (B1) are never a desk or a stand-in station; they're for servicing (B2).
+- **dayReport's station check** looks for two people at one work station at overlapping times, so the galley's shared, time-booked stations pass. Beds are still checked as one owner's.
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 
