@@ -21,6 +21,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 | session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 plan agreed at Sketch 8 (71642e6); all three plans done |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Idle, kept for review fixes |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Building Deck 1 T1–T4 from ed1da74 |
+| session_014DMHpLuFyNknrAcZZGGNhU | Command architect (Deck 2) | `claude/deck2-command` (builds 0.9.x) | Building Deck 2 from ed1da74 plus the lead branch (Sketch 8) |
 
 ## Done
 
