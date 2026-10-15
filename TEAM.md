@@ -38,7 +38,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 ## Plan of work (agreed with the user, 2026-10-15)
 
 1. **Build the ship (DEV_NOTES 6e):** Deck 6, then 1, then 2, with a review after each. Deck architect only. Shell, rooms and furniture; no crew or machines.
-2. **Then: the Living Ship** (design-living-ship.md, agreed 2026-10-15). Crew and simulation as one phase, in four pillars: foundation, ship systems and jobs, social, events.
+2. **Then: the Living Ship** (design-doc.md, agreed 2026-10-15). Crew and simulation as one phase, in four pillars: foundation, ship systems and jobs, social, events.
 
 ## Overnight plan (agreed with the user, 2026-10-15)
 
