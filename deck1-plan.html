@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: Deck 1 plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.room:focus-visible{outline:none}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.room.sealed{opacity:.38}
+.room.newroom rect{stroke:rgba(233,196,106,.0)}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.qs{max-width:1100px;margin:-12px auto 28px;padding:0 16px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.qs b{color:#cfd9dc;font-weight:600}
+.qs ul{margin:6px 0 0;padding-left:18px}
+.qs li{margin:3px 0}
+.qs code{font-size:11.5px;color:#bdeee6}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck 1: Bridge</h1>
+  <div class="sub">Sketch 1, for build 0.6.6. Bow points forward, port side is on the left when facing it. The smallest deck, at the very top of the hull. Step out of the lift and the bridge doors are right ahead, with the observation room behind you, looking aft over the whole ship. Few people come up here, so every visit feels like an occasion. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+  <button id="first" aria-pressed="false">Built first</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>Deck 1 at a glance</b><span>The bridge fills the bow: a viewscreen across the bow wall, a sunken command ring with a curved rail behind it, and the rear stations along the aft wall. The Captain's ready room opens off the bridge. Aft of the lift, the observation room doubles as the conference room. The service layer is small: the relay room and a sub-floor crawl under the rear stations, plus a utility closet.</span><span class="meta">20 × 10 tiles, the narrowest deck (Deck 3 is 22 wide). The lift lines up with Decks 3, 4 and 5 (game lift: [8, 5], car rows 3–5, ladder row 6, trunks row 2).</span></div></div>
+<div class="legend" id="legend"></div>
+<div class="qs" id="qs"><b>Open questions I had to guess at</b><ul>
+  <li><b>Size.</b> The design doc says about 14 × 10. This is 20 × 10: the bridge itself is about 10 × 10, and the lobby round the spine and the observation room take the rest. Trimming the observation room to 3 columns would get it to 18.</li>
+  <li><b>Sunken ring.</b> The build has no floor steps, so the ring is shown by a curved rail (a <code>bar</code> curve) behind the chairs. A real sunken floor would need a step kit and a floor-painter change.</li>
+  <li><b>Viewscreen.</b> It sits on the bow hull as a dress piece that follows the curve, like the music room's stage. A <code>wall</code> curve in front of the hull would leave tiles behind it that nobody can reach. There are no bridge windows; the view is in the observation room.</li>
+  <li><b>Getting in.</b> Bridge and observation room doors are drawn as open. Should the lift panel or the bridge doors stay shut (with tap text) until a story event calls you up?</li>
+  <li><b>Floors.</b> The bridge uses <code>plate</code> for now. It probably wants a floor of its own, such as dark carpet with an inlaid ring.</li>
+  <li><b>Bridge washroom.</b> This is a new idea. Keep it, or let the watch ride down to Deck 2?</li>
+  <li><b>Top of the spine.</b> I've assumed the ladder and trunks end here, at a trunk head behind glass.</li>
+</ul></div>
+<script>
+// =====================================================================
+// DECK 1 DATA, in the game's format: no margin rows, so DECK1 can go
+// straight into DECKS[1] (add dress). '.' is outside the hull.
+// Halls (+ lobby) join each other with no wall.
+// Alignment: the game lift is [8, 5], which sits at world (-4, 0) like
+// Decks 3, 4 and 5. The car is 2 x 3 (rows 3-5) with the ladder row Z
+// below it and the trunks row Y above it, behind the car's back wall.
+// The deck is 10 wide (world z -5..5) and runs from world x -11 to 7.6,
+// well inside Deck 2's outline below it.
+// =====================================================================
+const DECK1 = {
+  num: 1, name: 'Bridge', seed: 10109,
+  blurb: 'Bridge, ready room, observation room', arrive: 'The bridge is forward of the lift, the observation room aft. People talk quietly up here.',
+  lift: [8, 5],
+  map: [
+    '..OOOOkkkkRRRRBBB...',
+    '.OOOOO++++RRRRBBBB..',
+    '.OOOOO+YY+RRRRBBBBB.',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+ZZ+BBBBBBBBBB',
+    '.OOOOO++++wwBBBBBBB.',
+    '.OOOOOuuuuwwBBBBBB..',
+    '..OOOOuuuuccccccc...',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,7,3': 'lift', 'v,7,4': 'lift', 'v,7,5': 'lift', 'v,9,3': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift',   // one wide door each side
+    'h,7,2': 'glass', 'h,8,2': 'glass',                       // the trunk head, behind glass above the car
+    'h,7,7': 'hatch', 'h,8,7': 'glass',                       // the top of the ladder, with its hatch
+    'v,10,4': 'door', 'v,10,5': 'door', 'v,10,3': 'glass', 'v,10,6': 'glass',   // bridge doors, straight ahead of the bow-side lift door
+    'v,6,4': 'door', 'v,6,5': 'door', 'v,6,3': 'glass', 'v,6,6': 'glass',       // glass doors into the observation room, aft
+    'h,12,3': 'closed',                                       // the ready room, off the bridge
+    'v,10,7': 'door',                                         // bridge washroom, from the lobby
+    'h,6,1': 'hatch', 'h,9,8': 'hatch',                       // utility closet; relay room
+    'h,13,9': 'hatch',                                        // floor hatch by the rear stations, down into the sub-floor crawl
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: { 'h,12,3': 'R', 'h,6,1': 'k', 'h,9,8': 'u', 'h,13,9': 'c' },
+  plates: [['v,10,2', 'w', 'Bridge'], ['v,6,2', 'e', 'Observation']],
+  rooms: {
+    '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    B: { name: 'Bridge', floor: 'plate' },
+    O: { name: 'Observation room', floor: 'wood' },
+    w: { name: 'Bridge washroom', floor: 'tile' },
+    // locked, not yours
+    R: { name: 'Ready room', floor: 'wood', tap: 'The Captain\'s ready room. The door is shut, and you have not been sent for.' },
+    // sealed until their tier
+    k: { name: 'Utility closet', void: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
+    u: { name: 'Relay room', void: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
+    c: { name: 'Sub-floor crawl', void: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
+  },
+  windows: ['O', 'R'].map(room => ({ room })),
+  closedDoors: {
+    'h,7,7': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
+  },
+  hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6 },   // a short, round hull: big stern corners, a blunt elliptical bow
+  // the command ring: a curved rail in dark wood behind the chairs, open at both sides and forward.
+  // The viewscreen is not a curve: it is a dress piece on the bow hull itself (see the open questions).
+  curves: [
+    { kind: 'bar', arc: [15.4, 5, 2.2, 120, 240], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
+  ],
+};
+const ROOMS = {
+  '+': { kind: 'lobby', name: 'Bridge lobby', built: true, x: 'The smallest lobby on the ship. One step out of the bow-side lift door and you\'re at the bridge doors; out of the stern side, at the observation room\'s glass doors. The trunk head shows behind glass above the car, and the top of the ladder below it. People lower their voices here without being told.' },
+  '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, the same car as on every deck, with doors on the stern and bow sides. Deck 1 is the top of the line.' },
+  Y: { kind: 'core', name: 'Spine trunks', label: 'Trunks', x: 'The power and air trunks end here, behind glass above the car, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.' },
+  Z: { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The top of the maintenance ladder, behind glass, with a hatch for tier 2. The last rung has a name scratched into it.' },
+  B: { kind: 'command', name: 'Bridge', label: 'Bridge', built: true, x: 'The heart of the ship. A curved viewscreen fills the bow wall. Facing it is the command ring: the Captain\'s chair with a seat either side, the helm and ops consoles just in front, and a curved wooden rail behind. The rear stations line the aft wall: Watch, Survey, Works and comms, each with someone on watch. You come up when you\'re called, for a briefing, a repair timed with the bridge or a story event. Beside the Works station, a floor hatch drops into the sub-floor crawl (tier 3).' },
+  O: { kind: 'obs', name: 'Observation room', label: 'Observation', built: true, x: 'Behind the bridge, on the far side of the lift, and also the conference room. A long table for ten, a wall screen, and big windows round the stern and both sides. From the window seat at the very back you look aft along the whole ship. Briefings happen here, and so does the Captain\'s tea on quiet afternoons.' },
+  R: { kind: 'ready', name: 'Ready room', label: 'Ready room', win: true, x: 'The Captain\'s office, off the bridge. A desk, two chairs for whoever is in trouble, a bookshelf, a port window and a small aquarium holding one slow fish called the Admiral. Locked unless you\'re sent for.' },
+  w: { kind: 'wash', name: 'Bridge washroom', label: 'Wash', built: true, isNew: true, x: 'New idea. One toilet and a basin, so the watch doesn\'t have to ride the lift down. Off the lobby.' },
+  k: { kind: 'serv', name: 'Utility closet', label: 'Util', x: 'Deck 1\'s light relays and the lobby\'s power junction, through a hatch off the lobby. Tier 1.' },
+  u: { kind: 'serv', name: 'Relay room', label: 'Relays', x: 'The bridge sub-floor relays: racks of them, clicking, under blue status lights, and the way down into the sub-floor crawl. Through a hatch off the lobby. Tier 3: some relay jobs need a quiet hour agreed with the bridge.' },
+  c: { kind: 'serv', name: 'Sub-floor crawl', label: 'Sub-floor crawl', x: 'A low crawl under the rear stations, from the relay room to a floor hatch on the bridge. You crouch-walk through it. A tier 3 shortcut: in from the lobby, up beside the Works station, without walking across the bridge.' },
+};
+const DECK = DECK1;
+const KIND = {
+  command: { c: '#7a3f3f', name: 'Bridge' },
+  ready:   { c: '#6d4a3a', name: 'Ready room' },
+  obs:     { c: '#4b5b7a', name: 'Observation room' },
+  wash:    { c: '#8ea2a3', name: 'Washroom' },
+  lobby:   { c: '#4f6466', name: 'Lift lobby' },
+  core:    { c: '#1d252d', name: 'Spine' },
+  serv:    { c: '#2e373c', name: 'Service space' },
+};
+const LEGEND = ['command', 'ready', 'obs', 'wash', 'lobby', 'serv'];
+const LEGEND_EXTRA = [['#5fd6c6', 'Viewscreen'], ['#c58b4a', 'Command rail']];
+const POS = { B: [13.4, 7.6], O: [3.5, 1.6], R: [12, .9], u: [8, 8.9], c: [14, 9.35], k: [8, .5], Y: [8, 2.5], '@': [8, 4.5], Z: [8, 6.5], w: [11, 8] };
+const SMALL = new Set(['R', 'w', 'Y', 'Z']);
+function decorate() {
+  // the viewscreen, on the bow hull
+  { let d = ''; for (let a = -62; a <= 62; a += 3) { const t = a * Math.PI / 180; d += (d ? 'L' : 'M') + ((13 + 6.05 * Math.cos(t)) * S).toFixed(1) + ',' + ((5 + 4.45 * Math.sin(t)) * S).toFixed(1); }
+    deco('path', { d, fill: 'none', stroke: '#5fd6c6', 'stroke-width': 5, 'stroke-linecap': 'round', opacity: .9 }); }
+  // chairs in the command ring, the helm and ops consoles, and the rear stations along the aft wall
+  deco('circle', { cx: 15.2 * S, cy: 5 * S, r: .42 * S, fill: '#b0413e', stroke: '#2a3037', 'stroke-width': 1.5 });
+  for (const y of [3.95, 6.05]) deco('circle', { cx: 15.2 * S, cy: y * S, r: .32 * S, fill: '#8e4744', stroke: '#2a3037', 'stroke-width': 1.5 });
+  for (const y of [3.7, 5.5]) deco('rect', { x: 16.7 * S, y: y * S, width: .8 * S, height: .8 * S, rx: 3, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
+  for (const [x, y, w, h] of [[10.15, 3.1, .6, .8], [10.15, 6.1, .6, .8], [10.9, 3.1, 1.9, .5], [10.9, 6.4, 1.9, .5]]) {   // either side of the doors, and along the ready room and washroom walls
+    deco('rect', { x: x * S, y: y * S, width: w * S, height: h * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
+    deco('rect', { x: (x + .1) * S, y: (y + h / 2) * S - 1.5, width: (w - .2) * S, height: 3, fill: '#e9c46a', opacity: .8 }); }
+  // the observation room: the long table, chairs, the window seat at the stern
+  deco('rect', { x: 2.7 * S, y: 2.6 * S, width: 1.6 * S, height: 4.8 * S, rx: 8, fill: '#8a6a45' });
+  for (let y = 3.1; y < 7.2; y += 1) for (const x of [2.35, 4.65]) deco('circle', { cx: x * S, cy: y * S, r: 4, fill: '#c3d3d6', opacity: .7 });
+  deco('rect', { x: 1.15 * S, y: 3.2 * S, width: .55 * S, height: 3.6 * S, rx: 4, fill: '#5c4a6e' });
+  // the ready room: the desk and the Admiral's aquarium
+  deco('rect', { x: 11.5 * S, y: 1.1 * S, width: 1.6 * S, height: .6 * S, rx: 2, fill: '#8a6a45' });
+  deco('rect', { x: 10.25 * S, y: 1.3 * S, width: .5 * S, height: 1 * S, rx: 2, fill: 'rgba(159,227,255,.35)', stroke: '#9fe3ff', 'stroke-width': 1 });
+  // relay racks
+  for (let x = 6.3; x < 9.6; x += .8) deco('rect', { x: x * S, y: 8.2 * S, width: .5 * S, height: 1.2 * S, fill: '#26323a', stroke: '#7a8fd0', 'stroke-width': 1 });
+}
+function notes() {
+  note(18.2 * S, 2.1 * S, 'viewscreen', 7, 'rgba(159,227,255,.85)');
+  note(12.3 * S, 3.6 * S, 'rail', 7, 'rgba(240,210,170,.9)');
+  note(11.9 * S, 6.15 * S, 'stations', 7, 'rgba(225,240,238,.7)');
+  note(8 * S, 1.5 * S, 'Lobby', 8, 'rgba(225,240,238,.7)');
+  note(3.5 * S, 8.2 * S, 'table for ten', 7, 'rgba(225,240,238,.7)');
+}
+
+// ---- hull, as in the game: stern flat with rounded corners, bow an ellipse ----
+const MAP = DECK.map, DOORS = DECK.doors, HULL = DECK.hull, W = MAP[0].length, D = MAP.length;
+const hullL = y => { const d = Math.min(y, D - y), r = HULL.stern; return HULL.sternX + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+const hullR = y => { const v = (y - D / 2) / (D / 2); return HULL.bowFrom + HULL.bowLen * Math.sqrt(Math.max(0, 1 - v * v)); };
+const CORR = new Set(Object.keys(DECK.rooms).filter(k => DECK.rooms[k].hall));
+const WIN = new Set(DECK.windows.map(w => w.room));
+const SPINE = new Set(['@', 'Y', 'Z']);
+
+const S = 20;   // svg units per tile
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const open = (a, b) => (CORR.has(a) && CORR.has(b)) || (a === '@' && b === '@');
+
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+const pts = [];
+for (let y = 0; y <= D + .001; y += .1) pts.push([hullR(Math.min(y, D)), Math.min(y, D)]);
+for (let y = D; y >= -.001; y -= .1) pts.push([hullL(Math.max(y, 0)), Math.max(y, 0)]);
+const hullD = 'M' + pts.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+const deco = (t, a) => el(t, { 'pointer-events': 'none', ...a }, floorG);
+// an arc in the game's curve format: [cx, cz, r, a0, a1] in tiles and degrees, 0 to the bow, 90 to starboard
+const arcD = ([cx, cz, r, a0, a1]) => { let d = ''; for (let a = a0; a <= a1 + .01; a += 3) { const t = a * Math.PI / 180; d += (d ? 'L' : 'M') + ((cx + r * Math.cos(t)) * S).toFixed(1) + ',' + ((cz + r * Math.sin(t)) * S).toFixed(1); } return d; };
+const CURVE_C = { wall: '#d7dfdc', bar: '#c58b4a', glass: '#9fe3ff', planter: '#6fa35a' };
+for (const c of DECK.curves || []) deco('path', { d: arcD(c.arc), fill: 'none', stroke: CURVE_C[c.kind], 'stroke-width': c.kind === 'wall' ? 5 : 6, 'stroke-linecap': 'round' });
+// lift car and ladder rungs, the same in every plan
+{ const [lx, lz] = DECK.lift;
+  deco('rect', { x: (lx - 1) * S + 4, y: (lz - 2) * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5 });
+  for (let y = lz + 1.15; y < lz + 1.95; y += .3) deco('rect', { x: (lx - .75) * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)' });
+  if (BOX.Y) for (const x of [lx - .5, lx + .5]) deco('circle', { cx: x * S, cy: (lz - 2.5) * S, r: 6, fill: 'none', stroke: 'rgba(159,227,255,.55)', 'stroke-width': 2 }); }
+decorate();
+// new-idea rooms get a dashed gold ring
+for (const [k, R_] of Object.entries(ROOMS)) if (R_.isNew) {
+  const b = BOX[k]; deco('rect', { x: b.i0 * S + 3, y: b.j0 * S + 3, width: (b.i1 - b.i0 + 1) * S - 6, height: (b.j1 - b.j0 + 1) * S - 6, rx: 6, fill: 'none', stroke: 'rgba(233,196,106,.85)', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' });
+}
+
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff', DOORC = { door: 'rgba(95,214,198,.85)', closed: '#c9b98a', lift: '#e8c06a' };
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b || a === '.' || b === '.' || open(a, b)) return;
+  const type = DOORS[key], hz = y1 === y2;
+  if (type === 'door' || type === 'closed' || type === 'lift') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, g = type === 'lift' ? 9 : 6;
+    seg(x1, y1, hz ? mx - g : x1, hz ? y1 : my - g, WALL, 2.6);
+    seg(hz ? mx + g : x2, hz ? y2 : my + g, x2, y2, WALL, 2.6);
+    seg(hz ? mx - g : x1, hz ? y1 : my - g, hz ? mx + g : x2, hz ? y2 : my + g, DOORC[type], type === 'lift' ? 3 : 1.6);
+    return;
+  }
+  if (type === 'hatch') { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (hz ? 5 : 0), y1 + (hz ? 0 : 5), x2 - (hz ? 5 : 0), y2 - (hz ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  if (type === 'glass') { seg(x1, y1, x2, y2, '#56646b', 3.4); seg(x1 + (hz ? 2 : 0), y1 + (hz ? 0 : 2), x2 - (hz ? 2 : 0), y2 - (hz ? 0 : 2), WINC, 2); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+{
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    if (WIN.has(at(Math.floor(mx - dy / l * .6), Math.floor(my + dx / l * .6)))) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+
+const lblG = el('g', {});
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (CORR.has(k) || R_.nolabel) continue;
+  const [px, py] = POS[k] || [b.sx / b.n + .5, b.sy / b.n + .5];
+  const [tx, ty] = T(px * S, py * S), t = el('text', { x: tx, y: ty, class: 'lbl' + (SMALL.has(k) || R_.kind === 'serv' ? ' sm' : '') }, lblG);
+  t.textContent = R_.label || R_.name;
+}
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+notes();
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 12, D / 2 * S, 'Bow', 11, '#93a6ae');
+{ const [x, y] = T(-13, D / 2 * S), t = el('text', { x, y, ...(PORTRAIT ? {} : { transform: `rotate(-90 ${x} ${y})` }), 'font-size': 11, fill: '#93a6ae', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = 'Stern'; }
+
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  const when = R_.built ? 'Open when the deck is built.' : (SPINE.has(k) ? 'Built with the shell.' : (R_.opens || 'Sealed until its milestone.'));
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}. ${when}</span>`;
+}
+
+const lg = document.getElementById('legend');
+for (const k of LEGEND) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${k === 'serv' ? 'repeating-linear-gradient(45deg,#2e373c 0 4px,#5a5a46 4px 5px)' : KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t] of [[WINC, 'Window or glass wall'], [DOORC.door, 'Door'], [DOORC.closed, 'Shut for now'], [DOORC.lift, 'Lift doors'], ['#e9c46a', 'Service hatch'], ...(LEGEND_EXTRA || [])]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+if (Object.values(ROOMS).some(r => r.isNew)) { const s = document.createElement('span'); s.innerHTML = '<i style="border:1.5px dashed #e9c46a;background:none"></i>New idea'; lg.appendChild(s); }
+
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+const fb = document.getElementById('first');
+fb.onclick = () => { const on = fb.getAttribute('aria-pressed') !== 'true'; fb.setAttribute('aria-pressed', on);
+  for (const [k, g] of Object.entries(roomEls)) g.classList.toggle('sealed', on && !ROOMS[k].built && !SPINE.has(k)); };
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+</body>
+</html>
