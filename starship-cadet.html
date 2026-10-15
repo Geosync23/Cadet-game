@@ -3855,10 +3855,10 @@ DECKS[5] = {
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
     // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
-    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
-    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
-    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
-    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-parts-1', type: 'storage', anim: 'browse', stock: ['relay', 'breaker', 'cable', 'cell', 'signal card', 'coil winding'], at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', stock: ['filter', 'cartridge', 'membrane', 'oxygen cell', 'uv lamp'], at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', stock: ['pump', 'valve', 'seal', 'nutrient pack', 'regulator'], at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', stock: ['element', 'fan belt', 'compressor', 'bearing', 'control rod'], at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
     { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
     { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
@@ -8280,7 +8280,7 @@ const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
-const YOU_KEEP = 720;                                   // a job you take goes back on the board if it isn't done in 12 ship hours
+const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
 // make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
@@ -8304,7 +8304,20 @@ function panelPlace(id) {
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
-// the plan alone, without jobs, is planWhere (section 14): whereIs lays the jobs over it, so claiming must not ask whereIs
+// jobRun reads planWhere (section 14): the plan alone, without jobs, so claiming never asks whereIs
+// where parts are fetched and made: the Deck 6 architect's storage places on Deck 5 (main storage's shelves and the
+// machine shop), the first one free of other jobs for the time, or nowhere (stand where you are) if none
+const FETCH_AT = ['5-parts-1', '5-parts-2', '5-parts-3', '5-parts-4'], MAKE_AT = ['5-make-1', '5-make-2'];
+// the shelves to try for a part: the one that stocks it first (the places' `stock`), then the rest
+function shelvesFor(part) {
+  const st = id => ((DECKS[5].places || []).find(p => p.id === id) || {}).stock || [];
+  return FETCH_AT.filter(id => st(id).includes(part)).concat(FETCH_AT.filter(id => !st(id).includes(part)));
+}
+function storagePlace(ids, a, b) {
+  const known = new Set((DECKS[5].places || []).map(p => p.id));
+  for (const id of ids) if (known.has(id) && !SHIP.jobs.some(j => j.segs && j.status === 'claimed' && j.segs.some(s => s.placeId === id && s.from < b && a < s.to))) return id;
+  return null;
+}
 function jobRun(p, j, t, makeMin) {
   const w = planWhere(p, t);
   if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
@@ -8312,11 +8325,14 @@ function jobRun(p, j, t, makeMin) {
   const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
   const at = (min, tag, placeId = null) => { segs.push({ from: c, to: c + min, act: 'work', deck: dk, type: 'job', placeId, tag }); c += min; };
   if (j.kind === 'restock') {
-    go(5); at(j.cargo === 'meals' ? 10 : 30, j.cargo === 'meals' ? 'fetch' : 'restock');
+    go(5); at(j.cargo === 'meals' ? 10 : 30, j.cargo === 'meals' ? 'fetch' : 'restock', j.cargo === 'meals' ? null : storagePlace(FETCH_AT, c, c + 30));
     if (j.cargo === 'meals') { go(3); at(15, 'restock'); }
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
-    go(5); at(JOB_FETCH + makeMin, makeMin ? 'make' : 'fetch');
+    go(5);
+    const shelves = shelvesFor(j.parts[0]);
+    if (makeMin) { at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH)); at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
+    else at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH));
     go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1))), 'job', panelPlace(m.id));
   }
   const done = c; go(home);
@@ -8340,7 +8356,7 @@ function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - j.start >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
@@ -8415,8 +8431,11 @@ function dropJob(id) {
   const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; j.claimedBy = null; j.status = 'open'; delete j.start; MACH_REV++; return true;
 }
-// take a part off the storage shelf (you carry it; carrying is the player engineer's)
+// take a part off the storage shelf (you carry it; carrying is the player engineer's), or put one back
 function takePart(part) { machinesNow(); if (!(SHIP.stores[part] > 0)) return false; SHIP.stores[part]--; MACH_REV++; return true; }
+function returnPart(part) { if (typeof part !== 'string' || !part) return false; machinesNow(); SHIP.stores[part] = (SHIP.stores[part] || 0) + 1; MACH_REV++; return true; }
+// progress on your job (a part fitted, repair minutes done): the 12-hour lapse counts from the last progress
+function touchJob(id) { const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return false; j.touched = shipNow(); return true; }
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
