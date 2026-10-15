@@ -1,27 +1,12 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.0). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc.md** and **starship-cadet.html** (build 0.7.0). The design doc is the source of truth for what the game is (update it when a design decision is made); these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
+This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
 **Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and signed off ("ok for now").** Plan pages for Decks 1, 2 and 6 are in `plans/` (Deck 2 is being reworked). Building them falls to the deck architect when the lead says go; see TEAM.md.
 
-Nine small updates for the design doc when it's next edited:
-
-- Mother Fen is now Chef Auda Brennan, who runs the galley and mess hall.
-
-- Deck 3 gains three rooms along the starboard side of the promenade: a gym, a small crew store, and call-home booths for recorded messages home. Its layout is a central promenade from the garden (stern) to the lounge (bow), with the lift in a plaza halfway along.
-
-- Two meals a day, not three: breakfast and dinner. Each is served over a window, not at a set time. Breakfast 06:00 to 08:00 catches the night shift coming off at 06:00 and the day shift before 08:00. Dinner 17:00 to 20:30 catches the day shift coming off at 17:00 and the night shift before 21:00. The galley also keeps a grab-and-go shelf for anyone running late. Remove the line about crew asking you to join them at lunch.
-
-- There is no freight lift. Supplies leave Deck 5's cargo hold on hover hand carts and go up the main lift (a job in step 7). Deck 5's `m` is now the Cart bay.
-- Deck 3's bow lounge is one big room on one floor, not two levels.
-
-- Deck 4's bow nook is now the music room: a soundproofed room at the end of the officers' corridor, with a door.
-
-- The lift car is a walkable room on every deck.
-- The spine's trunks and ladder can be seen behind glass beside the lift.
-- Pell works on Deck 5 for now, until shifts move people between decks.
+The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
 ## Current build: 0.7.0 (about 4,450 lines)
@@ -357,7 +342,7 @@ They checked:
         - The lift's stern door opens to the quarters and its bow door to science.
         - Open, with defaults until the user says otherwise: the six invented officers are placeholders, and the 15th room is a visitors' cabin.
 
-**7. The Living Ship (next big phase, agreed 2026-10-15).** Crew and simulation as one phase. It replaces the old step 7 (machines, supplies and the shared job list), which is now Pillar 2. The full design is in **design-living-ship.md**: no fail state, a 30-minute ship day, all 75 crew with varied routines, ship systems the crew tend, relationships and gossip, and ship-wide events as the main missions. Built in four pillars, each reviewed when it's done:
+**7. The Living Ship (next big phase, agreed 2026-10-15).** Crew and simulation as one phase. It replaces the old step 7 (machines, supplies and the shared job list), which is now Pillar 2. The full design is in **design-doc.md** ("The living ship", "Crew simulation", "Social life", "Ship-wide events" and "Milestones"): no fail state, a 30-minute ship day, all 75 crew with varied routines, ship systems the crew tend, relationships and gossip, and ship-wide events as the main missions. Built in four pillars, each reviewed when it's done:
 1. Foundation: clock, rota, the 75-crew roster, simulation of crew on other decks.
 2. Ship systems and jobs.
 3. Social.
@@ -375,15 +360,7 @@ They checked:
 
 ## Open questions
 
-From design doc v4:
-
-- Who is the Works Chief?
-- ~~How long is a ship day in real time?~~ 30 minutes (design-living-ship.md).
-- Should the player ever move to the night shift?
-- How does diagnosis look on screen?
-- Can the player be passed over for certification, or only delayed?
-- Should the player customise their character at the start?
-- What triggers the first story events?
+They're all in one place now: the "Open questions" section at the end of design-doc.md.
 
 
 ## File map
@@ -403,4 +380,6 @@ The script is split into numbered sections:
 11. Interaction and UI: taps, `goToDeck`, the lift (`enterLift`, panel, `startRide`, `updateRide`)
 12. Main loop: rides, doors, `SPINS`, steam, cutaway and fades
 
-The character spec, uniforms and badges are unchanged; see section 8 and the design doc.
+The character spec, uniforms and badges are unchanged; see section 8 and design-doc.md ("Setting & names").
+
+Other files: design-doc.md (the design, the source of truth), plans/ (deck plans), TEAM.md (who's working on what), cadet_test.py and deck_check.py (tests), archive/design-doc-v4.pdf (the old design doc, for reference only).
