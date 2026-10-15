@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.25.0
+   STARSHIP CADET: CSV Wren                            build 0.25.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5456,7 +5456,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.25.0';                             // keep in step with the header's build line
+const GAME_BUILD = '0.25.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5557,14 +5557,14 @@ newBtn.onclick = () => {
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
-// Going to sleep: tap your own bunk (PLAYER_BED, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
+// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
-const PLAYER_BED = '4-B1-4', WAKE_AT = 6 * 60;
+const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
-  const bed = (DECKS[4].places || []).find(p => p.id === PLAYER_BED) || { at: [7, 1] };
-  if (deckDef.num !== deckOf(PLAYER_BED) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
+  if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
   document.getElementById('sleepX').textContent = clockText() + '. Sleep until ' + hhmm(WAKE_AT) + '?';
   sleepEl.hidden = false; toastEl.classList.remove('show'); document.getElementById('sleepYes').focus();
@@ -5636,7 +5636,7 @@ let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
   const people = ROSTER.concat(ROSTER_GUESTS)
-    .filter(p => !p.player && p.bed !== PLAYER_BED);     // you live your own day
+    .filter(p => !p.player);                             // you live your own day
   const places = [];
   for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) places.push({ ...p, deck: n });
   const byId = new Map(places.map(p => [p.id, p]));
@@ -6926,6 +6926,9 @@ target.copy(player.obj.position).setY(.7);
 const CREW_SPEED = 1.15;                                 // tiles per real second
 const _cp = new THREE.Vector3();
 const FACE_ANGLE = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+// seat and mattress tops (the performance engineer's measurements): a place's own `y` wins, then beds (upper
+// berths, the even ones, at 1.6), then these by type; 0 is the crowd's default (0.475 to sit, 0.5 to lie)
+const SEAT_Y = { 'mess-seat': .475, bench: .48, 'lounge-seat': .44, 'common-room': .44 };
 const idHash = s => { let h = 7; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 let SPOT_OF = new Map(), PLACE_OF = new Map();          // this deck's places, and where each one is (made per deck)
 const edgeTiles = k => { const [o, i, j] = k.split(','); return o === 'v' ? [[+i - 1, +j], [+i, +j]] : [[+i, +j - 1], [+i, +j]]; };
@@ -6949,7 +6952,8 @@ function placeSpot(id) {
       walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms)) || opts[0] || nearestOpen(x, z, null);
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
-    s = { id, walk, x, z, y: berth && +berth[1] % 2 === 0 ? 1.6 : 0, face: FACE_ANGLE[pl.face] || 0,
+    const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
+    s = { id, walk, x, z, y, face: FACE_ANGLE[pl.face] || 0,
       pose: pl.type === 'bed' ? 'lie' : pl.pose, room: pl.room, onTile: free(...pl.at) };
   }
   SPOT_OF.set(id, s); return s;
@@ -7104,7 +7108,9 @@ function crewNearDoor(d) {
 function crewAtScreen(cx, cy) {
   if (!crowd.visible) return null;
   let best = null, bd = 26 * Math.max(.8, camera.zoom);
-  for (const a of DECK_CREW) for (const hy of a.pose === 'lie' ? [.15] : a.pose === 'sit' ? [.5, .9] : [.5, 1.0, 1.4]) {
+  const mine = PLACE_OF.get(playerBed()), myBunk = mine && placeSpot(mine.id);   // a tap on your own bunk is for you,
+  for (const a of DECK_CREW) for (const hy of a.pose === 'lie' && myBunk && Math.hypot(a.x - myBunk.x, a.z - myBunk.z) < .6 ? [] :   // not your bunkmate below
+    a.pose === 'lie' ? [.15] : a.pose === 'sit' ? [.5, .9] : [.5, 1.0, 1.4]) {
     _cp.set(a.x, a.y + hy, a.z).project(camera);
     const d = Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy);
     if (d < bd) { bd = d; best = a; }
