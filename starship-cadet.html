@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.18.1
+   STARSHIP CADET: CSV Wren                            build 0.18.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3472,6 +3472,8 @@ DECKS[3] = {
   // plan's format, plus two fields: xy, the exact spot in tile units (a seat can sit off its tile's centre, and a tile can
   // hold two seats), and walk, the tile a person walks to first (the place's own tile when it's walkable, otherwise the
   // nearest reachable tile in the same room, within 2.5 m). Generated from the furniture's own positions, then kept as fixed data.
+  // Held back until deck_check accepts them (ids kept free): 3-mess-1, -3, -13 and 3-lounge-11, -13, -17, -19, -23, seats you slide into from
+  // a bench end or a booth's open side, two tiles from the aisle; and the crew store's browsing spots (type shop, not in the list yet).
   places: [
     { id: '3-bench-1', type: 'bench', at: [22, 14], xy: [22.7, 14.15], walk: [22, 13], face: 'w', pose: 'sit', room: '+' },
     { id: '3-bench-2', type: 'bench', at: [22, 14], xy: [22.7, 14.85], walk: [21, 14], face: 'w', pose: 'sit', room: '+' },
@@ -3489,9 +3491,7 @@ DECKS[3] = {
     { id: '3-bench-14', type: 'bench', at: [14, 9], xy: [14.95, 9.32], walk: [15, 9], face: 's', pose: 'sit', room: '=' },
     { id: '3-bench-15', type: 'bench', at: [14, 12], xy: [14.95, 12.68], walk: [15, 12], face: 'n', pose: 'sit', room: '=' },
     { id: '3-bench-16', type: 'bench', at: [14, 12], xy: [14.25, 12.68], walk: [14, 11], face: 'n', pose: 'sit', room: '=' },
-    { id: '3-mess-1', type: 'mess-seat', at: [24, 0], xy: [24.25, 0.38], walk: [23, 1], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-2', type: 'mess-seat', at: [24, 1], xy: [24.25, 1.62], walk: [23, 1], face: 'n', pose: 'sit', room: 'M' },
-    { id: '3-mess-3', type: 'mess-seat', at: [25, 0], xy: [25.15, 0.38], walk: [23, 1], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-4', type: 'mess-seat', at: [25, 1], xy: [25.15, 1.62], walk: [25, 2], face: 'n', pose: 'sit', room: 'M' },
     { id: '3-mess-5', type: 'mess-seat', at: [26, 0], xy: [26.05, 0.38], walk: [27, 0], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-6', type: 'mess-seat', at: [26, 1], xy: [26.05, 1.62], walk: [26, 2], face: 'n', pose: 'sit', room: 'M' },
@@ -3501,7 +3501,6 @@ DECKS[3] = {
     { id: '3-mess-10', type: 'mess-seat', at: [29, 1], xy: [29.05, 1.62], walk: [28, 1], face: 'n', pose: 'sit', room: 'M' },
     { id: '3-mess-11', type: 'mess-seat', at: [29, 0], xy: [29.95, 0.38], walk: [28, 0], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-12', type: 'mess-seat', at: [29, 1], xy: [29.95, 1.62], walk: [29, 2], face: 'n', pose: 'sit', room: 'M' },
-    { id: '3-mess-13', type: 'mess-seat', at: [30, 0], xy: [30.85, 0.38], walk: [32, 0], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-14', type: 'mess-seat', at: [30, 1], xy: [30.85, 1.62], walk: [30, 2], face: 'n', pose: 'sit', room: 'M' },
     { id: '3-mess-15', type: 'mess-seat', at: [31, 0], xy: [31.75, 0.38], walk: [32, 0], face: 's', pose: 'sit', room: 'M' },
     { id: '3-mess-16', type: 'mess-seat', at: [31, 1], xy: [31.75, 1.62], walk: [32, 1], face: 'n', pose: 'sit', room: 'M' },
@@ -3552,19 +3551,14 @@ DECKS[3] = {
     { id: '3-lounge-8', type: 'lounge-seat', at: [42, 8], xy: [42.07, 8.53], walk: [42, 8], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-9', type: 'lounge-seat', at: [46, 3], xy: [46.11, 3.35], walk: [46, 3], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-10', type: 'lounge-seat', at: [45, 2], xy: [45.56, 2.41], walk: [46, 2], face: 's', pose: 'sit', room: 'L' },
-    { id: '3-lounge-11', type: 'lounge-seat', at: [45, 1], xy: [45.24, 1.99], walk: [44, 2], face: 'w', pose: 'sit', room: 'L' },
     { id: '3-lounge-12', type: 'lounge-seat', at: [44, 1], xy: [44.18, 1.73], walk: [43, 1], face: 'e', pose: 'sit', room: 'L' },
-    { id: '3-lounge-13', type: 'lounge-seat', at: [41, 15], xy: [41.57, 15.3], walk: [41, 13], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-14', type: 'lounge-seat', at: [42, 15], xy: [42.23, 15.3], walk: [43, 15], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-15', type: 'lounge-seat', at: [41, 13], xy: [41.57, 13.9], walk: [41, 13], face: 's', pose: 'sit', room: 'L' },
     { id: '3-lounge-16', type: 'lounge-seat', at: [42, 13], xy: [42.23, 13.9], walk: [42, 13], face: 's', pose: 'sit', room: 'L' },
-    { id: '3-lounge-17', type: 'lounge-seat', at: [41, 17], xy: [41.57, 17.3], walk: [43, 17], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-18', type: 'lounge-seat', at: [42, 17], xy: [42.23, 17.3], walk: [43, 17], face: 'n', pose: 'sit', room: 'L' },
-    { id: '3-lounge-19', type: 'lounge-seat', at: [41, 15], xy: [41.57, 15.9], walk: [43, 15], face: 's', pose: 'sit', room: 'L' },
     { id: '3-lounge-20', type: 'lounge-seat', at: [42, 15], xy: [42.23, 15.9], walk: [43, 15], face: 's', pose: 'sit', room: 'L' },
     { id: '3-lounge-21', type: 'lounge-seat', at: [41, 19], xy: [41.57, 19.3], walk: [41, 20], face: 'n', pose: 'sit', room: 'L' },
     { id: '3-lounge-22', type: 'lounge-seat', at: [42, 19], xy: [42.23, 19.3], walk: [42, 20], face: 'n', pose: 'sit', room: 'L' },
-    { id: '3-lounge-23', type: 'lounge-seat', at: [41, 17], xy: [41.57, 17.9], walk: [43, 17], face: 's', pose: 'sit', room: 'L' },
     { id: '3-lounge-24', type: 'lounge-seat', at: [42, 17], xy: [42.23, 17.9], walk: [43, 17], face: 's', pose: 'sit', room: 'L' },
     { id: '3-lounge-25', type: 'lounge-seat', at: [48, 11], xy: [48.01, 11.8], walk: [48, 11], face: 'e', pose: 'sit', room: 'L' },
     { id: '3-lounge-26', type: 'lounge-seat', at: [48, 11], xy: [48.01, 11], walk: [48, 11], face: 'e', pose: 'sit', room: 'L' },
@@ -3622,13 +3616,7 @@ DECKS[3] = {
     { id: '3-gym-7', type: 'gym', at: [23, 15], xy: [23.85, 15.6], walk: [23, 15], face: 's', pose: 'lie', room: 'F' },
     { id: '3-gym-8', type: 'gym', at: [24, 15], xy: [24.6, 15.6], walk: [24, 15], face: 's', pose: 'lie', room: 'F' },
     { id: '3-gym-9', type: 'gym', at: [25, 15], xy: [25.35, 15.6], walk: [25, 15], face: 's', pose: 'lie', room: 'F' },
-    { id: '3-shop-1', type: 'shop', at: [32, 16], xy: [32.96, 16], walk: [33, 15], face: 'w', pose: 'stand', room: 'S' },
-    { id: '3-shop-2', type: 'shop', at: [32, 17], xy: [32.96, 17.4], walk: [33, 17], face: 'w', pose: 'stand', room: 'S' },
-    { id: '3-shop-3', type: 'shop', at: [32, 18], xy: [32.96, 18.8], walk: [33, 18], face: 'w', pose: 'stand', room: 'S' },
-    { id: '3-shop-4', type: 'shop', at: [35, 17], xy: [35.04, 17.4], walk: [34, 17], face: 'e', pose: 'stand', room: 'S' },
-    { id: '3-shop-5', type: 'shop', at: [35, 18], xy: [35.04, 18.8], walk: [34, 18], face: 'e', pose: 'stand', room: 'S' },
     { id: '3-store-1', type: 'work:store', at: [34, 15], xy: [34.85, 15.5], walk: [34, 15], face: 'e', pose: 'stand', room: 'S' },
-    { id: '3-shop-6', type: 'shop', at: [34, 20], xy: [34, 20.85], walk: [34, 20], face: 's', pose: 'stand', room: 'S' },
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', room: 'B' },
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', room: 'B' },
