@@ -357,7 +357,11 @@ They checked:
         - The lift's stern door opens to the quarters and its bow door to science.
         - Open, with defaults until the user says otherwise: the six invented officers are placeholders, and the 15th room is a visitors' cabin.
 
-**7. Machines, supplies and the shared job list,** anchored on the Works bay job board. Comes after the ship is built (6e).
+**7. The Living Ship (next big phase, agreed 2026-10-15).** Crew and simulation as one phase. It replaces the old step 7 (machines, supplies and the shared job list), which is now Pillar 2. The full design is in **design-living-ship.md**: no fail state, a 30-minute ship day, all 75 crew with varied routines, ship systems the crew tend, relationships and gossip, and ship-wide events as the main missions. Built in four pillars, each reviewed when it's done:
+1. Foundation: clock, rota, the 75-crew roster, simulation of crew on other decks.
+2. Ship systems and jobs.
+3. Social.
+4. Events, starting with the ion storm.
 
 
 ## Agreed ideas waiting for their milestone
@@ -374,7 +378,7 @@ They checked:
 From design doc v4:
 
 - Who is the Works Chief?
-- How long is a ship day in real time?
+- ~~How long is a ship day in real time?~~ 30 minutes (design-living-ship.md).
 - Should the player ever move to the night shift?
 - How does diagnosis look on screen?
 - Can the player be passed over for certification, or only delayed?
