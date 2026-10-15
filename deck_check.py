@@ -11,7 +11,8 @@
 #   tile must be walkable, in the same room, reachable from the lift, and `at` itself or within 2.5 m of the spot
 #   (`xy: [x, z]` in tile units if given, else the tile centre); it replaces the next-door rule. Counts by type are printed.
 #   Pillar 2: service hatches (a deck's `service` list) pass for the player and for Works crew. Room tiles and items are
-#   checked as the player walks; `work:works` places may be reached through a service hatch, other places may not.
+#   checked as the player walks; `work:works` and `storage` places (Works errands: parts, carts) may be reached through a
+#   service hatch, other places may not.
 #   A deck's `machines` ({ id, kind, at, room, face, panel }): ids unique ship-wide, `at` in its room, the panel tile
 #   walkable and in the same room, and exactly one place that names it (`machine: id`): a `work:works` place on the
 #   panel tile. Every place that names a machine must name one on its deck.
@@ -62,7 +63,7 @@ PLACES = r"""(() => {
   const seenAll = flood(passFor(null)), seenWorks = flood(passFor(WORKS));
   const bad = [], counts = {};
   for (const p of ps) {
-    const why = [], works = p.type === 'work:works', seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
+    const why = [], works = p.type === 'work:works' || p.type === 'storage', seen = works ? seenWorks : seenAll, pass = passFor(works ? WORKS : null);
     if (typeof p.id !== 'string' || !p.id) why.push('no id');
     if (!(TYPES.includes(p.type) || /^work:[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);
     if (!POSES.includes(p.pose)) why.push('pose ' + p.pose);

@@ -3237,13 +3237,15 @@ Object.assign(KIT, {
     return { w, d: .78, tall: true };
   },
   // a hover-cart dock: a charging post on a floor plate, and a cart parked on it
-  cartDock(g) {
+  cartDock(g, o = {}) {
     box(1.7, .02, .85, WM.hazard, 0, .01, 0, g);
     box(.2, 1.2, .2, WM.paintDark, 0, .6, -.3, g); box(.16, .1, .03, WM.screen, 0, 1.0, -.19, g);
-    box(1.4, .22, .62, UT.cart, 0, .5, .05, g); box(1.3, .04, .5, UT.cartGlow, 0, .37, .05, g);
-    for (const x of [-.6, .6]) box(.06, .5, .06, WM.steel, x, .85, -.2, g);
-    box(1.26, .05, .05, WM.steel, 0, 1.1, -.2, g);
+    const cart = new THREE.Group(); g.add(cart);              // the parked cart, kept whole so it can hide while it's out (cartDockLive)
+    box(1.4, .22, .62, UT.cart, 0, .5, .05, cart); box(1.3, .04, .5, UT.cartGlow, 0, .37, .05, cart);
+    for (const x of [-.6, .6]) box(.06, .5, .06, WM.steel, x, .85, -.2, cart);
+    box(1.26, .05, .05, WM.steel, 0, 1.1, -.2, cart);
     cyl(.02, .02, .4, WM.rubber, .05, .7, -.25, g, 6);
+    if (o.dock) { noMergeAll(cart); if (typeof cartDockLive === 'function') cartDockLive(cart, o.dock); }   // section 17 (B3) hides it while the cart is out
     return { w: 1.7, d: .85 };
   },
   // a heavy cargo rack: two levels of crates and drums, fixed pattern
@@ -3861,6 +3863,11 @@ DECKS[5] = {
     { id: '5-parts-4', type: 'storage', anim: 'browse', stock: ['element', 'fan belt', 'compressor', 'bearing', 'control rod'], at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
     { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
     { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
+    // restock runs (0.30.10, for the systems engineer's B3): loading a cart in the cargo hold, and taking or returning one at its dock
+    { id: '5-hold-1', type: 'storage', anim: 'lift', at: [16, 11], face: 'e', pose: 'stand', room: 'c' },   // by the crate stack
+    { id: '5-hold-2', type: 'storage', anim: 'lift', at: [13, 14], face: 's', pose: 'stand', room: 'c' },   // at the racks
+    { id: '5-cart-1', type: 'storage', at: [19, 13], face: 'e', pose: 'stand', room: 'm' },                 // beside cart dock 1
+    { id: '5-cart-2', type: 'storage', at: [19, 14], face: 'e', pose: 'stand', room: 'm' },                 // beside cart dock 2
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-2', type: 'work:works', at: [7, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-3', type: 'work:works', at: [2, 4], face: 'w', pose: 'work', room: 'S' },
@@ -3982,7 +3989,7 @@ DECKS[5] = {
     place('u', 'breakerCabinet', 1.66, 1.5, 'e', { w: .7, it: IT('Breaker cabinet', 'Deck 5\'s power junction. The Works bay alone has its own row.') });
     placeWall('u', 'relayBoard', 'n', 1.5, { it: IT('Light relays', 'Deck 5\'s lights. The shuttle bay floods have a relay to themselves.') });
     // cart bay: two docks with a cart charging on each
-    for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
+    for (const [z, n] of [[1.0, 1], [3.0, 2]]) place('m', 'cartDock', 1.45, z, 'e', { dock: n, it: IT('Cart dock ' + n, n === 1 ? 'A hover hand cart, charging. The sticker says I BRAKE FOR NOBODY.' : 'A hover hand cart, charging, with a crate strap still hooked on.') });
     placeWall('m', 'workLight', 'w', 3.5);
     // cargo hold: heavy racks along the starboard hull, crate stacks by the walls, a clear floor for the carts
     for (const x of [1.0, 3.0, 5.0, 7.0]) place('c', 'cargoRack', x, 5.54, 's');
