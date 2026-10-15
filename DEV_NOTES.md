@@ -1,6 +1,6 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.10.0). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.10.1). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.10.0 (about 5,750 lines)
+## Current build: 0.10.1 (about 5,750 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -61,7 +61,9 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.9.2 | Deck 2, turn 2: the bedrooms. Fourteen furnished, locked bedrooms (the Captain's is turn 3): a new `d2Suite` layout that scales up Deck 4's officer cabin (double bed with headboard and two lamps, writing desk and leather chair, armchair, bookcase, frosted-glass en-suite, wooden wardrobe, rug, plant), with variants for the 3-wide cabins by the lift and the inner cabins; Vance's and the Envoy's corner cabins laid out by hand (the Envoy's with a futon, a sleeping screen and a Veyli tea table on the floor). A tap on a bed or desk says who lives there without walking (`see`). New kit `suiteBed`, `futon`, `suiteDesk`, `suiteChair`, `suiteShelf`, `suitePlant`, `suiteRug`, `ensuite`, `suiteWardrobe`, `lowTable`, `cushion`, `sleepScreen`. Decks 3–6 pixel-identical. |
 | 0.9.3 | Deck 2, turn 3: the Captain's quarters and the senior corridor. The quarters (locked, 5 × 12 across the stern): the sleeping alcove behind a curtain at the port end, a dining table for eight by the door with a window seat under the stern windows and a sideboard, and the study at the starboard end with the Captain's desk, low bookshelves, a globe and a reading chair; the deck's one real lamp hangs over the table. A brass knocker on her door. The corridor: brass wall lamps, portraits of four of the Wren's captains along the gallery, consoles with flowers. New kit `diningTable`, `sideboard`, `captainDesk`, `alcoveCurtain`, `globe`, `consoleTable`; wall kit `portrait`, `brassSconce`, `knocker`. Decks 3–6 pixel-identical. |
 | 0.9.4 | Deck 2, turn 4: science, the Watch office and the sensor array. Watch office (status board under the windows, the duty desk facing the lobby glass, lockers, coffee, lost property, the patrol rota), washroom, chart room (a chart table that glows from underneath, pigeonholes of rolled charts, a window seat), Survey lab (benches under the windows, an island, the sample scanner, the specimen shelf with the blue one), observatory (a brass telescope aimed out of the bow, a cushioned bench, star charts, beanbags), comms room (signal board along the windows, four headset desks), sample lab (fume hoods, glove box, centrifuges), and, locked: the specimen store (a sample that hums, `PULSES`), the probe bay (three probes nose to their launch tubes) and the sensor array behind glass (the dish turns, `SPINS`, its feed breathes blue, and the deck's second lamp lights it blue; signal racks, the comms mast). Benches, plants and notices in the science corridor. Deck 2 done. Decks 3–6 pixel-identical. |
+| 0.9.5 | Deck 2 takes the bridge architect's hull fix (`hull.byFace: true`; the splitter edit is byte-for-byte the one in `claude/deck1-bridge` e928563, so the branches merge cleanly): one hull piece per facing instead of many. Fewer draw calls over the quarters zoomed out (660 → 607) and over the Captain's quarters (322 → 243); by the lift unchanged (283). Decks 3–6 pixel-identical. |
 | 0.10.0 | All three new decks in one build: Deck 6 (0.7.1–0.7.4), Deck 1 (0.8.1–0.8.4) and Deck 2 (0.9.1–0.9.4), merged by the lead on `claude/ship-integration`. No changes beyond the merge. |
+| 0.10.1 | 0.10.0 plus Deck 2's 0.9.5 (the hull fix on Deck 2). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -91,7 +93,8 @@ Built from plans/deck2-plan.html (Sketch 8) on branch `claude/deck2-command`, al
     - **Locked rooms** F, P and A are `NO_FADE`; their taps are `see` items.
     - **Memory:** Deck 2's shared textures (rugs, portraits, charts, waveforms, rack lights) are made at load and upload on the first visit, then stay, like Deck 5's hatch textures. deck_check's Deck 4 round trips stay steady (496 geometries, 34 textures).
     - **Cost:** about 285 draw calls by the lift (Deck 3 326, Deck 4 332), 230–300 over the science rooms with walls down, 540–580 zoomed right out over the quarters.
-- **Deck 2 is done (0.9.4) and waiting for the user's review.**
+- **0.9.5:** `hull.byFace: true` on Deck 2 (the shared splitter edit from the bridge branch, opt-in per deck; Decks 3–6 keep the old split).
+- **Deck 2 is done (0.9.4, hull fix 0.9.5) and waiting for the user's review.**
 
 ## How decks work (section 4)
 

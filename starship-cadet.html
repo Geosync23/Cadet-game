@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.10.0
+   STARSHIP CADET: CSV Wren                            build 0.10.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4199,7 +4199,7 @@ DECKS[2] = {
   closedDoors: {
     'h,19,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
   },
-  hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6 },   // Deck 3's hull, with rounder stern corners
+  hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6, byFace: true },   // Deck 3's hull, with rounder stern corners; one hull piece per facing
   light: { sky: col('#e9e6ff'), sun: col('#fff0dc'), hemi: .94, sunI: .96 },   // calm: a touch cooler in the shade, a touch softer in the sun
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
