@@ -415,7 +415,7 @@ What makes it interesting:
 
 **No hard failure.** If you slack, other Works crew pick up jobs, but more slowly, and your supervisor notices. The ship never dies because of you, but it gets visibly worse.
 
-**Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Fitness gains you nothing, but let it (or your sleep) fall too low and you walk slower. Needs never punish you harder than that (no fail state).
+**Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Fitness gains you nothing, but let it (or your sleep) fall too low and you walk slower. Needs drain with ship time and come back by doing things: a meal +55, the grab shelf +25, a shower +80, a workout +30, a call home +40, and 8 hours' sleep fills energy. Fitness or energy under 25 makes you walk at 80% each (both: 64%) (built in 0.28.1). Needs never punish you harder than that (no fail state).
 
 **Your personal device** is the game's main interface (agreed 2026-10-15): your needs, the time, and later your jobs show on it. Its design is still to come from the user; until then the game uses a plain placeholder.
 
