@@ -349,5 +349,61 @@ fb.onclick = () => { const on = fb.getAttribute('aria-pressed') !== 'true'; fb.s
   for (const [k, g] of Object.entries(roomEls)) g.classList.toggle('sealed', on && !ROOMS[k].built && !SPINE.has(k)); };
 addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
 </script>
+<!-- ===== Utility rooms (Pillar 2, workstream A5b, the bridge architect): proposed, for the lead's review ===== -->
+<style>
+.util{max-width:1100px;margin:0 auto 32px;padding:0 16px;font-size:12.5px;color:#93a6ae;line-height:1.5}
+.util h2{font-size:16px;font-weight:600;color:#e8eef0;margin:8px 0 4px}
+.util>p{margin:0 0 10px;max-width:760px}
+.util .rooms{display:flex;flex-wrap:wrap;gap:14px}
+.util .rc{background:rgba(13,21,33,.78);border:1px solid rgba(150,200,196,.22);border-radius:14px;padding:12px 14px;flex:1 1 300px;min-width:0}
+.util .rc b{display:block;font-size:14px;color:#bdeee6;font-weight:600}
+.util .rc .why{color:#cfd9dc;margin:2px 0 8px}
+.util svg{display:block;max-width:100%;height:auto;margin:4px 0 8px}
+.util table{border-collapse:collapse;width:100%;font-size:11.5px}
+.util td,.util th{text-align:left;padding:2px 6px 2px 0;vertical-align:top}
+.util th{color:#cfd9dc;font-weight:600}
+.util code{font-size:11px;color:#bdeee6}
+.util .key{display:flex;flex-wrap:wrap;gap:6px 14px;margin:2px 0 12px}
+.util .key i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+<section class="util" id="utility">
+<h2>Utility rooms (proposed)</h2>
+<p>Deck 1's sealed service spaces get their insides, with nothing moved or resized: machines, a floor to stand and work on, and the hatch as the way in. Every machine has a <code>machines</code> entry, a panel tile beside it and a <code>work:works</code> place on that tile. Works crew and the player can pass the hatches; tier locks come later. Machine kinds are proposals for the systems engineer.</p>
+<div class="key"><span><i style="background:#56656e"></i>Floor to stand and work on</span><span><i style="background:#2f6f86"></i>Machine (in the registry)</span><span><i style="background:#3a4248"></i>Pipes and fittings (scenery)</span><span><i style="border:2px solid #e9c46a;background:none"></i>Panel tile: a <code>work:works</code> place</span><span><i style="background:#e9c46a"></i>Hatch, the way in</span><span><i style="background:#1d252d"></i>Outside the hull</span></div>
+<div class="rooms" id="utilRooms"></div>
+</section>
+<script>
+(() => {
+  const UTIL = [{"key": "u", "name": "Relay room", "i0": 6, "j0": 9, "w": 4, "h": 3, "stand": ["####", "####", "####"], "why": "Racks of bridge relays under blue status lights, and the way down into the sub-floor crawl. In from the lobby through the hatch at <code>h,9,9</code>.", "hatches": [{"i": 9, "j": 9, "side": "n"}, {"i": 9, "j": 10, "side": "e"}], "machines": [{"id": "1-relay-1", "kind": "relay", "label": "Relay racks, port bank: the helm and ops circuits", "tiles": [[6, 9], [7, 9], [8, 9]], "panel": [7, 10], "face": "n"}, {"id": "1-relay-2", "kind": "relay", "label": "Relay racks, starboard bank: the viewscreen, comms and the rear stations", "tiles": [[6, 11], [7, 11], [8, 11], [9, 11]], "panel": [8, 10], "face": "s"}], "decor": [], "notes": "Floor: <code>grate</code>. A walkway along row 10 from the hatch. <b>One door change:</b> a new hatch at <code>v,10,10</code> from the relay room into the sub-floor crawl, as the plan's text always said (\"from the relay room\"). The map is unchanged."}, {"key": "k", "name": "Utility closet", "i0": 6, "j0": 0, "w": 4, "h": 2, "stand": ["####", "####"], "why": "Deck 1's light relays and the lobby's power junction. In from the lobby through the hatch at <code>h,6,2</code>.", "hatches": [{"i": 6, "j": 1, "side": "s"}], "machines": [{"id": "1-junction-1", "kind": "junction", "label": "Power junction: the deck's breakers, fed from the trunk head", "tiles": [[8, 0], [9, 0]], "panel": [8, 1], "face": "n"}, {"id": "1-lights-1", "kind": "lights", "label": "Light relay cabinet: every lamp and light strip on Deck 1, including the bridge's mood light", "tiles": [[6, 0], [7, 0]], "panel": [7, 1], "face": "n"}], "decor": [], "notes": "Floor: <code>grate</code>. A walkway along row 1 from the hatch."}, {"key": "c", "name": "Sub-floor crawl", "i0": 10, "j0": 10, "w": 6, "h": 2, "stand": ["#####~", "######"], "why": "A low crawl under the rear stations, between the relay room and the floor hatch beside the Works station (<code>h,14,10</code>). Tier 3's shortcut onto the bridge.", "hatches": [{"i": 14, "j": 10, "side": "n"}, {"i": 10, "j": 10, "side": "w"}], "machines": [{"id": "1-databus-1", "kind": "databus", "label": "The bridge data bus: a junction box where every station's cables meet", "tiles": [[12, 11], [13, 11]], "panel": [12, 10], "face": "s"}], "decor": [{"label": "cable trays", "tiles": [[10, 11], [11, 11], [14, 11], [15, 11]]}], "notes": "Floor: <code>grate</code>, with cable trays along row 11. Tile (15, 10) is outside the map. The crawl is low in the story, but the build draws it full height like the other rooms; a lowered ceiling could come later."}];
+  const S = 34, el = (t, a, p) => { const e = document.createElementNS('http://www.w3.org/2000/svg', t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+  const host = document.getElementById('utilRooms');
+  for (const U of UTIL) {
+    const card = document.createElement('div'); card.className = 'rc'; host.appendChild(card);
+    card.innerHTML = `<b>${U.name} <span style="color:#93a6ae;font-weight:400">(${U.key}, ${U.w} × ${U.h}, columns ${U.i0}–${U.i0 + U.w - 1}, rows ${U.j0}–${U.j0 + U.h - 1})</span></b><div class="why">${U.why}</div>`;
+    const pad = 14, svg = el('svg', { viewBox: `${-pad} ${-pad} ${U.w * S + pad * 2} ${U.h * S + pad * 2}`, width: U.w * S + pad * 2, role: 'img', 'aria-label': U.name + ' sketch' }, card);
+    const T = (i, j) => [(i - U.i0) * S, (j - U.j0) * S];
+    for (let j = 0; j < U.h; j++) for (let i = 0; i < U.w; i++) {
+      const out = U.stand[j][i] !== '#';
+      el('rect', { x: i * S, y: j * S, width: S, height: S, fill: out ? '#1d252d' : '#56656e', stroke: 'rgba(255,255,255,.08)' }, svg);
+    }
+    for (const d of U.decor || []) for (const [i, j] of d.tiles) { const [x, y] = T(i, j); el('rect', { x: x + 3, y: y + 3, width: S - 6, height: S - 6, rx: 4, fill: '#3a4248' }, svg); }
+    U.machines.forEach((m, k) => {
+      for (const [i, j] of m.tiles) { const [x, y] = T(i, j); el('rect', { x: x + 2, y: y + 2, width: S - 4, height: S - 4, rx: 5, fill: '#2f6f86', stroke: '#5fd6c6', 'stroke-width': 1 }, svg); }
+      const [i, j] = m.tiles[0], [x, y] = T(i, j); const t = el('text', { x: x + S / 2, y: y + S / 2 + 4, 'text-anchor': 'middle', 'font-size': 12, fill: '#e8eef0', 'font-weight': 600 }, svg); t.textContent = k + 1;
+      const [px, py] = T(...m.panel); el('rect', { x: px + 4, y: py + 4, width: S - 8, height: S - 8, rx: 4, fill: 'none', stroke: '#e9c46a', 'stroke-width': 2.5 }, svg);
+      const pt = el('text', { x: px + S / 2, y: py + S / 2 + 4, 'text-anchor': 'middle', 'font-size': 10, fill: '#e9c46a' }, svg); pt.textContent = k + 1;
+    });
+    for (const h of U.hatches) {
+      const [x, y] = T(h.i, h.j), L = 6;
+      const r = h.side === 'n' ? { x: x + 4, y: y - L / 2, width: S - 8, height: L } : h.side === 's' ? { x: x + 4, y: y + S - L / 2, width: S - 8, height: L }
+        : h.side === 'w' ? { x: x - L / 2, y: y + 4, width: L, height: S - 8 } : { x: x + S - L / 2, y: y + 4, width: L, height: S - 8 };
+      el('rect', { ...r, fill: '#e9c46a', rx: 2 }, svg);
+    }
+    const rows = U.machines.map((m, k) => `<tr><td>${k + 1}</td><td><code>${m.id}</code></td><td><code>${m.kind}</code></td><td>${m.label}</td><td><code>at [${m.tiles[0]}]</code>, panel <code>[${m.panel}]</code>, facing ${m.face}</td></tr>`).join('');
+    card.insertAdjacentHTML('beforeend', `<table><tr><th>#</th><th>id</th><th>kind</th><th>What it is</th><th>Where</th></tr>${rows}</table><div style="margin-top:6px">${U.notes}</div>`);
+  }
+})();
+</script>
+
 </body>
 </html>
