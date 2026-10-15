@@ -276,6 +276,27 @@ with sync_playwright() as pw:
             done = json.loads(g.ev(f"JSON.stringify([myJob(), SHIP.jobs.find(j => j.id === {json.dumps(jid)}).status, SHIP.machines[{json.dumps(mj[2])}].cond])"))
             print('  repaired:', s3[3][:80], '| job', done[1], '| condition', round(done[2]))
             check(done[0] is None and done[1] == 'done' and done[2] >= 99 and s3[2] is None, f'job loop: the job should be done and the machine as new ({done})')
+        # making a part: storage has none, so the machine shop (an hour at the lathe; resumed here near the end)
+        mk = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); j.parts = ['element']; MACH_REV++;
+          if (!claimJob(j.id)) return null; window.__stock = SHIP.stores.element; SHIP.stores.element = 0; SHIP.player.carry = []; myWork(); return j.id; })()""")
+        if mk:
+            g.ev("goToDeck(5)"); g.step(5)
+            f = g.ev(TAPS % '"Galley parts"'); s5 = jrun(); print('  storage out of elements:', s5[3][:120])
+            check(s5[1] == [] and 'machine shop' in s5[3], 'job loop: no elements in storage should point to the machine shop')
+            g.ev("SHIP.player.work.make = { part: 'element', done: 57 }")
+            lathe = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'f').map(i => i.t)[0])")
+            check(g.ev(TAPS % lathe) is True, f'job loop: a tap in the machine shop ({lathe}) should make the part'); s6 = jrun()
+            print('  made:', s6[1], '|', s6[3][:100])
+            check(s6[1] == ['element'] and s6[2]['make'] is None, 'job loop: making should leave the part in your hands')
+            g.ev(f"SHIP.stores.element = window.__stock; dropJob({json.dumps(mk)}); SHIP.player.carry = []")
+        # the wrist comm: a job you could take, posted while you're free
+        nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow();
+          const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; jobNotice();
+          return [document.getElementById('tt').textContent, document.getElementById('tx').textContent]; })()""")
+        print('  notice:', nt)
+        check(nt is None or (nt[0] == 'Your device' and nt[1].startswith('New job')), f'job loop: a new job you could take should be announced ({nt})')
         # carrying two at most: a job needing three filters takes two trips
         two = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && !j.claimedBy && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind))
           || SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
