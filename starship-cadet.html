@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.10.1
+   STARSHIP CADET: CSV Wren                            build 0.11.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1885,7 +1885,7 @@ const KIT = {
     const core = std('#ffb35c', .35, 0, { emissive: col('#f08a2c'), emissiveIntensity: 1 });
     cyl(1.0, 1.08, .22, ENG.plinth, 0, .11, 0, g, 28);
     const band = new THREE.Mesh(new THREE.TorusGeometry(1.02, .035, 6, 36), WM.paintGold); band.rotation.x = Math.PI / 2; band.position.y = .23; g.add(band);
-    cyl(.42, .42, 1.9, core, 0, 1.17, 0, g, 20);
+    cyl(.42, .42, 1.9, core, 0, 1.17, 0, g, 20).userData.noMerge = true;   // kept out of the fade's material copies, so it keeps pulsing
     for (let k = 0; k < 7; k++) { const r = new THREE.Mesh(new THREE.TorusGeometry(.6, .085, 8, 28), ENG.copper); r.rotation.x = Math.PI / 2; r.position.y = .45 + k * .26; r.castShadow = true; g.add(r); }
     for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; box(.06, 2.14, .06, WM.steel, Math.sin(a) * .78, 1.28, Math.cos(a) * .78, g); }
     cyl(.8, .8, .16, ENG.housing, 0, 2.4, 0, g, 28);
@@ -4343,10 +4343,10 @@ for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key
 
 // =====================================================================
 // DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room, turn 3 the reactor and engine control,
-// turn 4 the watch room, the lobby and the deck's warm light)
+// turn 4 the watch room, the lobby and the deck's warm light; 0.11.0 the engine room opened, the watch room moved and enlarged)
 // From plans/deck6-plan.html. The bottom of the ship: the engine room fills the flat stern, the reactor the bow,
-// with the foot of the spine, the overlook, engine control and the watch room between. No windows anywhere.
-// Engine room, engine control and the reactor are locked rooms you look into through glass.
+// with the foot of the spine, the overlook, the watch room and engine control between. No windows anywhere.
+// The engine room is open through the overlook; engine control and the reactor are locked rooms you look into through glass.
 // =====================================================================
 DECKS[6] = {
   num: 6, name: 'Engineering', seed: 60661, hazard: true,
@@ -4361,10 +4361,10 @@ DECKS[6] = {
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
-    '..EEEEEEEEEEOOOO++ZZ++KKKKKRRRRRRRRR',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRR..',
+    '..EEEEEEEEEESSSS++ZZ++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRRR.',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRRR.',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRR..',
     '..EEEEEEEEEECCCCCCCCCCCCCCCRRRRR....',
   ],
   // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
@@ -4373,61 +4373,62 @@ DECKS[6] = {
     'v,18,4': 'lift', 'v,18,5': 'lift', 'v,18,6': 'lift', 'v,20,4': 'lift', 'v,20,5': 'lift', 'v,20,6': 'lift',   // one wide door each side
     'h,18,3': 'glass', 'h,19,3': 'glass',                     // the foot of the trunks, behind glass above the car
     'h,18,8': 'hatch', 'h,19,8': 'glass',                     // the bottom of the ladder, with its hatch
-    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass', 'v,16,7': 'glass',   // onto the overlook
-    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass',  // the overlook's long window onto the engine room...
-    'v,12,5': 'closed',                                                          // ...the stair door down to the coil floor...
-    'v,12,6': 'glass', 'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and the rest of the window
+    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass',  // onto the overlook
+    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass', 'v,12,6': 'glass',   // the overlook's window onto the engine room...
+    'v,12,5': 'door',                                                            // ...and the door down onto the coil floor
+    'v,16,9': 'door', 'v,16,7': 'glass', 'v,16,8': 'glass',   // the watch room, off the lobby, with glass onto it...
+    'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and its own window onto the coils
     'v,22,5': 'closed', 'v,22,4': 'glass', 'v,22,6': 'glass', // engine control, glass onto the lobby
     'v,27,4': 'glass', 'v,27,5': 'glass', 'v,27,6': 'glass', 'v,27,7': 'glass', // engine control's window onto the reactor
     'v,27,3': 'closed',                                       // the reactor's shielded door, at the end of the lobby's alcove
-    'v,22,9': 'door',                                         // the watch room
     'h,17,1': 'hatch', 'h,17,11': 'hatch',                    // down into the port and starboard crawlways
-    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // port power junction from the lobby; starboard from the watch room
+    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // the two power junctions, both off the lobby
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'v,12,5': 'E', 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
-  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,22,8', 'w', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
+  sealed: { 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
+  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,16,10', 'e', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
   rooms: {
     '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
     '@': { name: 'Main lift', floor: 'lift' },
     Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
     O: { name: 'Engine overlook', floor: 'steel' },
     S: { name: 'Engine watch room', floor: 'wood' },
+    E: { name: 'Engine room', floor: 'grate' },
     // locked, but seen through glass
-    E: { name: 'Engine room', floor: 'grate', tap: 'The stair down to the engine room floor: the drive coils and the drive itself. Tier 4 access. Watch them through the glass.' },
     K: { name: 'Engine control', floor: 'plate', tap: 'Engine control. Tier 3 access, once power work opens. You can see the board through the glass.' },
     R: { name: 'Reactor', floor: 'grate', tap: 'The reactor\'s shielded door, with radiation trefoils painted either side. Tier 4 access, and only on a team job.' },
     // sealed until their tier
     c: { name: 'Port crawlway', void: true, tap: 'The lowest crawlway on the ship, along the port hull from the engine room to the reactor. Tier 3 access.' },
     C: { name: 'Starboard crawlway', void: true, tap: 'The lowest crawlway on the starboard side, from the engine room to the reactor. Tier 3 access.' },
     j: { name: 'Port power junction', void: true, tap: 'Breaker cabinets and the main junction, where the reactor\'s power splits for the decks above. Tier 3 access.' },
-    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, behind the watch room\'s kettle. Tier 3 access.' },
+    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, through a hatch at the lobby\'s starboard end. Tier 3 access.' },
   },
   windows: [],
   closedDoors: {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  markings: [[3, 4, 8, 4]],                                     // keep-clear round the row of coils
   light: { sky: col('#ffd2a6'), sun: col('#ffc48c'), hemi: .8, sunI: .78 },   // warmer and dimmer than the decks above
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,18,7', 'w'], ['v,20,7', 'e']]) placeOnEdge('liftPanel', key, tw);
     placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Engineering, the bottom of the line.') });
     // the foot of the spine: the trunks start behind glass above the car, the ladder ends behind glass below it
-    for (const r of ['Y', 'Z', 'E', 'K', 'R']) NO_FADE.add(r);        // the locked rooms behind glass stay solid
+    for (const r of ['Y', 'Z', 'K', 'R']) NO_FADE.add(r);             // the locked rooms behind glass stay solid
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    // the engine room, seen through the overlook's long window: the drive housing across the stern, three drive coils
-    // down the middle cycling one after another, copper feeds between them, and catwalks either side
-    place('E', 'driveHousing', .55, 6, 'w', { w: 8.6, it: { t: 'The drive', x: 'The drive housing fills the whole stern. Its mouth glows as the coils feed it, and the deck hums in time.', see: true } });
+    // the engine room, through the door from the overlook: the drive housing across the stern, three drive coils down
+    // the middle cycling one after another behind a rail, copper feeds between them, and open aisles either side.
+    // Room-local: the coils block rows 5-6 from x 1 to 8; rows 1-4 and 7-10 and column 9 (inside the door) stay clear.
+    place('E', 'driveHousing', .55, 6, 'w', { w: 8.6, it: IT('The drive', 'The drive housing fills the whole stern. Its mouth glows as the coils feed it, and the deck hums in time.') });
     ['The first coil takes the reactor\'s power and starts the cycle.', 'The middle coil. Its windings were replaced last refit; you can tell by the brighter copper.', 'The last coil, nearest the window. When all three glow in turn, the drive is happy.']
-      .forEach((x, k) => place('E', 'driveCoil', 2.6 + k * 2.5, 6, 'n', { ph: -k * 2.1, it: { t: 'Drive coil ' + (k + 1), x, see: true } }));
+      .forEach((x, k) => place('E', 'driveCoil', 2.6 + k * 2.5, 6, 'n', { ph: -k * 2.1, it: IT('Drive coil ' + (k + 1), x) }));
     for (const x of [1.4, 3.85, 6.35]) place('E', 'pipeRun', x, 6, 'n', { w: 1.0, y: 2.4 });
-    for (const z of [3.1, 8.9]) place('E', 'catwalk', 5.55, z, 'n', { w: 8.4 });
-    place('E', 'catwalk', 9.35, 6, 'e', { w: 4.96 });                // the landing at the foot of the stair door
-    // the overlook: a rail along the window, open at the stair door; benches facing the coils; the first-week board
-    place('O', 'overlookRail', .2, 2.0, 'w', { w: 3.7 }); place('O', 'overlookRail', .2, 7.5, 'w', { w: 4.7 });
-    for (const z of [2.5, 7.5]) place('O', 'bench', 2.3, z, 'e', { snug: true, it: IT('Bench', 'Facing the coils. People come down here to think, because nobody can hear you over the hum.') });
+    for (const z of [4.85, 7.15]) place('E', 'overlookRail', 5.1, z, 'n', { w: 7.6 });   // a rail either side of the coils
+    // the overlook: a rail along the window, open at the engine room door; a bench facing the coils; the first-week board
+    place('O', 'overlookRail', .2, 2.0, 'w', { w: 3.7 }); place('O', 'overlookRail', .2, 5.5, 'w', { w: .8 });
+    place('O', 'bench', 2.3, 2.5, 'e', { snug: true, it: IT('Bench', 'Facing the coils. People come down here to think, because nobody can hear you over the hum.') });
     placeWall('O', 'notices', 'n', 2.0, { hitW: 1.0, it: IT('First week', 'A list of names under COME AND SEE THE ENGINE. Every new crew member is on it. Yours has been added in pencil.') });
     // the reactor fills the bow, seen through engine control's window: the shield drum and its coolant loop
     place('R', 'reactorDrum', 4.4, 6, 'n', { loop: 3.0, it: { t: 'The reactor', x: 'The core sits inside that drum, behind more shielding than anything else aboard. The green glow is the safe kind. Everyone says so, a bit too quickly.', see: true } });
@@ -4437,18 +4438,20 @@ DECKS[6] = {
     placeWall('K', 'mimicPanel', 'n', 2.5, { hitW: 3.0, it: { t: 'Mimic panel', x: 'The whole ship\'s power on one board: the reactor, both junctions and a line up to every deck. Deck 3\'s line is amber; the galley ovens are drawing hard.', see: true } });
     // the reactor door at the end of the alcove: a radiation sign either side
     for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. Tier 4, and only ever on a team job.') });
-    // the watch room: two armchairs facing each other, the kettle in the corner (the junction hatch is beside it),
-    // a lamp, a panel heater nobody needs and a shelf of old engine logs
-    place('S', 'rug', 1, 1.5, 'n', { tex: rugLounge, w: 1.7, d: 2.6 });
-    place('S', 'armchair', .55, .55, 'n', { fab: M.mustard, it: IT('Armchair', 'The engine watch\'s chair. From here you can see the lobby through the door and hear the coils through the floor.') });
-    place('S', 'armchair', .55, 2.45, 's', { fab: M.mustard, it: IT('Armchair', 'Worn in exactly one place. Whoever has the night watch sits here.') });
-    place('S', 'dispenser', 1.55, .4, 'n', { it: IT('Kettle', 'Hot water on tap, a tin of tea and a mug for every Works tech who ever stood a watch. The power junction hatch is right behind it.') });
-    place('S', 'floorLamp', 1.6, 2.6, 'n', { light: true });
-    placeWall('S', 'heater', 's', 1.0, { hitW: 1.0, it: IT('Heater', 'Switched on, on the warmest deck in the ship. Nobody knows why; nobody turns it off.') });
-    placeWall('S', 'logShelf', 'w', .5, { hitW: .9, it: IT('Engine logs', 'Years of watch logs in grey and gold binders. One entry, underlined: QUIET NIGHT. COILS SANG.') });
+    // the watch room (4 x 4, the overlook's south end): two armchairs and a tea table at the window onto the coils,
+    // the kettle in the corner, a lamp, a panel heater nobody needs and a shelf of old engine logs. The door is on the lobby side.
+    place('S', 'rug', 1.9, 2.0, 'n', { tex: rugLounge, w: 2.8, d: 3.0 });
+    place('S', 'armchair', .9, 1.1, 'e', { fab: M.mustard, it: IT('Armchair', 'The engine watch\'s chair, facing the coils. From here you can see every one of them and hear them through the floor.') });
+    place('S', 'armchair', .9, 2.9, 'e', { fab: M.mustard, it: IT('Armchair', 'Worn in exactly one place. Whoever has the night watch sits here.') });
+    place('S', 'teaTable', .7, 2.0, 'n', { it: IT('Tea table', 'Two mugs and a watch log, open at tonight. The coils on the other side of the glass do most of the talking.') });
+    place('S', 'dispenser', 3.55, .35, 'n', { it: IT('Kettle', 'Hot water on tap, a tin of tea and a mug for every Works tech who ever stood a watch.') });
+    place('S', 'floorLamp', 3.6, 3.6, 'n', { light: true });
+    placeWall('S', 'heater', 's', 2.0, { hitW: 1.0, it: IT('Heater', 'Switched on, on the warmest deck in the ship. Nobody knows why; nobody turns it off.') });
+    placeWall('S', 'logShelf', 'n', 1.0, { hitW: .9, it: IT('Engine logs', 'Years of watch logs in grey and gold binders. One entry, underlined: QUIET NIGHT. COILS SANG.') });
     // the lobby: coolant risers in its corners (steaming at a joint), and a bench facing the lift
-    for (const [x, z] of [[.35, .35], [5.65, .35], [.35, 9.65], [5.65, 9.65]]) place('+', 'coolantRiser', x, z, 'n', { it: IT('Coolant riser', 'Coolant on its way up from the reactor loop. Warm to the touch, and the reason this lobby never needs a heater.') });
+    for (const [x, z] of [[.35, .35], [5.65, .35], [.35, 9.65], [7.65, 9.65]]) place('+', 'coolantRiser', x, z, 'n', { it: IT('Coolant riser', 'Coolant on its way up from the reactor loop. Warm to the touch, and the reason this lobby never needs a heater.') });
     place('+', 'bench', 2.5, 9.55, 's', { snug: true, it: IT('Bench', 'Warm, because everything down here is. People wait here for the lift and doze off.') });
+    place('+', 'bench', 7.0, 7.3, 'n', { snug: true, it: IT('Bench', 'Under engine control\'s wall. You can hear the operators arguing about coolant through it.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };

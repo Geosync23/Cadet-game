@@ -41,7 +41,7 @@ svg{display:block}
 <body>
 <header>
   <h1>Deck 6: Engineering</h1>
-  <div class="sub">Sketch 2, for build 0.6.6. Bow points forward, port side is on the left when facing it. The bottom of the ship: short, narrow and warm, with a hum you feel through your boots. The engine room fills the flat stern and the reactor fills the bow. Between them is the foot of the spine, an overlook onto the drive coils, and engine control looking into the reactor. Most of it stays shut until tiers 3 and 4, but you can come and look from day one. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+  <div class="sub">Sketch 3, as built in 0.11.0. Bow points forward, port side is on the left when facing it. The bottom of the ship: short, narrow and warm, with a hum you feel through your boots. The engine room fills the flat stern and the reactor fills the bow. Between them is the foot of the spine, an overlook and the engine watch room looking onto the drive coils, and engine control looking into the reactor. You can walk the engine room from day one; engine control, the reactor, the junctions and the crawlways stay shut until tiers 3 and 4. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -50,15 +50,15 @@ svg{display:block}
   <button id="first" aria-pressed="false">Built first</button>
 </div>
 <div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="info"><div id="card"><b>Deck 6 at a glance</b><span>The engine room aft, with three drive coils and the drive housing across the stern, watched from the overlook gallery. The reactor core is in the bow, watched from engine control. Two power junctions sit by the spine, and the ship's lowest crawlways run along both hulls from the engine room to the reactor. A small watch room for the engine watch. No windows anywhere.</span><span class="meta">36 × 12 tiles, the narrowest deck below the bridge, with a blunt bow and a flat stern for the drive. The lift lines up with Decks 3, 4 and 5 (game lift: [19, 6], car rows 4–6, ladder row 7, trunks row 3). The spine ends here.</span></div></div>
+<div id="info"><div id="card"><b>Deck 6 at a glance</b><span>The engine room aft, with three drive coils and the drive housing across the stern, watched from the overlook and the watch room, and open to walk through from the overlook. The reactor core is in the bow, watched from engine control. Two power junctions sit by the spine, and the ship's lowest crawlways run along both hulls from the engine room to the reactor. The engine watch room sits at the south end of the overlook, with its own window onto the coils. No windows to space anywhere.</span><span class="meta">36 × 12 tiles, the narrowest deck below the bridge, with a blunt bow and a flat stern for the drive. The lift lines up with Decks 3, 4 and 5 (game lift: [19, 6], car rows 4–6, ladder row 7, trunks row 3). The spine ends here.</span></div></div>
 <div class="legend" id="legend"></div>
 <div class="qs" id="qs"><b>Open questions I had to guess at</b><ul>
-  <li><b>When it opens.</b> The doc says Deck 6 opens at tiers 3 and 4. I've assumed the lift comes here from the start, with the lobby, overlook and watch room open, so you can look at the engine long before you work on it (like Deck 5's fan hall window). Or should the lift panel grey out Deck 6 until tier 3?</li>
-  <li><b>An overlook on one level.</b> The build has one floor height per deck, so the overlook is a gallery behind glass, level with the engine room floor, and the stair down is a shut door. A real drop to a lower coil floor would need new kit.</li>
-  <li><b>Who works here.</b> The engine watch room is a new idea. Is there an engine watch on both shifts, and are they Works crew?</li>
+  <li><b>When it opens.</b> The doc says Deck 6 opens at tiers 3 and 4. I've assumed the lift comes here from the start, with the lobby, overlook, watch room and engine room open (the user asked for the engine room to be walkable in 0.11.0). Repairs there are still tier 4 team jobs; locking by tier comes later with the story work.</li>
+  <li><b>An overlook on one level.</b> The build has one floor height per deck, so the overlook is a gallery behind glass, level with the engine room floor, with a door straight onto it. A real drop to a lower coil floor would need new kit.</li>
+  <li><b>Who works here.</b> The engine watch room is a new idea. In 0.11.0 it moved from a 2 × 3 corner by engine control to a 4 × 4 room at the overlook's south end, looking onto the coils. Is there an engine watch on both shifts, and are they Works crew?</li>
   <li><b>Crawlways.</b> They're sealed void strips for now, like Deck 5's pipe galleries. They'll want the low ceiling and crouch-walk when crawlways arrive.</li>
   <li><b>Reactor door.</b> The reactor's shielded door opens off a short alcove at the end of the lobby, not out of engine control. That way no room sits behind another locked room, and a tier 4 team can reach it without engine control being unlocked.</li>
-  <li><b>Tiers.</b> Both power junctions and engine control are tier 3; the engine room and reactor are tier 4. Should one junction open at tier 2?</li>
+  <li><b>Tiers.</b> Both power junctions and engine control are tier 3; the reactor is tier 4, and so are big repairs in the engine room. Should one junction open at tier 2?</li>
   <li><b>Shape.</b> 36 × 12 with a blunt bow, as if the lower hull sweeps up toward the bow under Deck 5. It runs from world x −21 to 12.6, inside Deck 5's −21 to 21.6. The stern lines up with Deck 5's bay doors.</li>
 </ul></div>
 <script>
@@ -84,10 +84,10 @@ const DECK6 = {
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
     '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
-    '..EEEEEEEEEEOOOO++ZZ++KKKKKRRRRRRRRR',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
-    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRR..',
+    '..EEEEEEEEEESSSS++ZZ++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRRR.',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRRR.',
+    '..EEEEEEEEEESSSS++++++++JJJRRRRRRR..',
     '..EEEEEEEEEECCCCCCCCCCCCCCCRRRRR....',
   ],
   // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
@@ -96,54 +96,55 @@ const DECK6 = {
     'v,18,4': 'lift', 'v,18,5': 'lift', 'v,18,6': 'lift', 'v,20,4': 'lift', 'v,20,5': 'lift', 'v,20,6': 'lift',   // one wide door each side
     'h,18,3': 'glass', 'h,19,3': 'glass',                     // the foot of the trunks, behind glass above the car
     'h,18,8': 'hatch', 'h,19,8': 'glass',                     // the bottom of the ladder, with its hatch
-    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass', 'v,16,7': 'glass',   // onto the overlook
-    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass',  // the overlook's long window onto the engine room...
-    'v,12,5': 'closed',                                                          // ...the stair door down to the coil floor...
-    'v,12,6': 'glass', 'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and the rest of the window
+    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass',  // onto the overlook
+    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass', 'v,12,6': 'glass',   // the overlook's window onto the engine room...
+    'v,12,5': 'door',                                                            // ...and the door down onto the coil floor
+    'v,16,9': 'door', 'v,16,7': 'glass', 'v,16,8': 'glass',   // the watch room, off the lobby, with glass onto it...
+    'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and its own window onto the coils
     'v,22,5': 'closed', 'v,22,4': 'glass', 'v,22,6': 'glass', // engine control, glass onto the lobby
     'v,27,4': 'glass', 'v,27,5': 'glass', 'v,27,6': 'glass', 'v,27,7': 'glass', // engine control's window onto the reactor
     'v,27,3': 'closed',                                       // the reactor's shielded door, at the end of the lobby's alcove
-    'v,22,9': 'door',                                         // the watch room
     'h,17,1': 'hatch', 'h,17,11': 'hatch',                    // down into the port and starboard crawlways
-    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // port power junction from the lobby; starboard from the watch room
+    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // the two power junctions, both off the lobby
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'v,12,5': 'E', 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
-  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,22,8', 'w', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
+  sealed: { 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
+  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,16,10', 'e', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
   rooms: {
     '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
     '@': { name: 'Main lift', floor: 'lift' },
     Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
     O: { name: 'Engine overlook', floor: 'steel' },
     S: { name: 'Engine watch room', floor: 'wood' },
+    E: { name: 'Engine room', floor: 'grate' },
     // locked, but seen through glass
-    E: { name: 'Engine room', floor: 'grate', tap: 'The stair down to the engine room floor: the drive coils and the drive itself. Tier 4 access. Watch them through the glass.' },
     K: { name: 'Engine control', floor: 'plate', tap: 'Engine control. Tier 3 access, once power work opens. You can see the board through the glass.' },
     R: { name: 'Reactor', floor: 'grate', tap: 'The reactor\'s shielded door, with radiation trefoils painted either side. Tier 4 access, and only on a team job.' },
     // sealed until their tier
     c: { name: 'Port crawlway', void: true, tap: 'The lowest crawlway on the ship, along the port hull from the engine room to the reactor. Tier 3 access.' },
     C: { name: 'Starboard crawlway', void: true, tap: 'The lowest crawlway on the starboard side, from the engine room to the reactor. Tier 3 access.' },
     j: { name: 'Port power junction', void: true, tap: 'Breaker cabinets and the main junction, where the reactor\'s power splits for the decks above. Tier 3 access.' },
-    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, behind the watch room\'s kettle. Tier 3 access.' },
+    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, through a hatch at the lobby\'s starboard end. Tier 3 access.' },
   },
   windows: [],
   closedDoors: {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  markings: [[3, 4, 8, 4]],                                     // keep-clear round the row of coils
 };
 const ROOMS = {
   '+': { kind: 'lobby', name: 'Lift lobby', built: true, x: 'The bottom of the line. Step out and it\'s warmer than anywhere else aboard, with a low hum underfoot. The trunks start here behind glass above the car, and the ladder ends below it. A short alcove runs forward to the reactor\'s shielded door. There are hazard bands at every door and hatches into the junctions and crawlways.' },
   '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, the same car as every deck, with doors on the stern and bow sides. Deck 6 is the bottom of the line.' },
   Y: { kind: 'core', name: 'Spine trunks', label: 'Trunks', x: 'The foot of the power and air trunks: thick insulated risers leaving the engine deck for every deck above. The ship\'s power starts its climb here.' },
   Z: { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The bottom of the maintenance ladder, behind glass, with a hatch for tier 2. The lowest rung is stamped with the shipyard\'s mark.' },
-  O: { kind: 'over', name: 'Engine overlook', label: 'Overlook', built: true, x: 'A steel gallery with a rail along one long window, looking aft into the engine room: three drive coils glowing in a row, and the drive housing across the stern. The stair down to the coil floor is a shut door (tier 4). Open from the start, so you can come and look long before you\'re allowed in. New crew always come down in their first week.' },
-  E: { kind: 'engine', name: 'Engine room', label: 'Engine room', x: 'The engine room proper: three drive coils in a row, each taller than a person and glowing as they cycle, with catwalks between them and the drive housing across the flat stern. Big repairs here are team jobs, often timed with the bridge. Tier 4.' },
+  O: { kind: 'over', name: 'Engine overlook', label: 'Overlook', built: true, x: 'A steel gallery with a rail along its window, looking aft into the engine room: three drive coils glowing in a row, and the drive housing across the stern. A door leads straight onto the coil floor. New crew always come down in their first week.' },
+  E: { kind: 'engine', name: 'Engine room', label: 'Engine room', built: true, x: 'The engine room proper: three drive coils in a row, each taller than a person and glowing as they cycle, behind a rail either side, and the drive housing across the flat stern. Open aisles run along both sides of the coils, joined inside the door from the overlook. Walk round from day one; big repairs here are tier 4 team jobs, often timed with the bridge.' },
   K: { kind: 'control', name: 'Engine control', label: 'Control', x: 'The board that runs the reactor and the drive, a big mimic panel of the ship\'s power, and two chairs that are never both empty. Glass onto the lobby on one side and the reactor on the other. Tier 3, when power work opens.' },
   R: { kind: 'reactor', name: 'Reactor', label: 'Reactor', x: 'The reactor core in its shielded drum, filling the bow of Deck 6, with coolant loops round it. Seen through engine control\'s window. Its shielded door is at the end of the lobby\'s alcove, not through engine control, so the reactor never sits behind another locked room. Tier 4.' },
-  S: { kind: 'common', name: 'Engine watch room', label: 'Watch room', built: true, isNew: true, x: 'New idea. A small, warm room for the engine watch, against engine control\'s back wall: a kettle, two armchairs, a stack of old engine logs and a heater nobody needs. The hatch into the starboard power junction is behind the kettle.' },
+  S: { kind: 'common', name: 'Engine watch room', label: 'Watch room', built: true, isNew: true, x: 'New idea. A warm room for the engine watch at the south end of the overlook, 4 × 4, with a window onto the coils and glass onto the lobby: two armchairs and a tea table at the window, a kettle, a lamp, a stack of old engine logs and a heater nobody needs. Its door is off the lobby.' },
   j: { kind: 'serv', name: 'Port power junction', label: 'Junction', x: 'Breaker cabinets and the main junction, where the reactor\'s output splits for every deck above. Through a hatch off the lobby. Tier 3: some jobs need a shutdown, so you pick a quiet hour and warn whoever loses power.' },
-  J: { kind: 'serv', name: 'Starboard power junction', label: 'Junction', x: 'The second power junction, through a hatch in the watch room. Tier 3.' },
+  J: { kind: 'serv', name: 'Starboard power junction', label: 'Junction', x: 'The second power junction, through a hatch at the lobby\'s starboard end. Tier 3.' },
   c: { kind: 'serv', name: 'Port crawlway', label: 'Port crawlway', x: 'The lowest crawlway on the ship: along the port hull from the engine room to the reactor, under pipe runs and cable trays, so you crouch-walk all the way. Through a hatch off the lobby. Tier 3, and the quickest way from the coils to the reactor during a team job.' },
   C: { kind: 'serv', name: 'Starboard crawlway', label: 'Starboard crawlway', x: 'The starboard crawlway, the twin of the port one. Tier 3.' },
 };
@@ -160,18 +161,18 @@ const KIND = {
 };
 const LEGEND = ['engine', 'reactor', 'control', 'over', 'common', 'lobby', 'serv'];
 const LEGEND_EXTRA = [];
-const POS = { E: [7, 1.3], O: [14, 9.4], R: [31.2, 1.6], K: [24.5, 6.6], S: [23, 9.4], j: [24.5, 2.2], J: [25.5, 8.6], c: [19.5, .5], C: [19.5, 11.5], Y: [19, 3.5], '@': [19, 5.5], Z: [19, 7.5] };
-const SMALL = new Set(['K', 'S', 'Y', 'Z']);
+const POS = { E: [7, 1.3], O: [14, 1.6], R: [31.2, 1.6], K: [24.5, 6.6], S: [14, 10.3], j: [24.5, 2.2], J: [25.5, 8.6], c: [19.5, .5], C: [19.5, 11.5], Y: [19, 3.5], '@': [19, 5.5], Z: [19, 7.5] };
+const SMALL = new Set(['K', 'Y', 'Z']);
 function decorate() {
-  // the drive housing across the stern, the three drive coils, catwalks between them
+  // the drive housing across the stern, the three drive coils, a rail either side of them
   deco('rect', { x: 2.15 * S, y: 1.6 * S, width: .9 * S, height: 8.8 * S, rx: 4, fill: '#5b6770', stroke: '#e9c46a', 'stroke-width': 1.5 });
-  for (const y of [3.1, 8.9]) deco('line', { x1: 3.3 * S, y1: y * S, x2: 11.8 * S, y2: y * S, stroke: 'rgba(233,196,106,.5)', 'stroke-width': 3, 'stroke-dasharray': '4 3' });
+  for (const y of [4.85, 7.15]) deco('line', { x1: 3.3 * S, y1: y * S, x2: 10.9 * S, y2: y * S, stroke: '#c9b98a', 'stroke-width': 2 });
   for (const x of [4.6, 7.1, 9.6]) {
     deco('circle', { cx: x * S, cy: 6 * S, r: 1.1 * S, fill: '#3a2a26', stroke: '#e8a35a', 'stroke-width': 2.5 });
     deco('circle', { cx: x * S, cy: 6 * S, r: .7 * S, fill: 'rgba(255,170,90,.35)', stroke: 'rgba(255,190,120,.8)', 'stroke-width': 1.5 });
   }
-  // the overlook's rail along its window
-  deco('line', { x1: 12.3 * S, y1: 1.1 * S, x2: 12.3 * S, y2: 10.9 * S, stroke: '#c9b98a', 'stroke-width': 2 });
+  // the overlook's rail along its window, open at the engine room door
+  deco('line', { x1: 12.3 * S, y1: 1.1 * S, x2: 12.3 * S, y2: 3.9 * S, stroke: '#c9b98a', 'stroke-width': 2 });
   // engine control: the board facing the reactor window, the mimic panel, two chairs
   deco('rect', { x: 26.1 * S, y: 4.2 * S, width: .7 * S, height: 3.6 * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
   deco('rect', { x: 22.6 * S, y: 4.15 * S, width: 3 * S, height: .3 * S, fill: '#7dffb0', opacity: .6 });
@@ -180,9 +181,10 @@ function decorate() {
   deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 3.2 * S, fill: 'none', stroke: 'rgba(159,227,255,.35)', 'stroke-width': 6 });
   deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 2.1 * S, fill: '#26323a', stroke: '#c9d1d3', 'stroke-width': 2 });
   deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 1 * S, fill: 'rgba(125,255,176,.35)', stroke: '#7dffb0', 'stroke-width': 1.5 });
-  // the watch room's armchairs and kettle; junction cabinets
-  for (const y of [8.3, 9.5]) deco('rect', { x: 22.15 * S, y: y * S, width: .7 * S, height: .7 * S, rx: 4, fill: '#a0603a' });
-  deco('circle', { cx: 23.6 * S, cy: 10.6 * S, r: 4, fill: '#e2d3b5' });
+  // the watch room's armchairs and tea table at its window, and the kettle; junction cabinets
+  for (const y of [8.1, 9.9]) deco('rect', { x: 12.5 * S, y: (y - .4) * S, width: .8 * S, height: .8 * S, rx: 4, fill: '#a0603a' });
+  deco('circle', { cx: 12.7 * S, cy: 9 * S, r: .4 * S, fill: '#8a6a45' });
+  deco('rect', { x: 15.2 * S, y: 7.1 * S, width: .7 * S, height: .5 * S, rx: 2, fill: '#26323a', stroke: '#5fd6c6', 'stroke-width': 1 });
   for (let x = 22.3; x < 26.8; x += .9) { deco('rect', { x: x * S, y: 1.15 * S, width: .6 * S, height: .55 * S, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 }); }
   for (let x = 24.3; x < 26.8; x += .9) { deco('rect', { x: x * S, y: 9.6 * S, width: .6 * S, height: .9 * S, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 }); }
 }
