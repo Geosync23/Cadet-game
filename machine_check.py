@@ -1,5 +1,6 @@
 # Starship Cadet: machine check (keep in the repo, next to day_check.py)
 # Runs the ship's machines (section 17) on paper for DAYS ship days with ?nosave and checks, deterministically:
+#   every machine in DECKS[n].machines is of a kind section 17 knows
 #   with no repairs: conditions only ever fall; nothing is faulty in the first two days; some machines are broken
 #   by the end, but the slow ones (reactor, hull, array) are not; ship health falls but stays above 0; every
 #   machine's effects stay in range (multipliers, mood)
@@ -123,9 +124,13 @@ with sync_playwright() as pw:
     pure = g.ev("(() => { const r = MACH_REV, h = MACH_HOUR; for (let d = 1; d <= 6; d++) shipEffectsAt(d, shipNow() - 500); return MACH_REV === r && MACH_HOUR === h; })()")
     if not pure: fail('shipEffectsAt changed the machines')
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
+    unknown = g.ev("Object.keys(DECKS).flatMap(n => (DECKS[n].machines || []).filter(m => !MACHINE_KINDS[m.kind]).map(m => m.id + ' (' + m.kind + ')'))")
+    if unknown: fail(f"machines of kinds section 17 doesn't know (they'd be left out): {unknown}")
+    noPanel = g.ev("machineList().filter(m => !m.stub && !panelPlace(m.id)).map(m => m.id)")
+    if noPanel: print('  real machines with no panel place yet:', noPanel)
     n = g.ev("machineList().length")
     stubs = g.ev("machineList().filter(m => m.stub).length")
-    print(f"{n} machines ({stubs} stand-ins), {DAYS} days")
+    print(f"{n} machines ({n - stubs} from the decks, {stubs} stand-ins), {DAYS} days")
 
     run = lambda **o: g.page.evaluate("([s, o]) => window.__sc(s)(o)", [RUN, {'days': DAYS, 'mode': 'hour', 'crew': False, 'perHour': CREW_PER_HOUR, **o}])
 
@@ -168,7 +173,7 @@ with sync_playwright() as pw:
     b = run()
     j = run(mode='jump')
     o = run(mode='odd')
-    c = g.ev("(() => { SHIP_DAYS.clear(); MACH_USE.clear(); MACH_NORM = null; return 1; })()") and run()
+    c = g.ev("(() => { SHIP_DAYS.clear(); MACH_USE.clear(); MACH_NORM = null; MACH_NORM_PART = null; return 1; })()") and run()
     same = lambda x, y: all(abs(x['final'][i] - y['final'][i]) < 1e-9 for i in x['final'])
     print('The same twice:', same(a, b), '| one jump:', same(a, j), '| odd minutes:', same(a, o), '| caches cleared:', same(a, c))
     for name, x in (('twice', b), ('jump', j), ('odd minutes', o), ('caches cleared', c)):
