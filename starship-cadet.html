@@ -2192,7 +2192,7 @@ const WALL_KIT = {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.64, .16), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
     p.position.set(0, 1.85, .045); g.add(p); box(.68, .2, .04, M.slateDark, 0, 1.85, .02, g);
   },
-  // the Works job board: home of the shared job list. Static cards for now; step 7 makes it live.
+  // the Works job board: home of the shared job list. Its cards are the deck's until section 17 draws the live list.
   jobBoard(g, o = {}) {
     const cards = o.cards || [];
     const t = tex(640, 300, (c, w, h) => {
@@ -2208,6 +2208,7 @@ const WALL_KIT = {
         c.fillStyle = '#93b8b2'; c.font = '500 15px system-ui,sans-serif'; c.fillText(where + '  ·  ' + state, x + 18, y + 49);
       });
     });
+    if (typeof jobBoardLive === 'function') jobBoardLive(t);   // section 17 keeps it up to date with the real job list
     const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.22), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
     p.position.set(0, 1.55, .075); g.add(p);                 // the frame's face is at .065
     box(2.74, 1.36, .07, WM.paintDark, 0, 1.55, .03, g);
@@ -3853,6 +3854,13 @@ DECKS[5] = {
     { id: '5-shop-3', type: 'work:works', at: [26, 11], face: 'e', pose: 'work', room: 'f' },
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
+    // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
+    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
+    { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-2', type: 'work:works', at: [7, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-3', type: 'work:works', at: [2, 4], face: 'w', pose: 'work', room: 'S' },
@@ -6926,6 +6934,20 @@ function roomsInUse(d0, days = 7) {
   return Object.entries(T).sort().map(([k, t]) => ({ k, places: t.places, used: t.used.size, uses: t.uses, hours: Math.round(t.min / 60), people: t.people.size }));
 }
 
+// the places the crew's jobs (section 17) took them to: per 'deck type', visits and different places, from the jobs
+// on the books now (claimed or done in the last two days); null before there are any
+function jobVisits() {
+  if (typeof SHIP === 'undefined' || !Array.isArray(SHIP.jobs)) return null;
+  const S = schedData(), byId = new Map(); for (const n in DECKS) for (const p of DECKS[n].places || []) byId.set(p.id, { ...p, deck: +n });
+  const T = {};
+  for (const j of SHIP.jobs) for (const s of j.segs || []) if (s.placeId) {
+    const pl = S.byId.get(s.placeId) || byId.get(s.placeId); if (!pl) continue;
+    const t = T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] || (T[pl.deck + ' ' + pl.type + (pl.machine ? ' (panel)' : '')] = { visits: 0, places: new Set() });
+    t.visits++; t.places.add(pl.id);
+  }
+  return Object.entries(T).sort().map(([k, t]) => ({ k, visits: t.visits, places: t.places.size }));
+}
+
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
@@ -6950,8 +6972,20 @@ function shipDay(d) {
   return day;
 }
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
+// whereIs: where someone is at ship minute t. A job they've claimed (section 17's jobWhere: to the parts shelf, the
+// machine's panel and back) is laid over their plan; otherwise it's the plan (planWhere). Anything that needs the
+// plan alone (section 17's jobRun, which fits jobs into it) calls planWhere, never whereIs: whereIs from inside
+// machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
+let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
-  const job = typeof jobWhere === 'function' && jobWhere(person, t); if (job) return job;   // on a job (section 17), laid over the plan
+  if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
+    JOB_WHERE_BUSY = true; let j;
+    try { j = jobWhere(person, t); } finally { JOB_WHERE_BUSY = false; }
+    if (j) return j;
+  }
+  return planWhere(person, t);
+}
+function planWhere(person, t) {
   const segs = planDay(person, Math.floor(t / 1440) + 1);
   let a = 0, b = segs.length - 1;
   while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
@@ -7006,7 +7040,7 @@ function dayReport(day) {
   }
   for (const [id, v] of atWork) { v.sort((x, y) => x[0] - y[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1] && v[i][2] !== v[i - 1][2]) rep.double.push(id + ' ' + v[i - 1][2] + '/' + v[i][2] + '@' + hhmm(v[i][0] % 1440)); }
   for (let t = B; t < B + 1440; t += 5) {
-    const n = {}; for (const p of S.people) { const w = whereIs(p, t); n[w.deck] = (n[w.deck] || 0) + 1; }
+    const n = {}; for (const p of S.people) { const w = planWhere(p, t); n[w.deck] = (n[w.deck] || 0) + 1; }
     for (const k in n) if (!rep.peak[k] || n[k] > rep.peak[k][0]) rep.peak[k] = [n[k], hhmm(t - B)];
   }
   return rep;
@@ -8202,6 +8236,7 @@ const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
+const YOU_KEEP = 720;                                   // a job you take goes back on the board if it isn't done in 12 ship hours
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
 // make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
@@ -8225,14 +8260,7 @@ function panelPlace(id) {
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
-// the plan alone, without jobs (whereIs lays the jobs over it, so claiming must not ask whereIs)
-function planWhere(p, t) {
-  const segs = planDay(p, Math.floor(t / 1440) + 1);
-  let a = 0, b = segs.length - 1;
-  while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
-  const s = segs[a];
-  return s ? { deck: s.deck, act: s.act, placeId: s.placeId, moving: s.act === 'commute', until: s.to, tag: s.tag } : null;
-}
+// the plan alone, without jobs, is planWhere (section 14): whereIs lays the jobs over it, so claiming must not ask whereIs
 function jobRun(p, j, t, makeMin) {
   const w = planWhere(p, t);
   if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
@@ -8266,8 +8294,9 @@ function jobFinish(j, t, by) {
 const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
 function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
-  // 1. finished jobs (the crew's; yours finish when you finish them)
+  // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - j.start >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
@@ -8335,7 +8364,7 @@ function jobWhere(person, t) {
 function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++; return true;
 }
 function dropJob(id) {
@@ -8347,6 +8376,81 @@ function takePart(part) { machinesNow(); if (!(SHIP.stores[part] > 0)) return fa
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+}
+
+// ---- the device's jobs section (0.33.9): the board in your pocket. The device itself is section 15's placeholder
+// (device.addSection); this only lists jobs and lets you claim or drop one. Doing it, at the machine's panel,
+// comes with the player engineer's repair activity (finishJob). ----
+function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed') || null; }
+function jobsSection(el) {
+  const line = (txt, cls) => { const p = document.createElement('p'); p.textContent = txt; if (cls) p.className = cls; el.appendChild(p); return p; };
+  const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
+  const board = jobsBoard(), mine = myJob();
+  if (mine) {
+    const [title, where, state] = jobCard(mine), m = mine.machine && machineById(mine.machine);
+    line('Yours: ' + title + ', ' + where + '.', 'devtime');
+    if (m) {
+      const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
+      line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+    } else line('Hover cart from the cargo hold, Deck 5.');
+    button('Drop it', () => dropJob(mine.id));
+  }
+  const open = board.filter(j => !j.claimedBy);
+  if (!open.length && !mine) line('Nothing on the board. Enjoy it while it lasts.');
+  for (const j of open.slice(0, 5)) {
+    const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+    const p = line((pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > PLAYER_TIER ? ' (tier ' + jobTier(j) + ')' : ''));
+    if (canTake) button('Take it', () => claimJob(j.id));
+  }
+  if (open.length > 5) line('And ' + (open.length - 5) + ' more on the board in the Works bay.');
+}
+if (typeof device !== 'undefined' && device.addSection) device.addSection('jobs', 'Jobs', jobsSection);
+
+// ---- the Works bay job board (Deck 5), live (0.33.8) ----
+// The jobBoard kit (section 4b) hands its canvas texture to jobBoardLive as the deck is built (one inert line);
+// worksTick (main loop) redraws it whenever the job list changes, in the kit's own look. Up to six cards: the
+// most urgent first. Nothing here calls R() or makes geometry; the board's draw calls are unchanged.
+let JOB_BOARD = null;
+function jobBoardLive(t) { JOB_BOARD = { t, def: deckDef, rev: -1, min: -1 }; worksTick(); }
+const JOB_PRI = ['routine', 'soon', 'urgent', 'urgent'];
+const JOB_WORD = { service: 'service due', repair: 'repair', overhaul: 'broken: overhaul' };
+function jobCard(j) {
+  const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
+  if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : 'Restock storage', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : 'hover cart', JOB_PRI[j.urgency]];
+  const m = machineById(j.machine), K = MACHINE_KINDS[m.kind], room = (DECKS[m.deck].rooms[m.room] || {}).name;
+  const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : '');
+  return [K.name + n, 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];
+}
+function drawJobBoard(t) {
+  const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;
+  const jobs = jobsBoard(), cards = jobs.slice(0, 6).map(jobCard);
+  c.textAlign = 'left';
+  c.fillStyle = '#0c1a1f'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#e8c06a'; c.font = '700 26px system-ui,sans-serif'; c.fillText('WORKS  ·  JOB BOARD', 22, 40);
+  c.fillStyle = '#7fa9a3'; c.font = '500 17px system-ui,sans-serif'; c.textAlign = 'right';
+  c.fillText(jobs.length + ' open  ·  ' + (now >= 480 && now < 1020 ? 'day shift' : 'night shift'), w - 22, 40); c.textAlign = 'left';
+  c.fillStyle = 'rgba(95,214,198,.35)'; c.fillRect(22, 54, w - 44, 2);
+  cards.forEach(([title, where, state, pri], k) => {
+    const x = 22 + (k % 2) * 304, y = 70 + Math.floor(k / 2) * 74;
+    c.fillStyle = '#16303a'; c.fillRect(x, y, 292, 62);
+    c.fillStyle = { urgent: '#e0503f', soon: '#e8c06a', routine: '#5fd6c6' }[pri] || '#5fd6c6'; c.fillRect(x, y, 7, 62);
+    c.fillStyle = '#e8f4f1'; c.font = '600 20px system-ui,sans-serif'; c.fillText(title, x + 18, y + 26, 266);
+    c.fillStyle = '#93b8b2'; c.font = '500 15px system-ui,sans-serif'; c.fillText(where + '  ·  ' + state, x + 18, y + 49, 266);
+  });
+  if (!cards.length) { c.fillStyle = '#7fa9a3'; c.font = '500 20px system-ui,sans-serif'; c.fillText('Nothing on the board. The Chief says it never lasts.', 22, 110); }
+  if (jobs.length > 6) { c.fillStyle = '#7fa9a3'; c.font = '500 15px system-ui,sans-serif'; c.textAlign = 'right'; c.fillText('+ ' + (jobs.length - 6) + ' more', w - 22, h - 10); c.textAlign = 'left'; }
+  t.needsUpdate = true;
+}
+// the main loop's step (section 12): redraw the board on Deck 5 when the jobs change (or each ship hour, for the shift)
+function worksTick() {
+  const B = JOB_BOARD;
+  if (!B || B.def !== deckDef) return;
+  machinesNow();
+  const hr = Math.floor(shipNow() / 60);
+  if (B.rev === MACH_REV && B.min === hr) return;
+  B.rev = MACH_REV; B.min = hr;
+  drawJobBoard(B.t);
 }
 
 // ---- saving: the save's ship.machines = { id: [cond, lastService] }, ship.machineHour, ship.jobs, ship.stores, ship.hold ----
@@ -10182,6 +10286,7 @@ function loop() {
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
   tickShip(dt);                                          // section 13: the ship's clock
   galleyTick();                                          // section 16: the galley, on paper and on Deck 3
+  worksTick();                                           // section 17: the Works bay job board
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
