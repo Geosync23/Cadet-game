@@ -91,6 +91,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.40.0 | First Pillar 2 combined build (the lead): service hatches and still floors (0.30.1), every room in use with crew needs (0.26.1), new habits (0.16.4–0.16.5), Deck 3 activity furniture and anims (0.31.1) and the Decks 1/3 utility plans, Deck 2 anims (0.32.1), machines and wear on paper (0.33.0). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. |
 | 0.33.2 | 0.40.0 merged into `claude/ship-systems` (the systems engineer). Wear retuned: every use counter is now measured against an average day of the current schedules (`machNorm`), so 0.26.1's extra washing no longer wears the recycler out in two days; water use weights showers 1 and other washes .25. Ovens wear with `galleyCooks` once section 16 is in. Kinds renamed and added for the agreed utility rooms (`lights` for light relays, `junction` for power junctions; `extractor`, `chiller`, `filter`, `pump`, `uv`, `nutrient`, `databus`), 44 stand-ins, a stand-in drops out only when its own id or room gets a real machine. New `shipEffectsAt(deck, t)` (pure, from an 8-day record) and `spoil` in the effects. cadet_test ALL IDENTICAL against 0.40.0; deck_check OK; day_check day 1 OK (peaks as 0.40.0, Deck 3 415); machine_check OK (no repairs: health by day 98 96 92 85 75 64 54 45 37 30 24 20 18 16; the real Works crew 124 jobs in 14 days, nothing past worn). |
 | 0.30.2 | Pillar 2, A5a: **Deck 4's utility rooms built** from the agreed plan. The air scrubbers (s), heating plant (t), junior utility closet (k) and junior stores (u) get `still` floors (steel or plate), service hatches (`service` list) and their insides: 2 scrubber units with a duct riser and an overhead duct, a filter rack; a heat exchanger, 2 circulation pumps piped to it overhead, an expansion tank; a breaker cabinet and a light-relay board; fixed-pattern store shelves. The officers' starboard utility closet (y) gains a breaker cabinet, behind its ordinary 'closed' door. 7 `machines` (4-scrubber-1/2, 4-heater-1, 4-pump-1/2, 4-junction-1/2) and 7 `work:works` places `<id>-svc` on their panel tiles. New shared kit in a `UTILITY ROOMS KIT` block before DECKS[4] (made at load, no R()); everything is placed last in dress(). Proof: Decks 1, 2, 3, 5 and 6 pixel-identical; on Deck 4 every changed edge, blocked tile, item and room tile is in s, t, k, u or y, the random seed after the build is unchanged, 400 sample routes outside those rooms are identical (crew and player), the pixel changes are all over those rooms, and cadet_test's shots are identical (renderer noise only; its route and collision probes change only in and beside those rooms). deck_check OK (Deck 4: 605 tiles, 7 machines, 315 draw calls by the lift, was 319); day_check OK. |
+| 0.27.0 | Pillar 2, workstream A2: activity animations (the performance engineer, from 0.25.2). Thirteen activities as poses for the crowd, full rigs and Walkers: run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk, with seated variants and props (dumbbells, receiver, basket, card, guitar, watering can, spoon and pan, sponge and plate, cloth, glass, book). `poseOf(place)` and `animateActivity()` in 8b; crowd props ride three prop bones inside the crowd's meshes. Section 10: `placeSpot` takes its pose from `poseOf(pl)` (one line). See "Activities (0.27.x)". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -638,6 +639,43 @@ Each group of 12 adds at most two draw calls, so the count isn't the limit; tria
 For comparison, 40 full rigs would add about 1,300 draw calls and 600,000 triangles. Memory is flat over Deck 3 and 4 round trips with the demo on (the four groups' bone textures stay, like kit).
 
 **Testing a crowd turn:** cadet_test and deck_check as usual (the crowd is empty in both). For the demo, open the build with `?crowd=40`; the Game class in cadet_test.py loads `file://` paths, so a script that adds the query to the `goto` is enough.
+
+## Activities (0.27.x)
+
+Section 8b, Pillar 2 workstream A2, by the performance engineer.
+
+**Poses.** `handle.set(pos, face, pose)` takes a base (`walk`, `stand`, `sit`, `lie`, `work`), an activity, or both as `'base:activity'`:
+
+- **Activities:** `run`, `lift`, `call`, `browse`, `pay`, `play`, `water`, `cook`, `wash`, `fold`, `drink`, `read`, `talk`.
+- **An activity alone** stands. The exception: `call`, `read`, `drink`, `talk`, `play` and `lift` sit when `pos.y` is 0.3 or more (y is then the seat).
+- **Seated and lying forms** are written out: `'sit:call'` in a booth, `'sit:play'` at the piano (keys; standing `play` is a guitar), `'lie:lift'` on the weight bench (a press), `'sit:lift'` on the rower.
+- **Standing on something:** a standing pose with `pos.y` under 0.3 stands on a floor that high (a stage, the treadmill's belt, 0.16).
+- **Unknown poses** stand.
+- **`poseOf(place)`** gives a place's pose from `anim`, or from its type (the plan's table: `gym` lift, `callhome` call, `shop` browse, `music` play, `garden` water, `laundry` fold, `work:galley` cook), on its base pose. By type alone, seated places stay plain `sit` except booths (`sit:call`) and the gym (`sit:lift`, `lie:lift` on the bench); a place with its own `anim` (the piano bench: `anim: 'play'`) gets it seated too. Section 10's `placeSpot` uses it, so crew at those places now do the activity.
+
+**Cost (0.27.0 against 0.25.2):** draw calls identical on every deck in day_check (peaks 370, 373, 415, 412, 377, 321). Props add a few hundred triangles (Deck 3 at 18:20: 475,711 against 475,163, with 67 crew). cadet_test ALL IDENTICAL against 0.25.2, also with the `placeSpot` hook reverted (the refactor alone changes nothing).
+
+**How it's drawn.**
+
+- `animateActivity(o, pose, dt, t, sk, y)` does a rig's whole frame: the gait (`animateRig`), the base pose's overlay (sit, work, lie, as before), the activity's overlay, and props. It works on a `CrowdPerson`, a `FullPerson` (which borrows `CrowdPerson.prototype.update`) or a `Walker`.
+- Each activity is an entry in `ACTS`: the props it holds, and a function that moves the arms, head and torso with a blend weight. Blends take about half a second, like the bases.
+- `run` drives the gait in place (the legs cycle at a jog with no movement).
+- **Props** are made from the character kit's primitives, on first use (`PROP_KIT`, no `R()`, colours through `col()`).
+  - **On a crowd person** they ride three prop bones (right hand, left hand, chest: `CROWD_BONES` is now 20, joints 0–16, props 17–19), inside the group's skinned mesh. Picking one up rebuilds that group's geometry, so props cost no draw calls.
+  - **On a full rig or Walker** each prop is a small mesh on the hand or chest (`rigProps`), its own copy of the geometry so the rig can dispose it.
+  - Props appear once the activity is more than halfway blended in.
+
+**For the player (A3).** In `Walker.update`, replace
+
+    animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
+
+with
+
+    animateActivity(this, this.act || 'stand', dt, t + g.t0, Math.min(1, this.vel / this.maxV));
+
+- Set `player.act` to an activity (`'run'`, `'lift'`, `'call'`, `'browse'`, `'pay'`, or any other) while the player does it, and back to `null` after.
+- With `act` null this is exactly `animateRig` (same `R()` draws, no props), so nothing changes until an activity is set.
+- Standing on the treadmill: raise `player.obj.position.y` to the belt (0.16) yourself; the Walker's root isn't moved by `animateActivity`.
 
 
 ## Rules that keep it working
