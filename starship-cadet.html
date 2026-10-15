@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.9.1
+   STARSHIP CADET: CSV Wren                            build 0.9.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3605,7 +3605,7 @@ DECKS[3] = {
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
 
 // =====================================================================
-// DECK 2: COMMAND & SCIENCE (step 6e: turn 1 the shell)
+// DECK 2: COMMAND & SCIENCE (step 6e: turn 1 the shell, turn 2 the bedrooms)
 // From plans/deck2-plan.html (Sketch 8), on Deck 3's outline with rounder stern corners. The deck splits at the lift:
 // the senior quarters aft, round a looped carpeted corridor (fifteen locked bedrooms, the Captain's across the stern),
 // science forward, off a four-wide corridor that ends at the sensor array behind glass in the nose.
@@ -3625,6 +3625,155 @@ Object.assign(WALL_KIT, {
     p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
   },
 });
+// bedrooms (0.9.2): shared materials only, so fifteen furnished rooms merge into a handful of draw calls
+Object.assign(D2, {
+  woodDark: std('#3e2a1f', .6), linen: std('#efe9dc', .9), duvet: std('#e4e7ea', .9), leather: std('#5a3324', .55),
+  fabs: { navy: std('#2c3a5e', .9), sage: std('#6f8a6a', .9), wine: std('#6b2f3a', .9), teal: std('#2f6f73', .9), sand: std('#b9a27a', .9), slate: std('#4a5568', .9) },
+  shade: std('#f1e4c8', .8, 0, { emissive: col('#ffcf8a'), emissiveIntensity: .55 }),
+  books: ['#7a2f2f', '#2c4a6e', '#c9a24a', '#3f6b4f', '#e3dccb', '#5a3f6e'].map(c => std(c, .8)),
+  paper: std('#f1ece0', .9), towel: std('#f6f4ee', .95), china: std('#dfe8ec', .3), screenPanel: std('#efe2c6', .85),
+  model: std('#cfd6da', .4, .5), cord: std('#c8463c', .7),
+  frost: std('#dcebf0', .15, 0, { transparent: true, opacity: .5, depthWrite: false }), tray: std('#e8ebe8', .35),
+  rugs: [['#2c375e', '#c9a24a', '#e9dfc7', '#6b2f3a'], ['#3b4a3f', '#c9a24a', '#ece4d4', '#2f6f73'], ['#5a2f3a', '#d9b45a', '#efe3c8', '#2c3a5e']]
+    .map(c => new THREE.MeshStandardMaterial({ map: makeRug(c), roughness: 1 })),
+});
+Object.assign(KIT, {
+  // a double bed with an upholstered headboard, a nightstand and lamp either side
+  suiteBed(g, o = {}) {
+    const f = o.fab || D2.fabs.navy;
+    box(1.5, .3, 2.1, D2.woodDark, 0, .15, .05, g); box(1.42, .18, 2.0, D2.linen, 0, .39, .05, g);
+    box(1.48, .08, 1.45, D2.duvet, 0, .51, .37, g); box(1.52, .05, .42, f, 0, .56, .82, g);
+    for (const x of [-.36, .36]) soft(D2.linen, x, .56, -.72, .3, .08, .15, g);
+    box(1.7, 1.05, .12, f, 0, .72, -1.04, g); box(1.74, .05, .14, M.wood, 0, 1.27, -1.04, g);
+    for (const x of [-1.0, 1.0]) {
+      box(.44, .48, .4, M.wood, x, .24, -.86, g); box(.4, .02, .02, D2.brass, x, .36, -.65, g);
+      cyl(.04, .06, .26, D2.brass, x, .61, -.9, g, 10); cyl(.09, .12, .14, D2.shade, x, .8, -.9, g, 16);
+    }
+    if (o.swans) for (const x of [-.25, .25]) { soft(D2.towel, x, .62, .45, .14, .07, .1, g); const n = box(.04, .18, .04, D2.towel, x, .72, .37, g); n.rotation.x = -.3; }
+    return { w: 2.44, d: 2.2 };
+  },
+  // a low futon for the Envoy: no headboard, a quilt in her own colours
+  futon(g, o = {}) {
+    box(1.5, .14, 2.1, M.wood, 0, .07, 0, g); box(1.4, .14, 2.0, D2.linen, 0, .21, 0, g);
+    box(1.44, .05, 1.3, o.fab || D2.fabs.teal, 0, .3, .32, g); soft(D2.linen, 0, .32, -.75, .4, .07, .15, g);
+    return { w: 1.5, d: 2.1 };
+  },
+  // a writing desk: terminal, brass lamp, and whatever its owner leaves on it
+  suiteDesk(g, o = {}) {
+    box(1.2, .05, .55, M.wood, 0, .75, 0, g);
+    box(.4, .72, .5, D2.woodDark, .38, .36, 0, g); box(.04, .72, .5, D2.woodDark, -.56, .36, 0, g);
+    const mon = new THREE.Mesh(new THREE.BoxGeometry(.5, .32, .03), [M.dark, M.dark, M.dark, M.dark, screenMat, M.dark]);
+    mon.position.set(-.15, 1.0, -.18); g.add(mon); box(.04, .16, .04, M.slateDark, -.15, .84, -.2, g);
+    cyl(.05, .06, .02, D2.brass, .42, .785, -.12, g, 12); cyl(.012, .012, .3, D2.brass, .42, .93, -.12, g, 6); cyl(.07, .1, .1, D2.shade, .42, 1.1, -.12, g, 14);
+    if (o.papers) [[-.3, .04, .3], [.05, .1, -.4], [.2, -.05, .7], [-.05, .12, -.1]].forEach(([x, z, r], k) => { const p = box(.24, .012 + k * .006, .32, D2.paper, x, .785 + k * .012, z, g); p.rotation.y = r; });
+    if (o.model) { box(.26, .06, .08, D2.model, .1, .85, .1, g); for (const z of [.04, .16]) box(.1, .04, .04, D2.model, .02, .85, z, g); }
+    if (o.kettle) { cyl(.07, .08, .16, D2.brass, -.45, .86, .1, g, 12); cyl(.04, .035, .08, D2.china, -.3, .82, .14, g, 10); }
+    return { w: 1.2, d: .55 };
+  },
+  // the en-suite: a frosted glass shower and basin in a brass frame, lighter to look over than a wash pod
+  ensuite(g) {
+    box(1.0, .06, 1.0, D2.tray, 0, .03, 0, g);
+    box(.96, 1.9, .03, D2.frost, 0, 1.0, -.47, g); box(.03, 1.9, .96, D2.frost, -.47, 1.0, 0, g); box(.03, 1.9, .96, D2.frost, .47, 1.0, 0, g); box(.96, 1.9, .03, D2.frost, 0, 1.0, .47, g);
+    for (const [x, z] of [[-.49, -.49], [.49, -.49], [-.49, .49], [.49, .49]]) box(.04, 1.98, .04, D2.brass, x, .99, z, g);
+    for (const z of [-.49, .49]) box(1.02, .04, .04, D2.brass, 0, 1.98, z, g);
+    for (const x of [-.49, .49]) box(.04, .04, 1.02, D2.brass, x, 1.98, 0, g);
+    cyl(.02, .02, .5, D2.brass, -.3, 1.6, -.4, g, 6); cyl(.08, .06, .03, D2.brass, -.3, 1.85, -.32, g, 12);
+    box(.42, .1, .3, D2.tray, .2, .82, -.3, g); cyl(.012, .012, .7, D2.brass, .2, .47, -.38, g, 6); box(.36, .3, .02, KM.mirror, .2, 1.3, -.445, g);
+    box(.24, .04, .16, D2.towel, -.25, .9, .3, g);
+    return { w: 1.0, d: 1.0, tall: true };
+  },
+  // a wardrobe in wood, with brass pulls
+  suiteWardrobe(g) {
+    box(.9, 1.9, .55, D2.woodDark, 0, .95, 0, g);
+    for (const sx of [-.215, .215]) { box(.41, 1.78, .03, M.wood, sx, .95, .29, g); box(.02, .2, .03, D2.brass, sx - Math.sign(sx) * .16, 1.0, .31, g); }
+    box(.94, .05, .59, M.wood, 0, 1.92, 0, g);
+    return { w: .9, d: .55, tall: true };
+  },
+  suiteChair(g) {
+    box(.5, .08, .48, D2.leather, 0, .46, 0, g); box(.5, .55, .08, D2.leather, 0, .8, -.22, g).rotation.x = .1;
+    cyl(.03, .03, .38, D2.brass, 0, .23, 0, g, 8); box(.46, .03, .05, M.slateDark, 0, .03, 0, g); box(.05, .03, .46, M.slateDark, 0, .03, 0, g);
+    return { w: .5, d: .5, noBlock: true };
+  },
+  // a low bookcase; the books come from a fixed pattern, not R(), so they never shift a texture
+  suiteShelf(g, o = {}) {
+    box(1.0, 1.15, .32, M.wood, 0, .575, 0, g); box(.92, 1.05, .02, D2.woodDark, 0, .58, -.14, g);
+    for (let s = 0; s < 3; s++) {
+      box(.92, .025, .28, D2.woodDark, 0, .06 + s * .36, .01, g);
+      let x = -.44;
+      for (let k = 0; x < .4; k++) { const bw = .04 + (k * 37 + s * 11) % 5 * .012, bh = .2 + (k * 23 + s * 7) % 4 * .025; box(bw, bh, .2, D2.books[(k + s * 2) % 6], x + bw / 2, .075 + s * .36 + bh / 2, .02, g); x += bw + .008; if ((k + s) % 7 === 5) x += .1; }
+    }
+    if (o.trophy) { box(.16, .04, .1, D2.woodDark, .25, 1.17, 0, g); cyl(.05, .03, .14, D2.brass, .25, 1.26, 0, g, 10); }
+    return { w: 1.0, d: .32 };
+  },
+  suitePlant(g) {
+    cyl(.2, .15, .38, M.ceramic, 0, .19, 0, g); cyl(.205, .2, .05, D2.brass, 0, .3, 0, g);
+    for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2, l = soft(i % 2 ? M.leaf : M.leaf2, Math.sin(a) * .14, .55, Math.cos(a) * .14, .05, .26, .1, g); l.rotation.set(Math.cos(a) * .7, 0, -Math.sin(a) * .7); }
+    return { w: .4, d: .4 };
+  },
+  suiteRug(g, o) {
+    const r = new THREE.Mesh(new THREE.BoxGeometry(o.w, .025, o.d), [M.slateDark, M.slateDark, D2.rugs[o.k || 0], M.slateDark, M.slateDark, M.slateDark]);
+    r.position.y = .0125; r.userData.noShadow = true; g.add(r);
+    return { w: o.w, d: o.d, noBlock: true };
+  },
+  // the Envoy's low tea table, a Veyli tea set on it, cushions round it
+  lowTable(g) {
+    cyl(.45, .45, .05, M.wood, 0, .3, 0, g, 28); cyl(.32, .36, .26, D2.woodDark, 0, .14, 0, g, 20);
+    soft(D2.china, 0, .41, 0, .1, .08, .1, g); cyl(.012, .012, .1, D2.china, .1, .42, 0, g, 6).rotation.z = -.9;
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + .4; cyl(.035, .03, .05, D2.china, Math.sin(a) * .25, .35, Math.cos(a) * .25, g, 10); }
+    return { w: .9, d: .9 };
+  },
+  cushion(g, o = {}) { soft(o.fab || D2.fabs.teal, 0, .1, 0, .3, .1, .3, g); return { w: .6, d: .6, noBlock: true }; },
+  // a folding screen: three panels in a zigzag
+  sleepScreen(g) {
+    for (let k = -1; k <= 1; k++) {
+      const p = new THREE.Group(); p.position.set(k * .56, 0, k ? .1 : 0); p.rotation.y = k * .35; g.add(p);
+      box(.58, 1.7, .04, D2.screenPanel, 0, .9, 0, p); box(.6, .05, .06, M.wood, 0, 1.77, 0, p); for (const x of [-.29, .29]) box(.04, 1.75, .05, M.wood, x, .88, 0, p);
+    }
+    return { w: 1.8, d: .4, tall: true };
+  },
+});
+// furnish a bedroom from its door. Bedroom doors are 'closed', so roomFrame can't find them: the door is named here.
+// Layouts are drawn with the door in the left half of the door wall, and mirrored when it's in the right half.
+function d2Frame(rk, doorKey) {
+  const b = ROOM_BOX[rk], Wr = b.i1 - b.i0 + 1, Dr = b.j1 - b.j0 + 1, [k, a, c] = doorKey.split(','), i = +a, j = +c;
+  const side = k === 'h' ? (j === b.j0 ? 'n' : 's') : (i === b.i0 ? 'w' : 'e'), at = k === 'h' ? i - b.i0 + .5 : j - b.j0 + .5, ns = side === 'n' || side === 's';
+  return {
+    U: ns ? Wr : Dr, V: ns ? Dr : Wr,
+    toL: { s: (u, v) => [u, Dr - v], n: (u, v) => [Wr - u, v], w: (u, v) => [v, u], e: (u, v) => [Wr - v, Dr - u] }[side],
+    wall: { s: { back: 'n', left: 'w', right: 'e', front: 's' }, n: { back: 's', left: 'e', right: 'w', front: 'n' },
+            w: { back: 'e', left: 'n', right: 's', front: 'w' }, e: { back: 'w', left: 's', right: 'n', front: 'e' } }[side],
+    doorU: { s: at, n: Wr - at, w: at, e: Dr - at }[side],
+  };
+}
+function d2Suite(rk, doorKey, o = {}) {
+  NO_FADE.add(rk);
+  const F = d2Frame(rk, doorKey), U = F.U, V = F.V, flip = F.doorU > U / 2, dU = flip ? U - F.doorU : F.doorU, P = [];
+  const bed = { kind: 'suiteBed', u: U / 2, v: V - 1.2, o: { fab: o.fab, swans: o.swans, it: o.bed } };
+  const desk = (u, v, back, chairU) => P.push({ kind: 'suiteDesk', u, v, back, o: { papers: o.papers, model: o.model, kettle: o.kettle, it: o.desk } },
+    { kind: 'suiteChair', u: chairU, v, back: back === 'left' ? 'right' : 'left' });
+  if (o.inner) {                                       // 4 x 4, no windows: bed to the back, wash pod and wardrobe by the door
+    bed.u = U - 1.5; P.push(bed);
+    P.push({ kind: 'ensuite', u: U - .6, v: .6, back: 'right' }, { kind: 'suiteWardrobe', u: .375, v: .65, back: 'left' });
+    if (o.armchairs) P.push({ kind: 'armchair', u: .53, v: 2.3, back: 'left', o: { fab: o.fab } });
+    else desk(.375, 2.5, 'left', .95);
+    P.push({ kind: 'suiteRug', u: 1.9, v: 1.25, o: { w: 1.4, d: .9, k: o.rug } });
+  } else if (U <= 3) {                                 // 3 x 5 by the lift: wardrobe by the door, wash pod and desk either side
+    P.push(bed, { kind: 'suiteWardrobe', u: U - .375, v: .65, back: 'right' }, { kind: 'ensuite', u: .6, v: 1.95, back: 'left' });
+    desk(U - .375, 2.05, 'right', U - .95);
+    P.push({ kind: 'suiteRug', u: 1.5, v: 1.35, o: { w: 1.0, d: 1.5, k: o.rug } });
+  } else {                                             // 4 x 5 on the hull: bed under the windows, desk on the far wall
+    P.push(bed, { kind: 'ensuite', u: U - .6, v: .6, back: 'right' });
+    desk(U - .375, 2.05, 'right', U - 1.0);
+    if (dU >= 1.4) P.push({ kind: 'suiteWardrobe', u: .375, v: .65, back: 'left' }, { kind: 'armchair', u: .53, v: 2.15, back: 'left', o: { fab: o.fab } });
+    else P.push({ kind: 'suiteWardrobe', u: 1.6, v: .375, back: 'front' }, { kind: 'armchair', u: .53, v: 2.0, back: 'left', o: { fab: o.fab } });
+    P.push({ kind: 'suiteShelf', u: .26, v: 3.85, back: 'left', o: { trophy: o.trophy } }, { kind: 'suitePlant', u: U - .4, v: V - .4 });
+    P.push({ kind: 'suiteRug', u: U / 2 + .1, v: 1.55, o: { w: 1.9, d: 1.3, k: o.rug } });
+  }
+  for (const p of P) {
+    const u = flip ? U - p.u : p.u, back = flip && (p.back === 'left' || p.back === 'right') ? (p.back === 'left' ? 'right' : 'left') : (p.back || 'back');
+    const [lx, lz] = F.toL(u, p.v); place(rk, p.kind, lx, lz, F.wall[back], p.o || {});
+  }
+}
 DECKS[2] = {
   num: 2, name: 'Command & Science', seed: 20219,
   blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
@@ -3757,6 +3906,39 @@ DECKS[2] = {
     // the lobby ring: a bench by the washroom, plants in the far corners, clear of every doorway and both ends of the loop
     place('+', 'bench', 4.5, 11.68, 's', { snug: true, it: IT('Bench', 'Somewhere to wait for the lift without looking as if you are waiting outside the Captain\'s door.') });
     for (const [x, z, band] of [[5.55, .45, '#c9a24a'], [5.55, 11.55, '#c9a24a']]) place('+', 'plant', x, z, 'n', { band, big: true });
+    // ---- the bedrooms (turn 2): locked, furnished, and seen from above when the walls drop. A tap on the bed or desk
+    // says something about who lives there, without walking (the door stays shut).
+    const SEE = (t, x) => ({ t, x, see: true });
+    d2Suite('O', 'h,9,5', { fab: D2.fabs.sand, rug: 1, bed: SEE('The Works Chief\'s bed', 'Made with hospital corners. A spare hard hat on the nightstand, just in case.'), desk: SEE('The Works Chief\'s desk', 'The job list on the terminal, and your name on it somewhere. Probably near the bottom, for now.') });
+    d2Suite('I', 'h,13,5', { fab: D2.fabs.teal, rug: 1, bed: SEE('The Infirmary Chief\'s bed', 'A comm on the pillow, set to wake for anything from Deck 3.'), desk: SEE('Medical journals', 'A stack of them, bookmarked, with notes in the margins in very small writing.') });
+    d2Suite('V', 'h,17,5', { fab: D2.fabs.sage, rug: 0, papers: true, kettle: true, bed: SEE('Dr. Sato\'s bed', 'A field guide to frontier lichens, face down on the pillow.'), desk: SEE('Dr. Sato\'s desk', 'Buried in survey printouts and a kettle that is never quite cold. Her terrible tea, in a tin marked TEA (GOOD).') });
+    d2Suite('S', 'h,19,5', { fab: D2.fabs.slate, rug: 2, bed: SEE('The Second Officer\'s bed', 'Two alarm clocks, set a minute apart, for the night watch.'), desk: SEE('The Second Officer\'s desk', 'The night watch rota, and a mug that says THIRD IN COMMAND, FIRST TO BE WOKEN.') });
+    d2Suite('T', 'h,9,17', { fab: D2.fabs.wine, rug: 2, bed: SEE('Chief Holt\'s bed', 'Squared away. A pair of boots under it, polished, side by side.'), desk: SEE('Chief Holt\'s desk', 'Patrol reports in a neat pile, and a note: ASK THE ENVOY ABOUT THE CORD. DON\'T.') });
+    d2Suite('B', 'h,13,17', { fab: D2.fabs.navy, rug: 0, swans: true, bed: SEE('Visitors\' suite', 'Made up for whoever the Concord sends next. Two towel swans on the bed, beak to beak.') });
+    d2Suite('H', 'h,17,17', { fab: D2.fabs.navy, rug: 1, model: true, bed: SEE('The Senior Helm Officer\'s bed', 'A sleep mask with stars on it.'), desk: SEE('A model of the Wren', 'Hand-built, every hull plate scored in. The helm officer flies the real one on the day watch.') });
+    d2Suite('R', 'h,19,17', { fab: D2.fabs.teal, rug: 2, bed: SEE('The Comms Chief\'s bed', 'A spare headset on the nightstand. Calls home don\'t keep office hours.'), desk: SEE('The Comms Chief\'s desk', 'A queue of messages waiting to go out, sorted by how far they have to travel.') });
+    d2Suite('N', 'h,10,7', { inner: true, armchairs: true, fab: D2.fabs.sage, rug: 1, bed: SEE('The Counsellor\'s cabin', 'An armchair by the door and a box of tissues within reach of it. Even off duty.') });
+    d2Suite('G', 'h,14,7', { inner: true, fab: D2.fabs.wine, rug: 2, bed: SEE('The Senior Watch Officer\'s bed', 'A night-watch sleeper: blackout blind, earplugs, and a sign on the wall that says LATER.'), desk: SEE('The Watch Officer\'s desk', 'A chessboard mid-game. Holt is losing, by the look of it.') });
+    d2Suite('D', 'h,10,15', { inner: true, fab: D2.fabs.navy, rug: 0, papers: true, bed: SEE('The Deputy Survey Chief\'s bed', 'A star chart pinned to the wall where a window would be.'), desk: SEE('The Survey deputy\'s desk', 'Sample logs, cross-referenced in three colours. Dr. Sato\'s handwriting in the fourth.') });
+    d2Suite('U', 'h,14,15', { inner: true, armchairs: true, fab: D2.fabs.sand, rug: 1, swans: true, bed: SEE('Visitors\' cabin', 'Made up and empty. Fresh towels, folded into swans by someone with time on their hands.') });
+    // Commander Vance's corner cabin (6 x 5, the stern corner rounded off): bed under the port windows, two chairs squared to a table
+    NO_FADE.add('X');
+    place('X', 'suiteBed', 4.4, 1.2, 'n', { fab: D2.fabs.navy, it: SEE('Commander Vance\'s bed', 'Made so tight you could bounce a coin on it. Someone probably has.') });
+    place('X', 'suiteRug', 2.4, 3.2, 'n', { w: 3.0, d: 1.5, k: 0 });
+    place('X', 'armchair', 1.4, 3.2, 'w', { fab: D2.fabs.navy }); place('X', 'armchair', 3.4, 3.2, 'e', { fab: D2.fabs.navy });
+    place('X', 'coffeeTable', 2.4, 3.2, 'w');
+    place('X', 'suiteDesk', .375, 4.3, 'w', { it: SEE('Commander Vance\'s desk', 'Pens in a row, by length. The ship\'s rowing leaderboard, printed out, with one name circled.') }); place('X', 'suiteChair', .95, 4.3, 'e');
+    place('X', 'suiteShelf', 2.1, 4.74, 's', { trophy: true }); place('X', 'ensuite', 4.2, 4.4, 's'); place('X', 'suiteWardrobe', 5.625, 3.2, 'e');
+    place('X', 'suitePlant', 2.6, .9, 'n');
+    // Envoy Saruth's corner cabin, mirroring Vance's: a low futon behind a screen, a tea table on the floor with cushions round it
+    NO_FADE.add('E');
+    place('E', 'futon', 4.4, 3.85, 's', { fab: D2.fabs.teal, it: SEE('The Envoy\'s futon', 'Low, firm and very neatly made. A Veyli sleeping screen stands beside it.') });
+    place('E', 'sleepScreen', 3.2, 3.4, 'w');
+    place('E', 'suiteRug', 1.9, 2.0, 'n', { w: 2.4, d: 2.2, k: 1 });
+    place('E', 'lowTable', 1.9, 2.0, 'n', { it: SEE('Veyli tea table', 'Low, round, with a tea set for five. Veyli tea is taken kneeling, in silence, and takes an hour. Holt has been invited twice.') });
+    for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5 + .3; place('E', 'cushion', 1.9 + Math.sin(a) * .82, 2.0 + Math.cos(a) * .82, 'n', { fab: k % 2 ? D2.fabs.teal : D2.fabs.sand }); }
+    place('E', 'ensuite', 3.9, .6, 'n'); place('E', 'suiteWardrobe', 5.625, 2.0, 'e');
+    place('E', 'suitePlant', .6, .5, 'n');
   },
 };
 for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key] = { t: DECKS[2].rooms[r].name, x: DECKS[2].rooms[r].tap };
