@@ -363,11 +363,11 @@ They checked:
 - **Deck 1's empty shell draws 593 calls.** Bring that down before dressing it, without changing the hull output on Decks 3, 4 and 5.
 - **Plans:**
     - plans/deck6-plan.html and plans/deck1-plan.html are agreed.
-    - plans/deck2-plan.html is being reworked (Sketch 5):
-        - every bedroom (12 crew plus visitors) goes in the stern half, the left of the landscape plan;
-        - science goes in the bow half;
-        - the lift's stern door opens towards the officers' quarters and its bow door towards science;
-        - the deck may grow, but no bigger than Deck 3 below it (52 × 22).
+    - plans/deck2-plan.html is agreed at Sketch 8 (approved by the lead for the user, 2026-10-15). It's 52 × 22 on Deck 3's outline, with the lift at [20, 11].
+        - Aft of the lift: a looped carpeted senior corridor, and 15 bedrooms (12 crew plus 3 visitor rooms), each with its own door. The Captain's quarters across the stern are the biggest bedroom (60 tiles).
+        - Forward of the lift: science, off a four-wide corridor. The sensor and comms array is a sealed room in the nose (106 tiles).
+        - The lift's stern door opens to the quarters and its bow door to science.
+        - Open, with defaults until the user says otherwise: the six invented officers are placeholders, and the 15th room is a visitors' cabin.
 
 **7. Machines, supplies and the shared job list,** anchored on the Works bay job board. Comes after the ship is built (6e).
 
