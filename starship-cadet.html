@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.4
+   STARSHIP CADET: CSV Wren                            build 0.9.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3603,6 +3603,163 @@ DECKS[3] = {
 
 };
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
+
+// =====================================================================
+// DECK 2: COMMAND & SCIENCE (step 6e: turn 1 the shell)
+// From plans/deck2-plan.html (Sketch 8), on Deck 3's outline with rounder stern corners. The deck splits at the lift:
+// the senior quarters aft, round a looped carpeted corridor (fifteen locked bedrooms, the Captain's across the stern),
+// science forward, off a four-wide corridor that ends at the sensor array behind glass in the nose.
+// =====================================================================
+// ---- Deck 2 kit (made at load, no R()) ----
+const D2 = {
+  brass: std('#c9a24a', .35, .75), navy: std('#1d2740', .6, .1),
+};
+Object.assign(WALL_KIT, {
+  // a brass nameplate on the header above a bedroom door: gold letters on navy, in a brass frame
+  brassPlate(g, o) {
+    const t = tex(256, 64, (c, w, h) => {
+      c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
+      c.fillStyle = '#ecd08a'; c.font = '600 27px Georgia,serif'; c.textAlign = 'center'; c.fillText(o.text, w / 2, 42);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.56, .14), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+    p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
+  },
+});
+DECKS[2] = {
+  num: 2, name: 'Command & Science', seed: 20219,
+  blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
+  lift: [20, 11],                                  // car rows 9-11, trunks row 8 above it, ladder row 12: the same world spot as every deck
+  map: [
+    '...XXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJ.......',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJAA.....',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJAAA....',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJAAAA...',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJAAAAA..',
+    '..CCCCC----------++++++WWWWKKKKKKLLLLLLggJJJJAAAAAA.',
+    '..CCCCC----------++++++WWWWKKKKKKLLLLLLggJJJJAAAAAA.',
+    '..CCCCC--NNNNGGGG++++++WWWWKKKKKKLLLLLLggJJJJAAAAAA.',
+    '..CCCCC--NNNNGGGG++YY++WWWWKKKKKKLLLLLLggJJJJAAAAAAA',
+    '..CCCCC--NNNNGGGG++@@++======================AAAAAAA',
+    '..CCCCC--NNNNGGGG++@@++======================AAAAAAA',
+    '..CCCCC--DDDDUUUU++@@++======================AAAAAAA',
+    '..CCCCC--DDDDUUUU++ZZ++======================AAAAAAA',
+    '..CCCCC--DDDDUUUU++++++wwQQQQQQFFFMMMMMMMPPPPAAAAAAA',
+    '..CCCCC--DDDDUUUU++++++wwQQQQQQFFFMMMMMMMPPPPAAAAAA.',
+    '..CCCCC----------++++++wwQQQQQQFFFMMMMMMMPPPPAAAAAA.',
+    '..CCCCC----------++++++wwQQQQQQFFFMMMMMMMPPPPAAAAAA.',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPAAAAA..',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPAAAA...',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPAAA....',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPAA.....',
+    '...EEEEETTTTBBBBHHHRRRRuuQQQQQQFFFnnnnnnnPPPP.......',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,19,9': 'lift', 'v,19,10': 'lift', 'v,19,11': 'lift', 'v,21,9': 'lift', 'v,21,10': 'lift', 'v,21,11': 'lift',   // stern door to the quarters, bow door to science
+    'h,19,8': 'glass', 'h,20,8': 'glass', 'v,19,8': 'glass', 'v,21,8': 'glass',   // the trunks, behind glass above the car
+    'h,19,13': 'hatch', 'h,20,13': 'glass',                   // the ladder, behind glass, with its hatch
+    // the quarters: every bedroom has its own door onto the loop or the lobby
+    'v,7,10': 'closed',                                       // the Captain's quarters, off the middle of the gallery
+    'h,7,5': 'closed', 'h,9,5': 'closed', 'h,13,5': 'closed', 'h,17,5': 'closed', 'h,19,5': 'closed',      // port hull: Vance, Works Chief, Infirmary Chief, Dr. Sato, Second Officer
+    'h,7,17': 'closed', 'h,9,17': 'closed', 'h,13,17': 'closed', 'h,17,17': 'closed', 'h,19,17': 'closed', // starboard hull: Envoy Saruth, Chief Holt, visitors' suite, Senior Helm Officer, Comms Chief
+    'h,10,7': 'closed', 'h,14,7': 'closed',                   // inside the loop, facing port: Counsellor, Senior Watch Officer
+    'h,10,15': 'closed', 'h,14,15': 'closed',                 // inside the loop, facing starboard: Deputy Survey Chief, visitors' cabin
+    // the science side of the lobby
+    'v,23,7': 'door', 'v,23,6': 'glass', 'v,23,8': 'glass',   // the Watch office, glass onto the science lobby (its plate is on v,23,5)
+    'v,23,14': 'door',                                        // washroom
+    'h,23,17': 'hatch',                                       // utility closet, through the washroom
+    // science
+    'h,29,9': 'door', 'h,28,9': 'glass', 'h,30,9': 'glass', 'h,31,9': 'glass',   // the chart room
+    'h,35,9': 'door', 'h,34,9': 'glass', 'h,36,9': 'glass', 'h,37,9': 'glass',   // the Survey lab, glass onto the science corridor
+    'v,39,4': 'hatch',                                        // the lab gas plant, from the Survey lab
+    'h,43,9': 'door', 'h,42,9': 'glass', 'h,44,9': 'glass',   // the observatory
+    'h,27,13': 'door', 'h,26,13': 'glass', 'h,28,13': 'glass', 'h,29,13': 'glass',   // the comms room
+    'h,32,13': 'closed',                                      // the specimen store
+    'h,36,13': 'door', 'h,35,13': 'glass', 'h,37,13': 'glass', 'h,38,13': 'glass',   // the sample lab
+    'h,37,21': 'hatch',                                       // down into the cable crawl, from the sample lab
+    'h,43,13': 'closed',                                      // the probe bay
+    'v,45,10': 'glass', 'v,45,11': 'glass', 'v,45,12': 'glass', 'v,45,9': 'closed',   // the array: a window at the end of the corridor, and its shut door
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: {
+    'v,7,10': 'C', 'h,7,5': 'X', 'h,9,5': 'O', 'h,13,5': 'I', 'h,17,5': 'V', 'h,19,5': 'S',
+    'h,7,17': 'E', 'h,9,17': 'T', 'h,13,17': 'B', 'h,17,17': 'H', 'h,19,17': 'R',
+    'h,10,7': 'N', 'h,14,7': 'G', 'h,10,15': 'D', 'h,14,15': 'U',
+    'h,23,17': 'u', 'v,39,4': 'g', 'h,32,13': 'F', 'h,37,21': 'n', 'h,43,13': 'P', 'v,45,9': 'A',
+  },
+  // bedrooms: a brass plate over each door [door, the corridor side, name]
+  nameplates: [
+    ['v,7,10', 'e', 'Capt. Marrow'], ['h,7,5', 's', 'Cdr. Vance'], ['h,9,5', 's', 'Works Chief'], ['h,13,5', 's', 'Infirmary Chief'], ['h,17,5', 's', 'Dr. Sato'], ['h,19,5', 's', 'Second Officer'],
+    ['h,7,17', 'n', 'Envoy Saruth'], ['h,9,17', 'n', 'Chief Holt'], ['h,13,17', 'n', 'Visitors'], ['h,17,17', 'n', 'Senior Helm'], ['h,19,17', 'n', 'Comms Chief'],
+    ['h,10,7', 'n', 'Counsellor'], ['h,14,7', 'n', 'Watch Officer'], ['h,10,15', 's', 'Survey Deputy'], ['h,14,15', 's', 'Visitors'],
+  ],
+  // science and the lobby: the usual plates beside the doors
+  plates: [
+    ['v,23,5', 'w', 'Watch office'], ['v,23,13', 'w', 'Washroom'],
+    ['h,27,9', 's', 'Chart room'], ['h,33,9', 's', 'Survey lab'], ['h,41,9', 's', 'Observatory'],
+    ['h,25,13', 'n', 'Comms'], ['h,31,13', 'n', 'Specimens'], ['h,34,13', 'n', 'Sample lab'], ['h,41,13', 'n', 'Probe bay'],
+  ],
+  rooms: {
+    '-': { name: 'Senior corridor', floor: 'carpet', hall: true },
+    '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
+    '=': { name: 'Science corridor', floor: 'corridor', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    W: { name: 'Watch office', floor: 'plate' },
+    w: { name: 'Washroom', floor: 'tile' },
+    K: { name: 'Chart room', floor: 'wood' },
+    L: { name: 'Survey lab', floor: 'tile' },
+    Q: { name: 'Comms room', floor: 'plate' },
+    M: { name: 'Sample lab', floor: 'tile' },
+    J: { name: 'Observatory', floor: 'wood' },
+    // bedrooms: locked, and not yours
+    C: { name: 'Captain\'s quarters', floor: 'wood', tap: 'Captain Marrow\'s quarters. There\'s a brass knocker nobody uses; the Captain prefers the comm.' },
+    X: { name: 'Commander Vance\'s cabin', floor: 'wood', tap: 'Commander Vance\'s cabin. The nameplate is perfectly level. Someone checked.' },
+    O: { name: 'Works Chief\'s cabin', floor: 'wood', tap: 'The Works Chief\'s cabin. Your boss lives here when not in the glass office on Deck 5. Knock only if something is on fire.' },
+    I: { name: 'Infirmary Chief\'s cabin', floor: 'wood', tap: 'The Infirmary Chief\'s cabin. A sign on the door: IF YOU ARE BLEEDING, DECK 3.' },
+    V: { name: 'Dr. Sato\'s cabin', floor: 'wood', tap: 'Dr. Sato\'s cabin. It smells faintly of her terrible tea.' },
+    T: { name: 'Chief Holt\'s cabin', floor: 'wood', tap: 'Chief Holt\'s cabin, right next door to the Envoy. Holt asked for it.' },
+    H: { name: 'Senior Helm Officer\'s cabin', floor: 'wood', tap: 'The Senior Helm Officer\'s cabin. A model of the Wren sits on the door\'s little shelf.' },
+    S: { name: 'Second Officer\'s cabin', floor: 'wood', tap: 'The Second Officer\'s cabin. Third in command, and first to be woken.' },
+    N: { name: 'Counsellor\'s cabin', floor: 'wood', tap: 'The Ship\'s Counsellor\'s cabin. A note on the door: OFFICE HOURS ON DECK 3. HERE, ONLY IF IT CAN\'T WAIT.' },
+    R: { name: 'Comms Chief\'s cabin', floor: 'wood', tap: 'The Comms Chief\'s cabin. A headset hangs on the door handle, just in case.' },
+    G: { name: 'Senior Watch Officer\'s cabin', floor: 'wood', tap: 'The Senior Watch Officer\'s cabin. Holt\'s deputy, and the only one who can make him laugh.' },
+    D: { name: 'Deputy Survey Chief\'s cabin', floor: 'wood', tap: 'The Deputy Survey Chief\'s cabin. There\'s a star chart taped over the nameplate.' },
+    // visitors: locked
+    E: { name: 'Guest cabin', floor: 'wood', tap: 'Envoy Saruth\'s door. A knot of Veyli cord hangs from the handle: visitors by invitation only.' },
+    B: { name: 'Visitors\' suite', floor: 'wood', tap: 'The visitors\' suite, made up and empty, for inspectors, visiting captains and anyone the Concord sends.' },
+    U: { name: 'Visitors\' cabin', floor: 'wood', tap: 'A second visitors\' cabin, made up and empty. Fresh towels, folded into swans by someone with time on their hands.' },
+    // locked, but seen through glass
+    A: { name: 'Sensor array', floor: 'grate', tap: 'The ship\'s sensor and comms array, in the nose: the dish, the mast\'s base and the signal racks. Tier 3 access. You can watch it through the window beside this door.' },
+    F: { name: 'Specimen store', floor: 'steel', tap: 'Frozen samples from the frontier, labelled in Dr. Sato\'s handwriting. Survey staff only.' },
+    P: { name: 'Probe bay', floor: 'steel', tap: 'Survey probes in their cradles beside the launch tubes, charged and waiting. Survey staff only.' },
+    // sealed until their tier
+    u: { name: 'Utility closet', void: true, tap: 'Deck 2\'s power junction and light relays. Tier 1 access, once the job list is running.' },
+    g: { name: 'Lab gas plant', void: true, tap: 'Gas bottles in racks, regulators and the lines that feed both labs. Tier 2 access.' },
+    n: { name: 'Cable crawl', void: true, tap: 'A low crawl along the starboard hull, carrying the array\'s cables aft. Tier 3 access.' },
+  },
+  windows: ['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'W', 'K', 'L', 'J', 'Q'].map(room => ({ room })),
+  closedDoors: {
+    'h,19,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
+  },
+  hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6 },   // Deck 3's hull, with rounder stern corners
+  light: { sky: col('#e9e6ff'), sun: col('#fff0dc'), hemi: .94, sunI: .96 },   // calm: a touch cooler in the shade, a touch softer in the sun
+  dress(d) {
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, { text });
+    for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Command & Science, one below the bridge.') });
+    // the spine behind glass: the trunks above the car, the ladder below it
+    for (const r of ['Y', 'Z']) NO_FADE.add(r);
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
+    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    // the lobby ring: a bench by the washroom, plants in the far corners, clear of every doorway and both ends of the loop
+    place('+', 'bench', 4.5, 11.68, 's', { snug: true, it: IT('Bench', 'Somewhere to wait for the lift without looking as if you are waiting outside the Captain\'s door.') });
+    for (const [x, z, band] of [[5.55, .45, '#c9a24a'], [5.55, 11.55, '#c9a24a']]) place('+', 'plant', x, z, 'n', { band, big: true });
+  },
+};
+for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key] = { t: DECKS[2].rooms[r].name, x: DECKS[2].rooms[r].tap };
 
 // =====================================================================
 // DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room, turn 3 the reactor and engine control,

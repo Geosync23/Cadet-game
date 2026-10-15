@@ -53,9 +53,21 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.7.2 | Deck 6, turn 2: the engine room, seen through the overlook glass: the drive housing across the stern with its glowing mouth, three drive coils down the middle (copper windings, a cage, a core whose glow breathes, one coil after another), copper feeds between them, catwalks either side and a landing by the stair door. The overlook gets a rail along the window, two benches facing the coils and the first-week board. New engine list `PULSES` (glow on the game clock). New kit `driveCoil`, `driveHousing`, `pipeRun`, `catwalk`, `overlookRail`; materials `ENG`. Deck 4 ALL IDENTICAL. |
 | 0.7.3 | Deck 6, turn 3: the reactor (a ribbed shield drum with glowing ports, the core showing through a ring on top, conduits, and the coolant loop on stands with spokes to the drum; its green glow breathes slowly) and engine control (the board along the reactor window, two chairs, the mimic panel of the ship's power). Radiation signs either side of the reactor door. New kit `reactorDrum`, `controlBoard`; wall kit `mimicPanel`, `trefoil`; `ENG.mimic` and `ENG.trefoil` are canvas panels drawn at load (no `R()`). Deck 4 ALL IDENTICAL. |
 | 0.7.4 | Deck 6, turn 4: the watch room (two mustard armchairs on a rug, the kettle by the junction hatch, a real lamp, a panel heater, a shelf of engine logs), coolant risers with valve wheels and steam in the lobby's corners, a bench facing the lift, and Deck 6's mood lighting (`light` in a deck definition tints the hemisphere and sun; Deck 6 runs warm and dim). Deck 6 done. Decks 3, 4 and 5 pixel-identical to 0.7.0, day and night. |
+| 0.9.1 | Deck 2, turn 1: the shell (Deck 2 architect, branch `claude/deck2-command`; builds 0.9.x, merged by the lead). `DECKS[2]` from plans/deck2-plan.html Sketch 8 (52 × 22, `lift: [20, 11]`, seed 20219): the senior quarters round a looped carpeted corridor with fifteen locked bedrooms, the lobby ring, the Watch office and washroom, science off the four-wide corridor, the sensor array behind glass. Brass nameplates over the bedroom doors (new wall kit `brassPlate`, materials `D2`), science plates, lift panels, the deck directory, a bench and plants in the lobby, trunks and ladder behind glass. Calm mood light (`light`). Decks 3–6 pixel-identical to 0.7.4, day and night. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
+
+## Deck 2 (builds 0.9.x, the Deck 2 architect)
+
+Built from plans/deck2-plan.html (Sketch 8) on branch `claude/deck2-command`, alongside the Deck 1 architect (0.8.x). Everything for Deck 2 sits in one block in section 4d, between Deck 3 and Deck 6: the `// ---- Deck 2 kit ----` (materials `D2`, new pieces added to `KIT` and `WALL_KIT` with `Object.assign`, nothing calls `R()` at load) and then `DECKS[2]`. No shared engine code was changed.
+
+- **Turn 1, the shell (0.9.1).** The plan's data went in as it was, with two fixes:
+    - The plan listed `v,23,9` as Watch office glass, but that edge is between the lobby and the science corridor (both halls), so it would have walled off a row of the lobby. Dropped. The Watch office's glass is `v,23,6` and `v,23,8` either side of its door `v,23,7`.
+    - The plan's Watch office plate was on `v,23,4`, which faces into the Second Officer's cabin. The plate is on `v,23,5` (now plain wall) instead.
+    - **Bedroom plates** are brass plates on the header above each door (`nameplates`, wall kit `brassPlate`), not the teal plates beside it: Vance's and the Envoy's corner cabins have no wall beside their doors, and a plate over the door can't be mistaken for the neighbour's. Names: Capt. Marrow, Cdr. Vance, Works Chief, Infirmary Chief, Dr. Sato, Second Officer, Envoy Saruth, Chief Holt, Visitors, Senior Helm, Comms Chief, Counsellor, Watch Officer, Survey Deputy, Visitors. The six new officers are placeholders, by role.
+    - **Mood light:** `sky #e9e6ff`, `sun #fff0dc`, `hemi .94`, `sunI .96`: a touch cooler in the shade and softer in the sun.
+    - About 220 draw calls by the lift (empty shell).
 
 ## How decks work (section 4)
 
