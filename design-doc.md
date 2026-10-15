@@ -122,7 +122,7 @@ All 75 crew have a rank and a bed, and where you sleep shows where you stand: se
 | Department Chief | 4 (Works, Watch, Survey, Infirmary) | Cabins, Deck 2 |
 | Senior Officer | 6 | Cabins, Deck 2 |
 | Officer | 16 | Single cabins, Deck 4 (24 built: 16 officers, 6 guest cabins, 2 spare) |
-| Junior Officer | 47, the player included | Bunks, Deck 4 (8 rooms × 6 = 48 berths, 1 empty). The bunk rooms as built (0.14.0) hold 4 each; they are being enlarged to fit three bunk beds (6 berths) each, and guest cabins may be given up for the space if needed (agreed 2026-10-15) |
+| Junior Officer | 47, the player included | Bunks, Deck 4 (8 rooms × 6 = 48 berths, 1 empty). Bunk rooms 5 × 4 tiles with three bunk beds each (Deck 4 plan Sketch 3, approved 2026-10-15); the space comes from sealed service rooms, no guest cabins given up |
 
 **Deck 2's senior quarters** have twelve crew bedrooms and three visitor rooms for VIPs such as the Envoy. Six of the twelve are the Captain, the XO and the four Chiefs. The other six are the senior officers, with provisional names: Second Officer Anja Kowalczyk, Senior Helm Officer Dev Raman, Comms Chief Lucia Ferreira, Ship's Counsellor Matthias Oduya, Senior Watch Officer Kofi Mensah and Deputy Survey Chief Hana Mori.
 
@@ -595,7 +595,7 @@ Done so far:
 - The bridge washroom stays.
 - The game starts on Day 1, a Monday, at 06:00, with the player in Bunk 1 (agreed 2026-10-15).
 - The player is one of the 75 crew: one of the 47 juniors, so 46 others plus you share the 48 berths, with one empty (agreed 2026-10-15).
-- The junior bunk rooms get bigger so each fits three ordinary bunk beds (6 berths), rather than triple bunks or fewer juniors; some guest cabins can be released to make room (agreed 2026-10-15).
+- The junior bunk rooms get bigger so each fits three ordinary bunk beds (6 berths), rather than triple bunks or fewer juniors (agreed 2026-10-15). Deck 4 plan Sketch 3 approved the same day: rooms 5 × 4, the air scrubbers, junior stores, utility closet and heating plant shrink, no guest cabins given up, and no table in the bunk rooms.
 - Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15).
 - The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15). Chosen: Works Chief Ines Calder, Infirmary Chief Priya Nandakumar, and the six senior officers named in "Crew and rooms" (build 0.16.1).
 - Envoy Saruth is a guest, not one of the 75 crew.
