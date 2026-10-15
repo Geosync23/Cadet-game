@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.30.8
+   STARSHIP CADET: CSV Wren                            build 0.30.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3854,10 +3854,10 @@ DECKS[5] = {
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
     // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
-    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
-    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
-    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
-    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-parts-1', type: 'storage', anim: 'browse', stock: ['relay', 'breaker', 'cable', 'cell', 'signal card', 'coil winding'], at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', stock: ['filter', 'cartridge', 'membrane', 'oxygen cell', 'uv lamp'], at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', stock: ['pump', 'valve', 'seal', 'nutrient pack', 'regulator'], at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', stock: ['element', 'fan belt', 'compressor', 'bearing', 'control rod'], at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
     { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
     { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
@@ -6292,7 +6292,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.30.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
