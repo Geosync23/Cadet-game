@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.5
+   STARSHIP CADET: CSV Wren                            build 0.29.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6293,7 +6293,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.5';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7483,7 +7483,8 @@ const FOOD = {
   bake: 8, bakeT: 15,                     // a tray for the grab shelf: 8 items, 15 minutes
   serveryCap: 50, grabCap: 16,            // what the hot line (5 pans of 10) and the shelf hold
   coldCap: 300, deliverAt: 630,           // the cold store holds under two days' food; topped up daily at 10:30...
-  restock: 'rule',                        // ...while this is 'rule'. 'carts': section 17's hover carts bring it instead (B3)
+  restock: 'carts',                       // ...while this is 'rule'. 'carts': section 17's hover carts bring it (B3; the
+                                          // top-up stays on until cartClaim exists, so a build without section 17 still eats)
   plates: 110, washRate: 3,               // plates aboard; plates a minute through the dish machine
   open: { breakfast: 360, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
   lead: 70,                               // ...and hot pots start at most this long before
@@ -7496,7 +7497,7 @@ const MENU = {
   dinner: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'pizza night', 'Sunday roast'],
 };
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
-const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [] });
+const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
 const GALLEY_EV = new Map();
 function galleyEvents(d) {
@@ -7538,7 +7539,15 @@ const countFrom = (arr, t) => { let a = 0, b = arr.length; while (a < b) { const
 // one ship minute m (absolute) of the galley, on state S; st collects the day's figures (galleyReport), or null
 function galleyStep(S, m, st) {
   const d = Math.floor(m / 1440) + 1, E = galleyEvents(d), md = m - E.B, meal = galleyMeal(md);
-  if (md === FOOD.deliverAt && FOOD.restock === 'rule') { const n = Math.max(0, FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) st.delivered += n; }
+  const carts = FOOD.restock === 'carts' && typeof cartClaim === 'function';
+  if (md === FOOD.deliverAt && !carts) { const n = Math.max(0, FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) st.delivered += n; }
+  // B3, with FOOD.restock 'carts': on the hour, section 17's cartClaim(t, cold) (a pure rule) says whether a hover
+  // cart sets off from the Deck 5 hold, and when it arrives; the meals land here, in replays and live alike
+  if (carts) {
+    if (!S.carts) S.carts = [];
+    if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals]); }
+    if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
+  }
   // plates come back, and the dish pit washes what it can
   if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
   const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;

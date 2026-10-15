@@ -10,6 +10,7 @@
 #   the same start gives the same days, and the live galley (galleyAdvance) matches the report
 #   on Deck 3: food in the pans while serving, covers when they're empty, the grab shelf's stock (when the shelf is
 #   live), takePortion, draw calls under BUDGET
+#   hover carts (B3): with FOOD.restock 'carts', a week fed by cartClaim never runs short; two days with none does
 #   with an empty cold store, people wait at the servery, each in their own spot (galleyHold)
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
 # Setup and environment as for cadet_test.py.
@@ -94,17 +95,33 @@ with sync_playwright() as pw:
     if q[1:] != [False, True, True, False, True]: fail(f"galleyJoin / galleyTurn: {q}")
     if not (eat[1] and eat[2] == eat[0] - 1): fail(f"takePortion: {eat}")
     # an empty cold store: no food at breakfast, so people wait at the servery, each in their own spot
-    hold = g.ev(f"""(() => {{ setShipNow({B} + 6 * 60 + 40); SHIP.galley = null; galleyAdvance({B}); SHIP.galley.cold.meals = 0; SHIP.galley.grab.items = 0;
+    hold = g.ev(f"""(() => {{ const was = FOOD.restock; FOOD.restock = 'rule'; setShipNow({B} + 6 * 60 + 40); SHIP.galley = null; galleyAdvance({B}); SHIP.galley.cold.meals = 0; SHIP.galley.grab.items = 0;
       galleyAdvance({B} + 6 * 60 + 40); const S = SHIP.galley, ids = S.wait.map(w => w[0]);
       const spots = schedPeople().filter(p => ids.includes(p.id)).map(p => galleyHold(p, shipNow()));
       const named = spots.filter(x => x), out = {{ waiting: ids.length, named: named.length, distinct: new Set(named).size, nulls: spots.filter(x => x === null).length,
         others: schedPeople().filter(p => !ids.includes(p.id)).some(p => galleyHold(p, shipNow()) !== undefined) }};
-      SHIP.galley = null; return out; }})()""")
-    print('Cold store empty at 06:40:', hold)
+      SHIP.galley = null; FOOD.restock = was; return out; }})()""")
+    print('Cold store empty at 06:40 (no deliveries):', hold)
     if not hold['waiting'] or hold['named'] != hold['distinct'] or hold['named'] != min(4, hold['waiting']) or hold['others']: fail(f"galleyHold: {hold}")
     rt = g.ev("(() => { const s = galleySave(); const was = JSON.stringify(SHIP.galley); galleyLoad(JSON.parse(JSON.stringify(s))); const same = JSON.stringify(SHIP.galley) === was; const bad = galleyLoad({ junk: 1 }); galleyLoad(s); return [same, bad]; })()")
     print('Save and load:', rt)
     if rt != [True, False]: fail(f"galleySave / galleyLoad: {rt}")
+
+    # 4b. hover carts (B3): the cold store fed only by cartClaim. Section 17's rule when it's there, else a stand-in of
+    # the agreed rule (a daily run from 09:00 when under 250, an urgent one under 90; carry up to 150, never past the
+    # cap; 40 minutes on the way). A week with no shortage, then no carts on days 2 and 3, to show the shortage and the queue
+    carts = g.ev(f"""(() => {{ const real = typeof cartClaim === 'function', was = FOOD.restock;
+      if (!real) window.__sc("cartClaim = (t, cold) => {{ const md = t % 1440, n = Math.min(150, FOOD.coldCap - cold); return n > 0 && (cold < 90 || (cold < 250 && md >= 540 && md < 1020)) ? {{ meals: n, arriveAt: t + 40 }} : null; }}");
+      FOOD.restock = 'carts';
+      for (const E of GALLEY_EV.values()) E.k = 0;
+      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, delivered: st.delivered, ready: st.ready }}));
+      const keep = cartClaim, d2 = {DAY} + 1; cartClaim = (t, c, o) => [d2, d2 + 1].includes(Math.floor(t / 1440) + 1) ? null : keep(t, c, o);
+      const missed = galleyReport({DAY}, 4).map(st => ({{ coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, waited: st.waited, missed: st.missed.length }}));
+      if (real) cartClaim = keep; else window.__sc("cartClaim = undefined"); FOOD.restock = was; return {{ real, week, missed }}; }})()""")
+    print('Carts' + (' (section 17)' if carts['real'] else ' (stand-in rule)') + ':', ', '.join(f"day {DAY + k}: low {w['coldMin']}, in {w['delivered']}, wait {w['maxWait']}" for k, w in enumerate(carts['week'])))
+    print('  no carts on days 2 and 3:', carts['missed'])
+    if any(w['coldOut'] or w['maxWait'] > WAIT_MAX or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
+    if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
     # 5. once the schedules use the rota: galley staff are at the rota's stations
     hooked = g.ev(f"galleyStaff().some(p => planDay(p, {DAY}).some(s => s.act === 'work' && s.from < {B} + 330))")
