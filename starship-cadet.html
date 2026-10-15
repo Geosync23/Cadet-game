@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.3
+   STARSHIP CADET: CSV Wren                            build 0.33.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6261,7 +6261,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6927,6 +6927,7 @@ function shipDay(d) {
 }
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
 function whereIs(person, t) {
+  const job = typeof jobWhere === 'function' && jobWhere(person, t); if (job) return job;   // on a job (section 17), laid over the plan
   const segs = planDay(person, Math.floor(t / 1440) + 1);
   let a = 0, b = segs.length - 1;
   while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
@@ -7876,6 +7877,8 @@ function machinesReset(hour) {
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
 // A clock earlier than the machines' (New game) starts afresh
 function machinesNow() {
+  const t = shipNow();
+  if (MACH_HOUR !== null && t >= MACH_SEEN && MACH_HOUR * 60 > t) { MACH_SEEN = t; return SHIP.machines; }   // up to date: the common case
   const now = Math.floor(shipNow() / 60), start = Math.floor(((SHIP_START.day - 1) * 1440 + SHIP_START.min) / 60);
   if (MACH_HOUR === null || shipNow() < MACH_SEEN) machinesReset(Math.min(start, now));
   MACH_SEEN = shipNow();
@@ -8082,8 +8085,16 @@ function panelPlace(id) {
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
+// the plan alone, without jobs (whereIs lays the jobs over it, so claiming must not ask whereIs)
+function planWhere(p, t) {
+  const segs = planDay(p, Math.floor(t / 1440) + 1);
+  let a = 0, b = segs.length - 1;
+  while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
+  const s = segs[a];
+  return s ? { deck: s.deck, act: s.act, placeId: s.placeId, moving: s.act === 'commute', until: s.to, tag: s.tag } : null;
+}
 function jobRun(p, j, t, makeMin) {
-  const w = whereIs(p, t);
+  const w = planWhere(p, t);
   if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
   const home = w.deck, segs = []; let c = t, dk = home;
   const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
@@ -8164,10 +8175,12 @@ function jobsHour(h) {
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
-// where a job puts someone at minute t, shaped like whereIs (plus `job`), or null: lay it over whereIs to see the
-// crew go about their jobs. Not wired into whereIs yet: that waits for the utility rooms' panel places.
+// where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
+// first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
+// test copies that want the plain plans.
 let JOB_IDX = null, JOB_IDX_REV = -1;
 function jobWhere(person, t) {
+  if (!jobWhere.on) return null;
   machinesNow();
   if (JOB_IDX_REV !== MACH_REV) {
     JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
@@ -8224,6 +8237,7 @@ function machinesLoad(s) {
   return true;
 }
 machinesLoad(SAVED);
+jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // =====================================================================
 // 6. CAMERA
