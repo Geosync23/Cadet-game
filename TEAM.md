@@ -43,6 +43,8 @@ How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 
 
 ## Done
 
+- **Plan (the user, 2026-10-15):** finish Pillar 2 and its end-of-pillar review first; hand over to a fresh lead session after that. Remaining for Pillar 2: B3 carts (systems engineer cartDockLive 0.33.15, galley flip 0.29.9, sim engineer section-10 `hold` line 0.26.7), then combined build 0.40.7, all checks, republish, review.
+
 - **Ship integration 0.40.6** (952526d): the player's job loop (take a job, inspect, fetch parts, make a part, repair). All six checks pass. Being republished to the playable link. Remaining for Pillar 2: B3 visible (hover-cart restock runs; food by cart only), with the systems, performance and galley engineers. Then the end-of-pillar review.
 
 - **Ship integration 0.40.5** (dc7bb12): Works crew do their jobs on the decks (parts at Deck 5 storage, then the machine's panel), the live Works bay job board, and the device's Jobs section. All six checks pass. Being republished to the playable link. Next: the player's repair loop (the player engineer with the systems engineer), then the end-of-Pillar-2 review.
