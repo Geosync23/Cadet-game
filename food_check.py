@@ -10,6 +10,7 @@
 #   the same start gives the same days, and the live galley (galleyAdvance) matches the report
 #   on Deck 3: food in the pans while serving, covers when they're empty, the grab shelf's stock (when the shelf is
 #   live), takePortion, draw calls under BUDGET
+#   with an empty cold store, people wait at the servery, each in their own spot (galleyHold)
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
 # Setup and environment as for cadet_test.py.
 # Run:  python3 food_check.py BUILD.html [DAY] [DAYS]     (DAY defaults to 1, DAYS to 7)
@@ -92,6 +93,15 @@ with sync_playwright() as pw:
     print('The player queues at 18:00 (ahead, turn too soon, turn, ate, turn after, spot free):', q)
     if q[1:] != [False, True, True, False, True]: fail(f"galleyJoin / galleyTurn: {q}")
     if not (eat[1] and eat[2] == eat[0] - 1): fail(f"takePortion: {eat}")
+    # an empty cold store: no food at breakfast, so people wait at the servery, each in their own spot
+    hold = g.ev(f"""(() => {{ setShipNow({B} + 6 * 60 + 40); SHIP.galley = null; galleyAdvance({B}); SHIP.galley.cold.meals = 0; SHIP.galley.grab.items = 0;
+      galleyAdvance({B} + 6 * 60 + 40); const S = SHIP.galley, ids = S.wait.map(w => w[0]);
+      const spots = schedPeople().filter(p => ids.includes(p.id)).map(p => galleyHold(p, shipNow()));
+      const named = spots.filter(x => x), out = {{ waiting: ids.length, named: named.length, distinct: new Set(named).size, nulls: spots.filter(x => x === null).length,
+        others: schedPeople().filter(p => !ids.includes(p.id)).some(p => galleyHold(p, shipNow()) !== undefined) }};
+      SHIP.galley = null; return out; }})()""")
+    print('Cold store empty at 06:40:', hold)
+    if not hold['waiting'] or hold['named'] != hold['distinct'] or hold['named'] != min(4, hold['waiting']) or hold['others']: fail(f"galleyHold: {hold}")
     rt = g.ev("(() => { const s = galleySave(); const was = JSON.stringify(SHIP.galley); galleyLoad(JSON.parse(JSON.stringify(s))); const same = JSON.stringify(SHIP.galley) === was; const bad = galleyLoad({ junk: 1 }); galleyLoad(s); return [same, bad]; })()")
     print('Save and load:', rt)
     if rt != [True, False]: fail(f"galleySave / galleyLoad: {rt}")

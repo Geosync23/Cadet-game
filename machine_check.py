@@ -90,7 +90,7 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   for (const j of J) if (j.segs && j.claimedBy !== 'you') {
     (byWho[j.claimedBy] = byWho[j.claimedBy] || []).push([j.start, j.end]);
     const p = ppl.get(j.claimedBy);
-    for (let m = j.start; m < j.end; m += 5) { const w = whereIs(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
+    for (let m = j.start; m < j.end; m += 5) { const w = planWhere(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
   }
   for (const who in byWho) { const v = byWho[who].sort((a, b) => a[0] - b[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) out.overlap.push(who); }
   // the overlay: someone mid-job is where the job says
@@ -223,14 +223,20 @@ with sync_playwright() as pw:
       const j = jobsBoard().find(x => x.machine === '3-oven-1' && !x.claimedBy);
       if (!j) return { none: true };
       const id = j.id, before = SHIP.machines[j.machine].cond, claimed = claimJob(id);
-      setShipNow(5 * 1440 + 12 * 60); machinesNow();
+      setShipNow(4 * 1440 + 19 * 60); machinesNow();
       const still = SHIP.jobs.find(x => x.id === id), mine = still && still.claimedBy === 'you' && still.status === 'claimed';
       const fin = finishJob(id), after = SHIP.machines[j.machine].cond;
       const took = takePart('relay'), stock = SHIP.stores.relay;
-      return { id, claimed, mine, fin, before, after, took, stock };
+      // one job at a time; one you leave goes back on the board after 12 ship hours
+      const k = jobsBoard().find(x => !x.claimedBy && jobTier(x) <= PLAYER_TIER && x.machine && !ENGINE_KINDS.has(machineById(x.machine).kind));
+      let lapse = null, oneAtATime = null;
+      if (k) { claimJob(k.id); const k2 = jobsBoard().find(x => !x.claimedBy && x.id !== k.id && jobTier(x) <= PLAYER_TIER); oneAtATime = !k2 || !claimJob(k2.id);
+               setShipNow(shipNow() + 13 * 60); machinesNow(); const back = SHIP.jobs.find(x => x.id === k.id); lapse = !back || back.claimedBy !== 'you'; }
+      return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse };
     })()""")
     print(f"Your job: {y}")
     if y.get('none') or not (y['claimed'] and y['mine'] and y['fin'] and y['after'] >= 90): fail('claiming and finishing a job yourself')
+    if y.get('oneAtATime') is False or y.get('lapse') is False: fail('one job at a time, and a job left 12 hours goes back')
 
     # 6. the save
     rt = g.ev("""(() => {
