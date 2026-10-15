@@ -7,6 +7,7 @@
 #   nobody is left with no way to their place; everyone whereIs puts on the deck is there (or on the way)
 #   draw calls: a frame drawn every ship hour on every deck, by the lift and over the crowd, peak under BUDGET
 #   the same start gives the same day: the plans, and Deck 4's crew at the end of the day, twice over
+#   rooms in use over the week (every place type, with those nobody used listed) and the crew's needs through the day
 # Setup and environment as for cadet_test.py.
 # Run:  python3 day_check.py BUILD.html [DAY]     (DAY defaults to 1, a Monday)
 import sys, json
@@ -74,6 +75,18 @@ with sync_playwright() as pw:
         if r[k]: fail(f"{k}: {r[k][:8]}")
     print('  peak headcount by deck:', ', '.join(f"{d}: {v[0]} at {v[1]}" for d, v in sorted(r['peak'].items())))
     if r['unplaced']: print('  moments with no place (standing about):', r['unplaced'])
+
+    # rooms in use: every place type over the week from DAY (types nobody used are listed, not failed)
+    rooms = g.ev(f"roomsInUse({DAY}, 7)")
+    unused = [x['k'] for x in rooms if not x['uses']]
+    few = [f"{x['k']} ({x['people']})" for x in rooms if x['uses'] and x['people'] < 3]
+    print(f"Rooms in use over the week from day {DAY}: {len(rooms) - len(unused)} of {len(rooms)} place types (deck and type) used")
+    print('  never used:', ', '.join(unused) or 'none')
+    print('  used by fewer than 3 people:', ', '.join(few) or 'none')
+    # crew needs on paper through the day (lowest and middle value of each)
+    nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
+      out.push(hhmm(hm) + '  ' + NEEDS.map(k => {{ const v = all.map(n => n[k]).sort((a, b) => a - b); return k + ' ' + v[0] + '/' + v[v.length >> 1]; }}).join('  ')); }} return out; }})()""")
+    print('Crew needs (lowest/middle):'); [print('  ' + l) for l in nd]
 
     # 2. the same start gives the same plans
     a = g.ev(f"(() => {{ SHIP_DAYS.clear(); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
