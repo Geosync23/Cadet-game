@@ -25,6 +25,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Done
 
+- Decided: six senior officers confirmed on Deck 2; six of Deck 4's officer cabins become guest cabins (design-doc.md updated).
+
 - design-doc.md (fd40490) replaces design-doc-v4.pdf (now in archive/) as the single living design document, with the nine pending updates, six decks as built and the Living Ship merged in. Checked by the lead against the PDF.
 
 - **Ship integration 0.13.0** on `claude/ship-integration` (7e95eae): the user's review fixes for Deck 6 (0.11.0) and Deck 1 (0.12.1). cadet_test ALL IDENTICAL against 0.10.1; deck_check OK on all six decks. Waiting on the user's sign-off, then merge into the lead branch and so into PR #1.
@@ -62,4 +64,5 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 
 ## Queue
 
-- Nothing queued. Next: plan Pillar 1 of the Living Ship with the user.
+- Pillar 1 of the Living Ship: plan it with the user, then build.
+- Game follow-up for Pillar 1: label Deck 4's six guest cabins (plates and tap text) when the crew roster assigns cabins.

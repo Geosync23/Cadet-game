@@ -94,7 +94,7 @@ Layout principles:
 | 1 | Bridge | Bridge (sunken command ring, curved viewscreen, rear stations), the Captain's ready room, observation room behind the bridge that serves as the conference room, bridge washroom | Bridge sub-floor relays: relay room, sub-floor crawl, utility closet | 22 × 12 (the smallest) | The lift reaches it from day one, but visits are rare, so each one feels like an occasion; relays at tier 3 |
 | 2 | Command & Science | Senior quarters (12 crew bedrooms including the Captain's quarters, plus 3 visitor rooms, among them Envoy Saruth's guest cabin) on a looped senior corridor; Survey lab, sample lab, chart room, observatory, comms room, Watch office | Sensor and comms array, lab gas lines, specimen store, probe bay, cable crawl | 52 × 22 (Deck 3's outline) | Visitable; sensor array at tier 3 |
 | 3 | Commons | Large mess hall and galley with a walk-in cold store, large one-floor bow lounge with sweeping curved windows and a bar, infirmary, hydroponics garden, gym, crew store, call-home booths, washrooms, all off a central promenade | Galley machinery, water recycler, garden irrigation | 52 × 22 (widest) | Start; recycler and irrigation at tier 2 |
-| 4 | Quarters | Junior wing (8 bunk rooms, 2 washrooms, laundry, common room), officers' corridor (24 single cabins, music room) | Air scrubbers, heating plant, utility and supply closets | 50 × 20 | Start; utility closet tier 1, scrubbers and heating tier 2 |
+| 4 | Quarters | Junior wing (8 bunk rooms, 2 washrooms, laundry, common room), officers' corridor (24 single cabins: 16 officers, 6 guest cabins, 2 spare; music room) | Air scrubbers, heating plant, utility and supply closets | 50 × 20 | Start; utility closet tier 1, scrubbers and heating tier 2 |
 | 5 | Operations | Works bay, tea corner, main storage, machine shop, cargo hold, Cart bay, shuttle bay | Air plant, fan hall, manifold room, battery room, pipe galleries | 44 × 16 | Works complex at start; machine rooms tier 2; battery room tier 3 |
 | 6 | Engineering | Engine room (walkable from day one), engine overlook, engine watch room | Reactor core, engine control, power junctions, the lowest crawlways | 36 × 12 | The lift reaches it from day one; engine control and junctions tier 3; reactor and engine repairs tier 4 |
 
@@ -120,12 +120,15 @@ All 75 crew have a rank and a bed, and where you sleep shows where you stand: se
 | Captain | 1 | The Captain's quarters, Deck 2 |
 | Executive Officer | 1 | Cabin, Deck 2 |
 | Department Chief | 4 (Works, Watch, Survey, Infirmary) | Cabins, Deck 2 |
-| Officer | 22 | Single cabins, Deck 4 (24 built, 2 spare); six senior officers may move to Deck 2 (see below) |
+| Senior Officer | 6 | Cabins, Deck 2 |
+| Officer | 16 | Single cabins, Deck 4 (24 built: 16 officers, 6 guest cabins, 2 spare) |
 | Junior Officer | 47 | Bunks, Deck 4 (8 rooms × 6 = 48 berths, 1 empty) |
 
-**Deck 2's senior quarters** have twelve crew bedrooms and three for visitors. Six of the twelve are the Captain, the XO and the four Chiefs. The other six are placeholders for senior officers, not yet confirmed: a Second Officer, a Senior Helm Officer, a Ship's Counsellor, a Comms Chief, a Deputy Survey Chief and a Senior Watch Officer. If they're confirmed, they come out of the 22 Officers, leaving 16 on Deck 4 (see Open questions).
+**Deck 2's senior quarters** have twelve crew bedrooms and three visitor rooms for VIPs such as the Envoy. Six of the twelve are the Captain, the XO and the four Chiefs. The other six are senior officers: a Second Officer, a Senior Helm Officer, a Ship's Counsellor, a Comms Chief, a Deputy Survey Chief and a Senior Watch Officer. Their names and personalities are still to be written.
 
-**Deck 4, the Quarters deck.** The junior wing sits aft of the lift: 6-berth bunk rooms, two shared washrooms, a laundry and a junior common room with stern windows. The officers' corridor runs forward of the lift toward the bow: single cabins, carpet, warm lamps and quiet after 23:00, ending in the music room at the bow, a soundproofed room with a door, so the corridor stays quiet. It has a stage round the bow windows with drums, guitars, amps and a mic, a grand piano, beanbags, a record cabinet and a rail of instruments to borrow; the Captain plays the piano late on Thursdays. Twelve cabins have hull windows; twelve are inner cabins.
+**Guest cabins on Deck 4.** With six officers moved up to Deck 2, six of the officers' corridor's 24 cabins are guest cabins and two stay spare. Guests come and go: visiting specialists, passengers being carried somewhere, crew from other ships in transit, and people who arrive with events (a scientist for the nebula, a delegation's staff, survivors from a salvage job). The corridor always has a few new faces and new things to talk about, which feeds the social system and gossip. Guests aren't part of the 75 crew.
+
+**Deck 4, the Quarters deck.** The junior wing sits aft of the lift: 6-berth bunk rooms, two shared washrooms, a laundry and a junior common room with stern windows. The officers' corridor runs forward of the lift toward the bow: single cabins, carpet, warm lamps and quiet after 23:00, ending in the music room at the bow, a soundproofed room with a door, so the corridor stays quiet. It has a stage round the bow windows with drums, guitars, amps and a mic, a grand piano, beanbags, a record cabinet and a rail of instruments to borrow; the Captain plays the piano late on Thursdays. Twelve cabins have hull windows; twelve are inner cabins. Sixteen hold officers, six are guest cabins and two are spare.
 
 **The night-shift room.** One junior bunk room houses the night shift, so it is dark and hushed at midday.
 
@@ -218,9 +221,9 @@ The smallest deck, at the very top of the hull. 22 × 12 tiles. Step out of the 
 
 - **The senior quarters**, aft of the lift: one carpeted corridor in a loop, with fifteen bedrooms opening off it, each with its own door. Twelve are for the senior crew and three for visitors.
   - **The Captain's quarters** fill the stern, with windows all along it: the biggest bedroom aboard, with a dining table where the Captain hosts the senior crew and the Envoy, a study and a sleeping alcove.
-  - **Hull cabins with windows** for Commander Vance, the Works Chief, the Infirmary Chief, Dr. Sato, Chief Holt (next door to the Envoy), the visitors' suite and three of the senior officer placeholders.
+  - **Hull cabins with windows** for Commander Vance, the Works Chief, the Infirmary Chief, Dr. Sato, Chief Holt (next door to the Envoy), the visitors' suite and three of the senior officers.
   - **Envoy Saruth's guest cabin**, on a stern corner: a low table for Veyli tea rituals, cushions instead of chairs, and a knot of cord on the door handle meaning visitors by invitation.
-  - **Inner cabins** inside the loop for the other placeholders and a second visitors' cabin.
+  - **Inner cabins** inside the loop for the other three senior officers and a second visitors' cabin.
 - **Science**, forward of the lift along a wide science corridor: the Watch office (glass onto the lobby, so the Watch sees who rides the lift), the chart room, the Survey lab, the sample lab, the comms room (where every recorded call home goes out), an observatory with bow windows, the specimen store and the probe bay.
 - **Service layer:** the sensor and comms array, a sealed machine room in the nose seen through glass at the end of the science corridor (tier 3); the lab gas plant (tier 2); a cable crawl along the starboard hull (tier 3); a utility closet.
 
@@ -575,7 +578,7 @@ Done so far:
 
 **The decks:**
 
-- Deck 2's six senior officer placeholders: are they the right six (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer)? If they're confirmed, Deck 4 keeps 24 officer cabins for 16 officers.
+- Which six Deck 4 cabins are the guest cabins, and how often do guests change? Decide when the crew roster is built (Pillar 1).
 - Deck 2's fifteenth bedroom is a second visitors' cabin for now. Keep it, or make it a senior lounge?
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 - Should one of Deck 6's power junctions open at tier 2 rather than tier 3?
@@ -588,3 +591,4 @@ Done so far:
 - Decks 6 and 1 are reachable by lift from day one; locking by tier or story comes later.
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.
+- Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
