@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.4
+   STARSHIP CADET: CSV Wren                            build 0.8.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2610,6 +2610,11 @@ function buildDeck(def) {
           g.fillRect(bx, by, 1.5, 4 + R() * 4);
         }
         if (R() < .25) { g.fillStyle = 'rgba(240,240,220,.6)'; g.beginPath(); g.arc(x + R() * PX, y + R() * PX, 1.6, 0, 6.3); g.fill(); }
+      } else if (st.floor === 'bridge') {
+        // the bridge (Deck 1): deep blue-grey carpet tiles with a fine woven rib and a dark seam
+        g.fillStyle = `rgb(${46 + v * .4},${53 + v * .4},${68 + v * .4})`; g.fillRect(x, y, PX, PX);
+        g.fillStyle = 'rgba(170,196,230,.05)'; for (let k = 2; k < PX; k += 6) g.fillRect(x, y + k, PX, 2);
+        g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
       } else if (st.floor === 'corridor' || st.floor === 'lobby' || st.floor === 'carpet') {
         const carpet = st.floor === 'carpet';
         if (carpet) {
@@ -2629,6 +2634,7 @@ function buildDeck(def) {
       }
     }
     if (def.hazard) paintHazards(g, PX, def);
+    if (def.floorArt) def.floorArt(g, PX);               // a deck's own inlays (Deck 1's command ring); drawn before the wall shading
     if (ROOM_BOX['@']) {                                 // a gold edge round the lift car floor
       const b = ROOM_BOX['@']; g.strokeStyle = 'rgba(217,164,65,.8)'; g.lineWidth = 5;
       g.strokeRect(b.i0 * PX + 6, b.j0 * PX + 6, (b.i1 - b.i0 + 1) * PX - 12, (b.j1 - b.j0 + 1) * PX - 12);
@@ -2787,8 +2793,10 @@ function buildDeck(def) {
       // each piece can follow the camera on its own. R() is still drawn once per span, as before.
       const faceOf = k => { const s = HULL_SEGS[k]; return Math.abs(s.nx) >= Math.abs(s.nz) ? (s.nx > 0 ? 1 : 0) : (s.nz > 0 ? 3 : 2); };
       const FACE = [[1, 0], [-1, 0], [0, 1], [0, -1]];      // outward: bow, stern, +z side, -z side
-      const part = run.segs.map(faceOf), parts = [];
-      run.segs.forEach((k, n) => { if (!n || part[n] !== part[n - 1]) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
+      // (part[] is overwritten with piece numbers as it goes, so older decks split far more often than they need to;
+      // a deck with hull.byFace compares the facings themselves and gets one piece per facing. Decks 3-6 keep the old split.)
+      const part = run.segs.map(faceOf), fc = part.slice(), parts = [];
+      run.segs.forEach((k, n) => { if (!n || (HULL.byFace ? fc[n] !== fc[n - 1] : part[n] !== part[n - 1])) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
       for (const p of parts) { deckRoot.add(p.g); deckRoot.add(p.decor); }
       // split into spans of wall or window
       let n = 0;
@@ -3715,6 +3723,363 @@ DECKS[6] = {
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
+
+// ---- Deck 1 kit (made at load, no R()). Kept in its own block: materials in BRG, pieces added to KIT and WALL_KIT ----
+const BRG = {
+  duct: std('#7f9aa3', .4, .45),
+  // the brass plate on the trunk head
+  trunkPlate: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(256, 96, (c, w, h) => {
+    c.fillStyle = '#b8913e'; c.fillRect(0, 0, w, h); c.strokeStyle = '#6e5420'; c.lineWidth = 5; c.strokeRect(5, 5, w - 10, h - 10);
+    c.fillStyle = '#3a2c12'; c.font = '700 26px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('CSV WREN', w / 2, 40);
+    c.font = '600 18px system-ui,sans-serif'; c.fillText('TRUNK HEAD  ·  DECK 1', w / 2, 72);
+    for (const x of [16, w - 16]) for (const y of [16, h - 16]) { c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 2); c.fill(); }
+  }, 1, 1) }),
+  // the viewscreen: deep space with a soft nebula and a far planet. Stars come from a fixed hash, not R().
+  // It wraps sideways and scrolls slowly (the offset is turned through SPINS, see bridgeViewscreen).
+  sky: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(1024, 256, (c, w, h) => {
+    const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#060a16'); gr.addColorStop(.5, '#0b1428'); gr.addColorStop(1, '#070b18');
+    c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    for (const [x, y, r, col_] of [[180, 120, 150, 'rgba(90,70,160,.22)'], [330, 150, 110, 'rgba(60,140,170,.16)'], [700, 90, 170, 'rgba(150,70,120,.14)'], [880, 170, 120, 'rgba(70,110,190,.16)']])
+      for (const dx of [-w, 0, w]) { const n = c.createRadialGradient(x + dx, y, 0, x + dx, y, r); n.addColorStop(0, col_); n.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = n; c.fillRect(x + dx - r, y - r, r * 2, r * 2); }
+    let s = 1101; const hash = () => (s = (s * 48271) % 2147483647) / 2147483647;
+    for (let k = 0; k < 520; k++) { const x = hash() * w, y = hash() * h, b = hash(), r = b > .96 ? 1.6 : b > .8 ? 1.1 : .7;
+      c.fillStyle = b > .9 ? '#fff4dc' : b > .6 ? '#dfe9ff' : 'rgba(200,215,255,.6)'; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
+    const px = 610, py = 150, pr = 34, pg = c.createRadialGradient(px - 12, py - 12, 4, px, py, pr);
+    pg.addColorStop(0, '#d7b98a'); pg.addColorStop(.7, '#8a6a4a'); pg.addColorStop(1, '#2a1f18'); c.fillStyle = pg; c.beginPath(); c.arc(px, py, pr, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(230,210,170,.45)'; c.lineWidth = 2; c.beginPath(); c.ellipse(px, py, pr * 1.8, pr * .35, -.25, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = 'rgba(95,214,198,.18)'; c.lineWidth = 1; for (let y = 0; y < h; y += 4) { c.beginPath(); c.moveTo(0, y + .5); c.lineTo(w, y + .5); c.stroke(); }   // faint scan lines
+  }) }),
+  bezel: std('#1e252c', .45, .35),
+  // the command ring and stations
+  leather: std('#8e2f2c', .5, .05), leatherDark: std('#3a3f48', .55, .05), frame: std('#2a3138', .4, .55), console: std('#252d35', .5, .35),
+  brass: std('#c9a24a', .35, .75), stepGlow: std('#9ff3e6', .4, 0, { emissive: col('#5fd6c6'), emissiveIntensity: 1.1 }),
+};
+// station screens, drawn at load from fixed numbers (no R()): a title bar in the station's colour over a readout
+function stationScreen(title, hue, kind) {
+  return new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(256, 160, (c, w, h) => {
+    c.fillStyle = '#0b141b'; c.fillRect(0, 0, w, h);
+    c.fillStyle = hue; c.fillRect(0, 0, w, 24); c.fillStyle = '#0b141b'; c.font = '700 15px system-ui,sans-serif'; c.fillText(title, 10, 17);
+    c.strokeStyle = hue; c.fillStyle = hue; c.lineWidth = 2;
+    if (kind === 'helm') {                               // the course: range rings, a heading line and the next waypoint
+      for (const r of [22, 44, 66]) { c.beginPath(); c.arc(128, 150, r * 1.5, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); }
+      c.beginPath(); c.moveTo(128, 150); c.lineTo(150, 40); c.stroke(); c.beginPath(); c.arc(150, 40, 5, 0, Math.PI * 2); c.fill();
+    } else if (kind === 'bars') {                        // levels: power, air, water, comms
+      [.82, .64, .9, .45, .7, .58].forEach((v, k) => { c.globalAlpha = .85; c.fillRect(16 + k * 38, 140 - v * 100, 24, v * 100); });
+    } else if (kind === 'wave') {                        // a signal trace
+      c.beginPath(); for (let x = 0; x < w; x += 4) { const y = 92 + Math.sin(x * .09) * 22 * Math.sin(x * .013 + 1); x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
+    } else {                                             // lines of a list, one highlighted
+      for (let k = 0; k < 6; k++) { c.globalAlpha = k === 2 ? 1 : .5; c.fillRect(12, 36 + k * 20, [180, 140, 200, 120, 160, 90][k], 8); }
+    }
+    c.globalAlpha = 1;
+  }, 1, 1) });
+}
+BRG.helm = stationScreen('HELM', '#5fd6c6', 'helm'); BRG.ops = stationScreen('OPS', '#e9c46a', 'bars');
+BRG.watch = stationScreen('WATCH', '#9fb8ff', 'list'); BRG.survey = stationScreen('SURVEY', '#8fd18a', 'wave');
+BRG.works = stationScreen('WORKS', '#f0a640', 'bars'); BRG.comms = stationScreen('COMMS', '#d98ad1', 'wave');
+Object.assign(WALL_KIT, {
+  briefingScreen(g) {                                    // the observation room's wall screen
+    box(1.7, 1.0, .05, BRG.frame, 0, 1.55, .03, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.6, .9), BRG.briefing); p.position.set(0, 1.55, .061); g.add(p);
+    box(.5, .03, .06, BRG.brass, 0, 1.02, .04, g);
+  },
+});
+// the observation room's wall screen, set up for a briefing: the Wren in profile and an agenda
+BRG.briefing = new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(384, 216, (c, w, h) => {
+  c.fillStyle = '#0d1a22'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('BRIEFING', 18, 32);
+  c.fillStyle = '#a9c4bf'; c.font = '500 13px system-ui,sans-serif'; c.fillText('CSV WREN  ·  OBSERVATION', 120, 31);
+  c.strokeStyle = '#5fd6c6'; c.lineWidth = 2; c.beginPath(); c.moveTo(30, 120); c.lineTo(210, 120); c.quadraticCurveTo(250, 120, 252, 140); c.quadraticCurveTo(250, 160, 210, 160); c.lineTo(30, 160); c.closePath(); c.stroke();
+  for (let k = 1; k < 6; k++) { c.beginPath(); c.moveTo(30, 160 - k * 8 + 0); c.lineTo(205, 160 - k * 8); c.globalAlpha = .25; c.stroke(); c.globalAlpha = 1; }
+  c.fillStyle = '#e8c06a'; c.beginPath(); c.arc(232, 128, 4, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#d7e4e1'; c.font = '500 12px system-ui,sans-serif';
+  ['1  Course and weather', '2  Deck reports', '3  Works: this week', '4  Any other business'].forEach((t, k) => c.fillText(t, 270, 92 + k * 22));
+  c.fillStyle = '#5fd6c6'; c.fillRect(18, 190, 120, 4); c.fillStyle = '#3a4a52'; c.fillRect(138, 190, 228, 4);
+}, 1, 1) });
+Object.assign(BRG, {
+  table: std('#4a2f22', .45, .05), books: ['#b4553f', '#d9c79b', '#3f6e8c', '#56466a', '#2a9d8f'].map(c => std(c, .8)), tea: std('#e9e1d0', .35), teaBlue: std('#3f6e8c', .4), gold: std('#c9a24a', .3, .8),
+  tankGlass: std('#cfe8ee', .05, 0, { transparent: true, opacity: .22, depthWrite: false }),
+  tankWater: std('#2f8fa3', .1, 0, { emissive: col('#1f6f86'), emissiveIntensity: .6, transparent: true, opacity: .55, depthWrite: false }),
+});
+// The bridge viewscreen: a strip just inside the bow hull, following its curve between bearings a0 and a1 (degrees on
+// the bow ellipse, 0 dead ahead), over the hull pieces of room rk only. Each piece's share is added to that hull piece,
+// so it drops with it for the cutaway and shows as a lit band at knee height.
+function bridgeViewscreen(rk, a0, a1, y0 = .55, y1 = 2.35) {
+  const span = 6;                                        // metres of wall per width of the picture
+  const t = BRG.sky.map; t.repeat.set(1 / span, H / (y1 - y0)); t.offset.y = -y0 / (y1 - y0);
+  const piece = new Map(); for (const hr of HULL_RUNS) if (hr.room === rk) for (const e of hr.edges) piece.set(e.cx.toFixed(4) + ',' + e.cz.toFixed(4), hr);
+  const groups = [];
+  HULL_SEGS.forEach((s, k) => {
+    const mx = (s.ax + s.bx) / 2, mz = (s.az + s.bz) / 2; if (mx < HULL.bowFrom) return;
+    const a = Math.atan2((mz - D / 2) / (D / 2), (mx - HULL.bowFrom) / HULL.bowLen) * 180 / Math.PI, hr = piece.get((mx - OX).toFixed(4) + ',' + (mz - OZ).toFixed(4));
+    if (a < a0 || a > a1 || !hr) return;
+    const last = groups[groups.length - 1];
+    if (last && last.hr === hr && last.ix[last.ix.length - 1] === k) last.ix.push((k + 1) % HULL_PTS.length); else groups.push({ hr, ix: [k, (k + 1) % HULL_PTS.length] });
+  });
+  let arc = 0;
+  for (const { hr, ix } of groups) {
+    const bz = [BRG.bezel, BRG.bezel, BRG.bezel], vs = new THREE.Group(), pic = hullStrip(ix, y0, y1, T / 2 + .04, T / 2 - .03, [BRG.sky, BRG.bezel, BRG.bezel], { arc0: arc, shadow: false });
+    pic.userData.noShadow = true; vs.add(pic);
+    vs.add(hullStrip(ix, y0 - .1, y0 + .02, T / 2 + .08, T / 2 - .02, bz));   // bezel under and over the picture
+    vs.add(hullStrip(ix, y1 - .02, y1 + .1, T / 2 + .08, T / 2 - .02, bz));
+    mergeMeshes(vs); hr.g.add(vs);                       // two draw calls a piece: the picture and the bezel
+    for (let n = 0; n < ix.length - 1; n++) arc += HULL_SEGS[ix[n]].l;
+  }
+  SPINS.push({ o: { rotation: t.offset }, ax: 'x', w: .004 });   // SPINS turns o.rotation[ax]; here that's the picture's offset, so it drifts
+}
+Object.assign(KIT, {
+  tapSpot() { return { w: .6, d: .6, noBlock: true }; },     // nothing to see: a tap target for something built elsewhere (the viewscreen)
+  // the Captain's chair: red leather, a high back, armrests with small panels. o.small: a plainer seat for the others
+  commandChair(g, o = {}) {
+    const s = o.small, lth = s ? BRG.leatherDark : BRG.leather;
+    cyl(.26, .3, .06, BRG.frame, 0, .03, 0, g, 18); cyl(.06, .06, .36, BRG.frame, 0, .24, 0, g, 10);
+    box(s ? .54 : .62, .12, s ? .5 : .58, lth, 0, .48, 0, g);
+    box(s ? .52 : .6, s ? .55 : .8, .12, lth, 0, s ? .82 : .95, -.26, g).rotation.x = -.1;
+    if (!s) box(.4, .18, .13, lth, 0, 1.42, -.31, g).rotation.x = -.1;
+    for (const x of [-1, 1]) {
+      box(.08, .07, s ? .4 : .5, BRG.frame, x * (s ? .3 : .35), .68, .02, g);
+      if (!s) box(.07, .02, .2, x < 0 ? WM.screen : WM.screenAmber, x * .35, .72, .1, g);
+    }
+    return { w: s ? .6 : .75, d: s ? .55 : .65, noBlock: o.noBlock };
+  },
+  // helm and ops: a free-standing desk, its screen sloped toward whoever sits behind it (front, +z)
+  bridgeConsole(g, o = {}) {
+    box(.86, .68, .48, BRG.console, 0, .34, -.02, g);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(.9, .05, .56), [BRG.frame, BRG.frame, o.screen, BRG.frame, BRG.frame, BRG.frame]);
+    top.position.set(0, .74, 0); top.rotation.x = .32; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(.9, .04, .06, BRG.brass, 0, .66, .26, g);
+    for (let k = 0; k < 4; k++) box(.06, .025, .05, k % 2 ? WM.navGreen : WM.red, -.18 + k * .12, .7, .17, g).rotation.x = .32;
+    return { w: .9, d: .6 };
+  },
+  // a rear station against a wall: a sloped desk with a screen, and an upright screen above it
+  rearStation(g, o = {}) {
+    const w = o.w || 1.0;
+    box(w, .72, .55, BRG.console, 0, .36, 0, g);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(w, .05, .5), [BRG.frame, BRG.frame, o.screen, BRG.frame, BRG.frame, BRG.frame]);
+    top.position.set(0, .79, .02); top.rotation.x = .3; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(w, .62, .08, BRG.frame, 0, 1.18, -.23, g);
+    const up = new THREE.Mesh(new THREE.BoxGeometry(w - .16, .46, .02), [BRG.frame, BRG.frame, BRG.frame, BRG.frame, o.screen, BRG.frame]);
+    up.position.set(0, 1.2, -.185); g.add(up);
+    box(w, .03, .04, BRG.brass, 0, .74, .27, g);
+    return { w, d: .6 };
+  },
+  // the conference table for ten: a dark wood racetrack along local z, a brass inlay, two pedestals, water and tablets
+  confTable(g) {
+    const L = 3.4, r = .7, s = new THREE.Shape();
+    s.moveTo(-r, -L / 2); s.lineTo(-r, L / 2); s.absarc(0, L / 2, r, Math.PI, 0, true); s.lineTo(r, -L / 2); s.absarc(0, -L / 2, r, 0, Math.PI, true);
+    const top = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: .06, bevelEnabled: false, curveSegments: 16 }), BRG.table);
+    top.rotation.x = Math.PI / 2; top.position.y = .79; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(.06, .016, L + .9, BRG.brass, 0, .788, 0, g);
+    for (const z of [-1.1, 1.1]) { box(.34, .74, .9, BRG.frame, 0, .37, z, g); box(.7, .04, 1.1, BRG.frame, 0, .02, z, g); }
+    cyl(.07, .06, .24, BRG.tankGlass, 0, .915, -.25, g, 14);
+    for (const [x, z] of [[-.42, -1.6], [.42, -.6], [-.42, .4], [.42, 1.4]]) { box(.2, .012, .28, WM.screen, x, .797, z, g).rotation.y = x < 0 ? .1 : -.1; }
+    for (const [x, z] of [[-.3, -1.0], [.3, 0], [-.3, 1.0]]) cyl(.035, .03, .1, BRG.tankGlass, x, .845, z, g, 10);
+    return { w: 1.4, d: L + 2 * r };
+  },
+  // the Captain's tea, on a low sideboard: a pot, cups and a tin
+  teaSideboard(g) {
+    box(.9, .75, .42, BRG.table, 0, .375, 0, g); box(.94, .04, .46, BRG.frame, 0, .76, 0, g);
+    for (const x of [-.22, .22]) box(.02, .3, .01, BRG.gold, x, .45, .215, g);
+    soft(BRG.teaBlue, -.15, .88, 0, .11, .1, .11, g); box(.04, .03, .1, BRG.teaBlue, -.15, .92, .11, g).rotation.x = -.6;
+    for (const [x, z] of [[.12, -.08], [.26, .06], [.12, .1]]) cyl(.04, .035, .07, BRG.tea, x, .815, z, g, 12);
+    cyl(.07, .07, .14, BRG.gold, .32, .85, -.1, g, 14);
+    return { w: .9, d: .46 };
+  },
+  // the ready room desk: wood with two pedestals, a tablet, a mug and a model of the Wren; the Captain sits at +z
+  readyDesk(g) {
+    box(1.5, .06, .72, BRG.table, 0, .76, 0, g);
+    for (const x of [-.52, .52]) box(.42, .74, .64, BRG.table, x, .37, 0, g);
+    box(.62, .5, .03, BRG.table, 0, .48, -.32, g);
+    box(.3, .015, .22, WM.screen, -.3, .797, .14, g).rotation.y = .2;
+    cyl(.045, .04, .1, BRG.teaBlue, .45, .84, .12, g, 14);
+    const ship = new THREE.Group(); ship.position.set(.25, .79, -.18); ship.rotation.y = .5; g.add(ship);
+    box(.06, .04, .02, BRG.frame, 0, .02, 0, ship); box(.22, .05, .07, M.trim, 0, .065, 0, ship); soft(M.trim, .11, .065, 0, .05, .025, .035, ship);
+    return { w: 1.5, d: .72 };
+  },
+  // the Admiral's aquarium: a cabinet, the tank, weed, gravel, and one slow orange fish
+  aquarium(g) {
+    box(1.0, .7, .46, BRG.table, 0, .35, 0, g);
+    box(.96, .05, .44, BRG.frame, 0, .725, 0, g); box(.96, .05, .44, BRG.frame, 0, 1.27, 0, g);
+    box(.92, .46, .4, BRG.tankWater, 0, 1.0, 0, g);
+    box(.96, .52, .44, BRG.tankGlass, 0, 1.0, 0, g);
+    box(.9, .05, .38, GD.stone2, 0, .775, 0, g);
+    for (const [x, h] of [[-.32, .3], [-.22, .22], [.3, .34]]) soft(M.leaf, x, .8 + h / 2, -.08, .04, h / 2, .04, g);
+    soft(GD.fish, .05, 1.02, .02, .07, .045, .03, g); soft(GD.fish, -.03, 1.02, .02, .03, .035, .012, g);
+    glow('#7fd8ff', 1.1, 0, 1.0, .1, g, .25);
+    return { w: 1.0, d: .46 };
+  },
+  // the ready room's bookshelf: like the cabins' one, but its books share a few materials and come from a fixed pattern
+  readyShelf(g) {
+    box(1.2, 1.9, .05, BRG.table, 0, .95, -.15, g);                                  // an open carcass: back, sides, top and plinth
+    for (const x of [-.58, .58]) box(.04, 1.9, .35, BRG.table, x, .95, 0, g);
+    box(1.2, .04, .35, BRG.table, 0, 1.88, 0, g); box(1.2, .1, .35, BRG.table, 0, .05, 0, g);
+    for (let s = 0; s < 4; s++) {
+      box(1.12, .03, .3, M.slateDark, 0, .2 + s * .42, .01, g);
+      let x = -.5, k = s * 7;
+      while (x < .45) { const bw = .05 + (k * 37 % 5) * .01, bh = .22 + (k * 53 % 7) * .02; box(bw, bh, .22, BRG.books[k % 5], x + bw / 2, .215 + s * .42 + bh / 2, .02, g); x += bw + .01; if (k % 9 === 4) x += .12; k++; }
+    }
+    return { w: 1.2, d: .35, tall: true };
+  },
+  // the bridge washroom: a compact toilet and a small basin with a mirror
+  compactToilet(g) {
+    cyl(.17, .13, .4, M.ceramic, 0, .2, .06, g, 18); box(.34, .3, .15, M.ceramic, 0, .56, -.2, g);
+    box(.06, .03, .03, M.metal, .1, .73, -.2, g);
+    return { w: .4, d: .56 };
+  },
+  smallBasin(g) {
+    box(.5, .1, .4, M.ceramic, 0, .82, 0, g); cyl(.15, .12, .05, KM.basin, 0, .855, .03, g, 18);
+    cyl(.06, .08, .78, M.ceramic, 0, .39, -.05, g, 14);
+    box(.03, .14, .03, M.metal, 0, .94, -.15, g); box(.03, .03, .09, M.metal, 0, 1.0, -.11, g);
+    box(.44, .56, .02, KM.mirror, 0, 1.5, -.18, g); box(.5, .62, .02, M.slateDark, 0, 1.5, -.195, g);
+    return { w: .5, d: .4 };
+  },
+  trunkHead(g) {                                         // where the trunks end: a manifold across both ducts under the ceiling, its plate facing the lobby glass
+    box(1.8, .5, .72, BRG.duct, 0, 2.38, 0, g);
+    for (const x of [-.5, .5]) cyl(.37, .37, .08, WM.paintDark, x, 2.1, 0, g, 24);
+    box(.56, .23, .02, WM.paintDark, 0, 2.38, -.37, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.5, .19), BRG.trunkPlate); p.position.set(0, 2.38, -.385); p.rotation.y = Math.PI; g.add(p);
+    return { w: 2, d: 1, noBlock: true };
+  },
+});
+
+// =====================================================================
+// DECK 1: BRIDGE (step 6e: turn 1 the shell)
+// From plans/deck1-plan.html. The top of the ship and the smallest deck: the bridge fills the bow, the
+// observation room (also the conference room) the stern, with the lift lobby, the trunk head and the
+// top of the ladder between. The ready room is locked; the service spaces are sealed until their tier.
+// =====================================================================
+DECKS[1] = {
+  num: 1, name: 'Bridge', seed: 10109,
+  blurb: 'Bridge, ready room, observation room', arrive: 'The bridge is forward of the lift, the observation room aft. People talk quietly up here.',
+  lift: [8, 5],
+  // car rows 3-5, trunks row 2 above it, ladder row 6: the same world spot as every deck. The spine ends here.
+  map: [
+    '..OOOOkkkkRRRRBBB...',
+    '.OOOOO++++RRRRBBBB..',
+    '.OOOOO+YY+RRRRBBBBB.',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+ZZ+BBBBBBBBBB',
+    '.OOOOO++++wwBBBBBBB.',
+    '.OOOOOuuuuwwBBBBBB..',
+    '..OOOOuuuuccccccc...',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,7,3': 'lift', 'v,7,4': 'lift', 'v,7,5': 'lift', 'v,9,3': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift',   // one wide door each side
+    'h,7,2': 'glass', 'h,8,2': 'glass',                       // the trunk head, behind glass above the car
+    'h,7,7': 'hatch', 'h,8,7': 'glass',                       // the top of the ladder, with its hatch
+    'v,10,4': 'door', 'v,10,5': 'door', 'v,10,3': 'glass', 'v,10,6': 'glass',   // bridge doors, straight ahead of the bow-side lift door
+    'v,6,4': 'door', 'v,6,5': 'door', 'v,6,3': 'glass', 'v,6,6': 'glass',       // glass doors into the observation room, aft
+    'h,12,3': 'closed',                                       // the ready room, off the bridge
+    'v,10,7': 'door',                                         // bridge washroom, from the lobby
+    'h,6,1': 'hatch', 'h,9,8': 'hatch',                       // utility closet; relay room
+    'h,13,9': 'hatch',                                        // floor hatch by the rear stations, down into the sub-floor crawl
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: { 'h,12,3': 'R', 'h,6,1': 'k', 'h,9,8': 'u', 'h,13,9': 'c' },
+  plates: [['v,10,2', 'w', 'Bridge'], ['v,6,2', 'e', 'Observation']],
+  rooms: {
+    '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    B: { name: 'Bridge', floor: 'bridge' },
+    O: { name: 'Observation room', floor: 'wood' },
+    w: { name: 'Bridge washroom', floor: 'tile' },
+    // locked, not yours
+    R: { name: 'Ready room', floor: 'wood', tap: 'The Captain\'s ready room. The door is shut, and you have not been sent for.' },
+    // sealed until their tier
+    k: { name: 'Utility closet', void: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
+    u: { name: 'Relay room', void: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
+    c: { name: 'Sub-floor crawl', void: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
+  },
+  windows: ['O', 'R'].map(room => ({ room })),
+  closedDoors: {
+    'h,7,7': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
+  },
+  hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
+  light: { sky: col('#d4e2ff'), sun: col('#dfe8ff'), hemi: .96, sunI: .9 },   // cooler than the decks below
+  // the command ring, inlaid in the carpet (the ring is faked: no sunken floor). A darker well, shaded under its edge,
+  // a brass step edge with a teal light line outside it, and a faint inner circle round the Captain's chair.
+  ring: [15.4, 5, 2.0],
+  // the command rail: a curved rail in dark wood behind the ring, open at both sides and forward
+  curves: [
+    { kind: 'bar', arc: [15.4, 5, 2.2, 140, 220], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
+  ],
+  floorArt(g, PX) {
+    const [i, j, r0] = this.ring, cx = i * PX, cy = j * PX, r = r0 * PX, arc = (rr) => { g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); };
+    g.fillStyle = 'rgba(8,12,22,.32)'; arc(r); g.fill();
+    const sh = g.createRadialGradient(cx, cy, r * .7, cx, cy, r); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.38)'); g.fillStyle = sh; arc(r); g.fill();
+    g.strokeStyle = '#b8913e'; g.lineWidth = 7; arc(r); g.stroke();
+    g.strokeStyle = 'rgba(255,236,190,.35)'; g.lineWidth = 2; arc(r + 4); g.stroke();
+    g.strokeStyle = 'rgba(95,214,198,.6)'; g.lineWidth = 3; arc(r + 12); g.stroke();
+    g.strokeStyle = 'rgba(184,145,62,.35)'; g.lineWidth = 2; arc(r * .42); g.stroke();
+    // the floor hatch down into the sub-floor crawl, beside the Works station: a plate with hazard edges and a recessed handle
+    const [hi, hj] = this.floorHatch, hx = hi * PX + 12, hy = hj * PX + 10, hw = PX - 22;
+    g.fillStyle = '#2c333a'; g.fillRect(hx, hy, hw, hw);
+    hazardBand(g, hx, hy, hw, 6, true); hazardBand(g, hx, hy + hw - 6, hw, 6, true); hazardBand(g, hx, hy, 6, hw, false); hazardBand(g, hx + hw - 6, hy, 6, hw, false);
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(hx + hw / 2 - 9, hy + hw / 2 - 3, 18, 6); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(hx + 7, hy + 7, hw - 14, 1);
+  },
+  floorHatch: [13, 8],
+  dress(d) {
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw] of [['v,7,6', 'w'], ['v,9,6', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'h,8,1', 's', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Bridge, the top of the line.') });
+    // the top of the spine: the trunks end behind glass above the car, the ladder behind glass below it
+    for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
+    place('Y', 'trunkHead', 1, .5, 'n');
+    // the viewscreen across the bow, and something to tap in front of it
+    bridgeViewscreen('B', -60, 60);
+    // the command ring: the Captain's chair with a seat either side, helm and ops just forward, and a brass step edge
+    // with a light line round the well (the ring is faked: the floor stays flat). Ring centre: tile (15.4, 5); B starts at col 10.
+    const ring = curvePoints({ arc: [d.ring[0], d.ring[1], d.ring[2], -180, 180] });
+    staticRoot.add(curveStrip(ring, -.01, .03, -.05, .05, [BRG.brass, BRG.brass, BRG.brass]));
+    const lit = curveStrip(ring, -.01, .012, .06, .085, [BRG.stepGlow, BRG.stepGlow, BRG.stepGlow]); lit.castShadow = false; staticRoot.add(lit);
+    place('B', 'commandChair', 5.2, 5, 'w', { block: [[5, 4], [5, 5]], it: IT('The Captain\'s chair', 'Red leather, worn pale on the right armrest where the Captain drums her fingers. Nobody else sits in it. Not even for a photo.') });
+    for (const [z, t, x] of [[3.85, 'First officer\'s seat', 'The Commander\'s seat, at the Captain\'s left. A tablet is tucked down the side cushion.'], [6.15, 'Guest seat', 'The seat at the Captain\'s right, for whoever has been invited up. Today, nobody.']])
+      place('B', 'commandChair', 5.2, z, 'w', { small: true, block: [[5, z < 5 ? 3 : 6]], it: IT(t, x) });
+    for (const [z, scr, t, x] of [[4.45, BRG.helm, 'Helm', 'The helm: course, speed and the next waypoint, plotted in teal. The heading hasn\'t changed in three days.'], [5.55, BRG.ops, 'Ops', 'Operations: power, air, water and comms, all on one desk. Every bar in the green, for once.']]) {
+      place('B', 'bridgeConsole', 7.45, z, 'e', { screen: scr, it: IT(t, x) });
+      place('B', 'commandChair', 6.55, z, 'w', { small: true, block: [[6, z < 5 ? 4 : 5]] });
+    }
+    // the rear stations: Watch and Survey along the ready room wall (its door between them stays clear), Comms along the
+    // washroom wall, Works against the washroom's far side, beside the floor hatch. Each has a seat facing it.
+    for (const [x, z, back, scr, t, txt] of [
+      [1.45, 3.4, 'n', BRG.watch, 'Watch station', 'The watch officer\'s board: who\'s on shift, where, and what\'s due. Your name is on it, in the Works column.'],
+      [3.45, 3.4, 'n', BRG.survey, 'Survey station', 'Sensor returns from the array on Deck 2. A long, slow wave that the survey team calls "the ship breathing".'],
+      [1.45, 6.6, 's', BRG.comms, 'Comms station', 'Incoming and outgoing traffic. A queue of call-home messages from Deck 3, waiting for the next relay window.'],
+      [2.4, 8.5, 'w', BRG.works, 'Works station', 'The Works board, mirrored from the job list on Deck 5. Bridge jobs are marked in gold; the sub-floor hatch is right beside it.'],
+    ]) {
+      place('B', 'rearStation', x, z, back, { screen: scr, w: back === 'w' ? .88 : 1.0, it: IT(t, txt) });
+      const o = { n: [0, .7, 's'], s: [0, -.7, 'n'], w: [.52, 0, 'e'] }[back];
+      place('B', 'commandChair', x + o[0], z + o[1], o[2], { small: true, noBlock: true });
+    }
+    // the observation room (also the conference room): the table for ten, the briefing screen on the lobby wall, the window
+    // seat across the stern, the Captain's tea, a lamp and two plants. O starts at column 1, so room-local x is tile x - 1.
+    place('O', 'confTable', 2.5, 5, 'n', { it: IT('Conference table', 'Ten seats, a brass line down the middle, and a ring on the wood where somebody once put down a hot mug. Briefings happen here.') });
+    for (const z of [3.0, 4.0, 5.0, 6.0, 7.0]) for (const [x, b] of [[1.35, 'w'], [3.65, 'e']]) place('O', 'commandChair', x, z, b, { small: true, noBlock: true });
+    placeWall('O', 'briefingScreen', 'e', 2.0, { hitW: 1.6, it: IT('Wall screen', 'Set up for the next briefing: the Wren in profile and four items on the agenda. Item three is about the Works. Item three is about you.') });
+    place('O', 'windowSeat', .38, 5, 'w', { w: 3.6, it: IT('Window seat', 'The best seat on the ship. From here you look aft along the whole length of the Wren, with the stars sliding away behind.') });
+    place('O', 'teaSideboard', 4.67, 7.9, 'e', { it: IT('The Captain\'s tea', 'A blue teapot, three cups and a tin with a handwritten label: NOT FOR BRIEFINGS. On quiet afternoons the Captain takes her tea at the window seat.') });
+    place('O', 'floorLamp', .55, 2.45, 'n', { light: true });
+    for (const z of [.6, 9.4]) place('O', 'plant', 4.45, z, 'n', { big: true, band: '#c9a24a' });
+    // the ready room, locked: the desk facing the door, the Captain's chair behind it and two for visitors, the bookshelf,
+    // and the Admiral's aquarium. R starts at column 10.
+    place('R', 'readyDesk', 1.6, 1.5, 's', { it: { t: 'The Captain\'s desk', x: 'A tidy desk, a model of the Wren, and a mug that says WORLD\'S OKAYEST CAPTAIN. A gift, apparently.', see: true } });
+    place('R', 'commandChair', 1.6, .72, 'n', { it: { t: 'Desk chair', x: 'The Captain\'s other chair. It faces the door, so she sees who comes in.', see: true } });
+    for (const x of [1.1, 2.1]) place('R', 'chair', x, 2.4, 's');
+    place('R', 'aquarium', .36, 1.4, 'w', { it: { t: 'The Admiral', x: 'One slow orange fish in a well-kept tank. The Admiral has outlasted two refits and a first officer.', see: true } });
+    place('R', 'readyShelf', 3.72, 1.4, 'e', { it: { t: 'Bookshelf', x: 'Star charts, old logbooks, a field guide to Veyli customs, and a paperback with every page dog-eared.', see: true } });
+    // the bridge washroom (2 x 2): a compact toilet in the far corner and a small basin by the door. w starts at column 10.
+    place('w', 'compactToilet', 1.45, 1.62, 's', { it: IT('Toilet', 'Compact, spotless, and the only one on Deck 1. The watch is grateful.') });
+    place('w', 'smallBasin', 1.4, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
+    place('B', 'tapSpot', 8.6, 5, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
+    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+  },
+};
+for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
 
 // =====================================================================
 // 5. LIGHTING
