@@ -30,7 +30,7 @@ Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the works
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link. Also: bigger bunk rooms on Deck 4 (6 berths each; the user's decision), plan sketch first, then build after the user's OK | `claude/deck-architect` | 0.17.x | Workstream 3a done. Bigger bunk rooms built (0.17.1, 1bf1598): signed off by the lead as the new Deck 4 baseline; only the junior wing changed, using the inert `floorSeeds` hook. Waiting to republish the playable link from 0.23.x |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Workstream 3b done (0.18.3, 6fb0abe; checked by the lead): Deck 1 31 places, Deck 3 173, ready-room chair added. Waiting |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Workstream 3c done (0.19.2, af0b74f + 4294ab2; checked by the lead): 159 places, furniture nudges in cabins S, R, X, the Captain's wardrobe and the public washroom; the window seat stays. Waiting |
-| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1, 4, then 6 | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | 1 and 4 done. 6 turn 1 done (0.22.1, f630bdf; merged into 0.24.1). Doing 0.22.2: full rigs for nearby story crew, day_check.py, PLAYER_BED from ROSTER_PLAYER |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1, 4, 6 | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | All three done (0.22.2, 62f530e; merged into 0.25.0). Small 0.22.3 requested: overflow skips locked or private rooms, PLAYER_BED from ROSTER_PLAYER |
 | session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Workstream 5 done (0.20.1, ad2e4c4; checked): demo with real crew on real seats, no saving under ?crowd. 70 on Deck 3 = 331 draw calls by the lift. Demo: https://claude.ai/artifact/DpVKqTdA1Fci6PzYaWw69t. Waiting (phone ms check at the check-in; shadow and LOD levers approved if needed) |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived: all its work is merged |
 
@@ -41,6 +41,8 @@ Earlier status of the inherited helpers: all idle at hand-over, all decks built 
 How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 6 architect 199k (both already compacted), bridge architect 570k, command architect 525k, performance engineer 510k; sim engineer not reported while working. Sessions compact themselves automatically, but lose detail when they do. Plan: no new hires for the end of Pillar 1. For Pillar 2, give big new jobs to fresh sessions, and retire the bridge and command architects (idle, work merged) once the user agrees, after the usual idle check.
 
 ## Done
+
+- **Ship integration 0.25.0** (51ca655): workstream 6 done (0.22.2: full rigs for nearby story crew, day_check.py). deck_check OK, day_check OK (Deck 3 peak 415 draw calls, 69 crew). Being republished to the playable link. Pillar 1's workstreams are all done; next is the end-of-pillar review with the user.
 
 - **Ship integration 0.24.1** (a881bc3): 0.24.0 plus 0.17.2 (bunk texts), 0.21.2 (sleeping) and 0.22.1 (crew follow their schedules on every deck, drawn by the crowd). Merge fix: PLAYER_BED 4-B1-4. deck_check OK. Being republished to the playable link for the user's check-in.
 
