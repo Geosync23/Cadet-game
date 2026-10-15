@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.25.2
+   STARSHIP CADET: CSV Wren                            build 0.32.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4615,76 +4615,89 @@ DECKS[2] = {
   },
   hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6, byFace: true },   // Deck 3's hull, with rounder stern corners; one hull piece per facing
   light: { sky: col('#e9e6ff'), sun: col('#fff0dc'), hemi: .94, sunI: .96 },   // calm: a touch cooler in the shade, a touch softer in the sun
-  // places (0.19.1, 0.19.2): every spot where a crew member does something, for the schedules (plans/pillar1-plan.md, "Places").
+  // places (0.19.1, 0.19.2, 0.32.1): every spot where a crew member does something, for the schedules (plans/pillar1-plan.md, "Places").
+  // anim (0.32.1, plans/pillar2-plan.md "Activities on places"): read, talk or drink. The chart room's and observatory's seats are common-room, for free time.
   // Data only: nothing draws them. at is [column, row]; face is the way the person faces. Beds are '2-<room letter>'.
   // A bedroom's places are its resident's own: the room has a bed place, and only that bed's owner should be sent there.
   places: [
     // the Captain's quarters
     { id: '2-C', type: 'bed', at: [4, 6], face: 's', pose: 'lie', room: 'C' }, { id: '2-shower-15', type: 'shower', at: [6, 5], face: 's', pose: 'stand', room: 'C' },
     { id: '2-basin-15', type: 'basin', at: [6, 5], face: 's', pose: 'stand', room: 'C' }, { id: '2-toilet-15', type: 'toilet', at: [6, 5], face: 's', pose: 'sit', room: 'C' },
-    { id: '2-captable-1', type: 'lounge-seat', at: [5, 10], face: 'w', pose: 'sit', room: 'C' }, { id: '2-captable-2', type: 'lounge-seat', at: [5, 11], face: 'w', pose: 'sit', room: 'C' },
-    { id: '2-captable-3', type: 'lounge-seat', at: [3, 12], face: 'e', pose: 'sit', room: 'C' }, { id: '2-captable-4', type: 'lounge-seat', at: [5, 12], face: 'w', pose: 'sit', room: 'C' },
-    { id: '2-captable-5', type: 'lounge-seat', at: [4, 9], face: 's', pose: 'sit', room: 'C' }, { id: '2-captable-6', type: 'lounge-seat', at: [4, 13], face: 'n', pose: 'sit', room: 'C' },
-    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C' }, { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C' },
-    { id: '2-command-1', type: 'work:command', at: [4, 15], face: 'n', pose: 'sit', room: 'C' }, { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C' },
+    { id: '2-captable-1', type: 'lounge-seat', at: [5, 10], face: 'w', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-captable-2', type: 'lounge-seat', at: [5, 11], face: 'w', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-captable-3', type: 'lounge-seat', at: [3, 12], face: 'e', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-captable-4', type: 'lounge-seat', at: [5, 12], face: 'w', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-captable-5', type: 'lounge-seat', at: [4, 9], face: 's', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-captable-6', type: 'lounge-seat', at: [4, 13], face: 'n', pose: 'sit', room: 'C', anim: 'talk' },
+    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
+    { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
+    { id: '2-command-1', type: 'work:command', at: [4, 15], face: 'n', pose: 'sit', room: 'C', anim: 'read' },
+    { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
     // Vance
-    { id: '2-X', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'X' }, { id: '2-armchair-9', type: 'lounge-seat', at: [3, 2], face: 'e', pose: 'sit', room: 'X' },
-    { id: '2-armchair-10', type: 'lounge-seat', at: [5, 2], face: 'w', pose: 'sit', room: 'X' }, { id: '2-desk-11', type: 'lounge-seat', at: [2, 4], face: 'w', pose: 'sit', room: 'X' },
-    { id: '2-shower-13', type: 'shower', at: [6, 4], face: 'n', pose: 'stand', room: 'X' }, { id: '2-basin-13', type: 'basin', at: [6, 4], face: 'n', pose: 'stand', room: 'X' },
-    { id: '2-toilet-13', type: 'toilet', at: [6, 4], face: 'n', pose: 'sit', room: 'X' },
+    { id: '2-X', type: 'bed', at: [6, 1], face: 's', pose: 'lie', room: 'X' }, { id: '2-armchair-9', type: 'lounge-seat', at: [3, 2], face: 'e', pose: 'sit', room: 'X', anim: 'read' },
+    { id: '2-armchair-10', type: 'lounge-seat', at: [5, 2], face: 'w', pose: 'sit', room: 'X', anim: 'read' },
+    { id: '2-desk-11', type: 'lounge-seat', at: [2, 4], face: 'w', pose: 'sit', room: 'X', anim: 'read' }, { id: '2-shower-13', type: 'shower', at: [6, 4], face: 'n', pose: 'stand', room: 'X' },
+    { id: '2-basin-13', type: 'basin', at: [6, 4], face: 'n', pose: 'stand', room: 'X' }, { id: '2-toilet-13', type: 'toilet', at: [6, 4], face: 'n', pose: 'sit', room: 'X' },
     // Works Chief
     { id: '2-O', type: 'bed', at: [10, 1], face: 's', pose: 'lie', room: 'O' }, { id: '2-shower-1', type: 'shower', at: [11, 4], face: 'w', pose: 'stand', room: 'O' },
     { id: '2-basin-1', type: 'basin', at: [11, 4], face: 'w', pose: 'stand', room: 'O' }, { id: '2-toilet-1', type: 'toilet', at: [11, 4], face: 'w', pose: 'sit', room: 'O' },
-    { id: '2-desk-1', type: 'lounge-seat', at: [11, 2], face: 'e', pose: 'sit', room: 'O' }, { id: '2-armchair-1', type: 'lounge-seat', at: [8, 2], face: 'e', pose: 'sit', room: 'O' },
+    { id: '2-desk-1', type: 'lounge-seat', at: [11, 2], face: 'e', pose: 'sit', room: 'O', anim: 'read' },
+    { id: '2-armchair-1', type: 'lounge-seat', at: [8, 2], face: 'e', pose: 'sit', room: 'O', anim: 'read' },
     // Infirmary Chief
     { id: '2-I', type: 'bed', at: [14, 1], face: 's', pose: 'lie', room: 'I' }, { id: '2-shower-2', type: 'shower', at: [15, 4], face: 'w', pose: 'stand', room: 'I' },
     { id: '2-basin-2', type: 'basin', at: [15, 4], face: 'w', pose: 'stand', room: 'I' }, { id: '2-toilet-2', type: 'toilet', at: [15, 4], face: 'w', pose: 'sit', room: 'I' },
-    { id: '2-desk-2', type: 'lounge-seat', at: [15, 2], face: 'e', pose: 'sit', room: 'I' }, { id: '2-armchair-2', type: 'lounge-seat', at: [12, 2], face: 'e', pose: 'sit', room: 'I' },
+    { id: '2-desk-2', type: 'lounge-seat', at: [15, 2], face: 'e', pose: 'sit', room: 'I', anim: 'read' },
+    { id: '2-armchair-2', type: 'lounge-seat', at: [12, 2], face: 'e', pose: 'sit', room: 'I', anim: 'read' },
     // Dr. Sato
     { id: '2-V', type: 'bed', at: [17, 1], face: 's', pose: 'lie', room: 'V' }, { id: '2-shower-3', type: 'shower', at: [16, 3], face: 'e', pose: 'stand', room: 'V' },
     { id: '2-basin-3', type: 'basin', at: [16, 3], face: 'e', pose: 'stand', room: 'V' }, { id: '2-toilet-3', type: 'toilet', at: [16, 3], face: 'e', pose: 'sit', room: 'V' },
-    { id: '2-desk-3', type: 'lounge-seat', at: [18, 2], face: 'e', pose: 'sit', room: 'V' },
+    { id: '2-desk-3', type: 'lounge-seat', at: [18, 2], face: 'e', pose: 'sit', room: 'V', anim: 'read' },
     // Second Officer
     { id: '2-S', type: 'bed', at: [21, 1], face: 's', pose: 'lie', room: 'S' }, { id: '2-shower-4', type: 'shower', at: [22, 4], face: 'w', pose: 'stand', room: 'S' },
     { id: '2-basin-4', type: 'basin', at: [22, 4], face: 'w', pose: 'stand', room: 'S' }, { id: '2-toilet-4', type: 'toilet', at: [22, 4], face: 'w', pose: 'sit', room: 'S' },
-    { id: '2-desk-4', type: 'lounge-seat', at: [22, 2], face: 'e', pose: 'sit', room: 'S' }, { id: '2-armchair-3', type: 'lounge-seat', at: [19, 2], face: 'e', pose: 'sit', room: 'S' },
+    { id: '2-desk-4', type: 'lounge-seat', at: [22, 2], face: 'e', pose: 'sit', room: 'S', anim: 'read' },
+    { id: '2-armchair-3', type: 'lounge-seat', at: [19, 2], face: 'e', pose: 'sit', room: 'S', anim: 'read' },
     // Envoy Saruth (visitor)
-    { id: '2-E', type: 'bed', at: [6, 20], face: 'n', pose: 'lie', room: 'E' }, { id: '2-cushion-1', type: 'lounge-seat', at: [4, 19], face: 's', pose: 'sit', room: 'E' },
-    { id: '2-cushion-2', type: 'lounge-seat', at: [4, 18], face: 's', pose: 'sit', room: 'E' }, { id: '2-cushion-3', type: 'lounge-seat', at: [3, 18], face: 's', pose: 'sit', room: 'E' },
-    { id: '2-cushion-4', type: 'lounge-seat', at: [3, 19], face: 's', pose: 'sit', room: 'E' }, { id: '2-shower-14', type: 'shower', at: [5, 17], face: 's', pose: 'stand', room: 'E' },
+    { id: '2-E', type: 'bed', at: [6, 20], face: 'n', pose: 'lie', room: 'E' }, { id: '2-cushion-1', type: 'lounge-seat', at: [4, 19], face: 's', pose: 'sit', room: 'E', anim: 'drink' },
+    { id: '2-cushion-2', type: 'lounge-seat', at: [4, 18], face: 's', pose: 'sit', room: 'E', anim: 'drink' },
+    { id: '2-cushion-3', type: 'lounge-seat', at: [3, 18], face: 's', pose: 'sit', room: 'E', anim: 'drink' },
+    { id: '2-cushion-4', type: 'lounge-seat', at: [3, 19], face: 's', pose: 'sit', room: 'E', anim: 'drink' }, { id: '2-shower-14', type: 'shower', at: [5, 17], face: 's', pose: 'stand', room: 'E' },
     { id: '2-basin-14', type: 'basin', at: [5, 17], face: 's', pose: 'stand', room: 'E' }, { id: '2-toilet-14', type: 'toilet', at: [5, 17], face: 's', pose: 'sit', room: 'E' },
     // Holt
     { id: '2-T', type: 'bed', at: [10, 20], face: 'n', pose: 'lie', room: 'T' }, { id: '2-shower-5', type: 'shower', at: [11, 17], face: 'w', pose: 'stand', room: 'T' },
     { id: '2-basin-5', type: 'basin', at: [11, 17], face: 'w', pose: 'stand', room: 'T' }, { id: '2-toilet-5', type: 'toilet', at: [11, 17], face: 'w', pose: 'sit', room: 'T' },
-    { id: '2-desk-5', type: 'lounge-seat', at: [11, 19], face: 'e', pose: 'sit', room: 'T' }, { id: '2-armchair-4', type: 'lounge-seat', at: [8, 19], face: 'e', pose: 'sit', room: 'T' },
+    { id: '2-desk-5', type: 'lounge-seat', at: [11, 19], face: 'e', pose: 'sit', room: 'T', anim: 'read' },
+    { id: '2-armchair-4', type: 'lounge-seat', at: [8, 19], face: 'e', pose: 'sit', room: 'T', anim: 'read' },
     // visitors' suite
     { id: '2-B', type: 'bed', at: [14, 20], face: 'n', pose: 'lie', room: 'B' }, { id: '2-shower-6', type: 'shower', at: [15, 17], face: 'w', pose: 'stand', room: 'B' },
     { id: '2-basin-6', type: 'basin', at: [15, 17], face: 'w', pose: 'stand', room: 'B' }, { id: '2-toilet-6', type: 'toilet', at: [15, 17], face: 'w', pose: 'sit', room: 'B' },
-    { id: '2-desk-6', type: 'lounge-seat', at: [15, 19], face: 'e', pose: 'sit', room: 'B' }, { id: '2-armchair-5', type: 'lounge-seat', at: [12, 19], face: 'e', pose: 'sit', room: 'B' },
+    { id: '2-desk-6', type: 'lounge-seat', at: [15, 19], face: 'e', pose: 'sit', room: 'B', anim: 'read' },
+    { id: '2-armchair-5', type: 'lounge-seat', at: [12, 19], face: 'e', pose: 'sit', room: 'B', anim: 'read' },
     // Senior Helm
     { id: '2-H', type: 'bed', at: [17, 20], face: 'n', pose: 'lie', room: 'H' }, { id: '2-shower-7', type: 'shower', at: [18, 18], face: 'w', pose: 'stand', room: 'H' },
     { id: '2-basin-7', type: 'basin', at: [18, 18], face: 'w', pose: 'stand', room: 'H' }, { id: '2-toilet-7', type: 'toilet', at: [18, 18], face: 'w', pose: 'sit', room: 'H' },
-    { id: '2-desk-7', type: 'lounge-seat', at: [16, 19], face: 'w', pose: 'sit', room: 'H' },
+    { id: '2-desk-7', type: 'lounge-seat', at: [16, 19], face: 'w', pose: 'sit', room: 'H', anim: 'read' },
     // Comms Chief
     { id: '2-R', type: 'bed', at: [21, 20], face: 'n', pose: 'lie', room: 'R' }, { id: '2-shower-8', type: 'shower', at: [22, 17], face: 'w', pose: 'stand', room: 'R' },
     { id: '2-basin-8', type: 'basin', at: [22, 17], face: 'w', pose: 'stand', room: 'R' }, { id: '2-toilet-8', type: 'toilet', at: [22, 17], face: 'w', pose: 'sit', room: 'R' },
-    { id: '2-desk-8', type: 'lounge-seat', at: [22, 19], face: 'e', pose: 'sit', room: 'R' }, { id: '2-armchair-6', type: 'lounge-seat', at: [19, 19], face: 'e', pose: 'sit', room: 'R' },
+    { id: '2-desk-8', type: 'lounge-seat', at: [22, 19], face: 'e', pose: 'sit', room: 'R', anim: 'read' },
+    { id: '2-armchair-6', type: 'lounge-seat', at: [19, 19], face: 'e', pose: 'sit', room: 'R', anim: 'read' },
     // Counsellor
     { id: '2-N', type: 'bed', at: [11, 9], face: 'n', pose: 'lie', room: 'N' }, { id: '2-shower-9', type: 'shower', at: [12, 7], face: 'w', pose: 'stand', room: 'N' },
     { id: '2-basin-9', type: 'basin', at: [12, 7], face: 'w', pose: 'stand', room: 'N' }, { id: '2-toilet-9', type: 'toilet', at: [12, 7], face: 'w', pose: 'sit', room: 'N' },
-    { id: '2-armchair-7', type: 'lounge-seat', at: [9, 9], face: 'e', pose: 'sit', room: 'N' },
+    { id: '2-armchair-7', type: 'lounge-seat', at: [9, 9], face: 'e', pose: 'sit', room: 'N', anim: 'read' },
     // Senior Watch Officer
     { id: '2-G', type: 'bed', at: [15, 9], face: 'n', pose: 'lie', room: 'G' }, { id: '2-shower-10', type: 'shower', at: [16, 7], face: 'w', pose: 'stand', room: 'G' },
     { id: '2-basin-10', type: 'basin', at: [16, 7], face: 'w', pose: 'stand', room: 'G' }, { id: '2-toilet-10', type: 'toilet', at: [16, 7], face: 'w', pose: 'sit', room: 'G' },
-    { id: '2-desk-9', type: 'lounge-seat', at: [13, 9], face: 'w', pose: 'sit', room: 'G' },
+    { id: '2-desk-9', type: 'lounge-seat', at: [13, 9], face: 'w', pose: 'sit', room: 'G', anim: 'read' },
     // Deputy Survey Chief
     { id: '2-D', type: 'bed', at: [11, 12], face: 's', pose: 'lie', room: 'D' }, { id: '2-shower-11', type: 'shower', at: [12, 14], face: 'w', pose: 'stand', room: 'D' },
     { id: '2-basin-11', type: 'basin', at: [12, 14], face: 'w', pose: 'stand', room: 'D' }, { id: '2-toilet-11', type: 'toilet', at: [12, 14], face: 'w', pose: 'sit', room: 'D' },
-    { id: '2-desk-10', type: 'lounge-seat', at: [9, 12], face: 'w', pose: 'sit', room: 'D' },
+    { id: '2-desk-10', type: 'lounge-seat', at: [9, 12], face: 'w', pose: 'sit', room: 'D', anim: 'read' },
     // visitors' cabin
     { id: '2-U', type: 'bed', at: [15, 12], face: 's', pose: 'lie', room: 'U' }, { id: '2-shower-12', type: 'shower', at: [16, 14], face: 'w', pose: 'stand', room: 'U' },
     { id: '2-basin-12', type: 'basin', at: [16, 14], face: 'w', pose: 'stand', room: 'U' }, { id: '2-toilet-12', type: 'toilet', at: [16, 14], face: 'w', pose: 'sit', room: 'U' },
-    { id: '2-armchair-8', type: 'lounge-seat', at: [13, 12], face: 'e', pose: 'sit', room: 'U' },
+    { id: '2-armchair-8', type: 'lounge-seat', at: [13, 12], face: 'e', pose: 'sit', room: 'U', anim: 'read' },
     // the Watch office
     { id: '2-watch-1', type: 'work:watch', at: [24, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-2', type: 'work:watch', at: [25, 1], face: 's', pose: 'work', room: 'W' },
     { id: '2-watch-3', type: 'work:watch', at: [26, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-4', type: 'work:watch', at: [25, 6], face: 'w', pose: 'sit', room: 'W' },
@@ -4693,11 +4706,14 @@ DECKS[2] = {
     { id: '2-wctoilet-1', type: 'toilet', at: [24, 13], face: 'w', pose: 'sit', room: 'w' }, { id: '2-wctoilet-2', type: 'toilet', at: [24, 16], face: 'w', pose: 'sit', room: 'w' },
     { id: '2-wcbasin-1', type: 'basin', at: [24, 15], face: 'w', pose: 'stand', room: 'w' },
     // the chart room
-    { id: '2-survey-1', type: 'work:survey', at: [29, 2], face: 's', pose: 'sit', room: 'K' }, { id: '2-survey-2', type: 'work:survey', at: [30, 2], face: 's', pose: 'sit', room: 'K' },
-    { id: '2-survey-3', type: 'work:survey', at: [29, 5], face: 's', pose: 'sit', room: 'K' }, { id: '2-survey-4', type: 'work:survey', at: [30, 5], face: 's', pose: 'sit', room: 'K' },
-    { id: '2-survey-5', type: 'work:survey', at: [31, 4], face: 'w', pose: 'work', room: 'K' }, { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K' },
-    { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K' }, { id: '2-windowseat-5', type: 'lounge-seat', at: [31, 0], face: 's', pose: 'sit', room: 'K' },
-    { id: '2-armchair-12', type: 'lounge-seat', at: [27, 7], face: 'e', pose: 'sit', room: 'K' },
+    { id: '2-survey-1', type: 'work:survey', at: [29, 2], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-survey-2', type: 'work:survey', at: [30, 2], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-survey-3', type: 'work:survey', at: [29, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-survey-4', type: 'work:survey', at: [30, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' }, { id: '2-survey-5', type: 'work:survey', at: [31, 4], face: 'w', pose: 'work', room: 'K' },
+    { id: '2-windowseat-3', type: 'common-room', at: [28, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-windowseat-4', type: 'common-room', at: [30, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-armchair-12', type: 'common-room', at: [27, 7], face: 'e', pose: 'sit', room: 'K', anim: 'read' },
     // the Survey lab
     { id: '2-survey-6', type: 'work:survey', at: [33, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-7', type: 'work:survey', at: [35, 1], face: 's', pose: 'work', room: 'L' },
     { id: '2-survey-8', type: 'work:survey', at: [36, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-9', type: 'work:survey', at: [37, 1], face: 's', pose: 'work', room: 'L' },
@@ -4710,15 +4726,21 @@ DECKS[2] = {
     { id: '2-survey-21', type: 'work:survey', at: [35, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-22', type: 'work:survey', at: [36, 19], face: 'n', pose: 'work', room: 'M' },
     { id: '2-survey-23', type: 'work:survey', at: [39, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-24', type: 'work:survey', at: [35, 18], face: 'e', pose: 'work', room: 'M' },
     // the observatory
-    { id: '2-windowseat-6', type: 'lounge-seat', at: [41, 1], face: 's', pose: 'sit', room: 'J' }, { id: '2-windowseat-7', type: 'lounge-seat', at: [43, 1], face: 's', pose: 'sit', room: 'J' },
-    { id: '2-survey-16', type: 'work:survey', at: [42, 5], face: 's', pose: 'work', room: 'J' }, { id: '2-beanbag-1', type: 'lounge-seat', at: [42, 6], face: 's', pose: 'sit', room: 'J' },
-    { id: '2-beanbag-2', type: 'lounge-seat', at: [43, 7], face: 's', pose: 'sit', room: 'J' },
+    { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
+    { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
+    { id: '2-survey-16', type: 'work:survey', at: [42, 5], face: 's', pose: 'work', room: 'J' },
+    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
+    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
     // the comms room
     { id: '2-comms-1', type: 'work:comms', at: [29, 20], face: 'n', pose: 'work', room: 'Q' }, { id: '2-comms-2', type: 'work:comms', at: [26, 20], face: 'n', pose: 'work', room: 'Q' },
-    { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q' }, { id: '2-comms-4', type: 'work:comms', at: [27, 15], face: 's', pose: 'sit', room: 'Q' },
-    { id: '2-comms-5', type: 'work:comms', at: [28, 15], face: 's', pose: 'sit', room: 'Q' }, { id: '2-comms-6', type: 'work:comms', at: [29, 15], face: 's', pose: 'sit', room: 'Q' },
-    { id: '2-comms-7', type: 'work:comms', at: [26, 18], face: 's', pose: 'sit', room: 'Q' }, { id: '2-comms-8', type: 'work:comms', at: [27, 18], face: 's', pose: 'sit', room: 'Q' },
-    { id: '2-comms-9', type: 'work:comms', at: [28, 18], face: 's', pose: 'sit', room: 'Q' }, { id: '2-comms-10', type: 'work:comms', at: [29, 18], face: 's', pose: 'sit', room: 'Q' },
+    { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-4', type: 'work:comms', at: [27, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-5', type: 'work:comms', at: [28, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-6', type: 'work:comms', at: [29, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-7', type: 'work:comms', at: [26, 18], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-8', type: 'work:comms', at: [27, 18], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-9', type: 'work:comms', at: [28, 18], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
+    { id: '2-comms-10', type: 'work:comms', at: [29, 18], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
     // the lobby
     { id: '2-bench-1', type: 'bench', at: [21, 16], face: 'n', pose: 'sit', room: '+' }, { id: '2-watch-6', type: 'work:watch', at: [22, 6], face: 'w', pose: 'stand', room: '+' },
     { id: '2-liftwait-1', type: 'lift-wait', at: [17, 9], face: 'e', pose: 'stand', room: '+' }, { id: '2-liftwait-2', type: 'lift-wait', at: [22, 9], face: 'w', pose: 'stand', room: '+' },
@@ -5458,7 +5480,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.25.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.32.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
