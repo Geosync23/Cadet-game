@@ -1,6 +1,6 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.4). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.8.1). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
@@ -53,6 +53,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.7.2 | Deck 6, turn 2: the engine room, seen through the overlook glass: the drive housing across the stern with its glowing mouth, three drive coils down the middle (copper windings, a cage, a core whose glow breathes, one coil after another), copper feeds between them, catwalks either side and a landing by the stair door. The overlook gets a rail along the window, two benches facing the coils and the first-week board. New engine list `PULSES` (glow on the game clock). New kit `driveCoil`, `driveHousing`, `pipeRun`, `catwalk`, `overlookRail`; materials `ENG`. Deck 4 ALL IDENTICAL. |
 | 0.7.3 | Deck 6, turn 3: the reactor (a ribbed shield drum with glowing ports, the core showing through a ring on top, conduits, and the coolant loop on stands with spokes to the drum; its green glow breathes slowly) and engine control (the board along the reactor window, two chairs, the mimic panel of the ship's power). Radiation signs either side of the reactor door. New kit `reactorDrum`, `controlBoard`; wall kit `mimicPanel`, `trefoil`; `ENG.mimic` and `ENG.trefoil` are canvas panels drawn at load (no `R()`). Deck 4 ALL IDENTICAL. |
 | 0.7.4 | Deck 6, turn 4: the watch room (two mustard armchairs on a rug, the kettle by the junction hatch, a real lamp, a panel heater, a shelf of engine logs), coolant risers with valve wheels and steam in the lobby's corners, a bench facing the lift, and Deck 6's mood lighting (`light` in a deck definition tints the hemisphere and sun; Deck 6 runs warm and dim). Deck 6 done. Decks 3, 4 and 5 pixel-identical to 0.7.0, day and night. |
+| 0.8.1 | Step 6e, Deck 1, turn 1: the shell. `DECKS[1]` from plans/deck1-plan.html (20 × 10, `lift: [8, 5]`, seed 10109): lobby, bridge, observation room, washroom, the locked ready room, sealed closet, relay room and crawl; plates, lift panels, the deck directory, the trunk head (new `trunkHead`, brass plate) and the top of the ladder behind glass; cooler mood light. Hull pieces split by facing (`hull.byFace`, Deck 1 only): the empty shell went from 589 draw calls to 256. Decks 3–6 pixel-identical, Deck 4 ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -315,6 +316,16 @@ They checked:
 - When a deck's turns are all done, stop for review: a playable link, screenshots, a summary and the test results.
 - Keep these notes current as you go, so any new session can pick up from them.
 
+
+## Deck 1, the Bridge (0.8.x)
+
+Built from plans/deck1-plan.html (agreed) by the bridge architect, in parallel with Deck 2 (0.9.x). Builds 0.8.1 onward.
+
+- **Shell (0.8.1).** `DECKS[1]`: 20 × 10, `lift: [8, 5]`, seed 10109. Rooms: `+` Bridge lobby (hall), `B` Bridge (plate for now), `O` Observation room (wood, windows), `w` Bridge washroom, `R` Ready room (locked, windows, `NO_FADE`), and sealed `k` Utility closet, `u` Relay room, `c` Sub-floor crawl. `sealed` maps each shut door to its room's tap text, as on Decks 5 and 6. The ladder hatch is `h,7,7`.
+- **Hull pieces by facing (`hull.byFace`).** In `buildDeck`, the hull run splitter wrote piece numbers back into `part[]` while still comparing facings against it, so a run was split almost everywhere: Deck 1's small round hull came out as 128 one-segment pieces (589 draw calls for an empty shell). A deck whose `hull` has `byFace: true` compares the facings themselves (`fc[]`) and gets one piece per facing (Deck 1: 10 pieces, 256 calls). Decks 3–6 don't set it and keep their old pieces exactly (Deck 6 has 234, Deck 4 119). Turning it on for them would save draw calls but changes their hull-run table, so it needs its own regression pass.
+- **Mood light:** `light: { sky #d4e2ff, sun #dfe8ff, hemi .96, sunI .9 }`, a little cooler and dimmer than the decks below.
+- **Kit:** the Deck 1 block sits just above `DECKS[1]`: materials in `BRG`, pieces added with `Object.assign(KIT, ...)` (and `WALL_KIT`). Nothing there calls `R()`.
+- **Doors cost a lot of draw calls on every deck** (about 120 of Deck 1's 256): each leaf is a box with six material groups. Grouping the four edge faces and the two leaf faces would cut that by two thirds with identical pixels, but changes the call counts the tests compare, so it's left for the lead.
 
 ## Known issues
 

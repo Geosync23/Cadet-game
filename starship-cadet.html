@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.4
+   STARSHIP CADET: CSV Wren                            build 0.8.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2787,8 +2787,10 @@ function buildDeck(def) {
       // each piece can follow the camera on its own. R() is still drawn once per span, as before.
       const faceOf = k => { const s = HULL_SEGS[k]; return Math.abs(s.nx) >= Math.abs(s.nz) ? (s.nx > 0 ? 1 : 0) : (s.nz > 0 ? 3 : 2); };
       const FACE = [[1, 0], [-1, 0], [0, 1], [0, -1]];      // outward: bow, stern, +z side, -z side
-      const part = run.segs.map(faceOf), parts = [];
-      run.segs.forEach((k, n) => { if (!n || part[n] !== part[n - 1]) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
+      // (part[] is overwritten with piece numbers as it goes, so older decks split far more often than they need to;
+      // a deck with hull.byFace compares the facings themselves and gets one piece per facing. Decks 3-6 keep the old split.)
+      const part = run.segs.map(faceOf), fc = part.slice(), parts = [];
+      run.segs.forEach((k, n) => { if (!n || (HULL.byFace ? fc[n] !== fc[n - 1] : part[n] !== part[n - 1])) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
       for (const p of parts) { deckRoot.add(p.g); deckRoot.add(p.decor); }
       // split into spans of wall or window
       let n = 0;
@@ -3715,6 +3717,99 @@ DECKS[6] = {
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
+
+// ---- Deck 1 kit (made at load, no R()). Kept in its own block: materials in BRG, pieces added to KIT and WALL_KIT ----
+const BRG = {
+  duct: std('#7f9aa3', .4, .45),
+  // the brass plate on the trunk head
+  trunkPlate: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(256, 96, (c, w, h) => {
+    c.fillStyle = '#b8913e'; c.fillRect(0, 0, w, h); c.strokeStyle = '#6e5420'; c.lineWidth = 5; c.strokeRect(5, 5, w - 10, h - 10);
+    c.fillStyle = '#3a2c12'; c.font = '700 26px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('CSV WREN', w / 2, 40);
+    c.font = '600 18px system-ui,sans-serif'; c.fillText('TRUNK HEAD  ·  DECK 1', w / 2, 72);
+    for (const x of [16, w - 16]) for (const y of [16, h - 16]) { c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 2); c.fill(); }
+  }, 1, 1) }),
+};
+Object.assign(KIT, {
+  trunkHead(g) {                                         // where the trunks end: a manifold across both ducts under the ceiling, its plate facing the lobby glass
+    box(1.8, .5, .72, BRG.duct, 0, 2.38, 0, g);
+    for (const x of [-.5, .5]) cyl(.37, .37, .08, WM.paintDark, x, 2.1, 0, g, 24);
+    box(.56, .23, .02, WM.paintDark, 0, 2.38, -.37, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.5, .19), BRG.trunkPlate); p.position.set(0, 2.38, -.385); p.rotation.y = Math.PI; g.add(p);
+    return { w: 2, d: 1, noBlock: true };
+  },
+});
+
+// =====================================================================
+// DECK 1: BRIDGE (step 6e: turn 1 the shell)
+// From plans/deck1-plan.html. The top of the ship and the smallest deck: the bridge fills the bow, the
+// observation room (also the conference room) the stern, with the lift lobby, the trunk head and the
+// top of the ladder between. The ready room is locked; the service spaces are sealed until their tier.
+// =====================================================================
+DECKS[1] = {
+  num: 1, name: 'Bridge', seed: 10109,
+  blurb: 'Bridge, ready room, observation room', arrive: 'The bridge is forward of the lift, the observation room aft. People talk quietly up here.',
+  lift: [8, 5],
+  // car rows 3-5, trunks row 2 above it, ladder row 6: the same world spot as every deck. The spine ends here.
+  map: [
+    '..OOOOkkkkRRRRBBB...',
+    '.OOOOO++++RRRRBBBB..',
+    '.OOOOO+YY+RRRRBBBBB.',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBB',
+    '.OOOOO+ZZ+BBBBBBBBBB',
+    '.OOOOO++++wwBBBBBBB.',
+    '.OOOOOuuuuwwBBBBBB..',
+    '..OOOOuuuuccccccc...',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,7,3': 'lift', 'v,7,4': 'lift', 'v,7,5': 'lift', 'v,9,3': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift',   // one wide door each side
+    'h,7,2': 'glass', 'h,8,2': 'glass',                       // the trunk head, behind glass above the car
+    'h,7,7': 'hatch', 'h,8,7': 'glass',                       // the top of the ladder, with its hatch
+    'v,10,4': 'door', 'v,10,5': 'door', 'v,10,3': 'glass', 'v,10,6': 'glass',   // bridge doors, straight ahead of the bow-side lift door
+    'v,6,4': 'door', 'v,6,5': 'door', 'v,6,3': 'glass', 'v,6,6': 'glass',       // glass doors into the observation room, aft
+    'h,12,3': 'closed',                                       // the ready room, off the bridge
+    'v,10,7': 'door',                                         // bridge washroom, from the lobby
+    'h,6,1': 'hatch', 'h,9,8': 'hatch',                       // utility closet; relay room
+    'h,13,9': 'hatch',                                        // floor hatch by the rear stations, down into the sub-floor crawl
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: { 'h,12,3': 'R', 'h,6,1': 'k', 'h,9,8': 'u', 'h,13,9': 'c' },
+  plates: [['v,10,2', 'w', 'Bridge'], ['v,6,2', 'e', 'Observation']],
+  rooms: {
+    '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    B: { name: 'Bridge', floor: 'plate' },
+    O: { name: 'Observation room', floor: 'wood' },
+    w: { name: 'Bridge washroom', floor: 'tile' },
+    // locked, not yours
+    R: { name: 'Ready room', floor: 'wood', tap: 'The Captain\'s ready room. The door is shut, and you have not been sent for.' },
+    // sealed until their tier
+    k: { name: 'Utility closet', void: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
+    u: { name: 'Relay room', void: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
+    c: { name: 'Sub-floor crawl', void: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
+  },
+  windows: ['O', 'R'].map(room => ({ room })),
+  closedDoors: {
+    'h,7,7': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
+  },
+  hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
+  light: { sky: col('#d4e2ff'), sun: col('#dfe8ff'), hemi: .96, sunI: .9 },   // cooler than the decks below
+  dress(d) {
+    for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
+    for (const [key, tw] of [['v,7,6', 'w'], ['v,9,6', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'h,8,1', 's', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Bridge, the top of the line.') });
+    // the top of the spine: the trunks end behind glass above the car, the ladder behind glass below it
+    for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
+    place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
+    place('Y', 'trunkHead', 1, .5, 'n');
+    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+  },
+};
+for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
 
 // =====================================================================
 // 5. LIGHTING
