@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.10
+   STARSHIP CADET: CSV Wren                            build 0.33.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3855,10 +3855,10 @@ DECKS[5] = {
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
     // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
-    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
-    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
-    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
-    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-parts-1', type: 'storage', anim: 'browse', stock: ['relay', 'breaker', 'cable', 'cell', 'signal card', 'coil winding'], at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', stock: ['filter', 'cartridge', 'membrane', 'oxygen cell', 'uv lamp'], at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', stock: ['pump', 'valve', 'seal', 'nutrient pack', 'regulator'], at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', stock: ['element', 'fan belt', 'compressor', 'bearing', 'control rod'], at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
     { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
     { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
@@ -6293,7 +6293,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.10';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.11';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8155,6 +8155,11 @@ const jobTier = j => { const m = j.machine && machineById(j.machine); return m ?
 // where parts are fetched and made: the Deck 6 architect's storage places on Deck 5 (main storage's shelves and the
 // machine shop), the first one free of other jobs for the time, or nowhere (stand where you are) if none
 const FETCH_AT = ['5-parts-1', '5-parts-2', '5-parts-3', '5-parts-4'], MAKE_AT = ['5-make-1', '5-make-2'];
+// the shelves to try for a part: the one that stocks it first (the places' `stock`), then the rest
+function shelvesFor(part) {
+  const st = id => ((DECKS[5].places || []).find(p => p.id === id) || {}).stock || [];
+  return FETCH_AT.filter(id => st(id).includes(part)).concat(FETCH_AT.filter(id => !st(id).includes(part)));
+}
 function storagePlace(ids, a, b) {
   const known = new Set((DECKS[5].places || []).map(p => p.id));
   for (const id of ids) if (known.has(id) && !SHIP.jobs.some(j => j.segs && j.status === 'claimed' && j.segs.some(s => s.placeId === id && s.from < b && a < s.to))) return id;
@@ -8172,8 +8177,9 @@ function jobRun(p, j, t, makeMin) {
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
-    if (makeMin) { at(JOB_FETCH, 'fetch', storagePlace(FETCH_AT, c, c + JOB_FETCH)); at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
-    else at(JOB_FETCH, 'fetch', storagePlace(FETCH_AT, c, c + JOB_FETCH));
+    const shelves = shelvesFor(j.parts[0]);
+    if (makeMin) { at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH)); at(makeMin, 'make', storagePlace(MAKE_AT, c, c + makeMin)); }
+    else at(JOB_FETCH, 'fetch', storagePlace(shelves, c, c + JOB_FETCH));
     go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1))), 'job', panelPlace(m.id));
   }
   const done = c; go(home);
