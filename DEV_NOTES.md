@@ -89,6 +89,9 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.32.1 | Pillar 2, A5c (the command architect): activities on Deck 2's places (plans/pillar2-plan.md, "Activities on places"). `anim: 'read'` on bedroom desk chairs and armchairs, the Captain's desk, the chart table's stools and the reading seats; `'talk'` on the comms desks, the Captain's table and the observatory beanbags; `'drink'` on the Envoy's tea cushions. The chart room's and observatory's public seats (window seats, armchair, beanbags: 8) are now `common-room`, so free time reaches them: the quiet-corner habit looks for `common-room` on Deck 2 and found none before. Ids, tiles and counts unchanged (159). Data only: every deck pixel-identical with crew off. Crew plans shift on purpose (55 of 74 over days 1-3, as seats are shared out differently), so cadet_test's crew shots differ; its crew-off shot is noise only. deck_check and day_check (day 1) OK. |
 | 0.33.0 | Pillar 2 B1 (the systems engineer, on `claude/ship-systems` from 0.25.2): section 17, machines and wear, data and logic only. A registry of 35 stand-in machines in 22 kinds (`STUB_MACHINES`, replaced deck by deck by `DECKS[n].machines`), condition and the five states, wear by the hour from the schedules (meals, laundry and uniforms, lift rides, people per deck, washes, time), the nine systems with their dependencies, ship health, and `shipEffects(deck)` for needs, mood, walking, cooking and the lift. Saved through a new `SAVE_EXTRA` hook in section 13. New `machine_check.py`. cadet_test ALL IDENTICAL against 0.25.2; deck_check OK; day_check day 1 OK (draw-call peaks unchanged, 415 on Deck 3); machine_check OK. See "Machines and wear". |
 | 0.40.0 | First Pillar 2 combined build (the lead): service hatches and still floors (0.30.1), every room in use with crew needs (0.26.1), new habits (0.16.4–0.16.5), Deck 3 activity furniture and anims (0.31.1) and the Decks 1/3 utility plans, Deck 2 anims (0.32.1), machines and wear on paper (0.33.0). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. |
+| 0.29.0 | Pillar 2, A4 (the galley engineer): section 16, the galley. The rota (`galleyDay`: Brennan up about 04:30 and cooking from 04:50, her deputy on her days off, early and late hands), the food worked out minute by minute on paper (`SHIP.galley`: cold store, pots, servery, grab shelf, plates, waits), food in the servery's pans and dirty plates in the dish pit on Deck 3, `takePortion`, `galleySave`/`galleyLoad`, food_check.py. One hook: `galleyTick()` in the main loop. |
+| 0.29.1 | The grab shelf's rolls and wraps drawn from the stock, through `galleyShelfRows` (the hook in the bridge architect's 0.31.2 shelf kit). Inert without that kit. |
+| 0.29.2 | The galley roles read ROSTER's `galley` field (crew designer's 0.16.5): Brennan the chef, varga-tariq her deputy on Fridays and Saturdays. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -693,6 +696,53 @@ They checked:
 - Keep these notes current as you go, so any new session can pick up from them.
 
 
+## Galley and food (section 16, the galley engineer, 0.29.x)
+
+Pillar 2, workstream A4: the galley really cooks. Section 16 sits after section 14 (and after section 15, the player's needs, once that's in), before section 6. Nothing in it calls `R()`; every choice is `schedU(person.seed, day, k)`.
+
+- **The rota (`galleyDay(person, day)`).** For galley staff (`dept: 'galley'`), else null: `{ role, wake, bedBy, blocks: [{ from, to, placeId, task }], meals: { breakfast, dinner } }`, in minutes of the day. `role` is `chef`, `early`, `late`, or null on a day off. `wake` is null when the usual wake is fine. `bedBy` is the latest bedtime tonight because tomorrow starts early (6 h 55 before tomorrow's wake); it's set on days off too. `meals` are the staff's own meal times. The schedules (section 14) ask for it through a hook (the sim engineer's); it never asks them, so there's no loop. `galleyShift(person, day)` is the same in the shape that hook takes: `[[from, to, placeId, task], ...]`, or null for the normal shift.
+    - **Who does what (`galleyRoles`).** The chef is Brennan (ROSTER `galley: 'chef'`, crew designer's 0.16.5), else her deputy (`galley: 'cook'`: varga-tariq, who works Fridays and Saturdays), else the first hand on duty by id. The hands (`galley: 'hand'`) on duty take early and late shifts by turns, late first, so every day has at least one of each. Fixed teams also work (`rota.team: 'early' | 'late'`, with `rota.cover: { for }` marking a deputy) if the roster ever sets them. Without any field, the chef is found by role ("Chef ..."). The galley's hours live only here, never in the roster's `rota.hours`.
+    - **The shifts (`GALLEY_SHIFTS`).**
+        - Chef: up about 04:30 (±5 minutes); cooks 04:50–08:00; eats 08:00–08:20; cleans down to 09:30; free 09:30–14:30; cooks 14:30–16:30; eats 16:30–16:50; cooks 16:50–20:30; tea on the stool 20:30–20:45.
+        - Early hand: up about 05:05; bakes for the grab shelf 05:30–06:00; serves and washes up by turns 06:00–08:00; eats 08:00–08:20; washes up to 09:30; bakes to 10:30; preps to 13:00; cleans to 13:30.
+        - Late hand: a normal morning; preps 13:00–14:30; cooks 14:30–16:30; eats 16:30–16:50; serves and washes up 16:50–20:30; washes up and cleans down to 21:15.
+    - **Stations (`GALLEY_AT`).** The blocks are cut into 15–30 minute stints at different stations (the line swaps every half hour), so you see people move between the ranges (`3-galley-1..3`), the ovens (`-4`), the prep island (`-5`, `-6`), the dish pit (`-7`), the pass (`3-galley-pass`) and Brennan's stool (`-8`). No station is held by two people at once; when a job's stations are taken, the next job's are tried (`GALLEY_NEXT`).
+- **The food (`SHIP.galley`).** `{ at, cold: { meals }, servery: { portions, dish, meal }, grab: { items }, dirty, inUse, pots, wait, back }`. `galleyAdvance(t)` steps it a ship minute at a time (`galleyStep`) up to absolute minute `t`. It's called every frame (`galleyTick`, a one-line hook in the main loop after `tickShip`) and on time skips (`SIM_ADVANCE`). With no state, or when time went backwards (New game), it starts fresh at midnight of the current day and works forward. Whatever deck you're on, the same sums run.
+    - **Events (`galleyEvents(day)`).** Read from the plans: each person's first breakfast or dinner segment is when they take food (2 minutes into a `queue` segment, at once otherwise). `grab` at a `grab-shelf` takes a grab item; anything else takes a hot portion. A sit-down meal brings its plate back when the meal ends. From the rota, how many people cook, bake and wash each minute.
+    - **Cooking.** A pot is 10 portions and 20 minutes of a cook's time; a baking tray for the grab shelf is 8 items and 15 minutes. From 70 minutes before a window opens, an idle cook starts a pot when the servery and pots hold less than the portions the plans still need for that meal (plus 3, for you), up to the hot line's 50. Bakers, and idle cooks, keep the grab shelf at what's still needed today plus 4, up to 16. Pots take their meals from the cold store when they start.
+    - **Eating.** A hot portion needs a clean plate (110 aboard). Anyone who finds nothing waits (`S.wait`) and is served first when food arrives; they give up 30 minutes after the line closes.
+    - **Closing.** At 08:30 and 20:45 what's left in the servery is wrapped for the grab shelf; anything over 16 is wasted.
+    - **Washing up.** 3 plates a minute for each person at the dish pit.
+    - **The cold store.** 300 meals, under two days' food (about 150 a day), topped up at 10:30 each day (B3 will bring it by hover cart from the Deck 5 hold instead).
+    - **Menus (`MENU`).** One breakfast and one dinner per weekday; `servery.dish` names what's on.
+- **For other sections.**
+    - `takePortion(who)`: the player eats. A hot portion and a plate if the servery has one, else a grab item; true or false.
+    - `galleyHold(person, t)`: for section 10. The queue place someone is waiting at (or null to stand), else undefined.
+    - `galleySave()` and `galleyLoad(obj)`: SHIP.galley as plain data for the save, and back (anything malformed means a fresh start). When section 13 has `SAVE_EXTRA` (the systems engineer's), section 16 adds `save.galley` through it and loads `SAVED.galley` at start; both are guarded by typeof, so they're inert until it's merged.
+    - `galleyCooks(t)`: how many are cooking or baking at absolute minute t, for oven wear (section 17). `shipEffects(3).cook`, when it exists, scales each new pot's cook time (`galleyCookT`).
+    - `galleyText(what)`: a line for tap texts (`servery`, `grab`, `dish`, `cold`).
+    - `galleyReport(day, days)`: days from a fresh galley, with each day's figures, for food_check.py.
+- **On Deck 3 (`galleyShow`).** Made when you arrive (after the deck is built, so its unload frees them) and redrawn only when the numbers change. Four instanced meshes, no shadows, never tapped:
+    - food in the servery's five pans, rising with the portions;
+    - steel covers over the pans when the servery is empty;
+    - dirty plates stacking in the dish pit's sink (one for every 3, up to 24);
+    - the grab shelf's rolls and wraps, one for every 2 items. The shelf kit (the bridge architect's 0.31.2) calls `galleyShelfRows(g, ys)` instead of drawing those two rows, when its place has `live` and the function exists. It's a function declaration, so it's there when the first deck is built at load. It marks the group, and `galleyVisuals` puts the items on the shelves at `ys`. Their material joins the shelf's fade list, so they fade with it.
+
+  Each mesh is at most 1 draw call.
+- **Numbers (days 1–7, before the schedules use the rota).** About 150 people come to eat each day: about 140 hot portions and 7–14 grab items. 30 portions are ready at 06:00 and 40–50 at 17:00. Nobody waits. Cooked 150–160, wasted 0–9. The cold store dips to about 140. All plates are washed by 21:15.
+- **food_check.py.** `python3 food_check.py BUILD.html [DAY] [DAYS]` (defaults 1 and 7, about a minute). It checks:
+    - food is ready at each opening (10 portions or more), and the grab shelf isn't empty at 06:00;
+    - nobody waits more than 5 minutes, and nobody gives up;
+    - portions and grab items taken equal the crew who came to eat;
+    - no dirty plates and none still out at midnight;
+    - the cold store never runs dry;
+    - a chef up by 04:45 and cooking by 05:00, with an early and a late hand every day;
+    - no station double-booked;
+    - the same days twice (with the caches cleared and other days planned first);
+    - the live galley matches the report;
+    - on Deck 3: pans and covers follow the servery, `takePortion`, save and load, draw calls under 450;
+    - once section 14 uses the rota, galley staff are at the rota's stations mid-block.
+
 ## Deck 1, the Bridge (0.8.x)
 
 Built from plans/deck1-plan.html (agreed) by the bridge architect, in parallel with Deck 2 (0.9.x). Builds 0.8.1 onward.
@@ -839,4 +889,4 @@ The script is split into numbered sections:
 
 The character spec, uniforms and badges are unchanged; see section 8 and design-doc.md ("Setting & names").
 
-Other files: design-doc.md (the design, the source of truth), plans/ (deck plans), TEAM.md (who's working on what), cadet_test.py and deck_check.py (tests), archive/design-doc-v4.pdf (the old design doc, for reference only).
+Other files: design-doc.md (the design, the source of truth), plans/ (deck plans), TEAM.md (who's working on what), cadet_test.py, deck_check.py, day_check.py and food_check.py (tests), archive/design-doc-v4.pdf (the old design doc, for reference only).
