@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.24.1
+   STARSHIP CADET: CSV Wren                            build 0.25.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5456,7 +5456,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.24.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.25.0';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6941,11 +6941,12 @@ function placeSpot(id) {
       if (best) [x, z] = best;
     }
     let walk = pl.walk || (free(...pl.at) ? pl.at : null);
-    if (!walk) {                                         // a seat or bed: the open tile beside it, nearest the spot
+    if (!walk) {                                         // a seat or bed: the open tile beside it in its room, nearest the spot
       const [a, b] = pl.at, opts = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]].map(([di, dj]) => [a + di, b + dj])
-        .filter(n => free(...n) && (n[0] === a || n[1] === b ? edgeOpen(a, b, ...n) || !free(a, b) : true))
+        .filter(n => free(...n) && roomAt(...n) === pl.room && (n[0] === a || n[1] === b ? edgeOpen(a, b, ...n) : true))   // never through a wall
         .sort((m, n) => cellPos(...m).distanceTo(new THREE.Vector3(x, 0, z)) - cellPos(...n).distanceTo(new THREE.Vector3(x, 0, z)));
-      walk = opts[0] || nearestOpen(x, z, null);
+      const lift = liftTiles()[0], rooms = new Set([pl.room]);   // the nearest one you can actually get to from the lift
+      walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms)) || opts[0] || nearestOpen(x, z, null);
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
     s = { id, walk, x, z, y: berth && +berth[1] % 2 === 0 ? 1.6 : 0, face: FACE_ANGLE[pl.face] || 0,
@@ -6976,17 +6977,20 @@ class CrewAgent {
   here() { return cellAt(this.x, this.z); }
   // head for a place (an id), the lift ('@lift'), or nowhere in particular (null: stay on an open tile)
   retarget(goalId) {
+    // set off from the place you're at (or sliding into): its walk-to tile, never the seat's own tile
+    const atSpot = this.spot && (this.settled || !this.path.length);
+    let from = atSpot ? this.spot.walk : this.here();
+    if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
+    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); this.x = w.x; this.z = w.z; }   // up from the seat
     this.goalId = goalId; this.path = [];
-    const from = this.settled && this.spot ? this.spot.walk : this.here();
-    if (this.settled && this.spot && !this.spot.onTile) { const w = cellPos(...this.spot.walk); this.x = w.x; this.z = w.z; }   // up from the seat
     this.settled = false; this.spot = null;
     let goal = null;
     if (goalId === '@lift') goal = this.liftCell;
     else if (goalId) { this.spot = placeSpot(goalId); goal = this.spot && this.spot.walk; if (this.spot) this.rooms = new Set(this.bedRooms.concat(this.spot.room)); }
     if (!goal) { goal = free(...from) ? from : nearestOpen(this.x, this.z, null); if (!goal) return; }
-    const path = crewPath(from, goal, this.rooms);
+    const path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from)]));   // you can always leave the room you're in
     if (path) this.path = path;
-    else { this.noPath++; const c = cellPos(...goal); this.x = c.x; this.z = c.z; }   // no way there: they're simply there
+    else { this.noPath++; this.lost = { from, goal, goalId, at: hhmm(SHIP.time.min) }; const c = cellPos(...goal); this.x = c.x; this.z = c.z; }   // no way there: they're simply there
   }
   update(dt, now, N) {
     const w = whereIs(this.p, now);
@@ -7018,7 +7022,36 @@ class CrewAgent {
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, this.pose);
     return true;
   }
-  remove() { crowd.remove(this.h); }
+  remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
+}
+// Story crew close to you get a full rig (makeCharacter, baked) instead of a crowd body: FULL_MAX of them at most,
+// within FULL_NEAR tiles, back to the crowd beyond FULL_FAR. A FullPerson takes the crowd's set() and its posing
+// update() (sit, lie, work) as they are, so the two look and move the same; it borrows them from CrowdPerson,
+// so it relies on CrowdPerson's fields (g, k, pos, face, rot, pose, phase, moved, fresh, eat, eatT, rnd).
+const FULL_MAX = 3, FULL_NEAR = 4.5, FULL_FAR = 6;
+class FullPerson {
+  constructor(spec, id) {
+    this.rig = makeCharacter(spec); this.spec = this.rig.spec; this.h = this.spec.height;
+    this.rig.root.rotation.order = 'YXZ'; scene.add(this.rig.root); this.full = true;
+    let sd = idHash(id) % 2147483646 + 1; this.rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    this.g = { p: 0, w: 0, turn: 0, look: 0, lookT: this.rnd() * 3, tail: 0, tailV: 0, lean: 0, t0: this.rnd() * 20 };
+    this.k = { sit: 0, lie: 0, work: 0 }; this.eat = 0; this.eatT = 2 + this.rnd() * 6;
+    this.pos = new THREE.Vector3(); this.face = 0; this.rot = 0; this.pose = 'stand'; this.phase = undefined; this.moved = 0; this.fresh = true;
+  }
+  dispose() { scene.remove(this.rig.root); this.rig.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); }
+}
+FullPerson.prototype.set = CrowdPerson.prototype.set;
+FullPerson.prototype.update = CrowdPerson.prototype.update;
+function crewDetail() {                                  // who gets a full rig: the nearest story crew to you
+  const pp = player.obj.position;
+  const near = DECK_CREW.filter(a => a.p.story).map(a => [a, Math.hypot(a.x - pp.x, a.z - pp.z)])
+    .filter(([a, d]) => d < (a.h.full ? FULL_FAR : FULL_NEAR)).sort((m, n) => m[1] - n[1]).slice(0, FULL_MAX).map(m => m[0]);
+  for (const a of DECK_CREW) {
+    const want = near.includes(a);
+    if (want === !!a.h.full) continue;
+    a.remove(); a.h = want ? new FullPerson(rosterSpec(a.p), a.p.id) : crowd.add(rosterSpec(a.p));
+    a.h.set({ x: a.x, y: a.y, z: a.z }, a.face, a.pose);
+  }
 }
 let crewCheckT = 0;
 function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; }
@@ -7050,8 +7083,10 @@ function crewArrive(p, w, now, mid) {
 function updateDeckCrew(dt) {
   const now = shipNow(), N = deckDef.num;
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
+  for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
+  crewDetail();
   const here = new Set(DECK_CREW.map(a => a.p.id));
   for (const p of schedPeople()) if (!here.has(p.id)) { const w = whereIs(p, now); if (w.deck === N) crewArrive(p, w, now, false); }
 }
