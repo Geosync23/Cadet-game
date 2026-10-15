@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.8.3
+   STARSHIP CADET: CSV Wren                            build 0.8.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3776,6 +3776,30 @@ function stationScreen(title, hue, kind) {
 BRG.helm = stationScreen('HELM', '#5fd6c6', 'helm'); BRG.ops = stationScreen('OPS', '#e9c46a', 'bars');
 BRG.watch = stationScreen('WATCH', '#9fb8ff', 'list'); BRG.survey = stationScreen('SURVEY', '#8fd18a', 'wave');
 BRG.works = stationScreen('WORKS', '#f0a640', 'bars'); BRG.comms = stationScreen('COMMS', '#d98ad1', 'wave');
+Object.assign(WALL_KIT, {
+  briefingScreen(g) {                                    // the observation room's wall screen
+    box(1.7, 1.0, .05, BRG.frame, 0, 1.55, .03, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.6, .9), BRG.briefing); p.position.set(0, 1.55, .061); g.add(p);
+    box(.5, .03, .06, BRG.brass, 0, 1.02, .04, g);
+  },
+});
+// the observation room's wall screen, set up for a briefing: the Wren in profile and an agenda
+BRG.briefing = new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(384, 216, (c, w, h) => {
+  c.fillStyle = '#0d1a22'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('BRIEFING', 18, 32);
+  c.fillStyle = '#a9c4bf'; c.font = '500 13px system-ui,sans-serif'; c.fillText('CSV WREN  ·  OBSERVATION', 120, 31);
+  c.strokeStyle = '#5fd6c6'; c.lineWidth = 2; c.beginPath(); c.moveTo(30, 120); c.lineTo(210, 120); c.quadraticCurveTo(250, 120, 252, 140); c.quadraticCurveTo(250, 160, 210, 160); c.lineTo(30, 160); c.closePath(); c.stroke();
+  for (let k = 1; k < 6; k++) { c.beginPath(); c.moveTo(30, 160 - k * 8 + 0); c.lineTo(205, 160 - k * 8); c.globalAlpha = .25; c.stroke(); c.globalAlpha = 1; }
+  c.fillStyle = '#e8c06a'; c.beginPath(); c.arc(232, 128, 4, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#d7e4e1'; c.font = '500 12px system-ui,sans-serif';
+  ['1  Course and weather', '2  Deck reports', '3  Works: this week', '4  Any other business'].forEach((t, k) => c.fillText(t, 270, 92 + k * 22));
+  c.fillStyle = '#5fd6c6'; c.fillRect(18, 190, 120, 4); c.fillStyle = '#3a4a52'; c.fillRect(138, 190, 228, 4);
+}, 1, 1) });
+Object.assign(BRG, {
+  table: std('#4a2f22', .45, .05), books: ['#b4553f', '#d9c79b', '#3f6e8c', '#56466a', '#2a9d8f'].map(c => std(c, .8)), tea: std('#e9e1d0', .35), teaBlue: std('#3f6e8c', .4), gold: std('#c9a24a', .3, .8),
+  tankGlass: std('#cfe8ee', .05, 0, { transparent: true, opacity: .22, depthWrite: false }),
+  tankWater: std('#2f8fa3', .1, 0, { emissive: col('#1f6f86'), emissiveIntensity: .6, transparent: true, opacity: .55, depthWrite: false }),
+});
 // The bridge viewscreen: a strip just inside the bow hull, following its curve between bearings a0 and a1 (degrees on
 // the bow ellipse, 0 dead ahead), over the hull pieces of room rk only. Each piece's share is added to that hull piece,
 // so it drops with it for the cutaway and shows as a lit band at knee height.
@@ -3793,10 +3817,11 @@ function bridgeViewscreen(rk, a0, a1, y0 = .55, y1 = 2.35) {
   });
   let arc = 0;
   for (const { hr, ix } of groups) {
-    const bz = [BRG.bezel, BRG.bezel, BRG.bezel];
-    hr.g.add(hullStrip(ix, y0, y1, T / 2 + .04, T / 2 - .03, [BRG.sky, BRG.bezel, BRG.bezel], { arc0: arc, shadow: false }));
-    hr.g.add(hullStrip(ix, y0 - .1, y0 + .02, T / 2 + .08, T / 2 - .02, bz));   // bezel under and over the picture
-    hr.g.add(hullStrip(ix, y1 - .02, y1 + .1, T / 2 + .08, T / 2 - .02, bz));
+    const bz = [BRG.bezel, BRG.bezel, BRG.bezel], vs = new THREE.Group(), pic = hullStrip(ix, y0, y1, T / 2 + .04, T / 2 - .03, [BRG.sky, BRG.bezel, BRG.bezel], { arc0: arc, shadow: false });
+    pic.userData.noShadow = true; vs.add(pic);
+    vs.add(hullStrip(ix, y0 - .1, y0 + .02, T / 2 + .08, T / 2 - .02, bz));   // bezel under and over the picture
+    vs.add(hullStrip(ix, y1 - .02, y1 + .1, T / 2 + .08, T / 2 - .02, bz));
+    mergeMeshes(vs); hr.g.add(vs);                       // two draw calls a piece: the picture and the bezel
     for (let n = 0; n < ix.length - 1; n++) arc += HULL_SEGS[ix[n]].l;
   }
   SPINS.push({ o: { rotation: t.offset }, ax: 'x', w: .004 });   // SPINS turns o.rotation[ax]; here that's the picture's offset, so it drifts
@@ -3836,6 +3861,76 @@ Object.assign(KIT, {
     up.position.set(0, 1.2, -.185); g.add(up);
     box(w, .03, .04, BRG.brass, 0, .74, .27, g);
     return { w, d: .6 };
+  },
+  // the conference table for ten: a dark wood racetrack along local z, a brass inlay, two pedestals, water and tablets
+  confTable(g) {
+    const L = 3.4, r = .7, s = new THREE.Shape();
+    s.moveTo(-r, -L / 2); s.lineTo(-r, L / 2); s.absarc(0, L / 2, r, Math.PI, 0, true); s.lineTo(r, -L / 2); s.absarc(0, -L / 2, r, 0, Math.PI, true);
+    const top = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: .06, bevelEnabled: false, curveSegments: 16 }), BRG.table);
+    top.rotation.x = Math.PI / 2; top.position.y = .79; top.castShadow = top.receiveShadow = true; g.add(top);
+    box(.06, .016, L + .9, BRG.brass, 0, .788, 0, g);
+    for (const z of [-1.1, 1.1]) { box(.34, .74, .9, BRG.frame, 0, .37, z, g); box(.7, .04, 1.1, BRG.frame, 0, .02, z, g); }
+    cyl(.07, .06, .24, BRG.tankGlass, 0, .915, -.25, g, 14);
+    for (const [x, z] of [[-.42, -1.6], [.42, -.6], [-.42, .4], [.42, 1.4]]) { box(.2, .012, .28, WM.screen, x, .797, z, g).rotation.y = x < 0 ? .1 : -.1; }
+    for (const [x, z] of [[-.3, -1.0], [.3, 0], [-.3, 1.0]]) cyl(.035, .03, .1, BRG.tankGlass, x, .845, z, g, 10);
+    return { w: 1.4, d: L + 2 * r };
+  },
+  // the Captain's tea, on a low sideboard: a pot, cups and a tin
+  teaSideboard(g) {
+    box(.9, .75, .42, BRG.table, 0, .375, 0, g); box(.94, .04, .46, BRG.frame, 0, .76, 0, g);
+    for (const x of [-.22, .22]) box(.02, .3, .01, BRG.gold, x, .45, .215, g);
+    soft(BRG.teaBlue, -.15, .88, 0, .11, .1, .11, g); box(.04, .03, .1, BRG.teaBlue, -.15, .92, .11, g).rotation.x = -.6;
+    for (const [x, z] of [[.12, -.08], [.26, .06], [.12, .1]]) cyl(.04, .035, .07, BRG.tea, x, .815, z, g, 12);
+    cyl(.07, .07, .14, BRG.gold, .32, .85, -.1, g, 14);
+    return { w: .9, d: .46 };
+  },
+  // the ready room desk: wood with two pedestals, a tablet, a mug and a model of the Wren; the Captain sits at +z
+  readyDesk(g) {
+    box(1.5, .06, .72, BRG.table, 0, .76, 0, g);
+    for (const x of [-.52, .52]) box(.42, .74, .64, BRG.table, x, .37, 0, g);
+    box(.62, .5, .03, BRG.table, 0, .48, -.32, g);
+    box(.3, .015, .22, WM.screen, -.3, .797, .14, g).rotation.y = .2;
+    cyl(.045, .04, .1, BRG.teaBlue, .45, .84, .12, g, 14);
+    const ship = new THREE.Group(); ship.position.set(.25, .79, -.18); ship.rotation.y = .5; g.add(ship);
+    box(.06, .04, .02, BRG.frame, 0, .02, 0, ship); box(.22, .05, .07, M.trim, 0, .065, 0, ship); soft(M.trim, .11, .065, 0, .05, .025, .035, ship);
+    return { w: 1.5, d: .72 };
+  },
+  // the Admiral's aquarium: a cabinet, the tank, weed, gravel, and one slow orange fish
+  aquarium(g) {
+    box(1.0, .7, .46, BRG.table, 0, .35, 0, g);
+    box(.96, .05, .44, BRG.frame, 0, .725, 0, g); box(.96, .05, .44, BRG.frame, 0, 1.27, 0, g);
+    box(.92, .46, .4, BRG.tankWater, 0, 1.0, 0, g);
+    box(.96, .52, .44, BRG.tankGlass, 0, 1.0, 0, g);
+    box(.9, .05, .38, GD.stone2, 0, .775, 0, g);
+    for (const [x, h] of [[-.32, .3], [-.22, .22], [.3, .34]]) soft(M.leaf, x, .8 + h / 2, -.08, .04, h / 2, .04, g);
+    soft(GD.fish, .05, 1.02, .02, .07, .045, .03, g); soft(GD.fish, -.03, 1.02, .02, .03, .035, .012, g);
+    glow('#7fd8ff', 1.1, 0, 1.0, .1, g, .25);
+    return { w: 1.0, d: .46 };
+  },
+  // the ready room's bookshelf: like the cabins' one, but its books share a few materials and come from a fixed pattern
+  readyShelf(g) {
+    box(1.2, 1.9, .05, BRG.table, 0, .95, -.15, g);                                  // an open carcass: back, sides, top and plinth
+    for (const x of [-.58, .58]) box(.04, 1.9, .35, BRG.table, x, .95, 0, g);
+    box(1.2, .04, .35, BRG.table, 0, 1.88, 0, g); box(1.2, .1, .35, BRG.table, 0, .05, 0, g);
+    for (let s = 0; s < 4; s++) {
+      box(1.12, .03, .3, M.slateDark, 0, .2 + s * .42, .01, g);
+      let x = -.5, k = s * 7;
+      while (x < .45) { const bw = .05 + (k * 37 % 5) * .01, bh = .22 + (k * 53 % 7) * .02; box(bw, bh, .22, BRG.books[k % 5], x + bw / 2, .215 + s * .42 + bh / 2, .02, g); x += bw + .01; if (k % 9 === 4) x += .12; k++; }
+    }
+    return { w: 1.2, d: .35, tall: true };
+  },
+  // the bridge washroom: a compact toilet and a small basin with a mirror
+  compactToilet(g) {
+    cyl(.17, .13, .4, M.ceramic, 0, .2, .06, g, 18); box(.34, .3, .15, M.ceramic, 0, .56, -.2, g);
+    box(.06, .03, .03, M.metal, .1, .73, -.2, g);
+    return { w: .4, d: .56 };
+  },
+  smallBasin(g) {
+    box(.5, .1, .4, M.ceramic, 0, .82, 0, g); cyl(.15, .12, .05, KM.basin, 0, .855, .03, g, 18);
+    cyl(.06, .08, .78, M.ceramic, 0, .39, -.05, g, 14);
+    box(.03, .14, .03, M.metal, 0, .94, -.15, g); box(.03, .03, .09, M.metal, 0, 1.0, -.11, g);
+    box(.44, .56, .02, KM.mirror, 0, 1.5, -.18, g); box(.5, .62, .02, M.slateDark, 0, 1.5, -.195, g);
+    return { w: .5, d: .4 };
   },
   trunkHead(g) {                                         // where the trunks end: a manifold across both ducts under the ceiling, its plate facing the lobby glass
     box(1.8, .5, .72, BRG.duct, 0, 2.38, 0, g);
@@ -3961,6 +4056,25 @@ DECKS[1] = {
       const o = { n: [0, .7, 's'], s: [0, -.7, 'n'], w: [.52, 0, 'e'] }[back];
       place('B', 'commandChair', x + o[0], z + o[1], o[2], { small: true, noBlock: true });
     }
+    // the observation room (also the conference room): the table for ten, the briefing screen on the lobby wall, the window
+    // seat across the stern, the Captain's tea, a lamp and two plants. O starts at column 1, so room-local x is tile x - 1.
+    place('O', 'confTable', 2.5, 5, 'n', { it: IT('Conference table', 'Ten seats, a brass line down the middle, and a ring on the wood where somebody once put down a hot mug. Briefings happen here.') });
+    for (const z of [3.0, 4.0, 5.0, 6.0, 7.0]) for (const [x, b] of [[1.35, 'w'], [3.65, 'e']]) place('O', 'commandChair', x, z, b, { small: true, noBlock: true });
+    placeWall('O', 'briefingScreen', 'e', 2.0, { hitW: 1.6, it: IT('Wall screen', 'Set up for the next briefing: the Wren in profile and four items on the agenda. Item three is about the Works. Item three is about you.') });
+    place('O', 'windowSeat', .38, 5, 'w', { w: 3.6, it: IT('Window seat', 'The best seat on the ship. From here you look aft along the whole length of the Wren, with the stars sliding away behind.') });
+    place('O', 'teaSideboard', 4.67, 7.9, 'e', { it: IT('The Captain\'s tea', 'A blue teapot, three cups and a tin with a handwritten label: NOT FOR BRIEFINGS. On quiet afternoons the Captain takes her tea at the window seat.') });
+    place('O', 'floorLamp', .55, 2.45, 'n', { light: true });
+    for (const z of [.6, 9.4]) place('O', 'plant', 4.45, z, 'n', { big: true, band: '#c9a24a' });
+    // the ready room, locked: the desk facing the door, the Captain's chair behind it and two for visitors, the bookshelf,
+    // and the Admiral's aquarium. R starts at column 10.
+    place('R', 'readyDesk', 1.6, 1.5, 's', { it: { t: 'The Captain\'s desk', x: 'A tidy desk, a model of the Wren, and a mug that says WORLD\'S OKAYEST CAPTAIN. A gift, apparently.', see: true } });
+    place('R', 'commandChair', 1.6, .72, 'n', { it: { t: 'Desk chair', x: 'The Captain\'s other chair. It faces the door, so she sees who comes in.', see: true } });
+    for (const x of [1.1, 2.1]) place('R', 'chair', x, 2.4, 's');
+    place('R', 'aquarium', .36, 1.4, 'w', { it: { t: 'The Admiral', x: 'One slow orange fish in a well-kept tank. The Admiral has outlasted two refits and a first officer.', see: true } });
+    place('R', 'readyShelf', 3.72, 1.4, 'e', { it: { t: 'Bookshelf', x: 'Star charts, old logbooks, a field guide to Veyli customs, and a paperback with every page dog-eared.', see: true } });
+    // the bridge washroom (2 x 2): a compact toilet in the far corner and a small basin by the door. w starts at column 10.
+    place('w', 'compactToilet', 1.45, 1.62, 's', { it: IT('Toilet', 'Compact, spotless, and the only one on Deck 1. The watch is grateful.') });
+    place('w', 'smallBasin', 1.4, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
     place('B', 'tapSpot', 8.6, 5, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
   },
