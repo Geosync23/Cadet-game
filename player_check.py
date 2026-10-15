@@ -150,7 +150,8 @@ with sync_playwright() as pw:
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 17 * 60 + 40); needsT = null"); g.step(5)   # dinner
     tp, b, seen, e, pk = run_activity(g, 'Servery', label='Servery, then a seat'); peak = max(peak, pk)
     kinds = [a[0] for a in seen]
-    check(tp is True and 'tray' in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
+    joins = g.ev("typeof galleyJoin === 'function'")    # with the galley's queue (0.29.6) the servery is the queue; without it, a tray at a queue spot
+    check(tp is True and ('queue' if joins else 'tray') in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'servery: should sit at a mess seat to eat')
     body_check('eat', 'hunger', 55, b, e, seen, None)
     check(peak < BUDGET, f'draw calls {peak} over {BUDGET}')
