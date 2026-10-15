@@ -142,6 +142,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.40.5 | 0.40.4 plus jobs live on the decks (0.26.6: Works crew walk their claimed jobs to Deck 5 storage, the lift and the machine's panel), the live Works bay job board and the device's Jobs section (0.33.8–0.33.9), Deck 5 storage places (0.30.8), the galley's queue spots (0.29.8) and the player's test fixes (0.28.5), merged by the lead. One planWhere (section 14). |
 | 0.33.10 | 0.40.4 and the sim engineer's 0.26.5 merged (the lead's base for 0.40.5): section 14's `whereIs` and `planWhere` kept, section 17's duplicate `planWhere` deleted, `jobRun` reads `planWhere`. Parts fetched and made at the storage places `5-parts-1`..`4` and `5-make-1`..`2` (claude/deck-architect ea2cee0; until that's merged they're skipped). cadet_test ALL IDENTICAL against 0.40.4; deck_check OK; day_check day 3 OK with jobs on (also with ea2cee0 merged in a scratch copy); machine_check OK; player_check OK. |
 | 0.33.11 | 0.40.5 and the Deck 6 architect's 0.30.9 (shelf `stock`) merged. A tech fetches from the shelf that stocks the job's part (`shelvesFor`): breakers and signal cards from the Lights shelves, filters and oxygen cells from Filters, pumps from Plumbing, elements and bearings from Galley parts; the next free shelf if that one's taken. cadet_test ALL IDENTICAL against 0.40.5; deck_check OK; day_check day 1 OK; machine_check OK; player_check OK; food_check OK. |
+| 0.33.12 | For the player engineer's repair loop: `returnPart(part)` (a part back on the shelf) and `touchJob(id)` (progress on your job; the 12-hour lapse now counts from the last progress). cadet_test ALL IDENTICAL against 0.33.11; deck_check OK; day_check day 1 OK; machine_check OK (now also: progress keeps a job yours, a part goes back); player_check OK. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -388,6 +389,8 @@ The lead's go (2026-10-15): on paper only. There's no board drawing and no devic
     - `claimJob(id)`: yours, if it's at your tier and not engine work; the crew leave it alone;
     - `dropJob(id)`;
     - `takePart(part)`: off the shelf; carrying it is the player engineer's;
+    - `returnPart(part)`: back on the shelf (0.33.12);
+    - `touchJob(id)`: progress on your job (a part fitted, repair minutes done); the 12-hour lapse counts from the last progress (0.33.12);
     - `finishJob(id)`: puts the machine right now.
 - **Saving.** The save hook also writes `ship.jobs`, `ship.stores` and `ship.hold`. A save from 0.33.0 loads with an empty job list and full shelves.
 - **`JOBS_ON`** (default true) is off only in machine_check's no-repair and ideal-crew runs.

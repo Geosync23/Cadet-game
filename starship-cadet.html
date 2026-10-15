@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.11
+   STARSHIP CADET: CSV Wren                            build 0.33.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6293,7 +6293,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.11';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.12';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8127,7 +8127,7 @@ const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 
 const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
 const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
 const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
-const YOU_KEEP = 720;                                   // a job you take goes back on the board if it isn't done in 12 ship hours
+const YOU_KEEP = 720;                                   // a job you take goes back on the board after 12 ship hours with no progress (touchJob)
 const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
 // make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
@@ -8203,7 +8203,7 @@ function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - j.start >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
@@ -8278,8 +8278,11 @@ function dropJob(id) {
   const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; j.claimedBy = null; j.status = 'open'; delete j.start; MACH_REV++; return true;
 }
-// take a part off the storage shelf (you carry it; carrying is the player engineer's)
+// take a part off the storage shelf (you carry it; carrying is the player engineer's), or put one back
 function takePart(part) { machinesNow(); if (!(SHIP.stores[part] > 0)) return false; SHIP.stores[part]--; MACH_REV++; return true; }
+function returnPart(part) { if (typeof part !== 'string' || !part) return false; machinesNow(); SHIP.stores[part] = (SHIP.stores[part] || 0) + 1; MACH_REV++; return true; }
+// progress on your job (a part fitted, repair minutes done): the 12-hour lapse counts from the last progress
+function touchJob(id) { const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return false; j.touched = shipNow(); return true; }
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
   if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
