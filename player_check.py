@@ -270,6 +270,10 @@ with sync_playwright() as pw:
             g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3)
             paused = json.loads(g.ev(JST)); print('  walked away mid-repair:', paused[0], paused[2])
             check(not paused[0] and paused[2]['fitted'] == mj[0] and paused[2]['done'] >= 4, 'job loop: walking away should keep the part fitted and the repair time done')
+            if g.ev("typeof touchJob === 'function'"):
+                tc = g.ev(f"(() => {{ const j = SHIP.jobs.find(j => j.id === {json.dumps(jid)}); return [j.touched || 0, j.start, shipNow()]; }})()")
+                print('  touched (section 17\'s touchJob):', tc)
+                check(tc[0] > tc[1] and tc[2] - tc[0] < 3, 'job loop: repairing should touch the job (keeps it yours)')
             sv = json.loads(g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return JSON.stringify(s.player); })()"))
             check(sv.get('work', {}).get('done', 0) >= 4 and sv.get('carry') == [], f"job loop: the save should hold the work ({sv.get('work')})")
             g.step(60); check(g.ev(TAPI) is True, 'job loop: resume'); s3 = jrun(160)
@@ -307,6 +311,10 @@ with sync_playwright() as pw:
             print('  three filters needed, carrying:', s4[1], '|', s4[3][:110])
             check(s4[1] == ['filter', 'filter'] and 'another trip' in s4[3], 'job loop: two at most, and say another trip is needed')
             g.ev(f"dropJob({json.dumps(two)})")
+            if g.ev("typeof returnPart === 'function'"):          # no job now: a tap in storage puts the filters back
+                f0 = g.ev("SHIP.stores.filter"); g.ev(TAPS % '"Filters"'); s7 = jrun()
+                print('  put back:', s7[1], '|', s7[3][:60], '| filters on the shelf', f0, '->', g.ev("SHIP.stores.filter"))
+                check(s7[1] == [] and g.ev("SHIP.stores.filter") == f0 + 2, 'job loop: with no job, parts go back on the shelf')
         else: print('  (no job left to try carrying with)')
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
