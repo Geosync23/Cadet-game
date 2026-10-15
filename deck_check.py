@@ -38,7 +38,7 @@ CHECK = """(() => {
   }
   unreachTiles.splice(0, unreachTiles.length, ...unreachTiles.filter(t => !shut.includes(t.split(':')[0])));
   return { tiles: Object.values(ROOM_TILES).reduce((a, t) => a + t.length, 0), items: ITEMS.length, unreachTiles, unreachItems, shut,
-    crew: crew.filter(c => c.active).map(c => c.spec.name) };
+    crew: typeof DECK_CREW !== 'undefined' ? [DECK_CREW.length + ' scheduled (' + clockText() + ')'] : crew.filter(c => c.active).map(c => c.spec.name) };
 })()"""
 
 # places: reachability for crew (doors, lift doors and 'closed' doors pass; walls, glass and hatches don't)
