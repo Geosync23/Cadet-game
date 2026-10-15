@@ -92,6 +92,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    12. MAIN LOOP
    13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
    14. SCHEDULES        planDay, whereIs: where all the crew are (after 13)
+   16. GALLEY & FOOD    the galley rota, cooking, the servery, plates (after 14)
    17. MACHINES & JOBS  machines, wear, systems, ship health, effects on people (after 14)
 
    RULES THAT KEEP IT WORKING ON PHONES
@@ -6668,6 +6669,364 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // =====================================================================
+// 16. GALLEY & FOOD
+// The galley really cooks (Pillar 2, workstream A4). Three parts, all worked out from ship time alone:
+//  - The rota. galleyDay(person, day) gives a galley worker's day: when they rise, how late they may go to bed
+//    before an early start, their work blocks at the galley's stations, and when they eat. Chef Brennan rises
+//    about 04:30 and cooks breakfast before 06:00, and dinner from 14:30; her deputy cooks on her days off. The
+//    hands work an early shift (05:30-13:30) or a late one (13:00-21:15). The schedules (section 14) ask for it;
+//    it never asks them, so there's no loop.
+//  - The food. SHIP.galley, stepped a ship minute at a time (galleyAdvance) whatever deck you're on: meals in the
+//    cold store, pots cooking, portions in the servery, the grab-and-go shelf, plates dirty and in use, anyone
+//    waiting. The cooks cook to the numbers the crew's plans (planDay) say will eat; the crew take a portion when
+//    they reach the front of the queue and bring the plate back when they've eaten; the hands wash up.
+//  - What you see on Deck 3: food in the servery's pans, the grab shelf, dirty plates at the dish pit.
+// For other sections: takePortion(who) (the player eats), galleyHold(person, t) (someone waiting at the servery),
+// galleySave() / galleyLoad(obj) (the save), galleyText(what) (tap text), galleyReport(day, days) (food_check.py).
+// Nothing here calls R().
+// =====================================================================
+// ---- the rota ----
+// a galley worker's team: ROSTER's galley field ('chef'; 'cook' for the chef's deputy; 'hand', who take early and late
+// shifts by turns), or rota.team ('chef', 'early', 'late', with rota.cover: { for } on the deputy); without either,
+// the chef by role
+const galleyStaff = () => ROSTER.filter(p => p.dept === 'galley' && p.work && p.work.deck === 3);
+const galleyTeam = p => (p.rota && p.rota.team) || (p.galley === 'chef' || /^chef\b/i.test(p.role || '') ? 'chef' : null);
+const galleyDeputy = (p, head) => p.galley === 'cook' || !!(p.rota && p.rota.cover && (!head || p.rota.cover.for === head.id));
+// the stations, by job: work:galley places on Deck 3, in the order they're tried
+const GALLEY_AT = {
+  cook: ['3-galley-1', '3-galley-4', '3-galley-2', '3-galley-5', '3-galley-3'],   // ranges, ovens, ranges, prep island, ranges
+  bake: ['3-galley-4', '3-galley-6'],                                              // the ovens, the prep island's far side
+  prep: ['3-galley-5', '3-galley-6'],                                              // the prep island
+  serve: ['3-galley-pass'],                                                        // the pass, behind the servery
+  wash: ['3-galley-7'],                                                            // the dish pit
+  clean: ['3-galley-6', '3-galley-2', '3-galley-5', '3-galley-3'],
+  tea: ['3-galley-8'],                                                             // Brennan's stool
+};
+const GALLEY_NEXT = { cook: 'prep', bake: 'prep', serve: 'wash', wash: 'clean', prep: 'clean', tea: 'clean' };   // when every station for a job is taken
+// each role's day, in minutes of the day: [from, to, task]. 'line' is serving and washing up by turns;
+// 'breakfast' and 'dinner' are the staff's own meals
+const GALLEY_SHIFTS = {
+  chef: { wake: 270, plan: [[290, 480, 'cook'], [480, 500, 'breakfast'], [500, 570, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
+  early: { wake: 305, plan: [[330, 360, 'bake'], [360, 480, 'line'], [480, 500, 'breakfast'], [500, 570, 'wash'], [570, 630, 'bake'], [630, 780, 'prep'], [780, 810, 'clean']] },
+  late: { wake: null, plan: [[780, 870, 'prep'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'line'], [1230, 1275, 'wash']] },
+};
+// who does what on a day: the chef (Brennan, else her deputy, else the first hand on duty), then the hands on
+// duty by turns, late first, so there's always one on each shift
+function galleyRoles(d) {
+  const on = galleyStaff().filter(p => isWorkDay(p, d)).sort((a, b) => a.id < b.id ? -1 : 1), roles = new Map();
+  const head = galleyStaff().find(p => galleyTeam(p) === 'chef');
+  const chef = on.find(p => p === head) || on.find(p => galleyDeputy(p, head)) || on[0];
+  if (chef) roles.set(chef.id, 'chef');
+  const hands = on.filter(p => p !== chef), fixed = hands.filter(p => ['early', 'late'].includes(galleyTeam(p)));
+  for (const p of fixed) roles.set(p.id, galleyTeam(p));
+  const rest = hands.filter(p => !fixed.includes(p)), r = rest.length ? ((d % rest.length) + rest.length) % rest.length : 0;
+  rest.slice(r).concat(rest.slice(0, r)).forEach((p, k) => roles.set(p.id, k % 2 ? 'early' : 'late'));
+  return roles;
+}
+const galleyWake = (p, d, role) => { const s = GALLEY_SHIFTS[role]; return s && s.wake !== null ? s.wake - 5 + Math.round(10 * schedU(p.seed, d, 301)) : null; };
+// the whole galley's day: everyone's blocks, cut into 15-30 minute stints that move between stations, with no
+// station held by two people at once
+const GALLEY_ROTA = new Map();
+function galleyRota(d) {
+  if (GALLEY_ROTA.has(d)) return GALLEY_ROTA.get(d);
+  const roles = galleyRoles(d), next = galleyRoles(d + 1), out = new Map(), busy = new Map();
+  const have = new Set((DECKS[3].places || []).map(p => p.id));
+  const isFree = (id, a, b) => !(busy.get(id) || []).some(([x, y]) => x < b && a < y);
+  const take = (task, a, b, k) => {                      // the first free station for the job (or the next job), from the k-th
+    for (let t = task; t; t = GALLEY_NEXT[t]) {
+      const l = GALLEY_AT[t].filter(id => have.has(id));
+      for (let i = 0; i < l.length; i++) { const id = l[(k + i) % l.length]; if (isFree(id, a, b)) { if (!busy.has(id)) busy.set(id, []); busy.get(id).push([a, b]); return [id, t]; } }
+    }
+    return [null, task];
+  };
+  const order = galleyStaff().slice().sort((a, b) => ['chef', 'early', 'late'].indexOf(roles.get(a.id)) - ['chef', 'early', 'late'].indexOf(roles.get(b.id)) || (a.id < b.id ? -1 : 1));
+  let n = 0;
+  for (const p of order) {
+    const role = roles.get(p.id) || null, nr = next.get(p.id), nw = nr ? galleyWake(p, d + 1, nr) : null;
+    const day = { role, wake: role ? galleyWake(p, d, role) : null, bedBy: nw !== null ? nw + 1440 - 415 : null, blocks: [], meals: {} };
+    if (role) {
+      const me = n++;
+      for (const [a, b, task] of GALLEY_SHIFTS[role].plan) {
+        if (task === 'breakfast' || task === 'dinner') { day.meals[task] = [a, b]; continue; }
+        for (let s = a, k = 0; s < b; k++) {             // stints of 15-30 minutes; the line swaps every half hour
+          let e = task === 'line' ? s + 30 : s + 15 + Math.round(15 * schedU(p.seed, d, 310 + s));
+          if (b - e < 10) e = b;
+          const job = task === 'line' ? ((me + k) % 2 ? 'wash' : 'serve') : task;
+          const [placeId, did] = take(job, s, e, me + k);
+          const l = day.blocks[day.blocks.length - 1];
+          if (l && l.placeId === placeId && l.task === did && l.to === s) l.to = e; else day.blocks.push({ from: s, to: e, placeId, task: did });
+          s = e;
+        }
+      }
+    }
+    out.set(p.id, day);
+  }
+  GALLEY_ROTA.set(d, out);
+  for (const k of GALLEY_ROTA.keys()) if (k < d - 3 || k > d + 3) GALLEY_ROTA.delete(k);
+  return out;
+}
+// the hook for the schedules: a galley worker's day (null for anyone else), in minutes of the day
+function galleyDay(person, d) { return person.dept === 'galley' ? galleyRota(d).get(person.id) || null : null; }
+
+// ---- the food ----
+// SHIP.galley = { at, cold: { meals }, servery: { portions, dish }, grab: { items }, dirty, inUse, pots, wait, back }
+//   at: the next ship minute to work out; cold.meals: meal units in the cold store (one makes a portion or a grab item);
+//   pots: [[minutes left, portions, 'hot' | 'grab'], ...] cooking; wait: [[id, since, kind, meal, place, eat], ...]
+//   people waiting for food; back: [[minute, plates], ...] plates coming back to the dish pit
+const FOOD = {
+  batch: 10, cookT: 20,                   // a pot: 10 portions, 20 minutes of a cook's time
+  bake: 8, bakeT: 15,                     // a tray for the grab shelf: 8 items, 15 minutes
+  serveryCap: 50, grabCap: 16,            // what the hot line (5 pans of 10) and the shelf hold
+  coldCap: 300, deliverAt: 630,           // the cold store holds under two days' food; topped up daily at 10:30...
+  restock: 'rule',                        // ...while this is 'rule'. 'carts': section 17's hover carts bring it instead (B3)
+  plates: 110, washRate: 3,               // plates aboard; plates a minute through the dish machine
+  open: { breakfast: 360, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
+  lead: 70,                               // ...and hot pots start at most this long before
+  close: { breakfast: 510, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted)
+  slack: 3, grabSlack: 4,                 // a few more than the plans need (you, for one)
+  giveUp: 30,                             // minutes after the close that anyone still waiting gives up
+};
+const MENU = {
+  breakfast: ['porridge and eggs', 'pancakes and fruit', 'eggs and garden greens', 'oat bake and yoghurt', 'eggs on toast', 'Brennan\'s spiced beans', 'the big Sunday fry'],
+  dinner: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'pizza night', 'Sunday roast'],
+};
+const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
+const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [] });
+// a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
+const GALLEY_EV = new Map();
+function galleyEvents(d) {
+  if (GALLEY_EV.has(d)) return GALLEY_EV.get(d);
+  const B = (d - 1) * 1440, ev = [], rota = galleyRota(d);
+  const cook = new Int8Array(1440), bake = new Int8Array(1440), wash = new Int8Array(1440);
+  for (const day of rota.values()) for (const b of day.blocks) {
+    const arr = b.task === 'cook' ? cook : b.task === 'bake' ? bake : b.task === 'wash' ? wash : null;
+    if (arr) for (let m = b.from; m < Math.min(b.to, 1440); m++) arr[m]++;
+  }
+  const ppl = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1);
+  for (const p of ppl) {
+    const segs = planDay(p, d);
+    for (let i = 0; i < segs.length; i++) {
+      const s = segs[i]; if (s.act !== 'breakfast' && s.act !== 'dinner') continue;
+      if (i && segs[i - 1].act === s.act) continue;      // the first segment of a meal is where they get their food
+      let j = i; while (j + 1 < segs.length && segs[j + 1].act === s.act) j++;
+      const len = s.to - s.from, t = Math.floor(s.from + (s.tag === 'queue' ? Math.min(2, Math.max(0, len - 1)) : 0));
+      const kind = s.tag === 'grab' && s.type === 'grab-shelf' ? 'grab' : 'servery';
+      const eat = s.tag === 'grab' ? 0 : Math.max(1, Math.floor(segs[j].to) - t);   // a sit-down meal brings a plate back when it's over
+      ev.push({ t, id: p.id, meal: s.act, kind, place: s.tag === 'queue' || s.tag === 'grab' ? s.placeId : null, eat });
+    }
+  }
+  ev.sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : 1));
+  const left = { breakfast: [], dinner: [] };           // when each meal's servery portions are taken, for "how many still to come"
+  for (const e of ev) if (e.kind === 'servery') left[e.meal].push(e.t);
+  const grabs = ev.filter(e => e.kind === 'grab').map(e => e.t);
+  const out = { d, B, ev, cook, bake, wash, left, grabs, k: 0 };
+  GALLEY_EV.set(d, out);
+  for (const k of GALLEY_EV.keys()) if (k < d - 2 || k > d + 2) GALLEY_EV.delete(k);
+  return out;
+}
+// worn ovens and ranges cook slower: section 17's shipEffectsAt(3, m).cook scales the time (1 when it isn't there).
+// It's the pure, recorded version, safe inside a replay. The rota and galleyCooks never read it (wear reads them).
+const galleyCookT = (t, m) => { const e = typeof shipEffectsAt === 'function' && shipEffectsAt(3, m); return Math.max(1, Math.round(t * (e && e.cook > 0 ? e.cook : 1))); };
+// how many are at the stoves (cooking or baking) at absolute minute t, for oven wear (section 17)
+function galleyCooks(t) { const d = Math.floor(t / 1440) + 1, md = Math.floor(t) - (d - 1) * 1440, E = galleyEvents(d); return E.cook[md] + E.bake[md]; }
+const countFrom = (arr, t) => { let a = 0, b = arr.length; while (a < b) { const m = (a + b) >> 1; if (arr[m] < t) a = m + 1; else b = m; } return arr.length - a; };
+// one ship minute m (absolute) of the galley, on state S; st collects the day's figures (galleyReport), or null
+function galleyStep(S, m, st) {
+  const d = Math.floor(m / 1440) + 1, E = galleyEvents(d), md = m - E.B, meal = galleyMeal(md);
+  if (md === FOOD.deliverAt && FOOD.restock === 'rule') { const n = Math.max(0, FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) st.delivered += n; }
+  // plates come back, and the dish pit washes what it can
+  if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
+  const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;
+  // cooking: idle cooks start a pot when the coming meal needs more than the servery and the pots hold; bakers
+  // (and idle cooks) fill the grab shelf; then everyone at the stoves works a pot
+  const inPots = kind => S.pots.reduce((n, p) => n + (p[2] === kind ? p[1] : 0), 0);
+  let cooks = E.cook[md], bakers = E.bake[md];
+  const potsOf = kind => S.pots.filter(p => p[2] === kind).length;
+  if (meal && md >= FOOD.open[meal] - FOOD.lead) {
+    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = MENU[meal][weekday(d)]; S.servery.meal = meal; }
+    let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack) - S.servery.portions - inPots('hot');
+    for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
+      const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
+      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT, m), n, 'hot']); need -= n; if (st) st.cooked += n;
+    }
+  }
+  {
+    let need = Math.min(FOOD.grabCap, countFrom(E.grabs, m) + FOOD.grabSlack) - S.grab.items - inPots('grab');
+    for (let idle = bakers + Math.max(0, cooks - potsOf('hot')) - potsOf('grab'); idle > 0 && need > 0; idle--) {
+      const n = Math.min(FOOD.bake, S.cold.meals); if (n <= 0) break;
+      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.bakeT, m), n, 'grab']); need -= n; if (st) st.baked += n;
+    }
+  }
+  const done = [];
+  for (const p of S.pots) {
+    if (p[2] === 'hot' ? cooks > 0 : bakers + cooks > 0) {
+      if (p[2] === 'hot') cooks--; else if (bakers > 0) bakers--; else cooks--;
+      if (--p[0] <= 0) done.push(p);
+    }
+  }
+  for (const p of done) {
+    S.pots.splice(S.pots.indexOf(p), 1);
+    if (p[2] === 'hot') S.servery.portions += p[1];
+    else { const n = Math.min(p[1], FOOD.grabCap - S.grab.items); S.grab.items += n; if (st) st.waste += p[1] - n; }
+  }
+  // serving: those already waiting first, then whoever reaches the front this minute
+  const serve = (kind, plate) => {
+    if (kind === 'grab' && S.grab.items > 0) { S.grab.items--; return 'grab'; }
+    if (S.servery.portions > 0 && (!plate || FOOD.plates - S.dirty - S.inUse > 0)) { S.servery.portions--; return 'servery'; }
+    return null;
+  };
+  const got = (x, how, eat) => {
+    if (eat && how === 'servery') { S.inUse++; S.back.push([m + eat, 1]); }
+    if (st) { st[how === 'grab' ? 'grabbed' : 'eaten']++; const wt = m - x.since; st.waits.push(wt); if (wt > st.maxWait) { st.maxWait = wt; st.maxWho = x.id + ' ' + hhmm(md); } }
+  };
+  if (S.wait.length) {
+    const keep = [];
+    for (const x of S.wait) {
+      const [id, since, kind, wm, place, eat] = x, how = serve(kind, eat > 0);
+      if (how) got({ id, since }, how, eat);
+      else if (md === FOOD.close[wm] + FOOD.giveUp) { if (st) st.missed.push(id + ' ' + wm); }
+      else keep.push(x);
+    }
+    S.wait = keep;
+  }
+  if (E.k > E.ev.length || (E.k && E.ev[E.k - 1].t >= md + E.B)) E.k = 0;   // a fresh pass over the day (a report, a new game)
+  while (E.k < E.ev.length && E.ev[E.k].t < m) E.k++;
+  for (; E.k < E.ev.length && E.ev[E.k].t === m; E.k++) {
+    const e = E.ev[E.k], how = serve(e.kind, e.eat > 0);
+    if (st) st.ate++;
+    if (how) got({ id: e.id, since: m }, how, e.eat);
+    else S.wait.push([e.id, m, e.kind, e.meal, e.place, e.eat]);
+  }
+  // the line closes: what's left goes to the grab shelf, wrapped, and the rest is wasted
+  if (meal === null && S.servery.portions > 0 && (md === FOOD.close.breakfast || md === FOOD.close.dinner)) {
+    const n = Math.min(S.servery.portions, FOOD.grabCap - S.grab.items);
+    S.grab.items += n; if (st) st.waste += S.servery.portions - n; S.servery.portions = 0;
+  }
+  if (st) {
+    st.coldMin = Math.min(st.coldMin, S.cold.meals);
+    if (md === FOOD.open.breakfast || md === FOOD.open.dinner) st.ready[md === FOOD.open.breakfast ? 'breakfast' : 'dinner'] = { portions: S.servery.portions, grab: S.grab.items };
+    if (md % 60 === 0) st.hours.push([hhmm(md), S.cold.meals, S.servery.portions, S.grab.items, S.dirty, S.inUse, S.pots.length, S.wait.length]);
+  }
+}
+// step SHIP.galley up to ship minute `to` (absolute); a fresh start when there's no state or time went backwards
+function galleyAdvance(to) {
+  to = Math.floor(to);
+  let S = SHIP.galley;
+  if (!S || !(S.at <= to + 1)) S = SHIP.galley = { at: (Math.floor(to / 1440)) * 1440, ...GALLEY_START() };
+  while (S.at <= to) galleyStep(S, S.at++, null);
+  return S;
+}
+// the player (or anyone) eats: a hot portion and a plate if the servery has one, else something from the grab shelf
+function takePortion(who = 'player') {
+  const S = galleyAdvance(shipNow()), m = Math.floor(shipNow());
+  if (S.servery.portions > 0 && FOOD.plates - S.dirty - S.inUse > 0) { S.servery.portions--; S.inUse++; S.back.push([m + 20, 1]); return true; }
+  if (S.grab.items > 0) { S.grab.items--; return true; }
+  return false;
+}
+// someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
+function galleyHold(person, t) {
+  const S = SHIP.galley; if (!S || !S.wait.length) return undefined;
+  const x = S.wait.find(w => w[0] === person.id); return x ? x[4] : undefined;
+}
+// the save: SHIP.galley as plain data, and back (anything malformed means a fresh start from the plans)
+function galleySave() { return SHIP.galley ? JSON.parse(JSON.stringify(SHIP.galley)) : null; }
+function galleyLoad(o) {
+  const ok = o && typeof o === 'object' && Number.isInteger(o.at) && o.cold && isFinite(o.cold.meals) && o.servery && isFinite(o.servery.portions)
+    && o.grab && isFinite(o.grab.items) && isFinite(o.dirty) && isFinite(o.inUse) && ['pots', 'wait', 'back'].every(k => Array.isArray(o[k]));
+  SHIP.galley = ok ? JSON.parse(JSON.stringify(o)) : null;
+  return !!ok;
+}
+// a line about the galley for tap texts: what's on, and how much is left
+function galleyText(what = 'servery') {
+  const S = galleyAdvance(shipNow()), md = SHIP.time.min, meal = md >= FOOD.close.breakfast && md < FOOD.close.dinner ? 'dinner' : 'breakfast';
+  if (what === 'grab') return S.grab.items ? `${S.grab.items} on the shelf.` : 'The shelf is empty.';
+  if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
+  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.`;
+  const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
+  if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.`;
+  return open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`;
+}
+// food_check.py: `days` ship days from a fresh galley at the start of `day`, with the figures for each day
+function galleyReport(day, days = 1) {
+  const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
+  for (const E of GALLEY_EV.values()) E.k = 0;
+  for (let d = day; d < day + days; d++) {
+    const st = { day: d, ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
+    const rota = galleyRota(d), staff = [];
+    for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
+    st.staff = staff;
+    st.waited = st.waits.filter(w => w > 0).length;
+    st.end = { cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length };
+    delete st.waits; out.push(st);
+  }
+  for (const E of GALLEY_EV.values()) E.k = 0;
+  return out;
+}
+// time skips (sleep, the debug button): bring the galley up to date before the save
+SIM_ADVANCE.push((from, to) => { galleyAdvance(to); });
+// the save (section 13's SAVE_EXTRA, when it's there): SHIP.galley goes in as `galley`, and comes back from it
+if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => { s.galley = galleySave(); });
+if (typeof SAVED !== 'undefined' && SAVED && SAVED.galley) galleyLoad(SAVED.galley);
+
+// ---- what you see on Deck 3 ----
+// Made when you arrive (after the deck is built, so the deck's unload frees it) and redrawn only when the
+// numbers change: food in the servery's five pans, rising with the portions and covered over when they're gone;
+// the grab shelf's rolls and wraps (when the shelf leaves them to us: galleyShelfRows);
+// dirty plates stacking in the dish pit's sink. Four instanced meshes, no shadows, never tapped.
+let GV = null;
+// the grab shelf's kit (section 4b, with `live` set) calls this instead of drawing its rolls and wraps: we draw
+// them from the stock. A function declaration, so it's there when the first deck is built at load.
+function galleyShelfRows(g, ys) { g.userData.live = ys; }
+function galleyVisuals() {
+  const it = t => ITEMS.find(x => x.t === t), V = { root: deckRoot, key: '' }, nope = () => {};
+  const im = (geo, mat, n, parent, cols) => {             // colours first: r128 sizes the colour buffer by the count
+    const m = new THREE.InstancedMesh(geo, mat, n); m.castShadow = false; m.receiveShadow = true; m.raycast = nope;
+    if (cols) cols.forEach((c, k) => m.setColorAt(k, c));
+    m.count = 0; m.frustumCulled = false; parent.add(m); return m;
+  };
+  const sv = it('Servery'), gs = it('Grab and go'), dp = it('Dish pit');
+  if (sv) {                                              // food in the pans (the pan colours), and steel covers over empty ones
+    V.food = im(new THREE.BoxGeometry(.42, 1, .28), std('#ffffff', .55), 5, sv.g, MESS.pans.map(m => m.color));
+    V.covers = im(new THREE.BoxGeometry(.47, .016, .33), std('#8e989f', .35, .5), 5, sv.g);   // over the whole pan, inside its rim
+  }
+  if (gs && gs.g.userData.live) {                        // rolls on the top shelf, wraps below: 8 places, one for every 2 items
+    V.grab = im(new THREE.SphereGeometry(1, 12, 8), std('#ffffff', .7), 8, gs.g, [...Array(8)].map((_, k) => (k < 4 ? MESS.food.bread : MESS.food.wrap).color));
+    const t = TALL.find(t => t.g === gs.g.parent);       // fade with the shelf when it would hide you
+    if (t) { V.grab.material.userData.base = { op: 1, tr: false }; t.mats.push(V.grab.material); }
+  }
+  if (dp) V.plates = im(new THREE.CylinderGeometry(.1, .1, .012, 16), std('#d9d3c4', .45, .05), 24, dp.g);
+  return V;
+}
+const _gm = new THREE.Matrix4(), _gq = new THREE.Quaternion(), _gsc = new THREE.Vector3(), _gpo = new THREE.Vector3();
+function galleyShow() {
+  if (!deckDef || deckDef.num !== 3) { GV = null; return; }
+  if (!GV || GV.root !== deckRoot) GV = galleyVisuals();
+  const S = SHIP.galley, p = S.servery.portions, g = Math.ceil(S.grab.items / 2), dirty = Math.min(24, Math.ceil(S.dirty / 3));
+  const key = p + '|' + g + '|' + dirty; if (key === GV.key) return; GV.key = key;
+  const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
+  if (GV.food) {
+    const h = .008 + .05 * Math.min(1, p / FOOD.serveryCap);   // from just over the pans' own food (top at .98) up
+    GV.food.count = p > 0 ? 5 : 0; GV.covers.count = p > 0 ? 0 : 5;
+    for (let k = 0; k < 5; k++) { put(GV.food, k, -1.2 + k * .6, .978 + h / 2, -.05, 1, h, 1); put(GV.covers, k, -1.2 + k * .6, .98, -.05, 1, 1, 1); }
+    GV.food.instanceMatrix.needsUpdate = GV.covers.instanceMatrix.needsUpdate = true;
+  }
+  if (GV.grab) {
+    GV.grab.count = Math.min(8, g);
+    const ys = GV.grab.parent.userData.live;          // the shelves' heights: wraps, then rolls
+    for (let k = 0; k < 8; k++) put(GV.grab, k, -.3 + (k % 4) * .2, (k < 4 ? ys[1] : ys[0]) + .05, .04, .08, .04, .05);
+    GV.grab.instanceMatrix.needsUpdate = true;
+  }
+  if (GV.plates) {
+    GV.plates.count = dirty;
+    for (let k = 0; k < 24; k++) put(GV.plates, k, k < 12 ? -.62 : -.28, .914 + (k % 12) * .014, .1, 1, 1, 1);
+    GV.plates.instanceMatrix.needsUpdate = true;
+  }
+}
+// once a frame from the main loop: the galley up to the minute, and on Deck 3, what it looks like
+function galleyTick() { galleyAdvance(shipNow()); galleyShow(); }
+
+// =====================================================================
 // 17. MACHINES & JOBS
 // The ship's machines, how they wear, and what that does to the ship and the people aboard. So far (0.33.x, B1)
 // it's data and logic only: nothing here draws anything or calls R().
@@ -8949,6 +9308,7 @@ function loop() {
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
   tickShip(dt);                                          // section 13: the ship's clock
+  galleyTick();                                          // section 16: the galley, on paper and on Deck 3
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
