@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.3
+   STARSHIP CADET: CSV Wren                            build 0.7.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1967,12 +1967,31 @@ const KIT = {
     box(w, .45, .06, ENG.console, 0, 1.08, -.31, g);
     return { w, d: .7 };
   },
+  // a coolant riser: a lagged pipe floor to deckhead with a valve wheel, a gauge, and a wisp of steam at a joint
+  coolantRiser(g) {
+    cyl(.16, .16, H, ENG.pipe, 0, H / 2, 0, g, 14);
+    for (const y of [.3, 1.4, 2.5]) cyl(.21, .21, .1, ENG.housing, 0, y, 0, g, 14);
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(.16, .025, 6, 18), WM.red); wheel.position.set(0, 1.15, .3); g.add(wheel);
+    box(.05, .05, .14, WM.steel, 0, 1.15, .22, g);
+    cyl(.07, .07, .04, M.trim, 0, 1.65, .19, g, 16).rotation.x = Math.PI / 2;
+    addSteam(g, 0, 2.55, .22);
+    return { w: .45, d: .45, tall: true };
+  },
 };
 // wall-mounted pieces: built against a wall, origin on the wall's inner face, front toward +z
 const WALL_KIT = {
   mimicPanel(g) {                                        // engine control's map of the ship's power
     box(3.1, 1.06, .04, M.slateDark, 0, 1.75, .02, g);
     const p = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.0), ENG.mimic); p.position.set(0, 1.75, .045); g.add(p);
+  },
+  heater(g) {                                            // a panel heater nobody needs, down here
+    box(.9, .55, .08, M.trim, 0, .45, .04, g);
+    for (let k = 0; k < 6; k++) box(.1, .5, .03, M.slate, -.375 + k * .15, .45, .095, g);
+    box(.9, .04, .1, M.slateDark, 0, .745, .05, g);
+  },
+  logShelf(g) {                                          // a short shelf of old engine logs in grey and gold binders
+    box(.8, .04, .24, M.wood, 0, 1.5, .12, g);
+    for (let k = 0; k < 8; k++) box(.07, .26 + (k % 3) * .02, .2, k % 3 ? WM.paintDark : WM.paintGold, -.32 + k * .08, 1.65 + (k % 3) * .01, .12, g);
   },
   trefoil(g) {                                           // a radiation sign
     box(.42, .42, .03, M.slateDark, 0, 1.6, .015, g);
@@ -3586,7 +3605,8 @@ DECKS[3] = {
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
 
 // =====================================================================
-// DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room, turn 3 the reactor and engine control)
+// DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room, turn 3 the reactor and engine control,
+// turn 4 the watch room, the lobby and the deck's warm light)
 // From plans/deck6-plan.html. The bottom of the ship: the engine room fills the flat stern, the reactor the bow,
 // with the foot of the spine, the overlook, engine control and the watch room between. No windows anywhere.
 // Engine room, engine control and the reactor are locked rooms you look into through glass.
@@ -3651,6 +3671,7 @@ DECKS[6] = {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  light: { sky: col('#ffd2a6'), sun: col('#ffc48c'), hemi: .8, sunI: .78 },   // warmer and dimmer than the decks above
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,18,7', 'w'], ['v,20,7', 'e']]) placeOnEdge('liftPanel', key, tw);
@@ -3679,6 +3700,18 @@ DECKS[6] = {
     placeWall('K', 'mimicPanel', 'n', 2.5, { hitW: 3.0, it: { t: 'Mimic panel', x: 'The whole ship\'s power on one board: the reactor, both junctions and a line up to every deck. Deck 3\'s line is amber; the galley ovens are drawing hard.', see: true } });
     // the reactor door at the end of the alcove: a radiation sign either side
     for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. Tier 4, and only ever on a team job.') });
+    // the watch room: two armchairs facing each other, the kettle in the corner (the junction hatch is beside it),
+    // a lamp, a panel heater nobody needs and a shelf of old engine logs
+    place('S', 'rug', 1, 1.5, 'n', { tex: rugLounge, w: 1.7, d: 2.6 });
+    place('S', 'armchair', .55, .55, 'n', { fab: M.mustard, it: IT('Armchair', 'The engine watch\'s chair. From here you can see the lobby through the door and hear the coils through the floor.') });
+    place('S', 'armchair', .55, 2.45, 's', { fab: M.mustard, it: IT('Armchair', 'Worn in exactly one place. Whoever has the night watch sits here.') });
+    place('S', 'dispenser', 1.55, .4, 'n', { it: IT('Kettle', 'Hot water on tap, a tin of tea and a mug for every Works tech who ever stood a watch. The power junction hatch is right behind it.') });
+    place('S', 'floorLamp', 1.6, 2.6, 'n', { light: true });
+    placeWall('S', 'heater', 's', 1.0, { hitW: 1.0, it: IT('Heater', 'Switched on, on the warmest deck in the ship. Nobody knows why; nobody turns it off.') });
+    placeWall('S', 'logShelf', 'w', .5, { hitW: .9, it: IT('Engine logs', 'Years of watch logs in grey and gold binders. One entry, underlined: QUIET NIGHT. COILS SANG.') });
+    // the lobby: coolant risers in its corners (steaming at a joint), and a bench facing the lift
+    for (const [x, z] of [[.35, .35], [5.65, .35], [.35, 9.65], [5.65, 9.65]]) place('+', 'coolantRiser', x, z, 'n', { it: IT('Coolant riser', 'Coolant on its way up from the reactor loop. Warm to the touch, and the reason this lobby never needs a heater.') });
+    place('+', 'bench', 2.5, 9.55, 's', { snug: true, it: IT('Bench', 'Warm, because everything down here is. People wait here for the lift and doze off.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
@@ -3712,6 +3745,8 @@ function applyLight(k) {
   hemi.color.copy(DAY.sky).lerp(NIGHT.sky, k); hemi.groundColor.copy(DAY.gnd).lerp(NIGHT.gnd, k);
   hemi.intensity = lerp(DAY.hemi, NIGHT.hemi, k);
   sun.color.copy(DAY.sun).lerp(NIGHT.sun, k); sun.intensity = lerp(DAY.sunI, NIGHT.sunI, k);
+  const ml = deckDef && deckDef.light;                   // a deck's own mood (Deck 6 runs warm and dim)
+  if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);

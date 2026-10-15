@@ -1,6 +1,6 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.3). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.4). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.7.3 (about 4,610 lines)
+## Current build: 0.7.4 (about 4,650 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -52,6 +52,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.7.1 | Step 6e, Deck 6, turn 1: the shell. `DECKS[6]` straight from plans/deck6-plan.html (36 × 12, `lift: [19, 6]`, seed 60661, `hazard`, no windows): lobby, overlook, watch room, the locked engine room, engine control and reactor seen through glass, sealed junctions and crawlways, plates, lift panels, the deck directory, the foot of the trunks and the bottom of the ladder behind glass. No new kit or engine changes. Deck 4 ALL IDENTICAL against 0.7.0. |
 | 0.7.2 | Deck 6, turn 2: the engine room, seen through the overlook glass: the drive housing across the stern with its glowing mouth, three drive coils down the middle (copper windings, a cage, a core whose glow breathes, one coil after another), copper feeds between them, catwalks either side and a landing by the stair door. The overlook gets a rail along the window, two benches facing the coils and the first-week board. New engine list `PULSES` (glow on the game clock). New kit `driveCoil`, `driveHousing`, `pipeRun`, `catwalk`, `overlookRail`; materials `ENG`. Deck 4 ALL IDENTICAL. |
 | 0.7.3 | Deck 6, turn 3: the reactor (a ribbed shield drum with glowing ports, the core showing through a ring on top, conduits, and the coolant loop on stands with spokes to the drum; its green glow breathes slowly) and engine control (the board along the reactor window, two chairs, the mimic panel of the ship's power). Radiation signs either side of the reactor door. New kit `reactorDrum`, `controlBoard`; wall kit `mimicPanel`, `trefoil`; `ENG.mimic` and `ENG.trefoil` are canvas panels drawn at load (no `R()`). Deck 4 ALL IDENTICAL. |
+| 0.7.4 | Deck 6, turn 4: the watch room (two mustard armchairs on a rug, the kettle by the junction hatch, a real lamp, a panel heater, a shelf of engine logs), coolant risers with valve wheels and steam in the lobby's corners, a bench facing the lift, and Deck 6's mood lighting (`light` in a deck definition tints the hemisphere and sun; Deck 6 runs warm and dim). Deck 6 done. Decks 3, 4 and 5 pixel-identical to 0.7.0, day and night. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -356,7 +357,9 @@ They checked:
     2. **The engine room (done, 0.7.2).** Room-local, `E` is 10 × 12 with the stern hull at x 0. Drive housing at (.55, 6) against the stern (`'w'`, 8.6 long); coils at x 2.6, 5.1, 7.6 on z 6, phases 0, −2.1, −4.2; copper feeds at y 2.4 between housing and coils; catwalks at z 3.1 and 8.9 (8.4 long) and a cross landing at x 9.35 by the stair door (`v,12,5`). All `see` taps. Overlook `O`: rails at x .2 either side of the stair door, benches at (2.3, 2.5) and (2.3, 7.5) facing the window.
         - **`PULSES`** (new): `{ m, key, base, amp, w, ph }`; the main loop sets `m[key] = base + amp * (.5 + .5 sin(t w + ph))`. Reset with each deck, like `SPINS`. Pulsing materials are made in the kit at dress time (owned by the deck, freed on unload), so each coil has its own phase. Don't pulse a material that a fading tall piece clones: `E` is `NO_FADE`, so its pieces never get cloned.
     3. **The reactor and engine control (done, 0.7.3).** Reactor `R` (room-local 9 × 12): `reactorDrum` at (4.4, 6), loop radius 3.0. Engine control `K` (5 × 4): `controlBoard` at (4.45, 2) against the reactor glass (`'e'`), chairs at x 3.4 facing it, `mimicPanel` on the north wall at 2.5. `trefoil` signs on `h,26,3` and `h,26,4`, in the alcove by the reactor door.
-    4. The watch room, lobby dressing and Deck 6's mood lighting. Then the deck review.
+    4. **The watch room, lobby and mood lighting (done, 0.7.4).** Watch room `S` (2 × 3): armchairs at (.55, .55) and (.55, 2.45) facing each other, the kettle (`dispenser`) at (1.55, .4), a lamp (the deck's one real lamp) at (1.6, 2.6); tiles (0, 1) (the door) and (1, 1) (in front of the junction hatch) stay clear. Lobby: `coolantRiser` in its four corners, a bench at (2.5, 9.55).
+        - **Mood lighting** (new): a deck definition may carry `light: { sky, sun, hemi, sunI }`. `applyLight` multiplies the hemisphere and sun colours by `sky` and `sun` and their intensities by `hemi` and `sunI`, after the day–night blend. Only uniforms change, so no shader recompiles; decks without `light` run exactly the old code. Deck 6: `sky #ffd2a6`, `sun #ffc48c`, `hemi .8`, `sunI .78`.
+    - **Deck 6 is done and waiting for the user's review** (0.7.4).
 - **Deck 1's empty shell draws 593 calls.** Bring that down before dressing it, without changing the hull output on Decks 3, 4 and 5.
 - **Plans:**
     - plans/deck6-plan.html and plans/deck1-plan.html are agreed.
