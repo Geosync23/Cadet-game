@@ -9845,6 +9845,8 @@ function placeSpot(id) {
 // and day); then the place itself (poseOf, 8b). Collisions and taps use the place's plain pose (spot.pose).
 const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null };
 const SIT_ABOUT = new Set(['lounge-seat', 'common-room', 'bench']);
+// the pose with what's held: '+cart', '+cartfull' or '+carry' after it (the crowd's held things, 8b)
+const heldPose = a => a.hold ? a.pose + '+' + a.hold : a.pose;
 function crewPose(a) {
   const sp = a.spot, pl = PLACE_OF.get(sp.id), base = sp.pose;
   if (typeof CROWD_ANIMS === 'undefined') return base;
@@ -9897,10 +9899,11 @@ class CrewAgent {
   }
   update(dt, now, N) {
     const w = whereIs(this.p, now);
+    this.hold = w && w.hold || null;                      // something in hand: a hover cart on a run (section 17's whereIs)
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, this.pose); return true;
+      this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N) goalId = '@lift';
@@ -9928,7 +9931,7 @@ class CrewAgent {
     // stuck: meant to be going somewhere and not getting there (in ship minutes)
     const going = this.path.length > 0 || (this.spot && !this.settled);
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, this.pose);
+    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
@@ -9959,7 +9962,7 @@ function crewDetail() {                                  // who gets a full rig:
     const want = near.includes(a);
     if (want === !!a.h.full) continue;
     a.remove(); a.h = want ? new FullPerson(rosterSpec(a.p), a.p.id) : crowd.add(rosterSpec(a.p));
-    a.h.set({ x: a.x, y: a.y, z: a.z }, a.face, a.pose);
+    a.h.set({ x: a.x, y: a.y, z: a.z }, a.face, heldPose(a));
   }
 }
 // placeBusy(id): is someone settled at that place on this deck? A Set rebuilt once a frame, so it's a cheap lookup
