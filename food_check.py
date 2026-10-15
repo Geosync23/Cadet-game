@@ -8,7 +8,8 @@
 #   the rota: a chef up by 04:45 and at the stoves by 05:00, an early and a late hand every day, no station
 #   held by two people at once
 #   the same start gives the same days, and the live galley (galleyAdvance) matches the report
-#   on Deck 3: food in the pans while serving, covers when they're empty, takePortion, draw calls under BUDGET
+#   on Deck 3: food in the pans while serving, covers when they're empty, the grab shelf's stock (when the shelf is
+#   live), takePortion, draw calls under BUDGET
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
 # Setup and environment as for cadet_test.py.
 # Run:  python3 food_check.py BUILD.html [DAY] [DAYS]     (DAY defaults to 1, DAYS to 7)
@@ -80,9 +81,10 @@ with sync_playwright() as pw:
     for t, name in [(6 * 60 + 30, '06:30'), (9 * 60, '09:00'), (18 * 60, '18:00')]:
         g.ev(f"setShipNow({B} + {t}); deckCrewFill()")
         g.step(3)
-        vis[name] = g.ev("({ calls: renderer.info.render.calls, p: SHIP.galley.servery.portions, dirty: SHIP.galley.dirty, food: GV && GV.food ? GV.food.count : -1, covers: GV && GV.covers ? GV.covers.count : -1, plates: GV && GV.plates ? GV.plates.count : -1, text: galleyText() })")
+        vis[name] = g.ev("({ calls: renderer.info.render.calls, p: SHIP.galley.servery.portions, dirty: SHIP.galley.dirty, food: GV && GV.food ? GV.food.count : -1, covers: GV && GV.covers ? GV.covers.count : -1, plates: GV && GV.plates ? GV.plates.count : -1, grab: SHIP.galley.grab.items, shelf: GV && GV.grab ? GV.grab.count : -1, text: galleyText() })")
         print(f"Deck 3 at {name}: {vis[name]}")
         if vis[name]['calls'] > BUDGET: fail(f"{name}: {vis[name]['calls']} draw calls")
+        if vis[name]['shelf'] >= 0 and vis[name]['shelf'] != min(8, -(-vis[name]['grab'] // 2)): fail(f"{name}: grab shelf shows {vis[name]['shelf']} for {vis[name]['grab']} items")
         if vis[name]['p'] > 0 and vis[name]['food'] != 5 or vis[name]['p'] == 0 and vis[name]['covers'] != 5: fail(f"{name}: pans don't match the servery")
     eat = g.ev(f"(() => {{ setShipNow({B} + 6 * 60 + 40); const a = galleyAdvance(shipNow()).servery.portions, ok = takePortion('player'); return [a, ok, SHIP.galley.servery.portions]; }})()")
     print('The player eats at 06:40:', eat)
