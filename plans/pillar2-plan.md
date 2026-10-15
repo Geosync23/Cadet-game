@@ -60,7 +60,7 @@ The owner of each may refine its details, but must tell the lead and keep the ot
 
 ### Activities on places (A1, A2, A5)
 
-- **A place may carry `anim`**: what someone does there. The values are `run`, `lift`, `call`, `browse`, `pay`, `play`, `water`, `cook`, `wash`, `fold`, `drink`, `read` and `talk`.
+- **A place may carry `anim`**: what someone does there. The values are `run`, `row`, `lift`, `call`, `browse`, `pay`, `play`, `water`, `cook`, `wash`, `fold`, `drink`, `read` and `talk`.
 - **Without `anim`,** the activity comes from the type:
   - `gym` → `lift`
   - `callhome` → `call`
@@ -70,7 +70,7 @@ The owner of each may refine its details, but must tell the lead and keep the ot
   - `laundry` → `fold`
   - `work:galley` → `cook`
   - The dish pit is `wash`.
-- **The treadmill** is a new place type `gym` with `anim: 'run'`.
+- **The gym** already has three treadmills (3-gym-1 to 3-gym-3) and a rower (3-gym-4). They get `anim: 'run'` and `anim: 'row'`. The treadmill's belt scrolls and its console lights up while someone is on it (the Deck 6 architect's kit, driven by an occupancy hook).
 - **The crowd and full rigs** take the activity as a pose: `handle.set(pos, face, pose, walkPhase)`, where `pose` may be any `anim` value as well as `walk`, `stand`, `sit`, `lie` and `work`. Unknown poses fall back to `stand`.
 - **Props** (a phone receiver, a basket, a watering can, a pan): drawn by the crowd, kept cheap, and optional per pose.
 - **New places** can carry an optional `y`. They're added by the architects, never by anyone else.
