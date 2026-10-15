@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.31.1
+   STARSHIP CADET: CSV Wren                            build 0.31.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1785,13 +1785,18 @@ const KIT = {
     for (let k = 0; k < 5; k++) cyl(.04, .035, .06, MESS.white, .72, .93 + k * .045, .12, g, 12);
     return { w: 1.6, d: .6 };
   },
-  grabShelf(g) {                                         // open chiller: rolls, fruit and juice for anyone running late
+  // open chiller: rolls, fruit and juice for anyone running late. With o.live (Deck 3), the wraps and rolls rows (k = 2, 3) are
+  // handed to the galley's galleyShelfRows(g, ys) when section 16 defines it (a function declaration, so it exists at load),
+  // and drawn from its stock there; without it they're drawn as before.
+  grabShelf(g, o = {}) {
     for (const x of [-.43, .43]) box(.04, 1.85, .6, M.slateDark, x, .925, 0, g);
     box(.9, .06, .6, M.slateDark, 0, 1.82, 0, g); box(.86, 1.7, .03, MESS.chill, 0, .95, -.28, g);
     box(.9, .14, .6, M.slateDark, 0, .07, 0, g);
     const F = MESS.food;
+    const live = o.live && typeof galleyShelfRows === 'function';
     for (let k = 0; k < 4; k++) {
       const y = .35 + k * .38; box(.82, .02, .5, M.metal, 0, y, 0, g);
+      if (live && k >= 2) continue;
       for (let q = 0; q < 4; q++) {
         const x = -.3 + q * .2;
         if (k === 0) cyl(.035, .035, .16, MESS.juice[q % 3], x, y + .09, .05, g, 10);
@@ -1800,6 +1805,7 @@ const KIT = {
       }
     }
     box(.86, .12, .04, MESS.heat, 0, 1.68, .29, g);
+    if (live) galleyShelfRows(g, [.35 + 2 * .38, .35 + 3 * .38]);   // shelf heights of the wraps and rolls rows, in the shelf's own frame
     return { w: .9, d: .6, tall: true };
   },
   // ---- the galley ----
@@ -3835,7 +3841,7 @@ DECKS[3] = {
     { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
     { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
-    { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', room: 'F' },
+    { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', room: 'F' },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
     { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', room: 'F' },
     { id: '3-gym-7', type: 'gym', at: [23, 15], xy: [23.85, 15.6], walk: [23, 15], face: 's', pose: 'lie', room: 'F' },
@@ -3846,9 +3852,9 @@ DECKS[3] = {
     { id: '3-shop-3', type: 'shop', at: [32, 18], xy: [32.96, 18.8], walk: [33, 18], face: 'w', pose: 'stand', anim: 'browse', room: 'S' },
     { id: '3-shop-4', type: 'shop', at: [35, 17], xy: [35.04, 17.4], walk: [34, 17], face: 'e', pose: 'stand', anim: 'browse', room: 'S' },
     { id: '3-shop-5', type: 'shop', at: [35, 18], xy: [35.04, 18.8], walk: [34, 18], face: 'e', pose: 'stand', anim: 'browse', room: 'S' },
-    { id: '3-store-1', type: 'work:store', at: [34, 15], xy: [34.85, 15.5], walk: [34, 15], face: 'e', pose: 'stand', room: 'S' },
+    { id: '3-store-1', type: 'work:store', at: [35, 14], xy: [35.55, 14.85], walk: [35, 14], face: 'w', pose: 'stand', room: 'S' },   // behind the till
     { id: '3-shop-6', type: 'shop', at: [34, 20], xy: [34, 20.85], walk: [34, 20], face: 's', pose: 'stand', anim: 'browse', room: 'S' },
-    { id: '3-shop-7', type: 'shop', at: [34, 14], xy: [34.85, 14.85], walk: [34, 14], face: 'e', pose: 'stand', anim: 'pay', room: 'S' },   // the till (A5b)
+    { id: '3-shop-7', type: 'shop', at: [34, 14], xy: [34.15, 14.85], walk: [34, 14], face: 'e', pose: 'stand', anim: 'pay', room: 'S' },   // paying at the till (A5b)
     { id: '3-shop-8', type: 'shop', at: [32, 14], xy: [32.4, 14.25], walk: [32, 14], face: 'n', pose: 'stand', anim: 'browse', room: 'S' },   // taking a basket by the door
     { id: '3-gym-10', type: 'gym', at: [31, 14], xy: [31.5, 14.05], walk: [31, 14], face: 'n', pose: 'stand', anim: 'drink', room: 'F' },   // the water dispenser
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', anim: 'call', room: 'B' },
@@ -3904,7 +3910,7 @@ DECKS[3] = {
     place('M', 'trayReturn', 11.62, 2.5, 'e', { it: IT('Tray return', 'Trays in, cups on top, cutlery in the bin. Chef Brennan notices who doesn\'t.') });
     place('M', 'trayStack', 11.65, 3.5, 'e', { it: IT('Trays and cutlery', 'The start of the line. Take a tray, take a fork, keep moving.') });
     place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 08:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
-    place('M', 'grabShelf', 11.6, 7.5, 'e', { it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
+    place('M', 'grabShelf', 11.6, 7.5, 'e', { live: true, it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
     placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 08:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
     placeWall('M', 'notices', 'w', 4.5, { hitW: 1.0, it: IT('Mess notices', 'This week\'s birthdays, the galley rota, and a polite note about taking mugs back to the mess.') });
     for (const x of [.45, 5.0]) place('M', 'plant', x, .45, 'n', { band: '#c86b4a' });   // under the windows, out of the aisles
@@ -4031,8 +4037,9 @@ DECKS[3] = {
     // ---- crew store: shelves both sides, the counter, a fridge of drinks at the back, and the window display ----
     for (const z of [3.0, 4.4, 5.8]) place('S', 'shopShelf', .31, z, 'w', { fadeGroup: 'S:w', it: z === 4.4 ? IT('Shelves', 'Toothpaste, socks, snacks, birthday cards and batteries, in no order anyone has worked out.') : undefined });
     for (const z of [4.4, 5.8]) place('S', 'shopShelf', 3.69, z, 'e', { fadeGroup: 'S:e' });
-    place('S', 'counter', 3.6, 2.5, 'e', { it: IT('Counter', 'Scan your badge and take it. The honesty box is for things that won\'t scan.') });
-    place('S', 'till', 3.6, 1.85, 'e', { it: IT('Till', 'Tap your badge on the pad and the screen thanks you by name. It has never once been wrong about the price of socks.') });   // A5b
+    // the counter stands out from the east wall, so whoever's on the till stands behind it (0.31.2: the store is staffed)
+    place('S', 'counter', 2.85, 2.5, 'e', { it: IT('Counter', 'Whoever\'s on the counter scans your badge. The honesty box is for the hours nobody is.') });
+    place('S', 'till', 2.85, 1.85, 'e', { it: IT('Till', 'The storekeeper taps your badge on the pad and the screen thanks you by name. It has never once been wrong about the price of socks.') });   // A5b
     place('S', 'basketStack', .4, .5, 'n', { it: IT('Baskets', 'Wire baskets in department colours. Take one, fill it, pay at the till.') });
     place('S', 'drinksFridge', 2.0, 8.55, 's', { it: IT('Drinks fridge', 'Fizzy drinks in colours not found in nature. The orange one sells out first.') });
     place('S', 'shopDisplay', 2.5, .5, 'n', { it: IT('Window display', 'This week: new socks in department colours, and a single, expensive jar of real honey.') });
@@ -5484,7 +5491,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.31.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.31.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
