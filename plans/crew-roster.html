@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: the crew</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header,main,.bar{max-width:1100px;margin:0 auto;padding:0 16px}
+header{padding-top:16px}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13.5px;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.summary{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:12px 0;font-size:13.5px;line-height:1.55;color:#cfd9dc}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.bar a{color:#bdeee6;font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--glass)}
+.bar input[type=search]{flex:1 1 180px;min-width:0;font:inherit;font-size:13.5px;color:var(--ink);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:7px 12px}
+.bar label{font-size:13px;color:var(--muted)}
+h2{font-size:17px;font-weight:600;margin:22px 0 2px}
+h2 .n{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:6px}
+.blurb{font-size:13px;color:var(--muted);margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.p{position:relative;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 12px 10px 26px;font-size:13px;line-height:1.45}
+.dot{position:absolute;left:10px;top:15px;width:9px;height:9px;border-radius:50%}
+.who b{font-size:14.5px;color:#eef3f1}
+.role{display:block;color:var(--muted);font-size:12.5px}
+.b{display:inline-block;font-size:11px;border-radius:999px;padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
+.b.story{background:rgba(76,195,181,.18);color:#bdeee6;border:1px solid rgba(76,195,181,.5)}
+.b.prov{background:rgba(233,196,106,.14);color:#f0d88e;border:1px dashed rgba(233,196,106,.7)}
+.b.night{background:rgba(122,143,208,.18);color:#c3cff2;border:1px solid rgba(122,143,208,.5)}
+.b.you{background:rgba(214,165,58,.2);color:#f3d58f;border:1px solid rgba(214,165,58,.6)}
+.bio{margin:6px 0;color:#dfe7e9}
+dl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0}
+dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+dd{margin:0;color:#cfd9dc}
+.more{margin:7px 0 0;color:var(--muted);font-size:12.5px}
+.tr{font-style:italic}
+.hide{display:none}
+footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>The crew of the CSV Wren</h1>
+  <p class="sub">Everyone aboard, for Pillar 1 of the Living Ship. Grouped by department, most senior first. Each card shows when they work, their days off, where they sleep and where they work. Names marked <span class="b prov">Provisional name</span> are first ideas and can still change. <span class="b story">Story crew</span> are the hand-written characters. The coloured dot is their uniform: red for command, gold for operations, blue-green for sciences.</p>
+  <div class="summary"><b>75 crew</b>, you included, plus Envoy Saruth as a guest. 1 Captain, 1 Executive Officer, 4 Department Chiefs, 6 Senior Officers, 16 Officers and 47 Junior Officers. 60 work days and 15 work nights. Everyone has two days off in a row, staggered round the week so every department always has people on. Beds: 12 in the senior quarters on Deck 2, 16 in officers' cabins on Deck 4 and 47 in the junior bunk rooms on Deck 4 (eight rooms of six berths, with one spare berth in Bunk 1).</div>
+</header>
+<div class="bar"><a href="#command">Command</a> <a href="#helm">Helm</a> <a href="#comms">Comms</a> <a href="#works">Works</a> <a href="#watch">Watch</a> <a href="#survey">Survey</a> <a href="#infirmary">Infirmary</a> <a href="#galley">Galley</a> <a href="#guest">Guests</a></div>
+<div class="bar"><input id="q" type="search" placeholder="Find someone: a name, a job, a word" aria-label="Find someone"><label><input id="nights" type="checkbox"> Night shift only</label></div>
+<main>
+<section class="dept" id="command"><h2>Command <span class="n">4 people</span></h2><p class="blurb">The bridge: the Captain, the Executive Officer and the officers who run the ship.</p><div class="grid">
+<article class="p" data-text="captain odile marrow captain calm, fair, and always testing you with questions." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Captain Odile Marrow</b> <span class="b story">Story crew</span><span class="role">Captain</span></div>
+  <p class="bio">Calm, fair, and always testing you with questions.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 2, the Captain&#x27;s quarters</dd></div><div><dt>Works</dt><dd>the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Plays the grand piano in the music room late on Thursdays. Has commanded the Wren for six years and knows every captain in her portrait gallery by name. <span class="tr">Patient, curious, quietly funny.</span></p></article>
+<article class="p" data-text="commander teo vance executive officer by the book. every page of it." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Commander Teo Vance</b> <span class="b story">Story crew</span><span class="role">Executive Officer</span></div>
+  <p class="bio">By the book. Every page of it.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room X</dd></div><div><dt>Works</dt><dd>the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Top of the rowing leaderboard in the gym, and taped the leaderboard there himself. Keeps the waiting list for the good records. Has two messages from home waiting. <span class="tr">Precise, competitive, loyal.</span></p></article>
+<article class="p" data-text="anja kowalczyk second officer second officer. runs the bridge at night, when the ship is hers." data-shift="night"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Anja Kowalczyk</b> <span class="b prov">Provisional name</span> <span class="b night">Night shift</span><span class="role">Second Officer, Senior Officer</span></div>
+  <p class="bio">Second Officer. Runs the bridge at night, when the ship is hers.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room S</dd></div><div><dt>Works</dt><dd>the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Third in command, and first to be woken. Reads old paper novels on the bridge during quiet nights. <span class="tr">Steady, private, wry.</span></p></article>
+<article class="p" data-text="oona zielinski operations officer keeps the bridge&#x27;s boards honest, one status light at a time." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Oona Zielinski</b><span class="role">Operations officer</span></div>
+  <p class="bio">Keeps the bridge&#x27;s boards honest, one status light at a time.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-09</dd></div><div><dt>Works</dt><dd>the ops console, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Ran a market stall on Marra Station before joining up. Has a parent who served on the Wren years ago. <span class="tr">Meticulous, sarcastic.</span></p></article>
+</div></section>
+<section class="dept" id="helm"><h2>Helm <span class="n">5 people</span></h2><p class="blurb">They fly the Wren, from the helm on the bridge.</p><div class="grid">
+<article class="p" data-text="dev raman senior helm officer senior helm officer. flies the wren like it might spill." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Dev Raman</b> <span class="b prov">Provisional name</span><span class="role">Senior Helm Officer, Senior Officer</span></div>
+  <p class="bio">Senior Helm Officer. Flies the Wren like it might spill.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room H</dd></div><div><dt>Works</dt><dd>the helm, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Keeps a model of the Wren on the shelf by his door. Has flown survey ships for twenty years. <span class="tr">Careful, proud, gentle.</span></p></article>
+<article class="p" data-text="hugo janssen helm officer flies the night watch with one hand on the helm and one on a cup of tea." data-shift="night"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Hugo Janssen</b> <span class="b night">Night shift</span><span class="role">Helm officer</span></div>
+  <p class="bio">Flies the night watch with one hand on the helm and one on a cup of tea.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-11</dd></div><div><dt>Works</dt><dd>the helm, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Keeps a cactus called Gerald on the windowsill. Grows herbs for the galley. <span class="tr">Curious, kind.</span></p></article>
+<article class="p" data-text="isak lindqvist helm officer can feel a drift in the wren&#x27;s course before the console shows it." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Isak Lindqvist</b><span class="role">Helm officer</span></div>
+  <p class="bio">Can feel a drift in the Wren&#x27;s course before the console shows it.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-06</dd></div><div><dt>Works</dt><dd>the helm, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Is learning the guitar, badly. Is training for the gym&#x27;s rowing leaderboard. <span class="tr">Restless, stubborn.</span></p></article>
+<article class="p" data-text="sol bakshi helm rating plots courses for fun on rest days." data-shift="night"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Sol Bakshi</b> <span class="b night">Night shift</span><span class="role">Helm rating, Junior Officer</span></div>
+  <p class="bio">Plots courses for fun on rest days.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 1 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the helm, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Paints tiny portraits of the crew. Grew up on Lisk, and misses the rain. <span class="tr">Easygoing, gentle.</span></p></article>
+<article class="p" data-text="erik strand helm rating learning the helm one watch at a time." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Erik Strand</b><span class="role">Helm rating, Junior Officer</span></div>
+  <p class="bio">Learning the helm one watch at a time.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 6</dd></div><div><dt>Works</dt><dd>the helm, on the bridge (Deck 1)</dd></div></dl>
+  <p class="more">Paints tiny portraits of the crew. Writes poetry and shows nobody. <span class="tr">Optimistic, restless.</span></p></article>
+</div></section>
+<section class="dept" id="comms"><h2>Comms <span class="n">5 people</span></h2><p class="blurb">Every message in and out of the ship, from the comms room on Deck 2 and the bridge.</p><div class="grid">
+<article class="p" data-text="lucia ferreira comms chief comms chief. every message home passes through her hands, and she never reads them." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Lucia Ferreira</b> <span class="b prov">Provisional name</span><span class="role">Comms Chief, Senior Officer</span></div>
+  <p class="bio">Comms Chief. Every message home passes through her hands, and she never reads them.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room R</dd></div><div><dt>Works</dt><dd>comms (Deck 2)</dd></div></dl>
+  <p class="more">Hangs a headset on her door handle, just in case. Speaks four languages and some Veyli. <span class="tr">Sociable, discreet, quick.</span></p></article>
+<article class="p" data-text="olu farouk comms officer hears every voice on the ship&#x27;s channels, and remembers most of them." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Olu Farouk</b><span class="role">Comms officer</span></div>
+  <p class="bio">Hears every voice on the ship&#x27;s channels, and remembers most of them.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-10</dd></div><div><dt>Works</dt><dd>comms (Deck 2)</dd></div></dl>
+  <p class="more">Knows the lyrics to every song in the record cabinet. Ran a market stall on Lisk before joining up. <span class="tr">Quiet, kind.</span></p></article>
+<article class="p" data-text="wen takahashi comms officer can tune a signal out of static like picking a lock." data-shift="night"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Wen Takahashi</b> <span class="b night">Night shift</span><span class="role">Comms officer</span></div>
+  <p class="bio">Can tune a signal out of static like picking a lock.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-12</dd></div><div><dt>Works</dt><dd>comms (Deck 1)</dd></div></dl>
+  <p class="more">Knows the lyrics to every song in the record cabinet. Keeps a journal of every star they have seen. <span class="tr">Blunt, practical.</span></p></article>
+<article class="p" data-text="zofia santos comms rating sorts the ship&#x27;s messages, and sneaks a look at the gossip." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Zofia Santos</b><span class="role">Comms rating, Junior Officer</span></div>
+  <p class="bio">Sorts the ship&#x27;s messages, and sneaks a look at the gossip.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 3</dd></div><div><dt>Works</dt><dd>comms (Deck 2)</dd></div></dl>
+  <p class="more">Ran a market stall on Hesper Dock before joining up. Is training for the gym&#x27;s rowing leaderboard. <span class="tr">Easygoing, ambitious.</span></p></article>
+<article class="p" data-text="chloe tran comms rating sorts the ship&#x27;s messages, and sneaks a look at the gossip." data-shift="day"><i class="dot" style="background:#b4453f"></i>
+  <div class="who"><b>Chloe Tran</b><span class="role">Comms rating, Junior Officer</span></div>
+  <p class="bio">Sorts the ship&#x27;s messages, and sneaks a look at the gossip.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 4</dd></div><div><dt>Works</dt><dd>comms (Deck 2)</dd></div></dl>
+  <p class="more">Bakes on rest days, if Brennan allows it. Is quietly in charge of the lost-property box. <span class="tr">Reliable, dry humour.</span></p></article>
+</div></section>
+<section class="dept" id="works"><h2>Works <span class="n">25 people</span></h2><p class="blurb">Your department: they keep every machine running, from the Works bay on Deck 5 and the engine room on Deck 6.</p><div class="grid">
+<article class="p" data-text="chief ines calder head of works head of works. remembers every repair you got wrong, and every one you got right." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Chief Ines Calder</b> <span class="b story">Story crew</span> <span class="b prov">Provisional name</span><span class="role">Head of Works, Department Chief</span></div>
+  <p class="bio">Head of Works. Remembers every repair you got wrong, and every one you got right.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room O</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard. Keeps a battered toolbox that belonged to her first chief. <span class="tr">Exacting, fair, dry.</span></p></article>
+<article class="p" data-text="emeka halloran works systems officer keeps the works bay&#x27;s day running, and the job board tidy." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Emeka Halloran</b><span class="role">Works systems officer</span></div>
+  <p class="bio">Keeps the Works bay&#x27;s day running, and the job board tidy.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-13</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Tells terrible jokes at breakfast. Bakes on rest days, if Brennan allows it. <span class="tr">Kind, loyal.</span></p></article>
+<article class="p" data-text="mateo navarro works systems officer keeps the works bay&#x27;s day running, and the job board tidy." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Mateo Navarro</b> <span class="b night">Night shift</span><span class="role">Works systems officer</span></div>
+  <p class="bio">Keeps the Works bay&#x27;s day running, and the job board tidy.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-15</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Is quietly in charge of the lost-property box. Has a twin on another survey ship. <span class="tr">Reliable, sharp-eyed.</span></p></article>
+<article class="p" data-text="alejandro reyes engine officer knows the drive coils&#x27; moods better than anyone&#x27;s." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Alejandro Reyes</b> <span class="b night">Night shift</span><span class="role">Engine officer</span></div>
+  <p class="bio">Knows the drive coils&#x27; moods better than anyone&#x27;s.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-16</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Has a cat back home on Port Halloran, and talks about it a lot. Writes letters home to Lisk every rest day, on paper. <span class="tr">Restless, nervous.</span></p></article>
+<article class="p" data-text="zeke torres engine officer knows the drive coils&#x27; moods better than anyone&#x27;s." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Zeke Torres</b><span class="role">Engine officer</span></div>
+  <p class="bio">Knows the drive coils&#x27; moods better than anyone&#x27;s.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-14</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Knows the lyrics to every song in the record cabinet. Knits scarves for anyone who stands still long enough. <span class="tr">Curious, ambitious.</span></p></article>
+<article class="p" data-text="you works technician (you) new aboard, a junior technician in works. your bunk is in bunk 1, with tomas." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>You</b> <span class="b you">You</span><span class="role">Works technician (you), Junior Officer</span></div>
+  <p class="bio">New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 2</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more"> <span class="tr"></span></p></article>
+<article class="p" data-text="asha amadi engine technician tends the coils on the long engine watch." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Asha Amadi</b><span class="role">Engine technician, Junior Officer</span></div>
+  <p class="bio">Tends the coils on the long engine watch.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 2</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Sings in the shower; the whole washroom knows. Climbs the garden&#x27;s big tree when nobody is looking. <span class="tr">Dry humour, optimistic.</span></p></article>
+<article class="p" data-text="leila eklund works technician new to works, eager, and already covered in grease." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Leila Eklund</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">New to Works, eager, and already covered in grease.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 3</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Collects old maps of Hesper Dock. Sends voice messages to a grandmother on Kesh. <span class="tr">Dry humour, meticulous.</span></p></article>
+<article class="p" data-text="yara esposito works technician a steady pair of hands on the job board." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Yara Esposito</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">A steady pair of hands on the job board.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 4</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Keeps a cactus called Gerald on the windowsill. Keeps a journal of every star they have seen. <span class="tr">Dry humour, kind.</span></p></article>
+<article class="p" data-text="ravi hart works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Ravi Hart</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Good with filters, bad with mornings.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 5</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Draws comics about life aboard and pins them in the common room. Keeps fish back home on Valo. <span class="tr">Stubborn, gentle.</span></p></article>
+<article class="p" data-text="orla ishikawa works technician fixes lamps, ovens and washers, and grumbles about all three." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Orla Ishikawa</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Fixes lamps, ovens and washers, and grumbles about all three.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 6</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Sings in the shower; the whole washroom knows. Grows herbs for the galley. <span class="tr">Loyal, kind.</span></p></article>
+<article class="p" data-text="petra jovanovic engine technician tends the coils on the long engine watch." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Petra Jovanovic</b> <span class="b night">Night shift</span><span class="role">Engine technician, Junior Officer</span></div>
+  <p class="bio">Tends the coils on the long engine watch.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 3 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Got married just before the tour and counts the days. Grew up on Valo, and misses the rain. <span class="tr">Nervous, reliable.</span></p></article>
+<article class="p" data-text="davi keane engine technician keeps the engine room clean enough to eat in." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Davi Keane</b> <span class="b night">Night shift</span><span class="role">Engine technician, Junior Officer</span></div>
+  <p class="bio">Keeps the engine room clean enough to eat in.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 2 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Sends voice messages to a grandmother on Kesh. Is secretly afraid of the lift. <span class="tr">Cheerful, reliable.</span></p></article>
+<article class="p" data-text="zainab kovac works technician can strip a scrubber in ten minutes flat." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Zainab Kovac</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Can strip a scrubber in ten minutes flat.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 1</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Knits scarves for anyone who stands still long enough. Is secretly afraid of the lift. <span class="tr">Meticulous, shy.</span></p></article>
+<article class="p" data-text="signe moreau works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Signe Moreau</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Good with filters, bad with mornings.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 3</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Is training for the gym&#x27;s rowing leaderboard. Reads mystery novels and guesses the ending too early. <span class="tr">Stubborn, sharp-eyed.</span></p></article>
+<article class="p" data-text="imani o&#x27;neill works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Imani O&#x27;Neill</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Good with filters, bad with mornings.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 4</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Paints tiny portraits of the crew. Makes a playlist for every week of the tour. <span class="tr">Dry humour, cheerful.</span></p></article>
+<article class="p" data-text="pell okafor works technician works, like you, and two years ahead. can fix anything except his sleep schedule." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Pell Okafor</b> <span class="b story">Story crew</span><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Works, like you, and two years ahead. Can fix anything except his sleep schedule.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 2</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Talks in his sleep, mostly about engines. Has three messages from his mum waiting. <span class="tr">Easygoing, handy, chatty.</span></p></article>
+<article class="p" data-text="ilse quist works technician new to works, eager, and already covered in grease." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Ilse Quist</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">New to Works, eager, and already covered in grease.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 5</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Grows herbs for the galley. Reads mystery novels and guesses the ending too early. <span class="tr">Dreamy, dry humour.</span></p></article>
+<article class="p" data-text="farah rahman works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Farah Rahman</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Good with filters, bad with mornings.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 6</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Is saving up for a boat on Hesper Dock. Keeps a journal of every star they have seen. <span class="tr">Stubborn, restless.</span></p></article>
+<article class="p" data-text="femi rossi works technician new to works, eager, and already covered in grease." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Femi Rossi</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">New to Works, eager, and already covered in grease.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 1</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Brought a telescope from home. Is learning Veyli from a phrasebook. <span class="tr">Optimistic, competitive.</span></p></article>
+<article class="p" data-text="saad salo engine technician keeps the engine room clean enough to eat in." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Saad Salo</b><span class="role">Engine technician, Junior Officer</span></div>
+  <p class="bio">Keeps the engine room clean enough to eat in.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 2</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
+  <p class="more">Has a twin on another survey ship. Grew up on the Tevan belt, and misses the rain. <span class="tr">Cheerful, patient.</span></p></article>
+<article class="p" data-text="bea silva works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Bea Silva</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Good with filters, bad with mornings.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 3</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Grew up on Coriel, and misses the rain. Got married just before the tour and counts the days. <span class="tr">Dreamy, reliable.</span></p></article>
+<article class="p" data-text="marta soto works technician fixes lamps, ovens and washers, and grumbles about all three." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Marta Soto</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Fixes lamps, ovens and washers, and grumbles about all three.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 4</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Keeps a tin of good biscuits and tells no one. Got married just before the tour and counts the days. <span class="tr">Loyal, blunt.</span></p></article>
+<article class="p" data-text="theo teague works technician new to works, eager, and already covered in grease." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Theo Teague</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">New to Works, eager, and already covered in grease.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 5</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Draws comics about life aboard and pins them in the common room. Makes a playlist for every week of the tour. <span class="tr">Restless, blunt.</span></p></article>
+<article class="p" data-text="maeve volkov works technician can strip a scrubber in ten minutes flat." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Maeve Volkov</b><span class="role">Works technician, Junior Officer</span></div>
+  <p class="bio">Can strip a scrubber in ten minutes flat.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 7, berth 6</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more">Collects pressed flowers from the garden. Is the best at fixing the coffee machine. <span class="tr">Kind, playful.</span></p></article>
+</div></section>
+<section class="dept" id="watch"><h2>Watch <span class="n">12 people</span></h2><p class="blurb">Safety, patrols, docking and keeping the peace, from the Watch office on Deck 2.</p><div class="grid">
+<article class="p" data-text="chief bram holt head of watch head of watch. does not trust the veyli, and says so." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Chief Bram Holt</b> <span class="b story">Story crew</span><span class="role">Head of Watch, Department Chief</span></div>
+  <p class="bio">Head of Watch. Does not trust the Veyli, and says so.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room T</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Asked for the cabin next door to the Envoy&#x27;s. Only his deputy can make him laugh. <span class="tr">Suspicious, dependable, gruff.</span></p></article>
+<article class="p" data-text="kofi mensah senior watch officer senior watch officer. holt&#x27;s deputy, in charge of the watch at night." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Kofi Mensah</b> <span class="b prov">Provisional name</span> <span class="b night">Night shift</span><span class="role">Senior Watch Officer, Senior Officer</span></div>
+  <p class="bio">Senior Watch Officer. Holt&#x27;s deputy, in charge of the Watch at night.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room G</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">The only one who can make Holt laugh. Walks the whole ship once a night, deck by deck. <span class="tr">Easy laugh, watchful, patient.</span></p></article>
+<article class="p" data-text="lars achterberg watch officer calm in a crisis, fussy about paperwork." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Lars Achterberg</b> <span class="b night">Night shift</span><span class="role">Watch officer</span></div>
+  <p class="bio">Calm in a crisis, fussy about paperwork.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-19</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Knows the lyrics to every song in the record cabinet. Reads mystery novels and guesses the ending too early. <span class="tr">Reliable, dry humour.</span></p></article>
+<article class="p" data-text="mira dahl watch officer calm in a crisis, fussy about paperwork." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Mira Dahl</b><span class="role">Watch officer</span></div>
+  <p class="bio">Calm in a crisis, fussy about paperwork.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-17</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Knits scarves for anyone who stands still long enough. Has a parent who served on the Wren years ago. <span class="tr">Practical, thoughtful.</span></p></article>
+<article class="p" data-text="carmen chen watch rating friendly on patrol, firm at the airlock." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Carmen Chen</b><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Friendly on patrol, firm at the airlock.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 3</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Sings in the shower; the whole washroom knows. Sends voice messages to a grandmother on Lisk. <span class="tr">Dreamy, restless.</span></p></article>
+<article class="p" data-text="greta garcia watch rating friendly on patrol, firm at the airlock." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Greta Garcia</b> <span class="b night">Night shift</span><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Friendly on patrol, firm at the airlock.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 4 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Fixes everyone&#x27;s broken headphones. Grew up on Hesper Dock, and misses the rain. <span class="tr">Sarcastic, gentle.</span></p></article>
+<article class="p" data-text="tomas lind watch rating new to watch, and your bunkmate. still learning where everything is." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Tomas Lind</b> <span class="b story">Story crew</span><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">New to Watch, and your bunkmate. Still learning where everything is.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 1</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Taped a star map to the underside of the top bunk. Joined the Wren a week before you did. <span class="tr">Earnest, curious, a little lost.</span></p></article>
+<article class="p" data-text="bilal nakamura watch rating learning the watch from holt, one lecture at a time." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Bilal Nakamura</b><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Learning the Watch from Holt, one lecture at a time.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 4</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Grows herbs for the galley. Has a twin on another survey ship. <span class="tr">Patient, proud.</span></p></article>
+<article class="p" data-text="noor park watch rating friendly on patrol, firm at the airlock." data-shift="night"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Noor Park</b> <span class="b night">Night shift</span><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Friendly on patrol, firm at the airlock.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 5 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Is saving up for a boat on Coriel. Is learning the guitar, badly. <span class="tr">Tidy, patient.</span></p></article>
+<article class="p" data-text="dara shah watch rating friendly on patrol, firm at the airlock." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Dara Shah</b><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Friendly on patrol, firm at the airlock.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 5</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Has a parent who served on the Wren years ago. Is the best at fixing the coffee machine. <span class="tr">Shy, dry humour.</span></p></article>
+<article class="p" data-text="vera ueda watch rating friendly on patrol, firm at the airlock." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Vera Ueda</b><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Friendly on patrol, firm at the airlock.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 6</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Brought a telescope from home. Writes letters home to Valo every rest day, on paper. <span class="tr">Kind, thoughtful.</span></p></article>
+<article class="p" data-text="uma vasquez watch rating learning the watch from holt, one lecture at a time." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Uma Vasquez</b><span class="role">Watch rating, Junior Officer</span></div>
+  <p class="bio">Learning the Watch from Holt, one lecture at a time.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 5, berth 1</dd></div><div><dt>Works</dt><dd>the Watch office (Deck 2)</dd></div></dl>
+  <p class="more">Writes poetry and shows nobody. Keeps fish back home on the Ostrander colonies. <span class="tr">Homesick, cheerful.</span></p></article>
+</div></section>
+<section class="dept" id="survey"><h2>Survey <span class="n">12 people</span></h2><p class="blurb">Sensors, labs, samples and charting, in the Survey labs on Deck 2.</p><div class="grid">
+<article class="p" data-text="dr. imra sato head of survey head of survey. her lab, her rules, her terrible tea." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Dr. Imra Sato</b> <span class="b story">Story crew</span><span class="role">Head of Survey, Department Chief</span></div>
+  <p class="bio">Head of Survey. Her lab, her rules, her terrible tea.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room V</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Brews a tea nobody else will drink. Labels every sample in the specimen store in her own handwriting. <span class="tr">Brilliant, absent-minded, stubborn.</span></p></article>
+<article class="p" data-text="hana mori deputy survey chief deputy survey chief. runs the labs while sato runs everyone." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Hana Mori</b> <span class="b prov">Provisional name</span><span class="role">Deputy Survey Chief, Senior Officer</span></div>
+  <p class="bio">Deputy Survey Chief. Runs the labs while Sato runs everyone.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room D</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Tapes a star chart over her nameplate. Maps the frontier one survey at a time, in the chart room. <span class="tr">Organised, shy, meticulous.</span></p></article>
+<article class="p" data-text="tove cruz survey officer can name every star in the chart room, and argues about the rest." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Tove Cruz</b><span class="role">Survey officer</span></div>
+  <p class="bio">Can name every star in the chart room, and argues about the rest.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-18</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Is secretly afraid of the lift. Keeps a cactus called Gerald on the windowsill. <span class="tr">Messy, shy.</span></p></article>
+<article class="p" data-text="rafael ibarra survey officer lives for the next sensor sweep." data-shift="night"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Rafael Ibarra</b> <span class="b night">Night shift</span><span class="role">Survey officer</span></div>
+  <p class="bio">Lives for the next sensor sweep.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-20</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Keeps a tin of good biscuits and tells no one. Plays Tiles, and loses gracefully. <span class="tr">Forgetful, sarcastic.</span></p></article>
+<article class="p" data-text="quinn zamora survey officer can name every star in the chart room, and argues about the rest." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Quinn Zamora</b><span class="role">Survey officer</span></div>
+  <p class="bio">Can name every star in the chart room, and argues about the rest.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-21</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Brought a telescope from home. Sings in the shower; the whole washroom knows. <span class="tr">Meticulous, quiet.</span></p></article>
+<article class="p" data-text="rosa abara survey assistant runs the lab scanners and labels everything twice." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Rosa Abara</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Runs the lab scanners and labels everything twice.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 3</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Ran a market stall on Valo before joining up. Draws comics about life aboard and pins them in the common room. <span class="tr">Quiet, loyal.</span></p></article>
+<article class="p" data-text="luca alvarez survey assistant carries samples and dreams of naming a star." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Luca Alvarez</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Carries samples and dreams of naming a star.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 4</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">A sister on Coriel who sends recipes. Keeps a cactus called Gerald on the windowsill. <span class="tr">Playful, cheerful.</span></p></article>
+<article class="p" data-text="arjun fonseca survey assistant runs the lab scanners and labels everything twice." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Arjun Fonseca</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Runs the lab scanners and labels everything twice.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 5</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Is quietly in charge of the lost-property box. Collects pressed flowers from the garden. <span class="tr">Sarcastic, competitive.</span></p></article>
+<article class="p" data-text="yusuf kim survey assistant runs the lab scanners and labels everything twice." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Yusuf Kim</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Runs the lab scanners and labels everything twice.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 6</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Collects old maps of Marra Station. Fixes everyone&#x27;s broken headphones. <span class="tr">Curious, quiet.</span></p></article>
+<article class="p" data-text="nils lemaire survey assistant carries samples and dreams of naming a star." data-shift="night"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Nils Lemaire</b> <span class="b night">Night shift</span><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Carries samples and dreams of naming a star.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 8, berth 6 (the night-shift room)</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Ran a market stall on the Ostrander colonies before joining up. Tells terrible jokes at breakfast. <span class="tr">Quiet, ambitious.</span></p></article>
+<article class="p" data-text="bo mbeki survey assistant carries samples and dreams of naming a star." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Bo Mbeki</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Carries samples and dreams of naming a star.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 1</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Brought a telescope from home. A sister on Kesh who sends recipes. <span class="tr">Cheerful, meticulous.</span></p></article>
+<article class="p" data-text="karin yilmaz survey assistant carries samples and dreams of naming a star." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Karin Yilmaz</b><span class="role">Survey assistant, Junior Officer</span></div>
+  <p class="bio">Carries samples and dreams of naming a star.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 4, berth 2</dd></div><div><dt>Works</dt><dd>the Survey labs (Deck 2)</dd></div></dl>
+  <p class="more">Tells terrible jokes at breakfast. Bakes on rest days, if Brennan allows it. <span class="tr">Quiet, playful.</span></p></article>
+</div></section>
+<section class="dept" id="infirmary"><h2>Infirmary <span class="n">6 people</span></h2><p class="blurb">Crew health and rest, in the infirmary on Deck 3.</p><div class="grid">
+<article class="p" data-text="dr. priya nandakumar head of infirmary head of infirmary. says &quot;drink some water&quot; in a way that ends the argument." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Dr. Priya Nandakumar</b> <span class="b prov">Provisional name</span><span class="role">Head of Infirmary, Department Chief</span></div>
+  <p class="bio">Head of Infirmary. Says &quot;drink some water&quot; in a way that ends the argument.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room I</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3. Grows chillies in a corner of the garden. <span class="tr">Calm, brisk, kind.</span></p></article>
+<article class="p" data-text="matthias oduya ship&#x27;s counsellor ship&#x27;s counsellor. seventy-five people a long way from home keep him busy." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Matthias Oduya</b> <span class="b prov">Provisional name</span><span class="role">Ship&#x27;s Counsellor, Senior Officer</span></div>
+  <p class="bio">Ship&#x27;s Counsellor. Seventy-five people a long way from home keep him busy.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 2, senior quarters, room N</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Keeps office hours on Deck 3 and a bowl of sweets on his desk. Knows everyone&#x27;s birthday. <span class="tr">Warm, perceptive, unhurried.</span></p></article>
+<article class="p" data-text="elif yoon doctor night doctor. steady hands and a soft voice at three in the morning." data-shift="night"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Elif Yoon</b> <span class="b night">Night shift</span><span class="role">Doctor, Officer</span></div>
+  <p class="bio">Night doctor. Steady hands and a soft voice at three in the morning.</p>
+  <dl><div><dt>Shift</dt><dd>Nights, 21:00 to 06:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-22</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Tells terrible jokes at breakfast. Is the best at fixing the coffee machine. <span class="tr">Nervous, patient.</span></p></article>
+<article class="p" data-text="rina deshi infirmary aide dry humour, steady hands, undefeated at tiles." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Rina Deshi</b> <span class="b story">Story crew</span><span class="role">Infirmary aide, Junior Officer</span></div>
+  <p class="bio">Dry humour, steady hands, undefeated at Tiles.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 3</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Uses a stack of medical journals as a pillow. Has a message from her sister waiting. Undefeated at Tiles in the junior common room. <span class="tr">Dry humour, steady, competitive.</span></p></article>
+<article class="p" data-text="thea grieve infirmary aide changes the infirmary beds and knows everyone&#x27;s blood type." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Thea Grieve</b><span class="role">Infirmary aide, Junior Officer</span></div>
+  <p class="bio">Changes the infirmary beds and knows everyone&#x27;s blood type.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Thu and Fri</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 1</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Keeps fish back home on New Aberdeen. Is quietly in charge of the lost-property box. <span class="tr">Serious, nervous.</span></p></article>
+<article class="p" data-text="hamid larsen infirmary aide changes the infirmary beds and knows everyone&#x27;s blood type." data-shift="day"><i class="dot" style="background:#3f9a92"></i>
+  <div class="who"><b>Hamid Larsen</b><span class="role">Infirmary aide, Junior Officer</span></div>
+  <p class="bio">Changes the infirmary beds and knows everyone&#x27;s blood type.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 3, berth 2</dd></div><div><dt>Works</dt><dd>the infirmary (Deck 3)</dd></div></dl>
+  <p class="more">Is learning the guitar, badly. Is saving up for a boat on the Ostrander colonies. <span class="tr">Serious, chatty.</span></p></article>
+</div></section>
+<section class="dept" id="galley"><h2>Galley <span class="n">6 people</span></h2><p class="blurb">Two meals a day for seventy-five people, in the galley and mess hall on Deck 3.</p><div class="grid">
+<article class="p" data-text="chef auda brennan chef, galley and mess hall runs the galley and mess hall. cooks by ear, and sends biscuits down for the juniors." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Chef Auda Brennan</b> <span class="b story">Story crew</span><span class="role">Chef, galley and mess hall, Officer</span></div>
+  <p class="bio">Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Fri and Sat</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-05</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Furious whenever the cold store runs warm. Sends biscuits down to the junior wing. <span class="tr">Warm, fierce in her kitchen, generous.</span></p></article>
+<article class="p" data-text="lukas dlamini galley hand chops, stirs and washes up under brennan&#x27;s eye." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Lukas Dlamini</b><span class="role">Galley hand, Junior Officer</span></div>
+  <p class="bio">Chops, stirs and washes up under Brennan&#x27;s eye.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Wed and Thu</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 5</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Grew up on Port Halloran, and misses the rain. Got married just before the tour and counts the days. <span class="tr">Dry humour, blunt.</span></p></article>
+<article class="p" data-text="tamsin haddad galley hand chops, stirs and washes up under brennan&#x27;s eye." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Tamsin Haddad</b><span class="role">Galley hand, Junior Officer</span></div>
+  <p class="bio">Chops, stirs and washes up under Brennan&#x27;s eye.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 2</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Knows the lyrics to every song in the record cabinet. Is learning the guitar, badly. <span class="tr">Optimistic, nervous.</span></p></article>
+<article class="p" data-text="ivo madsen galley hand can carry six trays at once." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Ivo Madsen</b><span class="role">Galley hand, Junior Officer</span></div>
+  <p class="bio">Can carry six trays at once.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 1</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Sings in the shower; the whole washroom knows. Collects pressed flowers from the garden. <span class="tr">Stubborn, chatty.</span></p></article>
+<article class="p" data-text="tariq varga galley hand chops, stirs and washes up under brennan&#x27;s eye." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Tariq Varga</b><span class="role">Galley hand, Junior Officer</span></div>
+  <p class="bio">Chops, stirs and washes up under Brennan&#x27;s eye.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Mon and Tue</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 4</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Sends voice messages to a grandmother on the Tevan belt. Writes letters home to Valo every rest day, on paper. <span class="tr">Competitive, thoughtful.</span></p></article>
+<article class="p" data-text="esme walsh galley hand chops, stirs and washes up under brennan&#x27;s eye." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>Esme Walsh</b><span class="role">Galley hand, Junior Officer</span></div>
+  <p class="bio">Chops, stirs and washes up under Brennan&#x27;s eye.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 2, berth 5</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <p class="more">Keeps fish back home on Port Halloran. Keeps a cactus called Gerald on the windowsill. <span class="tr">Sharp-eyed, meticulous.</span></p></article>
+</div></section>
+<section class="dept" id="guest"><h2>Guests <span class="n">1 person</span></h2><p class="blurb">Not crew: visitors who live aboard.</p><div class="grid">
+<article class="p" data-text="envoy saruth veyli envoy (guest) the veyli envoy, guest of the concord. courteous, ritual-minded, and hard to read." data-shift="day"><i class="dot" style="background:#8a8f9a"></i>
+  <div class="who"><b>Envoy Saruth</b> <span class="b story">Story crew</span><span class="role">Veyli Envoy (guest)</span></div>
+  <p class="bio">The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>none</dd></div><div><dt>Sleeps</dt><dd>Deck 2, the Envoy&#x27;s guest cabin</dd></div><div><dt>Works</dt><dd>no ship duties</dd></div></dl>
+  <p class="more">Keeps a knot of Veyli cord on the door handle: visitors by invitation only. Takes tea at a low table, kneeling, at the same hour every day. <span class="tr">Formal, observant, patient.</span></p></article>
+</div></section>
+</main>
+<footer>Made by the crew designer from the roster in the game file (section 9). The other crew come from plans/crew-roster-gen.py and are stored in the game as fixed data, so they only change when someone means them to.</footer>
+<script>
+const q = document.getElementById('q'), nights = document.getElementById('nights');
+function filt() {
+  const t = q.value.trim().toLowerCase();
+  for (const a of document.querySelectorAll('.p')) a.classList.toggle('hide', (t && !a.dataset.text.includes(t)) || (nights.checked && a.dataset.shift !== 'night'));
+  for (const s of document.querySelectorAll('.dept')) s.classList.toggle('hide', !s.querySelector('.p:not(.hide)'));
+}
+q.addEventListener('input', filt); nights.addEventListener('change', filt);
+</script>
+</body>
+</html>
