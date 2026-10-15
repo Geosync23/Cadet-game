@@ -144,6 +144,11 @@ STORY = [
          life=['Tapes a star chart over her nameplate.', 'Maps the frontier one survey at a time, in the chart room.']),
 ]
 
+# the player: one of the 75 (a Works junior), kept apart from ROSTER because the player isn't scheduled
+PLAYER = dict(id='you', name='You', player=True, rank='junior', dept='works', role='Works technician (you)', shift='day', bed='4-B1-2', job='works',
+              rota={'offDays': [5, 6]}, looks=dict(skin=2, hair='short', hairColor='dark', height=1.05, build='average', acc=[]),
+              bio='New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.', habits=[], traits=[], life=[])
+
 GUESTS = [
     dict(id='saruth', name='Envoy Saruth', story=True, rank='guest', dept='guest', role='Veyli Envoy (guest)', shift='day', bed='2-E', job=None,
          looks=dict(skin=2, hair='long', hairColor='white', height=1.09, build='slim', acc=['headband']),
@@ -235,6 +240,8 @@ def looks():
                 height=round(R.uniform(.9, 1.1), 2), build=R.choice(['slim', 'average', 'average', 'broad']),
                 acc=sorted(R.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], R.choice([0, 0, 1, 1, 2]))))
 
+DROPPED = []
+
 def main():
     used_names = {p['name'].split()[-1] for p in STORY + GUESTS}
     used_first = {p['name'].split()[-2] if len(p['name'].split()) > 1 else '' for p in STORY}
@@ -277,13 +284,20 @@ def main():
         for p in [p for p in crew if p['dept'] == dept]:
             p['rota'] = {'offDays': pairs[k % 7]}; k += 1
     for p in GUESTS: p['rota'] = {'offDays': []}
+    # ---- the player is one of the 47 juniors, so the last generated Works technician makes way. Beds and days off were
+    # given out first, so nobody else's change; whoever had 4-B1-6 takes the freed berth, leaving 4-B1-6 empty in your room
+    drop = [p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-1]
+    crew.remove(drop); DROPPED.append(drop['name'])
+    for p in crew:
+        if p['bed'] == '4-B1-6': p['bed'] = drop['bed']
     # ---- work places, seeds, uniform
     out = []
-    for p in crew + GUESTS:
+    for p in crew + GUESTS + [PLAYER]:
         deck, place = WORK[p['job']] if p['job'] else (None, None)
         e = dict(id=p['id'], name=p['name'])
         if p.get('story'): e['story'] = True
         if p.get('provisional'): e['provisional'] = True
+        if p.get('player'): e['player'] = True
         e.update(rank=p['rank'], dept=p['dept'], uniform=UNIFORM.get(p['dept']), role=p['role'], shift=p['shift'], rota=p['rota'], bed=p['bed'],
                  work=dict(deck=deck, place=place) if deck else None, habits=p['habits'], traits=p['traits'], looks=p['looks'],
                  bio=p['bio'], life=p['life'], seed=seed_of(p['id']))
@@ -352,6 +366,7 @@ h2 .n{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:6px}
 .b.story{background:rgba(76,195,181,.18);color:#bdeee6;border:1px solid rgba(76,195,181,.5)}
 .b.prov{background:rgba(233,196,106,.14);color:#f0d88e;border:1px dashed rgba(233,196,106,.7)}
 .b.night{background:rgba(122,143,208,.18);color:#c3cff2;border:1px solid rgba(122,143,208,.5)}
+.b.you{background:rgba(214,165,58,.2);color:#f3d58f;border:1px solid rgba(214,165,58,.6)}
 .bio{margin:6px 0;color:#dfe7e9}
 dl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0}
 dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -388,18 +403,18 @@ def page(entries):
     out = [PAGE_HEAD]
     rc = Counter(x['rank'] for x in crew); sc = Counter(x['shift'] for x in crew)
     beds = Counter('d2' if x['bed'].startswith('2-') else 'cab' if not x['bed'].startswith('4-B') else 'bunk' for x in crew)
-    out.append('  <div class="summary"><b>%d crew</b>, plus Envoy Saruth as a guest. %d Captain, %d Executive Officer, %d Department Chiefs, %d Senior Officers, %d Officers and %d Junior Officers. '
+    out.append('  <div class="summary"><b>%d crew</b>, you included, plus Envoy Saruth as a guest. %d Captain, %d Executive Officer, %d Department Chiefs, %d Senior Officers, %d Officers and %d Junior Officers. '
                '%d work days and %d work nights. Everyone has two days off in a row, staggered round the week so every department always has people on. '
-               'Beds: %d in the senior quarters on Deck 2, %d in officers\' cabins on Deck 4 and %d in the junior bunk rooms on Deck 4, where you sleep too (Bunk 1).</div>\n</header>\n'
+               'Beds: %d in the senior quarters on Deck 2, %d in officers\' cabins on Deck 4 and %d in the junior bunk rooms on Deck 4 (eight rooms of six berths, with one spare berth in Bunk 1).</div>\n</header>\n'
                % (len(crew), rc['captain'], rc['xo'], rc['chief'], rc['senior'], rc['officer'], rc['junior'], sc['day'], sc['night'], beds['d2'], beds['cab'], beds['bunk']))
     out.append('<div class="bar">' + ' '.join('<a href="#%s">%s</a>' % (k, e(t)) for k, t, _ in GROUPS) + '</div>\n')
     out.append('<div class="bar"><input id="q" type="search" placeholder="Find someone: a name, a job, a word" aria-label="Find someone"><label><input id="nights" type="checkbox"> Night shift only</label></div>\n<main>\n')
     for key, title, blurb in GROUPS:
-        ppl = sorted([x for x in entries if x['dept'] == key], key=lambda x: (RANK_ORDER.index(x['rank']), x['name'].split()[-1]))
+        ppl = sorted([x for x in entries if x['dept'] == key], key=lambda x: (RANK_ORDER.index(x['rank']), not x.get('player'), x['name'].split()[-1]))
         if not ppl: continue
         out.append('<section class="dept" id="%s"><h2>%s <span class="n">%d %s</span></h2><p class="blurb">%s</p><div class="grid">\n' % (key, e(title), len(ppl), 'person' if len(ppl) == 1 else 'people', e(blurb)))
         for x in ppl:
-            badges = (' <span class="b story">Story crew</span>' if x.get('story') else '') + (' <span class="b prov">Provisional name</span>' if x.get('provisional') else '') + \
+            badges = (' <span class="b you">You</span>' if x.get('player') else '') + (' <span class="b story">Story crew</span>' if x.get('story') else '') + (' <span class="b prov">Provisional name</span>' if x.get('provisional') else '') + \
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
@@ -408,10 +423,10 @@ def page(entries):
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
                        '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div></dl>\n'
-                       '  <p class="more">%s <span class="tr">%s.</span></p></article>\n'
+                       '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio']).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
                           e(x['role']), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work),
-                          e(' '.join(x['life'])), e(', '.join(x['traits']).capitalize())))
+                          e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
     return ''.join(out)
@@ -419,18 +434,20 @@ def page(entries):
 if __name__ == '__main__':
     here = os.path.dirname(os.path.abspath(__file__))
     entries = main()
-    crew = [x for x in entries if x['rank'] != 'guest']; guests = [x for x in entries if x['rank'] == 'guest']
+    crew = [x for x in entries if x['rank'] != 'guest' and not x.get('player')]; guests = [x for x in entries if x['rank'] == 'guest']
+    you = [x for x in entries if x.get('player')][0]
     from collections import Counter
-    rc = Counter(x['rank'] for x in crew); sc = Counter(x['shift'] for x in crew)
-    assert len(crew) == 75 and rc == {'captain': 1, 'xo': 1, 'chief': 4, 'senior': 6, 'officer': 16, 'junior': 47}, rc
+    rc = Counter(x['rank'] for x in crew + [you]); sc = Counter(x['shift'] for x in crew + [you])
+    assert len(crew) == 74 and rc == {'captain': 1, 'xo': 1, 'chief': 4, 'senior': 6, 'officer': 16, 'junior': 47}, rc
     assert sc == {'day': 60, 'night': 15}, sc
     block = ('// ---- BEGIN ROSTER (generated by plans/crew-roster-gen.py: fixed data; to change the crew, edit the generator and re-run it) ----\n'
              'const HABITS = ' + json.dumps(HABITS, ensure_ascii=False, indent=2) + ';\n'
              'const ROSTER = [\n' + js(crew) + '\n];\n'
              'const ROSTER_GUESTS = [\n' + js(guests) + '\n];\n'
+             'const ROSTER_PLAYER = ' + json.dumps(you, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
              '// ---- END ROSTER ----\n')
     game = os.path.join(here, '..', 'starship-cadet.html'); g = open(game).read()
     a = g.index('// ---- BEGIN ROSTER'); b = g.index('// ---- END ROSTER ----\n') + len('// ---- END ROSTER ----\n')
     open(game, 'w').write(g[:a] + block + g[b:])
     open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries))
-    print('75 crew + %d guest; ranks %s; shifts %s. Wrote section 9 of starship-cadet.html and plans/crew-roster.html' % (len(guests), dict(rc), dict(sc)))
+    print('74 crew + you = 75, + %d guest; ranks %s; shifts %s; made way for you: %s. Wrote section 9 of starship-cadet.html and plans/crew-roster.html' % (len(guests), dict(rc), dict(sc), DROPPED))

@@ -30,6 +30,7 @@ h2 .n{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:6px}
 .b.story{background:rgba(76,195,181,.18);color:#bdeee6;border:1px solid rgba(76,195,181,.5)}
 .b.prov{background:rgba(233,196,106,.14);color:#f0d88e;border:1px dashed rgba(233,196,106,.7)}
 .b.night{background:rgba(122,143,208,.18);color:#c3cff2;border:1px solid rgba(122,143,208,.5)}
+.b.you{background:rgba(214,165,58,.2);color:#f3d58f;border:1px solid rgba(214,165,58,.6)}
 .bio{margin:6px 0;color:#dfe7e9}
 dl{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0}
 dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -44,7 +45,7 @@ footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var
 <header>
   <h1>The crew of the CSV Wren</h1>
   <p class="sub">Everyone aboard, for Pillar 1 of the Living Ship. Grouped by department, most senior first. Each card shows when they work, their days off, where they sleep and where they work. Names marked <span class="b prov">Provisional name</span> are first ideas and can still change. <span class="b story">Story crew</span> are the hand-written characters. The coloured dot is their uniform: red for command, gold for operations, blue-green for sciences.</p>
-  <div class="summary"><b>75 crew</b>, plus Envoy Saruth as a guest. 1 Captain, 1 Executive Officer, 4 Department Chiefs, 6 Senior Officers, 16 Officers and 47 Junior Officers. 60 work days and 15 work nights. Everyone has two days off in a row, staggered round the week so every department always has people on. Beds: 12 in the senior quarters on Deck 2, 16 in officers' cabins on Deck 4 and 47 in the junior bunk rooms on Deck 4, where you sleep too (Bunk 1).</div>
+  <div class="summary"><b>75 crew</b>, you included, plus Envoy Saruth as a guest. 1 Captain, 1 Executive Officer, 4 Department Chiefs, 6 Senior Officers, 16 Officers and 47 Junior Officers. 60 work days and 15 work nights. Everyone has two days off in a row, staggered round the week so every department always has people on. Beds: 12 in the senior quarters on Deck 2, 16 in officers' cabins on Deck 4 and 47 in the junior bunk rooms on Deck 4 (eight rooms of six berths, with one spare berth in Bunk 1).</div>
 </header>
 <div class="bar"><a href="#command">Command</a> <a href="#helm">Helm</a> <a href="#comms">Comms</a> <a href="#works">Works</a> <a href="#watch">Watch</a> <a href="#survey">Survey</a> <a href="#infirmary">Infirmary</a> <a href="#galley">Galley</a> <a href="#guest">Guests</a></div>
 <div class="bar"><input id="q" type="search" placeholder="Find someone: a name, a job, a word" aria-label="Find someone"><label><input id="nights" type="checkbox"> Night shift only</label></div>
@@ -151,6 +152,11 @@ footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var
   <p class="bio">Knows the drive coils&#x27; moods better than anyone&#x27;s.</p>
   <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, officer cabin 4-14</dd></div><div><dt>Works</dt><dd>the engine room (Deck 6)</dd></div></dl>
   <p class="more">Knows the lyrics to every song in the record cabinet. Knits scarves for anyone who stands still long enough. <span class="tr">Curious, ambitious.</span></p></article>
+<article class="p" data-text="you works technician (you) new aboard, a junior technician in works. your bunk is in bunk 1, with tomas." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
+  <div class="who"><b>You</b> <span class="b you">You</span><span class="role">Works technician (you), Junior Officer</span></div>
+  <p class="bio">New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.</p>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sat and Sun</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 2</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
+  <p class="more"> <span class="tr"></span></p></article>
 <article class="p" data-text="asha amadi engine technician tends the coils on the long engine watch." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
   <div class="who"><b>Asha Amadi</b><span class="role">Engine technician, Junior Officer</span></div>
   <p class="bio">Tends the coils on the long engine watch.</p>
@@ -191,11 +197,6 @@ footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var
   <p class="bio">Can strip a scrubber in ten minutes flat.</p>
   <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 1</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
   <p class="more">Knits scarves for anyone who stands still long enough. Is secretly afraid of the lift. <span class="tr">Meticulous, shy.</span></p></article>
-<article class="p" data-text="kai lachance works technician new to works, eager, and already covered in grease." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
-  <div class="who"><b>Kai Lachance</b><span class="role">Works technician, Junior Officer</span></div>
-  <p class="bio">New to Works, eager, and already covered in grease.</p>
-  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Sun and Mon</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 2</dd></div><div><dt>Works</dt><dd>the Works bay (Deck 5)</dd></div></dl>
-  <p class="more">Has a parent who served on the Wren years ago. Has a twin on another survey ship. <span class="tr">Homesick, patient.</span></p></article>
 <article class="p" data-text="signe moreau works technician good with filters, bad with mornings." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
   <div class="who"><b>Signe Moreau</b><span class="role">Works technician, Junior Officer</span></div>
   <p class="bio">Good with filters, bad with mornings.</p>
@@ -422,7 +423,7 @@ footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var
 <article class="p" data-text="tamsin haddad galley hand chops, stirs and washes up under brennan&#x27;s eye." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
   <div class="who"><b>Tamsin Haddad</b><span class="role">Galley hand, Junior Officer</span></div>
   <p class="bio">Chops, stirs and washes up under Brennan&#x27;s eye.</p>
-  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 1, berth 6</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
+  <dl><div><dt>Shift</dt><dd>Days, 08:00 to 17:00</dd></div><div><dt>Days off</dt><dd>Tue and Wed</dd></div><div><dt>Sleeps</dt><dd>Deck 4, Bunk 6, berth 2</dd></div><div><dt>Works</dt><dd>the galley (Deck 3)</dd></div></dl>
   <p class="more">Knows the lyrics to every song in the record cabinet. Is learning the guitar, badly. <span class="tr">Optimistic, nervous.</span></p></article>
 <article class="p" data-text="ivo madsen galley hand can carry six trays at once." data-shift="day"><i class="dot" style="background:#d6a53a"></i>
   <div class="who"><b>Ivo Madsen</b><span class="role">Galley hand, Junior Officer</span></div>
