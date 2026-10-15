@@ -47,11 +47,12 @@ svg{display:block}
 <div class="legend" style="display:block;line-height:1.55">
   <b style="color:var(--ink)">What changes in Sketch 3</b>
   <ul style="margin:6px 0 0;padding-left:20px">
-    <li><b>Every bunk room grows from 4 × 4 to 5 × 4,</b> so it holds three ordinary bunk beds (6 berths) side by side, with the lockers by the door. 8 rooms × 6 = 48 berths: 47 juniors (the player included) and 1 empty. Today's rooms hold 4 each (32 berths).</li>
+    <li><b>Every bunk room grows from 4 × 4 to 5 × 4,</b> so it holds three ordinary bunk beds (6 berths) side by side with normal gaps between them (about 0.7 m, the same as today), footlockers at their feet and the two lockers by the door. A table doesn't fit: the bunk template only adds one in rooms 6 deep, and today's rooms don't have one either. 8 rooms × 6 = 48 berths: 47 juniors (the player included) and 1 empty. Today's rooms hold 4 each (32 berths).</li>
     <li><b>Port side (Bunks 1–3):</b> each room is one tile wider. The air scrubbers behind them shrink from 6 × 4 to 3 × 4, still sealed, still opening off the lobby.</li>
     <li><b>Middle (Bunks 5–8, the night shift in Bunk 8):</b> each room is one tile wider, taking the junior utility closet's 2 × 8 strip. That closet moves to the starboard side.</li>
     <li><b>Starboard side (Bunk 4):</b> one tile wider. The laundry keeps its size (4 × 4) and shifts one tile toward the lift. The junior stores shrink from 4 × 4 to 3 × 4. The utility closet becomes a 1 × 4 closet off the lobby, and the heating plant shrinks from 6 × 4 to 5 × 4.</li>
     <li><b>Unchanged:</b> both washrooms, the junior common room, the junior corridors, the lift lobby, all 24 officers' cabins (no guest cabins given up) and the music room.</li>
+    <li><b>The small-change alternative (not chosen):</b> keep the 4 × 4 rooms and squeeze three bunks in, with gaps of about 0.3 m and nothing else moving. 48 berths either way.</li>
     <li><b>For the build:</b> Bunk 1 still holds the player's start tile; crew routes in the junior wing change with the walls. Berths are numbered 4-B&lt;room&gt;-1 to 6.</li>
   </ul>
 </div>
@@ -120,7 +121,7 @@ const ROOMS = {
   const outer = 'abcd'.includes(k);
   ROOMS[k] = { kind: 'bunk', name: 'Bunk room ' + (n + 1), label: 'Bunk ' + (n + 1), win: outer,
     x: (k === 'h' ? 'The night-shift bunk room. Inner, windowless and kept dark and hushed at midday. ' : '') +
-       'Three double bunks, six footlockers, one table. ' + (outer ? 'A window, which makes it the room everyone wants.' : 'No window; the wall screen shows the stars instead.') };
+       'Three bunk beds, six footlockers, two lockers. ' + (outer ? 'A window, which makes it the room everyone wants.' : 'No window; the wall screen shows the stars instead.') };
 });
 ROOMS.h.night = true;
 // officer cabins: A..X, laid out in columns of four (outer port, inner port, inner starboard, outer starboard)
