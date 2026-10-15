@@ -7,7 +7,12 @@
 #   with the schedule caches cleared
 #   with an ideal crew (the day shift services anything worn, a few machines an hour): nothing ever gets past
 #   worn, and ship health stays at 90 or more
-#   the save: machines written by the save hook and read back by machinesLoad come out the same
+#   with the real Works crew claiming jobs on paper (B2, B3): nothing breaks, ship health stays at 85 or more,
+#   shelves never go below zero, deliveries get carried to storage, easy jobs wait for you first, nobody does two
+#   jobs at once or a job outside their work block, jobWhere agrees with the jobs, and it's the same every way
+#   your side: a job you claim is left to you, and finishing it puts the machine right
+#   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
+#   same, and run on the same afterwards
 #   nothing runs unless asked: a game left running with ?nosave never touches the machines
 # Setup and environment as for cadet_test.py.
 # Run:  python3 machine_check.py BUILD.html [DAYS]     (DAYS defaults to 14)
@@ -23,8 +28,9 @@ CREW_PER_HOUR = 3                                       # jobs the ideal day shi
 # 'jump' (ask once at the end), 'odd' (ask at odd minutes); crew: service worn machines on the day shift
 RUN = r"""(({ days, mode, crew, perHour }) => {
   const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + days * 1440;
-  MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
-  const out = { daily: [], first: {}, rising: [], worst: {}, minHealth: 100, fx: [], jobs: 0 };
+  JOBS_ON = crew === 'real'; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+  const out = { daily: [], first: {}, rising: [], worst: {}, minHealth: 100, fx: [], jobs: 0, maxOpen: 0, minStock: 99, waiting: 0 };
+  const seen = new Map();
   const list = machineList(), prev = {};
   for (const m of list) prev[m.id] = SHIP.machines[m.id].cond;
   const look = t => {
@@ -39,12 +45,21 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
       if (!(s.state in out.first[m.id])) out.first[m.id][s.state] = Math.round((t - t0) / 144) / 10;
     }
     out.minHealth = Math.min(out.minHealth, shipHealth());
+    for (const j of SHIP.jobs) seen.set(j.id, j);
+    const cur = SHIP.jobs.find(j => j.segs && j.status === 'claimed' && j.claimedBy !== 'you');
+    if (cur) {
+      const sg = cur.segs.find(x => x.tag === 'job' || x.tag === 'restock'), w = jobWhere(schedPeople().find(p => p.id === cur.claimedBy), sg.from);
+      out.overlay = (out.overlay !== false) && !!w && w.deck === sg.deck && w.job === cur.id;
+    }
+    out.maxOpen = Math.max(out.maxOpen, SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).length);
+    out.waiting += SHIP.jobs.filter(j => j.status === 'waiting').length;
+    for (const k in SHIP.stores) out.minStock = Math.min(out.minStock, SHIP.stores[k]);
   };
   if (mode === 'jump') { setShipNow(end); machinesNow(); look(end); }
   else for (let t = t0; t <= end; t += mode === 'odd' ? 37 : 60) {
     setShipNow(t); machinesNow(); look(t);
     const min = t % 1440;
-    if (crew && min >= 480 && min < 1020) {
+    if (crew === 'ideal' && min >= 480 && min < 1020) {
       const due = list.filter(m => SHIP.machines[m.id].state !== 'healthy').sort((a, b) => SHIP.machines[a.id].cond - SHIP.machines[b.id].cond);
       for (const m of due.slice(0, perHour)) { serviceMachine(m.id); out.jobs++; }
     }
@@ -59,6 +74,20 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   out.states = Object.fromEntries(list.map(m => [m.id, SHIP.machines[m.id].state]));
   out.kinds = Object.fromEntries(list.map(m => [m.id, m.kind]));
   out.effects4 = shipEffects(4); out.effects3 = shipEffects(3);
+  // the jobs, for the real crew's checks
+  const J = [...seen.values()], ppl = new Map(schedPeople().map(p => [p.id, p]));
+  out.jobList = J.map(j => ({ id: j.id, kind: j.kind, status: j.status, by: j.claimedBy, urgency: j.urgency, posted: j.posted, found: j.found, start: j.start, end: j.end, done: j.done, made: j.made || 0, tier: jobTier(j), cargo: j.cargo || null }));
+  // nobody on two jobs at once; every job inside its person's work block (whereIs says work all through)
+  const byWho = {}; out.overlap = []; out.offShift = [];
+  for (const j of J) if (j.segs && j.claimedBy !== 'you') {
+    (byWho[j.claimedBy] = byWho[j.claimedBy] || []).push([j.start, j.end]);
+    const p = ppl.get(j.claimedBy);
+    for (let m = j.start; m < j.end; m += 5) { const w = whereIs(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
+  }
+  for (const who in byWho) { const v = byWho[who].sort((a, b) => a[0] - b[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) out.overlap.push(who); }
+  // the overlay: someone mid-job is where the job says
+  out.endJobs = JSON.stringify([SHIP.jobs, SHIP.stores, SHIP.hold]);
+  JOBS_ON = true;
   return out;
 })"""
 
@@ -127,23 +156,71 @@ with sync_playwright() as pw:
         if not same(a, x): fail(f"wear differs ({name})")
 
     # 3. an ideal crew
-    i = run(crew=True)
+    i = run(crew='ideal')
     worst = max(i['worst'].values())
     print(f"Ideal crew ({CREW_PER_HOUR} jobs an hour on the day shift): {i['jobs']} jobs, worst state {['healthy', 'worn', 'faulty', 'failing', 'broken'][worst]}, lowest ship health {i['minHealth']:.1f}")
     print('  ship health by day:', ' '.join(f"{d['health']:.0f}" for d in i['daily']))
     if worst > 1: fail('a machine got past worn with an ideal crew')
     if i['minHealth'] < 90: fail(f"ship health fell to {i['minHealth']} with an ideal crew")
 
-    # 4. the save
-    rt = g.ev("""(() => {
-      const s = { ship: {} }; SAVE_EXTRA.forEach(f => f(s));
-      const before = JSON.stringify(machinesNow());
-      const back = JSON.parse(JSON.stringify(s)); MACH_HOUR = null;
-      const ok = machinesLoad(back), after = JSON.stringify(machinesNow());
-      const junk = [machinesLoad(null), machinesLoad({ ship: { machines: 5, machineHour: 3 } }), machinesLoad({ ship: { machines: {}, machineHour: 1e9 } })];
-      return { ok, same: before === after, junk, n: Object.keys(s.ship.machines).length, hour: s.ship.machineHour };
+    # 4. the real Works crew, claiming jobs on paper
+    r = run(crew='real')
+    worst = max(r['worst'].values())
+    J = r['jobList']; done = [j for j in J if j['status'] == 'done' and j['by'] not in (None, 'you')]
+    kinds = {}
+    for j in done: kinds[j['kind']] = kinds.get(j['kind'], 0) + 1
+    waits = sorted((j['start'] - j['found']) / 60 for j in done if j['kind'] in ('repair', 'overhaul'))
+    print(f"Real Works crew: {len(done)} jobs done ({', '.join(f'{k} {v}' for k, v in sorted(kinds.items()))}), {sum(j['made'] for j in done)} parts made in the machine shop")
+    print(f"  worst state {['healthy', 'worn', 'faulty', 'failing', 'broken'][worst]}, lowest ship health {r['minHealth']:.1f}, at most {r['maxOpen']} jobs on the board, lowest shelf {r['minStock']}, job-hours waiting for parts {r['waiting']}")
+    if waits: print(f"  repairs claimed after {waits[len(waits) // 2]:.1f} h (median), {waits[-1]:.1f} h at worst")
+    print('  ship health by day:', ' '.join(f"{d['health']:.0f}" for d in r['daily']))
+    early = [j['id'] for j in done if j['tier'] <= 1 and j['urgency'] < 2 and j['start'] < j['found'] + 180]
+    restocks = [j for j in done if j['kind'] == 'restock']
+    print(f"  restock runs {len(restocks)}, nobody on two jobs at once: {not r['overlap']}, every job inside its work block: {not r['offShift']}, overlay matches: {r.get('overlay')}")
+    if worst > 3: fail('a machine broke with the Works crew on the job')
+    if r['minHealth'] < 85: fail(f"ship health fell to {r['minHealth']} with the Works crew on the job")
+    if r['minStock'] < 0: fail('a shelf went below zero')
+    if early: fail(f"crew took easy jobs before leaving them for you: {early[:4]}")
+    if r['overlap']: fail(f"two jobs at once: {r['overlap'][:4]}")
+    if r['offShift']: fail(f"jobs outside the work block: {r['offShift'][:4]}")
+    if DAYS >= 7 and not restocks: fail('no restock after a delivery')
+    if r.get('overlay') is not True: fail('jobWhere disagrees with the job')
+    r2 = run(crew='real', mode='jump'); r3 = run(crew='real', mode='odd'); r4 = run(crew='real')
+    js = lambda x: x['endJobs']
+    print('  the same twice:', same(r, r4) and js(r) == js(r4), '| one jump:', same(r, r2) and js(r) == js(r2), '| odd minutes:', same(r, r3) and js(r) == js(r3))
+    for name, x in (('twice', r4), ('jump', r2), ('odd minutes', r3)):
+        if not (same(r, x) and js(r) == js(x)): fail(f"jobs differ ({name})")
+
+    # 5. your side: a job you claim is left to you
+    y = g.ev("""(() => {
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(4 * 1440 + 9 * 60); machinesNow();
+      const o = SHIP.machines['3-oven-1']; o.cond = 40; o.state = machineState(40);       // the oven acts up
+      setShipNow(4 * 1440 + 10 * 60); machinesNow();
+      const j = jobsBoard().find(x => x.machine === '3-oven-1' && !x.claimedBy);
+      if (!j) return { none: true };
+      const id = j.id, before = SHIP.machines[j.machine].cond, claimed = claimJob(id);
+      setShipNow(5 * 1440 + 12 * 60); machinesNow();
+      const still = SHIP.jobs.find(x => x.id === id), mine = still && still.claimedBy === 'you' && still.status === 'claimed';
+      const fin = finishJob(id), after = SHIP.machines[j.machine].cond;
+      const took = takePart('relay'), stock = SHIP.stores.relay;
+      return { id, claimed, mine, fin, before, after, took, stock };
     })()""")
-    print(f"Save round trip: {rt['n']} machines at hour {rt['hour']}, read back {rt['ok']}, the same {rt['same']}, junk refused {not any(rt['junk'])}")
+    print(f"Your job: {y}")
+    if y.get('none') or not (y['claimed'] and y['mine'] and y['fin'] and y['after'] >= 90): fail('claiming and finishing a job yourself')
+
+    # 6. the save
+    rt = g.ev("""(() => {
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
+      const s = { ship: {} }; SAVE_EXTRA.forEach(f => f(s));
+      const all = () => JSON.stringify([machinesNow(), SHIP.jobs, SHIP.stores, SHIP.hold]);
+      const before = all();
+      const back = () => JSON.parse(JSON.stringify(s)); MACH_HOUR = null;
+      const ok = machinesLoad(back()), after = all();
+      const junk = [machinesLoad(null), machinesLoad({ ship: { machines: 5, machineHour: 3 } }), machinesLoad({ ship: { machines: {}, machineHour: 1e9 } })];
+      setShipNow(9 * 1440); const later1 = all(); setShipNow(6 * 1440 + 11 * 60 + 17); machinesLoad(back()); setShipNow(9 * 1440); const later2 = all();
+      return { ok, same: before === after && later1 === later2, junk, n: Object.keys(s.ship.machines).length, hour: s.ship.machineHour, jobs: s.ship.jobs.length };
+    })()""")
+    print(f"Save round trip: {rt['n']} machines and {rt['jobs']} jobs at hour {rt['hour']}, read back {rt['ok']}, the same {rt['same']}, junk refused {not any(rt['junk'])}")
     if not (rt['ok'] and rt['same']) or any(rt['junk']): fail('the save round trip')
 
     print('errors', g.errors[:5])
