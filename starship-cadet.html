@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.6.6
+   STARSHIP CADET: CSV Wren                            build 0.6.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3832,9 +3832,11 @@ const CREW = [
   { name: 'Dr. Imra Sato', deck: 4, dept: 'survey', rank: 2, skin: 0, hair: 'long', hairColor: 'grey', height: .94, build: 'slim', acc: ['glasses'], bio: 'Head of Survey. Her lab, her rules, her terrible tea.', start: [20, 5], haunts: { j: 3, '+': 2, n: 2 } },
   // Pell is on shift in the Works bay: he lives in Bunk 2 on Deck 4, but until shifts move people between decks he stays on Deck 5
   { name: 'Pell Okafor', deck: 5, dept: 'works', rank: 0, skin: 5, hair: 'buzz', hairColor: 'black', height: 1.1, build: 'broad', acc: ['beard'], bio: 'Works, like you, and two years ahead. Can fix anything except his sleep schedule.', start: [16, 3], haunts: { w: 5, t: 3, f: 2, r: 1, S: 1 }, spots: [[15, 3], [18, 3], [16, 1], [22, 1], [22, 11], [25, 5]] },
-  { name: 'Rina Deshi', deck: 4, dept: 'infirmary', rank: 0, skin: 3, hair: 'curls', hairColor: 'black', height: .95, build: 'average', acc: ['earrings', 'headband'], bio: 'Dry humour, steady hands, undefeated at Tiles.', start: [12, 3], home: 'b', haunts: { j: 6 } },
+  // Rina is on duty in the infirmary: she lives in Bunk 2 on Deck 4, but until shifts move people between decks she stays on Deck 3
+  { name: 'Rina Deshi', deck: 3, dept: 'infirmary', rank: 0, skin: 3, hair: 'curls', hairColor: 'black', height: .95, build: 'average', acc: ['earrings', 'headband'], bio: 'Dry humour, steady hands, undefeated at Tiles.', start: [22, 4], haunts: { I: 8, X: 3 }, spots: [[22, 3], [22, 4], [14, 1], [18, 1], [22, 1], [13, 4], [14, 7], [16, 2]] },
   { name: 'Chief Bram Holt', deck: 4, dept: 'watch', rank: 2, skin: 2, hair: 'bald', hairColor: 'grey', height: 1.05, build: 'broad', acc: ['moustache'], bio: 'Head of Watch. Does not trust the Veyli, and says so.', start: [19, 12], haunts: { '=': 4, '+': 4, '-': 2 } },
-  { name: 'Chef Auda Brennan', deck: 4, dept: 'works', rank: 1, skin: 1, hair: 'bun', hairColor: 'auburn', height: .92, build: 'broad', acc: ['apron', 'glasses'], bio: 'Runs the mess hall on Deck 3. Comes down with biscuits for the juniors.', start: [4, 9], haunts: { j: 9 } },
+  // Chef Brennan works the galley: the ranges, the ovens, the prep island, the pass and her stool, with trips out into the mess hall
+  { name: 'Chef Auda Brennan', deck: 3, dept: 'works', rank: 1, skin: 1, hair: 'bun', hairColor: 'auburn', height: .92, build: 'broad', acc: ['apron', 'glasses'], bio: 'Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.', start: [36, 5], haunts: { K: 8, M: 3, G: 1 }, spots: [[35, 5], [35, 4], [39, 4], [38, 4], [39, 6], [37, 7], [39, 8], [36, 3], [33, 6]] },
   { name: 'Tomas Lind', deck: 4, dept: 'watch', rank: 0, skin: 0, hair: 'ponytail', hairColor: 'blonde', height: 1.0, build: 'slim', acc: [], bio: 'New to Watch, and your bunkmate. Still learning where everything is.', start: [8, 3], home: 'a' },
 ];
 

@@ -1,10 +1,10 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.6.6). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.6.7). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
-**First job in the next chat: step 6d, Deck 3, turn 5: crew.** Every Deck 3 room is built and furnished (see "Next" below).
+**Deck 3 is complete (0.6.7) and waiting for review.** After sign-off, the next deck is the user's choice: 2, 1 or 6, each starting with a plan page (see "Next" below).
 
 Nine small updates for the design doc when it's next edited:
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.6.6 (about 4,400 lines)
+## Current build: 0.6.7 (about 4,400 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -44,6 +44,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.6.2 | Deck 3, turn 1: the shell. `DECKS[3]` from plans/deck3-plan.html: map, hull, doors, windows, floors (new `deck`, `gym` and `garden`), sealed service rooms, the lift and ladder, plaza benches and plants, name plates and the deck directory. Rooms are walkable and named but not furnished yet. The deck directory now marks whichever deck it's on. |
 | 0.6.3 | Deck 3, turn 2: the mess hall (44 seats: four long tables of eight, three round tables of four), the serving line, the galley and the walk-in cold store. A new edge type, `pass`: the serving counter through the mess–galley wall. |
 | 0.6.4 | Curved inner walls (`curves` in a deck definition), and Deck 3, turn 3: the bow lounge, with a curved bar round the galley door, two planted glass screens on one arc, booths, high tables, and a window end with a sofa, armchairs, two quiet corners and a telescope. |
+| 0.6.7 | Deck 3, turn 5: crew. Chef Brennan works the galley (haunts `K`, `M`, `G`; spots at the ranges, ovens, prep island, dish pit, pass, her stool and the mess floor). Rina is on duty in the infirmary (haunts `I`, `X`; spots at the desk, beds, cabinet, supplies and exam room). Both are `deck: 3`, which leaves five crew on Deck 4. Step 6d done. |
 | 0.6.5 | Deck 3, turn 4: the hydroponics garden (grass, grow racks under pink light, raised beds, trellises, fruit trees, a pond with benches, a stepping-stone path, a herb wall, a big tree and ground cover everywhere), the infirmary and exam room, public washrooms (all toilets), the gym, the crew store and the call-home booths. The lounge's glass screens are shorter, so the way round them is open. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
@@ -216,6 +217,7 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 
 ## Crew
 
+- **Chef Brennan and Rina are `deck: 3`** (0.6.7). Rina keeps her bunk on Deck 4 in the story, but has no `home` until shifts move people between decks. 0.6.7 against 0.6.6: Deck 4's crew paths and crew screenshots differ as expected; the crew-hidden shot differs only by a door still closing behind crew who had just walked past.
 - **Pell is `deck: 5`** with Works haunts and favourite spots (benches, job board, tea corner, lathe, storage counter). The game still starts with you on Deck 4, where seven crew wander.
 - **The room brain adds `j`, `=` and `+` weights on every deck.** On Deck 5 there's no `j`, which is harmless (that pick just fails and retries). Room letters are per-deck, so `home` and `haunts` only make sense for the walker's own deck.
 
@@ -315,7 +317,7 @@ Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, w
     - New kit: `longTable`, `roundTable`, `servery`, `trayStack`, `trayReturn`, `drinksStation`, `grabShelf`, `ovenStack`, `prepIsland`, `dishPit`, `coldShelf`, `chestFreezer`; wall kit `menuBoard`, `passShelf`. Materials in `MESS`. None call `R()`.
 3. **Curved inner walls, then the lounge (done, 0.6.4).** See "Curved inner walls" and "The bow lounge" above.
 4. **The infirmary, exam room, garden, washrooms, gym, crew store and call-home booths (done, 0.6.5).** See "Deck 3, turn 4" above.
-5. **Crew.** Chef Brennan moves to Deck 3; Rina works in the infirmary. Deck 4's crew routes change when she leaves.
+5. **Crew (done, 0.6.7).** Chef Brennan works the galley; Rina works in the infirmary. Deck 4's crew routes changed when they left.
 
 **7. Machines, supplies and the shared job list,** anchored on the Works bay job board.
 
