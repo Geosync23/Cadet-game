@@ -154,6 +154,24 @@ with sync_playwright() as pw:
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'servery: should sit at a mess seat to eat')
     body_check('eat', 'hunger', 55, b, e, seen, None)
     check(peak < BUDGET, f'draw calls {peak} over {BUDGET}')
+    # the galley's queue (section 16, 0.29.6): galleyJoin gives the back of the line and your turn; stand-ins shaped like it
+    g.ev(r"""(() => { window.portions = 30;
+      window.takePortion = () => { delete window.joined; if (window.portions > 0) { window.portions--; return true; } return false; };
+      window.galleyText = w => w === 'grab' ? '5 on the shelf.' : 'Serving: Fish pie. ' + window.portions + ' portions in the pans.';
+      window.galleyJoin = () => (window.joined = { at: [33, 2], xy: [33.55, 2.5], face: 's', ahead: 3, turnAt: shipNow() + 3.25 });
+      window.galleyTurn = () => !!window.joined && shipNow() >= window.joined.turnAt && window.portions > 0;
+      SHIP.player.needs.hunger = 20; })()""")
+    tp, b, seen, e, pk = run_activity(g, 'Servery', label='The queue, then a seat')
+    kinds = [a[0] for a in seen]
+    check(tp is True and 'queue' in kinds and 'eat' in kinds and 'tray' not in kinds, f'queue: {sorted(set(kinds))}')
+    check(any(a[0] == 'queue' and a[1] is None and a[2] == 'do' for a in seen), 'queue: should wait at the back of the line')
+    waited = sum(1 for a in seen if a[0] == 'queue' and a[2] == 'do')
+    check(waited >= 3, f'queue: should wait about 3 ship minutes for the turn ({waited} checks)')
+    check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'queue: then sit at a mess seat to eat')
+    body_check('queue and eat', 'hunger', 55, b, e, seen, None)
+    left = g.ev("[window.portions, !!window.joined]"); print('  portions left, still joined:', left)
+    check(left == [29, False], 'queue: one portion taken, and the join cleared')
+    g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
 
     print('Places held by crew, closed servery, walking away:')
     held = g.ev(r"""(() => { const a = DECK_CREW[0], old = a.goalId; const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
@@ -190,7 +208,7 @@ with sync_playwright() as pw:
     print(' ', st)
     check(st['drainHungerX2'] == 8 and st['hygieneDrain'] == 2.5, 'drain multipliers from shipEffects')
     check(st['speed'] == 1, "shipEffects' walk must not slow the player (the user's rule)")
-    check(st['peek'] is True and st['take'].get('dish') == 'fish pie' and st['peekEmpty']['ok'] is False and st['takeEmpty'] is False, f'galley stand-in: {st}')
+    check(st['peek'] is True and st['take'].get('dish') == 'Fish pie' and st['peekEmpty']['ok'] is False and st['takeEmpty'] is False, f'galley stand-in: {st}')
     check(st['note'], 'the ship notes should show on the device')
     shw = g.ev(r"""(() => { eval("window.shipEffects = function (d) { return { deck: d, restore: { hygiene: .5 }, drain: {}, notes: [] }; }"); FX_MIN = -1;
       const n = SHIP.player.needs; n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };

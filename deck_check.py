@@ -13,7 +13,8 @@
 #   Pillar 2: service hatches (a deck's `service` list) pass for the player and for Works crew. Room tiles and items are
 #   checked as the player walks; `work:works` places may be reached through a service hatch, other places may not.
 #   A deck's `machines` ({ id, kind, at, room, face, panel }): ids unique ship-wide, `at` in its room, the panel tile
-#   walkable and in the same room, and a `work:works` place standing on the panel tile.
+#   walkable and in the same room, and exactly one place that names it (`machine: id`): a `work:works` place on the
+#   panel tile. Every place that names a machine must name one on its deck.
 # Then rides 4 -> n -> 4 three times and checks Deck 4's memory comes back to the same counts.
 # Setup and environment as for cadet_test.py.
 # The game loads with ?nosave&debug (cadet_test.py's Game class), so a save never changes what it checks.
@@ -93,9 +94,12 @@ PLACES = r"""(() => {
     if (roomAt(c, r) !== m.room) why.push('at ' + c + ',' + r + ' is in room ' + roomAt(c, r) + ', not ' + m.room);
     if (roomAt(pc, pr) !== m.room) why.push('panel ' + pc + ',' + pr + ' is in room ' + roomAt(pc, pr));
     if (!free(pc, pr)) why.push('panel ' + pc + ',' + pr + ' not walkable');
-    if (!ps.some(p => p.type === 'work:works' && p.at && p.at[0] === pc && p.at[1] === pr)) why.push('no work:works place on the panel');
+    const mine = ps.filter(p => p.machine === m.id);
+    if (mine.length !== 1) why.push(mine.length + ' places name it (want 1)');
+    else if (mine[0].type !== 'work:works' || !mine[0].at || mine[0].at[0] !== pc || mine[0].at[1] !== pr) why.push('its place ' + mine[0].id + ' is not a work:works place on the panel');
     if (why.length) mbad.push(m.id + ': ' + why.join(', '));
   }
+  for (const p of ps) if (p.machine && !ms.some(m => m.id === p.machine)) mbad.push(p.id + ': names machine ' + p.machine + ', not on this deck');
   return { ids: ps.map(p => p.id), bad, counts, n: ps.length, mids: ms.map(m => m.id), mbad };
 })()"""
 

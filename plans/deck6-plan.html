@@ -90,8 +90,8 @@ svg{display:block}
 #util ul{margin:6px 0;padding-left:20px}
 </style>
 <section id="util">
-<h2>Utility rooms (Pillar 2, proposed for review)</h2>
-<p>Deck 6&#x27;s sealed service spaces get their insides. All keep today&#x27;s size and position. The crawlways stay one tile wide. 4 machines; the systems engineer reads them for wear. Each one gets a <code>machines</code> entry in <code>DECKS[6]</code> ({ id, kind, at, room, face, panel }), a panel tile where someone stands to service it, and a <code>work:works</code> place on that tile, facing the machine.</p>
+<h2>Utility rooms (Pillar 2: agreed, and built in 0.30.2 to 0.30.5)</h2>
+<p>Deck 6&#x27;s sealed service spaces get their insides. All keep today&#x27;s size and position. The crawlways stay one tile wide. 4 machines; the systems engineer reads them for wear. Each one gets a <code>machines</code> entry in <code>DECKS[6]</code> ({ id, kind, at, room, face, panel }), a panel tile where someone stands to service it, and a <code>work:works</code> place <code>&lt;id&gt;-svc</code> on that tile, facing the machine, with <code>machine: '&lt;id&gt;'</code> (panels are for jobs, not desks). In the game, <code>at</code> is the machine's tile in front of its panel and <code>face</code> the way its front faces; the table below shows each footprint's corner.</p>
 <div class="u-key"><span><i style="background:#3c464e"></i>walkable floor</span><span><i style="background:#2a9d8f"></i>machine (numbered)</span><span><i style="background:#58626a"></i>fittings, not in the registry</span><span><i style="border:2px solid #e8c06a;border-radius:50%;width:10px"></i>panel tile, line = way the worker faces</span><span><i style="background:#e8c06a;height:4px"></i>service hatch</span></div>
 <ul>
 <li><b>Way in:</b> each sealed room keeps the doorway it has today, and it becomes a service hatch. Works crew and the player can pass these hatches; tier locks come later, with progression.</li>
