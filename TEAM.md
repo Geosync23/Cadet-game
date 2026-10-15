@@ -21,7 +21,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Roster
 
-Pillar 1 work (see `plans/pillar1-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with.
+Pillar 1 work, all started 2026-10-15 (see `plans/pillar1-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with.
 
 | Session | Job | Branch it pushes to | Builds | Status |
 | --- | --- | --- | --- | --- |
@@ -30,8 +30,8 @@ Pillar 1 work (see `plans/pillar1-plan.md` for the workstreams, formats and buil
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link | `claude/deck-architect` | 0.17.x | Briefed 2026-10-15 |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Briefed 2026-10-15 |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Briefed 2026-10-15 |
-| (hiring) | Sim engineer: workstreams 1 (time and saving), then 4 (schedules), then 6 (crew on the deck, day_check) | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | Hiring |
-| (hiring) | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Hiring |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: workstreams 1 (time and saving), then 4 (schedules), then 6 (crew on the deck, day_check) | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | Hired and briefed 2026-10-15: workstream 1 first |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Hired and briefed 2026-10-15 (includes a `?crowd=40` mess-hall demo for the check-in) |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived: all its work is merged |
 
 Earlier status of the inherited helpers: all idle at hand-over, all decks built and merged (0.14.0 in `main`).
