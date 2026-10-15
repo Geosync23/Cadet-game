@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.22.3
+   STARSHIP CADET: CSV Wren                            build 0.22.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5456,7 +5456,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.22.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.22.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5662,15 +5662,22 @@ function schedData() {
   return SCHED_DATA;
 }
 const deckOf = id => +String(id).split('-')[0];
+// a locked room: one whose every door is 'closed' (the ready room, a bedroom), read from the deck's map and doors
+function schedRoomLocked(n, room) {
+  const def = DECKS[n], at = (i, j) => (def.map[j] || '')[i];
+  const doors = Object.entries(def.doors || {}).filter(([k]) => { const [o, i, j] = k.split(','); return (o === 'v' ? [at(+i - 1, +j), at(+i, +j)] : [at(+i, +j - 1), at(+i, +j)]).includes(room); });
+  return doors.length > 0 && doors.every(([, t]) => t === 'closed');
+}
 // work stations: fixed per person and shift. In rank order, each takes the next station of their type on their
-// work deck; when those run out, any other workstation on the deck nobody on that shift has; else none (null)
+// work deck; when those run out, any other workstation on the deck nobody on that shift has, outside locked
+// rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
   const desks = new Map(), used = new Set();
   const order = people.filter(p => p.work).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
-      : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l);
+      : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room));
     const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
     if (d) used.add(p.shift + '|' + d.id);
     desks.set(p.id, d ? d.id : null);

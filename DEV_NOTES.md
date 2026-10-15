@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.24.1 (about 7,300 lines)
+## Current build: 0.25.0 (about 7,300 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -76,6 +76,8 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.24.0 | Second combined build (the lead): 0.23.0 plus the player's berth moved to 4-B1-4 (0.16.3) and the crowd demo with real crew on real seats, the ship clock, and no saving under `?crowd` (0.20.1). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. |
 | 0.24.1 | Third combined build (the lead): 0.24.0 plus the bunk-room texts (0.17.2), going to sleep in your bunk (0.21.2) and the crew following their schedules on every deck, drawn by the crowd (0.22.1). Merge fixes: the HUD build line, `GAME_BUILD`, this table, and `PLAYER_BED` set to 4-B1-4 to match `ROSTER_PLAYER` (0.16.3). |
 | 0.22.3 | 0.24.1 merged into `claude/sim-engineer` with 0.22.2, plus three small changes (the sim engineer). The player's bed is read from `ROSTER_PLAYER.bed` (`playerBed()`, now 4-B1-4) for sleeping, and the schedules leave out only `player: true`. Seat and mattress heights per the performance engineer: a place's own `y`, else upper berths 1.6 and other beds 0.5, else `SEAT_Y` by type (mess seat 0.475, bench 0.48, lounge seat and common room 0.44). Someone asleep in your own bunk can't be tapped, so a tap there is always your bunk (your bunkmate below was catching it). With crew off, cadet_test ALL IDENTICAL to 0.24.1; deck_check OK; day_check days 1 and 5 OK (peak 425). |
+| 0.25.0 | Fourth combined build (the lead): 0.24.1 plus 0.22.2 (full rigs for the 3 story crew nearest you, walk-to tiles inside each place's room, two crew fixes, new `day_check.py`). Workstream 6 done. Merge fixes only: the HUD build line, `GAME_BUILD` and this table. |
+| 0.22.4 | 0.25.0 merged into `claude/sim-engineer`, plus one change (the sim engineer): overflow work stations skip locked rooms (`schedRoomLocked`: every door 'closed', from the deck's map and doors) as well as private ones, so the third day-shift helm rating works the bridge's Watch station instead of the Captain's ready-room desk. Overflow now: Rina to a galley station (4 infirmary stations for 5 day infirmary crew), two helm ratings to free command seats in the bridge ring, Strand to the bridge Watch station. With crew off, cadet_test ALL IDENTICAL to 0.25.0; deck_check OK; day_check days 1 and 7 OK. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -167,6 +169,7 @@ Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each 
 - **Crew and you.** Crew don't block each other (they never share a place, so they only cross in passing). Standing crew push you out when you steer (`Walker.update`), and `occupiedBy` keeps your paths off their tiles. Tap a crew member (`tapCrew`, by screen distance to their body) and they stop for 6 seconds, facing you if they're on their feet; the toast gives their name, role and bio. The Crew button hides the crowd (`crowd.visible`); they carry on unseen.
 - **Stuck.** `stuck` counts ship minutes an agent meant to move but didn't; `stuckMax` keeps the worst. `noPath` counts times there was no way to a place (the agent is then simply put there).
 - **The old walkers.** `CREW` (section 9) stays as data; `crew` is an empty array for the code that still loops over it. The rig, the player's `Walker` and its R() calls are unchanged, so with crew off nothing else moves.
+- **Overflow stations (0.22.4).** `schedDesks`' second pass (anyone whose own type of station has run out) takes another free `work:*` station on the work deck, but never one in a locked room (`schedRoomLocked(n, room)`: a room whose every door is 'closed') or a private one (places in a bedroom are already owned).
 - **Draw calls (0.22.1, by the lift at 06:00):** Deck 4 with 52 crew, 319 (0.22.0 with its five walkers: 346); Deck 3 at 18:00 with 63 crew, about 307–325.
 - **Full rigs (0.22.2).** Every quarter second `crewDetail` gives the `FULL_MAX` (3) story crew nearest you, within `FULL_NEAR` (4.5) tiles, a `FullPerson`, and sends them back to the crowd beyond `FULL_FAR` (6). A `FullPerson` is a baked `makeCharacter` rig in the scene, using `CrowdPerson.prototype.set` and `.update`, so it's posed exactly like the crowd (sit, lie, work, eating). That relies on `CrowdPerson`'s field names; if section 8b changes them, change `FullPerson` too. Each full rig costs about 30 draw calls. It has its own random stream (from the person's id), and its geometry is disposed when it goes back to the crowd.
 - **Walk-to tiles (0.22.2).** For a place on a blocked tile (a seat or bed) with no `walk`, the candidates are the open neighbours in the place's own room that aren't behind a wall, nearest the spot first. The first one `crewPath` can reach from the lift wins.
@@ -537,6 +540,8 @@ They checked:
 
 - Project a door's edge centre at y ≈ 0.08. The cutaway may have lowered the door, and a tap at head height goes past it.
 - Things in locked rooms can be hit through a lowered door; that's the test spot, not a bug.
+
+**day_check.py** (0.22.2): `CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py BUILD.html [DAY]` fast-forwards one ship day with `?nosave&debug` (about 4 minutes) and checks the plan's rules: everyone sleeps 6+ hours in their own bed, eats twice and works their shift; no double-booked places, no gaps; the same plans twice; on every deck a whole day of crew logic with nobody stuck over 10 ship minutes, nobody in someone else's bed or place, nobody missing; draw calls peak under 450; Deck 4 run twice comes out identical. Run it with cadet_test and deck_check whenever crew, schedules, places or the roster change.
 
 **deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
 
