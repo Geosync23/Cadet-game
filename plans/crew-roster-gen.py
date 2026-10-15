@@ -335,6 +335,11 @@ def main():
     for p, (hours, off, bio) in zip([p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-2:], STOREKEEPERS):
         p.update(dept='store', role='Storekeeper', job='store', bio=bio)
         p['rota'] = {'offDays': off, 'hours': hours}
+    # ---- the galley staff's parts in the galley engineer's rota (section 16, galleyDay owns the hours; shift stays
+    # 'day'): Brennan is the chef, Tariq Varga cooks on her days off (he works Fri and Sat), the rest are hands
+    for p in crew:
+        if p['dept'] == 'galley': p['galley'] = 'chef' if p['id'] == 'brennan' else 'cook' if p['id'] == 'varga-tariq' else 'hand'
+    assert sum(p.get('galley') == 'cook' for p in crew) == 1 and not {4, 5} & set(next(p for p in crew if p.get('galley') == 'cook')['rota']['offDays'])
     # ---- work places, seeds, uniform
     out = []
     for p in crew + GUESTS + [PLAYER]:
@@ -343,6 +348,7 @@ def main():
         if p.get('story'): e['story'] = True
         if p.get('provisional'): e['provisional'] = True
         if p.get('player'): e['player'] = True
+        if p.get('galley'): e['galley'] = p['galley']
         e.update(rank=p['rank'], dept=p['dept'], uniform=UNIFORM.get(p['dept']), role=p['role'], shift=p['shift'], rota=p['rota'], bed=p['bed'],
                  work=dict(deck=deck, place=place) if deck else None, habits=p['habits'], traits=p['traits'], looks=p['looks'],
                  bio=p['bio'], life=p['life'], seed=seed_of(p['id']))
@@ -484,7 +490,7 @@ def page(entries):
                        '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
-                          e(x['role']), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
+                          e(x['role'] + (', and cook on the chef\'s days off' if x.get('galley') == 'cook' else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
