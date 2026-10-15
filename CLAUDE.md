@@ -13,6 +13,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `cadet_test.py`: the regression test (compares two builds; see DEV_NOTES "Testing").
 - `deck_check.py`: visits every built deck and checks reachability, crew, draw calls and memory.
 - `day_check.py`: fast-forwards one ship day and checks the crew's schedules (sleep, meals, shifts, places, nobody stuck, draw calls).
+- `player_check.py`: checks the player's needs, activities, walking speed and saving.
 - `plans/`: deck plan pages.
 
 ## How we work
