@@ -578,7 +578,7 @@ Done so far:
 
 **The decks:**
 
-- Which six Deck 4 cabins are the guest cabins, and how often do guests change? Decide when the crew roster is built (Pillar 1).
+- How often do Deck 4's guests change? Decide when the crew roster is built (Pillar 1).
 - Deck 2's fifteenth bedroom is a second visitors' cabin for now. Keep it, or make it a senior lounge?
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 - Should one of Deck 6's power junctions open at tier 2 rather than tier 3?
@@ -592,3 +592,4 @@ Done so far:
 - The bridge's sunken command ring is faked for now with a rail, a painted step edge and a curved step strip.
 - The bridge washroom stays.
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
+- Deck 4's guest cabins are the six nearest the lift: 4-01, 4-02, 4-03 and 4-04 (the first column, two with windows) and the inner pair 4-07 and 4-08, so guests don't walk the corridor and officers keep 10 of the 12 window cabins. The two spares are 4-23 and 4-24, the inner pair at the music-room end. Guest cabins never use bunks (built in 0.14.0).

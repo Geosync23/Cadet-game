@@ -25,6 +25,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Done
 
+- **Deck 4 guest cabins, build 0.14.0** (2c47c50, now also the head of `claude/ship-integration`): six guest cabins by the lift, two spares, plan page updated. Crew routes unchanged; Decks 1, 2, 3, 5 and 6 pixel-identical; deck_check OK. Waiting on the user's sign-off along with 0.13.0.
 - Decided: six senior officers confirmed on Deck 2; six of Deck 4's officer cabins become guest cabins (design-doc.md updated).
 
 - design-doc.md (fd40490) replaces design-doc-v4.pdf (now in archive/) as the single living design document, with the nine pending updates, six decks as built and the Living Ship merged in. Checked by the lead against the PDF.
@@ -65,4 +66,3 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 ## Queue
 
 - Pillar 1 of the Living Ship: plan it with the user, then build.
-- Deck 4 guest cabins in the game: given to the Deck 6 architect (build 0.14.0, from 0.13.0).
