@@ -43,6 +43,8 @@ How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 
 
 ## Done
 
+- **Ship integration 0.40.3** (f15f8e5): utility rooms on all six decks, crew showing activities, the player's dinner queue, machines' background average day. deck_check, day_check, food_check and machine_check OK; player_check failing on the combined build (the player engineer, 0.28.4). Known: Deck 6's engine-room view is 517 draw calls (the performance engineer). Next: B2's visible half (jobWhere, the job board, the device's jobs).
+
 - **Ship integration 0.40.2** (9022006): the player's needs and device (0.28.2), the galley rota live (0.26.2 + 0.29.x + final roster c02e656), utility rooms on Decks 1–4 (0.31.4, 0.32.2, 0.30.2), poses (0.27.x), jobs on paper (0.33.4). deck_check, day_check and food_check OK. machine_check and player_check fail on test stand-ins and the SAVE_EXTRA hook: the player engineer (0.28.3) and the systems engineer are fixing them. Lead merge fixes: sections 15/16/17 in order, SAVE_V 2, the sim engineer's schedData taken whole. (Local attempts kept on branches `lead-wip-0401` and `lead-wip-0402`, not pushed.)
 
 - **Ship integration 0.40.1** (32c8aee): 0.30.2 (Deck 4 utility rooms), 0.27.0 (activity poses), 0.16.5 (storekeepers, galley roles), 0.31.2, 0.33.1–0.33.2 (jobs and supplies on paper, retuned wear). Lead fixes: Deck 4 panel places carry `machine`; schedDesks and stand-ins skip machine panels. deck_check, day_check and machine_check OK. Still to come: the sim engineer's 0.26.2 (galleyDay reader, poseOf wiring, crewPath `who`), then the galley.
