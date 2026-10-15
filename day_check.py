@@ -20,7 +20,7 @@ STEP = 0.05                    # real seconds a step (the main loop's longest fr
 
 # run one deck through the day: the crew logic only, a step at a time; every ship hour, draw a frame or two
 SIM = r"""(async ({ n, day, step, draw }) => {
-  const B = (day - 1) * 1440, out = { deck: n, stuck: 0, stuckWho: '', shared: 0, notOwnBed: [], noPath: [], missing: 0, peakCrew: 0, calls: [], unexpected: [] };
+  const B = (day - 1) * 1440, out = { deck: n, stuck: 0, stuckWho: '', shared: 0, sharedWho: [], notOwnBed: [], noPath: [], missing: 0, peakCrew: 0, calls: [], unexpected: [] };
   setShipNow(B); goToDeck(n);
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
@@ -31,7 +31,8 @@ SIM = r"""(async ({ n, day, step, draw }) => {
       if (a.stuckMax > out.stuck) { out.stuck = a.stuckMax; out.stuckWho = a.p.id + ' ' + hhmm(now - B); }
       if (a.noPath && !out.noPath.includes(a.p.id)) out.noPath.push(a.p.id);
       if (a.settled && a.spot) {
-        if (held.has(a.spot.id)) out.shared++; held.set(a.spot.id, a.p.id);
+        if (held.has(a.spot.id)) { out.shared++; const w = a.spot.id + ' ' + held.get(a.spot.id) + '/' + a.p.id; if (out.sharedWho.length < 6 && !out.sharedWho.some(x => x.startsWith(w))) out.sharedWho.push(w + ' from ' + hhmm(now - B)); }
+        held.set(a.spot.id, a.p.id);
         if (a.spot.pose === 'lie' && PLACE_OF.get(a.spot.id) && PLACE_OF.get(a.spot.id).type === 'bed' && a.spot.id !== own.get(a.p.id)) out.notOwnBed.push(a.p.id + ' in ' + a.spot.id);
       }
     }
@@ -103,7 +104,7 @@ with sync_playwright() as pw:
         busiest = sorted(o['calls'], key=lambda c: -c[2])[:2]
         print('  busiest frames:', ', '.join(f"{c[0]} {c[1]} {c[2]} calls, {c[3]} crew" for c in busiest))
         if o['stuck'] > 10: fail(f"deck {n}: {o['stuckWho']} stuck {o['stuck']:.1f} ship minutes")
-        if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times")
+        if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times: {o['sharedWho']}")
         if o['notOwnBed']: fail(f"deck {n}: in someone else's bed: {sorted(set(o['notOwnBed']))[:6]}")
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")
         if o['missing']: fail(f"deck {n}: someone due on the deck wasn't there ({o['missing']} person-minutes)")
