@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.10.1
+   STARSHIP CADET: CSV Wren                            build 0.12.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4671,44 +4671,48 @@ Object.assign(KIT, {
 });
 
 // =====================================================================
-// DECK 1: BRIDGE (step 6e: turn 1 the shell)
-// From plans/deck1-plan.html. The top of the ship and the smallest deck: the bridge fills the bow, the
+// DECK 1: BRIDGE (step 6e, builds 0.8.x; scaled up in 0.12.x)
+// From plans/deck1-plan.html (Sketch 2). The top of the ship and the smallest deck: the bridge fills the bow, the
 // observation room (also the conference room) the stern, with the lift lobby, the trunk head and the
-// top of the ladder between. The ready room is locked; the service spaces are sealed until their tier.
+// top of the ladder between. The ready room is locked and tucked aft of the bridge to port, beside the lobby;
+// the washroom mirrors it to starboard. The service spaces are sealed until their tier.
 // =====================================================================
 DECKS[1] = {
   num: 1, name: 'Bridge', seed: 10109,
   blurb: 'Bridge, ready room, observation room', arrive: 'The bridge is forward of the lift, the observation room aft. People talk quietly up here.',
-  lift: [8, 5],
-  // car rows 3-5, trunks row 2 above it, ladder row 6: the same world spot as every deck. The spine ends here.
+  lift: [8, 6],
+  // car rows 4-6, trunks row 3 above it, ladder row 7: the same world spot as every deck. The spine ends here.
+  // 22 x 12, world x -12..10 and z -6..6: well inside Deck 2 (52 x 22) below it.
   map: [
-    '..OOOOkkkkRRRRBBB...',
-    '.OOOOO++++RRRRBBBB..',
-    '.OOOOO+YY+RRRRBBBBB.',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+ZZ+BBBBBBBBBB',
-    '.OOOOO++++wwBBBBBBB.',
-    '.OOOOOuuuuwwBBBBBB..',
-    '..OOOOuuuuccccccc...',
+    '..OOOOkkkkRRRBBBBB....',
+    '.OOOOOkkkkRRRBBBBBBB..',
+    '.OOOOO++++RRRBBBBBBBB.',
+    '.OOOOO+YY+RRRBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+ZZ+BBBBBBBBBBBB',
+    '.OOOOO++++wwwBBBBBBBBB',
+    '.OOOOOuuuuwwwBBBBBBBB.',
+    '.OOOOOuuuucccccBBBBB..',
+    '..OOOOuuuuccccccBB....',
   ],
   // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
   // glass: an inner window. lift: the main lift (one wide door each side).
   doors: {
-    'v,7,3': 'lift', 'v,7,4': 'lift', 'v,7,5': 'lift', 'v,9,3': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift',   // one wide door each side
-    'h,7,2': 'glass', 'h,8,2': 'glass',                       // the trunk head, behind glass above the car
-    'h,7,7': 'hatch', 'h,8,7': 'glass',                       // the top of the ladder, with its hatch
-    'v,10,4': 'door', 'v,10,5': 'door', 'v,10,3': 'glass', 'v,10,6': 'glass',   // bridge doors, straight ahead of the bow-side lift door
-    'v,6,4': 'door', 'v,6,5': 'door', 'v,6,3': 'glass', 'v,6,6': 'glass',       // glass doors into the observation room, aft
-    'h,12,3': 'closed',                                       // the ready room, off the bridge
-    'v,10,7': 'door',                                         // bridge washroom, from the lobby
-    'h,6,1': 'hatch', 'h,9,8': 'hatch',                       // utility closet; relay room
-    'h,13,9': 'hatch',                                        // floor hatch by the rear stations, down into the sub-floor crawl
+    'v,7,4': 'lift', 'v,7,5': 'lift', 'v,7,6': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift', 'v,9,6': 'lift',   // one wide door each side
+    'h,7,3': 'glass', 'h,8,3': 'glass',                       // the trunk head, behind glass above the car
+    'h,7,8': 'hatch', 'h,8,8': 'glass',                       // the top of the ladder, with its hatch
+    'v,10,5': 'door', 'v,10,6': 'door', 'v,10,4': 'glass', 'v,10,7': 'glass',   // bridge doors, straight ahead of the bow-side lift door
+    'v,6,5': 'door', 'v,6,6': 'door', 'v,6,4': 'glass', 'v,6,7': 'glass',       // glass doors into the observation room, aft
+    'h,11,4': 'closed',                                       // the ready room, from the aft edge of the bridge
+    'v,10,8': 'door',                                         // bridge washroom, from the lobby
+    'h,6,2': 'hatch', 'h,9,9': 'hatch',                       // utility closet; relay room
+    'h,14,10': 'hatch',                                       // floor hatch by the Works station, down into the sub-floor crawl
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'h,12,3': 'R', 'h,6,1': 'k', 'h,9,8': 'u', 'h,13,9': 'c' },
-  plates: [['v,10,2', 'w', 'Bridge'], ['v,6,2', 'e', 'Observation']],
+  sealed: { 'h,11,4': 'R', 'h,6,2': 'k', 'h,9,9': 'u', 'h,14,10': 'c' },
+  plates: [['v,10,3', 'w', 'Bridge'], ['v,6,3', 'e', 'Observation'], ['h,12,4', 's', 'Ready room']],
   rooms: {
     '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
     '@': { name: 'Main lift', floor: 'lift' },
@@ -4725,16 +4729,16 @@ DECKS[1] = {
   },
   windows: ['O', 'R'].map(room => ({ room })),
   closedDoors: {
-    'h,7,7': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
+    'h,7,8': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
   },
-  hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
+  hull: { sternX: 1, stern: 3, bowFrom: 15, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
   light: { sky: col('#d4e2ff'), sun: col('#dfe8ff'), hemi: .96, sunI: .9 },   // cooler than the decks below
   // the command ring, inlaid in the carpet (the ring is faked: no sunken floor). A darker well, shaded under its edge,
   // a brass step edge with a teal light line outside it, and a faint inner circle round the Captain's chair.
-  ring: [15.4, 5, 2.0],
+  ring: [17, 6, 2.0],
   // the command rail: a curved rail in dark wood behind the ring, open at both sides and forward
   curves: [
-    { kind: 'bar', arc: [15.4, 5, 2.2, 140, 220], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
+    { kind: 'bar', arc: [17, 6, 2.4, 130, 230], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
   ],
   floorArt(g, PX) {
     const [i, j, r0] = this.ring, cx = i * PX, cy = j * PX, r = r0 * PX, arc = (rr) => { g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); };
@@ -4750,11 +4754,11 @@ DECKS[1] = {
     hazardBand(g, hx, hy, hw, 6, true); hazardBand(g, hx, hy + hw - 6, hw, 6, true); hazardBand(g, hx, hy, 6, hw, false); hazardBand(g, hx + hw - 6, hy, 6, hw, false);
     g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(hx + hw / 2 - 9, hy + hw / 2 - 3, 18, 6); g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(hx + 7, hy + 7, hw - 14, 1);
   },
-  floorHatch: [13, 8],
+  floorHatch: [14, 9],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
-    for (const [key, tw] of [['v,7,6', 'w'], ['v,9,6', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,8,1', 's', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Bridge, the top of the line.') });
+    for (const [key, tw] of [['v,7,7', 'w'], ['v,9,7', 'e']]) placeOnEdge('liftPanel', key, tw);
+    placeOnEdge('deckDirectory', 'h,8,2', 's', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Bridge, the top of the line.') });
     // the top of the spine: the trunks end behind glass above the car, the ladder behind glass below it
     for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
@@ -4762,49 +4766,49 @@ DECKS[1] = {
     // the viewscreen across the bow, and something to tap in front of it
     bridgeViewscreen('B', -60, 60);
     // the command ring: the Captain's chair with a seat either side, helm and ops just forward, and a brass step edge
-    // with a light line round the well (the ring is faked: the floor stays flat). Ring centre: tile (15.4, 5); B starts at col 10.
+    // with a light line round the well (the ring is faked: the floor stays flat). Ring centre: tile (17, 6); B starts at col 10.
     const ring = curvePoints({ arc: [d.ring[0], d.ring[1], d.ring[2], -180, 180] });
     staticRoot.add(curveStrip(ring, -.01, .03, -.05, .05, [BRG.brass, BRG.brass, BRG.brass]));
     const lit = curveStrip(ring, -.01, .012, .06, .085, [BRG.stepGlow, BRG.stepGlow, BRG.stepGlow]); lit.castShadow = false; staticRoot.add(lit);
-    place('B', 'commandChair', 5.2, 5, 'w', { block: [[5, 4], [5, 5]], it: IT('The Captain\'s chair', 'Red leather, worn pale on the right armrest where the Captain drums her fingers. Nobody else sits in it. Not even for a photo.') });
-    for (const [z, t, x] of [[3.85, 'First officer\'s seat', 'The Commander\'s seat, at the Captain\'s left. A tablet is tucked down the side cushion.'], [6.15, 'Guest seat', 'The seat at the Captain\'s right, for whoever has been invited up. Today, nobody.']])
-      place('B', 'commandChair', 5.2, z, 'w', { small: true, block: [[5, z < 5 ? 3 : 6]], it: IT(t, x) });
-    for (const [z, scr, t, x] of [[4.45, BRG.helm, 'Helm', 'The helm: course, speed and the next waypoint, plotted in teal. The heading hasn\'t changed in three days.'], [5.55, BRG.ops, 'Ops', 'Operations: power, air, water and comms, all on one desk. Every bar in the green, for once.']]) {
-      place('B', 'bridgeConsole', 7.45, z, 'e', { screen: scr, it: IT(t, x) });
-      place('B', 'commandChair', 6.55, z, 'w', { small: true, block: [[6, z < 5 ? 4 : 5]] });
+    place('B', 'commandChair', 6.8, 6, 'w', { block: [[6, 5], [6, 6], [5, 5], [5, 6]], it: IT('The Captain\'s chair', 'Red leather, worn pale on the right armrest where the Captain drums her fingers. Nobody else sits in it. Not even for a photo.') });
+    for (const [z, t, x] of [[4.85, 'First officer\'s seat', 'The Commander\'s seat, at the Captain\'s left. A tablet is tucked down the side cushion.'], [7.15, 'Guest seat', 'The seat at the Captain\'s right, for whoever has been invited up. Today, nobody.']])
+      place('B', 'commandChair', 6.8, z, 'w', { small: true, block: [[6, z < 6 ? 4 : 7]], it: IT(t, x) });
+    for (const [z, scr, t, x] of [[5.45, BRG.helm, 'Helm', 'The helm: course, speed and the next waypoint, plotted in teal. The heading hasn\'t changed in three days.'], [6.55, BRG.ops, 'Ops', 'Operations: power, air, water and comms, all on one desk. Every bar in the green, for once.']]) {
+      place('B', 'bridgeConsole', 9.4, z, 'e', { screen: scr, it: IT(t, x) });
+      place('B', 'commandChair', 8.5, z, 'w', { small: true, block: [[8, z < 6 ? 5 : 6]] });
     }
-    // the rear stations: Watch and Survey along the ready room wall (its door between them stays clear), Comms along the
-    // washroom wall, Works against the washroom's far side, beside the floor hatch. Each has a seat facing it.
+    // the rear stations, in two banks facing the bow: Watch and Survey against the ready room's side wall, Comms and Works
+    // against the washroom's, Works beside the floor hatch. Each has a seat facing it, and the aisles round them stay open.
     for (const [x, z, back, scr, t, txt] of [
-      [1.45, 3.4, 'n', BRG.watch, 'Watch station', 'The watch officer\'s board: who\'s on shift, where, and what\'s due. Your name is on it, in the Works column.'],
-      [3.45, 3.4, 'n', BRG.survey, 'Survey station', 'Sensor returns from the array on Deck 2. A long, slow wave that the survey team calls "the ship breathing".'],
-      [1.45, 6.6, 's', BRG.comms, 'Comms station', 'Incoming and outgoing traffic. A queue of call-home messages from Deck 3, waiting for the next relay window.'],
-      [2.4, 8.5, 'w', BRG.works, 'Works station', 'The Works board, mirrored from the job list on Deck 5. Bridge jobs are marked in gold; the sub-floor hatch is right beside it.'],
+      [3.4, 1.5, 'w', BRG.watch, 'Watch station', 'The watch officer\'s board: who\'s on shift, where, and what\'s due. Your name is on it, in the Works column.'],
+      [3.4, 2.5, 'w', BRG.survey, 'Survey station', 'Sensor returns from the array on Deck 2. A long, slow wave that the survey team calls "the ship breathing".'],
+      [3.4, 8.5, 'w', BRG.comms, 'Comms station', 'Incoming and outgoing traffic. A queue of call-home messages from Deck 3, waiting for the next relay window.'],
+      [3.4, 9.5, 'w', BRG.works, 'Works station', 'The Works board, mirrored from the job list on Deck 5. Bridge jobs are marked in gold; the sub-floor hatch is right beside it.'],
     ]) {
-      place('B', 'rearStation', x, z, back, { screen: scr, w: back === 'w' ? .88 : 1.0, it: IT(t, txt) });
+      place('B', 'rearStation', x, z, back, { screen: scr, w: .94, it: IT(t, txt) });
       const o = { n: [0, .7, 's'], s: [0, -.7, 'n'], w: [.52, 0, 'e'] }[back];
       place('B', 'commandChair', x + o[0], z + o[1], o[2], { small: true, noBlock: true });
     }
     // the observation room (also the conference room): the table for ten, the briefing screen on the lobby wall, the window
     // seat across the stern, the Captain's tea, a lamp and two plants. O starts at column 1, so room-local x is tile x - 1.
-    place('O', 'confTable', 2.5, 5, 'n', { it: IT('Conference table', 'Ten seats, a brass line down the middle, and a ring on the wood where somebody once put down a hot mug. Briefings happen here.') });
-    for (const z of [3.0, 4.0, 5.0, 6.0, 7.0]) for (const [x, b] of [[1.35, 'w'], [3.65, 'e']]) place('O', 'commandChair', x, z, b, { small: true, noBlock: true });
-    placeWall('O', 'briefingScreen', 'e', 2.0, { hitW: 1.6, it: IT('Wall screen', 'Set up for the next briefing: the Wren in profile and four items on the agenda. Item three is about the Works. Item three is about you.') });
-    place('O', 'windowSeat', .38, 5, 'w', { w: 3.6, it: IT('Window seat', 'The best seat on the ship. From here you look aft along the whole length of the Wren, with the stars sliding away behind.') });
-    place('O', 'teaSideboard', 4.67, 7.9, 'e', { it: IT('The Captain\'s tea', 'A blue teapot, three cups and a tin with a handwritten label: NOT FOR BRIEFINGS. On quiet afternoons the Captain takes her tea at the window seat.') });
+    place('O', 'confTable', 2.5, 6, 'n', { it: IT('Conference table', 'Ten seats, a brass line down the middle, and a ring on the wood where somebody once put down a hot mug. Briefings happen here.') });
+    for (const z of [4.0, 5.0, 6.0, 7.0, 8.0]) for (const [x, b] of [[1.35, 'w'], [3.65, 'e']]) place('O', 'commandChair', x, z, b, { small: true, noBlock: true });
+    placeWall('O', 'briefingScreen', 'e', 2.5, { hitW: 1.6, it: IT('Wall screen', 'Set up for the next briefing: the Wren in profile and four items on the agenda. Item three is about the Works. Item three is about you.') });
+    place('O', 'windowSeat', .38, 6, 'w', { w: 3.6, it: IT('Window seat', 'The best seat on the ship. From here you look aft along the whole length of the Wren, with the stars sliding away behind.') });
+    place('O', 'teaSideboard', 4.67, 8.9, 'e', { it: IT('The Captain\'s tea', 'A blue teapot, three cups and a tin with a handwritten label: NOT FOR BRIEFINGS. On quiet afternoons the Captain takes her tea at the window seat.') });
     place('O', 'floorLamp', .55, 2.45, 'n', { light: true });
-    for (const z of [.6, 9.4]) place('O', 'plant', 4.45, z, 'n', { big: true, band: '#c9a24a' });
-    // the ready room, locked: the desk facing the door, the Captain's chair behind it and two for visitors, the bookshelf,
-    // and the Admiral's aquarium. R starts at column 10.
-    place('R', 'readyDesk', 1.6, 1.5, 's', { it: { t: 'The Captain\'s desk', x: 'A tidy desk, a model of the Wren, and a mug that says WORLD\'S OKAYEST CAPTAIN. A gift, apparently.', see: true } });
-    place('R', 'commandChair', 1.6, .72, 'n', { it: { t: 'Desk chair', x: 'The Captain\'s other chair. It faces the door, so she sees who comes in.', see: true } });
-    for (const x of [1.1, 2.1]) place('R', 'chair', x, 2.4, 's');
-    place('R', 'aquarium', .36, 1.4, 'w', { it: { t: 'The Admiral', x: 'One slow orange fish in a well-kept tank. The Admiral has outlasted two refits and a first officer.', see: true } });
-    place('R', 'readyShelf', 3.72, 1.4, 'e', { it: { t: 'Bookshelf', x: 'Star charts, old logbooks, a field guide to Veyli customs, and a paperback with every page dog-eared.', see: true } });
-    // the bridge washroom (2 x 2): a compact toilet in the far corner and a small basin by the door. w starts at column 10.
-    place('w', 'compactToilet', 1.45, 1.62, 's', { it: IT('Toilet', 'Compact, spotless, and the only one on Deck 1. The watch is grateful.') });
-    place('w', 'smallBasin', 1.4, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
-    place('B', 'tapSpot', 8.6, 5, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
+    for (const z of [.6, 11.4]) place('O', 'plant', 4.45, z, 'n', { big: true, band: '#c9a24a' });
+    // the ready room (3 x 4), locked: the desk facing the door, the Captain's chair behind it and two for visitors, the
+    // bookshelf, and the Admiral's aquarium. R starts at column 10; its door is in the middle of its bridge side.
+    place('R', 'readyDesk', 1.5, 2.1, 's', { it: { t: 'The Captain\'s desk', x: 'A tidy desk, a model of the Wren, and a mug that says WORLD\'S OKAYEST CAPTAIN. A gift, apparently.', see: true } });
+    place('R', 'commandChair', 1.5, 1.3, 'n', { it: { t: 'Desk chair', x: 'The Captain\'s other chair. It faces the door, so she sees who comes in.', see: true } });
+    for (const x of [.6, 2.4]) place('R', 'chair', x, 3.2, 's');
+    place('R', 'aquarium', .36, .9, 'w', { it: { t: 'The Admiral', x: 'One slow orange fish in a well-kept tank. The Admiral has outlasted two refits and a first officer.', see: true } });
+    place('R', 'readyShelf', 2.72, .9, 'e', { it: { t: 'Bookshelf', x: 'Star charts, old logbooks, a field guide to Veyli customs, and a paperback with every page dog-eared.', see: true } });
+    // the bridge washroom (3 x 2): a small basin and a compact toilet down its far wall, both reached from the middle. w starts at column 10.
+    place('w', 'compactToilet', 2.62, 1.45, 'e', { it: IT('Toilet', 'Compact, spotless, and the only one on Deck 1. The watch is grateful.') });
+    place('w', 'smallBasin', 2.5, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
+    place('B', 'tapSpot', 10.4, 6, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
   },
 };
