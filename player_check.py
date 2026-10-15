@@ -262,6 +262,7 @@ with sync_playwright() as pw:
             check(g.ev(TAPS % shelf) is True, 'job loop: a tap on a storage shelf should fetch'); s2 = jrun()
             print('  fetched:', s2[1], s2[3][:100]); check(s2[1] == mj[0][:2], f'job loop: should carry {mj[0]}, carries {s2[1]}')
             check(g.ev(f"SHIP.stores[{json.dumps(mj[0][0])}]") == mj[3] - 1, 'job loop: one off the storage shelf')
+            check(g.ev("player.holding") is True, 'job loop: carrying parts should show the crate (player.holding)')
             g.ev(f"goToDeck({mj[1]})"); g.step(5)
             check(g.ev(TAPI) is True, 'job loop: back at the machine')
             for k in range(60):                                # repair a few minutes, then walk away
@@ -270,6 +271,7 @@ with sync_playwright() as pw:
             g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3)
             paused = json.loads(g.ev(JST)); print('  walked away mid-repair:', paused[0], paused[2])
             check(not paused[0] and paused[2]['fitted'] == mj[0] and paused[2]['done'] >= 4, 'job loop: walking away should keep the part fitted and the repair time done')
+            check(g.ev("player.holding") is False, 'job loop: with the parts fitted, the crate goes')
             if g.ev("typeof touchJob === 'function'"):
                 tc = g.ev(f"(() => {{ const j = SHIP.jobs.find(j => j.id === {json.dumps(jid)}); return [j.touched || 0, j.start, shipNow()]; }})()")
                 print('  touched (section 17\'s touchJob):', tc)
