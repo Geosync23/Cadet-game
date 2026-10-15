@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.29.2
+   STARSHIP CADET: CSV Wren                            build 0.29.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5459,7 +5459,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6092,7 +6092,8 @@ const FOOD = {
   batch: 10, cookT: 20,                   // a pot: 10 portions, 20 minutes of a cook's time
   bake: 8, bakeT: 15,                     // a tray for the grab shelf: 8 items, 15 minutes
   serveryCap: 50, grabCap: 16,            // what the hot line (5 pans of 10) and the shelf hold
-  coldCap: 300, deliverAt: 630,           // the cold store holds under two days' food; topped up daily at 10:30 (B3: by hover cart)
+  coldCap: 300, deliverAt: 630,           // the cold store holds under two days' food; topped up daily at 10:30...
+  restock: 'rule',                        // ...while this is 'rule'. 'carts': section 17's hover carts bring it instead (B3)
   plates: 110, washRate: 3,               // plates aboard; plates a minute through the dish machine
   open: { breakfast: 360, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
   lead: 70,                               // ...and hot pots start at most this long before
@@ -6138,15 +6139,16 @@ function galleyEvents(d) {
   for (const k of GALLEY_EV.keys()) if (k < d - 2 || k > d + 2) GALLEY_EV.delete(k);
   return out;
 }
-// worn ovens and ranges cook slower: section 17's shipEffects(3).cook scales the time (1 when it isn't there)
-const galleyCookT = t => { const e = typeof shipEffects === 'function' && shipEffects(3); return Math.max(1, Math.round(t * (e && e.cook > 0 ? e.cook : 1))); };
+// worn ovens and ranges cook slower: section 17's shipEffectsAt(3, m).cook scales the time (1 when it isn't there).
+// It's the pure, recorded version, safe inside a replay. The rota and galleyCooks never read it (wear reads them).
+const galleyCookT = (t, m) => { const e = typeof shipEffectsAt === 'function' && shipEffectsAt(3, m); return Math.max(1, Math.round(t * (e && e.cook > 0 ? e.cook : 1))); };
 // how many are at the stoves (cooking or baking) at absolute minute t, for oven wear (section 17)
 function galleyCooks(t) { const d = Math.floor(t / 1440) + 1, md = Math.floor(t) - (d - 1) * 1440, E = galleyEvents(d); return E.cook[md] + E.bake[md]; }
 const countFrom = (arr, t) => { let a = 0, b = arr.length; while (a < b) { const m = (a + b) >> 1; if (arr[m] < t) a = m + 1; else b = m; } return arr.length - a; };
 // one ship minute m (absolute) of the galley, on state S; st collects the day's figures (galleyReport), or null
 function galleyStep(S, m, st) {
   const d = Math.floor(m / 1440) + 1, E = galleyEvents(d), md = m - E.B, meal = galleyMeal(md);
-  if (md === FOOD.deliverAt) { const n = Math.max(0, FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) st.delivered += n; }
+  if (md === FOOD.deliverAt && FOOD.restock === 'rule') { const n = Math.max(0, FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) st.delivered += n; }
   // plates come back, and the dish pit washes what it can
   if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
   const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;
@@ -6160,14 +6162,14 @@ function galleyStep(S, m, st) {
     let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
-      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT), n, 'hot']); need -= n; if (st) st.cooked += n;
+      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT, m), n, 'hot']); need -= n; if (st) st.cooked += n;
     }
   }
   {
     let need = Math.min(FOOD.grabCap, countFrom(E.grabs, m) + FOOD.grabSlack) - S.grab.items - inPots('grab');
     for (let idle = bakers + Math.max(0, cooks - potsOf('hot')) - potsOf('grab'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.bake, S.cold.meals); if (n <= 0) break;
-      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.bakeT), n, 'grab']); need -= n; if (st) st.baked += n;
+      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.bakeT, m), n, 'grab']); need -= n; if (st) st.baked += n;
     }
   }
   const done = [];

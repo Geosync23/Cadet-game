@@ -84,6 +84,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.29.0 | Pillar 2, A4 (the galley engineer): section 16, the galley. The rota (`galleyDay`: Brennan up about 04:30 and cooking from 04:50, her deputy on her days off, early and late hands), the food worked out minute by minute on paper (`SHIP.galley`: cold store, pots, servery, grab shelf, plates, waits), food in the servery's pans and dirty plates in the dish pit on Deck 3, `takePortion`, `galleySave`/`galleyLoad`, food_check.py. One hook: `galleyTick()` in the main loop. |
 | 0.29.1 | The grab shelf's rolls and wraps drawn from the stock, through `galleyShelfRows` (the hook in the bridge architect's 0.31.2 shelf kit). Inert without that kit. |
 | 0.29.2 | The galley roles read ROSTER's `galley` field (crew designer's 0.16.5): Brennan the chef, varga-tariq her deputy on Fridays and Saturdays. |
+| 0.29.3 | Cook time from section 17's `shipEffectsAt(3, m)` (pure, safe in a replay). `FOOD.restock` switch (`'rule'` now, `'carts'` for B3), so only one of the 10:30 top-up and the carts brings food. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -583,7 +584,8 @@ Pillar 2, workstream A4: the galley really cooks. Section 16 sits after section 
     - `takePortion(who)`: the player eats. A hot portion and a plate if the servery has one, else a grab item; true or false.
     - `galleyHold(person, t)`: for section 10. The queue place someone is waiting at (or null to stand), else undefined.
     - `galleySave()` and `galleyLoad(obj)`: SHIP.galley as plain data for the save, and back (anything malformed means a fresh start). When section 13 has `SAVE_EXTRA` (the systems engineer's), section 16 adds `save.galley` through it and loads `SAVED.galley` at start; both are guarded by typeof, so they're inert until it's merged.
-    - `galleyCooks(t)`: how many are cooking or baking at absolute minute t, for oven wear (section 17). `shipEffects(3).cook`, when it exists, scales each new pot's cook time (`galleyCookT`).
+    - `galleyCooks(t)`: how many are cooking or baking at absolute minute t, for oven wear (section 17). `shipEffectsAt(3, m).cook` (section 17's pure, recorded version, safe in a replay), when it exists, scales each new pot's cook time (`galleyCookT`). The rota and `galleyCooks` must never read the effects, because wear reads them and the effects read wear: that would be a loop.
+    - `FOOD.restock`: `'rule'` (the 10:30 top-up, today) or `'carts'`. With `'carts'`, the top-up stops and section 17's restock job (150 meals by hover cart from `SHIP.hold` when `cold.meals` is under 150) is the only way food arrives. One owner at a time, so meals never arrive twice.
     - `galleyText(what)`: a line for tap texts (`servery`, `grab`, `dish`, `cold`).
     - `galleyReport(day, days)`: days from a fresh galley, with each day's figures, for food_check.py.
 - **On Deck 3 (`galleyShow`).** Made when you arrive (after the deck is built, so its unload frees them) and redrawn only when the numbers change. Four instanced meshes, no shadows, never tapped:
