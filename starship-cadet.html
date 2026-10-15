@@ -3381,13 +3381,13 @@ DECKS[4] = {
     { id: '4-lift-3', type: 'lift-wait', at: [23, 8], face: 'w', pose: 'stand', room: '+' },
     { id: '4-lift-4', type: 'lift-wait', at: [23, 10], face: 'w', pose: 'stand', room: '+' },
     // utility rooms (0.30.2): one work:works place on each machine's panel tile, facing the machine
-    { id: '4-scrubber-1-svc', type: 'work:works', at: [21, 2], face: 'n', pose: 'work', room: 's' },
-    { id: '4-scrubber-2-svc', type: 'work:works', at: [23, 2], face: 'n', pose: 'work', room: 's' },
-    { id: '4-heater-1-svc', type: 'work:works', at: [21, 18], face: 'e', pose: 'work', room: 't' },
-    { id: '4-pump-1-svc', type: 'work:works', at: [20, 18], face: 'w', pose: 'work', room: 't' },
-    { id: '4-pump-2-svc', type: 'work:works', at: [20, 19], face: 'w', pose: 'work', room: 't' },
-    { id: '4-junction-1-svc', type: 'work:works', at: [18, 18], face: 's', pose: 'work', room: 'k' },
-    { id: '4-junction-2-svc', type: 'work:works', at: [42, 18], face: 's', pose: 'work', room: 'y' },
+    { id: '4-scrubber-1-svc', machine: '4-scrubber-1', type: 'work:works', at: [21, 2], face: 'n', pose: 'work', room: 's' },
+    { id: '4-scrubber-2-svc', machine: '4-scrubber-2', type: 'work:works', at: [23, 2], face: 'n', pose: 'work', room: 's' },
+    { id: '4-heater-1-svc', machine: '4-heater-1', type: 'work:works', at: [21, 18], face: 'e', pose: 'work', room: 't' },
+    { id: '4-pump-1-svc', machine: '4-pump-1', type: 'work:works', at: [20, 18], face: 'w', pose: 'work', room: 't' },
+    { id: '4-pump-2-svc', machine: '4-pump-2', type: 'work:works', at: [20, 19], face: 'w', pose: 'work', room: 't' },
+    { id: '4-junction-1-svc', machine: '4-junction-1', type: 'work:works', at: [18, 18], face: 's', pose: 'work', room: 'k' },
+    { id: '4-junction-2-svc', machine: '4-junction-2', type: 'work:works', at: [42, 18], face: 's', pose: 'work', room: 'y' },
   ],
   lockedRoom(r) { return { t: this.rooms[r].name, x: this.guests[r] || (this.spares.includes(r) ? 'Spare. Stripped and empty, ready for whoever comes aboard next.' : 'An officer\'s cabin. Locked, and not yours. Yet.') }; },
   dress(d) {
@@ -5886,7 +5886,7 @@ function schedData() {
   const desks = schedDesks(people, shared);
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
-  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l).filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room));
+  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l).filter(pl => !pl.machine && !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room));
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -5907,7 +5907,7 @@ function schedDesks(people, shared) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room));
-    const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
+    const d = pool.find(pl => !pl.machine && !used.has(p.shift + '|' + pl.id));   // machine panels are for servicing, never desks
     if (d) used.add(p.shift + '|' + d.id);
     desks.set(p.id, d ? d.id : null);
   }
