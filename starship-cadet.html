@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.31.3
+   STARSHIP CADET: CSV Wren                            build 0.31.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3015,6 +3015,112 @@ function unloadDeck() {
 // =====================================================================
 const DECKS = {};
 // =====================================================================
+// UTILITY ROOMS KIT (Pillar 2, A5a: the Deck 6 architect). The insides of the sealed service rooms on
+// Decks 4, 5 and 6: machines a Works tech stands in front of, and the ducts, pipes and shelves around them.
+// Made at load and placed at the very end of a deck's dress(), with no R() anywhere, so nothing else on a
+// deck shifts. A machine's front (+z) faces its panel tile, where its work:works place is.
+// =====================================================================
+const UT = {
+  body: std('#7b8790', .5, .35), shell: std('#4d7d84', .45, .4), cab: std('#5d6a73', .5, .35), door: std('#6f7c85', .45, .35),
+  louvre: std('#2b3238', .6, .3), filter: std('#e2dcc2', .9), duct: std('#a9b4ba', .4, .55), tank: std('#c45a3f', .5, .3),
+  window: std('#1d2a30', .2, .2, { emissive: col('#16323c'), emissiveIntensity: .6 }),
+};
+Object.assign(KIT, {
+  // an air scrubber: a tall housing on a plinth, louvres above the filter drawer, a fill screen, a collar up into the duct
+  utilScrubber(g) {
+    box(.9, .1, 1.6, WM.paintDark, 0, .05, 0, g);
+    box(.86, 2.0, 1.5, UT.body, 0, 1.1, -.02, g);
+    for (let k = 0; k < 6; k++) box(.7, .04, .03, UT.louvre, 0, 1.35 + k * .12, .74, g);
+    box(.7, .5, .04, UT.filter, 0, .55, .745, g); box(.3, .04, .05, WM.steel, 0, .74, .78, g);
+    box(.24, .13, .02, WM.screen, .2, 1.14, .74, g); box(.05, .05, .02, WM.navGreen, -.22, 1.14, .74, g);
+    cyl(.22, .22, .6, UT.duct, 0, 2.4, -.2, g, 16);
+    return { w: .9, d: 1.6, tall: true };
+  },
+  // ducting: a run along the ceiling (o.w long), or a riser floor to ceiling
+  ductRun(g, o = {}) {
+    const w = o.w || 1, y = o.y || 2.5;
+    box(w, .34, .34, UT.duct, 0, y, 0, g);
+    for (let x = -w / 2 + .3; x < w / 2; x += 1) box(.04, .4, .4, WM.steel, x, y, 0, g);
+    return { w, d: .34, noBlock: true };
+  },
+  ductRiser(g) {
+    box(.46, H, .46, UT.duct, 0, H / 2, 0, g);
+    for (const y of [.4, 1.4, 2.4]) box(.52, .05, .52, WM.steel, 0, y, 0, g);
+    return { w: .5, d: .5, tall: true };
+  },
+  // a heat exchanger: a long shell on two saddles, banded, with flow and return nozzles up to the ceiling and a control box
+  heatExchanger(g, o = {}) {
+    for (const x of [-.75, .75]) box(.25, .45, 1.0, WM.paintDark, x, .225, 0, g);
+    cyl(.55, .55, 2.0, UT.shell, 0, 1.0, 0, g, 24).rotation.z = Math.PI / 2;
+    for (const x of [-1.0, 1.0]) soft(UT.shell, x, 1.0, 0, .18, .55, .55, g);
+    for (const x of [-.55, 0, .55]) cyl(.57, .57, .06, WM.steel, x, 1.0, 0, g, 24).rotation.z = Math.PI / 2;
+    for (const x of o.nozzles || [-.6, .6]) cyl(.12, .12, 1.2, ENG.copper, x, 2.15, 0, g, 12);
+    box(.5, .45, .15, UT.cab, 0, .85, .6, g); box(.3, .14, .02, WM.screenAmber, 0, .95, .68, g); box(.05, .05, .02, WM.navGreen, .17, .75, .68, g);
+    cyl(.08, .08, .03, M.trim, .55, 1.35, .55, g, 16).rotation.x = Math.PI / 2;
+    return { w: 2.6, d: 1.6, tall: true };
+  },
+  // a circulation pump: motor and volute on a base plate, the outlet straight up to the ceiling
+  circPump(g) {
+    box(.75, .1, .6, WM.paintDark, 0, .05, 0, g);
+    cyl(.2, .2, .5, UT.shell, -.12, .35, 0, g, 18).rotation.z = Math.PI / 2;
+    cyl(.22, .22, .18, UT.body, .25, .35, 0, g, 18).rotation.z = Math.PI / 2;
+    cyl(.07, .07, 2.3, ENG.copper, .25, 1.6, 0, g, 10);
+    cyl(.07, .07, .4, ENG.copper, .25, .35, -.3, g, 10).rotation.x = Math.PI / 2;
+    box(.05, .05, .02, WM.navGreen, -.12, .58, .2, g);
+    return { w: .8, d: .7 };
+  },
+  // a red expansion tank on three legs
+  expansionTank(g) {
+    for (let k = 0; k < 3; k++) { const a = k * 2.09; cyl(.025, .025, .5, WM.steel, Math.cos(a) * .22, .25, Math.sin(a) * .22, g, 6); }
+    cyl(.3, .3, .9, UT.tank, 0, .95, 0, g, 20); for (const y of [.5, 1.4]) soft(UT.tank, 0, y, 0, .3, .12, .3, g);
+    cyl(.05, .05, 1.3, ENG.copper, 0, 2.15, 0, g, 8);
+    return { w: .7, d: .7, tall: true };
+  },
+  // breaker cabinets, side by side (o.w wide): doors with a window onto the breakers, status lights, a label, a hazard kick plate
+  breakerCabinet(g, o = {}) {
+    const w = o.w || .8, n = Math.max(1, Math.round(w / .8)), dw = w / n;
+    box(w, 2.0, .45, UT.cab, 0, 1.0, 0, g);
+    box(w, .08, .47, WM.hazard, 0, .04, 0, g);
+    for (let k = 0; k < n; k++) {
+      const x = -w / 2 + dw * (k + .5);
+      box(dw - .06, 1.8, .02, UT.door, x, 1.02, .235, g);
+      box(dw * .55, .55, .012, UT.window, x, 1.35, .248, g);
+      for (let q = 0; q < 3; q++) box(.04, .04, .012, q === k % 3 ? WM.screenAmber : WM.navGreen, x - .1 + q * .1, 1.72, .248, g);
+      box(.03, .18, .04, WM.steel, x + dw * .36, 1.0, .25, g);
+      box(dw * .4, .07, .01, KM.label, x, .55, .248, g);
+    }
+    return { w, d: .45, tall: true };
+  },
+  // store shelving with a fixed pattern of boxes and folded linen (no R(), unlike the deck shelving)
+  utilShelf(g) {
+    for (const sx of [-.45, .45]) for (const sz of [-.17, .17]) box(.04, 1.9, .04, M.metal, sx, .95, sz, g);
+    const cols = [KM.label, KM.teal, M.trim, KM.panel, KM.gold, M.cream], ws = [.18, .24, .14, .2, .16];
+    for (let k = 0; k < 4; k++) {
+      const y = .12 + k * .55; box(.94, .03, .38, M.slateDark, 0, y, 0, g);
+      let x = -.4, q = k;
+      while (x < .3) { const w = ws[q % 5], h = .12 + (q * 7 % 5) * .04; box(w, h, .28, cols[(q * 3 + k) % 6], x + w / 2, y + .015 + h / 2, 0, g); x += w + .03; q++; }
+    }
+    return { w: .95, d: .4, tall: true };
+  },
+});
+Object.assign(WALL_KIT, {
+  // a light-relay board: rows of relays and their lights
+  relayBoard(g) {
+    box(.7, .9, .06, UT.cab, 0, 1.45, .03, g);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
+      box(.1, .14, .06, WM.steel, -.24 + c * .16, 1.7 - r * .24, .08, g);
+      box(.03, .03, .01, (r + c) % 4 ? WM.navGreen : WM.screenAmber, -.24 + c * .16, 1.8 - r * .24, .115, g);
+    }
+  },
+  // spare filter cartridges on a wall rack
+  filterRack(g) {
+    box(.8, .04, .26, WM.steel, 0, 1.2, .13, g);
+    for (const x of [-.26, 0, .26]) box(.22, .32, .2, UT.filter, x, 1.38, .12, g);
+    box(.3, .08, .01, KM.label, 0, 1.6, .02, g);
+  },
+});
+
+// =====================================================================
 // DECK 4: QUARTERS. Generated from deck4-plan.html (the plan's tile map, minus its
 // empty margin rows). Junior wing aft, lift lobby midships, officers' corridor forward.
 // =====================================================================
@@ -3052,8 +3158,8 @@ DECKS[4] = {
     'h,34,16': 'closed', 'h,37,4': 'closed', 'h,37,6': 'closed', 'h,37,14': 'closed', 'h,37,16': 'closed',
     'h,40,4': 'closed', 'h,40,6': 'closed', 'h,40,14': 'closed', 'h,40,16': 'closed', 'h,8,4': 'door',
     'h,13,4': 'door', 'h,17,4': 'door', 'h,8,16': 'door', 'h,10,6': 'door', 'h,10,14': 'door', 'h,15,6': 'door',
-    'h,15,14': 'door', 'h,4,14': 'door', 'h,4,6': 'door', 'h,18,16': 'closed', 'h,12,16': 'door', 'h,3,4': 'door',
-    'h,3,16': 'door', 'h,21,4': 'closed', 'h,20,16': 'closed', 'h,15,16': 'closed', 'h,43,4': 'closed',
+    'h,15,14': 'door', 'h,4,14': 'door', 'h,4,6': 'door', 'h,18,16': 'hatch', 'h,12,16': 'door', 'h,3,4': 'door',
+    'h,3,16': 'door', 'h,21,4': 'hatch', 'h,20,16': 'hatch', 'h,15,16': 'hatch', 'h,43,4': 'closed',
     'h,43,16': 'closed', 'v,44,9': 'door', 'v,44,10': 'door', 'v,20,10': 'lift', 'v,20,9': 'lift', 'v,20,8': 'lift', 'v,22,10': 'lift', 'v,22,9': 'lift', 'v,22,8': 'lift',
     // the spine: glass onto the air and power trunks above the car and the ladder well below it; a hatch down the ladder
     'v,20,6': 'glass', 'v,22,6': 'glass', 'h,20,6': 'glass', 'h,21,6': 'glass',
@@ -3097,22 +3203,32 @@ DECKS[4] = {
     Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
     j: { name: 'Junior common room', floor: 'wood' },
     p: { name: 'Port washroom', floor: 'tile' }, q: { name: 'Starboard washroom', floor: 'tile' }, l: { name: 'Laundry', floor: 'tile' },
-    u: { name: 'Junior stores', void: true }, k: { name: 'Utility closet', void: true },
-    s: { name: 'Air scrubbers', void: true }, t: { name: 'Heating plant', void: true },
+    // utility rooms (Pillar 2, 0.30.2): floors that draw no random numbers, so the rest of the deck is unchanged
+    u: { name: 'Junior stores', floor: 'plate', still: true }, k: { name: 'Utility closet', floor: 'plate', still: true },
+    s: { name: 'Air scrubbers', floor: 'steel', still: true }, t: { name: 'Heating plant', floor: 'steel', still: true },
     x: { name: 'Port supply closet', floor: 'plate' }, y: { name: 'Starboard utility closet', floor: 'plate' },
   },
   // hull windows: a stretch of a flat side ('n' port, 's' starboard, 'w' stern) from a to b, or every hull wall of a room
   windows: ['j', 'a', 'b', 'c', 'd', 'n', 'A', 'D', 'E', 'H', 'I', 'L', 'M', 'P', 'Q', 'T', 'U', 'X'].map(room => ({ room })),
   // doors that stay shut, and what they say when you tap them (locked rooms are filled in by lockedRoom)
   closedDoors: {
-    'h,21,4': { t: 'Air scrubbers', x: 'The two scrubbers that keep Deck 4 breathable. Tier 2 access, and you are not cleared yet.' },
-    'h,20,16': { t: 'Heating plant', x: 'The deck\'s heat exchanger and pumps. Tier 2 access.' },
-    'h,18,16': { t: 'Utility closet', x: 'Power junction and light relays for the junior wing. Tier 1 access, once the job list is running.' },
     'h,20,14': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
-    'h,15,16': { t: 'Junior stores', x: 'Linen, spare bedding and cleaning supplies. Locked until restock jobs arrive.' },
     'h,43,4': { t: 'Port supply closet', x: 'Bulbs, filters and cleaning kit for the officers\' wing.' },
     'h,43,16': { t: 'Starboard utility closet', x: 'Power and lights for the officers\' wing.' },
   },
+  // service hatches into the utility rooms (0.30.2): the player and Works crew pass (see hatchPassable)
+  service: ['h,21,4', 'h,20,16', 'h,18,16', 'h,15,16'],
+  // machines (Pillar 2): at = the machine's tile in front of its panel; face = the way its front faces (toward the panel);
+  // panel = where a Works tech stands, with a work:works place '<id>-svc' on it
+  machines: [
+    { id: '4-scrubber-1', kind: 'scrubber', at: [21, 1], room: 's', face: 's', panel: [21, 2] },
+    { id: '4-scrubber-2', kind: 'scrubber', at: [23, 1], room: 's', face: 's', panel: [23, 2] },
+    { id: '4-heater-1', kind: 'heater', at: [22, 18], room: 't', face: 'w', panel: [21, 18] },
+    { id: '4-pump-1', kind: 'pump', at: [19, 18], room: 't', face: 'e', panel: [20, 18] },
+    { id: '4-pump-2', kind: 'pump', at: [19, 19], room: 't', face: 'e', panel: [20, 19] },
+    { id: '4-junction-1', kind: 'junction', at: [18, 19], room: 'k', face: 'n', panel: [18, 18] },
+    { id: '4-junction-2', kind: 'junction', at: [42, 19], room: 'y', face: 'n', panel: [42, 18] },
+  ],
   hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6 },   // stern line, stern corner radius, where the bow curve starts, how far it reaches
   // 0.17.1: the bunk rooms grew, so the floor painter draws a different count of random numbers west of column 21. At column 21
   // of each row it picks up the value 0.17.0 had there, so the officers' wing floor, and everything built after the floor
@@ -3264,6 +3380,14 @@ DECKS[4] = {
     { id: '4-lift-2', type: 'lift-wait', at: [18, 10], face: 'e', pose: 'stand', room: '+' },
     { id: '4-lift-3', type: 'lift-wait', at: [23, 8], face: 'w', pose: 'stand', room: '+' },
     { id: '4-lift-4', type: 'lift-wait', at: [23, 10], face: 'w', pose: 'stand', room: '+' },
+    // utility rooms (0.30.2): one work:works place on each machine's panel tile, facing the machine
+    { id: '4-scrubber-1-svc', machine: '4-scrubber-1', type: 'work:works', at: [21, 2], face: 'n', pose: 'work', room: 's' },
+    { id: '4-scrubber-2-svc', machine: '4-scrubber-2', type: 'work:works', at: [23, 2], face: 'n', pose: 'work', room: 's' },
+    { id: '4-heater-1-svc', machine: '4-heater-1', type: 'work:works', at: [21, 18], face: 'e', pose: 'work', room: 't' },
+    { id: '4-pump-1-svc', machine: '4-pump-1', type: 'work:works', at: [20, 18], face: 'w', pose: 'work', room: 't' },
+    { id: '4-pump-2-svc', machine: '4-pump-2', type: 'work:works', at: [20, 19], face: 'w', pose: 'work', room: 't' },
+    { id: '4-junction-1-svc', machine: '4-junction-1', type: 'work:works', at: [18, 18], face: 's', pose: 'work', room: 'k' },
+    { id: '4-junction-2-svc', machine: '4-junction-2', type: 'work:works', at: [42, 18], face: 's', pose: 'work', room: 'y' },
   ],
   lockedRoom(r) { return { t: this.rooms[r].name, x: this.guests[r] || (this.spares.includes(r) ? 'Spare. Stripped and empty, ready for whoever comes aboard next.' : 'An officer\'s cabin. Locked, and not yours. Yet.') }; },
   dress(d) {
@@ -3380,6 +3504,27 @@ DECKS[4] = {
     place('+', 'bench', 5.7, 3.0, 'e', { snug: true, it: IT('Bench', 'Officers wait here. They wait more upright than the juniors do.') });
     place('+', 'plant', 5.55, 9.55, 'e', { band: '#c45a3f' });
     placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Quarters.') });
+    // ---- utility rooms (Pillar 2, 0.30.2). Last in dress() and free of R(), so nothing above them changes ----
+    // air scrubbers: two units on the port hull, a duct riser between them, the duct across the ceiling
+    for (const [x, n] of [[.5, 1], [2.5, 2]]) place('s', 'utilScrubber', x, 1.0, 'n', { it: IT('Air scrubber ' + n, 'One of the two units that keep Deck 4\'s air clean. The filter drawer is at the front; the screen shows how full it is.') });
+    place('s', 'ductRiser', 1.5, .5, 'n');
+    place('s', 'ductRun', 1.5, .8, 'n', { w: 2.9 });
+    placeWall('s', 'filterRack', 'e', 3.4, { it: IT('Spare filters', 'Scrubber filters, ready to swap. There are always fewer than the list says.') });
+    placeWall('s', 'workLight', 's', 2.5);
+    // heating plant: the exchanger on the starboard hull, two pumps by the closet wall, an expansion tank, pipes overhead
+    place('t', 'heatExchanger', 4.0, 2.5, 'e', { nozzles: [-.25, .75], it: IT('Heat exchanger', 'Deck 4\'s heat: warm water from the plant below, through the tubes, out to every cabin. The gauge reads warm, mostly.') });
+    for (const [z, n] of [[2.5, 1], [3.5, 2]]) place('t', 'circPump', .5, z, 'w', { it: IT('Circulation pump ' + n, n === 1 ? 'The duty pump. It hums.' : 'The standby pump. It waits.') });
+    place('t', 'expansionTank', 4.5, .5, 'n');
+    for (const z of [2.25, 3.25]) place('t', 'pipeRun', 2.25, z, 'n', { w: 3.5, y: 2.5 });   // from each pump's riser to the exchanger's nozzle
+    placeWall('t', 'workLight', 'n', 3.0);
+    // utility closets: the junior wing's breakers at the hull end, its light relays on the wall; the officers' cabinet in y
+    place('k', 'breakerCabinet', .5, 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The junior wing\'s power junction. Every bunk-room light on Deck 4 aft runs through here.') });
+    placeWall('k', 'relayBoard', 'w', 2.0, { it: IT('Light relays', 'Twelve relays, twelve little lights. One of them flickers if you stare at it.') });
+    place('y', 'breakerCabinet', .5, 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The officers\' wing power junction, tucked into the narrow end of the closet.') });
+    // junior stores: shelves on three sides
+    for (const z of [1.5, 2.5, 3.5]) place('u', 'utilShelf', .33, z, 'w');
+    for (const x of [1.5, 2.5]) place('u', 'utilShelf', x, 3.67, 's');
+    placeWall('u', 'workLight', 'n', 2.5);
   },
 };
 'abcdefgh'.split('').forEach((k, n) => { DECKS[4].rooms[k] = { name: 'Bunk ' + (n + 1) + (k === 'h' ? ', night shift' : ''), floor: 'plate' }; });
@@ -3999,9 +4144,9 @@ DECKS[3] = {
     { id: '3-basin-2', type: 'basin', at: [21, 17], xy: [21.93, 17.7], walk: [21, 17], face: 'e', pose: 'stand', room: 'w' },
     { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', room: 'w' },
     { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', room: 'w' },
-    { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
-    { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
-    { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', room: 'F' },
+    { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
+    { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-4', type: 'gym', at: [30, 20], xy: [30.6, 20.2], walk: [31, 20], face: 's', pose: 'sit', anim: 'row', room: 'F' },
     { id: '3-gym-5', type: 'gym', at: [30, 15], xy: [30.92, 15.6], walk: [30, 15], face: 'e', pose: 'stand', room: 'F' },
     { id: '3-gym-6', type: 'gym', at: [29, 16], xy: [29.4, 16], walk: [28, 15], face: 'e', pose: 'lie', room: 'F' },
@@ -5727,7 +5872,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.31.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.31.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5945,7 +6090,7 @@ function schedData() {
   const desks = schedDesks(people, shared);
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
-  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l).filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room));
+  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l).filter(pl => !pl.machine && !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room));
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -5966,7 +6111,7 @@ function schedDesks(people, shared) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room));
-    const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
+    const d = pool.find(pl => !pl.machine && !used.has(p.shift + '|' + pl.id));   // machine panels are for servicing, never desks
     if (d) used.add(p.shift + '|' + d.id);
     desks.set(p.id, d ? d.id : null);
   }
@@ -6413,54 +6558,62 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // game is played: one big jump or minute by minute. Nothing moves until something asks (machinesNow); the save
 // asks every ship hour.
 // =====================================================================
-// kinds: sys = the system it belongs to (null: none, like the lift); life = days from 100 to 0 at normal use,
-// never serviced; time = the share of wear that comes with time (the rest comes with use); use = what wears it
-// (a counter from machUseDay) and per = how much of that counter a normal day brings; scope = where its
-// effects are felt ('deck': its own deck, 'ship': everywhere); w = its weight in its system; tier = who may
-// work on it (design doc, "Works progression"); part = what a repair needs (B3)
+// kinds: sys = the system it belongs to; life = days from 100 to 0 at normal use, never serviced; time = the share
+// of wear that comes with time (the rest comes with use); use = what wears it (a counter from machUseDay, measured
+// against an average day, so it follows the schedules as they change); scope = where its effects are felt
+// ('deck': its own deck, 'ship': everywhere); w = its weight in its system; tier = who may work on it (design
+// doc, "Works progression"; a machine may carry its own `tier`); part = what a repair needs (B3)
 const MACHINE_KINDS = {
-  oven:          { name: 'Oven',              sys: 'food',       life: 10, time: .2, use: 'cook',    per: 300,  scope: 'ship', w: 2, tier: 1, part: 'element' },
-  range:         { name: 'Range',             sys: 'food',       life: 12, time: .2, use: 'cook',    per: 300,  scope: 'ship', w: 2, tier: 1, part: 'element' },
-  galleyplant:   { name: 'Galley plant',      sys: 'food',       life: 14, time: .5, use: 'meal',    per: 150,  scope: 'ship', w: 1, tier: 1, part: 'fan belt' },
-  washer:        { name: 'Washer',            sys: 'waste',      life: 12, time: .1, use: 'loads',   per: 20,   scope: 'ship', w: 1, tier: 1, part: 'pump' },
-  lift:          { name: 'Main lift',         sys: null,         life: 16, time: .3, use: 'ride',    per: 385,  scope: 'ship', w: 1, tier: 1, part: 'relay' },
-  junction:      { name: 'Light relays',      sys: 'power',      life: 18, time: .6, use: 'heads',   per: 0,    scope: 'deck', w: 1, tier: 1, part: 'relay' },
-  scrubber:      { name: 'Air scrubber',      sys: 'air',        life: 11, time: .4, use: 'heads',   per: 0,    scope: 'deck', w: 2, tier: 2, part: 'filter' },
-  heater:        { name: 'Heating plant',     sys: 'heat',       life: 18, time: .6, use: 'heads',   per: 0,    scope: 'deck', w: 2, tier: 2, part: 'valve' },
-  recycler:      { name: 'Water recycler',    sys: 'water',      life: 14, time: .3, use: 'wash',    per: 100,  scope: 'ship', w: 3, tier: 2, part: 'membrane' },
-  irrigation:    { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden',  per: 0,    scope: 'ship', w: 1, tier: 2, part: 'pump' },
-  airplant:      { name: 'Air plant',         sys: 'air',        life: 20, time: .7, use: 'heads',   per: 0,    scope: 'ship', w: 3, tier: 2, part: 'filter' },
-  fan:           { name: 'Main fan',          sys: 'air',        life: 24, time: 1,  scope: 'ship', w: 2, tier: 2, part: 'bearing' },
-  manifold:      { name: 'Manifold',          sys: 'heat',       life: 24, time: 1,  scope: 'ship', w: 2, tier: 2, part: 'valve' },
-  gasplant:      { name: 'Lab gas plant',     sys: 'comms',      life: 20, time: .5, use: 'heads',   per: 0,    scope: 'deck', w: 1, tier: 2, part: 'regulator' },
-  battery:       { name: 'Battery bank',      sys: 'power',      life: 28, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'cell' },
-  powerjunction: { name: 'Power junction',    sys: 'power',      life: 28, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'breaker' },
-  relay:         { name: 'Bridge relays',     sys: 'comms',      life: 24, time: .7, use: 'heads',   per: 0,    scope: 'ship', w: 2, tier: 3, part: 'relay' },
-  array:         { name: 'Sensor array',      sys: 'comms',      life: 40, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'signal card' },
-  doorgear:      { name: 'Bay door gear',     sys: 'hull',       life: 40, time: 1,  scope: 'ship', w: 1, tier: 2, part: 'seal' },
-  hullseal:      { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'seal' },
-  reactor:       { name: 'Reactor',           sys: 'power',      life: 60, time: 1,  scope: 'ship', w: 3, tier: 4, part: 'control rod' },
-  coil:          { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,  scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
+  oven:        { name: 'Oven',              sys: 'food',       life: 10, time: .2, use: 'cook',   scope: 'ship', w: 2, tier: 1, part: 'element' },
+  range:       { name: 'Range',             sys: 'food',       life: 12, time: .2, use: 'cook',   scope: 'ship', w: 2, tier: 1, part: 'element' },
+  galleyplant: { name: 'Galley plant',      sys: 'food',       life: 14, time: .5, use: 'meal',   scope: 'ship', w: 1, tier: 1, part: 'fan belt' },
+  extractor:   { name: 'Galley extractor',  sys: 'food',       life: 14, time: .5, use: 'cook',   scope: 'ship', w: 1, tier: 1, part: 'fan belt' },
+  chiller:     { name: 'Cold store chiller', sys: 'food',      life: 16, time: .7, use: 'meal',   scope: 'ship', w: 2, tier: 1, part: 'compressor' },
+  washer:      { name: 'Washer',            sys: 'waste',      life: 12, time: .1, use: 'loads',  scope: 'ship', w: 1, tier: 1, part: 'pump' },
+  lift:        { name: 'Main lift',         sys: 'transport',  life: 16, time: .3, use: 'ride',   scope: 'ship', w: 1, tier: 1, part: 'relay' },
+  lights:      { name: 'Light relays',      sys: 'power',      life: 18, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 1, part: 'relay' },
+  junction:    { name: 'Power junction',    sys: 'power',      life: 28, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'breaker' },
+  scrubber:    { name: 'Air scrubber',      sys: 'air',        life: 11, time: .4, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'filter' },
+  heater:      { name: 'Heating plant',     sys: 'heat',       life: 18, time: .6, use: 'heads',  scope: 'deck', w: 2, tier: 2, part: 'valve' },
+  recycler:    { name: 'Water recycler',    sys: 'water',      life: 14, time: .3, use: 'water',  scope: 'ship', w: 3, tier: 2, part: 'membrane' },
+  filter:      { name: 'Water filter bank', sys: 'water',      life: 9,  time: .3, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'cartridge' },
+  pump:        { name: 'Circulation pumps', sys: 'water',      life: 18, time: .5, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'pump' },
+  uv:          { name: 'UV steriliser',     sys: 'water',      life: 20, time: .5, use: 'water',  scope: 'ship', w: 1, tier: 2, part: 'uv lamp' },
+  irrigation:  { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'pump' },
+  nutrient:    { name: 'Nutrient dosing',   sys: 'food',       life: 16, time: .6, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'nutrient pack' },
+  airplant:    { name: 'Air plant',         sys: 'air',        life: 20, time: 1,                 scope: 'ship', w: 3, tier: 2, part: 'filter' },
+  fan:         { name: 'Main fan',          sys: 'air',        life: 24, time: 1,                 scope: 'ship', w: 2, tier: 2, part: 'bearing' },
+  manifold:    { name: 'Manifold',          sys: 'heat',       life: 24, time: 1,                 scope: 'ship', w: 2, tier: 2, part: 'valve' },
+  gasplant:    { name: 'Lab gas plant',     sys: 'comms',      life: 20, time: .5, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'regulator' },
+  battery:     { name: 'Battery bank',      sys: 'power',      life: 28, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'cell' },
+  relay:       { name: 'Bridge relays',     sys: 'comms',      life: 24, time: .7, use: 'heads',  scope: 'ship', w: 2, tier: 3, part: 'relay' },
+  databus:     { name: 'Bridge data bus',   sys: 'comms',      life: 24, time: 1,                 scope: 'ship', w: 1, tier: 3, part: 'signal card' },
+  array:       { name: 'Sensor array',      sys: 'comms',      life: 40, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'signal card' },
+  doorgear:    { name: 'Bay door gear',     sys: 'hull',       life: 40, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'seal' },
+  hullseal:    { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'seal' },
+  reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
+  coil:        { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,                 scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
 };
 const MACHINE_STATES = ['healthy', 'worn', 'faulty', 'failing', 'broken'];
 const machineState = c => c >= 75 ? 'healthy' : c >= 50 ? 'worn' : c >= 25 ? 'faulty' : c >= 10 ? 'failing' : 'broken';
 const MACHINE_SEV = { healthy: 0, worn: 0, faulty: .35, failing: .7, broken: 1 };   // how hard a state is felt
-const SYSTEMS = ['air', 'water', 'power', 'heat', 'food', 'waste', 'hull', 'comms', 'propulsion'];
-const SYSTEM_W = { air: 3, water: 2, power: 3, heat: 2, food: 2, waste: 1, hull: 2, comms: 1, propulsion: 1 };   // their weight in ship health
+const SYSTEMS = ['air', 'water', 'power', 'heat', 'food', 'waste', 'hull', 'comms', 'propulsion', 'transport'];
+const SYSTEM_W = { air: 3, water: 2, power: 3, heat: 2, food: 2, waste: 1, hull: 2, comms: 1, propulsion: 1, transport: 1 };   // their weight in ship health
 // stand-ins until the architects add DECKS[n].machines with the utility rooms (A5): [id, kind, room]. Their
-// `at` and `panel` are the room's middle tile; the lift is at the lift. A deck with any machines of its own
-// drops all of its stand-ins.
+// `at` and `panel` are the room's middle tile; the lift is at the lift. A stand-in drops out as soon as its deck
+// has a real machine with its id or in its room. Decks 1 and 3 use the bridge architect's agreed ids.
 const STUB_MACHINES = {
-  1: [['1-junction-1', 'junction', 'k'], ['1-relay-1', 'relay', 'u']],
-  2: [['2-junction-1', 'junction', 'u'], ['2-gasplant-1', 'gasplant', 'g'], ['2-array-1', 'array', 'A']],
-  3: [['3-oven-1', 'oven', 'K'], ['3-oven-2', 'oven', 'K'], ['3-range-1', 'range', 'K'], ['3-galleyplant-1', 'galleyplant', 'g'],
-      ['3-recycler-1', 'recycler', 'R'], ['3-irrigation-1', 'irrigation', 'i']],
-  4: [['4-scrubber-1', 'scrubber', 's'], ['4-scrubber-2', 'scrubber', 's'], ['4-heater-1', 'heater', 't'], ['4-junction-1', 'junction', 'k'],
+  1: [['1-lights-1', 'lights', 'k'], ['1-junction-1', 'junction', 'k'], ['1-relay-1', 'relay', 'u'], ['1-relay-2', 'relay', 'u'], ['1-databus-1', 'databus', 'c']],
+  2: [['2-lights-1', 'lights', 'u'], ['2-gasplant-1', 'gasplant', 'g'], ['2-array-1', 'array', 'A']],
+  3: [['3-oven-1', 'oven', 'K'], ['3-oven-2', 'oven', 'K'], ['3-range-1', 'range', 'K'], ['3-extractor-1', 'extractor', 'g'], ['3-chiller-1', 'chiller', 'g'],
+      ['3-recycler-1', 'recycler', 'R'], ['3-filter-1', 'filter', 'R'], ['3-pump-1', 'pump', 'R'], ['3-uv-1', 'uv', 'R'], ['3-lights-1', 'lights', 'R'],
+      ['3-irrigation-1', 'irrigation', 'i'], ['3-nutrient-1', 'nutrient', 'i']],
+  4: [['4-scrubber-1', 'scrubber', 's'], ['4-scrubber-2', 'scrubber', 's'], ['4-heater-1', 'heater', 't'], ['4-lights-1', 'lights', 'k'],
       ['4-washer-1', 'washer', 'l'], ['4-washer-2', 'washer', 'l'], ['4-washer-3', 'washer', 'l'], ['4-washer-4', 'washer', 'l']],
   5: [['5-lift-1', 'lift', null], ['5-airplant-1', 'airplant', 'a'], ['5-airplant-2', 'airplant', 'a'], ['5-fan-1', 'fan', 'F'],
-      ['5-manifold-1', 'manifold', 'n'], ['5-junction-1', 'junction', 'u'], ['5-battery-1', 'battery', 'y'], ['5-doorgear-1', 'doorgear', 'd']],
+      ['5-manifold-1', 'manifold', 'n'], ['5-lights-1', 'lights', 'u'], ['5-battery-1', 'battery', 'y'], ['5-doorgear-1', 'doorgear', 'd']],
   6: [['6-reactor-1', 'reactor', 'R'], ['6-coil-1', 'coil', 'E'], ['6-coil-2', 'coil', 'E'], ['6-coil-3', 'coil', 'E'],
-      ['6-powerjunction-1', 'powerjunction', 'j'], ['6-powerjunction-2', 'powerjunction', 'J'], ['6-hullseal-1', 'hullseal', 'c'], ['6-hullseal-2', 'hullseal', 'C']],
+      ['6-junction-1', 'junction', 'j'], ['6-junction-2', 'junction', 'J'], ['6-hullseal-1', 'hullseal', 'c'], ['6-hullseal-2', 'hullseal', 'C']],
 };
 // a room's middle tile: the room's tile nearest its centre
 function machRoomTile(n, room) {
@@ -6476,9 +6629,9 @@ function machineList() {
   if (MACH_LIST) return MACH_LIST;
   MACH_LIST = [];
   for (const n of Object.keys(DECKS).map(Number).sort()) {
-    const own = DECKS[n].machines;
-    const list = own && own.length ? own.map(m => ({ ...m }))
-      : (STUB_MACHINES[n] || []).map(([id, kind, room]) => { const at = room ? machRoomTile(n, room) : DECKS[n].lift.slice(); return { id, kind, at, room, face: 's', panel: at, stub: true }; });
+    const own = (DECKS[n].machines || []).map(m => ({ ...m })), ids = new Set(own.map(m => m.id)), rooms = new Set(own.map(m => m.room));
+    const list = own.concat((STUB_MACHINES[n] || []).filter(([id, , room]) => !ids.has(id) && !rooms.has(room))
+      .map(([id, kind, room]) => { const at = room ? machRoomTile(n, room) : DECKS[n].lift.slice(); return { id, kind, at, room, face: 's', panel: at, stub: true }; }));
     for (const m of list) if (MACHINE_KINDS[m.kind]) MACH_LIST.push({ ...m, deck: n, seed: machSeed(m.id) });
   }
   return MACH_LIST;
@@ -6486,14 +6639,15 @@ function machineList() {
 const machineById = id => machineList().find(m => m.id === id);
 
 // ---- use, from the schedules: per ship hour of a day, how much of each thing happened (cached, last few days) ----
-//   meal: meals begun; cook: meals this hour and next (cooking ahead); ride: lift rides; wash: showers and
-//   basins; loads: laundry visits plus yesterday's shift uniforms (washed 06:00-10:00); heads[n]: person-hours
-//   on deck n; garden: person-hours in the garden. Read from shipDay(d), so it's the same however often it's asked.
+//   meal: meals begun; cook: people cooking (galleyCooks, section 16), or before that meals this hour and next;
+//   ride: lift rides; water: showers (1) and other washes, toilets and hand-washing (.25 each); loads: laundry
+//   visits plus yesterday's shift uniforms (washed 06:00-10:00); heads[n]: person-hours on deck n; garden:
+//   person-hours in the garden. Read from shipDay(d) (and the galley rota), so it's the same however often it's asked.
 const MACH_USE = new Map();
 function machUseDay(d) {
   if (MACH_USE.has(d)) return MACH_USE.get(d);
   const B = (d - 1) * 1440, z = () => new Float32Array(24);
-  const u = { meal: z(), cook: z(), ride: z(), wash: z(), loads: z(), garden: z(), heads: {} };
+  const u = { meal: z(), cook: z(), ride: z(), water: z(), loads: z(), garden: z(), heads: {} };
   for (const n of Object.keys(DECKS)) u.heads[n] = z();
   const { plans } = shipDay(d), byId = schedData().byId;
   let workedYesterday = 0;
@@ -6503,7 +6657,7 @@ function machUseDay(d) {
     if (s.from >= B && h < 24) {
       if ((s.act === 'breakfast' || s.act === 'dinner') && s.tag !== 'queue') u.meal[h]++;
       if (s.act === 'commute') u.ride[h]++;
-      if (s.act === 'wash') u.wash[h]++;
+      if (s.act === 'wash') u.water[h] += s.type === 'shower' ? 1 : .25;
       if (s.tag === 'laundry') u.loads[h]++;
     }
     const pl = s.placeId && byId.get(s.placeId);
@@ -6514,33 +6668,32 @@ function machUseDay(d) {
       m = e;
     }
   }
-  for (let h = 0; h < 24; h++) u.cook[h] = u.meal[h] + (h < 23 ? u.meal[h + 1] : 0);
+  if (typeof galleyCooks === 'function') for (let m = 0; m < 1440; m++) u.cook[Math.floor(m / 60)] += galleyCooks(B + m) / 60;
+  else for (let h = 0; h < 24; h++) u.cook[h] = u.meal[h] + (h < 23 ? u.meal[h + 1] : 0);
   for (let h = 6; h < 10; h++) u.loads[h] += workedYesterday / 4 / 6;           // a load holds about six uniforms
   MACH_USE.set(d, u);
   for (const k of MACH_USE.keys()) if (k < d - 3 || k > d + 1) MACH_USE.delete(k);
   return u;
 }
-// a normal day's use of each counter, for counters that depend on the machine's deck (per: 0 in MACHINE_KINDS):
-// the average of days 1-7, worked out once
+// an average day's use of each counter (heads per deck): the mean of days 1-7, worked out once. Use is measured
+// against it, so a machine wears at its `life` on an average day however busy the schedules make the ship.
 let MACH_NORM = null;
 function machNorm() {
   if (MACH_NORM) return MACH_NORM;
-  const norm = { heads: {}, garden: 0 };
+  const norm = { heads: {} }, sum = a => a.reduce((x, y) => x + y, 0) / 7;
   for (let d = 1; d <= 7; d++) {
     const u = machUseDay(d);
-    for (const n in u.heads) norm.heads[n] = (norm.heads[n] || 0) + u.heads[n].reduce((a, b) => a + b, 0) / 7;
-    norm.garden += u.garden.reduce((a, b) => a + b, 0) / 7;
+    for (const k in u) if (k === 'heads') { for (const n in u.heads) norm.heads[n] = (norm.heads[n] || 0) + sum(u.heads[n]); } else norm[k] = (norm[k] || 0) + sum(u[k]);
   }
   return MACH_NORM = norm;
 }
-// how hard machine m was used in absolute ship hour h, against a normal day (1 = an average hour)
+// how hard machine m was used in absolute ship hour h, against an average day (1 = an average hour)
 function machUse(m, h) {
   const K = MACHINE_KINDS[m.kind];
   if (!K.use || K.time >= 1) return 1;
-  const u = machUseDay(Math.floor(h / 24) + 1), i = h % 24;
-  if (K.use === 'heads') { const nm = machNorm().heads[m.deck]; return nm > 0 ? u.heads[m.deck][i] * 24 / nm : 1; }
-  if (K.use === 'garden') { const nm = machNorm().garden; return nm > 0 ? u.garden[i] * 24 / nm : 1; }
-  return u[K.use][i] * 24 / K.per;
+  const u = machUseDay(Math.floor(h / 24) + 1), i = h % 24, N = machNorm();
+  const v = K.use === 'heads' ? u.heads[m.deck][i] : u[K.use][i], nm = K.use === 'heads' ? N.heads[m.deck] : N[K.use];
+  return nm > 0 ? v * 24 / nm : 1;
 }
 // one hour's wear for machine m at condition c: its life's share of the hour, split between time and use,
 // faster as it wears (up to half as fast again near 0), with a little variety from the hour
@@ -6552,32 +6705,37 @@ function machWear(m, h, c) {
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
 SHIP.machines = {};
-let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet worn; the last time asked; a counter of changes
+let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet run; the last time asked; a counter of changes
 const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
 function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
-  MACH_HOUR = hour; MACH_REV++;
+  jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++;
 }
-// wear every machine up to the last whole ship hour. A clock earlier than the machines' (New game) starts afresh
+// run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
+// A clock earlier than the machines' (New game) starts afresh
 function machinesNow() {
   const now = Math.floor(shipNow() / 60), start = Math.floor(((SHIP_START.day - 1) * 1440 + SHIP_START.min) / 60);
   if (MACH_HOUR === null || shipNow() < MACH_SEEN) machinesReset(Math.min(start, now));
   MACH_SEEN = shipNow();
   const list = machineList();
   for (const m of list) if (!SHIP.machines[m.id]) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
-  if (now > MACH_HOUR) MACH_REV++;
-  for (; MACH_HOUR < now; MACH_HOUR++) for (const m of list) {
-    const s = SHIP.machines[m.id];
-    s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond));
-    s.state = machineState(s.cond);
+  if (now >= MACH_HOUR) MACH_REV++;
+  for (; MACH_HOUR <= now; MACH_HOUR++) {
+    if (JOBS_ON) jobsHour(MACH_HOUR);
+    for (const m of list) {
+      const s = SHIP.machines[m.id];
+      s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond));
+      s.state = machineState(s.cond);
+    }
+    machRecord(MACH_HOUR);
   }
   return SHIP.machines;
 }
 // put a machine right: condition back to `to` (100: as new), serviced now
 function serviceMachine(id, to = 100) {
   const s = machinesNow()[id]; if (!s) return false;
-  s.cond = Math.max(s.cond, Math.min(100, to)); s.state = machineState(s.cond); s.lastService = shipNow(); MACH_REV++;
+  s.cond = Math.max(s.cond, Math.min(100, to)); s.state = machineState(s.cond); s.lastService = shipNow(); machRecord(MACH_HOUR - 1); MACH_REV++;
   return true;
 }
 
@@ -6589,19 +6747,20 @@ function machWorks(c) {
   for (let i = 1; i < MACH_WORKS.length; i++) { const [a, x] = MACH_WORKS[i - 1], [b, y] = MACH_WORKS[i]; if (c <= b) return x + (y - x) * (c - a) / (b - a); }
   return 100;
 }
+// the conditions now, as { id: cond } (the systems and effects are worked out from one of these)
+function machConds() { const st = machinesNow(), c = {}; for (const id in st) c[id] = st[id].cond; return c; }
 // a system's own score: how well its machines work, weighted, pulled toward the worst of them
-function systemOwn(sys) {
-  const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === sys), st = SHIP.machines;
+function systemOwn(sys, c) {
+  const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === sys);
   if (!ms.length) return 100;
   let a = 0, w = 0, lo = 100;
-  for (const m of ms) { const c = machWorks(st[m.id].cond), k = MACHINE_KINDS[m.kind].w; a += c * k; w += k; lo = Math.min(lo, c); }
+  for (const m of ms) { const x = machWorks(c[m.id] ?? 100), k = MACHINE_KINDS[m.kind].w; a += x * k; w += k; lo = Math.min(lo, x); }
   return .6 * a / w + .4 * lo;
 }
-// every system with the dependencies: power feeds everything; water feeds the garden and the garden the galley
-// (food); waste and laundry need water too. A feeding system only drags the others down once it's below 75. Air's need for filters from the hold comes with supplies (B3).
-function shipSystems() {
-  machinesNow();
-  const own = {}; for (const s of SYSTEMS) own[s] = systemOwn(s);
+// every system with the dependencies: power feeds everything but the hull; water feeds the garden and the garden
+// the galley (food); waste and laundry need water too. A feeding system only drags the others down once it's below 75.
+function systemsFrom(c) {
+  const own = {}; for (const s of SYSTEMS) own[s] = systemOwn(s, c);
   const pf = Math.min(1, .5 + .5 * own.power / 75), wf = Math.min(1, own.water / 75), r = x => Math.round(x * 10) / 10;
   const out = { power: r(own.power) };
   for (const s of SYSTEMS) if (s !== 'power' && s !== 'hull') out[s] = own[s] * pf;
@@ -6609,6 +6768,7 @@ function shipSystems() {
   for (const s of SYSTEMS) out[s] = r(out[s]);
   return out;
 }
+const shipSystems = () => systemsFrom(machConds());
 function shipHealth(sys = shipSystems()) {
   let a = 0, w = 0; for (const s of SYSTEMS) { a += sys[s] * SYSTEM_W[s]; w += SYSTEM_W[s]; }
   return Math.round(a / w * 10) / 10;
@@ -6619,55 +6779,92 @@ function shipHealth(sys = shipSystems()) {
 // at all (design doc, "Consequences": minor, noticeable, serious). Several machines of a kind count by their
 // average (one broken washer of four is a quarter of the trouble). Multipliers: restore = how much an action
 // gives back (a shower's hygiene), drain = how fast a need runs down, walk = walking speed, cook = cooking time,
-// lift = ride time. mood = points off a 0-100 mood.
+// lift = ride time, spoil = how fast the cold store's food spoils. mood = points off a 0-100 mood. local: felt
+// only on the machine's own deck.
 const MACHINE_FX = {
   oven:        { cook: .5, restore: { hunger: .15 }, mood: 2, text: 'Meals run late' },
   range:       { cook: .4, restore: { hunger: .1 }, mood: 2, text: 'Meals run late' },
   galleyplant: { cook: .25, mood: 2, text: 'The galley is hot and smoky' },
+  extractor:   { cook: .25, mood: 2, text: 'The galley is hot and smoky' },
+  chiller:     { spoil: 1, mood: 1, text: 'The cold store runs warm' },
   washer:      { drain: { hygiene: .3 }, mood: 4, text: 'Uniforms come back grubby' },
   lift:        { lift: 1, mood: 2, text: 'The lift runs slow' },
-  junction:    { walk: .12, mood: 3, text: 'The lights flicker and dim' },
+  lights:      { walk: .12, mood: 3, text: 'The lights flicker and dim' },
+  junction:    { walk: .06, mood: 2, text: 'The power browns out', local: true },   // Deck 6's lights hang off its junctions
   scrubber:    { drain: { energy: .4 }, mood: 6, text: 'The air is stuffy' },
   airplant:    { drain: { energy: .25 }, mood: 4, text: 'The air is stale everywhere' },
   fan:         { drain: { energy: .15 }, mood: 2, text: 'The air hardly moves' },
   heater:      { restore: { energy: .3 }, mood: 5, text: 'Cold cabins' },
   manifold:    { restore: { hygiene: .2 }, mood: 2, text: 'The water runs lukewarm and the pipes knock' },
-  recycler:    { restore: { hygiene: .6 }, mood: 5, text: 'Showers run weak' },
+  recycler:    { restore: { hygiene: .4 }, mood: 4, text: 'Showers run weak' },
+  filter:      { restore: { hygiene: .2 }, mood: 2, text: 'The water runs cloudy' },
+  pump:        { restore: { hygiene: .4 }, mood: 3, text: 'Showers run weak' },
+  uv:          { mood: 2, text: 'The water tastes of chlorine' },
   irrigation:  { mood: 2, text: 'The garden droops' },
+  nutrient:    { mood: 2, text: 'The garden wilts' },
+  relay:       { mood: 1, text: 'Bridge stations flicker', local: true },
+  databus:     { mood: 1, text: 'Bridge stations flicker', local: true },
 };
 const STAGE = { faulty: 'minor', failing: 'noticeable', broken: 'serious' };
-let FX_CACHE = new Map(), FX_REV = -1;
-function shipEffects(deck) {
-  machinesNow();
-  if (FX_REV !== MACH_REV) { FX_CACHE = new Map(); FX_REV = MACH_REV; }
-  if (FX_CACHE.has(deck)) return FX_CACHE.get(deck);
+// the effects on `deck` of conditions `c` ({ id: cond }; null: everything as new)
+function fxFrom(deck, c) {
   const one = () => ({ hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 });
-  const fx = { deck, restore: one(), drain: one(), walk: 1, cook: 1, lift: 1, mood: 0, notes: [] };
+  const fx = { deck, restore: one(), drain: one(), walk: 1, cook: 1, lift: 1, spoil: 1, mood: 0, health: 100, notes: [] };
+  if (!c) return fx;
   const groups = new Map();                             // kind -> machines whose effects reach this deck
   for (const m of machineList()) {
     const F = MACHINE_FX[m.kind]; if (!F) continue;
-    if (MACHINE_KINDS[m.kind].scope === 'deck' && m.deck !== deck) continue;
+    if ((MACHINE_KINDS[m.kind].scope === 'deck' || F.local) && m.deck !== deck) continue;
     if (!groups.has(m.kind)) groups.set(m.kind, []); groups.get(m.kind).push(m);
   }
+  const stateOf = id => machineState(c[id] ?? 100);
   for (const [kind, ms] of groups) {
-    const F = MACHINE_FX[kind], sev = ms.reduce((a, m) => a + MACHINE_SEV[SHIP.machines[m.id].state], 0) / ms.length;
+    const F = MACHINE_FX[kind], sev = ms.reduce((a, m) => a + MACHINE_SEV[stateOf(m.id)], 0) / ms.length;
     if (!sev) continue;
     for (const k in F.restore || {}) fx.restore[k] *= 1 - F.restore[k] * sev;
     for (const k in F.drain || {}) fx.drain[k] *= 1 + F.drain[k] * sev;
     if (F.walk) fx.walk *= 1 - F.walk * sev;
     if (F.cook) fx.cook *= 1 + F.cook * sev;
     if (F.lift) fx.lift *= 1 + F.lift * sev;
+    if (F.spoil) fx.spoil *= 1 + F.spoil * sev;
     fx.mood -= F.mood * sev;
-    for (const m of ms) { const st = SHIP.machines[m.id].state; if (STAGE[st]) fx.notes.push({ machine: m.id, kind, state: st, stage: STAGE[st], text: F.text }); }
+    for (const m of ms) { const st = stateOf(m.id); if (STAGE[st]) fx.notes.push({ machine: m.id, kind, state: st, stage: STAGE[st], text: F.text }); }
   }
   // the ship as a whole: low power dims every deck, and a run-down ship gets everyone down (serious)
-  const sys = shipSystems(), health = shipHealth(sys);
+  const sys = systemsFrom(c), health = shipHealth(sys);
   if (sys.power < 50) { fx.walk *= 1 - .1 * (1 - sys.power / 50); fx.notes.push({ machine: null, kind: 'power', state: null, stage: 'noticeable', text: 'Power is low; the ship is dim' }); }
   if (health < 70) fx.mood -= 10 * (70 - health) / 70;
   fx.mood = Math.max(-30, Math.round(fx.mood * 10) / 10);
   fx.health = health;
-  FX_CACHE.set(deck, fx);
   return fx;
+}
+// shipEffects(deck): the effects now. It brings the machines up to the present first (machinesNow), as any read
+// does; don't call it while the schedules are being planned (the plans feed the wear).
+// shipEffectsAt(deck, t): the effects at ship minute t, from the hour-by-hour record of the last 8 days. Pure: it
+// never runs the machines. Hours after the last one run use the latest; hours before the record use its first;
+// with no record at all (nothing has asked yet, as under ?nosave) everything is as new. For anything replayed
+// over past times (the crew's paper needs, the galley's minute-by-minute food).
+let FX_CACHE = new Map(), FX_REV = -1;
+function shipEffects(deck) {
+  machinesNow();
+  if (FX_REV !== MACH_REV) { FX_CACHE = new Map(); FX_REV = MACH_REV; }
+  if (!FX_CACHE.has(deck)) FX_CACHE.set(deck, fxFrom(deck, machConds()));
+  return FX_CACHE.get(deck);
+}
+const MACH_HIST = new Map(), MACH_HIST_DAYS = 8;          // hour -> { id: cond } once that hour has run
+let FX_AT = new Map(), FX_AT_REV = -1;
+function machRecord(h) {
+  const c = {}; for (const id in SHIP.machines) c[id] = SHIP.machines[id].cond;
+  MACH_HIST.set(h, c);
+  for (const k of MACH_HIST.keys()) if (k < h - MACH_HIST_DAYS * 24) MACH_HIST.delete(k); else break;
+}
+function shipEffectsAt(deck, t) {
+  if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
+  let h = Math.floor(t / 60);
+  if (!MACH_HIST.has(h) && MACH_HIST.size) { const ks = [...MACH_HIST.keys()]; h = h < ks[0] ? ks[0] : Math.min(h, ks[ks.length - 1]); if (!MACH_HIST.has(h)) h = ks.filter(k => k <= h).pop(); }
+  const key = deck + '|' + h;
+  if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
+  return FX_AT.get(key);
 }
 // one machine, for the job board and the device (B2): its definition, kind and state together
 function machineInfo(id) {
@@ -6675,22 +6872,179 @@ function machineInfo(id) {
   return { ...m, ...MACHINE_KINDS[m.kind], ...machinesNow()[id] };
 }
 
-// ---- saving: the save's ship.machines = { id: [cond, lastService] } and ship.machineHour ----
+// ---- B2: the job list. SHIP.jobs = [{ id, machine, deck, kind, urgency, posted, found, claimedBy, parts, status, ... }] ----
+// Every hour (jobsHour, inside machinesNow, before that hour's wear): finished jobs put their machine right, the
+// weekly delivery lands in the hold, a job is posted for each machine that needs one (or brought up to date as it
+// gets worse), and the crew on shift claim what they can. All of it on paper, from the schedules: a claim is a run
+// of segments (to Deck 5 storage for the parts, the lift, the machine's panel, back to the desk) that jobWhere()
+// lays over the person's plan. Nothing here draws.
+//   jobs by machine state: worn -> service (found on rounds a few hours later, not straight onto the board);
+//   faulty -> repair; failing -> repair, urgent; broken -> overhaul (longer, more parts)
+//   status: 'open' (on the board), 'waiting' (no parts and none can be made), 'claimed', 'done'
+//   kind 'restock': a hover cart from the cargo hold to storage (cargo 'stores') or to Deck 3's cold store ('meals')
+const JOB_TYPES = {                                      // work: minutes at the panel (more for higher tiers); restore: condition after
+  service:  { work: 20, restore: 100, parts: 1 },
+  repair:   { work: 45, restore: 95,  parts: 2 },
+  overhaul: { work: 90, restore: 90,  parts: 3 },
+};
+const JOB_FOR = { worn: 'service', faulty: 'repair', failing: 'repair', broken: 'overhaul' };
+const JOB_URGENCY = { worn: 0, faulty: 1, failing: 2, broken: 3 };
+const CREW_TIER = { junior: 2, officer: 3, senior: 3, chief: 4, xo: 4, captain: 4 };   // what Works crew may work on
+const ENGINE_KINDS = new Set(['reactor', 'coil']);      // the engine crew's, at any tier; nobody else's
+const PLAYER_TIER = 1;                                  // you, for now (design doc, "Works progression")
+const CREW_LEAVE = 180;                                 // crew leave easy, routine jobs this long for you before taking them
+const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching parts; making one in the machine shop; a lift ride
+// supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
+// make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
+const STOCK = { element: 6, 'fan belt': 4, compressor: 2, pump: 4, relay: 6, filter: 8, cartridge: 8, 'uv lamp': 3, 'nutrient pack': 4, valve: 4,
+                membrane: 3, bearing: 3, regulator: 3, cell: 3, breaker: 3, 'signal card': 2, seal: 4, 'control rod': 2, 'coil winding': 2 };
+const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'control rod']);
+const DELIVERY = { day: 2, hour: 10, meals: 1050 };     // weekday (0 = Monday), hour; a week of meals for the cold store
+const MEALS_LOW = 150, CART_MEALS = 150;                // a cart run when the cold store is under this; meals a cart carries
+SHIP.jobs = []; SHIP.stores = {}; SHIP.hold = {};
+let JOBS_ON = true;                                     // machine_check turns the crew's jobs off to see the ship unrepaired
+function jobsReset() { SHIP.jobs = []; SHIP.stores = { ...STOCK }; SHIP.hold = {}; }
+// the panel's place, if an architect has put one there ({ machine: id } on a place)
+function panelPlace(id) { const p = schedData().places.find(pl => pl.machine === id); return p ? p.id : null; }
+const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
+// a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
+// work block they're in (not mid-ride, not on a tea break)
+function jobRun(p, j, t, makeMin) {
+  const w = whereIs(p, t);
+  if (!w || w.act !== 'work' || w.moving || w.tag === 'tea') return null;
+  const home = w.deck, segs = []; let c = t, dk = home;
+  const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
+  const at = (min, tag, placeId = null) => { segs.push({ from: c, to: c + min, act: 'work', deck: dk, type: 'job', placeId, tag }); c += min; };
+  if (j.kind === 'restock') {
+    go(5); at(j.cargo === 'meals' ? 10 : 30, j.cargo === 'meals' ? 'fetch' : 'restock');
+    if (j.cargo === 'meals') { go(3); at(15, 'restock'); }
+  } else {
+    const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
+    go(5); at(JOB_FETCH + makeMin, makeMin ? 'make' : 'fetch');
+    go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1))), 'job', panelPlace(m.id));
+  }
+  const done = c; go(home);
+  return c <= w.until ? { segs, done, end: c } : null;
+}
+// a job is finished: its machine put right, or its cargo moved
+function jobFinish(j, t, by) {
+  j.status = 'done'; j.doneAt = t; j.doneBy = by;
+  if (j.machine) {
+    const s = SHIP.machines[j.machine];
+    if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
+  } else if (j.cargo === 'meals') {
+    const n = Math.min(SHIP.hold.meals || 0, CART_MEALS); SHIP.hold.meals -= n;
+    if (SHIP.galley && SHIP.galley.cold) SHIP.galley.cold.meals += n;
+  } else {
+    for (const k in SHIP.hold) if (k !== 'meals') { SHIP.stores[k] = (SHIP.stores[k] || 0) + SHIP.hold[k]; delete SHIP.hold[k]; }
+  }
+}
+const jobCrew = p => p.work && (p.work.place === 'work:works' ? 'works' : p.work.place === 'work:engine' ? 'engine' : null);
+function jobsHour(h) {
+  const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
+  // 1. finished jobs (the crew's; yours finish when you finish them)
+  for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
+  // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
+  if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
+    for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
+    if (SHIP.galley && SHIP.galley.cold) SHIP.hold.meals = (SHIP.hold.meals || 0) + DELIVERY.meals;
+  }
+  // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
+  const open = new Map(); for (const j of jobs) if (j.status !== 'done') open.set(j.machine || 'restock:' + j.cargo, j);
+  for (const m of machineList()) {
+    const st = SHIP.machines[m.id].state, kind = JOB_FOR[st], j = open.get(m.id);
+    if (j && j.status === 'claimed') continue;
+    if (!kind) { if (j) jobFinish(j, t, null); continue; }   // put right some other way: the job goes
+    if (j) {
+      if (JOB_URGENCY[st] > j.urgency) { j.kind = kind; j.urgency = JOB_URGENCY[st]; j.parts = Array(JOB_TYPES[kind].parts).fill(MACHINE_KINDS[m.kind].part); j.found = Math.min(j.found, t); }
+      continue;
+    }
+    const found = kind === 'service' ? t + 60 * Math.round(2 + 22 * schedU(m.seed, h, 9)) : t;
+    jobs.push({ id: m.id + '@' + h, machine: m.id, deck: m.deck, kind, urgency: JOB_URGENCY[st], posted: t, found, claimedBy: null,
+                parts: Array(JOB_TYPES[kind].parts).fill(MACHINE_KINDS[m.kind].part), status: 'open' });
+  }
+  const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
+  if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
+  if (SHIP.galley && SHIP.galley.cold && SHIP.galley.cold.meals < MEALS_LOW && SHIP.hold.meals > 0) restock('meals', 3);
+  // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
+  // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
+  const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
+  const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
+  const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t
+    && !(jobTier(j) <= PLAYER_TIER && j.urgency < 2 && t < j.found + CREW_LEAVE))
+    .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
+  for (const j of todo) {
+    const missing = [], have = { ...SHIP.stores };
+    for (const p of j.parts) { if (have[p] > 0) have[p]--; else missing.push(p); }
+    if (missing.some(p => NO_MAKE.has(p))) { j.status = 'waiting'; j.why = 'needs ' + missing.find(p => NO_MAKE.has(p)); continue; }
+    const engine = j.machine && ENGINE_KINDS.has(machineById(j.machine).kind), tier = jobTier(j);
+    for (const p of crew) {
+      if ((busy.get(p.id) || 0) > t || jobCrew(p) !== (engine ? 'engine' : 'works') || (!engine && (CREW_TIER[p.rank] || 0) < tier)) continue;
+      const run = jobRun(p, j, t, missing.length * JOB_MAKE);
+      if (!run) continue;
+      for (const k of j.parts) if (SHIP.stores[k] > 0) SHIP.stores[k]--;
+      Object.assign(j, { claimedBy: p.id, status: 'claimed', start: t, segs: run.segs, done: run.done, end: run.end, made: missing.length });
+      delete j.why; busy.set(p.id, run.end);
+      break;
+    }
+  }
+  // done jobs are kept two days, for the board's history
+  SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
+}
+// where a job puts someone at minute t, shaped like whereIs (plus `job`), or null: lay it over whereIs to see the
+// crew go about their jobs. Not wired into whereIs yet: that waits for the utility rooms' panel places.
+let JOB_IDX = null, JOB_IDX_REV = -1;
+function jobWhere(person, t) {
+  machinesNow();
+  if (JOB_IDX_REV !== MACH_REV) {
+    JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
+    for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
+  }
+  for (const j of JOB_IDX.get(person.id) || []) for (const s of j.segs) if (s.from <= t && t < s.to)
+    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id };
+  return null;
+}
+// ---- your side of the job list (the device and the board come later, with the player engineer) ----
+// the board: jobs found and not done, the most urgent first
+function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
+function claimJob(id) {
+  const j = jobsBoard().find(x => x.id === id);
+  if (!j || j.claimedBy || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++; return true;
+}
+function dropJob(id) {
+  const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
+  if (!j) return false; j.claimedBy = null; j.status = 'open'; delete j.start; MACH_REV++; return true;
+}
+// take a part off the storage shelf (you carry it; carrying is the player engineer's)
+function takePart(part) { machinesNow(); if (!(SHIP.stores[part] > 0)) return false; SHIP.stores[part]--; MACH_REV++; return true; }
+function finishJob(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
+  if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+}
+
+// ---- saving: the save's ship.machines = { id: [cond, lastService] }, ship.machineHour, ship.jobs, ship.stores, ship.hold ----
 SAVE_EXTRA.push(s => {
   const st = machinesNow(), out = {};
   for (const id in st) out[id] = [st[id].cond, st[id].lastService];   // in full, so a reload wears on exactly as before
   s.ship.machines = out; s.ship.machineHour = MACH_HOUR;
+  s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
 });
 // a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
 // fresh; ids it has that are gone are dropped
 function machinesLoad(s) {
   const sh = s && s.ship;
-  if (!sh || !sh.machines || typeof sh.machines !== 'object' || !Number.isInteger(sh.machineHour) || sh.machineHour > Math.floor(shipNow() / 60)) return false;
+  if (!sh || !sh.machines || typeof sh.machines !== 'object' || !Number.isInteger(sh.machineHour) || sh.machineHour > Math.floor(shipNow() / 60) + 1) return false;
   machinesReset(sh.machineHour); MACH_SEEN = shipNow();
   for (const [id, v] of Object.entries(sh.machines)) {
     if (!SHIP.machines[id] || !Array.isArray(v) || !(v[0] >= 0 && v[0] <= 100)) continue;
     SHIP.machines[id] = { cond: v[0], state: machineState(v[0]), lastService: Number.isFinite(v[1]) ? v[1] : null };
   }
+  // jobs and supplies (0.33.1): a save before them starts with an empty list and full shelves
+  const obj = o => o && typeof o === 'object' && !Array.isArray(o);
+  machRecord(sh.machineHour - 1);
+  if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock'));
+  for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
   return true;
 }
 machinesLoad(SAVED);
@@ -7101,7 +7455,7 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 // A person further than CROWD_FAR tiles from the camera's target, or everyone when zoomed far out, is
 // drawn with even fewer polygons. Nothing here calls R(): each person has their own random stream.
 // =====================================================================
-const CROWD_BONES = 17;                                  // joints per person: hips, legs 6, torso, chest, head, arms 6, ponytail
+const CROWD_JOINTS = 17, CROWD_BONES = 20;               // per person: 17 joints (hips, legs 6, torso, chest, head, arms 6, ponytail), then 3 prop bones
 const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] }];
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
@@ -7135,6 +7489,245 @@ function crowdPack(joints, lod) {
   }
   return { P, N, C, B, I, nv, ni };
 }
+// ---- activities (Pillar 2, workstream A2): what people do at a place, drawn on any rig ----
+// A pose is a base (walk, stand, sit, lie, work) or an activity, or both as 'base:activity' ('sit:call', 'lie:lift').
+// An activity alone stands, except that call, read, drink, talk, play and lift sit when y is 0.3 or more (a seat).
+// For a standing pose, a y under 0.3 is the floor it stands on (a stage, the treadmill's belt). Unknown poses stand.
+// Activities move the arms, head and torso over what the legs are doing, blend in and out like the bases, and may hold
+// a prop. Crowd people carry their props inside the crowd's meshes (three prop bones, on each hand and the chest),
+// so props cost no draw calls; full rigs get a small mesh on the hand. poseOf(place) gives a place's pose (plan,
+// "Activities on places"). animateActivity(o, pose, dt, t, sk, y) poses any rig: the crowd, a FullPerson, or a Walker.
+const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
+const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift']);
+const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work']);
+function poseOf(pl) {
+  const act = pl.anim || ACT_OF_TYPE[pl.type], base = pl.type === 'bed' ? 'lie' : pl.pose || 'stand';
+  if (!act || !ACTS[act]) return base;
+  if (base === 'stand' || base === 'work') return act;
+  if (base === 'sit' && !pl.anim && pl.type !== 'callhome' && pl.type !== 'gym') return base;   // by type, only booths and the gym are busy sitting (the music room's beanbags listen)
+  if (base === 'sit' && ACT_SEATED.has(act)) return 'sit:' + act;
+  if (base === 'lie' && act === 'lift') return 'lie:lift';
+  return base;
+}
+const _parsed = new Map();
+function parsePose(pose = 'stand', y = 0) {
+  const k = pose + (y >= .3 ? '+' : ''); let r = _parsed.get(k); if (r) return r;
+  const i = pose.indexOf(':'); let base = i < 0 ? pose : pose.slice(0, i), act = i < 0 ? null : pose.slice(i + 1);
+  if (i < 0 && ACTS[base]) { act = base; base = y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
+  if (!BASES.has(base)) base = 'stand';
+  if (act && !ACTS[act]) act = null;
+  _parsed.set(k, r = { base, act }); return r;
+}
+// an arm toward a target: shoulder forward (x, negative is forward), elbow bend, shoulder out (z, toward its own side)
+const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
+  a.sh.rotation.x = L(a.sh.rotation.x, sx, s); a.el.rotation.x = L(a.el.rotation.x, ex, s);
+  a.sh.rotation.z = L(a.sh.rotation.z, a.side * sz, s); a.hand.rotation.x = L(a.hand.rotation.x, hx, s);
+};
+const pulse = (t, period, len, ph = 0) => { const u = ((t + ph) % period) / len; return u < 1 ? Math.sin(Math.PI * u) : 0; };   // a bump of len seconds every period
+// each activity: the props it holds (R right hand, L left hand, C chest) and how it moves. s is its blend weight,
+// a.side is 1 for the left arm and -1 for the right. b is the base ('stand', 'sit' or 'lie'); ph is the person's phase.
+const ACTS = {
+  run: { f(r, s, t) {                                    // the legs run in place (the gait, in animateActivity); arms bent and pumping
+    for (const a of r.arms) { a.el.rotation.x = L(a.el.rotation.x, -1.5, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .12, s); }
+    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  lift: { props: { R: 'dumbbell', L: 'dumbbell' }, f(r, s, t, b, ph) {
+    for (const a of r.arms) {
+      const c = .5 - .5 * Math.cos(t * 2.4 + ph + (a.side > 0 ? Math.PI : 0));
+      if (b === 'lie') armTo(a, s, L(-.7, -1.5, c), L(-1.5, -.05, c), .25, .2);   // a press, straight up from the bench
+      else armTo(a, s, -.12, L(-.25, -2.3, c), .14, .2);                            // curls, one arm then the other
+    }
+  } },
+  call: { props: { R: 'receiver' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], g = pulse(t, 7, 2.2, ph);
+    armTo(R_, s, -.75, -2.45, .55, .3);                   // the receiver to the ear
+    armTo(L_, s, L(-.1, -.7, g) + Math.sin(t * 3) * .1 * g, L(-.2, -1.3, g), .12);   // and a gesture now and then
+    r.head.rotation.z = L(r.head.rotation.z, -.12, s); r.head.rotation.x = L(r.head.rotation.x, .08, s);
+  } },
+  browse: { props: { L: 'basket' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], reach = pulse(t, 6, 2.4, ph);
+    armTo(L_, s, -.05, -.2, .22);                         // the basket on a hanging arm
+    armTo(R_, s, L(-.15, -1.35, reach), L(-.25, -.35, reach), .1, L(0, .4, reach));   // reaching to a shelf
+    r.head.rotation.y = L(r.head.rotation.y, Math.sin(t * .5 + ph) * .55, s);         // looking along the shelves
+    r.head.rotation.x = L(r.head.rotation.x, .05 - .2 * reach, s);
+  } },
+  pay: { props: { R: 'card', L: 'basket' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], tap = pulse(t, 3, .6, ph);
+    armTo(L_, s, -.05, -.2, .22);
+    armTo(R_, s, -.85 - .15 * tap, -.75 + .25 * tap, .02, .3);
+    r.head.rotation.x = L(r.head.rotation.x, .3, s);
+  } },
+  play: { props: { C: 'guitar' }, seatedProps: {}, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)];
+    if (b === 'sit') {                                    // keys: both hands forward, moving along the keyboard
+      for (const a of r.arms) armTo(a, s, -.75, -.85, .06 + .1 * Math.sin(t * 1.1 + a.side + ph), .35 + .12 * Math.sin(t * 9 + a.side * 2));
+      r.head.rotation.x = L(r.head.rotation.x, .25 + .05 * Math.sin(t * 2), s); r.torso.rotation.x = L(r.torso.rotation.x, .06 + .04 * Math.sin(t * 1.3), s);
+    } else {                                              // a guitar: left hand up the neck, right hand strumming
+      armTo(L_, s, -.85, -1.05, .45, .2);
+      armTo(R_, s, -.35, -1.55 + .22 * Math.sin(t * 8 + ph), -.05, .1);
+      r.head.rotation.x = L(r.head.rotation.x, .2, s); r.head.rotation.y = L(r.head.rotation.y, .35, s);
+    }
+  } },
+  water: { props: { R: 'can' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)];
+    armTo(R_, s, -.75, -.35, .1 + .2 * Math.sin(t * .7 + ph), -.45);   // the can held out and tipped, swept slowly along the bed
+    armTo(L_, s, -.1, -.3, .12);
+    r.head.rotation.x = L(r.head.rotation.x, .4, s); r.torso.rotation.x = L(r.torso.rotation.x, .12, s);
+  } },
+  cook: { props: { R: 'spoon', L: 'pan' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], chop = ((t + ph) % 12) > 8;
+    if (chop) armTo(R_, s, -.75, -.95 + .4 * Math.abs(Math.sin(t * 9)), .05, .2);   // chopping
+    else armTo(R_, s, -.7 + .12 * Math.cos(t * 3.2), -1.0, .08 + .14 * Math.sin(t * 3.2), .2);   // stirring
+    armTo(L_, s, -.6, -.95, .16, .1);                     // a hand on the pan
+    r.head.rotation.x = L(r.head.rotation.x, .35, s); r.torso.rotation.x = L(r.torso.rotation.x, .08, s);
+  } },
+  wash: { props: { R: 'sponge', L: 'plate' }, f(r, s, t, b, ph) {
+    for (const a of r.arms) armTo(a, s, -.6 + .07 * Math.cos(t * 5 + a.side), -.95, .04 + .07 * Math.sin(t * 5 + a.side), .25);
+    r.head.rotation.x = L(r.head.rotation.x, .4, s); r.torso.rotation.x = L(r.torso.rotation.x, .14, s);
+  } },
+  fold: { props: { R: 'cloth' }, f(r, s, t, b, ph) {
+    const u = pulse(t, 4, 2, ph);                         // lift, bring together, lay down
+    for (const a of r.arms) armTo(a, s, L(-.7, -1.0, u), L(-.8, -1.4, u), L(.12, -.12, u), .3);
+    r.head.rotation.x = L(r.head.rotation.x, .32, s); r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
+  } },
+  drink: { props: { R: 'glass' }, f(r, s, t, b, ph) {
+    const [L_, R_] = [r.arms.find(a => a.side > 0), r.arms.find(a => a.side < 0)], sip = pulse(t, 8, 1.8, ph);
+    armTo(R_, s, L(-.5, -.8, sip), L(-1.3, -2.15, sip), .14, .25);
+    armTo(L_, s, b === 'sit' ? -.5 : -.15, b === 'sit' ? -1.2 : -.3, .14);
+    r.head.rotation.x = L(r.head.rotation.x, -.1 * sip, s);
+  } },
+  read: { props: { R: 'book' }, f(r, s, t, b, ph) {
+    const turn = pulse(t, 14, .8, ph);
+    for (const a of r.arms) armTo(a, s, -.55, -1.7 + (a.side > 0 ? .3 * turn : 0), -.14, .35);
+    r.head.rotation.x = L(r.head.rotation.x, .45, s);
+  } },
+  talk: { f(r, s, t, b, ph) {
+    for (const a of r.arms) {
+      const g = pulse(t, 5 + a.side, 1.6, ph + a.side * 1.7);
+      armTo(a, s, L(b === 'sit' ? -.5 : -.08, -.75, g) + .1 * g * Math.sin(t * 4), L(b === 'sit' ? -1.2 : -.25, -1.3, g), L(.12, .3, g), L(0, -.3, g));
+    }
+    r.head.rotation.x = L(r.head.rotation.x, .05 * Math.sin(t * 2.3 + ph), s);
+    r.head.rotation.y = L(r.head.rotation.y, .2 * Math.sin(t * .4 + ph), s);
+  } },
+};
+// props, in their bone's own space (a hand: the wrist at 0, fingers toward -y; the chest: its base at 0, front +z).
+// Built the first time they're needed, from the character kit's primitives; colours through col(); no R().
+const PROP_BONE = { R: 0, L: 1, C: 2 };
+const PROP_KIT = {
+  dumbbell(p) { part(p, cylG(.012, .012, .17, 8), '#a4aeb4', 0, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); for (const x of [-.07, .07]) part(p, cylG(.04, .04, .035, 10), '#2b2f33', x, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); },
+  receiver(p) { part(p, GEO.box, '#2b2f33', 0, -.07, .045, .04, .17, .045, .3); part(p, GEO.sph, '#2b2f33', 0, -.15, .07, .03, .025, .03); },
+  basket(p) { part(p, GEO.box, '#2a9d8f', 0, -.2, .02, .24, .12, .16); part(p, GEO.box, '#1f6f66', 0, -.11, .02, .015, .1, .015); },
+  card(p) { part(p, GEO.box, '#e8c06a', 0, -.1, .035, .055, .08, .006); },
+  guitar(p) {
+    part(p, GEO.sph, '#d9a35b', -.05, .02, .23, .17, .19, .055); part(p, GEO.sph, '#d9a35b', .07, .12, .22, .12, .12, .05);
+    part(p, cylG(.04, .04, .012, 12), '#3a2820', -.03, .05, .278, 1, 1, 1, Math.PI / 2);
+    part(p, GEO.box, '#5a3424', .27, .22, .23, .42, .045, .025, 0, 0, .38);
+  },
+  can(p) { part(p, cylG(.07, .08, .15, 10), '#3f7a5a', 0, -.14, .06); part(p, GEO.box, '#3f7a5a', 0, -.11, .19, .025, .025, .2, .6); part(p, GEO.box, '#2f5e46', 0, -.05, .06, .015, .06, .1); },
+  spoon(p) { part(p, GEO.box, '#a4aeb4', 0, -.06, -.08, .016, .016, .2); part(p, GEO.sph, '#a4aeb4', 0, -.06, -.18, .03, .03, .02); },
+  pan(p) { part(p, GEO.box, '#2b2f33', 0, -.12, 0, .025, .17, .025); part(p, cylG(.12, .1, .05, 14), '#3a3f44', 0, -.31, -.02, 1, 1, 1, Math.PI / 2); },
+  sponge(p) { part(p, GEO.box, '#e9c46a', 0, -.08, .03, .07, .035, .05); },
+  plate(p) { part(p, cylG(.11, .11, .014, 14), '#e8ebe8', 0, -.09, .07, 1, 1, 1, Math.PI / 2); },
+  cloth(p) { part(p, GEO.box, '#e9e1d0', .08, -.12, .02, .26, .18, .006); },
+  glass(p) { part(p, cylG(.033, .028, .1, 10), '#f0a640', 0, -.07, .06, 1, 1, 1, -Math.PI / 2); },
+  book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
+};
+const _propParts = {}, _propPacks = {}, _propGeos = {};
+function propParts(kind) {
+  if (_propParts[kind]) return _propParts[kind];
+  const g = new THREE.Group(); PROP_KIT[kind](g); return (_propParts[kind] = g.userData.parts);
+}
+function propPack(kind, lod, bone) {                    // for the crowd: packed like a body part, on prop bone `bone`
+  const k = kind + lod + bone; if (_propPacks[k]) return _propPacks[k];
+  const j = new THREE.Group(); j.userData.parts = propParts(kind);
+  const q = crowdPack([j], lod); q.B.fill(CROWD_JOINTS + bone); return (_propPacks[k] = q);
+}
+function propGeo(kind) {                                 // for full rigs: a plain vertex-coloured geometry
+  if (_propGeos[kind]) return _propGeos[kind];
+  const j = new THREE.Group(); j.userData.parts = propParts(kind); const q = crowdPack([j], 0), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(q.P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(q.N, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(q.C, 3)); geo.setIndex(new THREE.BufferAttribute(q.I, 1)); geo.computeBoundingSphere();
+  return (_propGeos[kind] = geo);
+}
+// the props someone holds now: a key like 'R:dumbbell L:dumbbell', or ''
+function propKeyOf(act, base) {
+  const A = act && ACTS[act], P = A && (base === 'sit' && A.seatedProps || A.props);
+  return P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '';
+}
+const _propList = new Map();
+const propList = key => _propList.get(key) || (_propList.set(key, key ? key.split(' ').map(s => { const [b, k] = s.split(':'); return [PROP_BONE[b], k]; }) : []), _propList.get(key));
+// full rigs and Walkers: small meshes on the hand or chest (each its own copy, so the rig can dispose it)
+function rigProps(o, key) {
+  for (const m of o.propMeshes || []) { m.parent.remove(m); m.geometry.dispose(); }
+  o.propMeshes = [];
+  const R_ = o.rig.arms.find(a => a.side < 0).hand, L_ = o.rig.arms.find(a => a.side > 0).hand, at = [R_, L_, o.rig.chest];
+  for (const [b, kind] of propList(key)) {
+    const m = new THREE.Mesh(propGeo(kind).clone(), CHAR_MAT); m.castShadow = m.receiveShadow = true;
+    if (o.obj) m.userData.walker = o;                   // a Walker's prop taps as the Walker
+    at[b].add(m); o.propMeshes.push(m);
+  }
+}
+// pose a rig for one frame: the gait (animateRig), the base pose, the activity and its props.
+// o: a CrowdPerson, a FullPerson or a Walker (anything with rig, g and h). t already includes the person's own offset.
+// sk: walking speed 0..1, as animateRig takes. y: the seat (sit, lie) or the floor (standing) height, as for set().
+// With pose 'stand' or 'walk' it does exactly what animateRig alone does, so a Walker can call it in animateRig's place.
+function animateActivity(o, pose, dt, t, sk, y = 0) {
+  const rig = o.rig, g = o.g, h = o.h, { base, act } = parsePose(pose, y);
+  const rnd = o.rnd || o.prnd || (o.prnd = (() => { let sd = 7907; return () => (sd = (sd * 16807) % 2147483647) / 2147483647; })());
+  const k = o.k || (o.k = {}), ph = o.ph !== undefined ? o.ph : (o.ph = (g.t0 || 0) * 3.7 % 10);
+  if (act === 'run') {                                   // running in place: the gait at a run, with nowhere to go
+    g.w = o.fresh ? 1 : g.w + (1 - g.w) * Math.min(1, dt * 6); g.p += dt * 1.9; sk = 1;
+  }
+  animateRig(rig, g, dt, t, sk, o.rnd || R);
+  for (const key of [base, act]) if (key && k[key] === undefined) k[key] = 0;
+  for (const key in k) k[key] = o.fresh ? +(key === base || key === act) : k[key] + (+(key === base || key === act) - k[key]) * Math.min(1, dt * 5);
+  const seat = base === 'sit' || base === 'lie' ? (y > 0 ? y : CROWD_SEAT[base]) : 0;
+  if (k.sit > .001) {                                    // on a bench or chair: feet on the floor, forearms on the table, eating now and then
+    const s = ss(k.sit), sy = seat || CROWD_SEAT.sit, hy = Math.max(sy / h + .09, HIP_OFF + .45);
+    rig.hips.position.y = L(rig.hips.position.y, hy, s); rig.hips.position.x *= 1 - s;
+    rig.hips.rotation.y *= 1 - s; rig.hips.rotation.z *= 1 - s;
+    for (const leg of rig.legs) {
+      const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
+      const ang = legIK(leg, ANK - (hy - HIP_OFF), .3);
+      leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
+      leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
+    }
+    rig.torso.rotation.x = L(rig.torso.rotation.x, .02, s); rig.chest.rotation.y *= 1 - s; rig.chest.rotation.z *= 1 - s;
+    if (o.eatT === undefined) { o.eat = 0; o.eatT = 2 + rnd() * 6; }
+    o.eatT -= dt; if (o.eatT < 0) { o.eat += dt / 1.6; if (o.eat >= 1) { o.eat = 0; o.eatT = 3 + rnd() * 7; } }
+    const lift = Math.sin(Math.PI * o.eat) * s;
+    for (const a of rig.arms) {
+      a.sh.rotation.x = L(a.sh.rotation.x, -.55, s); a.el.rotation.x = L(a.el.rotation.x, -1.25, s);
+      a.sh.rotation.z = L(a.sh.rotation.z, a.side * .14, s); a.hand.rotation.x = L(a.hand.rotation.x, .2, s);
+      if (a.side < 0 && lift > 0) { a.sh.rotation.x = L(a.sh.rotation.x, -.75, lift); a.el.rotation.x = L(a.el.rotation.x, -2.1, lift); }
+    }
+    rig.head.rotation.x = L(rig.head.rotation.x, .12 - lift * .1, s);
+  }
+  if (k.work > .001) {                                   // hands busy at a bench or counter, head down
+    const s = ss(k.work);
+    for (const a of rig.arms) {
+      a.sh.rotation.x = L(a.sh.rotation.x, -.85 + Math.sin(t * 2.1 + a.side * 1.7) * .07, s);
+      a.el.rotation.x = L(a.el.rotation.x, -.8 + Math.sin(t * 2.9 + a.side) * .12, s);
+      a.sh.rotation.z = L(a.sh.rotation.z, a.side * -.04, s); a.hand.rotation.x = L(a.hand.rotation.x, .25, s);
+    }
+    rig.torso.rotation.x = L(rig.torso.rotation.x, .1, s); rig.head.rotation.x = L(rig.head.rotation.x, .3, s);
+  }
+  if (k.lie > .001) {                                    // on the back, legs straight, arms by the sides
+    const s = ss(k.lie);
+    rig.hips.position.y = L(rig.hips.position.y, HIP_Y, s);
+    for (const leg of rig.legs) for (const j of [leg.thigh, leg.knee, leg.ankle]) j.rotation.x *= 1 - s;
+    for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
+    rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
+  }
+  for (const key in k) if (ACTS[key] && k[key] > .001) ACTS[key].f(rig, ss(k[key]), t, base, ph);
+  const key = act && k[act] > .5 ? propKeyOf(act, base) : '';   // props appear halfway into the activity
+  if (key !== (o.propKey || '')) {
+    o.propKey = key;
+    if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
+    else rigProps(o, key);
+  }
+  return { base, act, seat };
+}
 class CrowdPerson {
   constructor(spec, n) {
     let root = null;
@@ -7143,6 +7736,8 @@ class CrowdPerson {
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
     this.geo = [0, 1].map(l => crowdPack(this.joints, l));
     for (const j of this.joints) delete j.userData.parts;
+    const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
+    this.propBones = [hand(-1), hand(1), this.rig.chest].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
     let sd = 7919 * (n + 1) % 2147483647;
     this.rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
     this.g = { p: 0, w: 0, turn: 0, look: 0, lookT: this.rnd() * 3, tail: 0, tailV: 0, lean: 0, t0: this.rnd() * 20 };
@@ -7155,57 +7750,19 @@ class CrowdPerson {
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
   }
   update(dt, t) {
-    const g = this.g, rig = this.rig, walking = this.pose === 'walk', h = this.h, TAU = Math.PI * 2;
+    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk';
     const prev = this.rot; let df = this.face - this.rot; df = Math.atan2(Math.sin(df), Math.cos(df));
     this.rot = this.fresh ? this.face : this.rot + df * Math.min(1, dt * 8);
     g.turn += ((this.rot - prev) / Math.max(dt, 1e-3) - g.turn) * Math.min(1, dt * 10);
     const sk = walking ? (this.phase !== undefined ? 1 : Math.min(1, this.moved / Math.max(dt, 1e-3) / (1.2 * Math.sqrt(h)))) : 0;
-    if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && g.w < .02) g.p = 0; }
+    if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && act !== 'run' && g.w < .02) g.p = 0; }
     this.moved = 0;
-    g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
-    animateRig(rig, g, dt, t + g.t0, sk, this.rnd);
-    const k = this.k;
-    for (const key in k) k[key] = this.fresh ? +(this.pose === key) : k[key] + (+(this.pose === key) - k[key]) * Math.min(1, dt * 5);
-    const seat = this.pos.y > 0 ? this.pos.y : CROWD_SEAT[this.pose] || CROWD_SEAT.sit;
-    if (k.sit > .001) {                                  // on a bench or chair: feet on the floor, forearms on the table, eating now and then
-      const s = ss(k.sit), hy = Math.max(seat / h + .09, HIP_OFF + .45);
-      rig.hips.position.y = L(rig.hips.position.y, hy, s); rig.hips.position.x *= 1 - s;
-      rig.hips.rotation.y *= 1 - s; rig.hips.rotation.z *= 1 - s;
-      for (const leg of rig.legs) {
-        const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
-        const ang = legIK(leg, ANK - (hy - HIP_OFF), .3);
-        leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
-        leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
-      }
-      rig.torso.rotation.x = L(rig.torso.rotation.x, .02, s); rig.chest.rotation.y *= 1 - s; rig.chest.rotation.z *= 1 - s;
-      this.eatT -= dt; if (this.eatT < 0) { this.eat += dt / 1.6; if (this.eat >= 1) { this.eat = 0; this.eatT = 3 + this.rnd() * 7; } }
-      const lift = Math.sin(Math.PI * this.eat) * s;
-      for (const a of rig.arms) {
-        a.sh.rotation.x = L(a.sh.rotation.x, -.55, s); a.el.rotation.x = L(a.el.rotation.x, -1.25, s);
-        a.sh.rotation.z = L(a.sh.rotation.z, a.side * .14, s); a.hand.rotation.x = L(a.hand.rotation.x, .2, s);
-        if (a.side < 0 && lift > 0) { a.sh.rotation.x = L(a.sh.rotation.x, -.75, lift); a.el.rotation.x = L(a.el.rotation.x, -2.1, lift); }
-      }
-      rig.head.rotation.x = L(rig.head.rotation.x, .12 - lift * .1, s);
-    }
-    if (k.work > .001) {                                 // hands busy at a bench or counter, head down
-      const s = ss(k.work);
-      for (const a of rig.arms) {
-        a.sh.rotation.x = L(a.sh.rotation.x, -.85 + Math.sin(t * 2.1 + a.side * 1.7 + g.t0) * .07, s);
-        a.el.rotation.x = L(a.el.rotation.x, -.8 + Math.sin(t * 2.9 + a.side + g.t0) * .12, s);
-        a.sh.rotation.z = L(a.sh.rotation.z, a.side * -.04, s); a.hand.rotation.x = L(a.hand.rotation.x, .25, s);
-      }
-      rig.torso.rotation.x = L(rig.torso.rotation.x, .1, s); rig.head.rotation.x = L(rig.head.rotation.x, .3, s);
-    }
-    if (k.lie > .001) {                                  // on the back, legs straight, arms by the sides
-      const s = ss(k.lie);
-      rig.hips.position.y = L(rig.hips.position.y, HIP_Y, s);
-      for (const leg of rig.legs) for (const j of [leg.thigh, leg.knee, leg.ankle]) j.rotation.x *= 1 - s;
-      for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
-      rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
-    }
-    const lie = ss(k.lie), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
+    if (act !== 'run') g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
+    animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
+    const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
+    const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
     const root = rig.root;
-    root.position.set(this.pos.x + fx * off, L(0, seat + .17 * h, lie), this.pos.z + fz * off);
+    root.position.set(this.pos.x + fx * off, L(floor, (this.pos.y > 0 ? this.pos.y : CROWD_SEAT[base] || CROWD_SEAT.sit) + .17 * h, lie), this.pos.z + fz * off);   // as before 0.27.0, getting out of bed
     root.rotation.set(-Math.PI / 2 * lie, this.rot, 0);
     root.updateMatrixWorld(true);
     this.fresh = false;
@@ -7223,28 +7780,31 @@ class CrowdChunk {
   }
   put(p, i) {
     this.slots[i] = p; p.chunk = this; p.slot = i; this.dirty = true;
-    for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[i * CROWD_BONES + b] = p.joints[b] || CROWD_REST;
+    for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[i * CROWD_BONES + b] = (b < CROWD_JOINTS ? p.joints[b] : p.propBones[b - CROWD_JOINTS]) || CROWD_REST;
   }
   take(p) {
     this.slots[p.slot] = null; this.dirty = true;
     for (let b = 0; b < CROWD_BONES; b++) this.skel.bones[p.slot * CROWD_BONES + b] = CROWD_REST;
     p.chunk = null; p.slot = -1;
   }
-  rebuild() {                                            // only when someone joins, leaves or changes detail
+  rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
     this.dirty = false;
     const old = this.mesh.geometry; let nv = 0, ni = 0;
-    for (const p of this.slots) if (p) { nv += p.geo[p.lod].nv; ni += p.geo[p.lod].ni; }
+    const packs = p => [p.geo[p.lod], ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
+    for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
     if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
     const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
     const SI = new Uint16Array(nv * 4), SW = new Uint8Array(nv * 4), I = nv > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
     let o = 0, oi = 0;
     this.slots.forEach((p, s) => {
       if (!p) return;
-      const q = p.geo[p.lod], b0 = s * CROWD_BONES;
-      P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
-      for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
-      for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
-      o += q.nv;
+      const b0 = s * CROWD_BONES;
+      for (const q of packs(p)) {
+        P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
+        for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
+        for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
+        o += q.nv;
+      }
     });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
@@ -7432,7 +7992,7 @@ const ROSTER = [
   {"id": "calder", "name": "Chief Ines Calder", "story": true, "provisional": true, "rank": "chief", "dept": "works", "uniform": "works", "role": "Head of Works", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-O", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "workaholic", "tea-break"], "traits": ["exacting", "fair", "dry"], "looks": {"skin": 3, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["glasses"]}, "bio": "Head of Works. Remembers every repair you got wrong, and every one you got right.", "life": ["Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard.", "Keeps a battered toolbox that belonged to her first chief."], "seed": 211686},
   {"id": "pell", "name": "Pell Okafor", "story": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-2", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "tea-break", "gym-regular"], "traits": ["easygoing", "handy", "chatty"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": ["beard"]}, "bio": "Works, like you, and two years ahead. Can fix anything except his sleep schedule.", "life": ["Talks in his sleep, mostly about engines.", "Has three messages from his mum waiting."], "seed": 841867},
   {"id": "rina", "name": "Rina Deshi", "story": true, "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-3", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["common-room", "calls-home"], "traits": ["dry humour", "steady", "competitive"], "looks": {"skin": 3, "hair": "curls", "hairColor": "black", "height": 0.95, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Dry humour, steady hands, undefeated at Tiles.", "life": ["Uses a stack of medical journals as a pillow.", "Has a message from her sister waiting.", "Undefeated at Tiles in the junior common room."], "seed": 104849},
-  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728},
+  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "galley": "chef", "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728},
   {"id": "tomas", "name": "Tomas Lind", "story": true, "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B1-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["common-room", "window-seat", "stargazer"], "traits": ["earnest", "curious", "a little lost"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": []}, "bio": "New to Watch, and your bunkmate. Still learning where everything is.", "life": ["Taped a star map to the underside of the top bunk.", "Joined the Wren a week before you did."], "seed": 754367},
   {"id": "nandakumar", "name": "Dr. Priya Nandakumar", "provisional": true, "rank": "chief", "dept": "infirmary", "uniform": "infirmary", "role": "Head of Infirmary", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-I", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["early-riser", "garden-lover", "gardener"], "traits": ["calm", "brisk", "kind"], "looks": {"skin": 4, "hair": "long", "hairColor": "black", "height": 0.97, "build": "slim", "acc": ["glasses", "earrings"]}, "bio": "Head of Infirmary. Says \"drink some water\" in a way that ends the argument.", "life": ["Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3.", "Grows chillies in a corner of the garden."], "seed": 779824},
   {"id": "kowalczyk", "name": "Anja Kowalczyk", "provisional": true, "rank": "senior", "dept": "command", "uniform": "command", "role": "Second Officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "2-S", "work": {"deck": 1, "place": "work:command"}, "habits": ["night-owl", "quiet-corner"], "traits": ["steady", "private", "wry"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "brown", "height": 1.04, "build": "average", "acc": []}, "bio": "Second Officer. Runs the bridge at night, when the ship is hers.", "life": ["Third in command, and first to be woken.", "Reads old paper novels on the bridge during quiet nights."], "seed": 876932},
@@ -7494,11 +8054,11 @@ const ROSTER = [
   {"id": "mbeki-bo", "name": "Bo Mbeki", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B4-1", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["cheerful", "meticulous"], "looks": {"skin": 2, "hair": "curls", "hairColor": "dark", "height": 1.08, "build": "slim", "acc": []}, "bio": "Carries samples and dreams of naming a star.", "life": ["Brought a telescope from home.", "A sister on Kesh who sends recipes."], "seed": 802246},
   {"id": "grieve-thea", "name": "Thea Grieve", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-1", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["lingers-at-meals", "tea-break", "stargazer"], "traits": ["serious", "nervous"], "looks": {"skin": 1, "hair": "long", "hairColor": "dark", "height": 0.94, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Keeps fish back home on New Aberdeen.", "Is quietly in charge of the lost-property box."], "seed": 780864},
   {"id": "larsen-hamid", "name": "Hamid Larsen", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B3-2", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["skips-breakfast", "night-owl", "tea-break", "musician"], "traits": ["serious", "chatty"], "looks": {"skin": 1, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Is learning the guitar, badly.", "Is saving up for a boat on the Ostrander colonies."], "seed": 690121},
-  {"id": "walsh-esme", "name": "Esme Walsh", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530},
-  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898},
-  {"id": "varga-tariq", "name": "Tariq Varga", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511},
-  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759},
-  {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406},
+  {"id": "walsh-esme", "name": "Esme Walsh", "galley": "hand", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530},
+  {"id": "madsen-ivo", "name": "Ivo Madsen", "galley": "hand", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898},
+  {"id": "varga-tariq", "name": "Tariq Varga", "galley": "cook", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511},
+  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "galley": "hand", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759},
+  {"id": "dlamini-lukas", "name": "Lukas Dlamini", "galley": "hand", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406},
 ];
 const ROSTER_GUESTS = [
   {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695},
