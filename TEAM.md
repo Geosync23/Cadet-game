@@ -65,4 +65,4 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 ## Queue
 
 - Pillar 1 of the Living Ship: plan it with the user, then build.
-- Game follow-up for Pillar 1: label Deck 4's six guest cabins (plates and tap text) when the crew roster assigns cabins.
+- Deck 4 guest cabins in the game: given to the Deck 6 architect (build 0.14.0, from 0.13.0).
