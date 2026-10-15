@@ -19,7 +19,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 | --- | --- | --- | --- |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
 | session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 Sketch 7 merged; waiting on the user's review |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck architect: build Decks 6, 1 and 2 into the game | `claude/deck-architect` | Building Deck 6: T1 done (0.7.1, 36ad9b7), T2 in progress |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Idle, kept for review fixes |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Building Deck 1 T1–T4 from ed1da74 |
 
 ## Done
 
