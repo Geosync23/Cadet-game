@@ -233,6 +233,84 @@ with sync_playwright() as pw:
           delete window.takePortion; delete window.galleyText; delete window.portions; delete window.grab; return out; })()""")
         print('  galley stand-in:', fd)
         check(fd['peek'] is True and fd['take'].get('dish') == 'Fish pie' and fd['peekEmpty']['ok'] is False and fd['takeEmpty'] is False, f'galley stand-in: {fd}')
+
+    # the job loop (B2), when the build has section 17's jobs (myJob, finishJob, takePart): take a job, look the machine
+    # over, fetch its part from main storage on Deck 5, fit it and repair it; walking away pauses the repair
+    if g.ev("jobsOn()"):
+        print('The job loop (section 17\'s jobs):')
+        JST = "JSON.stringify([ACT && [ACT.kind, ACT.placeId, ACT.phase], SHIP.player.carry, SHIP.player.work, document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent])"
+        def jrun(n=80):
+            for k in range(n):
+                g.step(30)
+                if k > 1 and not g.ev("!!ACT || player.path.length > 0"): break
+            return json.loads(g.ev(JST))
+        TAPI = "(() => { const s = placeSpot(panelPlace(myJob().machine)), it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; }).sort((a, b) => Math.hypot(a[1].x - s.x, a[1].z - s.z) - Math.hypot(b[1].x - s.x, b[1].z - s.z))[0]; return playerTap(it[0], it[1].clone(), it[1].clone()); })()"
+        TAPS = "(() => { const it = ITEMS.find(i => i.t === %s); it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"
+        g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 * 2 + 9 * 60); needsT = null; SHIP.player.carry = []; SHIP.player.work = null"); g.step(3)
+        # a tier-1 service job on a machine with a panel place, handed to you (the crew may have claimed it: test only)
+        jid = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; return claimJob(j.id) ? j.id : null; })()""")
+        check(jid is not None, 'job loop: a tier-1 service job to take')
+        if jid:
+            mj = json.loads(g.ev("JSON.stringify([myJob().parts, machineById(myJob().machine).deck, myJob().machine, SHIP.stores[myJob().parts[0]]])"))
+            print('  your job:', jid, mj)
+            g.ev(f"goToDeck({mj[1]})"); g.step(5)
+            check(g.ev(TAPI) is True, 'job loop: a tap on the machine should be the job'); s1 = jrun()
+            print('  inspected:', s1[3][:110]); check(s1[2]['seen'] and 'needs' in s1[3], f'job loop: inspecting should say what it needs ({s1[3]})')
+            g.ev("goToDeck(5)"); g.step(5)
+            shelf = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).map(i => i.t)[0])")
+            check(g.ev(TAPS % shelf) is True, 'job loop: a tap on a storage shelf should fetch'); s2 = jrun()
+            print('  fetched:', s2[1], s2[3][:100]); check(s2[1] == mj[0][:2], f'job loop: should carry {mj[0]}, carries {s2[1]}')
+            check(g.ev(f"SHIP.stores[{json.dumps(mj[0][0])}]") == mj[3] - 1, 'job loop: one off the storage shelf')
+            g.ev(f"goToDeck({mj[1]})"); g.step(5)
+            check(g.ev(TAPI) is True, 'job loop: back at the machine')
+            for k in range(60):                                # repair a few minutes, then walk away
+                g.step(30)
+                if g.ev("!!ACT && ACT.phase === 'do' && SHIP.player.work.done >= 4"): break
+            g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3)
+            paused = json.loads(g.ev(JST)); print('  walked away mid-repair:', paused[0], paused[2])
+            check(not paused[0] and paused[2]['fitted'] == mj[0] and paused[2]['done'] >= 4, 'job loop: walking away should keep the part fitted and the repair time done')
+            sv = json.loads(g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return JSON.stringify(s.player); })()"))
+            check(sv.get('work', {}).get('done', 0) >= 4 and sv.get('carry') == [], f"job loop: the save should hold the work ({sv.get('work')})")
+            g.step(60); check(g.ev(TAPI) is True, 'job loop: resume'); s3 = jrun(160)
+            done = json.loads(g.ev(f"JSON.stringify([myJob(), SHIP.jobs.find(j => j.id === {json.dumps(jid)}).status, SHIP.machines[{json.dumps(mj[2])}].cond])"))
+            print('  repaired:', s3[3][:80], '| job', done[1], '| condition', round(done[2]))
+            check(done[0] is None and done[1] == 'done' and done[2] >= 99 and s3[2] is None, f'job loop: the job should be done and the machine as new ({done})')
+        # making a part: storage has none, so the machine shop (an hour at the lathe; resumed here near the end)
+        mk = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); j.parts = ['element']; MACH_REV++;
+          if (!claimJob(j.id)) return null; window.__stock = SHIP.stores.element; SHIP.stores.element = 0; SHIP.player.carry = []; myWork(); return j.id; })()""")
+        if mk:
+            g.ev("goToDeck(5)"); g.step(5)
+            f = g.ev(TAPS % '"Galley parts"'); s5 = jrun(); print('  storage out of elements:', s5[3][:120])
+            check(s5[1] == [] and 'machine shop' in s5[3], 'job loop: no elements in storage should point to the machine shop')
+            g.ev("SHIP.player.work.make = { part: 'element', done: 57 }")
+            lathe = g.ev("JSON.stringify(ITEMS.filter(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'f').map(i => i.t)[0])")
+            check(g.ev(TAPS % lathe) is True, f'job loop: a tap in the machine shop ({lathe}) should make the part'); s6 = jrun()
+            print('  made:', s6[1], '|', s6[3][:100])
+            check(s6[1] == ['element'] and s6[2]['make'] is None, 'job loop: making should leave the part in your hands')
+            g.ev(f"SHIP.stores.element = window.__stock; dropJob({json.dumps(mk)}); SHIP.player.carry = []")
+        # the wrist comm: a job you could take, posted while you're free
+        nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow();
+          const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++; jobNotice();
+          return [document.getElementById('tt').textContent, document.getElementById('tx').textContent]; })()""")
+        print('  notice:', nt)
+        check(nt is None or (nt[0] == 'Your device' and nt[1].startswith('New job')), f'job loop: a new job you could take should be announced ({nt})')
+        # carrying two at most: a job needing three filters takes two trips
+        two = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.status !== 'done' && !j.claimedBy && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind))
+          || SHIP.jobs.find(j => j.machine && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); j.parts = ['filter', 'filter', 'filter']; MACH_REV++; return claimJob(j.id) ? j.id : null; })()""")
+        if two:
+            g.ev("goToDeck(5); SHIP.player.carry = []"); g.step(5)
+            g.ev(TAPS % '"Filters"'); s4 = jrun()
+            print('  three filters needed, carrying:', s4[1], '|', s4[3][:110])
+            check(s4[1] == ['filter', 'filter'] and 'another trip' in s4[3], 'job loop: two at most, and say another trip is needed')
+            g.ev(f"dropJob({json.dumps(two)})")
+        else: print('  (no job left to try carrying with)')
+    else:
+        print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
+
     errors = g.errors
     g.close()
 

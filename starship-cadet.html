@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.13
+   STARSHIP CADET: CSV Wren                            build 0.33.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6293,7 +6293,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7080,8 +7080,8 @@ function needsLoad(s) {                                  // from the save (secti
   for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
   return out;
 }
-SHIP.player = { needs: needsLoad(SAVED) };
-SAVE_EXTRA.push(s => { (s.player || (s.player = {})).needs = { ...SHIP.player.needs }; });   // into the save (section 13)
+SHIP.player = { needs: needsLoad(SAVED), carry: [], work: null };   // carry and work come from the save below (the job loop)
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.needs = { ...SHIP.player.needs }; p.carry = SHIP.player.carry.slice(); p.work = SHIP.player.work && { ...SHIP.player.work, fitted: SHIP.player.work.fitted.slice(), make: SHIP.player.work.make && { ...SHIP.player.work.make } }; });   // into the save (section 13)
 // the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
 // restore and drain multiply ours (a failing recycler, weaker showers). walk is left out: the user's rule is that
 // only low fitness and energy slow you. Read at most once a ship minute; all 1s until section 17 is there.
@@ -7132,6 +7132,10 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   } },
   eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
   grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
+  fetch:  { mins: 4, pose: 'browse', title: 'Main storage' },   // the job loop (B2): parts off the shelf, the machine's panel, parts back
+  job:    { mins: 3, pose: 'work', title: 'Your job' },
+  stow:   { mins: 2, pose: 'browse', title: 'Main storage' },
+  make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
 };
 const ACT_TAP = [   // what you tapped (its title), the place types it leads to, the activity
   [/treadmill|rowing|weights|mats/i, ['gym'], 'gym'],
@@ -7176,6 +7180,7 @@ function foodFrom(where, peek) {
 }
 // an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 function playerTap(it, at, point) {
+  if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
   const [, types, kind] = rule;
   const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
@@ -7213,7 +7218,7 @@ function playerTap(it, at, point) {
 function actStart(kind, placeId, o = {}) {
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
-  ACT = { kind, def: PLAYER_ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
+  ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
   if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
@@ -7235,6 +7240,7 @@ function actBegin() {
     A.o.dish = f.dish;
   }
   if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt; }   // your place in line from when you reach it
+  if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
@@ -7251,6 +7257,7 @@ function actEnd(abort) {
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') basket = true;
+  if (A.kind === 'fetch' || A.kind === 'job' || A.kind === 'stow' || A.kind === 'make') jobEnd(A);
   if (A.kind === 'pay') basket = false;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
   if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
@@ -7297,6 +7304,8 @@ function playerUpdate(dt, t) {
     needsT = now; needsDrain(dm, false, fx, doing || null);
     if (A && A.phase === 'do') {
       const m = Math.max(0, Math.min(dm, A.def.mins - A.done)); A.done += dm;
+      if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
+      if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
     }
   }
@@ -7309,19 +7318,153 @@ function playerUpdate(dt, t) {
   }
   if (ACT) actUpdate(dt, t);
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); device.refresh(); }
 }
 // a time skip: asleep if you chose Sleep (section 13), or for the debug Day button (a skip from the night);
 // otherwise awake. Any activity stops.
 SIM_ADVANCE.push((from, to) => {
-  actEnd(true);
+  actEnd(true); JOB_SEEN = null;                        // jobs posted while you slept aren't announced one by one
   const d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;   // a replay: section 17's pure record, never the live machines
   let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, from) : null; } catch (e) { fx = null; }
   needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
-function playerNew() { actEnd(true); basket = false; SHIP.player.needs = needsLoad(null); needsT = null; slowWas = {}; device.refresh(); }
+function playerNew() { actEnd(true); basket = false; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {}; device.refresh(); }
+
+// ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
+// section), fetch its parts from main storage on Deck 5 (tap a shelf or the counter there; you carry CARRY_MAX at a
+// time), then tap the machine: you walk to its panel place, fit what you carry, look it over (INSPECT_MINS, the first
+// time) and repair it for the job's minutes. Walking away keeps what's fitted and the repair time done. Finished:
+// finishJob (17) puts the machine right. A job with more parts than you can carry takes two trips. Parts you hold
+// with no job to use them go back on a shelf (17's returnPart, when it's there). Without section 17, none of this. ----
+const CARRY_MAX = 2, INSPECT_MINS = 3;
+// a free place of a type in a room of this deck, nearest a point: the storage places by the shelves and the lathe
+function jobPlaceNear(type, room, at) {
+  return [...PLACE_OF.values()].filter(q => q.type === type && q.room === room && !heldBy(q.id)).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s)
+    .sort((m, n) => Math.hypot(m[1].x - at.x, m[1].z - at.z) - Math.hypot(n[1].x - at.x, n[1].z - at.z)).map(m => m[0])[0] || null;
+}
+// the wrist comm: a job you could take is posted (checked each ship minute; not for jobs posted while you slept)
+let JOB_SEEN = null;
+function jobNotice() {
+  if (!jobsOn() || typeof jobsBoard !== 'function') return;
+  const tier = typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1;
+  const open = jobsBoard().filter(j => !j.claimedBy && j.machine && (typeof jobTier !== 'function' || jobTier(j) <= tier)
+    && !(typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind)));
+  if (!JOB_SEEN) { JOB_SEEN = new Set(open.map(j => j.id)); return; }
+  const fresh = open.filter(j => !JOB_SEEN.has(j.id)); for (const j of open) JOB_SEEN.add(j.id);
+  if (!fresh.length || myJob() || ACT) return;           // not while you hold a job or are busy
+  const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, 'Deck ' + fresh[0].deck];
+  toast('Your device', 'New job: ' + c[0] + ', ' + c[1] + (fresh.length > 1 ? ', and ' + (fresh.length - 1) + ' more' : '') + '. Take it on your device.');
+}
+function carryLoad(s) { const c = s && s.player && s.player.carry; return Array.isArray(c) ? c.filter(x => typeof x === 'string').slice(0, CARRY_MAX) : []; }
+function workLoad(s) {
+  const w = s && s.player && s.player.work; if (!w || !(typeof w.job === 'string' || typeof w.job === 'number')) return null;
+  const mk = w.make && typeof w.make.part === 'string' ? { part: w.make.part, done: isFinite(w.make.done) && w.make.done > 0 ? +w.make.done : 0 } : null;
+  return { job: w.job, fitted: Array.isArray(w.fitted) ? w.fitted.filter(x => typeof x === 'string') : [], done: isFinite(w.done) && w.done > 0 ? +w.done : 0, seen: !!w.seen, make: mk };
+}
+SHIP.player.carry = carryLoad(SAVED); SHIP.player.work = workLoad(SAVED);
+const jobsOn = () => typeof myJob === 'function' && typeof finishJob === 'function' && typeof takePart === 'function' && typeof machineById === 'function';
+const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1));
+function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
+  const j = jobsOn() ? myJob() : null, P = SHIP.player;
+  if (!j || !j.machine) { P.work = null; return null; }
+  if (!P.work || P.work.job !== j.id) P.work = { job: j.id, fitted: [], done: 0, seen: false, make: null };
+  return { j, w: P.work };
+}
+function jobNeeds(j, w, less = []) {                     // the parts still to fit, less any listed (what you carry)
+  const need = j.parts.slice();
+  for (const p of w.fitted.concat(less)) { const i = need.indexOf(p); if (i >= 0) need.splice(i, 1); }
+  return need;
+}
+const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
+const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
+// a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
+function jobTap(it, at) {
+  if (!jobsOn() || typeof deckDef === 'undefined') return false;
+  const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
+  if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
+    if (!mw) {
+      if (!P.carry.length || typeof returnPart !== 'function') return false;
+      approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
+      return true;
+    }
+    const need = jobNeeds(mw.j, mw.w, P.carry);
+    if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first, then come back for ' + partList(need) + '.'); return true; }
+    const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
+    if (pl) actStart('fetch', pl.id, { ...o, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('fetch', null, o));
+    return true;
+  }
+  if (!mw) return false;
+  if (deckDef.num === 5 && roomAt(...c) === 'f') {         // the machine shop: make a part storage has run out of
+    const make = (P.work.make && P.work.make.part) || jobNeeds(mw.j, mw.w, P.carry).find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)));
+    const pl = make && jobPlaceNear('storage', 'f', at);
+    if (make && pl) {
+      if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first.'); return true; }
+      if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
+      const left = Math.max(1, PLAYER_ACTS.make.mins - P.work.make.done);
+      actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + Math.ceil(left) + ' minutes. Walk away to pause.' });
+      if (ACT && ACT.kind === 'make') ACT.def.mins = left;
+      return true;
+    }
+  }
+  const m = machineById(mw.j.machine), pid = m && m.deck === deckDef.num && typeof panelPlace === 'function' ? panelPlace(m.id) : null;
+  const spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; if (!spot) return false;
+  const mc = cellPos(...(m.at || PLACE_OF.get(pid).at));
+  if (Math.hypot(spot.x - at.x, spot.z - at.z) > ACT_NEAR + .6 && Math.hypot(mc.x - at.x, mc.z - at.z) > 1.6) return false;
+  actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
+  return true;
+}
+// at the panel (actBegin): fit the parts you carry, then repair if they're all in, else look it over the first time
+function jobBegin(A) {
+  const mw = myWork(); if (!mw || A.placeId !== panelPlace(mw.j.machine)) { ACT = null; toast(A.o.title, 'You don\'t have a job here any more.'); return false; }
+  const P = SHIP.player, { j, w } = mw, fit = [];
+  for (const p of P.carry.slice()) if (jobNeeds(j, w).includes(p)) { w.fitted.push(p); fit.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
+  const need = jobNeeds(j, w), name = machineName(machineById(j.machine)), fitted = fit.length ? 'You fit ' + partList(fit) + '. ' : '';
+  if (!need.length) {
+    const left = Math.max(1, jobMins(j) - w.done);
+    A.def = { mins: left, pose: 'work', title: 'Repairing' }; A.o.repair = true; w.seen = true;
+    A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + Math.ceil(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + Math.ceil(left) + ' minutes.') + ' Walk away to pause.';
+    return true;
+  }
+  if (!w.seen) {
+    w.seen = true; A.def = { mins: INSPECT_MINS, pose: 'work', title: 'Inspecting' };
+    A.o.after = fitted + 'You open the panel on the ' + name + ' and look it over.'; A.o.need = need;
+    return true;
+  }
+  ACT = null; toast(A.o.title, fitted + 'The ' + name + ' still needs ' + partList(need) + '. Main storage is on Deck 5.'); device.refresh();
+  return false;
+}
+// done (actEnd, not walked away): what each step leaves you with
+function jobEnd(A) {
+  const P = SHIP.player, mw = myWork();
+  if (A.kind === 'stow') {
+    const back = []; for (const p of P.carry.slice()) if (returnPart(p)) { back.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
+    toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
+  } else if (A.kind === 'make' && mw && P.work.make) {
+    const part = P.work.make.part; P.work.make = null;
+    if (P.carry.length < CARRY_MAX) { P.carry.push(part); toast('Machine shop', 'You make ' + partList([part]) + '. Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); }
+  } else if (A.kind === 'fetch' && mw) {
+    const need = jobNeeds(mw.j, mw.w, P.carry), got = [], none = [];
+    for (const p of need) {
+      if (P.carry.length >= CARRY_MAX) break;
+      if (takePart(p)) { P.carry.push(p); got.push(p); } else if (!none.includes(p)) none.push(p);
+    }
+    const rest = jobNeeds(mw.j, mw.w, P.carry);
+    toast('Main storage', (got.length ? 'You take ' + partList(got) + '.' : 'Nothing you need is on the shelves.')
+      + (none.length ? ' None left: ' + none.join(', ') + '. ' + (none.some(p => typeof NO_MAKE !== 'undefined' && !NO_MAKE.has(p)) ? 'The machine shop next door can make one (about an hour at the lathe).' : 'It can\'t be made aboard; the next delivery is on Wednesday.') : '')
+      + (rest.length && !none.length ? ' Your hands are full; you\'ll need another trip for ' + partList(rest) + '.' : '')
+      + (got.length ? ' Now to the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.' : ''));
+  } else if (A.kind === 'job' && mw) {
+    const name = machineName(machineById(mw.j.machine));
+    if (A.o.repair) {
+      if (finishJob(mw.j.id)) { P.work = null; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board.'); }
+      else toast('Your job', 'The job isn\'t yours any more.');
+    } else toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length ? '' : 'Main storage is on Deck 5.'));
+  }
+  device.refresh();
+}
 
 // ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
 // device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
@@ -7357,6 +7500,9 @@ device.addSection('now', 'Now', el => {
   q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
     : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
+  const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
+  if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
+  if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) { const r = document.createElement('p'); r.textContent = 'Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.'; el.appendChild(r); }
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
 device.addSection('needs', 'Needs', el => {
@@ -8180,16 +8326,17 @@ function jobRun(p, j, t, makeMin) {
   const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
   const at = (min, tag, placeId = null) => { segs.push({ from: c, to: c + min, act: 'work', deck: dk, type: 'job', placeId, tag }); c += min; };
   if (j.kind === 'restock') {
-    // a hover cart: from its dock, to the hold to load, then to the cold store (Deck 3) or the shelves, back to the dock.
-    // Segments with the cart in hand carry cart: true (the crowd draws it)
-    go(5); at(4, 'cart', storagePlace(CART_AT, c, c + 4));
-    const s0 = segs.length;
-    at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
-    if (j.cargo === 'meals') { go(3); at(15, 'unload', storagePlace(COLD_AT, c, c + 15)); go(5); }
+    // a hover cart: from its dock, to the hold to load, then to the cold store (Deck 3) or the shelves, back to the dock
+    // hold: the cart in hand for the crowd to draw (the performance engineer's): 'cart' empty, 'cartfull' loaded
+    go(5);
+    const s0 = segs.length; at(4, 'cart', storagePlace(CART_AT, c, c + 4)); at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
+    const s1 = segs.length;
+    if (j.cargo === 'meals') { go(3); at(15, 'unload', storagePlace(COLD_AT, c, c + 15)); }
     else at(20, 'unload', storagePlace(FETCH_AT, c, c + 20));
-    const s1 = segs.length; at(4, 'cart', storagePlace(CART_AT, c, c + 4));
-    for (let i = s0; i < s1; i++) segs[i].cart = true;
-    segs[segs.length - 1].cart = false;
+    const s2 = segs.length;
+    if (j.cargo === 'meals') go(5);
+    at(4, 'cart', storagePlace(CART_AT, c, c + 4));
+    segs.forEach((sg, i) => { if (i >= s0) sg.hold = i >= s1 && i < s2 ? 'cartfull' : 'cart'; });
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -8322,7 +8469,7 @@ function jobWhere(person, t) {
     for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
   }
   for (const j of JOB_IDX.get(person.id) || []) for (const s of j.segs) if (s.from <= t && t < s.to)
-    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, cart: !!s.cart };
+    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold };
   return null;
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
