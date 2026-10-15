@@ -32,7 +32,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer (new): A4, food and cooking (chef from 04:30, batches, servery, shelf, dish pit) | `claude/galley-food` | 0.29.x | Hired |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: A5a, the gym treadmill, then utility rooms on Decks 4, 5 and 6 (plan sketch first). Owns the playable link | `claude/deck-architect` | 0.30.x | Briefed |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: A5b, Deck 3 activity furniture (weights, till, baskets, anim on places), then utility rooms on Decks 1 and 3 (sketch first) | `claude/deck1-scale` | 0.31.x | Briefed |
-| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c, Deck 2 activity places, then its utility rooms (sketch first) | `claude/deck2-command` | 0.32.x | Briefed |
+| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c, Deck 2 activity anims (0.32.1), then its utility rooms (plan 15e5dbb approved by the lead: gas plant, utility closet, cable crawl, array machines; no room changes size) | `claude/deck2-command` | 0.32.x | Working |
 | session_01JScnVG158eYAHYvKDz3jZG | Crew designer: A6, galley staff shifts and habits for the new activities | `claude/deck-plans-1-2-6` | 0.16.x | Briefed |
 | session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer (new): B1 now (machines, wear, systems, consequences, machine_check; no drawing), B2 and B3 later | `claude/ship-systems` | 0.33.x | Hired |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived |

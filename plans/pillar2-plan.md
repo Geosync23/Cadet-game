@@ -128,7 +128,8 @@ JOBS: [{ id, machine, kind, urgency, posted, claimedBy, parts: ['filter'], statu
   - a `machines` entry;
   - a `panel` tile where someone stands to service it;
   - a `work:works` place at that tile.
-- **Access:** Works crew and the player can pass these hatches. Tier locks come later, with progression.
+- **Access:** Works crew and the player can pass these hatches, but only into a room whose inside is built (the Deck 6 architect adds the shared hatch code and the deck_check rule first; each architect marks their rooms as built). Everyone else treats hatches as walls. Tier locks come later, with progression.
+- **Crawlways** are standing floors with low trays for now; crouching comes later.
 - **Plan first:** add a short "Utility rooms" section to that deck's plan page, with a sketch, and send it to the lead before building. The lead reviews it, and shows the user anything that changes a room's size or position.
 - **New furniture for Half A:** the gym's treadmill (and weights if missing), the store's till and baskets, and anything else an activity needs. Each item gets a place with `anim`.
 
