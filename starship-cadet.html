@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.30.3
+   STARSHIP CADET: CSV Wren                            build 0.30.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3034,7 +3034,7 @@ Object.assign(KIT, {
     const w = o.w || 1, y = o.y || 2.5;
     box(w, .34, .34, UT.duct, 0, y, 0, g);
     for (let x = -w / 2 + .3; x < w / 2; x += 1) box(.04, .4, .4, WM.steel, x, y, 0, g);
-    return { w, d: .34, noBlock: true };
+    return { w, d: .34, noBlock: true, tall: true };
   },
   ductRiser(g) {
     box(.46, H, .46, UT.duct, 0, H / 2, 0, g);
@@ -3212,7 +3212,7 @@ Object.assign(KIT, {
     const w = o.w || 1, r = o.r || .08, y = o.y || 2.4;
     cyl(r, r, w, o.m || ENG.copper, 0, y, 0, g, 10).rotation.z = Math.PI / 2;
     for (let x = -w / 2 + .5; x < w / 2; x += 1.5) box(.04, .1, r * 2 + .06, WM.steel, x, y, 0, g);
-    return { w, d: r * 2, noBlock: true };
+    return { w, d: r * 2, noBlock: true, tall: true };
   },
 });
 Object.assign(WALL_KIT, {
@@ -3224,6 +3224,30 @@ Object.assign(WALL_KIT, {
       const wh = new THREE.Mesh(new THREE.TorusGeometry(.08, .016, 6, 12), UT.wheel); wh.position.set(-.25 + k * .25, 1.25, .2); g.add(wh);
     }
     cyl(.07, .07, .03, M.trim, .38, 1.5, .1, g, 14).rotation.x = Math.PI / 2;
+  },
+});
+
+// ---- Deck 6's utility rooms (0.30.4): the power junctions and the crawlways ----
+Object.assign(KIT, {
+  // a cable tray along a crawlway wall: a ladder tray with three bundled cables, on brackets (o.w long)
+  cableTray(g, o = {}) {
+    const w = o.w || 1, y = o.y || 2.3;
+    box(w, .03, .32, WM.steel, 0, y, 0, g);
+    for (const z of [-.15, .15]) box(w, .07, .02, WM.steel, 0, y + .03, z, g);
+    for (let k = 0; k < 3; k++) cyl(.035, .035, w, [UT.pipes[0], WM.rubber, UT.pipes[2]][k], 0, y + .055, -.09 + k * .09, g, 6).rotation.z = Math.PI / 2;
+    for (let x = -w / 2 + .5; x < w / 2; x += 1.5) box(.04, .3, .04, WM.paintDark, x, y + .15, -.17, g);
+    return { w, d: .34, noBlock: true, tall: true };   // tall: it fades with the cutaway, so it never hides the room behind
+  },
+});
+Object.assign(WALL_KIT, {
+  // an inspection box on a crawlway wall: a hinged grey box, cable glands below, two lights and a test socket
+  conduitBox(g) {
+    box(.5, .6, .16, UT.cab, 0, 1.4, .08, g);
+    box(.44, .54, .02, UT.door, 0, 1.4, .17, g);
+    for (let k = 0; k < 3; k++) cyl(.03, .03, .4, WM.rubber, -.15 + k * .15, .9, .08, g, 6);
+    box(.04, .04, .01, WM.navGreen, -.1, 1.6, .185, g); box(.04, .04, .01, WM.screenAmber, 0, 1.6, .185, g);
+    cyl(.035, .035, .02, M.trim, .12, 1.6, .185, g, 10).rotation.x = Math.PI / 2;
+    box(.2, .05, .01, KM.label, 0, 1.25, .185, g);
   },
 });
 
@@ -3622,7 +3646,7 @@ DECKS[4] = {
     place('t', 'heatExchanger', 4.0, 2.5, 'e', { nozzles: [-.25, .75], it: IT('Heat exchanger', 'Deck 4\'s heat: warm water from the plant below, through the tubes, out to every cabin. The gauge reads warm, mostly.') });
     for (const [z, n] of [[2.5, 1], [3.5, 2]]) place('t', 'circPump', .5, z, 'w', { it: IT('Circulation pump ' + n, n === 1 ? 'The duty pump. It hums.' : 'The standby pump. It waits.') });
     place('t', 'expansionTank', 4.5, .5, 'n');
-    for (const z of [2.25, 3.25]) place('t', 'pipeRun', 2.25, z, 'n', { w: 3.5, y: 2.5 });   // from each pump's riser to the exchanger's nozzle
+    for (const z of [2.25, 3.25]) place('t', 'pipeLine', 2.25, z, 'n', { w: 3.5, y: 2.5, r: .14 });   // from each pump's riser to the exchanger's nozzle
     placeWall('t', 'workLight', 'n', 3.0);
     // utility closets: the junior wing's breakers at the hull end, its light relays on the wall; the officers' cabinet in y
     place('k', 'breakerCabinet', .5, 3.65, 's', { w: .7, it: IT('Breaker cabinet', 'The junior wing\'s power junction. Every bunk-room light on Deck 4 aft runs through here.') });
@@ -3885,13 +3909,13 @@ DECKS[5] = {
     for (const [x, n] of [[2.0, 1], [4.0, 2]]) place('a', 'o2Bank', x, .47, 'n', { it: IT('Oxygen cells ' + n, 'Three glass columns, bubbling. The air every deck breathes starts here.') });
     for (const [x, n] of [[5.5, 1], [6.5, 2]]) place('a', 'scrubberStack', x, 4.5, 's', { it: IT('Main scrubber ' + n, 'One of the two big stacks that take the stale air back from every deck.') });
     place('a', 'ductRiser', 7.5, 4.5, 'n');
-    place('a', 'pipeRun', 2.5, 1.3, 'n', { w: 3.0, y: 2.5 });
+    place('a', 'pipeLine', 2.5, 1.3, 'n', { w: 3.0, y: 2.5, r: .14 });
     placeWall('a', 'workLight', 's', 6.5);
     // manifold room: the valve wall along the starboard hull, two water pumps on the stern wall, a pressure tank in the bow corner
     place('n', 'valveManifold', 3.0, 4.58, 's', { w: 3.6, it: IT('Valve manifold', 'Every deck\'s water, colour-coded. Fault tracing starts here: follow the colour, find the deck.') });
     for (const [z, n] of [[.5, 1], [1.5, 2]]) place('n', 'circPump', .5, z, 'w', { it: IT('Water pump ' + n, n === 1 ? 'The duty pump for the water main.' : 'The standby pump. Someone has written SPARE on it in marker.') });
     place('n', 'pressureTank', 7.5, .5, 'n', { r: .42, it: IT('Pressure tank', 'Keeps the water main steady when everyone showers at once, which is every morning at 06:30.') });
-    place('n', 'pipeRun', 4.0, .5, 'n', { w: 7.0, y: 2.5 });
+    place('n', 'pipeLine', 4.0, .5, 'n', { w: 7.0, y: 2.5, r: .14 });
     placeWall('n', 'workLight', 'n', 2.5);
     // battery room: four banks in two rows, the charge controller by the door, and the sign
     for (const [x, z, n] of [[1.0, 2.5, 1], [5.0, 2.5, 2], [1.0, 4.5, 3], [5.0, 4.5, 4]]) place('y', 'batteryBank', x, z, 'n', { it: IT('Battery bank ' + n, 'Eight big cells and their charge bars. The bars should all be green.') });
@@ -3909,9 +3933,10 @@ DECKS[5] = {
     for (const [x, z, tn] of [[7.5, .45, 0], [8.4, .45, .12], [7.6, 1.2, -.1], [8.4, 1.3, 0], [4.5, .4, .05], [5.3, .45, -.08], [.45, 4.5, .1]]) place('c', 'crate', x, z, 'n', { turn: tn });
     for (const x of [2.5, 6.5]) placeWall('c', 'workLight', 'n', x);
     // pipe galleries: pipe runs along the hull, and a valve station halfway along each
-    for (const [r, wall, n, z0] of [['g', 'n', 10, .2], ['h', 's', 13, .8]]) {
-      place(r, 'pipeLine', n / 2, z0, 'n', { w: n, y: 2.35, r: .09 });
-      place(r, 'pipeLine', n / 2, z0, 'n', { w: n, y: .35, r: .07, m: UT.pipes[1] });
+    for (const [r, n, z0] of [['g', 10, .2], ['h', 13, .8]]) for (let x = 0; x < n; x += 2.5) {   // in short pieces, so the one near you fades the run
+      const w = Math.min(2.5, n - x);
+      place(r, 'pipeLine', x + w / 2, z0, 'n', { w, y: 2.35, r: .09 });
+      place(r, 'pipeLine', x + w / 2, z0, 'n', { w, y: .35, r: .07, m: UT.pipes[1] });
     }
     placeWall('g', 'valveStation', 'n', 4.5, { it: IT('Valve station', 'Halfway along the port gallery: three valves and a gauge. Close the blue one and storage gets no water.') });
     placeWall('h', 'valveStation', 's', 8.5, { it: IT('Valve station', 'Halfway along the starboard gallery. The gauge has a sticky note: TAP IT.') });
@@ -5265,7 +5290,7 @@ DECKS[6] = {
     'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // the two power junctions, both off the lobby
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'v,22,5': 'K', 'v,27,3': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
+  sealed: { 'v,22,5': 'K', 'v,27,3': 'R' },
   plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,16,10', 'e', 'Watch room'], ['h,23,3', 's', 'Junction'], ['h,26,4', 'n', 'Reactor']],
   rooms: {
     '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
@@ -5277,17 +5302,26 @@ DECKS[6] = {
     // locked, but seen through glass
     K: { name: 'Engine control', floor: 'plate', tap: 'Engine control. Tier 3 access, once power work opens. You can see the board through the glass.' },
     R: { name: 'Reactor', floor: 'grate', tap: 'The reactor\'s shielded door, with radiation trefoils painted either side. Tier 4 access, and only on a team job.' },
-    // sealed until their tier
-    c: { name: 'Port crawlway', void: true, tap: 'The lowest crawlway on the ship, along the port hull from the engine room to the reactor. Tier 3 access.' },
-    C: { name: 'Starboard crawlway', void: true, tap: 'The lowest crawlway on the starboard side, from the engine room to the reactor. Tier 3 access.' },
-    j: { name: 'Port power junction', void: true, tap: 'Breaker cabinets and the main junction, where the reactor\'s power splits for the decks above. Tier 3 access.' },
-    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, through a hatch at the lobby\'s starboard end. Tier 3 access.' },
+    // utility rooms (Pillar 2, 0.30.4): floors that draw no random numbers, so the rest of the deck is unchanged
+    c: { name: 'Port crawlway', floor: 'grate', still: true },
+    C: { name: 'Starboard crawlway', floor: 'grate', still: true },
+    j: { name: 'Port power junction', floor: 'plate', still: true },
+    J: { name: 'Starboard power junction', floor: 'plate', still: true },
   },
   windows: [],
   closedDoors: {
     'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+  // service hatches into the utility rooms (0.30.4): the player and Works crew pass (see hatchPassable)
+  service: ['h,17,1', 'h,17,11', 'v,22,2', 'v,24,9'],
+  // machines (Pillar 2; format as on Deck 4): wall-mounted ones have `at` on their panel tile
+  machines: [
+    { id: '6-junction-1', kind: 'junction', at: [24, 1], room: 'j', face: 's', panel: [24, 2] },
+    { id: '6-junction-2', kind: 'junction', at: [26, 9], room: 'J', face: 'w', panel: [25, 9] },
+    { id: '6-conduit-1', kind: 'conduit', at: [22, 0], room: 'c', face: 's', panel: [22, 0] },
+    { id: '6-conduit-2', kind: 'conduit', at: [22, 11], room: 'C', face: 'n', panel: [22, 11] },
+  ],
   // places (Pillar 1): every spot where a crew member does something, for the schedules. Data only: nothing draws them.
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
   // face is the way the person faces there. deck_check.py checks every place can be reached.
@@ -5307,6 +5341,11 @@ DECKS[6] = {
     { id: '6-lift-2', type: 'lift-wait', at: [16, 7], face: 'e', pose: 'stand', room: '+' },
     { id: '6-lift-3', type: 'lift-wait', at: [21, 3], face: 'w', pose: 'stand', room: '+' },
     { id: '6-lift-4', type: 'lift-wait', at: [21, 7], face: 'w', pose: 'stand', room: '+' },
+    // utility rooms (0.30.4): one work:works place on each machine's panel tile, facing the machine
+    { id: '6-junction-1-svc', type: 'work:works', at: [24, 2], face: 'n', pose: 'work', room: 'j' },
+    { id: '6-junction-2-svc', type: 'work:works', at: [25, 9], face: 'e', pose: 'work', room: 'J' },
+    { id: '6-conduit-1-svc', type: 'work:works', at: [22, 0], face: 'n', pose: 'work', room: 'c' },
+    { id: '6-conduit-2-svc', type: 'work:works', at: [22, 11], face: 's', pose: 'work', room: 'C' },
   ],
   markings: [[3, 4, 8, 4]],                                     // keep-clear round the row of coils
   light: { sky: col('#ffd2a6'), sun: col('#ffc48c'), hemi: .8, sunI: .78 },   // warmer and dimmer than the decks above
@@ -5352,6 +5391,15 @@ DECKS[6] = {
     for (const [x, z] of [[.35, .35], [5.65, .35], [.35, 9.65], [7.65, 9.65]]) place('+', 'coolantRiser', x, z, 'n', { it: IT('Coolant riser', 'Coolant on its way up from the reactor loop. Warm to the touch, and the reason this lobby never needs a heater.') });
     place('+', 'bench', 2.5, 9.55, 's', { snug: true, it: IT('Bench', 'Warm, because everything down here is. People wait here for the lift and doze off.') });
     place('+', 'bench', 7.0, 7.3, 'n', { snug: true, it: IT('Bench', 'Under engine control\'s wall. You can hear the operators arguing about coolant through it.') });
+    // ---- utility rooms (Pillar 2, 0.30.4). Last in dress() and free of R(), so nothing above them changes ----
+    // the power junctions: a row of breaker cabinets in each, where the reactor's power splits for the decks above
+    place('j', 'breakerCabinet', 3.0, .345, 'n', { w: 3.76, it: IT('Main breakers, port', 'Where the reactor\'s power splits for the decks above. Four cabinets, one per pair of decks, and a spare that hums.') });
+    place('J', 'breakerCabinet', 2.66, 1.5, 'e', { w: 2.76, it: IT('Main breakers, starboard', 'The second junction: if the port side trips, this one carries the ship. Every label is laminated twice.') });
+    placeWall('j', 'workLight', 's', 3.5); placeWall('J', 'workLight', 'n', 1.5);
+    // the crawlways: cable trays along the hull, and an inspection box halfway along
+    for (let x = 1.5; x < 15; x += 3) { place('c', 'cableTray', x, .3, 'n', { w: 3 }); place('C', 'cableTray', x, .7, 'n', { w: 3 }); }   // in short pieces, so the one near you fades the run
+    placeWall('c', 'conduitBox', 'n', 10.5, { it: IT('Inspection box', 'Halfway along the port crawlway. Open it and you can test every feed to the decks above.') });
+    placeWall('C', 'conduitBox', 's', 10.5, { it: IT('Inspection box', 'Halfway along the starboard crawlway. Someone has left a torch on top of it, still on.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
@@ -5805,7 +5853,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.30.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
