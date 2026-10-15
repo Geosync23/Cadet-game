@@ -340,6 +340,7 @@ Crew use every room and every function in their daily life, not just beds, seats
 - **Each activity looks like itself:** running on the treadmill, talking in a booth, browsing the store's shelves and paying at the counter, playing an instrument, watering the beds.
 - **Needs and habits pick the activity** (see Needs below), so the gym is busy after shift and the booths on rest days.
 - **A room with no use is a gap to fill,** in the simulation or in the furniture.
+- **Small things too:** crew also use the toilets and basins, take tea breaks, shop at the crew store (browse, then pay at the till), wait by the lift, and stand in at stations their department doesn't fill every day. Needs (hunger, energy, hygiene, fitness, social) are worked out from each person's day, and steer the gym, calls home and resting (built in 0.26.1).
 - **The crew store is staffed:** two juniors are the ship's storekeepers, on staggered day shifts, so there's someone at the till through the day and evening (agreed 2026-10-15).
 
 ### Routines with variety
