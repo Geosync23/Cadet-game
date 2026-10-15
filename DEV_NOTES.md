@@ -1,10 +1,10 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.6.9). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.0). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
-**Deck 3 is complete (0.6.9, with the promenade dressed and review fixes) and waiting for sign-off.** After sign-off, the next deck is the user's choice: 2, 1 or 6, each starting with a plan page (see "Next" below).
+**Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and waiting for sign-off.** After sign-off, the next deck is the user's choice: 2, 1 or 6, each starting with a plan page (see "Next" below).
 
 Nine small updates for the design doc when it's next edited:
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.6.9 (about 4,450 lines)
+## Current build: 0.7.0 (about 4,450 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -48,6 +48,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.6.7 | Deck 3, turn 5: crew. Chef Brennan works the galley (haunts `K`, `M`, `G`; spots at the ranges, ovens, prep island, dish pit, pass, her stool and the mess floor). Rina is on duty in the infirmary (haunts `I`, `X`; spots at the desk, beds, cabinet, supplies and exam room). Both are `deck: 3`, which leaves five crew on Deck 4. Step 6d done. |
 | 0.6.8 | The promenade dressed (asked for at review): two planter islands down the middle with a tree, flowers, a bench facing each lane and lamp posts at the ends; the route-map kiosk where the promenade leaves the plaza; benches and potted plants by the garden doors. New `deck_check.py`. |
 | 0.6.9 | Review fixes. Planter islands smaller (two columns each, cols 29–30 and 35–36) with no lamp posts. Snug collision (`snug: true` in `place`): benches by the lifts on Decks 3 and 4 and by the garden doors push you off their real outline, not whole tiles. Lift doors sink into the floor instead of sliding out past the frame. |
+| 0.7.0 | Planter islands longer (2.48 m, three columns each, the same width) and their trees taller (trunk 1.9 m, crown raised 0.6 m; trunk thickness and crown size unchanged). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -164,7 +165,7 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 
 ## The promenade (0.6.8)
 
-- **Planter islands** (`planterIsland`, 1.58 × 1.34, `snug`) sit on rows 10–11 at cols 29–30 (lemon tree, `fruit`) and 35–36 (marigolds). No lamp posts (taken out at review, 0.6.9). Rows 9 and 12 stay clear as lanes, and so does every column with a door: the mess doors (25, 26, 31, 32), gym (27), store (33), galley back door (38) and booths (38). Each island has its own fade group (`'=:a'`, `'=:b'`), so only the one you're behind fades.
+- **Planter islands** (`planterIsland`, 2.48 × 1.34, `snug`) sit on rows 10–11 at cols 28–30 (lemon tree, `fruit`) and 34–36 (marigolds). Trees: a 1.9 m trunk with the crown at about 2.5 m (0.7.0). No lamp posts (taken out at review, 0.6.9). Rows 9 and 12 stay clear as lanes, and so does every column with a door: the mess doors (25, 26, 31, 32), gym (27), store (33), galley back door (38) and booths (38). Each island has its own fade group (`'=:a'`, `'=:b'`), so only the one you're behind fades.
 - **Route kiosk** (`routeKiosk`) at col 24, rows 10–11 (blocked with `block`), screens on both faces. Its canvas stars come from a fixed hash, not `R()`.
 - **Garden-door end:** a bench on each wall and four small potted plants (the `plant` kit, not `bush`, which draws from `R()` and would reshuffle the garden).
 - **Materials** in `PROM`. Nothing calls `R()`, so Deck 3's garden, lounge and infirmary are pixel-identical to 0.6.7, and Deck 4 is ALL IDENTICAL.
