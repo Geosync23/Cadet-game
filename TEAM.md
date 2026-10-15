@@ -26,15 +26,15 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | Session | Job | Branch it pushes to | Builds | Status |
 | --- | --- | --- | --- | --- |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.40.0+ (combined) | Active |
-| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: A1, every room in use (crew free time across the ship, crew needs, activity choice, galley-rota hook) | `claude/sim-engineer` | 0.26.x | Briefed |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: A2, activity poses and props (run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk) | `claude/crowd-render` | 0.27.x | Briefed |
-| session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer (new): A3, player needs (fitness and energy slow you), activities, placeholder device, save v2 | `claude/player-needs` | 0.28.x | Hired |
-| session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer (new): A4, food and cooking (chef from 04:30, batches, servery, shelf, dish pit) | `claude/galley-food` | 0.29.x | Hired |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: A5a. First 0.30.1, the shared turn: `service: true` hatches (player and Works crew pass, only into built rooms), `still` floors, deck_check machine and place rules. Then the utility rooms on Decks 4, 5 and 6 (plan c20fa6b approved: 29 machines, no room changes size). Also the treadmill belt animation. Owns the playable link | `claude/deck-architect` | 0.30.x | Working |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: A1, every room in use (crew free time across the ship, crew needs, activity choice, galley-rota hook) | `claude/sim-engineer` | 0.26.x | Done (0.26.7) |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: A2, activity poses and props (run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk) | `claude/crowd-render` | 0.27.x | Done (0.27.6) |
+| session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer (new): A3, player needs (fitness and energy slow you), activities, placeholder device, save v2 | `claude/player-needs` | 0.28.x | Done (0.28.8) |
+| session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer (new): A4, food and cooking (chef from 04:30, batches, servery, shelf, dish pit) | `claude/galley-food` | 0.29.x | Done (0.29.10) |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: A5a. First 0.30.1, the shared turn: `service: true` hatches (player and Works crew pass, only into built rooms), `still` floors, deck_check machine and place rules. Then the utility rooms on Decks 4, 5 and 6 (plan c20fa6b approved: 29 machines, no room changes size). Also the treadmill belt animation. Owns the playable link | `claude/deck-architect` | 0.30.x | Done (0.30.10) |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: A5b done (0.31.4: Deck 3 activity furniture, staffed till, rower, live grab shelf, treadmill y; utility rooms on Decks 1 and 3, 17 machines). Waiting | `claude/deck1-scale` | 0.31.x | Done |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c done (0.32.2: Deck 2 anims and utility rooms, 9 machines). Waiting | `claude/deck2-command` | 0.32.x | Done |
 | session_01JScnVG158eYAHYvKDz3jZG | Crew designer: A6 done (0.16.5 c02e656: six new habits, two storekeepers, galley teams). Waiting | `claude/deck-plans-1-2-6` | 0.16.x | Done |
-| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: B1 done (0.33.0, 8e34c3b: machine registry with stubs, wear on paper, 10 systems, shipEffects, SAVE_EXTRA, machine_check). Now B2 and B3 on paper (jobs, Works crew claiming, stores, restock); the board and device section wait for Half A | `claude/ship-systems` | 0.33.x | Working |
+| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: B1 done (0.33.0, 8e34c3b: machine registry with stubs, wear on paper, 10 systems, shipEffects, SAVE_EXTRA, machine_check). Now B2 and B3 on paper (jobs, Works crew claiming, stores, restock); the board and device section wait for Half A | `claude/ship-systems` | 0.33.x | Done (0.33.15) |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived |
 
 ## Context check (2026-10-15, 17:10)
@@ -43,7 +43,11 @@ How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 
 
 ## Done
 
-- **Plan (the user, 2026-10-15):** finish Pillar 2 and its end-of-pillar review first; hand over to a fresh lead session after that. Remaining for Pillar 2: B3 carts (systems engineer cartDockLive 0.33.15, galley flip 0.29.9, sim engineer section-10 `hold` line 0.26.7), then combined build 0.40.7, all checks, republish, review.
+- **Plan (the user, 2026-10-15):** finish Pillar 2 and its end-of-pillar review first; hand over to a fresh lead session after that. Pillar 2 is now complete (0.40.8); next: the review to the user, then the handover.
+
+- **Ship integration 0.40.8** (980e6a9): Pillar 2 final. 0.40.7 plus docked carts that hide while out (systems 0.33.15), the crate in the player's hands (player 0.28.8), galley 0.29.10 (food_check line only). All six checks pass; cadet_test ALL IDENTICAL against 0.40.7. Day check: nobody stuck, draw-call peak 422 (Deck 4, budget 450). Republish asked of the Deck 6 architect.
+
+- **Ship integration 0.40.7** (503bf63): food by hover cart (systems 0.33.13–0.33.14, galley 0.29.9, Deck 6 architect 0.30.10, bridge 0.31.5, performance 0.27.5–0.27.6, sim 0.26.7, player 0.28.7). All six checks pass.
 
 - **Ship integration 0.40.6** (952526d): the player's job loop (take a job, inspect, fetch parts, make a part, repair). All six checks pass. Being republished to the playable link. Remaining for Pillar 2: B3 visible (hover-cart restock runs; food by cart only), with the systems, performance and galley engineers. Then the end-of-pillar review.
 
