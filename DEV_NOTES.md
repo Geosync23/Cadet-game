@@ -338,7 +338,26 @@ They checked:
 4. **The infirmary, exam room, garden, washrooms, gym, crew store and call-home booths (done, 0.6.5).** See "Deck 3, turn 4" above.
 5. **Crew (done, 0.6.7).** Chef Brennan works the galley; Rina works in the infirmary. Deck 4's crew routes changed when they left.
 
-**7. Machines, supplies and the shared job list,** anchored on the Works bay job board.
+**6e. Build the rest of the ship: Decks 6, 1 and 2 (next, agreed 2026-10-15).** The user's priority is getting the whole ship built. Crew, machines, supplies and jobs come after.
+
+- **Who:** the deck architect session builds; the lead session reviews and merges (see TEAM.md).
+- **Scope:** shell, rooms, dressing and furniture only. No crew, no shifts, no machines, jobs or supply runs, which are step 7 and later. Rooms that will later need crew (the engine watch room, the bridge stations) get furniture but no people.
+- **Order:** Deck 6 (Engineering), then Deck 1 (Bridge), then Deck 2 (Command & Science, once its plan is final). After each deck: stop for the user's review and sign-off (CLAUDE.md).
+- **Decisions:**
+    - **Bridge command ring:** faked for now with a rail, a painted step edge and a curved step strip; no engine change. A real sunken floor can come later.
+    - **Access:** the lift reaches Decks 6 and 1 from day one. Locking by tier or story comes later with the story work.
+    - **Mood lighting per deck:** yes, warmer and dimmer on Deck 6, cooler on the bridge, as long as Decks 3, 4 and 5 stay pixel-identical.
+    - **Bridge washroom:** keep it.
+- **Deck 1's empty shell draws 593 calls.** Bring that down before dressing it, without changing the hull output on Decks 3, 4 and 5.
+- **Plans:**
+    - plans/deck6-plan.html and plans/deck1-plan.html are agreed.
+    - plans/deck2-plan.html is being reworked (Sketch 5):
+        - every bedroom (12 crew plus visitors) goes in the stern half, the left of the landscape plan;
+        - science goes in the bow half;
+        - the lift's stern door opens towards the officers' quarters and its bow door towards science;
+        - the deck may grow, but no bigger than Deck 3 below it (52 × 22).
+
+**7. Machines, supplies and the shared job list,** anchored on the Works bay job board. Comes after the ship is built (6e).
 
 
 ## Agreed ideas waiting for their milestone

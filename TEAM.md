@@ -7,7 +7,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 ## Rules for helper sessions
 
 - One job per session, one branch per job. Touch only the files the brief names.
-- `starship-cadet.html` (the build) has one writer at a time, and the lead says who. Right now nobody is writing to it: the Deck 3 builder is on hold and the deck architect hasn't been told to go.
+- `starship-cadet.html` (the build) has one writer at a time, and the lead says who. Right now that's the deck architect (Decks 6, 1, 2).
 - Follow CLAUDE.md "How we work". Plan pages live in `plans/`.
 - Report to the lead with `send_message` after each push: files, what changed, open questions.
 - The user sends every request through the lead, and the lead hands out the work.
@@ -18,8 +18,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 | Session | Job | Branch | Status |
 | --- | --- | --- | --- |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | On hold (user's request). Merged into the lead branch at 8390434 |
-| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 Sketch 4 done and merged; waiting on the user's answers to its open questions |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck architect: build Decks 6, 1 and 2 into the game | `claude/deck-architect` | Preparing only: reading and drafting a build plan for the lead. No edits until the lead says go |
+| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Working: Deck 2 Sketch 5, all bedrooms in the stern half, science in the bow half, lift doors split between them |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck architect: build Decks 6, 1 and 2 into the game | `claude/deck-architect` | Building Deck 6, turn 1 (the shell) |
 
 ## Done
 
@@ -29,7 +29,11 @@ The project lead session keeps this file current. A new lead session reads it fi
 - Merged the Deck 3 builder's branch: Deck 3 turn 5 (crew, 0.6.7), promenade dressing and fixes (0.6.8–0.7.0), the repo tidy (stable file names, `plans/`, CLAUDE.md, deck_check.py).
 - Plans for Decks 1, 2 and 6: Sketch 1 (36cce9d, 09f1feb, 68a8bc8); Deck 2 Sketch 2 (b4cfbc6); Deck 2 Sketch 3, 50 × 18 with the Captain's quarters as the biggest room (4fe97c4); Deck 6 reactor door off the lobby (355648a).
 
-## Queue (needs the user's go-ahead)
+## Plan of work (agreed with the user, 2026-10-15)
 
-- Step 7: machines, supplies and the shared job list.
+1. **Build the ship (DEV_NOTES 6e):** Deck 6, then 1, then 2, with a review after each. Deck architect only. Shell, rooms and furniture; no crew or machines.
+2. **Then:** crew on the new decks, and step 7 (machines, supplies, job list).
+
+## Queue
+
 - Design doc updates listed at the top of DEV_NOTES.
