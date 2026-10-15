@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.7
+   STARSHIP CADET: CSV Wren                            build 0.33.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2171,7 +2171,7 @@ const WALL_KIT = {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.64, .16), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
     p.position.set(0, 1.85, .045); g.add(p); box(.68, .2, .04, M.slateDark, 0, 1.85, .02, g);
   },
-  // the Works job board: home of the shared job list. Static cards for now; step 7 makes it live.
+  // the Works job board: home of the shared job list. Its cards are the deck's until section 17 draws the live list.
   jobBoard(g, o = {}) {
     const cards = o.cards || [];
     const t = tex(640, 300, (c, w, h) => {
@@ -2187,6 +2187,7 @@ const WALL_KIT = {
         c.fillStyle = '#93b8b2'; c.font = '500 15px system-ui,sans-serif'; c.fillText(where + '  ·  ' + state, x + 18, y + 49);
       });
     });
+    if (typeof jobBoardLive === 'function') jobBoardLive(t);   // section 17 keeps it up to date with the real job list
     const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.22), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
     p.position.set(0, 1.55, .075); g.add(p);                 // the frame's face is at .065
     box(2.74, 1.36, .07, WM.paintDark, 0, 1.55, .03, g);
@@ -6261,7 +6262,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8209,6 +8210,53 @@ function finishJob(id) {
   if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
 }
 
+// ---- the Works bay job board (Deck 5), live (0.33.8) ----
+// The jobBoard kit (section 4b) hands its canvas texture to jobBoardLive as the deck is built (one inert line);
+// worksTick (main loop) redraws it whenever the job list changes, in the kit's own look. Up to six cards: the
+// most urgent first. Nothing here calls R() or makes geometry; the board's draw calls are unchanged.
+let JOB_BOARD = null;
+function jobBoardLive(t) { JOB_BOARD = { t, def: deckDef, rev: -1, min: -1 }; worksTick(); }
+const JOB_PRI = ['routine', 'soon', 'urgent', 'urgent'];
+const JOB_WORD = { service: 'service due', repair: 'repair', overhaul: 'broken: overhaul' };
+function jobCard(j) {
+  const who = j.claimedBy === 'you' ? 'you' : j.claimedBy ? ((schedPeople().find(p => p.id === j.claimedBy) || {}).name || '').split(' ')[0] : null;
+  if (j.kind === 'restock') return [j.cargo === 'meals' ? 'Food to the cold store' : 'Restock storage', j.cargo === 'meals' ? 'Hold to Deck 3' : 'Deck 5 · cargo hold', who ? who + ' on it' : 'hover cart', JOB_PRI[j.urgency]];
+  const m = machineById(j.machine), K = MACHINE_KINDS[m.kind], room = (DECKS[m.deck].rooms[m.room] || {}).name;
+  const n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  const state = j.status === 'waiting' ? j.why : (j.urgency === 2 ? 'failing: urgent' : JOB_WORD[j.kind]) + (who ? ', ' + who + ' on it' : '');
+  return [K.name + n, 'Deck ' + m.deck + (room ? ' · ' + room.toLowerCase() : ''), state, JOB_PRI[j.urgency]];
+}
+function drawJobBoard(t) {
+  const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, now = shipNow() % 1440;
+  const jobs = jobsBoard(), cards = jobs.slice(0, 6).map(jobCard);
+  c.textAlign = 'left';
+  c.fillStyle = '#0c1a1f'; c.fillRect(0, 0, w, h);
+  c.fillStyle = '#e8c06a'; c.font = '700 26px system-ui,sans-serif'; c.fillText('WORKS  ·  JOB BOARD', 22, 40);
+  c.fillStyle = '#7fa9a3'; c.font = '500 17px system-ui,sans-serif'; c.textAlign = 'right';
+  c.fillText(jobs.length + ' open  ·  ' + (now >= 480 && now < 1020 ? 'day shift' : 'night shift'), w - 22, 40); c.textAlign = 'left';
+  c.fillStyle = 'rgba(95,214,198,.35)'; c.fillRect(22, 54, w - 44, 2);
+  cards.forEach(([title, where, state, pri], k) => {
+    const x = 22 + (k % 2) * 304, y = 70 + Math.floor(k / 2) * 74;
+    c.fillStyle = '#16303a'; c.fillRect(x, y, 292, 62);
+    c.fillStyle = { urgent: '#e0503f', soon: '#e8c06a', routine: '#5fd6c6' }[pri] || '#5fd6c6'; c.fillRect(x, y, 7, 62);
+    c.fillStyle = '#e8f4f1'; c.font = '600 20px system-ui,sans-serif'; c.fillText(title, x + 18, y + 26, 266);
+    c.fillStyle = '#93b8b2'; c.font = '500 15px system-ui,sans-serif'; c.fillText(where + '  ·  ' + state, x + 18, y + 49, 266);
+  });
+  if (!cards.length) { c.fillStyle = '#7fa9a3'; c.font = '500 20px system-ui,sans-serif'; c.fillText('Nothing on the board. The Chief says it never lasts.', 22, 110); }
+  if (jobs.length > 6) { c.fillStyle = '#7fa9a3'; c.font = '500 15px system-ui,sans-serif'; c.textAlign = 'right'; c.fillText('+ ' + (jobs.length - 6) + ' more', w - 22, h - 10); c.textAlign = 'left'; }
+  t.needsUpdate = true;
+}
+// the main loop's step (section 12): redraw the board on Deck 5 when the jobs change (or each ship hour, for the shift)
+function worksTick() {
+  const B = JOB_BOARD;
+  if (!B || B.def !== deckDef) return;
+  machinesNow();
+  const hr = Math.floor(shipNow() / 60);
+  if (B.rev === MACH_REV && B.min === hr) return;
+  B.rev = MACH_REV; B.min = hr;
+  drawJobBoard(B.t);
+}
+
 // ---- saving: the save's ship.machines = { id: [cond, lastService] }, ship.machineHour, ship.jobs, ship.stores, ship.hold ----
 SAVE_EXTRA.push(s => {
   const st = machinesNow(), out = {};
@@ -10041,6 +10089,7 @@ function loop() {
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
   tickShip(dt);                                          // section 13: the ship's clock
   galleyTick();                                          // section 16: the galley, on paper and on Deck 3
+  worksTick();                                           // section 17: the Works bay job board
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
