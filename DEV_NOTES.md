@@ -1,8 +1,8 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new chat, together with **Design Doc v4** and the latest **starship-cadet.html** (build 0.6.6). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.6.6). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-This file replaces DEV_NOTES_2. Keep only this one in the Project, along with the design doc, the latest build, deck3-plan.html, deck4-plan.html, deck5-plan.html and cadet_test.py.
+This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
 **First job in the next chat: step 6d, Deck 3, turn 5: crew.** Every Deck 3 room is built and furnished (see "Next" below).
 
@@ -41,7 +41,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.5.9 | Windows are real openings onto the sky (the painted nebula and stars behind the glass are gone). Deck 4's bow nook became the music room: a stage round the bow windows with drums, guitars, amps and a mic, a grand piano, beanbags, a record cabinet, soundproofing panels, an instrument rail and a gig poster. Double doors from the corridor (`v,44,9`, `v,44,10`). |
 | 0.6.0 | The main lift has one wide door on each side instead of two narrow ones: paired lift edges share one pair of leaves, with no post or corner block between them (`liftJoint`). No freight lift: Deck 5's cargo hold and Cart bay tap text changed. |
 | 0.6.1 | The lift car is 2 × 3, big enough for a hover cart: it takes over the trunks row, keeps the ladder row, and each side is one three-tile door. Choosing a deck walks you to the panel on the car's back wall, where you reach out and press it before the ride starts. |
-| 0.6.2 | Deck 3, turn 1: the shell. `DECKS[3]` from deck3-plan.html: map, hull, doors, windows, floors (new `deck`, `gym` and `garden`), sealed service rooms, the lift and ladder, plaza benches and plants, name plates and the deck directory. Rooms are walkable and named but not furnished yet. The deck directory now marks whichever deck it's on. |
+| 0.6.2 | Deck 3, turn 1: the shell. `DECKS[3]` from plans/deck3-plan.html: map, hull, doors, windows, floors (new `deck`, `gym` and `garden`), sealed service rooms, the lift and ladder, plaza benches and plants, name plates and the deck directory. Rooms are walkable and named but not furnished yet. The deck directory now marks whichever deck it's on. |
 | 0.6.3 | Deck 3, turn 2: the mess hall (44 seats: four long tables of eight, three round tables of four), the serving line, the galley and the walk-in cold store. A new edge type, `pass`: the serving counter through the mess–galley wall. |
 | 0.6.4 | Curved inner walls (`curves` in a deck definition), and Deck 3, turn 3: the bow lounge, with a curved bar round the galley door, two planted glass screens on one arc, booths, high tables, and a window end with a sofa, armchairs, two quiet corners and a telescope. |
 | 0.6.5 | Deck 3, turn 4: the hydroponics garden (grass, grow racks under pink light, raised beds, trellises, fruit trees, a pond with benches, a stepping-stone path, a herb wall, a big tree and ground cover everywhere), the infirmary and exam room, public washrooms (all toilets), the gym, the crew store and the call-home booths. The lounge's glass screens are shorter, so the way round them is open. |
@@ -250,11 +250,14 @@ Extrude geometry:
 - **Setup in a fresh container:**
 
   ```
-  mkdir -p /home/claude/work/three && cd /home/claude/work/three
+  pip install playwright
+  mkdir -p /tmp/cadet-work/three && cd /tmp/cadet-work/three
   npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
   ```
 
-- **Run:** `python3 cadet_test.py OLD.html NEW.html` with `timeout 280`, on its own. Tool calls have a 300-second limit, so don't chain other tests after it.
+  `CADET_WORK` (default `/tmp/cadet-work`) sets where three.js and the test copies live. `CADET_CHROME` points at a Chromium binary when Playwright's own browser isn't installed (in Claude Code cloud sessions, `/opt/pw-browsers/chromium`).
+
+- **Run:** `CADET_CHROME=/opt/pw-browsers/chromium python3 cadet_test.py OLD.html NEW.html` from a scratch folder (screenshots land in the current folder). It takes about a minute. The old build comes from git, for example `git show HEAD~1:starship-cadet.html > old.html`.
 - **When crew changes are expected,** compare the crew-hidden shot, or make a test copy with the crew change reverted and expect ALL IDENTICAL. That's how Pell's move was proven.
 
 Deck 5 and the lift were tested with small ad-hoc scripts that reuse cadet_test.py's `Game` class:
@@ -282,14 +285,10 @@ Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, w
 
 ## Working method
 
-- Edit the build in place and never rewrite the whole file. Patch with small Python scripts that replace exact strings and assert each matches once.
-- Keep turns short; each ends with a tested build handed over as a file.
-- **Project files can be re-synced into the work folder mid-chat,** overwriting the build in progress (it happened in 0.5.1).
-    - At the start of each turn, check the build number in the working copy.
-    - Keep a copy of each build outside the work folder (`/home/claude/build-0.5.x.html`).
-    - Keep the patch scripts, so a reset only costs a re-run.
-- When a chat gets long, update these notes as a handoff and continue in a fresh chat.
-- Download each build as soon as it's handed over.
+- Edit the build in place and never rewrite the whole file. Make small exact-string edits, each matching once.
+- Work a deck one turn at a time. Each turn ends with a tested build, a bumped build number, a line in the build table above, and a commit pushed to the repo. Git is the save point: earlier builds come back with `git show <commit>:starship-cadet.html`.
+- When a deck's turns are all done, stop for review: a playable link, screenshots, a summary and the test results.
+- Keep these notes current as you go, so any new session can pick up from them.
 
 
 ## Known issues
@@ -305,7 +304,7 @@ Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, w
 
 ## Next
 
-**6d. Deck 3, the Commons.** The plan is agreed: deck3-plan.html, 52 × 22, `lift: [20, 11]`. Built one turn at a time:
+**6d. Deck 3, the Commons.** The plan is agreed: plans/deck3-plan.html, 52 × 22, `lift: [20, 11]`. Built one turn at a time:
 
 1. **The shell (done, 0.6.2).** Every room is walkable and named. Sealed: galley plant `g` (hatch `h,39,3`), water recycler `R` (hatch `v,17,14`), irrigation room `i` (hatch `h,3,17`), and the ladder hatch `h,20,13`.
 2. **The mess hall, galley and cold store (done, 0.6.3).**

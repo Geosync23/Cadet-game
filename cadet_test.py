@@ -3,15 +3,18 @@
 # crew positions, tap results, and screenshots across rotate / walls / night /
 # shadows / crew / taps / steering. Deterministic: virtual clock, manual frames.
 # Setup in a fresh container:
-#   mkdir -p /home/claude/work/three && cd /home/claude/work/three && npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
+#   mkdir -p $CADET_WORK/three && cd $CADET_WORK/three && npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
+#   (CADET_WORK defaults to /tmp/cadet-work)
 # Run:  python3 cadet_test.py OLD.html NEW.html     (screenshots land in the current folder)
 # Builds must share a random seed for screenshots to match pixel for pixel.
 # Deterministic headless runner for Starship Cadet builds.
 # Virtual clock + manual frame stepping, three.js served locally, a direct-eval hook into the game's scope.
-import json, sys, re, pathlib, hashlib
+import json, sys, re, pathlib, hashlib, os
 from playwright.sync_api import sync_playwright
 
-THREE = pathlib.Path('/home/claude/work/three/package/build/three.min.js').read_text()
+WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
+(WORK / 'test').mkdir(parents=True, exist_ok=True)
+THREE = (WORK / 'three/package/build/three.min.js').read_text()
 INIT = """
 (() => {
   let vt = 1000; const cbs = [];
@@ -30,7 +33,7 @@ def instrument(html):
 class Game:
     def __init__(self, pw, path, w=900, h=760, errors=None):
         self.errors = [] if errors is None else errors
-        b = pw.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+        b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         self.b = b
         self.page = b.new_page(viewport={'width': w, 'height': h}, device_scale_factor=1)
         self.page.on('console', lambda m: m.type in ('error', 'warning') and self.errors.append(f'{m.type}: {m.text}'))
@@ -38,7 +41,7 @@ class Game:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = instrument(pathlib.Path(path).read_text())
-        tmp = pathlib.Path('/home/claude/work/test/_run_' + pathlib.Path(path).name)
+        tmp = WORK / 'test' / ('_run_' + pathlib.Path(path).name)
         tmp.write_text(html)
         self.page.goto('file://' + str(tmp))
         try:
