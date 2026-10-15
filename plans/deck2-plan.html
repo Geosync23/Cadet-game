@@ -41,7 +41,7 @@ svg{display:block}
 <body>
 <header>
   <h1>Deck 2: Command &amp; Science</h1>
-  <div class="sub">Sketch 6 (revised), for build 0.6.6. Bow points forward, port side is on the left when facing it. The deck splits at the lift. Every bedroom is in the quarters, from the stern up to the lift (the left of this plan when it's wide): twelve for the senior crew and three for visitors. All science is forward of the lift. Step out of the lift's stern door and you're in the quarters, on a looped corridor: down the port side, across the gallery past the Captain's door, and back up the starboard side. Step out of the bow door and you're in science. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+  <div class="sub">Sketch 7, for build 0.6.6. Bow points forward, port side is on the left when facing it. The deck splits at the lift. Every bedroom is in the quarters, from the stern up to the lift (the left of this plan when it's wide): twelve for the senior crew and three for visitors. All science is forward of the lift. Step out of the lift's stern door and you're in the quarters, on a looped corridor: down the port side, across the gallery past the Captain's door, and back up the starboard side. Step out of the bow door and you're on the wide science corridor, which runs to a compact sensor array right in the nose. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -50,13 +50,16 @@ svg{display:block}
   <button id="first" aria-pressed="false">Built first</button>
 </div>
 <div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="info"><div id="card"><b>Deck 2 at a glance</b><span>The quarters, from the stern to the lift: one looped senior corridor with fifteen bedrooms opening off it, twelve for the senior crew and three for visitors. The Captain's quarters fill the stern behind the loop's gallery, with windows all along the stern, and are the biggest room on the deck after the sensor array. Ten cabins line the hulls with windows, two of them beside the lift; four inner cabins sit inside the loop. Science, forward of the lift: the Watch office and a washroom by the science lobby, then the chart room, the Survey lab, the lab gas plant and the probe locker to port; the comms room, the specimen store and the sample lab to starboard; the sensor and comms array across the bow, seen through glass at the end of the science corridor.</span><span class="meta">52 × 22 tiles: exactly Deck 3's outline (same length, width and bow), with slightly rounder stern corners, so it never sticks out past the deck below. One tile longer and two rows wider than sketch 5. It runs from world x −22 to 27.6 and z −11 to 11. The lift lines up with every other deck (game lift: [20, 11], car rows 9–11, ladder row 12, trunks row 8).</span></div></div>
+<div id="info"><div id="card"><b>Deck 2 at a glance</b><span>The quarters, from the stern to the lift: one looped senior corridor with fifteen bedrooms opening off it, twelve for the senior crew and three for visitors. The Captain's quarters fill the stern behind the loop's gallery, with windows all along the stern, and are the biggest room on the deck. Ten cabins line the hulls with windows, two of them beside the lift; four inner cabins sit inside the loop. Science, forward of the lift, along a wide science corridor: the Watch office and a washroom by the science lobby; the chart room, the Survey lab, the lab gas plant and a bow observatory to port; the comms room, the specimen store, the sample lab and a probe bay to starboard. The sensor and comms array is now a compact room in the very nose, seen through glass at the end of the corridor.</span><span class="meta">52 × 22 tiles: exactly Deck 3's outline (same length, width and bow), with slightly rounder stern corners, so it never sticks out past the deck below. One tile longer and two rows wider than sketch 5. It runs from world x −22 to 27.6 and z −11 to 11. The lift lines up with every other deck (game lift: [20, 11], car rows 9–11, ladder row 12, trunks row 8).</span></div></div>
 <div class="legend" id="legend"></div>
 <div class="qs" id="qs"><b>Open questions I had to guess at</b><ul>
-  <li><b>Room taken from science, not bedrooms.</b> No bedroom is smaller than in sketch 5, and most are bigger. To fit the loop and keep the Captain's quarters at 60 tiles, the quarters now run past the lift along both hulls: two cabins sit beside the lift where the Watch office and washroom were. Those two moved into the science half, and the science rooms are 4 wide. The sensor array still fills the bow.</li>
+  <li><b>The array, chopped down.</b> The sensor and comms array shrank from 238 tiles to 48, a sealed room in the very nose behind glass at the end of the science corridor, with a shut door beside the window. The Captain's quarters (60) are now the biggest room on the whole deck, array included.</li>
+  <li><b>What the freed bow became.</b> Science got its width back. The chart room, Survey lab and comms room are 54 tiles each, the sample lab 56 and the specimen store 27, all at least their sketch 5 sizes. The science corridor is four tiles wide, like Deck 3's promenade. In the bow there are two new rooms: an observatory to port with windows round the bow (open, a place worth finding) and a probe bay to starboard (sealed). Each is 59 tiles, just under the Captain's 60. Too big? Either could shrink and give the array a little back.</li>
+  <li><b>Bedrooms couldn't grow further without crossing the lift.</b> The quarters sit between the stern and the lift, both fixed, so the freed bow space can't reach them. Every bedroom is already at least its sketch 5 size, and most are bigger (sizes below). To make them bigger still, some cabins would have to move forward of the lift into the bow half, for example the two cabins beside the lift, widened forward. I've left that for you to decide.</li>
+  <li><b>Room sizes.</b> Captain 60; stern corner cabins 29; other hull cabins 15–20; cabins inside the loop 16; Watch office 36.</li>
   <li><b>As long as it can get.</b> The deck now takes Deck 3's whole outline, so it can't grow any longer without overhanging the deck below. That's one tile longer than sketch 5, plus the two spare rows.</li>
   <li><b>The loop.</b> The senior corridor runs down the port side from the quarters lobby, across a short gallery at the stern end (past the Captain's door) and back up the starboard side to the lobby. The four inner cabins sit inside the loop. Is this the loop you had in mind? Sketches 2 and 3 had it right against the stern windows instead, but then the Captain loses the stern.</li>
-  <li><b>Captain's quarters.</b> 5 × 12 (60 tiles, as in sketch 5) across the stern, with stern windows along its whole length. The biggest room on the deck apart from the sensor array; the sample lab is next at 54, then the stern corner cabins at 29.</li>
+  <li><b>Captain's quarters.</b> 5 × 12 (60 tiles) across the stern, with stern windows along its whole length. The biggest room on the deck.</li>
   <li><b>Six new senior crew.</b> The design doc puts only the Captain, the XO and four Chiefs on Deck 2, so twelve bedrooms needs six more people: a Second Officer, a Senior Helm Officer, a Ship's Counsellor, a Comms Chief, a Deputy Survey Chief and a Senior Watch Officer (ringed in gold). If they move up from Deck 4, Deck 4 has 24 cabins for 16 officers. Are these the right six?</li>
   <li><b>Fifteen bedrooms.</b> As in sketch 5, there's a second visitors' cabin as well as the visitors' suite and the Envoy's cabin. It could become a senior lounge instead.</li>
   <li><b>Windows.</b> The Captain and ten hull cabins have windows. Only the four inner cabins inside the loop don't, like Deck 4's inner cabins.</li>
@@ -79,8 +82,8 @@ svg{display:block}
 // Quarters (columns 2-22): every bedroom, each with its own door onto the
 // corridor loop (rows 5-6, the gallery at columns 7-8, rows 15-16) or the
 // lobby; two hull cabins sit beside the lift. Science (columns 23-51): the
-// Watch office and washroom by the lobby, then science off the science
-// corridor (rows 10-11). The lift's stern door opens onto the quarters
+// Watch office and washroom by the lobby, then science off the wide science
+// corridor (rows 9-12), and the compact sensor array in the nose. The lift's stern door opens onto the quarters
 // lobby (columns 17-18), its bow door onto the science lobby (21-22).
 // =====================================================================
 const DECK2 = {
@@ -88,28 +91,28 @@ const DECK2 = {
   blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
   lift: [20, 11],
   map: [
-    '...XXXXXOOOOIIIIVVVSSSSWWWWKKKKLLLLggPPAAAAAA.......',
-    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKLLLLggPPAAAAAAAA.....',
-    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKLLLLggPPAAAAAAAAA....',
-    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKLLLLggPPAAAAAAAAAA...',
-    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKLLLLggPPAAAAAAAAAAA..',
-    '..CCCCC----------++++++WWWWKKKKLLLLggPPAAAAAAAAAAAA.',
-    '..CCCCC----------++++++WWWWKKKKLLLLggPPAAAAAAAAAAAA.',
-    '..CCCCC--NNNNGGGG++++++WWWWKKKKLLLLggPPAAAAAAAAAAAA.',
-    '..CCCCC--NNNNGGGG++YY++WWWWKKKKLLLLggPPAAAAAAAAAAAAA',
-    '..CCCCC--NNNNGGGG++@@++WWWWKKKKLLLLggPPAAAAAAAAAAAAA',
-    '..CCCCC--NNNNGGGG++@@++================AAAAAAAAAAAAA',
-    '..CCCCC--DDDDUUUU++@@++================AAAAAAAAAAAAA',
-    '..CCCCC--DDDDUUUU++ZZ++wwQQQQFFFFMMMMMMAAAAAAAAAAAAA',
-    '..CCCCC--DDDDUUUU++++++wwQQQQFFFFMMMMMMAAAAAAAAAAAAA',
-    '..CCCCC--DDDDUUUU++++++wwQQQQFFFFMMMMMMAAAAAAAAAAAA.',
-    '..CCCCC----------++++++wwQQQQFFFFMMMMMMAAAAAAAAAAAA.',
-    '..CCCCC----------++++++wwQQQQFFFFMMMMMMAAAAAAAAAAAA.',
-    '..EEEEEETTTTBBBBHHHRRRRuuQQQQFFFFMMMMMMAAAAAAAAAAA..',
-    '..EEEEEETTTTBBBBHHHRRRRuuQQQQFFFFMMMMMMAAAAAAAAAA...',
-    '..EEEEEETTTTBBBBHHHRRRRuuQQQQFFFFMMMMMMAAAAAAAAA....',
-    '..EEEEEETTTTBBBBHHHRRRRuuQQQQFFFFMMMMMMAAAAAAAA.....',
-    '...EEEEETTTTBBBBHHHRRRRuuQQQQFFFFnnnnnnAAAAAA.......',
+    '...XXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJ.......',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJJJ.....',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJJJJ....',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJJJJA...',
+    '..XXXXXXOOOOIIIIVVVSSSSWWWWKKKKKKLLLLLLggJJJJJJJAA..',
+    '..CCCCC----------++++++WWWWKKKKKKLLLLLLggJJJJJJJAAA.',
+    '..CCCCC----------++++++WWWWKKKKKKLLLLLLggJJJJJJJAAA.',
+    '..CCCCC--NNNNGGGG++++++WWWWKKKKKKLLLLLLggJJJJJJJAAA.',
+    '..CCCCC--NNNNGGGG++YY++WWWWKKKKKKLLLLLLggJJJJJJJAAAA',
+    '..CCCCC--NNNNGGGG++@@++=========================AAAA',
+    '..CCCCC--NNNNGGGG++@@++=========================AAAA',
+    '..CCCCC--DDDDUUUU++@@++=========================AAAA',
+    '..CCCCC--DDDDUUUU++ZZ++=========================AAAA',
+    '..CCCCC--DDDDUUUU++++++wwQQQQQQFFFMMMMMMMPPPPPPPAAAA',
+    '..CCCCC--DDDDUUUU++++++wwQQQQQQFFFMMMMMMMPPPPPPPAAA.',
+    '..CCCCC----------++++++wwQQQQQQFFFMMMMMMMPPPPPPPAAA.',
+    '..CCCCC----------++++++wwQQQQQQFFFMMMMMMMPPPPPPPAAA.',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPPPPAA..',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPPPPA...',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPPPP....',
+    '..EEEEEETTTTBBBBHHHRRRRuuQQQQQQFFFMMMMMMMPPPPPP.....',
+    '...EEEEETTTTBBBBHHHRRRRuuQQQQQQFFFnnnnnnnPPPP.......',
   ],
   // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
   // glass: an inner window. lift: the main lift (one wide door each side).
@@ -125,34 +128,34 @@ const DECK2 = {
     'h,10,15': 'closed', 'h,14,15': 'closed',                 // inside the loop, facing starboard: Deputy Survey Chief, visitors' cabin
     // the science side of the lobby
     'v,23,7': 'door', 'v,23,5': 'glass', 'v,23,6': 'glass', 'v,23,8': 'glass', 'v,23,9': 'glass',   // the Watch office, glass onto the science lobby
-    'v,23,13': 'door',                                        // washroom
+    'v,23,14': 'door',                                        // washroom
     'h,23,17': 'hatch',                                       // utility closet, through the washroom
     // science
-    'h,28,10': 'door', 'h,27,10': 'glass', 'h,29,10': 'glass',   // the chart room
-    'h,32,10': 'door', 'h,33,10': 'glass', 'h,34,10': 'glass',   // the Survey lab, glass onto the science corridor
-    'v,35,4': 'hatch',                                        // the lab gas plant, from the Survey lab
-    'h,38,10': 'closed',                                      // the probe locker
-    'h,26,12': 'door', 'h,25,12': 'glass', 'h,27,12': 'glass',   // the comms room
-    'h,30,12': 'closed',                                      // the specimen store
-    'h,35,12': 'door', 'h,34,12': 'glass', 'h,36,12': 'glass',   // the sample lab
-    'h,35,21': 'hatch',                                       // down into the cable crawl, from the sample lab
-    'v,39,10': 'glass', 'v,39,11': 'glass',                   // the array window at the end of the science corridor
-    'v,39,15': 'closed',                                      // array access, from the sample lab
+    'h,29,9': 'door', 'h,28,9': 'glass', 'h,30,9': 'glass', 'h,31,9': 'glass',   // the chart room
+    'h,35,9': 'door', 'h,34,9': 'glass', 'h,36,9': 'glass', 'h,37,9': 'glass',   // the Survey lab, glass onto the science corridor
+    'v,39,4': 'hatch',                                        // the lab gas plant, from the Survey lab
+    'h,44,9': 'door', 'h,43,9': 'glass', 'h,45,9': 'glass',   // the observatory
+    'h,27,13': 'door', 'h,26,13': 'glass', 'h,28,13': 'glass', 'h,29,13': 'glass',   // the comms room
+    'h,32,13': 'closed',                                      // the specimen store
+    'h,36,13': 'door', 'h,35,13': 'glass', 'h,37,13': 'glass', 'h,38,13': 'glass',   // the sample lab
+    'h,37,21': 'hatch',                                       // down into the cable crawl, from the sample lab
+    'h,44,13': 'closed',                                      // the probe bay
+    'v,48,10': 'glass', 'v,48,11': 'glass', 'v,48,12': 'glass', 'v,48,9': 'closed',   // the array: a window at the end of the corridor, and its shut door
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
   sealed: {
     'v,7,10': 'C', 'h,7,5': 'X', 'h,9,5': 'O', 'h,13,5': 'I', 'h,17,5': 'V', 'h,19,5': 'S',
     'h,7,17': 'E', 'h,9,17': 'T', 'h,13,17': 'B', 'h,17,17': 'H', 'h,19,17': 'R',
     'h,10,7': 'N', 'h,14,7': 'G', 'h,10,15': 'D', 'h,14,15': 'U',
-    'h,23,17': 'u', 'v,35,4': 'g', 'h,38,10': 'P', 'h,30,12': 'F', 'h,35,21': 'n', 'v,39,15': 'A',
+    'h,23,17': 'u', 'v,39,4': 'g', 'h,32,13': 'F', 'h,37,21': 'n', 'h,44,13': 'P', 'v,48,9': 'A',
   },
   plates: [
     ['v,7,9', 'e', 'Captain'], ['h,10,5', 's', 'Works Chief'], ['h,14,5', 's', 'Infirmary Chief'], ['h,18,5', 's', 'Survey Chief'], ['h,20,5', 's', 'Second Officer'],
     ['h,10,17', 'n', 'Watch Chief'], ['h,14,17', 'n', 'Visitors'], ['h,18,17', 'n', 'Helm'], ['h,20,17', 'n', 'Comms Chief'],
     ['h,11,7', 'n', 'Counsellor'], ['h,15,7', 'n', 'Watch'], ['h,11,15', 's', 'Survey'], ['h,15,15', 's', 'Visitors'],
-    ['v,23,10', 'w', 'Watch office'], ['v,23,12', 'w', 'Washroom'],
-    ['h,27,10', 's', 'Chart room'], ['h,31,10', 's', 'Survey lab'], ['h,37,10', 's', 'Probes'],
-    ['h,28,12', 'n', 'Comms'], ['h,29,12', 'n', 'Specimens'], ['h,33,12', 'n', 'Sample lab'],
+    ['v,23,4', 'w', 'Watch office'], ['v,23,13', 'w', 'Washroom'],
+    ['h,27,9', 's', 'Chart room'], ['h,33,9', 's', 'Survey lab'], ['h,42,9', 's', 'Observatory'],
+    ['h,25,13', 'n', 'Comms'], ['h,31,13', 'n', 'Specimens'], ['h,34,13', 'n', 'Sample lab'], ['h,42,13', 'n', 'Probe bay'],
   ],
   rooms: {
     '-': { name: 'Senior corridor', floor: 'carpet', hall: true },
@@ -166,6 +169,7 @@ const DECK2 = {
     L: { name: 'Survey lab', floor: 'tile' },
     Q: { name: 'Comms room', floor: 'plate' },
     M: { name: 'Sample lab', floor: 'tile' },
+    J: { name: 'Observatory', floor: 'wood' },
     // bedrooms: locked, and not yours
     C: { name: 'Captain\'s quarters', floor: 'wood', tap: 'Captain Marrow\'s quarters. There\'s a brass knocker nobody uses; the Captain prefers the comm.' },
     X: { name: 'Commander Vance\'s cabin', floor: 'wood', tap: 'Commander Vance\'s cabin. The nameplate is perfectly level. Someone checked.' },
@@ -184,15 +188,15 @@ const DECK2 = {
     B: { name: 'Visitors\' suite', floor: 'wood', tap: 'The visitors\' suite, made up and empty, for inspectors, visiting captains and anyone the Concord sends.' },
     U: { name: 'Visitors\' cabin', floor: 'wood', tap: 'A second visitors\' cabin, made up and empty. Fresh towels, folded into swans by someone with time on their hands.' },
     // locked, but seen through glass
-    A: { name: 'Sensor array', floor: 'grate', tap: 'The ship\'s sensor and comms array: the dish, the antenna mast\'s base and the signal racks. Tier 3 access. You can watch it through the window at the end of the science corridor.' },
+    A: { name: 'Sensor array', floor: 'grate', tap: 'The ship\'s sensor and comms array, packed into the nose: the dish, the mast\'s base and the signal racks. Tier 3 access. You can watch it through the window beside this door.' },
     F: { name: 'Specimen store', floor: 'steel', tap: 'Frozen samples from the frontier, labelled in Dr. Sato\'s handwriting. Survey staff only.' },
-    P: { name: 'Probe locker', floor: 'steel', tap: 'Survey probes in their cradles, charged and waiting. Survey staff only.' },
+    P: { name: 'Probe bay', floor: 'steel', tap: 'Survey probes in their cradles beside the launch tubes, charged and waiting. Survey staff only.' },
     // sealed until their tier
     u: { name: 'Utility closet', void: true, tap: 'Deck 2\'s power junction and light relays. Tier 1 access, once the job list is running.' },
     g: { name: 'Lab gas plant', void: true, tap: 'Gas bottles in racks, regulators and the lines that feed both labs. Tier 2 access.' },
     n: { name: 'Cable crawl', void: true, tap: 'A low crawl along the starboard hull, carrying the array\'s cables aft. Tier 3 access.' },
   },
-  windows: ['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'W', 'K', 'L', 'Q'].map(room => ({ room })),
+  windows: ['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'W', 'K', 'L', 'J', 'Q'].map(room => ({ room })),
   closedDoors: {
     'h,19,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
   },
@@ -201,7 +205,7 @@ const DECK2 = {
 const ROOMS = {
   '-': { kind: 'ocorr', name: 'Senior corridor', built: true, x: 'One carpeted corridor in a loop through the quarters. It leaves the quarters lobby down the port side, crosses a short gallery at the stern end, past the Captain\'s door, and comes back up the starboard side to the lobby. Warm lamps, a brass nameplate on every door, hull cabins on the outside of the loop and inner cabins on the inside. Two more cabins sit beside the lift, off the lobby. Quieter even than the officers\' corridor on Deck 4.' },
   '+': { kind: 'lobby', name: 'Lift lobby', built: true, x: 'A ring of lobby round the lift. Out of the stern door is the quarters lobby, where both ends of the corridor loop meet. Out of the bow door is the science lobby and the science corridor, with the Watch office looking over it through glass, so nobody comes and goes unseen. The ring joins the two above the trunks and below the ladder.' },
-  '=': { kind: 'corr', name: 'Science corridor', built: true, x: 'Bright, clean and a little cold, straight down the middle of the bow half. Labs and the chart room behind glass to port, the comms room and sample lab to starboard. At the end, a window onto the sensor array.' },
+  '=': { kind: 'corr', name: 'Science corridor', built: true, x: 'Four tiles wide, bright, clean and a little cold, straight down the middle of the bow half. The chart room, Survey lab and observatory behind glass to port; the comms room and sample lab to starboard. At the very end, a window onto the sensor array in the nose.' },
   '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, big enough for a hover cart, with one wide door on each side. The stern door opens towards the quarters and the bow door towards science. Lined up with every other deck.' },
   Y: { kind: 'core', name: 'Spine trunks', label: 'Trunks', x: 'The power and air trunks, running up behind the car\'s back wall to the bridge. Seen through glass from the lobby.' },
   Z: { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The maintenance ladder, behind glass, with a hatch for tier 2.' },
@@ -224,11 +228,12 @@ const ROOMS = {
   w: { kind: 'wash', name: 'Washroom', label: 'Wash', built: true, x: 'A small public washroom off the science lobby. The utility closet is through a hatch at the back.' },
   K: { kind: 'sci', name: 'Chart room', label: 'Chart room', built: true, win: true, isNew: true, x: 'New idea. Survey\'s star charts: a big chart table that glows from underneath, rolled charts in pigeonholes, and port windows to check the real thing. Where the frontier gets mapped, one survey at a time. A good quiet place to sit.' },
   L: { kind: 'sci', name: 'Survey lab', label: 'Survey lab', built: true, win: true, x: 'The main lab: long benches under the port windows, a sample scanner, and a specimen shelf of odd things from the frontier (do not lick the blue one). Glass onto the science corridor. The lab gas plant is through a hatch in the forward wall.' },
-  P: { kind: 'sci', name: 'Probe locker', label: 'Probes', isNew: true, x: 'New idea. Survey probes in their cradles, charged and ready to launch. Sealed, with a shut door onto the corridor.' },
+  P: { kind: 'sci', name: 'Probe bay', label: 'Probe bay', isNew: true, x: 'New idea. Survey probes in their cradles, charged and ready to launch through tubes in the starboard bow. Sealed, with a shut door onto the corridor.' },
+  J: { kind: 'sci', name: 'Observatory', label: 'Observatory', built: true, win: true, isNew: true, x: 'New idea. Windows round the port bow, a big telescope on a brass mount, star charts on the walls and a long cushioned bench. Survey uses it by day; off-duty crew sneak in at night. A place worth finding.' },
   Q: { kind: 'sci', name: 'Comms room', label: 'Comms', built: true, win: true, isNew: true, x: 'New idea. Where long-range messages come in and go out, including every recorded call home from the Deck 3 booths: headsets, a signal board along the starboard windows and a patient comms officer.' },
   F: { kind: 'sci', name: 'Specimen store', label: 'Specimens', isNew: true, x: 'New idea. A cold store for frontier samples: frosted cabinets, labelled jars, and a sample that hums when nobody\'s looking. Survey staff only.' },
   M: { kind: 'sci', name: 'Sample lab', label: 'Sample lab', built: true, x: 'Cleaner and quieter than the main lab: fume hoods, a cold cabinet, centrifuges and a glove box. A floor hatch drops into the cable crawl, and a shut door at the front leads into the array (tier 3).' },
-  A: { kind: 'mech', name: 'Sensor array', label: 'Sensor and comms array', x: 'The whole bow: the main sensor dish turning slowly under blue light, the comms mast\'s base and racks of signal processors. Watch it through the window at the end of the science corridor from day one. Tier 3, when the sensor array opens.' },
+  A: { kind: 'mech', name: 'Sensor array', label: 'Array', x: 'Packed into the nose: the main sensor dish turning slowly under blue light, the comms mast\'s base and a rack of signal processors. Watch it through the window at the end of the science corridor from day one. Tier 3, when the sensor array opens.' },
   u: { kind: 'serv', name: 'Utility closet', label: 'Util', x: 'Deck 2\'s power junction and light relays, through a hatch at the back of the washroom. Tier 1.' },
   g: { kind: 'serv', name: 'Lab gas plant', label: 'Gas', x: 'Gas bottles in racks, regulators, and the lab gas lines that run to both labs, under the science corridor. Through a hatch in the Survey lab. Tier 2: a gas fault can start here and show up in the sample lab.' },
   n: { kind: 'serv', name: 'Cable crawl', label: 'Cable crawl', x: 'A low crawl along the starboard hull, carrying the array\'s cables aft. In through a floor hatch in the sample lab. Tier 3.' },
@@ -252,9 +257,9 @@ const LEGEND = ['captain', 'suite', 'guest', 'sci', 'watch', 'mech', 'wash', 'oc
 const LEGEND_EXTRA = [];
 const POS = { C: [4.5, 7.8], X: [5.6, 3.3], O: [10, 3.3], I: [14, 3.3], V: [17.5, 3.3], S: [21, 3.3], E: [5.6, 18.2], T: [10, 18.2], B: [14, 18.2], H: [17.5, 18.2], R: [21, 18.2],
   N: [11, 7.6], G: [15, 7.6], D: [11, 14.4], U: [15, 14.4],
-  W: [25, 8.6], K: [29, 1.4], L: [33, 8.4], g: [36, 9.4], P: [38, 8.4], Q: [27, 20.3], F: [31, 20.3], M: [36, 13.2], n: [36, 21.5], A: [45, 4.6],
-  u: [24, 19], w: [24, 14.5], Y: [20, 8.5], '@': [20, 10.5], Z: [20, 12.5] };
-const SMALL = new Set(['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'N', 'G', 'D', 'U', 'W', 'P', 'F', 'Y', 'Z', 'w', 'Q', 'K', 'L', 'u']);
+  W: [25, 7.6], K: [30, 1.2], L: [36, 7.6], g: [40, 8.3], J: [44, 7.6], Q: [28, 20.3], F: [32.5, 20.3], M: [37.5, 14], n: [37.5, 21.5], P: [44, 14.2], A: [50, 13.6],
+  u: [24, 19], w: [24, 15], Y: [20, 8.5], '@': [20, 10.5], Z: [20, 12.5] };
+const SMALL = new Set(['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'N', 'G', 'D', 'U', 'W', 'P', 'F', 'Y', 'Z', 'w', 'Q', 'K', 'L', 'J', 'u', 'A']);
 function decorate() {
   // the Captain's quarters: the dining table, the sleeping alcove at one end, the study desk at the other
   deco('rect', { x: 3.8 * S, y: 9.2 * S, width: 1.4 * S, height: 3.6 * S, rx: 8, fill: '#8a6a45' });
@@ -271,29 +276,33 @@ function decorate() {
   for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5; deco('circle', { cx: (4 + Math.cos(a) * .8) * S, cy: (19 + Math.sin(a) * .8) * S, r: 4.5, fill: '#2a9d8f' }); }
   // Watch office: status screens along the hull, the duty desk facing the glass onto the lobby
   deco('rect', { x: 23.3 * S, y: .3 * S, width: 3.4 * S, height: .3 * S, fill: '#5fd6c6', opacity: .7 });
-  deco('rect', { x: 24 * S, y: 6 * S, width: .6 * S, height: 2.4 * S, rx: 3, fill: '#8a6a45' });
+  deco('rect', { x: 24 * S, y: 5 * S, width: .6 * S, height: 2.4 * S, rx: 3, fill: '#8a6a45' });
   // the chart room's glowing table
-  deco('rect', { x: 27.4 * S, y: 3.2 * S, width: 3.2 * S, height: 3.2 * S, rx: 6, fill: 'rgba(159,227,255,.3)', stroke: '#9fe3ff', 'stroke-width': 1.5 });
+  deco('rect', { x: 28.2 * S, y: 2.6 * S, width: 3.6 * S, height: 3.2 * S, rx: 6, fill: 'rgba(159,227,255,.3)', stroke: '#9fe3ff', 'stroke-width': 1.5 });
   // Survey lab: benches under the windows and a bench island
-  deco('rect', { x: 31.4 * S, y: .4 * S, width: 3.2 * S, height: .7 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
-  deco('rect', { x: 31.8 * S, y: 4 * S, width: 2.4 * S, height: 1.4 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
-  // gas bottles; probes in their cradles
-  for (let y = .6; y < 9.5; y += .9) for (const x of [35.5, 36.4]) deco('circle', { cx: x * S, cy: y * S, r: 6, fill: '#3d4850', stroke: '#c86b4a', 'stroke-width': 1.5 });
-  for (const y of [1.2, 3.2, 5.2]) deco('rect', { x: 37.3 * S, y: y * S, width: 1.4 * S, height: 1 * S, rx: 9, fill: '#c9d1d3', stroke: '#e9c46a', 'stroke-width': 1 });
+  for (const x of [33.4, 36]) deco('rect', { x: x * S, y: .4 * S, width: 2.2 * S, height: .7 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
+  deco('rect', { x: 34.2 * S, y: 3.8 * S, width: 3.6 * S, height: 1.4 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
+  // gas bottles
+  for (let y = .6; y < 8.5; y += .9) for (const x of [39.5, 40.4]) deco('circle', { cx: x * S, cy: y * S, r: 6, fill: '#3d4850', stroke: '#c86b4a', 'stroke-width': 1.5 });
+  // the observatory: the telescope and the long bench under the bow windows
+  deco('circle', { cx: 44.2 * S, cy: 4.2 * S, r: .9 * S, fill: '#26323a', stroke: '#c58b4a', 'stroke-width': 2 });
+  deco('line', { x1: 44.2 * S, y1: 4.2 * S, x2: 45.8 * S, y2: 2.8 * S, stroke: '#c58b4a', 'stroke-width': 5, 'stroke-linecap': 'round' });
+  deco('path', { d: `M${41.6 * S},${1.4 * S} Q${45 * S},${.6 * S} ${46.8 * S},${3.6 * S}`, fill: 'none', stroke: '#5c4a6e', 'stroke-width': 8, 'stroke-linecap': 'round' });
   // comms room: the signal board along the windows and the headset desks
-  deco('rect', { x: 25.4 * S, y: 21 * S, width: 3.2 * S, height: .5 * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
-  for (const y of [13.6, 15.8]) deco('rect', { x: 25.6 * S, y: y * S, width: 2.8 * S, height: .6 * S, rx: 2, fill: '#8a6a45' });
+  deco('rect', { x: 25.4 * S, y: 21 * S, width: 5.2 * S, height: .5 * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
+  for (const y of [14.6, 16.8]) deco('rect', { x: 25.8 * S, y: y * S, width: 4.4 * S, height: .6 * S, rx: 2, fill: '#8a6a45' });
   // specimen cabinets; the sample lab's bench and fume hoods
-  for (const y of [13, 14.8, 16.6, 18.4]) deco('rect', { x: 29.3 * S, y: y * S, width: .7 * S, height: 1.3 * S, rx: 2, fill: 'rgba(220,240,255,.3)', stroke: '#9fe3ff', 'stroke-width': 1 });
-  deco('rect', { x: 34 * S, y: 15 * S, width: 3.4 * S, height: 1 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
-  for (const x of [33.6, 35, 36.4]) deco('rect', { x: x * S, y: 19.3 * S, width: 1.1 * S, height: .8 * S, rx: 2, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 });
-  // the array: the dish, the mast's base and signal racks
-  deco('circle', { cx: 45 * S, cy: 11 * S, r: 3.6 * S, fill: '#27363b', stroke: 'rgba(159,227,255,.6)', 'stroke-width': 2 });
-  deco('circle', { cx: 45 * S, cy: 11 * S, r: 1.9 * S, fill: 'none', stroke: 'rgba(159,227,255,.35)', 'stroke-width': 1.5 });
-  deco('circle', { cx: 45 * S, cy: 11 * S, r: 5, fill: '#9fe3ff' });
-  for (const y of [2.2, 19]) for (let x = 40; x < 45; x += 1.1) deco('rect', { x: x * S, y: y * S, width: .7 * S, height: .9 * S, fill: '#26323a', stroke: '#7a8fd0', 'stroke-width': 1 });
+  for (const y of [13.8, 15.6, 17.4, 19.2]) deco('rect', { x: 31.3 * S, y: y * S, width: .7 * S, height: 1.3 * S, rx: 2, fill: 'rgba(220,240,255,.3)', stroke: '#9fe3ff', 'stroke-width': 1 });
+  deco('rect', { x: 35.4 * S, y: 15.6 * S, width: 4 * S, height: 1 * S, rx: 2, fill: '#b9c2c6', opacity: .85 });
+  for (const x of [34.6, 36.2, 37.8]) deco('rect', { x: x * S, y: 19.4 * S, width: 1.2 * S, height: .8 * S, rx: 2, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 });
+  // the probe bay: probes in their cradles by the launch tubes
+  for (const y of [15, 17, 19]) deco('rect', { x: 42 * S, y: y * S, width: 2.4 * S, height: 1 * S, rx: 9, fill: '#c9d1d3', stroke: '#e9c46a', 'stroke-width': 1 });
+  // the array, packed into the nose: the dish and signal racks
+  deco('circle', { cx: 49.8 * S, cy: 11 * S, r: 1.6 * S, fill: '#27363b', stroke: 'rgba(159,227,255,.6)', 'stroke-width': 2 });
+  deco('circle', { cx: 49.8 * S, cy: 11 * S, r: 4, fill: '#9fe3ff' });
+  for (const y of [6.6, 14.6]) deco('rect', { x: 48.4 * S, y: y * S, width: .7 * S, height: .9 * S, fill: '#26323a', stroke: '#7a8fd0', 'stroke-width': 1 });
   // the science corridor's guide stripes
-  for (const y of [10.12, 11.88]) deco('rect', { x: 23 * S, y: y * S - 1, width: 16 * S, height: 2, fill: 'rgba(95,214,198,.45)' });
+  for (const y of [9.12, 12.88]) deco('rect', { x: 23 * S, y: y * S - 1, width: 25 * S, height: 2, fill: 'rgba(95,214,198,.45)' });
   // arrows round the loop
   for (const [x, y, t] of [[12, 6, '→'], [7.95, 11, '↓'], [12, 16, '←']]) {
     const [tx, ty] = T(x * S, y * S); const e = el('text', { x: tx, y: ty, 'font-size': 10, fill: 'rgba(240,226,190,.6)', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, floorG); e.textContent = t; }
@@ -301,7 +310,7 @@ function decorate() {
 function notes() {
   note(11 * S, 5.55 * S, 'Senior corridor loop', 8, 'rgba(225,240,238,.7)');
   note(11 * S, 15.55 * S, 'Senior corridor loop', 8, 'rgba(225,240,238,.7)');
-  note(31 * S, 11 * S, 'Science corridor', 8, 'rgba(225,240,238,.7)');
+  note(35 * S, 11 * S, 'Science corridor', 8, 'rgba(225,240,238,.7)');
   note(20 * S, 6.2 * S, 'Lobby', 8, 'rgba(225,240,238,.7)');
   note(10 * S, -12, '◀ Quarters', 10, 'rgba(240,226,190,.9)');
   note(37 * S, -12, 'Science ▶', 10, 'rgba(159,227,255,.9)');
