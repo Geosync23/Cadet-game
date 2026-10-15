@@ -92,6 +92,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    12. MAIN LOOP
    13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
    14. SCHEDULES        planDay, whereIs: where all the crew are (after 13)
+   17. MACHINES & JOBS  machines, wear, systems, ship health, effects on people (after 14)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -5559,6 +5560,7 @@ function tickShip(dt) {
 
 // ---- saving: { v, build, time, player: { deck, tile, facing }, ship: { decks: { n: { open } } }, crew: {} } ----
 const SAVE_KEY = 'starship-cadet-save', SAVE_V = 1;
+const SAVE_EXTRA = [];                                   // other sections add their part: f(save) just before it's written (17: machines)
 const URL_FLAGS = new URLSearchParams(location.search);
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd'),   // the crowd demo (section 8b) never touches the save
       DEBUG = URL_FLAGS.has('debug');
@@ -5567,10 +5569,12 @@ function saveGame() {
   try {
     const decks = {};
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
+    const save = {
       v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
       player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
-    }));
+    };
+    for (const f of SAVE_EXTRA) f(save);
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save));
   } catch (e) { /* no storage, or full: the game carries on unsaved */ }
 }
 function loadGame() {
@@ -6176,6 +6180,309 @@ function dayReport(day) {
 }
 // sleeping (sleepUntil) and other jumps: plan the days you skip into, so arriving anywhere is instant
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
+
+// =====================================================================
+// 17. MACHINES & JOBS
+// The ship's machines, how they wear, and what that does to the ship and the people aboard. So far (0.33.x, B1)
+// it's data and logic only: nothing here draws anything or calls R().
+//   MACHINE_KINDS       what each kind is: its system, how long it lasts, what wears it, what it does when it falters
+//   machineList()       every machine aboard: DECKS[n].machines ({ id, kind, at, room, face, panel }), or the
+//                       stand-ins in STUB_MACHINES on a deck that has none yet
+//   machinesNow()       SHIP.machines brought up to date: SHIP.machines[id] = { cond: 0-100, state, lastService }
+//   machineState(cond)  'healthy' | 'worn' | 'faulty' | 'failing' | 'broken'
+//   shipSystems()       air, water, power, heat, food, waste, hull, comms, propulsion: 0-100 each, with the
+//                       dependencies (power feeds everything; water feeds the garden, the garden the galley)
+//   shipHealth()        the systems blended into one score, 0-100
+//   shipEffects(deck)   what the machines do to people on a deck now: needs, mood, walking, cooking, the lift
+//   serviceMachine(id)  put a machine right (the job list, B2; machine_check.py's ideal crew)
+// Wear runs on paper, one ship hour at a time, from the schedules (section 14): the ovens with the meals, the
+// washers with the laundry and the day's uniforms, the lift with every ride, the scrubbers with the people on
+// their deck, the recycler with every wash, and everything a little with time. Worn machines wear faster. Each
+// hour's wear has a little variety from schedU(machine, hour), so the same ship wears the same way however the
+// game is played: one big jump or minute by minute. Nothing moves until something asks (machinesNow); the save
+// asks every ship hour.
+// =====================================================================
+// kinds: sys = the system it belongs to (null: none, like the lift); life = days from 100 to 0 at normal use,
+// never serviced; time = the share of wear that comes with time (the rest comes with use); use = what wears it
+// (a counter from machUseDay) and per = how much of that counter a normal day brings; scope = where its
+// effects are felt ('deck': its own deck, 'ship': everywhere); w = its weight in its system; tier = who may
+// work on it (design doc, "Works progression"); part = what a repair needs (B3)
+const MACHINE_KINDS = {
+  oven:          { name: 'Oven',              sys: 'food',       life: 10, time: .2, use: 'cook',    per: 300,  scope: 'ship', w: 2, tier: 1, part: 'element' },
+  range:         { name: 'Range',             sys: 'food',       life: 12, time: .2, use: 'cook',    per: 300,  scope: 'ship', w: 2, tier: 1, part: 'element' },
+  galleyplant:   { name: 'Galley plant',      sys: 'food',       life: 14, time: .5, use: 'meal',    per: 150,  scope: 'ship', w: 1, tier: 1, part: 'fan belt' },
+  washer:        { name: 'Washer',            sys: 'waste',      life: 12, time: .1, use: 'loads',   per: 20,   scope: 'ship', w: 1, tier: 1, part: 'pump' },
+  lift:          { name: 'Main lift',         sys: null,         life: 16, time: .3, use: 'ride',    per: 385,  scope: 'ship', w: 1, tier: 1, part: 'relay' },
+  junction:      { name: 'Light relays',      sys: 'power',      life: 18, time: .6, use: 'heads',   per: 0,    scope: 'deck', w: 1, tier: 1, part: 'relay' },
+  scrubber:      { name: 'Air scrubber',      sys: 'air',        life: 11, time: .4, use: 'heads',   per: 0,    scope: 'deck', w: 2, tier: 2, part: 'filter' },
+  heater:        { name: 'Heating plant',     sys: 'heat',       life: 18, time: .6, use: 'heads',   per: 0,    scope: 'deck', w: 2, tier: 2, part: 'valve' },
+  recycler:      { name: 'Water recycler',    sys: 'water',      life: 14, time: .3, use: 'wash',    per: 100,  scope: 'ship', w: 3, tier: 2, part: 'membrane' },
+  irrigation:    { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden',  per: 0,    scope: 'ship', w: 1, tier: 2, part: 'pump' },
+  airplant:      { name: 'Air plant',         sys: 'air',        life: 20, time: .7, use: 'heads',   per: 0,    scope: 'ship', w: 3, tier: 2, part: 'filter' },
+  fan:           { name: 'Main fan',          sys: 'air',        life: 24, time: 1,  scope: 'ship', w: 2, tier: 2, part: 'bearing' },
+  manifold:      { name: 'Manifold',          sys: 'heat',       life: 24, time: 1,  scope: 'ship', w: 2, tier: 2, part: 'valve' },
+  gasplant:      { name: 'Lab gas plant',     sys: 'comms',      life: 20, time: .5, use: 'heads',   per: 0,    scope: 'deck', w: 1, tier: 2, part: 'regulator' },
+  battery:       { name: 'Battery bank',      sys: 'power',      life: 28, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'cell' },
+  powerjunction: { name: 'Power junction',    sys: 'power',      life: 28, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'breaker' },
+  relay:         { name: 'Bridge relays',     sys: 'comms',      life: 24, time: .7, use: 'heads',   per: 0,    scope: 'ship', w: 2, tier: 3, part: 'relay' },
+  array:         { name: 'Sensor array',      sys: 'comms',      life: 40, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'signal card' },
+  doorgear:      { name: 'Bay door gear',     sys: 'hull',       life: 40, time: 1,  scope: 'ship', w: 1, tier: 2, part: 'seal' },
+  hullseal:      { name: 'Hull seals',        sys: 'hull',       life: 32, time: 1,  scope: 'ship', w: 2, tier: 3, part: 'seal' },
+  reactor:       { name: 'Reactor',           sys: 'power',      life: 60, time: 1,  scope: 'ship', w: 3, tier: 4, part: 'control rod' },
+  coil:          { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,  scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
+};
+const MACHINE_STATES = ['healthy', 'worn', 'faulty', 'failing', 'broken'];
+const machineState = c => c >= 75 ? 'healthy' : c >= 50 ? 'worn' : c >= 25 ? 'faulty' : c >= 10 ? 'failing' : 'broken';
+const MACHINE_SEV = { healthy: 0, worn: 0, faulty: .35, failing: .7, broken: 1 };   // how hard a state is felt
+const SYSTEMS = ['air', 'water', 'power', 'heat', 'food', 'waste', 'hull', 'comms', 'propulsion'];
+const SYSTEM_W = { air: 3, water: 2, power: 3, heat: 2, food: 2, waste: 1, hull: 2, comms: 1, propulsion: 1 };   // their weight in ship health
+// stand-ins until the architects add DECKS[n].machines with the utility rooms (A5): [id, kind, room]. Their
+// `at` and `panel` are the room's middle tile; the lift is at the lift. A deck with any machines of its own
+// drops all of its stand-ins.
+const STUB_MACHINES = {
+  1: [['1-junction-1', 'junction', 'k'], ['1-relay-1', 'relay', 'u']],
+  2: [['2-junction-1', 'junction', 'u'], ['2-gasplant-1', 'gasplant', 'g'], ['2-array-1', 'array', 'A']],
+  3: [['3-oven-1', 'oven', 'K'], ['3-oven-2', 'oven', 'K'], ['3-range-1', 'range', 'K'], ['3-galleyplant-1', 'galleyplant', 'g'],
+      ['3-recycler-1', 'recycler', 'R'], ['3-irrigation-1', 'irrigation', 'i']],
+  4: [['4-scrubber-1', 'scrubber', 's'], ['4-scrubber-2', 'scrubber', 's'], ['4-heater-1', 'heater', 't'], ['4-junction-1', 'junction', 'k'],
+      ['4-washer-1', 'washer', 'l'], ['4-washer-2', 'washer', 'l'], ['4-washer-3', 'washer', 'l'], ['4-washer-4', 'washer', 'l']],
+  5: [['5-lift-1', 'lift', null], ['5-airplant-1', 'airplant', 'a'], ['5-airplant-2', 'airplant', 'a'], ['5-fan-1', 'fan', 'F'],
+      ['5-manifold-1', 'manifold', 'n'], ['5-junction-1', 'junction', 'u'], ['5-battery-1', 'battery', 'y'], ['5-doorgear-1', 'doorgear', 'd']],
+  6: [['6-reactor-1', 'reactor', 'R'], ['6-coil-1', 'coil', 'E'], ['6-coil-2', 'coil', 'E'], ['6-coil-3', 'coil', 'E'],
+      ['6-powerjunction-1', 'powerjunction', 'j'], ['6-powerjunction-2', 'powerjunction', 'J'], ['6-hullseal-1', 'hullseal', 'c'], ['6-hullseal-2', 'hullseal', 'C']],
+};
+// a room's middle tile: the room's tile nearest its centre
+function machRoomTile(n, room) {
+  const map = DECKS[n].map, ts = [];
+  map.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] === room) ts.push([i, j]); });
+  if (!ts.length) return null;
+  const ci = ts.reduce((a, t) => a + t[0], 0) / ts.length, cj = ts.reduce((a, t) => a + t[1], 0) / ts.length;
+  return ts.reduce((b, t) => (t[0] - ci) ** 2 + (t[1] - cj) ** 2 < (b[0] - ci) ** 2 + (b[1] - cj) ** 2 ? t : b);
+}
+const machSeed = id => { let h = 2166136261; for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619); return h | 0; };
+let MACH_LIST = null;
+function machineList() {
+  if (MACH_LIST) return MACH_LIST;
+  MACH_LIST = [];
+  for (const n of Object.keys(DECKS).map(Number).sort()) {
+    const own = DECKS[n].machines;
+    const list = own && own.length ? own.map(m => ({ ...m }))
+      : (STUB_MACHINES[n] || []).map(([id, kind, room]) => { const at = room ? machRoomTile(n, room) : DECKS[n].lift.slice(); return { id, kind, at, room, face: 's', panel: at, stub: true }; });
+    for (const m of list) if (MACHINE_KINDS[m.kind]) MACH_LIST.push({ ...m, deck: n, seed: machSeed(m.id) });
+  }
+  return MACH_LIST;
+}
+const machineById = id => machineList().find(m => m.id === id);
+
+// ---- use, from the schedules: per ship hour of a day, how much of each thing happened (cached, last few days) ----
+//   meal: meals begun; cook: meals this hour and next (cooking ahead); ride: lift rides; wash: showers and
+//   basins; loads: laundry visits plus yesterday's shift uniforms (washed 06:00-10:00); heads[n]: person-hours
+//   on deck n; garden: person-hours in the garden. Read from shipDay(d), so it's the same however often it's asked.
+const MACH_USE = new Map();
+function machUseDay(d) {
+  if (MACH_USE.has(d)) return MACH_USE.get(d);
+  const B = (d - 1) * 1440, z = () => new Float32Array(24);
+  const u = { meal: z(), cook: z(), ride: z(), wash: z(), loads: z(), garden: z(), heads: {} };
+  for (const n of Object.keys(DECKS)) u.heads[n] = z();
+  const { plans } = shipDay(d), byId = schedData().byId;
+  let workedYesterday = 0;
+  for (const p of schedPeople()) if (isWorkDay(p, d - 1)) workedYesterday++;
+  for (const segs of plans.values()) for (const s of segs) {
+    const h = Math.floor((s.from - B) / 60);
+    if (s.from >= B && h < 24) {
+      if ((s.act === 'breakfast' || s.act === 'dinner') && s.tag !== 'queue') u.meal[h]++;
+      if (s.act === 'commute') u.ride[h]++;
+      if (s.act === 'wash') u.wash[h]++;
+      if (s.tag === 'laundry') u.loads[h]++;
+    }
+    const pl = s.placeId && byId.get(s.placeId);
+    for (let m = Math.max(s.from, B); m < Math.min(s.to, B + 1440);) {
+      const h2 = Math.floor((m - B) / 60), e = Math.min(s.to, B + (h2 + 1) * 60);
+      if (u.heads[s.deck]) u.heads[s.deck][h2] += (e - m) / 60;
+      if (pl && pl.type === 'garden') u.garden[h2] += (e - m) / 60;
+      m = e;
+    }
+  }
+  for (let h = 0; h < 24; h++) u.cook[h] = u.meal[h] + (h < 23 ? u.meal[h + 1] : 0);
+  for (let h = 6; h < 10; h++) u.loads[h] += workedYesterday / 4 / 6;           // a load holds about six uniforms
+  MACH_USE.set(d, u);
+  for (const k of MACH_USE.keys()) if (k < d - 3 || k > d + 1) MACH_USE.delete(k);
+  return u;
+}
+// a normal day's use of each counter, for counters that depend on the machine's deck (per: 0 in MACHINE_KINDS):
+// the average of days 1-7, worked out once
+let MACH_NORM = null;
+function machNorm() {
+  if (MACH_NORM) return MACH_NORM;
+  const norm = { heads: {}, garden: 0 };
+  for (let d = 1; d <= 7; d++) {
+    const u = machUseDay(d);
+    for (const n in u.heads) norm.heads[n] = (norm.heads[n] || 0) + u.heads[n].reduce((a, b) => a + b, 0) / 7;
+    norm.garden += u.garden.reduce((a, b) => a + b, 0) / 7;
+  }
+  return MACH_NORM = norm;
+}
+// how hard machine m was used in absolute ship hour h, against a normal day (1 = an average hour)
+function machUse(m, h) {
+  const K = MACHINE_KINDS[m.kind];
+  if (!K.use || K.time >= 1) return 1;
+  const u = machUseDay(Math.floor(h / 24) + 1), i = h % 24;
+  if (K.use === 'heads') { const nm = machNorm().heads[m.deck]; return nm > 0 ? u.heads[m.deck][i] * 24 / nm : 1; }
+  if (K.use === 'garden') { const nm = machNorm().garden; return nm > 0 ? u.garden[i] * 24 / nm : 1; }
+  return u[K.use][i] * 24 / K.per;
+}
+// one hour's wear for machine m at condition c: its life's share of the hour, split between time and use,
+// faster as it wears (up to half as fast again near 0), with a little variety from the hour
+function machWear(m, h, c) {
+  const K = MACHINE_KINDS[m.kind];
+  const base = 100 / (K.life * 24), use = K.time + (1 - K.time) * machUse(m, h);
+  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7));
+}
+
+// ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
+SHIP.machines = {};
+let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet worn; the last time asked; a counter of changes
+const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
+function machinesReset(hour) {
+  SHIP.machines = {};
+  for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
+  MACH_HOUR = hour; MACH_REV++;
+}
+// wear every machine up to the last whole ship hour. A clock earlier than the machines' (New game) starts afresh
+function machinesNow() {
+  const now = Math.floor(shipNow() / 60), start = Math.floor(((SHIP_START.day - 1) * 1440 + SHIP_START.min) / 60);
+  if (MACH_HOUR === null || shipNow() < MACH_SEEN) machinesReset(Math.min(start, now));
+  MACH_SEEN = shipNow();
+  const list = machineList();
+  for (const m of list) if (!SHIP.machines[m.id]) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
+  if (now > MACH_HOUR) MACH_REV++;
+  for (; MACH_HOUR < now; MACH_HOUR++) for (const m of list) {
+    const s = SHIP.machines[m.id];
+    s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond));
+    s.state = machineState(s.cond);
+  }
+  return SHIP.machines;
+}
+// put a machine right: condition back to `to` (100: as new), serviced now
+function serviceMachine(id, to = 100) {
+  const s = machinesNow()[id]; if (!s) return false;
+  s.cond = Math.max(s.cond, Math.min(100, to)); s.state = machineState(s.cond); s.lastService = shipNow(); MACH_REV++;
+  return true;
+}
+
+// ---- systems and ship health ----
+// how well a machine does its job at a condition: fully while healthy, nearly while worn, badly when faulty,
+// hardly when failing, not at all when broken (a straight line between these points)
+const MACH_WORKS = [[0, 0], [10, 20], [25, 50], [50, 85], [75, 100], [100, 100]];
+function machWorks(c) {
+  for (let i = 1; i < MACH_WORKS.length; i++) { const [a, x] = MACH_WORKS[i - 1], [b, y] = MACH_WORKS[i]; if (c <= b) return x + (y - x) * (c - a) / (b - a); }
+  return 100;
+}
+// a system's own score: how well its machines work, weighted, pulled toward the worst of them
+function systemOwn(sys) {
+  const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === sys), st = SHIP.machines;
+  if (!ms.length) return 100;
+  let a = 0, w = 0, lo = 100;
+  for (const m of ms) { const c = machWorks(st[m.id].cond), k = MACHINE_KINDS[m.kind].w; a += c * k; w += k; lo = Math.min(lo, c); }
+  return .6 * a / w + .4 * lo;
+}
+// every system with the dependencies: power feeds everything; water feeds the garden and the garden the galley
+// (food); waste and laundry need water too. A feeding system only drags the others down once it's below 75. Air's need for filters from the hold comes with supplies (B3).
+function shipSystems() {
+  machinesNow();
+  const own = {}; for (const s of SYSTEMS) own[s] = systemOwn(s);
+  const pf = Math.min(1, .5 + .5 * own.power / 75), wf = Math.min(1, own.water / 75), r = x => Math.round(x * 10) / 10;
+  const out = { power: r(own.power) };
+  for (const s of SYSTEMS) if (s !== 'power' && s !== 'hull') out[s] = own[s] * pf;
+  out.food *= .7 + .3 * wf; out.waste *= .8 + .2 * wf; out.hull = own.hull;
+  for (const s of SYSTEMS) out[s] = r(out[s]);
+  return out;
+}
+function shipHealth(sys = shipSystems()) {
+  let a = 0, w = 0; for (const s of SYSTEMS) { a += sys[s] * SYSTEM_W[s]; w += SYSTEM_W[s]; }
+  return Math.round(a / w * 10) / 10;
+}
+
+// ---- consequences: what a faltering machine does to the people on a deck ----
+// Each kind's effect at full strength (broken); faulty is felt at .35 of it and failing at .7, a worn machine not
+// at all (design doc, "Consequences": minor, noticeable, serious). Several machines of a kind count by their
+// average (one broken washer of four is a quarter of the trouble). Multipliers: restore = how much an action
+// gives back (a shower's hygiene), drain = how fast a need runs down, walk = walking speed, cook = cooking time,
+// lift = ride time. mood = points off a 0-100 mood.
+const MACHINE_FX = {
+  oven:        { cook: .5, restore: { hunger: .15 }, mood: 2, text: 'Meals run late' },
+  range:       { cook: .4, restore: { hunger: .1 }, mood: 2, text: 'Meals run late' },
+  galleyplant: { cook: .25, mood: 2, text: 'The galley is hot and smoky' },
+  washer:      { drain: { hygiene: .3 }, mood: 4, text: 'Uniforms come back grubby' },
+  lift:        { lift: 1, mood: 2, text: 'The lift runs slow' },
+  junction:    { walk: .12, mood: 3, text: 'The lights flicker and dim' },
+  scrubber:    { drain: { energy: .4 }, mood: 6, text: 'The air is stuffy' },
+  airplant:    { drain: { energy: .25 }, mood: 4, text: 'The air is stale everywhere' },
+  fan:         { drain: { energy: .15 }, mood: 2, text: 'The air hardly moves' },
+  heater:      { restore: { energy: .3 }, mood: 5, text: 'Cold cabins' },
+  manifold:    { restore: { hygiene: .2 }, mood: 2, text: 'The water runs lukewarm and the pipes knock' },
+  recycler:    { restore: { hygiene: .6 }, mood: 5, text: 'Showers run weak' },
+  irrigation:  { mood: 2, text: 'The garden droops' },
+};
+const STAGE = { faulty: 'minor', failing: 'noticeable', broken: 'serious' };
+let FX_CACHE = new Map(), FX_REV = -1;
+function shipEffects(deck) {
+  machinesNow();
+  if (FX_REV !== MACH_REV) { FX_CACHE = new Map(); FX_REV = MACH_REV; }
+  if (FX_CACHE.has(deck)) return FX_CACHE.get(deck);
+  const one = () => ({ hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 });
+  const fx = { deck, restore: one(), drain: one(), walk: 1, cook: 1, lift: 1, mood: 0, notes: [] };
+  const groups = new Map();                             // kind -> machines whose effects reach this deck
+  for (const m of machineList()) {
+    const F = MACHINE_FX[m.kind]; if (!F) continue;
+    if (MACHINE_KINDS[m.kind].scope === 'deck' && m.deck !== deck) continue;
+    if (!groups.has(m.kind)) groups.set(m.kind, []); groups.get(m.kind).push(m);
+  }
+  for (const [kind, ms] of groups) {
+    const F = MACHINE_FX[kind], sev = ms.reduce((a, m) => a + MACHINE_SEV[SHIP.machines[m.id].state], 0) / ms.length;
+    if (!sev) continue;
+    for (const k in F.restore || {}) fx.restore[k] *= 1 - F.restore[k] * sev;
+    for (const k in F.drain || {}) fx.drain[k] *= 1 + F.drain[k] * sev;
+    if (F.walk) fx.walk *= 1 - F.walk * sev;
+    if (F.cook) fx.cook *= 1 + F.cook * sev;
+    if (F.lift) fx.lift *= 1 + F.lift * sev;
+    fx.mood -= F.mood * sev;
+    for (const m of ms) { const st = SHIP.machines[m.id].state; if (STAGE[st]) fx.notes.push({ machine: m.id, kind, state: st, stage: STAGE[st], text: F.text }); }
+  }
+  // the ship as a whole: low power dims every deck, and a run-down ship gets everyone down (serious)
+  const sys = shipSystems(), health = shipHealth(sys);
+  if (sys.power < 50) { fx.walk *= 1 - .1 * (1 - sys.power / 50); fx.notes.push({ machine: null, kind: 'power', state: null, stage: 'noticeable', text: 'Power is low; the ship is dim' }); }
+  if (health < 70) fx.mood -= 10 * (70 - health) / 70;
+  fx.mood = Math.max(-30, Math.round(fx.mood * 10) / 10);
+  fx.health = health;
+  FX_CACHE.set(deck, fx);
+  return fx;
+}
+// one machine, for the job board and the device (B2): its definition, kind and state together
+function machineInfo(id) {
+  const m = machineById(id); if (!m) return null;
+  return { ...m, ...MACHINE_KINDS[m.kind], ...machinesNow()[id] };
+}
+
+// ---- saving: the save's ship.machines = { id: [cond, lastService] } and ship.machineHour ----
+SAVE_EXTRA.push(s => {
+  const st = machinesNow(), out = {};
+  for (const id in st) out[id] = [st[id].cond, st[id].lastService];   // in full, so a reload wears on exactly as before
+  s.ship.machines = out; s.ship.machineHour = MACH_HOUR;
+});
+// a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
+// fresh; ids it has that are gone are dropped
+function machinesLoad(s) {
+  const sh = s && s.ship;
+  if (!sh || !sh.machines || typeof sh.machines !== 'object' || !Number.isInteger(sh.machineHour) || sh.machineHour > Math.floor(shipNow() / 60)) return false;
+  machinesReset(sh.machineHour); MACH_SEEN = shipNow();
+  for (const [id, v] of Object.entries(sh.machines)) {
+    if (!SHIP.machines[id] || !Array.isArray(v) || !(v[0] >= 0 && v[0] <= 100)) continue;
+    SHIP.machines[id] = { cond: v[0], state: machineState(v[0]), lastService: Number.isFinite(v[1]) ? v[1] : null };
+  }
+  return true;
+}
+machinesLoad(SAVED);
 
 // =====================================================================
 // 6. CAMERA

@@ -86,6 +86,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.30.1 | Pillar 2, A5a, shared and inert (the Deck 6 architect): **service hatches**: a deck's `service` list names hatches into built utility rooms; `hatchPassable(edgeKey, who)` is true there for the player and Works crew (`who.dept` or `who.p.dept` 'works'), false for everyone else and every other hatch. `edgeBlocks`, `edgeOpen`, `findPath`, `innerBlocks` and `collide` take an optional `who` (the player's walker passes itself); without it nothing changes. Service hatches open (a little slower) for the player, have no locked-door tap, and open for crew whose rooms are behind them. **`still: true` floors** draw no random numbers, like the lift. **deck_check:** rooms and items checked as the player walks; work:works places reachable through service hatches; `machines` checked (unique ids, `at` in its room, a walkable panel tile with a work:works place). No deck uses any of it yet: cadet_test identical (renderer noise only), all six decks pixel-identical with crew hidden and crew door-opening off, deck_check output unchanged, day_check OK. |
 | 0.26.1 | Pillar 2, A1 turn 1: every room in use (the sim engineer, from 0.25.2). New activities: toilet visits (morning, a break mid-shift, now and then in leisure, before bed) with hands at a basin; a tea break for about a third of the crew on any work day (the habit always); shopping at the crew store (browse a `shop` place, then pay at a till, any place with `anim: 'pay'`, once one exists); a minute by the lift before a ride (`lift-wait`); Deck 1's and Deck 2's lounges for officers and Deck 2's staff; benches on Decks 2 and 4; Works crew wash up after the shift; the gym before or after dinner. Stand-ins: each station no one on the day shift has gets someone from its department each day (Deck 1's survey and Works stations, Deck 5's Watch post). Needs on paper (`crewNeeds`, `needsEst`) steer the gym, calls home and resting. Activities carry `anim` (place, or default by type) into the plans and to the crowd, once the crowd lists the pose in `CROWD_ANIMS`. The galley rota hook (`galleyShift`, section 16) with split shifts and staff meals. `roomsInUse`, and day_check's rooms-in-use and needs summaries. 54 of 57 place types used over a week (was 37). With crew off, cadet_test ALL IDENTICAL to 0.25.2; deck_check OK; day_check days 1 and 7 OK (peak 413). |
 | 0.32.1 | Pillar 2, A5c (the command architect): activities on Deck 2's places (plans/pillar2-plan.md, "Activities on places"). `anim: 'read'` on bedroom desk chairs and armchairs, the Captain's desk, the chart table's stools and the reading seats; `'talk'` on the comms desks, the Captain's table and the observatory beanbags; `'drink'` on the Envoy's tea cushions. The chart room's and observatory's public seats (window seats, armchair, beanbags: 8) are now `common-room`, so free time reaches them: the quiet-corner habit looks for `common-room` on Deck 2 and found none before. Ids, tiles and counts unchanged (159). Data only: every deck pixel-identical with crew off. Crew plans shift on purpose (55 of 74 over days 1-3, as seats are shared out differently), so cadet_test's crew shots differ; its crew-off shot is noise only. deck_check and day_check (day 1) OK. |
+| 0.33.0 | Pillar 2 B1 (the systems engineer, on `claude/ship-systems` from 0.25.2): section 17, machines and wear, data and logic only. A registry of 35 stand-in machines in 22 kinds (`STUB_MACHINES`, replaced deck by deck by `DECKS[n].machines`), condition and the five states, wear by the hour from the schedules (meals, laundry and uniforms, lift rides, people per deck, washes, time), the nine systems with their dependencies, ship health, and `shipEffects(deck)` for needs, mood, walking, cooking and the lift. Saved through a new `SAVE_EXTRA` hook in section 13. New `machine_check.py`. cadet_test ALL IDENTICAL against 0.25.2; deck_check OK; day_check day 1 OK (draw-call peaks unchanged, 415 on Deck 3); machine_check OK. See "Machines and wear". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -240,6 +241,66 @@ Pillar 2, workstream A1 (plans/pillar2-plan.md).
     3. A meal window covered by work: a staff meal at the station (tag `staff`) from 30 to 10 minutes before the window ends.
     4. After the last block, the usual evening.
     `schedFrame` pulls the previous bedtime earlier for an early start. Tested with a stand-in rota (Brennan 04:30–08:10 and 15:30–20:30, hands 05:30–08:30 and 16:00–20:30): 28 days of dayReport clean.
+## Machines and wear (section 17, the systems engineer, 0.33.x)
+Pillar 2, Half B (`plans/pillar2-plan.md`, "Machines and jobs"). Section 17 sits right after section 14 (and after 15 and 16 once they're in). B1 is data and logic only: nothing in it draws anything or calls `R()`, and nothing in it runs unless something asks (a game with `?nosave` never touches it), so cadet_test is ALL IDENTICAL.
+- **The registry.** `machineList()` gives every machine: `{ id, kind, at, room, face, panel, deck, seed }`, from `DECKS[n].machines` (the architects add these with the utility rooms, A5). A deck with no `machines` of its own uses the stand-ins in `STUB_MACHINES` (35 machines, named in the plan's scheme: `4-scrubber-1`, `3-oven-1`, `5-lift-1`...), whose `at` and `panel` are the room's middle tile (the lift's is the lift). As soon as a deck has any real machines, all of its stand-ins drop out; a save's ids that are gone are dropped, new ids start fresh.
+- **Kinds (`MACHINE_KINDS`).** 22 kinds: `oven`, `range`, `galleyplant`, `washer`, `lift`, `junction` (a deck's light relays, in its utility closet), `scrubber`, `heater`, `recycler`, `irrigation`, `airplant`, `fan`, `manifold`, `gasplant`, `battery`, `powerjunction`, `relay`, `array`, `doorgear`, `hullseal`, `reactor`, `coil`. Each has its system, `life` (days from 100 to 0 at normal use, never serviced), `time` (the share of its wear that comes with time; the rest comes with use), `use` (what wears it) and `per` (a normal day's worth of that), `scope` (where its effects are felt: its own deck, or the whole ship), `w` (its weight in its system), `tier` (who may work on it) and `part` (what a repair needs, for B3). An architect adding a machine of a new kind tells the systems engineer, who adds the kind.
+- **State.** `SHIP.machines[id] = { cond, state, lastService }`. `cond` runs 0–100; `machineState(cond)`: healthy 75+, worn 50+, faulty 25+, failing 10+, broken under 10. `lastService` is absolute ship minutes, or null. Always read through `machinesNow()`, which wears everything up to the last whole ship hour first.
+- **Wear, on paper.** One ship hour at a time: `life`'s share of the hour, split between time and use, up to half as fast again as the machine wears down, times a little variety from `schedU(machine seed, hour, 7)`. Use comes from the schedules (`machUseDay(d)`, from `shipDay(d)`, cached for a few days):
+    - ovens and the range: meals that hour and the next (cooking ahead); the galley plant: meals;
+    - washers: laundry visits, plus the uniforms of everyone who worked the day before, washed 06:00–10:00 (about six to a load);
+    - the lift: every ride (`commute`) on the ship;
+    - scrubbers, heaters, light relays, the gas plant, the bridge relays and the air plant: person-hours on their deck, against an average day (`machNorm()`, days 1–7);
+    - the recycler: every wash; irrigation: time in the garden;
+    - the fan, manifold, battery, power junctions, array, door gear, hull seals, reactor and coils: time only.
+  Because every hour's wear depends only on the hour, the schedules and the condition, the result is the same whether time moves minute by minute, by odd jumps or in one leap (machine_check proves it). Wear numbers today (no repairs, from a fresh ship): ovens faulty at about day 3½ and broken at 6½; scrubbers 3 and 6½; the reactor still worn at day 14.
+- **A fresh ship** starts every machine at 70–100 (`machFresh`, from its seed), so a few are already worn on day 1. The clock going back (New game) starts the machines afresh.
+- **Servicing.** `serviceMachine(id, to = 100)` puts a machine back to `to` and sets `lastService`. B2's jobs call it; so does machine_check's ideal crew.
+- **Systems (`shipSystems()`).** Air, water, power, heat, food, waste (and laundry), hull, comms (and sensors), propulsion, 0–100 each. A machine counts by how well it works (`machWorks`: fully while healthy, 85% at the worn/faulty line, 50% at faulty/failing, 20% at failing/broken, 0 at 0), weighted by `w` and pulled toward the system's worst machine (`.6 × average + .4 × worst`). Dependencies, only once the feeding system is below 75: power feeds everything but the hull (down to half); water feeds food (the garden feeds the galley) and waste. The lift belongs to no system. `shipHealth()` blends the systems (air and power 3, water, heat, food and hull 2, the rest 1).
+- **Consequences (`shipEffects(deck)`).** What the machines do to people on a deck now, as the design doc's stages (`MACHINE_FX`: a faulty machine counts .35 of its full effect, failing .7, broken all of it; worn nothing; several of a kind count by their average):
+  ```js
+  shipEffects(deck) -> {
+    restore: { hunger, energy, hygiene, fitness, social },   // x what an action gives back (1 = normal; a weak shower 0.4)
+    drain:   { hunger, energy, hygiene, fitness, social },   // x how fast a need runs down (1 = normal)
+    walk,      // x walking speed
+    cook,      // x cooking time (the galley engineer)
+    lift,      // x lift ride time
+    mood,      // points off a 0-100 mood, 0 to -30
+    health,    // shipHealth()
+    notes: [{ machine, kind, state, stage: 'minor'|'noticeable'|'serious', text }],   // "Showers run weak"
+  }
+  ```
+  The table: the recycler weakens showers ship-wide (hygiene restore down to ×.4, mood −5); Deck 4's scrubbers make the air stuffy (energy drains up to ×1.4, mood −6); the air plant and fan do the same ship-wide, more gently; the heating plant gives cold cabins on Deck 4 (sleep restores energy down to ×.7, mood −5); washers send uniforms back grubby (hygiene drains up to ×1.3, mood −4); ovens, the range and the galley plant slow cooking (up to ×2.6 together) and give smaller meals (hunger restore down to ×.77); a deck's light relays dim it (walking down to ×.88); the lift runs slow (rides up to ×2). On top: power under 50 slows walking everywhere, and a ship under 70 health takes up to 10 more off everyone's mood. Cached until anything changes (`MACH_REV`).
+- **`machineInfo(id)`** gives a machine's definition, kind and state together, for the job board and the device.
+- **Saving.** Section 13 now has `SAVE_EXTRA`: functions that add their part to the save just before it's written (one line in `saveGame`, inert while nothing is registered). Section 17's adds `ship.machines = { id: [cond, lastService] }` (cond in full, so a reload wears on exactly as before) and `ship.machineHour`. `machinesLoad(SAVED)` reads it back at load; a save without machines (any save before 0.33.0), or with nonsense, means fresh machines worn from the start. It works in `v: 1` saves and carries over unchanged when the player engineer bumps the save to `v: 2`.
+- **machine_check.py.** `python3 machine_check.py BUILD.html [DAYS]` (DAYS defaults to 14; about 15 seconds). With `?nosave`:
+    1. A while of play leaves the machines untouched.
+    2. No repairs: conditions only fall; nothing faulty in the first two days; something broken by day 14 but not the slow kinds; ship health falls but stays above 0; every deck's effects stay in range. It prints ship health by day, the median day each kind turns faulty, failing and broken, and Deck 4's and Deck 3's effects at the end.
+    3. The same wear every way: twice, in one jump, at odd minutes, with the schedule caches cleared.
+    4. An ideal crew (the day shift services the 3 most worn machines that aren't healthy, every hour 08:00–17:00): nothing gets past worn and ship health stays at 90 or more.
+    5. The save hook and `machinesLoad` round trip, and junk saves are refused.
+- **machine_check numbers (0.33.0, stand-ins):** no repairs, ship health by day 98 96 91 85 76 66 55 46 39 33 27 24 21 19; at day 14, 21 of 35 broken, the reactor and hull seals still worn. Ideal crew: 106 jobs in 14 days (about 7½ a day), ship health 99–100.
+### Still to come in Half B (designed, not built)
+**B2, the job list** (after the lead's word, once Half A lands).
+- **Jobs from wear.** `JOBS: [{ id, machine, kind, urgency, posted, claimedBy, parts, status }]`, saved. Each machine has at most one open job, updated as it changes state:
+    - worn: a `service` job, low urgency. It isn't posted on the board, only found by someone who inspects the machine (on rounds, or the player's device later): the design's "sharp-eyed tech";
+    - faulty: a `repair` job, posted;
+    - failing: the same job, marked urgent;
+    - broken: an `overhaul`, longer and with more parts (`parts` from the kind's `part`: one for a service, two for a repair, three for an overhaul).
+  Job ids from the machine and the hour posted, so the same ship posts the same jobs.
+- **Crew claiming jobs, on paper.** Works crew on shift (day and night), by rank and tier, claim the most urgent jobs they're allowed. A claim turns part of their work block into a job: to Deck 5 storage for the parts, the lift, the machine's `panel` place, a while there (by kind and state), back to the desk. It's worked out an hour at a time, after the schedules, as an overlay on `whereIs` (a small hook the sim engineer agrees), so the plans themselves stay as they are and the crowd just walks people to the job. When the job finishes, `serviceMachine`. Engine crew take propulsion and reactor jobs; nobody else takes jobs.
+- **Jobs the player leaves** get done by the crew, more slowly (they claim them only after a delay, longer on a busy day), and jobs nobody claims get worse because the machine keeps wearing: the ship never dies, it gets shabby.
+- **Panel places** need a way to be kept out of the work stations: a `work:works` place at a panel would otherwise be handed out as a desk by `schedDesks`. Proposed: panel places carry `machine: id`, and `schedDesks` skips any place with a `machine` (a one-line change in section 14, for the sim engineer).
+- **The Works job board** (Deck 5) and the device's jobs section (`device.addSection('jobs', ...)`, section 15) show the posted jobs. The player's loop: notice, inspect at the panel (see the part), fetch (carry two), hold to repair, done. Repairs by the player use the same `serviceMachine`.
+- **Visible faults:** the stage notes from `shipEffects` drive what you see (a flickering lamp, a dripping pipe, weak shower spray, dim garden lights). Kept cheap: a few `PULSES`-style flickers and emissive changes on existing kit, nothing that costs draw calls.
+**B3, supplies and carts.**
+- `SHIP.stores = { [part]: n }` in Deck 5's main storage, saved. A repair takes its parts from storage; an empty shelf blocks it until a delivery, unless the part is made in the machine shop (slower). Filters for the scrubbers and the air plant are the design's example.
+- Deliveries come by shuttle to the cargo hold on a weekly day; restocking is a job (`restock`): a hover cart from the hold up the main lift to wherever it's needed. Food for the cold store is the galley engineer's side (`SHIP.galley.cold.meals`): when it runs low, a restock job carries meal units from the hold to Deck 3.
+- Carts charge in the Cart bay; a cart in use is a crew member walking with it (a prop on the crowd).
+**Open questions for the lead.**
+- Panel places and `schedDesks` (above).
+- The lift belongs to no system yet. Should doors and the lift be a system of their own ("transport"), or count under power?
+- Machines on Deck 3 and Deck 6 with no light relays: should every deck have a utility closet's worth of `junction`?
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 
@@ -597,6 +658,8 @@ They checked:
 
 **day_check.py** (0.22.2): `CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py BUILD.html [DAY]` fast-forwards one ship day with `?nosave&debug` (about 4 minutes) and checks the plan's rules: everyone sleeps 6+ hours in their own bed, eats twice and works their shift; no double-booked places, no gaps; the same plans twice; on every deck a whole day of crew logic with nobody stuck over 10 ship minutes, nobody in someone else's bed or place, nobody missing; draw calls peak under 450; Deck 4 run twice comes out identical. Run it with cadet_test and deck_check whenever crew, schedules, places or the roster change.
 
+**machine_check.py** (0.33.0): `CADET_CHROME=/opt/pw-browsers/chromium python3 machine_check.py BUILD.html [DAYS]` runs the machines on paper for 14 ship days, with no repairs and with an ideal crew, and checks the wear is sensible and the same every way (about 15 seconds). See "Machines and wear". Run it with the others whenever machines, schedules or places change.
+
 **deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
 
 
@@ -750,6 +813,7 @@ The script is split into numbered sections:
 10. Walkers (the starting deck is built here)
 11. Interaction and UI: taps, `goToDeck`, the lift (`enterLift`, panel, `startRide`, `updateRide`)
 12. Main loop: rides, doors, `SPINS`, steam, cutaway and fades
+17. Machines and jobs (after 14): the machine registry, wear, systems, ship health, `shipEffects`; later the job list and supplies
 
 The character spec, uniforms and badges are unchanged; see section 8 and design-doc.md ("Setting & names").
 
