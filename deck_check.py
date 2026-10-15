@@ -7,7 +7,9 @@
 #   and, for decks whose definition has `places` (Pillar 1, plans/pillar1-plan.md "Places"): every place's id is unique
 #   ship-wide, its type, pose and face come from the agreed lists, its room matches the map, and crew can reach it from
 #   the lift (its own tile, or for a seat or bed, a walk-to tile beside it). Crew have keys, so 'closed' doors count as
-#   passable for this; hatches, walls and glass don't. Counts by type are printed for each deck.
+#   passable for this; hatches, walls and glass don't. A place may name its own walk-to tile (`walk: [c, r]`): then that
+#   tile must be walkable, in the same room, reachable from the lift, and `at` itself or within 2.5 m of the spot
+#   (`xy: [x, z]` in tile units if given, else the tile centre); it replaces the next-door rule. Counts by type are printed.
 # Then rides 4 -> n -> 4 three times and checks Deck 4's memory comes back to the same counts.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 deck_check.py BUILD.html
@@ -42,7 +44,7 @@ CHECK = """(() => {
 PLACES = r"""(() => {
   const ps = deckDef.places; if (!ps) return null;
   const TYPES = ['bed', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
-    'music', 'bench', 'common-room', 'laundry', 'lift-wait'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
+    'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
   const pass = (i, j, i2, j2) => { const e = EDGES.get(i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`); return !e || !edgeBlocks(e) || e.type === 'closed'; };
   const start = nearestOpen(LIFT_AT[0], LIFT_AT[1], null), seen = new Set([K(start)]), q = [start];
   while (q.length) { const [i, j] = q.shift(); for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = [i + di, j + dj];
@@ -56,10 +58,19 @@ PLACES = r"""(() => {
     if (!FACES.includes(p.face)) why.push('face ' + p.face);
     const [c, r] = p.at || [];
     if (roomAt(c, r) !== p.room) why.push('room ' + p.room + ' but the map says ' + roomAt(c, r));
-    let ok = seen.has(K([c, r]));
-    if (!ok && (p.pose === 'sit' || p.pose === 'lie' || !free(c, r)))      // a seat or bed: reached from the tile beside it
-      ok = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => seen.has(K([c + di, r + dj])) && pass(c, r, c + di, r + dj));
-    if (!ok) why.push('unreachable');
+    if (p.xy && !(p.xy.length === 2 && p.xy.every(Number.isFinite))) why.push('xy ' + p.xy);
+    if (p.walk) {                                                            // its own walk-to tile
+      const [wc, wr] = p.walk, sp = p.xy || [c + .5, r + .5];
+      if (!free(wc, wr)) why.push('walk ' + wc + ',' + wr + ' not walkable');
+      if (roomAt(wc, wr) !== p.room) why.push('walk in room ' + roomAt(wc, wr));
+      if (!seen.has(K([wc, wr]))) why.push('walk unreachable');
+      if (!(wc === c && wr === r) && Math.hypot(wc + .5 - sp[0], wr + .5 - sp[1]) > 2.5) why.push('walk too far from the spot');
+    } else {
+      let ok = seen.has(K([c, r]));
+      if (!ok && (p.pose === 'sit' || p.pose === 'lie' || !free(c, r)))    // a seat or bed: reached from the tile beside it
+        ok = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => seen.has(K([c + di, r + dj])) && pass(c, r, c + di, r + dj));
+      if (!ok) why.push('unreachable');
+    }
     if (why.length) bad.push(p.id + ' @' + c + ',' + r + ': ' + why.join(', '));
     counts[p.type] = (counts[p.type] || 0) + 1;
   }
