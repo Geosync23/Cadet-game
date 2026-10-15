@@ -124,7 +124,7 @@ All 75 crew have a rank and a bed, and where you sleep shows where you stand: se
 | Officer | 16 | Single cabins, Deck 4 (24 built: 16 officers, 6 guest cabins, 2 spare) |
 | Junior Officer | 47, the player included | Bunks, Deck 4 (8 rooms × 6 = 48 berths, 1 empty). The bunk rooms as built (0.14.0) hold 4 each; they are being enlarged to fit three bunk beds (6 berths) each, and guest cabins may be given up for the space if needed (agreed 2026-10-15) |
 
-**Deck 2's senior quarters** have twelve crew bedrooms and three visitor rooms for VIPs such as the Envoy. Six of the twelve are the Captain, the XO and the four Chiefs. The other six are senior officers: a Second Officer, a Senior Helm Officer, a Ship's Counsellor, a Comms Chief, a Deputy Survey Chief and a Senior Watch Officer. Their names and personalities are still to be written.
+**Deck 2's senior quarters** have twelve crew bedrooms and three visitor rooms for VIPs such as the Envoy. Six of the twelve are the Captain, the XO and the four Chiefs. The other six are the senior officers, with provisional names: Second Officer Anja Kowalczyk, Senior Helm Officer Dev Raman, Comms Chief Lucia Ferreira, Ship's Counsellor Matthias Oduya, Senior Watch Officer Kofi Mensah and Deputy Survey Chief Hana Mori.
 
 **Guest cabins on Deck 4.** With six officers moved up to Deck 2, six of the officers' corridor's 24 cabins are guest cabins and two stay spare. Guests come and go: visiting specialists, passengers being carried somewhere, crew from other ships in transit, and people who arrive with events (a scientist for the nebula, a delegation's staff, survivors from a salvage job). The corridor always has a few new faces and new things to talk about, which feeds the social system and gossip. Guests aren't part of the 75 crew.
 
@@ -146,7 +146,8 @@ All 75 crew have a rank and a bed, and where you sleep shows where you stand: se
   - Chef Auda Brennan, who runs the galley and mess hall
   - Rina Deshi, who works in the infirmary
   - Envoy Saruth (Veyli), who has the guest cabin on Deck 2
-  - the Works Chief, your boss and the one who certifies you, still to be named and designed. They live on Deck 2 and work from a glass office on Deck 5.
+  - Chief Ines Calder (provisional name), Head of Works: your boss and the one who certifies you. She lives on Deck 2 and works from the glass office on Deck 5.
+  - Dr. Priya Nandakumar (provisional name), Head of Infirmary.
 - **About 65 generated crew,** with names, looks, jobs and personalities. Each comes from a template: role, home deck, shift, habits, a couple of personality traits, and a few life details for gossip.
 
 Pell works on Deck 5 for now. When shifts move crew between decks, Pell will sleep in Bunk 2 and work on Deck 5.
@@ -567,7 +568,8 @@ Done so far:
 
 **The game:**
 
-- Who is the Works Chief? Name, personality and how they judge your work. They live on Deck 2 and work from the glass office on Deck 5. Needed before Pillar 2, because they run the job board and certify the player.
+- The Works Chief is provisionally Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
+- Are the provisional names right (the Works Chief, the Infirmary Chief and the six senior officers)?
 - Who meets you off the shuttle, and which milestone builds the arrival?
 - Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
@@ -595,6 +597,7 @@ Done so far:
 - The player is one of the 75 crew: one of the 47 juniors, so 46 others plus you share the 48 berths, with one empty (agreed 2026-10-15).
 - The junior bunk rooms get bigger so each fits three ordinary bunk beds (6 berths), rather than triple bunks or fewer juniors; some guest cabins can be released to make room (agreed 2026-10-15).
 - Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15).
-- The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15).
+- The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15). Chosen: Works Chief Ines Calder, Infirmary Chief Priya Nandakumar, and the six senior officers named in "Crew and rooms" (build 0.16.1).
+- Envoy Saruth is a guest, not one of the 75 crew.
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
 - Deck 4's guest cabins are the six nearest the lift: 4-01, 4-02, 4-03 and 4-04 (the first column, two with windows) and the inner pair 4-07 and 4-08, so guests don't walk the corridor and officers keep 10 of the 12 window cabins. The two spares are 4-23 and 4-24, the inner pair at the music-room end. Guest cabins never use bunks (built in 0.14.0).
