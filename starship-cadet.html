@@ -7319,6 +7319,7 @@ function playerUpdate(dt, t) {
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
+  if (SHIP.player.carry.length || player.holding) player.holding = SHIP.player.carry.length > 0;   // carrying parts: the crate prop (Walker.update)
   player.maxV = PLAYER_V0 * playerSpeed();
   for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
     const slow = n[k] < SLOW_BELOW;
@@ -9884,7 +9885,8 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
+    if (this.holding !== undefined) animateActivity(this, this.holding ? 'stand+carry' : 'stand', dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: parts in hand (8b's '+carry')
+    else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
     this.active = on; this.obj.visible = on; this.stop();
