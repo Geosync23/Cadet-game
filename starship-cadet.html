@@ -62,13 +62,18 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <div class="decks" id="liftList"></div>
   <button class="stay" id="liftStay">Stay here</button>
 </div>
+<div class="lift" id="sleepAsk" role="dialog" aria-labelledby="sleepT" hidden>
+  <h2 id="sleepT">Your bunk</h2><p id="sleepX">Sleep until 06:00?</p>
+  <div class="decks"><button class="deckbtn" id="sleepYes">Sleep until 06:00</button></div>
+  <button class="stay" id="sleepNo">Not yet</button>
+</div>
 <div id="fade"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.21.1
+   STARSHIP CADET: CSV Wren                            build 0.21.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4908,7 +4913,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.21.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.21.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5008,6 +5013,30 @@ newBtn.onclick = () => {
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
+// Going to sleep: tap your own bunk (PLAYER_BED, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
+// The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
+const PLAYER_BED = '4-B1-2', WAKE_AT = 6 * 60;
+const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
+const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
+function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
+  const bed = (DECKS[4].places || []).find(p => p.id === PLAYER_BED) || { at: [7, 1] };
+  if (deckDef.num !== deckOf(PLAYER_BED) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
+  document.getElementById('sleepX').textContent = clockText() + '. Sleep until ' + hhmm(WAKE_AT) + '?';
+  sleepEl.hidden = false; toastEl.classList.remove('show'); document.getElementById('sleepYes').focus();
+  return true;
+}
+document.getElementById('sleepNo').onclick = () => { sleepEl.hidden = true; };
+document.getElementById('sleepYes').onclick = () => {
+  sleepEl.hidden = true; if (sleeping || ride) return;
+  sleeping = true; fadeEl.style.transition = 'opacity .8s'; fadeEl.style.opacity = 1;
+  setTimeout(() => {
+    sleepUntil(WAKE_AT); nightT = nightAt();
+    fadeEl.style.opacity = 0;
+    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; toast('Good morning', clockText() + '. You slept until ' + hhmm(WAKE_AT) + '.'); }, 850);
+  }, 900);
+};
+addEventListener('keydown', e => { if (e.key === 'Escape' && !sleepEl.hidden) sleepEl.hidden = true; });
 // the Night/Day button is a debug control now: Night skips to 21:40, Day sleeps until 07:40
 function debugSkip() {
   if (nightAt() > .5) sleepUntil(7 * 60 + 40);
@@ -5096,20 +5125,29 @@ function stubPlaces(n) {
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = (typeof ROSTER !== 'undefined' ? ROSTER : STUB_ROSTER).concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []);
+  const people = (typeof ROSTER !== 'undefined' ? ROSTER : STUB_ROSTER).concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : [])
+    .filter(p => !p.player && p.bed !== PLAYER_BED);     // you live your own day
   const places = [];
   for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || stubPlaces(n))) places.push({ ...p, deck: n });
   const byId = new Map(places.map(p => [p.id, p]));
-  // a place named after a bed ('4-05-wash') belongs to whoever sleeps there
+  // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
+  // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
+  // it's shared by the people who sleep there. owner: placeId -> [bed ids]
   const beds = new Set(people.map(p => p.bed).concat(places.filter(p => p.type === 'bed').map(p => p.id)));
+  const roomBeds = new Map();
+  for (const p of places) if (p.type === 'bed' && p.room) { const k = p.deck + '|' + p.room; if (!roomBeds.has(k)) roomBeds.set(k, []); roomBeds.get(k).push(p.id); }
   const owner = new Map();
-  for (const p of places) for (let i = p.id.lastIndexOf('-'); i > 0; i = p.id.lastIndexOf('-', i - 1)) if (beds.has(p.id.slice(0, i))) { owner.set(p.id, p.id.slice(0, i)); break; }
+  for (const p of places) {
+    if (p.type === 'bed') continue;
+    for (let i = p.id.lastIndexOf('-'); i > 0; i = p.id.lastIndexOf('-', i - 1)) if (beds.has(p.id.slice(0, i))) { owner.set(p.id, [p.id.slice(0, i)]); break; }
+    if (!owner.has(p.id) && p.room && roomBeds.has(p.deck + '|' + p.room)) owner.set(p.id, roomBeds.get(p.deck + '|' + p.room));
+  }
   const nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
   const shared = new Map();                              // 'deck|type' -> the places anyone may use, in id order
   for (const p of places) if (!owner.has(p.id) && p.type !== 'bed') { const k = p.deck + '|' + p.type; if (!shared.has(k)) shared.set(k, []); shared.get(k).push(p); }
   for (const l of shared.values()) l.sort(nat);
   const own = new Map();                                 // bed -> its own places
-  for (const [id, b] of owner) { if (!own.has(b)) own.set(b, []); own.get(b).push(byId.get(id)); }
+  for (const [id, bs] of owner) for (const b of bs) { if (!own.has(b)) own.set(b, []); own.get(b).push(byId.get(id)); }
   SCHED_DATA = { people, places, byId, owner, shared, own, desks: schedDesks(people, shared) };
   return SCHED_DATA;
 }
@@ -5176,8 +5214,9 @@ function schedBuild(p, d, occ, S) {
   const linger = to => {
     if (to <= t) return;
     const l = segs[segs.length - 1];
-    if (l && l.act !== 'commute' && l.act !== 'wash' && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || l.placeId === p.bed || S.owner.get(l.placeId) === p.bed || isFree(l.placeId, t, to))) {
-      if (l.placeId && l.placeId !== p.bed && S.owner.get(l.placeId) !== p.bed) hold(l.placeId, t, to);
+    const solo = id => id === p.bed || (S.owner.get(id) || []).length === 1;   // yours alone: nobody else can want it
+    if (l && l.act !== 'commute' && l.act !== 'wash' && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || solo(l.placeId) || isFree(l.placeId, t, to))) {
+      if (l.placeId && !solo(l.placeId)) hold(l.placeId, t, to);
       l.to = to; t = to;
     } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
   };
@@ -5194,7 +5233,7 @@ function schedBuild(p, d, occ, S) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
         if (end - s < (o.min || Math.min(dur, 10))) break;
         for (let i = 0; i < pool.length; i++) {
-          const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0;
+          const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (!mine && !isFree(pl.id, s, end)) continue;
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
@@ -6044,7 +6083,7 @@ function tap(cx, cy) {
   if (ud.item && ud.item.see) { toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to
   if (ud.item) {
     const it = ud.item; it.hit.getWorldPosition(_wp);
-    approach(_wp.clone(), it.front, it.depth, () => toast(it.t, it.x));
+    approach(_wp.clone(), it.front, it.depth, () => { if (!offerSleep(_wp)) toast(it.t, it.x); });   // offerSleep: section 13
     return;
   }
   if (ud.liftDoor) { enterLift(); return; }
