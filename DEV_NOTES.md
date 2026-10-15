@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.14.0 (about 5,800 lines)
+## Current build: 0.23.0 (about 7,300 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -54,8 +54,20 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.13.0 | The user's review fixes in one build: Deck 6 (0.11.0) and Deck 1 scaled up (0.12.1), merged by the lead on `claude/ship-integration`. |
 | 0.14.0 | Deck 4 guest cabins (the Deck 6 architect, from 0.13.0). Six senior officers moved up to Deck 2, so the officers' corridor's 24 cabins are now 16 officers', 6 guest cabins and 2 spare. Guests: the lift-end column A, B, C, D (4-02, 4-04, 4-03, 4-01; two window, two inner) and the inner pair F, G (4-08, 4-07), so guests don't walk the corridor's length and officers keep 10 of the 12 window cabins. Spares: V and W (4-24, 4-23), the inner pair at the music-room end, which were already the spares. `DECKS[4].guests` (door tap text per cabin) and `spares`; room names, door plates ("Guest 4-02", "Spare 4-24") and `lockedRoom` follow them. `officerCabin` takes `guest` (fresh linen folded on the bed, a `travelCase` at its foot that doesn't block) and `spare` (`bedSingle` `stripped`, `deskSmall` `bare` with the screen off, no poster); materials `GUEST`, no `R()`. Walking tiles, collisions, paths, spots and crew routes are identical to 0.13.0; only those eight cabins' items, door texts and the two spares' posters differ (Deck 4 harness views differ only by renderer noise). Decks 1, 2, 3, 5 and 6 pixel-identical. plans/deck4-plan.html labels them G and S. |
 | 0.15.1 | Pillar 1, workstream 1: ship time and saving (the sim engineer, branch `claude/sim-engineer`). New section 13. The ship day lasts 30 real minutes (`SHIP_RATE` 0.8 ship minutes a second); the game starts on Day 1, a Monday, at 06:00, in Bunk 1 (the tile is still `PLAYER_SPEC.start`, [7, 3]). The light follows the clock: night 21:00–06:00, an hour of dusk and of dawn centred on them. The HUD reads "Day 1, Monday 06:00". The game saves itself (localStorage `starship-cadet-save`) every ship hour, on deck change and when the page is hidden or closed, and resumes on the same deck, tile and facing at the same time. New game button (tap twice). The Night/Day button is a debug control, shown only with `?debug`: Night skips to 21:40, Day sleeps until 07:40. `?nosave` turns saving off; cadet_test.py loads with `?nosave&debug`. A test copy pinning the old clock (1 minute a second from 07:40, the old HUD text, no New game button) is ALL IDENTICAL to 0.14.0 with 0 pixels different; unpinned, only screenshots differ (state, paths, collisions, crew identical). Decks 1, 2, 3, 5, 6 pixel-identical day and night. |
+| 0.16.1 | The crew roster, Pillar 1 workstream 2 (the crew designer, branch `claude/deck-plans-1-2-6`; builds 0.16.x). Section 9 gains `ROSTER` (all 75 crew), `ROSTER_GUESTS` (Envoy Saruth), the shared `HABITS` vocabulary and `rosterSpec(p)`, all fixed data written by `plans/crew-roster-gen.py`; new readable page `plans/crew-roster.html`. `CREW` and the walkers are untouched, so nothing in play changes. Assumes 6 berths per bunk room (see "The crew roster"). |
+| 0.16.2 | The player is one of the 75 (the user's decision): `ROSTER` now holds the other 74 and `ROSTER_PLAYER` holds yours (a Works junior, bed `4-B1-2`, days off Sat and Sun). The last generated Works technician (Kai Lachance) made way; Tamsin Haddad moved from `4-B1-6` to his berth `4-B6-2`, so `4-B1-6` is the spare berth in your room. Nobody else changed. Bunk rooms: 6 berths each, as the user chose (three ordinary bunk beds per room, being built by workstream 3a). |
+| 0.17.0 | Pillar 1, workstream 3a (the Deck 6 architect): `places` on Decks 4, 5 and 6, data only (nothing draws them). Deck 4: 122 (56 beds: 32 bunk berths `4-B<room>-<berth>` and 24 cabin beds `4-01`..`4-24`; 28 showers, counting each cabin's wash pod; 2 toilets, 4 basins, 6 laundry, 12 common-room, 6 music, 4 bench, 4 lift-wait). Deck 5: 31 (20 work stations, 3 tea-corner seats, the washroom, 4 lift-wait). Deck 6: 15 (7 `work:engine`, 4 benches, 4 lift-wait). `deck_check.py` checks places (255aa9f). Deck 4 ALL IDENTICAL; Decks 1, 2, 3, 5 and 6 pixel-identical. |
+| 0.17.1 | Deck 4 Sketch 3, agreed with the user: the junior wing's bunk rooms are 5 × 4 with three bunk beds each (48 berths, was 32). Scrubbers 3 wide, utility door moved to `h,18,16`, plates and doors moved to match. Places redone: 138 (72 beds: berths `4-B1-1`..`4-B8-6` and the 24 cabins). One small shared line: a deck can give `floorSeeds` so its floor painter picks up the old random numbers at one column (Deck 4: column 21), and the officers' wing floor and everything built after the floor stay exactly as in 0.17.0. Deck 4 changes only in the junior wing (proof in the section below); Decks 1, 2, 3, 5 and 6 pixel-identical; deck_check OK. |
+| 0.18.1 | Pillar 1, workstream 3b: `places` on Decks 1 and 3 (data only; nothing draws them). Deck 1: 30 places, Deck 3: 173. Each has the plan's `id`, `type`, `at`, `face`, `pose` and `room`, plus `xy` (the exact spot) and `walk` (the tile to walk to first). Every deck pixel-identical, Deck 4 ALL IDENTICAL against 0.14.0. |
+| 0.18.2 | Places pass the official `deck_check` places check (from `claude/deck-architect`): 14 Deck 3 places held back until it accepts them (8 slide-in seats two tiles from the aisle, 6 store browsing spots of type `shop`). Deck 1: 30, Deck 3: 159. Every deck pixel-identical, Deck 4 ALL IDENTICAL. |
+| 0.18.3 | The 14 held-back Deck 3 places restored (the lead made `xy`, `walk` and `shop` official, and `deck_check` now applies the walk rule), plus the Captain's desk chair in the ready room (`1-ready-1`, `work:command`: its door is a closed door, which crew open). Deck 1: 31 places, Deck 3: 173. Every deck pixel-identical, Deck 4 ALL IDENTICAL. |
+| 0.19.1 | Pillar 1, workstream 3c (the command architect, branch `claude/deck2-command`): `DECKS[2].places`, 162 places on Deck 2's furniture (plans/pillar1-plan.md, "Places"): 15 beds (`2-<room letter>`), a shower, basin and toilet in every bedroom's en-suite, the public washroom, 44 lounge seats (armchairs, desk chairs, the Captain's table, cushions, window seats, beanbags), 24 `work:survey`, 10 `work:comms`, 8 `work:watch`, 1 `work:command`, 5 benches, 6 lift-wait. Data only: every deck pixel-identical, Deck 4 ALL IDENTICAL. Some places are boxed in by furniture until a layout fix (see the Deck 2 notes). |
+| 0.19.2 | Deck 2 layout fixes so every place can be reached (agreed with the lead): S's and R's armchair 0.2 m further from the door; Vance's wardrobe 1 m along the wall and his chairs and coffee table 0.45 m toward the windows; the Captain's wardrobe moved to the stern wall, which opens her en-suite; the public washroom laid out by hand (two stalls and a basin along the far wall, no bench; the shared `washroom` template is unchanged). The Captain's window seat stays, and the two table seats it blocks are left out of `places` (6 table places). 159 places, all reachable (the place check in `claude/deck-architect` 06ec42e: OK). Only those rooms change on screen; Decks 1, 3, 4, 5 and 6 pixel-identical, Deck 4 ALL IDENTICAL. |
+| 0.20.0 | Crowd rendering, workstream 5 (the performance engineer, from 0.14.0). New section 8b `crowd`: many crew drawn as a few skinned meshes, poses walk, stand, sit, lie and work, two levels of detail. `?crowd=40` demo: 40 made-up crew at dinner in Deck 3's mess hall. Section 8: `makeCharacter(spec, finish)` and `animateRig(..., rnd)` take optional extras (defaults unchanged); an unknown `dept` falls back to the Survey uniform. Main loop: `crowd.update(dt, t)`. The 9 crew stay on full rigs. Deck 4 ALL IDENTICAL against 0.14.0; Decks 1–6 pixel-identical; deck_check OK, same draw calls. See "Crowd rendering (0.20.x)". |
 | 0.21.1 | Pillar 1, workstream 4: the schedule engine (the sim engineer). New section 14 (after 13): `planDay(person, day)` and `whereIs(person, t)` per the plan's format, `shipDay(day)` planning everyone's day at once so no place is ever held twice, fixed work stations per person and shift, `peopleOn(deck, t)`, and `runDay` / `dayReport` to step a whole day with no drawing (about 30 ms a day). Reads `ROSTER` and `DECKS[n].places` when they're there, otherwise `STUB_ROSTER` and `stubPlaces(n)`. Sleeping (`sleepUntil`) plans the day you wake into. Nothing draws from it yet: cadet_test ALL IDENTICAL to 0.15.1 (renderer noise only), deck_check OK. With the real roster and the places pushed so far (a scratch build), 28 days check clean: everyone sleeps 6 hours or more in their own bed, eats twice and works their whole shift, no place double-booked, no gaps. |
 | 0.21.2 | Going to sleep, and the lead's notes on places (the sim engineer). Tap your own bunk (4-B1-2, found by its place on Deck 4) from 20:00 to 05:30 and a small dialog asks "Sleep until 06:00?"; Sleep fades out, skips time with `sleepUntil` and fades back in to "Good morning". Earlier in the day the bunk says it's too early. Schedules: any place in a room with a bed place belongs to whoever sleeps there (en-suites, desks, armchairs), shared by roommates in a bunk room; the player is left out of the schedules. With every deck's real places (Decks 1–6, scratch build), 28 days clean and none of the 104 private places ever used by anyone else. cadet_test ALL IDENTICAL to 0.21.1 (renderer noise only), deck_check OK. |
+| 0.23.0 | Pillar 1, first combined build (the lead, on `claude/ship-integration`): ship time and saving (0.15.1), the crew roster (0.16.2), places on every deck (0.17.0, 0.18.3, 0.19.2), Deck 4's bigger bunk rooms (0.17.1), crowd rendering with the `?crowd=40` demo (0.20.0) and the schedule engine (0.21.1). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. Nothing draws the schedules yet (workstream 6). |
+| 0.22.0 | 0.23.0 merged into `claude/sim-engineer` with 0.21.2 (going to sleep, private places by room), as the base for workstream 6. No other changes. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -124,6 +136,16 @@ Section 14 sits right after section 13. Nothing in it calls `R()` or draws anyth
     - Peak headcounts per deck: Deck 3 about 64–73 at 17:45–18:20 (dinner plus the Commons in the evening), Deck 4 about 60 at 06:45, Deck 2 about 20, Deck 5 about 13, Deck 1 about 10, Deck 6 3.
     - Speed: planning a day takes about 11 ms; `runDay` at 1-minute steps about 30 ms; `dayReport` about 17 ms.
 - **Testing it:** a scratch copy of the build with section 9's `ROSTER` block and the architects' `places` lists pasted in (not committed), then `dayReport(d)` for many days, the seams between days, and determinism (the same plans after clearing the cache and planning other days first).
+## Places on Decks 4, 5 and 6 (0.17.x, the Deck 6 architect)
+Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each of `DECKS[4]`, `DECKS[5]` and `DECKS[6]` has a `places` list, written as plain data just before `lockedRoom` (Deck 4) or `markings` (Decks 5 and 6).
+- **Where they sit.** On the furniture that's there: the tile of a seat, bed, bench or stall, or the free tile in front of a bench, console or machine for someone standing at it. Seats and beds are reached from a tile beside them. Nothing was moved to make room for them.
+- **`face`** is the way the person faces there: away from a seat's back, towards a console. For beds it points at the side you get in from.
+- **Deck 4 bunks (0.17.1, Sketch 3):** each bunk room is 5 × 4 with three bunk beds, so berths 1–2 are the first bunk (lower, upper), 3–4 the second and 5–6 the third, both berths on the bunk's tile. The rooms number 1–8 as the game names them (a = Bunk 1 … h = Bunk 8, the night shift).
+- **Wash pods:** every cabin's pod is one `shower` place (`4-xx-wash`); it stands for the pod's toilet and basin too.
+- **The check:** deck_check.py checks every place: unique ids ship-wide, the agreed types, poses and faces, the room against the map, and that crew can reach it from the lift. Crew have keys, so 'closed' doors pass; hatches and walls don't.
+- **Fixed in 0.17.1:** Deck 4 slept only 32 juniors in 0.17.0. Sketch 3 of plans/deck4-plan.html widened the bunk rooms to 5 tiles, so the bunk template fits three bunks: 48 berths.
+- **`floorSeeds` (0.17.1, shared, inert unless a deck sets it):** the floor painter draws random numbers tile by tile, row by row, so a layout change shifts every later number: the floor grain and every piece of furniture and crew choice after it. `floorSeeds: { col, rows }` sets the random sequence to `rows[j]` when the painter reaches column `col` of row `j`. Deck 4 uses column 21 with the values 0.17.0 had there, so everything east of the junior wing, and everything built after the floor, is unchanged. If the junior wing changes shape again west of column 21, keep the values; if anything at column 21 or east of it changes, the values need measuring again (or dropping, if pixel identity isn't wanted).
+- **0.17.1 proof (Deck 4, 0.17.0 against 0.17.1):** map cells changed only in columns 10–20; wall and door edges up to column 21; blocked tiles up to column 20; items, spots and closed doors in the officers' wing (columns 24 and on) identical; room tiles changed only in rooms a–h and l; 326 of 3000 collision probes changed, all at column 21 or west; all 9 test routes wholly in the officers' wing and east lobby identical. An officers'-wing view with crew hidden differs only where the shrunk scrubbers room shows over the wall at the top edge. The player still starts at (7,3) in Bunk 1. Crew start in the same places, but drift apart within seconds: the placeholder wander shares one random sequence between all crew, and the bunk rooms offer different spots, so cadet_test differs throughout (as expected; the new baseline needs the lead's sign-off).
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 
@@ -152,6 +174,31 @@ Built from plans/deck2-plan.html (Sketch 8) on branch `claude/deck2-command`, al
     - **Cost:** about 285 draw calls by the lift (Deck 3 326, Deck 4 332), 230–300 over the science rooms with walls down, 540–580 zoomed right out over the quarters.
 - **0.9.5:** `hull.byFace: true` on Deck 2 (the shared splitter edit from the bridge branch, opt-in per deck; Decks 3–6 keep the old split).
 - **Deck 2 is done (0.9.4, hull fix 0.9.5) and waiting for the user's review.**
+- **Places (0.19.1, Pillar 1 workstream 3c).** `DECKS[2].places` lists 162 places, made from the furniture's real positions (a script logs every `place()` on Deck 2, then puts a place on each seat, bed and workstation) and stored as fixed data.
+    - **Ids:** beds `2-<room letter>` for all fifteen bedrooms, visitors' rooms included. Everything else `2-<what>-<n>`: `shower`, `basin`, `toilet` (en-suites, numbered in placing order), `wctoilet` and `wcbasin` (the public washroom), `desk`, `armchair`, `cushion`, `windowseat`, `beanbag`, `captable`, `command`, `survey`, `comms`, `watch`, `bench`, `liftwait`.
+    - **Types:** desk chairs and armchairs in bedrooms are `lounge-seat`; the Captain's desk chair is `work:command`. Rule proposed to the lead: a place in a room that has a bed place belongs to that bed's owner, so nobody is sent into someone else's cabin.
+    - **Watch posts:** the roster puts 8 Watch crew on Deck 2 by day and the office has 4 work spots (duty chair, status board ×3), so four standing posts make up the rest: the lockers, the lobby by the office glass, outside the Captain's door, and the end of the science corridor at the array window.
+    - **Locked doors:** every bedroom door is `closed`, so today's pathfinding can't take anyone to a bed. Raised with the lead (proposal: a walker may pass a `closed` door whose `sealed` room holds their own bed).
+    - **Layout fixes (0.19.2):** some places were boxed in by furniture: S's and R's interiors, Vance's cabin, the Captain's en-suite, two of the Captain's table seats and two of the public washroom's three toilets. Fixed by moving S's and R's armchair, Vance's wardrobe and seating, and the Captain's wardrobe, and by laying the washroom out by hand (2 toilets, 1 basin). The Captain's window seat stays (the lead's call), so the two table seats behind it aren't places. 159 places, all reachable by the official place check.
+
+## The crew roster (builds 0.16.x, the crew designer)
+
+Pillar 1, workstream 2. Everything is in section 9, after `CREW`, between the `BEGIN ROSTER` and `END ROSTER` markers, plus two lines below them.
+
+- **`ROSTER`:** 74 of the 75 crew in the format of plans/pillar1-plan.md "The roster". With you, that's 1 Captain, 1 XO, 4 Chiefs, 6 Senior Officers, 16 Officers and 47 Juniors; 60 on days, 15 on nights. Each entry has `id`, `name`, `story`/`provisional` flags, `rank`, `dept`, `uniform`, `role`, `shift`, `rota.offDays`, `bed`, `work: { deck, place }`, `habits`, `traits`, `looks`, `bio`, `life` and `seed`.
+    - `dept` is the job's department: command, helm, comms, works, watch, survey, infirmary or galley. `uniform` is the uniform it wears, one of `makeCharacter`'s five `DEPT` keys (helm and comms wear command red, the galley wears works gold). `rosterSpec(p)` turns an entry into what `makeCharacter` takes.
+    - Story crew keep `CREW`'s looks and bios exactly. The Works Chief (Chief Ines Calder), the Infirmary Chief and the six senior officers have provisional names.
+    - Workplaces use the place types `work:command`, `work:helm`, `work:ops`, `work:comms`, `work:watch`, `work:survey`, `work:galley`, `work:infirmary`, `work:works` and `work:engine`.
+    - Days off: two in a row, staggered round the week within each department (20–22 people off on any day).
+    - Night shift: the 6 juniors in Bunk 8 (the night-shift room), the Second Officer, the Senior Watch Officer and 7 officers (in the quiet inner cabins).
+- **`ROSTER_GUESTS`:** people who live aboard but aren't crew, so not in the 75: Envoy Saruth (bed `2-E`).
+- **`ROSTER_PLAYER`:** you. You're one of the 75 (one of the 47 juniors, in Works) but aren't scheduled, so your entry is kept out of `ROSTER`. You sleep in Bunk 1, berth 2 (`4-B1-2`); Tomas has berth 1, and berth 6 is the one spare berth on the ship.
+- **`HABITS`:** the shared habit vocabulary, each with what it does to a day. The schedule engine reads it.
+- **Beds:**
+    - Deck 2: the 12 senior crew, one per room (`2-C` Captain, `2-X` Vance, `2-O` Works Chief, `2-I` Infirmary Chief, `2-V` Sato, `2-T` Holt, `2-S`, `2-H`, `2-R`, `2-N`, `2-G`, `2-D`); visitor rooms `2-B` and `2-U` are empty.
+    - Deck 4 cabins: the 16 officers in `4-05`, `4-06` and `4-09` to `4-22` (none in the guest cabins or spares).
+    - Deck 4 bunks: the 47 juniors (you included) in 8 rooms × 6 berths (`4-B<n>-1` to `-6`), with `4-B1-6` spare. As of 0.14.0 the rooms hold 4 berths each (2 double bunks); the user chose bigger rooms with three ordinary bunk beds, which workstream 3a is building.
+- **Fixed data:** `plans/crew-roster-gen.py` is seeded, so re-running it without edits writes exactly the same block. Edit it (names, habits, who's where) and re-run to change the crew; it rewrites the block in place and `plans/crew-roster.html`. Nothing in the roster calls `R()`.
 
 ## How decks work (section 4)
 
@@ -340,6 +387,45 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 - **The room brain adds `j`, `=` and `+` weights on every deck.** On Deck 5 there's no `j`, which is harmless (that pick just fails and retries). Room letters are per-deck, so `home` and `haunts` only make sense for the walker's own deck.
 
 
+## Crowd rendering (0.20.x)
+
+Section 8b, by the performance engineer (Pillar 1, workstream 5). The player and close crew keep full `makeCharacter` rigs (16–17 meshes, about 15,000 triangles and 32 draw calls each with shadows). Everyone else goes through `crowd`.
+
+**How it works.**
+
+- `crowd.add(spec)` calls `makeCharacter(spec, finish)` with a `finish` that keeps the queued parts instead of baking meshes. The rig's joints stay ordinary Groups, kept out of the scene, and `animateRig` drives them exactly as it drives a full rig.
+- Each person's parts are rebuilt at lower detail (`CROWD_DETAIL`: spheres, caps, cylinders and rings with fewer segments; boxes as they are) and packed once, in their joints' own space, at two levels: near (about 4,100 triangles) and far (about 2,100).
+- Up to `CROWD_PER` people (12) share one `SkinnedMesh`. Their joints are its bones (17 slots a person); every vertex follows one bone, and the bone inverses are identity, so a bone's matrix is just the joint's world matrix. One material, `CROWD_MAT` (as `CHAR_MAT`, with `skinning: true`, which r128 still needs). So 40 people are 4 meshes: at most 8 draw calls with the shadow pass.
+- A group's geometry is rebuilt only when someone joins, leaves or changes detail. Its bounding sphere is refitted every frame round its members, so a group off screen isn't drawn.
+- Far detail: anyone more than `CROWD_FAR` (9) tiles from the camera's target, or everyone when zoomed out past `CROWD_FAR_ZOOM` (0.75), with half a tile of hysteresis.
+- Without float vertex textures (rare on phones now), `CROWD_PER` shrinks so a group's bones fit the shader's uniforms.
+- Nothing in the crowd calls `R()`: each person has their own random stream (`animateRig`'s new `rnd` argument), so adding crowd never shifts anything else. `CROWD_MAT` and the empty geometry are made on the first `add`, so a game with no crowd has none of it.
+
+**Interface** (for the sim engineer):
+
+- `const h = crowd.add(spec)`: `spec` is the roster's `looks` plus `dept` and `rank` (for the uniform).
+- `h.set(pos, face, pose, walkPhase)`: `pos` is a world `{x, y, z}`; for `sit` and `lie`, `y` is the seat or mattress top (0 means a usual chair, 0.475, or bunk, 0.5). `face` is an angle like `Walker.face` (0 looks toward +z); for `lie` it's the way from head to feet. `pose` is `walk`, `stand`, `sit`, `lie` or `work`; changes blend over about half a second, except the first `set`, which snaps. `walkPhase` (gait cycles) is optional: leave it out and the gait follows how far `pos` moves each frame.
+- `crowd.remove(h)`, `crowd.clear()`, `crowd.near(x, z, r)` (who's at a spot, for taps; the meshes themselves are never hit by the tap raycast), `crowd.visible`, `crowd.stats()`.
+- `crowd.update(dt, t)` runs once a frame from the main loop, after the walkers.
+- Sitting puts the hips just above the seat and the feet on the floor by leg IK, forearms on the table, a fork to the mouth now and then. Working: hands busy at bench height, head down. Lying: on the back, arms by the sides, centred on `pos`.
+- Crowd people don't block walking. Who stands where is the sim's job (workstream 6).
+
+**The demo.** `?crowd=40` in the address (any number up to 54) starts you on Deck 3 by the lift at 18:30, and puts made-up crew in the mess hall: walkers in the aisles, two at the drinks station (`work`), five in the servery line (`stand`), the rest seated at the long and round tables (44 seats). A line under the clock shows the crowd, draw calls and frame time. They leave when you leave the deck and come back when you return; the Crew button hides them. `CROWD_DEMO.looks()` and `spots()` are the two to swap: `spots()` already reads `deckDef.places` (`mess-seat`, `servery-queue`) once Deck 3 has them. Without the flag, `CROWD_DEMO` is `null` and nothing of the demo exists.
+
+**Numbers** (headless, SwiftShader; frame times there aren't meaningful, so the demo's line is the one to read on a phone):
+
+| Deck 3 | Draw calls | Triangles drawn (both passes) | Crowd JS a frame |
+| --- | --- | --- | --- |
+| By the lift, no crowd | 326 | 285,000 | |
+| By the lift, 40 crowd | 329 | 364,000 | about 2 ms |
+| In the mess hall, no crowd | 242 | 240,000 | |
+| In the mess hall, 40 crowd | 246 | 401,000 | about 2 ms |
+
+For comparison, 40 full rigs would add about 1,300 draw calls and 600,000 triangles. Memory is flat over Deck 3 and 4 round trips with the demo on (the four groups' bone textures stay, like kit).
+
+**Testing a crowd turn:** cadet_test and deck_check as usual (the crowd is empty in both). For the demo, open the build with `?crowd=40`; the Game class in cadet_test.py loads `file://` paths, so a script that adds the query to the `goto` is enough.
+
+
 ## Rules that keep it working
 
 Phones:
@@ -434,6 +520,25 @@ Built from plans/deck1-plan.html (agreed) by the bridge architect, in parallel w
 - **Mood light:** `light: { sky #d4e2ff, sun #dfe8ff, hemi .96, sunI .9 }`, a little cooler and dimmer than the decks below.
 - **Kit:** the Deck 1 block sits just above `DECKS[1]`: materials in `BRG`, pieces added with `Object.assign(KIT, ...)` (and `WALL_KIT`). Nothing there calls `R()`.
 - **Doors cost a lot of draw calls on every deck** (about 120 of Deck 1's 256): each leaf is a box with six material groups. Grouping the four edge faces and the two leaf faces would cut that by two thirds with identical pixels, but changes the call counts the tests compare, so it's left for the lead.
+
+## Places on Decks 1 and 3 (0.18.x, Pillar 1 workstream 3b)
+
+The bridge architect's places, for the sim engineer's schedules (see plans/pillar1-plan.md, "Places"). Data only: nothing in the game reads or draws them yet.
+
+- **Where:** `places: [...]` in `DECKS[1]` (just before its `dress`) and `DECKS[3]` (just after its `curves`). One place per line.
+- **Fields:** the plan's `id`, `type`, `at: [c, r]`, `face`, `pose` and `room`, plus two more:
+    - `xy: [x, z]`, the exact spot in tile units. A seat can sit off its tile's centre, and one tile can hold two seats (the mess benches seat four along 3.6 m), so `at` alone would stack people.
+    - `walk: [c, r]`, the tile a person walks to before taking the place. It's `at` when that tile is walkable; otherwise the nearest tile in the same room, within 2.5 m, that can be reached from the lift. 122 of the 203 places need one: seats, booths, benches, toilets. Some can't be reached from a tile next door: the mess benches against the hull, which you slide into from the table's end, and the middle booths in the lounge.
+- **How they were made:** a script logged every `place()` call's real position and rotation, and put seats where each kit piece draws them (the long tables' benches at ±.62 m, the round tables' chairs at .8 m, booths, bar stools, high tables, sofas, benches, planter islands), plus a few spots by hand: the servery queue, the galley pass and the lift waits. The output is kept as fixed data, so it only changes when someone means it to. If furniture moves, regenerate it or fix the lines by hand.
+- **ids:** `<deck>-<what>-<n>`. Deck 1: `1-command-1` is the Captain's chair, `-2` the first officer's seat, `-3` the guest seat; `1-helm-1`, `1-ops-1`, `1-watch-1`, `1-survey-1`, `1-comms-1`, `1-works-1`; `1-conf-1..10` (the conference table), `1-tea-1`, `1-window-1..4`, `1-toilet-1`, `1-basin-1`, `1-lift-1..4`. Deck 3: `3-mess-1..44`, `3-queue-1..4` (in queue order, trays first), `3-grab-1`, `3-galley-1..8` and `3-galley-pass`, `3-infirmary-1..4`, `3-visit-1..2`, `3-toilet-1..4`, `3-basin-1..2`, `3-wbench-*`, `3-bench-*`, `3-garden-*` (bench seats), `3-tend-*` (beds and racks), `3-gym-*`, `3-callhome-1..4`, `3-lounge-*`, `3-store-1`, `3-shop-*`, `3-lift-1..6`.
+- **Types beyond the plan's list:** `work:command` (the command ring), `work:store` (the crew store counter) and `shop` (browsing the shelves and the drinks fridge). The conference seats are `common-room`.
+- **Counts:**
+    - Deck 1 (31): `work:command` 4, helm 1, ops 1, watch 1, survey 1, comms 1, works 1, `common-room` 11, `lounge-seat` 4, toilet 1, basin 1, `lift-wait` 4.
+    - Deck 3 (173): `mess-seat` 44, `servery-queue` 4, `grab-shelf` 1, `work:galley` 9, `work:infirmary` 4, `lounge-seat` 34, `bench` 22, `garden` 23, `gym` 9, `callhome` 4, `shop` 6, `work:store` 1, toilet 4, basin 2, `lift-wait` 6.
+- **Ready room (0.18.3):** `1-ready-1`, the Captain's desk chair (`work:command`), walk tile (10, 1). Its door `h,11,4` is a closed door, which crew can open; `deck_check` counts closed doors as passable for crew.
+- **Left out:** the infirmary's four patient beds (no type for them yet), and showers (none on these decks).
+- **Held back in 0.18.2, back in 0.18.3:** `deck_check` didn't yet take `walk` or `shop`, so 14 Deck 3 places sat out one build. The lead has since made `xy`, `walk` and `shop` part of the plan, and `deck_check` (from `claude/deck-architect`) checks the walk rule.
+- **Check:** every place is checked the way the plan says: `walk` is walkable, in the place's room, reachable from the lift, and equal to `at` or within 2.5 m of `xy`. ids are unique ship-wide, and `face`, `pose` and `room` are valid. The script is in the session scratchpad. `deck_check.py`'s own place check comes from the Deck 6 architect.
 
 ## Known issues
 

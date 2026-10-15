@@ -34,7 +34,7 @@ svg{display:block}
 <body>
 <header>
   <h1>Deck 4: Quarters</h1>
-  <div class="sub">Sketch 2, updated to build 0.14.0 (guest and spare cabins: G and S). Bow points forward, port side is on the left when facing it. The junior wing sits aft, the officers' corridor runs forward of the lift, and promotion moves you down the deck toward the bow. Tap any room.</div>
+  <div class="sub">Sketch 3, agreed with the user and built in 0.17.1: bigger junior bunk rooms, three bunk beds each. Guest and spare cabins are marked G and S. Bow points forward, port side is on the left when facing it. The junior wing sits aft, the officers' corridor runs forward of the lift, and promotion moves you down the deck toward the bow. Tap any room.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -42,8 +42,20 @@ svg{display:block}
   <button id="grid" aria-pressed="false">Tile grid</button>
 </div>
 <div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="info"><div id="card"><b>Deck 4 at a glance</b><span>8 bunk rooms with 48 berths, 24 single cabins (16 officers, 6 guest cabins by the lift, 2 spare at the music-room end), 2 washrooms, a laundry and the junior common room. Behind the walls: the deck's air scrubbers, the heating plant and two utility closets.</span><span class="meta">50 × 22 tiles. 12 cabins have windows, 12 are inner cabins.</span></div></div>
+<div id="info"><div id="card"><b>Deck 4 at a glance</b><span>8 bunk rooms with 48 berths (three bunk beds each, Sketch 3), 24 single cabins (16 officers, 6 guest cabins by the lift, 2 spare at the music-room end), 2 washrooms, a laundry and the junior common room. Behind the walls: the deck's air scrubbers, the heating plant and two utility closets.</span><span class="meta">50 × 22 tiles. 12 cabins have windows, 12 are inner cabins.</span></div></div>
 <div class="legend" id="legend"></div>
+<div class="legend" style="display:block;line-height:1.55">
+  <b style="color:var(--ink)">What changes in Sketch 3</b>
+  <ul style="margin:6px 0 0;padding-left:20px">
+    <li><b>Every bunk room grows from 4 × 4 to 5 × 4,</b> so it holds three ordinary bunk beds (6 berths) side by side with normal gaps between them (about 0.7 m, the same as today), footlockers at their feet and the two lockers by the door. A table doesn't fit: the bunk template only adds one in rooms 6 deep, and today's rooms don't have one either. 8 rooms × 6 = 48 berths: 47 juniors (the player included) and 1 empty. Today's rooms hold 4 each (32 berths).</li>
+    <li><b>Port side (Bunks 1–3):</b> each room is one tile wider. The air scrubbers behind them shrink from 6 × 4 to 3 × 4, still sealed, still opening off the lobby.</li>
+    <li><b>Middle (Bunks 5–8, the night shift in Bunk 8):</b> each room is one tile wider, taking the junior utility closet's 2 × 8 strip. That closet moves to the starboard side.</li>
+    <li><b>Starboard side (Bunk 4):</b> one tile wider. The laundry keeps its size (4 × 4) and shifts one tile toward the lift. The junior stores shrink from 4 × 4 to 3 × 4. The utility closet becomes a 1 × 4 closet off the lobby, and the heating plant shrinks from 6 × 4 to 5 × 4.</li>
+    <li><b>Unchanged:</b> both washrooms, the junior common room, the junior corridors, the lift lobby, all 24 officers' cabins (no guest cabins given up) and the music room.</li>
+    <li><b>The small-change alternative (not chosen):</b> keep the 4 × 4 rooms and squeeze three bunks in, with gaps of about 0.3 m and nothing else moving. 48 berths either way.</li>
+    <li><b>For the build:</b> Bunk 1 still holds the player's start tile; crew routes in the junior wing change with the walls. Berths are numbered 4-B&lt;room&gt;-1 to 6.</li>
+  </ul>
+</div>
 <script>
 // =====================================================================
 // DECK 4 DATA (same text-map format as the game's DECK_MAP)
@@ -51,26 +63,26 @@ svg{display:block}
 // =====================================================================
 const DECK4_MAP = [
   '..................................................',
-  '...pppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxx......',
-  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxx....',
-  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxx...',
-  '..ppppaaaabbbbccccssssssAAAEEEIIIMMMQQQUUUxxxxx...',
+  '...pppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxx......',
+  '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxx....',
+  '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxxx...',
+  '..ppppaaaaabbbbbcccccsssAAAEEEIIIMMMQQQUUUxxxxx...',
   '..================++++++--------------------nnnn..',
   '..================++++++--------------------nnnnn.',
-  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnn.',
-  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
-  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
-  '..jjjjjjeeeeggggkk++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
-  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
-  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
-  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
-  '..jjjjjjffffhhhhkk++##++CCCGGGKKKOOOSSSWWW--nnnnn.',
+  '..jjjjjjeeeeeggggg++##++BBBFFFJJJNNNRRRVVV--nnnnn.',
+  '..jjjjjjeeeeeggggg++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjeeeeeggggg++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjeeeeeggggg++##++BBBFFFJJJNNNRRRVVV--nnnnnn',
+  '..jjjjjjfffffhhhhh++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjfffffhhhhh++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjfffffhhhhh++##++CCCGGGKKKOOOSSSWWW--nnnnnn',
+  '..jjjjjjfffffhhhhh++##++CCCGGGKKKOOOSSSWWW--nnnnn.',
   '..================++++++--------------------nnnnn.',
   '..================++++++--------------------nnnn..',
-  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyy...',
-  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyyy...',
-  '..qqqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyyyy....',
-  '...qqqddddlllluuuuttttttDDDHHHLLLPPPTTTXXXyy......',
+  '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyyy...',
+  '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyyy...',
+  '..qqqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyyyy....',
+  '...qqqdddddlllluuuktttttDDDHHHLLLPPPTTTXXXyy......',
   '..................................................',
 ];
 const W = 50, D = 22;
@@ -109,7 +121,7 @@ const ROOMS = {
   const outer = 'abcd'.includes(k);
   ROOMS[k] = { kind: 'bunk', name: 'Bunk room ' + (n + 1), label: 'Bunk ' + (n + 1), win: outer,
     x: (k === 'h' ? 'The night-shift bunk room. Inner, windowless and kept dark and hushed at midday. ' : '') +
-       'Three double bunks, six footlockers, one table. ' + (outer ? 'A window, which makes it the room everyone wants.' : 'No window; the wall screen shows the stars instead.') };
+       'Three bunk beds, six footlockers, two lockers. ' + (outer ? 'A window, which makes it the room everyone wants.' : 'No window; the wall screen shows the stars instead.') };
 });
 ROOMS.h.night = true;
 // officer cabins: A..X, laid out in columns of four (outer port, inner port, inner starboard, outer starboard)
