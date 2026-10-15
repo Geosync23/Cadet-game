@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.9.4
+   STARSHIP CADET: CSV Wren                            build 0.9.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2787,8 +2787,10 @@ function buildDeck(def) {
       // each piece can follow the camera on its own. R() is still drawn once per span, as before.
       const faceOf = k => { const s = HULL_SEGS[k]; return Math.abs(s.nx) >= Math.abs(s.nz) ? (s.nx > 0 ? 1 : 0) : (s.nz > 0 ? 3 : 2); };
       const FACE = [[1, 0], [-1, 0], [0, 1], [0, -1]];      // outward: bow, stern, +z side, -z side
-      const part = run.segs.map(faceOf), parts = [];
-      run.segs.forEach((k, n) => { if (!n || part[n] !== part[n - 1]) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
+      // (part[] is overwritten with piece numbers as it goes, so older decks split far more often than they need to;
+      // a deck with hull.byFace compares the facings themselves and gets one piece per facing. Decks 3-6 keep the old split.)
+      const part = run.segs.map(faceOf), fc = part.slice(), parts = [];
+      run.segs.forEach((k, n) => { if (!n || (HULL.byFace ? fc[n] !== fc[n - 1] : part[n] !== part[n - 1])) parts.push({ face: part[n], g: new THREE.Group(), decor: new THREE.Group(), segs: [] }); parts[parts.length - 1].segs.push(k); part[n] = parts.length - 1; });
       for (const p of parts) { deckRoot.add(p.g); deckRoot.add(p.decor); }
       // split into spans of wall or window
       let n = 0;
@@ -4191,7 +4193,7 @@ DECKS[2] = {
   closedDoors: {
     'h,19,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
   },
-  hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6 },   // Deck 3's hull, with rounder stern corners
+  hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6, byFace: true },   // Deck 3's hull, with rounder stern corners; one hull piece per facing
   light: { sky: col('#e9e6ff'), sun: col('#fff0dc'), hemi: .94, sunI: .96 },   // calm: a touch cooler in the shade, a touch softer in the sun
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
