@@ -41,7 +41,7 @@ svg{display:block}
 <body>
 <header>
   <h1>Deck 1: Bridge</h1>
-  <div class="sub">Sketch 1, for build 0.6.6. Bow points forward, port side is on the left when facing it. The smallest deck, at the very top of the hull. Step out of the lift and the bridge doors are right ahead, with the observation room behind you, looking aft over the whole ship. Few people come up here, so every visit feels like an occasion. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+  <div class="sub">Sketch 2 (scaled up after the user's review of build 0.10.1; built as 0.12.x). Bow points forward, port side is on the left when facing it. The smallest deck, at the very top of the hull. Step out of the lift and the bridge doors are right ahead, with the observation room behind you, looking aft over the whole ship. Few people come up here, so every visit feels like an occasion. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -50,14 +50,15 @@ svg{display:block}
   <button id="first" aria-pressed="false">Built first</button>
 </div>
 <div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="info"><div id="card"><b>Deck 1 at a glance</b><span>The bridge fills the bow: a viewscreen across the bow wall, a sunken command ring with a curved rail behind it, and the rear stations along the aft wall. The Captain's ready room opens off the bridge. Aft of the lift, the observation room doubles as the conference room. The service layer is small: the relay room and a sub-floor crawl under the rear stations, plus a utility closet.</span><span class="meta">20 × 10 tiles, the narrowest deck (Deck 3 is 22 wide). The lift lines up with Decks 3, 4 and 5 (game lift: [8, 5], car rows 3–5, ladder row 6, trunks row 2).</span></div></div>
+<div id="info"><div id="card"><b>Deck 1 at a glance</b><span>The bridge fills the bow: a viewscreen across the bow wall, a sunken command ring with a curved rail behind it, and the rear stations along the aft wall. The Captain's ready room is tucked aft of the bridge on the port side, beside the lobby, with its door on the bridge's aft edge; the washroom mirrors it to starboard. Aft of the lift, the observation room doubles as the conference room. The service layer is small: the relay room and a sub-floor crawl under the rear stations, plus a utility closet.</span><span class="meta">22 × 12 tiles, still the smallest deck (Deck 6 is 36 × 12, Deck 2 below it 52 × 22). The bridge has about 85 standable tiles, up from 54 in Sketch 1. The lift lines up with every deck (game lift: [8, 6], car rows 4–6, ladder row 7, trunks row 3).</span></div></div>
 <div class="legend" id="legend"></div>
 <div class="qs" id="qs"><b>Open questions I had to guess at</b><ul>
-  <li><b>Size.</b> The design doc says about 14 × 10. This is 20 × 10: the bridge itself is about 10 × 10, and the lobby round the spine and the observation room take the rest. Trimming the observation room to 3 columns would get it to 18.</li>
+  <li><b>Size.</b> The design doc says about 14 × 10. Sketch 1 was 20 × 10 and the user found the bridge cramped, with the ready room crowding it. Sketch 2 is 22 × 12: the bridge is about 11 × 12 and has room to walk all the way round the command ring and the stations.</li>
+  <li><b>Ready room.</b> Sketch 1 had it jutting into the bridge's port corner. It's now 3 × 4, aft of the bridge beside the lobby, and its door opens from the bridge's aft edge, clear of the ring.</li>
   <li><b>Sunken ring.</b> The build has no floor steps, so the ring is shown by a curved rail (a <code>bar</code> curve) behind the chairs. A real sunken floor would need a step kit and a floor-painter change.</li>
   <li><b>Viewscreen.</b> It sits on the bow hull as a dress piece that follows the curve, like the music room's stage. A <code>wall</code> curve in front of the hull would leave tiles behind it that nobody can reach. There are no bridge windows; the view is in the observation room.</li>
   <li><b>Getting in.</b> Bridge and observation room doors are drawn as open. Should the lift panel or the bridge doors stay shut (with tap text) until a story event calls you up?</li>
-  <li><b>Floors.</b> The bridge uses <code>plate</code> for now. It probably wants a floor of its own, such as dark carpet with an inlaid ring.</li>
+  <li><b>Floors.</b> The bridge has its own floor in the build: dark blue-grey carpet with the command ring inlaid.</li>
   <li><b>Bridge washroom.</b> This is a new idea. Keep it, or let the watch ride down to Deck 2?</li>
   <li><b>Top of the spine.</b> I've assumed the ladder and trunks end here, at a trunk head behind glass.</li>
 </ul></div>
@@ -66,44 +67,46 @@ svg{display:block}
 // DECK 1 DATA, in the game's format: no margin rows, so DECK1 can go
 // straight into DECKS[1] (add dress). '.' is outside the hull.
 // Halls (+ lobby) join each other with no wall.
-// Alignment: the game lift is [8, 5], which sits at world (-4, 0) like
-// Decks 3, 4 and 5. The car is 2 x 3 (rows 3-5) with the ladder row Z
+// Alignment: the game lift is [8, 6], which sits at world (-4, 0) like
+// every deck. The car is 2 x 3 (rows 4-6) with the ladder row Z
 // below it and the trunks row Y above it, behind the car's back wall.
-// The deck is 10 wide (world z -5..5) and runs from world x -11 to 7.6,
-// well inside Deck 2's outline below it.
+// Sketch 2: the deck is 12 wide (world z -6..6) and runs from world x -11 to 9.6,
+// well inside Deck 2's outline below it (x -24..28, z -11..11).
 // =====================================================================
 const DECK1 = {
   num: 1, name: 'Bridge', seed: 10109,
   blurb: 'Bridge, ready room, observation room', arrive: 'The bridge is forward of the lift, the observation room aft. People talk quietly up here.',
-  lift: [8, 5],
+  lift: [8, 6],
   map: [
-    '..OOOOkkkkRRRRBBB...',
-    '.OOOOO++++RRRRBBBB..',
-    '.OOOOO+YY+RRRRBBBBB.',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+@@+BBBBBBBBBB',
-    '.OOOOO+ZZ+BBBBBBBBBB',
-    '.OOOOO++++wwBBBBBBB.',
-    '.OOOOOuuuuwwBBBBBB..',
-    '..OOOOuuuuccccccc...',
+    '..OOOOkkkkRRRBBBBB....',
+    '.OOOOOkkkkRRRBBBBBBB..',
+    '.OOOOO++++RRRBBBBBBBB.',
+    '.OOOOO+YY+RRRBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+@@+BBBBBBBBBBBB',
+    '.OOOOO+ZZ+BBBBBBBBBBBB',
+    '.OOOOO++++wwwBBBBBBBBB',
+    '.OOOOOuuuuwwwBBBBBBBB.',
+    '.OOOOOuuuucccccBBBBB..',
+    '..OOOOuuuuccccccBB....',
   ],
   // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
   // glass: an inner window. lift: the main lift (one wide door each side).
   doors: {
-    'v,7,3': 'lift', 'v,7,4': 'lift', 'v,7,5': 'lift', 'v,9,3': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift',   // one wide door each side
-    'h,7,2': 'glass', 'h,8,2': 'glass',                       // the trunk head, behind glass above the car
-    'h,7,7': 'hatch', 'h,8,7': 'glass',                       // the top of the ladder, with its hatch
-    'v,10,4': 'door', 'v,10,5': 'door', 'v,10,3': 'glass', 'v,10,6': 'glass',   // bridge doors, straight ahead of the bow-side lift door
-    'v,6,4': 'door', 'v,6,5': 'door', 'v,6,3': 'glass', 'v,6,6': 'glass',       // glass doors into the observation room, aft
-    'h,12,3': 'closed',                                       // the ready room, off the bridge
-    'v,10,7': 'door',                                         // bridge washroom, from the lobby
-    'h,6,1': 'hatch', 'h,9,8': 'hatch',                       // utility closet; relay room
-    'h,13,9': 'hatch',                                        // floor hatch by the rear stations, down into the sub-floor crawl
+    'v,7,4': 'lift', 'v,7,5': 'lift', 'v,7,6': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift', 'v,9,6': 'lift',   // one wide door each side
+    'h,7,3': 'glass', 'h,8,3': 'glass',                       // the trunk head, behind glass above the car
+    'h,7,8': 'hatch', 'h,8,8': 'glass',                       // the top of the ladder, with its hatch
+    'v,10,5': 'door', 'v,10,6': 'door', 'v,10,4': 'glass', 'v,10,7': 'glass',   // bridge doors, straight ahead of the bow-side lift door
+    'v,6,5': 'door', 'v,6,6': 'door', 'v,6,4': 'glass', 'v,6,7': 'glass',       // glass doors into the observation room, aft
+    'h,11,4': 'closed',                                       // the ready room, from the aft edge of the bridge
+    'v,10,8': 'door',                                         // bridge washroom, from the lobby
+    'h,6,2': 'hatch', 'h,9,9': 'hatch',                       // utility closet; relay room
+    'h,14,10': 'hatch',                                       // floor hatch by the Works station, down into the sub-floor crawl
   },
   // which room each shut door or hatch leads into (its tap text is that room's 'tap')
-  sealed: { 'h,12,3': 'R', 'h,6,1': 'k', 'h,9,8': 'u', 'h,13,9': 'c' },
-  plates: [['v,10,2', 'w', 'Bridge'], ['v,6,2', 'e', 'Observation']],
+  sealed: { 'h,11,4': 'R', 'h,6,2': 'k', 'h,9,9': 'u', 'h,14,10': 'c' },
+  plates: [['v,10,3', 'w', 'Bridge'], ['v,6,3', 'e', 'Observation'], ['h,12,4', 's', 'Ready room']],
   rooms: {
     '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
     '@': { name: 'Main lift', floor: 'lift' },
@@ -120,13 +123,13 @@ const DECK1 = {
   },
   windows: ['O', 'R'].map(room => ({ room })),
   closedDoors: {
-    'h,7,7': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
+    'h,7,8': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
   },
-  hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6 },   // a short, round hull: big stern corners, a blunt elliptical bow
+  hull: { sternX: 1, stern: 3, bowFrom: 15, bowLen: 6.6 },   // a short, round hull: big stern corners, a blunt elliptical bow
   // the command ring: a curved rail in dark wood behind the chairs, open at both sides and forward.
   // The viewscreen is not a curve: it is a dress piece on the bow hull itself (see the open questions).
   curves: [
-    { kind: 'bar', arc: [15.4, 5, 2.2, 120, 240], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
+    { kind: 'bar', arc: [17, 6, 2.4, 130, 230], out: 1, it: { t: 'Command rail', x: 'A curved rail in dark wood round the back of the command ring. The rear stations\' crew lean on it during briefings; the Captain pretends not to notice.' } },
   ],
 };
 const ROOMS = {
@@ -134,9 +137,9 @@ const ROOMS = {
   '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, the same car as on every deck, with doors on the stern and bow sides. Deck 1 is the top of the line.' },
   Y: { kind: 'core', name: 'Spine trunks', label: 'Trunks', x: 'The power and air trunks end here, behind glass above the car, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.' },
   Z: { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The top of the maintenance ladder, behind glass, with a hatch for tier 2. The last rung has a name scratched into it.' },
-  B: { kind: 'command', name: 'Bridge', label: 'Bridge', built: true, x: 'The heart of the ship. A curved viewscreen fills the bow wall. Facing it is the command ring: the Captain\'s chair with a seat either side, the helm and ops consoles just in front, and a curved wooden rail behind. The rear stations line the aft wall: Watch, Survey, Works and comms, each with someone on watch. You come up when you\'re called, for a briefing, a repair timed with the bridge or a story event. Beside the Works station, a floor hatch drops into the sub-floor crawl (tier 3).' },
+  B: { kind: 'command', name: 'Bridge', label: 'Bridge', built: true, x: 'The heart of the ship. A curved viewscreen fills the bow wall. Facing it is the command ring: the Captain\'s chair with a seat either side, the helm and ops consoles just in front, and a curved wooden rail behind. The rear stations stand in two banks along the aft walls: Watch and Survey beside the ready room, Comms and Works beside the washroom, each with someone on watch. You come up when you\'re called, for a briefing, a repair timed with the bridge or a story event. Beside the Works station, a floor hatch drops into the sub-floor crawl (tier 3).' },
   O: { kind: 'obs', name: 'Observation room', label: 'Observation', built: true, x: 'Behind the bridge, on the far side of the lift, and also the conference room. A long table for ten, a wall screen, and big windows round the stern and both sides. From the window seat at the very back you look aft along the whole ship. Briefings happen here, and so does the Captain\'s tea on quiet afternoons.' },
-  R: { kind: 'ready', name: 'Ready room', label: 'Ready room', win: true, x: 'The Captain\'s office, off the bridge. A desk, two chairs for whoever is in trouble, a bookshelf, a port window and a small aquarium holding one slow fish called the Admiral. Locked unless you\'re sent for.' },
+  R: { kind: 'ready', name: 'Ready room', label: 'Ready room', win: true, x: 'The Captain\'s office, aft of the bridge on the port side, beside the lobby; its door opens from the bridge\'s aft edge. A desk, two chairs for whoever is in trouble, a bookshelf, a port window and a small aquarium holding one slow fish called the Admiral. Locked unless you\'re sent for.' },
   w: { kind: 'wash', name: 'Bridge washroom', label: 'Wash', built: true, isNew: true, x: 'New idea. One toilet and a basin, so the watch doesn\'t have to ride the lift down. Off the lobby.' },
   k: { kind: 'serv', name: 'Utility closet', label: 'Util', x: 'Deck 1\'s light relays and the lobby\'s power junction, through a hatch off the lobby. Tier 1.' },
   u: { kind: 'serv', name: 'Relay room', label: 'Relays', x: 'The bridge sub-floor relays: racks of them, clicking, under blue status lights, and the way down into the sub-floor crawl. Through a hatch off the lobby. Tier 3: some relay jobs need a quiet hour agreed with the bridge.' },
@@ -154,35 +157,40 @@ const KIND = {
 };
 const LEGEND = ['command', 'ready', 'obs', 'wash', 'lobby', 'serv'];
 const LEGEND_EXTRA = [['#5fd6c6', 'Viewscreen'], ['#c58b4a', 'Command rail']];
-const POS = { B: [13.4, 7.6], O: [3.5, 1.6], R: [12, .9], u: [8, 8.9], c: [14, 9.35], k: [8, .5], Y: [8, 2.5], '@': [8, 4.5], Z: [8, 6.5], w: [11, 8] };
+const POS = { B: [17, 9.6], O: [3.5, 1.6], R: [11.5, 1.4], u: [8, 10.5], c: [12.5, 10.9], k: [8, 1], Y: [8, 3.5], '@': [8, 5.5], Z: [8, 7.5], w: [11.5, 9] };
 const SMALL = new Set(['R', 'w', 'Y', 'Z']);
 function decorate() {
   // the viewscreen, on the bow hull
-  { let d = ''; for (let a = -62; a <= 62; a += 3) { const t = a * Math.PI / 180; d += (d ? 'L' : 'M') + ((13 + 6.05 * Math.cos(t)) * S).toFixed(1) + ',' + ((5 + 4.45 * Math.sin(t)) * S).toFixed(1); }
+  { let d = ''; for (let a = -60; a <= 60; a += 3) { const t = a * Math.PI / 180; d += (d ? 'L' : 'M') + ((15 + 6.05 * Math.cos(t)) * S).toFixed(1) + ',' + ((6 + 5.45 * Math.sin(t)) * S).toFixed(1); }
     deco('path', { d, fill: 'none', stroke: '#5fd6c6', 'stroke-width': 5, 'stroke-linecap': 'round', opacity: .9 }); }
-  // chairs in the command ring, the helm and ops consoles, and the rear stations along the aft wall
-  deco('circle', { cx: 15.2 * S, cy: 5 * S, r: .42 * S, fill: '#b0413e', stroke: '#2a3037', 'stroke-width': 1.5 });
-  for (const y of [3.95, 6.05]) deco('circle', { cx: 15.2 * S, cy: y * S, r: .32 * S, fill: '#8e4744', stroke: '#2a3037', 'stroke-width': 1.5 });
-  for (const y of [3.7, 5.5]) deco('rect', { x: 16.7 * S, y: y * S, width: .8 * S, height: .8 * S, rx: 3, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
-  for (const [x, y, w, h] of [[10.15, 3.1, .6, .8], [10.15, 6.1, .6, .8], [10.9, 3.1, 1.9, .5], [10.9, 6.4, 1.9, .5]]) {   // either side of the doors, and along the ready room and washroom walls
-    deco('rect', { x: x * S, y: y * S, width: w * S, height: h * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
-    deco('rect', { x: (x + .1) * S, y: (y + h / 2) * S - 1.5, width: (w - .2) * S, height: 3, fill: '#e9c46a', opacity: .8 }); }
+  // the command ring (r 2.0 round tile (17, 6)): the Captain's chair with a seat either side, helm and ops forward
+  deco('circle', { cx: 17 * S, cy: 6 * S, r: 2 * S, fill: 'rgba(8,12,22,.25)', stroke: '#c9a24a', 'stroke-width': 1.5 });
+  deco('circle', { cx: 16.8 * S, cy: 6 * S, r: .42 * S, fill: '#b0413e', stroke: '#2a3037', 'stroke-width': 1.5 });
+  for (const y of [4.85, 7.15]) deco('circle', { cx: 16.8 * S, cy: y * S, r: .32 * S, fill: '#8e4744', stroke: '#2a3037', 'stroke-width': 1.5 });
+  for (const y of [5.45, 6.55]) { deco('circle', { cx: 18.5 * S, cy: y * S, r: .28 * S, fill: '#3a3f48' }); deco('rect', { x: 19.1 * S, y: (y - .45) * S, width: .6 * S, height: .9 * S, rx: 3, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 }); }
+  // the rear stations: two banks of two against the ready room's and the washroom's bridge walls, each with a seat
+  for (const y of [1.5, 2.5, 8.5, 9.5]) {
+    deco('rect', { x: 13.1 * S, y: (y - .47) * S, width: .6 * S, height: .94 * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
+    deco('rect', { x: 13.2 * S, y: y * S - 1.5, width: .4 * S, height: 3, fill: '#e9c46a', opacity: .8 });
+    deco('circle', { cx: 13.92 * S, cy: y * S, r: .25 * S, fill: '#3a3f48' }); }
+  // the floor hatch beside the Works station
+  deco('rect', { x: 14.2 * S, y: 9.15 * S, width: .65 * S, height: .65 * S, fill: 'none', stroke: '#e9c46a', 'stroke-width': 1.5, 'stroke-dasharray': '3 2' });
   // the observation room: the long table, chairs, the window seat at the stern
-  deco('rect', { x: 2.7 * S, y: 2.6 * S, width: 1.6 * S, height: 4.8 * S, rx: 8, fill: '#8a6a45' });
-  for (let y = 3.1; y < 7.2; y += 1) for (const x of [2.35, 4.65]) deco('circle', { cx: x * S, cy: y * S, r: 4, fill: '#c3d3d6', opacity: .7 });
-  deco('rect', { x: 1.15 * S, y: 3.2 * S, width: .55 * S, height: 3.6 * S, rx: 4, fill: '#5c4a6e' });
-  // the ready room: the desk and the Admiral's aquarium
-  deco('rect', { x: 11.5 * S, y: 1.1 * S, width: 1.6 * S, height: .6 * S, rx: 2, fill: '#8a6a45' });
-  deco('rect', { x: 10.25 * S, y: 1.3 * S, width: .5 * S, height: 1 * S, rx: 2, fill: 'rgba(159,227,255,.35)', stroke: '#9fe3ff', 'stroke-width': 1 });
+  deco('rect', { x: 2.8 * S, y: 3.6 * S, width: 1.4 * S, height: 4.8 * S, rx: 8, fill: '#8a6a45' });
+  for (let y = 4; y < 8.2; y += 1) for (const x of [2.35, 4.65]) deco('circle', { cx: x * S, cy: y * S, r: 4, fill: '#c3d3d6', opacity: .7 });
+  deco('rect', { x: 1.1 * S, y: 4.2 * S, width: .56 * S, height: 3.6 * S, rx: 4, fill: '#5c4a6e' });
+  // the ready room: the desk facing its door, and the Admiral's aquarium
+  deco('rect', { x: 10.75 * S, y: 1.74 * S, width: 1.5 * S, height: .72 * S, rx: 2, fill: '#8a6a45' });
+  deco('rect', { x: 10.13 * S, y: .4 * S, width: .46 * S, height: 1 * S, rx: 2, fill: 'rgba(159,227,255,.35)', stroke: '#9fe3ff', 'stroke-width': 1 });
   // relay racks
-  for (let x = 6.3; x < 9.6; x += .8) deco('rect', { x: x * S, y: 8.2 * S, width: .5 * S, height: 1.2 * S, fill: '#26323a', stroke: '#7a8fd0', 'stroke-width': 1 });
+  for (let x = 6.3; x < 9.6; x += .8) deco('rect', { x: x * S, y: 9.4 * S, width: .5 * S, height: 1.4 * S, fill: '#26323a', stroke: '#7a8fd0', 'stroke-width': 1 });
 }
 function notes() {
-  note(18.2 * S, 2.1 * S, 'viewscreen', 7, 'rgba(159,227,255,.85)');
-  note(12.3 * S, 3.6 * S, 'rail', 7, 'rgba(240,210,170,.9)');
-  note(11.9 * S, 6.15 * S, 'stations', 7, 'rgba(225,240,238,.7)');
-  note(8 * S, 1.5 * S, 'Lobby', 8, 'rgba(225,240,238,.7)');
-  note(3.5 * S, 8.2 * S, 'table for ten', 7, 'rgba(225,240,238,.7)');
+  note(20.6 * S, 1.6 * S, 'viewscreen', 7, 'rgba(159,227,255,.85)');
+  note(14.3 * S, 4.9 * S, 'rail', 7, 'rgba(240,210,170,.9)');
+  note(14.9 * S, .7 * S, 'stations', 7, 'rgba(225,240,238,.7)');
+  note(8 * S, 2.5 * S, 'Lobby', 8, 'rgba(225,240,238,.7)');
+  note(3.5 * S, 9.4 * S, 'table for ten', 7, 'rgba(225,240,238,.7)');
 }
 
 // ---- hull, as in the game: stern flat with rounded corners, bow an ellipse ----

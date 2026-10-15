@@ -34,7 +34,7 @@ svg{display:block}
 <body>
 <header>
   <h1>Deck 4: Quarters</h1>
-  <div class="sub">Sketch 2, updated to build 0.6.6. Bow points forward, port side is on the left when facing it. The junior wing sits aft, the officers' corridor runs forward of the lift, and promotion moves you down the deck toward the bow. Tap any room.</div>
+  <div class="sub">Sketch 2, updated to build 0.14.0 (guest and spare cabins: G and S). Bow points forward, port side is on the left when facing it. The junior wing sits aft, the officers' corridor runs forward of the lift, and promotion moves you down the deck toward the bow. Tap any room.</div>
 </header>
 <div class="bar">
   <button id="zin" aria-label="Zoom in">Zoom in</button>
@@ -42,7 +42,7 @@ svg{display:block}
   <button id="grid" aria-pressed="false">Tile grid</button>
 </div>
 <div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="info"><div id="card"><b>Deck 4 at a glance</b><span>8 bunk rooms with 48 berths, 24 officer cabins, 2 washrooms, a laundry and the junior common room. Behind the walls: the deck's air scrubbers, the heating plant and two utility closets.</span><span class="meta">50 × 22 tiles. 12 cabins have windows, 12 are inner cabins.</span></div></div>
+<div id="info"><div id="card"><b>Deck 4 at a glance</b><span>8 bunk rooms with 48 berths, 24 single cabins (16 officers, 6 guest cabins by the lift, 2 spare at the music-room end), 2 washrooms, a laundry and the junior common room. Behind the walls: the deck's air scrubbers, the heating plant and two utility closets.</span><span class="meta">50 × 22 tiles. 12 cabins have windows, 12 are inner cabins.</span></div></div>
 <div class="legend" id="legend"></div>
 <script>
 // =====================================================================
@@ -77,6 +77,7 @@ const W = 50, D = 22;
 const KIND = {
   bunk:   { c: '#78828a', name: 'Bunk room' },
   cabin:  { c: '#8c7a69', name: 'Officer cabin' },
+  guest:  { c: '#6f8a7a', name: 'Guest cabin' },
   common: { c: '#83593b', name: 'Lounge space' },
   wash:   { c: '#8ea2a3', name: 'Washroom and laundry' },
   jcorr:  { c: '#4c555f', name: 'Junior corridor' },
@@ -116,11 +117,13 @@ ROOMS.h.night = true;
 'ABCDEFGHIJKLMNOPQRSTUVWX'.split('').forEach((k, n) => {
   const col = Math.floor(n / 4), row = n % 4, port = row < 2, outer = row === 0 || row === 3;
   const num = port ? 2 + col * 4 + (row === 0 ? 0 : 2) : 1 + col * 4 + (row === 3 ? 0 : 2);
-  const spare = k === 'V' || k === 'W';
-  ROOMS[k] = { kind: 'cabin', name: 'Cabin 4-' + String(num).padStart(2, '0') + (spare ? ' (spare)' : ''), label: '4-' + String(num).padStart(2, '0'),
+  // 16 officers, 6 guest cabins nearest the lift (guests come and go), 2 spares at the quiet music-room end
+  const spare = k === 'V' || k === 'W', guest = 'ABCDFG'.includes(k), nn = '4-' + String(num).padStart(2, '0');
+  ROOMS[k] = { kind: guest ? 'guest' : 'cabin', name: (guest ? 'Guest cabin ' : spare ? 'Spare cabin ' : 'Cabin ') + nn, label: guest ? 'G ' + nn : spare ? 'S ' + nn : nn,
     win: outer, spare,
-    x: (outer ? 'Window cabin. These go by seniority, so a newly promoted officer usually starts inside.' : 'Inner cabin: snug, windowless, and completely yours.') +
-       ' A bed, a desk, a locker and a tiny washroom.' + (spare ? ' Kept empty for transfers and guests.' : '') };
+    x: guest ? 'Guest cabin, ' + (outer ? 'with a window' : 'inner') + ': an officer\'s cabin for someone passing through, such as a visiting specialist, a passenger or crew in transit. Fresh linen folded on the bed and a travel case at its foot. Near the lift, so guests don\'t walk the whole corridor.'
+       : spare ? 'Spare cabin, kept empty: a stripped bed and a bare desk, ready for whoever comes aboard next.'
+       : (outer ? 'Window cabin. These go by seniority, so a newly promoted officer usually starts inside.' : 'Inner cabin: snug, windowless, and completely yours.') + ' A bed, a desk, a locker and a tiny washroom.' };
 });
 
 // ---- hull: stern flat with rounded corners, bow an ellipse from x = 40 ----
@@ -262,7 +265,7 @@ const lblG = el('g', {});
 for (const [k, b] of Object.entries(BOX)) {
   const R_ = ROOMS[k]; if (CORR.has(k)) continue;
   const lab = R_.label || R_.name, cx = (b.sx / b.n + .5) * S, cy = (b.sy / b.n + .5) * S;
-  const [tx, ty] = T(cx, cy), t = el('text', { x: tx, y: ty, class: 'lbl' + (R_.kind === 'cabin' ? ' sm' : '') + (R_.spare ? ' dim' : '') }, lblG);
+  const [tx, ty] = T(cx, cy), t = el('text', { x: tx, y: ty, class: 'lbl' + (R_.kind === 'cabin' || R_.kind === 'guest' ? ' sm' : '') + (R_.spare ? ' dim' : '') }, lblG);
   t.textContent = k === 'j' ? 'Common room' : lab;
   if (R_.night) { const t2 = el('text', { x: tx, y: ty + 11, class: 'lbl sm' }, lblG); t2.textContent = 'night shift'; }
 }
@@ -296,7 +299,7 @@ function show(k) {
 
 // legend
 const lg = document.getElementById('legend');
-for (const k of ['bunk', 'cabin', 'common', 'wash', 'jcorr', 'ocorr', 'serv']) {
+for (const k of ['bunk', 'cabin', 'guest', 'common', 'wash', 'jcorr', 'ocorr', 'serv']) {
   const s = document.createElement('span'); s.innerHTML = `<i style="background:${KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
 }
 for (const [c, t, dash] of [[WINC, 'Window'], ['#5fd6c6', 'Door'], ['#e9c46a', 'Service hatch']]) {
