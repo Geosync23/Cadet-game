@@ -73,7 +73,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.1
+   STARSHIP CADET: CSV Wren                            build 0.26.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5458,7 +5458,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5673,7 +5673,18 @@ function schedData() {
   const desks = schedDesks(people, shared);
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
-  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l).filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room));
+  const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l)
+    .filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room) && !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));
+  // the new habits' places: treadmills (gym, anim 'run'), the garden's standing spots (tending), the bar's seats
+  // (anim 'drink'), and the observatory on Deck 2
+  for (const n of Object.keys(DECKS).map(Number)) {
+    const sub = (key, list) => { if (list.length) shared.set(n + '|' + key, list); };
+    const obs = Object.entries(DECKS[n].rooms || {}).filter(([, r]) => /observatory/i.test(r.name || '')).map(([k]) => k);
+    sub('gym-run', (shared.get(n + '|gym') || []).filter(pl => pl.anim === 'run'));
+    sub('garden-tend', (shared.get(n + '|garden') || []).filter(pl => pl.pose === 'stand'));
+    sub('bar', (shared.get(n + '|lounge-seat') || []).filter(pl => pl.anim === 'drink'));
+    sub('observatory', ['lounge-seat', 'bench'].flatMap(t => shared.get(n + '|' + t) || []).filter(pl => obs.includes(pl.room)));
+  }
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -5689,11 +5700,12 @@ function schedRoomLocked(n, room) {
 // rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
   const desks = new Map(), used = new Set();
-  const order = people.filter(p => p.work).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
+  const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley')).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
-    const pool = pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
-      : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room));
+    const pool = (pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
+      : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room)))
+      .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));   // machine panels are for servicing (B2); the galley books its own
     const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
     if (d) used.add(p.shift + '|' + d.id);
     desks.set(p.id, d ? d.id : null);
@@ -5708,24 +5720,38 @@ function schedU(seed, day, k) {
   return (h >>> 0) / 4294967296;
 }
 const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
-// The galley rota (section 16, the galley engineer): galleyShift(person, day) -> null | [[from, to], ...], the
-// person's work blocks that day in minutes from midnight. Consulted only for galley staff on work days, and only
-// if section 16 defines it; otherwise the normal shift.
-function galleyBlocks(p, d) {
-  if (p.dept !== 'galley' || p.shift === 'night' || !isWorkDay(p, d) || typeof galleyShift !== 'function') return null;
-  const b = galleyShift(p, d);
-  return Array.isArray(b) && b.length && b.every(x => x[1] > x[0]) ? b.slice().sort((x, y) => x[0] - y[0]) : null;
+// The galley rota (section 16, the galley engineer). galleyDay(person, day) -> null | { role, wake, bedBy,
+// blocks: [{ from, to, placeId, task }], meals: { breakfast: [from, to], dinner: [from, to] } }, minutes from that
+// day's midnight. role null is a day off. Each block (a stint at one station) is a work segment there; touching
+// stints make one stretch of work; a given meal is a normal meal (queue, then a seat) between those times; a meal
+// not given is the normal one in its window; bedBy caps that night's bedtime. If only the older galleyShift(person,
+// day) -> [[from, to, placeId?, task?], ...] exists, that's used instead. Consulted only for day-shift galley staff.
+function galleyPlan(p, d) {
+  if (p.dept !== 'galley' || p.shift === 'night') return null;
+  if (typeof galleyDay === 'function') {
+    const g = galleyDay(p, d); if (!g) return null;
+    const blocks = g.role && Array.isArray(g.blocks) ? g.blocks.filter(x => x.to > x.from).map(x => [x.from, x.to, x.placeId || null, x.task || null]) : [];
+    return { blocks: blocks.length ? blocks.sort((x, y) => x[0] - y[0]) : null, wake: g.wake == null ? null : g.wake, bedBy: g.bedBy == null ? null : g.bedBy, meals: g.meals || {} };
+  }
+  if (typeof galleyShift === 'function' && isWorkDay(p, d)) {
+    const b = galleyShift(p, d);
+    if (Array.isArray(b) && b.length && b.every(x => x[1] > x[0])) return { blocks: b.map(x => [x[0], x[1], x[2] || null, x[3] || null]).sort((x, y) => x[0] - y[0]), wake: null, bedBy: null, meals: null };
+  }
+  return null;
 }
+const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley books its own stations
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
 function schedFrame(p, d) {
-  const U = k => schedU(p.seed, d, k), H = new Set(p.habits || []), shape = WEEK_SHAPE[weekday(d)], works = isWorkDay(p, d);
+  const U = k => schedU(p.seed, d, k), H = new Set(p.habits || []), shape = WEEK_SHAPE[weekday(d)];
+  const gp = galleyPlan(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
   let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
-  const next = galleyBlocks(p, d + 1);                    // an early galley start tomorrow means an early night
-  if (next) bed = Math.min(bed, next[0][0] - 35 - 410 + 1440);
+  const next = galleyPlan(p, d + 1);                      // an early galley start tomorrow means an early night
+  if (gp && gp.bedBy != null) bed = Math.min(bed, gp.bedBy);
+  if (next && next.blocks) bed = Math.min(bed, (next.wake != null ? next.wake : next.blocks[0][0] - 35) - 410 + 1440);
   bed = Math.round(Math.min(1430, bed));
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
@@ -5744,7 +5770,7 @@ function schedFrame(p, d) {
 // looks back a fixed few days, not all the way to day 1.
 const GYM_BASE = (p, dd) => (p.habits || []).includes('gym-regular') ? (isWorkDay(p, dd) ? .8 : .6) : .12;
 const CALL_BASE = (p, dd) => (p.habits || []).includes('calls-home') ? (isWorkDay(p, dd) ? .3 : .9) : .06;
-const SHOP_BASE = (p, dd) => isWorkDay(p, dd) ? .1 : .45;
+const SHOP_BASE = (p, dd) => (p.habits || []).includes('shopper') ? (isWorkDay(p, dd) ? .35 : .8) : isWorkDay(p, dd) ? .1 : .45;
 function needsEst(p, d) {
   const since = (k, base) => { for (let i = 1; i <= 7; i++) if (schedU(p.seed, d - i, k) < base(p, d - i)) return i; return 8; };
   const F = schedFrame(p, d), P = schedFrame(p, d - 1);
@@ -5816,6 +5842,10 @@ function schedBuild(p, d, occ, S) {
     return null;
   };
   const work = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
+  const workAt = (pid, task, to) => {                    // a galley stint: its own station and task
+    const pl = pid && S.byId.get(pid), ex = { anim: placeAnim(pl) || 'cook' }; if (task) ex.tag = task;
+    seg('work', to, pl ? pl.type : 'work:galley', pid, ex);
+  };
   const toilet = k => {                                  // a toilet on the deck you're on, then hands at a basin; nothing if they're busy
     if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2 })) return false;
     take('wash', [[deck, 'basin']], 1, { tag: 'hands', min: 1 });   // no waiting: both busy, skip it
@@ -5896,6 +5926,14 @@ function schedBuild(p, d, occ, S) {
     });
     if (offDay && p.rota && p.rota.offDays && weekday(d) === p.rota.offDays[0]) out.push(() => take('leisure', [[4, 'laundry']], 30 + Math.round(15 * U(64)), { wait: 15, min: 20, tag: 'laundry' }));
     if (out[0] === gym && U(68) < .5) out.push(out.shift());   // half the time the gym waits until after dinner (the 17:00 rush)
+    // the rooms' regulars (HABITS, section 9): a run on the treadmill (before dinner), and after dinner the music
+    // room's instruments, tending the garden, a drink at the bar, the observatory
+    const wk = F.works;
+    if (H.has('runner') && U(100) < (wk ? .7 : .6)) out.unshift(() => take('gym', [[3, 'gym-run'], [3, 'gym']], 25 + Math.round(15 * U(101)), { wait: 10, min: 15, tag: 'run' }));
+    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play' }));
+    if (H.has('gardener') && U(104) < .6) out.push(() => take('leisure', [[3, 'garden-tend'], [3, 'garden']], 30 + Math.round(30 * U(105)), { wait: 5, min: 20, tag: 'tend' }));
+    if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar' }));
+    if (H.has('stargazer') && U(108) < .5) out.push(() => take('leisure', [[2, 'observatory'], [2, 'lounge-seat']], 45 + Math.round(45 * U(109)), { wait: 5, min: 25, tag: 'stars' }));
     return out;
   };
   // the evening: specials, dinner, leisure, then to bed (or to the night shift at workStart)
@@ -5927,25 +5965,31 @@ function schedBuild(p, d, occ, S) {
     meal('breakfast', k + 5, by);
   };
 
-  const GB = !F.night && galleyBlocks(p, d);
+  const GP = !F.night && galleyPlan(p, d), GB = GP && GP.blocks;
   if (GB) {
-    // the galley rota: work blocks with free time between; a meal whose window falls in a gap is eaten in the mess,
-    // one the work covers is a staff meal at the station near the window's end
-    seg('sleep', Math.max(GB[0][0] - 35, P.bed + 410 - 1440), 'bed', p.bed);
-    wash(20);
-    const ate = {};
-    GB.forEach(([a, b], i) => {
-      for (const m of ['breakfast', 'dinner']) {
-        const [w0, w1] = MEALS[m];
-        if (!ate[m] && Math.min(w1, a - C) - Math.max(w0, t + C) >= 20) { if (t + C < w0) leisureUntil(w0 - C, 90 + i); meal(m, 92 + i, Math.min(w1, a - C)); ate[m] = true; }
+    // the galley rota: stints at the galley's stations (each its own place and task), free time between, meals at
+    // the times the rota gives (or in their window, around the work), and a staff meal at the station only when
+    // the work covers a whole window and the rota gives no time for it
+    const early = GB[0][0] < 600;
+    seg('sleep', Math.max(GP.wake != null ? GP.wake : early ? GB[0][0] - 35 : F.wake, P.bed + 410 - 1440), 'bed', p.bed);
+    if (early) wash(20); else morning(20, Math.min(MEALS.breakfast[1], GB[0][0] - C));
+    const ate = { breakfast: !early }, given = GP.meals || {};
+    GB.forEach(([a, b, pid, task], i) => {
+      if (t < a) {                                        // a gap before this stint
+        for (const m of ['breakfast', 'dinner']) {
+          if (ate[m]) continue;
+          const w = given[m];
+          if (w && w[0] >= t && w[1] <= a) { if (w[0] - C > t) leisureUntil(w[0] - C, 90 + i); meal(m, 92 + i, w[1]); ate[m] = true; }
+          else if (!w) { const [w0, w1] = MEALS[m]; if (Math.min(w1, a - C) - Math.max(w0, t + C) >= 20) { if (t + C < w0) leisureUntil(w0 - C, 90 + i); meal(m, 92 + i, Math.min(w1, a - C)); ate[m] = true; } }
+        }
+        if (t < a - C) leisureUntil(a - C, 94 + i);          // back a ride early, wherever the free time took them
       }
-      if (t < a - C) leisureUntil(a - C, 94 + i);
-      go(wd);
-      for (const m of ['breakfast', 'dinner']) {
+      go(wd); linger(a);                                 // early: wait for the stint (someone else may be at that station)
+      if (!given.breakfast && !given.dinner) for (const m of ['breakfast', 'dinner']) {   // no time given and none free: eat at the station
         const [, w1] = MEALS[m];
-        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10) { work(w1 - 30); seg(m, w1 - 10, wtype, desk, { tag: 'staff' }); ate[m] = true; }
+        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, 'work:galley', pid, { tag: 'staff' }); ate[m] = true; }
       }
-      work(Math.min(b, 1440));
+      workAt(pid, task, Math.min(b, 1440));
     });
     if (t < 1440) evening(specials(50, false), Math.max(t + 30, F.bed), false, ate.dinner);
   } else if (!F.night) {
@@ -6041,7 +6085,7 @@ function shipDay(d) {
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
   S.spare.forEach((pl, i) => {
-    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !galleyBlocks(p, d));
+    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !galleyPlan(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
@@ -6083,9 +6127,9 @@ function dayReport(day) {
     const today = planDay(p, day);
     const meals = new Set(today.filter(s => s.act === 'breakfast' || s.act === 'dinner').map(s => s.act));
     if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
-    if (isWorkDay(p, day)) {                             // the whole shift worked (breaks and a galley staff meal count)
-      const gb = galleyBlocks(p, day);
-      const iv = gb ? gb.map(([a, b]) => [B + a, B + b]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
+    const gp = galleyPlan(p, day), gb = gp && gp.blocks;
+    if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
+      const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
       const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff'].includes(s.tag));
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
@@ -6103,14 +6147,14 @@ function dayReport(day) {
     const v = iv.slice().sort((x, y) => x[0] - y[0]);
     for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) rep.double.push(id + '@' + v[i][0]);
   }
-  // beds and desks aren't in occ: check nobody else's plan uses them
-  const holder = new Map();
-  for (const p of S.people) for (const s of planDay(p, day)) if (s.placeId && (s.type === 'bed' || /^work:/.test(s.type))) {
-    const k = s.placeId + '|' + (s.type === 'bed' ? '' : p.shift); const h = holder.get(k);
-    if (h && h !== p.id && s.type === 'bed') rep.double.push(s.placeId + ' ' + h + '/' + p.id);
-    if (h && h !== p.id && s.type !== 'bed') rep.double.push(s.placeId + ' ' + h + '/' + p.id);
-    holder.set(k, p.id);
+  // beds and work stations aren't in occ: a bed is only ever its owner's, and no two people work at one station
+  // at the same time (desks are fixed per shift; the galley's stations are booked by its rota)
+  const bedOf = new Map(), atWork = new Map();
+  for (const p of S.people) for (const s of planDay(p, day)) if (s.placeId) {
+    if (s.type === 'bed') { const h = bedOf.get(s.placeId); if (h && h !== p.id) rep.double.push(s.placeId + ' ' + h + '/' + p.id); bedOf.set(s.placeId, p.id); }
+    else if (s.act === 'work' && /^work:/.test(s.type)) (atWork.get(s.placeId) || atWork.set(s.placeId, []).get(s.placeId)).push([s.from, s.to, p.id]);
   }
+  for (const [id, v] of atWork) { v.sort((x, y) => x[0] - y[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1] && v[i][2] !== v[i - 1][2]) rep.double.push(id + ' ' + v[i - 1][2] + '/' + v[i][2] + '@' + hhmm(v[i][0] % 1440)); }
   for (let t = B; t < B + 1440; t += 5) {
     const n = {}; for (const p of S.people) { const w = whereIs(p, t); n[w.deck] = (n[w.deck] || 0) + 1; }
     for (const k in n) if (!rep.peak[k] || n[k] > rep.peak[k][0]) rep.peak[k] = [n[k], hhmm(t - B)];
@@ -7160,6 +7204,7 @@ class CrewAgent {
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || null;
+    if (typeof galleyHold === 'function') { const h = galleyHold(this.p, now); if (h !== undefined) goalId = h; }   // section 16: waiting for food
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -7210,8 +7255,13 @@ function crewDetail() {                                  // who gets a full rig:
     a.h.set({ x: a.x, y: a.y, z: a.z }, a.face, a.pose);
   }
 }
+// placeBusy(id): is someone settled at that place on this deck? A Set rebuilt once a frame, so it's a cheap lookup
+// for kit that animates while in use (the treadmill belts, the rower). PLAYER_PLACE is the player's own place id
+// when the player is using one (section 15 sets it), or null.
+const BUSY = new Set(); let PLAYER_PLACE = null;
+const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
@@ -7241,6 +7291,7 @@ function updateDeckCrew(dt) {
   const now = shipNow(), N = deckDef.num;
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
   for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
+  BUSY.clear(); for (const a of DECK_CREW) if (a.settled && a.spot) BUSY.add(a.spot.id);
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
   crewDetail();
