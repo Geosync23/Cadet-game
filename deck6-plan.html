@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starship Cadet: Deck 6 plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 40%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed}
+header{padding:16px 16px 6px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;max-width:1100px;margin:0 auto}
+button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--teal);color:#bdeee6}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+#wrap{overflow:auto;max-width:1100px;margin:0 auto;padding:4px 10px 10px;-webkit-overflow-scrolling:touch}
+svg{display:block}
+.room{cursor:pointer}
+.room:focus-visible{outline:none}
+.lbl{font-size:10px;fill:#eef3f1;text-anchor:middle;dominant-baseline:central;pointer-events:none;paint-order:stroke;stroke:rgba(10,14,20,.55);stroke-width:2.5px}
+.lbl.sm{font-size:8.5px}
+.room.sealed{opacity:.38}
+.room.newroom rect{stroke:rgba(233,196,106,.0)}
+#info{max-width:1100px;margin:0 auto 10px;padding:0 16px}
+#card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-height:74px}
+#card b{display:block;font-size:15px;color:#bdeee6;font-weight:600;margin-bottom:3px}
+#card span{font-size:13.5px;color:#cfd9dc;line-height:1.5}
+#card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.legend{max-width:1100px;margin:0 auto 24px;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.qs{max-width:1100px;margin:-12px auto 28px;padding:0 16px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.qs b{color:#cfd9dc;font-weight:600}
+.qs ul{margin:6px 0 0;padding-left:18px}
+.qs li{margin:3px 0}
+.qs code{font-size:11.5px;color:#bdeee6}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck 6: Engineering</h1>
+  <div class="sub">Sketch 1, for build 0.6.6. Bow points forward, port side is on the left when facing it. The bottom of the ship: short, narrow and warm, with a hum you feel through your boots. The engine room fills the flat stern and the reactor fills the bow. Between them is the foot of the spine, an overlook onto the drive coils, and engine control looking into the reactor. Most of it stays shut until tiers 3 and 4, but you can come and look from day one. Tap any room. Rooms ringed in gold are new ideas, not in the design doc yet.</div>
+</header>
+<div class="bar">
+  <button id="zin" aria-label="Zoom in">Zoom in</button>
+  <button id="zout" aria-label="Zoom out">Zoom out</button>
+  <button id="grid" aria-pressed="false">Tile grid</button>
+  <button id="first" aria-pressed="false">Built first</button>
+</div>
+<div id="wrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<div id="info"><div id="card"><b>Deck 6 at a glance</b><span>The engine room aft, with three drive coils and the drive housing across the stern, watched from the overlook gallery. The reactor core is in the bow, watched from engine control. Two power junctions sit by the spine, and the ship's lowest crawlways run along both hulls from the engine room to the reactor. A small watch room for the engine watch. No windows anywhere.</span><span class="meta">36 × 12 tiles, the narrowest deck below the bridge, with a blunt bow and a flat stern for the drive. The lift lines up with Decks 3, 4 and 5 (game lift: [19, 6], car rows 4–6, ladder row 7, trunks row 3). The spine ends here.</span></div></div>
+<div class="legend" id="legend"></div>
+<div class="qs" id="qs"><b>Open questions I had to guess at</b><ul>
+  <li><b>When it opens.</b> The doc says Deck 6 opens at tiers 3 and 4. I've assumed the lift comes here from the start, with the lobby, overlook and watch room open, so you can look at the engine long before you work on it (like Deck 5's fan hall window). Or should the lift panel grey out Deck 6 until tier 3?</li>
+  <li><b>An overlook on one level.</b> The build has one floor height per deck, so the overlook is a gallery behind glass, level with the engine room floor, and the stair down is a shut door. A real drop to a lower coil floor would need new kit.</li>
+  <li><b>Who works here.</b> The engine watch room is a new idea. Is there an engine watch on both shifts, and are they Works crew?</li>
+  <li><b>Crawlways.</b> They're sealed void strips for now, like Deck 5's pipe galleries. They'll want the low ceiling and crouch-walk when crawlways arrive.</li>
+  <li><b>Tiers.</b> Both power junctions and engine control are tier 3; the engine room and reactor are tier 4. Should one junction open at tier 2?</li>
+  <li><b>Shape.</b> 36 × 12 with a blunt bow, as if the lower hull sweeps up toward the bow under Deck 5. It runs from world x −21 to 12.6, inside Deck 5's −21 to 21.6. The stern lines up with Deck 5's bay doors.</li>
+</ul></div>
+<script>
+// =====================================================================
+// DECK 6 DATA, in the game's format: no margin rows, so DECK6 can go
+// straight into DECKS[6] (add dress). '.' is outside the hull.
+// Halls (+ lobby) join each other with no wall.
+// Alignment: the game lift is [19, 6], which sits at world (-4, 0) like
+// Decks 3, 4 and 5. The car is 2 x 3 (rows 4-6) with the ladder row Z
+// below it and the trunks row Y above it, behind the car's back wall.
+// The deck is 12 wide (world z -6..6) and runs from world x -21 to 12.6,
+// inside Deck 5's outline above it.
+// =====================================================================
+const DECK6 = {
+  num: 6, name: 'Engineering', seed: 60661, hazard: true,
+  blurb: 'Engine room, reactor, power junctions', arrive: 'The overlook is aft, onto the engine room. Engine control and the reactor are forward. Mind the heat.',
+  lift: [19, 6],
+  map: [
+    '..EEEEEEEEEEcccccccccccccccRRRRR....',
+    '..EEEEEEEEEEOOOO++++++jjjjjRRRRRRR..',
+    '..EEEEEEEEEEOOOO++++++jjjjjRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++YY++jjjjjRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++@@++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++ZZ++KKKKKRRRRRRRRR',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRRR.',
+    '..EEEEEEEEEEOOOO++++++SSJJJRRRRRRR..',
+    '..EEEEEEEEEECCCCCCCCCCCCCCCRRRRR....',
+  ],
+  // doors, in game edge keys. door: open to all. closed: shut, with tap text. hatch: service access.
+  // glass: an inner window. lift: the main lift (one wide door each side).
+  doors: {
+    'v,18,4': 'lift', 'v,18,5': 'lift', 'v,18,6': 'lift', 'v,20,4': 'lift', 'v,20,5': 'lift', 'v,20,6': 'lift',   // one wide door each side
+    'h,18,3': 'glass', 'h,19,3': 'glass',                     // the foot of the trunks, behind glass above the car
+    'h,18,8': 'hatch', 'h,19,8': 'glass',                     // the bottom of the ladder, with its hatch
+    'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass', 'v,16,7': 'glass',   // onto the overlook
+    'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass',  // the overlook's long window onto the engine room...
+    'v,12,5': 'closed',                                                          // ...the stair door down to the coil floor...
+    'v,12,6': 'glass', 'v,12,7': 'glass', 'v,12,8': 'glass', 'v,12,9': 'glass', 'v,12,10': 'glass',   // ...and the rest of the window
+    'v,22,5': 'closed', 'v,22,4': 'glass', 'v,22,6': 'glass', // engine control, glass onto the lobby
+    'v,27,5': 'closed', 'v,27,4': 'glass', 'v,27,6': 'glass', 'v,27,7': 'glass', // engine control's window onto the reactor, and the shielded door
+    'v,22,9': 'door',                                         // the watch room
+    'h,17,1': 'hatch', 'h,17,11': 'hatch',                    // down into the port and starboard crawlways
+    'v,22,2': 'hatch', 'v,24,9': 'hatch',                     // port power junction from the lobby; starboard from the watch room
+  },
+  // which room each shut door or hatch leads into (its tap text is that room's 'tap')
+  sealed: { 'v,12,5': 'E', 'v,22,5': 'K', 'v,27,5': 'R', 'h,17,1': 'c', 'h,17,11': 'C', 'v,22,2': 'j', 'v,24,9': 'J' },
+  plates: [['v,16,3', 'e', 'Overlook'], ['v,22,7', 'w', 'Engine control'], ['v,22,8', 'w', 'Watch room'], ['v,22,3', 'w', 'Junction']],
+  rooms: {
+    '+': { name: 'Lift lobby', floor: 'lobby', hall: true },
+    '@': { name: 'Main lift', floor: 'lift' },
+    Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
+    O: { name: 'Engine overlook', floor: 'steel' },
+    S: { name: 'Engine watch room', floor: 'wood' },
+    // locked, but seen through glass
+    E: { name: 'Engine room', floor: 'grate', tap: 'The stair down to the engine room floor: the drive coils and the drive itself. Tier 4 access. Watch them through the glass.' },
+    K: { name: 'Engine control', floor: 'plate', tap: 'Engine control. Tier 3 access, once power work opens. You can see the board through the glass.' },
+    R: { name: 'Reactor', floor: 'grate', tap: 'The reactor, behind a shielded door. Tier 4 access, and only on a team job.' },
+    // sealed until their tier
+    c: { name: 'Port crawlway', void: true, tap: 'The lowest crawlway on the ship, along the port hull from the engine room to the reactor. Tier 3 access.' },
+    C: { name: 'Starboard crawlway', void: true, tap: 'The lowest crawlway on the starboard side, from the engine room to the reactor. Tier 3 access.' },
+    j: { name: 'Port power junction', void: true, tap: 'Breaker cabinets and the main junction, where the reactor\'s power splits for the decks above. Tier 3 access.' },
+    J: { name: 'Starboard power junction', void: true, tap: 'The second power junction, behind the watch room\'s kettle. Tier 3 access.' },
+  },
+  windows: [],
+  closedDoors: {
+    'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
+  },
+  hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6 },   // flat stern with tight corners for the drive, a short blunt bow
+};
+const ROOMS = {
+  '+': { kind: 'lobby', name: 'Lift lobby', built: true, x: 'The bottom of the line. Step out and it\'s warmer than anywhere else aboard, with a low hum underfoot. The trunks start here behind glass above the car, and the ladder ends below it. There are hazard bands at every door and hatches into the junctions and crawlways.' },
+  '@': { kind: 'core', name: 'Main lift', label: 'Lift', x: 'The main lift: 2 × 3, the same car as every deck, with doors on the stern and bow sides. Deck 6 is the bottom of the line.' },
+  Y: { kind: 'core', name: 'Spine trunks', label: 'Trunks', x: 'The foot of the power and air trunks: thick insulated risers leaving the engine deck for every deck above. The ship\'s power starts its climb here.' },
+  Z: { kind: 'core', name: 'Spine ladder', label: 'Ladder', x: 'The bottom of the maintenance ladder, behind glass, with a hatch for tier 2. The lowest rung is stamped with the shipyard\'s mark.' },
+  O: { kind: 'over', name: 'Engine overlook', label: 'Overlook', built: true, x: 'A steel gallery with a rail along one long window, looking aft into the engine room: three drive coils glowing in a row, and the drive housing across the stern. The stair down to the coil floor is a shut door (tier 4). Open from the start, so you can come and look long before you\'re allowed in. New crew always come down in their first week.' },
+  E: { kind: 'engine', name: 'Engine room', label: 'Engine room', x: 'The engine room proper: three drive coils in a row, each taller than a person and glowing as they cycle, with catwalks between them and the drive housing across the flat stern. Big repairs here are team jobs, often timed with the bridge. Tier 4.' },
+  K: { kind: 'control', name: 'Engine control', label: 'Control', x: 'The board that runs the reactor and the drive, a big mimic panel of the ship\'s power, and two chairs that are never both empty. Glass onto the lobby on one side and the reactor on the other. Tier 3, when power work opens.' },
+  R: { kind: 'reactor', name: 'Reactor', label: 'Reactor', x: 'The reactor core in its shielded drum, filling the bow of Deck 6, with coolant loops round it. Seen through engine control\'s window. Tier 4.' },
+  S: { kind: 'common', name: 'Engine watch room', label: 'Watch room', built: true, isNew: true, x: 'New idea. A small, warm room for the engine watch, against engine control\'s back wall: a kettle, two armchairs, a stack of old engine logs and a heater nobody needs. The hatch into the starboard power junction is behind the kettle.' },
+  j: { kind: 'serv', name: 'Port power junction', label: 'Junction', x: 'Breaker cabinets and the main junction, where the reactor\'s output splits for every deck above. Through a hatch off the lobby. Tier 3: some jobs need a shutdown, so you pick a quiet hour and warn whoever loses power.' },
+  J: { kind: 'serv', name: 'Starboard power junction', label: 'Junction', x: 'The second power junction, through a hatch in the watch room. Tier 3.' },
+  c: { kind: 'serv', name: 'Port crawlway', label: 'Port crawlway', x: 'The lowest crawlway on the ship: along the port hull from the engine room to the reactor, under pipe runs and cable trays, so you crouch-walk all the way. Through a hatch off the lobby. Tier 3, and the quickest way from the coils to the reactor during a team job.' },
+  C: { kind: 'serv', name: 'Starboard crawlway', label: 'Starboard crawlway', x: 'The starboard crawlway, the twin of the port one. Tier 3.' },
+};
+const DECK = DECK6;
+const KIND = {
+  engine:  { c: '#6e4a3a', name: 'Engine room' },
+  reactor: { c: '#4d5e3f', name: 'Reactor' },
+  control: { c: '#3f5a6e', name: 'Engine control' },
+  over:    { c: '#5d6a63', name: 'Overlook' },
+  common:  { c: '#83593b', name: 'Watch room' },
+  lobby:   { c: '#4f6466', name: 'Lift lobby' },
+  core:    { c: '#1d252d', name: 'Spine' },
+  serv:    { c: '#2e373c', name: 'Service space' },
+};
+const LEGEND = ['engine', 'reactor', 'control', 'over', 'common', 'lobby', 'serv'];
+const LEGEND_EXTRA = [];
+const POS = { E: [7, 1.3], O: [14, 9.4], R: [31.2, 1.6], K: [24.5, 6.6], S: [23, 9.4], j: [24.5, 2.75], J: [25.5, 8.6], c: [19.5, .5], C: [19.5, 11.5], Y: [19, 3.5], '@': [19, 5.5], Z: [19, 7.5] };
+const SMALL = new Set(['K', 'S', 'Y', 'Z']);
+function decorate() {
+  // the drive housing across the stern, the three drive coils, catwalks between them
+  deco('rect', { x: 2.15 * S, y: 1.6 * S, width: .9 * S, height: 8.8 * S, rx: 4, fill: '#5b6770', stroke: '#e9c46a', 'stroke-width': 1.5 });
+  for (const y of [3.1, 8.9]) deco('line', { x1: 3.3 * S, y1: y * S, x2: 11.8 * S, y2: y * S, stroke: 'rgba(233,196,106,.5)', 'stroke-width': 3, 'stroke-dasharray': '4 3' });
+  for (const x of [4.6, 7.1, 9.6]) {
+    deco('circle', { cx: x * S, cy: 6 * S, r: 1.1 * S, fill: '#3a2a26', stroke: '#e8a35a', 'stroke-width': 2.5 });
+    deco('circle', { cx: x * S, cy: 6 * S, r: .7 * S, fill: 'rgba(255,170,90,.35)', stroke: 'rgba(255,190,120,.8)', 'stroke-width': 1.5 });
+  }
+  // the overlook's rail along its window
+  deco('line', { x1: 12.3 * S, y1: 1.1 * S, x2: 12.3 * S, y2: 10.9 * S, stroke: '#c9b98a', 'stroke-width': 2 });
+  // engine control: the board facing the reactor window, the mimic panel, two chairs
+  deco('rect', { x: 26.1 * S, y: 4.2 * S, width: .7 * S, height: 3.6 * S, rx: 2, fill: '#2b3238', stroke: '#5fd6c6', 'stroke-width': 1.2 });
+  deco('rect', { x: 22.6 * S, y: 4.15 * S, width: 3 * S, height: .3 * S, fill: '#7dffb0', opacity: .6 });
+  for (const y of [5.2, 6.8]) deco('circle', { cx: 25.4 * S, cy: y * S, r: .3 * S, fill: '#3f5a6e', stroke: '#c3d3d6', 'stroke-width': 1 });
+  // the reactor drum and its coolant loops
+  deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 3.2 * S, fill: 'none', stroke: 'rgba(159,227,255,.35)', 'stroke-width': 6 });
+  deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 2.1 * S, fill: '#26323a', stroke: '#c9d1d3', 'stroke-width': 2 });
+  deco('circle', { cx: 31.4 * S, cy: 6 * S, r: 1 * S, fill: 'rgba(125,255,176,.35)', stroke: '#7dffb0', 'stroke-width': 1.5 });
+  // the watch room's armchairs and kettle; junction cabinets
+  for (const y of [8.3, 9.5]) deco('rect', { x: 22.15 * S, y: y * S, width: .7 * S, height: .7 * S, rx: 4, fill: '#a0603a' });
+  deco('circle', { cx: 23.6 * S, cy: 10.6 * S, r: 4, fill: '#e2d3b5' });
+  for (let x = 22.3; x < 26.8; x += .9) { deco('rect', { x: x * S, y: 1.2 * S, width: .6 * S, height: .9 * S, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 }); }
+  for (let x = 24.3; x < 26.8; x += .9) { deco('rect', { x: x * S, y: 9.6 * S, width: .6 * S, height: .9 * S, fill: '#26323a', stroke: '#e9c46a', 'stroke-width': 1 }); }
+}
+function notes() {
+  note(7.1 * S, 8 * S, 'drive coils', 7, 'rgba(240,210,170,.9)');
+  note(2.6 * S, 11 * S, 'drive', 7, 'rgba(240,210,170,.9)');
+  note(19 * S, 9.4 * S, 'Lobby', 9, 'rgba(225,240,238,.7)');
+  note(14 * S, 3 * S, 'window', 7, 'rgba(159,227,255,.8)');
+}
+
+// ---- hull, as in the game: stern flat with rounded corners, bow an ellipse ----
+const MAP = DECK.map, DOORS = DECK.doors, HULL = DECK.hull, W = MAP[0].length, D = MAP.length;
+const hullL = y => { const d = Math.min(y, D - y), r = HULL.stern; return HULL.sternX + (d < r ? r - Math.sqrt(Math.max(0, r * r - (r - d) ** 2)) : 0); };
+const hullR = y => { const v = (y - D / 2) / (D / 2); return HULL.bowFrom + HULL.bowLen * Math.sqrt(Math.max(0, 1 - v * v)); };
+const CORR = new Set(Object.keys(DECK.rooms).filter(k => DECK.rooms[k].hall));
+const WIN = new Set(DECK.windows.map(w => w.room));
+const SPINE = new Set(['@', 'Y', 'Z']);
+
+const S = 20;   // svg units per tile
+const at = (i, j) => (i < 0 || j < 0 || i >= W || j >= D) ? '.' : MAP[j][i];
+const BOX = {};
+for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) {
+  const r = at(i, j); if (r === '.') continue;
+  const b = BOX[r] || (BOX[r] = { i0: i, j0: j, i1: i, j1: j, n: 0, sx: 0, sy: 0 });
+  b.i0 = Math.min(b.i0, i); b.j0 = Math.min(b.j0, j); b.i1 = Math.max(b.i1, i); b.j1 = Math.max(b.j1, j); b.n++; b.sx += i; b.sy += j;
+}
+const open = (a, b) => (CORR.has(a) && CORR.has(b)) || (a === '@' && b === '@');
+
+const svg = document.getElementById('plan'), NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p = svg) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const PAD = 26, VW = W * S + PAD * 2, VH = D * S + PAD * 2;
+const PORTRAIT = innerHeight > innerWidth * 1.15;   // phones held upright: bow points up, port on the left
+const PW = PORTRAIT ? VH : VW, PH = PORTRAIT ? VW : VH;
+svg.setAttribute('viewBox', `${-PAD} ${-PAD} ${PW} ${PH}`);
+const T = (x, y) => PORTRAIT ? [y, W * S - x] : [x, y];
+
+const pts = [];
+for (let y = 0; y <= D + .001; y += .1) pts.push([hullR(Math.min(y, D)), Math.min(y, D)]);
+for (let y = D; y >= -.001; y -= .1) pts.push([hullL(Math.max(y, 0)), Math.max(y, 0)]);
+const hullD = 'M' + pts.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join('L') + 'Z';
+const defs = el('defs', {});
+const clip = el('clipPath', { id: 'hull' }, defs); el('path', { d: hullD }, clip);
+const pat = el('pattern', { id: 'hz', width: 8, height: 8, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+el('rect', { width: 8, height: 8, fill: '#2e373c' }, pat); el('rect', { width: 2, height: 8, fill: 'rgba(233,196,106,.16)' }, pat);
+
+const mainG = el('g', PORTRAIT ? { transform: `matrix(0,-1,1,0,0,${W * S})` } : {});
+el('path', { d: hullD, fill: '#141a22', stroke: 'none' }, mainG);
+const floorG = el('g', { 'clip-path': 'url(#hull)' }, mainG);
+const roomEls = {};
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k], kind = KIND[R_.kind];
+  const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': R_.name }, floorG);
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) if (at(i, j) === k)
+    el('rect', { x: i * S - .3, y: j * S - .3, width: S + .6, height: S + .6, fill: R_.kind === 'serv' ? 'url(#hz)' : kind.c }, g);
+  roomEls[k] = g;
+  const go = () => show(k); g.addEventListener('click', go); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+}
+const deco = (t, a) => el(t, { 'pointer-events': 'none', ...a }, floorG);
+// an arc in the game's curve format: [cx, cz, r, a0, a1] in tiles and degrees, 0 to the bow, 90 to starboard
+const arcD = ([cx, cz, r, a0, a1]) => { let d = ''; for (let a = a0; a <= a1 + .01; a += 3) { const t = a * Math.PI / 180; d += (d ? 'L' : 'M') + ((cx + r * Math.cos(t)) * S).toFixed(1) + ',' + ((cz + r * Math.sin(t)) * S).toFixed(1); } return d; };
+const CURVE_C = { wall: '#d7dfdc', bar: '#c58b4a', glass: '#9fe3ff', planter: '#6fa35a' };
+for (const c of DECK.curves || []) deco('path', { d: arcD(c.arc), fill: 'none', stroke: CURVE_C[c.kind], 'stroke-width': c.kind === 'wall' ? 5 : 6, 'stroke-linecap': 'round' });
+// lift car and ladder rungs, the same in every plan
+{ const [lx, lz] = DECK.lift;
+  deco('rect', { x: (lx - 1) * S + 4, y: (lz - 2) * S + 2, width: 2 * S - 8, height: 3 * S - 4, rx: 3, fill: '#37434c', stroke: '#e8c06a', 'stroke-width': 1.5 });
+  for (let y = lz + 1.15; y < lz + 1.95; y += .3) deco('rect', { x: (lx - .75) * S, y: y * S, width: 1.5 * S, height: 1.4, fill: 'rgba(200,210,215,.35)' });
+  if (BOX.Y) for (const x of [lx - .5, lx + .5]) deco('circle', { cx: x * S, cy: (lz - 2.5) * S, r: 6, fill: 'none', stroke: 'rgba(159,227,255,.55)', 'stroke-width': 2 }); }
+decorate();
+// new-idea rooms get a dashed gold ring
+for (const [k, R_] of Object.entries(ROOMS)) if (R_.isNew) {
+  const b = BOX[k]; deco('rect', { x: b.i0 * S + 3, y: b.j0 * S + 3, width: (b.i1 - b.i0 + 1) * S - 6, height: (b.j1 - b.j0 + 1) * S - 6, rx: 6, fill: 'none', stroke: 'rgba(233,196,106,.85)', 'stroke-width': 1.5, 'stroke-dasharray': '6 4' });
+}
+
+const gridG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none', style: 'display:none' }, mainG);
+for (let i = 0; i <= W; i++) el('line', { x1: i * S, y1: 0, x2: i * S, y2: D * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+for (let j = 0; j <= D; j++) el('line', { x1: 0, y1: j * S, x2: W * S, y2: j * S, stroke: 'rgba(255,255,255,.08)', 'stroke-width': .6 }, gridG);
+
+const wallG = el('g', { 'clip-path': 'url(#hull)', 'pointer-events': 'none' }, mainG);
+const seg = (x1, y1, x2, y2, st, w, dash) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': w, 'stroke-linecap': 'square', ...(dash ? { 'stroke-dasharray': dash } : {}) }, wallG);
+const WALL = '#d7dfdc', WINC = '#9fe3ff', DOORC = { door: 'rgba(95,214,198,.85)', closed: '#c9b98a', lift: '#e8c06a' };
+function edge(key, a, b, x1, y1, x2, y2) {
+  if (a === b || a === '.' || b === '.' || open(a, b)) return;
+  const type = DOORS[key], hz = y1 === y2;
+  if (type === 'door' || type === 'closed' || type === 'lift') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, g = type === 'lift' ? 9 : 6;
+    seg(x1, y1, hz ? mx - g : x1, hz ? y1 : my - g, WALL, 2.6);
+    seg(hz ? mx + g : x2, hz ? y2 : my + g, x2, y2, WALL, 2.6);
+    seg(hz ? mx - g : x1, hz ? y1 : my - g, hz ? mx + g : x2, hz ? y2 : my + g, DOORC[type], type === 'lift' ? 3 : 1.6);
+    return;
+  }
+  if (type === 'hatch') { seg(x1, y1, x2, y2, WALL, 2.6); seg(x1 + (hz ? 5 : 0), y1 + (hz ? 0 : 5), x2 - (hz ? 5 : 0), y2 - (hz ? 0 : 5), '#e9c46a', 2.6, '3 2'); return; }
+  if (type === 'glass') { seg(x1, y1, x2, y2, '#56646b', 3.4); seg(x1 + (hz ? 2 : 0), y1 + (hz ? 0 : 2), x2 - (hz ? 2 : 0), y2 - (hz ? 0 : 2), WINC, 2); return; }
+  seg(x1, y1, x2, y2, WALL, 2.6);
+}
+for (let j = 0; j <= D; j++) for (let i = 0; i < W; i++) edge(`h,${i},${j}`, at(i, j - 1), at(i, j), i * S, j * S, (i + 1) * S, j * S);
+for (let j = 0; j < D; j++) for (let i = 0; i <= W; i++) edge(`v,${i},${j}`, at(i - 1, j), at(i, j), i * S, j * S, i * S, (j + 1) * S);
+
+el('path', { d: hullD, fill: 'none', stroke: '#8c9aa0', 'stroke-width': 4, 'pointer-events': 'none' }, mainG);
+const winG = el('g', { 'pointer-events': 'none' }, mainG);
+{
+  const P = [];
+  for (let k = 0; k < pts.length; k++) {
+    const [x, y] = pts[k], [x2, y2] = pts[(k + 1) % pts.length], n = Math.max(1, Math.ceil(Math.hypot(x2 - x, y2 - y) / .25));
+    for (let s = 0; s < n; s++) P.push([x + (x2 - x) * s / n, y + (y2 - y) * s / n]);
+  }
+  const N = P.length; let run = [];
+  const flush = () => { if (run.length > 1) el('polyline', { points: run.map(([x, y]) => `${(x * S).toFixed(1)},${(y * S).toFixed(1)}`).join(' '), fill: 'none', stroke: WINC, 'stroke-width': 3.2, 'stroke-linecap': 'butt', 'stroke-linejoin': 'round' }, winG); run = []; };
+  for (let k = 0; k < N; k++) {
+    const [x, y] = P[k], [x2, y2] = P[(k + 1) % N];
+    const mx = (x + x2) / 2, my = (y + y2) / 2, dx = x2 - x, dy = y2 - y, l = Math.hypot(dx, dy) || 1;
+    if (WIN.has(at(Math.floor(mx - dy / l * .6), Math.floor(my + dx / l * .6)))) { if (!run.length) run.push([x, y]); run.push([x2, y2]); } else flush();
+  }
+  flush();
+}
+
+const lblG = el('g', {});
+for (const [k, b] of Object.entries(BOX)) {
+  const R_ = ROOMS[k]; if (CORR.has(k) || R_.nolabel) continue;
+  const [px, py] = POS[k] || [b.sx / b.n + .5, b.sy / b.n + .5];
+  const [tx, ty] = T(px * S, py * S), t = el('text', { x: tx, y: ty, class: 'lbl' + (SMALL.has(k) || R_.kind === 'serv' ? ' sm' : '') }, lblG);
+  t.textContent = R_.label || R_.name;
+}
+const note = (x0, y0, s, size = 10, fill = '#c3d3d6', turn) => { const [x, y] = T(x0, y0), t = el('text', { x, y, ...(turn && PORTRAIT ? { transform: `rotate(-90 ${x} ${y})` } : {}), 'font-size': size, fill, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = s; };
+notes();
+note(VW / 2 - PAD, -12, 'Port', 11, '#93a6ae', true);
+note(VW / 2 - PAD, D * S + 13, 'Starboard', 11, '#93a6ae', true);
+note(W * S + 12, D / 2 * S, 'Bow', 11, '#93a6ae');
+{ const [x, y] = T(-13, D / 2 * S), t = el('text', { x, y, ...(PORTRAIT ? {} : { transform: `rotate(-90 ${x} ${y})` }), 'font-size': 11, fill: '#93a6ae', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'pointer-events': 'none' }, lblG); t.textContent = 'Stern'; }
+
+const outline = el('path', { fill: 'none', stroke: '#5fd6c6', 'stroke-width': 2.5, 'pointer-events': 'none', 'stroke-linejoin': 'round' }, mainG);
+function show(k) {
+  const R_ = ROOMS[k], b = BOX[k];
+  let d = '';
+  for (let j = b.j0; j <= b.j1; j++) for (let i = b.i0; i <= b.i1; i++) {
+    if (at(i, j) !== k) continue;
+    if (at(i, j - 1) !== k) d += `M${i * S},${j * S}h${S}`;
+    if (at(i, j + 1) !== k) d += `M${i * S},${(j + 1) * S}h${S}`;
+    if (at(i - 1, j) !== k) d += `M${i * S},${j * S}v${S}`;
+    if (at(i + 1, j) !== k) d += `M${(i + 1) * S},${j * S}v${S}`;
+  }
+  outline.setAttribute('d', d);
+  const size = CORR.has(k) ? `${b.n} tiles` : `${b.i1 - b.i0 + 1} × ${b.j1 - b.j0 + 1} tiles`;
+  const when = R_.built ? 'Open when the deck is built.' : (SPINE.has(k) ? 'Built with the shell.' : (R_.opens || 'Sealed until its milestone.'));
+  document.getElementById('card').innerHTML = `<b>${R_.name}</b><span>${R_.x}</span><span class="meta">${KIND[R_.kind].name}. ${size}. ${when}</span>`;
+}
+
+const lg = document.getElementById('legend');
+for (const k of LEGEND) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${k === 'serv' ? 'repeating-linear-gradient(45deg,#2e373c 0 4px,#5a5a46 4px 5px)' : KIND[k].c}"></i>${KIND[k].name}`; lg.appendChild(s);
+}
+for (const [c, t] of [[WINC, 'Window or glass wall'], [DOORC.door, 'Door'], [DOORC.closed, 'Shut for now'], [DOORC.lift, 'Lift doors'], ['#e9c46a', 'Service hatch'], ...(LEGEND_EXTRA || [])]) {
+  const s = document.createElement('span'); s.innerHTML = `<i style="background:${c};height:3px;vertical-align:3px"></i>${t}`; lg.appendChild(s);
+}
+if (Object.values(ROOMS).some(r => r.isNew)) { const s = document.createElement('span'); s.innerHTML = '<i style="border:1.5px dashed #e9c46a;background:none"></i>New idea'; lg.appendChild(s); }
+
+let z = 1;
+const fit = () => { const w = document.getElementById('wrap').clientWidth - 20; svg.style.width = (w * z) + 'px'; svg.style.height = (w * z * PH / PW) + 'px'; };
+document.getElementById('zin').onclick = () => { z = Math.min(3, z * 1.4); fit(); };
+document.getElementById('zout').onclick = () => { z = Math.max(1, z / 1.4); fit(); };
+const gb = document.getElementById('grid');
+gb.onclick = () => { const on = gb.getAttribute('aria-pressed') !== 'true'; gb.setAttribute('aria-pressed', on); gridG.style.display = on ? '' : 'none'; };
+const fb = document.getElementById('first');
+fb.onclick = () => { const on = fb.getAttribute('aria-pressed') !== 'true'; fb.setAttribute('aria-pressed', on);
+  for (const [k, g] of Object.entries(roomEls)) g.classList.toggle('sealed', on && !ROOMS[k].built && !SPINE.has(k)); };
+addEventListener('resize', () => { if ((innerHeight > innerWidth * 1.15) !== PORTRAIT) location.reload(); else fit(); }); fit();
+</script>
+</body>
+</html>
