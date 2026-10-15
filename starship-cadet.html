@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.9.2
+   STARSHIP CADET: CSV Wren                            build 0.9.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3605,7 +3605,7 @@ DECKS[3] = {
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
 
 // =====================================================================
-// DECK 2: COMMAND & SCIENCE (step 6e: turn 1 the shell, turn 2 the bedrooms)
+// DECK 2: COMMAND & SCIENCE (step 6e: turn 1 the shell, turn 2 the bedrooms, turn 3 the Captain's quarters and the senior corridor)
 // From plans/deck2-plan.html (Sketch 8), on Deck 3's outline with rounder stern corners. The deck splits at the lift:
 // the senior quarters aft, round a looped carpeted corridor (fifteen locked bedrooms, the Captain's across the stern),
 // science forward, off a four-wide corridor that ends at the sensor array behind glass in the nose.
@@ -3640,17 +3640,17 @@ Object.assign(D2, {
 Object.assign(KIT, {
   // a double bed with an upholstered headboard, a nightstand and lamp either side
   suiteBed(g, o = {}) {
-    const f = o.fab || D2.fabs.navy;
-    box(1.5, .3, 2.1, D2.woodDark, 0, .15, .05, g); box(1.42, .18, 2.0, D2.linen, 0, .39, .05, g);
-    box(1.48, .08, 1.45, D2.duvet, 0, .51, .37, g); box(1.52, .05, .42, f, 0, .56, .82, g);
-    for (const x of [-.36, .36]) soft(D2.linen, x, .56, -.72, .3, .08, .15, g);
-    box(1.7, 1.05, .12, f, 0, .72, -1.04, g); box(1.74, .05, .14, M.wood, 0, 1.27, -1.04, g);
-    for (const x of [-1.0, 1.0]) {
+    const f = o.fab || D2.fabs.navy, b = o.wide ? 1.8 : 1.5, n = b / 2 + .25;       // o.wide: the Captain's
+    box(b, .3, 2.1, D2.woodDark, 0, .15, .05, g); box(b - .08, .18, 2.0, D2.linen, 0, .39, .05, g);
+    box(b - .02, .08, 1.45, D2.duvet, 0, .51, .37, g); box(b + .02, .05, .42, f, 0, .56, .82, g);
+    for (const x of [-b / 4 - .01, b / 4 + .01]) soft(D2.linen, x, .56, -.72, .3, .08, .15, g);
+    box(b + .2, 1.05, .12, f, 0, .72, -1.04, g); box(b + .24, .05, .14, M.wood, 0, 1.27, -1.04, g);
+    for (const x of [-n, n]) {
       box(.44, .48, .4, M.wood, x, .24, -.86, g); box(.4, .02, .02, D2.brass, x, .36, -.65, g);
       cyl(.04, .06, .26, D2.brass, x, .61, -.9, g, 10); cyl(.09, .12, .14, D2.shade, x, .8, -.9, g, 16);
     }
-    if (o.swans) for (const x of [-.25, .25]) { soft(D2.towel, x, .62, .45, .14, .07, .1, g); const n = box(.04, .18, .04, D2.towel, x, .72, .37, g); n.rotation.x = -.3; }
-    return { w: 2.44, d: 2.2 };
+    if (o.swans) for (const x of [-.25, .25]) { soft(D2.towel, x, .62, .45, .14, .07, .1, g); box(.04, .18, .04, D2.towel, x, .72, .37, g).rotation.x = -.3; }
+    return { w: 2 * n + .44, d: 2.2 };
   },
   // a low futon for the Envoy: no headboard, a quilt in her own colours
   futon(g, o = {}) {
@@ -3774,6 +3774,99 @@ function d2Suite(rk, doorKey, o = {}) {
     const [lx, lz] = F.toL(u, p.v); place(rk, p.kind, lx, lz, F.wall[back], p.o || {});
   }
 }
+// the Captain's quarters and the senior corridor (0.9.3)
+Object.assign(D2, {
+  candle: std('#fff3d6', .6, 0, { emissive: col('#ffd9a0'), emissiveIntensity: .8 }), wine: std('#5a1a24', .2, 0, { transparent: true, opacity: .85 }),
+  globe: std('#3f6e8c', .5), land: std('#c9b27a', .7), inlay: std('#2f4a3e', .6),
+  // the Wren's past captains, painted at load (no R()): a dark ground, a lit face, a uniform collar
+  portraits: [['#2b2233', '#c99b7a', '#2c3a5e', '#c9a24a'], ['#1f2b2a', '#e0b896', '#6b2f3a', '#c9a24a'], ['#2e2a22', '#8f6a50', '#2f6f73', '#d9d2c2']].map(([bg, skin, coat, trim]) =>
+    new THREE.MeshStandardMaterial({ roughness: .7, map: tex(160, 200, (c, w, h) => {
+      const gr = c.createRadialGradient(80, 70, 10, 80, 90, 120); gr.addColorStop(0, '#5a4a3a'); gr.addColorStop(1, bg); c.fillStyle = gr; c.fillRect(0, 0, w, h);
+      c.fillStyle = coat; c.beginPath(); c.moveTo(20, h); c.quadraticCurveTo(30, 128, 80, 122); c.quadraticCurveTo(130, 128, 140, h); c.fill();
+      c.fillStyle = trim; c.fillRect(60, 150, 40, 5); c.fillRect(102, 160, 14, 10);
+      c.fillStyle = skin; c.fillRect(70, 104, 20, 22); c.beginPath(); c.ellipse(80, 82, 24, 30, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(88, 86, 12, 26, 0, 0, Math.PI * 2); c.fill();
+    }) })),
+});
+Object.assign(KIT, {
+  // the Captain's dining table: seats eight, with candles, a runner and places laid; o.light hangs the deck's lamp over it
+  diningTable(g, o = {}) {
+    box(1.1, .06, 3.0, M.wood, 0, .76, 0, g); box(.28, .06, 2.6, D2.fabs.wine, 0, .795, 0, g);
+    for (const z of [-.95, .95]) { box(.18, .7, .18, D2.woodDark, 0, .38, z, g); box(.7, .05, .5, D2.woodDark, 0, .025, z, g); }
+    for (const z of [-.6, 0, .6]) { cyl(.04, .05, .04, D2.brass, 0, .84, z, g, 10); cyl(.02, .02, .18, D2.candle, 0, .95, z, g, 8); }
+    const seat = (x, z, r) => {
+      const c = new THREE.Group(); c.position.set(x, 0, z); c.rotation.y = r; g.add(c);
+      box(.46, .06, .44, D2.fabs.wine, 0, .47, 0, c); box(.46, .6, .06, D2.woodDark, 0, .8, -.22, c);
+      for (const [sx, sz] of [[-.2, -.18], [.2, -.18], [-.2, .18], [.2, .18]]) box(.04, .45, .04, D2.woodDark, sx, .22, sz, c);
+      cyl(.11, .11, .01, D2.china, x * .6, .797, Math.abs(z) > 1.5 ? z * .75 : z, g, 16);
+    };
+    for (const z of [-1.0, 0, 1.0]) { seat(-.82, z, Math.PI / 2); seat(.82, z, -Math.PI / 2); }
+    seat(0, -1.78, 0); seat(0, 1.78, Math.PI);
+    if (o.light) addLamp(g, 0, 2.0, 0, 6, .35, 1.7);
+    return { w: 1.9, d: 4.0 };
+  },
+  sideboard(g) {
+    box(1.6, .82, .48, D2.woodDark, 0, .41, 0, g); box(1.66, .04, .52, M.wood, 0, .84, 0, g);
+    for (const x of [-.4, .4]) box(.7, .6, .02, M.wood, x, .42, .245, g);
+    for (const x of [-.1, .1]) box(.02, .14, .02, D2.brass, x, .45, .26, g);
+    cyl(.07, .09, .26, D2.wine, -.45, .99, 0, g, 12); cyl(.025, .025, .08, D2.wine, -.45, 1.15, 0, g, 8);
+    for (const x of [-.22, -.12]) cyl(.035, .025, .1, D2.china, x, .91, .08, g, 10);
+    box(.22, .28, .03, D2.brass, .45, 1.0, -.1, g).rotation.x = -.15;
+    return { w: 1.6, d: .52 };
+  },
+  // the Captain's desk: a partner desk with a leather top, a terminal and a brass lamp
+  captainDesk(g) {
+    box(1.8, .06, .85, M.wood, 0, .76, 0, g); box(1.5, .005, .6, D2.inlay, 0, .792, 0, g);
+    for (const x of [-.62, .62]) { box(.48, .72, .78, D2.woodDark, x, .36, 0, g); for (const y of [.2, .45, .66]) box(.04, .03, .02, D2.brass, x, y, .4, g); }
+    const mon = new THREE.Mesh(new THREE.BoxGeometry(.56, .34, .03), [M.dark, M.dark, M.dark, M.dark, screenMat, M.dark]);
+    mon.position.set(-.35, 1.02, -.25); g.add(mon); box(.04, .16, .04, M.slateDark, -.35, .86, -.27, g);
+    cyl(.05, .06, .02, D2.brass, .6, .8, -.2, g, 12); cyl(.012, .012, .32, D2.brass, .6, .96, -.2, g, 6); cyl(.08, .11, .11, D2.shade, .6, 1.15, -.2, g, 14);
+    [[.15, .1, .4], [.3, .05, -.2]].forEach(([x, z, r], k) => box(.24, .012 + k * .01, .32, D2.paper, x, .8 + k * .012, z, g).rotation.y = r);
+    return { w: 1.8, d: .85 };
+  },
+  // a drawn curtain on a brass rail: closes off the sleeping alcove
+  alcoveCurtain(g, o = {}) {
+    const w = o.w || 2.6, n = Math.round(w / .2);
+    box(w + .1, .04, .04, D2.brass, 0, 2.3, 0, g);
+    for (let k = 0; k < n; k++) box(w / n + .01, 2.2, .05, o.fab || D2.fabs.wine, -w / 2 + (k + .5) * w / n, 1.18, k % 2 ? .035 : -.035, g);
+    return { w, d: .15 };
+  },
+  globe(g) {
+    cyl(.18, .22, .04, D2.woodDark, 0, .02, 0, g, 16); cyl(.03, .03, .7, D2.woodDark, 0, .37, 0, g, 8);
+    const s = soft(D2.globe, 0, .92, 0, .22, .22, .22, g); s.rotation.z = .4;
+    soft(D2.land, .08, .98, .1, .1, .08, .1, g); soft(D2.land, -.1, .86, -.06, .09, .1, .08, g);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.25, .012, 6, 28), D2.brass); ring.position.y = .92; ring.rotation.set(0, Math.PI / 2, .4); g.add(ring);
+    return { w: .5, d: .5 };
+  },
+  // a narrow console against a corridor wall, with flowers
+  consoleTable(g, o = {}) {
+    box(.9, .04, .3, M.wood, 0, .82, 0, g); box(.86, .1, .26, D2.woodDark, 0, .75, 0, g);
+    for (const x of [-.4, .4]) for (const z of [-.1, .1]) cyl(.015, .012, .7, D2.brass, x, .35, z, g, 6);
+    cyl(.07, .05, .22, D2.china, -.15, .95, 0, g, 12);
+    for (let k = 0; k < 5; k++) { const a = k * 1.256; soft(GD.flowers[(k + (o.k || 0)) % 5], -.15 + Math.sin(a) * .07, 1.12 + k % 2 * .04, Math.cos(a) * .07, .05, .05, .05, g); }
+    for (const a of [.6, 2.4, 4.2]) soft(M.leaf, -.15 + Math.sin(a) * .05, 1.07, Math.cos(a) * .05, .03, .08, .02, g).rotation.z = Math.sin(a) * .6;
+    box(.2, .03, .14, D2.paper, .22, .855, 0, g).rotation.y = .2;
+    return { w: .9, d: .3 };
+  },
+});
+Object.assign(WALL_KIT, {
+  // a portrait of one of the Wren's past captains, in a gilt frame
+  portrait(g, o = {}) {
+    box(.62, .76, .04, D2.brass, 0, 1.55, .02, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.52, .66), D2.portraits[o.k || 0]); p.position.set(0, 1.55, .045); g.add(p);
+  },
+  // a brass wall lamp with a warm shade
+  brassSconce(g) {
+    box(.12, .26, .03, D2.brass, 0, 1.85, .015, g); cyl(.012, .012, .12, D2.brass, 0, 1.8, .08, g, 6).rotation.x = Math.PI / 2;
+    cyl(.07, .1, .14, D2.shade, 0, 1.9, .14, g, 14);
+    glow('#ffcf8a', .7, 0, 1.92, .16, g, .5);
+  },
+  // the brass knocker on the Captain's door (nobody uses it)
+  knocker(g) {
+    const r = new THREE.Mesh(new THREE.TorusGeometry(.07, .014, 8, 20), D2.brass); r.position.set(0, 1.32, -.04); g.add(r);
+    box(.08, .06, .02, D2.brass, 0, 1.42, -.05, g);
+  },
+});
 DECKS[2] = {
   num: 2, name: 'Command & Science', seed: 20219,
   blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
@@ -3939,6 +4032,32 @@ DECKS[2] = {
     for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5 + .3; place('E', 'cushion', 1.9 + Math.sin(a) * .82, 2.0 + Math.cos(a) * .82, 'n', { fab: k % 2 ? D2.fabs.teal : D2.fabs.sand }); }
     place('E', 'ensuite', 3.9, .6, 'n'); place('E', 'suiteWardrobe', 5.625, 2.0, 'e');
     place('E', 'suitePlant', .6, .5, 'n');
+    // ---- the Captain's quarters (turn 3): 5 x 12 across the stern, windows all along it. The sleeping alcove at the port
+    // end behind a curtain, the dining table in the middle by the door, the study lined with books at the starboard end.
+    NO_FADE.add('C');
+    place('C', 'suiteBed', 2.3, 1.2, 'n', { wide: true, fab: D2.fabs.wine, it: SEE('The Captain\'s bed', 'Behind a heavy curtain. A book face down on the nightstand, and a comm beside it that is never switched off.') });
+    place('C', 'ensuite', 4.4, .6, 'n'); place('C', 'suiteWardrobe', 4.625, 1.9, 'e'); place('C', 'suitePlant', .4, .4, 'n');
+    place('C', 'alcoveCurtain', 1.75, 3.0, 'n', { w: 3.2 });
+    place('C', 'telescope', .7, 4.0, 'w');
+    place('C', 'suiteRug', 2.3, 6.4, 'n', { w: 2.6, d: 4.6, k: 2 });
+    place('C', 'diningTable', 2.3, 6.4, 'n', { light: true, it: SEE('The Captain\'s table', 'Laid for eight. The Captain hosts the senior crew here, and the Envoy when she accepts. Nobody sits in the Captain\'s chair, even when she\'s late.') });
+    place('C', 'windowSeat', .38, 6.4, 'w', { w: 2.6 });
+    place('C', 'sideboard', 4.64, 7.6, 'e');
+    // low shelves all round the study, so the room still shows from the usual camera
+    for (const x of [.65, 1.7, 2.75, 3.8]) place('C', 'suiteShelf', x, 11.74, 's', { it: x === 1.7 ? SEE('The Captain\'s books', 'Real books, carried aboard one at a time over thirty years. Histories, poetry, and a shelf of very old star atlases.') : undefined });
+    for (const z of [9.6, 10.65]) place('C', 'suiteShelf', 4.74, z, 'e', { trophy: z > 10 });
+    place('C', 'captainDesk', 2.25, 9.4, 'n', { it: SEE('The Captain\'s desk', 'The day\'s reports in a neat stack, a fountain pen, and a photograph turned face down.') });
+    place('C', 'suiteChair', 2.25, 10.2, 's');
+    place('C', 'armchair', .65, 10.6, 'w', { fab: D2.fabs.wine }); place('C', 'globe', .5, 9.0, 'n');
+    placeOnEdge('knocker', 'v,7,10', 'e');
+    // ---- the senior corridor: brass wall lamps, the Wren's past captains along the gallery, flowers on the consoles ----
+    for (const [key, tw] of [['h,11,5', 's'], ['h,15,5', 's'], ['h,12,7', 'n'], ['h,16,7', 'n'], ['h,12,15', 's'], ['h,16,15', 's'], ['h,11,17', 'n'], ['h,15,17', 'n'], ['v,7,9', 'e'], ['v,7,11', 'e']])
+      placeOnEdge('brassSconce', key, tw);
+    placeOnEdge('portrait', 'v,7,7', 'e', { k: 0, it: IT('Captain Ilse Varga', 'The Wren\'s first captain, who took her out of the yards forty years ago. Nobody remembers her smiling, but the frame has been polished every week since.') });
+    placeOnEdge('portrait', 'v,7,13', 'e', { k: 1, it: IT('Captain Adaeze Moro', 'Captain of the Wren through the long blockade. A note on the frame: SHE GOT EVERYONE HOME.') });
+    placeOnEdge('portrait', 'v,9,8', 'w', { k: 2, it: IT('Captain Hal Brenner', 'He commissioned the music room, and a grand piano nobody knew how to lash down. Captain Marrow plays it now.') });
+    placeOnEdge('portrait', 'v,9,13', 'w', { k: 0, it: IT('Captain Odile Marrow', 'The current captain, painted the year she took command. She asked for it to hang last in line, where it is easy to take down.') });
+    place('-', 'consoleTable', 1.75, 3.5, 'e', { snug: true, k: 0 }); place('-', 'consoleTable', 1.75, 8.5, 'e', { snug: true, k: 2 });
   },
 };
 for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key] = { t: DECKS[2].rooms[r].name, x: DECKS[2].rooms[r].tap };
