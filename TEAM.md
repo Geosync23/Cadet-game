@@ -43,6 +43,8 @@ How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 
 
 ## Done
 
+- **Ship integration 0.40.5** (dc7bb12): Works crew do their jobs on the decks (parts at Deck 5 storage, then the machine's panel), the live Works bay job board, and the device's Jobs section. All six checks pass. Being republished to the playable link. Next: the player's repair loop (the player engineer with the systems engineer), then the end-of-Pillar-2 review.
+
 - **Ship integration 0.40.4** (9c780ff): Pillar 2 Half A complete. All five checks pass (deck, day 7, food, machine, player). Deck 6's engine room is fixed (hull byFace). Works crew walk to jobs. Being republished to the playable link for the user's Half A check-in. Open with the user: hull stripes on Decks 3–5 (smooth them?); how often the player meets real faults.
 
 - **Ship integration 0.40.3** (f15f8e5): utility rooms on all six decks, crew showing activities, the player's dinner queue, machines' background average day. deck_check, day_check, food_check and machine_check OK; player_check failing on the combined build (the player engineer, 0.28.4). Known: Deck 6's engine-room view is 517 draw calls (the performance engineer). Next: B2's visible half (jobWhere, the job board, the device's jobs).
