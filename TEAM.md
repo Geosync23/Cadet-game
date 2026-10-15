@@ -16,11 +16,11 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 | Session | Job | Branch | Status |
 | --- | --- | --- | --- |
-| session_01JScnVG158eYAHYvKDz3jZG | Plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Working: Deck 2 Sketch 3 (bigger deck, wardroom becomes the Captain's quarters), Deck 6 reactor door |
+| session_01JScnVG158eYAHYvKDz3jZG | Plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle, waiting on the user's feedback on the plans |
 
 ## Done
 
-- Plans for Decks 1, 2 and 6: Sketch 1 (36cce9d, 09f1feb, 68a8bc8); Deck 2 Sketch 2 (b4cfbc6).
+- Plans for Decks 1, 2 and 6: Sketch 1 (36cce9d, 09f1feb, 68a8bc8); Deck 2 Sketch 2 (b4cfbc6); Deck 2 Sketch 3, 50 × 18 with the Captain's quarters as the biggest room (4fe97c4); Deck 6 reactor door off the lobby (355648a).
 
 ## Queue (needs the user's go-ahead)
 
