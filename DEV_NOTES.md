@@ -54,6 +54,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.13.0 | The user's review fixes in one build: Deck 6 (0.11.0) and Deck 1 scaled up (0.12.1), merged by the lead on `claude/ship-integration`. |
 | 0.14.0 | Deck 4 guest cabins (the Deck 6 architect, from 0.13.0). Six senior officers moved up to Deck 2, so the officers' corridor's 24 cabins are now 16 officers', 6 guest cabins and 2 spare. Guests: the lift-end column A, B, C, D (4-02, 4-04, 4-03, 4-01; two window, two inner) and the inner pair F, G (4-08, 4-07), so guests don't walk the corridor's length and officers keep 10 of the 12 window cabins. Spares: V and W (4-24, 4-23), the inner pair at the music-room end, which were already the spares. `DECKS[4].guests` (door tap text per cabin) and `spares`; room names, door plates ("Guest 4-02", "Spare 4-24") and `lockedRoom` follow them. `officerCabin` takes `guest` (fresh linen folded on the bed, a `travelCase` at its foot that doesn't block) and `spare` (`bedSingle` `stripped`, `deskSmall` `bare` with the screen off, no poster); materials `GUEST`, no `R()`. Walking tiles, collisions, paths, spots and crew routes are identical to 0.13.0; only those eight cabins' items, door texts and the two spares' posters differ (Deck 4 harness views differ only by renderer noise). Decks 1, 2, 3, 5 and 6 pixel-identical. plans/deck4-plan.html labels them G and S. |
 | 0.15.1 | Pillar 1, workstream 1: ship time and saving (the sim engineer, branch `claude/sim-engineer`). New section 13. The ship day lasts 30 real minutes (`SHIP_RATE` 0.8 ship minutes a second); the game starts on Day 1, a Monday, at 06:00, in Bunk 1 (the tile is still `PLAYER_SPEC.start`, [7, 3]). The light follows the clock: night 21:00–06:00, an hour of dusk and of dawn centred on them. The HUD reads "Day 1, Monday 06:00". The game saves itself (localStorage `starship-cadet-save`) every ship hour, on deck change and when the page is hidden or closed, and resumes on the same deck, tile and facing at the same time. New game button (tap twice). The Night/Day button is a debug control, shown only with `?debug`: Night skips to 21:40, Day sleeps until 07:40. `?nosave` turns saving off; cadet_test.py loads with `?nosave&debug`. A test copy pinning the old clock (1 minute a second from 07:40, the old HUD text, no New game button) is ALL IDENTICAL to 0.14.0 with 0 pixels different; unpinned, only screenshots differ (state, paths, collisions, crew identical). Decks 1, 2, 3, 5, 6 pixel-identical day and night. |
+| 0.21.1 | Pillar 1, workstream 4: the schedule engine (the sim engineer). New section 14 (after 13): `planDay(person, day)` and `whereIs(person, t)` per the plan's format, `shipDay(day)` planning everyone's day at once so no place is ever held twice, fixed work stations per person and shift, `peopleOn(deck, t)`, and `runDay` / `dayReport` to step a whole day with no drawing (about 30 ms a day). Reads `ROSTER` and `DECKS[n].places` when they're there, otherwise `STUB_ROSTER` and `stubPlaces(n)`. Sleeping (`sleepUntil`) plans the day you wake into. Nothing draws from it yet: cadet_test ALL IDENTICAL to 0.15.1 (renderer noise only), deck_check OK. With the real roster and the places pushed so far (a scratch build), 28 days check clean: everyone sleeps 6 hours or more in their own bed, eats twice and works their whole shift, no place double-booked, no gaps. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -72,6 +73,51 @@ Section 13 sits after section 5 (lighting) and before section 6, not at the end:
 - **URL flags.** `?nosave` turns saving and loading off; `?debug` shows the Night/Day button. cadet_test.py loads every build with `?nosave&debug` (builds before 0.15.1 ignore both), and deck_check.py uses the same loader.
 - **Hooks in shared code (all small):** the HUD's clock text and the New game button (HTML); `nightTarget` gone from section 5; `updateClock` and the Night button in section 11 call into section 13; `goToDeck` ends with `saveGame()`; section 10 builds `START.deck` and places the player from `START`; the start toast picks welcome back on a resume; the main loop calls `tickShip(dt)` and eases toward `nightAt()`.
 - **Testing 0.15.1.** cadet_test against 0.14.0 differs on purpose (the dawn light at 06:00, the clock text, the New game button). To prove nothing else changed, make a test copy that pins the old clock: `SHIP_RATE = 1`, `SHIP_START.min = 7 * 60 + 40`, `clockText` returning `'Ship time ' + hhmm(...)`, the HUD's first text back to "Ship time 07:40", and the New game button `display:none`. That copy is ALL IDENTICAL to 0.14.0, 0 pixels different. Saving was tested with an ad-hoc script: hourly and deck-change saves, a reload resuming deck, tile, facing and time, unknown `v`, junk and unbuilt-deck saves ignored, storage that throws, `?nosave` neither reading nor writing, New game, the hidden-tab pause, `sleepUntil` and the `SIM_ADVANCE` call.
+
+## Schedules (section 14, the sim engineer, 0.21.x)
+
+Section 14 sits right after section 13. Nothing in it calls `R()` or draws anything; every choice comes from `schedU(seed, day, k)`, a hash, so the same crew and places always give the same day, and adding a new decision (a new `k`) doesn't shift the others.
+
+- **Interface.** `planDay(person, day)` gives `[{ from, to, act, deck, type, placeId, fromDeck?, tag? }, ...]`, back to back over the whole day, in absolute ship minutes (`shipNow()`'s units). `whereIs(person, t)` gives `{ deck, act, type, placeId, moving, fromDeck, until, tag }`. `moving` is true only during a lift ride (`act: 'commute'`, `deck` is the deck you're going to, `fromDeck` the one you left). `peopleOn(deck, t)` lists everyone there. `runDay(day, step, fn)` calls `fn(t, [{ p, w }])` every `step` minutes. `dayReport(day)` runs day_check's checks for one day. `schedPeople()` is everyone (the roster plus `ROSTER_GUESTS`).
+- **Acts:** `sleep`, `wash`, `breakfast`, `dinner`, `work`, `leisure`, `gym`, `callhome`, `commute`, `off`. Tags say more: `queue` (at the servery before a meal), `grab` (grab-and-go), `tea` (a tea break, counted as work), `rest` (leisure in your own bunk or cabin), `laundry`, `inspection`, `drill`, `room` (washing in your room when every shower and basin was busy).
+- **How a ship day is planned (`shipDay`).** Everyone is planned in one pass, in wake-up order (ties by id). Each person's day is built start to finish, taking places that nobody holds yet (`occ`: place → time ranges). When the showers, the servery or the grab shelf are busy, they wait a few minutes where they are, then fall back (shower → basin → their room; mess seat → lounge seat or bench → standing). The last five days are kept.
+    - **Beds** are always the person's own (`person.bed`).
+    - **Private places:** a place named after a bed (`4-05-wash`, `2-C-wash`) belongs to whoever sleeps there, and nobody else is offered it.
+    - **Work stations** are fixed (`schedDesks`): in rank order, each person takes the next station of their type on their work deck, separately for the day and night shifts. Overflow goes to another `work:*` station on that deck nobody on the shift has, else `placeId: null`.
+- **A day's shape (`schedFrame` and `schedBuild`).**
+    - **Day shift (08:00–17:00):** wake about 06:15, then a wash and breakfast (06:00–08:00) before work; a tea break mid-shift for `tea-break`; then evening specials, dinner (17:00–20:30), leisure and bed about 22:45.
+    - **Night shift (21:00–06:00):** after the shift, breakfast, a wash and about 7 hours' sleep through the day, then an evening like anyone's and back on at 21:00. Coming back after a night off: a normal night's sleep, then a four-hour nap in the afternoon.
+    - **Days off:** later waking, then leisure.
+    - Wake time always leaves 6 h 50 min after the previous bedtime.
+    - No lunch, as the design says: two meals a day.
+- **Variety, in layers:**
+    1. **The rota.** `rota.offDays` gives the days off. A night-shift person's day belongs to the shift that starts that evening.
+    2. **The weekday (`WEEK_SHAPE`).**
+        - Monday: briefing, the day shift starts 10 minutes early.
+        - Wednesday: a 15:00 drill; anyone at leisure musters at a `lift-wait` place for 15 minutes.
+        - Thursday: bunk inspection; juniors in Deck 4 bunks spend 10 minutes at their bunk after washing.
+        - Friday and Saturday: bedtimes 30 and 20 minutes later.
+        - Sunday: anyone off duty lies in 30 minutes longer.
+    3. **Jitter.** Waking 5–25 minutes either way, meal lengths, block lengths.
+    4. **Habits.** All 18 in `HABITS`:
+        - early-riser, late-sleeper, early-to-bed and night-owl move wake and bed times;
+        - skips-breakfast, late-diner and lingers-at-meals change meals;
+        - workaholic means 15–30 minutes early and late at work;
+        - tea-break is a break mid-shift;
+        - gym-regular and calls-home are in the specials below;
+        - garden-lover, lounge-regular, quiet-corner, common-room and music weight leisure places (`HABIT_LEISURE`);
+        - evening-shower moves the shower to before bed;
+        - window-seat does nothing yet: no place says it's by a window.
+    5. **Need (`schedWants`).** The gym, a call home and the weekly laundry (on the first day off). A habit's pull is raised when it hasn't happened in three days.
+- **Leisure choice.** `LEISURE` plus the person's habit places. Places on the deck you're on count four times and the place you just left a fifth, so people don't hop decks every hour (about 5 lift rides a day each). `[bedDeck, 'rest']` is time in your own bunk or cabin. Juniors get Deck 4's common room; officers and up get Deck 1's observation room (`common-room` on Deck 1).
+- **Stand-in data.** `STUB_ROSTER` (12 people) and `stubPlaces(n)` are used only where the real ones are missing: `ROSTER` from section 9, and each deck's `places` (a deck with none gets stub places named in the plan's scheme, with ids like `3-mess-seat-1`). Once the real roster and Deck 2's places are merged, the stubs go unused; delete them then.
+- **Sleeping.** `SIM_ADVANCE` gets a function that plans the day you skip into. There's nothing else to advance: `whereIs` is worked out from the plan, not stepped.
+- **Numbers (real roster and the places pushed so far, Deck 2 on stubs):**
+    - Over 28 days: nobody under 6 hours' own-bed sleep (counted from 18:00 the evening before), everyone eats twice and works their whole shift, nothing double-booked, no gaps, and each day joins the next exactly.
+    - Unplaced (standing) moments: the Wednesday drill (Deck 1 has 4 `lift-wait` places), and a few when someone lingers where their place is wanted.
+    - Peak headcounts per deck: Deck 3 about 64–73 at 17:45–18:20 (dinner plus the Commons in the evening), Deck 4 about 60 at 06:45, Deck 2 about 20, Deck 5 about 13, Deck 1 about 10, Deck 6 3.
+    - Speed: planning a day takes about 11 ms; `runDay` at 1-minute steps about 30 ms; `dayReport` about 17 ms.
+- **Testing it:** a scratch copy of the build with section 9's `ROSTER` block and the architects' `places` lists pasted in (not committed), then `dayReport(d)` for many days, the seams between days, and determinism (the same plans after clearing the cache and planning other days first).
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 

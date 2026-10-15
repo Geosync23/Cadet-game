@@ -68,7 +68,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.15.1
+   STARSHIP CADET: CSV Wren                            build 0.21.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -85,6 +85,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    11. INTERACTION/UI   tapping, toasts, buttons
    12. MAIN LOOP
    13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
+   14. SCHEDULES        planDay, whereIs: where all the crew are (after 13)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -4907,7 +4908,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.15.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.21.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -5013,6 +5014,406 @@ function debugSkip() {
   else skipTo((SHIP.time.day - 1) * 1440 + 21 * 60 + 40);
 }
 if (!DEBUG) document.getElementById('light').style.display = 'none';
+
+// =====================================================================
+// 14. SCHEDULES
+// Where everyone is, at any ship minute, on any deck, drawn or not.
+//   planDay(person, day) -> [{ from, to, act, deck, type, placeId, fromDeck?, tag? }, ...] covering the day,
+//                           from and to in absolute ship minutes (shipNow()'s units), back to back
+//   whereIs(person, t)   -> { deck, act, type, placeId, moving, fromDeck, until } at absolute ship minute t
+//   peopleOn(deck, t)    -> everyone whereIs puts on that deck at t, with where
+//   runDay(day, step, fn) and dayReport(day): step a whole day with no drawing (for day_check.py)
+// A ship day is planned for everyone at once (shipDay), one person after another in wake-up order, so each
+// takes only places nobody holds: a place is never double-booked, and someone who finds the showers or the
+// servery full waits a few minutes, then makes do. Beds are always the person's own; work stations are fixed
+// per person and shift (schedDesks). Every choice comes from schedU(seed, day, k), a hash, so the same crew and
+// places always give the same day. Variety, in layers: the rota and days off; the shape of the weekday
+// (WEEK_SHAPE); seeded jitter (waking 5-25 minutes either way, meal lengths, lingering); habits (HABITS in
+// section 9); and choices weighted by need (gym, calls home, laundry).
+// It reads ROSTER (+ ROSTER_GUESTS) from section 9 and each deck's places from DECKS[n].places. Until those
+// exist it uses STUB_ROSTER and stubPlaces(n), in the same formats. Nothing here calls R() or draws anything.
+// =====================================================================
+const SCHED_COMMUTE = 2;                                 // a lift ride, ship minutes; you're on the new deck after it
+const MEALS = { breakfast: [360, 480], dinner: [1020, 1230] };
+const SHIFTS = { day: [480, 1020], night: [1260, 360] }; // 08:00-17:00, 21:00-06:00 (into the next day)
+// the shape of each weekday (0 = Monday)
+const WEEK_SHAPE = [
+  { early: 10 },                                         // Monday: all-hands briefing, the day shift starts 10 minutes early
+  {},
+  { drill: 900 },                                        // Wednesday: a drill at 15:00; anyone off duty musters by the lift for 15 minutes
+  { inspect: true },                                     // Thursday: bunk inspection, juniors tidy their bunks after washing
+  { late: 30 },                                          // Friday: bedtimes 30 minutes later
+  { late: 20 },                                          // Saturday: a little later too
+  { lieIn: 30 },                                         // Sunday: anyone off duty lies in 30 minutes longer
+];
+// where leisure happens: [deck, place type, weight]. Habits add their favourites; options with no places are skipped
+const LEISURE = [[3, 'lounge-seat', 3], [3, 'garden', 2], [3, 'bench', 2], [4, 'common-room', 2, 'junior'], [4, 'music', 1], [1, 'common-room', 1, 'officer']];
+const HABIT_LEISURE = {
+  'garden-lover': [[3, 'garden', 8]], 'lounge-regular': [[3, 'lounge-seat', 8]], 'common-room': [[4, 'common-room', 8, 'junior']],
+  'music': [[4, 'music', 8]], 'quiet-corner': [[3, 'lounge-seat', 4], [1, 'common-room', 3], [2, 'common-room', 3]],
+};
+const STOPS = new Set(['queue', 'grab', 'drill', 'inspection', 'tea']);   // short stops that never stretch to fill time
+const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest'];
+
+// ---- stand-in data, used only until the real roster and places are in (same formats) ----
+const STUB_ROSTER = [
+  ['pell', 'junior', 'works', 'day', [1, 2], '4-B2-2', 5, 'work:works', ['late-sleeper', 'tea-break', 'gym-regular']],
+  ['rina', 'junior', 'infirmary', 'day', [6, 0], '4-B2-3', 3, 'work:infirmary', ['common-room', 'calls-home']],
+  ['tomas', 'junior', 'watch', 'day', [4, 5], '4-B1-1', 2, 'work:watch', ['common-room', 'window-seat']],
+  ['brennan', 'officer', 'galley', 'day', [4, 5], '4-05', 3, 'work:galley', ['early-riser', 'early-to-bed']],
+  ['marrow', 'captain', 'command', 'day', [0, 1], '2-C', 1, 'work:command', ['early-riser', 'music']],
+  ['vance', 'xo', 'command', 'day', [1, 2], '2-X', 1, 'work:command', ['workaholic', 'gym-regular']],
+  ['sato', 'chief', 'survey', 'day', [1, 2], '2-V', 2, 'work:survey', ['workaholic', 'quiet-corner', 'tea-break']],
+  ['holt', 'chief', 'watch', 'day', [3, 4], '2-T', 2, 'work:watch', ['early-riser', 'late-diner']],
+  ['kowalczyk', 'senior', 'command', 'night', [2, 3], '2-S', 1, 'work:command', ['night-owl', 'quiet-corner']],
+  ['stub-eng1', 'junior', 'engine', 'night', [5, 6], '4-B3-1', 6, 'work:engine', ['evening-shower', 'skips-breakfast']],
+  ['stub-eng2', 'junior', 'engine', 'day', [2, 3], '4-B3-2', 6, 'work:engine', ['garden-lover', 'lingers-at-meals']],
+  ['stub-works', 'junior', 'works', 'day', [5, 6], '4-B3-3', 5, 'work:works', ['late-diner', 'lounge-regular', 'skips-breakfast']],
+].map(([id, rank, dept, shift, offDays, bed, wd, wp, habits], i) =>
+  ({ id, name: id, rank, dept, shift, rota: { offDays }, bed, work: { deck: wd, place: wp }, habits, seed: 1000 + i * 7919 }));
+// a deck with no `places` yet gets these, named as the plan names real ones
+function stubPlaces(n) {
+  const out = [], add = (type, k, name = type, extra = {}) => { for (let i = 1; i <= k; i++) out.push({ id: `${n}-${name}-${i}`, type, stub: true, ...extra }); };
+  if (n === 1) { add('work:command', 3); add('work:helm', 3); add('work:ops', 1); add('work:comms', 1); add('common-room', 8); }
+  if (n === 2) {
+    add('work:survey', 12); add('work:watch', 8); add('work:comms', 4); add('common-room', 4);
+    for (const r of 'ABCDEFGHINORSTVX') out.push({ id: `2-${r}`, type: 'bed', stub: true }, { id: `2-${r}-wash`, type: 'shower', stub: true });
+  }
+  if (n === 3) {
+    add('mess-seat', 40); add('servery-queue', 4); add('grab-shelf', 1); add('lounge-seat', 20); add('garden', 12); add('bench', 8);
+    add('gym', 8); add('callhome', 4); add('work:galley', 8); add('work:infirmary', 4);
+  }
+  if (n === 4) {
+    add('shower', 4); add('basin', 4); add('common-room', 10); add('music', 5); add('laundry', 6); add('bench', 4);
+    for (let c = 1; c <= 24; c++) { const id = '4-' + String(c).padStart(2, '0'); out.push({ id, type: 'bed', stub: true }, { id: id + '-wash', type: 'shower', stub: true }); }
+  }
+  if (n === 5) { add('work:works', 19); add('lounge-seat', 3, 'tea'); }
+  if (n === 6) { add('work:engine', 7); add('bench', 3); }
+  return out;
+}
+
+// ---- data access (read at call time, so section 9's ROSTER and every deck's places are in by then) ----
+let SCHED_DATA = null;
+function schedData() {
+  if (SCHED_DATA) return SCHED_DATA;
+  const people = (typeof ROSTER !== 'undefined' ? ROSTER : STUB_ROSTER).concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []);
+  const places = [];
+  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || stubPlaces(n))) places.push({ ...p, deck: n });
+  const byId = new Map(places.map(p => [p.id, p]));
+  // a place named after a bed ('4-05-wash') belongs to whoever sleeps there
+  const beds = new Set(people.map(p => p.bed).concat(places.filter(p => p.type === 'bed').map(p => p.id)));
+  const owner = new Map();
+  for (const p of places) for (let i = p.id.lastIndexOf('-'); i > 0; i = p.id.lastIndexOf('-', i - 1)) if (beds.has(p.id.slice(0, i))) { owner.set(p.id, p.id.slice(0, i)); break; }
+  const nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
+  const shared = new Map();                              // 'deck|type' -> the places anyone may use, in id order
+  for (const p of places) if (!owner.has(p.id) && p.type !== 'bed') { const k = p.deck + '|' + p.type; if (!shared.has(k)) shared.set(k, []); shared.get(k).push(p); }
+  for (const l of shared.values()) l.sort(nat);
+  const own = new Map();                                 // bed -> its own places
+  for (const [id, b] of owner) { if (!own.has(b)) own.set(b, []); own.get(b).push(byId.get(id)); }
+  SCHED_DATA = { people, places, byId, owner, shared, own, desks: schedDesks(people, shared) };
+  return SCHED_DATA;
+}
+const deckOf = id => +String(id).split('-')[0];
+// work stations: fixed per person and shift. In rank order, each takes the next station of their type on their
+// work deck; when those run out, any other workstation on the deck nobody on that shift has; else none (null)
+function schedDesks(people, shared) {
+  const desks = new Map(), used = new Set();
+  const order = people.filter(p => p.work).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
+  for (const pass of [0, 1]) for (const p of order) {
+    if (desks.has(p.id) && desks.get(p.id)) continue;
+    const pool = pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
+      : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l);
+    const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
+    if (d) used.add(p.shift + '|' + d.id);
+    desks.set(p.id, d ? d.id : null);
+  }
+  return desks;
+}
+
+// ---- seeded choices: schedU(seed, day, k) is uniform in [0, 1), the same every time for the same inputs ----
+function schedU(seed, day, k) {
+  let h = (seed | 0) ^ Math.imul(day + 7, 0x9E3779B1) ^ Math.imul(k + 13, 0x85EBCA77);
+  h = Math.imul(h ^ h >>> 16, 0x7FEB352D); h = Math.imul(h ^ h >>> 15, 0x846CA68B); h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+// a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
+function schedFrame(p, d) {
+  const U = k => schedU(p.seed, d, k), H = new Set(p.habits || []), shape = WEEK_SHAPE[weekday(d)], works = isWorkDay(p, d);
+  const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
+  const wa = H.has('workaholic');
+  let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
+  if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
+  if (H.has('night-owl')) bed += 30 + 30 * U(5);
+  bed = Math.round(Math.min(1430, bed));
+  const f = { U, H, shape, works, bed, night: p.shift === 'night' };
+  if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
+  else { f.workStart = 480 - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 1020 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
+  let wake = 375 + jit(10);                                                 // about 06:15
+  if (H.has('early-riser')) wake -= 30 + 15 * U(12);
+  if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
+  if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
+  if (works && !f.night) wake = Math.min(wake, f.workStart - 45);
+  f.wake = Math.round(wake);
+  return f;
+}
+// choices weighted by need: a habit's pull on a day, raised when it hasn't happened for a few days
+function schedWants(p, d, k, base) {
+  const did = dd => schedU(p.seed, dd, k) < base(dd);
+  return did(d) || (base(d) > .2 && !did(d - 1) && !did(d - 2) && !did(d - 3));
+}
+
+// ---- one person's day, taking places from `occ` (placeId -> [[from, to], ...] in absolute minutes) ----
+function schedBuild(p, d, occ, S) {
+  const F = schedFrame(p, d), P = schedFrame(p, d - 1), U = F.U, H = F.H, B = (d - 1) * 1440, C = SCHED_COMMUTE;
+  const bedDeck = deckOf(p.bed), desk = S.desks.get(p.id) || null, wd = p.work && p.work.deck;
+  const segs = []; let t = 0, deck = bedDeck;
+  const isFree = (id, a, b) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y);
+  const hold = (id, a, b) => { if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b]); };
+  const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
+  const go = dk => { if (dk !== deck) { const from = deck; deck = dk; seg('commute', t + C, 'lift', null, { fromDeck: from }); } };
+  // stay a little longer where you are (a free place stays held; a busy one, or none, becomes standing about)
+  const linger = to => {
+    if (to <= t) return;
+    const l = segs[segs.length - 1];
+    if (l && l.act !== 'commute' && l.act !== 'wash' && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || l.placeId === p.bed || S.owner.get(l.placeId) === p.bed || isFree(l.placeId, t, to))) {
+      if (l.placeId && l.placeId !== p.bed && S.owner.get(l.placeId) !== p.bed) hold(l.placeId, t, to);
+      l.to = to; t = to;
+    } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
+  };
+  // take a free place of one of `opts` ([deck, type] pairs, best first) for `dur` minutes, waiting up to `wait`
+  // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
+  const take = (act, opts, dur, o = {}) => {
+    for (const [dk, type] of opts) {
+      const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
+      const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
+      if (!pool.length) continue;
+      const fav = Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
+      const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
+      for (let s = arrive; s <= arrive + wait; s++) {
+        let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
+        if (end - s < (o.min || Math.min(dur, 10))) break;
+        for (let i = 0; i < pool.length; i++) {
+          const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0;
+          if (!mine && !isFree(pl.id, s, end)) continue;
+          linger(s - (dk !== deck ? C : 0)); go(dk);
+          if (!mine) hold(pl.id, s, end);
+          seg(act, end, type, pl.id, o.tag ? { tag: o.tag } : undefined);
+          return pl.id;
+        }
+      }
+    }
+    return null;
+  };
+  // showers in the evening: the habit, or about one day in three for anyone else
+  const eveShower = H.has('evening-shower') || U(90) < .3;
+  const wash = (k, evening) => {                         // a shower (queueing if need be), else a basin, else in your own room
+    const dur = evening || !eveShower ? 7 + Math.round(5 * U(k)) : 5;
+    const type = dur === 5 ? 'basin' : 'shower';
+    if (!take('wash', [[bedDeck, type]], dur, { wait: 25 }) && !take('wash', [[bedDeck, type === 'shower' ? 'basin' : 'shower']], 5, { wait: 15 })) {
+      go(bedDeck); seg('wash', t + 6, 'bed', p.bed, { tag: 'room' });
+    }
+  };
+  const grab = (meal, k) => {                            // grab-and-go: two minutes at the shelf, or the servery
+    if (!take(meal, [[3, 'grab-shelf']], 2, { wait: 4, tag: 'grab' }) && !take(meal, [[3, 'servery-queue']], 3, { wait: 6, tag: 'grab' })) { go(3); seg(meal, t + 3, null, null, { tag: 'grab' }); }
+  };
+  // a sit-down meal: queue at the servery, then a seat; `by` is when it has to end
+  const meal = (meal, k, by) => {
+    let dur = 22 + Math.round(15 * U(k)); if (H.has('lingers-at-meals')) dur += 15 + Math.round(10 * U(k + 1));
+    if (by - (t + (deck !== 3 ? C : 0)) < 18) return grab(meal, k);
+    take(meal, [[3, 'servery-queue']], 3, { wait: 8, tag: 'queue', min: 1 });
+    if (!take(meal, [[3, 'mess-seat']], dur, { wait: 5, by, min: 12 }) && !take(meal, [[3, 'lounge-seat'], [3, 'bench']], dur, { wait: 5, by, min: 12 })) {
+      go(3); seg(meal, Math.min(by, t + dur), null, null);
+    }
+  };
+  // leisure options for this person, weighted: places on the deck you're on count four times, the one you just
+  // left counts for little; [bedDeck, 'rest'] is time in your own bunk or cabin
+  let lastLeisure = null;
+  const leisureOpts = k => {
+    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest';
+    const opts = LEISURE.concat(...(p.habits || []).map(h => HABIT_LEISURE[h] || []))
+      .filter(([dk, type, w, who]) => (!who || (who === 'junior' ? junior : senior)) && (S.shared.get(dk + '|' + type) || []).length)
+      .concat([[bedDeck, 'rest', 3]])
+      .map(([dk, type, w]) => [dk, type, w * (dk === deck ? 4 : 1) * (dk + '|' + type === lastLeisure ? .2 : 1)]);
+    const tot = opts.reduce((a, o) => a + o[2], 0); let r = U(k) * tot, i = 0;
+    while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
+    return opts.slice(i).concat(opts.slice(0, i)).map(o => [o[0], o[1]]);   // the pick first, then the rest
+  };
+  // leisure until `end`: blocks of 30-100 minutes; the Wednesday drill musters anyone off duty by the lift
+  const leisureUntil = (end, k) => {
+    for (let n = 0; end - t >= 20 && n < 12; n++) {
+      let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
+      if (end - to < 20) to = end;
+      if (F.shape.drill && t < F.shape.drill && to > F.shape.drill) to = F.shape.drill;
+      const opts = leisureOpts(k + n * 3 + 1), pick = opts[0];
+      lastLeisure = pick[0] + '|' + pick[1];
+      if (pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 })) {
+        if (deck !== bedDeck && to - t < C + 15) linger(to); else { go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }
+      }
+      if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
+    }
+    linger(end);
+  };
+  const specials = (k, offDay) => {                      // needs: the gym, a call home, the weekly wash
+    const out = [];
+    if (schedWants(p, d, 60, dd => H.has('gym-regular') ? (isWorkDay(p, dd) ? .8 : .6) : .12)) out.push(() => take('gym', [[3, 'gym']], 40 + Math.round(20 * U(61)), { wait: 10, min: 25 }));
+    if (schedWants(p, d, 62, dd => H.has('calls-home') ? (isWorkDay(p, dd) ? .3 : .9) : .06)) out.push(() => take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 10, min: 12 }));
+    if (offDay && p.rota && p.rota.offDays && weekday(d) === p.rota.offDays[0]) out.push(() => take('leisure', [[4, 'laundry']], 30 + Math.round(15 * U(64)), { wait: 15, min: 20, tag: 'laundry' }));
+    return out;
+  };
+  // the evening: specials, dinner, leisure, then to bed (or to the night shift at workStart)
+  const evening = (sp, until, toWork) => {
+    const dinnerAt = Math.max(t, H.has('late-diner') ? 1165 + Math.round(15 * U(70)) : 1030 + Math.round(70 * U(70)));
+    if (sp.length && t + 45 < dinnerAt) sp.shift()();
+    leisureUntil(Math.min(dinnerAt, until - 40), 71);
+    if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0)));
+    else grab('dinner', 72);
+    while (sp.length && t < until - 60) sp.shift()();
+    if (toWork) { leisureUntil(until - C, 80); go(wd); seg('work', 1440, p.work.place, desk); return; }
+    const showerT = eveShower ? 22 : 0;
+    leisureUntil(until - showerT - C, 80);
+    if (showerT) wash(81, true);
+    go(bedDeck); linger(Math.max(t, until));
+    seg('sleep', 1440, 'bed', p.bed);
+  };
+  const morning = (k, by) => {                           // wash, tidy for inspection, breakfast (sit-down or grab)
+    wash(k);
+    if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
+    if (H.has('skips-breakfast') && U(k + 1) < .7) { linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
+    const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(25 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));
+    if (want > t + C + 5) linger(want - (deck !== 3 ? C : 0));
+    meal('breakfast', k + 5, by);
+  };
+
+  if (!F.night) {
+    seg('sleep', Math.max(F.wake, P.bed + 410 - 1440), 'bed', p.bed);
+    if (F.works) {
+      const ws = F.workStart, we = F.workEnd;
+      morning(20, ws - (wd !== 3 ? C : 0));
+      go(wd);
+      if (H.has('tea-break')) {
+        const bt = 600 + Math.round(240 * U(30));
+        seg('work', bt, p.work.place, desk);
+        if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) seg('work', t + 15, p.work.place, desk);
+        go(wd);
+      }
+      seg('work', we, p.work.place, desk);
+      evening(specials(50, false), F.bed, false);
+    } else {
+      morning(20, MEALS.breakfast[1]);
+      const sp = specials(50, true);
+      leisureUntil(t + 30 + Math.round(60 * U(55)), 56);
+      while (sp.length > 1) { sp.shift()(); leisureUntil(t + 40 + Math.round(80 * U(57 + sp.length)), 58 + sp.length * 4); }
+      evening(sp, F.bed, false);
+    }
+  } else {
+    // night shift: the shift that began last night runs to 06:00, then breakfast and sleep through the day
+    if (P.works) {
+      deck = wd; seg('work', P.workEnd, p.work.place, desk);
+      meal('breakfast', 20, MEALS.breakfast[1]);
+      wash(25); go(bedDeck);
+      seg('sleep', t + 420 + Math.round(30 * U(26)), 'bed', p.bed);
+      const sp = specials(50, !F.works);
+      evening(sp, F.works ? F.workStart : F.bed, F.works);
+    } else {
+      seg('sleep', Math.max(400 + Math.round(50 * U(21)), P.bed + 410 - 1440), 'bed', p.bed);
+      morning(22, MEALS.breakfast[1]);
+      const sp = specials(50, true);
+      if (F.works) {                                     // back on tonight: a long nap in the afternoon
+        if (sp.length) sp.shift()();
+        leisureUntil(Math.max(t, 770 + Math.round(30 * U(27))), 28);
+        go(bedDeck); seg('sleep', t + 240, 'bed', p.bed);
+        evening(sp, F.workStart, true);
+      } else {
+        leisureUntil(t + 30 + Math.round(60 * U(55)), 56);
+        while (sp.length > 1) { sp.shift()(); leisureUntil(t + 40 + Math.round(80 * U(57)), 58); }
+        evening(sp, F.bed, false);
+      }
+    }
+  }
+  // tidy: absolute times, neighbours with the same act and place joined
+  const out = [];
+  for (const s of segs) {
+    const l = out[out.length - 1];
+    if (l && l.act === s.act && l.placeId === s.placeId && l.deck === s.deck && l.tag === s.tag && l.to === B + s.from) l.to = B + s.to;
+    else out.push({ ...s, from: B + s.from, to: B + s.to });
+  }
+  return out;
+}
+
+// ---- the whole ship's day, planned once and kept (the last few days) ----
+const SHIP_DAYS = new Map();
+function shipDay(d) {
+  if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
+  const S = schedData(), occ = new Map(), plans = new Map();
+  const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
+  const order = S.people.slice().sort((a, b) => wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
+  for (const p of order) plans.set(p.id, schedBuild(p, d, occ, S));
+  const day = { d, plans, occ };
+  SHIP_DAYS.set(d, day);
+  for (const k of SHIP_DAYS.keys()) if (k < d - 2 || k > d + 2) SHIP_DAYS.delete(k);
+  return day;
+}
+function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
+function whereIs(person, t) {
+  const segs = planDay(person, Math.floor(t / 1440) + 1);
+  let a = 0, b = segs.length - 1;
+  while (a < b) { const m = (a + b + 1) >> 1; if (segs[m].from <= t) a = m; else b = m - 1; }
+  const s = segs[a];
+  return s ? { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, until: s.to, tag: s.tag } : null;
+}
+const schedPeople = () => schedData().people;
+const peopleOn = (deck, t) => schedPeople().map(p => ({ p, w: whereIs(p, t) })).filter(x => x.w && x.w.deck === deck);
+// step a whole day with no drawing: fn(t, [{ p, w }, ...]) every `step` ship minutes
+function runDay(day, step = 1, fn) {
+  const ppl = schedPeople();
+  for (let t = (day - 1) * 1440; t < day * 1440; t += step) fn(t, ppl.map(p => ({ p, w: whereIs(p, t) })));
+}
+// what day_check.py checks, for one day: own-bed sleep in the 24 hours from 18:00 the evening before, meals,
+// shift minutes worked, places held by two people at once, gaps in a plan, and how many people each deck holds
+function dayReport(day) {
+  const S = schedData(), B = (day - 1) * 1440, rep = { day, people: S.people.length, short: [], meals: [], work: [], double: [], gaps: [], unplaced: {}, peak: {} };
+  for (const p of S.people) {
+    const segs = planDay(p, day - 1).concat(planDay(p, day));
+    let sleep = 0;
+    for (const s of segs) if (s.act === 'sleep' && s.placeId === p.bed) sleep += Math.max(0, Math.min(s.to, B + 1080) - Math.max(s.from, B - 360));
+    if (sleep < 360) rep.short.push(p.id + ' ' + sleep);
+    const today = planDay(p, day);
+    const meals = new Set(today.filter(s => s.act === 'breakfast' || s.act === 'dinner').map(s => s.act));
+    if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
+    if (isWorkDay(p, day)) {
+      const [a, b] = p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020];
+      const both = planDay(p, day).concat(planDay(p, day + 1));
+      const worked = both.filter(s => s.act === 'work' || s.tag === 'tea').reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
+      if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
+    }
+    for (let i = 0; i < today.length; i++) {
+      const s = today[i];
+      if (i ? s.from !== today[i - 1].to : s.from !== B) rep.gaps.push(p.id + '@' + s.from);
+      if (!s.placeId && s.act !== 'commute') rep.unplaced[s.act] = (rep.unplaced[s.act] || 0) + 1;
+    }
+    if (!today.length || today[today.length - 1].to !== B + 1440) rep.gaps.push(p.id + ' end');
+  }
+  for (const [id, iv] of shipDay(day).occ) {
+    const v = iv.slice().sort((x, y) => x[0] - y[0]);
+    for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) rep.double.push(id + '@' + v[i][0]);
+  }
+  // beds and desks aren't in occ: check nobody else's plan uses them
+  const holder = new Map();
+  for (const p of S.people) for (const s of planDay(p, day)) if (s.placeId && (s.type === 'bed' || /^work:/.test(s.type))) {
+    const k = s.placeId + '|' + (s.type === 'bed' ? '' : p.shift); const h = holder.get(k);
+    if (h && h !== p.id && s.type === 'bed') rep.double.push(s.placeId + ' ' + h + '/' + p.id);
+    if (h && h !== p.id && s.type !== 'bed') rep.double.push(s.placeId + ' ' + h + '/' + p.id);
+    holder.set(k, p.id);
+  }
+  for (let t = B; t < B + 1440; t += 5) {
+    const n = {}; for (const p of S.people) { const w = whereIs(p, t); n[w.deck] = (n[w.deck] || 0) + 1; }
+    for (const k in n) if (!rep.peak[k] || n[k] > rep.peak[k][0]) rep.peak[k] = [n[k], hhmm(t - B)];
+  }
+  return rep;
+}
+// sleeping (sleepUntil) and other jumps: plan the days you skip into, so arriving anywhere is instant
+SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // =====================================================================
 // 6. CAMERA
