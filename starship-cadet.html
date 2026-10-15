@@ -7311,7 +7311,7 @@ device.addSection('needs', 'Needs', el => {
 //    waiting. The cooks cook to the numbers the crew's plans (planDay) say will eat; the crew take a portion when
 //    they reach the front of the queue and bring the plate back when they've eaten; the hands wash up.
 //  - What you see on Deck 3: food in the servery's pans, the grab shelf, dirty plates at the dish pit.
-// For other sections: takePortion(who) (the player eats), galleyHold(person, t) (someone waiting at the servery),
+// For other sections: takePortion(who) (the player eats), galleyJoin(who) / galleyTurn(who) (the player queues), galleyHold(person, t) (someone waiting at the servery),
 // galleySave() / galleyLoad(obj) (the save), galleyText(what) (tap text), galleyReport(day, days) (food_check.py).
 // Nothing here calls R().
 // =====================================================================
@@ -7549,9 +7549,24 @@ function galleyAdvance(to) {
 // the player (or anyone) eats: a hot portion and a plate if the servery has one, else something from the grab shelf
 function takePortion(who = 'player') {
   const S = galleyAdvance(shipNow()), m = Math.floor(shipNow());
+  GALLEY_JOINED.delete(who);
   if (S.servery.portions > 0 && FOOD.plates - S.dirty - S.inUse > 0) { S.servery.portions--; S.inUse++; S.back.push([m + 20, 1]); return true; }
   if (S.grab.items > 0) { S.grab.items--; return true; }
   return false;
+}
+// the player joins the servery queue: where to stand (the back of the line, by the tray return: a tile that's no
+// one's place) and when it's their turn: a minute, plus about 45 seconds for each crew member in the line or waiting.
+// galleyTurn(who) is true from then on while there's food; takePortion(who) serves them and ends it
+const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();
+function galleyJoin(who = 'player') {
+  const now = shipNow(), S = galleyAdvance(now);
+  const ahead = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length + S.wait.length;
+  const j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, turnAt: now + 1 + ahead * .75 };
+  GALLEY_JOINED.set(who, j); return j;
+}
+function galleyTurn(who = 'player') {
+  const j = GALLEY_JOINED.get(who); if (!j) return false;
+  const S = galleyAdvance(shipNow()); return shipNow() >= j.turnAt && (S.servery.portions > 0 || S.grab.items > 0);
 }
 // someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
 function galleyHold(person, t) {
