@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.2
+   STARSHIP CADET: CSV Wren                            build 0.7.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1933,9 +1933,51 @@ const KIT = {
     for (let k = 0; k <= n; k++) box(.05, 1.05, .05, WM.steel, -w / 2 + .03 + (w - .06) * k / n, .525, 0, g);
     return { w, d: .1, noBlock: true };
   },
+  // the reactor: a ribbed shield drum on a plinth, a band of ports glowing green, the core showing through a ring
+  // on top, conduits to the deckhead, and the coolant loop round it all on short stands. Its glow breathes slowly.
+  reactorDrum(g, o = {}) {
+    const loop = o.loop || 3.0, core = std('#4fbf7f', .3, 0, { emissive: col('#2fbf6f'), emissiveIntensity: 1 });
+    cyl(2.3, 2.4, .3, ENG.plinth, 0, .15, 0, g, 40);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(2.32, .05, 6, 48), WM.paintGold); band.rotation.x = Math.PI / 2; band.position.y = .31; g.add(band);
+    cyl(2.0, 2.0, 2.2, ENG.shield, 0, 1.38, 0, g, 40);
+    for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8; box(.12, 2.2, .14, ENG.housing, Math.sin(a) * 2.02, 1.38, Math.cos(a) * 2.02, g).rotation.y = a; }
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4 + Math.PI / 16; box(.34, .14, .06, core, Math.sin(a) * 2.03, 1.55, Math.cos(a) * 2.03, g).rotation.y = a; }
+    cyl(2.1, 2.1, .14, ENG.housing, 0, 2.53, 0, g, 40);
+    cyl(1.2, 1.2, .06, core, 0, 2.61, 0, g, 32);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(1.25, .07, 8, 32), WM.steelTop); rim.rotation.x = Math.PI / 2; rim.position.y = 2.62; g.add(rim);
+    for (const [x, z] of [[.9, 0], [-.45, .78], [-.45, -.78]]) cyl(.16, .16, H - 2.56, ENG.housing, x, (2.56 + H) / 2, z, g, 12);
+    const lp = new THREE.Mesh(new THREE.TorusGeometry(loop, .16, 10, 64), ENG.pipe); lp.rotation.x = Math.PI / 2; lp.position.y = .75; lp.castShadow = true; g.add(lp);
+    for (let k = 0; k < 8; k++) {
+      const a = k * Math.PI / 4; box(.12, .62, .12, WM.paintDark, Math.sin(a) * loop, .31, Math.cos(a) * loop, g);
+      if (k % 2 === 0) { cyl(.12, .12, loop - 2.0, ENG.pipe, Math.sin(a) * (loop + 2.0) / 2, .75, Math.cos(a) * (loop + 2.0) / 2, g, 10).quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(Math.sin(a), 0, Math.cos(a))); }   // spokes from the drum to the loop
+    }
+    const s = glow('#7dffb0', 2.4, 0, 2.9, 0, g, .3);
+    PULSES.push({ m: core, key: 'emissiveIntensity', base: .7, amp: .5, w: .45, ph: 0 }, { m: s.material, key: 'opacity', base: .15, amp: .2, w: .45, ph: 0 });
+    return { w: (loop + .2) * 2, d: (loop + .2) * 2, tall: true };
+  },
+  // engine control's board: a long desk with a sloped face of screens and switches. Kit x runs along it; operators sit on +z.
+  controlBoard(g, o = {}) {
+    const w = o.w || 3.4;
+    box(w, .72, .6, ENG.console, 0, .36, -.05, g);
+    const top = box(w, .06, .5, ENG.console, 0, .82, -.02, g); top.rotation.x = .35;
+    for (let x = -w / 2 + .35; x < w / 2 - .2; x += .7) {
+      const sc = box(.5, .02, .3, (Math.round((x + w) * 10) % 3) ? WM.screen : WM.screenAmber, x, .86, -.04, g); sc.rotation.x = .35;
+      for (let k = 0; k < 3; k++) box(.05, .03, .05, k === 1 ? WM.red : WM.navGreen, x - .12 + k * .12, .79, .18, g).rotation.x = .35;
+    }
+    box(w, .45, .06, ENG.console, 0, 1.08, -.31, g);
+    return { w, d: .7 };
+  },
 };
 // wall-mounted pieces: built against a wall, origin on the wall's inner face, front toward +z
 const WALL_KIT = {
+  mimicPanel(g) {                                        // engine control's map of the ship's power
+    box(3.1, 1.06, .04, M.slateDark, 0, 1.75, .02, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.0), ENG.mimic); p.position.set(0, 1.75, .045); g.add(p);
+  },
+  trefoil(g) {                                           // a radiation sign
+    box(.42, .42, .03, M.slateDark, 0, 1.6, .015, g);
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.38, .38), ENG.trefoil); p.position.set(0, 1.6, .035); g.add(p);
+  },
   notices(g) {
     box(1.0, .7, .04, KM.cork, 0, 1.5, .03, g); box(1.06, .76, .03, M.slateDark, 0, 1.5, .015, g);
     [[-.3, 1.62, KM.paper, 0.1], [.05, 1.66, KM.note, -.08], [.32, 1.55, KM.paper, .05], [-.25, 1.36, KM.note, .12], [.12, 1.38, KM.paper, -.04]]
@@ -2234,6 +2276,27 @@ const SHOP = { goods: ['#e86a9a', '#f2c94c', '#2a9d8f', '#d96a2e', '#7a5aa8', '#
 // ---- Deck 6: the engine room (made at load, no R()) ----
 const ENG = {
   copper: std('#b8733a', .35, .8), housing: std('#59646b', .5, .45), plinth: std('#2f363c', .6, .4), walk: std('#4a535a', .6, .5),
+  shield: std('#7d878c', .55, .35), pipe: std('#9fb7c2', .35, .55), console: std('#2b333a', .55, .3),
+  // engine control's mimic panel: the reactor, its two junctions, and a line up to every deck
+  mimic: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(512, 170, (c, w, h) => {
+    c.fillStyle = '#0d1a1f'; c.fillRect(0, 0, w, h);
+    c.strokeStyle = '#7dffb0'; c.lineWidth = 4; c.beginPath(); c.arc(70, 100, 34, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = 'rgba(125,255,176,.35)'; c.beginPath(); c.arc(70, 100, 20, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#e8c06a'; c.lineWidth = 3;
+    for (const y of [70, 130]) { c.beginPath(); c.moveTo(104, 100); c.lineTo(150, y); c.lineTo(200, y); c.stroke(); c.strokeRect(200, y - 12, 34, 24); }
+    for (let k = 0; k < 6; k++) {
+      const x = 270 + k * 38, live = k !== 3;
+      c.strokeStyle = live ? '#5fd6c6' : '#f0a640'; c.beginPath(); c.moveTo(234, k % 2 ? 130 : 70); c.lineTo(x, k % 2 ? 130 : 70); c.lineTo(x, 26); c.stroke();
+      c.fillStyle = live ? '#5fd6c6' : '#f0a640'; c.font = '700 18px system-ui,sans-serif'; c.fillText(String(6 - k), x - 5, 20);
+    }
+    c.fillStyle = '#a9c4bf'; c.font = '500 13px system-ui,sans-serif'; c.fillText('CSV WREN  POWER', 20, 22); c.fillText('REACTOR', 40, 158);
+  }, 1, 1) }),
+  // the radiation sign either side of the reactor door
+  trefoil: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(128, 128, (c, w, h) => {
+    c.fillStyle = '#e8c06a'; c.fillRect(0, 0, w, h); c.strokeStyle = '#1d2226'; c.lineWidth = 6; c.strokeRect(6, 6, w - 12, h - 12);
+    c.fillStyle = '#1d2226'; c.beginPath(); c.arc(64, 64, 9, 0, Math.PI * 2); c.fill();
+    for (let k = 0; k < 3; k++) { const a = -Math.PI / 2 + k * Math.PI * 2 / 3; c.beginPath(); c.moveTo(64, 64); c.arc(64, 64, 46, a - Math.PI / 6, a + Math.PI / 6); c.arc(64, 64, 15, a + Math.PI / 6, a - Math.PI / 6, true); c.closePath(); c.fill(); }
+  }, 1, 1) }),
 };
 function makePollen(w, d, n = 40) {                        // drifting motes over the beds
   const pos = new Float32Array(n * 3), seeds = [];
@@ -3523,7 +3586,7 @@ DECKS[3] = {
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
 
 // =====================================================================
-// DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room)
+// DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room, turn 3 the reactor and engine control)
 // From plans/deck6-plan.html. The bottom of the ship: the engine room fills the flat stern, the reactor the bow,
 // with the foot of the spine, the overlook, engine control and the watch room between. No windows anywhere.
 // Engine room, engine control and the reactor are locked rooms you look into through glass.
@@ -3608,6 +3671,14 @@ DECKS[6] = {
     place('O', 'overlookRail', .2, 2.0, 'w', { w: 3.7 }); place('O', 'overlookRail', .2, 7.5, 'w', { w: 4.7 });
     for (const z of [2.5, 7.5]) place('O', 'bench', 2.3, z, 'e', { snug: true, it: IT('Bench', 'Facing the coils. People come down here to think, because nobody can hear you over the hum.') });
     placeWall('O', 'notices', 'n', 2.0, { hitW: 1.0, it: IT('First week', 'A list of names under COME AND SEE THE ENGINE. Every new crew member is on it. Yours has been added in pencil.') });
+    // the reactor fills the bow, seen through engine control's window: the shield drum and its coolant loop
+    place('R', 'reactorDrum', 4.4, 6, 'n', { loop: 3.0, it: { t: 'The reactor', x: 'The core sits inside that drum, behind more shielding than anything else aboard. The green glow is the safe kind. Everyone says so, a bit too quickly.', see: true } });
+    // engine control: the board along the reactor window, two chairs facing it, and the mimic panel of the ship's power
+    place('K', 'controlBoard', 4.45, 2, 'e', { w: 3.4, it: { t: 'Engine control board', x: 'Reactor output, coil temperatures, coolant flow and the drive, all on one desk. One of the amber lights has been amber for a week, and someone has taped a note to it: KNOWN.', see: true } });
+    for (const z of [1.2, 2.8]) place('K', 'chair', 3.4, z, 'w');
+    placeWall('K', 'mimicPanel', 'n', 2.5, { hitW: 3.0, it: { t: 'Mimic panel', x: 'The whole ship\'s power on one board: the reactor, both junctions and a line up to every deck. Deck 3\'s line is amber; the galley ovens are drawing hard.', see: true } });
+    // the reactor door at the end of the alcove: a radiation sign either side
+    for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. Tier 4, and only ever on a team job.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
