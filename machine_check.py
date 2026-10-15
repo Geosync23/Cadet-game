@@ -13,7 +13,9 @@
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
-#   nothing runs unless asked: a game left running with ?nosave never touches the machines
+#   nothing runs unless asked: a game left running with ?nosave never touches the machines, and shipEffectsAt
+#   then says everything is as new; shipEffectsAt gives back what shipEffects said over the last 7 days, and reading
+#   it changes nothing
 # Setup and environment as for cadet_test.py.
 # Run:  python3 machine_check.py BUILD.html [DAYS]     (DAYS defaults to 14)
 import sys, json, time
@@ -66,7 +68,7 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
     if ((t - t0) % 1440 === 1080) {                      // every day at midnight: a snapshot
       const sys = shipSystems();
       out.daily.push({ day: SHIP.time.day, health: shipHealth(sys), sys, cond: Object.fromEntries(list.map(m => [m.id, Math.round(SHIP.machines[m.id].cond * 10) / 10])) });
-      for (const n of Object.keys(DECKS)) { const f = shipEffects(+n); out.fx.push({ deck: +n, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, mood: f.mood, notes: f.notes.length }); }
+      for (const n of Object.keys(DECKS)) { const f = shipEffects(+n); out.fx.push({ deck: +n, t, restore: f.restore, drain: f.drain, walk: f.walk, cook: f.cook, lift: f.lift, spoil: f.spoil, mood: f.mood, notes: f.notes.length, json: JSON.stringify(f) }); }
     }
   }
   setShipNow(end); machinesNow(); look(end);
@@ -74,6 +76,11 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   out.states = Object.fromEntries(list.map(m => [m.id, SHIP.machines[m.id].state]));
   out.kinds = Object.fromEntries(list.map(m => [m.id, m.kind]));
   out.effects4 = shipEffects(4); out.effects3 = shipEffects(3);
+  // shipEffectsAt: the record gives back what shipEffects said at the time (the last 8 days), and reading it
+  // changes nothing
+  const rev = MACH_REV, hour = MACH_HOUR;
+  out.atBad = out.fx.filter(f => f.t >= end - 7 * 1440 && JSON.stringify(shipEffectsAt(f.deck, f.t)) !== f.json).map(f => f.deck + '@' + f.t);
+  out.atPure = MACH_REV === rev && MACH_HOUR === hour;
   // the jobs, for the real crew's checks
   const J = [...seen.values()], ppl = new Map(schedPeople().map(p => [p.id, p]));
   out.jobList = J.map(j => ({ id: j.id, kind: j.kind, status: j.status, by: j.claimedBy, urgency: j.urgency, posted: j.posted, found: j.found, start: j.start, end: j.end, done: j.done, made: j.made || 0, tier: jobTier(j), cargo: j.cargo || null }));
@@ -102,7 +109,7 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     # 0. nothing runs unless asked: a while of play with ?nosave leaves the machines untouched
     g.step(60)
-    inert = g.ev("MACH_HOUR === null")
+    inert = g.ev("(() => { const f = shipEffectsAt(4, shipNow()); return MACH_HOUR === null && f.mood === 0 && f.restore.hygiene === 1; })()")
     print('Untouched by play (?nosave):', inert)
     if not inert: fail('the machines ran without being asked')
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
@@ -137,7 +144,7 @@ with sync_playwright() as pw:
     hs = [d['health'] for d in a['daily']]
     if not (hs[-1] < hs[0] and hs[-1] > 0): fail(f"ship health {hs[0]} -> {hs[-1]}")
     bad = [f for f in a['fx'] if not (all(0 < v <= 1 for v in f['restore'].values()) and all(1 <= v < 3 for v in f['drain'].values())
-           and .5 < f['walk'] <= 1 and 1 <= f['cook'] < 3 and 1 <= f['lift'] < 3 and -30 <= f['mood'] <= 0)]
+           and .5 < f['walk'] <= 1 and 1 <= f['cook'] < 3 and 1 <= f['lift'] < 3 and 1 <= f['spoil'] < 3 and -30 <= f['mood'] <= 0)]
     if bad: fail(f"effects out of range: {bad[:2]}")
     e4 = a['effects4']
     print(f"  Deck 4 at the end: hygiene restore x{e4['restore']['hygiene']:.2f}, energy drain x{e4['drain']['energy']:.2f}, energy restore x{e4['restore']['energy']:.2f}, walk x{e4['walk']:.2f}, mood {e4['mood']}")
@@ -145,6 +152,8 @@ with sync_playwright() as pw:
     e3 = a['effects3']
     print(f"  Deck 3 at the end: cook x{e3['cook']:.2f}, hunger restore x{e3['restore']['hunger']:.2f}, lift x{e3['lift']:.2f}, mood {e3['mood']}")
 
+    print(f"  shipEffectsAt matches the last 7 days: {not a['atBad']}, reads change nothing: {a['atPure']}")
+    if a['atBad'] or not a['atPure']: fail(f"shipEffectsAt: {a['atBad'][:4]} pure {a['atPure']}")
     # 2. the same every way
     b = run()
     j = run(mode='jump')
