@@ -35,6 +35,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
+    print('Food reaches the cold store by:', g.ev("FOOD.restock === 'carts' && typeof cartClaim === 'function' ? 'hover cart only (cartClaim)' : 'the 10:30 top-up'"))
     print(f"Days {DAY}-{DAY + DAYS - 1} from {g.ev(f'WEEKDAYS[weekday({DAY})]')}, {g.ev('schedPeople().length')} people, {g.ev('galleyStaff().length')} galley staff")
 
     # 1. the days
