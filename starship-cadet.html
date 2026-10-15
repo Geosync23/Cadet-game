@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.30.7
+   STARSHIP CADET: CSV Wren                            build 0.30.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3853,6 +3853,13 @@ DECKS[5] = {
     { id: '5-shop-3', type: 'work:works', at: [26, 11], face: 'e', pose: 'work', room: 'f' },
     { id: '5-shop-4', type: 'work:works', at: [23, 13], face: 'n', pose: 'work', room: 'f' },
     { id: '5-shop-5', type: 'work:works', at: [24, 13], face: 'n', pose: 'work', room: 'f' },
+    // fetching and making parts (0.30.8, for the systems engineer's jobs): not desks, so the planner never hands them out as work stations
+    { id: '5-parts-1', type: 'storage', anim: 'browse', at: [26, 2], face: 'e', pose: 'stand', room: 'r' },   // the Lights shelves
+    { id: '5-parts-2', type: 'storage', anim: 'browse', at: [28, 5], face: 'e', pose: 'stand', room: 'r' },   // Filters
+    { id: '5-parts-3', type: 'storage', anim: 'browse', at: [30, 5], face: 'e', pose: 'stand', room: 'r' },   // Plumbing
+    { id: '5-parts-4', type: 'storage', anim: 'browse', at: [32, 3], face: 'e', pose: 'stand', room: 'r' },   // Galley parts
+    { id: '5-make-1', type: 'storage', anim: 'work', at: [22, 12], face: 'w', pose: 'work', room: 'f' },     // at the lathe
+    { id: '5-make-2', type: 'storage', anim: 'work', at: [25, 9], face: 'e', pose: 'work', room: 'f' },      // beside the fabricator
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-2', type: 'work:works', at: [7, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-3', type: 'work:works', at: [2, 4], face: 'w', pose: 'work', room: 'S' },
@@ -6285,7 +6292,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.30.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6456,13 +6463,14 @@ const WEEK_SHAPE = [
 // where leisure happens: [deck, place type, weight]. Habits add their favourites; options with no places are skipped
 // who: 'junior', 'officer' (anyone above junior) or 'deck2' (officers, and anyone who works on Deck 2)
 const LEISURE = [[3, 'lounge-seat', 3], [3, 'garden', 2], [3, 'bench', 2], [4, 'common-room', 2, 'junior'], [4, 'music', 1], [4, 'bench', .5],
-  [1, 'common-room', 1, 'officer'], [1, 'lounge-seat', .5, 'officer'], [2, 'lounge-seat', 1.5, 'deck2'], [2, 'bench', .5, 'deck2']];
+  [1, 'common-room', 1, 'officer'], [1, 'lounge-seat', .5, 'officer'], [2, 'lounge-seat', 1.5, 'deck2'], [2, 'bench', .5, 'deck2'], [2, 'common-room', 1.5, 'deck2']];
 const HABIT_LEISURE = {
   'garden-lover': [[3, 'garden', 8]], 'lounge-regular': [[3, 'lounge-seat', 8]], 'common-room': [[4, 'common-room', 8, 'junior']],
   'music': [[4, 'music', 8]], 'quiet-corner': [[3, 'lounge-seat', 4], [1, 'common-room', 3], [2, 'lounge-seat', 4]],
 };
 // what someone does at a place (plans/pillar2-plan.md, "Activities on places"): the place's `anim`, else by type
-const PLACE_ANIM = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', laundry: 'fold', 'work:galley': 'cook' };
+// (the music room is listening unless someone plays: the musician habit sets 'play'; poseOf in 8b agrees)
+const PLACE_ANIM = { gym: 'lift', callhome: 'call', shop: 'browse', laundry: 'fold', 'work:galley': 'cook' };
 const placeAnim = pl => pl ? pl.anim || PLACE_ANIM[pl.type] || (pl.type === 'garden' && pl.pose === 'stand' ? 'water' : null) : null;
 // needs, 0-100, 100 = fully met (the plan's "Needs"). Crew needs are on paper: crewNeeds(person, t) reads them off
 // the plans, and needsEst(person, day) is the start-of-day estimate that steers the day's choices (below)
@@ -6531,15 +6539,17 @@ function schedRoomLocked(n, room) {
 // work deck; when those run out, any other workstation on the deck nobody on that shift has, outside locked
 // rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
-  const desks = new Map(), used = new Set();
+  const desks = new Map(), used = new Map();
   const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley')).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = (pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room)))
       .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));   // machine panels are for servicing (B2); the galley books its own
-    const d = pool.find(pl => !used.has(p.shift + '|' + pl.id));
-    if (d) used.add(p.shift + '|' + d.id);
+    // a desk is taken for a shift, or, for people with rota.hours, only for those hours (the storekeepers share the till)
+    const hrs = p.rota && p.rota.hours, clash = (a, b) => !a || !b || a.some(([x, y]) => b.some(([u, v]) => x < v && u < y));
+    const d = pool.find(pl => !(used.get(p.shift + '|' + pl.id) || []).some(h => clash(h, hrs)));
+    if (d) (used.get(p.shift + '|' + d.id) || used.set(p.shift + '|' + d.id, []).get(p.shift + '|' + d.id)).push(hrs || null);
     desks.set(p.id, d ? d.id : null);
   }
   return desks;
@@ -6558,8 +6568,15 @@ const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).incl
 // stints make one stretch of work; a given meal is a normal meal (queue, then a seat) between those times; a meal
 // not given is the normal one in its window; bedBy caps that night's bedtime. If only the older galleyShift(person,
 // day) -> [[from, to, placeId?, task?], ...] exists, that's used instead. Consulted only for day-shift galley staff.
-function galleyPlan(p, d) {
-  if (p.dept !== 'galley' || p.shift === 'night') return null;
+// A work day in blocks, for anyone whose hours aren't the plain shift: galley staff (their rota), and anyone with
+// rota.hours ([[from, to], ...] in minutes from midnight, on their work days, at their own desk: the storekeepers)
+function shiftBlocks(p, d) {
+  if (p.shift === 'night') return null;
+  const hrs = p.rota && p.rota.hours;
+  if (p.dept !== 'galley' || !(typeof galleyDay === 'function' || typeof galleyShift === 'function')) {
+    if (!Array.isArray(hrs) || !hrs.length || !isWorkDay(p, d)) return null;
+    return { blocks: hrs.filter(x => x[1] > x[0]).map(x => [x[0], x[1], null, null]).sort((x, y) => x[0] - y[0]), wake: null, bedBy: null, meals: null, desk: true };
+  }
   if (typeof galleyDay === 'function') {
     const g = galleyDay(p, d); if (!g) return null;
     const blocks = g.role && Array.isArray(g.blocks) ? g.blocks.filter(x => x.to > x.from).map(x => [x.from, x.to, x.placeId || null, x.task || null]) : [];
@@ -6575,13 +6592,13 @@ const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley book
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
 function schedFrame(p, d) {
   const U = k => schedU(p.seed, d, k), H = new Set(p.habits || []), shape = WEEK_SHAPE[weekday(d)];
-  const gp = galleyPlan(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
+  const gp = shiftBlocks(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
   let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
-  const next = galleyPlan(p, d + 1);                      // an early galley start tomorrow means an early night
+  const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
   if (gp && gp.bedBy != null) bed = Math.min(bed, gp.bedBy);
   if (next && next.blocks) bed = Math.min(bed, (next.wake != null ? next.wake : next.blocks[0][0] - 35) - 410 + 1440);
   bed = Math.round(Math.min(1430, bed));
@@ -6665,7 +6682,7 @@ function schedBuild(p, d, occ, S) {
           if (!mine && !isFree(pl.id, s, end)) continue;
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
-          const an = placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
+          const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
           seg(act, end, pl.type, pl.id, ex);
           return pl.id;
         }
@@ -6675,8 +6692,10 @@ function schedBuild(p, d, occ, S) {
   };
   const work = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
   const workAt = (pid, task, to) => {                    // a galley stint: its own station and task
-    const pl = pid && S.byId.get(pid), ex = { anim: placeAnim(pl) || 'cook' }; if (task) ex.tag = task;
-    seg('work', to, pl ? pl.type : 'work:galley', pid, ex);
+    const pl = pid && S.byId.get(pid);                   // tea on the stool takes the stool's own pose; the dish pit is 'wash'
+    const an = pl && pl.anim || (task === 'tea' ? null : task === 'wash' ? 'wash' : placeAnim(pl) || (p.dept === 'galley' ? 'cook' : null)), ex = {};
+    if (an) ex.anim = an; if (task) ex.tag = task;
+    seg('work', to, pl ? pl.type : wtype, pid, ex);
   };
   const toilet = k => {                                  // a toilet on the deck you're on, then hands at a basin; nothing if they're busy
     if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2 })) return false;
@@ -6762,9 +6781,9 @@ function schedBuild(p, d, occ, S) {
     // room's instruments, tending the garden, a drink at the bar, the observatory
     const wk = F.works;
     if (H.has('runner') && U(100) < (wk ? .7 : .6)) out.unshift(() => take('gym', [[3, 'gym-run'], [3, 'gym']], 25 + Math.round(15 * U(101)), { wait: 10, min: 15, tag: 'run' }));
-    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play' }));
+    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play', anim: 'play' }));
     if (H.has('gardener') && U(104) < .6) out.push(() => take('leisure', [[3, 'garden-tend'], [3, 'garden']], 30 + Math.round(30 * U(105)), { wait: 5, min: 20, tag: 'tend' }));
-    if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar' }));
+    if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar', anim: 'drink' }));
     if (H.has('stargazer') && U(108) < .5) out.push(() => take('leisure', [[2, 'observatory'], [2, 'lounge-seat']], 45 + Math.round(45 * U(109)), { wait: 5, min: 25, tag: 'stars' }));
     return out;
   };
@@ -6797,16 +6816,17 @@ function schedBuild(p, d, occ, S) {
     meal('breakfast', k + 5, by);
   };
 
-  const GP = !F.night && galleyPlan(p, d), GB = GP && GP.blocks;
+  const GP = !F.night && shiftBlocks(p, d), GB = GP && GP.blocks;
   if (GB) {
     // the galley rota: stints at the galley's stations (each its own place and task), free time between, meals at
     // the times the rota gives (or in their window, around the work), and a staff meal at the station only when
     // the work covers a whole window and the rota gives no time for it
-    const early = GB[0][0] < 600;
+    const early = GB[0][0] < 420;
     seg('sleep', Math.max(GP.wake != null ? GP.wake : early ? GB[0][0] - 35 : F.wake, P.bed + 410 - 1440), 'bed', p.bed);
     if (early) wash(20); else morning(20, Math.min(MEALS.breakfast[1], GB[0][0] - C));
     const ate = { breakfast: !early }, given = GP.meals || {};
     GB.forEach(([a, b, pid, task], i) => {
+      if (!pid && GP.desk) pid = desk;
       if (t < a) {                                        // a gap before this stint
         for (const m of ['breakfast', 'dinner']) {
           if (ate[m]) continue;
@@ -6819,7 +6839,7 @@ function schedBuild(p, d, occ, S) {
       go(wd); linger(a);                                 // early: wait for the stint (someone else may be at that station)
       if (!given.breakfast && !given.dinner) for (const m of ['breakfast', 'dinner']) {   // no time given and none free: eat at the station
         const [, w1] = MEALS[m];
-        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, 'work:galley', pid, { tag: 'staff' }); ate[m] = true; }
+        if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
       }
       workAt(pid, task, Math.min(b, 1440));
     });
@@ -6885,14 +6905,18 @@ function crewNeeds(p, t) {
   for (let d = d1 - 7; d <= d1; d++) for (const s of planDay(p, d)) {
     if (s.from >= t) break;
     const h = (Math.min(s.to, t) - s.from) / 60, type = s.type, tag = s.tag;
-    n.hunger = cl(n.hunger - 5.5 * h); n.fitness = cl(n.fitness - .35 * h);
-    if (s.act === 'sleep') n.energy = cl(n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h);
-    n.hygiene = cl(n.hygiene - 2.1 * h);
-    if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') n.hunger = cl(Math.max(n.hunger, tag === 'grab' ? 50 : 100));
-    if (s.act === 'wash') n.hygiene = cl(type === 'shower' ? 100 : n.hygiene + (tag === 'toilet' ? 0 : 15));
-    if (s.act === 'gym') { n.fitness = cl(n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
-    if (s.act === 'callhome') n.social = cl(n.social + 35);
-    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) n.social = cl(n.social + 15 * h); else n.social = cl(n.social - 2.5 * h);
+    // the ship's state where they were (section 17): drains run faster, restores give back less, e.g. a weak shower
+    const fx = typeof shipEffectsAt === 'function' ? shipEffectsAt(s.deck, s.from) : null;
+    const dr = k => fx && fx.drain && fx.drain[k] || 1, rs = k => fx && fx.restore && fx.restore[k] !== undefined ? fx.restore[k] : 1;
+    const up = (k, to) => { n[k] = cl(n[k] + Math.max(0, to - n[k]) * rs(k)); };   // restore toward `to`, scaled
+    n.hunger = cl(n.hunger - 5.5 * h * dr('hunger')); n.fitness = cl(n.fitness - .35 * h * dr('fitness'));
+    if (s.act === 'sleep') up('energy', n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
+    n.hygiene = cl(n.hygiene - 2.1 * h * dr('hygiene'));
+    if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') up('hunger', tag === 'grab' ? 50 : 100);
+    if (s.act === 'wash' && tag !== 'toilet') up('hygiene', type === 'shower' ? 100 : n.hygiene + 15);
+    if (s.act === 'gym') { up('fitness', n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
+    if (s.act === 'callhome') up('social', n.social + 35);
+    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social'));
   }
   for (const k of NEEDS) n[k] = Math.round(n[k]);
   return n;
@@ -6917,7 +6941,7 @@ function shipDay(d) {
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
   S.spare.forEach((pl, i) => {
-    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !galleyPlan(p, d));
+    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
@@ -6959,7 +6983,7 @@ function dayReport(day) {
     const today = planDay(p, day);
     const meals = new Set(today.filter(s => s.act === 'breakfast' || s.act === 'dinner').map(s => s.act));
     if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
-    const gp = galleyPlan(p, day), gb = gp && gp.blocks;
+    const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
       const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff'].includes(s.tag));
@@ -7074,6 +7098,10 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   pay:    { mins: 2, pose: 'pay', title: 'Paying', done: 'Paid. Nothing to carry yet: the shop\'s goods come later.' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
+  queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
+    if (!galleyTurn('player')) return false;
+    const f = foodFrom('servery'); A.o.dish = f.ok ? f.dish : null; A.o.why = f.why; return true;
+  } },
   eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
   grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
 };
@@ -7110,7 +7138,7 @@ function foodFrom(where, peek) {
       return { ok: true };
     }
     if (!takePortion('player')) return { ok: false, why: 'Nothing to eat just now. ' + sv + ' ' + gr };
-    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2].toLowerCase() : 'something from the grab shelf' };
+    return { ok: true, dish: hot ? (where === 'grab' ? 'a hot plate of ' : '') + hot[2] : 'something from the grab shelf' };
   }
   if (where === 'grab') return { ok: true, dish: 'a roll and an apple' };
   const m = SHIP.time.min;
@@ -7133,6 +7161,12 @@ function playerTap(it, at, point) {
     return true;
   }
   if ((kind === 'tray' || kind === 'eat') && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
+    const j = galleyJoin('player');
+    actStart('queue', null, { title: it.t, ahead: j.ahead, turnAt: j.turnAt,
+      spot: { id: null, walk: j.at, x: j.xy[0] - OX, z: j.xy[1] - OZ, y: 0, face: FACE_ANGLE[j.face] || 0, pose: 'stand' } });
+    return true;
+  }
   if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) {
@@ -7150,7 +7184,7 @@ function playerTap(it, at, point) {
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
   actEnd(true);
-  const spot = placeId ? placeSpot(placeId) : null, here = player.here();
+  const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: PLAYER_ACTS[kind], placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
@@ -7172,11 +7206,12 @@ function actBegin() {
     if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
     A.o.dish = f.dish;
   }
+  if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt; }   // your place in line from when you reach it
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
-  const what = A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
+  const what = A.kind === 'queue' ? 'You join the queue' + (A.o.ahead ? ': ' + A.o.ahead + ' ahead of you.' : '.') : A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + A.def.mins + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
 }
@@ -7189,7 +7224,9 @@ function actEnd(abort) {
   if (A.def.done) toast(A.def.title, A.def.done + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
   if (A.kind === 'browse') basket = true;
   if (A.kind === 'pay') basket = false;
-  if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
+  if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
+  if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
+  if (A.kind === 'tray' || A.kind === 'queue') {         // tray in hand: the nearest free mess seat
     const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
       .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
     const o = { title: 'Mess hall', fed: true, dish: A.o.dish };
@@ -7212,7 +7249,7 @@ function actUpdate(dt, t) {
   if (A.phase === 'in') {
     if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = 'walk';
   } else if (A.phase === 'do') {
-    if (A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
+    if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
   }
   if (A.phase === 'out') {
     const p = player.obj.position;
@@ -7287,7 +7324,8 @@ const device = (() => {
 device.addSection('now', 'Now', el => {
   const p = document.createElement('p'), q = document.createElement('p');
   p.className = 'devtime'; p.textContent = clockText();
-  q.textContent = ACT && ACT.phase !== 'walk' ? (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
+  q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
@@ -7318,7 +7356,7 @@ device.addSection('needs', 'Needs', el => {
 //    waiting. The cooks cook to the numbers the crew's plans (planDay) say will eat; the crew take a portion when
 //    they reach the front of the queue and bring the plate back when they've eaten; the hands wash up.
 //  - What you see on Deck 3: food in the servery's pans, the grab shelf, dirty plates at the dish pit.
-// For other sections: takePortion(who) (the player eats), galleyHold(person, t) (someone waiting at the servery),
+// For other sections: takePortion(who) (the player eats), galleyJoin(who) / galleyTurn(who) (the player queues), galleyHold(person, t) (someone waiting at the servery),
 // galleySave() / galleyLoad(obj) (the save), galleyText(what) (tap text), galleyReport(day, days) (food_check.py).
 // Nothing here calls R().
 // =====================================================================
@@ -7556,9 +7594,24 @@ function galleyAdvance(to) {
 // the player (or anyone) eats: a hot portion and a plate if the servery has one, else something from the grab shelf
 function takePortion(who = 'player') {
   const S = galleyAdvance(shipNow()), m = Math.floor(shipNow());
+  GALLEY_JOINED.delete(who);
   if (S.servery.portions > 0 && FOOD.plates - S.dirty - S.inUse > 0) { S.servery.portions--; S.inUse++; S.back.push([m + 20, 1]); return true; }
   if (S.grab.items > 0) { S.grab.items--; return true; }
   return false;
+}
+// the player joins the servery queue: where to stand (the back of the line, by the tray return: a tile that's no
+// one's place) and when it's their turn: a minute, plus about 45 seconds for each crew member in the line or waiting.
+// galleyTurn(who) is true from then on while there's food; takePortion(who) serves them and ends it
+const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();
+function galleyJoin(who = 'player') {
+  const now = shipNow(), S = galleyAdvance(now);
+  const ahead = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length + S.wait.length;
+  const j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, turnAt: now + 1 + ahead * .75 };
+  GALLEY_JOINED.set(who, j); return j;
+}
+function galleyTurn(who = 'player') {
+  const j = GALLEY_JOINED.get(who); if (!j) return false;
+  const S = galleyAdvance(shipNow()); return shipNow() >= j.turnAt && (S.servery.portions > 0 || S.grab.items > 0);
 }
 // someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
 function galleyHold(person, t) {
@@ -7704,6 +7757,12 @@ const MACHINE_KINDS = {
   recycler:    { name: 'Water recycler',    sys: 'water',      life: 14, time: .3, use: 'water',  scope: 'ship', w: 3, tier: 2, part: 'membrane' },
   filter:      { name: 'Water filter bank', sys: 'water',      life: 9,  time: .3, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'cartridge' },
   heatpump:    { name: 'Heating pumps',     sys: 'heat',       life: 18, time: .6, use: 'heads',  scope: 'deck', w: 1, tier: 2, part: 'pump' },
+  valve:       { name: 'Pipe valves',       sys: 'water',      life: 30, time: 1,                 scope: 'ship', w: 1, tier: 2, part: 'valve' },
+  o2cell:      { name: 'Oxygen cells',      sys: 'air',        life: 18, time: .8, use: 'heads',  scope: 'ship', w: 2, tier: 2, part: 'oxygen cell' },
+  electrolyser: { name: 'Electrolyser',     sys: 'air',        life: 20, time: 1,                 scope: 'ship', w: 2, tier: 2, part: 'membrane' },
+  inverter:    { name: 'Inverter',          sys: 'power',      life: 28, time: 1,                 scope: 'ship', w: 2, tier: 3, part: 'breaker' },
+  conduit:     { name: 'Power conduit',     sys: 'power',      life: 32, time: 1,                 scope: 'ship', w: 1, tier: 3, part: 'cable' },
+  cartdock:    { name: 'Cart dock',         sys: 'transport',  life: 20, time: 1,                 scope: 'ship', w: 1, tier: 1, part: 'relay' },
   pump:        { name: 'Circulation pumps', sys: 'water',      life: 18, time: .5, use: 'water',  scope: 'ship', w: 2, tier: 2, part: 'pump' },
   uv:          { name: 'UV steriliser',     sys: 'water',      life: 20, time: .5, use: 'water',  scope: 'ship', w: 1, tier: 2, part: 'uv lamp' },
   irrigation:  { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'pump' },
@@ -7721,6 +7780,7 @@ const MACHINE_KINDS = {
   reactor:     { name: 'Reactor',           sys: 'power',      life: 60, time: 1,                 scope: 'ship', w: 3, tier: 4, part: 'control rod' },
   coil:        { name: 'Drive coil',        sys: 'propulsion', life: 30, time: 1,                 scope: 'ship', w: 1, tier: 4, part: 'coil winding' },
 };
+MACHINE_KINDS.powerjunction = MACHINE_KINDS.junction;    // the old name for a power junction, still on Deck 2's 2-breaker-1
 const MACHINE_STATES = ['healthy', 'worn', 'faulty', 'failing', 'broken'];
 const machineState = c => c >= 75 ? 'healthy' : c >= 50 ? 'worn' : c >= 25 ? 'faulty' : c >= 10 ? 'failing' : 'broken';
 const MACHINE_SEV = { healthy: 0, worn: 0, faulty: .35, failing: .7, broken: 1 };   // how hard a state is felt
@@ -7804,16 +7864,21 @@ function machUseDay(d) {
 }
 // an average day's use of each counter (heads per deck): the mean of days 1-7, worked out once. Use is measured
 // against it, so a machine wears at its `life` on an average day however busy the schedules make the ship.
-let MACH_NORM = null;
-function machNorm() {
-  if (MACH_NORM) return MACH_NORM;
-  const norm = { heads: {} }, sum = a => a.reduce((x, y) => x + y, 0) / 7;
-  for (let d = 1; d <= 7; d++) {
-    const u = machUseDay(d);
-    for (const k in u) if (k === 'heads') { for (const n in u.heads) norm.heads[n] = (norm.heads[n] || 0) + sum(u.heads[n]); } else norm[k] = (norm[k] || 0) + sum(u[k]);
-  }
-  return MACH_NORM = norm;
+// Working it out plans seven days (about 80 ms), so it's done a day at a time in the background soon after load
+// (machNormWarm), and kept in the save for this build; a read before it's done finishes it there and then. The
+// days are added in the same order either way, so the result is exactly the same.
+let MACH_NORM = null, MACH_NORM_PART = null;
+function machNormStep() {                               // one more day of the average; true once it's done
+  if (MACH_NORM) return true;
+  const P = MACH_NORM_PART || (MACH_NORM_PART = { d: 1, norm: { heads: {} } }), norm = P.norm, sum = a => a.reduce((x, y) => x + y, 0) / 7;
+  const u = machUseDay(P.d++);
+  for (const k in u) if (k === 'heads') { for (const n in u.heads) norm.heads[n] = (norm.heads[n] || 0) + sum(u.heads[n]); } else norm[k] = (norm[k] || 0) + sum(u[k]);
+  if (P.d > 7) { MACH_NORM = norm; MACH_NORM_PART = null; return true; }
+  return false;
 }
+function machNorm() { while (!machNormStep()); return MACH_NORM; }
+function machNormWarm() { try { if (!machNormStep()) setTimeout(machNormWarm, 40); } catch (e) { /* tried again on first use */ } }
+setTimeout(machNormWarm, 300);                           // after the whole script has run (it reads the roster and places)
 // how hard machine m was used in absolute ship hour h, against an average day (1 = an average hour)
 function machUse(m, h) {
   const K = MACHINE_KINDS[m.kind];
@@ -7917,7 +7982,8 @@ const MACHINE_FX = {
   washer:      { drain: { hygiene: .3 }, mood: 4, text: 'Uniforms come back grubby' },
   lift:        { lift: 1, mood: 2, text: 'The lift runs slow' },
   lights:      { walk: .12, mood: 3, text: 'The lights flicker and dim' },
-  junction:    { walk: .06, mood: 2, text: 'The power browns out', local: true },   // Deck 6's lights hang off its junctions
+  junction:    { walk: .06, mood: 2, text: 'The power browns out', local: true },
+  powerjunction: { walk: .06, mood: 2, text: 'The power browns out', local: true },   // Deck 6's lights hang off its junctions
   scrubber:    { drain: { energy: .4 }, mood: 6, text: 'The air is stuffy' },
   airplant:    { drain: { energy: .25 }, mood: 4, text: 'The air is stale everywhere' },
   fan:         { drain: { energy: .15 }, mood: 2, text: 'The air hardly moves' },
@@ -7926,6 +7992,9 @@ const MACHINE_FX = {
   recycler:    { restore: { hygiene: .4 }, mood: 4, text: 'Showers run weak' },
   filter:      { restore: { hygiene: .2 }, mood: 2, text: 'The water runs cloudy' },
   pump:        { restore: { hygiene: .4 }, mood: 3, text: 'Showers run weak' },
+  valve:       { mood: 1, text: 'A pipe drips somewhere' },
+  o2cell:      { drain: { energy: .2 }, mood: 3, text: 'The air feels thin' },
+  electrolyser: { drain: { energy: .15 }, mood: 2, text: 'The air feels thin' },
   heatpump:    { restore: { energy: .15 }, mood: 2, text: 'The radiators run lukewarm' },
   uv:          { mood: 2, text: 'The water tastes of chlorine' },
   irrigation:  { mood: 2, text: 'The garden droops' },
@@ -8025,8 +8094,8 @@ const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching pa
 // supplies (B3): what main storage keeps of each part (topped up by the weekly delivery), and the parts nobody can
 // make in the machine shop. Deliveries come on Wednesdays at 10:00 into the cargo hold.
 const STOCK = { element: 6, 'fan belt': 4, compressor: 2, pump: 4, relay: 6, filter: 8, cartridge: 8, 'uv lamp': 3, 'nutrient pack': 4, valve: 4,
-                membrane: 3, bearing: 3, regulator: 3, cell: 3, breaker: 3, 'signal card': 2, seal: 4, 'control rod': 2, 'coil winding': 2 };
-const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'control rod']);
+                membrane: 3, bearing: 3, regulator: 3, cell: 3, 'oxygen cell': 3, breaker: 3, cable: 4, 'signal card': 2, seal: 4, 'control rod': 2, 'coil winding': 2 };
+const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'oxygen cell', 'control rod']);
 const DELIVERY = { day: 2, hour: 10, meals: 1050 };     // weekday (0 = Monday), hour; a week of meals for the cold store
 const MEALS_LOW = 150, CART_MEALS = 150;                // a cart run when the cold store is under this; meals a cart carries
 // food comes by cart only once the galley says so (section 16's FOOD.restock: 'rule' is its own 10:30 top-up, 'carts' is ours)
@@ -8034,8 +8103,13 @@ const cartsCarryFood = () => typeof FOOD !== 'undefined' && FOOD.restock === 'ca
 SHIP.jobs = []; SHIP.stores = {}; SHIP.hold = {};
 let JOBS_ON = true;                                     // machine_check turns the crew's jobs off to see the ship unrepaired
 function jobsReset() { SHIP.jobs = []; SHIP.stores = { ...STOCK }; SHIP.hold = {}; }
-// the panel's place, if an architect has put one there ({ machine: id } on a place)
-function panelPlace(id) { const p = schedData().places.find(pl => pl.machine === id); return p ? p.id : null; }
+// the panel's place, if an architect has put one there ({ machine: id } on a place). Read from the decks: the
+// schedules leave panel places out of their own list (they're never anyone's desk)
+let PANELS = null;
+function panelPlace(id) {
+  if (!PANELS) { PANELS = new Map(); for (const n in DECKS) for (const p of DECKS[n].places || []) if (p.machine) PANELS.set(p.machine, p.id); }
+  return PANELS.get(id) || null;
+}
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
@@ -8158,6 +8232,7 @@ SAVE_EXTRA.push(s => {
   const st = machinesNow(), out = {};
   for (const id in st) out[id] = [st[id].cond, st[id].lastService];   // in full, so a reload wears on exactly as before
   s.ship.machines = out; s.ship.machineHour = MACH_HOUR;
+  if (MACH_NORM) s.ship.machineNorm = { build: GAME_BUILD, norm: MACH_NORM };   // the average day, so a reload needn't work it out
   s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
 });
 // a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
@@ -8166,6 +8241,8 @@ function machinesLoad(s) {
   const sh = s && s.ship;
   if (!sh || !sh.machines || typeof sh.machines !== 'object' || !Number.isInteger(sh.machineHour) || sh.machineHour > Math.floor(shipNow() / 60) + 1) return false;
   machinesReset(sh.machineHour); MACH_SEEN = shipNow();
+  const mn = sh.machineNorm;                             // the average day, if this build saved it
+  if (mn && mn.build === GAME_BUILD && mn.norm && typeof mn.norm === 'object' && mn.norm.heads && typeof mn.norm.heads === 'object') MACH_NORM = mn.norm;
   for (const [id, v] of Object.entries(sh.machines)) {
     if (!SHIP.machines[id] || !Array.isArray(v) || !(v[0] >= 0 && v[0] <= 100)) continue;
     SHIP.machines[id] = { cond: v[0], state: machineState(v[0]), lastService: Number.isFinite(v[1]) ? v[1] : null };
@@ -9442,7 +9519,8 @@ function placeSpot(id) {
         .filter(n => free(...n) && roomAt(...n) === pl.room && (n[0] === a || n[1] === b ? edgeOpen(a, b, ...n) : true))   // never through a wall
         .sort((m, n) => cellPos(...m).distanceTo(new THREE.Vector3(x, 0, z)) - cellPos(...n).distanceTo(new THREE.Vector3(x, 0, z)));
       const lift = liftTiles()[0], rooms = new Set([pl.room]);   // the nearest one you can actually get to from the lift
-      walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms)) || opts[0] || nearestOpen(x, z, null);
+      const who = /^work:works/.test(pl.type) ? { dept: 'works' } : undefined;   // a Works place behind a service hatch
+      walk = opts.find(n => !lift || K(n) === K(lift) || crewPath(lift, n, rooms, who)) || opts[0] || nearestOpen(x, z, null);
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
     const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
@@ -9453,9 +9531,27 @@ function placeSpot(id) {
 }
 // the pose at a place: its activity (run, lift, call, play...) once the crowd can show it (section 8b lists those in
 // CROWD_ANIMS), else the place's plain pose, so a seated pianist stays seated until 'play' exists
-const crewPose = sp => sp.anim && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has(sp.anim) ? sp.anim : sp.pose;
-// findPath, with the 'closed' doors into `rooms` open for the moment. `who` (the CrewAgent) lets Works crew through
-// service hatches (hatchPassable); added by the Deck 6 architect in 0.30.5 at the lead's request, for this section's owner
+// (the activity comes from the plan's segment, which knows the task: tea on the galley stool is the stool's own pose)
+// The pose string the crowd takes (8b): 'base:activity' when seated or lying ('sit:play', 'lie:lift'), the
+// activity alone when standing ('browse', 'run'), else the plain pose. What the plan says they're doing comes first
+// (TAG_ACT: a musician plays, a bar regular drinks, the dish pit washes, tea on the galley stool just sits); then
+// someone sitting about in a lounge, common room or on a bench reads, talks or has a drink (seeded per person, place
+// and day); then the place itself (poseOf, 8b). Collisions and taps use the place's plain pose (spot.pose).
+const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null };
+const SIT_ABOUT = new Set(['lounge-seat', 'common-room', 'bench']);
+function crewPose(a) {
+  const sp = a.spot, pl = PLACE_OF.get(sp.id), base = sp.pose;
+  if (typeof CROWD_ANIMS === 'undefined') return base;
+  const ok = x => x && CROWD_ANIMS.has(x), comp = x => base === 'sit' || base === 'lie' ? base + ':' + x : base === 'stand' || base === 'work' ? x : base;
+  if (a.tag in TAG_ACT) { const x = TAG_ACT[a.tag]; return ok(x) ? comp(x) : base; }
+  if (base === 'sit' && pl && SIT_ABOUT.has(pl.type) && !pl.anim) {
+    const u = idHash(a.p.id + '|' + sp.id + '|' + SHIP.time.day) % 100, x = u < 45 ? 'read' : u < 80 || pl.type !== 'lounge-seat' ? 'talk' : 'drink';
+    if (ok(x)) return 'sit:' + x;
+  }
+  return typeof poseOf === 'function' && pl ? poseOf(pl) : base;
+}
+// findPath, with the 'closed' doors into `rooms` open for the moment; `who` (a CrewAgent or roster person) is passed
+// on so service hatches open for Works crew (hatchPassable, section 4)
 function crewPath(s, g, rooms, who) {
   const opened = [];
   for (const k in CLOSED_DOORS) {
@@ -9504,7 +9600,12 @@ class CrewAgent {
     if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || null;
-    if (typeof galleyHold === 'function') { const h = galleyHold(this.p, now); if (h !== undefined) goalId = h; }   // section 16: waiting for food
+    this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
+    if (goalId && goalId === PLAYER_PLACE) goalId = null;  // you're using it (section 15): they wait nearby
+    if (typeof galleyHold === 'function') {                // section 16: waiting for food, at a queue spot nobody else is heading for
+      const h = galleyHold(this.p, now);
+      if (h !== undefined) goalId = h && DECK_CREW.some(o => o !== this && o.goalId === h) ? null : h;
+    }
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -9514,7 +9615,7 @@ class CrewAgent {
       this.pose = 'walk'; this.y = 0;
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
       const dx = this.spot.x - this.x, dz = this.spot.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
-      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this.spot); this.face = this.spot.face; this.y = this.spot.y; }
+      if (d <= st) { this.x = this.spot.x; this.z = this.spot.z; this.settled = true; this.pose = crewPose(this); this.face = this.spot.face; this.y = this.spot.y; }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); this.pose = 'walk'; }
     } else if (this.goalId === '@lift') return false;    // in the car: gone to another deck
     else if (!this.spot) this.pose = 'stand';
@@ -9583,7 +9684,7 @@ function crewArrive(p, w, now, mid) {
   a.retarget(w.placeId || null);
   if (!mid || !spot || !a.path.length) return;
   const done = Math.floor((now - w.from) / SHIP_RATE * CREW_SPEED);   // tiles walked since they set off
-  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.pose = crewPose(spot); a.face = spot.face; a.y = spot.y; }
+  if (done >= a.path.length) { a.path = []; a.x = spot.x; a.z = spot.z; a.settled = true; a.tag = w.tag || null; a.pose = crewPose(a); a.face = spot.face; a.y = spot.y; }
   else if (done > 0) { const c = cellPos(...a.path[done - 1]); a.x = c.x; a.z = c.z; a.path = a.path.slice(done); }
 }
 // once a frame from the main loop: everyone moves; now and then, anyone due on this deck who isn't here yet arrives
@@ -9592,6 +9693,7 @@ function updateDeckCrew(dt) {
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
   for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
   BUSY.clear(); for (const a of DECK_CREW) if (a.settled && a.spot) BUSY.add(a.spot.id);
+  PLAYER_PLACE = typeof playerHolds === 'function' ? playerHolds() : null;
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
   crewDetail();
