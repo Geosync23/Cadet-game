@@ -1,6 +1,6 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.1). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.2). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
 This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.7.1 (about 4,470 lines)
+## Current build: 0.7.2 (about 4,550 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -50,6 +50,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.6.9 | Review fixes. Planter islands smaller (two columns each, cols 29–30 and 35–36) with no lamp posts. Snug collision (`snug: true` in `place`): benches by the lifts on Decks 3 and 4 and by the garden doors push you off their real outline, not whole tiles. Lift doors sink into the floor instead of sliding out past the frame. |
 | 0.7.0 | Planter islands longer (2.48 m, three columns each, the same width) and their trees taller (trunk 1.9 m, crown raised 0.6 m; trunk thickness and crown size unchanged). |
 | 0.7.1 | Step 6e, Deck 6, turn 1: the shell. `DECKS[6]` straight from plans/deck6-plan.html (36 × 12, `lift: [19, 6]`, seed 60661, `hazard`, no windows): lobby, overlook, watch room, the locked engine room, engine control and reactor seen through glass, sealed junctions and crawlways, plates, lift panels, the deck directory, the foot of the trunks and the bottom of the ladder behind glass. No new kit or engine changes. Deck 4 ALL IDENTICAL against 0.7.0. |
+| 0.7.2 | Deck 6, turn 2: the engine room, seen through the overlook glass: the drive housing across the stern with its glowing mouth, three drive coils down the middle (copper windings, a cage, a core whose glow breathes, one coil after another), copper feeds between them, catwalks either side and a landing by the stair door. The overlook gets a rail along the window, two benches facing the coils and the first-week board. New engine list `PULSES` (glow on the game clock). New kit `driveCoil`, `driveHousing`, `pipeRun`, `catwalk`, `overlookRail`; materials `ENG`. Deck 4 ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -351,7 +352,8 @@ They checked:
     - **Bridge washroom:** keep it.
 - **Progress, Deck 6:**
     1. **The shell (done, 0.7.1).** Every open room (lobby, overlook, watch room) is reachable; E, K and R are locked and stay solid (`NO_FADE`). About 230 draw calls by the lift.
-    2. The engine room through the overlook glass: drive coils, drive housing, catwalks.
+    2. **The engine room (done, 0.7.2).** Room-local, `E` is 10 × 12 with the stern hull at x 0. Drive housing at (.55, 6) against the stern (`'w'`, 8.6 long); coils at x 2.6, 5.1, 7.6 on z 6, phases 0, −2.1, −4.2; copper feeds at y 2.4 between housing and coils; catwalks at z 3.1 and 8.9 (8.4 long) and a cross landing at x 9.35 by the stair door (`v,12,5`). All `see` taps. Overlook `O`: rails at x .2 either side of the stair door, benches at (2.3, 2.5) and (2.3, 7.5) facing the window.
+        - **`PULSES`** (new): `{ m, key, base, amp, w, ph }`; the main loop sets `m[key] = base + amp * (.5 + .5 sin(t w + ph))`. Reset with each deck, like `SPINS`. Pulsing materials are made in the kit at dress time (owned by the deck, freed on unload), so each coil has its own phase. Don't pulse a material that a fading tall piece clones: `E` is `NO_FADE`, so its pieces never get cloned.
     3. The reactor and engine control.
     4. The watch room, lobby dressing and Deck 6's mood lighting. Then the deck review.
 - **Deck 1's empty shell draws 593 calls.** Bring that down before dressing it, without changing the hull output on Decks 3, 4 and 5.

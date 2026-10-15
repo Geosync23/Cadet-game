@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.7.1
+   STARSHIP CADET: CSV Wren                            build 0.7.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -376,6 +376,7 @@ let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [];
 let staticRoot = null, BLOCKED = new Set(), ITEMS = [], WALL_DECOR = [], SPOTS = [];
 let TALL = [], TALL_BY_ROOM = {}, NO_FADE = new Set();   // tall furniture fades a room at a time; locked rooms stay solid
 let LAMPS = [], STEAM = [], DUST = [], SPINS = [];   // SPINS: parts that turn (fan rotors, gears): { o, ax, w }
+let PULSES = [];                                       // glow that breathes (drive coils): { m, key, base, amp, w, ph }, m[key] = base + amp * (0..1)
 
 // =====================================================================
 // HULL: the deck's outline in tile units (x 0..W, z 0..D). Flat port and
@@ -1877,6 +1878,61 @@ const KIT = {
     if (o.light) addLamp(g, 0, 1.4, 0, 4.5, .4, 1.6);
     return { w: .4, d: .4, noBlock: true };
   },
+  // ---- Deck 6: the engine room ----
+  // a drive coil: copper windings round a glowing core, in a steel cage on a plinth, with a conduit to the deckhead.
+  // The core's glow breathes (PULSES); o.ph sets its phase, so a row of coils cycles one after another.
+  driveCoil(g, o = {}) {
+    const core = std('#ffb35c', .35, 0, { emissive: col('#f08a2c'), emissiveIntensity: 1 });
+    cyl(1.0, 1.08, .22, ENG.plinth, 0, .11, 0, g, 28);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(1.02, .035, 6, 36), WM.paintGold); band.rotation.x = Math.PI / 2; band.position.y = .23; g.add(band);
+    cyl(.42, .42, 1.9, core, 0, 1.17, 0, g, 20);
+    for (let k = 0; k < 7; k++) { const r = new THREE.Mesh(new THREE.TorusGeometry(.6, .085, 8, 28), ENG.copper); r.rotation.x = Math.PI / 2; r.position.y = .45 + k * .26; r.castShadow = true; g.add(r); }
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; box(.06, 2.14, .06, WM.steel, Math.sin(a) * .78, 1.28, Math.cos(a) * .78, g); }
+    cyl(.8, .8, .16, ENG.housing, 0, 2.4, 0, g, 28);
+    cyl(.18, .18, H - 2.46, ENG.housing, 0, (2.46 + H) / 2, 0, g, 12);
+    const s = glow('#ffb066', 2.6, 0, 1.2, 0, g, .3);
+    PULSES.push({ m: core, key: 'emissiveIntensity', base: .6, amp: .9, w: 1.4, ph: o.ph || 0 }, { m: s.material, key: 'opacity', base: .12, amp: .3, w: 1.4, ph: o.ph || 0 });
+    return { w: 2.16, d: 2.16, tall: true };
+  },
+  // the drive housing across the stern: a ribbed block with the drive's glowing mouth in the middle. Kit x runs along it.
+  driveHousing(g, o = {}) {
+    const w = o.w || 8.6, mouth = std('#ffc27a', .35, 0, { emissive: col('#f08a2c'), emissiveIntensity: 1 });
+    box(w, 2.1, .8, ENG.housing, 0, 1.05, 0, g);
+    box(w + .1, .14, .9, WM.paintDark, 0, 2.15, 0, g);
+    for (let x = -w / 2 + .4; x <= w / 2 - .3; x += .9) box(.1, 2.0, .86, WM.steel, x, 1.0, 0, g);
+    box(w, .1, .04, WM.hazard, 0, .05, .44, g);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.75, .12, 10, 32), WM.steelTop); ring.position.set(0, 1.1, .45); g.add(ring);
+    cyl(.66, .66, .06, mouth, 0, 1.1, .42, g, 28).rotation.x = Math.PI / 2;
+    for (const x of [-w / 2 + 1.4, w / 2 - 1.4]) cyl(.32, .32, .06, ENG.copper, x, 1.3, .43, g, 20).rotation.x = Math.PI / 2;
+    PULSES.push({ m: mouth, key: 'emissiveIntensity', base: .5, amp: .6, w: .7, ph: 0 });
+    return { w, d: .9 };
+  },
+  // a horizontal pipe along kit x at height o.y, for feeds between the drive and the coils
+  pipeRun(g, o = {}) {
+    const w = o.w || 1, r = o.r || .14;
+    cyl(r, r, w, ENG.copper, 0, o.y || 2.4, 0, g, 12).rotation.z = Math.PI / 2;
+    return { w, d: r * 2, noBlock: true };
+  },
+  // a raised catwalk along kit x: a steel deck on legs, gold rails both sides
+  catwalk(g, o = {}) {
+    const w = o.w || 4, d = .8, y = .38;
+    box(w, .06, d, ENG.walk, 0, y - .03, 0, g);
+    for (let x = -w / 2 + .3; x < w / 2; x += 1.2) for (const z of [-.3, .3]) box(.08, y - .04, .08, WM.paintDark, x, (y - .04) / 2, z, g);
+    for (const z of [-d / 2 + .03, d / 2 - .03]) {
+      box(w, .04, .04, WM.paintGold, 0, y + .95, z, g); box(w, .03, .03, WM.paintGold, 0, y + .5, z, g);
+      for (let x = -w / 2 + .05; x < w / 2; x += 1) box(.04, .95, .04, WM.paintGold, x, y + .47, z, g);
+      box(.04, .95, .04, WM.paintGold, w / 2 - .05, y + .47, z, g);
+    }
+    return { w, d };
+  },
+  // a rail along a window, waist high, on posts about a metre apart. Kit x runs along it; walkers pass right by it.
+  overlookRail(g, o = {}) {
+    const w = o.w || 3, n = Math.max(1, Math.round(w));
+    cyl(.025, .025, w, WM.steelTop, 0, 1.05, 0, g, 10).rotation.z = Math.PI / 2;
+    box(w, .03, .03, WM.steel, 0, .55, 0, g);
+    for (let k = 0; k <= n; k++) box(.05, 1.05, .05, WM.steel, -w / 2 + .03 + (w - .06) * k / n, .525, 0, g);
+    return { w, d: .1, noBlock: true };
+  },
 };
 // wall-mounted pieces: built against a wall, origin on the wall's inner face, front toward +z
 const WALL_KIT = {
@@ -2175,6 +2231,10 @@ const PROM = {                                             // the promenade's pl
   bloom: ['#f2c94c', '#ef7f45', '#e86a9a', '#f4f1e8'].map(c => std(c, .6)),
 };
 const SHOP = { goods: ['#e86a9a', '#f2c94c', '#2a9d8f', '#d96a2e', '#7a5aa8', '#e9e1d0', '#5f9e3a', '#c8463c'].map(c => std(c, .6)), glowW: std('#f4fbff', .3, 0, { emissive: col('#dff2ff'), emissiveIntensity: .8 }) };
+// ---- Deck 6: the engine room (made at load, no R()) ----
+const ENG = {
+  copper: std('#b8733a', .35, .8), housing: std('#59646b', .5, .45), plinth: std('#2f363c', .6, .4), walk: std('#4a535a', .6, .5),
+};
 function makePollen(w, d, n = 40) {                        // drifting motes over the beds
   const pos = new Float32Array(n * 3), seeds = [];
   for (let i = 0; i < n; i++) { pos[i * 3] = (R() - .5) * w; pos[i * 3 + 1] = .5 + R() * 1.6; pos[i * 3 + 2] = (R() - .5) * d; seeds.push(R() * 10); }
@@ -2713,7 +2773,7 @@ function buildDeck(def) {
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -2803,7 +2863,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -3463,7 +3523,7 @@ DECKS[3] = {
 for (const [key, r] of Object.entries(DECKS[3].sealed)) DECKS[3].closedDoors[key] = { t: DECKS[3].rooms[r].name, x: DECKS[3].rooms[r].tap };
 
 // =====================================================================
-// DECK 6: ENGINEERING (step 6e, turn 1: the shell)
+// DECK 6: ENGINEERING (step 6e: turn 1 the shell, turn 2 the engine room)
 // From plans/deck6-plan.html. The bottom of the ship: the engine room fills the flat stern, the reactor the bow,
 // with the foot of the spine, the overlook, engine control and the watch room between. No windows anywhere.
 // Engine room, engine control and the reactor are locked rooms you look into through glass.
@@ -3536,6 +3596,18 @@ DECKS[6] = {
     for (const r of ['Y', 'Z', 'E', 'K', 'R']) NO_FADE.add(r);        // the locked rooms behind glass stay solid
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    // the engine room, seen through the overlook's long window: the drive housing across the stern, three drive coils
+    // down the middle cycling one after another, copper feeds between them, and catwalks either side
+    place('E', 'driveHousing', .55, 6, 'w', { w: 8.6, it: { t: 'The drive', x: 'The drive housing fills the whole stern. Its mouth glows as the coils feed it, and the deck hums in time.', see: true } });
+    ['The first coil takes the reactor\'s power and starts the cycle.', 'The middle coil. Its windings were replaced last refit; you can tell by the brighter copper.', 'The last coil, nearest the window. When all three glow in turn, the drive is happy.']
+      .forEach((x, k) => place('E', 'driveCoil', 2.6 + k * 2.5, 6, 'n', { ph: -k * 2.1, it: { t: 'Drive coil ' + (k + 1), x, see: true } }));
+    for (const x of [1.4, 3.85, 6.35]) place('E', 'pipeRun', x, 6, 'n', { w: 1.0, y: 2.4 });
+    for (const z of [3.1, 8.9]) place('E', 'catwalk', 5.55, z, 'n', { w: 8.4 });
+    place('E', 'catwalk', 9.35, 6, 'e', { w: 4.96 });                // the landing at the foot of the stair door
+    // the overlook: a rail along the window, open at the stair door; benches facing the coils; the first-week board
+    place('O', 'overlookRail', .2, 2.0, 'w', { w: 3.7 }); place('O', 'overlookRail', .2, 7.5, 'w', { w: 4.7 });
+    for (const z of [2.5, 7.5]) place('O', 'bench', 2.3, z, 'e', { snug: true, it: IT('Bench', 'Facing the coils. People come down here to think, because nobody can hear you over the hum.') });
+    placeWall('O', 'notices', 'n', 2.0, { hitW: 1.0, it: IT('First week', 'A list of names under COME AND SEE THE ENGINE. Every new crew member is on it. Yours has been added in pencil.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[6].sealed)) DECKS[6].closedDoors[key] = { t: DECKS[6].rooms[r].name, x: DECKS[6].rooms[r].tap };
@@ -4457,6 +4529,7 @@ function loop() {
     D_.geo.attributes.position.needsUpdate = true;
   }
   for (const sp of SPINS) sp.o.rotation[sp.ax] += sp.w * dt;
+  for (const p of PULSES) p.m[p.key] = p.base + p.amp * (.5 + .5 * Math.sin(t * p.w + p.ph));
   for (const s of STEAM) { const k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
