@@ -16,7 +16,7 @@ import json, random, hashlib, html, os
 
 R = random.Random(20261015)
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works',
+UNIFORM = {'command': 'command', 'helm': 'command', 'comms': 'command', 'works': 'works', 'galley': 'works', 'store': 'works',
            'watch': 'watch', 'survey': 'survey', 'infirmary': 'infirmary'}
 RANK_NUM = {'junior': 0, 'officer': 1, 'senior': 1, 'chief': 2, 'xo': 3, 'captain': 4}
 
@@ -50,12 +50,13 @@ WORK = {   # where each kind of job is done: deck and place type
     'command': (1, 'work:command'), 'helm': (1, 'work:helm'), 'ops': (1, 'work:ops'), 'comms-bridge': (1, 'work:comms'),
     'comms': (2, 'work:comms'), 'watch': (2, 'work:watch'), 'survey': (2, 'work:survey'),
     'galley': (3, 'work:galley'), 'infirmary': (3, 'work:infirmary'),
-    'works': (5, 'work:works'), 'engine': (6, 'work:engine'),
+    'works': (5, 'work:works'), 'engine': (6, 'work:engine'), 'store': (3, 'work:store'),
 }
 WORK_WORDS = {
     'work:command': 'the bridge', 'work:helm': 'the helm, on the bridge', 'work:ops': 'the ops console, on the bridge',
     'work:comms': 'comms', 'work:watch': 'the Watch office', 'work:survey': 'the Survey labs',
     'work:galley': 'the galley', 'work:infirmary': 'the infirmary', 'work:works': 'the Works bay', 'work:engine': 'the engine room',
+    'work:store': 'the crew store',
 }
 
 # ---------------------------------------------------------------- story crew and provisional names (by hand)
@@ -251,6 +252,9 @@ P2_LIKES = {'runner': ['gym-regular', 'early-riser'], 'shopper': ['calls-home', 
             'gardener': ['garden-lover', 'early-riser'], 'musician': ['music', 'night-owl'], 'stargazer': ['quiet-corner', 'window-seat']}
 P2_DISLIKES = {'bar-regular': ['early-to-bed'], 'stargazer': ['early-to-bed'], 'runner': ['late-sleeper']}
 NEW_R = random.Random(20261016)
+# the storekeepers: work hours ([start, end] in ship minutes; they replace the shift's), days off, bio
+STOREKEEPERS = [([[480, 870]], [0, 1], 'Opens the crew store in the morning and knows who has run out of what.'),
+                ([[870, 1260]], [3, 4], 'Keeps the crew store open into the evening, and the ledger in perfect order.')]
 
 def looks():
     return dict(skin=R.randrange(6), hair=R.choice(['ponytail', 'short', 'bun', 'curls', 'buzz', 'long', 'bald', 'short', 'short']),
@@ -325,6 +329,12 @@ def main():
                  / (1 + 2 * depts.get(p['dept'], 0)) for p in pool]
             p = NEW_R.choices(pool, w)[0]
             p['habits'] = p['habits'] + [h]; depts[p['dept']] = depts.get(p['dept'], 0) + 1
+    # ---- the crew store (0.16.5): two Works technicians, from the biggest department, become the storekeepers
+    # (after the habits, so those don't move).
+    # They stay day-shift juniors; their hours hand over at the one till, and their days off never meet
+    for p, (hours, off, bio) in zip([p for p in crew if p['role'] == 'Works technician' and not p.get('story')][-2:], STOREKEEPERS):
+        p.update(dept='store', role='Storekeeper', job='store', bio=bio)
+        p['rota'] = {'offDays': off, 'hours': hours}
     # ---- work places, seeds, uniform
     out = []
     for p in crew + GUESTS + [PLAYER]:
@@ -355,6 +365,7 @@ GROUPS = [('command', 'Command', 'The bridge: the Captain, the Executive Officer
           ('survey', 'Survey', 'Sensors, labs, samples and charting, in the Survey labs on Deck 2.'),
           ('infirmary', 'Infirmary', 'Crew health and rest, in the infirmary on Deck 3.'),
           ('galley', 'Galley', 'Two meals a day for seventy-five people, in the galley and mess hall on Deck 3.'),
+          ('store', 'Crew store', 'The crew store on Deck 3: snacks, soap, socks and the odd luxury, from the counter by the till.'),
           ('guest', 'Guests', 'Not crew: visitors who live aboard.')]
 RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest']
 RANK_WORDS = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer', 'officer': 'Officer', 'junior': 'Junior Officer', 'guest': 'Guest'}
@@ -465,7 +476,8 @@ def page(entries):
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
-            shift = 'Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00'
+            shift = ('Days, 08:00 to 17:00' if x['shift'] == 'day' else 'Nights, 21:00 to 06:00') if not x['rota'].get('hours') else \
+                    ' and '.join('%02d:%02d to %02d:%02d' % (a // 60, a % 60, b // 60 % 24, b % 60) for a, b in x['rota']['hours'])
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
