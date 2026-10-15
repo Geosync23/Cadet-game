@@ -34,6 +34,7 @@ When the crew keep up, the ship hums. When they fall behind, or the player skips
 
 ### Ground rules
 
+- **Everything functional, everything simulated** (the project's ethos, agreed 2026-10-15). Every room and every function aboard is used, by the crew in their day-to-day and by the player. The gym is for working out, the booths are for calling home, the store is for shopping, the galley really cooks. Where full simulation isn't possible, get as close as we can, and never build a room that is only scenery.
 - **No fail state.** A neglected ship gets shabby, uncomfortable and talked about. It is never lost. Losing would break the feeling of being just another crew member.
 - **The player climbs but never commands.** They start on simple jobs (filters, lamps, carts), then move up to the engines and eventually sit in briefings with the Captain. Rank decides which jobs and which parts of an event reach the player.
 - **A ship day lasts 30 real minutes.** One ship hour is 75 real seconds, and a 7-day ship week is about 3½ hours of play.
@@ -187,7 +188,7 @@ Everyone comes here to eat. A wide promenade runs stern to bow down the middle o
 - **The bow lounge** fills the whole bow on one floor, with curved windows sweeping from side to side and a curved bar stocked from the galley behind it. It's zoned so it never feels like one empty hall: a lively bar end and a quiet window end.
 - **The infirmary** is just aft of the lift, with a ward, an exam room and Rina on duty.
 - **The hydroponics garden** fills the stern: grow racks, raised beds, fruit trees, a pond with benches and a herb wall for the galley. Glass doors at the end of the promenade let you see green as soon as you step out of the lift.
-- **Along the starboard side:** a gym, a small crew store, and call-home booths for recorded messages home.
+- **Along the starboard side:** a gym (with a treadmill, added 2026-10-15), a small crew store, and call-home booths for recorded messages home.
 - **Washrooms** off the plaza.
 - **Service layer:** the galley plant, the water recycler (when it struggles, the showers on Deck 4 run weak) and the garden's irrigation room, all sealed.
 
@@ -255,6 +256,15 @@ A machine's life runs through five states:
 4. **Failing.** Effects spread to the crew and the ship. The job is marked urgent.
 5. **Broken.** The machine stops. Repairs take longer and need more parts.
 
+### Food and cooking
+
+Food is simulated from store to plate (agreed 2026-10-15):
+
+- **The galley really cooks.** Chef Brennan (and her galley hands, when on shift) wakes early and starts cooking before breakfast opens, so food is ready when the window starts; the same before dinner. You can see her at the ranges, ovens and prep island, even when she works alone.
+- **Food flows:** stores from the Deck 5 hold, by hover cart and lift, to the cold store; from the cold store to the galley; cooked in batches; served at the servery; dishes back to the dish pit. The grab-and-go shelf is stocked from the same cooking.
+- **What runs out shows:** a late batch makes a queue, an empty shelf stays empty until restocked, low stores turn into restock jobs.
+- **Machines matter here too:** the ovens and ranges wear with use (see "Machines").
+
 ### Supplies
 
 Supplies come aboard by shuttle into the Deck 5 cargo hold and are shelved in main storage: filters, spare parts, tools, linen and food stores. Food goes up to Deck 3's cold store on hover hand carts via the main lift. Repairs use parts and cooking uses food. Low stock adds restock work. An empty shelf blocks a repair until supplies arrive, unless you make the part in the machine shop, which is slower.
@@ -316,9 +326,18 @@ On duty, crew claim jobs from the job list that match their department and skill
 
 Off duty, each person picks what to do by scoring their options against their needs and traits: eat, sleep, wash, socialise, relax in a favourite spot, a hobby.
 
-**Needs.** Hunger, energy, social and hygiene, from 0 to 100. Showers restore hygiene, which gives the washrooms a morning rush. Mood comes from needs, the state of the ship and the people around them.
+**Needs.** Hunger, energy, social, hygiene and fitness, from 0 to 100. Fitness (agreed 2026-10-15) drops slowly and is restored at the gym. Showers restore hygiene, which gives the washrooms a morning rush. Mood comes from needs, the state of the ship and the people around them.
 
 **Skill.** Each crew member has a skill level in their department. Skilled crew work faster and cause fewer follow-up faults.
+
+### Every room in use
+
+Crew use every room and every function in their daily life, not just beds, seats and workstations (agreed 2026-10-15):
+
+- **Free time draws on the whole ship:** the gym (treadmill, weights), the call-home booths, shopping at the crew store, the garden, the lounge and bar, the music room, the observatory, the laundry, the common room.
+- **Each activity looks like itself:** running on the treadmill, talking in a booth, browsing the store's shelves and paying at the counter, playing an instrument, watering the beds.
+- **Needs and habits pick the activity** (see Needs below), so the gym is busy after shift and the booths on rest days.
+- **A room with no use is a gap to fill,** in the simulation or in the furniture.
 
 ### Routines with variety
 
@@ -391,7 +410,9 @@ What makes it interesting:
 
 **No hard failure.** If you slack, other Works crew pick up jobs, but more slowly, and your supervisor notices. The ship never dies because of you, but it gets visibly worse.
 
-**Off shift**, you are free: eat, wash, socialise, explore, sleep. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
+**Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Needs never punish you hard; they nudge your mood and the crew notice (no fail state).
+
+**Off shift**, you are free: eat, wash, socialise, explore, sleep, work out, call home, shop. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
 
 **Thirty seconds of play.** Your wrist comm chirps: scrubber 2 on Deck 4 is at 60%. You head out of the junior wing, passing Rina and Pell arguing in the corridor. You open the scrubber panel; it needs a filter, so it's down the lift to storage on Deck 5. On the way back, Chef Brennan calls: the oven on Deck 3 is acting up again. Now, or after the scrubber? You choose, and the ship reacts.
 
@@ -547,7 +568,10 @@ Done so far:
    - crew drawn on the current deck walking their real schedule, with daily variety;
    - watch tools: time speed, crew panel, systems panel.
    - Test: watch a full ship day and check it feels alive.
-2. **Ship systems and jobs:**
+2. **Ship systems and jobs** (the breakdown is in `plans/pillar2-plan.md` once agreed):
+   - every room in use by crew and player, and the utility rooms built inside;
+   - player needs (hunger, energy, hygiene, fitness) and activities: working out, calling home, shopping;
+   - food and cooking simulated, with the chef cooking ahead of each meal;
    - systems with condition and wear, and their dependencies;
    - consequences in stages: machine effects on crew needs and mood, and uniforms and the laundry;
    - the job board, parts and carts;
@@ -584,6 +608,10 @@ Done so far:
 - Deck 2's fifteenth bedroom is a second visitors' cabin for now. Keep it, or make it a senior lounge?
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 - Should one of Deck 6's power junctions open at tier 2 rather than tier 3?
+
+- What does fitness do, beyond the gym restoring it? A small boost to energy and mood when high, or nothing more than crew remarks? Keep it gentle (no fail state).
+- Which of your needs show on screen, and how: bars, an icon, or only through mood and remarks?
+- The Pillar 1 watch tools (time speed, a crew panel, a systems panel) weren't built. Build them in Pillar 2, or drop them?
 
 **Answered:**
 
