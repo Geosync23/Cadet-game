@@ -67,7 +67,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.8.1
+   STARSHIP CADET: CSV Wren                            build 0.8.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2610,6 +2610,11 @@ function buildDeck(def) {
           g.fillRect(bx, by, 1.5, 4 + R() * 4);
         }
         if (R() < .25) { g.fillStyle = 'rgba(240,240,220,.6)'; g.beginPath(); g.arc(x + R() * PX, y + R() * PX, 1.6, 0, 6.3); g.fill(); }
+      } else if (st.floor === 'bridge') {
+        // the bridge (Deck 1): deep blue-grey carpet tiles with a fine woven rib and a dark seam
+        g.fillStyle = `rgb(${46 + v * .4},${53 + v * .4},${68 + v * .4})`; g.fillRect(x, y, PX, PX);
+        g.fillStyle = 'rgba(170,196,230,.05)'; for (let k = 2; k < PX; k += 6) g.fillRect(x, y + k, PX, 2);
+        g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
       } else if (st.floor === 'corridor' || st.floor === 'lobby' || st.floor === 'carpet') {
         const carpet = st.floor === 'carpet';
         if (carpet) {
@@ -2629,6 +2634,7 @@ function buildDeck(def) {
       }
     }
     if (def.hazard) paintHazards(g, PX, def);
+    if (def.floorArt) def.floorArt(g, PX);               // a deck's own inlays (Deck 1's command ring); drawn before the wall shading
     if (ROOM_BOX['@']) {                                 // a gold edge round the lift car floor
       const b = ROOM_BOX['@']; g.strokeStyle = 'rgba(217,164,65,.8)'; g.lineWidth = 5;
       g.strokeRect(b.i0 * PX + 6, b.j0 * PX + 6, (b.i1 - b.i0 + 1) * PX - 12, (b.j1 - b.j0 + 1) * PX - 12);
@@ -3728,8 +3734,50 @@ const BRG = {
     c.font = '600 18px system-ui,sans-serif'; c.fillText('TRUNK HEAD  ·  DECK 1', w / 2, 72);
     for (const x of [16, w - 16]) for (const y of [16, h - 16]) { c.beginPath(); c.arc(x, y, 4, 0, Math.PI * 2); c.fill(); }
   }, 1, 1) }),
+  // the viewscreen: deep space with a soft nebula and a far planet. Stars come from a fixed hash, not R().
+  // It wraps sideways and scrolls slowly (the offset is turned through SPINS, see bridgeViewscreen).
+  sky: new THREE.MeshBasicMaterial({ toneMapped: false, map: tex(1024, 256, (c, w, h) => {
+    const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#060a16'); gr.addColorStop(.5, '#0b1428'); gr.addColorStop(1, '#070b18');
+    c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    for (const [x, y, r, col_] of [[180, 120, 150, 'rgba(90,70,160,.22)'], [330, 150, 110, 'rgba(60,140,170,.16)'], [700, 90, 170, 'rgba(150,70,120,.14)'], [880, 170, 120, 'rgba(70,110,190,.16)']])
+      for (const dx of [-w, 0, w]) { const n = c.createRadialGradient(x + dx, y, 0, x + dx, y, r); n.addColorStop(0, col_); n.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = n; c.fillRect(x + dx - r, y - r, r * 2, r * 2); }
+    let s = 1101; const hash = () => (s = (s * 48271) % 2147483647) / 2147483647;
+    for (let k = 0; k < 520; k++) { const x = hash() * w, y = hash() * h, b = hash(), r = b > .96 ? 1.6 : b > .8 ? 1.1 : .7;
+      c.fillStyle = b > .9 ? '#fff4dc' : b > .6 ? '#dfe9ff' : 'rgba(200,215,255,.6)'; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
+    const px = 610, py = 150, pr = 34, pg = c.createRadialGradient(px - 12, py - 12, 4, px, py, pr);
+    pg.addColorStop(0, '#d7b98a'); pg.addColorStop(.7, '#8a6a4a'); pg.addColorStop(1, '#2a1f18'); c.fillStyle = pg; c.beginPath(); c.arc(px, py, pr, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(230,210,170,.45)'; c.lineWidth = 2; c.beginPath(); c.ellipse(px, py, pr * 1.8, pr * .35, -.25, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = 'rgba(95,214,198,.18)'; c.lineWidth = 1; for (let y = 0; y < h; y += 4) { c.beginPath(); c.moveTo(0, y + .5); c.lineTo(w, y + .5); c.stroke(); }   // faint scan lines
+  }) }),
+  bezel: std('#1e252c', .45, .35),
 };
+// The bridge viewscreen: a strip just inside the bow hull, following its curve between bearings a0 and a1 (degrees on
+// the bow ellipse, 0 dead ahead), over the hull pieces of room rk only. Each piece's share is added to that hull piece,
+// so it drops with it for the cutaway and shows as a lit band at knee height.
+function bridgeViewscreen(rk, a0, a1, y0 = .55, y1 = 2.35) {
+  const span = 6;                                        // metres of wall per width of the picture
+  const t = BRG.sky.map; t.repeat.set(1 / span, H / (y1 - y0)); t.offset.y = -y0 / (y1 - y0);
+  const piece = new Map(); for (const hr of HULL_RUNS) if (hr.room === rk) for (const e of hr.edges) piece.set(e.cx.toFixed(4) + ',' + e.cz.toFixed(4), hr);
+  const groups = [];
+  HULL_SEGS.forEach((s, k) => {
+    const mx = (s.ax + s.bx) / 2, mz = (s.az + s.bz) / 2; if (mx < HULL.bowFrom) return;
+    const a = Math.atan2((mz - D / 2) / (D / 2), (mx - HULL.bowFrom) / HULL.bowLen) * 180 / Math.PI, hr = piece.get((mx - OX).toFixed(4) + ',' + (mz - OZ).toFixed(4));
+    if (a < a0 || a > a1 || !hr) return;
+    const last = groups[groups.length - 1];
+    if (last && last.hr === hr && last.ix[last.ix.length - 1] === k) last.ix.push((k + 1) % HULL_PTS.length); else groups.push({ hr, ix: [k, (k + 1) % HULL_PTS.length] });
+  });
+  let arc = 0;
+  for (const { hr, ix } of groups) {
+    const bz = [BRG.bezel, BRG.bezel, BRG.bezel];
+    hr.g.add(hullStrip(ix, y0, y1, T / 2 + .04, T / 2 - .03, [BRG.sky, BRG.bezel, BRG.bezel], { arc0: arc, shadow: false }));
+    hr.g.add(hullStrip(ix, y0 - .1, y0 + .02, T / 2 + .08, T / 2 - .02, bz));   // bezel under and over the picture
+    hr.g.add(hullStrip(ix, y1 - .02, y1 + .1, T / 2 + .08, T / 2 - .02, bz));
+    for (let n = 0; n < ix.length - 1; n++) arc += HULL_SEGS[ix[n]].l;
+  }
+  SPINS.push({ o: { rotation: t.offset }, ax: 'x', w: .004 });   // SPINS turns o.rotation[ax]; here that's the picture's offset, so it drifts
+}
 Object.assign(KIT, {
+  tapSpot() { return { w: .6, d: .6, noBlock: true }; },     // nothing to see: a tap target for something built elsewhere (the viewscreen)
   trunkHead(g) {                                         // where the trunks end: a manifold across both ducts under the ceiling, its plate facing the lobby glass
     box(1.8, .5, .72, BRG.duct, 0, 2.38, 0, g);
     for (const x of [-.5, .5]) cyl(.37, .37, .08, WM.paintDark, x, 2.1, 0, g, 24);
@@ -3782,7 +3830,7 @@ DECKS[1] = {
     '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
     '@': { name: 'Main lift', floor: 'lift' },
     Y: { name: 'Spine trunks', floor: 'grate', spine: true }, Z: { name: 'Spine ladder', floor: 'grate', spine: true },
-    B: { name: 'Bridge', floor: 'plate' },
+    B: { name: 'Bridge', floor: 'bridge' },
     O: { name: 'Observation room', floor: 'wood' },
     w: { name: 'Bridge washroom', floor: 'tile' },
     // locked, not yours
@@ -3798,6 +3846,18 @@ DECKS[1] = {
   },
   hull: { sternX: 1, stern: 3, bowFrom: 13, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
   light: { sky: col('#d4e2ff'), sun: col('#dfe8ff'), hemi: .96, sunI: .9 },   // cooler than the decks below
+  // the command ring, inlaid in the carpet (the ring is faked: no sunken floor). A darker well, shaded under its edge,
+  // a brass step edge with a teal light line outside it, and a faint inner circle round the Captain's chair.
+  ring: [15.4, 5, 2.0],
+  floorArt(g, PX) {
+    const [i, j, r0] = this.ring, cx = i * PX, cy = j * PX, r = r0 * PX, arc = (rr) => { g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); };
+    g.fillStyle = 'rgba(8,12,22,.32)'; arc(r); g.fill();
+    const sh = g.createRadialGradient(cx, cy, r * .7, cx, cy, r); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.38)'); g.fillStyle = sh; arc(r); g.fill();
+    g.strokeStyle = '#b8913e'; g.lineWidth = 7; arc(r); g.stroke();
+    g.strokeStyle = 'rgba(255,236,190,.35)'; g.lineWidth = 2; arc(r + 4); g.stroke();
+    g.strokeStyle = 'rgba(95,214,198,.6)'; g.lineWidth = 3; arc(r + 12); g.stroke();
+    g.strokeStyle = 'rgba(184,145,62,.35)'; g.lineWidth = 2; arc(r * .42); g.stroke();
+  },
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,7,6', 'w'], ['v,9,6', 'e']]) placeOnEdge('liftPanel', key, tw);
@@ -3806,6 +3866,9 @@ DECKS[1] = {
     for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
     place('Y', 'trunkHead', 1, .5, 'n');
+    // the viewscreen across the bow, and something to tap in front of it
+    bridgeViewscreen('B', -60, 60);
+    place('B', 'tapSpot', 8.6, 5, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
     place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
   },
 };
