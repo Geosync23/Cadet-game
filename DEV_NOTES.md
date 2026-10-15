@@ -69,6 +69,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.23.0 | Pillar 1, first combined build (the lead, on `claude/ship-integration`): ship time and saving (0.15.1), the crew roster (0.16.2), places on every deck (0.17.0, 0.18.3, 0.19.2), Deck 4's bigger bunk rooms (0.17.1), crowd rendering with the `?crowd=40` demo (0.20.0) and the schedule engine (0.21.1). Merge fixes only: the HUD build line, `GAME_BUILD` and this table. Nothing draws the schedules yet (workstream 6). |
 | 0.22.0 | 0.23.0 merged into `claude/sim-engineer` with 0.21.2 (going to sleep, private places by room), as the base for workstream 6. No other changes. |
 | 0.22.1 | Pillar 1, workstream 6, turn 1: the crew follow their schedules on the deck (the sim engineer). The nine placeholder walkers and `Walker.think` are gone; everyone `whereIs` puts on your deck is a `CrewAgent` drawn by the crowd: walking the grid to their place, sitting, standing, working, lying in their own bunk (upper berths at 1.6 m), queueing at the servery, and arriving and leaving by the lift car. You find them mid-activity when you arrive (at their place, or partway there), and after a sleep. Crew open doors as they pass, and the 'closed' door of their own room or destination. Tap a crew member to talk (name, role, bio). You can't walk through anyone standing. The stubs are gone (the real roster and places cover everything). `DECK3_EVENING_MAX` caps Deck 3 in the evening (no cap yet). With crew switched off in both, cadet_test is ALL IDENTICAL to 0.22.0 (0.22.0 without its walkers); with crew, only the crew differ. deck_check OK. Four ship hours on Decks 3 and 4: nobody stuck, no one without a path, no place held twice. |
+| 0.22.2 | Workstream 6, turn 2 (the sim engineer). Story crew close to you get full rigs: the nearest 3 within 4.5 tiles (back to the crowd beyond 6), posed by the crowd's own code (`FullPerson` borrows `CrowdPerson`'s `set` and `update`), freed when they go; memory steady over round trips. A seat's or bed's walk-to tile is now in its own room and reachable from the lift (three people had no way to their own en-suite; three Deck 2 places were cut off): all 547 places on the six decks can be reached. Agents leaving a place set off from its walk-to tile, and can always leave the room they're in (one person sat at an overflow desk in the locked ready room). New `day_check.py`: one ship day fast-forwarded, every deck. Days 1–7: DAY CHECK OK, draw calls peak 425 (Deck 4) against 450. With crew off, cadet_test ALL IDENTICAL to 0.22.1; deck_check OK. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -161,7 +162,22 @@ Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each 
 - **Stuck.** `stuck` counts ship minutes an agent meant to move but didn't; `stuckMax` keeps the worst. `noPath` counts times there was no way to a place (the agent is then simply put there).
 - **The old walkers.** `CREW` (section 9) stays as data; `crew` is an empty array for the code that still loops over it. The rig, the player's `Walker` and its R() calls are unchanged, so with crew off nothing else moves.
 - **Draw calls (0.22.1, by the lift at 06:00):** Deck 4 with 52 crew, 319 (0.22.0 with its five walkers: 346); Deck 3 at 18:00 with 63 crew, about 307–325.
-- **Next (0.22.2):** full rigs for story crew near you, and day_check.py.
+- **Full rigs (0.22.2).** Every quarter second `crewDetail` gives the `FULL_MAX` (3) story crew nearest you, within `FULL_NEAR` (4.5) tiles, a `FullPerson`, and sends them back to the crowd beyond `FULL_FAR` (6). A `FullPerson` is a baked `makeCharacter` rig in the scene, using `CrowdPerson.prototype.set` and `.update`, so it's posed exactly like the crowd (sit, lie, work, eating). That relies on `CrowdPerson`'s field names; if section 8b changes them, change `FullPerson` too. Each full rig costs about 30 draw calls. It has its own random stream (from the person's id), and its geometry is disposed when it goes back to the crowd.
+- **Walk-to tiles (0.22.2).** For a place on a blocked tile (a seat or bed) with no `walk`, the candidates are the open neighbours in the place's own room that aren't behind a wall, nearest the spot first. The first one `crewPath` can reach from the lift wins.
+- **day_check.py (0.22.2).** `python3 day_check.py BUILD.html [DAY]`, about 4 minutes. It loads with `?nosave&debug` and switches the game's clock tick off, then:
+    1. `dayReport(DAY)`: sleep, meals, shifts, double-booking and gaps, plus the peak headcounts.
+    2. The plans come out the same after clearing the cache and planning other days first.
+    3. Each deck runs a whole ship day of crew logic in 0.05 s steps (`updateDeckCrew` only, no drawing), checking: nobody stuck more than 10 ship minutes; nobody settled in a place someone else holds; nobody lying in a bed that isn't theirs; nobody with no way to their place; nobody due on the deck missing. Every ship hour it draws one frame by the lift and one over the crowd, and the peak must stay under `BUDGET` (450).
+    4. Deck 4 runs twice without drawing and must end identically.
+- **day_check numbers.**
+    - Day 1 (Monday):
+        - Crew per deck at most 7 / 19 / 69 / 62 / 12 / 3.
+        - Draw-call peaks 370 / 373 / 415 / 411 / 377 / 321 (Deck 3's at 07:00 by the lift, Deck 4's at 07:00).
+        - Worst stuck 0.0 ship minutes.
+    - The whole first week (days 1–7): OK. The draw-call peak over the week is 425 (Deck 4, Friday).
+- **Fixes found by day_check (0.22.2):**
+    - Someone told to stand anywhere while still sliding into a seat set off from the seat's furniture tile into the next room. Agents now always set off from the place's walk-to tile.
+    - Someone at an overflow desk in the locked ready room couldn't get out. Agents can always pass the doors of the room they're in.
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 
