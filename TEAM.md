@@ -34,7 +34,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: A5b. 0.31.1 done (till, baskets, anim on 87 places). Doing 0.31.2 (storekeeper till text, rower anim, grabShelf live rows). Utility plans for Decks 3 and 1 approved (b6440e5: 11 machines, new hatch v,10,10); builds after the Deck 6 architect's 0.30.1 hatch turn lands | `claude/deck1-scale` | 0.31.x | Working |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c, Deck 2 activity anims (0.32.1), then its utility rooms (plan 15e5dbb approved by the lead: gas plant, utility closet, cable crawl, array machines; no room changes size) | `claude/deck2-command` | 0.32.x | Working; utility rooms wait for 0.30.1 |
 | session_01JScnVG158eYAHYvKDz3jZG | Crew designer: A6, galley staff shifts and habits for the new activities | `claude/deck-plans-1-2-6` | 0.16.x | Briefed |
-| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer (new): B1 now (machines, wear, systems, consequences, machine_check; no drawing), B2 and B3 later | `claude/ship-systems` | 0.33.x | Hired |
+| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: B1 done (0.33.0, 8e34c3b: machine registry with stubs, wear on paper, 10 systems, shipEffects, SAVE_EXTRA, machine_check). Now B2 and B3 on paper (jobs, Works crew claiming, stores, restock); the board and device section wait for Half A | `claude/ship-systems` | 0.33.x | Working |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived |
 
 ## Context check (2026-10-15, 17:10)
