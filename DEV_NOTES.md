@@ -1,10 +1,10 @@
 # Starship Cadet: dev notes 3
 
-Read this first in any new chat, together with **Design Doc v4** and the latest **starship-cadet.html** (build 0.6.6). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
+Read this first in any new session, together with **design-doc-v4.pdf** and **starship-cadet.html** (build 0.7.0). The design doc is the source for what the game is; these notes cover the build: what's in it, how the code works, the rules, testing and what's next.
 
-This file replaces DEV_NOTES_2. Keep only this one in the Project, along with the design doc, the latest build, deck3-plan.html, deck4-plan.html, deck5-plan.html and cadet_test.py.
+This file replaces DEV_NOTES_2. The repo holds it with the design doc, the build, the deck plans in `plans/` and cadet_test.py. Git keeps every earlier version, so files keep stable names (no version suffixes).
 
-**First job in the next chat: step 6d, Deck 3, turn 5: crew.** Every Deck 3 room is built and furnished (see "Next" below).
+**Deck 3 is complete (0.7.0, with the promenade dressed and review fixes) and waiting for sign-off.** After sign-off, the next deck is the user's choice: 2, 1 or 6, each starting with a plan page (see "Next" below).
 
 Nine small updates for the design doc when it's next edited:
 
@@ -24,7 +24,7 @@ Nine small updates for the design doc when it's next edited:
 - Pell works on Deck 5 for now, until shifts move people between decks.
 
 
-## Current build: 0.6.6 (about 4,400 lines)
+## Current build: 0.7.0 (about 4,450 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -41,10 +41,14 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.5.9 | Windows are real openings onto the sky (the painted nebula and stars behind the glass are gone). Deck 4's bow nook became the music room: a stage round the bow windows with drums, guitars, amps and a mic, a grand piano, beanbags, a record cabinet, soundproofing panels, an instrument rail and a gig poster. Double doors from the corridor (`v,44,9`, `v,44,10`). |
 | 0.6.0 | The main lift has one wide door on each side instead of two narrow ones: paired lift edges share one pair of leaves, with no post or corner block between them (`liftJoint`). No freight lift: Deck 5's cargo hold and Cart bay tap text changed. |
 | 0.6.1 | The lift car is 2 × 3, big enough for a hover cart: it takes over the trunks row, keeps the ladder row, and each side is one three-tile door. Choosing a deck walks you to the panel on the car's back wall, where you reach out and press it before the ride starts. |
-| 0.6.2 | Deck 3, turn 1: the shell. `DECKS[3]` from deck3-plan.html: map, hull, doors, windows, floors (new `deck`, `gym` and `garden`), sealed service rooms, the lift and ladder, plaza benches and plants, name plates and the deck directory. Rooms are walkable and named but not furnished yet. The deck directory now marks whichever deck it's on. |
+| 0.6.2 | Deck 3, turn 1: the shell. `DECKS[3]` from plans/deck3-plan.html: map, hull, doors, windows, floors (new `deck`, `gym` and `garden`), sealed service rooms, the lift and ladder, plaza benches and plants, name plates and the deck directory. Rooms are walkable and named but not furnished yet. The deck directory now marks whichever deck it's on. |
 | 0.6.3 | Deck 3, turn 2: the mess hall (44 seats: four long tables of eight, three round tables of four), the serving line, the galley and the walk-in cold store. A new edge type, `pass`: the serving counter through the mess–galley wall. |
 | 0.6.4 | Curved inner walls (`curves` in a deck definition), and Deck 3, turn 3: the bow lounge, with a curved bar round the galley door, two planted glass screens on one arc, booths, high tables, and a window end with a sofa, armchairs, two quiet corners and a telescope. |
 | 0.6.5 | Deck 3, turn 4: the hydroponics garden (grass, grow racks under pink light, raised beds, trellises, fruit trees, a pond with benches, a stepping-stone path, a herb wall, a big tree and ground cover everywhere), the infirmary and exam room, public washrooms (all toilets), the gym, the crew store and the call-home booths. The lounge's glass screens are shorter, so the way round them is open. |
+| 0.6.7 | Deck 3, turn 5: crew. Chef Brennan works the galley (haunts `K`, `M`, `G`; spots at the ranges, ovens, prep island, dish pit, pass, her stool and the mess floor). Rina is on duty in the infirmary (haunts `I`, `X`; spots at the desk, beds, cabinet, supplies and exam room). Both are `deck: 3`, which leaves five crew on Deck 4. Step 6d done. |
+| 0.6.8 | The promenade dressed (asked for at review): two planter islands down the middle with a tree, flowers, a bench facing each lane and lamp posts at the ends; the route-map kiosk where the promenade leaves the plaza; benches and potted plants by the garden doors. New `deck_check.py`. |
+| 0.6.9 | Review fixes. Planter islands smaller (two columns each, cols 29–30 and 35–36) with no lamp posts. Snug collision (`snug: true` in `place`): benches by the lifts on Decks 3 and 4 and by the garden doors push you off their real outline, not whole tiles. Lift doors sink into the floor instead of sliding out past the frame. |
+| 0.7.0 | Planter islands longer (2.48 m, three columns each, the same width) and their trees taller (trunk 1.9 m, crown raised 0.6 m; trunk thickness and crown size unchanged). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -159,6 +163,20 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 - Every walkable Deck 3 tile and every item can be reached. Deck 4 is pixel-identical to 0.6.4.
 - **0.6.6:** Mother Fen is renamed Chef Auda Brennan ("Chef Brennan" in tap text). Update the design doc to match.
 
+## The promenade (0.6.8)
+
+- **Planter islands** (`planterIsland`, 2.48 × 1.34, `snug`) sit on rows 10–11 at cols 28–30 (lemon tree, `fruit`) and 34–36 (marigolds). Trees: a 1.9 m trunk with the crown at about 2.5 m (0.7.0). No lamp posts (taken out at review, 0.6.9). Rows 9 and 12 stay clear as lanes, and so does every column with a door: the mess doors (25, 26, 31, 32), gym (27), store (33), galley back door (38) and booths (38). Each island has its own fade group (`'=:a'`, `'=:b'`), so only the one you're behind fades.
+- **Route kiosk** (`routeKiosk`) at col 24, rows 10–11 (blocked with `block`), screens on both faces. Its canvas stars come from a fixed hash, not `R()`.
+- **Garden-door end:** a bench on each wall and four small potted plants (the `plant` kit, not `bush`, which draws from `R()` and would reshuffle the garden).
+- **Materials** in `PROM`. Nothing calls `R()`, so Deck 3's garden, lounge and infirmary are pixel-identical to 0.6.7, and Deck 4 is ALL IDENTICAL.
+- **Cost:** about 30 more draw calls on a normal promenade view (338 → 368 at 1200 × 800).
+
+## Snug collision (0.6.9)
+
+- `place(..., { snug: true })` still adds the piece's tiles to `BLOCKED`, so paths and the crew brain avoid them as before. It also records the piece's real footprint in `SNUG` (tile → boxes), and `collide` pushes walkers off those boxes instead of the whole tile. You can walk right up to a bench against a wall.
+- Used on the lobby benches on Decks 3 and 4, the garden-door benches and the planter islands. Worth using for any thin piece against a wall.
+- 0.6.9 against 0.6.8 on Deck 4: only 21 of the 3000 collision probes move, all beside the two lobby benches; everything else is ALL IDENTICAL.
+
 ## The music room (0.5.9)
 
 - Room `n` on Deck 4, no longer a hall. Kit: `MUS` materials, `pianoSlab`, and `KIT` pieces `grandPiano`, `pianoBench`, `drumKit`, `guitarStand`, `amp`, `micStand`, `stageLight`, `beanbag` and `recordCabinet`, plus `WALL_KIT` pieces `acoustic` and `instrumentHooks`. None of them call `R()`.
@@ -169,6 +187,7 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 ## The lift (section 11)
 
 - **The car** is room `@` on each deck's map (2 × 3, mid-spine, big enough for a hover cart). `buildDeck` fits every car with a panel and handrail on its north wall and a light strip on its south wall.
+- **Lift doors sink into the floor** (0.6.9): `leaf.position.y = 1.1 - open * 2.3`, hidden once fully open, so they never stick out past the frame. Other doors still slide.
 - **Lift doors** are one wide door per side: lift edges in a line (three per side now) share a single pair of leaves, built on the first edge, and the corners between them have no posts (`liftJoint`). A door object carries its own `cx`, `cz` and `span`.
 - **Lift doors** are walkable, so you can walk straight through the car. Crew sometimes cut through it.
 - **Opening the deck list:**
@@ -216,6 +235,7 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 
 ## Crew
 
+- **Chef Brennan and Rina are `deck: 3`** (0.6.7). Rina keeps her bunk on Deck 4 in the story, but has no `home` until shifts move people between decks. 0.6.7 against 0.6.6: Deck 4's crew paths and crew screenshots differ as expected; the crew-hidden shot differs only by a door still closing behind crew who had just walked past.
 - **Pell is `deck: 5`** with Works haunts and favourite spots (benches, job board, tea corner, lathe, storage counter). The game still starts with you on Deck 4, where seven crew wander.
 - **The room brain adds `j`, `=` and `+` weights on every deck.** On Deck 5 there's no `j`, which is harmless (that pick just fails and retries). Room letters are per-deck, so `home` and `haunts` only make sense for the walker's own deck.
 
@@ -250,11 +270,15 @@ Extrude geometry:
 - **Setup in a fresh container:**
 
   ```
-  mkdir -p /home/claude/work/three && cd /home/claude/work/three
+  pip install playwright
+  mkdir -p /tmp/cadet-work/three && cd /tmp/cadet-work/three
   npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
   ```
 
-- **Run:** `python3 cadet_test.py OLD.html NEW.html` with `timeout 280`, on its own. Tool calls have a 300-second limit, so don't chain other tests after it.
+  `CADET_WORK` (default `/tmp/cadet-work`) sets where three.js and the test copies live. `CADET_CHROME` points at a Chromium binary when Playwright's own browser isn't installed (in Claude Code cloud sessions, `/opt/pw-browsers/chromium`).
+
+- **Run:** `CADET_CHROME=/opt/pw-browsers/chromium python3 cadet_test.py OLD.html NEW.html` from a scratch folder (screenshots land in the current folder). It takes about a minute. The old build comes from git, for example `git show HEAD~1:starship-cadet.html > old.html`.
+- **Screenshot noise (0.7.0).** In cloud containers the software renderer sometimes rounds a few dozen pixels one colour level differently between runs, even comparing a build with itself. The test treats a difference of at most 1 as noise and says so ("apart from renderer noise"); anything bigger fails. It also keeps toasts out of screenshots (they fade on real-time timers) and turns off CSS transitions; toast text is still compared.
 - **When crew changes are expected,** compare the crew-hidden shot, or make a test copy with the crew change reverted and expect ALL IDENTICAL. That's how Pell's move was proven.
 
 Deck 5 and the lift were tested with small ad-hoc scripts that reuse cadet_test.py's `Game` class:
@@ -277,19 +301,15 @@ They checked:
 - Project a door's edge centre at y ≈ 0.08. The cutaway may have lowered the door, and a tap at head height goes past it.
 - Things in locked rooms can be hit through a lowered door; that's the test spot, not a bug.
 
-Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, with a reachability and memory check on each.
+**deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
 
 
 ## Working method
 
-- Edit the build in place and never rewrite the whole file. Patch with small Python scripts that replace exact strings and assert each matches once.
-- Keep turns short; each ends with a tested build handed over as a file.
-- **Project files can be re-synced into the work folder mid-chat,** overwriting the build in progress (it happened in 0.5.1).
-    - At the start of each turn, check the build number in the working copy.
-    - Keep a copy of each build outside the work folder (`/home/claude/build-0.5.x.html`).
-    - Keep the patch scripts, so a reset only costs a re-run.
-- When a chat gets long, update these notes as a handoff and continue in a fresh chat.
-- Download each build as soon as it's handed over.
+- Edit the build in place and never rewrite the whole file. Make small exact-string edits, each matching once.
+- Work a deck one turn at a time. Each turn ends with a tested build, a bumped build number, a line in the build table above, and a commit pushed to the repo. Git is the save point: earlier builds come back with `git show <commit>:starship-cadet.html`.
+- When a deck's turns are all done, stop for review: a playable link, screenshots, a summary and the test results.
+- Keep these notes current as you go, so any new session can pick up from them.
 
 
 ## Known issues
@@ -305,7 +325,7 @@ Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, w
 
 ## Next
 
-**6d. Deck 3, the Commons.** The plan is agreed: deck3-plan.html, 52 × 22, `lift: [20, 11]`. Built one turn at a time:
+**6d. Deck 3, the Commons.** The plan is agreed: plans/deck3-plan.html, 52 × 22, `lift: [20, 11]`. Built one turn at a time:
 
 1. **The shell (done, 0.6.2).** Every room is walkable and named. Sealed: galley plant `g` (hatch `h,39,3`), water recycler `R` (hatch `v,17,14`), irrigation room `i` (hatch `h,3,17`), and the ladder hatch `h,20,13`.
 2. **The mess hall, galley and cold store (done, 0.6.3).**
@@ -316,7 +336,7 @@ Worth folding into cadet_test.py when Deck 3 lands: a ride to each built deck, w
     - New kit: `longTable`, `roundTable`, `servery`, `trayStack`, `trayReturn`, `drinksStation`, `grabShelf`, `ovenStack`, `prepIsland`, `dishPit`, `coldShelf`, `chestFreezer`; wall kit `menuBoard`, `passShelf`. Materials in `MESS`. None call `R()`.
 3. **Curved inner walls, then the lounge (done, 0.6.4).** See "Curved inner walls" and "The bow lounge" above.
 4. **The infirmary, exam room, garden, washrooms, gym, crew store and call-home booths (done, 0.6.5).** See "Deck 3, turn 4" above.
-5. **Crew.** Chef Brennan moves to Deck 3; Rina works in the infirmary. Deck 4's crew routes change when she leaves.
+5. **Crew (done, 0.6.7).** Chef Brennan works the galley; Rina works in the infirmary. Deck 4's crew routes changed when they left.
 
 **7. Machines, supplies and the shared job list,** anchored on the Works bay job board.
 
