@@ -2,7 +2,13 @@
 
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
-**Lead:** session_01HV1JuhWgKASQNmvLA2AXD3, branch `claude/mobile-session-linking-3es9z2`. Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
+**Lead:** session_0158BCCswtdujm3t5d2LXsFz, branch `claude/lead-pillar1` (started 2026-10-15 from the Pillar 1 plan commit 149a455, which is `main` plus the plan). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
+
+**Retired lead:** session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
+
+**Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
+
+**Playable build (the one link the user uses):** https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, owned by the Deck 6 architect. New builds are republished to this same link.
 
 ## Rules for helper sessions
 
@@ -15,13 +21,20 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 ## Roster
 
-| Session | Job | Branch | Status |
-| --- | --- | --- | --- |
-| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder (builds 0.6.7–0.7.0, repo tidy) | `claude/deck-building-workflow-iayt67` | Archived: all its work is merged |
-| session_01JScnVG158eYAHYvKDz3jZG | Deck planner: plans for Decks 1, 2 and 6 | `claude/deck-plans-1-2-6` | Idle. Deck 2 plan agreed at Sketch 8 (71642e6); all three plans done |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect | `claude/deck-architect` | Deck 6 done (0.7.4, ed1da74), waiting on the user's review. Review build: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y. Review fixes done: 0.11.0 (b670ca2) on `claude/deck-architect`, a fast-forward of 0.10.1. Engine room opened up, watch room moved to the overlook's south end at 4 × 4. Idle |
-| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect (Deck 1) | `claude/deck1-bridge` (builds 0.8.x) | Deck 1 done (0.8.4, a11f001), waiting on the user's review. Review build: https://claude.ai/artifact/LSfXFx2jDcjPJRjCr7o67v. Scale-up done: 0.12.1 (953d3be) on `claude/deck1-scale`. 22 × 12, bridge +57%, ready room moved aft to port. Idle |
-| session_014DMHpLuFyNknrAcZZGGNhU | Command architect (Deck 2) | `claude/deck2-command` (builds 0.9.x) | Deck 2 done (0.9.5, 1021921), waiting on the user's review. Review build: https://claude.ai/artifact/4hCG96ZNMSxK4q7m4zqk2P. Idle |
+Pillar 1 work (see `plans/pillar1-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with.
+
+| Session | Job | Branch it pushes to | Builds | Status |
+| --- | --- | --- | --- | --- |
+| session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.23.0+ (combined) | Active |
+| session_01JScnVG158eYAHYvKDz3jZG | Crew designer (was the deck planner): workstream 2, the 75-person roster and `plans/crew-roster.html` | `claude/deck-plans-1-2-6` | 0.16.x | Briefed 2026-10-15 |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: workstream 3a, places on Decks 4, 5 and 6. Owns the playable link | `claude/deck-architect` | 0.17.x | Briefed 2026-10-15 |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: workstream 3b, places on Decks 1 and 3 | `claude/deck1-scale` | 0.18.x | Briefed 2026-10-15 |
+| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: workstream 3c, places on Deck 2 | `claude/deck2-command` | 0.19.x | Briefed 2026-10-15 |
+| (hiring) | Sim engineer: workstreams 1 (time and saving), then 4 (schedules), then 6 (crew on the deck, day_check) | `claude/sim-engineer` | 0.15.x, 0.21.x, 0.22.x | Hiring |
+| (hiring) | Performance engineer: workstream 5, crowd rendering | `claude/crowd-render` | 0.20.x | Hiring |
+| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived: all its work is merged |
+
+Earlier status of the inherited helpers: all idle at hand-over, all decks built and merged (0.14.0 in `main`).
 
 ## Done
 
@@ -66,4 +79,4 @@ When the user approves the Deck 2 plan, the lead does this without waiting for t
 
 ## Queue
 
-- **Pillar 1 of the Living Ship:** the plan is agreed in `plans/pillar1-plan.md`. Hire and start the workstreams (no cap on parallel sessions).
+- **Pillar 1 of the Living Ship:** the plan is agreed in `plans/pillar1-plan.md`. Workstreams 1, 2, 3 and 5 started 2026-10-15 (no cap on parallel sessions). Next check-in with the user: the roster page plus a crowd demo, once 2 and 5 are done.
