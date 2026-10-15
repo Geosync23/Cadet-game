@@ -244,6 +244,24 @@ with sync_playwright() as pw:
     if y.get('oneAtATime') is False or y.get('lapse') is False: fail('one job at a time, and a job left 12 hours goes back')
     if y.get('kept') is False or not y.get('ret'): fail('touchJob keeps a job in progress yours; returnPart puts a part back')
 
+    # 5b. food by cart: cartClaim is one rule, pure in replays, the same twice live, and never past the store's cap
+    ck = g.ev("""(() => {
+      const rev = MACH_REV, hold = SHIP.hold.meals, a = [];
+      for (let t = 1440; t < 1440 * 3; t += 60) for (const cold of [0, 60, 89, 90, 150, 249, 250, 300]) a.push(JSON.stringify(cartClaim(t, cold, { replay: true })));
+      const b = []; for (let t = 1440; t < 1440 * 3; t += 60) for (const cold of [0, 60, 89, 90, 150, 249, 250, 300]) b.push(JSON.stringify(cartClaim(t, cold, { replay: true })));
+      const pure = MACH_REV === rev && SHIP.hold.meals === hold && a.join() === b.join();
+      let overCap = 0, urgentMissed = 0, nightDaily = 0;
+      for (let t = 1440; t < 1440 * 3; t += 60) for (const cold of [0, 60, 89, 150, 249, 280]) {
+        const r = cartClaim(t, cold, { replay: true }), hr = (t / 60) % 24;
+        if (r && cold + r.meals > coldCap()) overCap++;
+        if (!r && cold < CART_URGENT) urgentMissed++;
+        if (r && cold >= CART_URGENT && (hr < 9 || hr >= 17)) nightDaily++;
+      }
+      return { pure, overCap, urgentMissed, nightDaily };
+    })()""")
+    print(f"Food by cart: replays pure {ck['pure']}, over the cap {ck['overCap']}, urgent runs missed {ck['urgentMissed']}, daily runs off the day shift {ck['nightDaily']}")
+    if not ck['pure'] or ck['overCap'] or ck['urgentMissed'] or ck['nightDaily']: fail('cartClaim')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();

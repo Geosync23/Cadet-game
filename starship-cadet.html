@@ -8087,6 +8087,7 @@ function machWear(m, h, c) {
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
 SHIP.machines = {};
+const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cartClaim (by hour), and those not yet on the job list
 let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet run; the last time asked; a counter of changes
 const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
 function machinesReset(hour) {
@@ -8098,6 +8099,7 @@ function machinesReset(hour) {
 // A clock earlier than the machines' (New game) starts afresh
 function machinesNow() {
   const t = shipNow();
+  if (CART_PENDING.length && MACH_HOUR !== null && MACH_HOUR * 60 > t) cartPost();
   if (MACH_HOUR !== null && t >= MACH_SEEN && MACH_HOUR * 60 > t) { MACH_SEEN = t; return SHIP.machines; }   // up to date: the common case
   const now = Math.floor(shipNow() / 60), start = Math.floor(((SHIP_START.day - 1) * 1440 + SHIP_START.min) / 60);
   if (MACH_HOUR === null || shipNow() < MACH_SEEN) machinesReset(Math.min(start, now));
@@ -8289,8 +8291,12 @@ const JOB_FETCH = 10, JOB_MAKE = 60, JOB_RIDE = 2;       // minutes: fetching pa
 const STOCK = { element: 6, 'fan belt': 4, compressor: 2, pump: 4, relay: 6, filter: 8, cartridge: 8, 'uv lamp': 3, 'nutrient pack': 4, valve: 4,
                 membrane: 3, bearing: 3, regulator: 3, cell: 3, 'oxygen cell': 3, breaker: 3, cable: 4, 'signal card': 2, seal: 4, 'control rod': 2, 'coil winding': 2 };
 const NO_MAKE = new Set(['filter', 'cartridge', 'membrane', 'uv lamp', 'nutrient pack', 'cell', 'oxygen cell', 'control rod']);
-const DELIVERY = { day: 2, hour: 10, meals: 1050 };     // weekday (0 = Monday), hour; a week of meals for the cold store
-const MEALS_LOW = 150, CART_MEALS = 150;                // a cart run when the cold store is under this; meals a cart carries
+const DELIVERY = { day: 2, hour: 10, meals: 1200 };     // weekday (0 = Monday), hour; the hold's meals topped up to this (a week and a bit)
+// cart runs of food to the cold store (the galley engineer's numbers): one a day on the day shift when it's under
+// CART_DAILY, and one at any hour when it's under CART_URGENT; each carries up to CART_MEALS, never past the store's
+// cap; the meals land CART_RUN minutes after the hour (later when the lift is slow)
+const CART_MEALS = 150, CART_DAILY = 250, CART_URGENT = 90, CART_RUN = 40;
+const coldCap = () => typeof FOOD !== 'undefined' && FOOD.coldCap > 0 ? FOOD.coldCap : 300;
 // food comes by cart only once the galley says so (section 16's FOOD.restock: 'rule' is its own 10:30 top-up, 'carts' is ours)
 const cartsCarryFood = () => typeof FOOD !== 'undefined' && FOOD.restock === 'carts' && !!(SHIP.galley && SHIP.galley.cold);
 SHIP.jobs = []; SHIP.stores = {}; SHIP.hold = {};
@@ -8310,13 +8316,15 @@ const jobTier = j => { const m = j.machine && machineById(j.machine); return m ?
 // where parts are fetched and made: the Deck 6 architect's storage places on Deck 5 (main storage's shelves and the
 // machine shop), the first one free of other jobs for the time, or nowhere (stand where you are) if none
 const FETCH_AT = ['5-parts-1', '5-parts-2', '5-parts-3', '5-parts-4'], MAKE_AT = ['5-make-1', '5-make-2'];
+// for the hover carts: beside the docks, in the cargo hold, in Deck 3's cold store (asked of the architects; skipped till they're in)
+const CART_AT = ['5-cart-1', '5-cart-2'], HOLD_AT = ['5-hold-1', '5-hold-2'], COLD_AT = ['3-cold-1', '3-cold-2'];
 // the shelves to try for a part: the one that stocks it first (the places' `stock`), then the rest
 function shelvesFor(part) {
   const st = id => ((DECKS[5].places || []).find(p => p.id === id) || {}).stock || [];
   return FETCH_AT.filter(id => st(id).includes(part)).concat(FETCH_AT.filter(id => !st(id).includes(part)));
 }
 function storagePlace(ids, a, b) {
-  const known = new Set((DECKS[5].places || []).map(p => p.id));
+  const known = new Set(Object.values(DECKS).flatMap(d => (d.places || []).map(p => p.id)));
   for (const id of ids) if (known.has(id) && !SHIP.jobs.some(j => j.segs && j.status === 'claimed' && j.segs.some(s => s.placeId === id && s.from < b && a < s.to))) return id;
   return null;
 }
@@ -8327,8 +8335,17 @@ function jobRun(p, j, t, makeMin) {
   const go = d => { if (d !== dk) { segs.push({ from: c, to: c + JOB_RIDE, act: 'commute', deck: d, fromDeck: dk, type: 'lift', placeId: null }); c += JOB_RIDE; dk = d; } };
   const at = (min, tag, placeId = null) => { segs.push({ from: c, to: c + min, act: 'work', deck: dk, type: 'job', placeId, tag }); c += min; };
   if (j.kind === 'restock') {
-    go(5); at(j.cargo === 'meals' ? 10 : 30, j.cargo === 'meals' ? 'fetch' : 'restock', j.cargo === 'meals' ? null : storagePlace(FETCH_AT, c, c + 30));
-    if (j.cargo === 'meals') { go(3); at(15, 'restock'); }
+    // a hover cart: from its dock, to the hold to load, then to the cold store (Deck 3) or the shelves, back to the dock
+    // hold: the cart in hand for the crowd to draw (the performance engineer's): 'cart' empty, 'cartfull' loaded
+    go(5);
+    const s0 = segs.length; at(4, 'cart', storagePlace(CART_AT, c, c + 4)); at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
+    const s1 = segs.length;
+    if (j.cargo === 'meals') { go(3); at(15, 'unload', storagePlace(COLD_AT, c, c + 15)); }
+    else at(20, 'unload', storagePlace(FETCH_AT, c, c + 20));
+    const s2 = segs.length;
+    if (j.cargo === 'meals') go(5);
+    at(4, 'cart', storagePlace(CART_AT, c, c + 4));
+    segs.forEach((sg, i) => { if (i >= s0) sg.hold = i >= s1 && i < s2 ? 'cartfull' : 'cart'; });
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -8347,8 +8364,7 @@ function jobFinish(j, t, by) {
     const s = SHIP.machines[j.machine];
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
   } else if (j.cargo === 'meals') {
-    const n = Math.min(SHIP.hold.meals || 0, CART_MEALS); SHIP.hold.meals -= n;
-    if (cartsCarryFood()) SHIP.galley.cold.meals += n;
+    // nothing: the meals left the hold when the run was set (cartClaim) and the galley lands them (section 16)
   } else {
     for (const k in SHIP.hold) if (k !== 'meals') { SHIP.stores[k] = (SHIP.stores[k] || 0) + SHIP.hold[k]; delete SHIP.hold[k]; }
   }
@@ -8362,7 +8378,7 @@ function jobsHour(h) {
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
-    if (cartsCarryFood()) SHIP.hold.meals = (SHIP.hold.meals || 0) + DELIVERY.meals;
+    if (cartsCarryFood()) SHIP.hold.meals = Math.max(SHIP.hold.meals || 0, DELIVERY.meals);
   }
   // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
   const open = new Map(); for (const j of jobs) if (j.status !== 'done') open.set(j.machine || 'restock:' + j.cargo, j);
@@ -8380,7 +8396,7 @@ function jobsHour(h) {
   }
   const restock = (cargo, deck) => { if (!open.has('restock:' + cargo)) jobs.push({ id: 'restock-' + cargo + '@' + h, machine: null, deck, kind: 'restock', cargo, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); };
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
-  if (cartsCarryFood() && SHIP.galley.cold.meals < MEALS_LOW && SHIP.hold.meals > 0) restock('meals', 3);
+  // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
@@ -8406,6 +8422,50 @@ function jobsHour(h) {
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
+// ---- food by cart (B3, with the galley engineer): one rule, cartClaim, used by the galley's replays and live step
+// alike, so they always agree. cartClaim(t, cold, { replay }) -> null | { meals, arriveAt }: whether a cart run sets
+// off on the hour of t with the cold store at `cold`, how many meals it carries and when they land. The galley adds
+// them to its cold store at arriveAt; section 17 only takes them out of the hold and puts the run on the job list.
+// A replay ({ replay: true }) is pure and assumes the hold is stocked. A live call is the same rule, limited by
+// what's in the hold, and it's remembered for its hour (asking again gives the same run): it takes the meals out
+// of the hold and queues the run for the job list (cartPost).
+function cartClaim(t, cold, o = {}) {
+  if (!(cold >= 0)) return null;
+  const h = Math.floor(t / 60), hr = h % 24;
+  if (!o.replay && CART_RUNS.has(h)) return CART_RUNS.get(h);
+  let run = null;
+  if (cold < CART_URGENT || (hr >= 9 && hr < 17 && cold < CART_DAILY)) {
+    let meals = Math.min(CART_MEALS, coldCap() - cold);
+    if (!o.replay) { if (SHIP.hold.meals === undefined) SHIP.hold.meals = DELIVERY.meals; meals = Math.min(meals, SHIP.hold.meals); }
+    const fx = typeof shipEffectsAt === 'function' ? shipEffectsAt(5, h * 60) : null, lift = fx && fx.lift > 1 ? fx.lift : 1;
+    if (meals > 0) run = { meals, arriveAt: h * 60 + CART_RUN + Math.round(6 * (lift - 1)) };
+  }
+  if (o.replay) return run;
+  CART_RUNS.set(h, run);
+  for (const k of CART_RUNS.keys()) if (k < h - 6) CART_RUNS.delete(k);
+  if (run) { SHIP.hold.meals -= run.meals; CART_PENDING.push({ h, ...run }); }
+  return run;
+}
+// the run on the job list: the free Works crew member on shift with the lowest tier pushes the cart (dock, hold,
+// lift, cold store, back); with nobody free it goes unseen
+function cartPost() {
+  while (CART_PENDING.length) {
+    const r = CART_PENDING.shift(), t = r.h * 60, id = 'restock-meals@' + r.h;
+    if (SHIP.jobs.some(j => j.id === id)) continue;
+    const j = { id, machine: null, deck: 3, kind: 'restock', cargo: 'meals', meals: r.meals, urgency: 2, posted: t, found: t, claimedBy: null, parts: [], status: 'open' };
+    SHIP.jobs.push(j);
+    const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
+    const crew = schedPeople().filter(p => jobCrew(p) === 'works').sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
+    for (const p of crew) {
+      if ((busy.get(p.id) || 0) > t) continue;
+      const run = jobRun(p, j, t, 0); if (!run) continue;
+      Object.assign(j, { claimedBy: p.id, status: 'claimed', start: t, segs: run.segs, done: run.done, end: run.end, made: 0 });
+      break;
+    }
+    if (!j.claimedBy) { j.status = 'done'; j.doneAt = r.arriveAt; j.doneBy = null; }
+    MACH_REV++;
+  }
+}
 // where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
 // first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
 // test copies that want the plain plans.
@@ -8418,7 +8478,7 @@ function jobWhere(person, t) {
     for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
   }
   for (const j of JOB_IDX.get(person.id) || []) for (const s of j.segs) if (s.from <= t && t < s.to)
-    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id };
+    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold };
   return null;
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
