@@ -596,7 +596,9 @@ Done so far:
 - The game starts on Day 1, a Monday, at 06:00, with the player in Bunk 1 (agreed 2026-10-15).
 - The player is one of the 75 crew: one of the 47 juniors, so 46 others plus you share the 48 berths, with one empty (agreed 2026-10-15).
 - The junior bunk rooms get bigger so each fits three ordinary bunk beds (6 berths), rather than triple bunks or fewer juniors (agreed 2026-10-15). Deck 4 plan Sketch 3 approved the same day: rooms 5 × 4, the air scrubbers, junior stores, utility closet and heating plant shrink, no guest cabins given up, and no table in the bunk rooms.
-- Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15).
+- Saving is automatic, in the browser, per device; the game resumes where you left it (agreed 2026-10-15). Built in 0.15.1: the game saves every ship hour, on deck change and when it's hidden or closed; New game (tap twice) starts again.
+- Night runs 21:00–06:00, with an hour of dusk and of dawn centred on those times, so the game opens at first light. The old Night/Day button is now a debug control (built in 0.15.1).
+- Going to sleep: tap your own bunk to sleep until morning (to be built with the schedules).
 - The Works Chief and the six senior officers get provisional names from the crew designer, to be changed freely later (agreed 2026-10-15). Chosen: Works Chief Ines Calder, Infirmary Chief Priya Nandakumar, and the six senior officers named in "Crew and rooms" (build 0.16.1).
 - Envoy Saruth is a guest, not one of the 75 crew.
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
