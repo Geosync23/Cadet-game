@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.7
+   STARSHIP CADET: CSV Wren                            build 0.40.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.40.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8354,13 +8354,16 @@ function jobRun(p, j, t, makeMin) {
     // a hover cart: from its dock, to the hold to load, then to the cold store (Deck 3) or the shelves, back to the dock
     // hold: the cart in hand for the crowd to draw (the performance engineer's): 'cart' empty, 'cartfull' loaded
     go(5);
-    const s0 = segs.length; at(4, 'cart', storagePlace(CART_AT, c, c + 4)); at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
+    // the same dock out and back: one whose cart isn't already out on another run (about an hour, at most)
+    const known = new Set((DECKS[5].places || []).map(p => p.id));
+    const dock = CART_AT.find(id => known.has(id) && !SHIP.jobs.some(o => o.kind === 'restock' && o.segs && o.status === 'claimed' && o.segs[0] && o.segs.some(sg => sg.tag === 'cart' && sg.placeId === id) && o.start < c + 60 && c < o.end)) || null;
+    const s0 = segs.length; at(4, 'cart', dock); at(10, 'load', storagePlace(HOLD_AT, c, c + 10));
     const s1 = segs.length;
     if (j.cargo === 'meals') { go(3); at(15, 'unload', storagePlace(COLD_AT, c, c + 15)); }
     else at(20, 'unload', storagePlace(FETCH_AT, c, c + 20));
     const s2 = segs.length;
     if (j.cargo === 'meals') go(5);
-    at(4, 'cart', storagePlace(CART_AT, c, c + 4));
+    at(4, 'cart', dock);
     segs.forEach((sg, i) => { if (i >= s0) sg.hold = i >= s1 && i < s2 ? 'cartfull' : 'cart'; });
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
@@ -8585,13 +8588,33 @@ function drawJobBoard(t) {
 }
 // the main loop's step (section 12): redraw the board on Deck 5 when the jobs change (or each ship hour, for the shift)
 function worksTick() {
-  const B = JOB_BOARD;
-  if (!B || B.def !== deckDef) return;
+  const B = JOB_BOARD, D = CART_DOCKS;
+  if (B && B.def === deckDef) {
+    machinesNow();
+    const hr = Math.floor(shipNow() / 60);
+    if (B.rev !== MACH_REV || B.min !== hr) { B.rev = MACH_REV; B.min = hr; drawJobBoard(B.t); }
+  }
+  if (D.def === deckDef && D.groups.size) {                // a docked cart is hidden while it's out on a run
+    const m = Math.floor(shipNow());
+    if (m !== D.min) { D.min = m; const out = cartsOut(shipNow()); for (const [n, g] of D.groups) g.visible = !out.has(n); }
+  }
+}
+// the Cart bay's two docks (0.33.15): the cartDock kit hands each parked cart's group to cartDockLive as Deck 5 is
+// built (the Deck 6 architect's inert hook); worksTick hides it while that dock's cart is out
+const CART_DOCKS = { def: null, groups: new Map(), min: -1 };
+function cartDockLive(group, dock) {
+  if (CART_DOCKS.def !== deckDef) { CART_DOCKS.def = deckDef; CART_DOCKS.groups = new Map(); }
+  CART_DOCKS.groups.set(dock, group); CART_DOCKS.min = -1;
+}
+// which docks' carts are out at minute t: a claimed run's dock (its first stop, 5-cart-N), from taking it to putting it back
+function cartsOut(t) {
   machinesNow();
-  const hr = Math.floor(shipNow() / 60);
-  if (B.rev === MACH_REV && B.min === hr) return;
-  B.rev = MACH_REV; B.min = hr;
-  drawJobBoard(B.t);
+  const out = new Set();
+  for (const j of SHIP.jobs) if (j.kind === 'restock' && j.segs && j.status === 'claimed') {
+    const cs = j.segs.filter(s => s.tag === 'cart'); if (cs.length < 2) continue;
+    if (t >= cs[0].to && t < cs[cs.length - 1].to) out.add(+String(cs[0].placeId || '5-cart-1').split('-').pop() || 1);
+  }
+  return out;
 }
 
 // ---- saving: the save's ship.machines = { id: [cond, lastService] }, ship.machineHour, ship.jobs, ship.stores, ship.hold ----
