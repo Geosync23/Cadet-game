@@ -65,11 +65,12 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
   radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
 .device .crt::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;pointer-events:none;z-index:3;opacity:0;
   background:linear-gradient(to bottom,transparent,rgba(255,255,255,.035),transparent)}
-.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite}
-.device.fx .crt{animation:devflick 4s steps(1) infinite}
+.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite;will-change:transform}
+.device.fx .crt::after{animation:devflick 4s steps(1) infinite}
+.device .crt,.device #devBody{contain:paint}
 @keyframes devroll{from{transform:translateY(-100%)}to{transform:translateY(560%)}}
-@keyframes devflick{0%{opacity:1}31%{opacity:.985}32%{opacity:1}77%{opacity:.99}78%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
+@keyframes devflick{0%{opacity:1}31%{opacity:.55}32%{opacity:1}77%{opacity:.7}78%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt::after,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
 .device .devhead{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;flex:none}
 .device h2{margin:0;font:inherit;font-size:var(--crt-size);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
 .device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);-webkit-user-select:text;user-select:text;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
@@ -8133,7 +8134,7 @@ function deviceLoad(s) {
     .map((m, i) => ({ id: Number.isInteger(m.id) ? m.id : 1000 + i, title: m.title.slice(0, 80), text: typeof m.text === 'string' ? m.text.slice(0, 2000) : '', at: isFinite(m.at) ? +m.at : 0, pinned: !!m.pinned }));
   const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
-    .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
+    .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
   return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
@@ -8151,7 +8152,10 @@ setTimeout(() => {
 // ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
 // and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
-// whether you work on day d: playerShiftOn(d), section 14 (your rota: Saturday and Sunday off)
+// whether you work on day d: every day for now; a rota of your own drops in here
+// 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
+// Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
+const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
 const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
   [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
   [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
@@ -8181,7 +8185,7 @@ function devDay(d) {
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
-  if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
+  if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
     out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
@@ -8219,7 +8223,7 @@ function deviceTick() {
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
     DEV_REMINDED.add(x.id);
-    const m = SHIP.time.min, onShift = playerShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    const m = SHIP.time.min, onShift = devShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
     deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
   }
 }
@@ -8233,15 +8237,16 @@ function deviceDo(action) {
   if (!action) return;
   const a = DEVICE_APPS.get(action.app);
   if (action.do === 'open' || action.do === undefined) {   // open an app; one with no verb (e.g. { app, with }) hands the app the action
-    if (action.do === undefined && a && a.act) try { a.act('open', action); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
-    deviceShow(action.do === 'open' ? action.arg || action.app : action.app); return;
+    let to = action.do === 'open' ? action.arg || action.app : action.app;   // an app's act may name another app to show (Maps → Roster)
+    if (action.do === undefined && a && a.act) try { const r = a.act('open', action); if (typeof r === 'string' && DEVICE_APPS.has(r)) to = r; } catch (e) { DEV.errors.push(String(e && e.message || e)); }
+    deviceShow(to); return;
   }
   try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
   deviceRefresh();
 }
 // Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
 const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
-const devOnShift = () => playerShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
+const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
 function deviceNotify({ app, text, urgent } = {}) {
   if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
@@ -8331,7 +8336,7 @@ const DEVICE_SKIN = (() => {
   const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
-  let back = null, drawn = null, drawnKey = null;
+  let back = null, drawn = null, drawnKey = null, mapCache = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
     el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
@@ -8365,8 +8370,22 @@ const DEVICE_SKIN = (() => {
     },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
+      // 0.35.14 (the performance engineer's advice): the plan is kept while its deck, rooms, pick and goal stay the same,
+      // and only the dots (people, you) are drawn again, so a ship minute with Maps open costs a few circles
       const NS = 'http://www.w3.org/2000/svg', g = b.grid || [], H = g.length, W = Math.max(0, ...g.map(r => r.length)), at = (i, j) => (g[j] || '')[i] || '.';
       const sv = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const dots = svg => {
+        const old = svg.querySelector('g.m-dots'); if (old) old.remove();
+        const dg = sv('g', { class: 'm-dots' });
+        for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; dg.appendChild(c); }
+        if (b.you) dg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
+        svg.appendChild(dg);
+        svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
+          if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+        return svg;
+      };
+      const pk = JSON.stringify([b.rooms, b.pick, b.goal]);
+      if (mapCache && mapCache.grid === g && mapCache.key === pk) return dots(mapCache.svg);
       const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
       const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
       pat.appendChild(sv('rect', { width: .8, height: .8, class: 'm-hbg' })); pat.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: .8, class: 'm-hl' }));
@@ -8384,11 +8403,8 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
-      for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; svg.appendChild(c); }
-      if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
-      svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
-        if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
-      return svg;
+      mapCache = { grid: g, key: pk, svg };
+      return dots(svg);
     },
     form(b) {                                  // text fields; the submit action gets { field id: value }
       const box = mk('form', 'devform'), ins = {};
@@ -8492,21 +8508,22 @@ const DEVICE_SKIN = (() => {
   backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
   addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
   addEventListener('resize', () => { if (DEV.open) layout(); });
-  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it.
+  // 0.35.15 (the user: "sometimes it just pops up"): only the Device button opens it. The swipe up from the bottom edge
+  // is gone, as a drag that began low on the screen (steering) opened it. On a phone a swipe down on the bezel or a
+  // tap on the ship closes it.
   // 0.35.12 (the phone review): the ship closes it on a tap (lifted within 12px and 0.4 s), not at the first touch, so a
   // drag or a pinch over the ship doesn't close it (it doesn't steer or zoom either while the sheet is up); a cancelled
   // touch (the phone took the gesture) forgets the swipe
   let swipe = null;
   addEventListener('pointerdown', e => {
     const cv = e.target && e.target.tagName === 'CANVAS';
-    if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
-    else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
+    if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
     else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); swipe = { x: e.clientX, y: e.clientY, tap: performance.now() }; }
   }, true);
   addEventListener('pointerup', e => {
     if (!swipe) return; const dy = e.clientY - swipe.y;
     if (swipe.tap) { if (Math.hypot(e.clientX - swipe.x, dy) < 12 && performance.now() - swipe.tap < 400) { e.stopPropagation(); deviceClose(); } }
-    else if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    else if (dy > 40) deviceClose();
     swipe = null;
   }, true);
   addEventListener('pointercancel', () => { swipe = null; }, true);
@@ -8557,7 +8574,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   if (n.next) B.push({ kind: 'text', text: n.next });
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
-    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
   }
@@ -8580,7 +8597,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
       if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
-      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: calDay === d ? null : 'Tap to plan this day', mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: (devShiftOn(d) ? '' : 'Day off') + (calDay === d ? '' : (devShiftOn(d) ? '' : ' · ') + 'Tap to plan this day') || null, mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
       if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
@@ -8639,57 +8656,19 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
 // "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
 let mapDeck = null, mapPick = null;
 const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
-// people on Maps (0.35.9): only those whose whereabouts you may know (section 20's crewContacts and its rule:
-// acquaintances and up, or anyone on duty somewhere public; strangers show by their job). On your own deck a dot is
-// where they really are (the walkers); elsewhere it sits in the middle of their room. Tap a dot or a name to pick them;
-// "Go there" points the goal arrow at their room. { app: 'maps', who: crewId } opens Maps on them (the Crew app).
-let mapWho = null, mapFor = null;                         // mapFor: 'appointments' while picking a place to meet (0.35.10)
-const MAP_MID = new Map();                               // 'deck|room' -> [i, j], the room's middle tile
-function mapRoomTile(n, key) {
-  const k = n + '|' + key; if (MAP_MID.has(k)) return MAP_MID.get(k);
-  const g = DECKS[n].map || [], t = []; let sx = 0, sz = 0;
-  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[j].length; i++) if (g[j][i] === key) { t.push([i, j]); sx += i; sz += j; }
-  const c = t.length ? t.sort((a, b) => Math.hypot(a[0] - sx / t.length, a[1] - sz / t.length) - Math.hypot(b[0] - sx / t.length, b[1] - sz / t.length))[0] : null;
-  MAP_MID.set(k, c); return c;
-}
-function mapPeople() {                                   // [{ id, name, label, tierName, role, deck, room, roomName, act }]
-  if (typeof crewContacts !== 'function') return [];
-  let cs; try { cs = crewContacts({ all: true }); } catch (e) { DEV.errors.push('crewContacts: ' + (e && e.message || e)); return []; }
-  const out = [];
-  for (const c of cs || []) {
-    const w = c && c.where; if (!w || !DECKS[w.deck] || w.act === 'sleep' || w.act === 'wash') continue;   // never in their bunk or the shower
-    const rooms = DECKS[w.deck].rooms || {}, room = Object.keys(rooms).find(k => rooms[k].name === w.room) || null;
-    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', named: c.tier >= 1, tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
-  }
-  return out;
-}
-const MAP_ACT = { work: 'at work', breakfast: 'at breakfast', dinner: 'at dinner', lunch: 'at lunch', leisure: 'off duty', off: 'off duty', gym: 'at the gym', sleep: 'asleep', wash: 'washing' };
-const MAP_NEAR = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1], [2, 0], [-2, 0], [0, 2]];   // people sharing a room's middle spread out
-function mapDots(n, people) {                            // the dots on deck n: [{ id, x, y, pick }]
-  const live = new Map(), used = new Map(), out = [];
-  if (n === deckDef.num && typeof DECK_CREW !== 'undefined') for (const a of DECK_CREW) if (a && a.p) live.set(a.p.id, a);
-  for (const q of people) {
-    if (q.deck !== n) continue;
-    const a = live.get(q.id); let c = a ? cellAt(a.x, a.z) : null;
-    if (!c && q.room) { const m = mapRoomTile(n, q.room); if (m) { const k = used.get(q.room) || 0; used.set(q.room, k + 1); const o = MAP_NEAR[k % MAP_NEAR.length]; c = [m[0] + o[0], m[1] + o[1]]; } }
-    if (c) out.push({ id: q.id, x: c[0], y: c[1], pick: q.id === mapWho });
-  }
-  return out;
-}
+// Maps shows no people (0.35.16, the user's answer): where someone is lives in the Roster app below.
+let mapFor = null;                                       // 'appointments' while picking a place to meet (0.35.10)
 deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
   act(verb, arg) {
-    if (verb === 'open' && arg && arg.who) verb = 'who', arg = arg.who;   // { app: 'maps', who } from another app
-    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; mapWho = null; }
-    else if (verb === 'pick') { mapPick = mapPick === arg ? null : arg; mapWho = null; }
-    else if (verb === 'who') {
-      const q = mapPeople().find(x => x.id === arg);
-      if (!q || mapWho === arg) mapWho = null;
-      else { mapWho = q.id; mapDeck = q.deck; mapPick = q.room; }
-    }
+    // someone's whereabouts (section 20's Crew app: { app: 'maps', do: 'person', arg } or { app: 'maps', who }) go to the Roster
+    if (verb === 'open' && arg && arg.who) { rosterPick = arg.who; return 'roster'; }
+    if (verb === 'person' || verb === 'who') { rosterPick = arg; deviceShow('roster'); return; }
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
+    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
-      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick], q = mapWho && mapPeople().find(x => x.id === mapWho && x.room === mapPick);
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: (q ? q.label + ', ' + r.name.toLowerCase() : r.name) + (n !== deckDef.num ? ', Deck ' + n : '') });
-      deviceNotify({ app: 'maps', text: 'Follow the marker to ' + (q ? q.label : 'the ' + r.name.toLowerCase()) + '.', urgent: true }); delete DEV.notes.maps;
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
     else if (verb === 'meet' && mapFor === 'appointments') {
@@ -8707,11 +8686,9 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
-    const people = mapPeople(), who = mapWho && people.find(x => x.id === mapWho);
     const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
       { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
-      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' },
-        people: mapDots(n, people), whoAction: { app: 'maps', do: 'who' } }];
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
     if (mapFor === 'appointments') {
       if (!apptDraft) mapFor = null;
       else {
@@ -8720,26 +8697,75 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
           { kind: 'buttons', items: (id ? [{ label: 'Meet here', action: { app: 'maps', do: 'meet' } }] : []).concat([{ label: 'Cancel', action: { app: 'maps', do: 'unmeet' } }]) });
       }
     }
-    if (who) B.push({ kind: 'text', text: who.label + ': ' + (who.roomName ? 'the ' + who.roomName.toLowerCase() + ', ' : '') + 'Deck ' + who.deck + (MAP_ACT[who.act] ? ', ' + MAP_ACT[who.act] : '') + '.', mark: 'hot' });
     if (mapPick && rooms[mapPick]) {
       const r = rooms[mapPick];
-      if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
       if (r.kind !== 'locked' && r.kind !== 'void' && !mapFor) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
-    }
-    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
-      B.push({ kind: 'text', text: 'People', mark: 'head' });
-      const ps = people.filter(q => q.named).sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck), duty = {};
-      for (const q of people) if (!q.named && q.deck === n) duty[q.role] = (duty[q.role] || 0) + 1;
-      const dl = Object.entries(duty).map(([r, k]) => k + ' ' + r.toLowerCase() + (k > 1 ? 's' : ''));
-      if (dl.length) B.push({ kind: 'text', text: 'On duty on this deck: ' + dl.join(', ') + '.' });
-      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
-      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });   // strangers on duty: dots only
     }
     B.push({ kind: 'text', text: 'Rooms', mark: 'head' });
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
     B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
     return { title: 'Maps', blocks: B };
+  } });
+
+// Roster (0.35.16, the user's answer): everyone aboard by department, people you know first (section 20's relTier;
+// section 20's Crew app is the people you know and what you know about them). Tap a name for one line on where they
+// are now, from section 14's whereIs; asleep or washing reads "In their quarters" (privacy). Go there points the goal
+// arrow at that room. { app: 'roster', who: crewId } opens it on someone. Guests show only while aboard.
+const ROSTER_DEPTS = [['command', 'Command'], ['helm', 'Helm'], ['comms', 'Comms'], ['survey', 'Survey'], ['works', 'Works'], ['watch', 'Watch'],
+  ['infirmary', 'Infirmary'], ['galley', 'Galley'], ['store', 'Ship\'s store'], ['civilian', 'Civilians'], ['guest', 'Guests']];
+const ROSTER_ACT = { work: 'On duty', breakfast: 'At breakfast', lunch: 'At lunch', dinner: 'At dinner', gym: 'At the gym', appt: 'At an appointment' };
+let rosterPick = null;
+const rosterTier = id => { if (typeof relTier !== 'function') return 0; try { return relTier(id) || 0; } catch (e) { return 0; } };
+const rosterRoomName = n => /\d/.test(n) ? n : 'the ' + n.charAt(0).toLowerCase() + n.slice(1);
+function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }: room only when Go there makes sense
+  let w = null; try { w = typeof whereIs === 'function' ? whereIs(p, t) : null; } catch (e) { w = null; }
+  if (!w) return { line: 'Not aboard right now.' };
+  if (w.act === 'sleep' || w.act === 'wash') return { line: 'In their quarters.' };
+  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for Deck ' + w.deck : '') + '.' };
+  const S = typeof schedData === 'function' ? schedData() : null, pl = w.placeId && S ? S.byId.get(w.placeId) : null;
+  const room = pl && pl.deck === w.deck ? pl.room : null, r = room && DECKS[w.deck] && (DECKS[w.deck].rooms || {})[room], rn = r && r.name;
+  if (rn && mapLocked(w.deck, room) && w.act !== 'work') return { line: 'In their quarters.' };   // a private cabin
+  const at = 'Deck ' + w.deck + (rn ? ', ' + rosterRoomName(rn) : '');
+  return { line: (ROSTER_ACT[w.act] ? ROSTER_ACT[w.act] + ': ' : '') + at + '.', deck: w.deck, room: rn ? room : null, roomName: rn };
+}
+function rosterPeople() {                                // everyone aboard: [{ p, tier }]; guests only while aboard
+  const all = typeof schedPeople === 'function' ? schedPeople() : [], t = shipNow();
+  return all.filter(p => !p.player && (p.rank !== 'guest' && p.dept !== 'guest' || (() => { try { return !!whereIs(p, t); } catch (e) { return false; } })()))
+    .map(p => ({ p, tier: rosterTier(p.id) }));
+}
+deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
+  act(verb, arg) {
+    if (verb === 'open' && arg && arg.who) rosterPick = arg.who;
+    else if (verb === 'pick') rosterPick = rosterPick === arg ? null : arg;
+    else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
+      const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
+      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') });
+      deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
+    }
+  },
+  view: () => {
+    const B = [], ps = rosterPeople(), byName = (a, b) => a.p.name < b.p.name ? -1 : 1;
+    const group = (title, list) => {
+      if (!list.length) return;
+      B.push({ kind: 'text', text: title, mark: 'head' });
+      let rows = [];
+      for (const x of list) {
+        rows.push({ text: x.p.name, sub: (x.p.role || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
+        if (x.p.id !== rosterPick) continue;
+        const w = rosterWhere(x.p); B.push({ kind: 'list', rows }); rows = [];
+        B.push({ kind: 'text', text: w.line, mark: 'hot' });
+        if (w.room) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'roster', do: 'go' } }] });
+      }
+      if (rows.length) B.push({ kind: 'list', rows });
+    };
+    group('People you know', ps.filter(x => x.tier >= 1).sort((a, b) => b.tier - a.tier || byName(a, b)));
+    const rest = ps.filter(x => x.tier < 1), known = new Set(ROSTER_DEPTS.map(d => d[0]));
+    for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
+    group('Others aboard', rest.filter(x => !known.has(x.p.dept)).sort(byName));
+    if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
+    return { title: 'Roster', blocks: B };
   } });
 
 // Memos (0.35.4): notes you write (a title and plain text, dated), saved in SHIP.device.memos. Pin one to Home.
@@ -8901,7 +8927,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
     else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
       apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
-    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; mapWho = null; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
+    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
     else if (verb === 'new') { apptDraft = { with: [], day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
     else if (verb === 'cancel') { apptDraft = null; apptSay = null; }
     else if (verb === 'who' && apptDraft && arg) {               // add or remove someone (a group meeting: up to APPT_MAX)
