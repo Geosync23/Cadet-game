@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.18
+   STARSHIP CADET: CSV Wren                            build 0.26.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.18';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.19';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7187,6 +7187,12 @@ function schedU(seed, day, k) {
   return (h >>> 0) / 4294967296;
 }
 const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+// whether you (the player) are on shift on day d: your own rota, like a Works junior's (ROSTER_PLAYER.rota.offDays,
+// section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
+// when used (ROSTER_PLAYER comes later in the file); before it exists, Saturday and Sunday are the days off
+function playerShiftOn(d) {
+  try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; }
+}
 // The galley rota (section 16, the galley engineer). galleyDay(person, day) -> null | { role, wake, bedBy,
 // blocks: [{ from, to, placeId, task }], meals: { breakfast: [from, to], dinner: [from, to] } }, minutes from that
 // day's midnight. role null is a day off. Each block (a stint at one station) is a work segment there; touching
@@ -8126,8 +8132,7 @@ setTimeout(() => {
 // ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
 // and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
-// whether you work on day d: every day for now; a rota of your own drops in here
-function playerShiftOn(d) { return true; }
+// whether you work on day d: playerShiftOn(d), section 14 (your rota: Saturday and Sunday off)
 const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
   [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
   [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
