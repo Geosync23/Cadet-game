@@ -2,9 +2,9 @@
 
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
-**Lead:** session_015QoyPWBdMPM4ywf5W2jMMs, branch `claude/lead-pillar1` (took over 2026-10-16 ~15:20 UTC, mid Pillar 3, from session_01WHXNp9A1WHAD2EHJw384Qp; brief: `plans/handover-lead.md`). Repeating hourly check-in: trig_01Kr24HNvp976B4MapBpEqRo (fires :15). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
+**Lead:** session_015QoyPWBdMPM4ywf5W2jMMs, branch `claude/lead-pillar1` (took over 2026-10-16 ~15:15 UTC, mid Pillar 3, from session_01WHXNp9A1WHAD2EHJw384Qp; brief: `plans/handover-lead.md`). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
 
-**Retired leads:** session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:20, answers pass and Pillar 3 start, handed over because its memory was full; `plans/handover-lead.md`); session_0158BCCswtdujm3t5d2LXsFz (handed over 2026-10-16 ~04:20 to keep a clean memory; `plans/handover-lead.md`); session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
+**Retired leads:** session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:15; handed over when its memory filled); session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:20, answers pass and Pillar 3 start, handed over because its memory was full; `plans/handover-lead.md`); session_0158BCCswtdujm3t5d2LXsFz (handed over 2026-10-16 ~04:20 to keep a clean memory; `plans/handover-lead.md`); session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
