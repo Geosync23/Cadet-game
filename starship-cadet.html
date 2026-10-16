@@ -59,6 +59,20 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device .need em{font-style:normal;font-size:10px;margin-left:5px}
 .device .need em.up,.device #devBody p.fx.up{color:var(--teal)}
 .device .need em.down,.device #devBody p.fx.down{color:#e07a5f}
+.device .devhead{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.device #devBack{padding:4px 10px;font-size:12.5px}
+.device #devBody{max-height:62vh;overflow:auto}
+.device #devBody p.big{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
+.device #devBody p.hot{color:#cfe9e4}
+.device .row{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;font-size:13px;border-radius:10px}
+.device div.row{padding:2px 2px 0;border-radius:0}
+.device .row.new{border-color:var(--teal)}
+.device .row small{display:block;color:var(--muted);font-size:11.5px}
+.device .row .act,.device .btns .act{margin:4px 0 6px;padding:4px 10px;font-size:12.5px}
+.device .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.device .app{position:relative;flex-direction:column;gap:2px;border-radius:12px;padding:8px 4px;min-height:56px;font-size:12px;justify-content:center}
+.device .app i{font-style:normal;font-size:18px;color:var(--teal)}
+.device .app b{position:absolute;top:3px;right:5px;min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -90,7 +104,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
 <div class="lift device" id="device" role="dialog" aria-labelledby="devT" hidden>
-  <h2 id="devT">Your device</h2><p>A placeholder: the real device is still being designed.</p>
+  <div class="devhead"><button id="devBack" aria-label="Back to the home screen" hidden>Back</button><h2 id="devT">Your device</h2></div>
   <div id="devBody"></div>
   <button class="stay" id="devClose">Close</button>
 </div>
@@ -100,7 +114,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.4
+   STARSHIP CADET: CSV Wren                            build 0.35.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -123,6 +137,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    15b. INTERACTIONS    more places to use, the job board, the goal pointer (after 15)
    16. GALLEY & FOOD    the galley rota, cooking, the servery, plates (after 14)
    17. MACHINES & JOBS  machines, wear, systems, ship health, effects on people (after 14)
+   19. DEVICE           your device: apps (deviceApp) and the skin that draws them (before 15)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -6561,7 +6576,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.0';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7496,6 +7511,235 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // =====================================================================
+// 19. DEVICE
+// Your personal device (Pillar 3, the device engineer, 0.35.x): the game's one
+// menu. Two layers. The APPS describe: deviceApp({ id, title, icon, order,
+// badge, view, act }) registers one; view(ctx) returns plain content (a VIEW,
+// below) and act(verb, arg) handles its buttons. The SKIN draws: DEVICE_SKIN is
+// the only code here that touches the DOM, so the look can change without
+// touching an app. deviceDo(action) runs a tapped action; deviceNotify({ app,
+// text, urgent }) puts a badge on an app (and a toast if urgent); deviceOn('open'
+// | 'close', fn) for the pose and the camera. device.addSection(id, title,
+// render) stays as a shim: render(el) draws into a box, as before.
+// VIEW: { title, blocks: [ { kind: 'text', text, mark }, { kind: 'list', rows:
+//   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
+//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] } ] }
+// action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
+// Sits before 15 (after 14), so 15 and 17 can register at load; apps only read
+// other sections when drawn. Nothing here calls R() or makes 3D objects.
+// =====================================================================
+const DEVICE_APPS = new Map();                 // id -> { id, title, icon, order, badge, view, act }
+const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [] }, errors: [] };
+function deviceApp(def) {
+  if (!def || typeof def.id !== 'string') return;
+  DEVICE_APPS.set(def.id, Object.assign({ title: def.id, icon: 'dot', order: 50 }, def));
+  deviceRefresh();
+}
+function deviceDo(action) {
+  if (!action) return;
+  const a = DEVICE_APPS.get(action.app);
+  if (action.do === 'open') { deviceShow(action.arg || action.app); return; }
+  try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
+  deviceRefresh();
+}
+function deviceNotify({ app, text, urgent } = {}) {
+  if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
+  DEVICE_SKIN.notify({ app, text, urgent });
+  deviceRefresh();
+}
+function deviceOn(ev, fn) { if (DEV.on[ev] && typeof fn === 'function') DEV.on[ev].push(fn); }
+function deviceFire(ev) { for (const fn of DEV.on[ev] || []) try { fn(DEV.app); } catch (e) { DEV.errors.push(String(e && e.message || e)); } }
+function deviceBadge(a) {
+  let n = null; try { n = a.badge ? a.badge() : null; } catch (e) { n = null; }
+  return (n || 0) + (DEV.notes[a.id] || 0) || null;
+}
+function deviceView(id) {                      // the app's VIEW, or a stand-in if it fails
+  const a = DEVICE_APPS.get(id);
+  if (!a) return { title: 'Your device', blocks: [{ kind: 'text', text: 'No such app.' }] };
+  try { const v = a.view({ t: shipNow(), wide: DEVICE_SKIN.wide() }) || {}; return { title: v.title || a.title, blocks: v.blocks || [] }; }
+  catch (e) { DEV.errors.push(id + ': ' + String(e && e.message || e)); return { title: a.title, blocks: [{ kind: 'text', text: '(this app failed to draw)' }] }; }
+}
+function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home').sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+function deviceShow(id) {
+  if (!DEVICE_APPS.has(id)) id = 'home';
+  DEV.app = id; delete DEV.notes[id];
+  if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFire('open'); }
+  deviceRefresh();
+}
+function deviceClose() { if (!DEV.open) return; DEV.open = false; DEVICE_SKIN.close(); deviceFire('close'); }
+function deviceRefresh() {
+  DEVICE_SKIN.button();
+  if (DEV.open) DEVICE_SKIN.draw(DEV.app, deviceView(DEV.app));
+}
+
+// ---- the skin: the only DOM code. It draws a VIEW into #devBody, the home grid, the button's badge. ----
+const DEVICE_SKIN = (() => {
+  const $ = id => document.getElementById(id);
+  const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack');
+  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', dot: '•' };
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
+  let back = null, drawn = null;
+  const blocks = {
+    text(b) { return mk('p', b.mark ? (b.mark === 'up' || b.mark === 'down' ? 'fx ' + b.mark : b.mark) : '', b.text); },
+    list(b) {
+      const box = mk('div', 'list');
+      for (const r of b.rows || []) {
+        const whole = r.action && !r.button, row = mk(whole ? 'button' : 'div', 'row' + (r.mark ? ' ' + r.mark : ''));
+        row.appendChild(mk('span', 'rt', r.text));
+        if (r.sub) row.appendChild(mk('small', '', r.sub));
+        if (whole) act(row, r.action);
+        if (r.button) row.appendChild(act(mk('button', 'act', r.button), r.action));
+        box.appendChild(row);
+      }
+      return box;
+    },
+    bars(b) {
+      const box = mk('div', 'bars');
+      for (const it of b.items || []) {
+        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
+        fill.style.width = v.toFixed(1) + '%';
+        if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
+        row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
+        row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
+        bar.appendChild(fill); row.append(lab, bar, mk('span', '', Math.round(v))); box.appendChild(row);
+      }
+      return box;
+    },
+    buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) box.appendChild(act(mk('button', 'act', it.label), it.action)); return box; },
+    dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
+  };
+  const skin = {
+    wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
+    open() { back = document.activeElement; el.hidden = false; $('devClose').focus(); },
+    close() { el.hidden = true; drawn = null; if (back && back.focus) back.focus(); },
+    button() {
+      let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
+      btn.classList.toggle('low', low);
+      let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
+      if (badge) { badge.hidden = !un; badge.textContent = un; }
+    },
+    draw(id, v) {
+      const keep = drawn === id ? body.scrollTop : 0;
+      head.textContent = id === 'home' ? 'Your device' : v.title; backB.hidden = id === 'home';
+      body.textContent = ''; body.dataset.app = id;
+      for (const b of v.blocks) { const f = blocks[b && b.kind]; if (f) body.appendChild(f(b)); }
+      if (id === 'home') {                     // the app grid, with badges
+        const grid = mk('div', 'apps');
+        for (const a of deviceApps()) {
+          const t = act(mk('button', 'app'), { app: a.id, do: 'open' }), n = deviceBadge(a);
+          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '︎'), mk('span', '', a.title));
+          if (n) t.appendChild(mk('b', '', n));
+          t.setAttribute('aria-label', a.title + (n ? ', ' + n + ' new' : ''));
+          grid.appendChild(t);
+        }
+        body.appendChild(grid);
+      }
+      body.scrollTop = keep; drawn = id;
+    },
+    notify(n) { if (n && n.urgent && n.text) toast('Your device', n.text); },
+  };
+  btn.onclick = () => (DEV.open ? deviceClose() : deviceShow('home'));
+  $('devClose').onclick = deviceClose;
+  backB.onclick = () => deviceShow('home');
+  addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
+  return skin;
+})();
+
+// ---- the shim: the old device object. addSection(id, title, render) becomes an app drawn by render(el); an app
+// already registered with deviceApp keeps its id (the native one wins). show('status') is the home screen. ----
+const device = {
+  addSection(id, title, render) {
+    const a = DEVICE_APPS.get(id); if (a && !a.legacy) return;
+    deviceApp({ id, title, order: 70, legacy: true, view: () => ({ title, blocks: [{ kind: 'dom', render }] }) });
+  },
+  open(id) { deviceShow(id || 'home'); },
+  close() { deviceClose(); },
+  show(id) { deviceShow(id === 'status' ? 'home' : id); },
+  refresh() { deviceRefresh(); },
+  get isOpen() { return DEV.open; },
+  get tab() { return DEV.app; },
+};
+
+// ---- the apps. Home: the time and what you're doing (the old Now section), then the grid. ----
+deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
+  const B = [{ kind: 'text', text: clockText(), mark: 'big' }];
+  const say = text => B.push({ kind: 'text', text });
+  say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
+  const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
+  if (P.carry.length) say('Carrying: ' + P.carry.join(', ') + '.');
+  if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
+  if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
+  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  return { title: 'Home', blocks: B };
+} });
+
+// Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
+deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
+  const n = SHIP.player.needs, fx = needEffects(n), B = [];
+  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '',
+    mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null })) });
+  for (const k of NEED_KEYS) if (fx.marks[k]) B.push({ kind: 'text', text: (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1], mark: fx.marks[k][0] });
+  const sp = playerSpeed();
+  if (sp !== 1) B.push({ kind: 'text', text: 'Walking at ' + Math.round(sp * 100) + '% speed.' });
+  return { title: 'Needs', blocks: B };
+} });
+
+// Jobs: yours, and the board in your pocket (take one, drop yours), as section 17's jobs section had it
+deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
+  act(verb, id) { if (verb === 'take') claimJob(id); else if (verb === 'drop') dropJob(id); },
+  view: () => {
+    const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
+    if (!jobsOn() || typeof jobsBoard !== 'function') { say('No jobs today.'); return { title: 'Jobs', blocks: B }; }
+    const board = jobsBoard(), mine = myJob();
+    if (mine) {
+      const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine);
+      say('Yours: ' + title + ', ' + where + '.', 'hot');
+      if (mine.kind === 'chore') {
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+        say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
+      } else if (m) {
+        const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
+        : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
+      B.push({ kind: 'buttons', items: [{ label: 'Drop it', action: { app: 'jobs', do: 'drop', arg: mine.id } }] });
+    }
+    const open = board.filter(j => !j.claimedBy), rows = [];
+    if (!open.length && !mine) say('Nothing on the board. Enjoy it while it lasts.');
+    for (const j of open.slice(0, 5)) {
+      const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+      rows.push({ text: (pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > PLAYER_TIER ? ' (tier ' + jobTier(j) + ')' : ''),
+        mark: pri === 'urgent' ? 'urgent' : null, button: canTake ? 'Take it' : null, action: canTake ? { app: 'jobs', do: 'take', arg: j.id } : null });
+    }
+    if (rows.length) B.push({ kind: 'list', rows });
+    if (open.length > 5) say('And ' + (open.length - 5) + ' more on the board in the Works bay.');
+    return { title: 'Jobs', blocks: B };
+  } });
+
+// Mail: newest first; tap one to read it (and mark it read)
+let mailOpen = null;                                     // the message shown in full
+deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mailUnread() || null,
+  act(verb, id) { if (verb === 'read') { mailOpen = mailOpen === id ? null : id; const m = SHIP.mail.find(x => x.id === id); if (m) m.read = true; } },
+  view: () => {
+    if (!SHIP.mail.length) return { title: 'Mail', blocks: [{ kind: 'text', text: 'No mail.' }] };
+    const B = [];
+    for (const m of SHIP.mail) {
+      B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '● ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
+        mark: m.read ? null : 'new', action: { app: 'mail', do: 'read', arg: m.id } }] });
+      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body });
+    }
+    return { title: 'Mail', blocks: B };
+  } });
+
+// Wallet: credits and your locker (0.28.10)
+deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () => {
+  const P = SHIP.player;
+  return { title: 'Wallet', blocks: [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }] };
+} });
+
+// =====================================================================
 // 15. PLAYER NEEDS & DEVICE
 // Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
 // met) in SHIP.player.needs. They drain with ship time and come back by
@@ -7506,8 +7750,8 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
 // bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
 // There is no fail state.
-// The device is a PLACEHOLDER for the user's design: a button opens a plain
-// panel of sections, added with device.addSection(id, title, render).
+// The device's screens are section 19's apps (0.35.0); device.addSection(id,
+// title, render) still works there as a shim.
 // Sits after 14 like 13 and 14 do; it only touches the player, the deck and
 // the HUD at run time (section 10 and on). Nothing here calls R().
 // Mail (0.28.10): mailSend({ at, from, subject, body }) from any section puts a
@@ -8228,93 +8472,7 @@ function cartLoad(s) {
 SHIP.player.cart = cartLoad(SAVED);
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.player.cart && { ...SHIP.player.cart }; });
 
-// ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
-// device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
-// jobs live in their own data; this only shows them. ----
-// Tabs (0.28.10): a section belongs to a tab (addSection's fourth argument, 'status' if left out); the Mail tab is
-// one section of its own, with the unread count on its tab and the device button.
-const device = (() => {
-  const el = document.getElementById('device'), body = document.getElementById('devBody'), btn = document.getElementById('devBtn'), sections = [];
-  const badge = document.getElementById('devMail'), TABS = [['status', 'Status'], ['mail', 'Mail']];
-  let back = null, tab = 'status';
-  const api = {
-    addSection(id, title, render, inTab = 'status') { const i = sections.findIndex(s => s.id === id); const s = { id, title, render, tab: inTab }; if (i < 0) sections.push(s); else sections[i] = s; api.refresh(); },
-    show(t) { tab = t; api.refresh(); },
-    get tab() { return tab; },
-    open() { back = document.activeElement; el.hidden = false; api.refresh(); document.getElementById('devClose').focus(); },
-    close() { el.hidden = true; if (back && back.focus) back.focus(); },
-    get isOpen() { return !el.hidden; },
-    refresh() {
-      const n = SHIP.player.needs;
-      btn.classList.toggle('low', NEED_KEYS.some(k => n[k] < SLOW_BELOW));
-      const un = mailUnread();
-      if (badge) { badge.hidden = !un; badge.textContent = un; }
-      if (el.hidden) return;
-      body.textContent = '';
-      const bar = document.createElement('div'); bar.className = 'tabs'; bar.setAttribute('role', 'tablist');
-      for (const [id, name] of TABS) {
-        const b = document.createElement('button'); b.className = id === tab ? 'on' : ''; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === tab);
-        b.textContent = name + (id === 'mail' && un ? ' (' + un + ')' : ''); b.onclick = () => api.show(id); bar.appendChild(b);
-      }
-      body.appendChild(bar);
-      for (const s of sections) {
-        if (s.tab !== tab) continue;
-        const box = document.createElement('section'), h = document.createElement('h3'), inner = document.createElement('div');
-        h.textContent = s.title; box.append(h, inner); body.appendChild(box);
-        try { s.render(inner); } catch (e) { inner.textContent = '(this section failed to draw)'; }
-      }
-    },
-  };
-  btn.onclick = () => (el.hidden ? api.open() : api.close());
-  document.getElementById('devClose').onclick = api.close;
-  addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) api.close(); });
-  return api;
-})();
-device.addSection('now', 'Now', el => {
-  const p = document.createElement('p'), q = document.createElement('p');
-  p.className = 'devtime'; p.textContent = clockText();
-  q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
-    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine();
-  el.append(p, q);
-  const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
-  if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
-  if (P.cart) { const r = document.createElement('p'); r.textContent = 'Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')); el.appendChild(r); }
-  if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) { const r = document.createElement('p'); r.textContent = 'Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.'; el.appendChild(r); }
-  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
-});
-device.addSection('wallet', 'Wallet', el => {      // credits and your locker (0.28.10)
-  const P = SHIP.player, p = document.createElement('p');
-  p.textContent = P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.');
-  el.appendChild(p);
-});
-let mailOpen = null;                                     // the message shown in full
-device.addSection('mail', 'Inbox', el => {
-  if (!SHIP.mail.length) { const p = document.createElement('p'); p.textContent = 'No mail.'; el.appendChild(p); return; }
-  for (const m of SHIP.mail) {
-    const b = document.createElement('button'), sm = document.createElement('small');
-    b.className = 'mail' + (m.read ? '' : ' new'); b.textContent = (m.read ? '' : '● ') + m.subject;
-    sm.textContent = m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440); b.appendChild(sm);
-    b.onclick = () => { mailOpen = mailOpen === m.id ? null : m.id; m.read = true; device.refresh(); };
-    el.appendChild(b);
-    if (mailOpen === m.id) { const p = document.createElement('p'); p.textContent = m.body; el.appendChild(p); }
-  }
-}, 'mail');
-device.addSection('needs', 'Needs', el => {
-  const n = SHIP.player.needs, fx = needEffects(n);
-  for (const k of NEED_KEYS) {
-    const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
-    row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
-    lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
-    const mk = fx.marks[k];                              // a bonus (up) or a penalty (down), with its reason below the bars
-    if (mk) { const em = document.createElement('em'); em.className = mk[0]; em.textContent = mk[0] === 'up' ? '▲' : '▼'; em.title = mk[1]; em.setAttribute('aria-label', mk[0] === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
-    row.setAttribute('role', 'meter'); row.setAttribute('aria-label', NEED_LABEL[k]); row.setAttribute('aria-valuenow', Math.round(n[k]));
-    row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
-    bar.appendChild(fill); row.append(lab, bar, num); el.appendChild(row);
-  }
-  for (const k of NEED_KEYS) if (fx.marks[k]) { const p = document.createElement('p'); p.className = 'fx ' + fx.marks[k][0]; p.textContent = (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1]; el.appendChild(p); }
-  const sp = playerSpeed();
-  if (sp !== 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
-});
+// ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // =====================================================================
 // 15b. PLAYER INTERACTIONS
