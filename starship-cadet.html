@@ -12126,6 +12126,10 @@ function eventFree(p, d, a, b) {
 // a person's events on day d: who goes is a hash per person, day and event; a clash keeps the higher prio (then the earlier)
 function eventPlan(p, d) {
   if (!EV_READY) return [];
+  if (p.rank === 'guest') {                              // a guest goes only on the days they're aboard (section 14's aboard, else their event's days)
+    if (typeof aboard === 'function') { if (!aboard(p, d)) return []; }
+    else if (p.event && p.arrive == null) { const g = eventGuestDays(p); if (!g || d < g[0] || d > g[1]) return []; }
+  }
   const out = [];
   for (const e of eventsOn(d)) {
     const ev = e.ev, ctx = e;
