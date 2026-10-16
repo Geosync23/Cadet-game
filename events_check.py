@@ -229,6 +229,38 @@ HOOKS = r"""(() => {
   return R;
 })()"""
 
+# the diplomatic visit (event 2, 0.34.16) on paper, twice: after the storm (logged, ending day 16) it's due from day 23;
+# run from day 23 to its end; phases, addresses, Mail, meetings, the farewell as a gathering, the guests' days, the
+# formal dinners' galley batch on days 3 and 5 only, and the greeting's cast with the Veyli names
+DIPLO = r"""(() => {
+  const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), draft: SHIP_EVENTS.diplomatic.draft };
+  SHIP_EVENTS.diplomatic.draft = false;                  // as it will be when it's switched on
+  const run = () => {
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
+    SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
+    const due = eventDueDay(), sd = due.day, a0 = ADDRESSES.length, mails = [], send = mailSend;
+    mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - sd + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+    eventStart('diplomatic', sd); EV_DAYS.clear();
+    const steps = [], batch = [];
+    for (let t = (sd - 1) * 1440; t <= (sd + 9) * 1440; t += 15) {
+      const o = eventAdvance(t, true); if (o.length) steps.push((Math.floor(t / 1440) + 1 - sd) + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
+      if (t % 1440 === 900) { const b = eventMod('galley', 'batch', t); batch.push((Math.floor(t / 1440) + 1 - sd) + ':' + (b ? b.meals : '-')); }
+    }
+    mailSend = send;
+    const R = { due, steps, batch, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
+      farewell: eventsOn(sd + 7).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + 7).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
+      guests: ['teshavi', 'kesrin'].map(id => { const g = typeof GUESTS !== 'undefined' && GUESTS.find(x => x.id === id); return g ? id + ':' + (eventGuestDays(g) || []).map(d => d - sd).join('-') : id + ':-'; }),
+      log: SHIP.eventLog.slice(1).map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
+    ADDRESSES.length = a0; return R;
+  };
+  const a = run(), b = run();
+  const sc = MEETING_SCRIPTS.veyliGreeting; dialogueShow('veyliGreeting', { id: 'veyliGreeting', who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], at: shipNow() });
+  const names = []; let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); names.push(v.choices ? '[choice]' : v.who); dialogueStep(v.choices ? 1 : undefined); }
+  SHIP_EVENTS.diplomatic.draft = keep.draft;
+  SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear();
+  return { a, same: JSON.stringify(a) === JSON.stringify(b), names };
+})()"""
+
 ok = True
 def fail(msg):
     global ok
@@ -387,6 +419,23 @@ with sync_playwright() as pw:
     if not H['routines'][0].startswith('doubleShift') or not H['routines'][1].startswith('doubleShift') or H['routines'][2] != 'rush' or H['routines'][3] != '': fail(f"eventRoutines: {H['routines']}")
     if H['guest'] != [11, 14] or H['noGuest'] is not None: fail(f"eventGuestDays: {H['guest']}")
     if not H['added'] or H['again'] or H['today'] or 'pell-show' not in H['oneOffOn'] or not H['oneOffGoing'] or (H['hostFree'] and not H['hostFlag']): fail('eventOneOff')
+
+    # 9. the diplomatic visit on paper
+    V = g.ev(DIPLO); a = V['a']
+    print('Diplomatic visit on paper: due', a['due'], '| the same twice:', V['same'])
+    [print('  day ' + x) for x in a['steps']]
+    print('  galley batch at 15:00 by day:', a['batch'], '| guests (days from the start):', a['guests'])
+    print('  addresses:', a['addr']); print('  Mail:', a['mails']); print('  meetings:', a['meets'])
+    print('  farewell:', a['farewell'], 'going', a['going'], '| result', a['log'], a['traces'])
+    print('  greeting speakers:', V['names'])
+    if not a['due'] or a['due']['id'] != 'diplomatic' or a['due']['day'] < 23 or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
+    want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
+    if [w for x in a['steps'] for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
+    bd = dict(x.split(':') for x in a['batch'])
+    if bd.get('3') != '10' or bd.get('5') != '10' or bd.get('4') != '-' or bd.get('1') != '-': fail(f"the formal dinners' batch: {a['batch']}")
+    if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
+    if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
+    if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
