@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.37.2
+   STARSHIP CADET: CSV Wren                            build 0.37.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.37.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.37.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8408,9 +8408,63 @@ function ixTheirs(it, at) {
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
   return [...PLACE_OF.values()].some(pl => rule[1].includes(pl.type) && (() => { const s = placeSpot(pl.id); return s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR; })());
 }
+// ---- chores without a machine (section 17's CHORES: a lamp, a vent, a delivery, an inspection round): tap something at
+// the next stop and do its minutes; jobStepDone (17) marks the stop. Parts first, from main storage, when it needs any.
+// After the last stop the work is done (17 sets workDone) and the job waits to be turned in at the job board (Pillar 3:
+// "take and turn in at the board"). Chores on a machine (calibrate, faults, filters) go through section 15's repair. ----
+const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
+  inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'] };
+Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
+const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && j.kind === 'chore' && !j.machine ? j : null; };
+function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
+// first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
+function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
+function ixChoreTap(it, at) {
+  const j = ixChore(); if (!j || j.workDone) return false;
+  const nx = ixNextStop(j); if (!nx) return false;
+  const { k, s: st } = nx, room = roomAt(...cellAt(at.x, at.z)), P = SHIP.player, o = { title: it.t, flavour: it.x, job: j.id, ixStep: k };
+  if (st.step === 'fetch') {                             // parts off the shelves in main storage, Deck 5
+    if (deckDef.num !== 5 || room !== 'r') return false;
+    const need = jobNeeds(j, { fitted: [] }, P.carry);
+    if (!need.length) { jobStepDone(j.id, k); ixGoalAt = -1; toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '.'); return true; }
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Put something back first.'); return true; }
+    const pl = jobPlaceNear('storage', 'r', at);
+    actStart('ixStop', pl ? pl.id : null, { ...o, ixFetch: true, pose: 'browse', after: 'You look for ' + partList(need) + '.' });
+    if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = PLAYER_ACTS.fetch ? PLAYER_ACTS.fetch.mins : 4; ACT.def.title = 'Main storage'; }
+    return true;
+  }
+  if (st.deck !== deckDef.num) return false;
+  const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+  if (!spot || !(ixDist(it, spot) < IX_NEAR + .6 || PLACE_OF.get(pid).room === room)) return false;
+  const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
+  // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
+  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
+  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
+  return true;
+}
+// a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
+function ixStopDone(A) {
+  const j = ixChore(), P = SHIP.player; if (!j || j.id !== A.o.job) return;
+  if (A.o.ixFetch) {
+    const got = [], none = [];
+    for (const p of jobNeeds(j, { fitted: [] }, P.carry)) { if (P.carry.length >= CARRY_MAX) break; if (takePart(p)) { P.carry.push(p); got.push(p); } else none.push(p); }
+    if (!got.length) { toast('Main storage', 'None on the shelves: ' + none.join(', ') + '. The next delivery is on Wednesday.'); return; }
+    jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
+    toast('Main storage', 'You take ' + partList(got) + '. Now ' + j.title.charAt(0).toLowerCase() + j.title.slice(1) + '.'); return;
+  }
+  const r = jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
+  if (!r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  if (r.done) {
+    for (const p of j.parts) { const i = P.carry.indexOf(p); if (i >= 0) P.carry.splice(i, 1); }   // the lamp went in: it's used
+    toast('Work done', j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.');
+    ixTip('turnin', 'Head back to the board to turn it in.');
+  } else toast(A.def.title, 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.');
+  device.refresh();
+}
 // the tap (section 15's playerTap, through PLAYER_TAPS): the job board, or a place to use
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
+  if (ixChoreTap(it, at)) return true;                   // a stop of the chore you hold
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
@@ -8464,7 +8518,7 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const doable = j => !!(j && (j.machine || j.kind === 'restock'));
+  const doable = j => !!(j && (j.machine || j.kind === 'restock' || j.kind === 'chore' && typeof jobStepDone === 'function'));
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
@@ -8478,7 +8532,11 @@ const ixBoard = (() => {
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id));
       sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : open.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.' : 'Nothing on the board. The Chief says it never lasts.';
-      if (mine) { const [title, where, state, pri] = jobCard(mine); row(mine.title || title, where + ' · ' + state, pri, button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); })); }
+      if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
+        const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
+        row(mine.title || title, where + ' · ' + (done ? 'done: turn it in' : state), pri, done ? button('Turn it in', () => api.turnIn(mine.id))
+          : button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }));
+      }
       for (const o of yours) {
         const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
         row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null);
@@ -8492,7 +8550,17 @@ const ixBoard = (() => {
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
       const j = myJob(), [title, where] = jobCard(j);
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', title + ', ' + where + '. Follow the marker' + (j.machine ? ': parts first, from main storage on Deck 5.' : '.'));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
+      ixTip('taken', 'Track it on your device; the marker shows the way.');
+      return true;
+    },
+    turnIn(id) {
+      const j = myJob(); if (!j || j.id !== id || !turnInJob(id)) { toast('Job board', 'Nothing to turn in.'); api.draw(); return false; }
+      // pay: section 15 pays machine jobs and cart runs when it finishes them; chores are paid here
+      const pay = j.kind === 'chore' && !j.machine && typeof JOB_PAY !== 'undefined' ? JOB_PAY : 0;
+      if (pay) SHIP.player.credits = (SHIP.player.credits || 0) + pay;
+      api.draw(); device.refresh(); ixGoalAt = -1;
+      toast('Job complete', (j.title || jobCard(j)[0]) + ': signed off on the board.' + (pay ? ' +' + pay + ' credits.' : '') + ' That\'s one more on your record.');
       return true;
     },
   };
@@ -8509,6 +8577,7 @@ function clearGoal() { IX_GOAL = null; }
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
   const j = myJob(); if (!j) return null;
+  if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
     const c = SHIP.player.cart && SHIP.player.cart.job === j.id ? SHIP.player.cart : null, step = !c ? 'cart' : c.stage === 'empty' ? 'load' : c.stage === 'full' ? 'unload' : 'return';
     const st = typeof jobStops === 'function' ? jobStops(j).find(x => x.step === step) : null, meals = j.cargo === 'meals';
@@ -8516,9 +8585,10 @@ function ixJobStep() {
     return st ? { deck: st.deck, place: st.places[0] || null, room: !st.places.length && step === 'load' ? /cargo/i : null, label: lab } : { deck: 5, room: /cargo/i, label: lab };
   }
   if (!j.machine) {                                      // a chore (section 17): parts first if it needs any, then its stops
-    const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), st = typeof jobStops === 'function' ? jobStops(j).filter(x => x.step !== 'fetch') : [];
-    if (need.length && need.some(p => SHIP.stores[p] > 0)) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
-    return st[0] ? { deck: st[0].deck, place: st[0].places[0] || null, label: j.title || 'Your job' } : null;
+    const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), nx = typeof jobStops === 'function' ? ixNextStop(j) : null;
+    if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
+    const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
+    return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
@@ -8533,6 +8603,7 @@ function ixJobStep() {
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
+  if (g.item) { const it = ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item); if (it) { it.hit.getWorldPosition(ixP); return { x: ixP.x, z: ixP.z }; } }
   if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
   if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
   if (g.room) {
@@ -8546,14 +8617,31 @@ function ixGoalWorld(g) {
   }
   return null;
 }
+// the first tips that depend on where you are (once a second at most): near the job board; at your job's machine
+let ixTipAt = 0, ixStopLast = null;
+function ixTips() {
+  if (typeof tipShow !== 'function' || typeof deckDef === 'undefined' || !deckDef) return;
+  const now = performance.now(); if (now - ixTipAt < 1000) return; ixTipAt = now;
+  const p = player.obj.position, j = typeof myJob === 'function' ? myJob() : null;
+  if (deckDef.num === 5) { const b = ITEMS.find(i => /job board/i.test(i.t)); if (b) { b.hit.getWorldPosition(ixP); if (Math.hypot(ixP.x - p.x, ixP.z - p.z) < 3.5) ixTip('board', 'Take jobs here, and turn them in here when they\'re done.'); } }
+  if (j && j.machine && !j.workDone && typeof machineById === 'function') {
+    const m = machineById(j.machine), pid = m && m.deck === deckDef.num && typeof panelPlace === 'function' ? panelPlace(m.id) : null, s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+    if (s && Math.hypot(s.x - p.x, s.z - p.z) < 2.5) ixTip('machine', 'Tap the machine to inspect. You may need parts from storage or the machine shop.');
+  }
+  if (j && j.workDone) ixTip('turnin', 'Head back to the board to turn it in.');
+}
 const ixV = new THREE.Vector3();
 let ixLast = '';
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
+  // a chore's stop is done once its minutes are in: seen as it steps out, or (if it ended between our frames) once it's gone
+  const L = ixStopLast; ixStopLast = ACT && ACT.kind === 'ixStop' ? ACT : null;
+  for (const A of [ACT, L]) if (A && A.kind === 'ixStop' && !A.o.ixDone && (A.phase === 'out' || A !== ACT && A.done >= A.def.mins)) { A.o.ixDone = true; ixStopDone(A); }
+  ixTips();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
-  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
+  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = IX_GOAL || ixJobGoal;
   if (!g) { if (!el.hidden) el.hidden = true; return; }
@@ -8823,7 +8911,12 @@ function galleyStep(S, m, st) {
   // cart sets off from the Deck 5 hold, and when it arrives; the meals land here, in replays and live alike
   if (carts) {
     if (!S.carts) S.carts = [];
-    if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]); }
+    // meals already on their way (a run held for you, or not landed yet) count as in the cold store, so a run waiting
+    // on the board doesn't set off another every hour. In replays the carts land within the hour, so it's 0 there
+    if (md % 60 === 0) {
+      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming), { replay: !!st });
+      if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]);
+    }
     // a run that's yours (section 17's cartWaiting(hour): on the board for you, or yours and not unloaded yet) waits
     // past its arriveAt: its meals land when you unload at the cold store (galleyCartLand). Live only; replays never wait
     const held = c => !st && c[2] !== undefined && typeof cartWaiting === 'function' && cartWaiting(c[2]);
@@ -9806,6 +9899,10 @@ function jobRun(p, j, t, makeMin) {
 // a job is finished: its machine put right, or its cargo moved
 function jobFinish(j, t, by) {
   j.status = 'done'; j.doneAt = t; j.doneBy = by;
+  if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
+}
+// what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
+function jobEffect(j, t, by) {
   if (j.kind === 'chore') { choreDone(j, t); return; }
   if (j.machine) {
     const s = SHIP.machines[j.machine];
@@ -9823,7 +9920,7 @@ function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && !j.workDone && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day + deliveryLate(d) && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
@@ -9847,6 +9944,8 @@ function jobsHour(h) {
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
+  // a food run nobody took goes unseen (its meals landed long ago, in the galley's books): before the claims
+  for (const j of jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
@@ -9870,8 +9969,6 @@ function jobsHour(h) {
     }
   }
   suppliesHour(t, d);
-  // a food run nobody took goes unseen (its meals landed long ago, in the galley's books)
-  for (const j of SHIP.jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -9987,6 +10084,9 @@ function cartPost() {
     if (SHIP.jobs.some(j => j.id === id)) continue;
     const j = { id, machine: null, deck: 3, kind: 'restock', cargo: 'meals', meals: r.meals, urgency: r.urgent ? 2 : 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', lands: r.arriveAt };
     SHIP.jobs.push(j);
+    // a run set while time jumped (sleep, a skip) and only reaching the list now has already arrived in the galley's
+    // books: it's history, never a job for anyone now (0.33.20: three stale runs once took both carts at once)
+    if (r.arriveAt <= shipNow()) { j.status = 'done'; j.doneAt = r.arriveAt; j.doneBy = null; MACH_REV++; continue; }
     const md = t % 1440;
     if (!r.urgent && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { MACH_REV++; continue; }   // left for you first
     const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
@@ -10002,13 +10102,13 @@ function cartPost() {
   }
 }
 // the galley's question (0.33.19, with the galley engineer's 0.29.13): is hour h's food run still on its way? True
-// while it's on the board waiting for you, or yours and not yet unloaded; then the galley holds its meals past
-// arriveAt. False once the crew take it, it's done or it goes unseen (the meals land). Live play only: never in replays
-function cartWaiting(h) {
-  if (CART_PENDING.length && MACH_HOUR !== null) cartPost();
-  const j = SHIP.jobs.find(x => x.id === 'restock-meals@' + h);
-  return !!j && (j.status === 'open' || (j.status === 'claimed' && j.claimedBy === 'you'));
-}
+// only while it's yours and not yet unloaded; then the galley holds its meals past arriveAt. A run just sitting on the
+// board lands at arriveAt as in the galley's replays (0.33.20: holding those too kept the cold store low, so every
+// hour ordered another run and the hold ran dry). Live play only: never in replays
+const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you' && !x.workDone) || null;
+function cartWaiting(h) { return !!yourCartRun(h); }
+// (meals on their way, yours included, are counted by the galley when it asks cartClaim: section 16's 0.29.17; the
+// galley owns the cold store's accounting, so section 17 doesn't add them too: 0.33.22)
 // where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
 // first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
 // test copies that want the plain plans.
@@ -10043,7 +10143,33 @@ function returnPart(part) { if (typeof part !== 'string' || !part) return false;
 function touchJob(id) { const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return false; j.touched = shipNow(); return true; }
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
-  if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+  if (!j) return false;
+  if (TURN_IN) { if (!j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); } }   // done, awaiting turn-in
+  else jobFinish(j, shipNow(), 'you');
+  machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+}
+// turning jobs in at the board (0.33.23, for the interactions engineer and plans/pillar3-plan.md "Jobs: take and turn in
+// at the board"). Your job's stops are ticked off with jobStepDone; after the last one (or finishJob) its work is done:
+// the machine is put right, the lamp works, the meals land (j.workDone, the minute). It stays yours (no 12-hour
+// lapse), off the board, and myJob() still gives it, until you turn it in at a job board (turnInJob), which completes
+// it. TURN_IN off (for now): finishJob completes your job at once, as before, so section 15 needn't change; on:
+// finishJob only does the work, and turnInJob completes it. The lead turns it on when the board's Turn in lands.
+let TURN_IN = false;
+// jobStepDone(id, stepIndex) -> { ok, left, done }: a stop of your job done (stepIndex into jobStops(j), fetch
+// included); left: stops still to do; done: its work is done (after the last stop), awaiting turn-in
+function jobStepDone(id, k) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
+  const n = j ? jobStops(j).length : 0;
+  if (!j || !(k >= 0 && k < n)) return { ok: false, left: n, done: !!(j && j.workDone) };
+  j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
+  const left = n - j.stepsDone.length;
+  if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
+  MACH_REV++; return { ok: true, left, done: !!j.workDone };
+}
+// turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
+function turnInJob(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed' && x.workDone);
+  if (!j) return false; jobFinish(j, shipNow(), 'you'); MACH_REV++; return true;
 }
 
 // ---- the device's jobs section (0.33.9): the board in your pocket. The device itself is section 15's placeholder
@@ -10054,6 +10180,11 @@ function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status 
 // first free one best], deck }]. A machine job: parts from the shelves, then its panel. A cart run: a cart from a
 // dock, load in the hold, unload at the cold store (or the shelves), the cart back. Places not built yet are left out.
 function jobStops(j) {
+  const out = jobStopsOf(j), done = new Set((j && j.stepsDone) || []);
+  out.forEach((x, k) => { x.done = done.has(k) || !!(j && j.workDone); });
+  return out;
+}
+function jobStopsOf(j) {
   const known = new Set(Object.values(DECKS).flatMap(d => (d.places || []).map(p => p.id))), st = (step, ids, deck) => ({ step, places: ids.filter(id => known.has(id)), deck });
   if (!j) return [];
   if (j.kind === 'chore') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins })));

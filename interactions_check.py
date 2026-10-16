@@ -137,6 +137,61 @@ with sync_playwright() as pw:
         took = g.ev("claimJob('ixcart@1')"); g.step(3); s = st()
         check(took and s['goal'] and 'Cart bay' in s['goal'], f'a cart run: take a cart from the Cart bay ({took}, {s["goal"]})')
         g.ev("dropJob('ixcart@1')"); g.step(3)
+    # chores without a machine (0.37.3): fetch, each stop, work done, turn it in at the board
+    if g.ev("typeof jobStepDone === 'function' && typeof CHORES !== 'undefined'"):
+        print('== chores')
+        g.ev("TURN_IN = true")
+        # stand by the thing nearest a place and tap it, the way a player would
+        TAPAT = r"""(({ place }) => { const s = placeSpot(place); if (!s) return 'no spot';
+          const it = ITEMS.filter(i => !i.lift && !i.see).map(i => [i, ixDist(i, s)]).sort((a, b) => a[1] - b[1])[0][0];
+          it.hit.getWorldPosition(_wp); const g = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...g)); player.stop();
+          return [it.t, playerTap(it, _wp.clone(), _wp.clone())]; })"""
+        def walk_stop(label):
+            for k in range(200):
+                g.step(30); s = st()
+                if not s['act']: break
+            return s
+        for kind in ['lamp', 'delivery']:
+            job = g.ev(f"""(() => {{ const c = choreWhere('{kind}')[0]; if (!c) return null; const C = CHORES['{kind}'], t = shipNow();
+              (C.parts || []).forEach(p => SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 3));
+              const j = {{ id: 'ixchore-{kind}@1', machine: null, deck: c.deck, room: c.room, kind: 'chore', chore: '{kind}', target: c.key, title: c.title, bring: c.bring || null, tier: 1,
+                stops: c.stops.map(x => ({{ ...x }})), urgency: 0, posted: t, found: t, claimedBy: null, parts: C.parts.slice(), status: 'open' }};
+              SHIP.jobs.push(j); MACH_REV++; return [j.id, j.title, jobStops(j).map(x => x.step + '@' + x.deck + ':' + (x.places[0] || '-'))]; }})()""")
+            if not check(job, f'a {kind} chore to test'): continue
+            print('  ', job)
+            g.ev("goToDeck(5)"); g.step(3)
+            took = g.ev(f"claimJob('{job[0]}')"); g.step(3)
+            check(took, f'{kind}: taken')
+            stops = g.ev(f"jobStops(myJob()).map(x => [x.step, x.deck, x.places[0] || null])")
+            for i, (step, deck, place) in enumerate(stops):
+                s = st(); print('    goal before', step, ':', s['goal'])
+                check(s['goal'] and ('storage' in s['goal'] if step == 'fetch' else (f'Deck {deck}' in s['goal'] if g.ev('deckDef.num') != deck else True)), f'{kind} {step}: the pointer leads there ({s["goal"]})')
+                if g.ev('deckDef.num') != deck: g.ev(f"goToDeck({deck})"); g.step(3)
+                if step == 'fetch':
+                    r = g.ev(f"({TAP})({{title: ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'r' && !/tarp/i.test(i.t)).t}})")
+                else:
+                    r = g.ev(f"({TAPAT})({json.dumps({'place': place})})")
+                g.step(2); s0 = st()
+                for tries in range(5):                       # a crew member on the walk-to tile: try again in a little while
+                    if s0['act'] or 'in the way' not in s0['toast']: break
+                    g.step(120); r = g.ev(f"({TAPAT})({json.dumps({'place': place})})") if step != 'fetch' else r; g.step(2); s0 = st()
+                check(s0['act'] and s0['act'][0] == 'ixStop', f'{kind} {step}: the stop starts ({r}, {s0["act"]}, {s0["toast"][:80]})')
+                s = walk_stop(step); g.step(3); s = st()
+                done = g.ev(f"jobStops(myJob() || {{}}).map(x => !!x.done)") if g.ev("!!myJob()") else []
+                check(len(done) > i and done[i], f'{kind} {step}: marked done ({done}, {s["toast"][:80]})')
+            s = st()
+            check(g.ev("!!(myJob() && myJob().workDone)") and s['goal'] and 'turn it in' in s['goal'].lower(), f'{kind}: work done, the pointer says turn it in ({s["goal"]})')
+            check(not g.ev("SHIP.player.carry.length"), f'{kind}: the parts were used')
+            g.ev("goToDeck(5)"); g.step(3)
+            cr = g.ev("SHIP.player.credits || 0")
+            r = tap('Job board'); g.step(150)
+            btn = g.ev("(document.querySelector('#ixBoardL .ixjob button') || {}).textContent")
+            check(btn == 'Turn it in', f'{kind}: the board offers Turn it in ({btn})')
+            g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
+            check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
+            check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
+            g.ev("ixBoard.close()")
+        g.ev("TURN_IN = false")
     # real machines: their taps are section 15's machineTap (machineUse), never one of ours
     over = []
     for n in g.ev("Object.keys(DECKS).map(Number)"):

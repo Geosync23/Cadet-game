@@ -16,6 +16,8 @@
 #   pure and in step with shipEffectsAt
 #   tapping a machine, Stores' Mail and tier locks (0.33.18): see 5d below
 #   chores and openJobs (0.33.19): see 5e below
+#   turning jobs in at the board (0.33.23): jobStepDone, the work-done state, turnInJob (5g)
+#   food runs in live play (0.33.21): the crew take every food run soon after its wait (5f)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -316,7 +318,7 @@ with sync_playwright() as pw:
       const b = live(2 * 1440 + 13 * 60, 200), leftThen = !!b && !b.claimedBy;
       setShipNow(2 * 1440 + 14 * 60); machinesNow(); const crewTook = !!b && !!b.claimedBy && b.claimedBy !== 'you' && b.start >= b.found + 60;
       const c = live(2 * 1440 + 15 * 60, 50), urgentNow = !!c && !!c.claimedBy && c.claimedBy !== 'you';
-      const waitingOk = w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: held for you, released once done or the crew take it
+      const waitingOk = !w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: only while it's yours (0.33.20), released once done
       return { waits, took, fin, stops, leftThen, crewTook, urgentNow, waitingOk };
     })()""")
     print(f"Cart run as your job: {cr}")
@@ -397,6 +399,48 @@ with sync_playwright() as pw:
     print(f"  took '{ch['c']}': {ch['took']}, stops {ch['stops']}, finished {ch['fin']}, did its work {ch['helped']}")
     if len(ch['kinds']) < 7 or ch['badStop'] or ch['badTier'] or ch['shapeBad'] or len(ch['openKinds']) < 5: fail('chores and openJobs')
     if not (ch['took'] and ch['fin'] and ch['helped']): fail('taking and finishing a chore')
+
+    # 5g. turning jobs in (0.33.23, with TURN_IN on for the test): a chore's stops ticked off one by one with
+    # jobStepDone; after the last its work is done (the effect happens) but it stays yours, past the 12-hour lapse and
+    # off openJobs, until turnInJob completes it; finishJob only does the work. Off again afterwards
+    ti = g.ev("""(() => {
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 1440 + 180); machinesNow(); TURN_IN = true;
+      let c = null; for (let n = 0; n < 72 && !(c = openJobs().find(x => x.kind === 'delivery' || x.kind === 'lamp' || x.kind === 'vent' || x.kind === 'round')); n++) { setShipNow(shipNow() + 60); machinesNow(); }
+      if (!c) { TURN_IN = false; return { none: true }; }
+      claimJob(c.id); const j = SHIP.jobs.find(x => x.id === c.id), n = jobStops(j).length, steps = [];
+      for (let k = 0; k < n; k++) steps.push(jobStepDone(c.id, k));
+      const marked = jobStops(j).every(x => x.done), workDone = !!j.workDone, mine = myJob() && myJob().id === c.id;
+      setShipNow(shipNow() + 13 * 60); machinesNow();
+      const kept = j.claimedBy === 'you' && j.status === 'claimed', offBoard = !openJobs().some(x => x.id === c.id), bad = jobStepDone(c.id, 99).ok === false;
+      const tin = turnInJob(c.id), done = j.status === 'done' && j.doneBy === 'you', again = turnInJob(c.id);
+      // a machine job: finishJob does the work, turnInJob completes it
+      let m = null; for (let n2 = 0; n2 < 48 && !(m = openJobs().find(x => x.kind === 'service')); n2++) { setShipNow(shipNow() + 60); machinesNow(); }
+      let mOk = null; if (m) { claimJob(m.id); const mj = SHIP.jobs.find(x => x.id === m.id); finishJob(m.id); const fixed = SHIP.machines[mj.machine].cond >= 99 && mj.status === 'claimed' && !!mj.workDone; mOk = fixed && turnInJob(m.id) && mj.status === 'done'; }
+      TURN_IN = false; setShipNow(t0);
+      return { kind: c.kind, n, left: steps.map(x => x.left).join(','), lastDone: steps[n - 1].done, marked, workDone, mine, kept, offBoard, bad, tin, done, again, mOk };
+    })()""")
+    print(f"Turning jobs in: {ti}")
+    if ti.get('none') or not all(ti[k] for k in ('lastDone', 'marked', 'workDone', 'mine', 'kept', 'offBoard', 'bad', 'tin', 'done')) or ti['again'] or ti['mOk'] is False: fail('turning jobs in')
+
+    # 5f. food runs in live play (0.33.21): the galley stepping live and the job list together for six days, nobody
+    # pushing carts for you: every food run is taken by the crew (or goes unseen) within 2 hours of its hour's wait,
+    # never sits open for days; the cold store never runs empty and the hold isn't drained by repeat orders
+    fr = g.ev("""(() => {
+      if (typeof galleyAdvance !== 'function' || !cartsCarryFood || typeof FOOD === 'undefined' || FOOD.restock !== 'carts') return { skipped: true };
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.galley = null; setShipNow(t0); machinesNow(); galleyAdvance(t0);
+      let late = [], coldMin = 1e9, holdMin = 1e9, runs = new Set(), claimed = new Set();
+      for (let t = t0 + 1440; t <= t0 + 7 * 1440; t += 10) {
+        setShipNow(t); galleyAdvance(t); machinesNow();
+        coldMin = Math.min(coldMin, SHIP.galley.cold.meals); if (SHIP.hold.meals !== undefined) holdMin = Math.min(holdMin, SHIP.hold.meals);
+        for (const j of SHIP.jobs) if (j.cargo === 'meals') { runs.add(j.id); if (j.claimedBy && j.claimedBy !== 'you') claimed.add(j.id); if (j.status === 'open' && t > leaveEnd(j) + 120) late.push(j.id + ' open at ' + hhmm(t % 1440) + ' day ' + SHIP.time.day); }
+      }
+      setShipNow(t0); SHIP.galley = null;
+      return { runs: runs.size, crew: claimed.size, late: [...new Set(late)].slice(0, 4), coldMin, holdMin };
+    })()""")
+    print(f"Food runs in live play, 6 days: {fr}")
+    if not fr.get('skipped') and (fr['late'] or fr['coldMin'] <= 0 or fr['holdMin'] < 100 or fr['runs'] < 5 or fr['runs'] > 30 or fr['crew'] < fr['runs'] / 2): fail('food runs in live play')
 
     # 6. the save
     rt = g.ev("""(() => {
