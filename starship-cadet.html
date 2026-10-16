@@ -4736,11 +4736,14 @@ Object.assign(WALL_KIT, {
     p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
   },
 });
-// a bedroom's plate (0.32.3, answer 27): an officer's name and rank from the roster (read at dress time, so section 9 is in);
-// rooms without an officer (the Envoy, the visitors) keep the plate's own text
+// a bedroom's plate (0.32.3, answer 27): name over rank from the roster (read at dress time, so section 9 is in). The crew
+// designer's `plate: { rank, name }` (0.16.6) wins where a roster entry has one; before that, the rank and name are worked out
+// here. Rooms with nobody's plate (the visitors' rooms) keep the plate's own text.
 const D2_RANK = { captain: 'Captain', xo: 'Executive Officer', chief: 'Department Chief', senior: 'Senior Officer' };
 function d2Plate(room, text) {
-  const p = typeof ROSTER !== 'undefined' && ROSTER.find(q => q.bed === '2-' + room);
+  const all = typeof ROSTER !== 'undefined' ? ROSTER.concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []) : [];
+  const p = all.find(q => q.bed === '2-' + room);
+  if (p && p.plate && p.plate.name) return { text: p.plate.name, sub: p.plate.rank };
   return p && D2_RANK[p.rank] ? { text: p.name.replace(/^(Captain|Commander|Chief) /, ''), sub: D2_RANK[p.rank] } : { text };
 }
 // bedrooms (0.9.2): shared materials only, so fifteen furnished rooms merge into a handful of draw calls
@@ -5239,7 +5242,7 @@ Object.assign(KIT, {
     return { w: .9, d: .5, tall: true };
   },
   // the light relay rack: rows of relays with a lamp each, ticking over at dusk and dawn
-  relayRack(g) {
+  lightRelayRack(g) {
     box(.8, 1.8, .5, M.slateDark, 0, .9, 0, g);
     for (let r = 0; r < 8; r++) { box(.66, .14, .04, M.slate, 0, .3 + r * .19, .26, g); for (let q = 0; q < 4; q++) box(.04, .04, .02, (r + q) % 5 ? D2.led : D2.amber, -.24 + q * .16, .3 + r * .19, .29, g); }
     return { w: .8, d: .5, tall: true };
@@ -5251,7 +5254,7 @@ Object.assign(KIT, {
     return { w: .6, d: .2 };
   },
   // cable trays along a wall at knee and shoulder height, the array's cables in them: the crawl's low ceiling
-  cableTray(g, o = {}) {
+  crawlCableTray(g, o = {}) {
     const w = o.w || 2;
     for (const y of [.45, 1.35]) {
       box(w, .03, .32, D2.steel, 0, y, 0, g); box(w, .1, .02, D2.steel, 0, y + .05, .16, g);
@@ -5758,10 +5761,10 @@ DECKS[2] = {
     place('g', 'conduits', 1.8, 8.5, 'e');
     // the utility closet: Deck 2's breaker cabinet and the light relays, conduits at both ends
     place('u', 'powerCabinet', 1.65, 1.5, 'e', { it: IT('Breaker cabinet', 'Every circuit on Deck 2, labelled in two hands. One breaker is taped over: CAPTAIN\'S KETTLE. DO NOT.') });
-    place('u', 'relayRack', 1.65, 3.5, 'e', { it: IT('Light relays', 'They click over at dusk and dawn and run every lamp on the deck. A lazy one leaves a corridor flickering.') });
+    place('u', 'lightRelayRack', 1.65, 3.5, 'e', { it: IT('Light relays', 'They click over at dusk and dawn and run every lamp on the deck. A lazy one leaves a corridor flickering.') });
     for (const z of [.5, 4.5]) place('u', 'conduits', 1.8, z, 'e');
     // the cable crawl: trays along the hull carrying the array's cables aft, the repeater at one end, the feed at the other
-    place('n', 'cableTray', 3.5, .73, 's', { w: 5.0 });
+    place('n', 'crawlCableTray', 3.5, .73, 's', { w: 5.0 });
     place('n', 'signalRepeater', .35, .5, 'w', { it: IT('Signal repeater', 'Lifts the array\'s signal for the long run aft to the comms room. Warm to the touch, and humming.') });
     place('n', 'arrayFeed', 6.7, .5, 'e', { it: IT('Array feed', 'Where the dish\'s cables come through the bulkhead and split for the racks. Each one labelled, in Dr. Sato\'s handwriting, naturally.') });
     // lived-in touches (0.32.3): a sign in the gas plant, the calendar nook in the closet, a sign and a forgotten mug in the crawl
