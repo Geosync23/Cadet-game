@@ -14,6 +14,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
+**Closing sessions (the user, 2026-10-16 ~22:30):** the lead may archive finished, idle helpers whose work and handover notes are pushed (`.claude/settings.json` allows it). Archived sessions are kept and can be reopened.
+
 **Helper limit raised (the user, 2026-10-16 ~21:33, after upgrading their plan):** up to about a dozen helpers working at once, plus extra check runners, to finish faster.
 
 **New tweaks from the user (2026-10-16 ~21:10):** zoom-out limit (performance engineer, last job), bathroom need + feedback + progress bars (player engineer 2), a garden that grows food for the galley (galley engineer leads; sim, crew designer, systems help). The user also allowed extra check-runner sessions to speed up testing.
@@ -61,7 +63,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_012J4ctzJgFRBaUFU5sJvega | Player engineer 2 (hired 2026-10-16 ~21:14): bathroom need, need-fill feedback, progress bars for timed activities (section 15) | `claude/player-needs` | 0.28.19+ | Active | — |
 | session_01BQjtEzvKXuvPZNzGRRRwpZ | Player engineer (new, answers pass): long days, bed skips night, need bonuses, Mail, social, shopping, crouch (section 15) | `claude/player-needs` | 0.28.9+ | Retired 2026-10-16 ~21:15 (~57%; handover current at c7aab82/bf5b5af) | `plans/handover-player.md` |
 | session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer: player needs, device, job loop, save (section 15) | `claude/player-needs` | 0.28.x | Retired 2026-10-16 (~560k) | `plans/handover-player.md` |
-| session_01AVGVnj4Q1jFmVoD6xi5asT | Galley engineer (new, answers pass): spoilage, menus, queues, birthday cakes (section 16) | `claude/galley-food` | 0.29.11+ | Working | `plans/handover-galley.md` |
+| session_01AVGVnj4Q1jFmVoD6xi5asT | Galley engineer (new, answers pass): spoilage, menus, queues, birthday cakes (section 16) | `claude/galley-food` | 0.29.11–0.29.25 | Standby (~65%; the garden done from the galley side, 531c7d9; no new work) | `plans/handover-galley.md` |
 | session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer: cooking, servery, food by cart (section 16) | `claude/galley-food` | 0.29.x | Retired 2026-10-16 (~490k) | `plans/handover-galley.md` |
 | session_01EhJv6dqovqhQyruMveFuRR | Command architect (new, answers pass): Deck 2 plates, observatory night, window seats, touches, wear | `claude/deck2-command` | 0.32.3+ | Retired 2026-10-16 (Pillar 3 restaffing) | `plans/handover-command-architect.md` |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: Deck 2 | `claude/deck2-command` | 0.19, 0.32.x | Retired 2026-10-16 (~670k) | `plans/handover-command-architect.md` |
@@ -71,7 +73,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_014TpEMbWarRFJM8BHC9WM8c | Device engineer (Pillar 3, new): the device's two layers, the old-school CRT skin, apps, tips look, calendar reminders (section 19, C1/C2/C11/C13) | `claude/device` | 0.35.0–0.35.7 | Retired 2026-10-16 (memory ~410k; final 985ff28) | `plans/handover-device.md` |
 | session_01LGbDXmiNuSmR6dPGjRj8mX | Device engineer 2 (hired 2026-10-16 ~15:48): Ship news, people on Maps, Calendar appointments and group meetings, Quiet off shift, phone review (section 19) | `claude/device` | 0.35.8+ | Active | — |
 | session_01DzZ669spGpdSdVMYzUog2N | Social engineer (Pillar 3, new): relationships, affinity, news, chat cards, favours, crew seeking you out (section 20, C4/C5) | `claude/social` | 0.36.x | Working (wave 1) | — |
-| session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Done (idle; to be closed; events paused by the user) | `plans/handover-events.md` |
+| session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Archived 2026-10-16 ~22:30 (done; events paused by the user) | `plans/handover-events.md` |
 | session_014PT5L2QxXYoVhqFP7qhj3y | Deck architect (Pillar 3, all six decks; replaces the bridge, command and Deck 6 architects): gather places, event dressing and traces, ready room, gym kit (C9) | `claude/decks-p3` | 0.38.x | Standby (0.38.3 done) | the three architect handovers |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
