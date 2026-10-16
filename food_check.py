@@ -13,6 +13,10 @@
 #   hover carts (B3): with FOOD.restock 'carts', a week fed by cartClaim never runs short; two days with none does
 #   with an empty cold store, people wait at the servery, each in their own spot (galleyHold)
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
+#   spoilage (0.29.11): nothing spoils with the chiller fine; with it broken (a stand-in shipEffectsAt), food is binned
+#   at the 09:00 and 21:00 checks, the bin shows by the dish pit, Mail gets a note, and a week still never runs short
+#   the menu (0.29.11): Friday's treat has a pudding, Sunday's dinner is the crew's top vote, Wednesday's favourite isn't
+#   on the week's menu already, the servery and the menu board say what's on
 # Setup and environment as for cadet_test.py.
 # Run:  python3 food_check.py BUILD.html [DAY] [DAYS]     (DAY defaults to 1, DAYS to 7)
 import sys, json
@@ -44,7 +48,7 @@ with sync_playwright() as pw:
         d, r = st['day'], st['ready']
         print(f"Day {d} ({g.ev(f'WEEKDAYS[weekday({d})]')}): came to eat {st['ate']}, hot {st['eaten']}, grab {st['grabbed']}; ready at 06:00 {r['breakfast']['portions']}"
               f" (+{r['breakfast']['grab']} grab), at 17:00 {r['dinner']['portions']}; waited {st['waited']}, longest {st['maxWait']} min {st['maxWho']};"
-              f" cooked {st['cooked']}, baked {st['baked']}, wasted {st['waste']}; cold store low {st['coldMin']}, end {st['end']['cold']}")
+              f" cooked {st['cooked']}, baked {st['baked']}, wasted {st['waste']}, spoiled {st['spoiled']}; cold store low {st['coldMin']}, end {st['end']['cold']}")
         print('  staff:', ', '.join(f"{s['id']} {s['role']}" + (f" up {s['wake'] // 60:02d}:{s['wake'] % 60:02d}" if s['wake'] is not None else '') for s in st['staff']))
         for meal in ('breakfast', 'dinner'):
             if r[meal]['portions'] < READY_MIN: fail(f"day {d}: only {r[meal]['portions']} portions ready when {meal} opened")
@@ -54,6 +58,7 @@ with sync_playwright() as pw:
         if st['ate'] != st['eaten'] + st['grabbed']: fail(f"day {d}: {st['ate']} came to eat, {st['eaten'] + st['grabbed']} got food")
         if st['end']['dirty'] or st['end']['inUse'] or st['end']['wait']: fail(f"day {d}: at midnight {st['end']}")
         if st['coldOut']: fail(f"day {d}: the cold store ran dry ({st['coldOut']} times)")
+        if st['spoiled']: fail(f"day {d}: {st['spoiled']} meals spoiled with the chiller as new")
         roles = [s['role'] for s in st['staff']]
         chef = [s for s in st['staff'] if s['role'] == 'chef']
         if not chef or chef[0]['wake'] > 285 or chef[0]['first'] > 300: fail(f"day {d}: no chef up by 04:45 and cooking by 05:00: {chef}")
@@ -123,6 +128,37 @@ with sync_playwright() as pw:
     print('  no carts on days 2 and 3:', carts['missed'])
     if any(w['coldOut'] or w['maxWait'] > WAIT_MAX or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
+
+    # 4c. spoilage: a broken chiller (shipEffectsAt's spoil at 2, its worst) for a week
+    sp = g.ev(f"""(() => {{ window.__keepFx = shipEffectsAt; window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx(deck, t), spoil: 2 }})");
+      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait }}));
+      const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
+      SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
+      const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
+      window.__sc("shipEffectsAt = window.__keepFx; mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+    print('Chiller broken for a week, spoiled a day:', [w['spoiled'] for w in sp['week']], 'cold store low:', [w['coldMin'] for w in sp['week']])
+    print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
+    print('  mail:', sp['mail'][:2])
+    if not all(w['spoiled'] > 0 for w in sp['week']): fail('spoilage: a broken chiller spoiled nothing on some day')
+    if any(w['coldOut'] or w['maxWait'] > WAIT_MAX for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
+    if not sp['bin'] or sp['bags'] < 1: fail(f"spoilage: nothing in the bin by the dish pit at 09:30: {sp}")
+    if not sp['mail'] or 'binned' not in sp['mail'][0]: fail('spoilage: no Mail about the binned food')
+
+    # 4d. the menu: two weeks
+    mn = g.ev(f"""(() => {{ const out = [];
+      for (let d = {DAY}; d < {DAY} + 14; d++) {{ const M = galleyMenu(d), wk = [...Array(7)].map((_, k) => d - weekday(d) + k).filter(x => x !== d && weekday(x) !== 6).map(x => galleyMenu(x).dinner);
+        out.push({{ d, wd: weekday(d), b: M.breakfast, dinner: M.dinner, note: M.note, pudding: M.pudding || null, top: M.votes ? M.votes[0] : null, max: M.votes ? Math.max(...M.votes.map(v => v[1])) : 0, clash: weekday(d) === 2 && wk.includes(M.dinner) }}); }}
+      return out; }})()""")
+    for x in mn: print(f"  {x['d']}: {x['b']} / {x['dinner']}" + (f" ({x['note']})" if x['note'] else ''))
+    for x in mn:
+        if '.' in x['dinner'] or '.' in x['b']: fail(f"menu: a full stop in a dish name: {x}")
+        if x['wd'] == 4 and not x['pudding']: fail(f"menu: Friday {x['d']} has no pudding")
+        if x['wd'] == 6 and (not x['top'] or x['top'][0] != x['dinner'] or x['top'][1] != x['max']): fail(f"menu: Sunday {x['d']} isn't the top vote: {x}")
+        if x['clash']: fail(f"menu: Wednesday {x['d']}'s favourite is already on the week's menu")
+    bd = g.ev(f"""(() => {{ setShipNow({B} + 18 * 60); goToDeck(3); galleyTick(); const mb = ITEMS.find(x => x.t === 'Menu board');
+      return {{ text: galleyText('servery'), dinner: galleyMenu({DAY}).dinner, board: GV && GV.boardDay, tap: mb ? mb.x : '' }}; }})()""")
+    print('Menu at 18:00:', bd['text'], '| board:', bd['tap'][:90])
+    if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or bd['board'] != DAY or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
 
     # 5. once the schedules use the rota: galley staff are at the rota's stations
     hooked = g.ev(f"galleyStaff().some(p => planDay(p, {DAY}).some(s => s.act === 'work' && s.from < {B} + 330))")
