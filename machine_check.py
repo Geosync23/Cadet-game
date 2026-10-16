@@ -12,6 +12,8 @@
 #   shelves never go below zero, deliveries get carried to storage, easy jobs wait for you first (CREW_LEAVE minutes
 #   of the day shift; it reports how many a day are left for the player, aiming at 3 to 6), nobody does two
 #   jobs at once or a job outside their work block, jobWhere agrees with the jobs, and it's the same every way
+#   the looks (0.33.17): machineLook, deckLook and the Ship health board's rows in range; shipMoodAt and chillerAt
+#   pure and in step with shipEffectsAt
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -220,6 +222,36 @@ with sync_playwright() as pw:
     print('  the same twice:', same(r, r4) and js(r) == js(r4), '| one jump:', same(r, r2) and js(r) == js(r2), '| odd minutes:', same(r, r3) and js(r) == js(r3))
     for name, x in (('twice', r4), ('jump', r2), ('odd minutes', r3)):
         if not (same(r, x) and js(r) == js(x)): fail(f"jobs differ ({name})")
+
+    # 4b. what the machines look like (0.33.17): machineLook and deckLook in range for every machine and deck, a
+    # failing machine blinks and a fine one doesn't; the Ship health board's rows; shipMoodAt and chillerAt are pure
+    # and agree with shipEffectsAt (a chiller working well spoils nothing, a worse one more)
+    lk = g.ev("""(() => {
+      JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; const bad = [], t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      const states = ['fine', 'worn', 'poor', 'failing'];
+      for (const day of [1, 5, 10]) {
+        setShipNow(t0 + day * 1440); machinesNow();
+        for (const m of machineList()) {
+          const L = machineLook(m.id), st = SHIP.machines[m.id].state;
+          if (!L || !states.includes(L.state) || !(L.dim >= 0 && L.dim <= 1) || !(L.flicker >= 0 && L.flicker <= 1) || typeof L.drip !== 'boolean'
+              || L.blink !== (st === 'failing' || st === 'broken') || (st === 'healthy' && (L.state !== 'fine' || L.dim || L.flicker || L.drip))) bad.push(day + ' ' + m.id + ' ' + JSON.stringify(L));
+        }
+        for (const n of Object.keys(DECKS)) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
+      }
+      const rows = shipHealthRows(), rowsOk = rows.length === SYSTEMS.length + 1 && rows[0].key === 'ship' && rows.every(r => r.value >= 0 && r.value <= 100 && states.includes(r.state));
+      const rev = MACH_REV, hour = MACH_HOUR; let moodBad = 0, chill = [], about = null;
+      for (let t = shipNow() - 5 * 1440; t <= shipNow(); t += 180) {
+        for (const n of Object.keys(DECKS)) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
+        chill.push(chillerAt(t));
+      }
+      const chillOk = chill.every(c => c.spoil >= 0 && c.spoil <= CHILL_SPOIL && (machWorks(c.cond) >= 85) === (c.spoil === 0));
+      const pure = MACH_REV === rev && MACH_HOUR === hour;
+      setShipNow(t0); JOBS_ON = true;
+      return { bad: bad.slice(0, 4), nBad: bad.length, rowsOk, rows: rows.slice(0, 4).map(r => r.name + ' ' + r.value + ' ' + r.state + (r.worst ? ' (' + r.worst + ')' : '')), moodBad, about, chillOk, chillEnd: chill[chill.length - 1], pure };
+    })()""")
+    print(f"Looks: {lk['nBad']} out of range, board rows ok {lk['rowsOk']}: {lk['rows']}; crew grumble about {lk['about']}; chiller at day 10 {lk['chillEnd']}; pure {lk['pure']}")
+    if lk['nBad'] or not lk['rowsOk']: fail(f"machineLook / deckLook / shipHealthRows: {lk['bad']}")
+    if lk['moodBad'] or not lk['chillOk'] or not lk['pure']: fail('shipMoodAt / chillerAt')
 
     # 5. your side: a job you claim is left to you
     y = g.ev("""(() => {

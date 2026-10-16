@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.16
+   STARSHIP CADET: CSV Wren                            build 0.33.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.16';                            // keep in step with the header's build line
+const GAME_BUILD = '0.33.17';                            // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8267,11 +8267,15 @@ function machRecord(h) {
   MACH_HIST.set(h, c);
   for (const k of MACH_HIST.keys()) if (k < h - MACH_HIST_DAYS * 24) MACH_HIST.delete(k); else break;
 }
-function shipEffectsAt(deck, t) {
-  if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
+// the recorded hour to read for minute t: its own, else the latest before it, else the record's first
+function histHour(t) {
   let h = Math.floor(t / 60);
   if (!MACH_HIST.has(h) && MACH_HIST.size) { const ks = [...MACH_HIST.keys()]; h = h < ks[0] ? ks[0] : Math.min(h, ks[ks.length - 1]); if (!MACH_HIST.has(h)) h = ks.filter(k => k <= h).pop(); }
-  const key = deck + '|' + h;
+  return h;
+}
+function shipEffectsAt(deck, t) {
+  if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
+  const h = histHour(t), key = deck + '|' + h;
   if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
   return FX_AT.get(key);
 }
@@ -8279,6 +8283,91 @@ function shipEffectsAt(deck, t) {
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
   return { ...m, ...MACHINE_KINDS[m.kind], ...machinesNow()[id] };
+}
+
+// ---- what the machines look like, and the ship's health board (0.33.17: answers 2, 3, 7 and 22) ----
+// machineLook(id) -> { state, blink, dim, drip, flicker, running, cond, kind }, for deck dressing and effects (the
+// architects and the performance engineer draw it): state 'fine' (healthy) | 'worn' | 'poor' (faulty) | 'failing'
+// (failing or broken); dim 0-1, how far its screens and lamps dim; blink, a failing panel's warm-red blink; drip, a
+// water machine leaking (poor or worse); flicker 0-1, how often the lights it feeds flicker (light relays, power
+// junctions, bridge relays); running, started by a tap (machineUse) and still going. null for an unknown id.
+// deckLook(deck) -> { dim, flicker, spray, wilt, drip }: the signs a whole deck shows, from shipEffects: lights
+// dimmed and flickering, shower spray (1 = full, weaker below), garden plants wilting (0-1), pipes dripping.
+// Both read the machines now (machinesNow) and are cached until anything changes; ask once a ship minute, not
+// every frame, and never from inside the schedules' planning.
+const LOOK_OF = { healthy: 'fine', worn: 'worn', faulty: 'poor', failing: 'failing', broken: 'failing' };
+const LOOK_DIM = { fine: 0, worn: .15, poor: .35, failing: .65 };
+const LOOK_WET = new Set(['recycler', 'filter', 'pump', 'uv', 'valve', 'irrigation', 'manifold', 'heatpump']);
+const LOOK_LIT = { lights: 1, junction: .6, powerjunction: .6, relay: .5, databus: .4 };
+let LOOKS = new Map(), LOOKS_REV = -1;
+const MACH_RUN = {};                                     // id -> ship minute a tap-started run ends (machineUse)
+function machineLook(id) {
+  const st = machinesNow()[id], m = st && machineById(id); if (!m) return null;
+  if (LOOKS_REV !== MACH_REV) { LOOKS = new Map(); LOOKS_REV = MACH_REV; }
+  const running = (MACH_RUN[id] || 0) > shipNow();
+  const key = id + (running ? '+' : ''); if (LOOKS.has(key)) return LOOKS.get(key);
+  const state = LOOK_OF[st.state], bad = state === 'poor' ? .35 : state === 'failing' ? (st.state === 'broken' ? 1 : .7) : 0;
+  const look = { state, blink: state === 'failing', dim: LOOK_DIM[state], drip: LOOK_WET.has(m.kind) && bad > 0 || (m.kind === 'valve' && state === 'worn'),
+                 flicker: Math.round((LOOK_LIT[m.kind] || 0) * bad * 100) / 100, running, cond: Math.round(st.cond), kind: m.kind };
+  LOOKS.set(key, look); return look;
+}
+function deckLook(deck) {
+  const fx = shipEffects(deck);
+  if (LOOKS_REV !== MACH_REV) { LOOKS = new Map(); LOOKS_REV = MACH_REV; }
+  const key = 'deck' + deck; if (LOOKS.has(key)) return LOOKS.get(key);
+  let flicker = 0, drip = false, wilt = 0;
+  for (const m of machineList()) {
+    const L = machineLook(m.id); if (!L) continue;
+    if (L.flicker && m.deck === deck) flicker = Math.max(flicker, L.flicker);
+    if (L.drip && m.deck === deck) drip = true;
+    if ((m.kind === 'irrigation' || m.kind === 'nutrient') && m.deck === deck) wilt = Math.max(wilt, MACHINE_SEV[machinesNow()[m.id].state]);
+  }
+  const look = { dim: Math.round((1 - fx.walk) * 300) / 100, flicker, spray: Math.round(fx.restore.hygiene * 100) / 100, wilt, drip };
+  look.dim = Math.min(1, look.dim);
+  LOOKS.set(key, look); return look;
+}
+// the "Ship health" board (the bridge, Deck 1, and the Works bay, Deck 5; the architects draw it): the ship first,
+// then each system, worst first. shipHealthRows() -> [{ key, name, value 0-100, state, worst }]: state as
+// machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
+const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
+                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
+function machineLabel(m) {
+  const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  return K.name + n + ', Deck ' + m.deck;
+}
+function shipHealthRows() {
+  const sys = shipSystems(), st = machinesNow(), health = shipHealth(sys);
+  const rows = SYSTEMS.map(k => {
+    const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === k && st[m.id].state !== 'healthy').sort((a, b) => st[a.id].cond - st[b.id].cond);
+    return { key: k, name: SYSTEM_NAME[k], value: Math.round(sys[k]), state: healthState(sys[k]), worst: ms.length ? machineLabel(ms[0]) : null };
+  }).sort((a, b) => a.value - b.value || SYSTEMS.indexOf(a.key) - SYSTEMS.indexOf(b.key));
+  return [{ key: 'ship', name: 'Ship health', value: Math.round(health), state: healthState(health), worst: null }].concat(rows);
+}
+// the ship's mood for the crew (answer 22, with the sim engineer's crewMood): shipMoodAt(deck, t) -> { mood, health,
+// about }: mood is points off (0 to -30, as shipEffects), about what they grumble about ('the showers'), or null
+// while all is well. Pure (shipEffectsAt): safe inside the schedules and replays.
+const GRUMBLE = { recycler: 'the showers', pump: 'the showers', filter: 'the cloudy water', uv: 'the water', manifold: 'the lukewarm water',
+  scrubber: 'the stuffy air', airplant: 'the stale air', fan: 'the stale air', o2cell: 'the thin air', electrolyser: 'the thin air',
+  heater: 'the cold cabins', heatpump: 'the cold', washer: 'the laundry', oven: 'late meals', range: 'late meals', galleyplant: 'the galley',
+  extractor: 'the galley', chiller: 'the food', lights: 'the lights', junction: 'the brownouts', powerjunction: 'the brownouts', lift: 'the slow lift',
+  irrigation: 'the garden', nutrient: 'the garden', relay: 'the bridge stations', databus: 'the bridge stations', valve: 'the dripping pipes' };
+const STAGE_RANK = { minor: 1, noticeable: 2, serious: 3 };
+function shipMoodAt(deck, t) {
+  const fx = shipEffectsAt(deck, t);
+  const weight = n => STAGE_RANK[n.stage] * 100 + ((MACHINE_FX[n.kind] || {}).mood || 0);   // the most serious, then what upsets most
+  let best = null; for (const n of fx.notes) if (!best || weight(n) > weight(best)) best = n;
+  const about = best ? GRUMBLE[best.kind] || (best.kind === 'power' ? 'the low power' : null) : fx.health < 70 ? 'the state of the ship' : null;
+  return { mood: fx.mood, health: fx.health, about };
+}
+// the cold store's chiller (answer 7, with the galley engineer): chillerAt(t) -> { cond, state, spoil }: spoil is the
+// share of the cold store's meals lost each ship hour (0 while it works well; up to CHILL_SPOIL when broken). Pure,
+// from the hour-by-hour record, like shipEffectsAt; as new with no record. The galley bins the food and sends the Mail.
+const CHILL_SPOIL = .05;
+function chillerAt(t) {
+  const ms = machineList().filter(m => m.kind === 'chiller'); if (!ms.length) return { cond: 100, state: 'healthy', spoil: 0 };
+  const c = MACH_HIST.get(histHour(t)), cond = Math.min(...ms.map(m => c ? c[m.id] ?? 100 : 100)), w = machWorks(cond);
+  return { cond: Math.round(cond * 10) / 10, state: machineState(cond), spoil: w >= 85 ? 0 : Math.round(CHILL_SPOIL * (85 - w) / 85 * 10000) / 10000 };
 }
 
 // ---- B2: the job list. SHIP.jobs = [{ id, machine, deck, kind, urgency, posted, found, claimedBy, parts, status, ... }] ----
