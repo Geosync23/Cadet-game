@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   Quiet off shift and the #seek chip's look (0.35.11)
 #   Calendar days and group meetings (0.35.10): See the day, Make an appointment that day, pick the place on Maps,
 #   two or more people (a seat each, kept and cancelled together)
 #   people on Maps (0.35.9): who you may find (crewContacts), dots, { app: 'maps', who }, Go there
@@ -205,6 +206,18 @@ def run(path):
               apptDraft = null; calDay = null; schedDay = null; deviceShow('home'); return out; })()""")
             print('  calendar days:', cd)
             check(cd == [True, 'schedule', True, 'appointments', True, 1080, 'maps', 'appointments', 'appointments', True, None], f'Calendar days: see the day, an appointment that day, a place from Maps: {cd}')
+            # Quiet off shift (0.35.11): off shift, a work notice is a badge, not a toast; on shift it still toasts.
+            # Section 20's #seek chip in the screen's style (a stand-in chip when the build has none)
+            qt = g.ev("""(() => { const st = SHIP.device.settings, save = SHIP.time.min, tx = () => document.getElementById('tx').textContent, out = [];
+              st.quiet = true; SHIP.time.min = 1200; document.getElementById('tx').textContent = ''; deviceNotify({ app: 'jobs', text: 'Quiet test', urgent: true }); out.push(DEV.notes.jobs, tx().includes('Quiet test'));
+              SHIP.time.min = 600; deviceNotify({ app: 'jobs', text: 'Shift test', urgent: true }); out.push(tx().includes('Shift test'));
+              st.quiet = false; SHIP.time.min = 1200; deviceNotify({ app: 'jobs', text: 'Loud test', urgent: true }); out.push(tx().includes('Loud test'));
+              SHIP.time.min = save; delete DEV.notes.jobs; document.getElementById('tx').textContent = '';
+              out.push(deviceLoad({ device: { settings: { quiet: true } } }).settings.quiet, deviceLoad({}).settings.quiet);
+              let sk = document.getElementById('seek'), made = false; if (!sk) { sk = document.createElement('div'); sk.id = 'seek'; sk.innerHTML = '<b>Tomas</b> waves you over.'; document.body.appendChild(sk); made = true; }
+              const was = sk.hidden; sk.hidden = false; const cs = getComputedStyle(sk); out.push(cs.fontFamily.includes('monospace'), parseFloat(cs.fontSize) >= 15, cs.backdropFilter === 'none' || !cs.backdropFilter, sk.getBoundingClientRect().height >= 44);
+              sk.hidden = was; if (made) sk.remove(); return out; })()""")
+            check(qt == [1, False, True, True, True, False, True, True, True, True], f'Quiet off shift, saved; the #seek chip in the screen style: {qt}')
             # the meeting panel and the Captain's address: they draw, and taps report back
             dl = g.ev("""(() => { const got = []; deviceDialogue({ title: 'Briefing', name: 'Chief Ines Calder', who: 'calder', text: 'Gather round.', choices: null, i: 0, n: 2 }, k => got.push(k === undefined ? 'next' : k));
               const p = document.getElementById('devDlg'); const out = [!p.hidden, p.textContent.includes('Gather round.')]; p.querySelector('.next').click();

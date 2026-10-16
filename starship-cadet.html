@@ -42,9 +42,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device,.devtip,.devdlg,.devaddr,#chat.devchat{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+html[data-ph="amber"] body #seek,.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
@@ -127,6 +127,10 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
   border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
   box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);cursor:pointer}
 .devtip[hidden],.devdlg[hidden]{display:none}
+body #seek{border-radius:12px;border:3px solid var(--bezel);padding:10px 14px;min-height:44px;font-family:var(--crt-font);font-size:15px;line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);
+  text-shadow:0 0 4px var(--crt-glow);box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);-webkit-backdrop-filter:none;backdrop-filter:none}
+body #seek b{color:var(--crt-hot);font-weight:700}
+body #seek[hidden]{display:none}
 .devdlg,#chat.devchat{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;width:min(520px,calc(100% - 20px));padding:12px 16px 12px;border-radius:16px;border:3px solid var(--bezel);
   font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);box-shadow:0 8px 28px rgba(0,0,0,.55),inset 0 0 22px rgba(0,0,0,.85);-webkit-backdrop-filter:none;backdrop-filter:none}
 .devdlg small,#chat.devchat small{display:block;margin:0 34px 6px 0;font-size:15px;color:var(--crt-dim);letter-spacing:.06em}
@@ -185,7 +189,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.10
+   STARSHIP CADET: CSV Wren                            build 0.35.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6711,7 +6715,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.10';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.11';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7755,10 +7759,13 @@ function deviceLoad(s) {
     .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
-  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
+  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
+// the page knows the phosphor (html data-ph) for screens drawn by other sections, like section 20's #seek chip
+function devPhosphorPage() { document.documentElement.dataset.ph = SHIP.device.settings.phosphor; }
+devPhosphorPage();
 SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
 setTimeout(() => {
   DEV.live = true;
@@ -7856,7 +7863,11 @@ function deviceDo(action) {
   try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
   deviceRefresh();
 }
+// Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
+const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
+const devOnShift = () => playerShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
 function deviceNotify({ app, text, urgent } = {}) {
+  if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
   DEVICE_SKIN.notify({ app, text, urgent });
   deviceRefresh();
@@ -8259,9 +8270,9 @@ function mapPeople() {                                   // [{ id, name, label, 
   let cs; try { cs = crewContacts({ all: true }); } catch (e) { DEV.errors.push('crewContacts: ' + (e && e.message || e)); return []; }
   const out = [];
   for (const c of cs || []) {
-    const w = c && c.where; if (!w || !DECKS[w.deck]) continue;
+    const w = c && c.where; if (!w || !DECKS[w.deck] || w.act === 'sleep' || w.act === 'wash') continue;   // never in their bunk or the shower
     const rooms = DECKS[w.deck].rooms || {}, room = Object.keys(rooms).find(k => rooms[k].name === w.room) || null;
-    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
+    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', named: c.tier >= 1, tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
   }
   return out;
 }
@@ -8328,15 +8339,19 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
       if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
       if (r.kind !== 'locked' && r.kind !== 'void' && !mapFor) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
     }
+    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
+      B.push({ kind: 'text', text: 'People', mark: 'head' });
+      const ps = people.filter(q => q.named).sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck), duty = {};
+      for (const q of people) if (!q.named && q.deck === n) duty[q.role] = (duty[q.role] || 0) + 1;
+      const dl = Object.entries(duty).map(([r, k]) => k + ' ' + r.toLowerCase() + (k > 1 ? 's' : ''));
+      if (dl.length) B.push({ kind: 'text', text: 'On duty on this deck: ' + dl.join(', ') + '.' });
+      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
+      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });   // strangers on duty: dots only
+    }
+    B.push({ kind: 'text', text: 'Rooms', mark: 'head' });
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
     B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
-    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
-      B.push({ kind: 'text', text: 'People', mark: 'head' });
-      const ps = people.slice().sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck);
-      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
-      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });
-    }
     return { title: 'Maps', blocks: B };
   } });
 
@@ -8616,14 +8631,15 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
 // Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
 // phone asks for reduced motion), tips on or off
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg; },
   view: () => {
     const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
       { kind: 'text', text: 'Screen colour' },
       { kind: 'buttons', items: Object.entries(PHOSPHORS).map(([k, label]) => ({ label, action: { app: 'settings', do: 'phosphor', arg: k }, on: st.phosphor === k })) },
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
-      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') }] };
+      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
+      { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') }] };
   } });
 
 // Wallet: credits and your locker (0.28.10)
