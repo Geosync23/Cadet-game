@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.19
+   STARSHIP CADET: CSV Wren                            build 0.26.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.19';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.20';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7133,7 +7133,7 @@ function schedData() {
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
   const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l)
-    .filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room) && !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));
+    .filter(pl => !taken.has(pl.id) && !schedRoomLocked(pl.deck, pl.room) && !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley') && pl.type !== 'work:garden');
   // the new habits' places: treadmills (gym, anim 'run'), the garden's standing spots (tending), the bar's seats
   // (anim 'drink'), and the observatory on Deck 2
   for (const n of Object.keys(DECKS).map(Number)) {
@@ -7165,12 +7165,12 @@ function schedRoomLocked(n, room) {
 // rooms (bedrooms' places are private already); else none (null)
 function schedDesks(people, shared) {
   const desks = new Map(), used = new Map();
-  const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley')).sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
+  const order = people.filter(p => p.work && !(galleyRotaOn() && p.dept === 'galley') && p.dept !== 'garden').sort((a, b) => RANK_ORDER.indexOf(a.rank) - RANK_ORDER.indexOf(b.rank) || (a.id < b.id ? -1 : 1));
   for (const pass of [0, 1]) for (const p of order) {
     if (desks.has(p.id) && desks.get(p.id)) continue;
     const pool = (pass === 0 ? shared.get(p.work.deck + '|' + p.work.place) || []
       : [...shared.entries()].filter(([k]) => k.startsWith(p.work.deck + '|work:')).flatMap(([, l]) => l).filter(pl => !schedRoomLocked(pl.deck, pl.room)))
-      .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley'));   // machine panels are for servicing (B2); the galley books its own
+      .filter(pl => !pl.machine && !(galleyRotaOn() && pl.type === 'work:galley') && pl.type !== 'work:garden');   // machine panels are for servicing (B2); the galley and the garden book their own
     // a desk is taken for a shift, or, for people with rota.hours, only for those hours (the storekeepers share the till)
     const hrs = p.rota && p.rota.hours, clash = (a, b) => !a || !b || a.some(([x, y]) => b.some(([u, v]) => x < v && u < y));
     const d = pool.find(pl => !(used.get(p.shift + '|' + pl.id) || []).some(h => clash(h, hrs)));
@@ -7203,6 +7203,11 @@ function playerShiftOn(d) {
 // rota.hours ([[from, to], ...] in minutes from midnight, on their work days, at their own desk: the storekeepers)
 function shiftBlocks(p, d) {
   if (p.shift === 'night') return null;
+  if (p.dept === 'garden') {                             // the garden crew: gardenDay, below, shaped like galleyDay
+    const g = gardenDay(p, d); if (!g) return null;
+    const blocks = g.role ? g.blocks.map(x => [x.from, x.to, x.placeId || null, x.task || null]) : [];
+    return { blocks: blocks.length ? blocks : null, wake: g.wake, bedBy: g.bedBy, meals: g.meals || {} };
+  }
   const hrs = p.rota && p.rota.hours;
   if (p.dept !== 'galley' || !(typeof galleyDay === 'function' || typeof galleyShift === 'function')) {
     if (!Array.isArray(hrs) || !hrs.length || !isWorkDay(p, d)) return null;
@@ -7220,6 +7225,36 @@ function shiftBlocks(p, d) {
   return null;
 }
 const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley books its own stations
+// ---- the garden crew (the working garden, with the galley engineer's crops and yields) ----
+// gardenDay(p, d) -> null | { role, wake, bedBy, blocks: [{ from, to, placeId, task }], meals }, galleyDay's shape, for
+// dept 'garden' (null for anyone else; role null on their days off, rota.offDays). A work day, 07:00-15:30: 'tend'
+// stints at their own bed station (the deck architect's 'work:garden' places on Deck 3, one each; until those exist,
+// the garden's standing 'garden' spots, held so nobody else stands there), the day's 'pick' 10:00-10:45 at the same
+// station, then 'carry', 20 minutes at the cold store's shelves (3-cold-1, 3-cold-2). On a harvest morning (section
+// 18's 'harvest' tradition) they lead it from their stations ('harvest', its whole window) instead of the pick, and
+// carry after. gardenCrew(d) lists the day's gardeners and their pick, carry and harvest, for the galley's yields.
+// Pure (rota, places and the traditions only); nothing changes while nobody is in dept 'garden'.
+const GARDEN_SHIFT = [420, 930], GARDEN_PICK = [600, 645], GARDEN_CARRY = 20;
+const gardenSpots = () => {
+  const P = (DECKS[3] && DECKS[3].places) || [], nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
+  const w = P.filter(pl => pl.type === 'work:garden' && !pl.machine).sort(nat);
+  return w.length ? w : P.filter(pl => pl.type === 'garden' && pl.pose !== 'sit' && pl.anim === 'water').sort(nat);
+};
+const gardeners = d => schedPeople().filter(p => p.dept === 'garden' && p.shift !== 'night' && isWorkDay(p, d)).sort((a, b) => (a.id < b.id ? -1 : 1));
+function gardenDay(p, d) {
+  if (p.dept !== 'garden' || p.shift === 'night') return null;
+  if (!isWorkDay(p, d)) return { role: null, wake: null, bedBy: null, blocks: [], meals: {} };
+  const crew = gardeners(d), i = Math.max(0, crew.indexOf(p)), spots = gardenSpots(), cold = ['3-cold-1', '3-cold-2'];
+  const own = spots.length ? spots[(i * Math.max(1, Math.floor(spots.length / Math.max(1, crew.length)))) % spots.length].id : null;
+  let hv = null;
+  try { hv = typeof eventsOn === 'function' && eventsOn(d).find(e => e.id === 'harvest') || null; } catch (e) { hv = null; }
+  const [s0, s1] = GARDEN_SHIFT, [p0, p1] = hv ? [hv.from, hv.to] : GARDEN_PICK, c1 = p1 + GARDEN_CARRY, blocks = [];
+  const add = (from, to, placeId, task) => { if (to > from) blocks.push({ from, to, placeId, task }); };
+  add(s0, p0, own, 'tend'); add(p0, p1, own, hv ? 'harvest' : 'pick'); add(p1, c1, cold[i % 2], 'carry'); add(c1, s1, own, 'tend');
+  return { role: 'gardener', wake: null, bedBy: null, blocks, meals: {} };
+}
+const gardenCrew = d => gardeners(d).map(p => { const b = gardenDay(p, d).blocks, f = t => { const x = b.find(y => y.task === t); return x ? [x.from, x.to] : null; };
+  return { id: p.id, pick: f('pick') || f('harvest'), carry: f('carry'), harvest: !!f('harvest') }; });
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
 // ---- appointments (Pillar 3, C3): the crew side of the device's Appointments ----
 // SHIP.device.appts (section 19, the device engineer; saved there): { id, with: [crewId | 'guest:id' | 'place:id'],
@@ -7814,6 +7849,8 @@ function schedBuild(p, d, occ, S) {
         const [, w1] = MEALS[m];
         if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
       }
+      if (p.dept === 'garden' && pid && !isFree(pid, t, Math.min(b, 1440))) pid = null;   // someone already stands there: work beside it
+      if (p.dept === 'garden' && pid) hold(pid, Math.max(t, a), Math.min(b, 1440));
       workAt(pid, task, Math.min(b, 1440));
     });
     if (t < 1440) evening(specials(50, false), Math.max(t + 30, F.bed), false, ate.dinner);
