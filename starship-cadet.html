@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.9
+   STARSHIP CADET: CSV Wren                           build 0.41.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -508,7 +508,15 @@ let MAP = [], STAND = new Set(), ROOM_BOX = {}, EDGES = new Map();
 let HULL_PTS = [], HULL_SEGS = [], HULL_NRM = [];
 let floor = null, edgeList = [], wallEdges = [], frameEdges = [], wallIM = null, hdrIM = null;
 let POSTS = [], RUNS = [], fullPosts = [], hdrPosts = [], postIM = null, hpostIM = null;
-let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [];
+let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [], DOOR_LEAVES = [];
+const _leafM = new THREE.Matrix4(), _leafS = new THREE.Matrix4(), LEAF_HIDE = new THREE.Matrix4().makeScale(0, 0, 0);
+function doorLeavesSync() {                              // each frame, before the render: the leaves where the doors put them
+  for (const d of DOOR_OBJS) d.g.updateMatrixWorld(true);
+  for (const { im, list } of DOOR_LEAVES) {
+    list.forEach((l, k) => im.setMatrixAt(k, l.visible ? _leafM.multiplyMatrices(l.matrixWorld, _leafS.makeScale(l.userData.leaf.sx, 1, 1)) : LEAF_HIDE));
+    im.instanceMatrix.needsUpdate = true;
+  }
+}
 let staticRoot = null, BLOCKED = new Set(), ITEMS = [], WALL_DECOR = [], SPOTS = [];
 let TALL = [], TALL_BY_ROOM = {}, NO_FADE = new Set();   // tall furniture fades a room at a time; locked rooms stay solid
 let LAMPS = [], STEAM = [], DUST = [], SPINS = [];   // SPINS: parts that turn (fan rotors, gears): { o, ax, w }
@@ -856,6 +864,9 @@ const hatchLeafTex = tex(120, 220, (g, w, h) => {
   g.fillStyle = '#c9b98a'; g.fillRect(w / 2 - 20, h * .46, 6, 26); g.fillRect(w / 2 + 14, h * .46, 6, 26);
 });
 const hatchLeafMats = [0, .5].map(o => { const t = hatchLeafTex.clone(); t.needsUpdate = true; t.repeat.set(.5, 1); t.offset.set(o, 0); return new THREE.MeshStandardMaterial({ map: t, roughness: .6, metalness: .35 }); });
+// 0.27.21: every door leaf on a deck is drawn by one InstancedMesh per leaf material (doorLeavesSync), from this
+// one shared box, 1 m wide and stretched to each leaf's width. The leaves themselves stay as invisible boxes for taps.
+const DOOR_LEAF_GEO = packGroups(new THREE.BoxGeometry(1, 2.2, .07), [capMat, capMat, capMat, capMat, null, null]);
 // inner glass walls: a wall-textured sill to 1 m, a pane, and the usual header above 2.2 m
 const SILL = 1.0;
 const sillGeo = new THREE.BoxGeometry(SEG, SILL, T); sillGeo.translate(0, SILL / 2, 0);
@@ -1572,19 +1583,20 @@ const KIT = {
   // ---- the hydroponics garden ----
   raisedBed(g, o = {}) {                                 // a timber bed of soil, planted by o.crop; greens and herbs get a grow light
     const w = o.w || 1.8, crop = o.crop || 'greens', L = GD.leaves;
+    const P = o.live ? plantSlots(g, o.live, .475) : null, lf = P ? P.leaf : leaf, sf = P ? P.soft : soft;   // o.live: section 8b's garden view grows them (0.27.23)
     box(w, .46, .9, GD.bed, 0, .23, 0, g); box(w - .1, .03, .8, GD.soil, 0, .46, 0, g);
     for (const x of [-w / 2 + .02, w / 2 - .02]) box(.06, .5, .92, GD.post, x, .25, 0, g);
     const nx = Math.floor((w - .2) / .3);
     for (let r = 0; r < 2; r++) for (let k = 0; k < nx; k++) {
       const x = -w / 2 + .22 + k * (w - .44) / Math.max(1, nx - 1), z = r ? .2 : -.2, j = R();
-      if (crop === 'greens') { leaf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); leaf(L[1], x, .62, z, .08, .06, .08, g); }
-      else if (crop === 'herbs') { leaf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); leaf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
+      if (crop === 'greens') { lf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); lf(L[1], x, .62, z, .08, .06, .08, g); }
+      else if (crop === 'herbs') { lf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); lf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
       else if (crop === 'flowers') { leaf(L[1], x, .54, z, .1, .07, .1, g); leaf(GD.flowers[(k + r * 2) % 5], x + (j - .5) * .05, .64 + j * .05, z, .055, .045, .055, g); }
       else if (crop === 'tomato') {
         if (k % 2) continue;
         cyl(.012, .012, 1.3, GD.post, x, 1.1, z, g, 6);
-        for (let h = 0; h < 4; h++) leaf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
-        for (let h = 0; h < 3; h++) if (R() < .8) soft(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
+        for (let h = 0; h < 4; h++) lf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
+        for (let h = 0; h < 3; h++) if (R() < .8) sf(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
       }
     }
     if (crop === 'greens' || crop === 'herbs') {
@@ -1612,13 +1624,14 @@ const KIT = {
     glow('#ff7ae0', .8, 0, 1.2, .1, g, .3);
     return { w: 1.8, d: .6, tall: true };
   },
-  trellis(g) {                                           // a climbing frame lost under beans and vines
+  trellis(g, o = {}) {                                   // a climbing frame lost under beans and vines
     for (const x of [-.75, .75]) box(.05, 2.0, .05, GD.post, x, 1.0, 0, g);
     for (const y of [.6, 1.2, 1.9]) box(1.55, .03, .03, GD.post, 0, y, 0, g);
     box(1.6, .3, .35, GD.bed, 0, .15, 0, g);
-    for (let k = 0; k < 16; k++) leaf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
-    for (let k = 0; k < 8; k++) cyl(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
-    for (let k = 0; k < 5; k++) leaf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
+    const P = o.live ? plantSlots(g, o.live, .3) : null, lf = P ? P.leaf : leaf, pd = P ? P.pod : cyl;   // o.live: grown by section 8b (0.27.23)
+    for (let k = 0; k < 16; k++) lf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
+    for (let k = 0; k < 8; k++) pd(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
+    for (let k = 0; k < 5; k++) lf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
     return { w: 1.6, d: .4, tall: true };
   },
   citrusTree(g, o = {}) {                                // a little orange (or lemon) tree in a big pot
@@ -2642,6 +2655,64 @@ const TEMPLATES = {
 };
 
 // ---- merge everything static into a few meshes ----
+// 0.27.23: a garden kit with o.live records its plants here instead of building them (section 8b's gardenView grows
+// them with the galley's beds). Same calls in the same order, so R() is drawn exactly as before. GARDEN_PLOTS is the
+// deck's list: { g, crop, n (the nth bed of that crop on the deck), base (soil height), slots }
+let GARDEN_PLOTS = [];
+function plantSlots(g, crop, base) {
+  const P = { g, crop, n: GARDEN_PLOTS.filter(p => p.crop === crop).length, base, slots: [] }; GARDEN_PLOTS.push(P);
+  const fruit = m => m === GD.tomato || m === GD.bean || GD.flowers.includes(m);
+  const put = (geo, mat, x, y, z, sx, sy, sz) => { P.slots.push({ geo, mat, x, y, z, sx, sy, sz, fruit: fruit(mat) }); };
+  return { leaf: (mat, x, y, z, sx, sy, sz) => put('leaf', mat, x, y, z, sx, sy, sz), soft: (mat, x, y, z, sx, sy, sz) => put('ball', mat, x, y, z, sx, sy, sz),
+    pod: (rt, rb, h, mat, x, y, z) => put('pod', mat, x, y, z, 1, 1, 1) };
+}
+// 0.27.20: neighbouring faces of one geometry that share a material become one group, so a door leaf's box (four
+// edge faces, then two faces) draws in 2 calls, not 6, in the picture and in the shadows. Same triangles in the same
+// order, so nothing on screen changes.
+function packGroups(geo, mats) {
+  const out = [];
+  for (const gr of geo.groups) { const p = out[out.length - 1]; if (p && mats[p.materialIndex] === mats[gr.materialIndex] && p.start + p.count === gr.start) p.count += gr.count; else out.push({ ...gr }); }
+  geo.groups = out; return geo;
+}
+// 0.27.22: tall furniture is drawn together: one mesh per material (and shadow flag) for the whole deck, made from
+// every room's merged pieces in room order, with one more copy of the material made like each room's own (so it
+// doesn't pulse or wilt with the shared one, as before). A room that is fading or faded (t.o below 1) shows its own
+// meshes again, and the deck-wide mesh skips that room's stretch (tallSync, each frame after the fades). Opaque only.
+let TALL_ALL = [], TALL_KEY = null;
+function tallCombine() {
+  const buckets = new Map(); TALL_ALL = []; TALL_KEY = null;
+  TALL.forEach((t, ti) => {
+    t.own = [];
+    for (const o of t.g.children.slice()) {
+      const base = o.isMesh && !o.userData.noMerge && !Array.isArray(o.material) && t.src.get(o.material);
+      if (!base || base.transparent || base.opacity < 1) continue;
+      const key = base.uuid + (o.castShadow ? '' : '-ns');
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, P: [], N: [], U: [], ranges: [] });
+      const a = o.geometry.attributes, n = a.position.count;
+      b.ranges.push([ti, b.P.length / 3, n]); for (const [d, s] of [[b.P, a.position], [b.N, a.normal], [b.U, a.uv]]) for (const v of s.array) d.push(v);
+      o.visible = false; t.own.push(o);
+    }
+  });
+  for (const b of buckets.values()) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2)); geo.computeBoundingSphere();
+    const mesh = new THREE.Mesh(geo, [b.mat]); mesh.castShadow = b.shadow; mesh.receiveShadow = true; mesh.raycast = () => {}; deckRoot.add(mesh);
+    TALL_ALL.push({ mesh, ranges: b.ranges });
+  }
+  tallSync();
+}
+function tallSync() {
+  let key = ''; TALL.forEach((t, i) => { if (t.o !== 1) key += i + ','; });
+  if (key === TALL_KEY) return;
+  TALL_KEY = key; const out = new Set(key.split(',').filter(Boolean).map(Number));
+  TALL.forEach((t, i) => { for (const o of t.own || []) o.visible = out.has(i); });
+  for (const b of TALL_ALL) {
+    const gr = [];
+    for (const [ti, start, count] of b.ranges) { if (out.has(ti)) continue; const p = gr[gr.length - 1]; if (p && p.start + p.count === start) p.count += count; else gr.push({ start, count, materialIndex: 0 }); }
+    b.mesh.geometry.groups = gr; b.mesh.visible = gr.length > 0;
+  }
+}
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
@@ -2902,13 +2973,14 @@ function buildDeck(def) {
   frameEdges = edgeList.filter(e => e.type !== 'wall' && e.type !== 'window');   // doors, lifts, hatches and glass all carry a header
   glassEdges = edgeList.filter(e => e.type === 'glass' || e.type === 'pass'); sillIM = paneIM = null;   // a pass is glass with no pane
   if (glassEdges.length) {
-    sillIM = new THREE.InstancedMesh(sillGeo, [capMat, capMat, M.trim, capMat, wallMat, wallMat], glassEdges.length);
+    const sm = [capMat, capMat, M.trim, capMat, wallMat, wallMat]; sillIM = new THREE.InstancedMesh(packGroups(sillGeo, sm), sm, glassEdges.length);
     paneIM = new THREE.InstancedMesh(paneGeo, paneMat, glassEdges.length);
     glassEdges.forEach((e, k) => e.ginst = k);
     sillIM.castShadow = sillIM.receiveShadow = true; deckRoot.add(sillIM, paneIM);
   }
-  wallIM = new THREE.InstancedMesh(wallGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], wallEdges.length);
-  hdrIM = new THREE.InstancedMesh(hdrGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], frameEdges.length);
+  const wm = [capMat, capMat, capMat, capMat, wallMat, wallMat];   // 0.27.20: packGroups, 6 calls to 2
+  wallIM = new THREE.InstancedMesh(packGroups(wallGeo, wm), wm, wallEdges.length);
+  hdrIM = new THREE.InstancedMesh(packGroups(hdrGeo, wm), wm, frameEdges.length);
   wallEdges.forEach((e, k) => e.inst = k); frameEdges.forEach((e, k) => e.hinst = k);
   // posts at every corner where walls meet
   POSTS = [];
@@ -2952,8 +3024,8 @@ function buildDeck(def) {
     const mats = e.type === 'lift' ? liftLeafMats : e.type === 'hatch' ? hatchLeafMats : leafMats, leaves = [];
     for (const sd of [-1, 1]) {
       const m = mats[sd < 0 ? 0 : 1];
-      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), [capMat, capMat, capMat, capMat, m, m]);
-      leaf.position.set(sd * span / 4, 1.1, sd * .012); leaf.castShadow = true; g.add(leaf); leaves.push(leaf);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), HIT_MAT); leaf.userData.leaf = { m, sx: span / 2 };   // drawn by DOOR_LEAVES
+      leaf.position.set(sd * span / 4, 1.1, sd * .012); g.add(leaf); leaves.push(leaf);
     }
     if (e.type === 'door' || e.type === 'lift') {
       const th = new THREE.Mesh(new THREE.BoxGeometry(span - .1, .02, .1), thrMat); th.position.set(0, .01, 0); deckRoot.add(th); th.position.add(g.position); th.rotation.y = g.rotation.y;
@@ -2962,6 +3034,12 @@ function buildDeck(def) {
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
     DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
+  }
+  DOOR_LEAVES = [];                                      // 0.27.21: one InstancedMesh per leaf material (2 draw calls each, not 2 a leaf)
+  for (const m of new Set(DOOR_OBJS.flatMap(d => d.leaves.map(l => l.userData.leaf.m)))) {
+    const list = DOOR_OBJS.flatMap(d => d.leaves).filter(l => l.userData.leaf.m === m);
+    const im = new THREE.InstancedMesh(DOOR_LEAF_GEO, [capMat, capMat, capMat, capMat, m, m], list.length);
+    im.castShadow = true; im.frustumCulled = false; im.raycast = () => {}; deckRoot.add(im); DOOR_LEAVES.push({ im, list });
   }
 
   // ---- the hull wall: a thick ribbon along the outline, split into runs by the room inside it ----
@@ -3042,6 +3120,7 @@ function buildDeck(def) {
         n = e;
       }
       for (const p of parts) {
+        mergeMeshes(p.g);                                 // 0.27.20: one mesh per material for each piece (was one per strip); the decor is merged below
         p.g.traverse(o => { if (o.isMesh) HULL_MESHES.push(o); });
         // the hull doesn't follow you: pieces facing the camera stay low, the rest stay up
         let ox = 0, oz = 0; const edges = [];
@@ -3065,14 +3144,14 @@ function buildDeck(def) {
   for (const [i, j, w, d] of Object.entries(ROOM_BOX).filter(([k]) => ROOMS[k].void).map(([, b]) => [b.i0, b.j0, b.i1 - b.i0 + 1, b.j1 - b.j0 + 1])) {
     const t = hatchTex.clone(); t.needsUpdate = true; t.repeat.set(w / 2, d / 2);
     const top = new THREE.MeshStandardMaterial({ map: t, roughness: .9 });
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w - .21, H - .03, d - .21), [capMat, capMat, top, capMat, capMat, capMat]);
+    const vm = [capMat, capMat, top, capMat, capMat, capMat], m = new THREE.Mesh(packGroups(new THREE.BoxGeometry(w - .21, H - .03, d - .21), vm), vm);
     m.geometry.translate(0, (H - .03) / 2, 0); m.position.set(X0(i) + w / 2, 0, Z0(j) + d / 2); m.receiveShadow = true; deckRoot.add(m);
     VOID_BLOCKS.push({ m, cx: m.position.x, cz: m.position.z, s: 1 });
   }
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = []; GARDEN_PLOTS = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -3089,8 +3168,9 @@ function buildDeck(def) {
     const clones = new Map();
     const cl = m => { if (!clones.has(m)) { const c = m.clone(); c.userData.base = { op: m.opacity, tr: m.transparent }; clones.set(m, c); } return clones.get(m); };
     t.g.traverse(o => { if (o.isMesh && !o.userData.noMerge) o.material = Array.isArray(o.material) ? o.material.map(cl) : cl(o.material); });
-    mergeMeshes(t.g); t.mats = [...clones.values()];
+    mergeMeshes(t.g); t.mats = [...clones.values()]; t.src = new Map([...clones].map(([b, c]) => [c, b]));
   }
+  tallCombine();
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
   for (const it of ITEMS) it.hit.userData.item = it;
@@ -3162,7 +3242,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -4878,9 +4958,9 @@ DECKS[3] = {
       tomato: 'Vines up their stakes and fruit going red. Everyone eats one straight off the plant. Everyone denies it.', flowers: 'Not for eating. For bees, if we had them, and for people, who we do.' };
     [[3.4, 2.75, 'greens'], [6.0, 2.75, 'herbs'], [8.6, 2.75, 'greens'], [3.4, 5.3, 'tomato'], [6.0, 5.3, 'flowers'], [8.6, 5.3, 'tomato'],
      [3.4, 15.4, 'flowers'], [6.0, 15.4, 'greens'], [8.6, 15.4, 'herbs'], [6.0, 18.8, 'greens'], [8.6, 18.8, 'tomato']].forEach(([x, z, crop], k) =>
-      place(G, 'raisedBed', x, z, 'n', { crop, butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
-    place(G, 'trellis', .3, 5.0, 'w', { it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
-    place(G, 'trellis', 9.75, 16.5, 'e');
+      place(G, 'raisedBed', x, z, 'n', { crop, live: { greens: 'greens', herbs: 'herbs', tomato: 'tomatoes' }[crop], butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
+    place(G, 'trellis', .3, 5.0, 'w', { live: 'beans', it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
+    place(G, 'trellis', 9.75, 16.5, 'e', { live: 'beans' });
     placeWall(G, 'herbWall', 'e', 7.5, { hitW: 1.6, it: IT('Herb wall', 'Pockets of herbs by the door, labelled FOR THE GALLEY in Chef Brennan\'s writing. Take a sprig and she will know.') });
     // the pond, its benches and the path
     place(G, 'moss', 4.5, 11.0, 'n', { r: 1.75 });
@@ -6960,7 +7040,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.9';                            // keep in step with the header's build line
+const GAME_BUILD = '0.41.10';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15383,6 +15463,7 @@ const crowd = {
   },
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
+    gardenView.tick(t);                                  // the garden's crops grow with the galley's beds (0.27.23)
     deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
@@ -15549,6 +15630,60 @@ const FEEL_MOODS = {                                     // by event id: its moo
 const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
+// ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
+// bean trellises grow with the galley's beds (SHIP.galley.garden.beds: [crop, grown, days]): bare soil just after a
+// pick, seedlings, then full and fruiting when ripe. The kits record each plant (GARDEN_PLOTS, o.live) instead of
+// building it; here they're drawn as instances, one InstancedMesh per shape and material, culled with the garden.
+// Looked at about once a second; the matrices are only rewritten when a bed's growth has moved on. The nth bed of a
+// crop on the deck is the galley's nth bed of it; beds with no place in the garden (the third bean bed, the root
+// vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were. Plants in a tall piece
+// (the bean trellises) get their own copies of the materials, in that room's fade list, so they fade with it (0.27.24).
+const gardenView = {
+  root: null, list: [], key: '', next: 0, m: new THREE.Matrix4(), p: new THREE.Matrix4(), v: new THREE.Vector3(), s: new THREE.Vector3(), q: new THREE.Quaternion(),
+  make() {                                               // the deck's instanced meshes, once per deck build
+    this.root = deckRoot; this.list = []; this.key = ''; this.next = 0; if (!deckRoot || !GARDEN_PLOTS.length) return;
+    deckRoot.updateMatrixWorld(true);
+    const geo = { leaf: LEAF_GEO, ball: new THREE.SphereGeometry(1, 10, 7), pod: new THREE.CylinderGeometry(.012, .01, .14, 5) }, by = new Map(), box = new THREE.Box3();
+    const tallOf = P => { for (let o = P.g.parent; o; o = o.parent) { const t = TALL.find(t => t.g === o); if (t) return t; } return null; };
+    for (const P of GARDEN_PLOTS) for (const sl of P.slots) {
+      const t = tallOf(P), k = sl.geo + '|' + sl.mat.uuid + '|' + (t ? TALL.indexOf(t) : '');
+      let b = by.get(k);
+      if (!b) {                                          // in a tall piece (the trellises): its own copy of the material, faded with the room (0.27.24)
+        const mat = t ? sl.mat.clone() : sl.mat; if (t) { mat.userData.base = { op: sl.mat.opacity, tr: sl.mat.transparent }; t.mats.push(mat); }
+        by.set(k, b = { geo: sl.geo, mat, items: [] });
+      }
+      b.items.push({ P, sl }); box.expandByPoint(this.v.set(sl.x, sl.y, sl.z).applyMatrix4(P.g.matrixWorld));
+    }
+    const sphere = box.getBoundingSphere(new THREE.Sphere()); sphere.radius += 1;
+    for (const b of by.values()) {
+      const g = geo[b.geo].clone(); g.boundingSphere = sphere.clone();   // culled with the garden as a whole
+      const im = new THREE.InstancedMesh(g, b.mat, b.items.length); im.castShadow = im.receiveShadow = true; im.raycast = () => {};
+      deckRoot.add(im); this.list.push({ im, items: b.items });
+    }
+  },
+  grown(P) {                                             // a plot's growth, 0 (just picked) to 1 (ripe); 1 without the galley's beds
+    const G = SHIP.galley && SHIP.galley.garden, ci = typeof GARDEN_CROPS !== 'undefined' ? GARDEN_CROPS.findIndex(c => c.id === P.crop) : -1;
+    if (!G || ci < 0) return 1;
+    const b = G.beds.filter(x => x[0] === ci)[P.n]; return b ? Math.min(1, b[1] / GARDEN_CROPS[ci].days) : 1;
+  },
+  tick(t) {
+    if (this.root !== deckRoot) this.make();
+    if (!this.list.length || t < this.next) return;
+    this.next = t + 1;
+    const gr = new Map(GARDEN_PLOTS.map(P => [P, this.grown(P)])), key = [...gr.values()].map(x => Math.round(x * 50)).join();
+    if (key === this.key) return;
+    this.key = key;
+    for (const { im, items } of this.list) {
+      items.forEach(({ P, sl }, i) => {
+        const g = gr.get(P), lf = g < .03 ? 0 : .3 + .7 * Math.min(1, g / .75), f = sl.fruit ? (g < .6 ? 0 : (g - .6) / .4) * lf : lf;
+        if (!f) { im.setMatrixAt(i, LEAF_HIDE); return; }
+        this.m.compose(this.v.set(sl.x, P.base + (sl.y - P.base) * lf, sl.z), this.q, this.s.set(sl.sx * f, sl.sy * f, sl.sz * f));
+        im.setMatrixAt(i, this.p.multiplyMatrices(P.g.matrixWorld, this.m));
+      });
+      im.instanceMatrix.needsUpdate = true;
+    }
+  },
+};
 // a jolt's look up (0-1), for 8b's people: each a beat apart (by their animation offset), up for about two seconds
 function feelLook(t0) {
   const s = FEEL_S; if (!s.kinds.includes('jolt')) return 0;
@@ -16721,6 +16856,7 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
+  doorLeavesSync(); tallSync();                          // section 4: door leaves (0.27.21) and tall furniture (0.27.22), drawn together
   if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
 
   // ambient life
