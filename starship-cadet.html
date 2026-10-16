@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.7
+   STARSHIP CADET: CSV Wren                            build 0.28.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.19';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8997,11 +8997,11 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 
 // =====================================================================
 // 15. PLAYER NEEDS & DEVICE
-// Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
-// met) in SHIP.player.needs. They drain with ship time and come back by
+// Your needs (hunger, energy, hygiene, fitness, social, bathroom; 0-100,
+// 100 = fully met) in SHIP.player.needs. They drain with ship time and come back by
 // doing things: eat (the servery, a mess seat, the grab shelf), sleep (your
 // bunk, section 13), shower, work out (treadmill, weights), call home (a
-// booth). Tap the thing to do it: you walk there, take the pose, time runs,
+// booth), use a toilet (any public washroom, 0.28.19). Tap the thing to do it: you walk there, take the pose, time runs,
 // the need rises; walk away to stop. Places crew hold are left alone.
 // Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
 // bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
@@ -9022,16 +9022,17 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // crew tap (10: playerChat), Walker.update's pose (10: holding, crouch),
 // playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
-const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
-const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
+const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social', 'bathroom'];   // the plan's NEEDS (section 14 has it too, as NEEDS); bathroom: the user's, 0.28.19
+const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social', bathroom: 'Bathroom' };
 // drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
 // shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
 // up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
 // player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
-// (needEffects' drain, below).
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+// (needEffects' drain, below). Bathroom (0.28.19, the user's): 12 an hour awake, from a visit to the low line in
+// about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
-const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
+const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
@@ -9046,6 +9047,7 @@ const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
   hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
   social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+  bathroom: { hi: [{ task: 1.05 }, 'Comfortable: tasks go 5% faster.'], lo: [{ task: .9 }, 'You need the toilet: it\'s hard to concentrate, tasks go 10% slower.'] },
 };
 function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
   const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
@@ -9106,6 +9108,7 @@ const NEED_SAY = {
   hunger: ['You\'re hungry. The mess serves breakfast 06:00-08:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
+  bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
@@ -9155,6 +9158,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
+  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', title: 'Toilet', done: 'You wash your hands on the way out.' },   // any public toilet (0.28.19)
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
     if (!galleyTurn('player')) return false;
@@ -9196,7 +9200,9 @@ const ACT_TAP = [   // what you tapped (its title), the place types it leads to,
   [/^grab and go$/i, ['grab-shelf'], 'grab'],
   [/table/i, ['mess-seat'], 'eat'],
   [/^shower$/i, ['shower'], 'shower'],
+  [/^toilet$/i, ['toilet'], 'toilet'],
 ];
+const PRIVATE_TYPES = new Set(['shower', 'toilet']);     // someone's own (privatePlace) is never offered: wash pods, cabins' toilets
 const ACT_NEAR = 2.4;
 let ACT = null, basket = null, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
 const heldBy = id => DECK_CREW.find(a => a.goalId === id);       // crew at a place, or on their way to it
@@ -9236,7 +9242,7 @@ function playerTap(it, at, point) {
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || machineTap(it, at);
   const [, types, kind] = rule;
-  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
+  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)))
     .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
   if (!near.length) return false;
@@ -9258,7 +9264,7 @@ function playerTap(it, at, point) {
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) {
     const a = heldBy(near[0][0].id);
-    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
+    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : kind === 'toilet' ? 'Occupied: the little light is red. Try another, or wait a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
     return true;
   }
   const [pl, spot] = free;
@@ -9292,12 +9298,12 @@ function sitTap(it, at, point) {
 // usable place's spot at any height up to 1.2 m (the belt, the console, the seat), use that place as a tap on it
 // would: the gym, a call-home booth, a store shelf, or a seat to sit on. Else the floor tap walks, as always.
 const FLOOR_NEAR = .5;
-const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves' };
+const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
-    const use = FLOOR_ACTS[pl.type] ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
+    const use = FLOOR_ACTS[pl.type] && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)) ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
     const sp = placeSpot(pl.id); if (!sp) continue;
     let best = Infinity;
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
@@ -9350,7 +9356,7 @@ function actBegin() {
   const A = ACT; if (!A) return;
   const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && heldBy(pl.id);
   if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
-    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(q.type === 'shower' && privatePlace(q)))
+    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
