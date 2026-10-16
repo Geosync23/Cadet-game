@@ -42,9 +42,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device,.devtip,.devdlg,#chat.devchat{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip,.devdlg,.devaddr,#chat.devchat{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
@@ -134,6 +134,11 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 .devdlg .next{display:block;margin-left:auto}
 .devdlg .x,#chat.devchat .x{position:absolute;top:6px;right:8px;border:0;min-width:44px;font-size:22px;padding:0;flex:none}
 body.dlgon .devtip{display:none}
+.devaddr{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:5;width:min(560px,calc(100% - 20px));padding:10px 16px 12px;border-radius:14px;border:3px solid var(--bezel);cursor:pointer;
+  font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.4;color:var(--crt-hot);background:var(--crt-bg);text-shadow:0 0 6px var(--crt-glow);box-shadow:0 8px 28px rgba(0,0,0,.55),inset 0 0 22px rgba(0,0,0,.85)}
+.devaddr[hidden]{display:none}
+.devaddr small{display:block;margin-bottom:4px;font-size:15px;letter-spacing:.1em;color:var(--crt-ink)}
+.devaddr p{margin:0}
 .devtip b{flex:none;padding:0 6px;border-radius:3px;background:var(--crt-ink);color:var(--crt-bg);text-shadow:none;letter-spacing:.1em}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
@@ -176,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.6
+   STARSHIP CADET: CSV Wren                            build 0.35.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6638,7 +6643,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.6';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7758,6 +7763,9 @@ requestAnimationFrame(deviceFrameStep);
 // ---- the meeting dialogue panel (Part 2, "meetings with dialogue"): section 18 owns the scripts and their flow
 // (advancing, replies, walking away); this only draws and reports taps. deviceDialogue(view, onTap): view = { title,
 // name, who, text, to, pose, choices: null | [text], i, n }; onTap() goes on, onTap(k) picks reply k. null closes it.
+// the Captain's ship-wide address (section 18's captainAddress calls this first): a banner across the top in the
+// screen's style, about 20 real seconds, a tap dismisses it. deviceAddress(null) hides it.
+function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); return true; }
 let devDlgTap = null;
 function deviceDialogue(v, onTap) {
   devDlgTap = v && typeof onTap === 'function' ? onTap : null;
@@ -7912,6 +7920,15 @@ const DEVICE_SKIN = (() => {
         v.choices.forEach((ch, k) => { const b = mk('button', 'act', ch); b.type = 'button'; b.onclick = e => { e.stopPropagation(); devDialogueDo('choose', k); }; box.appendChild(b); });
         c.appendChild(box);
       } else { const n = mk('button', 'act next', 'Go on ▸'); n.type = 'button'; n.onclick = e => { e.stopPropagation(); devDialogueDo('next'); }; c.appendChild(n); }
+    },
+    address(a) {
+      let c = $('devAddr');
+      if (!c) { c = mk('div', 'devaddr'); c.id = 'devAddr'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
+        c.addEventListener('pointerdown', e => e.stopPropagation()); c.onclick = () => skin.address(null); }
+      clearTimeout(c._t); c.hidden = !a; if (!a) return;
+      c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
+      c.append(mk('small', '', ((a.from || 'The Captain') + ', to all hands').toUpperCase()), mk('p', '', a.text));
+      c._t = setTimeout(() => skin.address(null), 20000);
     },
     chat(el, v) {                              // section 20's chat card (CHAT_SKIN.draw), in the screen's style
       el.className = 'devchat'; el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = '';

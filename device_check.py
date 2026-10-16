@@ -9,6 +9,7 @@
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   Appointments (0.35.6): ask someone for tomorrow at a meeting place; an answer, booked or offered; saved
+#   the meeting panel (deviceDialogue(view, onTap)) and the Captain's address (deviceAddress) draw and report taps
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
@@ -146,6 +147,14 @@ def run(path):
               apptDraft = null; apptSay = null; SHIP.device.appts = []; deviceShow('home'); return out; })()""")
             print('  appointments:', at)
             check(at[0] >= 5 and at[1] == 'string' and at[2] == 1 and at[3] is True, f'appointments: places, an answer, booked or offered, saved: {at}')
+            # the meeting panel and the Captain's address: they draw, and taps report back
+            dl = g.ev("""(() => { const got = []; deviceDialogue({ title: 'Briefing', name: 'Chief Ines Calder', who: 'calder', text: 'Gather round.', choices: null, i: 0, n: 2 }, k => got.push(k === undefined ? 'next' : k));
+              const p = document.getElementById('devDlg'); const out = [!p.hidden, p.textContent.includes('Gather round.')]; p.querySelector('.next').click();
+              deviceDialogue({ title: 'Briefing', name: 'You', text: '', choices: ['Yes', 'No'], i: 1, n: 2 }, k => got.push(k)); p.querySelectorAll('.btns .act')[1].click();
+              deviceDialogue(null); out.push(p.hidden, got.join(','));
+              deviceAddress({ from: 'Captain Odile Marrow', text: 'All hands, the storm has passed.' }); const a = document.getElementById('devAddr'); out.push(!a.hidden && a.textContent.includes('storm has passed'));
+              a.click(); out.push(a.hidden); return out; })()""")
+            check(dl == [True, True, True, 'next,1', True, True], f'meeting panel and address: {dl}')
             # the shim
             sh = g.ev("""(() => { device.addSection('test', 'Test', el => { el.textContent = 'shim works'; }); device.addSection('mail', 'Old inbox', el => { el.textContent = 'old'; });
               device.show('test'); const a = document.getElementById('devBody').textContent; device.show('mail'); const b = document.getElementById('devT').textContent;
