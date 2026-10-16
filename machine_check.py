@@ -20,6 +20,7 @@
 #   event hooks and favours (Pillar 3, C7, 0.33.24): eventMod wear, event jobs, favours (5h)
 #   food runs in live play (0.33.21): the crew take every food run soon after its wait (5f)
 #   the board through a week (0.33.32): jobs for you on every weekday shift, none held on your days off (5i)
+#   the garden (0.33.34): grow lights, gardenAt, the crate run and carryWaiting (5j)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -574,6 +575,54 @@ with sync_playwright() as pw:
           f"crew took {wk['offCrew']} of your kind, you could take one {wk['offTook']} ({wk['offOpen']} job-hours open)")
     if wk['mean'] < 2 or wk['empty'] > wk['hours'] / 10 or not wk['firstMorning'] or wk['emptyStart'] or wk['maxHeld'] > g.ev("HOLD_MAX") or wk['offHeld'] or wk['offCrew'] < 1 or (wk['offOpen'] and wk['offTook'] is not True):
         fail('the board through a week')
+
+    # 5j. the garden (0.33.34, for the galley engineer's working garden): grow lights are machines like any other;
+    # gardenAt(t) is pure, .85 or more while the garden's machines are fine, and falls when the irrigation, dosing or grow
+    # lights are broken (only that one); gardenCarry posts one crate run (asking twice gives the same id), it waits
+    # for you, then a crew member takes it, carryWaiting is true until the drop-off ends and false after; yours lands
+    # through the galley's galleyCarryLand (a stand-in here if section 16 hasn't one) when you tick off the drop
+    gd = g.ev("""(() => {
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 180); machinesNow();
+      const out = { lights: machineList().filter(m => m.kind === 'growlight').map(m => m.id) };
+      const g0 = gardenAt(shipNow()), r0 = MACH_REV, g1 = gardenAt(shipNow()); out.fine = g0; out.pure = MACH_REV === r0 && JSON.stringify(g0) === JSON.stringify(g1);
+      const broke = {};
+      for (const kind of ['irrigation', 'nutrient', 'growlight']) {
+        const save = JSON.stringify(SHIP.machines);
+        for (const m of machineList()) if (m.kind === kind) { SHIP.machines[m.id].cond = 0; SHIP.machines[m.id].state = 'broken'; }
+        machRecord(MACH_HOUR - 1); broke[kind] = gardenAt(shipNow());
+        SHIP.machines = JSON.parse(save); machRecord(MACH_HOUR - 1);
+      }
+      out.broke = broke;
+      // a crate run at 09:00 on day 1: waits for you, then the crew
+      setShipNow(t0 + 180); const id = gardenCarry({ crates: 3 }), id2 = gardenCarry({ crates: 3, at: t0 + 180 });
+      out.id = id; out.same = id === id2; out.forYou = openJobs('you').some(x => x.id === id); out.waiting0 = carryWaiting(id);
+      let arrived = null, claimedBy = null;
+      for (let t = t0 + 180; t < t0 + 180 + 600; t += 10) { setShipNow(t); machinesNow(); const j = SHIP.jobs.find(x => x.id === id); claimedBy = j.claimedBy; if (!carryWaiting(id)) { arrived = t; break; } }
+      out.claimedBy = claimedBy; out.arrived = arrived !== null; out.after = arrived !== null && carryArrivedAt(id) <= arrived && carryWaiting(id, carryArrivedAt(id) - 1);
+      // yours: take one, tick off the pickup and the drop
+      const real = typeof galleyCarryLand === 'function' ? galleyCarryLand : null, landed = [];
+      if (!real) window.__sc("galleyCarryLand = id => { window.__landed.push(id); return 1; }"); else window.__sc("window.__gcl = galleyCarryLand; galleyCarryLand = id => { window.__landed.push(id); return window.__gcl(id); }");
+      window.__landed = landed;
+      const mine = gardenCarry({ crates: 2 }); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+      out.took = claimJob(mine); const st = jobStops(SHIP.jobs.find(x => x.id === mine));
+      out.stops = st.map(x => x.step).join(' ');
+      const wBefore = carryWaiting(mine); st.forEach((x, k) => jobStepDone(mine, k));
+      out.mineWaiting = [wBefore, carryWaiting(mine)]; out.landed = window.__landed.slice();
+      if (!real) window.__sc("galleyCarryLand = undefined"); else window.__sc("galleyCarryLand = window.__gcl");
+      SHIP.jobs = SHIP.jobs.filter(j => j.id !== mine && j.id !== id); setShipNow(t0);
+      return out;
+    })()""")
+    print(f"The garden: grow lights {gd['lights']}; gardenAt all fine {gd['fine']}, pure {gd['pure']}; broken: {gd['broke']}")
+    print(f"  crate run {gd['id']}: once {gd['same']}, for you first {gd['forYou']}, taken by {gd['claimedBy']}, arrived {gd['arrived']}, carryWaiting till then {gd['after']}; "
+          f"yours: took {gd['took']}, stops '{gd['stops']}', waiting before/after the drop {gd['mineWaiting']}, landed {gd['landed']}")
+    b = gd['broke']
+    if (len(gd['lights']) < 1 or min(gd['fine'].values()) < .85 or not gd['pure']
+        or not (b['irrigation']['water'] == 0 and b['irrigation']['feed'] == gd['fine']['feed'] and b['irrigation']['light'] == gd['fine']['light'])
+        or not (b['nutrient']['feed'] == 0 and b['nutrient']['water'] == gd['fine']['water']) or not (b['growlight']['light'] == 0 and b['growlight']['water'] == gd['fine']['water'])
+        or not gd['same'] or not gd['forYou'] or not gd['claimedBy'] or gd['claimedBy'] == 'you' or not gd['arrived'] or not gd['after']
+        or not gd['took'] or gd['mineWaiting'] != [True, False] or len(gd['landed']) != 1):
+        fail('the garden')
 
     # 6. the save
     rt = g.ev("""(() => {
