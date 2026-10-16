@@ -5,7 +5,7 @@ From the outgoing lead (session_01WHXNp9A1WHAD2EHJw384Qp) to the new lead. You a
 ## The user
 
 New to Claude Code and git: plain language, no jargon, short updates. Active today. Every request comes through the lead. They like PushNotification pings when something they wait for is ready (a new build on the link). PRs to `main` only when they approve; they approved and merged 0.41.4 (PR #2). Rules they set today:
-- **Hand over before memory fills** (CLAUDE.md). This brief exists because the user had to ask: do it earlier next time (around half of memory).
+- **Hand over before memory fills** (CLAUDE.md). This brief exists because the user had to ask: (Updated by the user later on 2026-10-16: helpers at ~70%; the lead judges before each bigger step whether it has room, and hands over first if not.)
 - **Resume fast after a usage limit**: keep a REPEATING hourly check-in (create_trigger cron). Mine is trig_01NKBjg2UJa1tXFjWU5Zd29L ("Lead check-in (repeating)", fires :53 into THIS old session) — DELETE it and create your own pointing at your session. If a limit is coming, also add a one-shot send_later just after the reset time.
 - **At most ~5-6 helpers actively building at once** (the user's "be more careful" after the 15:10 reset). Others on standby answering questions only.
 
