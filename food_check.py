@@ -231,23 +231,24 @@ with sync_playwright() as pw:
     if not ev['h'] or 'salad' not in (ev['salad'] or ''): fail(f"harvest salad: {ev}")
     if ev['real'] and ev['gather'] is None: fail('birthday gathering time not read from eventsOn')
 
-    # 4h. ship-wide events (C7, 0.29.18): section 18's eventMod('galley', key, t), read on the hour. A stand-in
-    # eventMod for the ion storm's escalation on day DAY + 9 (storm stew, quicker pots, 1.5 x the grab shelf, 6 trays for
+    # 4h. ship-wide events (C7, 0.29.18): section 18's eventModAt / eventMod('galley', key, t), read on the hour. Stand-ins
+    # through GALLEY_TEST (section 18's and 17's functions may be consts) for the ion storm's escalation on day DAY + 9 (storm stew, quicker pots, 1.5 x the grab shelf, 6 trays for
     # the bridge) and a formal dinner on day DAY + 10 (a batch of 12, 8 extra portions). Inert with no event: the
     # days above already ran with eventNow null (or no section 18)
-    evg = g.ev(f"""(() => {{ const keepAt = typeof eventMod === 'function' ? eventMod : undefined, keepTr = typeof cartTrays === 'function' ? cartTrays : undefined;
+    evg = g.ev(f"""(() => {{
       const storm = {DAY} + 9, dinner = {DAY} + 10, sent = []; window.__sent = sent;
       window.__evs = {{ [storm]: {{ menu: 'stormStew', cook: .75, grab: 1.5, trays: 6 }}, [dinner]: {{ batch: {{ meals: 12, label: 'the Envoy’s dinner' }}, extra: 8 }} }};
-      window.__sc("eventMod = (kind, key, t) => {{ const e = window.__evs[Math.floor(t / 1440) + 1]; return kind === 'galley' && e && e[key] !== undefined ? e[key] : null; }}; cartTrays = o => window.__sent.push(o)");
+      GALLEY_TEST.eventMod = (kind, key, t) => {{ const e = window.__evs[Math.floor(t / 1440) + 1]; return kind === 'galley' && e && e[key] !== undefined ? e[key] : null; }};
+      GALLEY_TEST.cartTrays = o => window.__sent.push(o);
       for (const E of GALLEY_EV.values()) E.k = 0;
       const plain = galleyReport(storm - 1, 1)[0], rep = galleyReport(storm, 2);
       SHIP.galley = null; setShipNow((storm - 1) * 1440 + 18 * 60 + 30); galleyAdvance(shipNow());
       const out = {{ plainCooked: plain.cooked, plainBaked: plain.baked, storm: {{ cooked: rep[0].cooked, baked: rep[0].baked, trays: rep[0].trays, maxWait: rep[0].maxWait, missed: rep[0].missed.length }},
         dinner: {{ batch: rep[1].batch, cooked: rep[1].cooked, maxWait: rep[1].maxWait }}, dish: SHIP.galley.servery.dish, text: galleyText('servery'), sent: sent.length ? sent[0] : null }};
       setShipNow((dinner - 1) * 1440 + 16 * 60); galleyAdvance(shipNow()); out.batchText = galleyText('servery'); out.cold = SHIP.galley.cold.meals;
-      window.__sc("eventMod = window.__keepAt; cartTrays = window.__keepTr"); window.__keepAt = keepAt; window.__keepTr = keepTr;
+      GALLEY_TEST.eventMod = GALLEY_TEST.cartTrays = null;
       SHIP.galley = null; GALLEY_EV.clear(); return out; }})()""")
-    print('Events (stand-in eventMod): storm', evg['storm'], 'dish', repr(evg['dish']), 'trays sent', evg['sent'])
+    print('Events (stand-ins in GALLEY_TEST): storm', evg['storm'], 'dish', repr(evg['dish']), 'trays sent', evg['sent'])
     print('  ', evg['text'][:150], '| formal dinner', evg['dinner'], '|', evg['batchText'][-80:])
     if evg['dish'] != 'storm stew' or evg['storm']['trays'] != 6 or not evg['sent'] or evg['sent'].get('trays') != 6 or 'bridge' not in evg['text']: fail(f"storm: {evg}")
     if evg['storm']['missed'] or evg['storm']['maxWait'] > BUSY_WAIT_MAX: fail(f"storm: waits {evg['storm']}")
