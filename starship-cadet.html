@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.8
+   STARSHIP CADET: CSV Wren                            build 0.29.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.11';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7654,11 +7654,52 @@ const FOOD = {
   close: { breakfast: 510, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted)
   slack: 3, grabSlack: 4,                 // a few more than the plans need (you, for one)
   giveUp: 30,                             // minutes after the close that anyone still waiting gives up
+  spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken
+  binAt: [540, 1260], binOut: 630,        // spoiled food is binned at the 09:00 and 21:00 checks; the bin goes at 10:30
 };
+// the menu (answer 10): a week's cycle. Breakfasts by weekday. Dinners on Monday, Tuesday, Thursday and Saturday from
+// `cycle`, moving on four dishes a week; Wednesday is a crew member's favourite (someone different each week);
+// Friday is the treat, with a pudding; Sunday is the dish the crew voted for (galleyMenu). No dish name has a full stop
+// in it (the player's section reads "Serving: <dish>.").
 const MENU = {
   breakfast: ['porridge and eggs', 'pancakes and fruit', 'eggs and garden greens', 'oat bake and yoghurt', 'eggs on toast', 'Brennan\'s spiced beans', 'the big Sunday fry'],
-  dinner: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'pizza night', 'Sunday roast'],
+  cycle: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'dumplings and greens', 'chilli and cornbread', 'mushroom risotto', 'shepherd\'s pie'],
+  treat: ['pizza night', 'fish and chips', 'burger night', 'tacos'],
+  pudding: ['sticky toffee pudding', 'apple crumble', 'chocolate cake', 'ice cream sundaes'],
+  // what the crew like best (a ROSTER `favourite` wins; otherwise one of these, from the person's seed)
+  fav: ['curry and rice', 'fish pie', 'Sunday roast', 'noodle soup', 'pizza night', 'dumplings and greens', 'chilli and cornbread', 'mushroom risotto', 'Brennan\'s spiced lentils', 'shepherd\'s pie', 'fish and chips', 'tacos'],
 };
+const galleyFirst = p => { const w = p.name.split(' '); return /^(Dr\.|Chef)$/.test(w[0]) ? w[0] + ' ' + w[w.length - 1] : w[0]; };
+const galleyFav = (p, k = 0) => k === 0 && p.favourite ? p.favourite : MENU.fav[Math.floor(schedU(p.seed, 0, 920 + k) * MENU.fav.length)];
+// a day's menu: { breakfast, dinner, note, pudding, fav: person, votes: [[dish, n], ...] }. Sunday's vote: everyone
+// aboard votes for their favourite, or their second choice if the favourite was on this week's menu; about one in
+// four doesn't bother. The most votes wins (ties: the earlier in MENU.fav).
+const GALLEY_MENU = new Map();
+function galleyMenu(d) {
+  if (GALLEY_MENU.has(d)) return GALLEY_MENU.get(d);
+  const wd = weekday(d), w = Math.floor((d - 1) / 7), C = MENU.cycle, out = { breakfast: MENU.breakfast[wd], dinner: '', note: '' };
+  const ppl = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1), regular = k => C[(w * 4 + k) % C.length];
+  if (wd === 2 && ppl.length) {                          // a favourite that isn't on the menu already this week
+    const p = ppl[(w * 5) % ppl.length], on = [0, 1, 2, 3].map(regular).concat(MENU.treat[w % MENU.treat.length]);
+    const pick = [galleyFav(p), galleyFav(p, 1), ...MENU.fav].find(x => !on.includes(x)) || galleyFav(p);
+    out.fav = p.id; out.dinner = pick; out.note = `${galleyFirst(p)}'s ${pick === galleyFav(p) ? 'favourite' : 'pick'}`;
+  } else if (wd === 4) {
+    out.dinner = MENU.treat[w % MENU.treat.length]; out.pudding = MENU.pudding[w % MENU.pudding.length]; out.note = `Friday treat, with ${out.pudding}`;
+  } else if (wd === 6) {
+    const week = [0, 1, 2, 3].map(regular).concat(MENU.treat[w % MENU.treat.length]), n = new Map();
+    for (const p of ppl) {
+      if (schedU(p.seed, w, 930) < .25) continue;
+      const a = galleyFav(p), b = galleyFav(p, 1), v = week.includes(a) && !week.includes(b) ? b : a;
+      n.set(v, (n.get(v) || 0) + 1);
+    }
+    out.votes = [...n].sort((x, y) => y[1] - x[1] || MENU.fav.indexOf(x[0]) - MENU.fav.indexOf(y[0]));
+    out.dinner = out.votes.length ? out.votes[0][0] : 'Sunday roast';
+    out.note = out.votes.length ? `voted for by the crew, ${out.votes[0][1]} votes` : '';
+  } else out.dinner = regular([0, 1, , 2, , 3][wd]);
+  GALLEY_MENU.set(d, out);
+  for (const k of GALLEY_MENU.keys()) if (k < d - 8 || k > d + 8) GALLEY_MENU.delete(k);
+  return out;
+}
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
 const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
@@ -7711,6 +7752,18 @@ function galleyStep(S, m, st) {
     if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals]); }
     if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
   }
+  // spoilage (answer 7): section 17's shipEffectsAt(3, m).spoil is 1 while the cold store's chiller is fine, up to 2
+  // when it's broken (read on the hour; pure, so replays agree). A warm store's food goes off bit by bit (S.rot);
+  // the 09:00 and 21:00 checks bin what's gone off (S.bin, by the dish pit) and tell you by Mail; the bin goes at 10:30
+  if (md % 60 === 0) { const e = typeof shipEffectsAt === 'function' && shipEffectsAt(3, m); S.spoil = e && e.spoil > 1 ? e.spoil - 1 : 0; }
+  if (S.spoil) S.rot = (S.rot || 0) + S.cold.meals * S.spoil * FOOD.spoilDay / 1440;
+  if (S.rot >= 1 && FOOD.binAt.includes(md)) {
+    const n = Math.min(S.cold.meals, Math.floor(S.rot));
+    S.rot -= Math.floor(S.rot); S.cold.meals -= n; S.bin = (S.bin || 0) + n;
+    if (st) st.spoiled += n;
+    else if (n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
+  }
+  if (md === FOOD.binOut) S.bin = 0;
   // plates come back, and the dish pit washes what it can
   if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
   const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;
@@ -7720,7 +7773,7 @@ function galleyStep(S, m, st) {
   let cooks = E.cook[md], bakers = E.bake[md];
   const potsOf = kind => S.pots.filter(p => p[2] === kind).length;
   if (meal && md >= FOOD.open[meal] - FOOD.lead) {
-    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = MENU[meal][weekday(d)]; S.servery.meal = meal; }
+    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = galleyMenu(d)[meal]; S.servery.meal = meal; }
     let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
@@ -7786,6 +7839,15 @@ function galleyStep(S, m, st) {
   }
 }
 // step SHIP.galley up to ship minute `to` (absolute); a fresh start when there's no state or time went backwards
+// a note to the device's Mail tab (section 15's mailSend, when it's there), once: never twice for the same minute and subject
+const GALLEY_MAILED = new Set();
+function galleyMail(at, subject, body) {
+  if (typeof mailSend !== 'function') return;
+  const key = at + '|' + subject, box = SHIP.mail && (Array.isArray(SHIP.mail) ? SHIP.mail : SHIP.mail.inbox);
+  if (GALLEY_MAILED.has(key) || (Array.isArray(box) && box.some(x => x && x.at === at && x.subject === subject))) return;
+  GALLEY_MAILED.add(key); mailSend({ at, from: galleyChef() || 'The galley', subject, body });
+}
+const galleyChef = () => { const c = galleyStaff().find(p => galleyTeam(p) === 'chef'); return c ? galleyFirst(c) : ''; };
 function galleyAdvance(to) {
   to = Math.floor(to);
   let S = SHIP.galley;
@@ -7838,17 +7900,25 @@ function galleyText(what = 'servery') {
   const S = galleyAdvance(shipNow()), md = SHIP.time.min, meal = md >= FOOD.close.breakfast && md < FOOD.close.dinner ? 'dinner' : 'breakfast';
   if (what === 'grab') return S.grab.items ? `${S.grab.items} on the shelf.` : 'The shelf is empty.';
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
-  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.`;
+  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
+  if (what === 'menu') return galleyBoard();
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
-  if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.`;
-  return open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`;
+  const M = galleyMenu(SHIP.time.day), extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
+  if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
+  return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
+}
+// the menu board: today's meals and the week's dinners
+function galleyBoard(d = SHIP.time.day) {
+  const M = galleyMenu(d);
+  const week = [...Array(7)].map((_, k) => d - weekday(d) + k).map(x => WEEKDAYS[weekday(x)].slice(0, 3) + ' ' + galleyMenu(x).dinner);
+  return `Today: ${M.breakfast} for breakfast, ${M.dinner} for dinner${M.note ? ' (' + M.note + ')' : ''}. This week's dinners: ${week.join(', ')}.`;
 }
 // food_check.py: `days` ship days from a fresh galley at the start of `day`, with the figures for each day
 function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, spoiled: 0, ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
@@ -7893,6 +7963,12 @@ function galleyVisuals() {
     if (t) { V.grab.material.userData.base = { op: 1, tr: false }; t.mats.push(V.grab.material); }
   }
   if (dp) V.plates = im(new THREE.CylinderGeometry(.1, .1, .012, 16), std('#d9d3c4', .45, .05), 24, dp.g);
+  if (dp) V.bin = im(new THREE.SphereGeometry(1, 10, 7), std('#2c3a30', .8), 3, dp.g);   // spoiled food, bagged, beside the dish pit
+  const mb = it('Menu board');                           // the board's canvas, redrawn with the day's menu; its tap text, live
+  if (mb) {
+    mb.g.traverse(o => { if (o.material && o.material.map && o.material.map.image && o.material.map.image.getContext) V.board = o.material.map; });
+    Object.defineProperty(mb, 'x', { get: () => galleyBoard(), configurable: true });
+  }
   return V;
 }
 const _gm = new THREE.Matrix4(), _gq = new THREE.Quaternion(), _gsc = new THREE.Vector3(), _gpo = new THREE.Vector3();
@@ -7900,7 +7976,9 @@ function galleyShow() {
   if (!deckDef || deckDef.num !== 3) { GV = null; return; }
   if (!GV || GV.root !== deckRoot) GV = galleyVisuals();
   const S = SHIP.galley, p = S.servery.portions, g = Math.ceil(S.grab.items / 2), dirty = Math.min(24, Math.ceil(S.dirty / 3));
-  const key = p + '|' + g + '|' + dirty; if (key === GV.key) return; GV.key = key;
+  if (GV.board && GV.boardDay !== SHIP.time.day) { GV.boardDay = SHIP.time.day; galleyBoardDraw(GV.board, SHIP.time.day); }
+  const bags = Math.min(3, Math.ceil((S.bin || 0) / 10));
+  const key = p + '|' + g + '|' + dirty + '|' + bags; if (key === GV.key) return; GV.key = key;
   const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
   if (GV.food) {
     const h = .008 + .05 * Math.min(1, p / FOOD.serveryCap);   // from just over the pans' own food (top at .98) up
@@ -7919,6 +7997,27 @@ function galleyShow() {
     for (let k = 0; k < 24; k++) put(GV.plates, k, k < 12 ? -.62 : -.28, .914 + (k % 12) * .014, .1, 1, 1, 1);
     GV.plates.instanceMatrix.needsUpdate = true;
   }
+  if (GV.bin) {                                         // up to three bags, one for every 10 meals binned, against the wall by the pit's end
+    GV.bin.count = bags;
+    [[-1.06, .15, -.19, .14, .15, .13], [-1.06, .15, .09, .14, .15, .13], [-1.06, .39, -.05, .12, .11, .11]].forEach((b, k) => put(GV.bin, k, ...b));
+    GV.bin.instanceMatrix.needsUpdate = true;
+  }
+}
+// the menu board (section 4b's menuBoard canvas, 320 x 200), in its own style: the day's breakfast and dinner, and the
+// dinner's note (a favourite, the Friday treat, the Sunday vote)
+function galleyBoardDraw(t, d) {
+  const c = t.image.getContext('2d'), w = t.image.width, h = t.image.height, M = galleyMenu(d), cap = x => x[0].toUpperCase() + x.slice(1);
+  const line = (txt, y, font, colour) => { let px = parseInt(font.split(' ')[1]); c.fillStyle = colour; do c.font = font.replace(/\d+px/, px + 'px'); while (c.measureText(txt).width > w - 30 && --px > 9); c.fillText(txt, 18, y); };
+  c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
+  line('MESS', 34, '700 24px system-ui,sans-serif', '#e8c06a');
+  c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText(WEEKDAYS[weekday(d)], w - 18 - c.measureText(WEEKDAYS[weekday(d)]).width, 34);
+  line('Breakfast 06:00  ' + cap(M.breakfast), 66, '600 15px system-ui,sans-serif', '#9fd9cf');
+  line('Dinner 17:00  ' + cap(M.dinner), 92, '600 15px system-ui,sans-serif', '#9fd9cf');
+  if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
+  line('Fresh rolls, garden greens', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  line('Grab & go by the line', 172, '500 15px system-ui,sans-serif', '#e8eef0');
+  c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
+  t.needsUpdate = true;
 }
 // once a frame from the main loop: the galley up to the minute, and on Deck 3, what it looks like
 function galleyTick() { galleyAdvance(shipNow()); galleyShow(); }
