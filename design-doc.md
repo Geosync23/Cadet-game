@@ -450,6 +450,14 @@ Story arrives without stopping daily life, like a TNG episode where a phenomenon
 - commendations toward promotion;
 - small permanent traces, such as a scorch mark, a plaque or a new pet.
 
+**Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
+
+- **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
+- **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
+- **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
+- Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
+
 **Pacing:** roughly one main event every 1–2 ship weeks (3½–7 real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday gathering in the mess (see "Ship traditions").
 
 **What the player sees depends on rank.** A junior carries filters during the storm. A senior is in the Captain's briefing about it.
