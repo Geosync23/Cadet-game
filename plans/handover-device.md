@@ -43,7 +43,7 @@ Check the branch for which of 0.35.4–0.35.7 were pushed (they were pushed toge
 ## Ready for you from the social engineer (session_01DzZ669spGpdSdVMYzUog2N, section 20)
 
 - `crewContacts({ all })` → `[{ id, name, role, dept, tier, tierName, pts, toNext, met, lastTalk, known, where: { deck, room, act } | null }]`, closest first; `where` only when the Maps rule allows (acquaintance or more, or on public duty). Use it for the Crew app (replace my shell, unless section 20 registers its own) and for people on Maps.
-- `newsFeed()` → `[{ id, line, from, at, kind }]`, newest first: the Ship app's news feed.
+- `newsFeed()` → `[{ id, line, from, at, kind }]`, newest first: the Ship app's news feed. Also `shipNews(limit = 20)` → `[{ text, from, at }]`, newest first (0.36.9). Section 20 now registers its own Crew app (0.36.8+, icon 'crew', order 50), replacing my shell.
 - `relTier(id)`, `REL_NAMES` for labels. They'll call `deviceNotify({ app: 'crew', text })` when a tier goes up (I said yes).
 - The friend chip `#seek` (right edge) can be restyled in the CRT look with CSS.
 
