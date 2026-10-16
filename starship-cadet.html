@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.21
+   STARSHIP CADET: CSV Wren                            build 0.27.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2657,6 +2657,45 @@ function packGroups(geo, mats) {
   for (const gr of geo.groups) { const p = out[out.length - 1]; if (p && mats[p.materialIndex] === mats[gr.materialIndex] && p.start + p.count === gr.start) p.count += gr.count; else out.push({ ...gr }); }
   geo.groups = out; return geo;
 }
+// 0.27.22: tall furniture is drawn together: one mesh per material (and shadow flag) for the whole deck, made from
+// every room's merged pieces in room order, with one more copy of the material made like each room's own (so it
+// doesn't pulse or wilt with the shared one, as before). A room that is fading or faded (t.o below 1) shows its own
+// meshes again, and the deck-wide mesh skips that room's stretch (tallSync, each frame after the fades). Opaque only.
+let TALL_ALL = [], TALL_KEY = null;
+function tallCombine() {
+  const buckets = new Map(); TALL_ALL = []; TALL_KEY = null;
+  TALL.forEach((t, ti) => {
+    t.own = [];
+    for (const o of t.g.children.slice()) {
+      const base = o.isMesh && !o.userData.noMerge && !Array.isArray(o.material) && t.src.get(o.material);
+      if (!base || base.transparent || base.opacity < 1) continue;
+      const key = base.uuid + (o.castShadow ? '' : '-ns');
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, P: [], N: [], U: [], ranges: [] });
+      const a = o.geometry.attributes, n = a.position.count;
+      b.ranges.push([ti, b.P.length / 3, n]); for (const [d, s] of [[b.P, a.position], [b.N, a.normal], [b.U, a.uv]]) for (const v of s.array) d.push(v);
+      o.visible = false; t.own.push(o);
+    }
+  });
+  for (const b of buckets.values()) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2)); geo.computeBoundingSphere();
+    const mesh = new THREE.Mesh(geo, [b.mat]); mesh.castShadow = b.shadow; mesh.receiveShadow = true; mesh.raycast = () => {}; deckRoot.add(mesh);
+    TALL_ALL.push({ mesh, ranges: b.ranges });
+  }
+  tallSync();
+}
+function tallSync() {
+  let key = ''; TALL.forEach((t, i) => { if (t.o !== 1) key += i + ','; });
+  if (key === TALL_KEY) return;
+  TALL_KEY = key; const out = new Set(key.split(',').filter(Boolean).map(Number));
+  TALL.forEach((t, i) => { for (const o of t.own || []) o.visible = out.has(i); });
+  for (const b of TALL_ALL) {
+    const gr = [];
+    for (const [ti, start, count] of b.ranges) { if (out.has(ti)) continue; const p = gr[gr.length - 1]; if (p && p.start + p.count === start) p.count += count; else gr.push({ start, count, materialIndex: 0 }); }
+    b.mesh.geometry.groups = gr; b.mesh.visible = gr.length > 0;
+  }
+}
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
@@ -3112,8 +3151,9 @@ function buildDeck(def) {
     const clones = new Map();
     const cl = m => { if (!clones.has(m)) { const c = m.clone(); c.userData.base = { op: m.opacity, tr: m.transparent }; clones.set(m, c); } return clones.get(m); };
     t.g.traverse(o => { if (o.isMesh && !o.userData.noMerge) o.material = Array.isArray(o.material) ? o.material.map(cl) : cl(o.material); });
-    mergeMeshes(t.g); t.mats = [...clones.values()];
+    mergeMeshes(t.g); t.mats = [...clones.values()]; t.src = new Map([...clones].map(([b, c]) => [c, b]));
   }
+  tallCombine();
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
   for (const it of ITEMS) it.hit.userData.item = it;
@@ -6959,7 +6999,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.21';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.22';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -16363,7 +16403,7 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
-  doorLeavesSync();                                      // section 4: the door leaves, drawn together (0.27.21)
+  doorLeavesSync(); tallSync();                          // section 4: door leaves (0.27.21) and tall furniture (0.27.22), drawn together
   if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
 
   // ambient life
