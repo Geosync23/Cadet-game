@@ -1,6 +1,6 @@
 # Pillar 4: the deep social system (plan)
 
-*Draft 1, 2026-10-16, by the social system designer (session_01SMfS1WKqzQ93X6zyZ7NFpJ, branch `claude/social-design`). Written with the Pillar 4 planner (session_01KLFXcNJztCSVLXunD8Jt7R), who owns the overall Pillar 4 plan (arrival, first week, dialogue at scale, traditions, staffing). Nothing here is built until the user approves it. It builds on what section 20 already does (see "Where we start").*
+*Draft 2, 2026-10-16 (draft 2 folds in the interfaces agreed with the Pillar 4 planner: the content pipeline, the query API, the ship notes bus, onboarding's flags, `lineFor`, two social engineers), by the social system designer (session_01SMfS1WKqzQ93X6zyZ7NFpJ, branch `claude/social-design`). Written with the Pillar 4 planner (session_01KLFXcNJztCSVLXunD8Jt7R), who owns the overall Pillar 4 plan (arrival, first week, dialogue at scale, traditions, staffing). Nothing here is built until the user approves it. It builds on what section 20 already does (see "Where we start").*
 
 ## The pitch (one page)
 
@@ -12,9 +12,9 @@ Pillar 3 gave the Wren's crew a relationship meter, a chat card, gossip, favours
 - **They have lives with each other.** Friendships form and fade, a few pairs fall out and make up, mentors take juniors under their wing, and crew talk about each other. You can bring two people together.
 - **Small kindnesses.** Give a small gift (a tin of tea from the store, herbs from the garden, a little thing you made in the machine shop). Friends drop by your bunk in the evening, leave a note if you're out, and invite you to things: dinner together, the observatory, their tradition, their show.
 - **Your name gets around.** Each department remembers what you've done for them (the galley knows who fixes their ovens). Strangers there start warmer, ask you for favours, and invite you to their things.
-- **Lines that fit.** Everything anyone says is picked from banks of lines by who they are (a voice card for each of the 75), how well they know you, their mood, what they remember and what's happening on the ship. Writers fill the banks as plain data; they never touch the game's code.
+- **Lines that fit.** Everything anyone says is picked from banks of lines by who they are (a voice card for each of the 75), how well they know you, their mood, what they remember and what's happening on the ship. Writers fill plain files under `content/` that a generator bakes into the game (the planner's pipeline); they never touch the game's code.
 - **No romance** with the player, ever (the user's rule). **No fail state:** you can't lose a friend for good, and there's never a wrong answer.
-- **Cheap:** all of it runs on paper hour by hour for 75 people in well under a millisecond, saved compactly, and checked by an extended `social_check.py` and a new `words_check.py` for the writers' data.
+- **Cheap:** all of it runs on paper hour by hour for 75 people in well under a millisecond, saved compactly, and checked by an extended `social_check.py` (the writers' data by the planner's `lines_check.py`).
 
 ## Where we start (section 20, built in Pillar 3, 0.36.0 to 0.36.17)
 
@@ -43,12 +43,12 @@ What's thin today (from the social engineer's handover and a read of the code): 
 
 1. **Cozy first.** Tiers never drop. Memories fade, but fading only means they stop being mentioned. A neglected friendship cools in *words* ("Haven't seen you in ages!"), never in tier.
 2. **Generally light, heartfelt as you get close** (the user). Strangers and acquaintances are friendly and funny; colleagues share opinions and small worries; friends share struggles; close friends share what matters most. At most **one serious moment a ship day** for you, ship-wide, so the tone stays light.
-3. **No romance with the player** (the user's rule). No flirting lines, no dates, no "more than friends" moments. Writers' lines are checked for it (`words_check` flags a short list of words). Crew-to-crew: see Open questions.
+3. **No romance with the player** (the user's rule). No flirting lines, no dates, no "more than friends" moments. Writers' lines are checked for it (`lines_check` flags a short list of words). Crew-to-crew: see Open questions.
 4. **Never a wrong answer.** Every reply in a moment is kind in its own way; the one that fits the person best gives a little more and a warmer reply. Nothing you say makes anyone dislike you.
 5. **Nothing locked away by luck.** Every crew member's steps can be reached by ordinary play (chatting, eating together, favours, work); moments wait for you rather than expire (except time-bound ones, which come back in a new form).
 6. **Built from the simulation.** Lines and moments use what's really happening (their real schedule, the machine you really fixed, the tradition that really happened, who really came).
 7. **The same ship gives the same social life** (the project's determinism rule): every choice is seeded per person, day and hour (`schedU`), never `Math.random`; running a day hour by hour or in one jump comes out the same.
-8. **Writers never touch engine code.** All words are data in their own block of the file, checked by a script.
+8. **Writers never touch engine code.** All words are plain files under `content/`, baked into marked blocks of the game file and checked by a script.
 9. **Phones first.** Card lines fit a phone (90 characters or fewer for a card line, 60 for a bubble); no new draw calls except the bunk keepsakes (one instanced mesh).
 
 ---
@@ -138,11 +138,11 @@ The existing four-beat arcs (Tomas, Pell, Rina) become the model, now told throu
 
 Each crew member keeps **up to 8 memories of you**: `SHIP.mem[crewId] = [[key, day, w], ...]`.
 
-- `key`: what happened, from a fixed list of memory kinds (with an argument): `fav:lamp`, `fixed:<machineId>`, `came:<traditionId>`, `show:pell-show`, `gift:tea`, `moment:<threadId>:<beat>:<reply>`, `intro:escort`, `intro:dinner`, `missed:<apptId>`, `bday`, `visit`, `introduced:<otherId>`, `helped:storm`, `grubby` (you turned up unwashed), `meeting:<id>:<choice>`.
+- `key`: what happened, from a fixed list of memory kinds (with an argument): `fav.lamp`, `fixed.<machine kind>`, `came.<traditionId>`, `show.pell-show`, `gift.tea`, `moment.<thread>.<beat>.<flavour>`, `intro.arrival`, `intro.dinner`, `missed.<apptId>`, `bday`, `visit`, `introduced.<otherId>`, `helped.storm`, `grubby` (you turned up unwashed), `meeting.<id>.<choice>`, `heard.<key>` (a friend told them).
 - `day`: the ship day it happened.
 - `w`: its weight, 0 to 100, set by its kind.
 
-Memories happen through `memAdd(id, key, { w })`, called by section 20 itself (favours, gifts, moments, traditions joined, appointments) and by other sections through that one function (systems: you fixed a machine they use; events: a meeting reply; the planner's onboarding: intro scenes).
+Memories happen through `memAdd(id, key, { w })`, called by section 20 itself, mostly from the ship notes bus (Part 6): `repair` (you fixed a machine they use), `favour`, `gift`, `tradition` (you came), `apptKept`/`apptMissed`, `choice` (a meeting reply), `introStep` (the planner's onboarding). Other sections never call it directly; they post a note.
 
 ### How they fade
 
@@ -160,9 +160,9 @@ No memory ever takes points away. Sour memories only change words ("You stood me
 
 ### What memories do
 
-1. **Lines call them back.** The line picker (Part 6) can match a memory: `mem: 'fav:lamp'` gives "The lamp's still perfect, by the way." Each callback is said once per memory (it's marked told), so it never nags.
+1. **Lines call them back.** The line picker (Part 6) can match a memory: `mem:fav.lamp` gives "The lamp's still perfect, by the way." Each callback is said once per memory (it's marked told), so it never nags.
 2. **Warmth.** The sum of a person's memory weights is their **warmth** toward you: how present you are in their life right now. It's separate from tier: a close friend you haven't seen in weeks has low warmth ("There you are! Thought you'd left the ship."). Warmth raises the odds of seeking you out, visits and invitations, and picks between "warm" and "missed you" greetings.
-3. **Friends of friends hear.** A big memory becomes small news among their friends ("Rina says you sat with her all evening. That was kind."), which gives those friends a small memory too (`heard:<key>`, small) and a warmer first meeting.
+3. **Friends of friends hear.** A big memory becomes small news among their friends ("Rina says you sat with her all evening. That was kind."), which gives those friends a small memory too (`heard.<key>`, small) and a warmer first meeting.
 
 ---
 
@@ -179,7 +179,7 @@ The pair affinity (`SHIP.aff`, Int8 per pair, hourly drift from time together) s
    - `mentor` (same department, rank gap of one or more, affinity 40+, the senior one's voice card `mentors: true` or traits patient/kind/steady): mentors pass news and favours to their mentee and talk about them;
    - `drifting` (former friends whose affinity has dropped 20 since they became friends, usually because shifts or bunks moved them apart): a bittersweet line, and a chance for you to bring them back together.
 3. **Pair stories.** A bond changing can start a small two-person story you witness: an argument in a corridor (two bubbles, as now), a reconciliation dinner (they sit together; `affinityPlan` gets a day hint), a mentor and mentee at the machine shop. Each is a `CONVOS` script (Part 6) with pair conditions.
-4. **You as the connector.** On the chat card's Ask about… list, a new topic **"Do you know …?"** offers up to three people you know well who they don't (affinity under 20, you colleague+ with both). Picking one: if they're compatible (no clash), their affinity +15, both get a memory (`introduced:<other>`), and it's news. If they clash, a gentle "We've met. We're… different." and nothing changes. Mending a feud already works (chat to both).
+4. **You as the connector.** On the chat card's Ask about… list, a new topic **"Do you know …?"** offers up to three people you know well who they don't (affinity under 20, you colleague+ with both). Picking one: if they're compatible (no clash), their affinity +15, both get a memory (`introduced.<other>`), and it's news. If they clash, a gentle "We've met. We're… different." and nothing changes. Mending a feud already works (chat to both).
 5. **They talk about each other.** Lines can name another crew member by bond: `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}` fill-ins ("Pell and I are doing the quiz together again." / "If you see Ade, don't mention the coffee machine.").
 6. **Seating and plans already use `affinityPlan`** (pure, from starting affinity). It must stay pure for determinism. The deep system adds a **weekly** plan affinity: `affinityPlan(a, b, d)` returns the affinity as it stood at the start of that ship week (a snapshot saved once a week, 2.7 KB), so seating follows friendships that changed without plans ever reading live numbers mid-week. (Needs the sim engineer's OK: plans already built for this week don't change.)
 
@@ -219,51 +219,46 @@ Three kinds, all delivered the same way:
 2. **Personal**, from friends: dinner together, the observatory after dark, a walk round the promenade, help with their hobby, their bunk room for a game. Picked from their habits and voice card (`invites: ['observatory', 'dinner', 'tiles']`).
 3. **Their moment's event**: a show (Pell's format, `eventOneOff`), a call home they want company for, a small ritual (the quiet watch).
 
-**Saying yes** makes an appointment (the device's Appointments, `kind: 'invite'`), which they keep in their plan (section 14, as appointments already are). Keeping it: +3 (as appointments today) and a medium memory (`came:<id>`); a tradition joined with the person who invited you: +2 more. **Saying no** is fine ("Next time, then."), no cost. **Missing it**: the existing remark, and a sour memory.
+**Saying yes** makes an appointment (the device's Appointments, `kind: 'invite'`), which they keep in their plan (section 14, as appointments already are). Keeping it: +3 (as appointments today) and a medium memory (`came.<id>`); a tradition joined with the person who invited you: +2 more. **Saying no** is fine ("Next time, then."), no cost. **Missing it**: the existing remark, and a sour memory.
 
 **From officers:** summons and the Captain's table stay the events engineer's (C10); social only supplies who's warm to you.
 
 ---
 
-## Part 6: How lines are picked (the line engine)
+## Part 6: How lines are picked (social state + the dialogue engine)
 
-### One picker for everything anyone says
+*Agreed with the Pillar 4 planner (draft 2): the planner's **dialogue engine** owns `lineFor(p, kind, ctx)` and the content pipeline; **section 20 decides which kind of line matters most** and owns the pure **query functions** that line conditions read. Writers never see either.*
 
-Every line (the chat card's tap line, the reply after Chat, Ask about answers, chatter bubbles, visit lines, invitations, callbacks) goes through one function:
+### Who does what
 
-`say(p, kind, ctx) -> { text, id, kind } | null`
+1. **Section 20 picks the kind** (the order below: a missed appointment, then a moment ready, then a story beat, and so on down to a greeting), exactly as `chatLine` does today.
+2. It asks the dialogue engine for the words: `lineFor(p, kind, ctx)` returns `{ text, id, kind }` or null (null: section 20 moves down its list).
+3. `lineFor` gathers the person's own lines, their voice template's, then the shared bank for that kind; keeps those whose conditions all hold; scores the most specific highest (person's own above template above shared); takes off points for lines said recently (last 6 by this person, last 12 ship-wide, not saved); picks by `schedU(p.seed, hour, k)` so a second tap in the same hour says the same and the next hour moves on (as now); fills placeholders; applies the voice tokens.
 
-1. Gather the candidate lines for `kind`: the person's own (`VOICE[id].lines[kind]`), their voice template's (`VOICE_TEMPLATES[tpl].lines[kind]`), then the shared bank (`LINES[kind]`).
-2. Keep those whose conditions all hold (below).
-3. Score each: +3 for each condition it names (the most specific line wins), +2 for the person's own, +1 for the template's; minus a big penalty if said recently (last 6 lines of this person, last 12 ship-wide, kept in memory, not saved).
-4. Among the top scores, pick by `schedU(p.seed, hour, k)`, so a second tap in the same hour says the same and the next hour moves on (as now).
-5. Fill the placeholders and apply the voice (below).
+What social needs from `lineFor` (the planner's dialogue engineer builds it): that scoring and seeding, the recently-said penalty, `told:` handling (a memory callback is said once and then marked told through `memTold(id, key)`), voice tokens from the voice card, and the social placeholders filled through the query API.
 
-**Conditions a line can carry** (all optional; writers use the ones they need):
+### The query API (section 20, pure, never changes state)
 
-| Field | Meaning | Example |
+| Function | Answers | Condition in line files |
 | --- | --- | --- |
-| `tier` | `[min, max]` relationship tier with you | `[2, 4]` |
-| `traits` | any of these traits | `['shy', 'quiet']` |
-| `dept`, `rank` | their department, rank | `'galley'` |
-| `mood` | `'low'`, `'ok'`, `'high'` (crewMood bands) | `'low'` |
-| `act` | what they're doing (whereIs act) | `'meal'` |
-| `place` | room name match | `'Observatory'` |
-| `time` | `'morning'`, `'day'`, `'evening'`, `'night'` | |
-| `weekday`, `offDay` | the day | |
-| `mem` | a memory of you they hold (key prefix) | `'fav:'` |
-| `warmth` | `'cold'`, `'warm'` (missed you vs saw you yesterday) | |
-| `bond` | they have a bond of this kind | `'rival'` |
-| `cue` | a recent ship happening (below) | `'fixed:oven'`, `'storm:after'` |
-| `event` | a ship-wide event and phase | `'ionStorm:onset'` |
-| `trad` | a tradition today / last night | `'quiz:today'` |
-| `rep` | your standing with their department | `'known'` |
-| `week1` | first-week only | `true` |
-| `w` | a weight, default 1 | |
+| `relTier(id)` | 0-4 | `tier>=friend`, `tier<colleague` |
+| `mem(id, key)` | the memory, or null; keys are `kind.arg` with prefix match | `mem:fav`, `mem:fav.lamp`, `mem:fixed.oven`, `mem:came.quiz` |
+| `warmth(id)` | `'cold'` / `'warm'` (recent memories vs none for a while) | `warmth:cold` |
+| `affBand(a, b)` | `'rival'` (-40 or less), `'neutral'`, `'friend'` (60+) | `aff:rival` |
+| `bondOf(id, kind)` | a crewmate they have that bond with, or null | `bond:best`, `bond:mentor`, `bond:drifting` |
+| `moodOf(p)` | `'low'` / `'ok'` / `'high'` (crewMood bands) | `mood:low` |
+| `beatOf(arcId)` | beats told so far (`arcBeat(p, t)` already exists for "the next beat due", hence the new name) | `beat:tomas.3` |
+| `knowsNews(p, newsId)` | bool | `news:<id>` |
+| `repBand(dept)` | `'new'` / `'known'` / `'well'` / `'theirs'` | `rep:known` |
+| `knownFor()` | your tags | `you:reliable` |
+| `cue(kind)` | a recent ship note still talked about (the bus, below) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:tradition.quiz` |
+| `flag(key)` | the shared flag store (section 13, beside the bus) | `flag:met.calder`, `week1:true` |
 
-**Placeholders:** `{me}` your first name, `{name}` theirs, `{room}`, `{deck}`, `{other}` (whoever the line is about), `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{boss}` (their Chief), `{thing}` (a memory's object: "the lamp"), `{trad}`, `{time}`. A line whose placeholder can't be filled is skipped.
+Other conditions are the planner's (`event:ionStorm.onset`, `time:morning`, `place:mess`, traits, dept, act). The vocabulary freezes at the end of wave 1.
 
-**Voice:** a voice card's `words` replace tokens in any line: `{hi}`, `{bye}`, `{yes}`, `{thanks}`, `{wow}`, `{sigh}`, `{nick}` (what they call you, by tier). So one shared line ("{hi}, {nick}. Busy day?") sounds like Holt ("Cadet. Busy day?") or like Pell ("Oi oi, spanner. Busy day?"). This is how 75 voices come cheaply from shared banks.
+**Placeholders social fills:** `{me}`, `{nick}` (what they call you, by tier, from the voice card), `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{boss}` (their Chief), `{thing}` (a memory's object: "the lamp"), `{trad}`. A line whose placeholder can't be filled is skipped.
+
+**Voice:** a voice card's `words` replace tokens in any line: `{hi}`, `{bye}`, `{yes}`, `{thanks}`, `{wow}`, `{sigh}`, `{nick}`. So one shared line ("{hi}, {nick}. Busy day?") sounds like Holt ("Cadet. Busy day?") or like Pell ("Oi oi, spanner. Busy day?"). This is how 75 voices come cheaply from shared banks.
 
 ### The chat card's order, extended
 
@@ -283,13 +278,13 @@ The order of "what matters most" (today's `chatLine`) becomes, top first:
 12. A life detail (built), **their joy**, **talk about a bonded crewmate**.
 13. A greeting by tier and warmth (built, now through `say`).
 
-### Ship cues: reacting to what really happened
+### Ship notes: reacting to what really happened
 
-Other sections tell social about things worth talking about with one call, `socialCue(key, { who, deck, dept, until })`: `fixed:<machine kind>` (systems: a repair finished; `who: 'you'` when it was you), `late:dinner` (galley), `harvest` (galley/garden), `storm:onset`, `storm:after` (events), `trad:<id>:done` with who came (events), `guest:arrived`, `promoted:you` (progression). A cue lasts a day or two; lines with `cue:` conditions pick it up ("The oven's working again. Someone's a hero." and, if it was you and they know it, "That was you on the oven? Thank you!"). Cues are also gossip seeds (news), which fixes "gossip is thin on quiet days".
+The planner's **ship notes bus** (`simNote(kind, data)` / `onSim(kind, fn)`, placed early in section 13 so load order never bites) is how every section tells the others what happened. Social listens to: `repair { who, machine, kind, deck }`, `favour { who, from }`, `tradition { id, day, came, you }`, `gift { to, item }`, `apptKept` / `apptMissed { id, with }`, `introStep { step, who }`, `eventPhase { id, phase }`, `choice { script, k, who }` (meeting replies), `jobAbandoned { machine, dept }` (reputation), `harvest`, `lateMeal`. From these it makes memories, reputation, gossip (which fixes "gossip is thin on quiet days") and **cues**: each note stays talked about for a day or two, read by `cue:` conditions ("The oven's working again. Someone's a hero." and, if it was you, "That was you on the oven? {thanks}!"). Social emits `tierUp { id, tier }`, `moment { id, who, beat }`, `bond { a, b, kind }`, `invite { from, id }` for others (onboarding's Settling-in list, the device).
 
 ### Overheard conversations
 
-`CONVOS`: two- to four-line exchanges between two crew, with pair conditions (`pair: { bond, sameDept, aff: [min, max], traits }`) and the usual line conditions. When two eligible crew are settled near each other within chatter range (same room, both awake, not working with a machine), now and then they play one as alternating bubbles (two at most on screen, the existing voice budget). News can ride on one (the second speaker learns it, on screen as on paper). This is the planner's "overheard two-person conversations as you pass"; the planner's writers fill `CONVOS`, the engine is section 20's.
+Two- to four-line exchanges between two crew as you pass (the planner's dialogue workstream: `content/overheard/*.lines`, played as alternating bubbles under the existing voice budget). Social's part: pair conditions read through `affBand` and `bondOf`, and news riding on a conversation is passed on (the second speaker learns it, on screen as on paper) through `newsAdd`'s spread. *TODO: confirm with the planner that the dialogue engine owns playing them.*
 
 ### Moment scripts
 
@@ -319,18 +314,16 @@ Generated crew's moments come from **theme templates** (`MOMENT_THEMES.homesick 
 
 ---
 
-## Part 7: The first week, from the social side (with the planner)
+## Part 7: The first week, from the social side (agreed with the planner)
 
-The planner owns the arrival and the first week (scripts, tutorials, the "Settling in" list). What social provides, through four functions:
+The planner owns the arrival and the first week: `SHIP.intro = { step, day, done, skipped }`, the scripts, tutorials and the "Settling in" list. The seam with social is small:
 
-- `socialIntro(id, role)`: `'escort'` (starts at acquaintance, 12 points, a core memory, and becomes your **mentor**: a mentor bond with you, extra week-1 lines, checks on you each evening of week 1), `'boss'` (Calder at dinner: acquaintance, a core memory), `'bunkmate'` (Tomas; Pell and Rina next door: met, 5 points), `'met'` (anyone else introduced on the tour: met, 2 points).
-- `memAdd(id, key, opts)`: the intro's memories, called back later ("Remember your first day? You held the spanner upside down.").
-- `socialFlag(key)` / `socialFlagged(key)`: saved flags. Social features stay quiet in week 1 until the planner's script opens them: chat cards always work; favours from day 2; friends waving from day 3; invitations from day 5 (the first-weekend tradition invite is the escort's, sent by the planner's script with `socialInvite({ trad, day, from })`); visits and moments after week 1 (except the escort's scripted visit).
-- `say(p, kind, ctx)` with `week1: true` lines, so the intro's in-passing lines come from the same banks.
+- **Relationships:** onboarding calls `relAdd(id, 'intro:<step>', pts)`. After the arrival evening: the escort 10 (acquaintance), Tomas 10, Pell 5, Calder 3, Brennan 3 (the planner's numbers). Skip-intro sets the same end state.
+- **Flags:** onboarding sets flags in the shared store (`flagSet('met.calder')`, `escort.halloran`, `week1.d2` ... `week1.done`); line conditions read them (`flag:met.calder`).
+- **Memories:** social listens for `simNote('introStep', { step, who })` and adds core memories (`intro.arrival` with the escort, `intro.dinner` with Calder and the escort, `intro.shadowShift` with the escort), so they can be called back for the rest of the game ("Remember your first day? You held the spanner upside down."). It also makes a **mentor bond** from the escort to you: extra week-1 lines (`week1:true`), a check-in each evening of week 1.
+- **Gating:** social features stay quiet until onboarding's flags open them: chat cards always; favours from `week1.d2`; friends waving you over from `week1.d3`; invitations from `week1.d5`; moments and bunk visits after `week1.done`. The first-weekend tradition invitation is the escort's, sent by the planner's script through `socialInvite({ trad, day, from: 'halloran' })` so it becomes a real appointment. A scripted escort visit on night 1 is the planner's call.
 
-**The escort.** A Works crew member one notch above you (the user): you're a junior, so a Works officer, or a senior junior like Pell (two years ahead). Suggestion: a named Works officer, written as story crew with a full voice card and arc, who's patient, a bit nervous about mentoring and very funny about machines. Who it is: decided with the planner and the crew designer (Open questions).
-
----
+**The escort: Emeka Halloran** (the planner's proposal, to confirm with the user): Works systems officer, Officer rank (one notch above you), day shift, off Thursday and Friday, cabin 4-13; kind, loyal, terrible breakfast jokes, bakes. He becomes story crew with a full voice card and an arc (suggested thread: "not good enough", whether he's ready to be anyone's mentor).
 
 ## Part 8: Reputation by department
 
@@ -365,18 +358,7 @@ The Record app shows the nine standings as words. Reputation feeds the progressi
 
 ## Part 9: The data writers fill (shapes)
 
-All words live in a new **section 20b. SOCIAL WORDS**, pure data, after section 20 in the file. It's split into blocks with markers so several writers can work in parallel and the lead merges block by block:
-
-```
-// ---- BEGIN WORDS: voices (story crew) ----     ... // ---- END WORDS: voices (story crew) ----
-// ---- BEGIN WORDS: voices (works) ----  ... (one block per department)
-// ---- BEGIN WORDS: lines (greet) ----   ... (one block per line kind)
-// ---- BEGIN WORDS: moments (themes) ---- ...
-// ---- BEGIN WORDS: moments (story crew) ----
-// ---- BEGIN WORDS: convos ----
-```
-
-Writers never edit anything outside their block; `words_check.py` checks every block (below).
+Writers and designers write **plain files under `content/`** (the planner's pipeline): `content/lines/<crewId>.lines`, `content/overheard/*.lines`, `content/reactions/*.lines`, `content/arcs/<id>.arc`, `content/traditions/<id>.trad`, and for social: `content/voices/<crewId>.voice` (voice cards), `content/themes/<theme>.arc` (the struggle-theme library), `content/gifts.list` (gift tags and items). The planner's `content_gen.py` bakes them into marked blocks of the game file (`// ---- BEGIN LINES ... END LINES` and so on), and `lines_check.py` lints them. The file syntax is the planner's; **what each baked block must hold is below** (the shapes section 20 reads, written as the JS the generator produces). Engine tuning (memory kinds, weights, half-lives, time gates, odds) stays in section 20 as one table the engineers tune, not in `content/`.
 
 ### Voice card (one per crew member; story crew hand-written, the rest start from a template)
 
@@ -406,9 +388,9 @@ VOICE.rina = {
 
 ```js
 LINES.greet = [ { text: '{hi}, {nick}.', tier: [1, 4] }, { text: 'Morning! Or is it evening? I lose track.', tier: [0, 1], time: 'night' }, … ];
-LINES.callback = [ { text: 'The lamp\'s still perfect, by the way.', mem: 'fav:lamp' }, { text: 'Still can\'t believe you came to the quiz. You were robbed on the reactor question.', mem: 'came:quiz' }, … ];
-LINES.cue = [ { text: 'Did you hear? Someone fixed the oven. Breakfast on time for once.', cue: 'fixed:oven' },
-              { text: 'That was you on the oven? {thanks}!', cue: 'fixed:oven', cueWho: 'you', dept: 'galley' }, … ];
+LINES.callback = [ { text: 'The lamp\'s still perfect, by the way.', mem: 'fav.lamp' }, { text: 'Still can\'t believe you came to the quiz. You were robbed on the reactor question.', mem: 'came.quiz' }, … ];
+LINES.cue = [ { text: 'Did you hear? Someone fixed the oven. Breakfast on time for once.', cue: 'repair.oven' },
+              { text: 'That was you on the oven? {thanks}!', cue: 'repair.oven.you', dept: 'galley' }, … ];
 LINES.invite = [ { text: '{trad} tonight. You in?', trad: 'today' }, … ];
 LINES.visit = [ … ];  LINES.note = [ … ];  LINES.gift = { loved: [ … ], liked: [ … ], polite: [ … ] };
 LINES.about = [ … ];   // what they say about a bonded crewmate: { text, bond: 'best' }
@@ -422,7 +404,7 @@ The shapes in Part 6 (`MOMENTS`, `MOMENT_THEMES`, `CONVOS`). A theme beat names 
 
 ### Writers' rules (in the head writer's brief)
 
-- Plain text in the JS strings; escape apostrophes (`\'`) or use the template's double quotes (the check catches mistakes).
+- Plain text in the planner's file format (the generator handles quoting).
 - British spelling, as the game already uses; short sentences; one idea per line.
 - A card line 90 characters or fewer; a bubble 60 or fewer; a moment line 140 or fewer.
 - Never contradict the roster (`bio`, `life`, `about`, `habits`, `birthday`): the check flags lines naming a habit the person doesn't have.
@@ -471,7 +453,7 @@ Target: the social part of the save stays under **30 KB** (today's limit in `soc
 6. Visits: a stand-in friend visits within 10 evenings of you sitting in your bunk room; no visit after 22:00; no visitor stuck (their agent gets back to its plan).
 7. Phone budget: the hourly pass and the daily pass timed (hourly under 1 ms, daily under 5 ms on the test machine).
 
-**`words_check.py`, new** (runs in a few seconds; the writers run it before handing in): loads the build, then for the words data checks every key is known, every line's placeholders and voice tokens are real, lengths, duplicates, every crew member has a voice card and a thread, every theme beat has fallbacks, every story arc's beats exist with their tiers, choices have 1 to 3 replies with flavours, no banned words (the romance list), no habit named that the person lacks, and prints counts per kind against the head writer's targets. It also renders 20 random chat cards per tier as text so the head writer can read a sample.
+**The planner's `lines_check.py`** covers the writers' files; social asks it to check, for social data: every key is known, every line's placeholders and voice tokens are real, lengths, duplicates, every crew member has a voice card and a thread, every theme beat has fallbacks, every story arc's beats exist with their tiers, choices have 1 to 3 replies with flavours, no banned words (the romance list), no habit named that the person lacks, and prints counts per kind against the head writer's targets. Social asks for one extra: render 20 random chat cards per tier as text so the head writer can read a sample.
 
 Other checks: `cadet_test` stays pixel-identical on decks until the keepsake shelf (Bunk 1 only); `day_check` must show nobody stuck with visits on; `events_check` with tradition invitations on.
 
@@ -481,13 +463,13 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 
 | With | They give social | Social gives them |
 | --- | --- | --- |
-| **Pillar 4 planner** (onboarding, first week) | the intro script calls `socialIntro`, `memAdd`, `socialFlag`, `socialInvite`; week-1 lines in `LINES.week1` | the four functions, the escort's voice card shape, what each week-1 day opens |
-| **Planner's dialogue workstream** (head writer, writers) | the words data: voice cards, line banks, convos, moment scripts | the shapes (Part 9), the targets per kind, `words_check.py` |
-| **Events / traditions designers** (section 18) | `invite: { host, odds, line }` on traditions; `socialCue('trad:<id>:done', { who })` after each; meeting choices may carry `mem` | who's warm to you (`relTier`, warmth) for invitations and the Captain's table; `say()` for tradition tap lines if they want voices |
+| **Pillar 4 planner** (onboarding, first week) | `relAdd(id, 'intro:<step>', pts)`, flags (`flagSet`), `simNote('introStep')`, the scripted first-weekend `socialInvite`; the ship notes bus and the flag store (section 13) | memories and the escort's mentor bond from intro notes; the gating of social features by week-1 flags (Part 7) |
+| **Planner's dialogue workstream** (dialogue engineer, head writer, writers) | `lineFor(p, kind, ctx)`; `content/` files baked by `content_gen.py`; `lines_check.py`; overheard conversations | the kind order; the query API (Part 6); the voice-card, theme and moment shapes (Part 9); `memTold` for callbacks |
+| **Events / traditions designers** (section 18) | `invite: { host, odds, line }` on traditions; `simNote('tradition', { id, day, came, you })` after each; `simNote('choice', ...)` for meeting replies | who's warm to you (`relTier`, `warmth`) for invitations and the Captain's table |
 | **Device engineer** (section 19) | the Crew app page draws "What you know" sections and counts; the Record app draws reputation bands and "known for"; Appointments takes `kind: 'invite'` and `'visit'`; the dialogue panel plays moments | `crewContacts()` gains `knowSections`, `knowLeft`, `warmth`; `repBands()`; `momentShow(id)` (wraps `dialogueShow`) |
 | **Sim engineer** (sections 10, 14) | `crewComeTo(p, placeId, onArrive)` for visits and friends walking over; appointments of kind `visit` with `doorOpenFor`; `affinityPlan` reading the weekly snapshot | the weekly snapshot, pure |
-| **Systems engineer** (section 17) | `socialCue('fixed:<kind>', { who, deck })` when a repair finishes; the machine's department (`machineDept(m)`, or a table social keeps); unfinished-job events for reputation | favours that matter (from moments' practical replies) on the existing favour API |
-| **Galley / garden** (section 16) | gift-tagged items (garden produce on harvest days); cues for late meals and harvests | nothing new |
+| **Systems engineer** (section 17) | `simNote('repair', { who, machine, kind, deck })` when a repair finishes; `simNote('jobAbandoned', ...)`; the machine's department (`machineDept(m)`, or a table social keeps); unfinished-job events for reputation | favours that matter (from moments' practical replies) on the existing favour API |
+| **Galley / garden** (section 16) | gift-tagged items (garden produce on harvest days); `simNote('lateMeal')`, `simNote('harvest')` | nothing new |
 | **Player engineer** (section 15) | carried items with a `gift` tag; the store's gift list; the bunk tap for notes | `Give` on the chat card |
 | **Crew designer** (section 9, the generator) | each person's `tpl`, `loves`, `likes`, `joy`, `thread`, `needs`, `openness`, `keepsake`, `home`/`family` fields for themes; more `about` details (45 today: aim for 6 or more per person) | the field list |
 | **Deck architect** | one keepsake shelf place by Bunk 1 berth 4; "calm" tags on places (which seats count as somewhere to sit and talk) | the list of calm place types |
@@ -499,36 +481,43 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 
 ## Part 12: Build steps
 
-Builds continue the social range **0.36.x** from **0.36.20** in section 20 (and the new 20b), unless the planner and the lead give Pillar 4 a new range. Each step is small exact-string edits, a build number bump, a DEV_NOTES row, the full test set, a push and a report, as CLAUDE.md asks. Steps marked *(inert)* change nothing you can see, so the writers can start on the data at once.
+**Two social engineers** (the planner's staffing, agreed): **Social A** owns section 20 and carries on the social range **0.36.20+**; **Social B** works in a marked sub-block `// 20c. SOCIAL STORIES` (so their merges never clash) with a new range the planner sets (**0.39.x** suggested: unused so far). Each step is small exact-string edits, a build number bump, a DEV_NOTES row, the full test set, a push and a report, as CLAUDE.md asks. Steps marked *(inert)* change nothing you can see.
 
-| # | Build | What | Sections touched | Depends on |
-| --- | --- | --- | --- | --- |
-| S1 | 0.36.20 | **The line engine and the words section** *(inert)*: section 20b with the empty blocks; `say(p, kind, ctx)`; the conditions, placeholders and voice tokens; today's hard-coded lists moved into `LINES` unchanged; `chatLine` and chatter call `say` (same lines out); `words_check.py` | 20, new 20b | — |
-| S2 | 0.36.21 | **Voice cards** from templates for all 74 (generator fields, or social's own fallback table until the crew designer's run); voice tokens on; story crew cards as stubs for the writers | 20b, 9 (generator fields, crew designer) | S1 |
-| S3 | 0.36.22 | **Memories with decay**: `SHIP.mem`, `memAdd`, daily fading, warmth, callbacks in the card order; existing events (favours, appointments, chat while grubby, traditions joined, meeting replies) leave memories; save | 20 | S1 |
-| S4 | 0.36.23 | **First week hooks**: `socialIntro`, `socialFlag`/`socialFlagged`, `socialInvite`, the gating of favours, waving, invitations, visits and moments; week-1 lines | 20 | S3; agreed with the planner |
-| S5 | 0.36.24 | **Steps and "What you know"**: knowledge sections and counts, `crewContacts` fields for the Crew app; time-known gates; openness | 20 (19 draws) | S2 |
-| S6 | 0.36.25 | **Moments**: `MOMENTS`, `MOMENT_THEMES`, readiness, the "Sit with them" button, `momentShow` on the dialogue panel, reply flavours, after-effects; Tomas, Pell and Rina's arcs moved into moments; one serious moment a day | 20, 18 (`dialogueShow` accepts a moment script; one line) | S3, S5 |
-| S7 | 0.36.26 | **Ship cues and reactions**: `socialCue`, cue lines, cue gossip; the systems, galley and events calls (one line each in their sections, by their owners) | 20 (+ one-line hooks in 16, 17, 18) | S1 |
-| S8 | 0.36.27 | **Crew-to-crew**: clash tuning, bonds, mentors, drifting, `{friend}`-style fill-ins, "Do you know…?" introductions, the weekly snapshot for `affinityPlan` | 20 (14 reads the snapshot, sim engineer) | S1 |
-| S9 | 0.36.28 | **Overheard conversations** (`CONVOS` as paired bubbles) | 20 (8b's bubbles) | S1, S8 |
-| S10 | 0.36.29 | **Gifts**: gift tags, Give on the card, loves/likes, crew gifts, keepsakes; the shelf | 20, 15 (carried item tag), 16 (garden items), deck 4 shelf (architect), 8b (instanced mesh) | S2, S3 |
-| S11 | 0.36.30 | **Invitations**: tradition invites, personal invites, `kind: 'invite'` appointments, Mail fallback | 20, 18 (`invite` fields), 19 (appointment kind) | S3, S4 |
-| S12 | 0.36.31 | **Bunk visits and notes**: the prompt, `crewComeTo`, visit lines, notes on the bunk, invitations to their quarters | 20, 10 and 14 (sim engineer), 15 (bunk tap) | S6, S11 |
-| S13 | 0.36.32 | **Reputation by department and "known for"**: `SHIP.rep`, sources, bands, warm starts, Record lines | 20, 17 (unfinished-job hook), 19 (Record draws) | S3, S7 |
-| S14 | 0.36.33 | **The story crew arcs** as the writers deliver them (Calder, Brennan, Holt, Vance, Sato, Marrow, the escort), and the theme library filled; tuning pass with `social_check` numbers | 20b | S6 |
+**Wave 1 (foundations, before the writers' vocabulary freezes; alongside the planner's dialogue engine and arrival):**
 
-The writers' work runs alongside from S1 (the shapes are fixed at S1): story crew voice cards first, then line banks by kind, then moment themes, then convos, then the story arcs. Each delivery passes `words_check` before the lead merges it.
+| # | Who | Build | What | Sections touched | Depends on |
+| --- | --- | --- | --- | --- | --- |
+| A1 | A | 0.36.20 | **The query API** *(inert)*: `mem`, `warmth`, `affBand`, `bondOf` (stub until B2), `moodOf`, `beatOf`, `knowsNews`, `repBand` (stub until A6), `knownFor` (stub), `cue`; listeners on the ship notes bus | 20 (+ the bus in 13, the planner's) | the bus |
+| A2 | A | 0.36.21 | **Memories with decay**: `SHIP.mem`, `memAdd` from bus notes, daily fading, `memTold`, warmth; save | 20 | A1 |
+| A3 | A | 0.36.22 | **The kind order calls `lineFor`**: today's hard-coded lists (`CHAT_GREET`, `CHAT_NEAR`, `CHAT_LIFE`, `CHAT_DEPT`, `CHATTER_IDLE`) move to `content/` unchanged (same lines out, `cadet_test` identical); the extended order with callbacks and cues | 20 | A1, the dialogue engine |
+| A4 | A | 0.36.23 | **First week gating**: flags read, intro memories, the escort's mentor bond, `socialInvite` | 20 | A2, onboarding's flags |
+| B1 | B | 0.39.0 | **Voice cards and steps**: `VOICE` read (generator fields from the crew designer, fallback by traits until then), openness, "What you know" sections and counts for the Crew app, time-known gates | 20c (19 draws; 9 generator) | A1 |
+| B2 | B | 0.39.1 | **Crew-to-crew**: clash tuning, bonds (friends, best, rivals, mentor, drifting), `bondOf`, "Do you know…?" introductions, the weekly affinity snapshot for `affinityPlan` | 20c (14 reads the snapshot) | A1 |
 
-**Suggested staffing (for the planner to fold into the Pillar 4 staffing):** one **social engineer** for S1 to S8 (section 20 owner; the standby social engineer if their memory allows, else a fresh one with the handover note), a **second social engineer** from S9 (visits, gifts and invitations touch more sections), the **crew designer** for the generator fields at S2, and this designer on call for questions and the tuning pass.
+**Wave 2 (the deep features):**
 
-**Order with the rest of Pillar 4 (to agree with the planner):** S1 to S4 first, in parallel with the planner's arrival build, because the intro needs `socialIntro` and the writers need the shapes. Moments (S6) before the first-week check-in if possible, since the user asked for them explicitly.
+| # | Who | Build | What | Sections touched | Depends on |
+| --- | --- | --- | --- | --- | --- |
+| B3 | B | 0.39.2 | **Moments**: arcs engine reading `content/arcs` and `content/themes`, readiness, the "Sit with them" button, `momentShow` on the dialogue panel, reply flavours, after-effects, one serious moment a day; Tomas, Pell and Rina's arcs moved into moments | 20c, 18 (`dialogueShow` takes a moment script: one line) | B1, A2 |
+| A5 | A | 0.36.24 | **Gifts**: gift tags, Give on the card, loves/likes, crew gifts, keepsakes and the shelf | 20, 15 (carried item tag), 16 (garden items), Deck 4 shelf (architect), 8b (instanced mesh) | A2, B1 |
+| A6 | A | 0.36.25 | **Reputation by department and "known for"**: `SHIP.rep`, bus sources, bands, warm starts, the Record's lines | 20, 17 (`jobAbandoned` note), 19 draws | A2 |
+| A7 | A | 0.36.26 | **Invitations**: tradition invites, personal invites, `kind: 'invite'` appointments, Mail fallback | 20, 18 (`invite` fields), 19 (appointment kind) | A2, A4 |
 
----
+**Wave 3:**
+
+| # | Who | Build | What | Sections touched | Depends on |
+| --- | --- | --- | --- | --- | --- |
+| A8 | A | 0.36.27 | **Bunk visits and notes**: the prompt, `crewComeTo`, visit lines, notes on the bunk, invitations to their quarters | 20, 10 and 14 (sim engineer), 15 (bunk tap) | A7, B3 |
+| B4 | B | 0.39.3+ | **Story crew arcs** as the writers deliver them (Halloran, Calder, Brennan, Holt, Vance, Sato, Marrow), the theme library filled, pair stories | 20c, `content/` | B3 |
+| A9/B5 | both | — | **Tuning pass** with `social_check` numbers and the user's play | 20, 20c | all |
+
+The writers' work runs alongside from wave 1 (the shapes and vocabulary freeze at its end): story crew voice cards first, then line banks by kind, then moment themes, then the story arcs. Each delivery passes `lines_check` before the lead merges it.
+
+**Also needed:** the **crew designer** for the generator fields (B1), the **sim engineer** for `crewComeTo` and `affinityPlan`'s snapshot, this designer on call for questions and the tuning pass. Moments (B3) before the first-week check-in if possible, since the user asked for them by name.
 
 ## Risks
 
-- **Too many words to write.** 75 voices and thousands of lines is a lot. *Answer:* templates and voice tokens make shared lines sound personal; generated crew start complete from the generator; writers improve the people the player meets most first; `words_check` counts against targets so we know what's thin.
+- **Too many words to write.** 75 voices and thousands of lines is a lot. *Answer:* templates and voice tokens make shared lines sound personal; generated crew start complete from the generator; writers improve the people the player meets most first; `lines_check` counts against targets so we know what's thin.
 - **Repetition.** The same line twice in a minute kills the illusion. *Answer:* the recently-said penalty per person and ship-wide; callbacks said once; more variants for the kinds that fire most (greet, near, smalltalk).
 - **Serious tone creeping in.** *Answer:* one serious moment a day at most, serious only from friend tier, two light moments for each serious one in each thread, and the head writer's tone pass.
 - **Visits feel intrusive.** *Answer:* only friends, only evenings, only when you're there and awake, at most one a day, easy to ignore, never during quiet hours.
@@ -538,7 +527,7 @@ The writers' work runs alongside from S1 (the shapes are fixed at S1): story cre
 
 ## Open questions for the user
 
-1. **The escort:** a named Works officer written as story crew (our suggestion), or Pell (a junior two years ahead, already your neighbour)? The user said "one notch above you in rank".
+1. **The escort:** Emeka Halloran, a new Works systems officer (the planner's proposal, which I support), written as story crew? (The other option was Pell, a junior two years ahead and already your neighbour.)
 2. **Crew-to-crew romance:** none anywhere (simplest and safest), or a few established couples who are simply together in the background (no storylines, never involving you)?
 3. **How serious can it get?** Struggles like an ill grandparent and homesickness are in. Is grief (someone they lost) in, handled gently?
 4. **Visits to your bunk:** OK as designed (friends only, evenings, easy to ignore)?
@@ -549,24 +538,23 @@ The writers' work runs alongside from S1 (the shapes are fixed at S1): story cre
 ## Appendix: the new shared formats, in one place
 
 ```js
-// 20. SOCIAL (deep, Pillar 4)
-say(p, kind, ctx) -> { text, id, kind } | null                 // every line anyone says
-memAdd(crewId, key, { w }) ; memOf(crewId) -> [[key, day, w, told]] ; warmth(crewId) -> 0..
-socialIntro(crewId, 'escort' | 'boss' | 'bunkmate' | 'met')
-socialFlag(key) ; socialFlagged(key) -> bool
+// 20. SOCIAL (deep, Pillar 4): pure queries (line conditions read only these)
+relTier(id) ; mem(id, key) ; warmth(id) ; affBand(a, b) ; bondOf(id, kind) ; moodOf(p) ; beatOf(arcId)
+knowsNews(p, newsId) ; repBand(dept) ; knownFor() ; cue(kind)
+// state changes (section 20 only, mostly from bus notes)
+memAdd(crewId, key, { w }) ; memTold(crewId, key)
 socialInvite({ trad | kind, day, from, at, where }) -> appointment id | null
-socialCue(key, { who, deck, dept, until })
 momentReady(p) -> momentId | null ; momentShow(momentId)       // plays on section 18's dialogue panel
-repBands() -> { dept: { v, band, name } } ; knownFor() -> [tag]
-SHIP.mem, SHIP.rep, SHIP.social.bonds, SHIP.social.flags, SHIP.social.affWeek   // all in save.social
+SHIP.mem, SHIP.rep, SHIP.social.bonds, SHIP.social.affWeek     // all in save.social
+// emits on the bus: tierUp, moment, bond, invite
 
-// 20b. SOCIAL WORDS (writers; data only)
+// the planner's, which social uses
+simNote(kind, data) ; onSim(kind, fn) ; flag(key) ; flagSet(key)   // section 13
+lineFor(p, kind, ctx) -> { text, id, kind } | null                 // the dialogue engine
+// baked from content/ by content_gen.py (shapes in Part 9):
 VOICE[id] = { tpl, talk, cares, jokes, words, needs, openness, loves, likes, invites, joy, thread, keepsake, avoid, lines }
-VOICE_TEMPLATES[tpl] = { words, lines }
-LINES[kind] = [{ text, ...conditions, w }]
-MOMENTS[id] = { who, thread, beat, tone, tier, metDays, gapDays, where, hint, lines, after }
-MOMENT_THEMES[theme] = [beat1, beat2, beat3]
-CONVOS = [{ id, pair, ...conditions, lines: [{ who: 'a' | 'b', text }] }]
+VOICE_TEMPLATES[tpl] ; LINES[kind] = [{ text, ...conditions, w }]
+MOMENTS[id] = { who, thread, beat, tone, tier, metDays, gapDays, where, hint, lines, after } ; MOMENT_THEMES[theme] = [b1, b2, b3]
 
 // asked of others
 crewComeTo(p, placeId, onArrive)        // section 10 (sim engineer)
