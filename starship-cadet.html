@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.5
+   STARSHIP CADET: CSV Wren                            build 0.36.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.5';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.6';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10846,6 +10846,35 @@ function socialTogether(step) {
   for (const k of [...SOC_WITH.keys()]) if (!here.has(k.slice(k.indexOf(':') + 1))) SOC_WITH.delete(k);
 }
 function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // section 13's New game
+
+// ---- for the device's apps (0.36.6; section 19 draws them): plain data, nothing drawn here ----
+// crewContacts() -> everyone you've met (or all with { all: true }), closest first: [{ id, name, role, dept, tier,
+//   tierName, pts, toNext (points to the next tier, or null), met, lastTalk, known: [what you know], where }].
+//   where: { deck, room, act } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
+//   shows people once you're acquaintances, or on public duty); else null
+// newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
+const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
+function crewWhere(p, t = shipNow()) {
+  const w = whereIs(p, t); if (!w || w.moving) return null;
+  const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
+  return { deck: w.deck, room: rm ? rm.name : null, act: w.act };
+}
+function crewContacts({ all = false } = {}) {
+  socInit(); const t = shipNow(), out = [];
+  for (const p of SOC.crew) {
+    const r = SHIP.rel[p.id]; if (!all && !(r && r.met !== null)) continue;
+    const tier = relTier(p.id), pts = r ? r.pts : 0, w = whereIs(p, t);
+    const show = tier >= 1 || (w && w.act === 'work' && PUBLIC_WORK.has(p.dept));
+    out.push({ id: p.id, name: p.name, role: p.role, dept: p.dept, tier, tierName: REL_NAMES[tier], pts, toNext: tier < 4 ? Math.ceil(REL_TIERS[tier + 1] - pts) : null,
+               met: r ? r.met : null, lastTalk: r ? r.lastTalk : null, known: r ? r.known.filter(k => k !== 'news' && k !== 'work') : [], where: show ? crewWhere(p, t) : null });
+  }
+  return out.sort((a, b) => b.pts - a.pts || (a.name < b.name ? -1 : 1));
+}
+function newsFeed() {
+  socInit();
+  return SHIP.heard.slice().reverse().map(h => { const it = NEWS.find(x => x.id === h.id), p = h.from && SOC.idx.has(h.from) ? SOC.crew[SOC.idx.get(h.from)] : null;
+    return { id: h.id, line: h.line, from: p ? p.name : null, at: h.at, kind: it ? it.kind : (h.id.split(':')[0] || 'news') }; });
+}
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
