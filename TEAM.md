@@ -14,6 +14,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
+**Helper limit raised (the user, 2026-10-16 ~21:33, after upgrading their plan):** up to about a dozen helpers working at once, plus extra check runners, to finish faster.
+
 **New tweaks from the user (2026-10-16 ~21:10):** zoom-out limit (performance engineer, last job), bathroom need + feedback + progress bars (player engineer 2), a garden that grows food for the galley (galley engineer leads; sim, crew designer, systems help). The user also allowed extra check-runner sessions to speed up testing.
 
 **The user's focus (2026-10-16 ~20:25):** the events engineer finishes the diplomatic visit (kept draft) and then stops; the comet viewing and the remaining events wait for later. Everyone else finishes the user's tweaks (job board, ship health panel, days off, Roster, device pop-up bug) and the personal device. Then the Pillar 3 check-in.
@@ -47,13 +49,14 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01TqLepvhqDZRwFj7ZuLb6Xa | Systems engineer 3 (hired 2026-10-16 ~20:22): empty job board (with interactions), days-off jobs to crew (section 17) | `claude/ship-systems` | 0.33.32+ | Active | — |
 | session_01R6RBwwBM9aorpsqDCrztDU | Sim engineer 2 (Pillar 3, hired 2026-10-16 ~15:30): guest schedules fix (0.26.15), C7 storm routines, seating by friendship (sections 10, 13, 14) | `claude/sim-engineer` | 0.26.15+ | Active | — |
 | session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: crew time, schedules, needs, day_check (sections 10, 13, 14) | `claude/sim-engineer` | 0.15, 0.21–0.22, 0.26.x | Retired 2026-10-16 | `plans/handover-sim.md` |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: crowd, poses, props, draw calls (sections 8, 8b) | `claude/crowd-render` | 0.20, 0.27.x | Working (answers pass, 0.27.7+) | `plans/handover-performance.md` |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: crowd, poses, props, draw calls (sections 8, 8b) | `claude/crowd-render` | 0.20, 0.27.x | Retired 2026-10-16 ~21:30 (~60%; final 0.27.18 eeffedf) | `plans/handover-performance.md` |
 | session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: Decks 1 and 3 | `claude/deck1-scale` | 0.18, 0.31.x | Retired 2026-10-16 (Pillar 3 restaffing) | `plans/handover-bridge-architect.md` |
 | session_01JScnVG158eYAHYvKDz3jZG | Crew designer: roster, habits, generator (section 9) | `claude/deck-plans-1-2-6` | 0.16.x | Working (answers pass, 0.16.6+) | `plans/handover-crew-designer.md` |
 | session_01FtwFYLBjAB9zFvPSpLezaR | Systems engineer (new, answers pass): faults for the player, visible faults hook, tiers, machine taps, shortages to Mail, cart job (section 17) | `claude/ship-systems` | 0.33.16–0.33.31 | Retired 2026-10-16 ~20:20 (~64%; final 6065854) | `plans/handover-systems.md` |
 | session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: machines, wear, jobs, supplies, carts (section 17) | `claude/ship-systems` | 0.33.x | Retired 2026-10-16 (~600k) | `plans/handover-systems.md` |
 | session_01MiQtjmdEa4CXsCsiCh6zWV | Deck 6 architect (new, answers pass): Decks 4-6, hull byFace 4-5, health board, tiers, plates, crawl tiles, cargo hatch, touches | `claude/deck-architect` | 0.30.11+ | Retired 2026-10-16 (Pillar 3 restaffing) | `plans/handover-deck6-architect.md` |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: Decks 4, 5, 6, utility kit, deck_check | `claude/deck-architect` | 0.17, 0.30.x | Retired 2026-10-16 (~690k) | `plans/handover-deck6-architect.md` |
+| session_01XAkY9U3mmstHQT2yAMTocA | Performance engineer 2 (hired ~21:33): the storm's look and feel (shake, flicker, sky moods, coarse crowd at gatherings), then zoomed-out decor thinning (sections 8/8b, camera) | `claude/crowd-render` | 0.27.19+ | Active | — |
 | session_012J4ctzJgFRBaUFU5sJvega | Player engineer 2 (hired 2026-10-16 ~21:14): bathroom need, need-fill feedback, progress bars for timed activities (section 15) | `claude/player-needs` | 0.28.19+ | Active | — |
 | session_01BQjtEzvKXuvPZNzGRRRwpZ | Player engineer (new, answers pass): long days, bed skips night, need bonuses, Mail, social, shopping, crouch (section 15) | `claude/player-needs` | 0.28.9+ | Retired 2026-10-16 ~21:15 (~57%; handover current at c7aab82/bf5b5af) | `plans/handover-player.md` |
 | session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer: player needs, device, job loop, save (section 15) | `claude/player-needs` | 0.28.x | Retired 2026-10-16 (~560k) | `plans/handover-player.md` |
