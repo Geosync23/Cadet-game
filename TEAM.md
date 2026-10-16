@@ -8,7 +8,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
-**Ship integration 0.41.10** (6d91ee1, 2026-10-16 ~23:45): draw calls packed with the same picture (crowd-render 0.27.20-0.27.24; end-of-test calls 358 -> 217), the garden you can see growing (all 15 beds), root beds and a second bean trellis (decks 0.38.7). All checks pass. Publishing. Next: Pillar 3 check-in 1.
+**Ship integration 0.41.10** (6d91ee1, 2026-10-16 ~23:45): draw calls packed with the same picture (crowd-render 0.27.20-0.27.24; end-of-test calls 358 -> 217), the garden you can see growing (all 15 beds), root beds and a second bean trellis (decks 0.38.7). All checks pass. Published: link version 18. Next: Pillar 3 check-in 1.
 
 **Ship integration 0.41.9** (098e922, 2026-10-16 ~23:00): bathroom need, "+N Need" notes and progress bars, the zoom-out limit (kept by the user), the storm's look and feel, the working garden (grow lights, gardeners, daily pick, carry run, fresh produce), Schedule fix, goal arrow hides under the progress bar. All checks pass. Published: link version 17 = 0.41.9. Next: 0.41.10 with crowd-render 0.27.20-0.27.22 (draw calls halved zoomed out), then Pillar 3 check-in 1.
 
@@ -51,7 +51,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 
 | Session | Job | Branch it pushes to | Builds | Status | Handover note |
 | --- | --- | --- | --- | --- | --- |
-| session_01PxXKwc5mkC7tV5MPi3p7PP | Lead (from 2026-10-16 ~21:40). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 17 = 0.41.9; steps in the Deck 6 architect's note, section 3; the live page must be read in full before replacing it, so publishers hand the read+publish to a helper agent) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
+| session_01PxXKwc5mkC7tV5MPi3p7PP | Lead (from 2026-10-16 ~21:40). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 18 = 0.41.10; steps in the Deck 6 architect's note, section 3; the live page must be read in full before replacing it, so publishers hand the read+publish to a helper agent) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
 | session_015QoyPWBdMPM4ywf5W2jMMs | Lead (2026-10-16 ~15:20 to ~21:40) | `claude/lead-pillar1` | 0.41.5–0.41.8 (combined) | Retired 2026-10-16 (~58%) | `plans/handover-lead.md` |
 | session_01WHXNp9A1WHAD2EHJw384Qp | Lead (2026-10-16 ~04:20 to ~15:20) | `claude/lead-pillar1` | 0.41.x (combined) | Retired 2026-10-16 (memory full) | `plans/handover-lead.md` |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead (2026-10-15 to 2026-10-16 ~04:20) | `claude/lead-pillar1` | 0.40.x–0.41.2 (combined) | Retired 2026-10-16 (~460k) | `plans/handover-lead.md` |

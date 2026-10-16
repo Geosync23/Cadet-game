@@ -116,3 +116,4 @@ Read this section first; the lines above are the running log.
 - **23:08 UTC: link = version 17 = 0.41.9.** Publisher archived. Note: publishing now requires reading the whole live page first; the publisher delegates read+publish to a subagent.
 - **~23:30 UTC: Pillar 4 drafts in** (planner b71a0eb/ddf1a99 on claude/pillar4-plan; social designer ab351f1 on claude/social-design). Readable doc for the user: https://claude.ai/code/artifact/c320bb5a-c65b-4769-87c1-8f23c61acff1 (14 merged questions at the end). Waiting on the user's answers.
 - **~23:45 UTC: 0.41.10 = 6d91ee1 on ship-integration** (all checks; +4 textures = door-leaf maps at load, 0.27.21, no leak). Publishing to link v18. Next: Pillar 3 check-in 1 (device, Roster, jobs at the board, crew life, days off, garden).
+- **23:43 UTC: link = version 18 = 0.41.10.** Check-in 1 guide sent to the user.
