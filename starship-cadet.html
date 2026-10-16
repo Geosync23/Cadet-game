@@ -92,6 +92,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device .devmap .pick{fill:var(--crt-hot);opacity:.8}
 .device .devmap .m-wall{fill:none;stroke:var(--crt-ink);stroke-width:.14;stroke-linecap:square}
 .device .devmap .m-you{fill:var(--crt-hot);stroke:var(--crt-bg);stroke-width:.3}
+.device .devmap .m-per{fill:var(--crt-bg);stroke:var(--crt-ink);stroke-width:.28;cursor:pointer}
+.device .devmap .m-per.pick{fill:var(--crt-hot);stroke:var(--crt-hot);opacity:1}
 .device .row.past .rt{color:var(--crt-dim)}
 .device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
 .device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
@@ -181,7 +183,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.8
+   STARSHIP CADET: CSV Wren                            build 0.35.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6707,7 +6709,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7990,8 +7992,10 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
+      for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; svg.appendChild(c); }
       if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
-      svg.onclick = e => { const k = e.target && e.target.dataset && e.target.dataset.room; if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+      svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
+        if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
       return svg;
     },
     form(b) {                                  // text fields; the submit action gets { field id: value }
@@ -8222,14 +8226,57 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
 // "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
 let mapDeck = null, mapPick = null;
 const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
+// people on Maps (0.35.9): only those whose whereabouts you may know (section 20's crewContacts and its rule:
+// acquaintances and up, or anyone on duty somewhere public; strangers show by their job). On your own deck a dot is
+// where they really are (the walkers); elsewhere it sits in the middle of their room. Tap a dot or a name to pick them;
+// "Go there" points the goal arrow at their room. { app: 'maps', who: crewId } opens Maps on them (the Crew app).
+let mapWho = null;
+const MAP_MID = new Map();                               // 'deck|room' -> [i, j], the room's middle tile
+function mapRoomTile(n, key) {
+  const k = n + '|' + key; if (MAP_MID.has(k)) return MAP_MID.get(k);
+  const g = DECKS[n].map || [], t = []; let sx = 0, sz = 0;
+  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[j].length; i++) if (g[j][i] === key) { t.push([i, j]); sx += i; sz += j; }
+  const c = t.length ? t.sort((a, b) => Math.hypot(a[0] - sx / t.length, a[1] - sz / t.length) - Math.hypot(b[0] - sx / t.length, b[1] - sz / t.length))[0] : null;
+  MAP_MID.set(k, c); return c;
+}
+function mapPeople() {                                   // [{ id, name, label, tierName, role, deck, room, roomName, act }]
+  if (typeof crewContacts !== 'function') return [];
+  let cs; try { cs = crewContacts({ all: true }); } catch (e) { DEV.errors.push('crewContacts: ' + (e && e.message || e)); return []; }
+  const out = [];
+  for (const c of cs || []) {
+    const w = c && c.where; if (!w || !DECKS[w.deck]) continue;
+    const rooms = DECKS[w.deck].rooms || {}, room = Object.keys(rooms).find(k => rooms[k].name === w.room) || null;
+    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
+  }
+  return out;
+}
+const MAP_ACT = { work: 'at work', breakfast: 'at breakfast', dinner: 'at dinner', lunch: 'at lunch', leisure: 'off duty', off: 'off duty', gym: 'at the gym', sleep: 'asleep', wash: 'washing' };
+const MAP_NEAR = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1], [2, 0], [-2, 0], [0, 2]];   // people sharing a room's middle spread out
+function mapDots(n, people) {                            // the dots on deck n: [{ id, x, y, pick }]
+  const live = new Map(), used = new Map(), out = [];
+  if (n === deckDef.num && typeof DECK_CREW !== 'undefined') for (const a of DECK_CREW) if (a && a.p) live.set(a.p.id, a);
+  for (const q of people) {
+    if (q.deck !== n) continue;
+    const a = live.get(q.id); let c = a ? cellAt(a.x, a.z) : null;
+    if (!c && q.room) { const m = mapRoomTile(n, q.room); if (m) { const k = used.get(q.room) || 0; used.set(q.room, k + 1); const o = MAP_NEAR[k % MAP_NEAR.length]; c = [m[0] + o[0], m[1] + o[1]]; } }
+    if (c) out.push({ id: q.id, x: c[0], y: c[1], pick: q.id === mapWho });
+  }
+  return out;
+}
 deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
   act(verb, arg) {
-    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
-    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
+    if (verb === 'open' && arg && arg.who) verb = 'who', arg = arg.who;   // { app: 'maps', who } from another app
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; mapWho = null; }
+    else if (verb === 'pick') { mapPick = mapPick === arg ? null : arg; mapWho = null; }
+    else if (verb === 'who') {
+      const q = mapPeople().find(x => x.id === arg);
+      if (!q || mapWho === arg) mapWho = null;
+      else { mapWho = q.id; mapDeck = q.deck; mapPick = q.room; }
+    }
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
-      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
-      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick], q = mapWho && mapPeople().find(x => x.id === mapWho && x.room === mapPick);
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: (q ? q.label + ', ' + r.name.toLowerCase() : r.name) + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to ' + (q ? q.label : 'the ' + r.name.toLowerCase()) + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
   },
@@ -8241,17 +8288,26 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
+    const people = mapPeople(), who = mapWho && people.find(x => x.id === mapWho);
     const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
       { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
-      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' },
+        people: mapDots(n, people), whoAction: { app: 'maps', do: 'who' } }];
+    if (who) B.push({ kind: 'text', text: who.label + ': ' + (who.roomName ? 'the ' + who.roomName.toLowerCase() + ', ' : '') + 'Deck ' + who.deck + (MAP_ACT[who.act] ? ', ' + MAP_ACT[who.act] : '') + '.', mark: 'hot' });
     if (mapPick && rooms[mapPick]) {
       const r = rooms[mapPick];
-      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
       if (r.kind !== 'locked' && r.kind !== 'void') B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
     }
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
     B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
+    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
+      B.push({ kind: 'text', text: 'People', mark: 'head' });
+      const ps = people.slice().sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck);
+      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
+      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });
+    }
     return { title: 'Maps', blocks: B };
   } });
 
