@@ -10649,7 +10649,17 @@ const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap, produce: [] }, server
 // replays agree with the live galley; an eventMod without the third argument is read live only (eventNow / eventMod:
 // now), and replays run as if there were none.
 const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
-const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
+const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays', 'herbs'];
+// a batch's dinner (the diplomatic visit's formal dinners): it starts at the batch's `at` (minutes of the day), else
+// 19:00; cooking takes GALLEY_BATCH_T from 15:00, longer with worn ovens (galleyCookT); `herbs: true` wants
+// GALLEY_HERBS meal units of the garden's herbs from the cold store. Late minutes and a dinner without herbs are the
+// event's threads 'dinnersLate' and 'noHerbs' (live only)
+const GALLEY_BATCH_T = 150, GALLEY_HERBS = 4;
+const produceOf = (S, id) => (S.cold.produce || []).reduce((n, b) => n + (GARDEN_CROPS[b[0]].id === id ? b[1] : 0), 0);
+function produceTakeOf(S, id, n) {
+  let got = 0; for (const b of S.cold.produce || []) if (GARDEN_CROPS[b[0]].id === id && got < n) { const k = Math.min(b[1], n - got); b[1] -= k; got += k; }
+  S.cold.produce = (S.cold.produce || []).filter(b => b[1] > 0); return got;
+}
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
 // can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
 const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null, gardenAt: null, gardenDay: null, gardenCrew: null, gardenCarry: null, carryWaiting: null };
@@ -10792,7 +10802,14 @@ function galleyStep(S, m, st) {
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
   if (md === 900 && S.ev && S.ev.batch) {
     const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
-    if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
+    if (n > 0) {
+      S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n;
+      const start = typeof b === 'object' && b.at > 900 ? b.at : 1140, ready = 900 + galleyCookT(GALLEY_BATCH_T, m);
+      S.batch.late = Math.max(0, ready - start);
+      if (S.ev.herbs) S.batch.herbs = produceTakeOf(S, 'herbs', GALLEY_HERBS) >= GALLEY_HERBS;
+      if (!st && S.batch.late) galleyScore(m, 'dinnersLate', S.batch.late);
+      if (!st && S.ev.herbs && !S.batch.herbs) galleyScore(m, 'noHerbs', 1);
+    }
   }
   if (md === FOOD.open.breakfast) S.batch = null;
   // a cake: a birthday, or one of section 18's events with cake: true (Founding Day)
@@ -10999,7 +11016,7 @@ function galleyText(what = 'servery') {
   else if (ck && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyCakeFor(ck)}.`;
   const fresh = produceByCrop(S).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name);
   if (fresh.length && (S.servery.portions || open)) extra += ` Fresh from the garden: ${fresh.join(' and ')}.`;
-  if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}.`;
+  if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}` + (S.batch.late ? ', running late' : '') + (S.batch.herbs === false ? ', without the garden\'s herbs' : '') + '.';
   if (S.trays && S.trays.d === SHIP.time.day && md >= FOOD.trayAt && md < FOOD.trayAt + 60) extra += ` ${S.trays.n} trays have gone up to the bridge.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
   return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
