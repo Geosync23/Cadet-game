@@ -2,7 +2,7 @@
 
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
-**Lead:** session_015QoyPWBdMPM4ywf5W2jMMs, branch `claude/lead-pillar1` (took over 2026-10-16 ~15:15 UTC, mid Pillar 3, from session_01WHXNp9A1WHAD2EHJw384Qp; brief: `plans/handover-lead.md`). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
+**Lead:** session_015QoyPWBdMPM4ywf5W2jMMs, branch `claude/lead-pillar1` (took over 2026-10-16 ~15:15 UTC, mid Pillar 3, from session_01WHXNp9A1WHAD2EHJw384Qp; brief: `plans/handover-lead.md`). Repeating hourly check-in: trig_01Kr24HNvp976B4MapBpEqRo (fires :15). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
 
 **Retired leads:** session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:20, answers pass and Pillar 3 start, handed over because its memory was full; `plans/handover-lead.md`); session_0158BCCswtdujm3t5d2LXsFz (handed over 2026-10-16 ~04:20 to keep a clean memory; `plans/handover-lead.md`); session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
 
@@ -29,7 +29,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 
 | Session | Job | Branch it pushes to | Builds | Status | Handover note |
 | --- | --- | --- | --- | --- | --- |
-| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (from 2026-10-16 ~15:20). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
+| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (from 2026-10-16 ~15:20). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 13 = 0.41.5; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
 | session_01WHXNp9A1WHAD2EHJw384Qp | Lead (2026-10-16 ~04:20 to ~15:20) | `claude/lead-pillar1` | 0.41.x (combined) | Retired 2026-10-16 (memory full) | `plans/handover-lead.md` |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead (2026-10-15 to 2026-10-16 ~04:20) | `claude/lead-pillar1` | 0.40.x–0.41.2 (combined) | Retired 2026-10-16 (~460k) | `plans/handover-lead.md` |
 | session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: crew time, schedules, needs, day_check (sections 10, 13, 14) | `claude/sim-engineer` | 0.15, 0.21–0.22, 0.26.x | Working (answers pass, 0.26.8+) | `plans/handover-sim.md` |
