@@ -65,11 +65,12 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
   radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
 .device .crt::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;pointer-events:none;z-index:3;opacity:0;
   background:linear-gradient(to bottom,transparent,rgba(255,255,255,.035),transparent)}
-.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite}
-.device.fx .crt{animation:devflick 4s steps(1) infinite}
+.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite;will-change:transform}
+.device.fx .crt::after{animation:devflick 4s steps(1) infinite}
+.device .crt,.device #devBody{contain:paint}
 @keyframes devroll{from{transform:translateY(-100%)}to{transform:translateY(560%)}}
-@keyframes devflick{0%{opacity:1}31%{opacity:.985}32%{opacity:1}77%{opacity:.99}78%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
+@keyframes devflick{0%{opacity:1}31%{opacity:.55}32%{opacity:1}77%{opacity:.7}78%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt::after,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
 .device .devhead{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;flex:none}
 .device h2{margin:0;font:inherit;font-size:var(--crt-size);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
 .device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);-webkit-user-select:text;user-select:text;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
@@ -190,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.13
+   STARSHIP CADET: CSV Wren                            build 0.35.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6911,7 +6912,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7952,7 +7953,7 @@ function deviceLoad(s) {
     .map((m, i) => ({ id: Number.isInteger(m.id) ? m.id : 1000 + i, title: m.title.slice(0, 80), text: typeof m.text === 'string' ? m.text.slice(0, 2000) : '', at: isFinite(m.at) ? +m.at : 0, pinned: !!m.pinned }));
   const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
-    .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
+    .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
   return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
@@ -8151,7 +8152,7 @@ const DEVICE_SKIN = (() => {
   const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
-  let back = null, drawn = null, drawnKey = null;
+  let back = null, drawn = null, drawnKey = null, mapCache = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
     el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
@@ -8185,8 +8186,22 @@ const DEVICE_SKIN = (() => {
     },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
+      // 0.35.14 (the performance engineer's advice): the plan is kept while its deck, rooms, pick and goal stay the same,
+      // and only the dots (people, you) are drawn again, so a ship minute with Maps open costs a few circles
       const NS = 'http://www.w3.org/2000/svg', g = b.grid || [], H = g.length, W = Math.max(0, ...g.map(r => r.length)), at = (i, j) => (g[j] || '')[i] || '.';
       const sv = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const dots = svg => {
+        const old = svg.querySelector('g.m-dots'); if (old) old.remove();
+        const dg = sv('g', { class: 'm-dots' });
+        for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; dg.appendChild(c); }
+        if (b.you) dg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
+        svg.appendChild(dg);
+        svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
+          if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+        return svg;
+      };
+      const pk = JSON.stringify([b.rooms, b.pick, b.goal]);
+      if (mapCache && mapCache.grid === g && mapCache.key === pk) return dots(mapCache.svg);
       const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
       const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
       pat.appendChild(sv('rect', { width: .8, height: .8, class: 'm-hbg' })); pat.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: .8, class: 'm-hl' }));
@@ -8204,11 +8219,8 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
-      for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; svg.appendChild(c); }
-      if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
-      svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
-        if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
-      return svg;
+      mapCache = { grid: g, key: pk, svg };
+      return dots(svg);
     },
     form(b) {                                  // text fields; the submit action gets { field id: value }
       const box = mk('form', 'devform'), ins = {};
@@ -8499,6 +8511,7 @@ function mapDots(n, people) {                            // the dots on deck n: 
 deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
   act(verb, arg) {
     if (verb === 'open' && arg && arg.who) verb = 'who', arg = arg.who;   // { app: 'maps', who } from another app
+    if (verb === 'person') { mapWho = null; verb = 'who'; if (DEV.app !== 'maps') deviceShow('maps'); }   // section 20's Crew app: On the map
     if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; mapWho = null; }
     else if (verb === 'pick') { mapPick = mapPick === arg ? null : arg; mapWho = null; }
     else if (verb === 'who') {

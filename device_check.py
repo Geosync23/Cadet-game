@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   0.35.14: { app: 'maps', do: 'person' }, the Maps plan kept between ship minutes, unknown appointment fields kept
 #   the phone review (0.35.12): tap the ship to close (a drag doesn't), the bezel's grip and swipe, no rebuild when unchanged
 #   Quiet off shift and the #seek chip's look (0.35.11)
 #   Calendar days and group meetings (0.35.10): See the day, Make an appointment that day, pick the place on Maps,
@@ -138,6 +139,17 @@ def run(path):
               clearGoal(); deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); if (!own) delete window.crewContacts; deviceShow('home'); return out; })()""")
             print('  people on maps:', pm)
             check(pm[1] == 0 if pm[0] and len(pm) == 2 else pm[1:] == [pm[1], 'maps', True, True, True, True, True, True] and (pm[0] or pm[1] == 2), f'people on Maps: dots, pick, Go there: {pm}')
+            # 0.35.14: section 20's "On the map" ({ app: 'maps', do: 'person' }) opens Maps on them; the plan is kept between
+            # ship minutes (only the dots are drawn again); appointments keep fields other sections add (socKept)
+            pp = g.ev("""(() => { const own = typeof crewContacts === 'function', mess = Object.values(DECKS[3].rooms).find(r => /mess/i.test(r.name || '')).name;
+              if (!own) window.crewContacts = () => [{ id: 'tst-a', name: 'Tess Able', role: 'Cook', tier: 1, tierName: 'acquaintance', where: { deck: 3, room: mess, act: 'dinner' } }];
+              const q = mapPeople()[0]; if (!q) { if (!own) delete window.crewContacts; return 'nobody'; }
+              deviceShow('home'); deviceDo({ app: 'maps', do: 'person', arg: q.id }); const out = [DEV.app, mapWho === q.id];
+              const s1 = document.querySelector('#devBody .devmap'); deviceRefresh(); DEVICE_SKIN.draw('maps', Object.assign(deviceView('maps'), { title: 'Maps again' }));
+              const s2 = document.querySelector('#devBody .devmap'); out.push(s1 === s2, s2.querySelectorAll('g.m-dots').length, !!s2.querySelector('circle.m-per.pick'));
+              deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); if (!own) delete window.crewContacts; deviceShow('home');
+              out.push(deviceLoad({ device: { appts: [{ id: 1, with: ['calder'], at: 9000, where: '3-mess-1', status: 'kept', socKept: true }] } }).appts[0].socKept === true); return out; })()""")
+            check(pp == ['maps', True, True, 1, True, True], f'On the map from the Crew app; the plan kept, dots redrawn; other sections\' appointment fields kept: {pp}')
             # Memos: write one with the form, it's saved in SHIP.device and pins to Home; Mail's Remember this makes one
             mm = g.ev("""(() => { SHIP.device.memos = []; deviceShow('memos'); deviceDo({ app: 'memos', do: 'new' });
               const f = document.querySelector('#devBody form.devform'); if (!f) return 'no form';
