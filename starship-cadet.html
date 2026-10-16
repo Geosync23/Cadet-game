@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.11
+   STARSHIP CADET: CSV Wren                            build 0.26.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6617,7 +6617,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.11';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.12';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7066,7 +7066,11 @@ function schedBuild(p, d, occ, S) {
   const N = needsEst(p, d);                               // the needs that steer today's choices
   const segs = []; let t = 0, deck = bedDeck;
   const deck3Full = (a, b) => { const h = occ.heads; for (let m = Math.max(a, 1020); m < Math.min(b, 1440); m++) if (h[m] >= DECK3_EVENING_MAX) return true; return false; };
-  const isFree = (id, a, b) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y);
+  // free from a to b (minutes from midnight). An event's own places are held for it from 5 minutes before it starts
+  // until it ends (occ.res, shipDay): only someone taking the place for that event (`tag` 'ev-<id>' or 'ev-<id>-<anim>') may
+  // use them then, so ordinary free time doesn't fill the room before the guests are planned
+  const isFree = (id, a, b, tag) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y)
+    && !(occ.res && (occ.res.get(id) || []).some(([x, y, ev]) => x < B + b && B + a < y && !(tag && (tag === 'ev-' + ev || tag.startsWith('ev-' + ev + '-')))));
   const hold = (id, a, b) => { if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b]); };
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
   const go = dk => {
@@ -7103,7 +7107,7 @@ function schedBuild(p, d, occ, S) {
         if (end - s < (o.min || Math.min(dur, 10))) break;
         for (let i = 0; i < pool.length; i++) {
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
-          if (!mine && !isFree(pl.id, s, end)) continue;
+          if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
@@ -7435,6 +7439,17 @@ function shipDay(d) {
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
   const order = S.people.slice().sort((a, b) => wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
   occ.heads = new Int16Array(1440);                      // how many the plans so far put on Deck 3, minute by minute
+  // section 18's events: each event's own places are held for it (occ.res: placeId -> [[from, to, eventId]], not a
+  // booking, so dayReport never counts them) from 5 minutes before it starts until it ends (releasing them 15 minutes
+  // in let early planners take seats later guests wanted: the jam stayed empty). The places: eventPlaces(e)
+  // (section 18), else its tagged places and rooms and its first pool
+  occ.res = new Map();
+  if (typeof eventsOn === 'function') for (const e of eventsOn(d)) {
+    const ids = typeof eventPlaces === 'function' ? eventPlaces(e) || []
+      : typeof eventOpts === 'function' ? eventOpts(e.ev, { rank: 'officer' })   // its tagged places and rooms, and its first pool (the event's own room)
+        .filter(([n, k]) => /^(@|ev:)/.test(k) || (e.ev.where[0] && e.ev.where[0].pool === k && e.ev.where[0].deck === n)).flatMap(([n, k]) => (S.shared.get(n + '|' + k) || []).map(pl => pl.id)) : [];
+    for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
+  }
   for (const p of order) {
     const plan = schedBuild(p, d, occ, S); plans.set(p.id, plan);
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
