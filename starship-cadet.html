@@ -12613,7 +12613,7 @@ const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing
   heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
 const NEWS = [];
 let SOC = null, SOC_MIN = -1;
-SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {} };
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {} };
 const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
 const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
 const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
@@ -12638,32 +12638,32 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
-  SHIP.social = { hour, fault: {}, pairs: {} };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay] } }, mail (story Mail to come). A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) } };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {} };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -12689,12 +12689,25 @@ function relAdd(id, why, pts) {
   r.pts = Math.max(REL_TIERS[r.tier], Math.round((r.pts + pts) * 100) / 100);   // never below the tier you've reached
   if (r.met === null) r.met = now;
   if (why !== 'news') r.lastTalk = now;
-  r.tier = relTierOf(r.pts);
+  const was = r.tier; r.tier = relTierOf(r.pts);
+  if (r.tier > was && typeof deviceNotify === 'function') {   // a badge on the device's Crew app (section 19)
+    const p = SOC.crew[SOC.idx.get(id)];
+    deviceNotify({ app: 'crew', text: r.tier === 1 ? 'You and ' + shortName(p) + ' know each other now.' : 'You and ' + shortName(p) + ' are ' + REL_NAMES[r.tier] + 's now.', urgent: false });   // a badge only: the chat card says it in person
+  }
   return r.tier;
 }
 function affinity(a, b) {
   socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
   return i === undefined || j === undefined || i === j ? 0 : SHIP.aff[pairIdx(i, j)];
+}
+// what section 14 plans with (seating by friendship): pure, so a day planned early or again after a reload comes out
+// the same. For now the pair's starting affinity (affStart: roster data and a seed only); d is kept for later
+const AFF_PLAN = new Map();
+function affinityPlan(a, b, d) {
+  socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
+  if (i === undefined || j === undefined || i === j) return 0;
+  const k = pairIdx(i, j); if (!AFF_PLAN.has(k)) AFF_PLAN.set(k, affStart(SOC.crew[Math.min(i, j)], SOC.crew[Math.max(i, j)]));
+  return AFF_PLAN.get(k);
 }
 
 // ---- news ----
@@ -12795,6 +12808,7 @@ function socialHour(h) {
   socBorn(h, rooms);
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
+  for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
@@ -12802,6 +12816,26 @@ function socPairNews(i, j, friends, t) {
     weight: .6, life: 4, born: t, seed: [SOC.crew[i].id, SOC.crew[j].id],
     lines: friends ? [a + ' and ' + b + ' are always together these days.', 'Have you noticed ' + a + ' and ' + b + '? Best of friends now.', a + ' and ' + b + ' have become thick as thieves.']
                    : [a + ' and ' + b + ' aren\'t speaking.', 'There\'s a chill between ' + a + ' and ' + b + ' lately.', 'Did you hear ' + a + ' and ' + b + ' had words?'] });
+  if (!friends) SHIP.social.feuds[SOC.crew[i].id + ':' + SOC.crew[j].id] = { until: t + 3 * 1440, talked: [] };   // a falling-out you can smooth over
+}
+// small dramas (0.36.11): a pair who fall out (rivals, above) is a feud for three days. Each of them grumbles about
+// the other on their card (feudOf); chat with both while it lasts and they make it up: their affinity goes back to
+// -10, it's news ("X and Y have made up"), and each gives you REL_PTS.chat extra. SHIP.social.feuds, saved
+function feudOf(id, t = shipNow()) {
+  for (const k in SHIP.social.feuds) { const f = SHIP.social.feuds[k], [a, b] = k.split(':'); if (f.until > t && (a === id || b === id)) return { k, f, other: a === id ? b : a }; }
+  return null;
+}
+function feudTalk(p) {                                   // you chatted with someone in a feud
+  const o = feudOf(p.id); if (!o) return null;
+  if (!o.f.talked.includes(p.id)) o.f.talked.push(p.id);
+  if (o.f.talked.length < 2) return null;
+  const [a, b] = o.k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(b), t = Math.floor(shipNow());
+  delete SHIP.social.feuds[o.k]; SHIP.aff[pairIdx(i, j)] = -10; SHIP.social.pairs[Math.min(i, j) + '-' + Math.max(i, j)] = 'm';
+  const na = shortName(SOC.crew[i]), nb = shortName(SOC.crew[j]);
+  newsAdd({ id: 'madeup:' + o.k + ':' + t, about: a + ',' + b, kind: 'madeup', weight: .5, life: 3, born: t, seed: [a, b],
+    lines: [na + ' and ' + nb + ' have made up.', 'Saw ' + na + ' and ' + nb + ' having dinner together. About time.', 'Looks like ' + na + ' and ' + nb + ' are talking again.'] });
+  relAdd(a, 'chat', REL_PTS.chat); relAdd(b, 'chat', REL_PTS.chat);
+  return 'You talk it over, and you can tell something\'s shifted. ' + shortName(SOC.crew[SOC.idx.get(o.other)]) + ' must have said something too.';
 }
 function socialTo(t) {
   socInit(); const h1 = Math.floor(t / 60);
@@ -12813,7 +12847,7 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts();
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -12903,14 +12937,14 @@ function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // s
 // ---- for the device's apps (0.36.6; section 19 draws them): plain data, nothing drawn here ----
 // crewContacts() -> everyone you've met (or all with { all: true }), closest first: [{ id, name, role, dept, tier,
 //   tierName, pts, toNext (points to the next tier, or null), met, lastTalk, known: [what you know], where }].
-//   where: { deck, room, act } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
+//   where: { deck, room, act, placeId } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
 //   shows people once you're acquaintances, or on public duty); else null
 // newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
 const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
 function crewWhere(p, t = shipNow()) {
   const w = whereIs(p, t); if (!w || w.moving) return null;
   const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
-  return { deck: w.deck, room: rm ? rm.name : null, act: w.act };
+  return { deck: w.deck, room: rm ? rm.name : null, act: w.act, placeId: w.placeId || null };
 }
 function crewContacts({ all = false } = {}) {
   socInit(); const t = shipNow(), out = [];
@@ -12928,6 +12962,23 @@ function newsFeed() {
   return SHIP.heard.slice().reverse().map(h => { const it = NEWS.find(x => x.id === h.id), p = h.from && SOC.idx.has(h.from) ? SOC.crew[SOC.idx.get(h.from)] : null;
     return { id: h.id, line: h.line, from: p ? p.name : null, at: h.at, kind: it ? it.kind : (h.id.split(':')[0] || 'news') }; });
 }
+// the Crew app (0.36.8), on the device engineer's deviceApp (section 19; nothing without it): the people you've met,
+// closest first, with where they are when you may know it; tap one for what you know about them
+let CREW_PICK = null;
+const shipNews = (limit = 20) => newsFeed().slice(0, limit).map(x => ({ text: x.line, from: x.from, at: x.at }));   // the Ship app's news feed (section 19)
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50,
+  view: () => {
+    const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
+    if (c) return { title: c.name, blocks: [
+      { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: c.where ? 'Now: Deck ' + c.where.deck + (c.where.room ? ', ' + c.where.room : '') + '.' : 'Where they are: you don\'t know them well enough yet.' },
+      { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
+      { kind: 'buttons', items: (c.where ? [{ label: 'On the map', action: { app: 'maps', do: 'person', arg: c.id } }] : []).concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
+    const cs = crewContacts();
+    return { title: 'Crew', blocks: cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+      : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }] };
+  },
+  act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
@@ -12970,10 +13021,90 @@ const CHAT_DEPT = { command: 'The bridge is calmer than people think.', helm: 'S
   works: 'Something always needs fixing, doesn\'t it?', watch: 'Quiet watch so far. I like it that way.', survey: 'Sato has us chasing another reading.',
   infirmary: 'Drink some water. Doctor\'s orders. Well, aide\'s orders.', galley: 'Two hundred meals a day, and they still ask what\'s for dinner.' };
 const chatName = () => (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet';
+// the first story arcs (0.36.10; plans/pillar3-plan.md "Story crew arcs"): Tomas (homesick, and a call home that goes
+// wrong), Pell (a hobby that becomes a little show in the music room) and Rina (a worry about her gran). Four beats
+// each, opening at acquaintance, colleague, friend and close friend: beat i is told the first time their card opens
+// once you're at tier i + 1, at most one a ship day (rel.arc beats told, rel.arcDay). mail: a message from them
+// `after` ship minutes later (SHIP.social.mail, sent by socialTick). They never contradict the roster's details.
+const STORY_ARCS = {
+  tomas: [
+    { say: 'Do you ever miss home? I keep staring at that star map above my bunk. Every place on it is somewhere I\'ve never been.' },
+    { say: 'My brother\'s birthday is on Thursday. I\'m going to call him from the booths on Deck 3. First proper call since I left.' },
+    { say: 'The call dropped halfway through. Relay lag. He thought I hung up on him. Now he won\'t answer.',
+      mail: { after: 180, subject: 'Sorry about earlier', body: 'Sorry I was so quiet. The call home really got to me. Thanks for listening, though. It helped more than you know. Tomas' } },
+    { say: 'He wrote back! He\'s taped a star map to his ceiling, same as mine. Says we can look at the same sky now. Sort of.',
+      mail: { after: 60, subject: 'Observatory?', body: 'If you\'re free on observatory night, come up to Deck 2. I want to show you where home is on the big window. Tomas' } },
+  ],
+  pell: [
+    { say: 'Want to see something? I made this out of my tin of spare screws. It plays a tune. Badly.' },
+    { say: 'I found an old music box at the swap meet. Rusted solid. I\'ve nearly got the chime working again.' },
+    { say: 'Brennan says I can show my music boxes in the music room after dinner one night. Is that mad? You\'d come, right?',
+      mail: { after: 120, subject: 'Music boxes!', body: 'It\'s happening: my music boxes, in the Deck 4 music room after dinner some night this week. Bring people. Or just you. Pell' },
+      show: { id: 'pell-show', name: 'Pell\'s music boxes', at: [1230, 1290], where: [{ deck: 4, pool: 'music' }], hostAnim: 'play', chance: .12,
+              mail: 'Tomorrow at 20:30 in the Deck 4 music room: my music boxes, all of them, wound up at once. Bring people. Or just you. Pell',
+              ask: 'Coming to see my music boxes tonight?', here: 'This one plays a waltz. Mostly.', thanks: 'You watch Pell wind up his music boxes one by one. The little room laughs and claps.' } },
+    { afterShow: true, say: p => { const n = showCrowd(p, 'pell-show'), w = n > 12 ? n : ['Nobody', 'One person', 'Two people', 'Three people', 'Four people', 'Five people', 'Six people', 'Seven people', 'Eight people', 'Nine people', 'Ten people', 'Eleven people', 'Twelve people'][n];
+      return n ? w + (n > 12 ? ' people' : '') + ' came to see the music boxes. ' + (n > 3 ? n + '! ' : '') + 'I think they actually liked them.' + (showJoined(p, 'pell-show') ? ' And you came. That meant a lot.' : '') : 'Hardly anyone came to the music boxes. That\'s fine. I\'ll try again some time.'; } },
+  ],
+  rina: [
+    { say: 'My gran taught me Tiles. Cheated the whole time. She hasn\'t been well lately.' },
+    { say: 'My sister says Gran\'s gone into hospital. She\'s the doctor in the family. I\'m just the one who worries.' },
+    { say: 'No news from the station for two days. I haven\'t slept. Talk to me about anything else, would you?',
+      mail: { after: 240, subject: 'Thank you', body: 'Thanks for keeping me company today. Still no news, but I feel steadier. You\'re a good one. Rina' } },
+    { say: 'Gran\'s home! First night back she beat my sister at Tiles. Cheated, obviously. I\'ve never been so happy to hear it.',
+      mail: { after: 30, subject: 'Tiles?', body: 'Gran sends her love, apparently, to "the friend who listened". Come and lose to me at Tiles in the common room some evening. Rina' } },
+  ],
+};
+// how many crew went to a beat's show (their plans that day), and whether you joined in (section 18's SHIP.events.joined)
+function showCrowd(p, id) {
+  const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; if (!d) return 0;
+  return SOC.crew.filter(q => q !== p && planDay(q, d).some(s => s.tag && (s.tag === 'ev-' + id || s.tag.startsWith('ev-' + id + '-')))).length;
+}
+const showJoined = (p, id) => { const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; return !!(d && SHIP.events && SHIP.events.joined.includes(id + '@' + d)); };
+function arcBeat(p, t = shipNow()) {
+  const arc = STORY_ARCS[p.id], r = SHIP.rel[p.id]; if (!arc || !r) return null;
+  const n = r.arc || 0, day = Math.floor(t / 1440) + 1;
+  if (arc[n] && arc[n].afterShow && r.showDay && day <= r.showDay) return null;   // Pell's last beat waits for his show
+  return n < arc.length && r.tier >= n + 1 && (r.arcDay || 0) < day ? arc[n] : null;
+}
+function arcTold(p) {                                    // the card showed their next beat
+  const beat = arcBeat(p); if (!beat) return;
+  const r = SHIP.rel[p.id]; r.arc = (r.arc || 0) + 1; r.arcDay = SHIP.time.day;
+  // a beat with a show: a real one-off gathering the next evening (section 18's eventOneOff), which sends its own Mail
+  if (beat.show && typeof eventOneOff === 'function' && eventOneOff({ ...beat.show, day: SHIP.time.day + 1, host: p.id, from: p.name })) { r.showDay = SHIP.time.day + 1; return; }
+  if (beat.mail) SHIP.social.mail.push({ at: Math.floor(shipNow()) + beat.mail.after, from: p.name, subject: beat.mail.subject, body: beat.mail.body });
+}
+// appointments (0.36.13; the device's Appointments, section 19, and the crew side, section 14's apptList): one you
+// kept gives REL_PTS.appt to each person in it, once (a.socKept); one you missed costs nothing, but the next time you
+// tap them they mention it (apptMissedBy, a.socSaid), within three days. The two flags ride on the appointment, saved
+// with the device's part of the save
+function socialAppts() {
+  if (typeof apptList !== 'function') return;
+  for (const a of apptList()) if (a.status === 'kept' && !a.socKept && Array.isArray(a.with)) { a.socKept = true; for (const id of a.with) if (SOC.idx.has(id)) relAdd(id, 'appt', REL_PTS.appt); }
+}
+function apptMissedBy(p, t = shipNow()) {
+  if (typeof apptList !== 'function') return null;
+  return apptList().find(a => a.status === 'missed' && !a.socSaid && Array.isArray(a.with) && a.with.includes(p.id) && t - a.at < 3 * 1440 && t >= a.at) || null;
+}
+function apptRemark(p, a, t = shipNow()) {
+  const pl = typeof apptPlace === 'function' ? apptPlace(a) : null, rm = pl && ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name;
+  const when = Math.floor(a.at / 1440) === Math.floor(t / 1440) ? 'earlier' : Math.floor(a.at / 1440) === Math.floor(t / 1440) - 1 ? 'yesterday' : 'the other day';
+  const at = rm ? ' at the ' + rm.toLowerCase() : '';
+  return ['Waited for you' + at + ' ' + when + '. No harm done.', 'I was' + at + ' ' + when + '. Thought you\'d forgotten me!', 'Missed you' + at + ' ' + when + '. Another time?'][Math.floor(schedU(p.seed, Math.floor(t / 60), 642) * 3)];
+}
+function socialMail(now) {                               // story Mail that's due (socialTick)
+  const due = SHIP.social.mail.filter(x => x.at <= now); if (!due.length || typeof mailSend !== 'function') return;
+  SHIP.social.mail = SHIP.social.mail.filter(x => x.at > now);
+  for (const x of due) mailSend(x);
+}
 function chatLine(p, t = shipNow()) {
   socInit();
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
+  const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
+  const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
+  const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
+    return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
   if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
   const heard = new Set(SHIP.heard.map(x => x.id));
   const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
@@ -13065,6 +13196,8 @@ function chatOpen(p, greet) {                             // greet: they came to
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
   CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
+  if (CHAT.line.kind === 'story') arcTold(p);
+  if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
   return true;
@@ -13080,9 +13213,14 @@ function chatDo(id) {
     if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
     const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.chat);
     const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
+    const fd = feudOf(p.id), made = fd ? feudTalk(p) : null;   // a falling-out: talking it over (small dramas)
     let l = null;                                       // the next thing on their mind: something they say, not the same again
-    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text); k++) l = chatLine(p, shipNow() + 60 * k);
+    if (made) l = { text: made, say: false };
+    else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
+    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) l = chatLine(p, shipNow() + 60 * k);
     if (l.news) playerHeard(l.news, p.id);
+    if (l.kind === 'story') arcTold(p);
+    if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
   } else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'back') { C.ask = false; chatShow(); }
