@@ -1,6 +1,6 @@
 # Pillar 4 plan: arriving, the voices aboard, deep social life and many more traditions
 
-**DRAFT 1 (2026-10-16, the Pillar 4 planner, session_01KLFXcNJztCSVLXunD8Jt7R).** Not agreed. Nothing here is official until the user approves it; the lead interprets their answers and marks each decision **Agreed** or **Changed** with the date, as in `plans/pillar3-plan.md`. Built from the user's own notes and answers in `plans/pillar4-notes.md`. The deep social design is the **social system designer's** (session_01SMfS1WKqzQ93X6zyZ7NFpJ, `plans/social-deep-plan.md` on `claude/social-design`): this plan references and schedules it, and the two plans must agree on shapes and order (see "Working with the social system design").
+**DRAFT 2 (2026-10-16, the Pillar 4 planner, session_01KLFXcNJztCSVLXunD8Jt7R).** Draft 2 folds in the interfaces agreed with the social system designer (their draft 2, ab351f1). Not agreed. Nothing here is official until the user approves it; the lead interprets their answers and marks each decision **Agreed** or **Changed** with the date, as in `plans/pillar3-plan.md`. Built from the user's own notes and answers in `plans/pillar4-notes.md`. The deep social design is the **social system designer's** (session_01SMfS1WKqzQ93X6zyZ7NFpJ, `plans/social-deep-plan.md` on `claude/social-design`): this plan references and schedules it, and the two plans must agree on shapes and order (see "Working with the social system design").
 
 Read with `design-doc.md` ("The player", "Social life", "Ship-wide events", "Milestones", "Open questions"), `plans/pillar3-plan.md` (the device, meetings with dialogue, chat cards, the news model), `TEAM.md`, `DEV_NOTES.md`, and the handover notes for social, events, device and the crew designer.
 
@@ -112,7 +112,7 @@ Each beat is something a person does in their real day: it is scheduled in their
 | | Pell, the quiz crowd | Bow lounge, 20:00 | Quiz night | Join a tradition |
 | **Fri 5** | Works team | Tea corner, Friday tea | **The new hand's mug**: the team gives you a mug with your name on it; it hangs on the tea corner rack from then on (a trace). | — |
 | | Tomas | evening | Invites you to Saturday's **Sowing morning** and film night | — |
-| **Sat 6** | Tomas, the gardeners | Garden, 09:00 | **Days off** ("You're off. The board's open if you're bored; nobody expects you."). **Sowing morning** (a new seasonal tradition): you plant a seedling of your own in the garden; it grows through the game (a lasting trace). Film night in the evening. | A day off |
+| **Sat 6** | Tomas (his invitation sent Friday through `socialInvite`, so it's a real appointment), the gardeners | Garden, 09:00 | **Days off** ("You're off. The board's open if you're bored; nobody expects you."). **Sowing morning** (a new seasonal tradition): you plant a seedling of your own in the garden; it grows through the game (a lasting trace). Film night in the evening. | A day off |
 | **Sun 7** | Calder (Mail) | 18:00 | "One week. You'll do." A summary of what you did. The Sunday swap meet. The intro ends at midnight (or when you tick everything, or when you end it). | — |
 
 **The Settling in list** (a small app on the device, section 19). About 14 items, all optional, each ticking itself when you've done the thing (by watching ship notes, see "Shared formats"), each naming who can teach it, with "Go there" to that person or place. Ticking them all earns a line in your Record and a short note from Calder. A button, **"I know my way around"**, ends the intro at any time: the scripted beats stop, the escort goes back to his day, the list stays as a checklist.
@@ -188,7 +188,9 @@ Writers and tradition designers write **plain text files** under a new folder `c
 ```
 content/
   facts.md                 the canon sheet: who's from where, who's related, running jokes (the head writer keeps it)
-  voices/<crewId>.md       voice cards
+  voices/<crewId>.voice    voice cards (the social designer's shape: talk, cares, jokes, words tokens, needs, openness, loves/likes, joy, thread, keepsake, avoid)
+  themes/<theme>.arc       struggle themes for generated crew (3 beats each, with roster fill-ins like {home})
+  gifts.list               gift tags
   lines/<crewId>.lines     each person's own lines
   banks/<dept|rank|trait>.lines   shared lines
   overheard/<topic>.lines  conversations
@@ -206,32 +208,33 @@ A `.lines` file (sketch; the dialogue engineer settles the exact grammar in wave
 == greet
 ? tier=stranger
 - Evening. You'll be the new hand.
-? tier>=acquaintance time=morning
-- Morning, {player}. Coffee's terrible. I made it.   #funny
+? tier>=acquaintance time:morning
+- {hi}, {me}. Coffee's terrible. I made it.   #funny
 - Morning! Board's light today. Don't tell it I said so.
 
-== react repair.mine
-? place.deck=4
-- That lamp's been blinking since Tuesday. Nicely done.   #warm
+== react
+? cue:repair.lamp.you
+- That lamp's been blinking since Tuesday. {thanks}!   #warm
 
 == feel
-? mood=low
+? mood:low
 - Long one. I'll be fine after bread.
 
 == arc halloran.4
-? tier>=friend flag=certified.tier2
+? tier>=friend flag:certified.tier2
 - I had a junior once. Didn't make it through. I used to think that was on me.   #serious
 ```
 
 ```
 == overheard
-? pair=works+works topic=board
+? pair:works+works topic:board
 A: Board's light today.
 B: Then it'll be heavy tomorrow. It always is.
 ```
 
-- **Sections** (`== kind`) name the line kind; **conditions** (`? ...`) use one fixed vocabulary (tier, mood, time, weekday, place, deck, event phase, tradition, flag, arc beat, memory, pair type, affinity band, topic); **tokens** (`{player}`, `{name}`, `{first}`, `{machine}`, `{room}`, `{deck}`, `{dish}`, `{tradition}`, `{friend}`, `{weekday}`, `{home}`) are filled from the simulation; **tone tags** (`#light` by default, `#funny`, `#warm`, `#serious`).
-- **Picking a line:** the most specific matching line wins (most conditions met), then a seeded pick among ties (per person, per day); a person's own lines beat the shared banks; a line isn't repeated to you within 7 ship days (a small ring of recent line ids in the save). Each line's id is a hash of its file, kind and text, so edits don't scramble memories.
+- **Sections** (`== kind`) name the line kind; **conditions** (`? ...`) use one fixed vocabulary: the social ones read section 20's queries (`tier`, `mem:`, `warmth:`, `aff:`, `bond:`, `mood:`, `beat:`, `news:`, `rep:`, `you:`, `cue:`, `flag:`, `week1:`; see the social designer's Part 6), the rest are the dialogue engine's (`time:`, `weekday:`, `place:`, `deck:`, `event:`, `trad:`, `dept:`, `trait:`, `act:`, `pair:`, `topic:`). **Placeholders** are filled from the simulation (`{me}`, `{nick}`, `{name}`, `{friend}`, `{best}`, `{rival}`, `{boss}`, `{thing}`, `{trad}`, `{machine}`, `{room}`, `{deck}`, `{dish}`, `{weekday}`, `{home}`); a line whose placeholder can't be filled is skipped. **Voice tokens** (`{hi}`, `{bye}`, `{yes}`, `{thanks}`, `{wow}`, `{sigh}`, `{nick}`) come from the speaker's voice card, so one shared line sounds like each person. **Tone tags:** `#light` by default, `#funny`, `#warm`, `#serious`.
+- **Picking a line** (`lineFor`, the dialogue engine; as agreed with the social designer): the person's own lines, then their voice template's, then the shared bank; keep those whose conditions all hold; most specific wins (own above template above shared); minus points for lines said recently (the last 6 by this person, the last 12 ship-wide); a seeded pick by person and hour (`schedU`), so a second tap in the same hour says the same; `told:` callbacks are said once and marked through `memTold`. Overheard conversations and reactions also keep a small saved ring so none repeats to you within 7 ship days. Each line's id is a hash of its file, kind and text.
+- **The baked shapes are the social designer's** (their Part 9: `VOICE`, `LINES[kind]` with condition fields, `MOMENTS` and themes in `MEETING_SCRIPTS`' `{ who, text, pose, to }` / `{ choice: [...] }` shape, choices gaining `flavour`, `mem`, `flag`, `favour`), so `dialogueShow` plays moments unchanged.
 - **The voice budget** from Pillar 3 stays: one bubble or one overheard conversation on screen at a time, none while a dialogue panel is open, at most one `#serious` line a day, reactions at most once per person per kind per day.
 
 ### How lines are reviewed (voice and tone)
@@ -255,13 +258,15 @@ The **social system designer** owns the design of deep social life in `plans/soc
 - **staffs** it with two social engineers (A and B, split as the designer decides; proposed split: A memories, gifts, visits and reputation; B crew-to-crew life, arcs and moments);
 - **agrees the interfaces** between onboarding, dialogue data and social state (below, proposed to the designer on 2026-10-16; to be confirmed in both plans before either is final).
 
-### The interfaces (proposed; to be agreed with the designer)
+### The interfaces (agreed with the designer, 2026-10-16; both plans say the same)
 
-1. **Line conditions read social state only through a few pure queries** that section 20 owns: `relTier(id)`, `mem(id, key)` (does this person remember something about you), `affBand(a, b)` (friends, neutral, rivals), `moodOf(p)`, `arcBeat(arcId)`, `knowsNews(p, newsId)`, `flag(key)`. The condition words in content files map one to one onto these, and **the vocabulary freezes at the end of wave 1**, so writers can write against it.
-2. **One ship notes bus,** `simNote(kind, data)` and `onSim(kind, fn)`, placed early in the file (section 13) so it's there before anything loads. Kinds: `repair`, `favour`, `tradition`, `gift`, `appt`, `chat`, `intro`, `event`, `need`, `job`. Social listens to build memories, the dialogue engine to trigger reactions, onboarding to tick the Settling-in list.
-3. **Onboarding → social:** onboarding owns `SHIP.intro`; it calls `relAdd` and sets flags (`met.calder`, `escort.halloran`, `mug`, `seedling`). Proposed relationships after the arrival evening: Halloran 10 (acquaintance), Tomas 10, Pell 5, Calder 3, Brennan 3. Skip-intro sets the same.
-4. **Chat card:** section 20 keeps deciding *which kind* of line matters most (news, then feeling, then the ship, then life, then a greeting), then asks the dialogue engine `lineFor(p, kind, ctx)` for the words. Today's templates in section 20 move into `content/` so writers can grow them.
-5. **Social data writers fill:** arc beat lists, gift lists, visit reasons and memory phrasings live in `content/` too (the designer's call).
+1. **Line conditions read social state only through section 20's pure queries:** `relTier`, `mem(id, key)` (keys `kind.arg` with prefix match: `mem:fav.lamp`, `mem:came.quiz`, `mem:intro.dinner`), `warmth`, `affBand` (rival at -40 or less, friend at 60 or more), `bondOf` (best, rival, mentor, mentee, drifting), `moodOf`, `beatOf(arcId)` (beats told; `arcBeat` already means "the next beat due"), `knowsNews`, `repBand`, `knownFor`, `cue` (a recent ship note still talked about), `flag`. **The vocabulary freezes at the end of wave 1.**
+2. **One ship notes bus and one flag store,** both in section 13 (the sim engineer), early in the file so load order never bites: `simNote(kind, data)` / `onSim(kind, fn)`, `flag(key)` / `flagSet(key)` (saved in the main save). Kinds others send: `repair`, `favour`, `tradition`, `gift`, `apptKept`, `apptMissed`, `introStep`, `eventPhase`, `choice`, `jobAbandoned`, `harvest`, `lateMeal`, `job`, `need`. Social sends `tierUp`, `moment`, `bond`, `invite`. Each note also stays a "cue" for a day or two for line conditions. Social makes memories from them, the dialogue engine reactions, onboarding Settling-in ticks.
+3. **Onboarding → social:** onboarding owns `SHIP.intro`, calls `relAdd(id, 'intro:<step>', pts)` (after the arrival evening: Halloran 10, Tomas 10, Pell 5, Calder 3, Brennan 3), sets flags (`met.calder`, `escort.halloran`, `mug`, `seedling`, and the week's gates `week1.d2` … `week1.done`), and sends `simNote('introStep', { step, who })`. Social turns those into core memories (`intro.arrival`, `intro.dinner`, `intro.shadowShift`) and a **mentor bond** from Halloran to you (extra week-1 lines, an evening check-in each day of week 1). Skip-intro sets the same end state and memories.
+4. **Week-1 gating** (social's): chat cards always; favours from `week1.d2`; friends waving you over from `week1.d3`; invitations from `week1.d5`; moments and bunk visits after `week1.done`. The scripted first-weekend invitation goes through `socialInvite({ trad, day, from })`, so it's a real `invite` appointment.
+5. **Chat card:** section 20 decides which kind of line matters most (its extended order: missed appointment, week 1, a moment ready, arc beat, feud, birthday, invitation, memory callback, news, cue, feeling, life, greeting) and asks `lineFor(p, kind, ctx)` for the words. Today's hard-coded lists move into `content/` unchanged first (same lines out, `cadet_test` identical).
+6. **Overheard conversations are the dialogue engine's** (playing them as alternating bubbles under the voice budget), with pair conditions read through `affBand` and `bondOf`; news riding on one spreads to the second speaker through section 20's `newsAdd`.
+7. **Social data writers fill** (voice cards, themes, moments, gifts, invitation lines) lives in `content/` and is baked by the same generator.
 
 ---
 
@@ -322,10 +327,10 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 | --- | --- | --- | --- | --- | --- |
 | 1 | **Onboarding engineer** | new | new section `// 21. ARRIVAL` (intro steps, `SHIP.intro`, `escortPlan`, `introPlan`, Settling-in items, skip-intro), `intro_check.py` | `claude/arrival` | 0.42.x |
 | 2 | **Dialogue engineer** | new | new section `// 22. LINES` (`lineFor`, `overheardFor`, reactions, conditions, tokens), `content_gen.py`, `lines_check.py`, the generated blocks' markers | `claude/dialogue` | 0.43.x |
-| 3 | **Social engineer A** (memories, gifts, visits, reputation) | existing social role (fresh session if over half full) | section `// 20. SOCIAL`, `social_check.py` | `claude/social` | 0.36.x |
-| 4 | **Social engineer B** (crew-to-crew life, arcs, moments) | new | new section `// 20b. SOCIAL DEPTH` | `claude/social-depth` | 0.45.x |
+| 3 | **Social engineer A** (query API, memories, the kind order, week-1 gating, gifts, reputation, invitations, bunk visits) | existing social role (fresh session if over half full) | section `// 20. SOCIAL`, `social_check.py` | `claude/social` | 0.36.20+ |
+| 4 | **Social engineer B** (voice cards and steps, crew-to-crew, the moments engine, story arcs) | new | a marked sub-block `// 20c. SOCIAL STORIES` inside section 20 | `claude/social-stories` | 0.39.x |
 | 5 | **Traditions engineer** (events engineer 3) | new session, existing role | section `// 18. SHIP EVENTS`, the TRADITIONS block's loader, `events_check.py`; collects the tradition designers' files | `claude/ship-events` | 0.34.x |
-| 6 | **Sim engineer** | existing | sections 13 (the `simNote` bus), 14 (day 0, `introPlan`, visits, tradition routines), 10 (lead/follow mode) | `claude/sim-engineer` | 0.26.x |
+| 6 | **Sim engineer** | existing | sections 13 (the `simNote` bus and the `flag` store), 14 (day 0, `introPlan`, `crewComeTo` for visits, the weekly affinity snapshot, tradition routines), 10 (lead/follow mode) | `claude/sim-engineer` | 0.26.x |
 | 7 | **Device engineer** | existing | section 19 (device lock and first boot, the Settling-in app, skip-intro choice, season in Calendar, gifts in the locker view) | `claude/device` | 0.35.x |
 | 8 | **Deck architect** (places and decor) | existing | `DECKS[n]` places and dressing (your seedling's pot, the mug rack, tradition decor, the postbox, the tasting board), kit | `claude/decks-p3` | 0.38.x |
 | 9 | **Head writer** | new | `content/` (merges writers' branches), `content/facts.md`, the voice bible, the voice cards of the story crew, arc outlines; runs the generator and owns the baked LINES and MEETINGS blocks | `claude/content` | 0.48.x |
@@ -336,7 +341,7 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 | 14 | **Tradition designer: every few weeks** | new | `content/traditions/` four-weekly ones, the "This week aboard" Mail | `claude/trad-monthly` | — |
 | 15 | **Tradition designer: seasons, year and life moments** | new | `content/traditions/` seasonal, yearly, life; the seasons on the Calendar (data) | `claude/trad-seasons` | — |
 
-**On call** (existing helpers, small rows, not counted in the 15, woken only for their row): systems engineer (`jobReserve`, 0.33.x), galley engineer (tasting table, roast, long breakfast, harvest supper, the four-week cake, the seedling in the garden's data, 0.29.x), performance engineer (two-person overheard bubbles, the device hand-over and bag props, draw calls at gatherings, the lantern instancing, 0.27.x), player engineer (the kit bag in your hands, device lock, 0.28.x), interactions engineer (tips marked seen when taught, the locker drop, 0.37.x), crew designer (only if a roster fact must change; voice cards live in `content/`, not the roster). **The social system designer** stays on as the keeper of the social design through wave 2, answering questions and reviewing the social engineers' work. **This planner** stays on through wave 1 to answer plan questions, then hands over.
+**On call** (existing helpers, small rows, not counted in the 15, woken only for their row): systems engineer (`jobReserve`, 0.33.x), galley engineer (tasting table, roast, long breakfast, harvest supper, the four-week cake, the seedling in the garden's data, 0.29.x), performance engineer (two-person overheard bubbles, the device hand-over and bag props, draw calls at gatherings, the lantern instancing, 0.27.x), player engineer (the kit bag in your hands, device lock, gift tags on carried items, 0.28.x), interactions engineer (tips marked seen when taught, the locker drop, 0.37.x), crew designer (the generator fields social needs: `tpl`, `loves`, `likes`, `joy`, `thread`, `needs`, `openness`, `keepsake`, `home`, `family`, more `about` details; 0.16.x). **The social system designer** stays on as the keeper of the social design through wave 2, answering questions and reviewing the social engineers' work. **This planner** stays on through wave 1 to answer plan questions, then hands over.
 
 **Combined builds:** **0.60.0, 0.60.1, …** on `claude/ship-integration` (the lead). (0.50.x was planned for Pillar 3 and not used; 0.60.x keeps Pillar 4 clearly apart.) Writers and tradition designers have no build numbers: their work reaches the game only through the head writer's (0.48.x) and the traditions engineer's (0.34.x) builds.
 
@@ -344,14 +349,14 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 
 - **Writers → head writer:** writers push `content/` files only, to their own branches; the head writer reviews each batch, merges it into `claude/content`, runs `lines_check.py` and `content_gen.py`, and pushes a build. The lead never merges a writer's branch.
 - **Tradition designers → traditions engineer:** the same, into `claude/ship-events`; text goes past the head writer for tone (light touch).
-- **The lead merges about nine branches** (seats 1–9) into the combined build, in a fixed order each round: sim (13/14/10) → device (19) → social A (20) → social B (20b) → traditions (18) → dialogue (22) → arrival (21) → places (DECKS) → content (generated blocks last; on any conflict in a generated block, re-run the generator rather than merge by hand).
+- **The lead merges about nine branches** (seats 1–9) into the combined build, in a fixed order each round: sim (13/14/10) → device (19) → social A (20) → social B (20c) → traditions (18) → dialogue (22) → arrival (21) → places (DECKS) → content (generated blocks last; on any conflict in a generated block, re-run the generator rather than merge by hand).
 
 ### Keeping the one file from colliding
 
-- **Each new piece is its own section,** owned by one seat (21, 22, 20b) and placed so load order is safe (each is lazy, as section 20 is).
+- **Each new piece is its own section,** owned by one seat (21, 22, and the sub-block 20c) and placed so load order is safe (each is lazy, as section 20 is).
 - **Generated blocks** (LINES, MEETINGS, TRADITIONS) sit between markers, are rewritten whole by the generator and never hand-merged.
 - **Hooks into other sections are one-line, `typeof`-guarded calls** (as today), and the lead keeps a **hook register** in DEV_NOTES listing every such line and its owner.
-- **Hash keys** for seeded randomness: each seat gets its own range (arrival 700–749, lines 750–799, social B 800–849, the new traditions 434–499), listed in DEV_NOTES beside the existing ones.
+- **Hash keys** for seeded randomness: each seat gets its own range (social, both engineers: 644–699; arrival 700–749; lines 750–799; the new traditions 434–499), listed in DEV_NOTES beside the existing ones.
 - **The save:** `save.intro`, `save.lines`, and the social engineers' new parts, each read defensively; `SAVE_V` stays 2 unless the lead decides otherwise.
 
 ### Waves and order
@@ -362,7 +367,7 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 - Dialogue engineer: the `.lines` grammar, `content_gen.py`, `lines_check.py`, `lineFor` with the section-20 templates moved into content; the condition vocabulary agreed with the social designer and **frozen**.
 - Sim engineer: the `simNote` bus; day 0 planned like a Sunday; `introPlan`; lead and follow modes for one walker.
 - Onboarding engineer: `SHIP.intro`, the steps as data, checkpoints and fallbacks, `intro_check.py` running Day 0 on paper.
-- Social engineers A and B: the designer's foundations (memories, the query API, the arcs engine's shape).
+- Social engineers A and B: the designer's wave 1 (A1 the query API, A2 memories with decay, A3 the kind order calling `lineFor`, A4 week-1 gating; B1 voice cards and steps, B2 crew-to-crew).
 - Traditions engineer: the new `when` rhythms, seasons, ties, the TRADITIONS block loader; `events_check` for a whole year on paper.
 - Head writer and writers: the voice bible; voice cards for all 75; the story crew's samples; the intro meetings' first drafts.
 - Tradition designers: design cards for every proposed tradition (who, what, where, ties, decor and galley asks).
@@ -372,14 +377,14 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 - Onboarding + sim + device + performance + deck architect: Day 0 playable from the ramp to the bunk; device lock and first boot; the kit bag; the escort leading across decks; dinner with Calder.
 - Dialogue engineer: overheard conversations and reactions running from content.
 - Writers: first full banks for the story crew and the Works crew; overheard batch 1; reactions to the storm and repairs.
-- Social A/B: crew remember what you did; the first deep features.
+- Social A/B: the moments engine (B3, before check-in B if possible: you asked for these by name), gifts (A5), reputation by department (A6), invitations (A7).
 - Traditions: the first six weekly traditions live.
 - **Check-in A with the user:** play the arrival evening; the **Voices sampler** (approve the main voices before the bulk is written); the **Traditions calendar** (pick, cut, add).
 
 **Wave 3: the first week, depth.** About 14 active (the peak).
 - Onboarding: Days 1–7, the shadow shift with `jobReserve`, the follow switch, every teacher, the Settling-in list, Sowing morning and your seedling, the new hand's mug, fallbacks; skip-intro.
 - Writers: all 75 people's banks; arcs beats 1–3 for the ten; overheard batch 2.
-- Social A/B: gifts, bunk visits, crew-to-crew changes, the first heartfelt moments.
+- Social A/B: bunk visits (A8), story arcs as the writers deliver them (B4), the tuning pass.
 - Traditions: the rest of the weekly ones, the four-weekly ones.
 - **Check-in B with the user:** a whole first week played; overheard conversations; reactions; crew who remember; the new weekly traditions.
 
@@ -419,14 +424,18 @@ With the existing twelve (running club, quiz, Works Friday tea, Friday jam, film
 8. **How serious is serious?** Proposed: homesickness, a failed exam, a parent getting older, self-doubt, a friend drifting; nobody dies on screen; no romance.
 9. **The remaining ship-wide events** (comet viewing onward) are paused (your call, ~20:25). Keep them out of Pillar 4 and do them next?
 
+The social system designer's own questions (crew couples in the background or none, whether grief is in, bunk visits, gifts from the machine shop, reputation that can dip, "what you know" counts) are in `plans/social-deep-plan.md`; the lead may want to put both lists to the user together.
+
 ---
 
 ## Appendix: shared formats (proposed; owners refine and tell the lead)
 
 ```js
 // 13. SHIP TIME & SAVE (sim engineer): the ship notes bus, early in the file
-simNote(kind, data)          // kinds: 'repair' {job, machine, by}, 'favour' {who}, 'tradition' {id, joined}, 'gift' {from, to, item},
-onSim(kind, fn)              //   'appt' {id, kept}, 'chat' {who}, 'intro' {step}, 'event' {id, phase}, 'need' {key, low}, 'job' {id, step}
+simNote(kind, data)   onSim(kind, fn)   flag(key)   flagSet(key)      // flags saved in the main save
+// kinds sent: repair {who, machine, kind, deck}, favour {who, from}, tradition {id, day, came, you}, gift {to, item}, apptKept / apptMissed {id, with},
+//   introStep {step, who}, eventPhase {id, phase}, choice {script, k, who}, jobAbandoned {machine, dept}, harvest, lateMeal, job {id, step}, need {key, low}
+// social sends: tierUp {id, tier}, moment {id, who, beat}, bond {a, b, kind}, invite {from, id}
 
 // 14 / 10 (sim engineer)
 // day 0 (Sunday) is planned like any Sunday; SHIP_START for a new arriving game: day 0, 17:40, the shuttle bay
@@ -444,7 +453,7 @@ SETTLE = [ { id, title, teacher, place, done: note => bool } ]   // ticks from s
 // 22. LINES (dialogue engineer)
 lineFor(who, kind, ctx) -> { text, id, tone } | null    // who: crewId or guest id; kind: 'greet', 'react.repair.mine', 'arc.tomas.3', ...
 overheardFor(a, b, ctx) -> [ { who, text } ] | null
-SHIP.lines = { ring: [ lineId x 200 ], serious: day }     // save.lines
+SHIP.lines = { ring: [ overheard/reaction ids x 200 ], serious: day }     // save.lines (chat lines' recent-penalty is not saved)
 LINE_CONDS (the frozen vocabulary)   LINE_TOKENS
 
 // generated by content_gen.py from content/ (never hand-edited)
@@ -452,8 +461,10 @@ LINE_CONDS (the frozen vocabulary)   LINE_TOKENS
 // ---- BEGIN MEETINGS ---- merged into MEETING_SCRIPTS at load
 // ---- BEGIN TRADITIONS -- merged into SHIP_EVENTS at load
 
-// 20 / 20b (social engineers; the social designer's plan decides the details)
-relTier(id)  relAdd(id, why, pts)  mem(id, key)  memAdd(id, key, data)  affBand(a, b)  moodOf(p)  arcBeat(arcId)  flag(key)  flagSet(key)
+// 20 / 20c (social engineers; the social designer's plan, Part 6 and its appendix, is the authority)
+relTier(id) relAdd(id, why, pts) mem(id, key) memAdd(id, key, data) memTold(id, key) warmth(id) affBand(a, b) bondOf(id, kind)
+moodOf(p) beatOf(arcId) knowsNews(p, newsId) repBand(dept) knownFor() cue(kind) socialInvite({ trad, day, from })
+// 13 (sim engineer): flag(key) flagSet(key) beside simNote
 
 // 18. SHIP EVENTS (traditions engineer)
 // SHIP_EVENTS.<id>.when gains: { every: 'week'|'2weeks'|'4weeks'|'quarter'|'year', weekday, week, quarterDay, dayOfYear, after: 'arrival', days }
