@@ -9590,6 +9590,18 @@ function ixChoreTap(it, at) {
   if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
 }
+// what you carry for your job between stops (section 15 asks, for the held prop: 8b's '+toolbox', '+carry'), after its own
+// cases (a cart, parts in hand, a tray): a delivery's crate from the pickup to the drop; a toolbox for any other job you're
+// on until its work is done (repairs, lamps, vents, rounds). Nothing for cart runs (the cart) or with no job.
+function ixHold() {
+  const j = typeof myJob === 'function' ? myJob() : null;
+  if (!j || j.workDone || j.kind === 'restock') return null;
+  if (j.kind === 'chore' && j.chore === 'delivery' && typeof jobStops === 'function') {
+    const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
+    return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) ? 'carry' : null;
+  }
+  return 'toolbox';
+}
 // a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
 function ixStopDone(A) {
   const j = ixChore(), P = SHIP.player; if (!j || j.id !== A.o.job) return;
