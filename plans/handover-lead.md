@@ -76,3 +76,22 @@ Ship traditions = official name (Calendar reminds ~30 ship min ahead); jobs take
 - **20:25 UTC, the user:** events engineer stops after the diplomatic visit (draft); comet + other events later. Priority now: the user's tweaks and the personal device, then check-in 1.
 - **20:52 UTC: 0.41.7 = d89a3f5 on ship-integration** (all checks pass). Publisher session_01LibC3b2PPyHrg7asNMsEb1 → link version 15. Next: 0.41.8 merge (sim b623606, device f26f960+, interactions 55f2dc8+ (strict jobs pending), systems a9c41bd, social 3e50a6d, events (visit draft, 0.34.17+), galley/decks small asks).
 - **20:58 UTC: link = version 15 = 0.41.7.**
+
+## Handover-ready summary (lead session_015QoyPWBdMPM4ywf5W2jMMs, 21:20 UTC, ~53% memory)
+
+Read this section first; the lines above are the running log.
+
+**Builds.** ship-integration = **0.41.7 (d89a3f5)**, the ion storm ON. Playable link https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y = **version 15 = 0.41.7**. **0.41.8** is being merged by the lead's background merge worker into /home/user/si-work → claude/integration-test (from d89a3f5): sim b623606, systems a9c41bd, social 3e50a6d, device f26f960 (+ newer if the Works-meeting fix lands), interactions d62aee4, events 7966136 (visit DRAFT). Then check runners (player, social, device, cadet_test; plus whatever the worker didn't run), push to ship-integration, publish with a fresh **publisher SESSION** (a subagent can't hold the two full reads), PushNotification the user.
+
+**What 0.41.8 has (the user's tweaks):** job board panel always on screen + jobs actually on the board (held until end of shift, cap 6, none on days off, day 1 from 06:00), ship health panel, two days off (Sat/Sun, playerShiftOn), Roster tab, Maps without people, no swipe-to-open (the pop-up bug), Day off on Schedule, friendship seating, discourtesy thread (inert), coldCabins (inert).
+
+**In progress (for 0.41.9+):**
+- Device engineer 2 (session_01LGbDXmiNuSmR6dPGjRj8mX, claude/device, ~35%): the "Works meeting" Schedule bug (Schedule listed a meeting that never happened) + device_check case; screenshots of Roster/Maps (git add -f); Needs row for the new bathroom need.
+- Player engineer 2 (session_012J4ctzJgFRBaUFU5sJvega, claude/player-needs, new): bathroom need + toilets; "+25 Food" style feedback when a need fills; progress bars for every timed activity.
+- Performance engineer (session_01TiBtENVFJV7RqEQ7YkxH1Z, claude/crowd-render, ~60%, LAST job): zoom-out limit so culling never shows; then final handover. Storm visuals (shipFeel) → a fresh performance session later.
+- The working garden (design-doc "Dependencies"): galley engineer session_01AVGVnj4Q1jFmVoD6xi5asT leads (claude/galley-food, ~50%, plan approved: crops, growth by water/feed/light/tending, daily pick + harvest morning, produce in cold store, carry run, menus; steps 0.29.23-25); systems 3 session_01TqLepvhqDZRwFj7ZuLb6Xa (gardenAt, 'growlight' machines, gardenCarry job); crew designer session_01JScnVG158eYAHYvKDz3jZG (2-3 gardeners); deck architect session_014PT5L2QxXYoVhqFP7qhj3y (4-6 'work:garden' places); sim 2 session_01R6RBwwBM9aorpsqDCrztDU (gardener shifts, gardenDay). Herbs for the visit's dinner come from garden stock (later, inert).
+- Standby: social session_01DzZ669spGpdSdVMYzUog2N (~51%), interactions session_01GGbtSiy4tDygCzrSUBDMYa (~51%), events 2 session_01GW9QtevJxaMQzzCGPBHaxb (done; close after 0.41.8 passes; plans/handover-events.md is final; comet draft in plans/comet-viewing-draft.js).
+
+**The user's decisions today (all in design-doc):** device button only (no pull tab, never opens by itself); Maps without people + Roster tab; two days off Sat/Sun; jobs held to end of shift; bathroom need; need-fill feedback and progress bars; a garden that really grows food; zoom-out limit; events paused after the diplomatic visit (draft) — comet + remaining events later; helpers hand over at ~70%, the lead judges before each big step; the user allowed extra check runners to speed testing.
+
+**Next milestones:** 0.41.8 out → 0.41.9 (bathroom, feedback/progress, zoom, Works-meeting fix, garden step 1) → Pillar 3 **check-in 1** with the user (device, Roster, jobs at the board, crew life, days off) → storm visuals (fresh performance session) → check-in 2 (play the full storm).
