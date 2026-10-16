@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.37.7
+   STARSHIP CADET: CSV Wren                            build 0.37.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.37.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.37.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10182,6 +10182,7 @@ function ixFrame() {
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
   if (!g) { if (!el.hidden) el.hidden = true; return; }
+  if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
   const label = here ? g.label : 'Take the lift to Deck ' + g.deck + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
