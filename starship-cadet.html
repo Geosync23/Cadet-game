@@ -6598,6 +6598,10 @@ function tickShip(dt) {
 const SAVE_KEY = 'starship-cadet-save', SAVE_V = 2;
 const SAVE_EXTRA = [];                                   // other sections add their part: f(save) just before it's written (17: machines)
 const URL_FLAGS = new URLSearchParams(location.search);
+// 0.27.12: a claude.ai artifact page never gets the ?query, only a #hash of letters, digits and . _ ~ -, so the switches
+// also read it: tokens joined by '.', a value after the first '-' (#crowd-120.seats is ?crowd=120&seats). The ?query wins.
+for (const tok of location.hash.slice(1).split('.')) { const i = tok.indexOf('-'), k = i < 0 ? tok : tok.slice(0, i); if (k && !URL_FLAGS.has(k)) URL_FLAGS.set(k, i < 0 ? '' : tok.slice(i + 1)); }
+const urlFlag = name => URL_FLAGS.has(name) ? URL_FLAGS.get(name) : null;   // a switch's value ('' when it has none), or null
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses') || URL_FLAGS.has('seats'),   // the crowd, pose and seat demos (section 8b) never touch the save
       DEBUG = URL_FLAGS.has('debug');
 function saveGame() {
@@ -10627,7 +10631,7 @@ const crowd = {
 // 0.27.10: while a deck's light relays flicker, some of its lamps stutter (lamps(t), called by the main loop after
 // applyLight). And a shower someone is using sprays (one more instanced mesh, hidden when no one showers): thin and
 // patchy while the ship's water or heat is below 50, worse below 25. ----
-const MACHINE_FX_ALL = /[?&]looks\b/.test(location.search), MACHINE_FX_MAX = 64, MACHINE_WILT = col('#a08a3c');
+const MACHINE_FX_ALL = urlFlag('looks') !== null, MACHINE_FX_MAX = 64, MACHINE_WILT = col('#a08a3c');
 const machineFx = {
   deck: undefined, list: [], next: 0, mesh: null, o: new THREE.Object3D(), lightIds: [], lampFl: 0, showers: [], weak: 0, sprayMesh: null, nextS: 0,
   make() {                                               // made the first time a machine shows something
@@ -10738,7 +10742,7 @@ const machineFx = {
 // pose and activity in two rows, labelled, on stools and benches where they sit or lie. Like ?crowd, it never touches
 // your save. Without the flag none of this exists. ----
 const POSE_DEMO = (() => {
-  if (!/[?&]poses\b/.test(location.search)) return null;
+  if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
     'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch'];
@@ -10795,7 +10799,7 @@ const POSE_DEMO = (() => {
 // 'sit', at placeSpot's spot, height and facing, exactly where the crew would sit), labelled with the place's id, at
 // 10:30 when most of the crew are at work (seats with crew on them show two people). For checking place data (xy, y, face) against the furniture. Never saves. ----
 const SEAT_DEMO = (() => {
-  if (!/[?&]seats\b/.test(location.search)) return null;
+  if (urlFlag('seats') === null) return null;
   let here = [], labels = null, deck = null, started = false;
   const v = new THREE.Vector3();
   function clear() { for (const e of here) crowd.remove(e.h); here = []; if (labels) { labels.remove(); labels = null; } }
@@ -10832,7 +10836,7 @@ const SEAT_DEMO = (() => {
 // garden, the gym and the store, doing what's done there, and some crew twice. Over 70, the far ones go coarse
 // (CROWD_MANY). Without the flag none of this exists. ----
 const CROWD_DEMO = (() => {
-  const m = /[?&]crowd=(\d+)/.exec(location.search); if (!m) return null;
+  const m = /^(\d+)$/.exec(urlFlag('crowd') || ''); if (!m) return null;   // ?crowd=40 or #crowd-40
   const want = Math.min(+m[1], 151);
   let sd = 4242; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const shuffle = a => { for (let i = 0; i < a.length; i++) { const j = i + Math.floor(rnd() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
