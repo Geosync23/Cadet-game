@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.22
+   STARSHIP CADET: CSV Wren                            build 0.27.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1579,19 +1579,20 @@ const KIT = {
   // ---- the hydroponics garden ----
   raisedBed(g, o = {}) {                                 // a timber bed of soil, planted by o.crop; greens and herbs get a grow light
     const w = o.w || 1.8, crop = o.crop || 'greens', L = GD.leaves;
+    const P = o.live ? plantSlots(g, o.live, .475) : null, lf = P ? P.leaf : leaf, sf = P ? P.soft : soft;   // o.live: section 8b's garden view grows them (0.27.23)
     box(w, .46, .9, GD.bed, 0, .23, 0, g); box(w - .1, .03, .8, GD.soil, 0, .46, 0, g);
     for (const x of [-w / 2 + .02, w / 2 - .02]) box(.06, .5, .92, GD.post, x, .25, 0, g);
     const nx = Math.floor((w - .2) / .3);
     for (let r = 0; r < 2; r++) for (let k = 0; k < nx; k++) {
       const x = -w / 2 + .22 + k * (w - .44) / Math.max(1, nx - 1), z = r ? .2 : -.2, j = R();
-      if (crop === 'greens') { leaf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); leaf(L[1], x, .62, z, .08, .06, .08, g); }
-      else if (crop === 'herbs') { leaf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); leaf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
+      if (crop === 'greens') { lf(L[(k + r) % 2 ? 2 : 4], x, .56, z, .16 + j * .03, .11, .16, g); lf(L[1], x, .62, z, .08, .06, .08, g); }
+      else if (crop === 'herbs') { lf(L[(k * 3 + r) % 5], x, .56 + j * .04, z, .07, .1 + j * .05, .07, g); lf(L[(k + 1) % 5], x + .06, .54, z + .04, .05, .07, .05, g); }
       else if (crop === 'flowers') { leaf(L[1], x, .54, z, .1, .07, .1, g); leaf(GD.flowers[(k + r * 2) % 5], x + (j - .5) * .05, .64 + j * .05, z, .055, .045, .055, g); }
       else if (crop === 'tomato') {
         if (k % 2) continue;
         cyl(.012, .012, 1.3, GD.post, x, 1.1, z, g, 6);
-        for (let h = 0; h < 4; h++) leaf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
-        for (let h = 0; h < 3; h++) if (R() < .8) soft(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
+        for (let h = 0; h < 4; h++) lf(L[(h + k) % 5], x + (R() - .5) * .1, .65 + h * .26, z + (R() - .5) * .1, .14, .12, .14, g);
+        for (let h = 0; h < 3; h++) if (R() < .8) sf(GD.tomato, x + (R() - .5) * .18, .7 + h * .3, z + .1, .04, .04, .04, g);
       }
     }
     if (crop === 'greens' || crop === 'herbs') {
@@ -1619,13 +1620,14 @@ const KIT = {
     glow('#ff7ae0', .8, 0, 1.2, .1, g, .3);
     return { w: 1.8, d: .6, tall: true };
   },
-  trellis(g) {                                           // a climbing frame lost under beans and vines
+  trellis(g, o = {}) {                                   // a climbing frame lost under beans and vines
     for (const x of [-.75, .75]) box(.05, 2.0, .05, GD.post, x, 1.0, 0, g);
     for (const y of [.6, 1.2, 1.9]) box(1.55, .03, .03, GD.post, 0, y, 0, g);
     box(1.6, .3, .35, GD.bed, 0, .15, 0, g);
-    for (let k = 0; k < 16; k++) leaf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
-    for (let k = 0; k < 8; k++) cyl(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
-    for (let k = 0; k < 5; k++) leaf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
+    const P = o.live ? plantSlots(g, o.live, .3) : null, lf = P ? P.leaf : leaf, pd = P ? P.pod : cyl;   // o.live: grown by section 8b (0.27.23)
+    for (let k = 0; k < 16; k++) lf(GD.leaves[k % 5], -.7 + R() * 1.4, .4 + R() * 1.6, (R() - .5) * .2, .12 + R() * .08, .12, .1, g);
+    for (let k = 0; k < 8; k++) pd(.012, .01, .14, GD.bean, -.6 + R() * 1.2, .6 + R() * 1.2, .08, g, 5);
+    for (let k = 0; k < 5; k++) lf(GD.flowers[k % 5], -.6 + R() * 1.2, .6 + R() * 1.3, .1, .04, .04, .04, g);
     return { w: 1.6, d: .4, tall: true };
   },
   citrusTree(g, o = {}) {                                // a little orange (or lemon) tree in a big pot
@@ -2649,6 +2651,17 @@ const TEMPLATES = {
 };
 
 // ---- merge everything static into a few meshes ----
+// 0.27.23: a garden kit with o.live records its plants here instead of building them (section 8b's gardenView grows
+// them with the galley's beds). Same calls in the same order, so R() is drawn exactly as before. GARDEN_PLOTS is the
+// deck's list: { g, crop, n (the nth bed of that crop on the deck), base (soil height), slots }
+let GARDEN_PLOTS = [];
+function plantSlots(g, crop, base) {
+  const P = { g, crop, n: GARDEN_PLOTS.filter(p => p.crop === crop).length, base, slots: [] }; GARDEN_PLOTS.push(P);
+  const fruit = m => m === GD.tomato || m === GD.bean || GD.flowers.includes(m);
+  const put = (geo, mat, x, y, z, sx, sy, sz) => { P.slots.push({ geo, mat, x, y, z, sx, sy, sz, fruit: fruit(mat) }); };
+  return { leaf: (mat, x, y, z, sx, sy, sz) => put('leaf', mat, x, y, z, sx, sy, sz), soft: (mat, x, y, z, sx, sy, sz) => put('ball', mat, x, y, z, sx, sy, sz),
+    pod: (rt, rb, h, mat, x, y, z) => put('pod', mat, x, y, z, 1, 1, 1) };
+}
 // 0.27.20: neighbouring faces of one geometry that share a material become one group, so a door leaf's box (four
 // edge faces, then two faces) draws in 2 calls, not 6, in the picture and in the shadows. Same triangles in the same
 // order, so nothing on screen changes.
@@ -3134,7 +3147,7 @@ function buildDeck(def) {
 
   // ---- furnish ----
   staticRoot = new THREE.Group(); deckRoot.add(staticRoot);
-  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = [];
+  BLOCKED = new Set(); SNUG = new Map(); ITEMS = []; WALL_DECOR = []; SPOTS = []; SPINS = []; PULSES = []; MOVERS = []; GARDEN_PLOTS = [];
   TALL = []; TALL_BY_ROOM = {}; NO_FADE = new Set();
   def.dress(def);
   buildCurves(def);
@@ -4929,9 +4942,9 @@ DECKS[3] = {
       tomato: 'Vines up their stakes and fruit going red. Everyone eats one straight off the plant. Everyone denies it.', flowers: 'Not for eating. For bees, if we had them, and for people, who we do.' };
     [[3.4, 2.75, 'greens'], [6.0, 2.75, 'herbs'], [8.6, 2.75, 'greens'], [3.4, 5.3, 'tomato'], [6.0, 5.3, 'flowers'], [8.6, 5.3, 'tomato'],
      [3.4, 15.4, 'flowers'], [6.0, 15.4, 'greens'], [8.6, 15.4, 'herbs'], [6.0, 18.8, 'greens'], [8.6, 18.8, 'tomato']].forEach(([x, z, crop], k) =>
-      place(G, 'raisedBed', x, z, 'n', { crop, butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
-    place(G, 'trellis', .3, 5.0, 'w', { it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
-    place(G, 'trellis', 9.75, 16.5, 'e');
+      place(G, 'raisedBed', x, z, 'n', { crop, live: { greens: 'greens', herbs: 'herbs', tomato: 'tomatoes' }[crop], butterflies: crop === 'flowers', it: [0, 1, 3, 4].includes(k) ? IT(BED[crop], BEDX[crop]) : undefined }));
+    place(G, 'trellis', .3, 5.0, 'w', { live: 'beans', it: IT('Bean trellis', 'Runner beans up a frame against the stern windows, so the beans get the stars.') });
+    place(G, 'trellis', 9.75, 16.5, 'e', { live: 'beans' });
     placeWall(G, 'herbWall', 'e', 7.5, { hitW: 1.6, it: IT('Herb wall', 'Pockets of herbs by the door, labelled FOR THE GALLEY in Chef Brennan\'s writing. Take a sprig and she will know.') });
     // the pond, its benches and the path
     place(G, 'moss', 4.5, 11.0, 'n', { r: 1.75 });
@@ -6999,7 +7012,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.22';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.23';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15203,6 +15216,7 @@ const crowd = {
   },
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
+    gardenView.tick(t);                                  // the garden's crops grow with the galley's beds (0.27.23)
     deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
@@ -15369,6 +15383,53 @@ const FEEL_MOODS = {                                     // by event id: its moo
 const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
+// ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
+// bean trellises grow with the galley's beds (SHIP.galley.garden.beds: [crop, grown, days]): bare soil just after a
+// pick, seedlings, then full and fruiting when ripe. The kits record each plant (GARDEN_PLOTS, o.live) instead of
+// building it; here they're drawn as instances, one InstancedMesh per shape and material, culled with the garden.
+// Looked at about once a second; the matrices are only rewritten when a bed's growth has moved on. The nth bed of a
+// crop on the deck is the galley's nth bed of it; beds with no place in the garden (the third bean bed, the root
+// vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were.
+const gardenView = {
+  root: null, list: [], key: '', next: 0, m: new THREE.Matrix4(), p: new THREE.Matrix4(), v: new THREE.Vector3(), s: new THREE.Vector3(), q: new THREE.Quaternion(),
+  make() {                                               // the deck's instanced meshes, once per deck build
+    this.root = deckRoot; this.list = []; this.key = ''; this.next = 0; if (!deckRoot || !GARDEN_PLOTS.length) return;
+    deckRoot.updateMatrixWorld(true);
+    const geo = { leaf: LEAF_GEO, ball: new THREE.SphereGeometry(1, 10, 7), pod: new THREE.CylinderGeometry(.012, .01, .14, 5) }, by = new Map(), box = new THREE.Box3();
+    for (const P of GARDEN_PLOTS) for (const sl of P.slots) {
+      const k = sl.geo + '|' + sl.mat.uuid; let b = by.get(k); if (!b) by.set(k, b = { geo: sl.geo, mat: sl.mat, items: [] });
+      b.items.push({ P, sl }); box.expandByPoint(this.v.set(sl.x, sl.y, sl.z).applyMatrix4(P.g.matrixWorld));
+    }
+    const sphere = box.getBoundingSphere(new THREE.Sphere()); sphere.radius += 1;
+    for (const b of by.values()) {
+      const g = geo[b.geo].clone(); g.boundingSphere = sphere.clone();   // culled with the garden as a whole
+      const im = new THREE.InstancedMesh(g, b.mat, b.items.length); im.castShadow = im.receiveShadow = true; im.raycast = () => {};
+      deckRoot.add(im); this.list.push({ im, items: b.items });
+    }
+  },
+  grown(P) {                                             // a plot's growth, 0 (just picked) to 1 (ripe); 1 without the galley's beds
+    const G = SHIP.galley && SHIP.galley.garden, ci = typeof GARDEN_CROPS !== 'undefined' ? GARDEN_CROPS.findIndex(c => c.id === P.crop) : -1;
+    if (!G || ci < 0) return 1;
+    const b = G.beds.filter(x => x[0] === ci)[P.n]; return b ? Math.min(1, b[1] / GARDEN_CROPS[ci].days) : 1;
+  },
+  tick(t) {
+    if (this.root !== deckRoot) this.make();
+    if (!this.list.length || t < this.next) return;
+    this.next = t + 1;
+    const gr = new Map(GARDEN_PLOTS.map(P => [P, this.grown(P)])), key = [...gr.values()].map(x => Math.round(x * 50)).join();
+    if (key === this.key) return;
+    this.key = key;
+    for (const { im, items } of this.list) {
+      items.forEach(({ P, sl }, i) => {
+        const g = gr.get(P), lf = g < .03 ? 0 : .3 + .7 * Math.min(1, g / .75), f = sl.fruit ? (g < .6 ? 0 : (g - .6) / .4) * lf : lf;
+        if (!f) { im.setMatrixAt(i, LEAF_HIDE); return; }
+        this.m.compose(this.v.set(sl.x, P.base + (sl.y - P.base) * lf, sl.z), this.q, this.s.set(sl.sx * f, sl.sy * f, sl.sz * f));
+        im.setMatrixAt(i, this.p.multiplyMatrices(P.g.matrixWorld, this.m));
+      });
+      im.instanceMatrix.needsUpdate = true;
+    }
+  },
+};
 // a jolt's look up (0-1), for 8b's people: each a beat apart (by their animation offset), up for about two seconds
 function feelLook(t0) {
   const s = FEEL_S; if (!s.kinds.includes('jolt')) return 0;

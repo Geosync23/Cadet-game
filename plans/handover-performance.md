@@ -5,7 +5,7 @@ Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.22; next is 0.27.23). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.23; next is 0.27.24). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
 - **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`. Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
 - **Test scripts:** I don't own any. I use `cadet_test.py`, `deck_check.py`, `day_check.py` and `player_check.py`.
@@ -60,7 +60,7 @@ All in sections 8 and 8b unless named. The DEV_NOTES rows have the detail.
 ## Waiting (at 0.27.22)
 - Desktop widest Deck 4 is 470, a little over 450; everything else, and every phone view, is under. The next cuts, if wanted: hide the smallest wall pieces (light switches, small plates) below about zoom 0.65, or merge wall decor that never drops. Wall decor batching per wall run was tried and saved only 7 calls (most pieces are alone on their wall stretch).
 - The user may want the zoom-out limit (0.55 desktop, 0.7 tall screens) widened now that it's cheaper; the near/far planes and shadows already follow the zoom.
-- The garden view (crops growing on the beds) if the lead asks.
+- The garden view is done (0.27.23): `gardenView` (8b) draws `GARDEN_PLOTS` (recorded by `raisedBed`/`trellis` with `o.live`) as instances scaled by `SHIP.galley.garden.beds`. Root vegetables and the third bean bed have no place in the garden yet. The user kept 0.27.18's zoom limit (2026-10-16).
 
 ## Waiting for me (at 0.27.17; shipFeel done in 0.27.19)
 - ~~**shipFeel(kinds, len)**~~ (done) for the events engineer (section 18). The kinds are 'jolt', 'lightsDip' and 'flicker' on the current deck; their stand-in, `eventFeelFrame`, shows the baseline and steps aside once shipFeel exists. Also the occasional flicker while `eventMod('effect', 'flicker')`, then emergency lighting, 'look up' at a jolt, and the address pose. The lead calls this when the storm switches on.
