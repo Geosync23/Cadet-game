@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.29.14
+   STARSHIP CADET: CSV Wren                            build 0.29.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.14';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.15';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7697,6 +7697,8 @@ function galleyMenu(d) {
     out.dinner = out.votes.length ? out.votes[0][0] : 'Sunday roast';
     out.note = out.votes.length ? `voted for by the crew, ${out.votes[0][1]} votes` : '';
   } else out.dinner = regular([0, 1, , 2, , 3][wd]);
+  // a harvest morning in the garden (section 18's eventsOn, id 'harvest'): fresh salad with dinner
+  if (typeof eventsOn === 'function' && eventsOn(d).some(e => e.id === 'harvest')) { out.salad = true; out.note = (out.note ? out.note + ', ' : '') + 'with fresh garden salad'; }
   GALLEY_MENU.set(d, out);
   for (const k of GALLEY_MENU.keys()) if (k < d - 8 || k > d + 8) GALLEY_MENU.delete(k);
   return out;
@@ -7720,6 +7722,17 @@ const CAKE = { mail: 720, bake: 900, out: 1170, gone: 1290, meals: 4 };
 // (yours too: ROSTER_PLAYER's birthday, when it's there)
 const galleyBirthdays = d => ROSTER.concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER ? [ROSTER_PLAYER] : []).filter(p => p.birthday && p.birthday === ((d - 1) % 364 + 364) % 364 + 1);
 const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' and ');
+// the day's cake, if any: { who: [people], name, gather }. A birthday (ours, above), or any of section 18's events
+// with `cake: true` (eventsOn(d), e.g. Founding Day); gather is when the event's gathering starts, if there is one
+function galleyCake(d) {
+  const all = typeof eventsOn === 'function' ? eventsOn(d) : [], who = galleyBirthdays(d);
+  const bev = all.find(e => e.id === 'birthday'), other = all.find(e => e.id !== 'birthday' && (e.cake || (e.ev && e.ev.cake)));
+  if (who.length) return { who, name: '', gather: bev ? bev.from : null };
+  if (other) return { who: [], name: other.name, gather: other.from > CAKE.out ? other.from : null };
+  return null;
+}
+// what the cake's for, in words: "Rosa's birthday", "your birthday", "Founding Day"
+const galleyCakeFor = c => c.who.length ? galleyWhose(c.who) + ' birthday' : c.name;
 const galleyWhose = ps => ps.length === 1 && ps[0].player ? 'your' : galleyNames(ps) + '\'s';
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
 const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
@@ -7792,13 +7805,13 @@ function galleyStep(S, m, st) {
     else if (n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
   }
   if (md === FOOD.binOut) S.bin = 0;
-  // a birthday cake
+  // a cake: a birthday, or one of section 18's events with cake: true (Founding Day)
   if (md === CAKE.mail || md === CAKE.bake || md === CAKE.out || md === CAKE.gone) {
-    const who = galleyBirthdays(d);
+    const c = galleyCake(d);
     if (md === CAKE.gone) S.cake = null;
-    else if (who.length) {
-      if (md === CAKE.mail && !st) galleyMail(m, 'Cake tonight', `It's ${galleyWhose(who)} birthday. There's cake in the mess after dinner, from 19:30. Everyone welcome.`);
-      if (md === CAKE.bake) { const n = Math.min(CAKE.meals, S.cold.meals); S.cold.meals -= n; S.cake = n ? { d, who: who.map(p => p.id), out: false } : null; if (st && n) st.cakes++; }
+    else if (c) {
+      if (md === CAKE.mail && !st) galleyMail(m, 'Cake tonight', `It's ${galleyCakeFor(c)}. The cake's out on the servery from 19:30` + (c.gather ? `, and everyone's in the mess at ${hhmm(c.gather)}.` : '. Everyone welcome.'));
+      if (md === CAKE.bake) { const n = Math.min(CAKE.meals, S.cold.meals); S.cold.meals -= n; S.cake = n ? { d, who: c.who.map(p => p.id), out: false } : null; if (st && n) st.cakes++; }
       if (md === CAKE.out && S.cake) S.cake.out = true;
     }
   }
@@ -7955,11 +7968,11 @@ function galleyText(what = 'servery') {
   if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
   if (what === 'menu') return galleyBoard();
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
-  const M = galleyMenu(SHIP.time.day), bd = galleyBirthdays(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
+  const M = galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
   let extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
-  if (S.cake && S.cake.out) extra += ` Birthday cake for ${galleyNames(bd)} on the end of the counter.`;
-  else if (bd.length && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyWhose(bd)} birthday.`;
+  if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ` A ${ck.name} cake on the end of the counter.`;
+  else if (ck && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyCakeFor(ck)}.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
   return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
 }
@@ -7967,8 +7980,8 @@ function galleyText(what = 'servery') {
 function galleyBoard(d = SHIP.time.day) {
   const M = galleyMenu(d);
   const week = [...Array(7)].map((_, k) => d - weekday(d) + k).map(x => WEEKDAYS[weekday(x)].slice(0, 3) + ' ' + galleyMenu(x).dinner);
-  const bd = galleyBirthdays(d);
-  return `Today: ${M.breakfast} for breakfast, ${M.dinner} for dinner${M.note ? ' (' + M.note + ')' : ''}.` + (bd.length ? ` Cake after dinner: happy birthday, ${galleyNames(bd)}!` : '') + ` This week's dinners: ${week.join(', ')}.`;
+  const ck = galleyCake(d), hb = ck && (ck.who.length ? `happy birthday, ${galleyNames(ck.who)}!` : `happy ${ck.name}!`);
+  return `Today: ${M.breakfast} for breakfast, ${M.dinner} for dinner${M.note ? ' (' + M.note + ')' : ''}.` + (ck ? ` Cake after dinner: ${hb}` : '') + ` This week's dinners: ${week.join(', ')}.`;
 }
 // food_check.py: `days` ship days from a fresh galley at the start of `day`, with the figures for each day
 function galleyReport(day, days = 1) {
@@ -8078,8 +8091,8 @@ function galleyBoardDraw(t, d) {
   line('Breakfast 06:00  ' + cap(M.breakfast), 66, '600 15px system-ui,sans-serif', '#9fd9cf');
   line('Dinner 17:00  ' + cap(M.dinner), 92, '600 15px system-ui,sans-serif', '#9fd9cf');
   if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
-  const bd = galleyBirthdays(d);
-  if (bd.length) line('Cake after dinner: happy birthday, ' + galleyNames(bd) + '!', 148, '600 15px system-ui,sans-serif', '#e8c06a');
+  const ck = galleyCake(d);
+  if (ck) line('Cake after dinner: ' + (ck.who.length ? 'happy birthday, ' + galleyNames(ck.who) + '!' : 'happy ' + ck.name + '!'), 148, '600 15px system-ui,sans-serif', '#e8c06a');
   else line('Fresh rolls, garden greens', 148, '500 15px system-ui,sans-serif', '#e8eef0');
   line('Grab & go by the line', 172, '500 15px system-ui,sans-serif', '#e8eef0');
   c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
