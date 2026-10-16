@@ -10054,13 +10054,14 @@ function machUse(m, h) {
 function machWear(m, h, c) {
   const K = MACHINE_KINDS[m.kind];
   const base = 100 / (K.life * 24), use = K.time + (1 - K.time) * machUse(m, h);
-  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7)) * eventWear(K.sys, h);
+  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7)) * eventWear(K.sys, h) * eventWear(m.kind, h);
 }
-// a ship-wide event's wear on a system (Pillar 3, C7: section 18's eventMod('wear', system) -> a multiplier, null for
-// no change; the hour is passed too, for an eventMod that can answer for past hours). 1 with no event
-function eventWear(sys, h) {
+// a ship-wide event's wear (Pillar 3, C7: section 18's eventMod('wear', key, minute) -> a multiplier, null for no
+// change; pure for any minute, so the machines catching up see the event as it was). key: a system ('power') or a
+// machine kind ('chiller'); machWear asks both. 1 with no event
+function eventWear(key, h) {
   if (typeof eventMod !== 'function') return 1;
-  const v = eventMod('wear', sys, h * 60);
+  const v = eventMod('wear', key, h * 60);
   return typeof v === 'number' && v > 0 && v < 20 ? v : 1;
 }
 
@@ -10278,7 +10279,8 @@ function machineLook(id) {
 function deckLook(deck) {
   const fx = shipEffects(deck);
   if (LOOKS_REV !== MACH_REV) { LOOKS = new Map(); LOOKS_REV = MACH_REV; }
-  const key = 'deck' + deck; if (LOOKS.has(key)) return LOOKS.get(key);
+  const bo = blackoutAt(shipNow()), dark = !!bo && bo.deck === deck;
+  const key = 'deck' + deck + (dark ? ':dark' : ''); if (LOOKS.has(key)) return LOOKS.get(key);
   let flicker = 0, drip = false, wilt = 0;
   for (const m of machineList()) {
     const L = machineLook(m.id); if (!L) continue;
@@ -10286,7 +10288,7 @@ function deckLook(deck) {
     if (L.drip && m.deck === deck) drip = true;
     if ((m.kind === 'irrigation' || m.kind === 'nutrient') && m.deck === deck) wilt = Math.max(wilt, MACHINE_SEV[machinesNow()[m.id].state]);
   }
-  const look = { dim: Math.round((1 - fx.walk) * 300) / 100, flicker, spray: Math.round(fx.restore.hygiene * 100) / 100, wilt, drip };
+  const look = { dim: Math.round((1 - fx.walk) * 300) / 100, flicker, spray: Math.round(fx.restore.hygiene * 100) / 100, wilt, drip, dark };
   look.dim = Math.min(1, look.dim);
   LOOKS.set(key, look); return look;
 }
@@ -10552,6 +10554,7 @@ function jobRun(p, j, t, makeMin) {
 // a job is finished: its machine put right, or its cargo moved
 function jobFinish(j, t, by) {
   j.status = 'done'; j.doneAt = t; j.doneBy = by;
+  if (by === 'you' && j.event && typeof eventMine === 'function') eventMine('jobs', 1);   // your part in the event (section 18)
   if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
 }
 // what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
@@ -10624,6 +10627,7 @@ function jobsHour(h) {
     }
   }
   suppliesHour(t, d);
+  const bo = blackoutHour(h); if (bo && typeof eventScore === 'function') eventScore('blackout', bo.to - bo.from);
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -10836,6 +10840,23 @@ function turnInJob(id) {
 // postEventJob(spec, { event, forYou }) posts one now (a meeting's choice: forYou claims it for you).
 const eventDef = id => typeof SHIP_EVENTS === 'undefined' ? null : Array.isArray(SHIP_EVENTS) ? SHIP_EVENTS.find(e => e.id === id) || null : SHIP_EVENTS[id] || null;
 const EVENT_JOB_TEXT = { secure: 'Secure loose things', check: 'Check', fetch: 'Fetch', carry: 'Carry', clean: 'Clean up', set: 'Set up', patch: 'Patch', tea: 'Bring tea' };
+// one stop of section 18's event jobs: { placeId } | { deck, room: RegExp, types } | { deck, machine: kind }, plus mins, tag
+function eventStopOf(x) {
+  const out = st => st && { deck: st.deck, placeId: st.placeId || null, mins: x.mins || 15, tag: x.tag || 'event', at: st.at || null, room: st.room, machine: st.machine };
+  if (x.placeId) { const pl = placeById(x.placeId); return pl ? out({ deck: pl.deck, placeId: pl.id, room: pl.room }) : null; }
+  if (x.machine) {                                       // its kind on that deck, else one whose id names it (Deck 5's junction carries its lights)
+    const on = m => !x.deck || m.deck === x.deck, named = m => m.id.split('-')[1] === x.machine;
+    const m = [m => m.kind === x.machine && panelPlace(m.id), m => m.kind === x.machine, m => named(m) && panelPlace(m.id), named].reduce((f, test) => f || machineList().find(m => on(m) && test(m)), null);
+    return m ? out({ deck: m.deck, placeId: panelPlace(m.id), room: m.room, at: m.panel.slice(), machine: m.id }) : null; }
+  if (x.room) {
+    const D = DECKS[x.deck]; if (!D) return null;
+    const rx = x.room instanceof RegExp ? x.room : new RegExp(String(x.room), 'i'), rooms = Object.keys(D.rooms).filter(r => rx.test(D.rooms[r].name || ''));
+    const pl = (D.places || []).find(p => rooms.includes(p.room) && !p.machine && (!x.types || x.types.includes(p.type)));
+    if (pl) return out({ deck: x.deck, placeId: pl.id, room: pl.room });
+    const at = rooms.length && machRoomTile(x.deck, rooms[0]); return at ? out({ deck: x.deck, room: rooms[0], at }) : null;
+  }
+  return null;
+}
 function eventStop(spec) {
   const pl = spec.place && placeById(spec.place); if (pl) return { deck: pl.deck, placeId: pl.id, room: pl.room };
   const m = spec.machine && machineById(spec.machine); if (m) return { deck: m.deck, placeId: panelPlace(m.id), room: m.room, machine: m.id, at: m.panel.slice() };
@@ -10851,7 +10872,11 @@ function eventStop(spec) {
 }
 function eventJob(spec, ev, t, key) {
   let where = null, title = spec.title, machine = null, stops;
-  if (CHORES[spec.kind] && !spec.place && !spec.machine && !spec.where) {
+  if (Array.isArray(spec.stops)) {                        // section 18's shape: its own stops
+    stops = spec.stops.map(eventStopOf); if (!stops.length || stops.some(x => !x)) return null;
+    const last = stops[stops.length - 1]; where = { deck: last.deck, room: last.room };
+    stops = stops.map(({ room, machine, ...x }) => x);
+  } else if (CHORES[spec.kind] && !spec.place && !spec.machine && !spec.where) {
     const cs = choreWhere(spec.kind); if (!cs.length) return null;
     const c = cs[Math.abs(machSeed(key)) % cs.length]; title = title || c.title; machine = c.machine || null; where = { deck: c.deck, room: c.room }; stops = c.stops.map(x => ({ ...x }));
   } else {
@@ -10866,12 +10891,17 @@ function eventJob(spec, ev, t, key) {
 }
 function eventJobsHour(h, jobs) {
   if (typeof eventNow !== 'function') return;
-  const ev = eventNow(); if (!ev || !ev.id) return;
-  const def = eventDef(ev.id), list = def && def.jobs && def.jobs[ev.phase]; if (!Array.isArray(list)) return;
+  const t = h * 60, ev = eventNow(t); if (!ev || !ev.id) return;
+  // the phase's list: section 18's eventMod('jobs') (which carries a phase's list on until one clears), else the
+  // event's jobs[phase]. Each job is posted once per run of the event (its start day in the key), at its `at` minute
+  const viaMod = typeof eventMod === 'function' ? eventMod('jobs', undefined, t) : null;
+  const def = eventDef(ev.id), list = Array.isArray(viaMod) ? viaMod : def && def.jobs && def.jobs[ev.phase]; if (!Array.isArray(list)) return;
+  const start = Math.floor(t / 1440) - (ev.day || 0);
   list.forEach((spec, k) => {
-    const key = 'event:' + ev.id + ':' + ev.phase + ':' + (spec.id || k) + '@' + (ev.day ?? '');
+    if (Number.isFinite(spec.at) && Math.floor((t % 1440) / 60) !== Math.floor(spec.at / 60)) return;   // only in the hour of its minute (afterglow's 08:00 is the next morning)
+    const key = 'event:' + ev.id + ':' + (spec.id || ev.phase + k) + '@' + start;
     if (jobs.some(j => j.id === key)) return;
-    const j = eventJob(spec, ev.id, h * 60, key); if (j) jobs.push(j);
+    const j = eventJob(spec, ev.id, Number.isFinite(spec.at) ? Math.max(t, Math.floor(t / 1440) * 1440 + spec.at) : t, key); if (j) jobs.push(j);
   });
 }
 function postEventJob(spec, o = {}) {
@@ -10882,6 +10912,22 @@ function postEventJob(spec, o = {}) {
   if (o.forYou) claimJob(j.id);
   return j.id;
 }
+
+// blackouts (Pillar 3, C7: section 18's eventMod('effect', 'blackouts')): while it's on, now and then one deck goes to
+// emergency lighting for 15-60 minutes, likelier the worse the power (from the conditions at the hour's start). At most
+// one an hour, inside its hour, so only ever one deck at a time. blackoutHour(h) -> { deck, from, to } | null is pure;
+// jobsHour scores each one as the event's 'blackout' thread (eventScore('blackout', minutes)) as its hour is run;
+// blackoutAt(t) -> the blackout at minute t or null; deckLook(deck).dark while it's that deck's
+const BLACKOUT_SEED = machSeed('blackout');
+function blackoutHour(h) {
+  if (typeof eventMod !== 'function' || eventMod('effect', 'blackouts', h * 60) !== true) return null;
+  const c = MACH_HIST.get(histHour((h - 1) * 60)), power = c ? systemsFrom(c).power : 100, u = k => schedU(BLACKOUT_SEED, h, k);
+  if (u(1) >= .15 + .45 * (1 - power / 100)) return null;
+  const decks = Object.keys(DECKS).map(Number).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
+  const from = h * 60 + Math.floor(u(4) * (61 - len));
+  return { deck, from, to: from + len };
+}
+function blackoutAt(t) { const b = blackoutHour(Math.floor(t / 60)); return b && t >= b.from && t < b.to ? b : null; }
 
 // trays by cart (Pillar 3, C7, with the galley engineer's 0.29.18): an event asks for trays, the galley plates them
 // and calls cartTrays({ trays, at, to: 'bridge' }) (live, once a day): a job to push them from the servery (Deck 3) to
