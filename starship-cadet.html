@@ -11984,16 +11984,34 @@ function birthdayOf(p) {
   }
   return EV_BDAYS.get(p.id) || null;
 }
+// gatherings shaped like traditions, so they reach the plans through the same door (eventPlan): a ship-wide event's
+// gathering moments (when: { ship: <event id>, day: <its day 0..> }) and one-offs (when: { date: <ship day> }).
+// They carry no Mail of their own (the event's address and Mail announce them, or the one-off's caller).
+// venue: the deck architect's gather venue (gatherSpots, non-lead spots) as the first pool when it's in the build
+const EV_SHIPWIDE = [];
+// (filled after SHIP_EVENTS, below: evShipwide)
+// one-offs (section 20's story beats: Pell's show), saved in SHIP.events.oneOffs; see eventOneOff
+function evOneOffDefs() {
+  return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
+    id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
+    where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
+    who: p => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinity === 'function' ? Math.max(0, affinity(r.host, p.id)) / 100 * .6 : 0)),
+    anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
+    from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
+}
+const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 // the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
 const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], wd = weekday(d), yd = shipYearDay(d);
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
+    else if (w.date) { if (d !== w.date) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
-    if (typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
+    if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
@@ -12007,8 +12025,9 @@ function eventPools(shared, desks) {
   if (!EV_READY) return;                                 // called before section 18 has run: the caches are cleared at its end
   if (!desks) desks = schedDesks(ROSTER.concat(ROSTER_GUESTS).filter(p => !p.player), shared);
   const taken = new Set(desks.values());
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const tagged = new Map();
+    if (ev.venue && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
     ev.where.forEach((w, i) => {
@@ -12064,7 +12083,7 @@ function eventPlan(p, d) {
     const opts = eventOpts(ev, p); if (!opts.length) continue;
     const anim = ev.anim(p, d) || null;
     const from = e.from - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0 });
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id) });   // host: section 14 seats them first
   }
   out.sort((x, y) => y.prio - x.prio || x.from - y.from);
   const keep = [];
@@ -12075,7 +12094,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of SHIP_TRADITIONS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -12095,9 +12114,21 @@ function eventLine(p, t) {
 // SHIP.events = { sent: ['id@day', ...], joined: ['id@day', ...] } (saved as ship.events)
 SHIP.events = (() => {
   const s = SAVED && SAVED.ship && SAVED.ship.events, ok = a => Array.isArray(a) && a.every(x => typeof x === 'string');
-  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [] };
+  const oo = s && Array.isArray(s.oneOffs) ? s.oneOffs.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Array.isArray(r.at) && Array.isArray(r.where)) : [];
+  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [], oneOffs: oo };
 })();
-SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60) }; });
+SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60), oneOffs: SHIP.events.oneOffs.slice(-20).map(({ def, ...r }) => r) }; });
+// a one-off gathering (section 20's story beats, e.g. Pell's music boxes): eventOneOff({ id, name, day, at: [from, to],
+// where: [{ deck, pool } | { deck, room: 'regexp source' | RegExp, types, ids? }], host?, chance? (base, 0-1; friends of
+// the host more), anim?, hostAnim?, venue?, from?, mail? (text: the evening-before Mail), ask?, here?, thanks? }).
+// Only for a later day (today's plans are made); it's saved and planned like a tradition. Returns true when added
+function eventOneOff(o) {
+  if (!o || !o.id || !Number.isInteger(o.day) || o.day <= Math.floor(shipNow() / 1440) + 1 || SHIP.events.oneOffs.some(r => r.id === o.id && r.day === o.day)) return false;
+  const r = { ...o, where: (o.where || []).map(w => w.room instanceof RegExp ? { ...w, room: w.room.source } : { ...w }) };
+  delete r.who; SHIP.events.oneOffs.push(r);
+  SCHED_DATA = null; EV_DAYS.clear(); for (const d of [...SHIP_DAYS.keys()]) if (d >= o.day) SHIP_DAYS.delete(d);   // its places join the pools; later plans are made again
+  return true;
+}
 const EV_MAIL_AT = 1080;                                 // 18:00 the evening before
 let EV_LAST = null;                                      // the last minute the Mail was checked to
 // the announcements due in (from, to]: at most three days' worth after a long skip. EV_MAILBOX keeps the last 20
@@ -12107,7 +12138,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
   from = Math.max(from, to - 3 * 1440);
   for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
-    if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
+    if (at <= from || at > to || SHIP.events.sent.includes(key) || !e.ev.mail) continue;   // ship-wide gatherings and one-offs: no tradition Mail
     SHIP.events.sent.push(key);
     const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
@@ -12186,6 +12217,7 @@ function eventsTick() {
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   eventsDress(now);                                      // its dressing and the traces left by past events
+  occasionsTick(now);                                    // C10: summons, invitations, progress talks
 }
 // the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does
 // nothing when nothing changed and puts them back after a deck change
@@ -12222,10 +12254,9 @@ const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
-// the afterglow runs on to the end of day 5. `draft: true` keeps it from starting on its own until events_check has
-// passed a full live storm.
+// the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'], draft: true,   // need: on shift on the warning day (Calder's briefing)
+  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'],    // switched on (0.34.12): it starts in play, day 10 in a new game   // need: on shift on the warning day (Calder's briefing)
   phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
     { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
   scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
@@ -12332,12 +12363,20 @@ const STORM_RETELL = {
 };
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
+// who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
 function stormCallBacklog(e) {
-  const d = e.startDay + 3, ppl = schedPeople().filter(p => p.rank !== 'guest');
-  const owed = ppl.filter(p => (habitsOn(p, d) || []).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33).length;
+  const ppl = schedPeople().filter(p => p.rank !== 'guest');
+  const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
   return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
 }
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
+  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
+  who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
+  thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 (() => {
@@ -12367,7 +12406,7 @@ function eventNow(t = shipNow()) {
 // stopping at a phase that `clears`. kinds: 'wear' and 'effect' (systems), 'routine', 'galley', 'jobs', or any other
 // table on the event (def[kind][phase][key]). null: no change.
 function eventMod(kind, key, t) {
-  const now = eventNow(t); if (!now) return null;
+  const now = eventNow(t); if (!now) return SHIP.occasions && typeof occasionMod === 'function' ? occasionMod(kind, key, t === undefined ? shipNow() : t) : null;
   const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
   for (let k = i; k >= 0; k--) {
     const ph = def.phases[k].id;
@@ -12408,8 +12447,32 @@ function eventPauses(ev, d) {
   }
   return false;
 }
-// the context an event's texts are written against: c.band (as things stand), c.mine, c.you
-const evCtx = e => ({ band: eventBand(e.id, e.threads || {}), mine: e.mine || {}, threads: e.threads || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet' });
+// a news seed's tokens as crew ids: 'dept:<d>' (that department), 'all' (everyone aboard), ids as they are
+const newsSeed = l => [...new Set(l.flatMap(x => x === 'all' ? schedPeople().map(p => p.id) : /^dept:/.test(x) ? schedPeople().filter(p => p.dept === x.slice(5)).map(p => p.id) : [x]))];
+// the deck that last went to emergency lighting in the 12 hours before t (section 17's blackoutAt), or null
+function lastDark(t) { if (typeof blackoutAt !== 'function') return null; for (let k = t; k > t - 720; k -= 15) { const b = blackoutAt(k); if (b) return b.deck; } return null; }
+// the context an event's texts are written against: c.band (as things stand), c.mine, c.you, c.dark
+const evCtx = (e, t) => ({ dark: t === undefined ? null : lastDark(t), band: e ? eventBand(e.id, e.threads || {}) : 'smooth', mine: (e && e.mine) || {}, threads: (e && e.threads) || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet',
+  jobsDone: typeof yourJobsDone === 'function' ? yourJobsDone() : 0, commended: !!(SHIP.commendations && SHIP.commendations.length) });
+// section 14's schedule rules at ship minute t: the whole list in force (the phase's, else an earlier phase's back to
+// one that `clears`), [] when nothing's on. Rules: { who: 'dept:<d>' | 'all', where: '<deck>|<room key>' |
+// 'type:<place type>', rule, share?, at? }. Pure, like eventNow
+function eventRoutines(t) {
+  const now = eventNow(t); if (!now) return [];
+  const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
+  for (let k = i; k >= 0; k--) { const l = def.routines && def.routines[def.phases[k].id]; if (l) return l; if (def.phases[k].clears) return []; }
+  return [];
+}
+// an event guest's stay (section 14, C8): [arriveDay, leaveDay] in ship days, from the event's start day (running,
+// logged or next due): they arrive arriveOffset days after it starts (default the event's `guestsArrive`, else its
+// onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
+function eventGuestDays(g) {
+  const def = g && SHIP_EVENTS[g.event]; if (!def) return null;
+  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
+  if (!e) return null;
+  const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
+  return [e.startDay + off, e.startDay + off + (g.stay || 1)];
+}
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
 function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
@@ -12449,7 +12512,7 @@ function eventAdvance(t = shipNow(), quiet) {
     const at = (e.startDay - 1 + n.at[0]) * 1440 + n.at[1];
     if (at > t || e.mine['news:' + n.id] || typeof newsAdd !== 'function') continue;
     e.mine['news:' + n.id] = 1;
-    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e)), weight: n.weight || 1, seed: (n.from ? [n.from] : []).concat(n.seed || []), born: at, kind: 'event', event: e.id, life: 2 });
+    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e, at)), weight: n.weight || 1, seed: newsSeed((n.from ? [n.from] : []).concat(n.seed || [])), born: at, kind: 'event', event: e.id, life: 2 });
   }
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
@@ -12466,6 +12529,11 @@ function eventAdvance(t = shipNow(), quiet) {
     for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
     SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
     if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+    const mine = e.mine || {};
+    if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
+      SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
+      if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
+    }
     SHIP.event = null; out.push('end ' + band);
   }
   return out;
@@ -12482,6 +12550,7 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
   ADDRESSES.push({ at, from, text });
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
+  if (typeof deviceAddress === 'function') return deviceAddress({ from, text });   // section 19's CRT banner (0.35.7)
   if (!ADDRESS_EL) {
     ADDRESS_EL = document.createElement('div');
     ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
@@ -12523,7 +12592,7 @@ const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[wh
 function dialogueShow(scriptId, m) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
   m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
-  DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }, queue: sc.lines.slice(), i: 0, at: 0 };
+  DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: evCtx(SHIP.event), queue: sc.lines.slice(), i: 0, at: 0 };
   eventMine('meetings', 1);
   dialogueDraw(); return true;
 }
@@ -12582,7 +12651,7 @@ function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
-  if (!finished) meetingGist(D.id);
+  if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
 }
 const dialogueClose = () => dialogueEnd(false);          // walking away: the gist arrives in Mail
 function meetingGist(scriptId) {
@@ -12595,14 +12664,18 @@ function inMeeting(m) {
   return !!room && (!w.room || w.room.test(room.name || ''));
 }
 // once a ship minute: the notice 15 minutes before (notify: true), the script when you're there, walking away, the gist after
-function meetingsTick(now) {
-  const e = SHIP.event; if (!e) return;
+function meetingFlags(m) {
+  if (m.event === 'occasion') { const r = (SHIP.occasions || []).find(x => x.key === m.id); return r && r.status === 'asked' ? (r.f || (r.f = {})) : null; }
+  return SHIP.event && SHIP.event.id === m.event ? SHIP.event.mine : null;
+}
+function meetingsTick(now, quiet) {                     // quiet: a sleep or skip (no notice, no panel; the gists still come)
   for (const m of MEETINGS) {
-    if (m.event !== e.id) continue;
-    const k = m.id, f = e.mine;
+    const k = m.id, f = meetingFlags(m); if (!f) continue;
+    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); } continue; }
     if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
     if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
     if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
+    if (m.event === 'occasion' && f['met:' + k]) { const r = SHIP.occasions.find(x => x.key === k); if (r) r.met = true; }
   }
   if (DIALOGUE && !inMeeting(DIALOGUE.m)) dialogueClose();
 }
@@ -12681,6 +12754,127 @@ MEETING_SCRIPTS.captainAllClear = {
       { text: '(Just nod)' },
     ] },
     { who: 'marrow', text: 'Right. I\'ll tell the ship.', pose: 'gesture' },
+  ],
+};
+
+// ---- occasions (C10; plans/pillar3-plan.md Part 4, "Progression hooks"): moments of trust, each opened by something
+// you earned and each an appointment (a time window that opens a door). Section 18 decides when they're due and plays
+// them as meetings; section 20 knows who's friends (relTier), section 19 shows the appointment (apptAdd), section 14
+// opens the door for its window (doorOpenFor reads occasionDoorOpen), the galley cooks for the Captain's table.
+//   OCCASIONS.<id> = { title, kind: 'summons' | 'invite' | 'meeting', by, deck, room (key), at, len, script,
+//                      due(d) -> bool (pure from saved state), ask? (you ask for it), galley?, trace?, mail }
+//   SHIP.occasions: [{ id, key, at, len, deck, room, status: 'asked' | 'kept' | 'missed' }]   (saved; the device's Record
+//   reads the kept ones). SHIP.commendations: [{ event, day }]   (saved; an event ends with your part counted)
+// Commended: two or more of the event's jobs, or one and a meeting (`eventMine`). Nothing here calls R().
+SHIP.occasions = []; SHIP.commendations = [];
+(() => {
+  const s = SAVED && SAVED.ship;
+  if (s && Array.isArray(s.occasions)) SHIP.occasions = s.occasions.filter(o => o && OCC_OK(o)).slice(-40);
+  if (s && Array.isArray(s.commendations)) SHIP.commendations = s.commendations.filter(c => c && typeof c.event === 'string' && Number.isInteger(c.day));
+})();
+function OCC_OK(o) { return typeof o.id === 'string' && typeof o.key === 'string' && Number.isFinite(o.at); }
+SAVE_EXTRA.push(s => { s.ship.occasions = SHIP.occasions.slice(-40); s.ship.commendations = SHIP.commendations; });
+const occRel = id => typeof relTier === 'function' ? relTier(id) || 0 : 0;
+const occOnShift = (id, d) => { const p = schedPeople().find(q => q.id === id); return !!p && isWorkDay(p, d); };
+const yourJobsDone = () => (SHIP.jobs || []).filter(j => j.status === 'done' && j.doneBy === 'you').length;
+const OCCASIONS = {
+  // summoned after your first commendation (the next day the Captain is on shift), or by Vance once you're friends
+  readyRoom: { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', deck: 1, room: 'R', at: 660, len: 25, script: 'readyRoomFirst', once: true,
+    due: d => { const c = SHIP.commendations[0], from = c ? c.day + 1 : null;
+      if (from === null && occRel('vance') < 3) return false;
+      if (from !== null && d < from) return false;
+      for (let k = from || d; k < d; k++) if (occOnShift('marrow', k)) return false;   // only the first such day
+      return occOnShift('marrow', d); },
+    mail: { from: 'Commander Teo Vance', subject: 'The Captain would like a word', body: 'The Captain would like to see you in her ready room on Deck 1 at 11:00 today. The door will be open. No need to change.' } },
+  // the Captain's table: a dinner in her quarters every 28 days (days 20, 48...), one junior who stood out invited
+  captainsTable: { title: 'The Captain\'s table', kind: 'invite', by: 'marrow', deck: 2, room: 'C', at: 1170, len: 90, script: 'captainsTable', notice: 1,
+    due: d => d % 28 === 20 && (SHIP.commendations.some(c => c.day > d - 28 && c.day <= d)
+      || (typeof SHIP.rel === 'object' && SHIP.rel ? Object.keys(SHIP.rel).filter(id => occRel(id) >= 3).length >= 3 : false)),
+    galley: { batch: { meals: 8, label: 'the Captain\'s table' } }, trace: 'framedMenu',
+    mail: { from: 'Captain Odile Marrow', subject: 'Dinner at my table', body: 'You\'re invited to dinner in my quarters on Deck 2 tomorrow at 19:30. Chef Brennan is cooking. Come as you are, but do come.' } },
+  // a progress talk in the Chief's office: you ask for one (the device's Appointments app calls occasionAsk)
+  progressTalk: { title: 'A progress talk', kind: 'meeting', by: 'calder', deck: 5, room: 'o', len: 20, script: 'calderProgress', ask: true,
+    mail: { from: 'Chief Ines Calder', subject: 'Your progress talk', body: 'My office, at the time you asked for. Bring nothing; I have your record.' } },
+};
+// a new occasion on the books: the appointment, the Mail, and the meeting that plays when you're in the room
+function occasionAdd(id, at, quiet) {
+  const o = OCCASIONS[id], key = id + '@' + (Math.floor(at / 1440) + 1);
+  if (!o || SHIP.occasions.some(x => x.key === key)) return null;
+  const r = { id, key, at, len: o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
+  SHIP.occasions.push(r);
+  if (typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+  if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: o.mail.body, quiet: !!quiet });
+  return r;
+}
+// you ask for one (ask: true): at ship minute `at`, if its person is on shift that day; returns the record or null
+function occasionAsk(id, at) { const o = OCCASIONS[id]; return o && o.ask && occOnShift(o.by, Math.floor(at / 1440) + 1) ? occasionAdd(id, at) : null; }
+// the doors (section 14's doorOpenFor): the room is open to you from 10 minutes before an occasion to its end
+function occasionDoorOpen(deck, room, t = shipNow()) { return SHIP.occasions.some(r => r.status === 'asked' && r.deck === deck && r.room === room && t >= r.at - 10 && t < r.at + r.len); }
+// the galley's keys during an occasion's day (eventMod falls back to this when no event is on)
+function occasionMod(kind, key, t) {
+  const d = Math.floor(t / 1440);
+  for (const r of SHIP.occasions) { const o = OCCASIONS[r.id]; if (o && o[kind] && Math.floor(r.at / 1440) === d && r.status !== 'missed' && o[kind][key] != null) return o[kind][key]; }
+  return null;
+}
+// once a ship minute (and on skips): book what's due today and tomorrow, keep the meetings registered, close the past
+function occasionsTick(now, quiet) {
+  const d = Math.floor(now / 1440) + 1;
+  for (const [id, o] of Object.entries(OCCASIONS)) {
+    if (o.ask || (o.once && SHIP.occasions.some(r => r.id === id))) continue;
+    for (const k of [d, d + (o.notice || 0)]) if (o.due(k)) { const at = (k - 1) * 1440 + o.at; if (at > now) occasionAdd(id, at, quiet); }
+  }
+  for (const r of SHIP.occasions) {
+    const o = OCCASIONS[r.id]; if (!o) continue;
+    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', Deck ' + r.deck + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
+    if (r.status === 'asked' && now >= r.at + r.len) { r.status = r.met ? 'kept' : 'missed'; if (r.met && o.trace && !SHIP.traces.includes(o.trace)) SHIP.traces.push(o.trace); }
+  }
+}
+SIM_ADVANCE.push((from, to) => { meetingsTick(to, true); occasionsTick(to, true); });   // after a skip: book what's due, and the gists of what you missed
+MEETING_SCRIPTS.readyRoomFirst = {
+  title: 'The ready room', from: 'Commander Teo Vance',
+  gist: 'The Captain sent for you and you weren\'t there. She says it will keep, and she has a long memory.',
+  lines: [
+    { who: 'marrow', text: 'Come in. Mind the step; everyone trips on it.', pose: 'gesture' },
+    { who: 'marrow', text: c => c.commended ? 'I read the debrief. Calder says you were where you were needed.' : 'Commander Vance tells me you\'re worth knowing. He doesn\'t say that often.', to: 'you' },
+    { who: 'marrow', text: 'Tell me something. From where you stand, what does this ship need that the senior crew can\'t see?', to: 'you' },
+    { choice: [
+      { text: 'Better lights on the lower decks.', rel: { marrow: 1 }, reply: { who: 'marrow', text: 'Noted. Calder will love that.', pose: 'nod' } },
+      { text: 'More people who know where the spare filters are.', rel: { marrow: 1, calder: 1 }, reply: { who: 'marrow', text: 'Ha. That\'s a Works answer.', pose: 'nod' } },
+      { text: 'I\'m still learning. Ask me in a month.', rel: { marrow: 2 }, reply: { who: 'marrow', text: 'Honest. I will.' } },
+    ] },
+    { who: 'marrow', text: 'Before you go: meet the Admiral.', pose: 'gesture' },
+    { who: 'marrow', text: 'He\'s been aboard longer than anyone. He doesn\'t say much, which is why he outranks us all.' },
+    { who: 'marrow', text: c => 'Thank you, ' + c.you + '. Back to it.', to: 'you' },
+  ],
+};
+MEETING_SCRIPTS.captainsTable = {
+  title: 'The Captain\'s table', from: 'Captain Odile Marrow',
+  gist: 'Your seat at the Captain\'s table stayed empty. Chef Brennan saved you a slice of the tart.',
+  lines: [
+    { who: 'marrow', text: 'Sit, sit. Brennan has outdone herself.', pose: 'gesture' },
+    { who: 'vance', text: 'To the Wren.' },
+    { who: 'sato', text: 'And to whoever fixed the observatory heater.' },
+    { who: 'calder', text: 'That would be Works. As usual.', pose: 'nod' },
+    { who: 'marrow', text: 'So. What do the juniors say about us when we\'re not listening?', to: 'you' },
+    { choice: [
+      { text: 'That the Commander never sleeps.', rel: { vance: 1 }, reply: { who: 'vance', text: 'Accurate.' } },
+      { text: 'That the stew\'s improved.', rel: { marrow: 1 }, reply: { who: 'marrow', text: 'I\'ll tell Brennan. She\'ll pretend not to care.', pose: 'nod' } },
+      { text: 'Only good things, Captain.', rel: { holt: 1 }, reply: { who: 'holt', text: 'A diplomat. We\'ll make an officer of you yet.' } },
+    ] },
+    { who: 'marrow', text: 'Same time next month, then. Perhaps.' },
+  ],
+};
+MEETING_SCRIPTS.calderProgress = {
+  title: 'A progress talk', from: 'Chief Ines Calder',
+  gist: 'You missed your progress talk. Calder says ask again when you\'re ready.',
+  lines: [
+    { who: 'calder', text: 'Sit. Let\'s look at your record.', pose: 'gesture' },
+    { who: 'calder', text: c => c.jobsDone + (c.jobsDone === 1 ? ' job' : ' jobs') + ' signed off since you came aboard.' },
+    { who: 'calder', text: c => c.jobsDone >= 25 ? 'That\'s close to what Tier 2 asks. A seal check or two and I\'ll put your name forward.' : 'Tier 2 wants about twenty-five, and a seal check or two. Keep at it.', to: 'you' },
+    { choice: [
+      { text: 'What should I work on?', rel: { calder: 1 }, reply: { who: 'calder', text: 'Seals. Everyone avoids them.' } },
+      { text: 'Thanks, Chief.', reply: { who: 'calder', text: 'Don\'t thank me. Thank the filters.', pose: 'nod' } },
+    ] },
   ],
 };
 
