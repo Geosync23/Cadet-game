@@ -26,7 +26,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd);
+      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d);   // a ship-wide event's quiet days
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -104,12 +104,14 @@ SIM = r"""(async ({ d, id, step }) => {
 STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0;
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
+    const due = eventDueDay();                           // as in a new game
     eventStart('ionStorm', 10); EV_DAYS.clear();
     const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
     if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
-    const news = [], hadNews = typeof newsAdd === 'function', na = hadNews ? newsAdd : null; const newsSpy = x => { news.push(Math.floor(x.born / 1440) + 1 + ' ' + hhmm(x.born % 1440) + ' ' + x.id + ' (' + x.seed.join(',') + '): ' + x.lines[0]); return x; };
-    if (hadNews) newsAdd = newsSpy; else window.newsAdd = newsSpy;   // social's newsAdd lives in the game's scope: a window stand-in is never seen
+    const news = [], fmt = x => Math.floor(x.born / 1440) + 1 + ' ' + hhmm(x.born % 1440) + ' ' + x.id + ' (' + x.seed.length + ' know): ' + x.lines[0];
+    const real = typeof NEWS !== 'undefined' && typeof newsAdd === 'function', n0 = real ? (socInit(), NEWS.length) : 0;   // section 20's own, or a stand-in
+    if (!real) window.newsAdd = x => { news.push(fmt(x)); return x; };
     const on = [10, 11, 13, 16].map(d => { const o = eventOn(d); return d + ':' + (o ? o.day + ' ' + o.phases.map(p => p.id + '@' + p.from).join(' ') : '-'); });
     const gath = [10, 13].map(d => eventGatherings(d).map(g => d + ' ' + g.id + ' ' + g.where + ' ' + hhmm(g.at) + ' ' + g.len).join('; '));
     const steps = [], sig = [], mods = {};
@@ -123,17 +125,17 @@ STORM = r"""(() => {
       const g = eventMod('galley', 'menu', t); if (g) mods.menu = g;
     }
     if (send) mailSend = send;
-    if (hadNews) newsAdd = na; else delete window.newsAdd;
+    if (real) { for (const x of NEWS.splice(n0)) { news.push(fmt(x)); delete SHIP.knows[x.id]; } } else delete window.newsAdd;
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
-    ADDRESSES.length = a0; MEETINGS.length = ms; EV_DAYS.clear();
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath,
+    ADDRESSES.length = a0; MEETINGS.length = 0; MEETINGS.push(...m0); EV_DAYS.clear();
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
       scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     return res;
   };
   const a = run(), b = run();
-  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log) && a.addr.join() === b.addr.join() && a.mails.join() === b.mails.join(), due: eventDueDay(), cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
+  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log) && a.addr.join() === b.addr.join() && a.mails.join() === b.mails.join(), due: a.due, cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
 })()"""
 
 # a live ion storm (0.34.9): started on day 10 and played through on the deck at the moments that matter: Calder's
@@ -174,6 +176,57 @@ LIVE = r"""(() => {
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
   MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
   return D;
+})()"""
+
+# occasions (C10, 0.34.11): a commendation on day 16 -> the ready-room summons on day 17 at 11:00 (the door open, the
+# meeting played in the room, kept), the Captain's table on day 20 (booked the day before, the galley's batch, missed),
+# a progress talk asked for on day 18, and nothing booked without a commendation
+OCC = r"""(() => {
+  const R = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+  const keep = { o: SHIP.occasions.slice(), c: SHIP.commendations.slice(), e: SHIP.event, tr: SHIP.traces.slice() };
+  SHIP.occasions.length = 0; SHIP.commendations.length = 0; SHIP.event = null; MEETINGS.length = 0;
+  const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
+  skipTo(16 * 1440 + 360); R.none = SHIP.occasions.length;
+  SHIP.commendations.push({ event: 'ionStorm', day: 16 });
+  skipTo(16 * 1440 + 400); R.booked = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);
+  R.doorBefore = occasionDoorOpen(1, 'R', 16 * 1440 + 600); R.doorAt = occasionDoorOpen(1, 'R', 16 * 1440 + 655);
+  skipTo(16 * 1440 + 640); goToDeck(1); const b = ROOM_BOX.R;   // inside the ready room (its door is section 14's doorOpenFor, not in yet)
+  player.obj.position.copy(cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2))); target.copy(player.obj.position).setY(.7);
+  R.room = roomAt(...player.here());
+  tick(16 * 1440 + 641, 16 * 1440 + 661);
+  R.open = DIALOGUE ? DIALOGUE.id : null; const seen = []; let n = 0;
+  while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); dialogueStep(v.choices ? 2 : undefined); }
+  R.lines = seen; tick(16 * 1440 + 662, 16 * 1440 + 690);
+  R.after = SHIP.occasions.map(r => r.key + ' ' + r.status);
+  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); R.askOff = !!occasionAsk('progressTalk', 21 * 1440 + 840);   // day 22 is a Monday: Calder's off
+  skipTo(18 * 1440 + 900); R.table = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);
+  R.batch = eventMod('galley', 'batch', 19 * 1440 + 900); R.noBatch = eventMod('galley', 'batch', 18 * 1440 + 900);
+  skipTo(20 * 1440 + 60); R.end = SHIP.occasions.map(r => r.key + ' ' + r.status); R.mails = mails; R.traces = SHIP.traces.slice();
+  mailSend = send; SHIP.occasions.length = 0; SHIP.occasions.push(...keep.o); SHIP.commendations.length = 0; SHIP.commendations.push(...keep.c);
+  SHIP.event = keep.e; SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; if (DIALOGUE) dialogueEnd(true);
+  return R;
+})()"""
+
+# the hooks for others (0.34.13): the party through eventPlan (in play, day 13), eventRoutines, eventGuestDays,
+# a one-off (Pell's show) added for a later day and planned like a tradition
+HOOKS = r"""(() => {
+  const R = {};
+  R.partyDay = eventsOn(13).map(e => e.id); R.party11 = eventsOn(11).some(e => e.id === 'party');
+  R.partyGoing = schedPeople().filter(p => planDay(p, 13).some(s => s.tag && s.tag.startsWith('ev-party'))).length;
+  R.partyPlaces = [...new Set(schedPeople().flatMap(p => planDay(p, 13).filter(s => s.tag && s.tag.startsWith('ev-party')).map(s => s.placeId)))].slice(0, 4);
+  R.routines = [11 * 1440 + 900, 12 * 1440 + 400, 12 * 1440 + 700, 13 * 1440 + 100].map(t => eventRoutines(t).map(r => r.rule).join(','));
+  R.guest = eventGuestDays({ event: 'ionStorm', stay: 3 }); R.noGuest = eventGuestDays({ event: 'nope', stay: 3 });
+  R.owed = schedPeople().filter(p => callOwed(p, 10)).length;
+  const d = Math.floor(shipNow() / 1440) + 3;
+  R.added = eventOneOff({ id: 'pell-show', name: 'Pell\'s music boxes', day: d, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }], host: 'pell', chance: .3, anim: null, here: 'Shh, the next one plays a waltz.' });
+  R.again = eventOneOff({ id: 'pell-show', name: 'x', day: d, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }] });
+  R.today = eventOneOff({ id: 'y', name: 'y', day: d - 2, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }] });
+  R.oneOffOn = eventsOn(d).map(e => e.id);
+  R.hostFlag = eventPlan(schedPeople().find(p => p.id === 'pell'), d).some(x => x.id === 'pell-show' && x.host);
+  R.hostFree = eventFree(schedPeople().find(p => p.id === 'pell'), d, 1230, 1290);
+  R.oneOffGoing = schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-pell-show'))).map(p => p.id);
+  SHIP.events.oneOffs.length = 0; SCHED_DATA = null; EV_DAYS.clear(); SHIP_DAYS.clear();
+  return R;
 })()"""
 
 ok = True
@@ -269,7 +322,7 @@ with sync_playwright() as pw:
     print('  traditions by day (storm from day 10):', a['paused'], '| menu', a['mods'].get('menu'))
     print('  news:'); [print('    ' + x) for x in a['news']]
     print('  eventOn:', a['on'], '| gatherings:', a['gath'])
-    print('  the same twice:', st['same'], '| due in play:', st['due'], '(None while the storm is a draft)')
+    print('  the same twice:', st['same'], '| due in play:', st['due'], '(day 10 in a new game)')
     print('  upcoming traditions:', [(c['title'], c['at'], c['where']) for c in st['cal']])
     want = ['start', 'warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
     got = [w for x in a['steps'] for w in want if (' ' + w) in (' ' + x.split(' ', 3)[3]).replace('phase ', ' ').replace('end ', ' end ')]
@@ -277,6 +330,7 @@ with sync_playwright() as pw:
     m = a['mods']
     if m.get('-') != [None, None, None] or m.get('onset') != [1.5, 2, True] or m.get('escalation') != [2, 3, True] or m.get('resolution') != [None, None, None]: fail(f"eventMod by phase: {m}")
     if not st['same']: fail('the storm ran differently the second time')
+    if not st['due'] or st['due'].get('day') != 10: fail(f"the storm isn't due on day 10 in play: {st['due']}")
     if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
@@ -310,6 +364,29 @@ with sync_playwright() as pw:
     if not L['allClear'] or L['allClear']['name'] != 'Captain Odile Marrow' or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')
     if max(L['calls1'], L['calls2'], L['calls3']) >= 450: fail('draw calls over 450 in the storm')
     if len(L['log']) != 1 or L['left'] is not None or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
+
+    # 7. occasions (C10)
+    O = g.ev(OCC)
+    print('Occasions: before a commendation', O['none'], '| booked', O['booked'], '| door', O['doorBefore'], O['doorAt'], '| in room', O['room'])
+    print('  ready room:', O['open'], O['lines'])
+    print('  after:', O['after'], '| progress talk asked:', O['ask'], 'on a day off:', O['askOff'])
+    print('  the table:', O['table'], '| batch', O['batch'], O['noBatch'], '| end', O['end'], '| traces', O['traces'])
+    print('  Mail:', O['mails'])
+    if O['none'] or not O['booked'] or 'readyRoom@17 11:00 asked' not in O['booked'][0] or O['doorBefore'] or not O['doorAt']: fail(f"the ready-room summons: {O['booked']}")
+    if O['open'] != 'readyRoomFirst' or not any('Admiral' in x for x in O['lines']) or 'readyRoom@17 kept' not in O['after']: fail(f"the ready room didn't play or wasn't kept: {O['open']} {O['after']}")
+    if not O['ask'] or O['askOff']: fail('occasionAsk: the progress talk')
+    if not any('captainsTable@20 19:30' in x for x in O['table']) or not O['batch'] or O['noBatch']: fail(f"the Captain's table: {O['table']} {O['batch']}")
+    if not any('captainsTable@20 missed' in x for x in O['end']) or 'framedMenu' in O['traces'] or not any('Captain\'s table (notes)' in x for x in O['mails']): fail(f"a missed table: {O['end']} {O['mails']}")
+
+    # 8. the hooks for others
+    H = g.ev(HOOKS)
+    print('Hooks: party on day 13', H['partyDay'], '(day 11:', H['party11'], ') going', H['partyGoing'], H['partyPlaces'])
+    print('  routines (day 12 15:00, 13 06:40, 13 11:40, 14 01:40):', H['routines'], '| guest days', H['guest'], H['noGuest'], '| owed a call', H['owed'])
+    print('  one-off:', H['added'], H['again'], H['today'], H['oneOffOn'], 'going', H['oneOffGoing'], '| Pell free:', H['hostFree'], '| host flagged:', H['hostFlag'])
+    if 'party' not in H['partyDay'] or H['party11'] or H['partyGoing'] < 10: fail('the all-clear party is not planned on day 13')
+    if not H['routines'][0].startswith('doubleShift') or not H['routines'][1].startswith('doubleShift') or H['routines'][2] != 'rush' or H['routines'][3] != '': fail(f"eventRoutines: {H['routines']}")
+    if H['guest'] != [11, 14] or H['noGuest'] is not None: fail(f"eventGuestDays: {H['guest']}")
+    if not H['added'] or H['again'] or H['today'] or 'pell-show' not in H['oneOffOn'] or not H['oneOffGoing'] or (H['hostFree'] and not H['hostFlag']): fail('eventOneOff')
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
