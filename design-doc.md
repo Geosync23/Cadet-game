@@ -311,6 +311,8 @@ During the night, only urgent jobs and essential systems get attention. Routine 
 
 **Meals.** Two meals a day, breakfast and dinner, each served over a window rather than at a set time. Breakfast runs 06:00 to 08:00, catching the night shift coming off at 06:00 and the day shift before 08:00. Dinner runs 17:00 to 20:30, catching the day shift coming off at 17:00 and the night shift before 21:00. The galley also keeps a grab-and-go shelf for anyone running late.
 
+**The galley's week** (decided 2026-10-16). The menu runs on a weekly cycle: a crew member's favourite on Wednesdays, a Friday treat with a pudding, and a Sunday dinner the crew vote for; the menu board in the mess shows the day's meals. Food in the cold store spoils when its chiller falters (faster the worse it is); the galley bins what's gone off and tells you by Mail. Some meals are busy: a rush after the 17:00 shift change, or an oven playing up, and a short queue forms. On a crew member's birthday the galley bakes a cake for after dinner. Nobody but the galley crew works in the galley, the grab shelf isn't cleared overnight, and there's no lunch.
+
 On duty, crew claim jobs from the job list that match their department and skill, walk there and do the work. A Works tech fixes the scrubber; Chef Brennan cooks; Infirmary checks on whoever is run-down.
 
 Off duty, each person picks what to do by scoring their options against their needs and traits: eat, sleep, wash, socialise, relax in a favourite spot, a hobby.
@@ -364,6 +366,17 @@ What higher tiers unlock:
 **Crew relationships with each other.** Each pair of crew has an affinity that drifts as they eat, work, bunk and spend time together. Friendships and small rivalries form on their own. They shape who sits together, who swaps shifts and who avoids whom, so the player can stumble into their dramas.
 
 **Romance** is out for now.
+
+### Ship traditions
+
+*Decided 2026-10-16 (the answers pass; built in 0.34.0).* Alongside the big ship-wide events, the Wren has small, recurring traditions, "lots of little holiday-like things, almost like Stardew Valley". The crew who are free simply go, and talk about them; nothing stops daily life, and there are no menus or cutscenes.
+
+- **Weekly:** running club (Monday evening, the gym), observatory night (Tuesday, Deck 2), quiz night (Thursday, the bow lounge), Works Friday tea and tool cleaning (Deck 5) and the Friday music jam (Deck 4), film night (Saturday, the junior common room), and the Sunday swap meet on the promenade.
+- **Every few weeks:** harvest morning in the garden (every other Saturday, fresh salad at dinner) and the hull-lights evening (every four weeks).
+- **Birthdays:** each crew member's day; the galley bakes a cake and their department and bunkmates gather in the mess after dinner.
+- **Once a year** (a ship year is 52 weeks): Founding Day (day 100: cake and a few words from the Captain) and the quiet watch (day 300: a quiet while at the windows for the people they miss).
+- **Hearing about them:** a Mail the evening before (on the device's calendar later), and crew mention them when you talk to them ("Coming to the quiz tonight?").
+- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you.
 
 
 ## The player: Works technician
@@ -437,7 +450,7 @@ Story arrives without stopping daily life, like a TNG episode where a phenomenon
 - commendations toward promotion;
 - small permanent traces, such as a scorch mark, a plaque or a new pet.
 
-**Pacing:** roughly one main event every 1–2 ship weeks (3½–7 real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday in the bow lounge.
+**Pacing:** roughly one main event every 1–2 ship weeks (3½–7 real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday gathering in the mess (see "Ship traditions").
 
 **What the player sees depends on rank.** A junior carries filters during the storm. A senior is in the Captain's briefing about it.
 
