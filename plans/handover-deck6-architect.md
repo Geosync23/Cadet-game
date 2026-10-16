@@ -160,3 +160,17 @@ Containment proofs, which I wrote as scratch scripts. They're easy to rebuild wi
 - **Visible wear:** machines in poor shape could show it (a dim screen, a dripping pipe, a red light). That needs a small agreed hook with the systems engineer.
 - **The cargo hold's shuttle-bay hatch:** open it when the shuttle starts flying cargo runs?
 - **More life in the utility rooms:** a radio left on in the heating plant, a mug on the breaker cabinet, a sign about the oxygen cells. Cheap touches that make Works rooms feel lived in.
+
+## 8. The answers pass (0.30.11–0.30.12, 2026-10-16)
+
+- **0.30.11:** `byFace` on Decks 4 and 5 (smooth hull stripes, fewer draw calls).
+- **0.30.12:** everything else on my rows. See its DEV_NOTES row. Formats others rely on:
+  - `service` entries are `{ key, tier }` (or a plain key); buildDeck sets `e.tier` on the hatch edge. Tier rule: section 17's `hatchPassable`.
+  - `window: true` on seats by hull windows; `DECKS[6].crawl` lists the crawl tiles ('c,r').
+  - `DECKS[4].officer(num)` finds a cabin's officer from ROSTER; the `namePlate` wall kit and `lockedRoom` use it.
+  - `healthBoard` (Works bay) reads `shipHealthRows()` or falls back to `shipSystems()`.
+  - `machineMarks(def)`, called last in each of my decks' dress(), draws lamps and drips from `machineLook(id)`. It is inert without that function. `MACHINE_MARKS` lists where each lamp went.
+- **Tools I used (rebuild in a scratch folder):**
+  - an all-deck pixel comparer (day, night, wide and rotated shots, crew hidden);
+  - a close-up shooter (camera target at a room-local spot; `WALLS=auto` keeps wall decor visible, since lowered walls hide it);
+  - a stand-in `window.machineLook` to see the marks.
