@@ -49,7 +49,8 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
 .device.wide{left:12px;top:12px;bottom:12px;right:auto;width:min(420px,40vw);height:auto;border-radius:24px;padding:8px 12px 10px}
-.device .bez{display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device .bez{position:relative;display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device:not(.wide) .bez::before{content:"";position:absolute;left:0;right:0;top:-14px;bottom:-8px}
 .device .bez .grip{flex:1;display:flex;justify-content:center}
 .device .bez .grip::before{content:"";width:44px;height:4px;border-radius:2px;background:#3a4148}
 .device.wide .bez .grip::before{display:none}
@@ -8290,7 +8291,7 @@ const DEVICE_SKIN = (() => {
   const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
-  let back = null, drawn = null;
+  let back = null, drawn = null, drawnKey = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
     el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
@@ -8369,7 +8370,7 @@ const DEVICE_SKIN = (() => {
     get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
-    close() { el.hidden = true; drawn = null; layout(); if (back && back.focus) back.focus(); },
+    close() { el.hidden = true; drawn = null; drawnKey = null; layout(); if (back && back.focus) back.focus(); },
     button() {
       let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
       btn.classList.toggle('low', low);
@@ -8379,6 +8380,12 @@ const DEVICE_SKIN = (() => {
     },
     draw(id, v) {
       if (drawn === id && body.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // typing: leave it be
+      // nothing changed since the last draw (most ship minutes): leave the screen be, as rebuilding the glowing text costs
+      // phones the most (0.35.12). Views holding a dom block (the shim) always redraw; home adds its badges
+      let key = null;
+      try { key = v.blocks.some(b => b && b.kind === 'dom') ? null : id + JSON.stringify(v) + (id === 'home' ? deviceApps().map(a => a.id + ':' + deviceBadge(a)).join() : ''); } catch (e) { key = null; }
+      if (key && key === drawnKey && drawn === id) { layout(); return; }
+      drawnKey = key;
       const keep = drawn === id ? body.scrollTop : 0;
       layout(); head.textContent = id === 'home' ? 'Your device' : v.title; backB.disabled = id === 'home';
       body.textContent = ''; body.dataset.app = id;
@@ -8445,19 +8452,24 @@ const DEVICE_SKIN = (() => {
   backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
   addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
   addEventListener('resize', () => { if (DEV.open) layout(); });
-  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it
+  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it.
+  // 0.35.12 (the phone review): the ship closes it on a tap (lifted within 12px and 0.4 s), not at the first touch, so a
+  // drag or a pinch over the ship doesn't close it (it doesn't steer or zoom either while the sheet is up); a cancelled
+  // touch (the phone took the gesture) forgets the swipe
   let swipe = null;
   addEventListener('pointerdown', e => {
     const cv = e.target && e.target.tagName === 'CANVAS';
     if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
     else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
-    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); deviceClose(); }
+    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); swipe = { x: e.clientX, y: e.clientY, tap: performance.now() }; }
   }, true);
   addEventListener('pointerup', e => {
     if (!swipe) return; const dy = e.clientY - swipe.y;
-    if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    if (swipe.tap) { if (Math.hypot(e.clientX - swipe.x, dy) < 12 && performance.now() - swipe.tap < 400) { e.stopPropagation(); deviceClose(); } }
+    else if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
     swipe = null;
   }, true);
+  addEventListener('pointercancel', () => { swipe = null; }, true);
   return skin;
 })();
 

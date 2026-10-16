@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   the phone review (0.35.12): tap the ship to close (a drag doesn't), the bezel's grip and swipe, no rebuild when unchanged
 #   Quiet off shift and the #seek chip's look (0.35.11)
 #   Calendar days and group meetings (0.35.10): See the day, Make an appointment that day, pick the place on Maps,
 #   two or more people (a seat each, kept and cancelled together)
@@ -249,6 +250,22 @@ def run(path):
             check(m1 == m2, f'opening again adds nothing (no leak): {m1} -> {m2}')
             ev = g.ev("__ev")
             check(ev == ['open', 'close', 'open', 'close', 'open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
+            # the phone review (0.35.12): a drag over the ship leaves it open, a tap closes it; a swipe down on the bezel
+            # closes it, its grip is 44px tall; an unchanged screen isn't rebuilt
+            if name == 'phone':
+                g.ev("deviceShow('home')"); g.step(2)
+                bz = g.ev("(() => { const r = document.getElementById('devBez').getBoundingClientRect(); return [r.left + r.width / 2, r.top, r.bottom]; })()")
+                pt = [w / 2, max(140, bz[1] - 120)]
+                same = g.ev("(() => { const f = document.getElementById('devBody').firstChild; deviceRefresh(); deviceRefresh(); return document.getElementById('devBody').firstChild === f; })()")
+                g.page.mouse.move(*pt); g.page.mouse.down(); g.page.mouse.move(pt[0] + 60, pt[1] + 40, steps=5); g.page.mouse.up(); g.step(1)
+                drag = g.ev("DEV.open")
+                g.page.mouse.click(*pt); g.step(1)
+                tapped = g.ev("!DEV.open")
+                g.ev("deviceShow('home')"); g.step(2)
+                grip = g.ev(f"(() => {{ const e = document.elementFromPoint({bz[0]}, {bz[1]} - 12); return !!(e && e.closest('#devBez')); }})()")
+                g.page.mouse.move(bz[0], bz[1] + 8); g.page.mouse.down(); g.page.mouse.move(bz[0], bz[1] + 90, steps=5); g.page.mouse.up(); g.step(1)
+                swiped = g.ev("!DEV.open")
+                check([same, drag, tapped, grip, swiped] == [True] * 5, f'phone: no rebuild when unchanged, a drag leaves it open, a tap closes it, the grip reaches 44px, a swipe down closes it: {[same, drag, tapped, grip, swiped]}')
             errs = g.ev("DEV.errors")
             check(not errs, f'no app errors: {errs}')
             check(not g.errors, f'no page errors: {g.errors[:5]}')
