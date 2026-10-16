@@ -27,14 +27,19 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | Session | Job | Branch it pushes to | Builds | Status | Handover note |
 | --- | --- | --- | --- | --- | --- |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead. Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 11 = 0.40.8; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.40.x (combined) | Active | — |
-| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: crew time, schedules, needs, day_check (sections 10, 13, 14) | `claude/sim-engineer` | 0.15, 0.21–0.22, 0.26.x | Standby (~120k since a summary) | `plans/handover-sim.md` |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: crowd, poses, props, draw calls (sections 8, 8b) | `claude/crowd-render` | 0.20, 0.27.x | Standby (<100k since a summary) | `plans/handover-performance.md` |
-| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: Decks 1 and 3 | `claude/deck1-scale` | 0.18, 0.31.x | Standby (~150k since a summary) | `plans/handover-bridge-architect.md` |
-| session_01JScnVG158eYAHYvKDz3jZG | Crew designer: roster, habits, generator (section 9) | `claude/deck-plans-1-2-6` | 0.16.x | Standby (~200k since a summary) | `plans/handover-crew-designer.md` |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: crew time, schedules, needs, day_check (sections 10, 13, 14) | `claude/sim-engineer` | 0.15, 0.21–0.22, 0.26.x | Working (answers pass, 0.26.8+) | `plans/handover-sim.md` |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: crowd, poses, props, draw calls (sections 8, 8b) | `claude/crowd-render` | 0.20, 0.27.x | Working (answers pass, 0.27.7+) | `plans/handover-performance.md` |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: Decks 1 and 3 | `claude/deck1-scale` | 0.18, 0.31.x | Working (answers pass, 0.31.6+) | `plans/handover-bridge-architect.md` |
+| session_01JScnVG158eYAHYvKDz3jZG | Crew designer: roster, habits, generator (section 9) | `claude/deck-plans-1-2-6` | 0.16.x | Working (answers pass, 0.16.6+) | `plans/handover-crew-designer.md` |
+| session_01FtwFYLBjAB9zFvPSpLezaR | Systems engineer (new, answers pass): faults for the player, visible faults hook, tiers, machine taps, shortages to Mail, cart job (section 17) | `claude/ship-systems` | 0.33.16+ | Working | `plans/handover-systems.md` |
 | session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: machines, wear, jobs, supplies, carts (section 17) | `claude/ship-systems` | 0.33.x | Retired 2026-10-16 (~600k) | `plans/handover-systems.md` |
+| session_01MiQtjmdEa4CXsCsiCh6zWV | Deck 6 architect (new, answers pass): Decks 4-6, hull byFace 4-5, health board, tiers, plates, crawl tiles, cargo hatch, touches | `claude/deck-architect` | 0.30.11+ | Working | `plans/handover-deck6-architect.md` |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: Decks 4, 5, 6, utility kit, deck_check | `claude/deck-architect` | 0.17, 0.30.x | Retired 2026-10-16 (~690k) | `plans/handover-deck6-architect.md` |
+| session_01BQjtEzvKXuvPZNzGRRRwpZ | Player engineer (new, answers pass): long days, bed skips night, need bonuses, Mail, social, shopping, crouch (section 15) | `claude/player-needs` | 0.28.9+ | Working | `plans/handover-player.md` |
 | session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer: player needs, device, job loop, save (section 15) | `claude/player-needs` | 0.28.x | Retired 2026-10-16 (~560k) | `plans/handover-player.md` |
+| session_01AVGVnj4Q1jFmVoD6xi5asT | Galley engineer (new, answers pass): spoilage, menus, queues, birthday cakes (section 16) | `claude/galley-food` | 0.29.11+ | Working | `plans/handover-galley.md` |
 | session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer: cooking, servery, food by cart (section 16) | `claude/galley-food` | 0.29.x | Retired 2026-10-16 (~490k) | `plans/handover-galley.md` |
+| session_01EhJv6dqovqhQyruMveFuRR | Command architect (new, answers pass): Deck 2 plates, observatory night, window seats, touches, wear | `claude/deck2-command` | 0.32.3+ | Working | `plans/handover-command-architect.md` |
 | session_014DMHpLuFyNknrAcZZGGNhU | Command architect: Deck 2 | `claude/deck2-command` | 0.19, 0.32.x | Retired 2026-10-16 (~670k) | `plans/handover-command-architect.md` |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
@@ -45,6 +50,8 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 6 architect 199k (both already compacted), bridge architect 570k, command architect 525k, performance engineer 510k; sim engineer not reported while working. Sessions compact themselves automatically, but lose detail when they do. Plan: no new hires for the end of Pillar 1. For Pillar 2, give big new jobs to fresh sessions, and retire the bridge and command architects (idle, work merged) once the user agrees, after the usual idle check.
 
 ## Done
+
+- **Answers pass started (2026-10-16, overnight):** the user answered the question board and authorised the lead alone to interpret it. Plan: `plans/answers-pass-plan.md`. Five fresh helpers hired for the retired roles; four standby helpers re-briefed. Combined builds 0.41.x. End: a decisions report and the Pillar 3 plan pitch.
 
 - **Helper handovers (2026-10-16):** all nine helpers wrote handover notes (`plans/handover-*.md`, on this branch and on ship-integration 9efcea0, no game changes). The five fullest (systems, Deck 6 architect, player, galley, command architect) are retired; the lead now owns the playable link. Four stay on standby.
 
