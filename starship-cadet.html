@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.6
+   STARSHIP CADET: CSV Wren                            build 0.41.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4672,6 +4672,12 @@ DECKS[3] = {
     { id: '3-infirmary-4', type: 'work:infirmary', at: [16, 7], xy: [16.3, 7.15], walk: [16, 7], face: 'n', pose: 'sit', room: 'X' },
     { id: '3-infirmary-5', type: 'work:infirmary', at: [16, 2], xy: [16.5, 2.4], walk: [16, 2], face: 'n', pose: 'stand', room: 'I' },   // ward round, between the middle beds
     { id: '3-infirmary-6', type: 'work:infirmary', at: [13, 4], xy: [13.05, 4.4], walk: [13, 4], face: 'w', pose: 'work', room: 'I' },   // the supplies shelf
+    // patients (C9, 0.38.4): the four ward beds, for anyone the sim sends to the infirmary (storm survivors, the sick). Type
+    // 'patient-bed', so nobody sleeps here at night and no plan uses them day to day; you get in from the south
+    { id: '3-ward-1', type: 'patient-bed', at: [13, 1], xy: [13.5, 1.12], walk: [13, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-2', type: 'patient-bed', at: [15, 1], xy: [15.5, 1.12], walk: [15, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-3', type: 'patient-bed', at: [17, 1], xy: [17.5, 1.12], walk: [17, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-4', type: 'patient-bed', at: [19, 1], xy: [19.5, 1.12], walk: [19, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
     { id: '3-toilet-1', type: 'toilet', at: [22, 21], xy: [22.18, 21.5], walk: [22, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-toilet-2', type: 'toilet', at: [20, 21], xy: [20.73, 21.5], walk: [20, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-toilet-3', type: 'toilet', at: [19, 21], xy: [19.27, 21.5], walk: [19, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
@@ -6902,7 +6908,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.6';                             // keep in step with the header's build line
+const GAME_BUILD = '0.41.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
