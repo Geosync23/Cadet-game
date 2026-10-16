@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.3
+   STARSHIP CADET: CSV Wren                            build 0.36.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10588,12 +10588,12 @@ function socReset(hour) {
   SHIP.social = { hour, fault: {}, pairs: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay] } }. A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
@@ -10610,7 +10610,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -10760,7 +10760,41 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m);
+}
+// friends come and find you (0.36.4): a friend (tier 3+) in their free time on your deck, within SEEK_NEAR tiles,
+// now and then (SEEK_ODDS a ship minute, schedU k 633) waves you over: a small prompt at the screen's edge, never one
+// you must answer. Tap it for the chat card; it goes on its own after SEEK_SECS real seconds or when they go. Once a
+// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open
+const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25;
+let SEEK = null;                                          // { p, el, until }
+function seekEl() {
+  let el = document.getElementById('seek'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:3;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
+  el.onclick = () => { const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
+  return el;
+}
+function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
+function socialSeek(m) {
+  if (typeof DECK_CREW === 'undefined') return;
+  const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
+  if (SEEK) { const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || performance.now() > SEEK.until || CHAT) seekEnd(); return; }
+  if (CHAT || sleeping) return;
+  const day = SHIP.time.day;
+  for (const a of DECK_CREW) {
+    const p = a.p; if (!SOC.idx.has(p.id) || relTier(p.id) < 3 || !near(a)) continue;
+    const r = SHIP.rel[p.id]; if (r.seekDay === day || schedU(p.seed, m, 633) >= SEEK_ODDS) continue;
+    const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
+    r.seekDay = day;
+    const el = seekEl(), U = k => schedU(p.seed, m, k);
+    el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
+    el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
+    el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000 };
+    return;
+  }
 }
 // time together (0.36.2), as you play: eating with crew at your table (settled at mess seats within COMPANY_NEAR,
 // section 15) or working near crew who are at work (within SOC_WORK_NEAR tiles of you while you do a job). After
@@ -10843,8 +10877,9 @@ function chatLine(p, t = shipNow()) {
     const l = hs.length && U(617) < .75 ? CHAT_LIFE[pick(hs, 618)] : CHAT_DEPT[p.dept];
     if (l) return { text: l, kind: 'life', say: true };
   }
-  return { text: fill(pick(CHAT_GREET[tier], 619)), kind: 'greet', say: true };
+  return chatGreet(p, t);
 }
+const chatGreet = (p, t = shipNow()) => { const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
 // favours (0.36.2 fills this in): the favour that person has for you, or null
 // favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
 // favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or
@@ -10908,13 +10943,14 @@ function chatShow() {
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
 }
-function chatOpen(p) {
+function chatOpen(p, greet) {                             // greet: they came to you (socialSeek), so they say hello first
   if (!p || !p.id) return false;
   socInit(); if (!SOC.idx.has(p.id)) return false;
   const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
-  CHAT = { p, line: chatLine(p), ask: false, fav: favourOf(p), at: shipNow() };
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
+  CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
@@ -10974,7 +11010,7 @@ function chatDo(id) {
 function chatTick() {
   if (!CHAT) return;
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === CHAT.p);
-  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) chatClose();
+  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > CHAT.reach) chatClose();
 }
 
 // =====================================================================
