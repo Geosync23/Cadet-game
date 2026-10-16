@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.5
+   STARSHIP CADET: CSV Wren                            build 0.34.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6617,7 +6617,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.5';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.6';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9460,6 +9460,7 @@ jobWhere.on = true;                                      // crew go to their job
 // =====================================================================
 // 18. SHIP EVENTS
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
+// To the player they're "ship traditions" (the user's name, 2026-10-16); the big story ones are "ship-wide events".
 // Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
 //   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
 //   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
@@ -9689,7 +9690,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
     if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
     SHIP.events.sent.push(key);
-    const m = { at, from: e.ev.from, subject: e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };
+    const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
     if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet || to < 390 });
   }

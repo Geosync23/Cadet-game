@@ -192,6 +192,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.34.3 | One cake (the lead's rule; the galley engineer asked): section 18's table cake shows only when the galley's own birthday cake isn't out on the servery (`SHIP.galley.cake.out`, section 16's 0.29.12), so it remains only for Founding Day until the galley bakes for that too. New `eventPlaces(e)`: every place an event can use, for the sim engineer's coming reservation of event places. events_check OK (now also: one cake during a birthday, the galley's); cadet_test ALL IDENTICAL against 0.34.2. |
 | 0.34.4 | Agreed with the galley engineer (their 0.29.15): the galley bakes for any event with `cake: true` (birthdays and Founding Day), puts the time of the gathering in its noon Mail, and adds a garden salad to dinner on harvest days. Section 18's table cake prop is no longer drawn when section 16 is there (it stays as a stand-in without the galley). events_check OK; cadet_test ALL IDENTICAL against 0.34.3. |
 | 0.34.5 | The sim engineer's 0.26.12 merged: section 14 holds an event's places for its window (from 5 minutes before to the end; only those going may take them, `occ.res`). `eventPlaces(e)` now gives only the core places: tagged ones and the `where` entries in the event's `hold` (default the first). Founding Day, the hull-lights evening and the quiet watch hold none (`hold: []`), so a big event never empties the mess at dinner or the lounge for everyone else; the birthday holds its two long tables. events_check OK with no empty events over 28 days (the jam 3-6 of 6, film up to 12 of 12, quiz 10-17). |
+| 0.34.6 | The user's name for them: "ship traditions" (the big story ones stay "ship-wide events"). Announcement Mail subjects read "Ship tradition: Quiz night, Thursday 20:00"; no player-facing text says "event". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -356,6 +357,8 @@ Pillar 2, workstream A1 (plans/pillar2-plan.md).
     4. After the last block, the usual evening.
     `schedFrame` pulls the previous bedtime earlier for an early start. Tested with a stand-in rota (Brennan 04:30–08:10 and 15:30–20:30, hands 05:30–08:30 and 16:00–20:30): 28 days of dayReport clean.
 ## Ship events (section 18, the events engineer, 0.34.x)
+
+To the player these are **ship traditions** (the user's name, 2026-10-16); the big story ones are "ship-wide events" (Pillar 3). In the code they keep the `SHIP_EVENTS` / `eventsOn` names.
 
 The small, recurring ship traditions (the user: "lots of little holiday-like things, almost like Stardew Valley"). Not the big ship-wide story events (Pillar 3). Section 18 sits after section 17, before section 6.
 
