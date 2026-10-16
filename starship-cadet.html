@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.8
+   STARSHIP CADET: CSV Wren                            build 0.36.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11443,7 +11443,11 @@ function relAdd(id, why, pts) {
   r.pts = Math.max(REL_TIERS[r.tier], Math.round((r.pts + pts) * 100) / 100);   // never below the tier you've reached
   if (r.met === null) r.met = now;
   if (why !== 'news') r.lastTalk = now;
-  r.tier = relTierOf(r.pts);
+  const was = r.tier; r.tier = relTierOf(r.pts);
+  if (r.tier > was && typeof deviceNotify === 'function') {   // a badge on the device's Crew app (section 19)
+    const p = SOC.crew[SOC.idx.get(id)];
+    deviceNotify({ app: 'crew', text: r.tier === 1 ? 'You and ' + shortName(p) + ' know each other now.' : 'You and ' + shortName(p) + ' are ' + REL_NAMES[r.tier] + 's now.', urgent: false });   // a badge only: the chat card says it in person
+  }
   return r.tier;
 }
 function affinity(a, b) {
@@ -11694,7 +11698,8 @@ function newsFeed() {
 // the Crew app (0.36.8), on the device engineer's deviceApp (section 19; nothing without it): the people you've met,
 // closest first, with where they are when you may know it; tap one for what you know about them
 let CREW_PICK = null;
-if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'people', order: 30,
+const shipNews = (limit = 20) => newsFeed().slice(0, limit).map(x => ({ text: x.line, from: x.from, at: x.at }));   // the Ship app's news feed (section 19)
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50,
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
