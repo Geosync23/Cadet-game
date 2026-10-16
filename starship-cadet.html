@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.20
+   STARSHIP CADET: CSV Wren                            build 0.27.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -504,7 +504,15 @@ let MAP = [], STAND = new Set(), ROOM_BOX = {}, EDGES = new Map();
 let HULL_PTS = [], HULL_SEGS = [], HULL_NRM = [];
 let floor = null, edgeList = [], wallEdges = [], frameEdges = [], wallIM = null, hdrIM = null;
 let POSTS = [], RUNS = [], fullPosts = [], hdrPosts = [], postIM = null, hpostIM = null;
-let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [];
+let DOOR_OBJS = [], HULL_RUNS = [], HULL_MESHES = [], VOID_BLOCKS = [], DOOR_LEAVES = [];
+const _leafM = new THREE.Matrix4(), _leafS = new THREE.Matrix4(), LEAF_HIDE = new THREE.Matrix4().makeScale(0, 0, 0);
+function doorLeavesSync() {                              // each frame, before the render: the leaves where the doors put them
+  for (const d of DOOR_OBJS) d.g.updateMatrixWorld(true);
+  for (const { im, list } of DOOR_LEAVES) {
+    list.forEach((l, k) => im.setMatrixAt(k, l.visible ? _leafM.multiplyMatrices(l.matrixWorld, _leafS.makeScale(l.userData.leaf.sx, 1, 1)) : LEAF_HIDE));
+    im.instanceMatrix.needsUpdate = true;
+  }
+}
 let staticRoot = null, BLOCKED = new Set(), ITEMS = [], WALL_DECOR = [], SPOTS = [];
 let TALL = [], TALL_BY_ROOM = {}, NO_FADE = new Set();   // tall furniture fades a room at a time; locked rooms stay solid
 let LAMPS = [], STEAM = [], DUST = [], SPINS = [];   // SPINS: parts that turn (fan rotors, gears): { o, ax, w }
@@ -852,6 +860,9 @@ const hatchLeafTex = tex(120, 220, (g, w, h) => {
   g.fillStyle = '#c9b98a'; g.fillRect(w / 2 - 20, h * .46, 6, 26); g.fillRect(w / 2 + 14, h * .46, 6, 26);
 });
 const hatchLeafMats = [0, .5].map(o => { const t = hatchLeafTex.clone(); t.needsUpdate = true; t.repeat.set(.5, 1); t.offset.set(o, 0); return new THREE.MeshStandardMaterial({ map: t, roughness: .6, metalness: .35 }); });
+// 0.27.21: every door leaf on a deck is drawn by one InstancedMesh per leaf material (doorLeavesSync), from this
+// one shared box, 1 m wide and stretched to each leaf's width. The leaves themselves stay as invisible boxes for taps.
+const DOOR_LEAF_GEO = packGroups(new THREE.BoxGeometry(1, 2.2, .07), [capMat, capMat, capMat, capMat, null, null]);
 // inner glass walls: a wall-textured sill to 1 m, a pane, and the usual header above 2.2 m
 const SILL = 1.0;
 const sillGeo = new THREE.BoxGeometry(SEG, SILL, T); sillGeo.translate(0, SILL / 2, 0);
@@ -2957,8 +2968,8 @@ function buildDeck(def) {
     const mats = e.type === 'lift' ? liftLeafMats : e.type === 'hatch' ? hatchLeafMats : leafMats, leaves = [];
     for (const sd of [-1, 1]) {
       const m = mats[sd < 0 ? 0 : 1];
-      const lm = [capMat, capMat, capMat, capMat, m, m], leaf = new THREE.Mesh(packGroups(new THREE.BoxGeometry(span / 2, 2.2, .07), lm), lm);
-      leaf.position.set(sd * span / 4, 1.1, sd * .012); leaf.castShadow = true; g.add(leaf); leaves.push(leaf);
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), HIT_MAT); leaf.userData.leaf = { m, sx: span / 2 };   // drawn by DOOR_LEAVES
+      leaf.position.set(sd * span / 4, 1.1, sd * .012); g.add(leaf); leaves.push(leaf);
     }
     if (e.type === 'door' || e.type === 'lift') {
       const th = new THREE.Mesh(new THREE.BoxGeometry(span - .1, .02, .1), thrMat); th.position.set(0, .01, 0); deckRoot.add(th); th.position.add(g.position); th.rotation.y = g.rotation.y;
@@ -2967,6 +2978,12 @@ function buildDeck(def) {
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
     DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
+  }
+  DOOR_LEAVES = [];                                      // 0.27.21: one InstancedMesh per leaf material (2 draw calls each, not 2 a leaf)
+  for (const m of new Set(DOOR_OBJS.flatMap(d => d.leaves.map(l => l.userData.leaf.m)))) {
+    const list = DOOR_OBJS.flatMap(d => d.leaves).filter(l => l.userData.leaf.m === m);
+    const im = new THREE.InstancedMesh(DOOR_LEAF_GEO, [capMat, capMat, capMat, capMat, m, m], list.length);
+    im.castShadow = true; im.frustumCulled = false; im.raycast = () => {}; deckRoot.add(im); DOOR_LEAVES.push({ im, list });
   }
 
   // ---- the hull wall: a thick ribbon along the outline, split into runs by the room inside it ----
@@ -3168,7 +3185,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -6942,7 +6959,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.20';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.21';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -16346,6 +16363,7 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
+  doorLeavesSync();                                      // section 4: the door leaves, drawn together (0.27.21)
   if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
 
   // ambient life
