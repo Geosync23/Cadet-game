@@ -42,9 +42,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
@@ -77,6 +77,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
 .device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .row.hot{border-color:var(--crt-ink)}
+.device .devform label{display:block;margin:8px 0;color:var(--crt-ink)}
+.device .devform input,.device .devform textarea{display:block;width:100%;margin-top:4px;padding:8px 10px;min-height:44px;font:inherit;color:var(--crt-hot);background:rgba(0,0,0,.35);border:2px solid var(--crt-dim);border-radius:4px;-webkit-user-select:text;user-select:text;touch-action:auto;caret-color:var(--crt-hot);resize:vertical}
+.device .devform input:focus,.device .devform textarea:focus{outline:none;border-color:var(--crt-ink)}
 .device .devmap{display:block;width:100%;height:auto;max-height:46vh;margin:6px 0 10px;touch-action:manipulation}
 .device .devmap rect{fill:var(--crt-dim);opacity:.3;cursor:pointer}
 .device .devmap .m-hall,.device .devmap .m-service{opacity:.14}
@@ -116,6 +119,12 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device .keys button:active{transform:translateY(2px);box-shadow:0 1px 0 #0d1013}
 .device .keys button:disabled{opacity:.45}
 body.devsheet .toast{bottom:calc(66vh + 12px)}
+.devtip{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:4;width:min(440px,calc(100% - 24px));display:flex;gap:12px;align-items:flex-start;padding:12px 14px;min-height:44px;
+  border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
+  box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);cursor:pointer}
+.devtip[hidden]{display:none}
+.devtip b{flex:none;padding:0 6px;border-radius:3px;background:var(--crt-ink);color:var(--crt-bg);text-shadow:none;letter-spacing:.1em}
+body.devsheet .devtip{bottom:calc(66vh + 70px)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -157,7 +166,7 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.3
+   STARSHIP CADET: CSV Wren                            build 0.35.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6619,7 +6628,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.3';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.4';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7579,7 +7588,10 @@ function deviceLoad(s) {
   const d = s && s.device && typeof s.device === 'object' ? s.device : {}, st = d.settings && typeof d.settings === 'object' ? d.settings : {};
   const r = d.calendarRemind && typeof d.calendarRemind === 'object' ? d.calendarRemind : {}, per = {};
   if (r.per && typeof r.per === 'object') for (const k in r.per) if (typeof r.per[k] === 'boolean' && k.length < 40) per[k] = r.per[k];
-  return { settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
+  const memos = (Array.isArray(d.memos) ? d.memos : []).filter(m => m && typeof m === 'object' && typeof m.title === 'string').slice(0, 50)
+    .map((m, i) => ({ id: Number.isInteger(m.id) ? m.id : 1000 + i, title: m.title.slice(0, 80), text: typeof m.text === 'string' ? m.text.slice(0, 2000) : '', at: isFinite(m.at) ? +m.at : 0, pinned: !!m.pinned }));
+  const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
+  return { memos, tipsSeen, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
@@ -7660,7 +7672,10 @@ function deviceApp(def) {
 function deviceDo(action) {
   if (!action) return;
   const a = DEVICE_APPS.get(action.app);
-  if (action.do === 'open') { deviceShow(action.arg || action.app); return; }
+  if (action.do === 'open' || action.do === undefined) {   // open an app; one with no verb (e.g. { app, with }) hands the app the action
+    if (action.do === undefined && a && a.act) try { a.act('open', action); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
+    deviceShow(action.do === 'open' ? action.arg || action.app : action.app); return;
+  }
   try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
   deviceRefresh();
 }
@@ -7685,10 +7700,37 @@ function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'h
 function deviceShow(id) {
   if (!DEVICE_APPS.has(id)) id = 'home';
   DEV.app = id; delete DEV.notes[id];
-  if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFire('open'); }
+  if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
+    tipShow('device', 'Your device: Schedule and Calendar for your day, Maps to find your way, Jobs to track your work, Mail and Memos, Needs for how you feel.'); }
   deviceRefresh();
 }
-function deviceClose() { if (!DEV.open) return; DEV.open = false; DEVICE_SKIN.close(); deviceFire('close'); }
+function deviceClose() { if (!DEV.open) return; DEV.open = false; DEVICE_SKIN.close(); deviceFrame(false); deviceFire('close'); }
+// first tips (C13): tipShow(id, text) shows a tip once ever (SHIP.device.tipsSeen, saved), unless tips are off in
+// Settings. The card never pauses anything; a tap or about 9 seconds closes it. One at a time; others wait their turn.
+const TIP_Q = [];
+function tipShow(id, text) {
+  const D = SHIP.device; if (!id || !text || D.tipsSeen[id] || !D.settings.tips || TIP_Q.some(x => x.id === id)) return false;
+  D.tipsSeen[id] = true; TIP_Q.push({ id, text }); if (TIP_Q.length === 1) DEVICE_SKIN.tip(TIP_Q[0]);
+  return true;
+}
+function tipDone() { TIP_Q.shift(); if (TIP_Q.length) DEVICE_SKIN.tip(TIP_Q[0]); else DEVICE_SKIN.tip(null); }
+// the camera's framing on a phone (C11): while the sheet covers the bottom two thirds, the view eases down so you
+// stay in the visible top part, and eases back on close. deviceFrame(on); the eased amount (0 to 1) is DEV.fr.
+// It only shifts the camera's projection (top and bottom), by whole pixels, and leaves it alone at 0.
+DEV.fr = 0; DEV.frOn = false;
+function deviceFrame(on) { DEV.frOn = !!on; }
+let devFrameT = 0;
+function deviceFrameStep(now) {
+  requestAnimationFrame(deviceFrameStep);
+  const dt = Math.min(.1, Math.max(0, (now - (devFrameT || now)) / 1000)); devFrameT = now;
+  const want = DEV.frOn ? 1 : 0; if (DEV.fr === want && !DEV.frApplied) return;
+  DEV.fr += (want - DEV.fr) * Math.min(1, dt * 6); if (Math.abs(want - DEV.fr) < .002) DEV.fr = want;
+  if (typeof camera === 'undefined' || typeof renderer === 'undefined') return;
+  const vh = camera.top - camera.bottom, px = vh / Math.max(1, renderer.domElement.height), off = Math.round(.33 * vh * DEV.fr / px) * px;
+  camera.top = vh / 2 - off; camera.bottom = -vh / 2 - off; camera.updateProjectionMatrix();
+  DEV.frApplied = off !== 0;
+}
+requestAnimationFrame(deviceFrameStep);
 function deviceRefresh() {
   deviceTick();
   DEVICE_SKIN.button();
@@ -7759,6 +7801,19 @@ const DEVICE_SKIN = (() => {
       svg.onclick = e => { const k = e.target && e.target.dataset && e.target.dataset.room; if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
       return svg;
     },
+    form(b) {                                  // text fields; the submit action gets { field id: value }
+      const box = mk('form', 'devform'), ins = {};
+      for (const f of b.fields || []) {
+        const lab = mk('label', '', f.label), x = mk(f.multiline ? 'textarea' : 'input');
+        if (!f.multiline) x.type = 'text'; x.value = f.value || ''; x.maxLength = f.multiline ? 2000 : 80; if (f.multiline) x.rows = 5;
+        ins[f.id] = x; lab.appendChild(x); box.appendChild(lab);
+      }
+      const row = mk('div', 'btns'), ok = mk('button', 'act', b.submit ? b.submit.label : 'OK'); ok.type = 'submit'; row.appendChild(ok);
+      if (b.cancel) row.appendChild(act(mk('button', 'act', b.cancel.label), b.cancel.action));
+      box.appendChild(row);
+      box.onsubmit = e => { e.preventDefault(); const v = {}; for (const k in ins) v[k] = ins[k].value; if (b.submit) deviceDo({ ...b.submit.action, arg: v }); };
+      return box;
+    },
     dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
   };
   const skin = {
@@ -7773,6 +7828,7 @@ const DEVICE_SKIN = (() => {
       led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
     draw(id, v) {
+      if (drawn === id && body.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // typing: leave it be
       const keep = drawn === id ? body.scrollTop : 0;
       layout(); head.textContent = id === 'home' ? 'Your device' : v.title; backB.disabled = id === 'home';
       body.textContent = ''; body.dataset.app = id;
@@ -7789,6 +7845,13 @@ const DEVICE_SKIN = (() => {
         body.appendChild(grid);
       }
       body.scrollTop = keep; drawn = id;
+    },
+    tip(t) {                                   // the tip card, in the screen's style; null hides it
+      let c = $('devTip');
+      if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
+      clearTimeout(c._t); c.hidden = !t; if (!t) return;
+      c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
+      c._t = setTimeout(() => tipDone(), 9000);
     },
     notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
   };
@@ -7841,6 +7904,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  const pin = SHIP.device.memos.find(x => x.pinned);
+  if (pin) say('▪ ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
   return { title: 'Home', blocks: B };
 } });
 
@@ -7960,6 +8025,75 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     return { title: 'Maps', blocks: B };
   } });
 
+// Memos (0.35.4): notes you write (a title and plain text, dated), saved in SHIP.device.memos. Pin one to Home.
+// "Remember this" on a Mail copies it into a new memo (memoAdd, for other apps too).
+let memoOpen = null, memoNew = false;
+function memoAdd(title, text) {
+  const M = SHIP.device.memos, id = M.reduce((a, m) => Math.max(a, m.id), 0) + 1;
+  M.unshift({ id, title: String(title || 'Memo').slice(0, 80), text: String(text || '').slice(0, 2000), at: shipNow(), pinned: false });
+  M.length = Math.min(M.length, 50);
+  return id;
+}
+deviceApp({ id: 'memos', title: 'Memos', icon: 'memo', order: 45,
+  act(verb, arg) {
+    const M = SHIP.device.memos, m = M.find(x => x.id === (arg && arg.id || arg));
+    if (verb === 'new') { memoNew = true; memoOpen = null; }
+    else if (verb === 'save' && arg) { if (String(arg.title || '').trim() || String(arg.text || '').trim()) memoOpen = memoAdd(String(arg.title || '').trim() || 'Memo', arg.text); memoNew = false; }
+    else if (verb === 'cancel') memoNew = false;
+    else if (verb === 'open') memoOpen = memoOpen === arg ? null : arg;
+    else if (verb === 'pin' && m) { const was = m.pinned; for (const x of M) x.pinned = false; m.pinned = !was; }
+    else if (verb === 'delete' && m) { M.splice(M.indexOf(m), 1); memoOpen = null; }
+  },
+  view: () => {
+    const M = SHIP.device.memos, B = [];
+    if (memoNew) {
+      B.push({ kind: 'form', fields: [{ id: 'title', label: 'Title', value: '' }, { id: 'text', label: 'Note', value: '', multiline: true }],
+        submit: { label: 'Save', action: { app: 'memos', do: 'save' } }, cancel: { label: 'Cancel', action: { app: 'memos', do: 'cancel' } } });
+      return { title: 'New memo', blocks: B };
+    }
+    B.push({ kind: 'buttons', items: [{ label: 'New memo', action: { app: 'memos', do: 'new' } }] });
+    if (!M.length) B.push({ kind: 'text', text: 'No memos yet. Write one, or tap "Remember this" on a message.' });
+    for (const m of M) {
+      B.push({ kind: 'list', rows: [{ text: (m.pinned ? '▪ ' : '') + m.title, sub: 'Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + devWhen(m.at), action: { app: 'memos', do: 'open', arg: m.id }, mark: m.id === memoOpen ? 'hot' : null }] });
+      if (m.id === memoOpen) {
+        if (m.text) B.push({ kind: 'text', text: m.text });
+        B.push({ kind: 'buttons', items: [{ label: m.pinned ? 'Unpin' : 'Pin to Home', action: { app: 'memos', do: 'pin', arg: m.id } }, { label: 'Delete', action: { app: 'memos', do: 'delete', arg: m.id } }] });
+      }
+    }
+    return { title: 'Memos', blocks: B };
+  } });
+
+// Ship (0.35.4): ship health and each system, as on the Works bay board (shipHealthRows, section 17), and what's on
+// today. Ship news (the social engineer's news model) joins it later.
+deviceApp({ id: 'ship', title: 'Ship', icon: 'ship', order: 60, view: () => {
+  const B = [];
+  if (typeof shipHealthRows === 'function') {
+    const rows = shipHealthRows();
+    B.push({ kind: 'bars', items: rows.map(r => ({ label: r.name, value: r.value, level: r.state === 'failing' ? 'low' : r.state === 'poor' ? 'mid' : '' })) });
+    for (const r of rows.slice(1)) if (r.worst && r.state !== 'fine') B.push({ kind: 'text', text: r.name + ': ' + r.state + ', worst is the ' + r.worst + '.' });
+  } else B.push({ kind: 'text', text: 'No ship systems report yet.' });
+  const notes = (playerFx().notes || []).filter(n => n && n.text);
+  if (notes.length) { B.push({ kind: 'text', text: 'Around you', mark: 'head' }); for (const n of notes.slice(0, 4)) B.push({ kind: 'text', text: n.text + '.' }); }
+  const today = devTraditions(shipNow(), SHIP.time.day * 1440 - 1);
+  B.push({ kind: 'text', text: 'Today aboard', mark: 'head' }, { kind: 'text', text: today.length ? today.map(x => x.title + ' at ' + devWhen(x.at) + ', ' + x.where).join('; ') + '.' : 'Nothing special. A quiet day.' });
+  return { title: 'Ship', blocks: B };
+} });
+
+// Record (0.35.4): your Works record, where progression shows. Certification and the Chief's comments come later.
+deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () => {
+  const mine = (SHIP.jobs || []).filter(j => j.doneBy === 'you'), B = [];
+  B.push({ kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });
+  B.push({ kind: 'text', text: mine.length ? 'Jobs on the recent record: ' + mine.length + '.' : 'No jobs on your record yet. Take one at the job board in the Works bay.' });
+  if (mine.length) B.push({ kind: 'list', rows: mine.slice(-6).reverse().map(j => { const [title, where] = jobCard(j); return { text: title, sub: where + ', Day ' + (Math.floor(j.doneAt / 1440) + 1) }; }) });
+  B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
+  return { title: 'Record', blocks: B };
+} });
+
+// Crew and Appointments (0.35.4): shells. The social engineer's section 20 registers its own 'crew' and 'appointments' apps
+// with deviceApp, which replace these.
+deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50, view: () => ({ title: 'Crew', blocks: [{ kind: 'text', text: 'Your contacts fill in as you get to know people aboard.' }] }) });
+deviceApp({ id: 'appointments', title: 'Appointments', icon: 'calendar', order: 12, view: () => ({ title: 'Appointments', blocks: [{ kind: 'text', text: 'No appointments. Making them is coming soon.' }] }) });
+
 // Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
 deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   const n = SHIP.player.needs, fx = needEffects(n), B = [];
@@ -7974,14 +8108,18 @@ deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
 // Mail: newest first; tap one to read it (and mark it read)
 let mailOpen = null;                                     // the message shown in full
 deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mailUnread() || null,
-  act(verb, id) { if (verb === 'read') { mailOpen = mailOpen === id ? null : id; const m = SHIP.mail.find(x => x.id === id); if (m) m.read = true; } },
+  act(verb, id) {
+    const m = SHIP.mail.find(x => x.id === id);
+    if (verb === 'read') { mailOpen = mailOpen === id ? null : id; if (m) m.read = true; }
+    else if (verb === 'remember' && m) { memoAdd(m.subject, m.from + ': ' + m.body); deviceNotify({ app: 'memos', text: 'Saved to your memos.', urgent: true }); delete DEV.notes.memos; }
+  },
   view: () => {
     if (!SHIP.mail.length) return { title: 'Mail', blocks: [{ kind: 'text', text: 'No mail.' }] };
     const B = [];
     for (const m of SHIP.mail) {
       B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '● ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
         mark: m.read ? null : 'new', action: { app: 'mail', do: 'read', arg: m.id } }] });
-      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body });
+      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body }, { kind: 'buttons', items: [{ label: 'Remember this', action: { app: 'mail', do: 'remember', arg: m.id } }] });
     }
     return { title: 'Mail', blocks: B };
   } });

@@ -6,6 +6,8 @@
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
+#   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
+#   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
@@ -113,6 +115,25 @@ def run(path):
             print('  maps:', mp)
             check(all(mp[n] > 5 for n in mp if n != 'goal'), f'every deck draws its rooms: {mp}')
             check(mp['goal'] and mp['goal'][0] == 3 and isinstance(mp['goal'][1], str), f'Go there sets the goal arrow: {mp["goal"]}')
+            # Memos: write one with the form, it's saved in SHIP.device and pins to Home; Mail's Remember this makes one
+            mm = g.ev("""(() => { SHIP.device.memos = []; deviceShow('memos'); deviceDo({ app: 'memos', do: 'new' });
+              const f = document.querySelector('#devBody form.devform'); if (!f) return 'no form';
+              f.querySelector('input').value = 'Ask Pell'; f.querySelector('textarea').value = 'About the fan hall.'; f.requestSubmit();
+              const out = [SHIP.device.memos.map(m => m.title)]; deviceDo({ app: 'memos', do: 'pin', arg: SHIP.device.memos[0].id }); deviceShow('home');
+              out.push(document.getElementById('devBody').textContent.includes('Ask Pell: About the fan hall.'));
+              mailSend({ from: 'Galley', subject: 'Cake tonight', body: 'Tomas turns 24.' }); const id = SHIP.mail[0].id;
+              deviceDo({ app: 'mail', do: 'remember', arg: id }); out.push(SHIP.device.memos[0].title);
+              const sv = {}; for (const f of SAVE_EXTRA) f(sv); out.push(sv.device.memos.length, deviceLoad(sv).memos.length, deviceLoad({ device: { memos: [7, null, { title: 3 }] } }).memos.length);
+              SHIP.device.memos = []; return out; })()""")
+            check(mm == [['Ask Pell'], True, 'Cake tonight', 2, 2, 0], f'memos: the form, pin to Home, Remember this, saved and read back, junk refused: {mm}')
+            # tips: once each, saved, off in Settings; the card closes on a tap
+            tp = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const out = [tipShow('t1', 'First tip'), tipShow('t1', 'Again')];
+              const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);
+              D.settings.tips = false; out.push(tipShow('t2', 'Off')); D.settings.tips = true; out.push(!!D.tipsSeen.t1); D.tipsSeen = {}; return out; })()""")
+            check(tp == [True, False, True, True, False, True], f'tips: once each, a tap closes, the switch: {tp}')
+            # an action with no verb opens its app (the social engineer's Meet up: { app: 'appointments', with })
+            ap = g.ev("(() => { deviceDo({ app: 'appointments', with: 'calder' }); const a = DEV.app; deviceShow('home'); return a; })()")
+            check(ap == 'appointments', f'deviceDo with no verb opens the app: {ap}')
             # the shim
             sh = g.ev("""(() => { device.addSection('test', 'Test', el => { el.textContent = 'shim works'; }); device.addSection('mail', 'Old inbox', el => { el.textContent = 'old'; });
               device.show('test'); const a = document.getElementById('devBody').textContent; device.show('mail'); const b = document.getElementById('devT').textContent;
@@ -124,8 +145,16 @@ def run(path):
             g.page.click('#devClose'); g.step(1)
             check(g.ev("document.getElementById('device').hidden && !DEV.open"), 'Close closes it')
             g.page.click('#devBtn'); g.step(1); g.page.click('#devClose'); g.step(1)   # wide: the side panel covers the button; Close is the way out
+            g.step(60)
+            fr = g.ev("[DEV.frOn, Math.round(DEV.fr * 100) / 100, Math.round((camera.top + camera.bottom) * 1000) / 1000]")
+            check(fr[0] is False and fr[2] == 0, f'after closing, the camera is centred again: {fr}')
+            g.ev("deviceShow('home')"); g.step(60)
+            fo = g.ev("[DEV.frOn, Math.round(DEV.fr * 100) / 100, Math.round((camera.top + camera.bottom) * 1000) / 1000]")
+            if name == 'phone': check(fo[0] is True and fo[1] == 1 and fo[2] < 0, f'phone: the view eases so you stay above the sheet: {fo}')
+            else: check(fo[0] is False and fo[2] == 0, f'wide: no reframing for the side panel: {fo}')
+            g.ev("deviceClose()"); g.step(60)
             ev = g.ev("__ev")
-            check(ev == ['open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
+            check(ev == ['open', 'close', 'open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
             errs = g.ev("DEV.errors")
             check(not errs, f'no app errors: {errs}')
             check(not g.errors, f'no page errors: {g.errors[:5]}')
