@@ -6650,7 +6650,7 @@ function tickShip(dt) {
 const SAVE_KEY = 'starship-cadet-save', SAVE_V = 2;
 const SAVE_EXTRA = [];                                   // other sections add their part: f(save) just before it's written (17: machines)
 const URL_FLAGS = new URLSearchParams(location.search);
-const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses'),   // the crowd and pose demos (section 8b) never touch the save
+const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses') || URL_FLAGS.has('seats'),   // the crowd, pose and seat demos (section 8b) never touch the save
       DEBUG = URL_FLAGS.has('debug');
 function saveGame() {
   if (NOSAVE) return;
@@ -10421,7 +10421,7 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     rig.hips.rotation.y *= 1 - s; rig.hips.rotation.z *= 1 - s;
     for (const leg of rig.legs) {
       const t0 = leg.thigh.rotation.x, k0 = leg.knee.rotation.x, a0 = leg.ankle.rotation.x;
-      const ang = legIK(leg, ANK - (hy - HIP_OFF), .3);
+      const ang = legIK(leg, ANK + (sy > .62 ? (sy - .5) / h : 0) - (hy - HIP_OFF), .3);   // on a high stool the feet rest on its ring (0.27.11)
       leg.thigh.rotation.x = L(t0, leg.thigh.rotation.x, s); leg.knee.rotation.x = L(k0, leg.knee.rotation.x, s);
       leg.ankle.rotation.x = L(a0, -ang, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .05, s);
     }
@@ -10589,6 +10589,7 @@ const crowd = {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
+    if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
     const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
     for (const p of this.people) {
@@ -10782,6 +10783,39 @@ const POSE_DEMO = (() => {
         e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, /^(walk|crouch)/.test(e.pose) ? t * 1.1 : undefined);   // walking in place
         v.set(e.x, 1.85, e.z).project(camera);
         const vis = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+        e.el.style.display = vis ? '' : 'none';
+        if (vis) { e.el.style.left = ((v.x + 1) / 2 * innerWidth).toFixed(0) + 'px'; e.el.style.top = ((1 - v.y) / 2 * innerHeight).toFixed(0) + 'px'; }
+      }
+    },
+  };
+})();
+
+// ---- seat check (0.27.11): ?seats in the address puts a stand-in on every seat place of the deck you're on (pose
+// 'sit', at placeSpot's spot, height and facing, exactly where the crew would sit), labelled with the place's id, at
+// 10:30 when most of the crew are at work (seats with crew on them show two people). For checking place data (xy, y, face) against the furniture. Never saves. ----
+const SEAT_DEMO = (() => {
+  if (!/[?&]seats\b/.test(location.search)) return null;
+  let here = [], labels = null, deck = null, started = false;
+  const v = new THREE.Vector3();
+  function clear() { for (const e of here) crowd.remove(e.h); here = []; if (labels) { labels.remove(); labels = null; } }
+  return {
+    tick(dt, t) {
+      if (!started) { started = true; setShipNow((SHIP.time.day - 1) * 1440 + 10 * 60 + 30); nightT = nightAt(); updateClock(); toast('Seat check', 'Everyone sits where the crew would, on every seat on this deck, labelled with its place. Take the lift to check another deck. This doesn\'t touch your save.'); }
+      if (deckDef.num !== deck && typeof placeSpot === 'function') {
+        clear(); deck = deckDef.num;
+        labels = document.createElement('div'); labels.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2'; document.body.appendChild(labels);
+        const people = ROSTER.filter(p => !p.story);
+        here = (deckDef.places || []).filter(p => p.pose === 'sit').map((p, i) => {
+          const sp = placeSpot(p.id), h = crowd.add(rosterSpec(people[(i * 7) % people.length]));
+          const el = document.createElement('div'); el.textContent = p.id;
+          el.style.cssText = 'position:absolute;transform:translate(-50%,-100%);font-size:10px;padding:1px 5px;border-radius:999px;background:rgba(13,21,33,.72);color:#e8eef0;white-space:nowrap';
+          labels.appendChild(el); return { sp, h, el };
+        });
+      }
+      for (const e of here) {
+        e.h.set({ x: e.sp.x, y: e.sp.y, z: e.sp.z }, e.sp.face, 'sit');
+        v.set(e.sp.x, 1.5, e.sp.z).project(camera);
+        const vis = v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05 && camera.zoom > 1.2;
         e.el.style.display = vis ? '' : 'none';
         if (vis) { e.el.style.left = ((v.x + 1) / 2 * innerWidth).toFixed(0) + 'px'; e.el.style.top = ((1 - v.y) / 2 * innerHeight).toFixed(0) + 'px'; }
       }
