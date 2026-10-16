@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.20
+   STARSHIP CADET: CSV Wren                            build 0.28.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.20';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.21';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9479,6 +9479,7 @@ function actUpdate(dt, t) {
 // DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
 const FLOAT_STEP = 10, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
 let NEED_SEEN = null, FLOAT_LIVE = 0;
+const FLOAT_LOG = [];                                    // the last notes shown (player_check reads it: notes come and go on real-time timers)
 const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
 const needPulse = k => (NEED_PULSE[k] || 0) > performance.now();
 function needFxLayer() {
@@ -9497,9 +9498,9 @@ function needFloat(text) {                               // one note over your h
   if (typeof camera === 'undefined' || typeof player === 'undefined') return;
   const A = ACT && ACT.body && ACT.phase !== 'walk' ? ACT : null, p = player.obj.position;
   floatV.set(A ? A.x : p.x, (A ? A.y : 0) + 2, A ? A.z : p.z).project(camera);
-  const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24);
+  const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24 - (actProgress() ? 40 : 0));   // above the progress bar (0.28.21)
   const n = document.createElement('div'); n.className = 'nf'; n.textContent = text; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px';
-  needFxLayer().appendChild(n); FLOAT_LIVE++;
+  needFxLayer().appendChild(n); FLOAT_LIVE++; FLOAT_LOG.push(text); if (FLOAT_LOG.length > 20) FLOAT_LOG.shift();
   setTimeout(() => { n.remove(); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); }, FLOAT_SECS * 1000);
   const b = document.getElementById('devBtn');
   if (b) { b.classList.remove('npulse'); void b.offsetWidth; b.classList.add('npulse'); }
@@ -9516,6 +9517,45 @@ function needsSeen() {                                   // once a frame: what r
       r.v = 0;
     }
   }
+}
+// ---- progress for things that take time (0.28.21, the user's): a small bar over your character while an activity
+// runs, with what you're doing and how long is left. Any activity of a set length shows it (eating, the grab shelf,
+// a shower, the toilet, a workout, a call home, browsing, paying, the job loop's steps, the cart run, and 15b's
+// activities, which are ACTs too); the servery queue shows the wait to your turn; sitting (until you get up) shows
+// none. actProgress(A) -> { title, frac, left } or null; the bar is placed once a frame. DOM only. ----
+const BAR_Y = 1.95;                                      // over the stand-in's head, m
+let BAR_TXT = '';
+function actProgress(A = ACT) {
+  if (!A || A.phase !== 'do' || !A.body) return null;
+  const title = A.def.title || A.o.title || '';
+  if (A.kind === 'queue') {
+    if (!isFinite(A.o.turnAt)) return null;
+    const now = shipNow(), t0 = isFinite(A.o.qFrom) ? A.o.qFrom : (A.o.qFrom = now), left = Math.max(0, A.o.turnAt - now);
+    return { title, left, frac: A.o.turnAt > t0 ? Math.min(1, (now - t0) / (A.o.turnAt - t0)) : 1 };
+  }
+  if (A.def.until || !(A.def.mins > 0)) return null;
+  return { title, frac: Math.max(0, Math.min(1, A.done / A.def.mins)), left: Math.max(0, (A.def.mins - A.done) / needEffects().task) };
+}
+function actBar() {
+  let el = document.getElementById('actBar');
+  const pr = actProgress();
+  if (!pr) { if (el && !el.hidden) el.hidden = true; return; }
+  if (!el) {
+    needFxLayer();
+    const st = document.createElement('style');
+    st.textContent = '#actBar{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:124px;margin:-34px 0 0 -62px;padding:4px 9px 6px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#cfd9dc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '#actBar[hidden]{display:none}#actBar i{display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden}'
+      + '#actBar b{display:block;height:100%;background:var(--teal);transform-origin:left center}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'actBar'; el.setAttribute('role', 'progressbar'); el.setAttribute('aria-valuemin', 0); el.setAttribute('aria-valuemax', 100);
+    el.innerHTML = '<span></span><i><b></b></i>'; document.body.appendChild(el); BAR_TXT = '';
+  }
+  const A = ACT, txt = pr.title + ' · ' + (pr.left < 1 ? 'nearly done' : Math.ceil(pr.left) + ' min');
+  if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
+  el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
+  floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
+  const x = Math.max(66, Math.min(innerWidth - 66, (floatV.x + 1) * innerWidth / 2)), y = Math.max(44, (1 - floatV.y) * innerHeight / 2);
+  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; el.hidden = false;
 }
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
@@ -9559,6 +9599,7 @@ function playerUpdate(dt, t) {
   }
   if (ACT) actUpdate(dt, t);
   needsSeen();                                           // a need that rose shows it (0.28.20)
+  actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
   if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
 }

@@ -77,9 +77,11 @@ TAP = r"""(({ title, near }) => {
 STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10, player.holding === undefined ? null : player.holding, typeof TRAY_ON !== 'undefined' && TRAY_ON.visible],
   needs: Object.fromEntries(NEED_KEYS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
   visible: player.obj.visible, toast: document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent,
-  time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num })"""
+  time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num,
+  bar: (b => b && !b.hidden ? b.textContent : null)(document.getElementById('actBar')), nf: typeof FLOAT_LOG === 'undefined' ? [] : FLOAT_LOG.splice(0) })"""
 
 def state(g): return json.loads(g.ev(STATE))
+UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
 
 def run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
@@ -92,6 +94,9 @@ def run_activity(g, title, near=None, limit=4000, label=None):
     for k in range(limit // 30):
         g.step(30); s = state(g); peak = max(peak, s['calls'])
         if s['act']: seen.append(s['act'])
+        u = UI.setdefault(label or title, {'bar': [], 'nf': set()})
+        if s['bar'] and s['bar'] not in u['bar']: u['bar'].append(s['bar'])
+        u['nf'].update(s['nf'])
         if not s['act'] and k > 0: break
     end = state(g)
     if not any(x[2] == 'do' for x in seen) and re.match(r"In use|There's a queue", end['toast'].split(': ', 1)[1]) and limit > 0:
@@ -206,6 +211,11 @@ with sync_playwright() as pw:
     g.ev("SHIP.player.needs.bathroom = 30")              # a public toilet on Deck 3 (0.28.19)
     tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[20, 20]); peak = max(peak, pk)
     check(tp is True and seen and seen[0][1].startswith('3-toilet'), f'deck 3 toilet: {seen[:1]}'); body_check('deck 3 toilet', 'bathroom', 70, b, e, seen, None)
+    print('Seeing it work (0.28.20, 0.28.21): progress bars and +N notes')
+    for name, need in [('Shower', 'Hygiene'), ('Toilet', 'Bathroom'), ('Grab and go', 'Food'), ('Treadmills', 'Fitness'), ('Booth 1', 'Social')]:
+        u = UI.get(name, {'bar': [], 'nf': set()}); print(f"  {name:12s} bar {u['bar'][:2]}{'...' if len(u['bar']) > 2 else ''} notes {sorted(u['nf'])[:4]}")
+        check(u['bar'] and any('min' in x or 'nearly' in x for x in u['bar']), f'{name}: no progress bar seen')
+        check(any(x.startswith('+') and x.endswith(need) for x in u['nf']), f'{name}: no +N {need} note seen')
     pv = g.ev("(() => { goToDeck(2); const r = [...PLACE_OF.values()].filter(q => q.type === 'toilet').map(q => [q.id, privatePlace(q)]); goToDeck(3); return r; })()"); g.step(5)
     print('  Deck 2 toilets private:', sum(1 for x in pv if x[1]), 'of', len(pv), [x[0] for x in pv if not x[1]])
     check(all(x[1] == ('wctoilet' not in x[0]) for x in pv), f'cabin toilets are private, the washroom ones public: {pv}')
