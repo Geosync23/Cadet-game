@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.31.9
+   STARSHIP CADET: CSV Wren                            build 0.31.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6201,6 +6201,20 @@ DECKS[1] = {
     { id: '1-window-3', type: 'lounge-seat', at: [1, 5], xy: [1.38, 5.6], walk: [2, 5], face: 'e', pose: 'sit', anim: 'read', window: true, room: 'O' },
     { id: '1-window-4', type: 'lounge-seat', at: [1, 4], xy: [1.38, 4.8], walk: [2, 4], face: 'e', pose: 'sit', anim: 'read', window: true, room: 'O' },
     { id: '1-tea-1', type: 'common-room', at: [5, 8], xy: [5.02, 8.9], walk: [4, 8], face: 'e', pose: 'stand', anim: 'drink', room: 'O' },
+    // answers pass row 24: places for the sim engineer's scheduled events. `event` keeps them out of everyday use (schedData skips them).
+    // The shift handover at 06:00 and 18:00: officers gather round the aft of the command ring, facing it.
+    { id: '1-handover-1', type: 'common-room', event: 'handover', at: [12, 4], face: 'e', pose: 'stand', anim: 'talk', room: 'B' },
+    { id: '1-handover-2', type: 'common-room', event: 'handover', at: [12, 7], face: 'e', pose: 'stand', anim: 'talk', room: 'B' },
+    { id: '1-handover-3', type: 'common-room', event: 'handover', at: [14, 3], face: 's', pose: 'stand', anim: 'talk', room: 'B' },
+    { id: '1-handover-4', type: 'common-room', event: 'handover', at: [15, 3], face: 's', pose: 'stand', anim: 'talk', room: 'B' },
+    { id: '1-handover-5', type: 'common-room', event: 'handover', at: [14, 8], face: 'n', pose: 'stand', anim: 'talk', room: 'B' },
+    { id: '1-handover-6', type: 'common-room', event: 'handover', at: [15, 8], face: 'n', pose: 'stand', anim: 'talk', room: 'B' },
+    // The Captain's evening walk through the observation room, stops in order: in from the glass doors, the three windows, a cup of tea.
+    { id: '1-walk-1', type: 'common-room', event: 'walk', at: [5, 3], face: 'w', pose: 'stand', room: 'O' },
+    { id: '1-walk-2', type: 'common-room', event: 'walk', at: [2, 1], face: 'n', pose: 'stand', window: true, room: 'O' },
+    { id: '1-walk-3', type: 'common-room', event: 'walk', at: [1, 3], face: 'w', pose: 'stand', window: true, room: 'O' },
+    { id: '1-walk-4', type: 'common-room', event: 'walk', at: [2, 10], face: 's', pose: 'stand', window: true, room: 'O' },
+    { id: '1-walk-5', type: 'common-room', event: 'walk', at: [4, 9], face: 'e', pose: 'stand', anim: 'drink', room: 'O' },
     { id: '1-toilet-1', type: 'toilet', at: [12, 9], xy: [12.56, 9.45], walk: [11, 9], face: 'w', pose: 'sit', room: 'w' },
     { id: '1-basin-1', type: 'basin', at: [12, 8], xy: [12.5, 8.92], walk: [11, 8], face: 'n', pose: 'stand', room: 'w' },
     { id: '1-lift-1', type: 'lift-wait', at: [6, 2], xy: [6.5, 2.5], walk: [6, 2], face: 's', pose: 'stand', room: '+' },
@@ -6336,7 +6350,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.31.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.31.10';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6533,7 +6547,7 @@ function schedData() {
   const people = ROSTER.concat(ROSTER_GUESTS)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine) places.push({ ...p, deck: n });   // a machine's panel place isn't handed out as a desk (A5b)
+  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine && !p.event) places.push({ ...p, deck: n });   // a machine's panel place isn't handed out as a desk (A5b), nor an event's place (answers pass)
   const byId = new Map(places.map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
