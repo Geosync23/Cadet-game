@@ -485,7 +485,7 @@ with sync_playwright() as pw:
             g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(3)
             paused = json.loads(g.ev(JST)); print('  walked away mid-repair:', paused[0], paused[2])
             check(not paused[0] and paused[2]['fitted'] == mj[0] and paused[2]['done'] >= 4, 'job loop: walking away should keep the part fitted and the repair time done')
-            check(g.ev("player.holding") is False, 'job loop: with the parts fitted, the crate goes')
+            check(g.ev("player.holding") is not True, 'job loop: with the parts fitted, the crate goes')   # True is the crate; 15b's toolbox may stay (0.37.5)
             if g.ev("typeof touchJob === 'function'"):
                 tc = g.ev(f"(() => {{ const j = SHIP.jobs.find(j => j.id === {json.dumps(jid)}); return [j.touched || 0, j.start, shipNow()]; }})()")
                 print('  touched (section 17\'s touchJob):', tc)
