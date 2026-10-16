@@ -374,7 +374,7 @@ You work the day shift as a Works maintenance tech, taking jobs from the same li
 
 **The job loop.** Every job follows the same physical steps:
 
-1. **Notice.** A fault arrives on your wrist comm or the Works bay job board, someone flags you down, or you spot a worn machine on your rounds.
+1. **Notice.** A fault arrives on your wrist comm or the Works bay job board, someone flags you down, or you spot a worn machine on your rounds. Tap the job board to see the open jobs and take one. While you have a job, an on-screen pointer shows where to go next (a marker over the place, an arrow at the screen edge, "Take the lift to Deck N" when it's on another deck); the map comes later and will use the same pointer (the user, 2026-10-16).
 2. **Diagnose.** Open the panel and inspect it. You see which component is failing and what the fix needs.
 3. **Fetch.** Get the part or tool from main storage or the Works bay, or make it in the machine shop. You can carry two items at a time.
 4. **Repair.** Hold to work. Repairs take longer on broken machines and go faster as your skill grows.
@@ -390,7 +390,7 @@ What makes it interesting:
 
 **No hard failure.** If you slack, other Works crew pick up jobs, but more slowly, and your supervisor notices. The ship never dies because of you, but it gets visibly worse.
 
-**Off shift**, you are free: eat, wash, socialise, explore, sleep. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
+**Off shift**, you are free: eat, wash, socialise, explore, sleep. Anything the crew use to meet a need or pass the time, you can use too, with the same pose: the gym, the bar, lounges and common rooms, reading seats, benches, the garden, the music room, the laundry, basins, the kettle, the observatories (the user, 2026-10-16). Tap the thing to use it. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
 
 **Thirty seconds of play.** Your wrist comm chirps: scrubber 2 on Deck 4 is at 60%. You head out of the junior wing, passing Rina and Pell arguing in the corridor. You open the scrubber panel; it needs a filter, so it's down the lift to storage on Deck 5. On the way back, Chef Brennan calls: the oven on Deck 3 is acting up again. Now, or after the scrubber? You choose, and the ship reacts.
 
