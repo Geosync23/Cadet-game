@@ -422,14 +422,16 @@ What higher tiers unlock:
 
 Daily routines belong to the crew's ordinary day instead: the bridge watch hands over at the command ring at 06:00 and 18:00, and the Captain takes an evening walk through the observation room.
 
-**Romance** is out for now.
+**Romance** is out (the user, 2026-10-16: no romance with the player).
 
 
 ## The player: Works technician
 
 You work the day shift as a Works maintenance tech, with **two days off a week** like a Works junior (the user's choice, 2026-10-16): Saturday and Sunday, no shift and no jobs expected, though the board stays open if you want work. On shift you take jobs from the same list as the rest of the crew and do them with your own hands.
 
-**Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1. Still to decide: which milestone builds it, and who meets you off the shuttle.
+**Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1.
+
+**The arrival and first week (the user, 2026-10-16; built in Pillar 4).** You land on a **Sunday evening**, so Monday is your first shift. Waiting at the ramp is your **escort: a Works crew member one rank above you**, who walks you (you stay in control, following them) through the haulway, past the Works bay, up to your bunk, where they hand you your device, then to **dinner in the mess**, where **Chief Calder** stops by the table to welcome you. Your first full day is a **shadow shift**: your escort trains you on one real job end to end. Then you're let loose a little at a time over the first week, each new thing taught by someone aboard (an optional "Settling in" list on the device tracks it); your first weekend brings an invitation to a tradition. A skip-intro option is offered on later new games.
 
 **The job loop.** Every job follows the same physical steps:
 
@@ -686,6 +688,7 @@ Done so far:
    - Two check-ins with the user: one after the device and social basics (where the phosphor colour is chosen), one after a full ion storm.
    - Combined builds are 0.50.x. Two new helpers join: the device engineer (builds 0.35.x) and the social engineer (0.36.x); the events engineer carries on.
 4. **More events, onboarding and tutorials:** after the ion storm, the rest of the event list in order (see "Ship-wide events"), each reviewed by the user as decks were; the festival once the real-phone test allows it. Also full onboarding and tutorials, growing from Pillar 3's first tips.
+   - **Pillar 4 scope (the user, 2026-10-16): a massive pass, "full bore".** The full arrival and first week (above); far more dialogue (a voice for every crew member, overheard conversations, reactions to what happens aboard, story arcs); a much deeper social system, where getting to know someone unlocks moments where you really get to know them, sometimes their struggles; many more traditions. Tone: mostly light, with serious and heartfelt moments as you grow close. Staffing: a Pillar 4 planner and a social system designer plan it together first; then engineers, a head writer with a few writers, and tradition designers (about 15 helpers).
 
 **After that:** progression to tier 2 (certification, promotion to Officer and your own cabin, the Deck 5 machine rooms and connected-system faults); the spine's crawlways and pipe galleries; and the shuttle arrival, if not built earlier.
 
@@ -695,7 +698,6 @@ Done so far:
 **The game:**
 
 - The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Who meets you off the shuttle, and which milestone builds the arrival?
 - Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Can the player be passed over for certification, or only delayed?
