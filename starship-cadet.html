@@ -43,12 +43,15 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
 .device .devtime{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
-.device .need{display:grid;grid-template-columns:64px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
+.device .need{display:grid;grid-template-columns:78px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
 .device .need i{height:8px;border-radius:4px;background:#26343a;overflow:hidden}
 .device .need b{display:block;height:100%;background:var(--teal)}
 .device .need.mid b{background:#d9b25a}
 .device .need.low b{background:#e07a5f}
 .device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.device .need em{font-style:normal;font-size:10px;margin-left:5px}
+.device .need em.up,.device #devBody p.fx.up{color:var(--teal)}
+.device .need em.down,.device #devBody p.fx.down{color:#e07a5f}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -90,7 +93,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.8
+   STARSHIP CADET: CSV Wren                            build 0.28.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6305,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6408,7 +6411,7 @@ newBtn.onclick = () => {
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
-// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
+// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
 const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
@@ -6417,8 +6420,7 @@ function offerSleep(at) {                                // at: where the tapped
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
-  document.getElementById('sleepX').textContent = clockText() + '. Sleep until ' + hhmm(WAKE_AT) + '?';
-  sleepEl.hidden = false; toastEl.classList.remove('show'); document.getElementById('sleepYes').focus();
+  toastEl.classList.remove('show'); document.getElementById('sleepYes').onclick();   // 0.28.9, the user's rule: no dialog, you just sleep
   return true;
 }
 document.getElementById('sleepNo').onclick = () => { sleepEl.hidden = true; };
@@ -7065,8 +7067,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // bunk, section 13), shower, work out (treadmill, weights), call home (a
 // booth). Tap the thing to do it: you walk there, take the pose, time runs,
 // the need rises; walk away to stop. Places crew hold are left alone.
-// Fitness gains you nothing, but below SLOW_BELOW of fitness, or of energy,
-// you walk slower. Nothing else is punished; there is no fail state.
+// Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
+// bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
+// There is no fail state.
 // The device is a PLACEHOLDER for the user's design: a button opens a plain
 // panel of sections, added with device.addSection(id, title, render).
 // Sits after 14 like 13 and 14 do; it only touches the player, the deck and
@@ -7076,14 +7079,38 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // =====================================================================
 const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
 const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
-// drain per ship hour: [awake, asleep]. A normal day (breakfast, dinner, a shower, 8 hours' sleep) keeps every
-// need above 40; the gym every two or three days keeps fitness up; a call home every two days keeps social up.
-const NEED_DRAIN = { hunger: [4, 2], energy: [3.75, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+// drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
+// shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
+// up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
+// player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
+// (needEffects' drain, below).
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
+// what your needs do (the user's rule, 0.28.9): at NEED_HIGH or over a need gives a bonus, under NEED_LOW a penalty,
+// in between nothing; the effects multiply. walk: walking speed; task: how fast tasks go (repairs, making parts,
+// activities: 1.15 = 15% faster); drain: how fast energy drains while awake; socialGain: social from chatting with
+// crew and eating in company. Each comes with the device's one-line reason. The machines' walk is never in it.
+const NEED_HIGH = 75, NEED_LOW = SLOW_BELOW;
+const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
+  energy:  { hi: [{ task: 1.15 }, 'Well rested: tasks go 15% faster.'], lo: [{ walk: SLOW_SPEED }, 'Tired: you walk slower.'] },
+  fitness: { hi: [{ drain: .94, walk: 1.05 }, 'Fit: a spring in your step, and you tire more slowly.'], lo: [{ walk: SLOW_SPEED, drain: 1.06 }, 'Out of shape: you walk slower and tire sooner.'] },
+  hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
+  hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
+  social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+};
+function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
+  const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
+  for (const k of NEED_KEYS) {
+    const side = n[k] >= NEED_HIGH ? 'hi' : n[k] < NEED_LOW ? 'lo' : null, fx = side && NEED_FX[k][side]; if (!fx) continue;
+    for (const f in fx[0]) e[f] *= fx[0][f];
+    e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
+  }
+  return e;
+}
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
   const src = s && s.v >= 2 && s.player && s.player.needs, out = {};
   for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
@@ -7107,12 +7134,16 @@ function playerFx() {
 const fxR = (fx, k) => fx && fx.restore && isFinite(fx.restore[k]) ? fx.restore[k] : 1;
 const fxD = (fx, k) => fx && fx.drain && isFinite(fx.drain[k]) ? fx.drain[k] : 1;
 function needsDrain(mins, asleep, fx, except) {          // except: the need an activity is restoring (it doesn't drain meanwhile)
-  const n = SHIP.player.needs, h = mins / 60;
-  for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * h);
-  if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+  const n = SHIP.player.needs;
+  for (let left = mins; left > 0;) {                     // in steps of up to half an hour, so a long skip feels the bonuses change
+    const step = Math.min(left, 30), h = step / 60, ed = asleep ? 1 : needEffects(n).drain; left -= step;
+    for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * (k === 'energy' ? ed : 1) * h);
+    if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+  }
 }
-// walking speed: 1, or SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy
-const playerSpeed = (n = SHIP.player.needs) => (n.fitness < SLOW_BELOW ? SLOW_SPEED : 1) * (n.energy < SLOW_BELOW ? SLOW_SPEED : 1);
+// walking speed (needEffects): SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy; 105% when fit
+const playerSpeed = (n = SHIP.player.needs) => needEffects(n).walk;
+const taskMins = mins => Math.max(1, Math.round(mins / needEffects().task));   // how long a task of so many minutes takes you now
 // the line on the device: the lowest need under 50 says something, else all's well
 const NEED_SAY = {
   energy: ['You feel sluggish: get some sleep. Your bunk is in Bunk 1 on Deck 4.', 'You\'re getting tired.'],
@@ -7256,7 +7287,7 @@ function actBegin() {
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
   const what = A.kind === 'queue' ? 'You join the queue' + (A.o.ahead ? ': ' + A.o.ahead + ' ahead of you.' : '.') : A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
-  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + A.def.mins + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
@@ -7312,7 +7343,8 @@ function playerUpdate(dt, t) {
     const A = ACT, fx = playerFx(), doing = A && A.phase === 'do' && A.done < A.def.mins && A.def.need;
     needsT = now; needsDrain(dm, false, fx, doing || null);
     if (A && A.phase === 'do') {
-      const m = Math.max(0, Math.min(dm, A.def.mins - A.done)); A.done += dm;
+      const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
+      const m = Math.max(0, Math.min(dw, A.def.mins - A.done)); A.done += dw;
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
@@ -7420,7 +7452,7 @@ function jobTap(it, at) {
       if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first.'); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
       const left = Math.max(1, PLAYER_ACTS.make.mins - P.work.make.done);
-      actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + Math.ceil(left) + ' minutes. Walk away to pause.' });
+      actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + taskMins(left) + ' minutes. Walk away to pause.' });
       if (ACT && ACT.kind === 'make') ACT.def.mins = left;
       return true;
     }
@@ -7442,7 +7474,7 @@ function jobBegin(A) {
   if (!need.length) {
     const left = Math.max(1, jobMins(j) - w.done);
     A.def = { mins: left, pose: 'work', title: 'Repairing' }; A.o.repair = true; w.seen = true;
-    A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + Math.ceil(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + Math.ceil(left) + ' minutes.') + ' Walk away to pause.';
+    A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + taskMins(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + taskMins(left) + ' minutes.') + ' Walk away to pause.';
     return true;
   }
   if (!w.seen) {
@@ -7515,7 +7547,7 @@ device.addSection('now', 'Now', el => {
   const p = document.createElement('p'), q = document.createElement('p');
   p.className = 'devtime'; p.textContent = clockText();
   q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
-    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
   if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
@@ -7523,17 +7555,20 @@ device.addSection('now', 'Now', el => {
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
 device.addSection('needs', 'Needs', el => {
-  const n = SHIP.player.needs;
+  const n = SHIP.player.needs, fx = needEffects(n);
   for (const k of NEED_KEYS) {
     const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
     row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
     lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
+    const mk = fx.marks[k];                              // a bonus (up) or a penalty (down), with its reason below the bars
+    if (mk) { const em = document.createElement('em'); em.className = mk[0]; em.textContent = mk[0] === 'up' ? '▲' : '▼'; em.title = mk[1]; em.setAttribute('aria-label', mk[0] === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
     row.setAttribute('role', 'meter'); row.setAttribute('aria-label', NEED_LABEL[k]); row.setAttribute('aria-valuenow', Math.round(n[k]));
     row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
     bar.appendChild(fill); row.append(lab, bar, num); el.appendChild(row);
   }
+  for (const k of NEED_KEYS) if (fx.marks[k]) { const p = document.createElement('p'); p.className = 'fx ' + fx.marks[k][0]; p.textContent = (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1]; el.appendChild(p); }
   const sp = playerSpeed();
-  if (sp < 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
+  if (sp !== 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
 });
 
 // =====================================================================
