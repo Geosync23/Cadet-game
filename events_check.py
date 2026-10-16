@@ -108,7 +108,9 @@ STORM = r"""(() => {
     eventStart('ionStorm', 10); EV_DAYS.clear();
     const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
     if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
-    const news = [], hadNews = typeof newsAdd === 'function', na = hadNews ? newsAdd : null; window.newsAdd = x => { news.push(Math.floor(x.born / 1440) + 1 + ' ' + hhmm(x.born % 1440) + ' ' + x.id + ' (' + x.seed.join(',') + '): ' + x.lines[0]); return x; };
+    const news = [], fmt = x => Math.floor(x.born / 1440) + 1 + ' ' + hhmm(x.born % 1440) + ' ' + x.id + ' (' + x.seed.length + ' know): ' + x.lines[0];
+    const real = typeof NEWS !== 'undefined' && typeof newsAdd === 'function', n0 = real ? (socInit(), NEWS.length) : 0;   // section 20's own, or a stand-in
+    if (!real) window.newsAdd = x => { news.push(fmt(x)); return x; };
     const on = [10, 11, 13, 16].map(d => { const o = eventOn(d); return d + ':' + (o ? o.day + ' ' + o.phases.map(p => p.id + '@' + p.from).join(' ') : '-'); });
     const gath = [10, 13].map(d => eventGatherings(d).map(g => d + ' ' + g.id + ' ' + g.where + ' ' + hhmm(g.at) + ' ' + g.len).join('; '));
     const steps = [], sig = [], mods = {};
@@ -122,7 +124,7 @@ STORM = r"""(() => {
       const g = eventMod('galley', 'menu', t); if (g) mods.menu = g;
     }
     if (send) mailSend = send;
-    if (hadNews) window.newsAdd = na; else delete window.newsAdd;
+    if (real) { for (const x of NEWS.splice(n0)) { news.push(fmt(x)); delete SHIP.knows[x.id]; } } else delete window.newsAdd;
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
     ADDRESSES.length = a0; MEETINGS.length = ms; EV_DAYS.clear();
