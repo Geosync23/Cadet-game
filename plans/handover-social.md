@@ -21,6 +21,7 @@ Written by session_01DzZ669spGpdSdVMYzUog2N while still working (ahead of the 70
 - schedU keys 600-642 are section 20's.
 
 ## Loose ends
+- Privacy match with the device's Maps (0.35.9): Maps hides anyone asleep or washing; my Crew app's detail page and `crewContacts().where` still show them. Make `crewWhere` return null for act `sleep`/`wash` (one line) when the lead next gives work.
 - **Pell's show:** done in 0.36.14 on the events engineer's eventOneOff (0.34.13). Re-test it once their build is merged into the integration.
 - Merge ship integration 0.41.6 when published (it has Appointments and the device).
 - On hold until the user plays the check-in build (the lead's call): arcs for the officers, tuning numbers.
