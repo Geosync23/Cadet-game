@@ -455,9 +455,11 @@ function roomLocked(rk) {
 const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who));
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
-// crewPath (section 10) asks this for each person; tier locks will plug in here later.
+// crewPath (section 10) asks this for each person. Tier locks (answer 4): a hatch with a `tier` lets through only
+// those of that tier or more (hatchTier, section 17: you are Tier 1, Works crew by rank).
 function hatchPassable(key, who) {
   const e = EDGES.get(key); if (!e || !e.service || !who) return false;
+  if (e.tier > 1 && typeof hatchTier === 'function' && hatchTier(who) < e.tier) return false;
   return who === 'player' || !!who.isPlayer || (who.p || who).dept === 'works';
 }
 // the corner between two lift edges in a line: the middle of one wide lift doorway
@@ -8862,6 +8864,7 @@ function machinesReset(hour) {
   SHIP.machines = {};
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++;
+  SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
 }
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
 // A clock earlier than the machines' (New game) starts afresh
@@ -8879,10 +8882,11 @@ function machinesNow() {
     if (JOBS_ON) jobsHour(MACH_HOUR);
     for (const m of list) {
       const s = SHIP.machines[m.id];
-      s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond));
+      s.cond = Math.max(0, s.cond - machWear(m, MACH_HOUR, s.cond) - (MACH_EXTRA[m.id] || 0));
       s.state = machineState(s.cond);
     }
     machRecord(MACH_HOUR);
+    for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
   }
   if (CART_PENDING.length) cartPost();
   return SHIP.machines;
@@ -9018,11 +9022,15 @@ function machRecord(h) {
   MACH_HIST.set(h, c);
   for (const k of MACH_HIST.keys()) if (k < h - MACH_HIST_DAYS * 24) MACH_HIST.delete(k); else break;
 }
-function shipEffectsAt(deck, t) {
-  if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
+// the recorded hour to read for minute t: its own, else the latest before it, else the record's first
+function histHour(t) {
   let h = Math.floor(t / 60);
   if (!MACH_HIST.has(h) && MACH_HIST.size) { const ks = [...MACH_HIST.keys()]; h = h < ks[0] ? ks[0] : Math.min(h, ks[ks.length - 1]); if (!MACH_HIST.has(h)) h = ks.filter(k => k <= h).pop(); }
-  const key = deck + '|' + h;
+  return h;
+}
+function shipEffectsAt(deck, t) {
+  if (FX_AT_REV !== MACH_REV) { FX_AT = new Map(); FX_AT_REV = MACH_REV; }
+  const h = histHour(t), key = deck + '|' + h;
   if (!FX_AT.has(key)) FX_AT.set(key, fxFrom(deck, MACH_HIST.get(h) || null));
   return FX_AT.get(key);
 }
@@ -9030,6 +9038,151 @@ function shipEffectsAt(deck, t) {
 function machineInfo(id) {
   const m = machineById(id); if (!m) return null;
   return { ...m, ...MACHINE_KINDS[m.kind], ...machinesNow()[id] };
+}
+
+// ---- what the machines look like, and the ship's health board (0.33.17: answers 2, 3, 7 and 22) ----
+// machineLook(id) -> { state, blink, dim, drip, flicker, running, cond, kind }, for deck dressing and effects (the
+// architects and the performance engineer draw it): state 'fine' (healthy) | 'worn' | 'poor' (faulty) | 'failing'
+// (failing or broken); dim 0-1, how far its screens and lamps dim; blink, a failing panel's warm-red blink; drip, a
+// water machine leaking (poor or worse); flicker 0-1, how often the lights it feeds flicker (light relays, power
+// junctions, bridge relays); running, started by a tap (machineUse) and still going. null for an unknown id.
+// deckLook(deck) -> { dim, flicker, spray, wilt, drip }: the signs a whole deck shows, from shipEffects: lights
+// dimmed and flickering, shower spray (1 = full, weaker below), garden plants wilting (0-1), pipes dripping.
+// Both read the machines now (machinesNow) and are cached until anything changes; ask once a ship minute, not
+// every frame, and never from inside the schedules' planning.
+const LOOK_OF = { healthy: 'fine', worn: 'worn', faulty: 'poor', failing: 'failing', broken: 'failing' };
+const LOOK_DIM = { fine: 0, worn: .15, poor: .35, failing: .65 };
+const LOOK_WET = new Set(['recycler', 'filter', 'pump', 'uv', 'valve', 'irrigation', 'manifold', 'heatpump']);
+const LOOK_LIT = { lights: 1, junction: .6, powerjunction: .6, relay: .5, databus: .4 };
+let LOOKS = new Map(), LOOKS_REV = -1;
+const MACH_RUN = {};                                     // id -> ship minute a tap-started run ends (machineUse)
+function machineLook(id) {
+  const st = machinesNow()[id], m = st && machineById(id); if (!m) return null;
+  if (LOOKS_REV !== MACH_REV) { LOOKS = new Map(); LOOKS_REV = MACH_REV; }
+  const running = (MACH_RUN[id] || 0) > shipNow();
+  const key = id + (running ? '+' : ''); if (LOOKS.has(key)) return LOOKS.get(key);
+  const state = LOOK_OF[st.state], bad = state === 'poor' ? .35 : state === 'failing' ? (st.state === 'broken' ? 1 : .7) : 0;
+  const look = { state, blink: state === 'failing', dim: LOOK_DIM[state], drip: LOOK_WET.has(m.kind) && bad > 0 || (m.kind === 'valve' && state === 'worn'),
+                 flicker: Math.round((LOOK_LIT[m.kind] || 0) * bad * 100) / 100, running, cond: Math.round(st.cond), kind: m.kind };
+  LOOKS.set(key, look); return look;
+}
+function deckLook(deck) {
+  const fx = shipEffects(deck);
+  if (LOOKS_REV !== MACH_REV) { LOOKS = new Map(); LOOKS_REV = MACH_REV; }
+  const key = 'deck' + deck; if (LOOKS.has(key)) return LOOKS.get(key);
+  let flicker = 0, drip = false, wilt = 0;
+  for (const m of machineList()) {
+    const L = machineLook(m.id); if (!L) continue;
+    if (L.flicker && m.deck === deck) flicker = Math.max(flicker, L.flicker);
+    if (L.drip && m.deck === deck) drip = true;
+    if ((m.kind === 'irrigation' || m.kind === 'nutrient') && m.deck === deck) wilt = Math.max(wilt, MACHINE_SEV[machinesNow()[m.id].state]);
+  }
+  const look = { dim: Math.round((1 - fx.walk) * 300) / 100, flicker, spray: Math.round(fx.restore.hygiene * 100) / 100, wilt, drip };
+  look.dim = Math.min(1, look.dim);
+  LOOKS.set(key, look); return look;
+}
+// the "Ship health" board (the bridge, Deck 1, and the Works bay, Deck 5; the architects draw it): the ship first,
+// then each system, worst first. shipHealthRows() -> [{ key, name, value 0-100, state, worst }]: state as
+// machineLook's; worst: the system's worst machine that isn't fine, as 'Air scrubber 2, Deck 4', or null
+const SYSTEM_NAME = { air: 'Air', water: 'Water', power: 'Power', heat: 'Heat', food: 'Galley and food', waste: 'Waste and laundry', hull: 'Hull',
+                      comms: 'Comms and sensors', propulsion: 'Drive', transport: 'Lift and doors' };
+const healthState = v => v >= 90 ? 'fine' : v >= 70 ? 'worn' : v >= 45 ? 'poor' : 'failing';
+function machineLabel(m) {
+  const K = MACHINE_KINDS[m.kind], n = machineList().filter(x => x.kind === m.kind && x.deck === m.deck).length > 1 ? ' ' + m.id.split('-').pop() : '';
+  return K.name + n + ', Deck ' + m.deck;
+}
+function shipHealthRows() {
+  const sys = shipSystems(), st = machinesNow(), health = shipHealth(sys);
+  const rows = SYSTEMS.map(k => {
+    const ms = machineList().filter(m => MACHINE_KINDS[m.kind].sys === k && st[m.id].state !== 'healthy').sort((a, b) => st[a.id].cond - st[b.id].cond);
+    return { key: k, name: SYSTEM_NAME[k], value: Math.round(sys[k]), state: healthState(sys[k]), worst: ms.length ? machineLabel(ms[0]) : null };
+  }).sort((a, b) => a.value - b.value || SYSTEMS.indexOf(a.key) - SYSTEMS.indexOf(b.key));
+  return [{ key: 'ship', name: 'Ship health', value: Math.round(health), state: healthState(health), worst: null }].concat(rows);
+}
+// the ship's mood for the crew (answer 22, with the sim engineer's crewMood): shipMoodAt(deck, t) -> { mood, health,
+// about }: mood is points off (0 to -30, as shipEffects), about what they grumble about ('the showers'), or null
+// while all is well. Pure (shipEffectsAt): safe inside the schedules and replays.
+const GRUMBLE = { recycler: 'the showers', pump: 'the showers', filter: 'the cloudy water', uv: 'the water', manifold: 'the lukewarm water',
+  scrubber: 'the stuffy air', airplant: 'the stale air', fan: 'the stale air', o2cell: 'the thin air', electrolyser: 'the thin air',
+  heater: 'the cold cabins', heatpump: 'the cold', washer: 'the laundry', oven: 'late meals', range: 'late meals', galleyplant: 'the galley',
+  extractor: 'the galley', chiller: 'the food', lights: 'the lights', junction: 'the brownouts', powerjunction: 'the brownouts', lift: 'the slow lift',
+  irrigation: 'the garden', nutrient: 'the garden', relay: 'the bridge stations', databus: 'the bridge stations', valve: 'the dripping pipes' };
+const STAGE_RANK = { minor: 1, noticeable: 2, serious: 3 };
+function shipMoodAt(deck, t) {
+  const fx = shipEffectsAt(deck, t);
+  const weight = n => STAGE_RANK[n.stage] * 100 + ((MACHINE_FX[n.kind] || {}).mood || 0);   // the most serious, then what upsets most
+  let best = null; for (const n of fx.notes) if (!best || weight(n) > weight(best)) best = n;
+  const about = best ? GRUMBLE[best.kind] || (best.kind === 'power' ? 'the low power' : null) : fx.health < 70 ? 'the state of the ship' : null;
+  return { mood: fx.mood, health: fx.health, about };
+}
+// the cold store's chiller (answer 7, with the galley engineer): chillerAt(t) -> { cond, state, spoil }: spoil is the
+// share of the cold store's meals lost each ship hour (0 while it works well; up to CHILL_SPOIL when broken). Pure,
+// from the hour-by-hour record, like shipEffectsAt; as new with no record. The galley bins the food and sends the Mail.
+const CHILL_SPOIL = .05;
+function chillerAt(t) {
+  const ms = machineList().filter(m => m.kind === 'chiller'); if (!ms.length) return { cond: 100, state: 'healthy', spoil: 0 };
+  const c = MACH_HIST.get(histHour(t)), cond = Math.min(...ms.map(m => c ? c[m.id] ?? 100 : 100)), w = machWorks(cond);
+  return { cond: Math.round(cond * 10) / 10, state: machineState(cond), spoil: w >= 85 ? 0 : Math.round(CHILL_SPOIL * (85 - w) / 85 * 10000) / 10000 };
+}
+
+// ---- tapping a machine (answer 5, 0.33.18): machineUse(id, who) -> { text, ran, until } ----
+// What a tap on a machine does (the player engineer's tap calls it; the architects' item text comes first). Every
+// machine gives a line about itself and its condition. One with a use (a washer, an oven or the range, the galley
+// extractor, the main fan, the lights, the lift's call panel) starts: it runs for its minutes (machineLook's
+// `running`), and your use wears it a little, at the next ship hour (MACH_EXTRA, saved). A broken one doesn't start.
+// who: 'you', or a crew member's id (their use is already in the schedules, so it adds no wear).
+const MACHINE_USES = {
+  washer:    { mins: 45, wear: .3,  go: 'You start a load. It fills and begins to churn.' },
+  oven:      { mins: 20, wear: .2,  go: 'You switch it on to warm through.' },
+  range:     { mins: 15, wear: .15, go: 'A ring glows to life under your hand.' },
+  extractor: { mins: 15, wear: .1,  go: 'You turn the extractor up. It roars, then settles.' },
+  fan:       { mins: 30, wear: .1,  go: 'You run the main fan up to boost. The air starts to move.' },
+  lights:    { mins: 1,  wear: .05, go: 'You cycle the deck lights. They blink off and come back up.' },
+  lift:      { mins: 1,  wear: .05, go: 'You call the lift. Somewhere below, it starts to move.' },
+};
+const USE_STATE = { healthy: 'in good order', worn: 'showing its age, due a service', faulty: 'playing up', failing: 'barely working', broken: 'broken' };
+const USE_HOW = { faulty: ' It sounds rough.', failing: ' It shudders and whines; it won\'t last.' };
+const MACH_EXTRA = {};                                   // id -> condition points your use takes off at the next hour
+function machineUse(id, who = 'you') {
+  const st = machinesNow()[id], m = st && machineById(id);
+  if (!m) return { text: null, ran: false, until: null };
+  const U = MACHINE_USES[m.kind], line = machineLabel(m).split(',')[0] + ': ' + USE_STATE[st.state] + '.';
+  const job = SHIP.jobs.find(j => j.machine === id && j.status !== 'done' && j.found <= shipNow());
+  const onBoard = job ? job.claimedBy === 'you' ? ' It\'s your job.' : ' It\'s on the job board.' : '';
+  if (!U) return { text: line + onBoard, ran: false, until: null };
+  if (st.state === 'broken') return { text: line + ' Nothing happens.' + onBoard, ran: false, until: null };
+  const until = shipNow() + U.mins;
+  MACH_RUN[id] = Math.max(MACH_RUN[id] || 0, until);
+  if (who === 'you') MACH_EXTRA[id] = (MACH_EXTRA[id] || 0) + U.wear;
+  MACH_REV++;
+  return { text: line + ' ' + U.go + (USE_HOW[st.state] || '') + onBoard, ran: true, until };
+}
+
+// ---- supplies running short (answer 6, 0.33.18): from the numbers, told by Mail ----
+// The weekly delivery is sometimes late (about one week in five, by a day or two: deliveryLate, from the week).
+// Stores sends Mail (section 15's mailSend, when it's there) when the delivery is late, when a part nobody can make
+// runs out (NO_MAKE: once, until it's restocked), and when the hold's food falls under two days' worth. SHIP.short remembers what's
+// been told (saved).
+const DELIVERY_SEED = machSeed('delivery'), FOOD_LOW = 300;
+const deliveryLate = d => { const wk = d - weekday(d); return schedU(DELIVERY_SEED, wk, 11) < .2 ? 1 + Math.floor(2 * schedU(DELIVERY_SEED, wk, 12)) : 0; };
+const DAY_NAME = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const plural = p => (/s$/.test(p) ? p : p.replace(/([^aeiou])y$/, '$1ie') + 's').replace(/^uv /, 'UV ');
+SHIP.short = {};
+function mail(t, subject, body) { if (typeof mailSend === 'function') mailSend({ at: t, from: 'Stores', subject, body }); }
+function suppliesHour(t, d) {
+  const S = SHIP.short;
+  if (weekday(d) === DELIVERY.day && (t / 60) % 24 === DELIVERY.hour && deliveryLate(d))
+    mail(t, 'The supply shuttle is late', 'This week\'s delivery won\'t make Wednesday. It\'s due ' + DAY_NAME[DELIVERY.day + deliveryLate(d)] + ' at 10:00. Go easy on the shelves till then.');
+  for (const k of NO_MAKE) {                            // parts the machine shop can make are never short for long
+    if ((SHIP.stores[k] || 0) > 0) { delete S[k]; continue; }
+    if (S[k]) continue;
+    S[k] = t;
+    mail(t, 'Out of ' + plural(k), 'Main storage on Deck 5 has run out of ' + plural(k) + ', and the machine shop can\'t make them. Jobs that need one wait for the delivery.');
+  }
+  if (cartsCarryFood() && SHIP.hold.meals !== undefined) {
+    if (SHIP.hold.meals >= FOOD_LOW) delete S.meals;
+    else if (!S.meals) { S.meals = t; mail(t, 'Food stores low', 'The cargo hold is down to ' + SHIP.hold.meals + ' meals, under two days\' worth. The galley will stretch it till the delivery.'); }
+  }
 }
 
 // ---- B2: the job list. SHIP.jobs = [{ id, machine, deck, kind, urgency, posted, found, claimedBy, parts, status, ... }] ----
@@ -9079,6 +9232,13 @@ function panelPlace(id) {
   return PANELS.get(id) || null;
 }
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
+// tier locks (answer 4, 0.33.18): who may pass a service hatch with a `tier` (section 4's hatchPassable): you at your
+// tier (PLAYER_TIER), Works crew by rank (CREW_TIER), the engine crew anywhere (they keep the reactor and coils)
+function hatchTier(who) {
+  if (who === 'player' || who.isPlayer) return PLAYER_TIER;
+  const p = who.p || who;
+  return jobCrew(p) === 'engine' ? 4 : CREW_TIER[p.rank] || 1;
+}
 // jobs left for you (0.33.16): the crew take urgent and big jobs, and everything above your tier, at once; a small
 // job at your tier waits CREW_LEAVE minutes of the day shift after it's found (one found in the evening waits for
 // your morning), a food run an hour. leaveEnd(j): the minute the crew may take it
@@ -9164,7 +9324,7 @@ function jobsHour(h) {
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
   for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
-  if (weekday(d) === DELIVERY.day && h % 24 === DELIVERY.hour) {
+  if (weekday(d) === DELIVERY.day + deliveryLate(d) && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
     if (cartsCarryFood()) SHIP.hold.meals = Math.max(SHIP.hold.meals || 0, DELIVERY.meals);
   }
@@ -9206,6 +9366,7 @@ function jobsHour(h) {
       break;
     }
   }
+  suppliesHour(t, d);
   // a food run nobody took goes unseen (its meals landed long ago, in the galley's books)
   for (const j of SHIP.jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // done jobs are kept two days, for the board's history
@@ -9411,6 +9572,7 @@ SAVE_EXTRA.push(s => {
   s.ship.machines = out; s.ship.machineHour = MACH_HOUR;
   if (MACH_NORM) s.ship.machineNorm = { build: GAME_BUILD, norm: MACH_NORM };   // the average day, so a reload needn't work it out
   s.ship.jobs = SHIP.jobs; s.ship.stores = SHIP.stores; s.ship.hold = SHIP.hold;
+  s.ship.short = SHIP.short; s.ship.machineUse = { ...MACH_EXTRA };   // 0.33.18: what Stores has told you; your use not yet worn in
 });
 // a save without machines (or with nonsense) leaves them to start afresh; machines the save doesn't know start
 // fresh; ids it has that are gone are dropped
@@ -9429,6 +9591,8 @@ function machinesLoad(s) {
   machRecord(sh.machineHour - 1);
   if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock'));
   for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
+  if (obj(sh.short)) for (const [p, n] of Object.entries(sh.short)) if (Number.isFinite(n)) SHIP.short[p] = n;
+  if (obj(sh.machineUse)) for (const [id, n] of Object.entries(sh.machineUse)) if (SHIP.machines[id] && n > 0 && n < 50) MACH_EXTRA[id] = n;
   return true;
 }
 machinesLoad(SAVED);

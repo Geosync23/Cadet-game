@@ -12,6 +12,9 @@
 #   shelves never go below zero, deliveries get carried to storage, easy jobs wait for you first (CREW_LEAVE minutes
 #   of the day shift; it reports how many a day are left for the player, aiming at 3 to 6), nobody does two
 #   jobs at once or a job outside their work block, jobWhere agrees with the jobs, and it's the same every way
+#   the looks (0.33.17): machineLook, deckLook and the Ship health board's rows in range; shipMoodAt and chillerAt
+#   pure and in step with shipEffectsAt
+#   tapping a machine, Stores' Mail and tier locks (0.33.18): see 5d below
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -221,6 +224,36 @@ with sync_playwright() as pw:
     for name, x in (('twice', r4), ('jump', r2), ('odd minutes', r3)):
         if not (same(r, x) and js(r) == js(x)): fail(f"jobs differ ({name})")
 
+    # 4b. what the machines look like (0.33.17): machineLook and deckLook in range for every machine and deck, a
+    # failing machine blinks and a fine one doesn't; the Ship health board's rows; shipMoodAt and chillerAt are pure
+    # and agree with shipEffectsAt (a chiller working well spoils nothing, a worse one more)
+    lk = g.ev("""(() => {
+      JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; const bad = [], t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      const states = ['fine', 'worn', 'poor', 'failing'];
+      for (const day of [1, 5, 10]) {
+        setShipNow(t0 + day * 1440); machinesNow();
+        for (const m of machineList()) {
+          const L = machineLook(m.id), st = SHIP.machines[m.id].state;
+          if (!L || !states.includes(L.state) || !(L.dim >= 0 && L.dim <= 1) || !(L.flicker >= 0 && L.flicker <= 1) || typeof L.drip !== 'boolean'
+              || L.blink !== (st === 'failing' || st === 'broken') || (st === 'healthy' && (L.state !== 'fine' || L.dim || L.flicker || L.drip))) bad.push(day + ' ' + m.id + ' ' + JSON.stringify(L));
+        }
+        for (const n of Object.keys(DECKS)) { const D = deckLook(+n); if (!(D.dim >= 0 && D.dim <= 1 && D.flicker >= 0 && D.flicker <= 1 && D.spray > 0 && D.spray <= 1 && D.wilt >= 0 && D.wilt <= 1)) bad.push(day + ' deck ' + n + ' ' + JSON.stringify(D)); }
+      }
+      const rows = shipHealthRows(), rowsOk = rows.length === SYSTEMS.length + 1 && rows[0].key === 'ship' && rows.every(r => r.value >= 0 && r.value <= 100 && states.includes(r.state));
+      const rev = MACH_REV, hour = MACH_HOUR; let moodBad = 0, chill = [], about = null;
+      for (let t = shipNow() - 5 * 1440; t <= shipNow(); t += 180) {
+        for (const n of Object.keys(DECKS)) { const M = shipMoodAt(+n, t); if (M.mood !== shipEffectsAt(+n, t).mood || M.mood < -30 || M.mood > 0 || (M.mood < 0 && !M.about && M.health >= 70)) moodBad++; if (+n === 4 && M.about) about = M.about; }
+        chill.push(chillerAt(t));
+      }
+      const chillOk = chill.every(c => c.spoil >= 0 && c.spoil <= CHILL_SPOIL && (machWorks(c.cond) >= 85) === (c.spoil === 0));
+      const pure = MACH_REV === rev && MACH_HOUR === hour;
+      setShipNow(t0); JOBS_ON = true;
+      return { bad: bad.slice(0, 4), nBad: bad.length, rowsOk, rows: rows.slice(0, 4).map(r => r.name + ' ' + r.value + ' ' + r.state + (r.worst ? ' (' + r.worst + ')' : '')), moodBad, about, chillOk, chillEnd: chill[chill.length - 1], pure };
+    })()""")
+    print(f"Looks: {lk['nBad']} out of range, board rows ok {lk['rowsOk']}: {lk['rows']}; crew grumble about {lk['about']}; chiller at day 10 {lk['chillEnd']}; pure {lk['pure']}")
+    if lk['nBad'] or not lk['rowsOk']: fail(f"machineLook / deckLook / shipHealthRows: {lk['bad']}")
+    if lk['moodBad'] or not lk['chillOk'] or not lk['pure']: fail('shipMoodAt / chillerAt')
+
     # 5. your side: a job you claim is left to you
     y = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(4 * 1440 + 9 * 60); machinesNow();
@@ -286,11 +319,56 @@ with sync_playwright() as pw:
     print(f"Cart run as your job: {cr}")
     if not all(cr[k] for k in ('waits', 'took', 'fin', 'leftThen', 'crewTook', 'urgentNow')) or cr['stops'] != 'cart load unload return': fail('the cart run as your job')
 
+    # 5d. tapping a machine (0.33.18): one with a use starts, shows as running, and your use wears it a little at the
+    # next hour (a crew member's adds nothing); a broken one doesn't start; one without a use only says how it is.
+    # Supplies: Stores' Mail (late deliveries, parts nobody can make running out, food low) has the shared shape and
+    # isn't sent twice for one shortage; a late week's delivery lands on its late day. Tier locks: a hatch with a tier
+    # keeps you (Tier 1) out and lets Works crew of that rank in.
+    mu = g.ev("""(() => {
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      const wearAt = (tap, who) => { JOBS_ON = false; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 30); machinesNow(); const r = tap ? machineUse('4-washer-1', who) : null;
+        const run = machineLook('4-washer-1').running; setShipNow(t0 + 150); machinesNow(); return [SHIP.machines['4-washer-1'].cond, r, run]; };
+      const [plain] = wearAt(false), [yours, r, running] = wearAt(true, 'you'), [crews] = wearAt(true, 'olu');
+      const extra = plain - yours, crewSame = Math.abs(plain - crews) < 1e-9;
+      const b = SHIP.machines['3-oven-1']; b.cond = 5; b.state = machineState(5); MACH_REV++;
+      const broken = machineUse('3-oven-1'), plainUse = machineUse('4-scrubber-1'), none = machineUse('no-such-machine');
+      // Mail over 28 days with the real crew
+      const sent = []; window.mailSend = m => sent.push(m);
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+      let lateLanded = null;
+      for (let t = t0; t <= t0 + 28 * 1440; t += 60) {
+        setShipNow(t); machinesNow();
+        const d = SHIP.time.day, md = t % 1440;
+        if (deliveryLate(d) && weekday(d) === DELIVERY.day + deliveryLate(d) && md === DELIVERY.hour * 60 + 60) lateLanded = SHIP.jobs.some(j => j.kind === 'restock' && j.cargo === 'stores' && Math.abs(j.posted - (t - 60)) < 1) || Object.keys(SHIP.hold).some(k => k !== 'meals');
+      }
+      delete window.mailSend;
+      const shapeOk = sent.every(m => Number.isFinite(m.at) && m.from === 'Stores' && typeof m.subject === 'string' && typeof m.body === 'string' && m.body.length > 20);
+      const subj = sent.map(m => m.subject), late = sent.filter(m => /late/.test(m.subject)).length;
+      let twice = 0; for (let i = 1; i < sent.length; i++) if (sent.slice(0, i).some(o => o.subject === sent[i].subject && sent[i].at - o.at < 60)) twice++;
+      // tier locks, on a scratch copy of one service hatch
+      const e = [...EDGES.values()].find(x => x.service), was = e && e.tier;
+      let tiers = null;
+      if (e) { e.tier = 3; const works = schedPeople().filter(p => p.dept === 'works'), jr = works.find(p => p.rank === 'junior'), sr = works.find(p => (CREW_TIER[p.rank] || 0) >= 3);
+               tiers = { you: hatchPassable(e.key, 'player'), junior: jr ? hatchPassable(e.key, jr) : null, senior: sr ? hatchPassable(e.key, sr) : null };
+               e.tier = 1; tiers.youTier1 = hatchPassable(e.key, 'player'); if (was) e.tier = was; else delete e.tier; }
+      setShipNow(t0); JOBS_ON = true;
+      return { extra, ran: r.ran, running, text: r.text, crewSame, broken: broken.ran, brokenText: broken.text, plainUse: plainUse.ran, none: none.ran,
+               mails: sent.length, late, lateLanded, shapeOk, twice, subj: subj.slice(0, 6), tiers };
+    })()""")
+    print(f"Tapping a machine: '{mu['text']}' ran {mu['ran']}, running {mu['running']}, extra wear {mu['extra']:.3f}, a crew member's adds none {mu['crewSame']}; broken starts {mu['broken']} ('{mu['brokenText']}'); no use starts {mu['plainUse']}")
+    print(f"Stores' Mail over 28 days: {mu['mails']} ({mu['late']} late deliveries, landed on the late day {mu['lateLanded']}), shape ok {mu['shapeOk']}, sent twice {mu['twice']}: {mu['subj']}")
+    print(f"Tier locks (a tier-3 hatch): {mu['tiers']}")
+    if not (mu['ran'] and mu['running'] and .25 < mu['extra'] < .35 and mu['crewSame'] and not mu['broken'] and not mu['plainUse'] and not mu['none']): fail('machineUse')
+    if not mu['shapeOk'] or mu['twice'] or (mu['late'] and mu['lateLanded'] is False) or mu['mails'] > 28: fail("Stores' Mail")
+    tt = mu['tiers']
+    if tt and (tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')
+
     # 6. the save
     rt = g.ev("""(() => {
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(6 * 1440 + 11 * 60 + 17); machinesNow();
+      machineUse('4-washer-1');                            // your use not yet worn in rides in the save
       const s = { player: { deck: 4, tile: [0, 0], facing: 0 }, ship: { decks: {} }, crew: {} }; SAVE_EXTRA.forEach(f => f(s));
-      const all = () => JSON.stringify([machinesNow(), SHIP.jobs, SHIP.stores, SHIP.hold]);
+      const all = () => JSON.stringify([machinesNow(), SHIP.jobs, SHIP.stores, SHIP.hold, SHIP.short, MACH_EXTRA]);
       const before = all();
       const back = () => JSON.parse(JSON.stringify(s)); MACH_HOUR = null;
       const ok = machinesLoad(back()), after = all();
