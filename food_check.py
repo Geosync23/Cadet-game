@@ -91,9 +91,9 @@ with sync_playwright() as pw:
     if a != b: fail('the galley came out differently the second time')
     # (with section 17's cartWaiting off: here the machines and jobs don't run, so a run left on the board for you
     # would wait all day; holding it for you is checked in 4g)
-    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined');
+    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined'); GALLEY_TEST.gardenCarry = () => null;
       SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); const out = {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }};
-      window.__sc('cartWaiting = window.__cw'); SHIP.galley = null; return out; }})()""")
+      window.__sc('cartWaiting = window.__cw'); GALLEY_TEST.gardenCarry = null; SHIP.galley = null; return out; }})()""")
     print('Live galley matches the report:', live == rep[0]['end'])
     if live != rep[0]['end']: fail(f"live {live} vs report {rep[0]['end']}")
 
@@ -274,12 +274,63 @@ with sync_playwright() as pw:
         if not th['threads'].get('spoiled') or th['threads'].get('bridgeHungry') != 6 or not th['again'] or th['late'] != 7 or th['never'] != 11: fail(f"storm threads: {th}")
     else: print('Storm threads: no section 18 with the ion storm in this build; skipped')
 
+    # 4j. the garden (0.29.23): four weeks with stand-ins through GALLEY_TEST: a good garden, a dry one (water .3), and
+    # one nobody tends (gardenDay gives no one hours). Produce is picked daily and on harvest mornings, used before stored
+    # meals, and a poor garden gives less while nobody goes hungry
+    gd = g.ev(f"""(() => {{ const run = (at, day) => {{ GALLEY_TEST.gardenAt = at; GALLEY_TEST.gardenDay = day; GARDEN_COND.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
+        const r = galleyReport({DAY}, 28), sum = k => r.reduce((a, st) => a + st[k], 0);
+        return {{ picked: sum('picked'), fresh: sum('fresh'), binned: sum('produceBinned'), delivered: sum('delivered'), missed: r.reduce((a, st) => a + st.missed.length, 0), coldOut: sum('coldOut'),
+          harvest: r.filter(st => gardenHarvestDay(st.day)).map(st => st.picked), daily: r.filter(st => !gardenHarvestDay(st.day)).map(st => st.picked) }}; }};
+      const ok = () => ({{ water: 1, feed: 1, light: 1 }});   // the machines as new; the real gardenAt is shown alongside
+      const good = run(ok, null), dry = run(t => ({{ water: .3, feed: 1, light: 1 }}), null), alone = run(ok, () => null), real = run(null, null);
+      GALLEY_TEST.gardenAt = GALLEY_TEST.gardenDay = null; GARDEN_COND.clear(); return {{ good, dry, alone, real }}; }})()""")
+    for k in ('good', 'dry', 'alone', 'real'):
+        x = gd[k]; print(f"Garden, 28 days, {k}: picked {x['picked']} ({x['picked'] / 28:.1f} a day; harvest mornings {x['harvest']}), cooked fresh {x['fresh']}, binned {x['binned']}, cart meals in {x['delivered']}, missed {x['missed']}")
+    G0, Gd, Ga = gd['good'], gd['dry'], gd['alone']
+    if not (20 <= G0['picked'] / 28 <= 40) or G0['fresh'] < .9 * G0['picked'] or min(G0['harvest'] or [0]) < 100 or sum(1 for x in G0['daily'] if x) < .75 * len(G0['daily']): fail(f"garden, good: {G0}")
+    if Gd['picked'] > .5 * G0['picked'] or Ga['picked'] > .6 * G0['picked']: fail(f"garden: a poor garden should give much less: dry {Gd['picked']}, untended {Ga['picked']}, good {G0['picked']}")
+    if Gd['delivered'] <= G0['delivered']: fail(f"garden: a dry garden should need more meals by cart ({Gd['delivered']} vs {G0['delivered']})")
+    if any(x['missed'] or x['coldOut'] for x in (G0, Gd, Ga, gd['real'])): fail('garden: someone went without food')
+
+    # 4k. the garden's carry, crew and Mail (0.29.24): the crates wait while the carry job (a stand-in) says so and land
+    # when it's done or when you unload (galleyCarryLand); no gardener on duty means no daily pick; a dry harvest morning
+    # sends a Mail
+    gk = g.ev(f"""(() => {{ const d = {DAY} + 1, B = (d - 1) * 1440, posted = [], held = new Set(); const mail = []; window.__mailBox = mail; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)");
+      GALLEY_TEST.gardenCarry = o => {{ posted.push(o); const id = 'garden@' + o.at; held.add(id); return id; }}; GALLEY_TEST.carryWaiting = id => held.has(id);
+      SHIP.galley = null; setShipNow(B + 11 * 60); galleyAdvance(shipNow()); const out = {{ posted: posted.map(o => o.title), waiting: SHIP.galley.garden.crates.length, produce: produceMeals(SHIP.galley) }};
+      out.landed = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.again = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.text = galleyText('garden');
+      GALLEY_TEST.gardenCarry = GALLEY_TEST.carryWaiting = null; GALLEY_TEST.gardenCrew = () => [];
+      SHIP.galley = null; GARDEN_COND.clear(); galleyAdvance(shipNow()); out.noCrew = SHIP.galley.garden.crates.length + produceMeals(SHIP.galley);
+      GALLEY_TEST.gardenCrew = null; GALLEY_TEST.gardenAt = () => ({{ water: .2, feed: 1, light: 1 }}); GARDEN_COND.clear();
+      const h = [...Array(28)].map((_, k) => {DAY} + k).find(x => gardenHarvestDay(x) && x > {DAY} + 7);
+      SHIP.galley = null; setShipNow((h - 15) * 1440); galleyAdvance(shipNow()); setShipNow((h - 1) * 1440 + 12 * 60); galleyAdvance(shipNow()); out.thin = mail.filter(x => x.subject === 'A thin harvest').map(x => x.body);
+      GALLEY_TEST.gardenAt = null; GARDEN_COND.clear(); window.__sc("mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+    print('Garden carry:', gk['posted'][:1], '| crates waiting', gk['waiting'], '| landed', gk['landed'], 'then', gk['again'], '| no gardener on duty:', gk['noCrew'])
+    print('  ', gk['text'], '| thin harvest Mail:', gk['thin'][:1])
+    if not gk['posted'] or not gk['waiting'] or gk['landed'] <= 0 or gk['again'] != 0 or gk['noCrew'] != 0 or not gk['thin']: fail(f"garden carry: {gk}")
+
+    # 4l. the diplomatic visit's formal dinner (0.29.25): herbs from the garden's stock, or 'noHerbs'; late minutes when
+    # worn ovens slow it ('dinnersLate'). A stand-in event through GALLEY_TEST, live, with a running event to score
+    if g.ev("typeof eventStart === 'function' && typeof SHIP_EVENTS !== 'undefined' && Object.keys(SHIP_EVENTS).length > 0"):
+        fd = g.ev(f"""(() => {{ const d = {DAY} + 30, keep = SHIP.event, id = Object.keys(SHIP_EVENTS)[0]; const run = (herbs, slow) => {{
+            eventStart(id, d - 1); SHIP.event.threads = {{}}; GALLEY_SCORED.clear();
+            GALLEY_TEST.eventMod = (kind, key, t) => kind === 'galley' && Math.floor(t / 1440) + 1 === d ? ({{ batch: {{ meals: 10, label: 'the Veyli dinner' }}, herbs: true }})[key] ?? null : null;
+            SHIP.galley = null; setShipNow((d - 1) * 1440 + 14 * 60); galleyAdvance(shipNow()); SHIP.galley.cold.produce = herbs ? [[1, 6, d]] : [];
+            if (slow) window.__keepFx3 = shipEffectsAt, window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx3(deck, t), cook: 2 }})");
+            setShipNow((d - 1) * 1440 + 16 * 60); galleyAdvance(shipNow()); if (slow) window.__sc("shipEffectsAt = window.__keepFx3");
+            return {{ threads: {{ ...SHIP.event.threads }}, batch: SHIP.galley.batch, text: galleyText('servery') }}; }};
+          const out = {{ fine: run(true, false), noHerbs: run(false, false), late: run(true, true) }};
+          GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; GALLEY_SCORED.clear(); return out; }})()""")
+        print('Formal dinner: with herbs', fd['fine']['threads'], '| without', fd['noHerbs']['threads'], '| worn ovens', fd['late']['threads'], '|', fd['late']['text'][-90:])
+        if fd['fine']['threads'].get('noHerbs') or fd['fine']['threads'].get('dinnersLate') or fd['noHerbs']['threads'].get('noHerbs') != 1 or fd['late']['threads'].get('dinnersLate', 0) <= 0: fail(f"formal dinner: {fd}")
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
       window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
       const D0 = {B} + 40 * 1440; if (typeof CART_RUNS !== 'undefined') CART_RUNS.clear();   // a day no other test has asked about
-      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      if (SHIP.hold) SHIP.hold.meals = 1200;                 // earlier live tests may have used the hold's meals
+      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200; SHIP.galley.cold.produce = [];
       let h = null; for (let t = D0 + 9 * 60; t < D0 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
       if (h === null) return {{ real, h }};
       const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];
