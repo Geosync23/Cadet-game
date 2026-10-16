@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.30.16
+   STARSHIP CADET: CSV Wren                            build 0.30.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3649,11 +3649,11 @@ DECKS[4] = {
     { id: '4-common-5', type: 'common-room', at: [7, 10], face: 'w', pose: 'sit', room: 'j', xy: [7.45, 10.5], y: 0.44 },
     { id: '4-common-6', type: 'common-room', at: [5, 8], face: 's', pose: 'sit', room: 'j', xy: [5.5, 8.3], y: 0.44 },
     { id: '4-common-7', type: 'common-room', at: [5, 12], face: 'n', pose: 'sit', room: 'j', xy: [5.42, 12.16], y: 0.44 },
-    // the card-table stools face the table itself, in degrees (0.30.16; 0 south, 90 east)
-    { id: '4-common-8', type: 'common-room', at: [3, 6], face: 350, pose: 'sit', room: 'j', xy: [3.25, 6.5], y: 0.49 },
-    { id: '4-common-9', type: 'common-room', at: [3, 8], face: 194, pose: 'sit', room: 'j' },
-    { id: '4-common-10', type: 'common-room', at: [2, 7], face: 99, pose: 'sit', room: 'j', xy: [2.5, 7.2], y: 0.49 },
-    { id: '4-common-11', type: 'common-room', at: [4, 7], face: 254, pose: 'sit', room: 'j' },
+    // the card-table stools: on the four stool tops round the table (centre 3.15, 7.1), facing it in degrees (0.30.17; 0 south, 90 east)
+    { id: '4-common-8', type: 'common-room', at: [3, 6], face: 0, pose: 'sit', room: 'j', xy: [3.15, 6.45], y: 0.49 },
+    { id: '4-common-9', type: 'common-room', at: [3, 8], face: 180, pose: 'sit', room: 'j', xy: [3.15, 7.75], y: 0.49 },
+    { id: '4-common-10', type: 'common-room', at: [2, 7], face: 90, pose: 'sit', room: 'j', xy: [2.5, 7.1], y: 0.49 },
+    { id: '4-common-11', type: 'common-room', at: [4, 7], face: 270, pose: 'sit', room: 'j', xy: [3.8, 7.1], y: 0.49 },
     { id: '4-common-kettle', type: 'common-room', at: [7, 7], face: 'n', pose: 'stand', room: 'j' },
     { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n', xy: [44.87, 5.35], y: 0.55 },   // the piano bench
     { id: '4-music-2', type: 'music', at: [45, 7], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
@@ -6554,7 +6554,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.30.16';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.17';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
