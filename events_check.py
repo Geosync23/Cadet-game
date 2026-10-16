@@ -204,6 +204,28 @@ OCC = r"""(() => {
   return R;
 })()"""
 
+# the hooks for others (0.34.13): the party through eventPlan (in play, day 13), eventRoutines, eventGuestDays,
+# a one-off (Pell's show) added for a later day and planned like a tradition
+HOOKS = r"""(() => {
+  const R = {};
+  R.partyDay = eventsOn(13).map(e => e.id); R.party11 = eventsOn(11).some(e => e.id === 'party');
+  R.partyGoing = schedPeople().filter(p => planDay(p, 13).some(s => s.tag && s.tag.startsWith('ev-party'))).length;
+  R.partyPlaces = [...new Set(schedPeople().flatMap(p => planDay(p, 13).filter(s => s.tag && s.tag.startsWith('ev-party')).map(s => s.placeId)))].slice(0, 4);
+  R.routines = [11 * 1440 + 900, 12 * 1440 + 400, 12 * 1440 + 700, 13 * 1440 + 100].map(t => eventRoutines(t).map(r => r.rule).join(','));
+  R.guest = eventGuestDays({ event: 'ionStorm', stay: 3 }); R.noGuest = eventGuestDays({ event: 'nope', stay: 3 });
+  R.owed = schedPeople().filter(p => callOwed(p, 10)).length;
+  const d = Math.floor(shipNow() / 1440) + 3;
+  R.added = eventOneOff({ id: 'pell-show', name: 'Pell\'s music boxes', day: d, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }], host: 'pell', chance: .3, anim: null, here: 'Shh, the next one plays a waltz.' });
+  R.again = eventOneOff({ id: 'pell-show', name: 'x', day: d, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }] });
+  R.today = eventOneOff({ id: 'y', name: 'y', day: d - 2, at: [1230, 1290], where: [{ deck: 4, pool: 'music' }] });
+  R.oneOffOn = eventsOn(d).map(e => e.id);
+  R.hostFlag = eventPlan(schedPeople().find(p => p.id === 'pell'), d).some(x => x.id === 'pell-show' && x.host);
+  R.hostFree = eventFree(schedPeople().find(p => p.id === 'pell'), d, 1230, 1290);
+  R.oneOffGoing = schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-pell-show'))).map(p => p.id);
+  SHIP.events.oneOffs.length = 0; SCHED_DATA = null; EV_DAYS.clear(); SHIP_DAYS.clear();
+  return R;
+})()"""
+
 ok = True
 def fail(msg):
     global ok
@@ -352,6 +374,16 @@ with sync_playwright() as pw:
     if not O['ask'] or O['askOff']: fail('occasionAsk: the progress talk')
     if not any('captainsTable@20 19:30' in x for x in O['table']) or not O['batch'] or O['noBatch']: fail(f"the Captain's table: {O['table']} {O['batch']}")
     if not any('captainsTable@20 missed' in x for x in O['end']) or 'framedMenu' in O['traces'] or not any('Captain\'s table (notes)' in x for x in O['mails']): fail(f"a missed table: {O['end']} {O['mails']}")
+
+    # 8. the hooks for others
+    H = g.ev(HOOKS)
+    print('Hooks: party on day 13', H['partyDay'], '(day 11:', H['party11'], ') going', H['partyGoing'], H['partyPlaces'])
+    print('  routines (day 12 15:00, 13 06:40, 13 11:40, 14 01:40):', H['routines'], '| guest days', H['guest'], H['noGuest'], '| owed a call', H['owed'])
+    print('  one-off:', H['added'], H['again'], H['today'], H['oneOffOn'], 'going', H['oneOffGoing'], '| Pell free:', H['hostFree'], '| host flagged:', H['hostFlag'])
+    if 'party' not in H['partyDay'] or H['party11'] or H['partyGoing'] < 10: fail('the all-clear party is not planned on day 13')
+    if not H['routines'][0].startswith('doubleShift') or not H['routines'][1].startswith('doubleShift') or H['routines'][2] != 'rush' or H['routines'][3] != '': fail(f"eventRoutines: {H['routines']}")
+    if H['guest'] != [11, 14] or H['noGuest'] is not None: fail(f"eventGuestDays: {H['guest']}")
+    if not H['added'] or H['again'] or H['today'] or 'pell-show' not in H['oneOffOn'] or not H['oneOffGoing'] or (H['hostFree'] and not H['hostFlag']): fail('eventOneOff')
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()

@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.12
+   STARSHIP CADET: CSV Wren                            build 0.34.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.12';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.13';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10787,16 +10787,34 @@ function birthdayOf(p) {
   }
   return EV_BDAYS.get(p.id) || null;
 }
+// gatherings shaped like traditions, so they reach the plans through the same door (eventPlan): a ship-wide event's
+// gathering moments (when: { ship: <event id>, day: <its day 0..> }) and one-offs (when: { date: <ship day> }).
+// They carry no Mail of their own (the event's address and Mail announce them, or the one-off's caller).
+// venue: the deck architect's gather venue (gatherSpots, non-lead spots) as the first pool when it's in the build
+const EV_SHIPWIDE = [];
+// (filled after SHIP_EVENTS, below: evShipwide)
+// one-offs (section 20's story beats: Pell's show), saved in SHIP.events.oneOffs; see eventOneOff
+function evOneOffDefs() {
+  return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
+    id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
+    where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
+    who: p => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinity === 'function' ? Math.max(0, affinity(r.host, p.id)) / 100 * .6 : 0)),
+    anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
+    from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
+}
+const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 // the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
 const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], wd = weekday(d), yd = shipYearDay(d);
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
+    else if (w.date) { if (d !== w.date) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
-    if (typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
+    if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
@@ -10810,8 +10828,9 @@ function eventPools(shared, desks) {
   if (!EV_READY) return;                                 // called before section 18 has run: the caches are cleared at its end
   if (!desks) desks = schedDesks(ROSTER.concat(ROSTER_GUESTS).filter(p => !p.player), shared);
   const taken = new Set(desks.values());
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const tagged = new Map();
+    if (ev.venue && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
     ev.where.forEach((w, i) => {
@@ -10867,7 +10886,7 @@ function eventPlan(p, d) {
     const opts = eventOpts(ev, p); if (!opts.length) continue;
     const anim = ev.anim(p, d) || null;
     const from = e.from - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0 });
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id) });   // host: section 14 seats them first
   }
   out.sort((x, y) => y.prio - x.prio || x.from - y.from);
   const keep = [];
@@ -10878,7 +10897,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of SHIP_TRADITIONS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -10898,9 +10917,21 @@ function eventLine(p, t) {
 // SHIP.events = { sent: ['id@day', ...], joined: ['id@day', ...] } (saved as ship.events)
 SHIP.events = (() => {
   const s = SAVED && SAVED.ship && SAVED.ship.events, ok = a => Array.isArray(a) && a.every(x => typeof x === 'string');
-  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [] };
+  const oo = s && Array.isArray(s.oneOffs) ? s.oneOffs.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Array.isArray(r.at) && Array.isArray(r.where)) : [];
+  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [], oneOffs: oo };
 })();
-SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60) }; });
+SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60), oneOffs: SHIP.events.oneOffs.slice(-20).map(({ def, ...r }) => r) }; });
+// a one-off gathering (section 20's story beats, e.g. Pell's music boxes): eventOneOff({ id, name, day, at: [from, to],
+// where: [{ deck, pool } | { deck, room: 'regexp source' | RegExp, types, ids? }], host?, chance? (base, 0-1; friends of
+// the host more), anim?, hostAnim?, venue?, from?, mail? (text: the evening-before Mail), ask?, here?, thanks? }).
+// Only for a later day (today's plans are made); it's saved and planned like a tradition. Returns true when added
+function eventOneOff(o) {
+  if (!o || !o.id || !Number.isInteger(o.day) || o.day <= Math.floor(shipNow() / 1440) + 1 || SHIP.events.oneOffs.some(r => r.id === o.id && r.day === o.day)) return false;
+  const r = { ...o, where: (o.where || []).map(w => w.room instanceof RegExp ? { ...w, room: w.room.source } : { ...w }) };
+  delete r.who; SHIP.events.oneOffs.push(r);
+  SCHED_DATA = null; EV_DAYS.clear(); for (const d of [...SHIP_DAYS.keys()]) if (d >= o.day) SHIP_DAYS.delete(d);   // its places join the pools; later plans are made again
+  return true;
+}
 const EV_MAIL_AT = 1080;                                 // 18:00 the evening before
 let EV_LAST = null;                                      // the last minute the Mail was checked to
 // the announcements due in (from, to]: at most three days' worth after a long skip. EV_MAILBOX keeps the last 20
@@ -10910,7 +10941,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
   from = Math.max(from, to - 3 * 1440);
   for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
-    if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
+    if (at <= from || at > to || SHIP.events.sent.includes(key) || !e.ev.mail) continue;   // ship-wide gatherings and one-offs: no tradition Mail
     SHIP.events.sent.push(key);
     const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
@@ -11135,12 +11166,20 @@ const STORM_RETELL = {
 };
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
+// who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
 function stormCallBacklog(e) {
-  const d = e.startDay + 3, ppl = schedPeople().filter(p => p.rank !== 'guest');
-  const owed = ppl.filter(p => (habitsOn(p, d) || []).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33).length;
+  const ppl = schedPeople().filter(p => p.rank !== 'guest');
+  const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
   return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
 }
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
+  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
+  who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
+  thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 (() => {
@@ -11218,6 +11257,25 @@ function lastDark(t) { if (typeof blackoutAt !== 'function') return null; for (l
 // the context an event's texts are written against: c.band (as things stand), c.mine, c.you, c.dark
 const evCtx = (e, t) => ({ dark: t === undefined ? null : lastDark(t), band: e ? eventBand(e.id, e.threads || {}) : 'smooth', mine: (e && e.mine) || {}, threads: (e && e.threads) || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet',
   jobsDone: typeof yourJobsDone === 'function' ? yourJobsDone() : 0, commended: !!(SHIP.commendations && SHIP.commendations.length) });
+// section 14's schedule rules at ship minute t: the whole list in force (the phase's, else an earlier phase's back to
+// one that `clears`), [] when nothing's on. Rules: { who: 'dept:<d>' | 'all', where: '<deck>|<room key>' |
+// 'type:<place type>', rule, share?, at? }. Pure, like eventNow
+function eventRoutines(t) {
+  const now = eventNow(t); if (!now) return [];
+  const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
+  for (let k = i; k >= 0; k--) { const l = def.routines && def.routines[def.phases[k].id]; if (l) return l; if (def.phases[k].clears) return []; }
+  return [];
+}
+// an event guest's stay (section 14, C8): [arriveDay, leaveDay] in ship days, from the event's start day (running,
+// logged or next due): they arrive arriveOffset days after it starts (default the event's `guestsArrive`, else its
+// onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
+function eventGuestDays(g) {
+  const def = g && SHIP_EVENTS[g.event]; if (!def) return null;
+  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
+  if (!e) return null;
+  const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
+  return [e.startDay + off, e.startDay + off + (g.stay || 1)];
+}
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
 function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
