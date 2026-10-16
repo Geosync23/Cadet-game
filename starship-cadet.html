@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.12
+   STARSHIP CADET: CSV Wren                            build 0.36.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.12';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.13';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11601,7 +11601,7 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts();
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -11815,6 +11815,24 @@ function arcTold(p) {                                    // the card showed thei
   const r = SHIP.rel[p.id]; r.arc = (r.arc || 0) + 1; r.arcDay = SHIP.time.day;
   if (beat.mail) SHIP.social.mail.push({ at: Math.floor(shipNow()) + beat.mail.after, from: p.name, subject: beat.mail.subject, body: beat.mail.body });
 }
+// appointments (0.36.13; the device's Appointments, section 19, and the crew side, section 14's apptList): one you
+// kept gives REL_PTS.appt to each person in it, once (a.socKept); one you missed costs nothing, but the next time you
+// tap them they mention it (apptMissedBy, a.socSaid), within three days. The two flags ride on the appointment, saved
+// with the device's part of the save
+function socialAppts() {
+  if (typeof apptList !== 'function') return;
+  for (const a of apptList()) if (a.status === 'kept' && !a.socKept && Array.isArray(a.with)) { a.socKept = true; for (const id of a.with) if (SOC.idx.has(id)) relAdd(id, 'appt', REL_PTS.appt); }
+}
+function apptMissedBy(p, t = shipNow()) {
+  if (typeof apptList !== 'function') return null;
+  return apptList().find(a => a.status === 'missed' && !a.socSaid && Array.isArray(a.with) && a.with.includes(p.id) && t - a.at < 3 * 1440 && t >= a.at) || null;
+}
+function apptRemark(p, a, t = shipNow()) {
+  const pl = typeof apptPlace === 'function' ? apptPlace(a) : null, rm = pl && ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name;
+  const when = Math.floor(a.at / 1440) === Math.floor(t / 1440) ? 'earlier' : Math.floor(a.at / 1440) === Math.floor(t / 1440) - 1 ? 'yesterday' : 'the other day';
+  const at = rm ? ' at the ' + rm.toLowerCase() : '';
+  return ['Waited for you' + at + ' ' + when + '. No harm done.', 'I was' + at + ' ' + when + '. Thought you\'d forgotten me!', 'Missed you' + at + ' ' + when + '. Another time?'][Math.floor(schedU(p.seed, Math.floor(t / 60), 642) * 3)];
+}
 function socialMail(now) {                               // story Mail that's due (socialTick)
   const due = SHIP.social.mail.filter(x => x.at <= now); if (!due.length || typeof mailSend !== 'function') return;
   SHIP.social.mail = SHIP.social.mail.filter(x => x.at > now);
@@ -11824,6 +11842,7 @@ function chatLine(p, t = shipNow()) {
   socInit();
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
+  const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
   const beat = arcBeat(p, t); if (beat) return { text: beat.say, kind: 'story', say: true };
   const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
     return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
@@ -11919,6 +11938,7 @@ function chatOpen(p, greet) {                             // greet: they came to
   CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (CHAT.line.kind === 'story') arcTold(p);
+  if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
   return true;
@@ -11941,6 +11961,7 @@ function chatDo(id) {
     for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) l = chatLine(p, shipNow() + 60 * k);
     if (l.news) playerHeard(l.news, p.id);
     if (l.kind === 'story') arcTold(p);
+    if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
   } else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'back') { C.ask = false; chatShow(); }
