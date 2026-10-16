@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.17
+   STARSHIP CADET: CSV Wren                            build 0.26.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.17';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.18';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7514,6 +7514,24 @@ function schedWants(p, d, k, base) {
   return did(d) || (base(d) > .2 && !did(d - 1) && !did(d - 2) && !did(d - 3));
 }
 
+// ---- seating by friendship: section 20's affinityPlan (pure, memoised); nothing changes without it ----
+const SEAT_SOCIAL = new Set(['mess-seat', 'lounge-seat', 'bench']);
+// a person's friends (affinity 30+) and those they don't get on with (-30 or less), aboard or not; guests have none
+function seatMates(p, S) {
+  if (typeof affinityPlan !== 'function' || p.guest) return null;
+  const c = S.mates || (S.mates = new Map()); if (c.has(p.id)) return c.get(p.id);
+  const m = { fr: [], foe: [] };
+  try { for (const q of S.people) if (q !== p && !q.guest) { const a = affinityPlan(p, q); if (a >= 30) m.fr.push(q.id); else if (a <= -30) m.foe.push(q.id); } }
+  catch (e) { return null; }                             // section 20 not loaded yet: seat as before
+  c.set(p.id, m); return m;
+}
+// the seats (mess, lounge, bench) within 2 tiles of a place, on its deck
+function seatNear(S, id) {
+  const c = S.seatNear || (S.seatNear = new Map()); if (c.has(id)) return c.get(id);
+  const pl = S.byId.get(id), xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], out = [];
+  if (pl) { const [x, z] = xy(pl); for (const t of SEAT_SOCIAL) for (const q of S.shared.get(pl.deck + '|' + t) || []) { const [qx, qz] = xy(q); if (Math.hypot(qx - x, qz - z) <= 2) out.push(q.id); } }
+  c.set(id, out); return out;
+}
 // ---- one person's day, taking places from `occ` (placeId -> [[from, to], ...] in absolute minutes) ----
 function schedBuild(p, d, occ, S) {
   const F = schedFrame(p, d), P = schedFrame(p, d - 1), U = F.U, H = F.H, B = (d - 1) * 1440, C = SCHED_COMMUTE;
@@ -7529,7 +7547,14 @@ function schedBuild(p, d, occ, S) {
   // use them then, so ordinary free time doesn't fill the room before the guests are planned
   const isFree = (id, a, b, tag) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y)
     && !(occ.res && (occ.res.get(id) || []).some(([x, y, ev]) => x < B + b && B + a < y && !(tag && (tag === 'ev-' + ev || tag.startsWith('ev-' + ev + '-')))));
-  const hold = (id, a, b) => { if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b]); };
+  const hold = (id, a, b) => {                           // [from, to, who]; occ.who: who -> [[from, to, placeId]] (seating by friendship)
+    if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b, p.id]);
+    if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([B + a, B + b, id]);
+  };
+  // seating by friendship (Pillar 3, with section 20's affinityPlan, pure): at a mess table, a lounge or a bench, a
+  // seat within 2 tiles of a friend already planned there (affinity 30+) comes first, and one next to someone they
+  // don't get on with (-30 or less) last. Without affinityPlan, or with nobody either way, seats are chosen as before
+  const mates = SEAT_SOCIAL && occ.who && seatMates(p, S);
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
   const go = dk => {
     if (dk === deck) return;
@@ -7559,13 +7584,22 @@ function schedBuild(p, d, occ, S) {
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
+      const soc = mates && SEAT_SOCIAL.has(type) && (mates.fr.length || mates.foe.length);
       const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       for (let s = arrive; s <= arrive + wait; s++) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
         if (end - s < (o.min || Math.min(dur, 10))) break;
-        for (let i = 0; i < pool.length; i++) {
+        let pref = null, avoid = null;
+        if (soc) {                                       // the seats beside friends (pref) and beside people to avoid, now
+          const near = (ids, set) => { for (const q of ids) for (const [x, y, pid] of occ.who.get(q) || []) if (x < B + end && B + s < y) for (const n of seatNear(S, pid)) set.add(n); return set; };
+          pref = near(mates.fr, new Set()); avoid = near(mates.foe, new Set());
+          if (!pref.size && !avoid.size) pref = avoid = null;
+        }
+        for (let j = 0; j < (pref ? 3 * pool.length : pool.length); j++) {
+          const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
+          if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           linger(s - (dk !== deck ? C : 0)); go(dk);
@@ -7928,6 +7962,7 @@ function shipDay(d) {
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
+  occ.who = new Map();                                   // who -> the places they hold (seating by friendship)
   S.spare.forEach((pl, i) => {
     const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
