@@ -540,7 +540,7 @@ with sync_playwright() as pw:
 
     # 5i. the board through a week (0.33.32, the user's "the job board never has any jobs", and two days off a week):
     # the real crew for a Monday-to-Sunday week, nobody taking jobs for you. On a weekday's day shift there's
-    # nearly always something for you (openJobs), from the first morning on; never more than HOLD_MAX small jobs held
+    # nearly always something for you (openJobs), from the game's first hour (06:00 on day 1) on; never more than HOLD_MAX small jobs held
     # for you. On Saturday and Sunday (playerShiftOn; a stand-in Monday-to-Friday rule if section 14's still says
     # every day) nothing is held: the crew take your kind of job, and you can still take one from the board.
     wk = g.ev("""(() => {
@@ -549,13 +549,14 @@ with sync_playwright() as pw:
       const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
       const small = j => forYou(j) && !j.leave && j.cargo !== 'meals';
-      const out = { stand, firstMorning: null, empty: 0, hours: 0, sum: 0, maxHeld: 0, offHeld: [], offCrew: 0, offTook: null, offOpen: 0 };
-      for (let t = t0 + 120; t < t0 + 7 * 1440; t += 60) {
+      const out = { stand, emptyStart: 0, firstMorning: null, empty: 0, hours: 0, sum: 0, maxHeld: 0, offHeld: [], offCrew: 0, offTook: null, offOpen: 0 };
+      for (let t = t0; t < t0 + 7 * 1440; t += 60) {
         setShipNow(t); machinesNow();
         const d = SHIP.time.day, m = t % 1440, open = SHIP.jobs.filter(j => j.status === 'open' && !j.claimedBy && j.found <= t);
         out.maxHeld = Math.max(out.maxHeld, open.filter(j => small(j) && t < leaveEnd(j)).length);
         if (playerShiftOn(d)) {
           if (m >= DAY_SHIFT[0] && m < DAY_SHIFT[1]) { const n = openJobs('you').length; out.hours++; out.sum += n; if (!n) out.empty++; if (d === SHIP_START.day && m === DAY_SHIFT[0]) out.firstMorning = n; }
+          if (d === SHIP_START.day && m < DAY_SHIFT[0] && m >= SHIP_START.min && !openJobs('you').length) out.emptyStart++;
         } else {
           for (const j of open) if (small(j) && t < leaveEnd(j)) out.offHeld.push(j.id + ' on day ' + d);
           out.offOpen += openJobs('you').length;
@@ -569,9 +570,9 @@ with sync_playwright() as pw:
       return out;
     })()""")
     print(f"The board through a week: weekday day shift {wk['mean']} jobs for you on average, {wk['empty']} of {wk['hours']} hours with none, "
-          f"{wk['firstMorning']} at 08:00 on day 1, at most {wk['maxHeld']} held; days off{' (stand-in rule)' if wk['stand'] else ''}: held {wk['offHeld']}, "
+          f"{wk['firstMorning']} at 08:00 on day 1 ({wk['emptyStart']} empty hours before that), at most {wk['maxHeld']} held; days off{' (stand-in rule)' if wk['stand'] else ''}: held {wk['offHeld']}, "
           f"crew took {wk['offCrew']} of your kind, you could take one {wk['offTook']} ({wk['offOpen']} job-hours open)")
-    if wk['mean'] < 2 or wk['empty'] > wk['hours'] / 10 or not wk['firstMorning'] or wk['maxHeld'] > g.ev("HOLD_MAX") or wk['offHeld'] or wk['offCrew'] < 1 or (wk['offOpen'] and wk['offTook'] is not True):
+    if wk['mean'] < 2 or wk['empty'] > wk['hours'] / 10 or not wk['firstMorning'] or wk['emptyStart'] or wk['maxHeld'] > g.ev("HOLD_MAX") or wk['offHeld'] or wk['offCrew'] < 1 or (wk['offOpen'] and wk['offTook'] is not True):
         fail('the board through a week')
 
     # 6. the save
