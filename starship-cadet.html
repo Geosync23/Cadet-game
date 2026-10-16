@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.9
+   STARSHIP CADET: CSV Wren                            build 0.27.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.10';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9544,10 +9544,13 @@ const crowd = {
 // Where: from the machine's `at` and `face`, or its optional look: { lamp, drip, light: [dx, y, dz], screen: [dx, y, dz, w, h] }.
 // dx and dz are tiles from the centre of `at` (dx to the right as you face its front, dz out of its front), y and w, h in
 // metres. On Deck 3 the garden's leaves also yellow while its irrigation pumps or nutrient dosing are poor or failing.
-// ?looks in the address turns every effect on, on every machine, to check where they go. ----
+// ?looks in the address turns every effect on, on every machine, to check where they go.
+// 0.27.10: while a deck's light relays flicker, some of its lamps stutter (lamps(t), called by the main loop after
+// applyLight). And a shower someone is using sprays (one more instanced mesh, hidden when no one showers): thin and
+// patchy while the ship's water or heat is below 50, worse below 25. ----
 const MACHINE_FX_ALL = /[?&]looks\b/.test(location.search), MACHINE_FX_MAX = 64, MACHINE_WILT = col('#a08a3c');
 const machineFx = {
-  deck: undefined, list: [], next: 0, mesh: null, o: new THREE.Object3D(),
+  deck: undefined, list: [], next: 0, mesh: null, o: new THREE.Object3D(), lightIds: [], lampFl: 0, showers: [], weak: 0, sprayMesh: null, nextS: 0,
   make() {                                               // made the first time a machine shows something
     const mk = (geo, c, opacity) => {
       const m = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ color: col(c), transparent: opacity < 1, opacity, depthWrite: opacity >= 1 }), MACHINE_FX_MAX);
@@ -9557,8 +9560,11 @@ const machineFx = {
       screen: mk(new THREE.BoxGeometry(1, 1, .006), '#05080c', .62), light: mk(new THREE.SphereGeometry(.13, 10, 8), '#fff1c4', .6) };
   },
   spots(n) {                                             // the deck's machines, and where each effect goes
-    this.deck = n; this.list = []; this.next = 0;
+    this.deck = n; this.list = []; this.next = 0; this.lightIds = []; this.lampFl = 0;
+    this.showers = n === null ? [] : (DECKS[n].places || []).filter(p => p.type === 'shower')   // where each shower's spray falls
+      .map(p => ({ id: p.id, x: (p.xy ? p.xy[0] : p.at[0] + .5) - OX, z: (p.xy ? p.xy[1] : p.at[1] + .5) - OZ }));
     if (typeof machineLook !== 'function' && !MACHINE_FX_ALL || typeof machineList !== 'function') return;
+    this.lightIds = machineList().filter(m => m.deck === n && m.kind === 'lights').map(m => m.id);   // stand-ins too: the deck's light relays
     for (const m of machineList()) {
       if (m.deck !== n || m.stub || !m.at) continue;
       const a = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[m.face] || 0, c = cellPos(m.at[0], m.at[1]), lk = m.look || {};
@@ -9577,12 +9583,46 @@ const machineFx = {
     if (!this.leafBase) this.leafBase = GD.leaves.map(m => m.color.clone());
     GD.leaves.forEach((m, i) => m.color.copy(this.leafBase[i]).lerp(MACHINE_WILT, w * .65));
   },
+  lamps(t) {                                             // after applyLight: a third of the lamps (two thirds when failing) stutter
+    if (!this.lampFl) return;
+    LAMPS.forEach((L, i) => {
+      if (i % 3 && !(this.lampFl >= 1 && i % 3 === 1)) return;
+      const hh = Math.sin(Math.floor(t * 9) * 12.9898 + i * 78.233) * 43758.5453;
+      if (hh - Math.floor(hh) < .5 * Math.min(1, this.lampFl)) L.l.intensity *= .15;
+    });
+  },
+  spray(t) {                                             // showers in use: streaks falling from the head; fewer and patchy when water or heat is poor
+    if (!this.showers.length || typeof placeBusy !== 'function') { if (this.sprayMesh) this.sprayMesh.visible = false; return; }
+    const on = this.showers.filter(s => placeBusy(s.id));
+    if (on.length && t >= this.nextS) {
+      this.nextS = t + .5;
+      const sys = typeof shipSystems === 'function' ? shipSystems() : null, q = sys ? Math.min(sys.water, sys.heat) : 100;
+      this.weak = q < 25 ? 1 : q < 50 ? .5 : 0;
+    }
+    if (!on.length) { if (this.sprayMesh) this.sprayMesh.visible = false; return; }
+    if (!this.sprayMesh) {
+      this.sprayMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(.012, .012, .28, 3), new THREE.MeshBasicMaterial({ color: col('#e6f7ff'), transparent: true, opacity: .7, depthWrite: false }), 120);
+      this.sprayMesh.frustumCulled = false; this.sprayMesh.raycast = () => {}; scene.add(this.sprayMesh);
+    }
+    const m = this.sprayMesh, o = this.o, per = this.weak >= 1 ? 4 : this.weak ? 7 : 12; let c = 0;
+    on.forEach((s, j) => {
+      if (this.weak) { const hh = Math.sin(Math.floor(t * 3) * 12.9898 + j * 78.233) * 43758.5453; if (hh - Math.floor(hh) < .3 + .3 * this.weak) return; }   // sputtering
+      for (let k = 0; k < per && c < 120; k++) {
+        const a = k * 2.4, r = .04 + .14 * ((k * .618) % 1), u = (t * 2.3 + k * .37) % 1;
+        o.position.set(s.x + Math.cos(a) * r, 1.9 - u * 1.75, s.z + Math.sin(a) * r); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); o.updateMatrix();
+        m.setMatrixAt(c++, o.matrix);
+      }
+    });
+    m.count = c; m.visible = c > 0; m.instanceMatrix.needsUpdate = true;
+  },
   tick(dt, t) {
     const n = deckDef ? deckDef.num : null;
     if (n !== this.deck) this.spots(n);
-    if (t >= this.next && (this.list.length || this.wilted)) {   // the machines' state, twice a second
+    this.spray(t);
+    if (t >= this.next && (this.list.length || this.wilted || this.lightIds.length)) {   // the machines' state, twice a second
       this.next = t + .5;
       for (const s of this.list) s.look = MACHINE_FX_ALL ? { blink: 1, dim: 1, drip: 1, flicker: 1 } : machineLook(s.id) || null;
+      this.lampFl = 0; for (const id of this.lightIds) { const lk = MACHINE_FX_ALL ? { flicker: 1 } : machineLook(id) || {}; this.lampFl = Math.max(this.lampFl, lk.flicker === true ? 1 : +lk.flicker || 0); }
       this.wilt(n);
     }
     if (!this.list.length) { if (this.mesh) for (const k in this.mesh) this.mesh[k].visible = false; return; }
@@ -10570,6 +10610,7 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
+  if (typeof machineFx !== 'undefined') machineFx.lamps(t);   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10)
 
   // ambient life
   // stars outside: the sky drifts aft across the screen, with a touch of parallax as the camera follows you.
