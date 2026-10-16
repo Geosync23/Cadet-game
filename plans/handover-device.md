@@ -81,7 +81,11 @@ Check the branch for which of 0.35.4–0.35.7 were pushed (they were pushed toge
 | 0.35.11 | cdfcdb1 | Quiet off shift (`settings.quiet`, `DEV_WORK_APPS`); #seek chip in the CRT style (`html[data-ph]`); Maps hides sleepers and lists only people you know |
 | 0.35.12 | 4a1d044 | Phone review: tap-to-close on a tap, `pointercancel`, a 44px bezel grip, no rebuild when the VIEW is unchanged |
 | 0.35.13 | 61ebe6a | Ship integration 0.41.6 merged in |
+| 0.35.14 | a6e072b | `{ app: 'maps', do: 'person' }`; deviceLoad keeps other sections' appointment fields (socKept, socSaid); CRT made cheaper (flicker on ::after, will-change, contain: paint, Maps plan kept, dots redrawn) |
+| 0.35.15 | 4f69bde | Only the Device button opens it: the bottom-edge swipe (which opened it while steering) is gone; device_check runs a day of reminders/tips/notices/address/dialogue/invitations and asserts it never opens |
+| 0.35.16 | bded336 | Maps shows no people; new Roster app (everyone by department, people you know first, where they are via whereIs, "In their quarters" for sleep/wash/locked cabins, Go there); Maps' person links open the Roster |
+| 0.35.17 | a1de068 | Days off: section 19's playerShiftOn stand-in removed (read via `devShiftOn`); Day off in Schedule, strip and Calendar once section 14's `playerShiftOn` lands |
 
-Loose ends now: 1 (the phosphor is chosen: Wren cyan), 3, 4, 5, 6, 7 are done. Still open: 2 (days off), 8 (a real phone; the performance engineer was asked to check the CRT skin's paint cost on a real GPU). Bottom-edge swipe-up fights the iPhone home bar; the Device button is the main way in.
+Loose ends now: 1-7 are done (days off wait only on section 14's playerShiftOn). User's answers (2026-10-16): no pull tab, the Device button is the only way in; no people on Maps; a Roster app for where people are; Saturday and Sunday off. Still open: 8 (a real phone; the performance engineer was asked to check the CRT skin's paint cost on a real GPU). Bottom-edge swipe-up fights the iPhone home bar; the Device button is the main way in.
 
 Gotchas added: a group meeting is one appointment per person (each a seat of their own) sharing `grp`, so section 14 needed no change; `deviceTick` keeps the group together (one kept → all kept). The full suite takes 25-40 minutes a build; run browser checks one at a time. For testing against the social branch's newer section 20 without merging, splice its section 20 into a scratch copy (between the `// 20. SOCIAL` and `// 6. CAMERA` headers).
