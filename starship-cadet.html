@@ -9170,11 +9170,11 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 
 // =====================================================================
 // 15. PLAYER NEEDS & DEVICE
-// Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
-// met) in SHIP.player.needs. They drain with ship time and come back by
+// Your needs (hunger, energy, hygiene, fitness, social, bathroom; 0-100,
+// 100 = fully met) in SHIP.player.needs. They drain with ship time and come back by
 // doing things: eat (the servery, a mess seat, the grab shelf), sleep (your
 // bunk, section 13), shower, work out (treadmill, weights), call home (a
-// booth). Tap the thing to do it: you walk there, take the pose, time runs,
+// booth), use a toilet (any public washroom, 0.28.19). Tap the thing to do it: you walk there, take the pose, time runs,
 // the need rises; walk away to stop. Places crew hold are left alone.
 // Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
 // bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
@@ -9195,16 +9195,17 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // crew tap (10: playerChat), Walker.update's pose (10: holding, crouch),
 // playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
-const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
-const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
+const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social', 'bathroom'];   // the plan's NEEDS (section 14 has it too, as NEEDS); bathroom: the user's, 0.28.19
+const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social', bathroom: 'Bathroom' };
 // drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
 // shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
 // up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
 // player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
-// (needEffects' drain, below).
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+// (needEffects' drain, below). Bathroom (0.28.19, the user's): 12 an hour awake, from a visit to the low line in
+// about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [12, 3] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
-const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
+const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
@@ -9219,6 +9220,7 @@ const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
   hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
   social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+  bathroom: { hi: [{ task: 1.05 }, 'Comfortable: tasks go 5% faster.'], lo: [{ task: .9 }, 'You need the toilet: it\'s hard to concentrate, tasks go 10% slower.'] },
 };
 function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
   const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
@@ -9279,6 +9281,7 @@ const NEED_SAY = {
   hunger: ['You\'re hungry. The mess serves breakfast 06:00-08:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
+  bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
 };
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
@@ -9328,6 +9331,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
+  toilet: { need: 'bathroom', gain: 100, mins: 3, pose: 'sit', title: 'Toilet', done: 'You wash your hands on the way out.' },   // any public toilet (0.28.19)
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
     if (!galleyTurn('player')) return false;
@@ -9369,7 +9373,9 @@ const ACT_TAP = [   // what you tapped (its title), the place types it leads to,
   [/^grab and go$/i, ['grab-shelf'], 'grab'],
   [/table/i, ['mess-seat'], 'eat'],
   [/^shower$/i, ['shower'], 'shower'],
+  [/^toilet$/i, ['toilet'], 'toilet'],
 ];
+const PRIVATE_TYPES = new Set(['shower', 'toilet']);     // someone's own (privatePlace) is never offered: wash pods, cabins' toilets
 const ACT_NEAR = 2.4;
 let ACT = null, basket = null, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
 const heldBy = id => DECK_CREW.find(a => a.goalId === id);       // crew at a place, or on their way to it
@@ -9409,7 +9415,7 @@ function playerTap(it, at, point) {
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || machineTap(it, at);
   const [, types, kind] = rule;
-  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
+  const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)))
     .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
   if (!near.length) return false;
@@ -9431,7 +9437,7 @@ function playerTap(it, at, point) {
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) {
     const a = heldBy(near[0][0].id);
-    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
+    toast(it.t, (kind === 'tray' ? 'There\'s a queue at the servery. Try again in a minute.' : kind === 'toilet' ? 'Occupied: the little light is red. Try another, or wait a minute.' : 'In use: ' + a.p.name + ' is ' + (kind === 'eat' ? 'sitting there.' : 'on it.')) + ' ' + it.x);
     return true;
   }
   const [pl, spot] = free;
@@ -9465,12 +9471,12 @@ function sitTap(it, at, point) {
 // usable place's spot at any height up to 1.2 m (the belt, the console, the seat), use that place as a tap on it
 // would: the gym, a call-home booth, a store shelf, or a seat to sit on. Else the floor tap walks, as always.
 const FLOOR_NEAR = .5;
-const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves' };
+const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
-    const use = FLOOR_ACTS[pl.type] ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
+    const use = FLOOR_ACTS[pl.type] && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)) ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
     const sp = placeSpot(pl.id); if (!sp) continue;
     let best = Infinity;
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
@@ -9523,7 +9529,7 @@ function actBegin() {
   const A = ACT; if (!A) return;
   const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && heldBy(pl.id);
   if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
-    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(q.type === 'shower' && privatePlace(q)))
+    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
@@ -9638,6 +9644,94 @@ function actUpdate(dt, t) {
   A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
   A.body.update(dt, t);
 }
+// ---- you can see it working (0.28.20, the user's): when a need rises, a small "+25 Food" note floats up from your
+// character and the device button gives a soft pulse. Read off the needs themselves once a frame (needsSeen), so
+// every gain shows, whichever section made it (meals, showers, the toilet, sleep, chats, company, the store, 15b's
+// and 20's): rises add up per need and show once they stop for FLOAT_WAIT real seconds, or every FLOAT_EVERY
+// seconds while they go on (a toilet visit or the grab shelf shows one note; a long meal a few).
+// Drains never show. needPulse(k) is true for PULSE_SECS after need k showed a rise (for the device's Needs bars).
+// DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
+const FLOAT_EVERY = 5, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
+let NEED_SEEN = null, FLOAT_LIVE = 0;
+const FLOAT_LOG = [];                                    // the last notes shown (player_check reads it: notes come and go on real-time timers)
+const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
+const needPulse = k => (NEED_PULSE[k] || 0) > performance.now();
+function needFxLayer() {
+  let el = document.getElementById('needFx'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#needFx{position:fixed;left:0;top:0;width:0;height:0;z-index:2;pointer-events:none}'
+    + '#needFx .nf{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:600;color:#bdeee6;padding:2px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--line);text-shadow:0 1px 6px rgba(0,0,0,.5);animation:nfup ' + FLOAT_SECS + 's ease-out forwards}'
+    + '@keyframes nfup{0%{opacity:0;margin-top:6px}15%{opacity:1}70%{opacity:1}100%{opacity:0;margin-top:-34px}}'
+    + '.devbtn.npulse{animation:npulse .9s ease-out}@keyframes npulse{0%{box-shadow:0 0 0 0 rgba(76,195,181,.7)}100%{box-shadow:0 0 0 12px rgba(76,195,181,0)}}'
+    + '@media (prefers-reduced-motion:reduce){@keyframes nfup{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}.devbtn.npulse{animation:none}}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'needFx'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el);
+  return el;
+}
+function needFloat(text) {                               // one note over your head (the stand-in's while you're at a place)
+  if (typeof camera === 'undefined' || typeof player === 'undefined') return;
+  const A = ACT && ACT.body && ACT.phase !== 'walk' ? ACT : null, p = player.obj.position;
+  floatV.set(A ? A.x : p.x, (A ? A.y : 0) + 2, A ? A.z : p.z).project(camera);
+  const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24 - (actProgress() ? 40 : 0));   // above the progress bar (0.28.21)
+  const n = document.createElement('div'); n.className = 'nf'; n.textContent = text; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px';
+  needFxLayer().appendChild(n); FLOAT_LIVE++; FLOAT_LOG.push(text); if (FLOAT_LOG.length > 20) FLOAT_LOG.shift();
+  setTimeout(() => { n.remove(); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); }, FLOAT_SECS * 1000);
+  const b = document.getElementById('devBtn');
+  if (b) { b.classList.remove('npulse'); void b.offsetWidth; b.classList.add('npulse'); }
+}
+function needsSeen() {                                   // once a frame: what rose since the last frame
+  const n = SHIP.player.needs, now = performance.now();
+  if (!NEED_SEEN) { NEED_SEEN = { ...n }; return; }
+  for (const k of NEED_KEYS) {
+    const d = n[k] - NEED_SEEN[k]; NEED_SEEN[k] = n[k];
+    const r = NEED_RISE[k] || (NEED_RISE[k] = { v: 0, t: 0 });
+    if (d > 0) { if (!(r.v > 0)) r.t0 = now; r.v += d; r.t = now; }
+    const stopped = now - r.t > FLOAT_WAIT * 1000;      // a slow trickle under FLOAT_MIN keeps adding up until it stops
+    if (r.v > 0 && (stopped || r.v >= FLOAT_MIN && now - r.t0 > FLOAT_EVERY * 1000)) {
+      if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k]); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
+      r.v = 0;
+    }
+  }
+}
+// ---- progress for things that take time (0.28.21, the user's): a small bar over your character while an activity
+// runs, with what you're doing and how long is left. Any activity of a set length shows it (eating, the grab shelf,
+// a shower, the toilet, a workout, a call home, browsing, paying, the job loop's steps, the cart run, and 15b's
+// activities, which are ACTs too); the servery queue shows the wait to your turn; sitting (until you get up) shows
+// none. actProgress(A) -> { title, frac, left } or null; the bar is placed once a frame. DOM only. ----
+const BAR_Y = 1.95;                                      // over the stand-in's head, m
+let BAR_TXT = '';
+function actProgress(A = ACT) {
+  if (!A || A.phase !== 'do' || !A.body) return null;
+  const title = A.def.title || A.o.title || '';
+  if (A.kind === 'queue') {
+    if (!isFinite(A.o.turnAt)) return null;
+    const now = shipNow(), t0 = isFinite(A.o.qFrom) ? A.o.qFrom : (A.o.qFrom = now), left = Math.max(0, A.o.turnAt - now);
+    return { title, left, frac: A.o.turnAt > t0 ? Math.min(1, (now - t0) / (A.o.turnAt - t0)) : 1 };
+  }
+  if (A.def.until || !(A.def.mins > 0)) return null;
+  return { title, frac: Math.max(0, Math.min(1, A.done / A.def.mins)), left: Math.max(0, (A.def.mins - A.done) / needEffects().task) };
+}
+function actBar() {
+  let el = document.getElementById('actBar');
+  const pr = actProgress();
+  if (!pr) { if (el && !el.hidden) el.hidden = true; return; }
+  if (!el) {
+    needFxLayer();
+    const st = document.createElement('style');
+    st.textContent = '#actBar{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:124px;margin:-34px 0 0 -62px;padding:4px 9px 6px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#cfd9dc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '#actBar[hidden]{display:none}#actBar i{display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden}'
+      + '#actBar b{display:block;height:100%;background:var(--teal);transform-origin:left center}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'actBar'; el.setAttribute('role', 'progressbar'); el.setAttribute('aria-valuemin', 0); el.setAttribute('aria-valuemax', 100);
+    el.innerHTML = '<span></span><i><b></b></i>'; document.body.appendChild(el); BAR_TXT = '';
+  }
+  const A = ACT, txt = pr.title + ' · ' + (pr.left < 1 ? 'nearly done' : Math.ceil(pr.left) + ' min');
+  if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
+  el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
+  floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
+  const x = Math.max(66, Math.min(innerWidth - 66, (floatV.x + 1) * innerWidth / 2)), y = Math.max(44, (1 - floatV.y) * innerHeight / 2);
+  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; el.hidden = false;
+}
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
   const now = shipNow(), n = SHIP.player.needs;
@@ -9679,6 +9773,8 @@ function playerUpdate(dt, t) {
     slowWas[k] = slow;
   }
   if (ACT) actUpdate(dt, t);
+  needsSeen();                                           // a need that rose shows it (0.28.20)
+  actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
   if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
 }
@@ -9725,7 +9821,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
