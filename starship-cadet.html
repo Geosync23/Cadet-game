@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.19
+   STARSHIP CADET: CSV Wren                            build 0.28.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.19';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.20';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9471,6 +9471,52 @@ function actUpdate(dt, t) {
   A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
   A.body.update(dt, t);
 }
+// ---- you can see it working (0.28.20, the user's): when a need rises, a small "+25 Food" note floats up from your
+// character and the device button gives a soft pulse. Read off the needs themselves once a frame (needsSeen), so
+// every gain shows, whichever section made it (meals, showers, the toilet, sleep, chats, company, the store, 15b's
+// and 20's): rises add up per need and show every FLOAT_STEP, or once they stop for FLOAT_WAIT real seconds.
+// Drains never show. needPulse(k) is true for PULSE_SECS after need k showed a rise (for the device's Needs bars).
+// DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
+const FLOAT_STEP = 10, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
+let NEED_SEEN = null, FLOAT_LIVE = 0;
+const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
+const needPulse = k => (NEED_PULSE[k] || 0) > performance.now();
+function needFxLayer() {
+  let el = document.getElementById('needFx'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#needFx{position:fixed;left:0;top:0;width:0;height:0;z-index:2;pointer-events:none}'
+    + '#needFx .nf{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12.5px;font-weight:600;color:#bdeee6;padding:2px 9px;border-radius:999px;background:var(--glass);border:1px solid var(--line);text-shadow:0 1px 6px rgba(0,0,0,.5);animation:nfup ' + FLOAT_SECS + 's ease-out forwards}'
+    + '@keyframes nfup{0%{opacity:0;margin-top:6px}15%{opacity:1}70%{opacity:1}100%{opacity:0;margin-top:-34px}}'
+    + '.devbtn.npulse{animation:npulse .9s ease-out}@keyframes npulse{0%{box-shadow:0 0 0 0 rgba(76,195,181,.7)}100%{box-shadow:0 0 0 12px rgba(76,195,181,0)}}'
+    + '@media (prefers-reduced-motion:reduce){@keyframes nfup{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}.devbtn.npulse{animation:none}}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'needFx'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el);
+  return el;
+}
+function needFloat(text) {                               // one note over your head (the stand-in's while you're at a place)
+  if (typeof camera === 'undefined' || typeof player === 'undefined') return;
+  const A = ACT && ACT.body && ACT.phase !== 'walk' ? ACT : null, p = player.obj.position;
+  floatV.set(A ? A.x : p.x, (A ? A.y : 0) + 2, A ? A.z : p.z).project(camera);
+  const x = Math.max(60, Math.min(innerWidth - 60, (floatV.x + 1) * innerWidth / 2)), y = Math.max(40, (1 - floatV.y) * innerHeight / 2 - FLOAT_LIVE * 24);
+  const n = document.createElement('div'); n.className = 'nf'; n.textContent = text; n.style.left = x.toFixed(1) + 'px'; n.style.top = y.toFixed(1) + 'px';
+  needFxLayer().appendChild(n); FLOAT_LIVE++;
+  setTimeout(() => { n.remove(); FLOAT_LIVE = Math.max(0, FLOAT_LIVE - 1); }, FLOAT_SECS * 1000);
+  const b = document.getElementById('devBtn');
+  if (b) { b.classList.remove('npulse'); void b.offsetWidth; b.classList.add('npulse'); }
+}
+function needsSeen() {                                   // once a frame: what rose since the last frame
+  const n = SHIP.player.needs, now = performance.now();
+  if (!NEED_SEEN) { NEED_SEEN = { ...n }; return; }
+  for (const k of NEED_KEYS) {
+    const d = n[k] - NEED_SEEN[k]; NEED_SEEN[k] = n[k];
+    const r = NEED_RISE[k] || (NEED_RISE[k] = { v: 0, t: 0 });
+    if (d > 0) { r.v += d; r.t = now; }
+    if (r.v > 0 && (r.v >= FLOAT_STEP || now - r.t > FLOAT_WAIT * 1000)) {
+      if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k]); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
+      r.v = 0;
+    }
+  }
+}
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
   const now = shipNow(), n = SHIP.player.needs;
@@ -9512,6 +9558,7 @@ function playerUpdate(dt, t) {
     slowWas[k] = slow;
   }
   if (ACT) actUpdate(dt, t);
+  needsSeen();                                           // a need that rose shows it (0.28.20)
   const m = Math.floor(now);
   if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
 }
@@ -9558,7 +9605,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
