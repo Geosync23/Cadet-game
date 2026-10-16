@@ -17,6 +17,10 @@
 #   at the 09:00 and 21:00 checks, the bin shows by the dish pit, Mail gets a note, and a week still never runs short
 #   the menu (0.29.11): Friday's treat has a pudding, Sunday's dinner is the crew's top vote, Wednesday's favourite isn't
 #   on the week's menu already, the servery and the menu board say what's on
+#   busy windows (0.29.12): queues only inside a day's galleyBusy windows (a rush, a slow oven), up to BUSY_WAIT_MAX
+#   minutes there and WAIT_MAX elsewhere, nobody gives up, and over the days at least one rush forms a queue
+#   birthday cakes (0.29.12): with a stand-in birthday, a cake is baked, shown on the servery from 19:30, gone by 21:30,
+#   and named on the board, in galleyText and in Mail
 # Setup and environment as for cadet_test.py.
 # Run:  python3 food_check.py BUILD.html [DAY] [DAYS]     (DAY defaults to 1, DAYS to 7)
 import sys, json
@@ -26,8 +30,14 @@ from playwright.sync_api import sync_playwright
 DAY = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 DAYS = int(sys.argv[3]) if len(sys.argv) > 3 else 7
 WAIT_MAX = 5
+BUSY_WAIT_MAX = 25
 READY_MIN = 10
 BUDGET = 450
+
+def wait_ok(st, mw=None):                # waits within the limits: longer only inside the day's busy windows
+    busy = {b['meal'] for b in st['busy']}
+    mm = mw or st['mealMax']
+    return all(mm[m] <= (BUSY_WAIT_MAX if m in busy else WAIT_MAX) for m in ('breakfast', 'dinner'))
 
 ok = True
 def fail(msg):
@@ -53,7 +63,8 @@ with sync_playwright() as pw:
         for meal in ('breakfast', 'dinner'):
             if r[meal]['portions'] < READY_MIN: fail(f"day {d}: only {r[meal]['portions']} portions ready when {meal} opened")
         if r['breakfast']['grab'] <= 0: fail(f"day {d}: grab shelf empty at 06:00")
-        if st['maxWait'] > WAIT_MAX: fail(f"day {d}: {st['maxWho']} waited {st['maxWait']} minutes")
+        if st['busy']: print('  busy:', ', '.join(f"{b['kind']} at {b['meal']}" for b in st['busy']), f"- longest wait breakfast {st['mealMax']['breakfast']}, dinner {st['mealMax']['dinner']} min")
+        if not wait_ok(st): fail(f"day {d}: {st['maxWho']} waited {st['maxWait']} minutes ({st['mealMax']}, busy {st['busy']})")
         if st['missed']: fail(f"day {d}: gave up waiting: {st['missed'][:6]}")
         if st['ate'] != st['eaten'] + st['grabbed']: fail(f"day {d}: {st['ate']} came to eat, {st['eaten'] + st['grabbed']} got food")
         if st['end']['dirty'] or st['end']['inUse'] or st['end']['wait']: fail(f"day {d}: at midnight {st['end']}")
@@ -120,18 +131,18 @@ with sync_playwright() as pw:
       if (!real) window.__sc("cartClaim = (t, cold) => {{ const md = t % 1440, n = Math.min(150, FOOD.coldCap - cold); return n > 0 && (cold < 90 || (cold < 250 && md >= 540 && md < 1020)) ? {{ meals: n, arriveAt: t + 40 }} : null; }}");
       FOOD.restock = 'carts';
       for (const E of GALLEY_EV.values()) E.k = 0;
-      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, delivered: st.delivered, ready: st.ready }}));
+      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy, delivered: st.delivered, ready: st.ready }}));
       const keep = cartClaim, d2 = {DAY} + 1; cartClaim = (t, c, o) => [d2, d2 + 1].includes(Math.floor(t / 1440) + 1) ? null : keep(t, c, o);
       const missed = galleyReport({DAY}, 4).map(st => ({{ coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, waited: st.waited, missed: st.missed.length }}));
       if (real) cartClaim = keep; else window.__sc("cartClaim = undefined"); FOOD.restock = was; return {{ real, week, missed }}; }})()""")
     print('Carts' + (' (section 17)' if carts['real'] else ' (stand-in rule)') + ':', ', '.join(f"day {DAY + k}: low {w['coldMin']}, in {w['delivered']}, wait {w['maxWait']}" for k, w in enumerate(carts['week'])))
     print('  no carts on days 2 and 3:', carts['missed'])
-    if any(w['coldOut'] or w['maxWait'] > WAIT_MAX or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
+    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
     # 4c. spoilage: a broken chiller (shipEffectsAt's spoil at 2, its worst) for a week
     sp = g.ev(f"""(() => {{ window.__keepFx = shipEffectsAt; window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx(deck, t), spoil: 2 }})");
-      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait }}));
+      const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy }}));
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
       const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
@@ -140,7 +151,7 @@ with sync_playwright() as pw:
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
     if not all(w['spoiled'] > 0 for w in sp['week']): fail('spoilage: a broken chiller spoiled nothing on some day')
-    if any(w['coldOut'] or w['maxWait'] > WAIT_MAX for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
+    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
     if not sp['bin'] or sp['bags'] < 1: fail(f"spoilage: nothing in the bin by the dish pit at 09:30: {sp}")
     if not sp['mail'] or 'binned' not in sp['mail'][0]: fail('spoilage: no Mail about the binned food')
 
@@ -159,6 +170,37 @@ with sync_playwright() as pw:
       return {{ text: galleyText('servery'), dinner: galleyMenu({DAY}).dinner, board: GV && GV.boardDay, tap: mb ? mb.x : '' }}; }})()""")
     print('Menu at 18:00:', bd['text'], '| board:', bd['tap'][:90])
     if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or bd['board'] != DAY or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
+
+    # 4e. busy windows over four weeks: queues only in them, nobody gives up, and rushes make queues
+    bz = g.ev(f"""(() => {{ for (const E of GALLEY_EV.values()) E.k = 0;
+      return galleyReport({DAY}, 28).map(st => ({{ day: st.day, busy: st.busy, mealMax: st.mealMax, waited: st.waited, missed: st.missed.length }})); }})()""")
+    rush = [x for x in bz if any(b['kind'] == 'rush' for b in x['busy'])]
+    slow = [x for x in bz if any(b['kind'] == 'slow' for b in x['busy'])]
+    print(f"Busy windows over 28 days: {len(rush)} rushes (queued {sum(x['waited'] for x in rush)}, longest {max([x['mealMax']['dinner'] for x in rush] or [0])} min),"
+          f" {len(slow)} slow ovens (longest {max([max(x['mealMax'].values()) for x in slow] or [0])} min); calm days' longest {max([max(x['mealMax'].values()) for x in bz if not x['busy']] or [0])} min")
+    for x in bz:
+        if not wait_ok(x): fail(f"busy: day {x['day']} waits {x['mealMax']} with {x['busy']}")
+        if x['missed']: fail(f"busy: day {x['day']}: {x['missed']} gave up")
+    if not rush or not any(x['waited'] for x in rush): fail('busy: no rush made a queue')
+    q = g.ev(f"""(() => {{ const d = [...Array(28)].map((_, k) => {DAY} + k).find(d => galleyBusy(d).some(b => b.kind === 'rush'));
+      setShipNow((d - 1) * 1440 + 17 * 60 + 35); SHIP.galley = null; galleyAdvance(shipNow()); return [d, SHIP.galley.wait.length, galleyText('servery')]; }})()""")
+    print('A rush at 17:35:', q)
+    if not q[1] or 'waiting' not in q[2]: fail(f"busy: no queue in the servery's text during a rush: {q}")
+
+    # 4f. a birthday cake (a stand-in birthday on day DAY + 2 for the first crew member, until ROSTER has them)
+    ck = g.ev(f"""(() => {{ const p = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[0], had = p.birthday, d = {DAY} + 2, B = (d - 1) * 1440, out = {{}};
+      const real = ROSTER.some(x => x.birthday); p.birthday = ((d - 1) % 364) + 1;
+      const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
+      for (const E of GALLEY_EV.values()) E.k = 0; out.cakes = galleyReport(d, 1)[0].cakes;
+      SHIP.galley = null; goToDeck(3);
+      for (const [t, k] of [[14 * 60, 'before'], [18 * 60, 'dinner'], [19 * 60 + 45, 'out'], [21 * 60 + 45, 'gone']]) {{
+        setShipNow(B + t); galleyTick(); out[k] = {{ cake: !!(SHIP.galley.cake && SHIP.galley.cake.out), shown: !!(GV && GV.cake && GV.cake.visible), candles: GV && GV.candles ? GV.candles.count : -1, text: galleyText('servery') }}; }}
+      out.board = galleyBoard(d); out.mail = mail.map(x => x.subject + ': ' + x.body); out.name = p.name; out.real = real;
+      window.__sc("mailSend = window.__keepMail"); if (had === undefined) delete p.birthday; else p.birthday = had; GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")
+    print('Birthday cake for', ck['name'] + (' (ROSTER has birthdays)' if ck['real'] else ' (stand-in birthday)') + ':', 'baked', ck['cakes'], '| 19:45:', ck['out']['text'])
+    print('  shown at 14:00/18:00/19:45/21:45:', [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')], '| mail:', ck['mail'][:1])
+    if ck['cakes'] != 1 or [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')] != [False, False, True, False] or ck['out']['candles'] != 10: fail(f"cake: {ck}")
+    if 'birthday' not in ck['board'] or 'cake' not in ck['out']['text'].lower() or not any('Cake tonight' in m for m in ck['mail']): fail(f"cake: board, text or mail: {ck}")
 
     # 5. once the schedules use the rota: galley staff are at the rota's stations
     hooked = g.ev(f"galleyStaff().some(p => planDay(p, {DAY}).some(s => s.act === 'work' && s.from < {B} + 330))")
