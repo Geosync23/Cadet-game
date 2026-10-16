@@ -8496,7 +8496,7 @@ function mailWelcome() {
 // ---- activities: tap the thing. ACT_TAP picks the activity by what you tapped, then the nearest free place of
 // its types (on this deck, within ACT_NEAR m of the thing). Without a place nearby the tap does what it always did. ----
 const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd's (anim names fall back to stand until 8b has them)
-  gym:    { need: 'fitness', gain: 30, mins: 30, title: 'Working out', done: 'Workout done. You feel loose and warm.' },
+  gym:    { need: 'fitness', gain: 30, mins: 30, cost: { energy: 6 }, title: 'Working out', done: 'Workout done. You feel loose and warm.' },
   call:   { need: 'social', gain: 40, mins: 15, pose: 'call', title: 'Calling home', done: 'You say goodbye and send it off. It\'ll be days getting there.' },
   browse: { mins: 8, pose: 'browse', title: 'Browsing' },
   pay:    { mins: 2, pose: 'pay', title: 'Paying' },
@@ -8629,8 +8629,30 @@ function sitTap(it, at, point) {
   if (!near.length) return false;
   const free = near.find(([pl]) => !heldBy(pl.id));
   if (!free) { toast(it.t, it.x + ' ' + heldBy(near[0][0].id).p.name + ' is sitting there.'); return true; }
-  actStart('sit', free[0].id, { pose: free[1].pose, title: it.t, after: it.x + ' You sit down. Tap anywhere to get up.' });
+  actStart('sit', free[0].id, { pose: free[1].pose, title: it.t, after: [it.x, 'You sit down. Tap anywhere to get up.'].filter(Boolean).join(' ') });
   return true;
+}
+// a tap that reached the floor (0.28.17, the user's treadmills; section 11, one line): things with no description of
+// their own aren't tappable (two of the three treadmills, the far mess tables' seats, two store shelves), so the tap
+// went through to the floor and you only walked there. If the tap's line of sight passes within FLOOR_NEAR m of a
+// usable place's spot at any height up to 1.2 m (the belt, the console, the seat), use that place as a tap on it
+// would: the gym, a call-home booth, a store shelf, or a seat to sit on. Else the floor tap walks, as always.
+const FLOOR_NEAR = .5;
+const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves' };
+function playerFloorTap(point) {
+  if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
+  const o = ray.ray.origin, d = ray.ray.direction, hits = [];
+  for (const pl of PLACE_OF.values()) {
+    const use = FLOOR_ACTS[pl.type] ? 'act' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) ? 'sit' : null; if (!use) continue;
+    const sp = placeSpot(pl.id); if (!sp) continue;
+    let best = Infinity;
+    for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
+    if (best < FLOOR_NEAR) hits.push([best, pl, sp, use]);
+  }
+  if (!hits.length) return false;
+  const [, pl, sp, use] = hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
+  if (use === 'sit') return sitTap({ t: 'Seat', x: '' }, at, at);
+  return playerTap({ t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at, at);
 }
 // crew near you (0.28.12, for sitting): settled at a place you'd sit at, within COMPANY_NEAR m
 const sitCompany = A => !A || !A.spot || typeof DECK_CREW === 'undefined' ? 0
@@ -8807,6 +8829,7 @@ function playerUpdate(dt, t) {
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
+      if (A.def.cost) for (const k in A.def.cost) n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m);   // a workout tires you (0.28.17)
       if (A.kind === 'eat' && m > 0) {                   // company at the table (0.28.10): social for each one near you, up to COMPANY_MAX
         const c = company(A); A.o.company = Math.max(A.o.company || 0, c);
         n.social = needClamp(n.social + COMPANY_GAIN * Math.min(c, COMPANY_MAX) * needEffects(n).socialGain * m);
@@ -14644,6 +14667,7 @@ function tap(cx, cy) {
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
     return;
   }
+  if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
   playerGo(nearestOpen(h.point.x, h.point.z, player));
 }
 
