@@ -1,60 +1,59 @@
-# Lead handover (2026-10-16, ~04:20 UTC, mid answers-pass)
+# Lead handover (2026-10-16, ~15:20 UTC, Pillar 3 in progress)
 
-From the outgoing lead (session_0158BCCswtdujm3t5d2LXsFz, ~460k of 1M after one summary) to the new lead. You are the PROJECT LEAD for Starship Cadet. Read this, then CLAUDE.md, TEAM.md, plans/answers-pass-plan.md, plans/answers-pass-decisions.md, then skim DEV_NOTES.md's build table.
+From the outgoing lead (session_01WHXNp9A1WHAD2EHJw384Qp) to the new lead. You are the PROJECT LEAD for Starship Cadet. Read this, then CLAUDE.md, TEAM.md, `plans/pillar3-plan.md` (the AGREED plan), design-doc.md's "The player", "Social life", "Ship-wide events" and "Open questions", and skim DEV_NOTES.md's build table.
 
 ## The user
 
-New to Claude Code and git: plain language, no jargon, short updates. Asleep tonight; they gave the lead sole authority to interpret their answers. Every request comes through the lead. PRs to main only when they approve a milestone; merge only with their explicit OK. They like PushNotification pings when something they're waiting for is ready. Our rule (CLAUDE.md): warn early and hand over before auto-summarizing.
+New to Claude Code and git: plain language, no jargon, short updates. Active today. Every request comes through the lead. They like PushNotification pings when something they wait for is ready (a new build on the link). PRs to `main` only when they approve; they approved and merged 0.41.4 (PR #2). Rules they set today:
+- **Hand over before memory fills** (CLAUDE.md). This brief exists because the user had to ask: do it earlier next time (around half of memory).
+- **Resume fast after a usage limit**: keep a REPEATING hourly check-in (create_trigger cron). Mine is trig_01NKBjg2UJa1tXFjWU5Zd29L ("Lead check-in (repeating)", fires :53 into THIS old session) — DELETE it and create your own pointing at your session. If a limit is coming, also add a one-shot send_later just after the reset time.
+- **At most ~5-6 helpers actively building at once** (the user's "be more careful" after the 15:10 reset). Others on standby answering questions only.
 
-## Tonight's job (the "answers pass"), and what the user expects in the morning
+## Builds and the playable link
 
-1. **The new playable build** at the same link: https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y (owned by the user's account; version 11 = 0.40.8). Republish ONCE at the end, from the final combined build. Steps: plans/handover-deck6-architect.md section 3. Caution: publishing to it needs a full Read of the current 10.5k-line page first (very costly in memory). Consider delegating the republish to a fresh helper session with those steps.
-2. **A report of the design decisions faced and what was decided** (plans/answers-pass-decisions.md is the running log; turn it into a clear page). The user also asked mid-night for: sitting anywhere, small Stardew-like traditions, player can use everything crew use, job board pick-and-take with an on-screen arrow, more jobs, crew seat alignment. All are assigned (below).
-3. **The Pillar 3 plan and pitch.** The Pillar 3 planner (session_01FvJicF3TPx3ZV84fiZGUyU, branch claude/pillar3-plan) has pushed plans/pillar3-plan.md (52568ac) and plans/pillar3-pitch.md (16f9fba). NOT YET REVIEWED by the lead. Review, give feedback, then publish the pitch as an artifact for the morning. The user's must-haves: personal device with Schedule, Appointments, Maps, Memos (+ more), the start of ship-wide events and how they run ambiently ("everyone talks about them") vs traditional missions, plus the lead's ideas.
-4. The **real-phone test checklist** for the user (only they can do it).
+- `main` = 0.41.4 + all docs (PR #2, 4b2ee4f). `claude/lead-pillar1` restarted from main (shared history now).
+- `claude/ship-integration` = **0.41.5** (8027d4b, all nine checks pass): the player carries a tray (user's note), jobs taken and turned in at the board (TURN_IN on), chore walk, plus Pillar 3 groundwork, mostly inert.
+- Playable link https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y: version 12 = 0.41.4. **0.41.5 is being republished** by a subagent of the old lead; if it finished, the link is version 13 = 0.41.5 (check with Artifact read/list; if not, republish: steps in plans/handover-deck6-architect.md section 3, or delegate to a fresh helper — the publish needs a full Read of the live ~13k-line page). Then ping the user.
+- Morning report: https://claude.ai/artifact/VDETEN1m2yWca1C2vxFKkU (plans/morning-report.html). Pillar 3 pitch (agreed): https://claude.ai/artifact/A3HL2vuWXa1cguTQxnBbiZ (plans/pillar3-pitch.html).
 
-## Where the build is
+## How merging and checking works now (fast)
 
-- Combined builds on `claude/ship-integration`: 0.41.0 (99de199), 0.41.1 (f29fa93), **0.41.2 (e806e7b, latest, pushed)**. All checks pass on 0.41.2 (deck, day 1, food, machine, player, events); cadet_test differences explained in the commit message.
-- Work in a local branch (`lead-wip`), push ship-integration only after all checks pass (the stop hook nags about unpushed commits otherwise).
-- Merge tooling in `tools/` on the lead branch: `resolve.py <build>` (auto-resolves HUD build line, GAME_BUILD and DEV_NOTES unions), `fixrate.py <file>` (auto-resolves the GAME_BUILD + SHIP_RATE conflict block every helper branch now hits; keeps HEAD's), `kitdup.py <file>` (duplicate KIT piece names: last definition silently wins). Also scan duplicate top-level declarations: `grep -oE "^(const|let|var|function) +[A-Za-z_$][A-Za-z0-9_$]*" starship-cadet.html | awk '{print $2}' | sort | uniq -d`.
-- DEV_NOTES build table: dedupe, sort by version, append the combined row, update "## Current build".
-- Checks: CADET_CHROME=/opt/pw-browsers/chromium; three.js in /tmp/cadet-work/three; run ONE AT A TIME: deck_check.py, day_check.py BUILD 1, food_check.py, machine_check.py, player_check.py, events_check.py, cadet_test.py old new. ~25 minutes for all.
+- Combine in a local worktree (the old lead used /home/user/si-work, branch lead-wip; recreate with `git worktree add -B lead-wip <dir> origin/claude/ship-integration`). Tools in tools/: resolve.py, fixrate.py, kitdup.py. ALWAYS reset the HUD line + GAME_BUILD after merges: clean merges silently bring helpers' build numbers in.
+- Push the unchecked attempt to **`claude/integration-test`** (user-approved test branch), then start short-lived **check-runner sessions** (create_session, source_revision claude/integration-test, model claude-sonnet-5-5, tag cadet:check-runner) each running 1-3 checks and reporting by send_message; archive them after. ~8-25 min total instead of ~30-60. player_check takes ~25 min alone.
+- Checks: deck_check, day_check BUILD 1, food_check, machine_check, player_check, events_check, interactions_check, social_check, cadet_test old new. Setup: pip install playwright; three r128 in /tmp/cadet-work/three; CADET_CHROME=/opt/pw-browsers/chromium. Only builds where ALL pass go to ship-integration.
+- When a combined check fails, have the owning helpers diagnose on their own machines from integration-test (it worked well: the food-supply bug was found that way).
 
-## Waiting to merge (pushed but not yet in a combined build)
+## Queued for 0.41.6 (base 8027d4b)
 
-- deck1-scale 0.31.10 (Deck 1 handover/walk places)
-- deck-architect 0.30.13 (machineMarks removed, look overrides, plates read ROSTER plate)
-- systems 0.33.16 (jobs left for the player 3-6/day, cart run as a player job, jobStops)
-- crowd-render 0.27.11 (stool footrests, ?seats view)
-- galley 0.29.12 is in; player 0.28.10 is in.
+- device 196f520 (0.35.0-0.35.3: two layers, CRT skin — the user chose **Wren cyan** as default, Schedule/Calendar with tradition reminders, Jobs as tracker, Maps) — 0.35.4-0.35.6 coming (Memos/Ship/Record/Crew shell/tips/framing, dialogue panel + chat card CRT, Appointments).
+- social fbef6ff (0.36.1 chat cards, 0.36.2 time together, 0.36.3 favours).
+- ship-events 7248bce (0.34.9 meetings at run time, eventFeel) — storm still `draft: true`.
+- ship-systems 1d32621 (0.33.26 blackout thread score, event jobs per hour). Decision: drop `stormTrays` from the storm data (galley's cartTrays is the one tray run) — events engineer told.
+- galley 0.29.21 pending (scores 'spoiled' and 'bridgeHungry'); then events engineer prepares the switch-on (draft off) as its own push.
+- crowd-render 07c2a9b (0.27.14 civilian outfit, 0.27.15 punch/stretch, 0.27.16 prop follows phosphor).
+- player-needs 42de361 (0.28.16 texts: jobs taken at the board).
+- crew designer a56b3a1 (0.16.9 about tiers/topics, 0.16.10 rosterSpec civilians).
+- decks-p3 27f50d9 (0.38.1 event dressing/traces); 0.38.2 coming (ready room, Captain's dining room, gym kit).
+- **DO NOT merge sim 0.26.14 (guest schedules)** until a fresh sim engineer fixes it against the real GUESTS (day-of-year arrive/leave, null arrive for event guests, GUEST_TEMPLATES). See plans/handover-sim.md on claude/sim-engineer (f2f4b9f).
 
-## Who is doing what (all report to the lead by send_message)
+## Team (details in TEAM.md)
 
-| Helper | Session | Branch | Remaining |
-| --- | --- | --- | --- |
-| Sim engineer | session_01S5xTHRBpJ9kqytfrwKipUG | claude/sim-engineer | Remove observatory/birthday gatherings (section 18 owns them), numeric `face` + per-place `y` in placeSpot. |
-| Performance engineer | session_01TiBtENVFJV7RqEQ7YkxH1Z | claude/crowd-render | Done; standby (may check architects' seat fixes). |
-| Bridge architect | session_015BoZMMp5b4A4F51dMcZ3ax | claude/deck1-scale | Tiers on 7 hatches, bridge health board (reuse Deck 6's healthBoard kit), look overrides (NO machineMarks), seat fixes for Decks 1 and 3 from the performance engineer's list. |
-| Crew designer | session_01JScnVG158eYAHYvKDz3jZG | claude/deck-plans-1-2-6 | Done; standby. |
-| Systems engineer | session_01FtwFYLBjAB9zFvPSpLezaR | claude/ship-systems | 0.33.17 machineLook/shipHealthRows/shipMoodAt/chiller; 0.33.18 machineUse, tier locks (e.tier on hatch edges), shortages to Mail; MANY MORE JOB TYPES + openJobs(forWho) for the interactions engineer. |
-| Deck 6 architect | session_01MiQtjmdEa4CXsCsiCh6zWV | claude/deck-architect | Seat fixes for Decks 4-6; check Deck 6 crawl trays once the cableTray rename lands. |
-| Player engineer | session_01BQjtEzvKXuvPZNzGRRRwpZ | claude/player-needs | 0.28.11: squeeze past settled crew (fixes the blocked galley plant panel), machine tap (machineUse), cart run (jobStops), crouch on crawl tiles, SIT ANYWHERE. |
-| Galley engineer | session_01AVGVnj4Q1jFmVoD6xi5asT | claude/galley-food | One line: meals the PLAYER pushes land on unload. Otherwise done. |
-| Command architect | session_01EhJv6dqovqhQyruMveFuRR | claude/deck2-command | Seat fixes for Deck 2 (0.32.6). Messages to them crossed several times: be explicit. |
-| Events engineer | session_01YXDbUmtB1mg4kiJyuToqKA | claude/ship-events | 0.34.1: reconcile with the sim engineer (section 18 is the ONE events system), one observatory night day/time, announcement mails quiet on Day 1 morning (they covered the intro toast). |
-| Interactions engineer | session_01GGbtSiy4tDygCzrSUBDMYa | claude/player-interactions | Section 15b: player can use everything crew use (treadmill, rower, bar, music, garden, laundry, games...), job-board pick-and-take, on-screen goal arrow (setGoal/clearGoal). No push yet. |
-| Pillar 3 planner | session_01FvJicF3TPx3ZV84fiZGUyU | claude/pillar3-plan | Draft done; waiting for the lead's review. |
+Active (6): device session_014TpEMbWarRFJM8BHC9WM8c (claude/device 0.35.x), social session_01DzZ669spGpdSdVMYzUog2N (claude/social 0.36.x), events 2 session_01GW9QtevJxaMQzzCGPBHaxb (claude/ship-events 0.34.x), interactions session_01GGbtSiy4tDygCzrSUBDMYa (claude/player-interactions 0.37.4 = job-loop tips), systems session_01FtwFYLBjAB9zFvPSpLezaR (claude/ship-systems 0.33.x), deck architect session_014PT5L2QxXYoVhqFP7qhj3y (claude/decks-p3 0.38.x).
+Standby: performance session_01TiBtENVFJV7RqEQ7YkxH1Z (next: shipFeel for the storm's felt-everywhere, CRT phone review), player session_01BQjtEzvKXuvPZNzGRRRwpZ, galley session_01AVGVnj4Q1jFmVoD6xi5asT (doing 0.29.21 then standby), crew designer session_01JScnVG158eYAHYvKDz3jZG.
+Retired today: sim session_01S5xTHRBpJ9kqytfrwKipUG (handover written), events 1 session_01YXDbUmtB1mg4kiJyuToqKA, three architects, Pillar 3 planner, old lead session_0158BCCswtdujm3t5d2LXsFz.
+**To hire next** (when a slot frees): a fresh SIM engineer — first the guest-schedule fix above, then C7 event routines (storm keys in handover-sim.md: doubleShift, patrol, closed, stayIn, rush; needs; the bow-lounge party via gatherSpots('bow-lounge')).
 
-## Decisions already made (don't relitigate)
+## Decisions made today (beyond the design doc)
 
-See plans/answers-pass-decisions.md. Highlights: SHIP_RATE 1080/1800; energy lasts ~16-18 h; bed after 20:00 skips to 06:00; need bonus table (tuned); machine trouble doesn't slow the player; visible faults drawn ONLY by the performance engineer's central system (architects add `look` overrides); shipHealthRows shape; place type 'event' + `event` tags; one events system in section 18; Tier 1 player; squeeze past settled crew; seats fixed by place data (y, xy, numeric face).
+Ship traditions = official name (Calendar reminds ~30 ship min ahead); jobs taken and turned in at the board, device only tracks; favours in person (user confirmed); first tips for the job loop; see your character use the device; device colour Wren cyan; meetings with dialogue (never cutscenes); full event order kept (7 main + 6 short); crew Works juniors are Tier 2, player Tier 1; jobs left for the player ~5.6/day; galley owns cold-store accounting; thread owners: blackout = systems, spoiled + bridgeHungry = galley, calls = events; traditions pause during a ship-wide event's onset/escalation (birthdays kept); afterglow to end of day 5. **Open, asked the user:** should the player get days off (suggested two a week like a Works junior)? Device engineer reads playerShiftOn(day) (default true) so a rota can drop in.
 
-## Lessons from tonight
+## Next milestones
 
-- Messages reach a helper only between its turns, so a changed decision arrives late. Settle who-does-what before work starts.
-- Three architects built the same machine lamps because of that; two KIT names collided (cableTray, relayRack). Run kitdup.py on every merge.
+0.41.6 (above) → switch the storm on once galley scores land and all checks pass → **Pillar 3 check-in 1** with the user (device in cyan with its apps, jobs at the board, tips, chats/favours/relationships) → the full ion storm (check-in 2).
 
-## Safety net
+## Lessons
 
-A self check-in was scheduled into the old lead's session; cancel it if the old lead hands over (trigger trig_01Xz7RrwGS2BNT274jDYKs8U). Schedule your own with send_later (~60 min) while helpers work.
+- A one-shot reminder that fires while the account is limited is lost: use a repeating trigger.
+- Clean merges carry helper build numbers: always reset build lines.
+- `const` functions can't be stubbed by tests; tests should use a test hook (the galley's GALLEY_TEST pattern).
+- Two helpers adding the same safeguard (double counting) or the same job (storm trays): decide one owner fast.
