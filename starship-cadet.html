@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.8
+   STARSHIP CADET: CSV Wren                            build 0.34.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10520,12 +10520,16 @@ function eventsDecor(now) {
 }
 let EV_MIN = -1;
 function eventsTick() {
+  eventFeelFrame();                                      // a ship-wide event's jolt and light dip (inert with none)
+  if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
+  const prev = EV_MIN;
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now);
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
+  eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
 }
 // ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
 // The format (plans/pillar3-plan.md, "How an event is put together" and "Shared formats"):
@@ -10629,7 +10633,8 @@ SHIP_EVENTS.ionStorm = {
   ],
   // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
   meetings: [
-    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { deck: 5, placeId: '5-jobboard-1', room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'] },
+    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { deck: 5, placeId: '5-jobboard-1', room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'],
+      notify: 'Chief Calder\'s storm briefing, at the job board in the Works bay at 08:15.' },
     { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
   ],
   address: {
@@ -10755,7 +10760,7 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script });
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script, notify: m.notify });
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
@@ -10799,23 +10804,148 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
 }
 
 // ---- meetings with dialogue (the fourth kind of moment): scripts are data; section 19 (the device engineer) draws
-// the panel. These are stand-ins: until section 19 provides deviceDialogue(script, i), a line shows as a toast.
+// the panel; until section 19 provides deviceDialogue(view, onTap), a plain strip at the bottom stands in.
 // MEETING_SCRIPTS.<id> = { title, gist, lines: [{ who, text, pose? } | { choice: [{ text, rel?, job? }, ...] }] }
 const MEETING_SCRIPTS = {};
 const MEETINGS = [];                                     // meetings registered by events: { id, where, at, who, script }
 function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at === m.at)) MEETINGS.push(m); return m; }
-let DIALOGUE = null;                                     // { id, i }: the script being shown, and the line
-function dialogueShow(scriptId) {
-  const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
-  DIALOGUE = { id: scriptId, i: 0 };
-  if (typeof deviceDialogue === 'function') return deviceDialogue(sc, 0);
-  const l = sc.lines.find(x => x.text); if (l) toast(sc.title + ': ' + l.who, l.text);
-  return true;
+// At run time (0.34.9): you're there when you're in the meeting's room on its deck while it's on; then its script plays,
+// line by line, tap to go on (or it moves on by itself after a few seconds; a choice waits for you). Walking out of the
+// room closes it and the gist comes by Mail; if you weren't there at all, the gist comes when it ends. The panel is
+// section 19's: deviceDialogue(view, onTap) when it exists (view = { title, name, text, to, pose, choices, i, n };
+// onTap(choiceIndex | undefined)), else the plain strip below.
+let DIALOGUE = null;                                     // { id, m, cast, ctx, queue, i, at }: the script being shown
+let DIALOGUE_EL = null;
+const DIALOGUE_AUTO = 7000;                              // real ms before a line moves on by itself
+// the cast: ROSTER ids as they are; 'works:2' -> two Works juniors on shift that day (by hash), as tech1 and tech2
+function meetingCast(m) {
+  const d = Math.floor(m.at / 1440) + 1, ppl = schedPeople(), cast = {};
+  for (const w of m.who || []) {
+    const mm = /^(\w+):(\d+)$/.exec(w);
+    if (!mm) { const p = ppl.find(q => q.id === w); if (p) cast[w] = p; continue; }
+    const pool = ppl.filter(p => p.dept === mm[1] && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !(m.who || []).includes(p.id))
+      .sort((a, b) => schedU(a.seed, d, 602) - schedU(b.seed, d, 602));
+    pool.slice(0, +mm[2]).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
+  }
+  return cast;
 }
-function dialogueClose() {                               // walking away: the gist arrives in Mail
-  if (!DIALOGUE) return;
-  const sc = MEETING_SCRIPTS[DIALOGUE.id]; DIALOGUE = null;
-  if (sc && sc.gist && typeof mailSend === 'function') mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });
+const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[who].name : (schedPeople().find(p => p.id === who) || { name: who }).name;
+function dialogueShow(scriptId, m) {
+  const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
+  m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
+  DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }, queue: sc.lines.slice(), i: 0, at: 0 };
+  eventMine('meetings', 1);
+  dialogueDraw(); return true;
+}
+function dialogueView() {
+  const D = DIALOGUE, sc = MEETING_SCRIPTS[D.id], l = D.queue[D.i]; if (!l) return null;
+  if (l.choice) return { title: sc.title, name: D.ctx.you, text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
+  return { title: sc.title, name: castName(D, l.who), who: l.who, text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
+}
+function dialogueDraw() {
+  const v = DIALOGUE && dialogueView();
+  if (!v) return dialogueEnd(true);
+  DIALOGUE.at = performance.now();
+  if (typeof deviceDialogue === 'function') return deviceDialogue(v, dialogueStep);
+  if (typeof document === 'undefined') return;
+  if (!DIALOGUE_EL) {
+    DIALOGUE_EL = document.createElement('div');
+    DIALOGUE_EL.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,92vw);box-sizing:border-box;padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.94);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:31;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+    DIALOGUE_EL.addEventListener('click', e => { if (DIALOGUE && !e.target.dataset.c && !dialogueView().choices) dialogueStep(); });
+    document.body.appendChild(DIALOGUE_EL);
+  }
+  DIALOGUE_EL.innerHTML = '';
+  const h = document.createElement('div'); h.style.cssText = 'font-weight:600;color:#9fe0cf;margin-bottom:2px';
+  h.textContent = v.choices ? v.title + ': your reply' : v.name; DIALOGUE_EL.appendChild(h);
+  if (!v.choices) DIALOGUE_EL.appendChild(document.createTextNode(v.text));
+  else v.choices.forEach((c, k) => {
+    const b = document.createElement('button'); b.textContent = c; b.dataset.c = '1';
+    b.style.cssText = 'display:block;width:100%;margin-top:6px;padding:8px 10px;border-radius:8px;border:1px solid #3d5a52;background:#1d2b2a;color:#e8f4ef;font:inherit;text-align:left';
+    b.addEventListener('click', () => dialogueStep(k)); DIALOGUE_EL.appendChild(b);
+  });
+  DIALOGUE_EL.hidden = false;
+}
+// on to the next line; on a choice line, k is the reply picked: its nudges, its job, and the reply said back
+function dialogueStep(k) {
+  const D = DIALOGUE; if (!D) return;
+  const l = D.queue[D.i];
+  if (l && l.choice) {
+    const c = l.choice[k]; if (!c) return;
+    eventMine('choice:' + D.id, k + 1);
+    for (const [who, pts] of Object.entries(c.rel || {})) { const p = D.cast[who] || schedPeople().find(q => q.id === who); if (p && typeof relAdd === 'function') relAdd(p.id, 'meeting:' + D.m.id, pts); }
+    if (c.job) eventTakeJob(c.job);
+    if (c.reply) D.queue.splice(D.i + 1, 0, c.reply);
+  }
+  D.i++; dialogueDraw();
+}
+// a job offered in a meeting: claimed for you if section 17 has posted it (tagged event and eventJob), else remembered
+// in SHIP.event.mine ('wants:<job>') for section 17 to give you when it posts
+function eventTakeJob(job) {
+  const e = SHIP.event; if (!e) return false;
+  const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
+  if (j && typeof claimJob === 'function') return claimJob(j.id);
+  e.mine['wants:' + job] = 1; return false;
+}
+function dialogueEnd(finished) {
+  const D = DIALOGUE; if (!D) return;
+  DIALOGUE = null;
+  if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
+  if (!finished) meetingGist(D.id);
+}
+const dialogueClose = () => dialogueEnd(false);          // walking away: the gist arrives in Mail
+function meetingGist(scriptId) {
+  const sc = MEETING_SCRIPTS[scriptId]; if (!sc || !sc.gist || typeof mailSend !== 'function') return;
+  mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });
+}
+function inMeeting(m) {
+  const w = m.where || {}; if (deckDef.num !== w.deck) return false;
+  const r = roomAt(...player.here()), room = r && DECKS[w.deck].rooms && DECKS[w.deck].rooms[r];
+  return !!room && (!w.room || w.room.test(room.name || ''));
+}
+// once a ship minute: the notice 15 minutes before (notify: true), the script when you're there, walking away, the gist after
+function meetingsTick(now) {
+  const e = SHIP.event; if (!e) return;
+  for (const m of MEETINGS) {
+    if (m.event !== e.id) continue;
+    const k = m.id, f = e.mine;
+    if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
+    if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
+    if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
+  }
+  if (DIALOGUE && !inMeeting(DIALOGUE.m)) dialogueClose();
+}
+
+// ---- felt everywhere (the first kind of moment): the front hits, every light dips, then flickers. The performance
+// engineer owns the real effect, shipFeel(kinds, len) (sections 5, 8b), used when it exists; until then this plain
+// stand-in: the camera shakes, the lights dip and come back, a rare flicker while the event's 'flicker' effect is on.
+// Visual only (real time, never the simulation), on the current deck; nothing happens with no event.
+const FEEL = { until: 0, t0: 0, kinds: [], flicker: false, log: [] };
+function eventFeel(kinds, len = 4) {
+  FEEL.log.push({ at: shipNow(), kinds: kinds.slice() }); if (FEEL.log.length > 20) FEEL.log.shift();
+  if (typeof shipFeel === 'function') return shipFeel(kinds, len);
+  FEEL.t0 = performance.now(); FEEL.until = FEEL.t0 + len * 1000; FEEL.kinds = kinds.slice();
+}
+function eventFeelFrame() {                              // every frame, after the lights and camera are set, before the render
+  if (typeof shipFeel === 'function') return;
+  const now = performance.now(); let k = 1;
+  if (now < FEEL.until) {
+    const s = (now - FEEL.t0) / 1000;
+    if (FEEL.kinds.includes('jolt') && s < .7) { const a = .25 * (1 - s / .7); camera.position.x += a * Math.sin(s * 60); camera.position.y += a * .6 * Math.sin(s * 47 + 1); }
+    if (FEEL.kinds.includes('lightsDip')) k = s < .3 ? 1 - s / .3 * .6 : s < 1.5 ? .4 : Math.min(1, .4 + (s - 1.5) * .4);
+    if (FEEL.kinds.includes('flicker') && s > 1.5 && Math.floor(s * 9) % 5 === 0) k *= .6;
+  } else if (FEEL.flicker && (Math.imul(Math.floor(now / 110), 2654435761) >>> 0) % 97 < 3) k = .7;
+  if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
+}
+// the event's felt moments as their minute comes, in play only (a sleep or skip passes them quietly)
+const FEEL_DONE = new Set();
+function eventMomentsTick(from, to) {
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) { FEEL.flicker = false; return; }
+  FEEL.flicker = !!eventMod('effect', 'flicker', to);
+  for (const mo of def.moments || []) {
+    if (!mo.feel) continue;
+    const at = (e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1], key = mo.id + '@' + e.startDay;
+    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len); }
+  }
 }
 
 // the ion storm's two meetings. who: a ROSTER id, or a cast slot the meeting fills from who's there ('tech1', 'tech2':
