@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.8
+   STARSHIP CADET: CSV Wren                            build 0.41.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -764,13 +764,19 @@ const SKY = (() => {
     const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; return t;
   };
   const mat = new THREE.ShaderMaterial({
-    uniforms: { tFar: { value: layer(320, 1.1, 1.8, .03) }, tNear: { value: layer(70, 1.6, 2.8, .12) }, uFar: { value: new THREE.Vector2() }, uNear: { value: new THREE.Vector2() }, uPR: { value: 1 }, uK: { value: .8 } },
+    uniforms: { tFar: { value: layer(320, 1.1, 1.8, .03) }, tNear: { value: layer(70, 1.6, 2.8, .12) }, uFar: { value: new THREE.Vector2() }, uNear: { value: new THREE.Vector2() }, uPR: { value: 1 }, uK: { value: .8 },
+      uWash: { value: 0 }, uT: { value: 0 }, uA: { value: new THREE.Color() }, uB: { value: new THREE.Color() } },   // 0.27.19: an event's mood (section 8b's shipFeelFrame)
     vertexShader: 'void main() { gl_Position = vec4(position.xy, .9999, 1.0); }',
-    fragmentShader: `uniform sampler2D tFar, tNear; uniform vec2 uFar, uNear; uniform float uPR, uK;
+    fragmentShader: `uniform sampler2D tFar, tNear; uniform vec2 uFar, uNear; uniform float uPR, uK, uWash, uT; uniform vec3 uA, uB;
       void main() {
         vec2 p = gl_FragCoord.xy / uPR;
         vec4 a = texture2D(tFar, (p + uFar) / 512.0), b = texture2D(tNear, (p + uNear) / 512.0);
-        gl_FragColor = vec4((a.rgb * a.a * .6 + b.rgb * b.a) * uK, 1.0);
+        vec3 c = (a.rgb * a.a * .6 + b.rgb * b.a) * uK;
+        if (uWash > 0.0) {                               // slow broad bands of ion light drifting across space
+          float w1 = .5 + .5 * sin(p.x * .0042 + p.y * .0061 + uT * .23), w2 = .5 + .5 * sin(p.y * .0053 - p.x * .0021 - uT * .17 + 1.7);
+          c = c * mix(vec3(1.0), uA * 1.6 + .45, .35 * min(uWash, 1.0)) + uWash * .75 * (uA * w1 * w1 * w1 + uB * w2 * w2 * w2 * w2);
+        }
+        gl_FragColor = vec4(c, 1.0);
       }`,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   });
@@ -6882,10 +6888,18 @@ sun.shadow.bias = -.0004; sun.shadow.normalBias = .03;
 const sunDir = SUN_OFF.clone().normalize();
 const sunR = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), sunDir).normalize();
 const sunU = new THREE.Vector3().crossVectors(sunDir, sunR);
+let SHADOW_K = 1;
 function placeSun(p) {
-  const ts = 20 / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
+  // 0.27.18: zoomed out, the shadowed square grows with the view (k), so shadows never stop short on screen; the
+  // texels per screen pixel stay about the same. At the usual zooms k is 1 and nothing changes.
+  const hd = Math.hypot((camera.right - camera.left) / 2, (camera.top - camera.bottom) / 2 / Math.sin(.62)) / camera.zoom, k = Math.max(1, hd / 9.5);
+  if (k !== SHADOW_K) {
+    SHADOW_K = k; Object.assign(sun.shadow.camera, { left: -10 * k, right: 10 * k, top: 10 * k, bottom: -10 * k, far: 30 * k });
+    sun.shadow.camera.updateProjectionMatrix(); sun.shadow.normalBias = .03 * k;
+  }
+  const ts = 20 * k / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
   v.addScaledVector(sunR, Math.round(a / ts) * ts - a).addScaledVector(sunU, Math.round(b / ts) * ts - b);
-  sun.target.position.copy(v); sun.position.copy(v).add(SUN_OFF);
+  sun.target.position.copy(v); sun.position.copy(v).addScaledVector(SUN_OFF, k);
 }
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
@@ -6918,7 +6932,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.8';                            // keep in step with the header's build line
+const GAME_BUILD = '0.41.9';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14096,7 +14110,12 @@ function frame() {
 const _r = new THREE.Vector3(), _u = new THREE.Vector3();
 function placeCam() {
   const el = .62;
-  camera.position.set(target.x + 30 * Math.cos(el) * Math.sin(az), target.y + 30 * Math.sin(el), target.z + 30 * Math.cos(el) * Math.cos(az));
+  // 0.27.18: how far the view reaches along the line of sight; zoomed far out (mostly on tall phones) the near and far
+  // planes move out with it, so the deck is never sliced off. At the usual zooms it's the old 16 to 46 at 30.
+  const reach = (camera.top - camera.bottom) / 2 / camera.zoom / Math.tan(el) + 4, dist = Math.max(30, reach + 2);
+  const near = reach > 14 ? dist - reach : 16, far = reach > 14 ? dist + reach : 46;
+  if (camera.near !== near || camera.far !== far) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
+  camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
   camera.lookAt(target); camera.updateMatrixWorld();
   const wpp = (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // snap to device pixels
   _r.setFromMatrixColumn(camera.matrixWorld, 0); _u.setFromMatrixColumn(camera.matrixWorld, 1);
@@ -14106,8 +14125,12 @@ function placeCam() {
 }
 frame();
 camera.zoom = innerWidth / innerHeight < .8 ? 1.5 : 1.15; camera.updateProjectionMatrix();
-const ZOOM_MIN = .45, ZOOM_MAX = 2.4;
-addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); });
+// 0.27.18 (the user: a decent zoom out, but no visible culling): the widest zoom is 0.55, or 0.7 on a tall screen
+// (which already sees far more of the deck top to bottom); shadows and the near and far planes follow the zoom.
+const ZOOM_MAX = 2.4; let ZOOM_MIN = .55;
+const fitZoomMin = () => { ZOOM_MIN = innerWidth / innerHeight < .8 ? .7 : .55; if (camera.zoom < ZOOM_MIN) { camera.zoom = ZOOM_MIN; camera.updateProjectionMatrix(); } };
+fitZoomMin();
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); fitZoomMin(); });
 
 // =====================================================================
 // 7. GRID & PATHFINDING
@@ -14495,6 +14518,7 @@ const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sp
   { sph: [5, 4], cap: [5, 3], cyl: 4, tor: [3, 5], min: .03 }];   // 2 (0.27.8): coarse, for big crowds; parts smaller than min (eyes, badges) left out
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
+const CROWD_GATHER = 40, CROWD_GATHER2 = 12;             // at an event's gathering: more than 40 on the deck, coarse from 12 tiles (0.27.19)
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -14890,7 +14914,9 @@ class CrowdPerson {
     if (this.phase !== undefined) g.p = this.phase; else { g.p += this.moved / (CYCLE * h); if (!walking && act !== 'run' && g.w < .02) g.p = 0; }
     this.moved = 0;
     if (act !== 'run') g.w = this.fresh ? (walking ? 1 : 0) : g.w + ((walking ? 1 : 0) - g.w) * Math.min(1, dt * (walking ? 6 : 7));
+    if (this.lookOff) rig.head.rotation.x += this.lookOff;   // 0.27.19: last frame's look up, taken off again
     animateActivity(this, this.pose, dt, t + g.t0, sk, this.pos.y);
+    this.lookOff = base === 'lie' ? 0 : .5 * feelLook(g.t0); rig.head.rotation.x -= this.lookOff;   // a jolt: everyone looks up a moment
     const lie = ss(this.k.lie || 0), fx = Math.sin(this.rot), fz = Math.cos(this.rot), off = .76 * h * lie;
     const floor = base === 'sit' || base === 'lie' || this.pos.y >= .3 ? 0 : this.pos.y;   // standing on a stage or a treadmill
     const root = rig.root;
@@ -14977,11 +15003,14 @@ const crowd = {
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
-    const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
+    // 0.27.19: at a ship-wide event's gathering on this deck (FEEL_S.gather: the storm's all-clear party), the coarse
+    // level of detail starts nearer (CROWD_GATHER2 tiles) once the deck holds more than CROWD_GATHER people
+    const gather = FEEL_S.gather && this.people.length > CROWD_GATHER, many = this.people.length > CROWD_MANY || gather;
+    const allFar = camera.zoom < CROWD_FAR_ZOOM, far2 = gather ? CROWD_GATHER2 : CROWD_FAR2;
     for (const p of this.people) {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
       let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
-      if (many && lod && (allFar || d > CROWD_FAR2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
+      if (many && lod && (allFar || d > far2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
       p.update(dt, t);
     }
@@ -15119,6 +15148,79 @@ const machineFx = {
   },
 };
 
+// ---- how a ship-wide event feels on your deck (0.27.19, Pillar 3 C7). Section 18's eventFeel calls shipFeel(kinds, len)
+// for a felt moment: 'jolt' (a short light camera shake and a flash of ion light in the windows), 'lightsDip' (every
+// light dips and comes back), 'flicker' (then it flickers for the rest of len seconds). shipFeelFrame(t, dt) runs every
+// frame from the main loop, after applyLight and the camera: the event's mood by phase (FEEL_MOODS: in the storm the
+// space outside shifts to violet and teal with slow drifting bands, and the ship's light cools a little), the odd
+// flicker while eventMod('effect', 'flicker'), and emergency lighting while section 17's blackoutAt has this deck
+// dark: the lights cut out for a second, then come back dim red-amber, and flicker back to normal at the end.
+// Visual only, in real time; never the simulation, never R(). Reduced motion: no shake, and flickers become soft dips.
+// With no event on, it returns at once and changes nothing.
+const FEEL_CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FEEL_MOODS = {                                     // by event id: its mood (0-1) in each phase, and its colours
+  ionStorm: { phases: { warning: .15, onset: .75, escalation: 1 }, a: col('#7a3cff'), b: col('#19d6c8'), light: col('#a99cff'), bg: col('#4a2488') },
+};
+const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
+const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
+function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
+// a jolt's look up (0-1), for 8b's people: each a beat apart (by their animation offset), up for about two seconds
+function feelLook(t0) {
+  const s = FEEL_S; if (!s.kinds.includes('jolt')) return 0;
+  const e = performance.now() / 1000 - s.t0 - .25 - (t0 % 1) * .5;
+  return e <= 0 || e > 3 ? 0 : e < .4 ? ss(e / .4) : e < 2.2 ? 1 : 1 - ss((e - 2.2) / .8);
+}
+const feelHash = (a, b) => { const h = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return h - Math.floor(h); };
+function shipFeelFrame(t, dt) {
+  const s = FEEL_S, now = performance.now() / 1000, dn = deckDef ? deckDef.num : null;
+  if (now >= s.check || dn !== s.deck) {                 // twice a second: the event's phase, its flicker, this deck's blackout
+    s.check = now + .5;
+    const ev = typeof eventNow === 'function' ? eventNow() : null, md = ev && FEEL_MOODS[ev.id];
+    if (md) s.def = md;
+    s.moodT = md ? md.phases[ev.phase] || 0 : 0;
+    s.flick = !!(ev && typeof eventMod === 'function' && eventMod('effect', 'flicker'));
+    const bo = ev && typeof blackoutAt === 'function' ? blackoutAt(shipNow()) : null, dark = !!bo && bo.deck === dn;
+    if (dark !== s.dark || dn !== s.deck) s.darkT = dn !== s.deck || s.first ? -99 : now;   // arriving on a dark deck: no cut-out
+    s.dark = dark; s.deck = dn;
+    const e = ev && SHIP.event, sd = e && SHIP_EVENTS[e.id], tn = shipNow();   // one of the event's gatherings on this deck, now (for 8b's crowd)
+    s.gather = !!sd && (sd.moments || []).some(mo => mo.gathering && mo.where && mo.where.deck === dn && (at => tn >= at - 30 && tn < at + (mo.len || 60) + 30)((e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1]));
+    if (s.first) { s.mood = s.moodT; s.first = false; }
+  }
+  s.mood += (s.moodT - s.mood) * Math.min(1, dt * .4); if (Math.abs(s.mood - s.moodT) < .002) s.mood = s.moodT;
+  const se = now - s.t0, felt = now < s.until, de = now - s.darkT;
+  if (!s.mood && !felt && !s.flick && !s.dark && de > 2) { SKY.mat.uniforms.uWash.value = 0; return; }
+  const has = k => felt && s.kinds.includes(k);
+  let k = 1, emerg = s.dark ? 1 : 0, flash = 0;
+  // a felt moment: the shake, the dip, then flickers
+  if (has('jolt') && se < .8 && !FEEL_CALM) {
+    const a = 5 * (1 - se / .8) ** 2 * (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // about 5 pixels
+    camera.position.addScaledVector(_r, a * Math.sin(se * 58)).addScaledVector(_u, a * .7 * Math.sin(se * 43 + 1)); camera.updateMatrixWorld();
+  }
+  if (has('jolt') && se < .9) flash = 1 - se / .9;
+  if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
+  if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
+  // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
+  if (s.flick && !felt && !FEEL_CALM && feelHash(Math.floor(now * 9), 7) < .035) k *= .68;
+  // emergency lighting: cut out, then dim red-amber; at the end it flickers back
+  if (s.dark && de < 1.1) { k *= FEEL_CALM ? 1 - Math.min(1, de) * .9 : .08; emerg = de / 1.1; }
+  else if (s.dark && de < 1.9 && !FEEL_CALM && feelHash(Math.floor(de * 12), 5) < .5) k *= .15;
+  else if (!s.dark && de < .9) emerg = FEEL_CALM ? 1 - de / .9 : feelHash(Math.floor(de * 12), 6) < .5 ? 1 : 0;
+  // the mood: the space outside and the ship's light
+  const m = s.mood, d = s.def;
+  if (m && d) {
+    hemi.color.lerp(d.light, .28 * m); sun.color.lerp(d.light, .3 * m); sun.intensity *= 1 - .12 * m;
+    scene.background.lerp(d.bg, .7 * m);
+  }
+  const U = SKY.mat.uniforms;
+  if (d && (m || flash)) { U.uWash.value = .55 * m + .9 * flash * Math.max(m, .3); U.uT.value = t; U.uA.value.copy(d.a); U.uB.value.copy(d.b); }
+  else U.uWash.value = 0;
+  if (emerg) {
+    const e = emerg; hemi.color.lerp(FEEL_EMERG, .62 * e); hemi.intensity *= 1 - .58 * e; sun.color.lerp(FEEL_EMERG, .6 * e); sun.intensity *= 1 - .85 * e;
+    for (const L of LAMPS) L.l.intensity *= 1 - .75 * e;
+  }
+  if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
+}
+
 // ---- seeing yourself use the device (0.27.13, Pillar 3 C11): when section 19's deviceOn('open'|'close', fn) exists,
 // opening the device sets player.deviceOut and the player raises it ('+device', HOLDS), closing puts it away. Hooked
 // on the first frame it's there, so nothing happens without it. Something already in your hands wins.
@@ -15150,7 +15252,7 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(),
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
       this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
-      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1 && camera.zoom > .6;
+      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1;   // any zoom the camera allows (0.27.18)
       b.el.style.display = vis ? '' : 'none';
       if (vis) { const hw = b.el.offsetWidth / 2 + 8; b.el.style.left = Math.min(innerWidth - hw, Math.max(hw, (this.v.x + 1) / 2 * innerWidth)).toFixed(0) + 'px'; b.el.style.top = ((1 - this.v.y) / 2 * innerHeight).toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2); }
     }
@@ -16234,7 +16336,7 @@ function loop() {
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
-  if (typeof machineFx !== 'undefined') machineFx.lamps(t);   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10)
+  if (typeof machineFx !== 'undefined') { machineFx.lamps(t); shipFeelFrame(t, dt); }   // section 8b: lamps stutter while the deck's light relays flicker (0.27.10); a ship-wide event's feel (0.27.19)
 
   // ambient life
   // stars outside: the sky drifts aft across the screen, with a touch of parallax as the camera follows you.
