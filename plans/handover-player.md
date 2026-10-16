@@ -2,6 +2,14 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
+## Update: builds 0.28.19 to 0.28.21 (the user's bathroom need and "You can see it working"; written 2026-10-16 at 15d0209)
+
+Read this first. The lead is now session_01PxXKwc5mkC7tV5MPi3p7PP. Branch `claude/player-needs` sits on ship-integration d89a3f5 (0.41.7); next build number **0.28.22**. All checks green at 15d0209 (cadet_test identical except the debug Day skip's "+69 Energy" note in f_noshadow, which is expected).
+- **0.28.19, bathroom:** sixth need `bathroom` on the end of `NEED_KEYS` (label Bathroom), drains 12/h awake, 3/h asleep; `NEED_FX.bathroom` high tasks x1.05, low x0.9 (keep the key and the NEED_FX row together: the device's Needs app breaks without the row). `PLAYER_ACTS.toilet` (+100 in 3 min, sit); `ACT_TAP` `/^toilet$/`, `FLOOR_ACTS.toilet`; `PRIVATE_TYPES` (shower, toilet) never offers someone else's (privatePlace). New game 60, a save without it 80.
+- **0.28.20, notes:** `needsSeen()` (end of playerUpdate) diffs the needs each frame and floats "+N Need" (`needFloat`, `#needFx`) when a rise stops (0.6 s) or every 5 s while it goes on; pulses `#devBtn`; `needPulse(k)` (the device engineer's Needs bars use it, device 0.35.19); `FLOAT_LOG` for tests. Times are `performance.now()` (virtual in tests) but the fade/removal is real time, so tests read `FLOAT_LOG`, not the DOM.
+- **0.28.21, progress:** `actBar()` / `actProgress(A)`: one bar over the stand-in for any ACT with a fixed `def.mins` and no `until` (incl. 15b's), the queue's wait to `turnAt`. 15b hides its goal marker while `actProgress()` is non-null (their 0.37.x).
+- **Gotchas:** any player_check test that times an activity must pin `bathroom: 50` (its task effect); section 17's `shipEffects` doesn't list bathroom (counts 1). Python output is buffered when redirected: use `python3 -u` for live logs.
+
 ## Update: builds 0.28.9 to 0.28.17 (the answers pass and after; written 2026-10-16 at b6e8d7e)
 
 Read this first; the older sections below still hold except where this says otherwise. DEV_NOTES "Player needs and the device" has the full detail and the build rows.
