@@ -8340,14 +8340,13 @@ const IX_ACTS = {
   ixTea:    { need: 'hunger', gain: 5, mins: 6, also: { social: 1 }, with: 3, pose: 'drink', title: 'A cup of tea', done: 'Tea, the ship\'s real fuel.' },
   ixRead:   { need: 'energy', gain: 5, mins: 20, also: { social: 2 }, with: 3, title: 'Reading', done: 'You put the book down feeling rested.' },
   ixLounge: { need: 'social', gain: 4, mins: 20, also: { energy: 4 }, with: 8, title: 'Taking it easy', done: 'You get up, unhurried.' },
-  ixRest:   { need: 'energy', gain: 4, mins: 10, also: { social: 2 }, with: 4, title: 'Sitting a while', done: 'A good sit. You stretch and get up.' },
   ixStars:  { need: 'energy', gain: 6, mins: 15, also: { social: 2 }, with: 4, title: 'Stargazing', done: 'The stars don\'t move much, but you feel calmer for watching them.' },
   ixGarden: { need: 'social', gain: 6, mins: 20, also: { fitness: 2 }, with: 4, pose: 'water', title: 'Gardening', done: 'The beds are watered. Your hands smell of tomato leaves.' },
   ixMusic:  { need: 'social', gain: 8, mins: 20, also: { energy: 2 }, with: 4, pose: 'play', title: 'Playing music', done: 'You stop playing. Someone, somewhere, claps.' },
   ixFold:   { need: 'hygiene', gain: 12, mins: 15, pose: 'fold', title: 'Doing your laundry', done: 'Clean clothes, folded, ready for the locker.' },
   ixBasin:  { need: 'hygiene', gain: 6, mins: 2, pose: 'stand', title: 'Washing up', done: 'Hands and face washed.' },
 };
-const IX_SKIP = /\bbed\b|bunk|berth|notice|rota|board|sign|journal|plaque|chart|screen|messages|model of|survey/i;   // taps that stay what they were
+const IX_SKIP = /\bbed\b|bunk|berth|notice|rota|board|sign|journal|plaque|chart|screen|messages|model of|survey|^washer\b/i;   // taps that stay what they were
 const IX_BEDS = /(herb|flower|salad|seed|grow|raised) bed/i;   // garden beds aren't for sleeping
 const IX_NEAR = 2.4, IX_COMPANY = 3.5;                    // IX_NEAR: from the edge of the thing you tapped
 // how far a place's spot is from the thing tapped, measured to its outline (a long table, a big garden bed)
@@ -8363,9 +8362,9 @@ function ixKind(pl, it) {
     if (!sit) return /telescope|window/i.test(title) ? 'ixStars' : 'ixTea';  // the kettle, the hot water, the telescope
     return a === 'read' ? 'ixRead' : 'ixLounge';
   }
-  if (t === 'bench') return 'ixRest';
-  if (t === 'garden') return sit ? 'ixRest' : 'ixGarden';
-  if (t === 'music') return a === 'play' || !sit || /guitar|piano|keys|drum/i.test(title) ? 'ixMusic' : 'ixRest';
+  if (t === 'bench') return null;                        // plain seats (benches, garden seats, beanbags) are section 15's sit-anywhere (sitTap)
+  if (t === 'garden') return sit ? null : 'ixGarden';
+  if (t === 'music') return a === 'play' || !sit || /guitar|piano|keys|drum/i.test(title) ? 'ixMusic' : null;
   if (t === 'laundry') return 'ixFold';
   if (t === 'basin') return 'ixBasin';
   return null;
@@ -8398,11 +8397,12 @@ function ixPose(kind, pl, spot, company) {
   if (kind === 'ixGarden' || kind === 'ixFold' || kind === 'ixWater') return IX_ACTS[kind].pose;
   if (kind === 'ixTea') return 'drink';
   if (kind === 'ixDrink') return base === 'sit' ? 'sit:drink' : 'drink';
-  if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixRest' || kind === 'ixStars' ? 'sit' : 'sit:read';
+  if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixStars' ? 'sit' : 'sit:read';
   return own;
 }
 // a machine you tapped (section 17's list; stand-ins don't count): its tap is the machine's own (repairs, using it)
-const ixMachine = at => typeof machineList === 'function' && machineList().some(m => !m.stub && m.deck === deckDef.num && m.at && (() => { const c = cellPos(...m.at); return Math.hypot(c.x - at.x, c.z - at.z) < 1; })());
+// (section 15's machineTap rule exactly: a real machine within MACHINE_NEAR); washers too, which machineUse runs
+const ixMachine = at => typeof machineList === 'function' && machineList().some(m => !m.stub && m.deck === deckDef.num && m.at && (() => { const c = cellPos(...m.at); return Math.hypot(c.x - at.x, c.z - at.z) < (typeof MACHINE_NEAR !== 'undefined' ? MACHINE_NEAR : 1); })());
 // would section 15's own ACT_TAP take this tap? Then leave it to them
 function ixTheirs(it, at) {
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
@@ -8412,8 +8412,9 @@ function ixTheirs(it, at) {
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
+  const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
-    .filter(([pl, s, k]) => k && s && !privatePlace(pl) && ixDist(it, s) < IX_NEAR)
+    .filter(([pl, s, k]) => k && s && (!room || pl.room === room) && !privatePlace(pl) && ixDist(it, s) < IX_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
   if (!near.length) return false;
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
@@ -8456,11 +8457,14 @@ const ixBoard = (() => {
   let back = null;
   const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= PLAYER_TIER)
     && !(j.machine && typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind));
-  function row(j, btn) {
-    const [title, where, state, pri] = jobCard(j), r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
-    r.className = 'ixjob ' + (pri || ''); h.textContent = title; s.textContent = where + ' · ' + state; d.append(h, s); r.append(document.createElement('i'), d);
+  function row(title, line, pri, btn) {
+    const r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
+    r.className = 'ixjob ' + (pri || ''); h.textContent = title; s.textContent = line; d.append(h, s); r.append(document.createElement('i'), d);
     if (btn) r.appendChild(btn); list.appendChild(r);
   }
+  const PRI = ['routine', 'soon', 'urgent', 'urgent'];
+  // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
+  const doable = j => !!(j && (j.machine || j.kind === 'restock'));
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
@@ -8470,12 +8474,18 @@ const ixBoard = (() => {
       if (el.hidden) return;
       list.textContent = '';
       const jobs = jobsBoard(), mine = myJob(), open = jobs.filter(j => !j.claimedBy);
+      // yours to take: section 17's openJobs('you') when it's there (its titles and wording), else the device's rule
+      const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
+      const ids = new Set(yours.map(o => o.id));
       sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : open.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.' : 'Nothing on the board. The Chief says it never lasts.';
-      if (mine) row(mine, button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }));
-      for (const j of open) {
-        const ok = canTake(j, mine);
-        row(j, ok ? button('Take it', () => api.take(j.id)) : null);
-        if (!ok && !mine && jobTier(j) > PLAYER_TIER) list.lastChild.querySelector('small').textContent += ' · tier ' + jobTier(j);
+      if (mine) { const [title, where, state, pri] = jobCard(mine); row(mine.title || title, where + ' · ' + state, pri, button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); })); }
+      for (const o of yours) {
+        const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
+        row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null);
+      }
+      for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
+        const [title, where, state, pri] = jobCard(j), why = jobTier(j) > PLAYER_TIER ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
+        row(j.title || title, where + ' · ' + state + (why ? ' · ' + why : ''), pri, null);
       }
     },
     take(id) {
@@ -8499,7 +8509,17 @@ function clearGoal() { IX_GOAL = null; }
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
   const j = myJob(); if (!j) return null;
-  if (!j.machine) return { deck: 5, room: /cargo/i, label: 'Your job: the cargo hold, Deck 5' };
+  if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
+    const c = SHIP.player.cart && SHIP.player.cart.job === j.id ? SHIP.player.cart : null, step = !c ? 'cart' : c.stage === 'empty' ? 'load' : c.stage === 'full' ? 'unload' : 'return';
+    const st = typeof jobStops === 'function' ? jobStops(j).find(x => x.step === step) : null, meals = j.cargo === 'meals';
+    const lab = { cart: 'Take a hover cart from the Cart bay', load: 'Load the cart in the cargo hold', unload: 'Unload at ' + (meals ? 'the cold store' : 'main storage'), return: 'Dock the cart in the Cart bay' }[step];
+    return st ? { deck: st.deck, place: st.places[0] || null, room: !st.places.length && step === 'load' ? /cargo/i : null, label: lab } : { deck: 5, room: /cargo/i, label: lab };
+  }
+  if (!j.machine) {                                      // a chore (section 17): parts first if it needs any, then its stops
+    const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), st = typeof jobStops === 'function' ? jobStops(j).filter(x => x.step !== 'fetch') : [];
+    if (need.length && need.some(p => SHIP.stores[p] > 0)) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
+    return st[0] ? { deck: st[0].deck, place: st[0].places[0] || null, label: j.title || 'Your job' } : null;
+  }
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
@@ -8803,7 +8823,12 @@ function galleyStep(S, m, st) {
   // cart sets off from the Deck 5 hold, and when it arrives; the meals land here, in replays and live alike
   if (carts) {
     if (!S.carts) S.carts = [];
-    if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]); }
+    // meals already on their way (a run held for you, or not landed yet) count as in the cold store, so a run waiting
+    // on the board doesn't set off another every hour. In replays the carts land within the hour, so it's 0 there
+    if (md % 60 === 0) {
+      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming), { replay: !!st });
+      if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]);
+    }
     // a run that's yours (section 17's cartWaiting(hour): on the board for you, or yours and not unloaded yet) waits
     // past its arriveAt: its meals land when you unload at the cold store (galleyCartLand). Live only; replays never wait
     const held = c => !st && c[2] !== undefined && typeof cartWaiting === 'function' && cartWaiting(c[2]);
@@ -9943,7 +9968,6 @@ function cartClaim(t, cold, o = {}) {
   if (!(cold >= 0)) return null;
   const h = Math.floor(t / 60), hr = h % 24;
   if (!o.replay && CART_RUNS.has(h)) return CART_RUNS.get(h);
-  if (!o.replay) cold += yourCartMeals();                 // your run's meals are on their way (0.33.20)
   let run = null;
   if (cold < CART_URGENT || (hr >= 9 && hr < 17 && cold < CART_DAILY)) {
     let meals = Math.min(CART_MEALS, coldCap() - cold);
@@ -9991,8 +10015,8 @@ function cartPost() {
 // hour ordered another run and the hold ran dry). Live play only: never in replays
 const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you') || null;
 function cartWaiting(h) { return !!yourCartRun(h); }
-// the meals on your cart, not yet unloaded: cartClaim counts them as on their way, so the galley doesn't order more
-const yourCartMeals = () => SHIP.jobs.reduce((n, j) => n + (j.cargo === 'meals' && j.status === 'claimed' && j.claimedBy === 'you' ? j.meals || 0 : 0), 0);
+// (meals on their way, yours included, are counted by the galley when it asks cartClaim: section 16's 0.29.17; the
+// galley owns the cold store's accounting, so section 17 doesn't add them too: 0.33.22)
 // where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
 // first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
 // test copies that want the plain plans.
@@ -10198,6 +10222,7 @@ jobWhere.on = true;                                      // crew go to their job
 // =====================================================================
 // 18. SHIP EVENTS
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
+// To the player they're "ship traditions" (the user's name, 2026-10-16); the big story ones are "ship-wide events".
 // Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
 //   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
 //   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
@@ -10427,7 +10452,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
     if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
     SHIP.events.sent.push(key);
-    const m = { at, from: e.ev.from, subject: e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };
+    const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
     if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet || to < 390 });
   }
