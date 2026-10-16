@@ -12596,7 +12596,7 @@ function eventsDress(now) {
 //   captainAddress({ lines, at }), MEETING_SCRIPTS, meeting(), dialogueShow(), dialogueClose(), upcomingTraditions()
 // Nothing here calls R(); when an event starts comes from schedU and the day, so a replay is identical.
 const SHIP_EVENTS = {};
-const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
+const EVENT_ORDER = ['ionStorm', 'diplomatic'];   // the main events with the short ones between (Part 2, "The full order")                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
@@ -12709,16 +12709,102 @@ const STORM_RETELL = {
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
 // who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
-const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 336) < .33;
 function stormCallBacklog(e) {
   const ppl = schedPeople().filter(p => p.rank !== 'guest');
   const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
   return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
 }
-// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+// ---- the diplomatic visit (event 2; plans/pillar3-plan.md, "The main events"): a Veyli delegation of four (GUESTS with
+// event 'diplomatic', section 9) aboard for five days. Day 0 Vance's warning; day 2 10:00 the greeting in the shuttle
+// bay; formal dinners on days 3 and 5 in the Captain's quarters; day 7 the gift exchange at 09:00 and the farewell at
+// 10:00, when the guests leave (eventGuestDays: guestsArrive 2, their stay 5); the afterglow to the end of day 8
+SHIP_EVENTS.diplomatic = {
+  title: 'Diplomatic visit', days: 9, gap: 7, need: ['vance'], guestsArrive: 2, draft: true,   // on when the lead says (events_check runs it)
+  phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [2, 600] }, { id: 'escalation', at: [3, 360] },
+    { id: 'resolution', at: [7, 540], clears: true }, { id: 'afterglow', at: [7, 720], clears: true }],
+  pause: ['onset'], keep: ['birthday'],                  // the greeting day is all hands; traditions carry on after it
+  systems: {
+    warning: { wear: { washer: 1.5 } },                  // dress uniforms through the laundry
+    onset: { effects: ['guests'] },                      // eventMod('effect', 'guests'): the delegation is aboard (section 17's coldCabins)
+    escalation: { wear: { heat: 1.3, heater: 1.5 }, effects: ['guests'] },   // the guest cabins' heaters turned up: the Veyli like it warm
+  },
+  routines: {
+    onset: [{ who: 'dept:watch', rule: 'patrol' }],
+    escalation: [{ where: '2|C', name: 'the Captain\'s quarters', rule: 'closed' }],   // set for the formal dinners
+  },
+  // the galley: guests at the servery all visit long; the formal dinners on days 3 and 5 (a function of eventNow: { day })
+  galley: {
+    onset: { extra: 4 },
+    escalation: { extra: 4, batch: n => n.day === 3 || n.day === 5 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null, herbs: true },
+  },
+  jobs: {
+    warning: [
+      { id: 'veyliSuite', title: 'Visit prep: make up the visitors\' cabin and turn its heater up', tier: 1, at: 600,
+        stops: [{ placeId: '2-armchair-8', mins: 25, tag: 'tidy' }] },
+      { id: 'veyliLamp', title: 'Visit prep: fix the lamp in the Captain\'s dining room', tier: 1, at: 600, parts: ['lamp'],
+        stops: [{ placeId: '2-captable-1', mins: 15, tag: 'lamp' }] },
+      { id: 'veyliGifts', title: 'Visit prep: bring the gift crates up from the hold', tier: 1, at: 660, bring: 'a crate of gifts',
+        stops: [{ placeId: '5-hold-1', mins: 5, tag: 'pickup' }, { placeId: '1-conf-1', mins: 10, tag: 'drop' }] },
+    ],
+    escalation: [
+      { id: 'veyliHerbs', title: 'Pick herbs in the garden for the Veyli dinner', tier: 1, at: 840,
+        stops: [{ placeId: '3-tend-1', mins: 20, tag: 'pick' }, { placeId: '3-cold-1', mins: 5, tag: 'drop' }] },
+    ],
+  },
+  news: [
+    { id: 'veyli-coming', from: 'vance', phase: 'warning', at: [0, 540], seed: ['dept:command'], weight: 3,
+      lines: ['A Veyli delegation is coming aboard. Four of them.', 'Dress uniforms. Everyone. Vance was very clear.'] },
+    { id: 'veyli-holt', from: 'holt', phase: 'warning', at: [0, 780], seed: ['dept:watch'], weight: 2,
+      lines: ['Holt says he\'ll be polite. Holt says a lot of things.', 'Watch is doubling up on the Deck 2 corridor.'] },
+    { id: 'veyli-moleth', phase: 'escalation', at: [3, 600], seed: ['dept:works'], weight: 2,
+      lines: ['One of the Veyli has forty questions for Calder. Forty.', 'Their scholar wants to see the engine room. Torres is thrilled.'] },
+    { id: 'veyli-clash', from: 'holt', phase: 'escalation', at: [4, 1260], seed: ['dept:watch', 'dept:command'], weight: 3,
+      lines: ['Holt and the Veyli pilot had words about the Watch rota.', 'Something about who stands where at the door. It got frosty.'] },
+    { id: 'veyli-told', phase: 'afterglow', at: [7, 720], seed: ['all'], weight: 2, lines: c => VEYLI_RETELL[c.band] },
+  ],
+  moments: [
+    { id: 'farewell', phase: 'resolution', at: [7, 600], len: 30, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: .8, anim: null,   // mid-morning: only those off shift can come
+      name: 'The Veyli farewell', ask: 'The Veyli leave at ten. I want to see them off.', here: 'Safe travels.', thanks: 'You line the shuttle bay to see the delegation off.' },
+  ],
+  meetings: [
+    { id: 'veyliGreeting', phase: 'onset', at: [2, 600], len: 20, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'veyliGreeting',
+      who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], notify: 'The Veyli delegation arrives in the shuttle bay (Deck 5) at 10:00.' },
+    { id: 'veyliGifts', phase: 'resolution', at: [7, 540], len: 20, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'veyliGiftExchange',
+      who: ['marrow', 'saruth', 'teshavi', 'moleth'] },
+  ],
+  address: {
+    onset: ['This is the Captain. Our Veyli guests are aboard.', 'They are here as friends. Make them welcome, answer their questions, and mind your manners.', 'Marrow out.'],
+    resolution: c => ['This is the Captain. The delegation leaves us this morning.',
+      { smooth: 'Speaker Teshavi tells me she has rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
+        rough: 'Not everything went to plan. They leave as friends all the same, and we\'ll do better next time.' }[c.band], 'Marrow out.'],
+  },
+  mail: {
+    warning: { from: 'Commander Teo Vance', subject: 'A Veyli delegation', body: 'A Veyli delegation of four arrives in two days, 10:00 in the shuttle bay. Dress uniforms for the greeting. The visitors\' cabin and the guest cabins on Deck 4 need making up, and the Veyli like it warm: heaters up. Visit jobs are on the Works board.' },
+  },
+  // lower is better. Who scores what (to agree with the lead): late dinners (minutes, galley 16), cold guest cabins
+  // (hours below comfort, systems 17), dinners without herbs (galley 16, from the garden), discourtesy (section 20 from
+  // crew mood toward the guests, Holt above all; plus meeting choices here)
+  threads: [{ id: 'dinnersLate', label: 'Dinners on time', good: 10, bad: 60 }, { id: 'coldCabins', label: 'Warm guest cabins', good: 4, bad: 16 },
+    { id: 'noHerbs', label: 'Herbs from the garden', good: 0, bad: 2 }, { id: 'discourtesy', label: 'Courtesy', good: 2, bad: 6 }],
+  dressing: { warning: [{ id: 'signupMess', title: 'The greeting line: volunteers', lines: c => ['T. Vance', 'B. Holt (under protest)'].concat(c.mine['wants:veyliSuite'] ? [c.you] : []) }] },
+  traces: { smooth: ['veyliCordSculpture'], bumpy: [], rough: [] },
+  debrief: { from: 'Commander Teo Vance',
+    smooth: 'The delegation left delighted. Dinners on time, warm cabins, and not one incident at the door. The Speaker\'s gift hangs in the bow lounge.',
+    bumpy: 'The delegation left on good terms. A cold cabin and a late dinner, but nothing that will make the Concord\'s reports.',
+    rough: 'The delegation left politely, which is the most I can say. Cold cabins, a bare herb rack and Chief Holt\'s remarks. We will do better.',
+    mine: c => c.mine.jobs ? ' Your work on the visit was noticed.' : '' },
+};
+const VEYLI_RETELL = {
+  smooth: ['Did you see the cord sculpture? It moves when the vents come on.', 'The Speaker laughed at one of Brennan\'s jokes. Actually laughed.'],
+  bumpy: ['The Veyli dinner was late. Brennan blamed the herbs.', 'Holt\'s still telling the door story. It gets longer every time.'],
+  rough: ['Their cabin was freezing the first night. Nobody\'s owning up.', 'Holt and their pilot still won\'t look at each other.'],
+};
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
+// hash key k (the storm's party 340, then 351 up)
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
-  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  id: m.id, name: m.name || 'All-clear party', k: EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
   who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
@@ -12760,6 +12846,7 @@ function eventMod(kind, key, t) {
     else if (kind === 'effect') v = def.systems && def.systems[ph] && def.systems[ph].effects ? (def.systems[ph].effects.includes(key) ? true : undefined) : undefined;
     else if (kind === 'routine') v = def.routines && def.routines[ph] ? def.routines[ph].find(r => r.rule === key || r.where === key || r.who === key) : undefined;
     else { const tb = def[kind === 'jobs' ? 'jobs' : kind]; v = tb && tb[ph] ? (key === undefined ? tb[ph] : tb[ph][key]) : undefined; }
+    if (typeof v === 'function' && key !== undefined) v = v(now, t);   // a value by day (the diplomatic visit's dinners)
     if (v !== undefined && v !== null) return v;
     if (def.phases[k].clears) return null;
   }
@@ -12926,14 +13013,15 @@ function meetingCast(m) {
   const d = Math.floor(m.at / 1440) + 1, ppl = schedPeople(), cast = {};
   for (const w of m.who || []) {
     const mm = /^(\w+):(\d+)$/.exec(w);
-    if (!mm) { const p = ppl.find(q => q.id === w); if (p) cast[w] = p; continue; }
+    if (!mm) { const p = evPerson(w); if (p) cast[w] = p; continue; }
     const pool = ppl.filter(p => p.dept === mm[1] && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !(m.who || []).includes(p.id))
-      .sort((a, b) => schedU(a.seed, d, 602) - schedU(b.seed, d, 602));
+      .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337));
     pool.slice(0, +mm[2]).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
   }
   return cast;
 }
-const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[who].name : (schedPeople().find(p => p.id === who) || { name: who }).name;
+const evPerson = id => schedPeople().find(p => p.id === id) || (typeof GUESTS !== 'undefined' && GUESTS.find(g => g.id === id)) || null;   // crew, Saruth, event guests
+const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[who].name : (evPerson(who) || { name: who }).name;
 function dialogueShow(scriptId, m) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
   m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
@@ -12944,7 +13032,7 @@ function dialogueShow(scriptId, m) {
 function dialogueView() {
   const D = DIALOGUE, sc = MEETING_SCRIPTS[D.id], l = D.queue[D.i]; if (!l) return null;
   if (l.choice) return { title: sc.title, name: D.ctx.you, who: D.ctx.you, id: 'you', role: '', text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
-  const p = D.cast[l.who] || schedPeople().find(q => q.id === l.who);
+  const p = D.cast[l.who] || evPerson(l.who);
   return { title: sc.title, name: castName(D, l.who), who: castName(D, l.who), id: p ? p.id : l.who, role: p ? p.role || '' : '', text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
 }
 function dialogueDraw() {
@@ -12979,16 +13067,18 @@ function dialogueStep(k) {
     eventMine('choice:' + D.id, k + 1);
     for (const [who, pts] of Object.entries(c.rel || {})) { const p = D.cast[who] || schedPeople().find(q => q.id === who); if (p && typeof relAdd === 'function') relAdd(p.id, 'meeting:' + D.m.id, pts); }
     if (c.job) eventTakeJob(c.job);
+    for (const [th, n] of Object.entries(c.thread || {})) eventScore(th, n);   // a small nudge to the event's thread
     if (c.reply) D.queue.splice(D.i + 1, 0, c.reply);
   }
   D.i++; dialogueDraw();
 }
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
-// a job offered in a meeting: remembered in SHIP.event.mine ('wants:<job>'), and claimed for you if section 17 has
-// posted it (tagged event and eventJob), else section 17 gives it to you when it posts
+// a job offered in a meeting: always remembered in SHIP.event.mine ('wants:<job>': the sign-up sheet reads it, and
+// section 17 claims it for you when it posts it later), and claimed at once if section 17 has already posted it
+// (tagged event and eventJob). The lead's 0.41.7 merge fix: the battery job is already up at the 08:15 briefing
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
-  e.mine['wants:' + job] = 1;   // always remembered (the sign-up sheet reads it), even when it's claimed at once (0.41.7)
+  e.mine['wants:' + job] = 1;
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
   if (j && typeof claimJob === 'function') return claimJob(j.id);
   return false;
@@ -13221,6 +13311,41 @@ MEETING_SCRIPTS.calderProgress = {
       { text: 'What should I work on?', rel: { calder: 1 }, reply: { who: 'calder', text: 'Seals. Everyone avoids them.' } },
       { text: 'Thanks, Chief.', reply: { who: 'calder', text: 'Don\'t thank me. Thank the filters.', pose: 'nod' } },
     ] },
+  ],
+};
+
+// the diplomatic visit's two meetings (its data is with the storm's, above)
+MEETING_SCRIPTS.veyliGreeting = {
+  title: 'The Veyli greeting', from: 'Commander Teo Vance',
+  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 for five days.',
+  lines: [
+    { who: 'marrow', text: 'Speaker Teshavi. Welcome aboard the Wren.', pose: 'gesture' },
+    { who: 'teshavi', text: 'Captain. Your ship is warmer than the reports said. That is a compliment.', pose: 'nod' },
+    { who: 'saruth', text: 'Speaker. It has been too long.' },
+    { who: 'teshavi', text: 'Saruth. You look well fed. The humans are treating you kindly, then.' },
+    { who: 'kesrin', text: 'The Speaker would like to meet the crew who keep the ship running. Informally.', to: 'you' },
+    { who: 'teshavi', text: 'You. The young one in Works grey. What do you do aboard?', to: 'you' },
+    { choice: [
+      { text: 'I keep the lights on, Speaker. Mostly.', rel: { marrow: 1 }, reply: { who: 'teshavi', text: 'Mostly. An honest answer. I like it.', pose: 'nod' } },
+      { text: 'Welcome aboard. Ask me anything about the ship.', rel: { vance: 1 }, thread: { discourtesy: -1 }, reply: { who: 'kesrin', text: 'Careful. Moleth has forty questions.' } },
+      { text: '(A respectful nod)', reply: { who: 'teshavi', text: 'Quiet. Good. Most of your crew talk too much.' } },
+    ] },
+    { who: 'marrow', text: 'Commander Vance will show you to your cabins. Dinner is tomorrow, in my quarters.' },
+  ],
+};
+MEETING_SCRIPTS.veyliGiftExchange = {
+  title: 'The gift exchange', from: 'Commander Teo Vance',
+  gist: c => 'The gift exchange in the observation room this morning. ' + (c.band === 'smooth' ? 'The Speaker gave the Wren a cord sculpture; it hangs in the bow lounge.' : 'The Speaker thanked the Captain with a few formal words.') + ' The delegation left from the shuttle bay at 10:00.',
+  lines: [
+    { who: 'teshavi', text: 'Captain. It is our custom to leave something of ourselves behind.', pose: 'gesture' },
+    { who: 'teshavi', text: c => c.band === 'smooth' ? 'Seven knots, tied by seven hands. Hang it where your crew gather.' : 'Please accept our thanks. They are sincere.' },
+    { who: 'marrow', text: 'Thank you, Speaker. And from us: charts of every system we\'ve crossed. Dr. Sato insisted.', pose: 'nod' },
+    { who: 'moleth', text: 'I have thirty-one questions left. I will write.', to: 'you' },
+    { choice: [
+      { text: 'Write to me. I\'ll ask Calder for the answers.', rel: { calder: 1 }, thread: { discourtesy: -1 }, reply: { who: 'moleth', text: 'I will hold you to that.', pose: 'nod' } },
+      { text: 'Safe travels.', reply: { who: 'moleth', text: 'And to you. Keep the lights on. Mostly.' } },
+    ] },
+    { who: 'saruth', text: 'Speaker. Travel well.' },
   ],
 };
 
