@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.4
+   STARSHIP CADET: CSV Wren                            build 0.26.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -453,7 +453,8 @@ function roomLocked(rk) {
   return true;
 }
 // who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
-const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who));
+const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
+  && !(e.type === 'closed' && who && typeof doorOpenFor === 'function' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => doorOpenFor(roomAt(...c), who)));   // section 14: invited in
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
 // crewPath (section 10) asks this for each person. Tier locks (answer 4): a hatch with a `tier` lets through only
@@ -6561,7 +6562,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.13';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6599,7 +6600,7 @@ function tickShip(dt) {
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
   SHIP.time.min += dt * SHIP_RATE;
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
-  if (Math.floor(SHIP.time.min) !== m) updateClock();
+  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); }   // section 14: appointments kept or missed
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
@@ -6873,6 +6874,81 @@ function shiftBlocks(p, d) {
 }
 const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley books its own stations
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
+// ---- appointments (Pillar 3, C3): the crew side of the device's Appointments ----
+// SHIP.device.appts (section 19, the device engineer; saved there): { id, with: [crewId | 'guest:id' | 'place:id'],
+// at: absolute ship minutes, len, where: placeId, kind: 'social'|'work'|'checkup'|'meeting'|'summons'|'invite',
+// status: 'asked'|'yes'|'no'|'kept'|'missed', by }.
+// apptReply(p, a): what someone says when asked, from their real day: { answer: 'yes'|'later'|'no', at, text }.
+// An accepted one ('yes') is laid over their plan by whereIs (apptWhere): they go there, ride the lift if need be,
+// and wait APPT_WAIT ship minutes; if you come ('kept', apptTick) they stay the whole `len`, else they go back to
+// their day ('missed'). Nobody is punished for a missed one. Nothing here touches the plans (planWhere, dayReport).
+const APPT_WAIT = 15;
+const apptList = () => typeof SHIP !== 'undefined' && SHIP.device && Array.isArray(SHIP.device.appts) ? SHIP.device.appts : [];
+const apptOn = a => !!a && (a.status === 'yes' || a.status === 'kept') && isFinite(a.at) && !!a.where && Array.isArray(a.with);
+const apptPlace = a => { const d = deckOf(a.where), pl = (DECKS[d] && DECKS[d].places || []).find(q => q.id === a.where); return pl ? { ...pl, deck: d } : null; };
+// is p free from a to b (absolute minutes)? Free time, standing about, or (for work, a check-up or a summons) their
+// own shift on the appointment's deck; never asleep, eating, at an event or at another appointment
+function apptFree(p, a, from, to) {
+  const pl = apptPlace(a), workOk = /^(work|checkup|summons|meeting)$/.test(a.kind || '');
+  for (let t = from; t < to; t += 5) {
+    const w = planWhere(p, t); if (!w) return false;
+    const ok = (w.act === 'leisure' || w.act === 'off') && !(w.tag && /^ev-|^(drill|handover|stroll)$/.test(w.tag))
+      || workOk && w.act === 'work' && pl && w.deck === pl.deck;
+    if (!ok) return false;
+  }
+  return !apptList().some(o => o !== a && o.id !== a.id && apptOn(o) && o.with.includes(p.id) && o.at < to && from < o.at + (o.len || 30));
+}
+function apptReply(p, a) {
+  const len = a.len || 30, C = SCHED_COMMUTE + 10, who = shortName(p);   // the lift and most of a walk
+  if (!p || !apptPlace(a)) return { answer: 'no', at: null, text: who + ': "Where\'s that?"' };
+  if (apptFree(p, a, a.at - C, a.at + len)) return { answer: 'yes', at: a.at, text: who + ': "See you at ' + hhmm(a.at % 1440) + '."' };
+  const dayEnd = Math.floor(a.at / 1440) * 1440 + 22 * 60;
+  for (let t = Math.ceil((a.at + 30) / 30) * 30; t + len <= dayEnd; t += 30)
+    if (apptFree(p, a, t - C, t + len)) return { answer: 'later', at: t, text: who + ': "Can\'t then. How about ' + hhmm(t % 1440) + '?"' };
+  return { answer: 'no', at: null, text: who + ': "Sorry, not today."' };
+}
+// where someone with an accepted appointment is (whereIs asks this first); null when none applies at t
+function apptWhere(p, t) {
+  for (const a of apptList()) {
+    if (!apptOn(a) || !a.with.includes(p.id)) continue;
+    const end = a.at + (a.status === 'kept' ? (a.len || 30) : APPT_WAIT), pl = apptPlace(a); if (!pl) continue;
+    // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
+    const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
+    const go = a.at - walk, C = SCHED_COMMUTE;
+    if (t < go - C - 3 || t >= end) continue;
+    if (t < go - C) return null;                         // still finishing what they were doing
+    const w = planWhere(p, go - C - 1);
+    if (t < go && w && w.deck !== pl.deck)               // a lift ride if they're on another deck
+      return { deck: pl.deck, act: 'commute', type: 'lift', placeId: null, moving: true, fromDeck: w.deck, from: go - C, until: go, tag: 'appt' };
+    return { deck: pl.deck, act: 'appt', type: pl.type, placeId: pl.id, moving: false, fromDeck: undefined, from: go, until: end, tag: 'appt', anim: pl.anim || null };
+  }
+  return null;
+}
+// every ship minute (section 13's clock): you came (within 2 tiles of the place, on its deck, before they gave up) -> 'kept'; else 'missed'
+function apptTick() {
+  const now = shipNow();
+  for (const a of apptList()) {
+    if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2) continue;
+    const pl = apptPlace(a);
+    if (pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {
+      const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; continue; }
+    }
+    if (now >= a.at + APPT_WAIT) a.status = 'missed';
+  }
+}
+// ---- doors for invitations and summons (C3, C10): the ready room, Deck 2 bedrooms, officers' cabins ----
+// doorOpenFor(room, who, t, deck): a locked room is open to you ('player') and to the crew in the appointment while an
+// accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
+// with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
+function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
+  for (const a of apptList()) {
+    if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
+    const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
+    if (t < a.at - 15 || t > a.at + (a.len || 30) + 15) continue;
+    if (who === 'player' || (who && who.isPlayer) || a.with.includes((who && (who.p || who).id) || who)) return true;
+  }
+  return false;
+}
 // ---- habits that change slowly (answer 18): a few changes a month, the same in every game ----
 // From the second week on, each week has 0, 1 or 2 changes (about 3.5 a month): someone takes up a habit
 // (a junior starts running, someone takes to the observatory) or drops one (stops going to the bar). Each is
@@ -7414,6 +7490,7 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
 let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
+  const ap = apptWhere(person, t); if (ap) return withHold(person, ap, false);   // an accepted appointment comes first
   if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
     JOB_WHERE_BUSY = true; let j;
     try { j = jobWhere(person, t); } finally { JOB_WHERE_BUSY = false; }
@@ -12200,6 +12277,9 @@ function crewNearDoor(d) {
   for (const a of DECK_CREW) {
     if (a.settled || Math.abs(a.x - d.cx) > r || Math.abs(a.z - d.cz) > r || Math.hypot(a.x - d.cx, a.z - d.cz) > r) continue;
     if (d.passable || d.rooms.some(rm => a.rooms.has(rm))) return true;
+  }
+  if (d.e.type === 'closed' && d.rooms.some(rm => doorOpenFor(rm, 'player'))) {   // an invitation or summons: the door opens for you
+    const p = player.obj.position; if (Math.hypot(p.x - d.cx, p.z - d.cz) < r) return true;
   }
   return false;
 }

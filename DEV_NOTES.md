@@ -97,6 +97,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.26.10 | Hooks for the events engineer's section 18 (the sim engineer), both inert without it. `schedData` calls `eventPools(shared)` just before it's stored. `gatherings(p, d, F)` takes `eventPlan(p, d)`'s entries (`{ id, from, to, opts, tag, anim, min }`, minutes from midnight, already filtered to who goes) when it exists, and then skips its own birthday and observatory night: those move into section 18's `SHIP_EVENTS`. The Deck 1 routines stay in section 14. |
 | 0.26.11 | The events reconciled, and seats (the sim engineer). Merged the events engineer's 0.34.2 (with ship integration 0.41.2) and the bridge architect's 0.31.10 (Deck 1's handover and walk places). Section 18 is the one events system: section 14's own birthday and observatory night are gone, and `gatherings()` keeps the `eventPlan` hook plus the Deck 1 routines (`birthdaysOn(d)` stays as a helper). Event places: anything with an `event` field is listed per event as `n|@<event>`; those only for an event (type `event`, or `event: 'handover' / 'walk'`) are kept out of everyday use, while everyday seats an event also uses (the observatory's window seats and beanbags) stay in it. This replaces the bridge architect's `!p.event` filter, which also took those seats away. `placeSpot` takes a numeric `face` in degrees (0 = south, 90 = east, as the letters) for round tables, the bar and card tables; a place's own `y` already wins over `SEAT_Y`, for the crew and the player. |
 | 0.26.12 | Event places held for their guests (the sim engineer, asked by the events engineer). `shipDay` puts each of the day's events' own places in `occ.res` (placeId → [[from, to, eventId]], a hold, not a booking, so `dayReport` never counts it) from 5 minutes before the event to its end. `isFree(id, a, b, tag)` treats a hold as busy unless the place is being taken for that event (tag `ev-<id>` or `ev-<id>-<anim>`), so ordinary free time doesn't fill the room before the guests are planned. The places come from section 18's `eventPlaces(e)` when it exists, else its tagged places, its room pools and its first pool. Releasing them 15 minutes in was tried: the earlier planners then took seats the later guests wanted. events_check: the Friday jam went from 0–3 of 6 seats used to 5–6 (day 26: 0/9 to 5/9), and quiz, film and observatory night all came up a little. |
+| 0.26.13 | Pillar 3, C3 crew side (the sim engineer, on 0.41.4). Appointments: `apptReply(p, a)` answers from the person's real day (`yes`, `later` with a time, or `no`), and an accepted one (`SHIP.device.appts`, status `yes`) is laid over their plan by `whereIs` (`apptWhere`, ahead of jobs): they leave in time to ride the lift and walk there, wait 15 ship minutes (`APPT_WAIT`), and stay the whole appointment if you come. `apptTick` (every ship minute, from section 13's clock) marks it `kept` when you're within 2 tiles of the place on its deck, else `missed` after the wait. Doors: `doorOpenFor(room, who, t, deck)` opens a locked room to you and the invited crew from 15 minutes before an accepted appointment there to 15 after. Section 4's `edgeBlocks` asks it for 'closed' doors (one inert line), and section 10's `crewNearDoor` opens the door as you come. With no appointments, nothing changes. |
 | 0.27.0 | Pillar 2, workstream A2: activity animations (the performance engineer, from 0.25.2). Thirteen activities as poses for the crowd, full rigs and Walkers: run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk, with seated variants and props (dumbbells, receiver, basket, card, guitar, watering can, spoon and pan, sponge and plate, cloth, glass, book). `poseOf(place)` and `animateActivity()` in 8b; crowd props ride three prop bones inside the crowd's meshes. Section 10: `placeSpot` takes its pose from `poseOf(pl)` (one line). See "Activities (0.27.x)". |
 | 0.27.1 | A2: `row` for the gym's rower (legs drive on the footrests, the seat slides, the body swings back, the arms pull in last; always seated; a seated `gym` place with no `anim` rows). `CROWD_ANIMS`, the set of activities drawn, for the schedules to check before sending one. |
 | 0.27.2 | A2 (from 0.40.1): the `?poses` lineup. Deck 3's promenade at 10:30, one crew member per pose and activity (24), labelled, on stools and benches where they sit or lie; never touches the save (`NOSAVE` also checks `poses`). Without the flag none of it exists. |
@@ -476,6 +477,32 @@ plans/answers-pass-plan.md, the sim engineer's rows.
 - **The rush (11).** On about 2 days in 5 (`schedU(9200, d, 0)`), half the day shift goes straight to dinner 3–13 minutes after the shift ends.
 - **Going to bed (plan item 3).** `sleepUntil` runs `SIM_ADVANCE`, and section 10's hook calls `deckCrewFill`, so the crew are wherever their plans put them when you wake.
 - **Testing.** A scratch script with stand-in birthdays and Deck 1 event places ran `dayReport` over 28 days: clean. It counted the gatherings, the habit log over 60 days (6 changes), feelings, moods and holds. day_check shows nothing new on days 1 and 7, apart from the plans moving.
+
+## Pillar 3: appointments and doors (sections 14 and 10, the sim engineer, 0.26.13)
+
+plans/pillar3-plan.md, C3 (crew side) and C10 (doors).
+
+- **The appointment** (section 19's, saved there): `{ id, with: [crewId], at (absolute ship minutes), len, where: placeId, kind, status, by }`.
+- **Answering:** `apptReply(p, a)` gives `{ answer: 'yes'|'later'|'no', at, text }`, worked out from `planWhere`.
+    - Who is free: someone at leisure or standing about. For work, check-ups, summons and meetings, also someone on their own shift on the place's deck. Never anyone asleep, eating, at an event, the drill, the handover or the Captain's walk, or at another accepted appointment.
+    - The check covers the appointment plus 12 minutes before it, for the lift and the walk.
+    - `later` is the next free half hour that day, before 22:00.
+    - The text is in their voice: "Tomas: \"Can't then. How about 18:30?\"".
+- **Keeping it:** `apptWhere(p, t)` (whereIs asks it first) lays the appointment over the plan.
+    - They leave in time: the lift (`SCHED_COMMUTE`), plus the walk from the lift (1.3 × the straight line at `CREW_SPEED`).
+    - Then they wait at the place (act `appt`, tag `appt`). After `APPT_WAIT` (15) they go back to their day, or they stay the whole `len` if it's `kept`.
+    - Plans, `dayReport` and the jobs never see it.
+- **Kept or missed:** `apptTick()`, from section 13's clock every ship minute.
+    - Kept: you're on the place's deck within 2.2 m of it, from 2 minutes before until they give up.
+    - Missed: nobody came by then. There's no penalty (the plan's rule); section 20 can read `missed` for "Waited for you at the gym yesterday".
+- **Doors:** `doorOpenFor(room, who, t, deck)` is true for you and for the crew in an accepted appointment whose place is in that room, from 15 minutes before to 15 after.
+    - Section 4's `edgeBlocks` lets 'closed' doors through then, and section 10's `crewNearDoor` slides the door open as you reach it.
+    - The room's inside must be walkable. The Captain's quarters is (36 tiles); a locked room with a solid inside isn't.
+- **Tested** with a scratch script:
+    - Tomas at 18:00 → "how about 18:30"; Pell at 19:00 → yes.
+    - Tomas rides down from Deck 2 and settles by the time; with you there he stays the half hour.
+    - Pell, with nobody coming, is `missed` at +15 and back to his evening.
+    - An invitation to the Captain's quarters lets your path in during it and not after.
 
 ## Machines and wear (section 17, the systems engineer, 0.33.x)
 Pillar 2, Half B (`plans/pillar2-plan.md`, "Machines and jobs"). Section 17 sits right after section 14 (and after 15 and 16 once they're in). B1 is data and logic only: nothing in it draws anything or calls `R()`, and nothing in it runs unless something asks (a game with `?nosave` never touches it), so cadet_test is ALL IDENTICAL.
