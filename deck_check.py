@@ -70,7 +70,7 @@ PLACES = r"""(() => {
     if (typeof p.id !== 'string' || !p.id) why.push('no id');
     if (!(TYPES.includes(p.type) || /^work:[a-z-]+$/.test(p.type || ''))) why.push('type ' + p.type);
     if (!POSES.includes(p.pose)) why.push('pose ' + p.pose);
-    if (!FACES.includes(p.face)) why.push('face ' + p.face);
+    if (!(FACES.includes(p.face) || (typeof p.face === 'number' && p.face >= 0 && p.face < 360))) why.push('face ' + p.face);   // a letter, or degrees (0 south, 90 east; sim 0.26.11)
     const [c, r] = p.at || [];
     if (roomAt(c, r) !== p.room) why.push('room ' + p.room + ' but the map says ' + roomAt(c, r));
     if (p.xy && !(p.xy.length === 2 && p.xy.every(Number.isFinite))) why.push('xy ' + p.xy);
