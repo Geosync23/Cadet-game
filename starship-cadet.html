@@ -40,39 +40,67 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
-.device .tabs{display:flex;gap:6px;margin:4px 2px 2px}
-.device .tabs button{padding:4px 10px;font-size:12.5px}
-.device .tabs button.on{border-color:var(--teal);color:#cfe9e4}
-.device .mail{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;font-size:13px}
-.device .mail.new{border-color:var(--teal)}
-.device .mail small{display:block;color:var(--muted);font-size:11.5px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
-.device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
-.device .devtime{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
-.device .need{display:grid;grid-template-columns:78px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
-.device .need i{height:8px;border-radius:4px;background:#26343a;overflow:hidden}
-.device .need b{display:block;height:100%;background:var(--teal)}
-.device .need.mid b{background:#d9b25a}
-.device .need.low b{background:#e07a5f}
-.device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
-.device .need em{font-style:normal;font-size:10px;margin-left:5px}
-.device .need em.up,.device #devBody p.fx.up{color:var(--teal)}
-.device .need em.down,.device #devBody p.fx.down{color:#e07a5f}
-.device .devhead{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.device #devBack{padding:4px 10px;font-size:12.5px}
-.device #devBody{max-height:62vh;overflow:auto}
-.device #devBody p.big{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
-.device #devBody p.hot{color:#cfe9e4}
-.device .row{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;font-size:13px;border-radius:10px}
-.device div.row{padding:2px 2px 0;border-radius:0}
-.device .row.new{border-color:var(--teal)}
-.device .row small{display:block;color:var(--muted);font-size:11.5px}
-.device .row .act,.device .btns .act{margin:4px 0 6px;padding:4px 10px;font-size:12.5px}
-.device .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
-.device .app{position:relative;flex-direction:column;gap:2px;border-radius:12px;padding:8px 4px;min-height:56px;font-size:12px;justify-content:center}
-.device .app i{font-style:normal;font-size:18px;color:var(--teal)}
-.device .app b{position:absolute;top:3px;right:5px;min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px}
+/* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
+.device{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
+  left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+.device[hidden]{display:none}
+.device.wide{left:12px;top:12px;bottom:12px;right:auto;width:min(420px,40vw);height:auto;border-radius:24px;padding:8px 12px 10px}
+.device .bez{display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device .bez .grip{flex:1;display:flex;justify-content:center}
+.device .bez .grip::before{content:"";width:44px;height:4px;border-radius:2px;background:#3a4148}
+.device.wide .bez .grip::before{display:none}
+.device .led{width:8px;height:8px;border-radius:50%;background:#2c3a33;box-shadow:inset 0 0 2px #000}
+.device .led.on{background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.device .led.blink{animation:devled 1.2s steps(2) infinite}
+@keyframes devled{50%{background:#2c3a33;box-shadow:none}}
+.device .crt{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--crt-bg);border-radius:var(--crt-radius);overflow:hidden;
+  box-shadow:inset 0 0 0 2px #0a0d10,inset 0 0 28px rgba(0,0,0,.85)}
+.device .crt::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:2;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 2px,var(--crt-scan) 2px,var(--crt-scan) 3px),
+  radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
+.device .crt::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;pointer-events:none;z-index:3;opacity:0;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.035),transparent)}
+.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite}
+.device.fx .crt{animation:devflick 4s steps(1) infinite}
+@keyframes devroll{from{transform:translateY(-100%)}to{transform:translateY(560%)}}
+@keyframes devflick{0%{opacity:1}31%{opacity:.985}32%{opacity:1}77%{opacity:.99}78%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
+.device .devhead{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;flex:none}
+.device h2{margin:0;font:inherit;font-size:var(--crt-size);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
+.device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);-webkit-user-select:text;user-select:text;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
+.device #devBody p{margin:4px 0 10px;color:var(--crt-ink)}
+.device #devBody p.big{font-size:22px;color:var(--crt-hot);font-variant-numeric:tabular-nums;letter-spacing:.04em;text-shadow:0 0 7px var(--crt-glow)}
+.device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
+.device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
+.device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
+.device button:focus-visible{outline:2px solid var(--crt-hot);outline-offset:2px}
+.device .row{display:block;width:100%;text-align:left;margin:6px 0;padding:8px 10px;min-height:44px;border:2px solid transparent;border-bottom-color:rgba(255,255,255,.06)}
+.device button.row{border-color:var(--crt-dim) transparent transparent;border-width:0 0 2px;border-radius:0}
+.device .row.new .rt,.device .row.urgent .rt{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
+.device .row small{display:block;color:var(--crt-dim);font-size:15px;margin-top:2px}
+.device .act{margin:8px 0 4px;text-transform:uppercase;letter-spacing:.08em}
+.device .btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
+.device .need{display:grid;grid-template-columns:7.5em 1fr 2.5em;align-items:center;gap:10px;margin:10px 0}
+.device .need i{height:14px;border:2px solid var(--crt-dim);border-radius:2px;overflow:hidden;background:transparent}
+.device .need b{display:block;height:100%;background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.device .need.low b{background:repeating-linear-gradient(90deg,var(--crt-hot) 0 6px,transparent 6px 9px)}
+.device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
+.device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
+.device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
+.device .app i{font-style:normal;font-size:26px;line-height:1;color:var(--crt-hot)}
+.device .app b{position:absolute;top:3px;right:4px;min-width:22px;padding:0 5px;border-radius:4px;background:var(--crt-hot);color:var(--crt-bg);font-size:15px;line-height:22px;text-shadow:none}
+.device .keys{display:flex;gap:10px;padding-top:10px;flex:none}
+.device .keys button{flex:1;justify-content:center;min-height:48px;font-family:var(--crt-font);font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#c3ccd3;text-shadow:none;border:0;border-radius:10px;
+  background:linear-gradient(#30363d,#22272d);box-shadow:0 3px 0 #0d1013,inset 0 1px 0 rgba(255,255,255,.08)}
+.device .keys button:active{transform:translateY(2px);box-shadow:0 1px 0 #0d1013}
+.device .keys button:disabled{opacity:.45}
+body.devsheet .toast{bottom:calc(66vh + 12px)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -103,10 +131,10 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
-<div class="lift device" id="device" role="dialog" aria-labelledby="devT" hidden>
-  <div class="devhead"><button id="devBack" aria-label="Back to the home screen" hidden>Back</button><h2 id="devT">Your device</h2></div>
-  <div id="devBody"></div>
-  <button class="stay" id="devClose">Close</button>
+<div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
+  <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
+  <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
+  <div class="keys"><button id="devBack" aria-label="Back">Back</button><button id="devHome" aria-label="Home screen">Home</button><button id="devClose" aria-label="Close your device">Close</button></div>
 </div>
 <div id="fade"></div>
 
@@ -114,7 +142,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.0
+   STARSHIP CADET: CSV Wren                            build 0.35.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6576,7 +6604,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.0';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.1';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7530,6 +7558,14 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // =====================================================================
 const DEVICE_APPS = new Map();                 // id -> { id, title, icon, order, badge, view, act }
 const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [] }, errors: [] };
+// what the device keeps (saved, SAVE_EXTRA): settings now; memos, appointments, pins and tips as their apps arrive
+const PHOSPHORS = { amber: 'Amber', green: 'Green', cyan: 'Wren cyan' };
+function deviceLoad(s) {
+  const d = s && s.device && typeof s.device === 'object' ? s.device : {}, st = d.settings && typeof d.settings === 'object' ? d.settings : {};
+  return { settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false } };
+}
+SHIP.device = deviceLoad(SAVED);
+SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
 function deviceApp(def) {
   if (!def || typeof def.id !== 'string') return;
   DEVICE_APPS.set(def.id, Object.assign({ title: def.id, icon: 'dot', order: 50 }, def));
@@ -7575,11 +7611,16 @@ function deviceRefresh() {
 // ---- the skin: the only DOM code. It draws a VIEW into #devBody, the home grid, the button's badge. ----
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
-  const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack');
-  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', dot: '•' };
+  const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
+  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
   let back = null, drawn = null;
+  const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
+    const st = SHIP.device.settings, w = skin.wide();
+    el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
+    document.body.classList.toggle('devsheet', DEV.open && !w);
+  };
   const blocks = {
     text(b) { return mk('p', b.mark ? (b.mark === 'up' || b.mark === 'down' ? 'fx ' + b.mark : b.mark) : '', b.text); },
     list(b) {
@@ -7606,22 +7647,23 @@ const DEVICE_SKIN = (() => {
       }
       return box;
     },
-    buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) box.appendChild(act(mk('button', 'act', it.label), it.action)); return box; },
+    buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
   };
   const skin = {
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
-    open() { back = document.activeElement; el.hidden = false; $('devClose').focus(); },
-    close() { el.hidden = true; drawn = null; if (back && back.focus) back.focus(); },
+    open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
+    close() { el.hidden = true; drawn = null; layout(); if (back && back.focus) back.focus(); },
     button() {
       let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
       btn.classList.toggle('low', low);
       let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
       if (badge) { badge.hidden = !un; badge.textContent = un; }
+      led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
     draw(id, v) {
       const keep = drawn === id ? body.scrollTop : 0;
-      head.textContent = id === 'home' ? 'Your device' : v.title; backB.hidden = id === 'home';
+      layout(); head.textContent = id === 'home' ? 'Your device' : v.title; backB.disabled = id === 'home';
       body.textContent = ''; body.dataset.app = id;
       for (const b of v.blocks) { const f = blocks[b && b.kind]; if (f) body.appendChild(f(b)); }
       if (id === 'home') {                     // the app grid, with badges
@@ -7641,8 +7683,22 @@ const DEVICE_SKIN = (() => {
   };
   btn.onclick = () => (DEV.open ? deviceClose() : deviceShow('home'));
   $('devClose').onclick = deviceClose;
-  backB.onclick = () => deviceShow('home');
+  backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
   addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
+  addEventListener('resize', () => { if (DEV.open) layout(); });
+  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it
+  let swipe = null;
+  addEventListener('pointerdown', e => {
+    const cv = e.target && e.target.tagName === 'CANVAS';
+    if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
+    else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
+    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); deviceClose(); }
+  }, true);
+  addEventListener('pointerup', e => {
+    if (!swipe) return; const dy = e.clientY - swipe.y;
+    if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    swipe = null;
+  }, true);
   return skin;
 })();
 
@@ -7731,6 +7787,19 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
       if (mailOpen === m.id) B.push({ kind: 'text', text: m.body });
     }
     return { title: 'Mail', blocks: B };
+  } });
+
+// Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
+// phone asks for reduced motion), tips on or off
+deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) st.phosphor = arg; else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
+  view: () => {
+    const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
+    return { title: 'Settings', blocks: [
+      { kind: 'text', text: 'Screen colour' },
+      { kind: 'buttons', items: Object.entries(PHOSPHORS).map(([k, label]) => ({ label, action: { app: 'settings', do: 'phosphor', arg: k }, on: st.phosphor === k })) },
+      { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
+      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') }] };
   } });
 
 // Wallet: credits and your locker (0.28.10)

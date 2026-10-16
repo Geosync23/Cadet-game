@@ -5,6 +5,7 @@
 #   tapping a tile opens the app; Back goes home; Close and the button close it; deviceOn('open' / 'close') fire once each
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
+#   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
 # Setup and environment as for cadet_test.py.
 # Run:  python3 device_check.py BUILD.html
@@ -19,6 +20,20 @@ def check(cond, msg):
     return cond
 
 SIZES = [('phone', 390, 844), ('wide', 1280, 800)]
+# the look rules: nothing under 15px, every button 44px high, no blur or backdrop filter, text 7:1 on the screen
+LOOK = r"""(() => {
+  const dev = document.getElementById('device'), lum = c => { const v = c.match(/[\d.]+/g).slice(0, 3).map(x => +x / 255).map(x => x <= .04045 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+  const small = [], tiny = [], blur = [];
+  for (const e of dev.querySelectorAll('*')) {
+    const cs = getComputedStyle(e); if (e.offsetParent === null) continue;
+    if (e.childNodes.length && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()) && parseFloat(cs.fontSize) < 15) small.push(e.tagName + ':' + e.textContent.slice(0, 20));
+    if (e.tagName === 'BUTTON' && e.getBoundingClientRect().height < 44) tiny.push(e.textContent.slice(0, 20));
+    if ((cs.backdropFilter && cs.backdropFilter !== 'none') || (cs.webkitBackdropFilter && cs.webkitBackdropFilter !== 'none') || (cs.filter && cs.filter !== 'none')) blur.push(e.tagName);
+  }
+  const st = getComputedStyle(dev), ink = lum(st.getPropertyValue('--crt-ink').trim().replace(/^#(..)(..)(..)$/, (m, r, g, b) => `rgb(${parseInt(r, 16)},${parseInt(g, 16)},${parseInt(b, 16)})`)),
+    bgc = getComputedStyle(dev.querySelector('.crt')).backgroundColor, bg = lum(bgc);
+  return { small: small.slice(0, 4), tiny: tiny.slice(0, 4), blur: blur.slice(0, 4), contrast: Math.round((Math.max(ink, bg) + .05) / (Math.min(ink, bg) + .05) * 10) / 10 };
+})()"""
 
 def run(path):
     with sync_playwright() as pw:
@@ -35,7 +50,7 @@ def run(path):
             # the home screen
             g.page.click('#devBtn'); g.step(2)
             home = g.ev("""(() => { const b = document.getElementById('devBody'); return { open: !document.getElementById('device').hidden, app: DEV.app,
-              tiles: [...b.querySelectorAll('.apps .app')].map(t => t.dataset.app), text: b.textContent, back: !document.getElementById('devBack').hidden }; })()""")
+              tiles: [...b.querySelectorAll('.apps .app')].map(t => t.dataset.app), text: b.textContent, back: !document.getElementById('devBack').disabled }; })()""")
             check(home['open'] and home['app'] == 'home' and not home['back'], f'the button opens the home screen: {home["app"]}')
             check(home['tiles'] == apps, f'a tile for every app, in order: {home["tiles"]}')
             check('Day ' in home['text'], 'the home screen shows the day and time')
@@ -45,9 +60,11 @@ def run(path):
             for a in apps:
                 g.page.click(f'#devBody .apps .app[data-app="{a}"]'); g.step(1)
                 r = g.ev("""(() => { const b = document.getElementById('devBody'); return { app: DEV.app, kids: b.children.length, text: b.textContent.slice(0, 80),
-                  head: document.getElementById('devT').textContent, back: !document.getElementById('devBack').hidden, failed: b.textContent.includes('failed to draw') }; })()""")
+                  head: document.getElementById('devT').textContent, back: !document.getElementById('devBack').disabled, failed: b.textContent.includes('failed to draw') }; })()""")
                 print(f'  {a}: {r["head"]!r} {r["text"]!r}')
                 check(r['app'] == a and r['kids'] > 0 and r['back'] and not r['failed'], f'{a} opens and draws: {r}')
+                lk = g.ev(LOOK)
+                check(not lk['small'] and not lk['tiny'] and not lk['blur'] and lk['contrast'] >= 7, f'{a}: the look rules (15px+, 44px targets, no blur, 7:1): {lk}')
                 g.page.click('#devBack'); g.step(1)
                 check(g.ev("DEV.app") == 'home', f'Back from {a} goes home')
             # mail: badge, read through deviceDo, tile badge clears
@@ -71,7 +88,7 @@ def run(path):
             check(box[0] >= 0 and box[1] >= 0 and box[2] <= w and box[3] <= h, f'the panel fits on screen: {box}')
             g.page.click('#devClose'); g.step(1)
             check(g.ev("document.getElementById('device').hidden && !DEV.open"), 'Close closes it')
-            g.page.click('#devBtn'); g.step(1); g.page.click('#devBtn'); g.step(1)
+            g.page.click('#devBtn'); g.step(1); g.page.click('#devClose'); g.step(1)   # wide: the side panel covers the button; Close is the way out
             ev = g.ev("__ev")
             check(ev == ['open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
             errs = g.ev("DEV.errors")
