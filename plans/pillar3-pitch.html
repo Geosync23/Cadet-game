@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pillar 3 Pitch</title>
+<style>
+:root{
+  --bg:#eef2f3;--bg2:#e2e9ec;--ink:#17232b;--muted:#566a73;--teal:#16897c;--teal-ink:#0d5f56;
+  --gold:#a8741a;--rose:#b2493d;--card:rgba(255,255,255,.82);--line:rgba(22,70,80,.16);--chip:rgba(22,137,124,.1);
+  --storm:#3d4f7a;--glow:rgba(22,137,124,.14);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141c2b;--bg2:#0c111b;--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--teal-ink:#bdeee6;
+    --gold:#e9c46a;--rose:#e8857a;--card:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.12);
+    --storm:#9fb4e8;--glow:rgba(76,195,181,.10);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141c2b;--bg2:#0c111b;--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--teal-ink:#bdeee6;
+  --gold:#e9c46a;--rose:#e8857a;--card:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.12);
+  --storm:#9fb4e8;--glow:rgba(76,195,181,.10);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);background:var(--bg);
+  background-image:radial-gradient(ellipse at 50% 0%,var(--glow) 0%,transparent 60%),linear-gradient(var(--bg),var(--bg2));
+  background-attachment:fixed;font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.55;overflow-x:hidden}
+main{max-width:760px;margin:0 auto;padding:0 16px 48px}
+header{padding:28px 0 8px}
+.eyebrow{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);font-weight:600}
+h1{font-size:28px;line-height:1.2;font-weight:600;margin:6px 0 10px}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px}
+h3{font-size:16px;font-weight:600;margin:0 0 4px;color:var(--teal-ink)}
+p{margin:0 0 12px}
+.lede{font-size:17px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.grid{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:620px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0}
+.see li{margin:8px 0}
+
+/* the storm */
+.storm{border:1px solid var(--line);border-radius:18px;background:var(--card);padding:18px 16px 8px;margin-top:8px}
+.storm h2{margin-top:0}
+.tl{list-style:none;padding:0;margin:0;position:relative}
+.tl:before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl>li{position:relative;padding:0 0 18px 36px;margin:0}
+.tl>li:before{content:"";position:absolute;left:4px;top:5px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--teal)}
+.tl>li.hit:before{background:var(--storm);border-color:var(--storm)}
+.day{font-weight:600;color:var(--teal-ink)}
+.tag{display:inline-block;font-size:12px;line-height:1.4;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--teal-ink);margin:0 4px 4px 0;white-space:nowrap}
+.tag.felt{background:none;border:1px solid var(--storm);color:var(--storm)}
+.quote{border-left:3px solid var(--teal);padding:2px 0 2px 12px;margin:8px 0;font-style:italic}
+.bands{display:grid;gap:10px;grid-template-columns:1fr;margin:4px 0 12px}
+@media (min-width:620px){.bands{grid-template-columns:1fr 1fr}}
+.band{border-radius:12px;padding:12px 14px;border:1px solid var(--line)}
+.band b{display:block;margin-bottom:2px}
+.band.good b{color:var(--teal-ink)}
+.band.rough b{color:var(--rose)}
+
+/* apps */
+.apps{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+@media (min-width:620px){.apps{grid-template-columns:1fr 1fr 1fr}}
+.app{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.app b{display:block;font-size:15px}
+.app.extra{border-style:dashed}
+.app.extra b:after{content:" · extra";font-weight:400;font-size:12px;color:var(--muted)}
+
+/* order */
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:2px 0 10px 40px;margin:0}
+.steps li:before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--chip);color:var(--teal-ink);font-weight:600;text-align:center;line-height:28px;font-size:14px}
+.steps li.check:before{content:"✓";background:var(--teal);color:var(--bg)}
+
+/* choices */
+.choice{background:var(--card);border:1px solid var(--teal);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.choice .n{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.choice p{margin:4px 0 0}
+/* the CRT mock */
+.crt{--ci:#6ff0dc;--cd:#46a99b;--cb:#03141a;--cg:rgba(95,227,208,.45);
+  background:#1b1f24;border-radius:22px;padding:14px 14px 10px;max-width:360px;margin:12px auto 6px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.crt.amber{--ci:#ffb347;--cd:#b8803a;--cb:#140c03;--cg:rgba(255,170,60,.5)}
+.crt.green{--ci:#5dff8a;--cd:#3fae63;--cb:#041309;--cg:rgba(80,255,130,.45)}
+.crt .scr{position:relative;overflow:hidden;border-radius:18px;background:var(--cb);padding:14px 16px;
+  font-family:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;font-size:16px;line-height:1.35;color:var(--ci);text-shadow:0 0 4px var(--cg);
+  box-shadow:inset 0 0 28px rgba(0,0,0,.75)}
+.crt .scr:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.2) 2px,rgba(0,0,0,.2) 3px),
+  radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45) 100%)}
+.crt .hd{text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:var(--cd);display:flex;justify-content:space-between}
+.crt .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--cd)}
+.crt .row:last-child{border-bottom:0}
+.crt .hot{background:var(--ci);color:var(--cb);text-shadow:none;padding:0 6px;border-radius:3px}
+.crt .lbl{display:flex;justify-content:space-between;align-items:center;color:#8a949c;font-size:11px;letter-spacing:.12em;margin-top:8px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.crt .led{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ci);box-shadow:0 0 6px var(--ci);margin-right:6px;vertical-align:1px}
+.swatches{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.swatches button{appearance:none;font:inherit;font-size:13px;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.swatches button[aria-pressed="true"]{border-color:var(--teal);color:var(--teal-ink)}
+.evlist{list-style:none;padding:0;margin:0}
+.evlist li{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);margin:0}
+.evlist li:last-child{border-bottom:0}
+.evlist .num{flex:0 0 28px;height:28px;border-radius:50%;background:var(--teal);color:var(--bg);font-weight:600;text-align:center;line-height:28px;font-size:14px}
+.evlist li.short{padding-left:40px;color:var(--muted);font-size:14.5px}
+.evlist li.first .num{background:var(--storm)}
+footer{margin-top:36px;font-size:13px;color:var(--muted)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">Starship Cadet · Pillar 3 · agreed 16 October 2026</div>
+  <h1>The ship gets a voice</h1>
+  <p class="lede">The Wren already works: the galley cooks, machines wear out, the Works crew fix them and so can you. Pillar 3 gives that ship a voice. Your <b>personal device</b> becomes the one screen you use for everything, and it looks like an old-school screen. The <b>crew become people you know</b>, who remember you, chat, invite you places and ask for favours. <b>Ship-wide events</b> begin, starting with the ion storm: a few days when the whole ship changes and everyone talks about it. There are no cutscenes and no mission markers, and the game never stops for a story.</p>
+  <p class="muted">This is what you agreed. The full plan is in <code>plans/pillar3-plan.md</code>.</p>
+</header>
+
+<h2>What you'd see and do</h2>
+<div class="card">
+  <ul class="see">
+    <li>Walking through the mess, you overhear someone say <i>"Sato hasn't left the chart room since last night"</i>, and later find it in your news feed.</li>
+    <li>You tap Pell and get a short chat, with buttons to chat, ask about something, offer help, or meet up.</li>
+    <li>You make an appointment to go to the gym with Tomas at 18:00, and he's there.</li>
+    <li>You take a job at the Works bay board and track it on your device. The on-screen arrow leads you step by step: storage for the part, then the machine, then back to the board to turn it in.</li>
+    <li>A friend asks you to fix the lamp in their cabin. You say yes in the chat, the arrow points the way, and you hand it back to them in person when it's done.</li>
+    <li>The Captain's face appears across the top of the screen with a ship-wide announcement. The crew around you stop and look up for a moment, then carry on.</li>
+    <li>At the start of shift, Chief Calder gathers the Works crew at the job board. Her lines play one by one in a panel at the bottom of the screen, and you can offer to take a job, while the ship carries on around you.</li>
+  </ul>
+</div>
+
+<section class="storm" aria-labelledby="storm-h">
+  <div class="eyebrow">How ambient events work</div>
+  <h2 id="storm-h">The ion storm, through your eyes</h2>
+  <p class="muted">You're never given a mission. You hear about it the way everyone does, and help as much as you choose to.</p>
+  <ol class="tl">
+    <li>
+      <div class="day">Day 1, morning: a rumour</div>
+      <p>Nothing official yet. At the start of shift, Calder holds a quick storm briefing at the Works bay job board: her lines play in the panel, and you can offer to take the bridge battery run. At breakfast a Survey officer says the sensors are "doing something odd". By dinner, half the mess is talking about it. A Works notice lands in your Mail: <i>storm prep, secure loose fittings, top up filters.</i> New jobs appear on the board, such as securing the bow lounge's glassware and carrying battery packs to the bridge. You take some of them, or you don't. That's up to you.</p>
+      <span class="tag">a meeting with dialogue</span><span class="tag">crew chatter</span><span class="tag">Mail</span><span class="tag">job board</span>
+    </li>
+    <li class="hit">
+      <div class="day">Day 2, 14:00: the storm hits</div>
+      <p>You're fixing a lamp on Deck 4 when the screen jolts, every light dips, and then they start to flicker. The Captain's announcement appears across the top of the screen:</p>
+      <p class="quote">"We're in it. Expect flickers and no calls home for a while. Look after each other."</p>
+      <p>The call-home booths close, the lounge is shut, the mess is quiet, and bridge crew are on double shifts.</p>
+      <span class="tag felt">felt on every deck</span><span class="tag">the Captain's address</span>
+    </li>
+    <li>
+      <div class="day">Day 3: it gets harder</div>
+      <p>Relays fail, and one deck at a time drops to dim emergency lighting. The chef makes storm stew and sends trays up to the bridge; you can push the cart. People are tired and snappy when you tap them. Each job you do keeps the lights on for someone.</p>
+      <span class="tag">more faults</span><span class="tag">tired crew</span>
+    </li>
+    <li class="hit">
+      <div class="day">Day 4, mid-morning: all clear</div>
+      <p>The Captain gives the all-clear in the observation room, and it goes out to every deck as an announcement. Calls home come back on, and there's a queue at the booths all afternoon. In the evening there's a party in the bow lounge.</p>
+      <span class="tag">a meeting with dialogue</span><span class="tag">the Captain's address</span><span class="tag">gathering, announced ahead</span>
+    </li>
+    <li>
+      <div class="day">Afterwards: no score, just the ship</div>
+      <div class="bands">
+        <div class="band good"><b>If it went smoothly</b>The storm crew's signed duty roster goes up in the Works tea corner, and people thank you.</div>
+        <div class="band rough"><b>If it went roughly</b>There's a scorch mark in the relay room and the ship is grumpy for a couple of days, then it recovers.</div>
+      </div>
+      <p><b>You can't fail.</b> If you did your part you may get a commendation, which counts toward promotion. If you slept through it, the crew coped, and you hear all about it the next day.</p>
+    </li>
+  </ol>
+</section>
+
+<h2>Big moments, in four kinds</h2>
+<div class="grid two">
+  <div class="card"><h3>Felt everywhere</h3>The jolt, the lights dipping, a nebula filling every window. It happens wherever you are.</div>
+  <div class="card"><h3>The Captain's address</h3>A banner on every deck. The crew stop and look up, and time keeps running.</div>
+  <div class="card"><h3>Gatherings</h3>Announced ahead, at a real place and time. If you're there, you see it; if not, people tell you about it.</div>
+  <div class="card"><h3>Meetings with dialogue</h3>A briefing, a summons, a greeting. If you're there, the lines play one by one, sometimes with a choice of reply. You can always walk away and get the gist in Mail.</div>
+</div>
+<p class="muted" style="margin-top:10px">Never a full cutscene, and the camera is never taken away from you.</p>
+
+<h2>All the events, in order</h2>
+<p>Pillar 3 builds the ion storm first, then works down the list. Nothing is dropped.</p>
+<div class="card">
+<ol class="evlist">
+  <li class="first"><span class="num">1</span><span><b>Ion storm</b>: touches every system</span></li>
+  <li class="short">Comet viewing</li>
+  <li><span class="num">2</span><span><b>Diplomatic visit</b>: a greeting at the shuttle bay, formal dinners, Veyli guests</span></li>
+  <li class="short">Crew rotation day</li>
+  <li><span class="num">3</span><span><b>Something in the garden</b>: a creature eats the crops and becomes the ship's pet</span></li>
+  <li class="short">Power surge</li>
+  <li><span class="num">4</span><span><b>Shipboard illness</b>: fewer hands, more work</span></li>
+  <li class="short">Founding Day festival, once your phone test says big crowds are fine</li>
+  <li><span class="num">5</span><span><b>Nebula drift</b>: beautiful, sleepy and chatty</span></li>
+  <li class="short">The late supply shuttle</li>
+  <li><span class="num">6</span><span><b>Salvage</b>: the shuttle flies; in later playthroughs it can lead into the garden creature</span></li>
+  <li class="short">A Veyli vessel needs help</li>
+  <li><span class="num">7</span><span><b>The déjà vu day</b>: one day, replayed</span></li>
+</ol>
+</div>
+
+<h2>Your device</h2>
+<p>It opens from a corner button or a swipe up. <b>You see your character take it out</b>: they raise a small glowing handheld and look at it, read it as they walk, and put it away when you close it. On a phone it slides up from the bottom, and the camera eases gently to keep you in view above it; on the unfolded TriFold it sits at the side. <b>Time keeps running while it's open.</b></p>
+<p><b>The look:</b> an old-school screen, like looking at an actual device's display. It has fine interlaced scan lines, a soft phosphor glow, slightly curved, darkened edges and chunky letters, all set in a sturdy frame. Any flicker is optional and switches off on phones set to reduce motion. It's built to stay crisp at phone size and cost nothing extra to draw. A rough sketch, with the three colours you'll choose from:</p>
+<div class="crt" id="crt" role="img" aria-label="A sketch of the device screen showing the Jobs app">
+  <div class="scr">
+    <div class="hd"><span>Jobs · Tier 1</span><span>Tue 09:42</span></div>
+    <div class="row"><span class="hot">Scrubber 2</span><span>Deck 4 · urgent</span></div>
+    <div class="row"><span>Lounge glassware</span><span>storm prep</span></div>
+    <div class="row"><span>Lamp, cabin 4-12</span><span>favour · Pell</span></div>
+  </div>
+  <div class="lbl"><span><span class="led"></span>CSV WREN · CREW PDA</span><span>◀ BACK &nbsp; ● HOME</span></div>
+</div>
+<div class="swatches" role="group" aria-label="Screen colour">
+  <button type="button" data-c="" aria-pressed="true">Wren cyan</button>
+  <button type="button" data-c="amber" aria-pressed="false">Amber</button>
+  <button type="button" data-c="green" aria-pressed="false">Green</button>
+</div>
+<div class="apps" style="margin-top:16px">
+  <div class="app"><b>Schedule</b>Your shift, meals, plans</div>
+  <div class="app"><b>Appointments</b>Crew turn up</div>
+  <div class="app"><b>Maps</b>Find rooms and friends</div>
+  <div class="app"><b>Memos</b>Your own notes</div>
+  <div class="app"><b>Mail</b>Ship, crew, Captain, home</div>
+  <div class="app"><b>Calendar</b>Ship traditions, with reminders</div>
+  <div class="app"><b>Needs</b>Bonuses and penalties</div>
+  <div class="app"><b>Jobs</b>Tracks work and favours</div>
+  <div class="app extra"><b>Crew</b>Everyone you've met</div>
+  <div class="app extra"><b>Ship</b>Health and news</div>
+  <div class="app extra"><b>Record</b>Your Works progress</div>
+  <div class="app extra"><b>Wallet</b>Credits and locker</div>
+  <div class="app extra"><b>Music</b>Later, with sound</div>
+</div>
+<p class="muted" style="margin-top:10px">The look is still a separate layer, so it can be changed later without touching the apps.</p>
+<div class="grid two" style="margin-top:12px">
+  <div class="card"><h3>Jobs at the board</h3>Take a job at the Works bay board, track it on your device (the arrow leads step by step), do the work, then turn it in back at the board. Favours are taken and handed back in person.</div>
+  <div class="card"><h3>First tips</h3>The first few times through the job loop, a short tip appears in the same old-school style. Each shows once, never pauses the game, and can be switched off. Fuller tutorials come in Pillar 4.</div>
+</div>
+
+<div class="grid two" style="margin-top:28px">
+  <div class="card">
+    <h3>Getting to know the crew</h3>
+    <ul>
+      <li>Stranger, acquaintance, colleague, friend, close friend.</li>
+      <li>You get closer by working, eating and chatting together, and by doing favours. Friendships don't fade.</li>
+      <li>Friends come and find you, invite you places and put in a good word with the Chief.</li>
+      <li>The crew have friendships and rivalries with each other.</li>
+      <li>Tomas, Pell and Rina get the first personal storylines.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Moving up</h3>
+    <ul>
+      <li>Summoned to the Captain's ready room after an event.</li>
+      <li>Taken by the Chief to a briefing at the conference table.</li>
+      <li>Invited to tea in an officer's cabin.</li>
+      <li>Dinner at the Captain's table.</li>
+      <li>Progress talks in the Chief's office.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>The order of work</h2>
+<ol class="steps">
+  <li>The device (in its old-school look), relationships and chats, and appointments, built side by side, starting from what your phone test shows.</li>
+  <li class="check"><b>Check-in 1 with you:</b> try the new device, pick its screen colour, and try the social life.</li>
+  <li>The ion storm from start to finish, with its two meetings, and the first visit to the ready room.</li>
+  <li class="check"><b>Check-in 2 with you:</b> play through a whole storm.</li>
+  <li>Then down the event list, with a review after each main event.</li>
+</ol>
+
+<h2>What you decided</h2>
+<div class="choice"><span class="n">The device</span><p>Keep the swappable layers, but build the real look now: an old-school screen. Add all the extra apps except Camera.</p></div>
+<div class="choice"><span class="n">Ambient events</span><p>Agreed, and an event can also call a meeting with dialogue, never a full cutscene.</p></div>
+<div class="choice"><span class="n">The event order</span><p>Keep the whole list, in the order above. The ion storm is built first.</p></div>
+<div class="choice"><span class="n">Seeing yourself use it</span><p>Your character takes out the glowing handheld, reads it as they walk, and puts it away.</p></div>
+<div class="choice"><span class="n">Jobs at the board</span><p>Take and turn in jobs at the board; the device only tracks them. Favours are taken and handed back in person.</p></div>
+<div class="choice"><span class="n">First tips</span><p>A few short tips for the job loop, once each; full onboarding in Pillar 4.</p></div>
+<div class="choice"><span class="n">Ship traditions</span><p>The small recurring happenings (quiz night, film night, observatory night, birthdays, Founding Day...) are "ship traditions"; the big ones are "ship-wide events". The Calendar reminds you about 30 ship minutes before each tradition, with a "Today aboard" line each morning and a switch for each one.</p></div>
+<div class="choice"><span class="n">Everything else</span><p>Yes to all ten: the device never pauses time; Maps shows people you know; a missed appointment costs only a remark; your own part counts toward commendations; ordinary visitors weekly; friendship tiers and short chats, with Tomas, Pell and Rina first; visits by invitation; more gym kit and simple sounds; two new helpers.</p></div>
+
+<footer>Starship Cadet · CSV Wren · Pillar 3, as agreed on 16 October 2026.</footer>
+</main>
+<script>
+document.querySelectorAll('.swatches button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var c = document.getElementById('crt');
+    c.className = 'crt' + (b.dataset.c ? ' ' + b.dataset.c : '');
+    document.querySelectorAll('.swatches button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Decisions log (answers pass)
+- Time: SHIP_RATE 1080/1800 (18 ship h = 30 real min; full day 40 min).
+- Long days: energy lasts ~17 h at average fitness.
+- Bed after 20:00 skips to 06:00, no dialog; earlier says too early.
+- Need bonus table (high>=75 bonus, low<25 penalty, multiplied).
+- Unanswered "machine trouble slows you": kept no.
+- Faults for player: target 3-6 jobs/day left (crew take urgent/big at once).
+- Tier: player is Tier 1 (Works junior).
+- Supplies shortage -> Mail tab now (simple inbox); full device Pillar 3.
+- Shopping: credits balance; snacks + comforts.
+- Birthdays: ship day-of-year 1-364, ~1/week.
+- Visible faults split: per-machine lamps/drips = Deck 6 architect (marks flag); room effects = perf.
+- shipHealthRows shape fixed.
+- Deferred to Pillar 3: device, ready room meetings, officers' quarters visits, events.
+- Visible faults REVISED: perf engineer draws all machine marks centrally (section 8b, all decks, 'look' overrides); architects only boards + overrides. Chosen because one shared system covers every deck with no per-deck opt-in.
+- User asked mid-night: sit on benches/chairs -> added: tap a free seat to sit (crowd sit pose); rest slows energy drain; sitting near chatting crew gives a little social.
+- Observatory night: new place type 'event' + tag event:'observatory-night' (so everyday habits don't take those spots); deck_check TYPES gains 'event'. Fixed stargazers on Deck 2 using common-room seats.
+- User mid-night: small Stardew-like traditions tonight -> hired events engineer (section 18 SHIP EVENTS, builds 0.34.x, events_check.py). One events system: observatory night + birthday gathering become entries; sim keeps the hook in planDay and daily routines (handover, Captain's walk). Announcements via Mail; calendar on device later.
+- Hired a Pillar 3 planner (docs only, claude/pillar3-plan) to draft plans/pillar3-plan.md; lead reviews and pitches. Saves lead memory.
+- Need bonus drain numbers softened by player engineer (fit 0.94/1.06, fed 0.96, lonely 1.05) so 16-18 h rule holds: unfit 16.1 h, average 17.1 h, fit 18.2 h. Approved.
+- Added shower spray (cheap, weak when water/heater poor) and room light flicker hook in section 12. Garden wilting shares planter materials (promenade planters yellow too) - accepted.
+- User late tweaks: player can use everything crew use (parity rule) + job board pick-and-take + on-screen goal arrow -> hired interactions engineer (new section 15b, builds 0.37.x, setGoal/clearGoal for the future map). Player engineer keeps section 15 and adds a small registration hook.
+- More jobs: systems engineer widens job variety (Tier 1 heavy), exposes openJobs(forWho).
+- Seated crew misaligned -> performance engineer investigates (pose, place data or placement) and fixes; architects get a list if place data is wrong.
+- Bug: three KIT pieces named cableTray (last wins, every deck drew Deck 2's). Bridge renamed theirs floorCableTray; command architect renames Deck 2's to crawlCableTray, restoring Deck 6's own tray. Lead adds a duplicate-KIT-name scan to merges.
+- One events system: section 18 (events engineer) owns all traditions incl. observatory night & birthdays; sim removes its duplicates, keeps hook + daily routines. Tap toast = role + feeling + event line (else bio) + chat.
+- Jobs for player: small Tier-1 jobs wait 3 day-shift hours for the player; ~3.7/day + a food run = 4-5/day (target 3-6). Cart run waits 1 h for the player before crew take it.
+- Player can squeeze past settled crew (working/seated/standing at a station) with a polite line; walking crew still block. (Found: Chef Brennan's station blocked the only path to the galley plant panel.)
+- Food you push yourself lands in the cold store when you unload (not on paper).
+- Seating fix: 176 of 264 seats wrong (height too low, spot beside the seat, compass facing at angled tables). Fix by place data: per-place y + xy nudges + numeric face (degrees) supported in placeSpot; feet rest on stool rings above 0.62 m; ?seats debug view. Architects apply per-deck lists.
