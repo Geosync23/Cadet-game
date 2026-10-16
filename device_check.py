@@ -10,12 +10,12 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
 #   and a drag up from the bottom edge leave it shut; only the Device button opens it
-#   0.35.14: { app: 'maps', do: 'person' }, the Maps plan kept between ship minutes, unknown appointment fields kept
+#   0.35.14: the Maps plan kept between ship minutes, unknown appointment fields kept
 #   the phone review (0.35.12): tap the ship to close (a drag doesn't), the bezel's grip and swipe, no rebuild when unchanged
 #   Quiet off shift and the #seek chip's look (0.35.11)
 #   Calendar days and group meetings (0.35.10): See the day, Make an appointment that day, pick the place on Maps,
 #   two or more people (a seat each, kept and cancelled together)
-#   people on Maps (0.35.9): who you may find (crewContacts), dots, { app: 'maps', who }, Go there
+#   the Roster (0.35.16): everyone by department, where they are, quarters for sleepers, Go there; Maps has no people
 #   Ship news (0.35.8): section 20's shipNews feed in the Ship app
 #   Appointments (0.35.6): ask someone for tomorrow at a meeting place; an answer, booked or offered; saved
 #   the meeting panel (deviceDialogue(view, onTap)) and the Captain's address (deviceAddress) draw and report taps
@@ -127,31 +127,31 @@ def run(path):
             print('  maps:', mp)
             check(all(mp[n] > 5 for n in mp if n != 'goal'), f'every deck draws its rooms: {mp}')
             check(mp['goal'] and mp['goal'][0] == 3 and isinstance(mp['goal'][1], str), f'Go there sets the goal arrow: {mp["goal"]}')
-            # people on Maps (0.35.9): section 20's crewContacts (a stand-in when this build has none); { app: 'maps', who }
-            # opens Maps on their deck with them picked; a dot per person; Go there points at their room
-            pm = g.ev("""(() => { const own = typeof crewContacts === 'function', mess = Object.values(DECKS[3].rooms).find(r => /mess/i.test(r.name || '')).name;
-              if (!own) window.crewContacts = () => [{ id: 'tst-a', name: 'Tess Able', role: 'Cook', tier: 1, tierName: 'acquaintance', where: { deck: 3, room: mess, act: 'dinner' } },
-                { id: 'tst-b', name: 'Ben Cole', role: 'Medic', tier: 0, tierName: 'stranger', where: { deck: 3, room: mess, act: 'work' } }, { id: 'tst-c', name: 'Cy Dunn', role: 'Pilot', tier: 0, tierName: 'stranger', where: null }];
-              const ps = mapPeople(), q = ps[0]; if (!q) { if (!own) delete window.crewContacts; return [own, 0]; }
-              deviceDo({ app: 'maps', who: q.id }); const out = [own, ps.length, DEV.app, mapDeck === q.deck, mapWho === q.id];
-              const dots = [...document.querySelectorAll('#devBody .devmap circle[data-who]')]; out.push(dots.length >= ps.filter(x => x.deck === q.deck).length, !!dots.find(d => d.dataset.who === q.id && d.classList.contains('pick')));
-              out.push(document.getElementById('devBody').textContent.includes(q.label));
-              const go = [...document.querySelectorAll('#devBody .btns .act')].find(b => b.textContent === 'Go there'); go && go.click();
-              out.push(!!(IX_GOAL && IX_GOAL.deck === q.deck && IX_GOAL.room === q.room && IX_GOAL.label.includes(q.label)));
-              clearGoal(); deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); if (!own) delete window.crewContacts; deviceShow('home'); return out; })()""")
-            print('  people on maps:', pm)
-            check(pm[1] == 0 if pm[0] and len(pm) == 2 else pm[1:] == [pm[1], 'maps', True, True, True, True, True, True] and (pm[0] or pm[1] == 2), f'people on Maps: dots, pick, Go there: {pm}')
-            # 0.35.14: section 20's "On the map" ({ app: 'maps', do: 'person' }) opens Maps on them; the plan is kept between
-            # ship minutes (only the dots are drawn again); appointments keep fields other sections add (socKept)
-            pp = g.ev("""(() => { const own = typeof crewContacts === 'function', mess = Object.values(DECKS[3].rooms).find(r => /mess/i.test(r.name || '')).name;
-              if (!own) window.crewContacts = () => [{ id: 'tst-a', name: 'Tess Able', role: 'Cook', tier: 1, tierName: 'acquaintance', where: { deck: 3, room: mess, act: 'dinner' } }];
-              const q = mapPeople()[0]; if (!q) { if (!own) delete window.crewContacts; return 'nobody'; }
-              deviceShow('home'); deviceDo({ app: 'maps', do: 'person', arg: q.id }); const out = [DEV.app, mapWho === q.id];
+            # Maps has no people (0.35.16, the user's answer); the plan is kept between ship minutes (0.35.14); appointments
+            # keep fields other sections add (socKept)
+            pp = g.ev("""(() => { deviceShow('maps'); const out = [];
+              for (const n of Object.keys(DECKS)) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out.push(document.querySelectorAll('#devBody .devmap circle.m-per').length); }
               const s1 = document.querySelector('#devBody .devmap'); deviceRefresh(); DEVICE_SKIN.draw('maps', Object.assign(deviceView('maps'), { title: 'Maps again' }));
-              const s2 = document.querySelector('#devBody .devmap'); out.push(s1 === s2, s2.querySelectorAll('g.m-dots').length, !!s2.querySelector('circle.m-per.pick'));
-              deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); if (!own) delete window.crewContacts; deviceShow('home');
-              out.push(deviceLoad({ device: { appts: [{ id: 1, with: ['calder'], at: 9000, where: '3-mess-1', status: 'kept', socKept: true }] } }).appts[0].socKept === true); return out; })()""")
-            check(pp == ['maps', True, True, 1, True, True], f'On the map from the Crew app; the plan kept, dots redrawn; other sections\' appointment fields kept: {pp}')
+              const s2 = document.querySelector('#devBody .devmap'); deviceDo({ app: 'maps', do: 'deck', arg: deckDef.num }); deviceShow('home');
+              return [out.every(x => x === 0), s1 === s2, !document.getElementById('devBody').textContent.includes('On duty on this deck'),
+                deviceLoad({ device: { appts: [{ id: 1, with: ['calder'], at: 9000, where: '3-mess-1', status: 'kept', socKept: true }] } }).appts[0].socKept === true]; })()""")
+            check(pp == [True, True, True, True], f'Maps: no people on any deck, the plan kept between ship minutes; other sections\' appointment fields kept: {pp}')
+            # the Roster (0.35.16): everyone by department, people you know first; tap a name for where they are; asleep or
+            # washing reads "In their quarters"; Go there aims the arrow at their room; Maps' old person links open it
+            rs = g.ev("""(() => { const save = { day: SHIP.time.day, min: SHIP.time.min }, out = {}, ps = rosterPeople(); out.n = ps.length;
+              deviceShow('roster'); const t = document.getElementById('devBody').textContent; out.depts = ['Command', 'Works', 'Galley'].every(d => t.includes(d));
+              SHIP.time.min = 120; const sleeper = ps.find(x => { try { const w = whereIs(x.p, shipNow()); return w && w.act === 'sleep'; } catch (e) { return false; } });
+              out.sleep = sleeper ? rosterWhere(sleeper.p).line : 'nobody asleep';
+              SHIP.time.min = 600; const worker = ps.find(x => rosterWhere(x.p).room && /^On duty/.test(rosterWhere(x.p).line));
+              if (worker) { deviceDo({ app: 'roster', do: 'pick', arg: worker.p.id }); out.line = document.getElementById('devBody').textContent.includes(rosterWhere(worker.p).line);
+                const go = [...document.querySelectorAll('#devBody .btns .act')].find(b => b.textContent === 'Go there'); go && go.click();
+                const w = rosterWhere(worker.p); out.goal = !!(IX_GOAL && IX_GOAL.deck === w.deck && IX_GOAL.room === w.room); clearGoal(); }
+              deviceShow('home'); deviceDo({ app: 'maps', who: ps[0].p.id }); out.who = [DEV.app, rosterPick === ps[0].p.id];
+              deviceShow('home'); deviceDo({ app: 'maps', do: 'person', arg: ps[1].p.id }); out.person = [DEV.app, rosterPick === ps[1].p.id];
+              rosterPick = null; SHIP.time.day = save.day; SHIP.time.min = save.min; deviceShow('home'); return out; })()""")
+            print('  roster:', rs)
+            check(rs.get('n', 0) >= 20 and rs.get('depts') and rs.get('sleep') == 'In their quarters.' and rs.get('line') and rs.get('goal')
+                  and rs.get('who') == ['roster', True] and rs.get('person') == ['roster', True], f'Roster: everyone by department, quarters for sleepers, where and Go there, Maps links: {rs}')
             # Memos: write one with the form, it's saved in SHIP.device and pins to Home; Mail's Remember this makes one
             mm = g.ev("""(() => { SHIP.device.memos = []; deviceShow('memos'); deviceDo({ app: 'memos', do: 'new' });
               const f = document.querySelector('#devBody form.devform'); if (!f) return 'no form';
