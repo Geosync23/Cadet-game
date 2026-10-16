@@ -11771,12 +11771,13 @@ if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // 
 //   newsKnownBy(p, t)        -> the news that person knows at minute t, the freshest and weightiest first
 //   playerHeard(newsId, from)  you heard it: SHIP.heard (the Ship app's feed); told first by a crew member, +1
 //   socialTo(t)              run the ship's social hours up to minute t (the main loop, every time jump, social_check)
+//   chatLine(p, t), chatOpen(p), chatClose()   the chat card when you tap someone (0.36.1; section 10's tapCrew)
 // Hour by hour, from who is where (planWhere, section 14, at the half hour): people awake in the same room spend
 // time together, though in a big room each hour only a few of them do. Affinity drifts with that time (most pairs
 // slowly friendlier, pairs with clashing traits the other way) and news passes on (friends more readily). Gossip is
 // born from the ship: a machine going faulty (section 17's hourly record), habit changes (habitWeek, 09:00 that
 // day), birthdays and the day's ship traditions (07:00, section 18), and pairs becoming friends or falling out.
-// Every choice is schedU (k 600-619), so the same ship gives the same social life however it's played (one big jump
+// Every choice is schedU (k 600-639), so the same ship gives the same social life however it's played (one big jump
 // or hour by hour); the hours already run are kept in the save (SHIP.social.hour), and a clock earlier than that
 // (New game) starts afresh. Everything waits for its first use: ROSTER (section 9) comes later in the file.
 // =====================================================================
@@ -11818,12 +11819,12 @@ function socReset(hour) {
   SHIP.social = { hour, fault: {}, pairs: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay] } }. A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice()]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
@@ -11840,7 +11841,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [] }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -11877,6 +11878,8 @@ function affinity(a, b) {
 // ---- news ----
 function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
+  // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
+  seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
   const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s)), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
   return it;
@@ -11984,12 +11987,262 @@ function socialTo(t) {
   if (h1 - SHIP.social.hour > 24 * 14) SHIP.social.hour = h1 - 24 * 14;   // never more than two weeks at once
   while (SHIP.social.hour < h1) socialHour(SHIP.social.hour++);
 }
-function socialTick() {                                  // the main loop: once a ship minute
+function socialTick() {                                  // the main loop: the chat card every frame, the hours once a ship minute
+  chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
-  SOC_MIN = m; socialTo(m);
+  const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m);
+}
+// friends come and find you (0.36.4): a friend (tier 3+) in their free time on your deck, within SEEK_NEAR tiles,
+// now and then (SEEK_ODDS a ship minute, schedU k 633) waves you over: a small prompt at the screen's edge, never one
+// you must answer. Tap it for the chat card; it goes on its own after SEEK_SECS real seconds or when they go. Once a
+// friend a ship day (rel.seekDay), one prompt at a time, none while a card is open
+const SEEK_NEAR = 10, SEEK_ODDS = .06, SEEK_SECS = 25;
+let SEEK = null;                                          // { p, el, until }
+function seekEl() {
+  let el = document.getElementById('seek'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:3;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
+  el.onclick = () => { const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
+  return el;
+}
+function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
+function socialSeek(m) {
+  if (typeof DECK_CREW === 'undefined') return;
+  const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
+  if (SEEK) { const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || performance.now() > SEEK.until || CHAT) seekEnd(); return; }
+  if (CHAT || sleeping) return;
+  const day = SHIP.time.day;
+  for (const a of DECK_CREW) {
+    const p = a.p; if (!SOC.idx.has(p.id) || relTier(p.id) < 3 || !near(a)) continue;
+    const r = SHIP.rel[p.id]; if (r.seekDay === day || schedU(p.seed, m, 633) >= SEEK_ODDS) continue;
+    const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
+    r.seekDay = day;
+    const el = seekEl(), U = k => schedU(p.seed, m, k);
+    el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
+    el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
+    el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000 };
+    return;
+  }
+}
+// time together (0.36.2), as you play: eating with crew at your table (settled at mess seats within COMPANY_NEAR,
+// section 15) or working near crew who are at work (within SOC_WORK_NEAR tiles of you while you do a job). After
+// SOC_TOGETHER ship minutes with someone they get REL_PTS.meal or .work, once each a ship day (rel.mealDay, .workDay)
+const SOC_TOGETHER = 10, SOC_WORK_NEAR = 3, SOC_WITH = new Map();   // crew id -> minutes together, this meal or job
+function socialTogether(step) {
+  const A = typeof ACT !== 'undefined' ? ACT : null, kind = A && A.phase === 'do' ? (A.kind === 'eat' ? 'meal' : ['job', 'fetch', 'make', 'stow'].includes(A.kind) ? 'work' : null) : null;
+  if (!kind || typeof DECK_CREW === 'undefined') { SOC_WITH.clear(); return; }
+  const day = SHIP.time.day, at = A.spot || player.obj.position, now = shipNow(), here = new Set();
+  for (const a of DECK_CREW) {
+    if (!SOC.idx.has(a.p.id) || !a.settled || Math.hypot(a.x - at.x, a.z - at.z) >= (kind === 'meal' ? COMPANY_NEAR : SOC_WORK_NEAR)) continue;
+    if (kind === 'meal' ? (PLACE_OF.get(a.goalId) || {}).type !== 'mess-seat' : whereIs(a.p, now).act !== 'work') continue;
+    here.add(a.p.id);
+    const k = kind + ':' + a.p.id, n = (SOC_WITH.get(k) || 0) + step; SOC_WITH.set(k, n);
+    const r = relGet(a.p.id), dk = kind + 'Day';
+    if (n >= SOC_TOGETHER && r[dk] !== day) { r[dk] = day; relAdd(a.p.id, kind, REL_PTS[kind]); }
+  }
+  for (const k of [...SOC_WITH.keys()]) if (!here.has(k.slice(k.indexOf(':') + 1))) SOC_WITH.delete(k);
 }
 function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // section 13's New game
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
+// ---- chat cards (0.36.1): tap a crew member ----
+// chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
+// haven't heard → how they feel (crewFeeling, told as what you notice) → something about where they are → a life
+// detail (acquaintances and up) → a greeting by how well they know you. say: false when it's what you notice, not
+// what they say. Lines are templates filled from the simulation, picked with schedU per person, day and hour, so a
+// second tap in the same hour says the same and the next hour moves on.
+// chatOpen(p) shows the card (section 10's crew tap): their name, role and tier, the line, and the buttons Chat
+// (once a ship day: social for you through playerChat, +2), Ask about (news, work, home: each fills a line of
+// SHIP.rel[id].known for the Crew app), Help? (favourOf: a favour to accept in person, or "Done: here you go" to hand
+// one back) and Meet up (Appointments with them picked, once the device has it). The look is a plain panel for now;
+// the device engineer's skin (section 19) takes it over through CHAT_SKIN.
+const CHAT_GREET = [
+  ['Oh, hello.', 'Hi.', 'Can I help you?', 'Morning. Or is it evening? I lose track.', 'You\'re the new Works cadet, aren\'t you?', 'Hello there.', 'Mm? Oh, hi.', 'Don\'t think we\'ve met.', 'Afternoon.', 'All right?'],
+  ['Hey, {me}.', 'Oh, hi again.', 'Hello, cadet.', 'Good to see you.', 'How\'s Works treating you?', 'Hi! Settling in?', 'You again! Hi.', 'Hey. Busy day?', 'Hello, hello.', 'Nice to see a familiar face.'],
+  ['{me}! Just who I wanted to see.', 'Hey, how\'s it going?', 'There you are.', 'Good timing, I could use a break.', 'Hi, {me}. Keeping out of trouble?', 'Oh good, it\'s you.', 'Hey, colleague.', 'How\'s your day been?', 'Pull up a chair.', 'Hi! Got a minute?'],
+  ['{me}! Come here, you.', 'Hey, friend.', 'Was hoping I\'d run into you.', 'There\'s my favourite cadet.', 'You look like you need a tea.', 'Hey! Sit, sit.', 'Oh, I\'m glad you\'re here.', 'Just the person.', 'How are you really?', 'Hi! Tell me everything.'],
+  ['{me}! Best part of my day.', 'Hey, you.', 'I saved you a seat. Well, I would have.', 'There you are, I was about to come looking.', 'My favourite person aboard.', 'Hey! I\'ve got so much to tell you.', 'Oh, thank the stars, a friendly face.', 'Hi, {me}. Missed you.', 'Come on, walk with me.', 'You always turn up at the right time.'],
+];
+// where they are: [test on whereIs, lines]; {room} is the room's name
+const CHAT_NEAR = [
+  [w => w.act === 'work', ['Busy shift in the {room}.', 'Never a quiet minute in the {room}.', 'Can\'t stop long. Work.', 'The {room} keeps me on my toes.', 'Halfway through the shift. Nearly there.']],
+  [w => w.act === 'breakfast' || w.act === 'dinner', ['The food\'s good today.', 'Brennan\'s outdone herself.', 'I was starving.', 'Best part of the day, this.', 'Mind if I eat while we talk?']],
+  [w => w.act === 'gym', ['Just warming up.', 'Don\'t mind me, I\'m all sweat.', 'Trying to beat yesterday.', 'Gym\'s busy tonight.']],
+  [w => w.act === 'wash', ['Not the best time for a chat, is it?', 'Give me a minute to dry off.']],
+  [w => true, ['Nice and quiet in the {room} right now.', 'I like it here in the {room}.', 'Just taking it easy.', 'Needed a moment to myself.', 'This is my favourite spot.']],
+];
+// a life detail by habit (acquaintances and up), then by department
+const CHAT_LIFE = {
+  'early-riser': 'Up before the lights, me. Always have been.', 'late-sleeper': 'Don\'t talk to me before my second tea.', 'night-owl': 'I do my best thinking after midnight.',
+  'early-to-bed': 'I\'ll be asleep by nine. No shame.', 'skips-breakfast': 'Breakfast? Never had the habit.', 'late-diner': 'I always end up eating last.',
+  'lingers-at-meals': 'I could sit over dinner for hours.', 'window-seat': 'I always grab a window seat. The stars never get old.', workaholic: 'I\'ll stay late again tonight, probably.',
+  'tea-break': 'My mid-shift tea is sacred.', 'gym-regular': 'Gym after shift keeps me sane.', 'garden-lover': 'You should see the tomatoes in the garden.',
+  'lounge-regular': 'Come by the bow lounge some evening.', 'quiet-corner': 'I know all the quiet corners on this ship.', 'common-room': 'The common room\'s the best place on the ship.',
+  music: 'I like to sit in the music room after shift.', 'calls-home': 'Called home yesterday. Everyone\'s well.', 'evening-shower': 'An evening shower and I sleep like a stone.',
+  runner: 'I\'m trying to beat my lap time on the treadmill.', shopper: 'The store had new tea in. I bought too much.', musician: 'I\'ve been learning a new piece. Badly.',
+  gardener: 'The herbs in the garden are coming on nicely.', 'bar-regular': 'One drink in the lounge after dinner. Tradition.', stargazer: 'The observatory\'s amazing at night. You should come up.',
+};
+const CHAT_DEPT = { command: 'The bridge is calmer than people think.', helm: 'Steady as she goes, on my watch.', comms: 'You wouldn\'t believe the static we pick up.',
+  works: 'Something always needs fixing, doesn\'t it?', watch: 'Quiet watch so far. I like it that way.', survey: 'Sato has us chasing another reading.',
+  infirmary: 'Drink some water. Doctor\'s orders. Well, aide\'s orders.', galley: 'Two hundred meals a day, and they still ask what\'s for dinner.' };
+const chatName = () => (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet';
+function chatLine(p, t = shipNow()) {
+  socInit();
+  const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
+  const fill = s => s.replace('{me}', chatName());
+  if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
+  const heard = new Set(SHIP.heard.map(x => x.id));
+  const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
+  if (news && U(611) < .8) return { text: pick(news.lines, 612), kind: 'news', news: news.id, say: true };
+  const f = crewFeeling(p, t); if (f && !/birthday/.test(f) && U(613) < .7) return { text: f, kind: 'feel', say: false };
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null;
+  if (w && U(614) < .45) {
+    const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
+    const lines = CHAT_NEAR.find(([test]) => test(w))[1].filter(s => rm || !/\{room\}/.test(s));
+    if (lines.length) return { text: pick(lines, 615).replace('{room}', rm ? rm.name.toLowerCase() : ''), kind: 'near', say: true };
+  }
+  if (tier >= 1 && U(616) < .6) {
+    const hs = (typeof habitsOn === 'function' ? habitsOn(p, Math.floor(t / 1440) + 1) : p.habits || []).filter(x => CHAT_LIFE[x]);
+    const l = hs.length && U(617) < .75 ? CHAT_LIFE[pick(hs, 618)] : CHAT_DEPT[p.dept];
+    if (l) return { text: l, kind: 'life', say: true };
+  }
+  return chatGreet(p, t);
+}
+const chatGreet = (p, t = shipNow()) => { const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
+// favours (0.36.2 fills this in): the favour that person has for you, or null
+// favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
+// favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or
+// yours), else today's idea for one (not yet posted: { idea: true, title, ask, post }), else null. Ideas come from
+// their life: something left behind where they spent yesterday's free time (fetch it back to them), or a lamp over
+// their work station that needs swapping (the 'lamp' chore). Acquaintances and up ask; the better they know you,
+// the more often (FAVOUR_ODDS per ship day, schedU k 624-628), and only one a day each.
+const FAVOUR_ODDS = [0, .2, .3, .4, .45];
+const FAVOUR_THINGS = ['datapad', 'mug', 'jacket', 'notebook', 'glasses case', 'stylus', 'scarf', 'water bottle'];
+function favourOf(p) {
+  if (typeof favourPost !== 'function' || typeof favoursOf !== 'function') return null;
+  const open = favoursOf(p.id)[0]; if (open) return open;
+  const r = relGet(p.id), d = SHIP.time.day, U = k => schedU(p.seed, d, k), tier = relTier(p.id);
+  if (r.favDay === d || U(624) >= FAVOUR_ODDS[tier]) return null;
+  const S = schedData(), left = planDay(p, d - 1).filter(s => s.placeId && SOCIAL_TYPES.has(s.type) && s.type !== 'servery-queue').map(s => S.byId.get(s.placeId)).filter(pl => pl && DECKS[pl.deck]);
+  if (left.length && U(625) < .6) {
+    const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
+    return { idea: true, title: 'Fetch ' + shortName(p) + '\'s ' + thing, ask: 'I think I left my ' + thing + ' in the ' + room.toLowerCase() + ' yesterday. Could you bring it to me?',
+             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', Deck ' + pl.deck + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
+  }
+  if (p.work && p.work.place && U(628) < .7)
+    return { idea: true, title: 'A lamp for ' + shortName(p), ask: 'The lamp over my station keeps flickering. Could you swap it when you get a chance?',
+             post: { from: p.id, title: 'Swap the lamp at ' + shortName(p) + '\'s station', kind: 'lamp', where: p.work.place, deck: p.work.deck, parts: ['lamp'] } };
+  return null;
+}
+// the card. CHAT_SKIN.draw(el, view) is the device engineer's hook: view = { who, role, tier, line, say, buttons:
+// [{ id, label }] }; until there is one, chatDraw below draws a plain panel like the toast
+let CHAT = null;
+const CHAT_SKIN = { draw: null };
+function chatEl() {
+  let el = document.getElementById('chat');
+  if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#chat{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:min(440px,calc(100% - 24px));z-index:3;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}'
+    + '#chat b{display:block;font-size:14.5px;color:#bdeee6;font-weight:600}#chat small{display:block;font-size:12px;color:#8fa6ab;margin:1px 0 6px}'
+    + '#chat p{margin:0 0 10px;font-size:13.5px;color:#cfd9dc;line-height:1.45}#chat p.feel{font-style:italic;color:#a9bcc0}'
+    + '#chat .row{display:flex;gap:6px;flex-wrap:wrap}#chat button{flex:1 1 auto;min-height:36px;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#e6f0f1;font:inherit;font-size:13px}'
+    + '#chat button:disabled{opacity:.45}#chat .x{position:absolute;top:6px;right:8px;flex:none;min-height:0;border:0;background:none;font-size:18px;color:#8fa6ab}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'chat'; el.hidden = true; document.body.appendChild(el);
+  el.addEventListener('pointerdown', e => e.stopPropagation());   // taps on the card never reach the deck
+  return el;
+}
+function chatDraw(el, v) {
+  el.innerHTML = '';
+  const add = (tag, txt, cls) => { const e = document.createElement(tag); if (txt !== undefined) e.textContent = txt; if (cls) e.className = cls; el.appendChild(e); return e; };
+  add('button', '×', 'x').onclick = () => chatClose();
+  add('b', v.who); add('small', v.role + ' · ' + v.tier);
+  add('p', v.say ? '"' + v.line + '"' : v.line, v.say ? '' : 'feel');
+  const row = add('div', undefined, 'row');
+  for (const b of v.buttons) { const e = document.createElement('button'); e.textContent = b.label; e.disabled = !!b.off; e.onclick = () => chatDo(b.id); row.appendChild(e); }
+}
+function chatShow() {
+  const C = CHAT, p = C.p, r = relGet(p.id), today = SHIP.time.day;
+  const f = C.fav, ready = f && !f.idea && f.status === 'claimed' && f.claimedBy === 'you' && (f.workDone || !f.stops.length);
+  const buttons = C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }, { id: 'back', label: 'Back' }]
+    : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
+    : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
+       { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
+  const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
+  const el = chatEl(); el.hidden = false;
+  (CHAT_SKIN.draw || chatDraw)(el, v);
+}
+function chatOpen(p, greet) {                             // greet: they came to you (socialSeek), so they say hello first
+  if (!p || !p.id) return false;
+  socInit(); if (!SOC.idx.has(p.id)) return false;
+  const w = typeof whereIs === 'function' ? whereIs(p, shipNow()) : null;
+  if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
+  const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
+  CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
+  if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
+  if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
+  chatShow();
+  return true;
+}
+function chatClose() { CHAT = null; const el = document.getElementById('chat'); if (el) el.hidden = true; }
+const chatSay = (text, say = true) => { CHAT.line = { text, say }; chatShow(); };
+function chatDo(id) {
+  const C = CHAT; if (!C) return;
+  const p = C.p, r = relGet(p.id), U = k => schedU(p.seed, Math.floor(shipNow() / 60), k), pick = (a, k) => a[Math.floor(U(k) * a.length)];
+  if (id === 'chat') {
+    if (r.chatDay === SHIP.time.day) return;
+    r.chatDay = SHIP.time.day;
+    if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
+    const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.chat);
+    const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
+    let l = null;                                       // the next thing on their mind: something they say, not the same again
+    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text); k++) l = chatLine(p, shipNow() + 60 * k);
+    if (l.news) playerHeard(l.news, p.id);
+    chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
+  } else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'back') { C.ask = false; chatShow(); }
+  else if (id === 'ask-news') {
+    const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
+    if (n) { playerHeard(n.id, p.id); chatSay(pick(n.lines, 620)); } else chatSay(pick(['Nothing new, really.', 'Quiet week. I\'ll let you know.', 'Not that I\'ve heard.'], 621));
+    if (!r.known.includes('news')) r.known.push('news');
+  } else if (id === 'ask-work' || id === 'ask-home') {
+    // the crew designer's life details (ROSTER[i].about: [{ tier, topic, text }], third person; topic work for
+    // Their work, anything else for Home) up to how well they know you; Home falls back to their `life` lines once
+    // you're acquaintances, Their work to a line about their department. Each one told goes into rel.known
+    const work = id === 'ask-work', tier = relTier(p.id), mine = x => x && x.text && (x.topic === 'work') === work;
+    const all = (p.about || []).filter(x => mine(x) && (x.tier || 0) <= tier).map(x => x.text).concat(!work && tier >= 1 ? p.life || [] : []);
+    const life = all.filter(x => !r.known.includes(x)), more = (p.about || []).some(x => mine(x) && (x.tier || 0) > tier) || (!work && tier < 1 && (p.life || []).length);
+    if (life.length) { const x = life[0]; r.known.push(x); chatSay(/^([A-Z][a-z]*s|Grew|Ran|Got|Brought|Joined|Was|Left|Spent|Came|Lost|Won|Once|Used)\b/.test(x) ? shortName(p) + ' ' + x[0].toLowerCase() + x.slice(1) : 'About ' + shortName(p) + ': ' + x, false); }
+    else if (work) { chatSay((CHAT_DEPT[p.dept] || 'Work\'s work.') + ' ' + (p.role ? 'I\'m ' + (/^[aeiou]/i.test(p.role) ? 'an ' : 'a ') + p.role.toLowerCase().replace(/^the /, '') + '.' : '')); if (!r.known.includes('work')) r.known.push('work'); }
+    else chatSay(more ? pick(['Maybe when we know each other better.', 'Oh, there\'s not much to tell.', 'Ha. Another time.'], 622) : 'You\'ve heard all my stories by now.');
+  } else if (id === 'help') {
+    const f = C.fav = favourOf(p);
+    if (!f) chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
+    else if (f.idea || f.status === 'offered') { C.offer = true; chatSay(f.idea ? f.ask : 'Still could use a hand: ' + f.title.toLowerCase() + '.'); }
+    else if (f.workDone || !f.stops.length) {          // handing it back, face to face
+      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
+      else chatSay('Hmm, not quite done yet, is it?');
+    } else chatSay(pick(['No rush. Whenever you can.', 'Thanks for doing that, by the way.', 'Any luck yet?'], 630));
+  } else if (id === 'fav-yes' || id === 'fav-no') {
+    const f = C.fav; C.offer = false;
+    if (f && f.idea) { const fid = favourPost(f.post); C.fav = fid ? favourById(fid) : null; r.favDay = SHIP.time.day; }
+    if (!C.fav) { chatSay('Never mind, it\'s sorted.'); return; }
+    if (id === 'fav-yes' && favourAccept(C.fav.id)) chatSay(pick(['Thank you! Find me when it\'s done.', 'You\'re a lifesaver. I\'ll be around.', 'Brilliant, thanks.'], 631) + ' (It\'s in your Jobs.)');
+    else { if (typeof favourDecline === 'function') favourDecline(C.fav.id); C.fav = null; chatSay(pick(['No worries, I\'ll manage.', 'That\'s fine. Another time.', 'Sure, no problem.'], 632)); }
+  } else if (id === 'meet') {
+    if (typeof deviceDo === 'function') { chatClose(); deviceDo({ app: 'appointments', with: p.id }); }
+    else chatSay('Appointments come with the new device. Soon.', false);
+  }
+}
+// the card closes when you walk off or they leave the deck (socialTick, every frame)
+function chatTick() {
+  if (!CHAT) return;
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === CHAT.p);
+  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > CHAT.reach) chatClose();
+}
 
 // =====================================================================
 // 6. CAMERA
@@ -13829,6 +14082,7 @@ function crewAtScreen(cx, cy) {
 function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  if (typeof chatOpen === 'function' && chatOpen(a.p)) return true;   // section 20: the chat card
   const f = crewFeeling(a.p, shipNow());               // section 14: "Tomas looks tired"
   const el = typeof eventLine === 'function' ? eventLine(a.p, shipNow()) : null;   // section 18: "Coming to the quiz tonight?"
   toast(a.p.name, a.p.role + '. ' + (f ? f + ' ' : '') + (el ? '"' + el + '"' : a.p.bio));
