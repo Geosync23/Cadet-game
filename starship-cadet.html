@@ -77,6 +77,18 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
 .device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .row.hot{border-color:var(--crt-ink)}
+.device .devmap{display:block;width:100%;height:auto;max-height:46vh;margin:6px 0 10px;touch-action:manipulation}
+.device .devmap rect{fill:var(--crt-dim);opacity:.3;cursor:pointer}
+.device .devmap .m-hall,.device .devmap .m-service{opacity:.14}
+.device .devmap .m-lift{fill:var(--crt-ink);opacity:.5}
+.device .devmap .m-void{fill:#000;opacity:.55}
+.device .devmap .m-locked{fill:url(#devhatch);opacity:1}
+.device .devmap .m-hbg{fill:var(--crt-bg);opacity:1}
+.device .devmap .m-hl{stroke:var(--crt-dim);stroke-width:.22}
+.device .devmap .goal{fill:var(--crt-ink);opacity:.55}
+.device .devmap .pick{fill:var(--crt-hot);opacity:.8}
+.device .devmap .m-wall{fill:none;stroke:var(--crt-ink);stroke-width:.14;stroke-linecap:square}
+.device .devmap .m-you{fill:var(--crt-hot);stroke:var(--crt-bg);stroke-width:.3}
 .device .row.past .rt{color:var(--crt-dim)}
 .device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
 .device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
@@ -145,7 +157,7 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.2
+   STARSHIP CADET: CSV Wren                            build 0.35.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6607,7 +6619,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7723,6 +7735,30 @@ const DEVICE_SKIN = (() => {
       return box;
     },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
+    map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
+      const NS = 'http://www.w3.org/2000/svg', g = b.grid || [], H = g.length, W = Math.max(0, ...g.map(r => r.length)), at = (i, j) => (g[j] || '')[i] || '.';
+      const sv = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
+      const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
+      pat.appendChild(sv('rect', { width: .8, height: .8, class: 'm-hbg' })); pat.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: .8, class: 'm-hl' }));
+      const defs = sv('defs', {}); defs.appendChild(pat); svg.appendChild(defs);
+      for (let j = 0; j < H; j++) for (let i = 0; i < W;) {
+        const k = at(i, j); let e = i; while (e < W && at(e, j) === k) e++;
+        const r = b.rooms[k];
+        if (k !== '.' && r) { const x = sv('rect', { x: i, y: j, width: e - i, height: 1, class: 'm-' + r.kind + (k === b.pick ? ' pick' : '') + (k === b.goal ? ' goal' : '') }); x.dataset.room = k; svg.appendChild(x); }
+        i = e;
+      }
+      let d = '';
+      for (let j = -1; j < H; j++) for (let i = -1; i < W; i++) {
+        const k = at(i, j);
+        if (k !== at(i + 1, j) && (k !== '.' || at(i + 1, j) !== '.')) d += 'M' + (i + 1) + ' ' + j + 'v1';
+        if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
+      }
+      svg.appendChild(sv('path', { d, class: 'm-wall' }));
+      if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
+      svg.onclick = e => { const k = e.target && e.target.dataset && e.target.dataset.room; if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+      return svg;
+    },
     dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
   };
   const skin = {
@@ -7884,6 +7920,44 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
     } else if (!mine) say('Nothing on the board. Enjoy it while it lasts.');
     if (!mine) B.push({ kind: 'buttons', items: [{ label: 'Show me the board', action: { app: 'jobs', do: 'board' } }] });
     return { title: 'Jobs', blocks: B };
+  } });
+
+// Maps (0.35.3): each deck as a plan drawn from its deck data (DECKS[n].map and rooms): halls, rooms, locked rooms
+// hatched, the lift, you as a dot on your deck, the goal as a pin. Tap a room on the plan or in the list to pick it;
+// "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
+let mapDeck = null, mapPick = null;
+const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
+deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
+  act(verb, arg) {
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
+    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
+    else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
+    }
+    else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
+  },
+  view: () => {
+    const n = mapDeck && DECKS[mapDeck] ? mapDeck : deckDef.num, def = DECKS[n], rooms = {};
+    for (const [k, r] of Object.entries(def.rooms || {})) {
+      const kind = r.void ? 'void' : r.floor === 'lift' ? 'lift' : r.hall ? 'hall' : mapLocked(n, k) ? 'locked' : r.still || r.spine ? 'service' : 'room';
+      rooms[k] = { name: r.name || k, kind };
+    }
+    const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
+    const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
+    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
+      { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
+    if (mapPick && rooms[mapPick]) {
+      const r = rooms[mapPick];
+      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      if (r.kind !== 'locked' && r.kind !== 'void') B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
+    }
+    const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
+      .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
+    B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
+    return { title: 'Maps', blocks: B };
   } });
 
 // Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed

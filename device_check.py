@@ -5,6 +5,7 @@
 #   tapping a tile opens the app; Back goes home; Close and the button close it; deviceOn('open' / 'close') fire once each
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
+#   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
@@ -102,6 +103,16 @@ def run(path):
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
             jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
+            # Maps: every deck draws; tap a room on the plan, Go there points the goal arrow at it
+            mp = g.ev("""(() => { const out = {}; deviceShow('maps');
+              for (const n of Object.keys(DECKS)) { deviceDo({ app: 'maps', do: 'deck', arg: +n }); out[n] = document.querySelectorAll('#devBody .devmap rect[data-room]').length; }
+              deviceDo({ app: 'maps', do: 'deck', arg: 3 }); const r = [...document.querySelectorAll('#devBody .devmap rect[data-room]')].find(x => DECKS[3].rooms[x.dataset.room] && /galley|mess/i.test(DECKS[3].rooms[x.dataset.room].name));
+              r.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              const go = [...document.querySelectorAll('#devBody .btns .act')].find(b => b.textContent === 'Go there'); go && go.click();
+              out.goal = IX_GOAL && [IX_GOAL.deck, IX_GOAL.room, IX_GOAL.label]; clearGoal(); deviceShow('home'); return out; })()""")
+            print('  maps:', mp)
+            check(all(mp[n] > 5 for n in mp if n != 'goal'), f'every deck draws its rooms: {mp}')
+            check(mp['goal'] and mp['goal'][0] == 3 and isinstance(mp['goal'][1], str), f'Go there sets the goal arrow: {mp["goal"]}')
             # the shim
             sh = g.ev("""(() => { device.addSection('test', 'Test', el => { el.textContent = 'shim works'; }); device.addSection('mail', 'Old inbox', el => { el.textContent = 'old'; });
               device.show('test'); const a = document.getElementById('devBody').textContent; device.show('mail'); const b = document.getElementById('devT').textContent;
