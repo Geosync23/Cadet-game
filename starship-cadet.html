@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.10
+   STARSHIP CADET: CSV Wren                            build 0.36.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.10';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.11';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11367,7 +11367,7 @@ const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing
   heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
 const NEWS = [];
 let SOC = null, SOC_MIN = -1;
-SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [] };
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {} };
 const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
 const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
 const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
@@ -11392,7 +11392,7 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
-  SHIP.social = { hour, fault: {}, pairs: {}, mail: [] };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
 // rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay] } }, mail (story Mail to come). A save made with a different crew list starts the crew's side afresh
@@ -11403,14 +11403,14 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), rel };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [] };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {} };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
@@ -11562,6 +11562,7 @@ function socialHour(h) {
   socBorn(h, rooms);
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
+  for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
@@ -11569,6 +11570,26 @@ function socPairNews(i, j, friends, t) {
     weight: .6, life: 4, born: t, seed: [SOC.crew[i].id, SOC.crew[j].id],
     lines: friends ? [a + ' and ' + b + ' are always together these days.', 'Have you noticed ' + a + ' and ' + b + '? Best of friends now.', a + ' and ' + b + ' have become thick as thieves.']
                    : [a + ' and ' + b + ' aren\'t speaking.', 'There\'s a chill between ' + a + ' and ' + b + ' lately.', 'Did you hear ' + a + ' and ' + b + ' had words?'] });
+  if (!friends) SHIP.social.feuds[SOC.crew[i].id + ':' + SOC.crew[j].id] = { until: t + 3 * 1440, talked: [] };   // a falling-out you can smooth over
+}
+// small dramas (0.36.11): a pair who fall out (rivals, above) is a feud for three days. Each of them grumbles about
+// the other on their card (feudOf); chat with both while it lasts and they make it up: their affinity goes back to
+// -10, it's news ("X and Y have made up"), and each gives you REL_PTS.chat extra. SHIP.social.feuds, saved
+function feudOf(id, t = shipNow()) {
+  for (const k in SHIP.social.feuds) { const f = SHIP.social.feuds[k], [a, b] = k.split(':'); if (f.until > t && (a === id || b === id)) return { k, f, other: a === id ? b : a }; }
+  return null;
+}
+function feudTalk(p) {                                   // you chatted with someone in a feud
+  const o = feudOf(p.id); if (!o) return null;
+  if (!o.f.talked.includes(p.id)) o.f.talked.push(p.id);
+  if (o.f.talked.length < 2) return null;
+  const [a, b] = o.k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(b), t = Math.floor(shipNow());
+  delete SHIP.social.feuds[o.k]; SHIP.aff[pairIdx(i, j)] = -10; SHIP.social.pairs[Math.min(i, j) + '-' + Math.max(i, j)] = 'm';
+  const na = shortName(SOC.crew[i]), nb = shortName(SOC.crew[j]);
+  newsAdd({ id: 'madeup:' + o.k + ':' + t, about: a + ',' + b, kind: 'madeup', weight: .5, life: 3, born: t, seed: [a, b],
+    lines: [na + ' and ' + nb + ' have made up.', 'Saw ' + na + ' and ' + nb + ' having dinner together. About time.', 'Looks like ' + na + ' and ' + nb + ' are talking again.'] });
+  relAdd(a, 'chat', REL_PTS.chat); relAdd(b, 'chat', REL_PTS.chat);
+  return 'You talk it over, and you can tell something\'s shifted. ' + shortName(SOC.crew[SOC.idx.get(o.other)]) + ' must have said something too.';
 }
 function socialTo(t) {
   socInit(); const h1 = Math.floor(t / 60);
@@ -11804,6 +11825,8 @@ function chatLine(p, t = shipNow()) {
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
   const beat = arcBeat(p, t); if (beat) return { text: beat.say, kind: 'story', say: true };
+  const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
+    return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
   if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
   const heard = new Set(SHIP.heard.map(x => x.id));
   const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
@@ -11911,8 +11934,11 @@ function chatDo(id) {
     if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
     const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.chat);
     const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
+    const fd = feudOf(p.id), made = fd ? feudTalk(p) : null;   // a falling-out: talking it over (small dramas)
     let l = null;                                       // the next thing on their mind: something they say, not the same again
-    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text); k++) l = chatLine(p, shipNow() + 60 * k);
+    if (made) l = { text: made, say: false };
+    else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
+    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) l = chatLine(p, shipNow() + 60 * k);
     if (l.news) playerHeard(l.news, p.id);
     if (l.kind === 'story') arcTold(p);
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
