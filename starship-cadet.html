@@ -11662,7 +11662,7 @@ function choresOfDay(d) {
     const n = Math.floor(C.per) + (schedU(seed, d, 1) < C.per % 1 ? 1 : 0);
     for (let k = 0; k < n; k++) out.push({ hour: 7 + Math.floor(12 * schedU(seed, d, 10 + k)), kind, cand: cs[Math.floor(cs.length * schedU(seed, d, 30 + k))] });
   }
-  if (d === SHIP_START.day) for (const c of out.slice().sort((a, b) => a.hour - b.hour).slice(0, 2)) c.hour = 7;   // your first morning: two ready by 08:00 (0.33.32)
+  if (d === SHIP_START.day) for (const c of out.slice().sort((a, b) => a.hour - b.hour).slice(0, 2)) c.hour = 6;   // your first morning: two on the board from the start (0.33.32; 06:00 from 0.33.33)
   CHORE_DAYS.set(d, out); for (const k of CHORE_DAYS.keys()) if (k < d - 2) CHORE_DAYS.delete(k);
   return out;
 }

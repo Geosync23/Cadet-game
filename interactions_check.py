@@ -245,7 +245,7 @@ if '--quick' not in sys.argv:
         g = Game(pw, sys.argv[1])
         print('== a fresh game: jobs for you on the board, Day 1')
         hours = []
-        for h in range(8, 17):
+        for h in range(6, 17):                             # from the moment a new game starts (06:00) to the end of the day shift
             g.ev(f"skipTo({h * 60})"); g.step(3)
             hours.append((h, g.ev("typeof openJobs === 'function' ? openJobs('you').length : jobsBoard().filter(j => !j.claimedBy).length")))
         print('   open to you by hour:', ' '.join(f'{h:02d}:00 {n}' for h, n in hours))
