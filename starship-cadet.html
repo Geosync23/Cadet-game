@@ -120,6 +120,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    13. SHIP TIME & SAVE the clock, day and night, saving (sits after 5)
    14. SCHEDULES        planDay, whereIs: where all the crew are (after 13)
    15. PLAYER NEEDS     needs, activities, walking speed, the device (after 14)
+   15b. INTERACTIONS    more places to use, the job board, the goal pointer (after 15)
    16. GALLEY & FOOD    the galley rota, cooking, the servery, plates (after 14)
    17. MACHINES & JOBS  machines, wear, systems, ship health, effects on people (after 14)
 
@@ -7727,8 +7728,8 @@ function foodFrom(where, peek) {
   if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
   return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 08:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
 }
-// an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 const PLAYER_TAPS = [];                                  // other sections' taps (15b): f(item, itemPos, tapPoint) -> true if handled
+// an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 function playerTap(it, at, point) {
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
@@ -8314,6 +8315,246 @@ device.addSection('needs', 'Needs', el => {
   const sp = playerSpeed();
   if (sp !== 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
 });
+
+// =====================================================================
+// 15b. PLAYER INTERACTIONS
+// More things to use, the job board and a pointer to where you're going (the interactions engineer).
+// Parity: wherever the crew meet a need or pass the time, you can too, with their pose: the bar, lounges and
+// common rooms, reading seats, benches, the garden, the music room, the laundry, basins, the gym's water, the
+// observatory. Tap the thing; section 15's activity loop does the rest (walk there, the pose, the minutes,
+// the gain; walk away to stop), so its rules (needEffects, the ship's effects) apply here too. A second need
+// (the bar: food and a little company) comes in from 15b's own frame loop (ixSide). Places crew hold are left alone,
+// and so is anything private (a room with someone's bed in it).
+// The job board: tap it for the open jobs; take one (section 17's claimJob, as the device's Jobs section does).
+// The goal pointer: setGoal({ deck, at: [i, j] | place: id | room: key or name, label }) and clearGoal(). While
+// you hold a job the pointer follows it by itself (storage, the machine shop, the machine). On screen: a marker
+// over the place; off screen: an arrow at the edge; on another deck: "Take the lift to Deck N". DOM only, so
+// no draw calls. Hidden with no goal.
+// Hooks: one line in section 15's playerTap (PLAYER_TAPS). Nothing here calls R() or makes geometry.
+// =====================================================================
+// ---- parity: what a place is for. ixKind(place, item) -> an activity kind below, or null (not ours) ----
+// need: the main need, gain over mins; also: { need: gain } on the side, and `with`: extra social with company
+const IX_ACTS = {
+  ixWater:  { need: 'hunger', gain: 3, mins: 2, pose: 'drink', title: 'Water', done: 'Cold, and it tastes faintly of the recycler. You feel better for it.' },
+  ixDrink:  { need: 'hunger', gain: 10, mins: 20, also: { social: 4 }, with: 6, title: 'A drink', done: 'You finish your drink and push the glass back across.' },
+  ixTea:    { need: 'hunger', gain: 5, mins: 6, also: { social: 1 }, with: 3, pose: 'drink', title: 'A cup of tea', done: 'Tea, the ship\'s real fuel.' },
+  ixRead:   { need: 'energy', gain: 5, mins: 20, also: { social: 2 }, with: 3, title: 'Reading', done: 'You put the book down feeling rested.' },
+  ixLounge: { need: 'social', gain: 4, mins: 20, also: { energy: 4 }, with: 8, title: 'Taking it easy', done: 'You get up, unhurried.' },
+  ixRest:   { need: 'energy', gain: 4, mins: 10, also: { social: 2 }, with: 4, title: 'Sitting a while', done: 'A good sit. You stretch and get up.' },
+  ixStars:  { need: 'energy', gain: 6, mins: 15, also: { social: 2 }, with: 4, title: 'Stargazing', done: 'The stars don\'t move much, but you feel calmer for watching them.' },
+  ixGarden: { need: 'social', gain: 6, mins: 20, also: { fitness: 2 }, with: 4, pose: 'water', title: 'Gardening', done: 'The beds are watered. Your hands smell of tomato leaves.' },
+  ixMusic:  { need: 'social', gain: 8, mins: 20, also: { energy: 2 }, with: 4, pose: 'play', title: 'Playing music', done: 'You stop playing. Someone, somewhere, claps.' },
+  ixFold:   { need: 'hygiene', gain: 12, mins: 15, pose: 'fold', title: 'Doing your laundry', done: 'Clean clothes, folded, ready for the locker.' },
+  ixBasin:  { need: 'hygiene', gain: 6, mins: 2, pose: 'stand', title: 'Washing up', done: 'Hands and face washed.' },
+};
+const IX_SKIP = /\bbed\b|bunk|berth|notice|rota|board|sign|journal|plaque|chart|screen|messages|model of|survey/i;   // taps that stay what they were
+const IX_BEDS = /(herb|flower|salad|seed|grow|raised) bed/i;   // garden beds aren't for sleeping
+const IX_NEAR = 2.4, IX_COMPANY = 3.5;                    // IX_NEAR: from the edge of the thing you tapped
+// how far a place's spot is from the thing tapped, measured to its outline (a long table, a big garden bed)
+const ixBox = new THREE.Box3(), ixP = new THREE.Vector3();
+function ixDist(it, s) { ixBox.setFromObject(it.hit); ixP.set(s.x, (ixBox.min.y + ixBox.max.y) / 2, s.z); return ixBox.distanceToPoint(ixP); }
+const ixRoomName = pl => ((typeof deckDef !== 'undefined' && deckDef && deckDef.rooms && deckDef.rooms[pl.room]) || {}).name || '';
+function ixKind(pl, it) {
+  const t = pl.type, a = pl.anim || '', sit = pl.pose === 'sit', title = it ? it.t : '';
+  if (t === 'gym') return a === 'drink' ? 'ixWater' : 'gym';                 // the gym's kit is section 15's; its water cooler is ours
+  if (t === 'lounge-seat' || t === 'common-room') {
+    if (/observ/i.test(ixRoomName(pl))) return 'ixStars';
+    if (a === 'drink') return sit ? 'ixDrink' : 'ixTea';
+    if (!sit) return /telescope|window/i.test(title) ? 'ixStars' : 'ixTea';  // the kettle, the hot water, the telescope
+    return a === 'read' ? 'ixRead' : 'ixLounge';
+  }
+  if (t === 'bench') return 'ixRest';
+  if (t === 'garden') return sit ? 'ixRest' : 'ixGarden';
+  if (t === 'music') return a === 'play' || !sit || /guitar|piano|keys|drum/i.test(title) ? 'ixMusic' : 'ixRest';
+  if (t === 'laundry') return 'ixFold';
+  if (t === 'basin') return 'ixBasin';
+  return null;
+}
+Object.assign(PLAYER_ACTS, IX_ACTS);
+// company: crew settled near the spot (or anyone sitting in the same room)
+const ixCompany = s => DECK_CREW.filter(c => c.settled && c.spot && (Math.hypot(c.x - s.x, c.z - s.z) < IX_COMPANY || c.spot.room === s.room && s.room)).length;
+// the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
+// social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
+function ixSide(A) {
+  const d = A.def, f = Math.max(0, Math.min(1, A.done / d.mins));
+  if (!A.o.ixSide) {
+    let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
+    const side = { ...(d.also || {}) };
+    if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult;
+    if (side[d.need]) { d.gain += side[d.need]; delete side[d.need]; }   // more of the main need: section 15 spreads d.gain over the minutes
+    A.o.ixSide = side; A.o.ixGiven = {};
+    if (A.o.company && d.with) d.done = (d.done || '') + ' The company helped.';
+  }
+  const fx = typeof playerFx === 'function' ? playerFx() : null, n = SHIP.player.needs;
+  for (const k in A.o.ixSide) {
+    const want = A.o.ixSide[k] * f, give = want - (A.o.ixGiven[k] || 0);
+    if (give > 0) { n[k] = needClamp(n[k] + give * fxR(fx, k)); A.o.ixGiven[k] = want; }
+  }
+}
+// the pose: the crew's own (poseOf, section 8b) for the place; seats with nothing particular read alone, talk in company
+function ixPose(kind, pl, spot, company) {
+  const base = spot.pose || pl.pose || 'stand', own = typeof poseOf === 'function' ? poseOf(pl) : base;
+  if (kind === 'ixMusic') return base === 'sit' ? 'sit:play' : 'play';
+  if (kind === 'ixGarden' || kind === 'ixFold' || kind === 'ixWater') return IX_ACTS[kind].pose;
+  if (kind === 'ixTea') return 'drink';
+  if (kind === 'ixDrink') return base === 'sit' ? 'sit:drink' : 'drink';
+  if (base === 'sit' && own === 'sit') return company ? 'sit:talk' : kind === 'ixRest' || kind === 'ixStars' ? 'sit' : 'sit:read';
+  return own;
+}
+// a machine you tapped (section 17's list; stand-ins don't count): its tap is the machine's own (repairs, using it)
+const ixMachine = at => typeof machineList === 'function' && machineList().some(m => !m.stub && m.deck === deckDef.num && m.at && (() => { const c = cellPos(...m.at); return Math.hypot(c.x - at.x, c.z - at.z) < 1; })());
+// would section 15's own ACT_TAP take this tap? Then leave it to them
+function ixTheirs(it, at) {
+  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
+  return [...PLACE_OF.values()].some(pl => rule[1].includes(pl.type) && (() => { const s = placeSpot(pl.id); return s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR; })());
+}
+// the tap (section 15's playerTap, through PLAYER_TAPS): the job board, or a place to use
+function ixTap(it, at, point) {
+  if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
+  if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
+  const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
+    .filter(([pl, s, k]) => k && s && !privatePlace(pl) && ixDist(it, s) < IX_NEAR)
+    .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
+  if (!near.length) return false;
+  const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
+  const free = near.find(([pl]) => !busy(pl.id));
+  if (!free) { const a = heldBy(near[0][0].id); toast(it.t, 'In use' + (a ? ': ' + a.p.name + ' is there.' : '.') + ' ' + it.x); return true; }
+  const [pl, spot, kind] = free, company = ixCompany(spot) > 0;
+  const pose = kind === 'gym' ? (typeof poseOf === 'function' ? poseOf(pl) : pl.anim || 'lift') : ixPose(kind, pl, spot, company);
+  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, company });
+  return true;
+}
+PLAYER_TAPS.push(ixTap);
+
+// ---- the look: the board panel and the goal pointer, made here (DOM and CSS), so the HTML stays as it was ----
+(() => {
+  const st = document.createElement('style');
+  st.textContent = '.ixboard .ixjob{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(38,52,58,.55)}'
+    + '.ixboard .ixjob i{flex:none;width:6px;align-self:stretch;border-radius:3px;background:#5fd6c6}.ixboard .ixjob.soon i{background:#e8c06a}.ixboard .ixjob.urgent i{background:#e0503f}'
+    + '.ixboard .ixjob div{flex:1;min-width:0}.ixboard .ixjob b{display:block;font-size:13.5px;font-weight:600}.ixboard .ixjob small{display:block;font-size:12px;color:var(--muted);margin-top:1px}'
+    + '.ixboard .ixjob button{flex:none;padding:6px 11px;font-size:12.5px}.ixboard .ixlist{max-height:min(52vh,420px);overflow-y:auto;touch-action:pan-y}'
+    + '#ixGoal{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:0;height:0}#ixGoal[hidden]{display:none}'
+    + '#ixGoal .ixarr{position:absolute;left:-19px;top:-19px;width:38px;height:38px;border-radius:50%;background:rgba(13,21,33,.82);border:2px solid #e8c06a;box-shadow:0 2px 10px rgba(0,0,0,.45)}'
+    + '#ixGoal .ixarr::after{content:"";position:absolute;left:13px;top:10px;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent #e8c06a}'
+    + '#ixGoal .ixpin{position:absolute;left:-11px;top:-30px;width:22px;height:22px;animation:ixbob 1.4s ease-in-out infinite}'
+    + '#ixGoal .ixpin::after{content:"";position:absolute;left:1px;top:2px;border-style:solid;border-width:14px 10px 0 10px;border-color:#e8c06a transparent transparent transparent;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}'
+    + '#ixGoal .ixlab{position:absolute;left:0;top:14px;transform:translateX(-50%);white-space:nowrap;max-width:min(260px,70vw);overflow:hidden;text-overflow:ellipsis;font-size:12.5px;padding:3px 9px;border-radius:999px;background:rgba(13,21,33,.82);border:1px solid rgba(232,192,106,.5);color:#f2e3bf}'
+    + '@keyframes ixbob{50%{transform:translateY(-5px)}}@media (prefers-reduced-motion:reduce){#ixGoal .ixpin{animation:none}}';
+  document.head.appendChild(st);
+  const g = document.createElement('div'); g.id = 'ixGoal'; g.hidden = true; g.setAttribute('aria-live', 'polite');
+  g.innerHTML = '<div class="ixarr"></div><div class="ixpin"></div><div class="ixlab"></div>';
+  document.body.appendChild(g);
+  const b = document.createElement('div'); b.className = 'lift device ixboard'; b.id = 'ixBoard'; b.hidden = true;
+  b.setAttribute('role', 'dialog'); b.setAttribute('aria-labelledby', 'ixBoardT');
+  b.innerHTML = '<h2 id="ixBoardT">Job board</h2><p id="ixBoardX">Pick a job and take it.</p><div class="ixlist" id="ixBoardL"></div><button class="stay" id="ixBoardC">Close</button>';
+  document.body.appendChild(b);
+})();
+
+// ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
+const ixBoard = (() => {
+  const el = document.getElementById('ixBoard'), list = document.getElementById('ixBoardL'), sub = document.getElementById('ixBoardX');
+  let back = null;
+  const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= PLAYER_TIER)
+    && !(j.machine && typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind));
+  function row(j, btn) {
+    const [title, where, state, pri] = jobCard(j), r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
+    r.className = 'ixjob ' + (pri || ''); h.textContent = title; s.textContent = where + ' · ' + state; d.append(h, s); r.append(document.createElement('i'), d);
+    if (btn) r.appendChild(btn); list.appendChild(r);
+  }
+  const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
+  const api = {
+    open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
+    close() { el.hidden = true; if (back && back.focus) back.focus(); },
+    get isOpen() { return !el.hidden; },
+    draw() {
+      if (el.hidden) return;
+      list.textContent = '';
+      const jobs = jobsBoard(), mine = myJob(), open = jobs.filter(j => !j.claimedBy);
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : open.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.' : 'Nothing on the board. The Chief says it never lasts.';
+      if (mine) row(mine, button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }));
+      for (const j of open) {
+        const ok = canTake(j, mine);
+        row(j, ok ? button('Take it', () => api.take(j.id)) : null);
+        if (!ok && !mine && jobTier(j) > PLAYER_TIER) list.lastChild.querySelector('small').textContent += ' · tier ' + jobTier(j);
+      }
+    },
+    take(id) {
+      if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
+      const j = myJob(), [title, where] = jobCard(j);
+      api.close(); device.refresh(); ixGoalAt = -1;
+      toast('Job taken', title + ', ' + where + '. Follow the marker' + (j.machine ? ': parts first, from main storage on Deck 5.' : '.'));
+      return true;
+    },
+  };
+  document.getElementById('ixBoardC').onclick = api.close;
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) api.close(); });
+  return api;
+})();
+
+// ---- the goal pointer: setGoal / clearGoal for any section; with no goal set, your job's next step ----
+let IX_GOAL = null, ixJobGoal = null, ixGoalAt = -1;
+function setGoal(g) { IX_GOAL = g && g.deck ? { ...g } : null; }
+function clearGoal() { IX_GOAL = null; }
+// your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
+function ixJobStep() {
+  if (typeof myJob !== 'function') return null;
+  const j = myJob(); if (!j) return null;
+  if (!j.machine) return { deck: 5, room: /cargo/i, label: 'Your job: the cargo hold, Deck 5' };
+  const m = machineById(j.machine); if (!m) return null;
+  const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
+  const need = jobNeeds(j, w, P.carry), name = machineName(m);
+  if (need.length && P.carry.length < CARRY_MAX) {
+    if (w.make && w.make.part) return { deck: 5, room: 'f', label: 'Make ' + partList([w.make.part]) + ' in the machine shop' };
+    if (need.some(p => SHIP.stores[p] > 0)) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need.filter(p => SHIP.stores[p] > 0)) + ' from main storage' };
+    if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
+  }
+  const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
+  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length ? 'Look over the ' : 'Repair the ') + name };
+}
+// where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
+function ixGoalWorld(g) {
+  if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
+  if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
+  if (g.room) {
+    const key = typeof g.room === 'string' && ROOMS[g.room] ? g.room : Object.keys(ROOMS).find(k => g.room instanceof RegExp ? g.room.test(ROOMS[k].name || '') : ROOMS[k].name === g.room);
+    if (!key) return null;
+    let sx = 0, sz = 0, n = 0, tiles = [];
+    for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (MAP[j][i] === key) { sx += i; sz += j; n++; tiles.push([i, j]); }
+    if (!n) return null;
+    const c = tiles.sort((a, b) => Math.hypot(a[0] - sx / n, a[1] - sz / n) - Math.hypot(b[0] - sx / n, b[1] - sz / n))[0], p = cellPos(...c);
+    return { x: p.x, z: p.z };
+  }
+  return null;
+}
+const ixV = new THREE.Vector3();
+let ixLast = '';
+function ixFrame() {
+  requestAnimationFrame(ixFrame);
+  if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
+  const el = document.getElementById('ixGoal');
+  if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
+  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
+  if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
+  const g = IX_GOAL || ixJobGoal;
+  if (!g) { if (!el.hidden) el.hidden = true; return; }
+  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
+  if (!w) { el.hidden = true; return; }
+  const label = here ? g.label : 'Take the lift to Deck ' + g.deck + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
+  ixV.set(w.x, 1.2, w.z).project(camera);
+  // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
+  const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
+  const dx = sx - W2, dy = sy - H2, k = Math.min(dx > 0 ? (R0 - W2) / dx : dx < 0 ? (L0 - W2) / dx : Infinity, dy > 0 ? (B0 - H2) / dy : dy < 0 ? (T0 - H2) / dy : Infinity);
+  const on = sx >= L0 && sx <= R0 && sy >= T0 && sy <= B0, arr = el.children[0], pin = el.children[1], lab = el.children[2];
+  const x = on ? sx : W2 + dx * k, y = on ? sy : H2 + dy * k;
+  el.hidden = false; el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+  arr.style.display = on ? 'none' : ''; pin.style.display = on ? '' : 'none';
+  if (!on) arr.style.transform = 'rotate(' + Math.atan2(dy, dx).toFixed(3) + 'rad)';
+  lab.style.top = on ? '6px' : y > H2 ? '-50px' : '24px';
+  lab.style.transform = 'translateX(' + (x > innerWidth - 140 ? '-100%' : x < 140 ? '0' : '-50%') + ')';
+  lab.style.left = x > innerWidth - 140 ? '18px' : x < 140 ? '-18px' : '0';
+  if (label !== ixLast) { lab.textContent = ixLast = label; }
+}
+requestAnimationFrame(ixFrame);
 
 // =====================================================================
 // 16. GALLEY & FOOD

@@ -387,7 +387,7 @@ You work the day shift as a Works maintenance tech, taking jobs from the same li
 
 **The job loop.** Every job follows the same physical steps:
 
-1. **Notice.** A fault arrives on your wrist comm or the Works bay job board, someone flags you down, or you spot a worn machine on your rounds.
+1. **Notice.** A fault arrives on your wrist comm or the Works bay job board, someone flags you down, or you spot a worn machine on your rounds. Tap the job board to see the open jobs and take one. While you have a job, an on-screen pointer shows where to go next (a marker over the place, an arrow at the screen edge, "Take the lift to Deck N" when it's on another deck); the map comes later and will use the same pointer (the user, 2026-10-16).
 2. **Diagnose.** Open the panel and inspect it. You see which component is failing and what the fix needs.
 3. **Fetch.** Get the part or tool from main storage or the Works bay, or make it in the machine shop. You can carry two items at a time.
 4. **Repair.** Hold to work. Repairs take longer on broken machines and go faster as your skill grows.
@@ -403,7 +403,7 @@ What makes it interesting:
 
 **No hard failure.** If you slack, other Works crew pick up jobs, but more slowly, and your supervisor notices. The ship never dies because of you, but it gets visibly worse.
 
-**Off shift**, you are free: eat, wash, socialise, explore, sleep. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
+**Off shift**, you are free: eat, wash, socialise, explore, sleep. Anything the crew use to meet a need or pass the time, you can use too, with the same pose: the gym, the bar, lounges and common rooms, reading seats, benches, the garden, the music room, the laundry, basins, the kettle, the observatories (the user, 2026-10-16). Tap the thing to use it. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
 
 **Your needs** (decided 2026-10-16). Food, energy, hygiene, fitness and social, from 0 to 100. A rested player stays up 16 to 18 ship hours before energy runs low (about 17 at average fitness). Getting into your bunk from 20:00 fades out and wakes you at 06:00, with no question asked; earlier, the bunk says it's too early. Needs give bonuses as well as penalties: at 75 or more a bonus, under 25 a penalty, in between nothing, and the effects multiply. Well rested: tasks go faster; fit: you walk a little faster and tire more slowly; well fed: you tire more slowly; clean: chatting does you more good; in good spirits: tasks go faster. Tired or out of shape: you walk slower; hungry: tasks go slower; unwashed: chatting does less good; lonely: you tire sooner. The device marks each need giving a bonus or a penalty, with a one-line reason. Faulty machines slow only the crew, not you. The exact numbers are in DEV_NOTES ("Player needs and the device").
 
