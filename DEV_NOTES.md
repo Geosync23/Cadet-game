@@ -10,7 +10,6 @@ The nine small updates once listed here for the design doc (Chef Brennan, Deck 3
 
 
 ## Current build: 0.41.5 (about 13,400 lines)
-## Current build: 0.41.4 (ship events branch: 0.34.8) (about 12,500 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
