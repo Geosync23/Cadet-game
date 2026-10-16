@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
 #   and a drag up from the bottom edge leave it shut; only the Device button opens it
@@ -209,6 +210,20 @@ def run(path):
               D.appts = []; deviceShow('home'); return out; })()""")
             print('  group meeting:', gm)
             check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
+            # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
+            # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
+            # event's tag, the drill, the bunk tidy) within its first half hour, on its deck
+            sh = g.ev("""(() => { const S = schedData(), bad = [], seen = []; const d0 = SHIP.time.day;
+              for (let d = d0; d < d0 + 7; d++) for (const x of devDay(d)) {
+                if (x.kind !== 'ship' && x.kind !== 'tradition') continue;
+                const m = /Deck (\\d)/.exec(x.where), deck = m ? +m[1] : null; let best = 0;
+                for (let k = 0; k <= 30; k += 5) { let n = 0; const t = (d - 1) * 1440 + x.from + k;
+                  for (const p of S.people) { let w = null; try { w = whereIs(p, t); } catch (e) {} if (w && w.tag && /^(ev-|drill$|inspection$)/.test(w.tag) && (!deck || w.deck === deck || x.kind === 'ship')) n++; }
+                  best = Math.max(best, n); }
+                seen.push(x.title); if (best < 2) bad.push(d + ' ' + hhmm(x.from) + ' ' + x.title + ' (' + best + ')'); }
+              return [seen.length, bad, seen.some(t => /briefing/i.test(t))]; })()""")
+            print('  schedule items checked:', sh[0], 'not happening:', sh[1])
+            check(sh[0] >= 5 and not sh[1] and not sh[2], f'the Schedule lists only what really happens: {sh}')
             # days off (0.35.17): section 14's playerShiftOn(d) (a stand-in here: Saturday and Sunday off) shows "Day off" in
             # Schedule, the strip and the Calendar, with no shift that day
             do = g.ev("""(() => { const own = typeof playerShiftOn === 'function'; if (!own) window.playerShiftOn = d => weekday(d) < 5;
