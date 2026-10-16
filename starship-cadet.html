@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.7
+   STARSHIP CADET: CSV Wren                            build 0.27.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6881,10 +6881,18 @@ sun.shadow.bias = -.0004; sun.shadow.normalBias = .03;
 const sunDir = SUN_OFF.clone().normalize();
 const sunR = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), sunDir).normalize();
 const sunU = new THREE.Vector3().crossVectors(sunDir, sunR);
+let SHADOW_K = 1;
 function placeSun(p) {
-  const ts = 20 / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
+  // 0.27.18: zoomed out, the shadowed square grows with the view (k), so shadows never stop short on screen; the
+  // texels per screen pixel stay about the same. At the usual zooms k is 1 and nothing changes.
+  const hd = Math.hypot((camera.right - camera.left) / 2, (camera.top - camera.bottom) / 2 / Math.sin(.62)) / camera.zoom, k = Math.max(1, hd / 9.5);
+  if (k !== SHADOW_K) {
+    SHADOW_K = k; Object.assign(sun.shadow.camera, { left: -10 * k, right: 10 * k, top: 10 * k, bottom: -10 * k, far: 30 * k });
+    sun.shadow.camera.updateProjectionMatrix(); sun.shadow.normalBias = .03 * k;
+  }
+  const ts = 20 * k / sun.shadow.mapSize.x, v = new THREE.Vector3(p.x, 0, p.z), a = v.dot(sunR), b = v.dot(sunU);
   v.addScaledVector(sunR, Math.round(a / ts) * ts - a).addScaledVector(sunU, Math.round(b / ts) * ts - b);
-  sun.target.position.copy(v); sun.position.copy(v).add(SUN_OFF);
+  sun.target.position.copy(v); sun.position.copy(v).addScaledVector(SUN_OFF, k);
 }
 
 const DAY = { sky: col('#e3ebf1'), gnd: col('#5b4d41'), hemi: .85, sun: col('#fff2e0'), sunI: 1.6, exp: 1.05, bg: new THREE.Color('#151d2c') };
@@ -6917,7 +6925,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.18';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13792,7 +13800,12 @@ function frame() {
 const _r = new THREE.Vector3(), _u = new THREE.Vector3();
 function placeCam() {
   const el = .62;
-  camera.position.set(target.x + 30 * Math.cos(el) * Math.sin(az), target.y + 30 * Math.sin(el), target.z + 30 * Math.cos(el) * Math.cos(az));
+  // 0.27.18: how far the view reaches along the line of sight; zoomed far out (mostly on tall phones) the near and far
+  // planes move out with it, so the deck is never sliced off. At the usual zooms it's the old 16 to 46 at 30.
+  const reach = (camera.top - camera.bottom) / 2 / camera.zoom / Math.tan(el) + 4, dist = Math.max(30, reach + 2);
+  const near = reach > 14 ? dist - reach : 16, far = reach > 14 ? dist + reach : 46;
+  if (camera.near !== near || camera.far !== far) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
+  camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
   camera.lookAt(target); camera.updateMatrixWorld();
   const wpp = (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // snap to device pixels
   _r.setFromMatrixColumn(camera.matrixWorld, 0); _u.setFromMatrixColumn(camera.matrixWorld, 1);
@@ -13802,8 +13815,12 @@ function placeCam() {
 }
 frame();
 camera.zoom = innerWidth / innerHeight < .8 ? 1.5 : 1.15; camera.updateProjectionMatrix();
-const ZOOM_MIN = .45, ZOOM_MAX = 2.4;
-addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); });
+// 0.27.18 (the user: a decent zoom out, but no visible culling): the widest zoom is 0.55, or 0.7 on a tall screen
+// (which already sees far more of the deck top to bottom); shadows and the near and far planes follow the zoom.
+const ZOOM_MAX = 2.4; let ZOOM_MIN = .55;
+const fitZoomMin = () => { ZOOM_MIN = innerWidth / innerHeight < .8 ? .7 : .55; if (camera.zoom < ZOOM_MIN) { camera.zoom = ZOOM_MIN; camera.updateProjectionMatrix(); } };
+fitZoomMin();
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); frame(); fitZoomMin(); });
 
 // =====================================================================
 // 7. GRID & PATHFINDING
@@ -14846,7 +14863,7 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(),
       const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
       const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
       this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
-      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1 && camera.zoom > .6;
+      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1;   // any zoom the camera allows (0.27.18)
       b.el.style.display = vis ? '' : 'none';
       if (vis) { const hw = b.el.offsetWidth / 2 + 8; b.el.style.left = Math.min(innerWidth - hw, Math.max(hw, (this.v.x + 1) / 2 * innerWidth)).toFixed(0) + 'px'; b.el.style.top = ((1 - this.v.y) / 2 * innerHeight).toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2); }
     }
