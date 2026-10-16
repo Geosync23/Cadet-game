@@ -1,85 +1,112 @@
 # Handover: the bridge architect (Decks 1 and 3)
 
-Written at the end of Pillar 2, against combined build 0.40.8 (`claude/ship-integration` 980e6a9). Read `DEV_NOTES.md` sections "Deck 1, the Bridge (0.8.x)", "Places on Decks 1 and 3 (0.18.x)" and "Pillar 2 on Decks 1 and 3 (0.31.x)" alongside this; they hold the detail. This note is the map.
+Updated at retirement, after the answers pass (my last build 0.31.13, `claude/deck1-scale` 5b6ffeb, accepted into the combined build after 0.41.4). For Pillar 3, one deck architect owns every deck; this note is the map to Decks 1 and 3. Read it with `DEV_NOTES.md`: the sections "Deck 1, the Bridge (0.8.x)", "Places on Decks 1 and 3 (0.18.x)" and "Pillar 2 on Decks 1 and 3 (0.31.x)", plus build rows 0.31.1–0.31.13, which hold the detail.
 
 ## Role, branch, builds
 
-- **Role:** architect of Deck 1 (the Bridge) and, from Pillar 1, Deck 3's places and Pillar 2 rooms. Deck 3's shell, rooms and dressing were built earlier (0.5.x–0.6.x) by the first lead; I've owned `DECKS[3]` since 0.18.
-- **Branch:** `claude/deck1-scale`. (The brief named `claude/deck1-bridge`; the work has lived on `deck1-scale` since the 0.12 rescale, and the lead merges from there.)
-- **Builds:** 0.8.x (Deck 1 built), 0.12.x (Deck 1 scaled up), 0.18.x (places on Decks 1 and 3), 0.31.1–0.31.5 (Pillar 2, workstream A5b). The lead folds them into 0.40.x.
+- **Role:** architect of Deck 1 (the Bridge). From Pillar 1 I also owned Deck 3's places, and from Pillar 2 its utility rooms. Deck 3's shell, rooms and dressing are the first lead's work (0.5.x–0.6.x); I've owned `DECKS[3]` since 0.18.
+- **Branch:** `claude/deck1-scale`.
+- **Builds:**
+  - 0.8.x: Deck 1 built.
+  - 0.12.x: Deck 1 scaled up.
+  - 0.18.x: places on Decks 1 and 3.
+  - 0.31.1–0.31.5: Pillar 2 (activity furniture, utility rooms, cold store).
+  - 0.31.6–0.31.13: the answers pass.
 
-## What I own in `starship-cadet.html`
+## What I owned in `starship-cadet.html`
 
-All inside section 4 (decks):
+All of it is inside section 4 (decks):
 
 | What | Where (search for) |
 | --- | --- |
 | Deck 1 kit: materials `BRG`, pieces via `Object.assign(KIT, …)` and `WALL_KIT`, `bridgeViewscreen` | `const BRG = {`, just above `// DECK 1: BRIDGE` |
 | `DECKS[1]` | `DECKS[1] = {` |
-| Deck 3 kit (A5b): `till`, `basketStack`, the utility kit and helpers `pipeX`, `pipeZ`, `statusLights`, wall kit `relayBox` | `// ---- Deck 3 kit (A5b` |
+| Deck 3 kit (A5b): `till`, `basketStack`, the utility kit (`recyclerTanks` … `relayBank`, `cabinet`, `dataBus`, `floorCableTray`), helpers `pipeX`, `pipeZ`, `statusLights`; wall kit `relayBox`, `wallCalendar`, `handSign`, `radioShelf`, `mugRail` | `// ---- Deck 3 kit (A5b` |
 | `DECKS[3]`: its `places`, `machines`, `service`, rooms and `dress` | `DECKS[3] = {` |
 | `grabShelf` in shared kit (the `o.live` hook only) | `grabShelf(g, o = {})` |
 
-Plus the plan pages `plans/deck1-plan.html` and `plans/deck3-plan.html` (each has a "Utility rooms (built in 0.31.3)" section with a sketch).
+There are also the plan pages `plans/deck1-plan.html` and `plans/deck3-plan.html`. Each has a "Utility rooms (built in 0.31.3)" section with a sketch. The sketches' machine `face` values predate 0.31.11's correction, so trust the game file.
 
-**Not mine, but I put one line in:** section 14's `schedData` skips places that have `machine` (`if (!p.machine)`), so a machine's panel spot is never handed out as a desk. The sim engineer knows.
+**Not mine:**
+- Section 14's `schedData` (the sim engineer's) skips places with `machine`, so panels are never desks. Event places are its own handling since sim 0.26.11.
+- `deck_check.py` accepts a numeric `face`. Both the Deck 6 architect and I added this; the lead keeps one version.
 
-## What I built, and what other sections rely on
+## What's on the decks
 
-**Deck 1, the Bridge.** 22 × 12 tiles. Lobby, bridge with the command ring and viewscreen, observation room, ready room (locked, Captain only), washroom, and three service rooms: utility closet `k`, relay room `u`, sub-floor crawl `c`.
+- **Deck 1, the Bridge.** 22 × 12 tiles: lobby, bridge (command ring, viewscreen), observation room, ready room (locked; access is a Pillar 3 progression item), washroom, and three service rooms: closet `k`, relay room `u`, sub-floor crawl `c`.
+  - A Ship health board is in the bridge vestibule. It's the Deck 6 architect's `healthBoard` kit, placed with `placeOnEdge('healthBoard', 'h,10,4', 's')`.
+- **Deck 3 utility rooms.** Water recycler `R`, galley plant `g`, irrigation `i`. They have machines, pipes, `still: true` floors (no random numbers), and lived-in touches: calendars, a radio shelf, signs and a mug rail (Deck 1's rooms have them too).
+- **Activity furniture.** A till and baskets in the store; the store is staffed (`3-store-1` behind the till, `3-shop-7` paying).
+- **Hull.** Both decks are `byFace` (Deck 3 since 0.31.6: 17 hull pieces, not 126).
 
-**Deck 3 utility rooms (0.31.3).** Water recycler `R`, galley plant `g`, irrigation `i`. Each has machines, pipes and a floor you can stand on (`still: true`, so the floor draws no random numbers). The hatches into them are listed in the deck's `service` list, so the player and Works crew can pass them and nobody else can. Deck 1's `k`, `u` and `c` are done the same way, plus one new hatch, `v,10,10`, between the relay room and the crawl.
+## Shared formats other sections rely on
 
-**Activity furniture (0.31.1–0.31.2).** A till on the store counter and a basket stack by the store door. The store is staffed: `3-store-1` (storekeeper, behind the till) and `3-shop-7` (shopper paying, in front). The three treadmill places carry `y: 0.16`, so runners stand on the belt. The rower is `anim: 'row'`.
+If you rename or move any of these, tell the owner first.
 
-**Shared formats other sections rely on** (if you rename or move any of these, tell the owner first):
+- **Places** (sim, performance, player): `{ id, type, at, xy?, walk?, face, pose, anim?, y?, window?, event?, machine?, room }`.
+  - **`face`:** a letter, or degrees from south toward east (0 S, 90 E, 180 N, 270 W). To face a table at (tx, tz) from (x, z), use `atan2(tx - x, tz - z)` in degrees.
+  - **`y`:** the seat top in metres. All 142 seats on Decks 1 and 3 were measured by the performance engineer (0.31.12, 0.31.13).
+  - **Window seats** (`window: true`):
+    - Deck 1: `1-window-1..4`, `1-walk-2..4`.
+    - Deck 3: mess seats `3-mess-1, 3, …, 15` and `3-lounge-10..12`.
+  - **Event places** (type `event`):
+    - `1-handover-1..6`, at the aft of the command ring: the 06:00 and 18:00 shift handover.
+    - `1-walk-1..5`, in walking order through the observation room: the Captain's evening walk.
+    - The sim engineer lists these per event (`'1|@handover'`, `'1|@walk'`); free time never uses them.
+  - **Cold store:** `3-cold-1`/`-2`, type `storage`, unloading spots for the restock carts (section 17's `COLD_AT`).
+  - **Gym:** `3-gym-1..3` (treadmills, `y` .16) and `3-gym-4` (rower) are read by `placeBusy(id)` for the moving belts. Keep these ids.
+- **Machines** (systems, performance): `{ id, kind, at, room, face, panel, look? }`.
+  - Deck 3 has 12: ovens, range, galleyplant, chiller, recycler, filter, pump, uv, lights, nutrient, irrigation.
+  - Deck 1 has 5: relay ×2, junction, lights, databus.
+  - Each has a `<id>-panel` place (`work:works`, `machine: '<id>'`).
+  - **`face` is the way the machine's front points**, towards its panel (corrected in 0.31.11; it had been the wall behind).
+  - **`look`** puts the fault lamp, drip, glow and screen-dim on the piece's real front. The performance engineer's `machineFx` draws them; check with `?looks`.
+- **Service hatches** with tiers: `service: [{ key, tier }]`.
+  - Deck 3: galley plant 1, recycler 2, irrigation 2.
+  - Deck 1: closet 1; relay room, crawl hatch and `v,10,10` all 3.
+- **Crawl tiles:** Deck 1 `crawl: [...]`, the crawl's 5 walkable tiles. Deck 3 has no crawlways.
+- **Grab shelf:** `grabShelf` with `live: true` hands two rows to the galley's `galleyShelfRows(g, ys)`. It must stay a function declaration.
 
-- **Places** (sim engineer, section 14; performance engineer, 8 and 8b): `{ id, type, at, xy?, walk?, face, pose, anim?, y?, machine?, room }`. 36 places on Deck 1 and 192 on Deck 3. Ids follow `<deck>-<what>-<n>`. The full list of id families is in DEV_NOTES "Places on Decks 1 and 3".
-- **Machines** (systems engineer, section 17): `{ id, kind, at, room, face, panel }`.
-  - Deck 3 has 12: `3-oven-1`, `3-oven-2`, `3-range-1`, `3-galleyplant-1`, `3-chiller-1`, `3-recycler-1`, `3-filter-1`, `3-pump-1`, `3-uv-1`, `3-lights-1`, `3-nutrient-1`, `3-irrigation-1`.
-  - Deck 1 has 5: `1-relay-1`, `1-relay-2`, `1-junction-1`, `1-lights-1`, `1-databus-1`.
-  - Each machine has a `<id>-panel` place (`work:works`, `machine: '<id>'`) standing on its panel tile.
-  - The ids match the systems engineer's old stand-ins on purpose. A deck's real machine replaces the stand-in with the same id.
-- **Grab shelf** (galley engineer, section 16): `grabShelf` with `live: true` hands its top two rows (wraps and rolls) to `galleyShelfRows(g, ys)`. That function must stay a function declaration, so it exists when Deck 3 is built at load.
-- **Cold store** (systems engineer, B3 restock carts): `3-cold-1` [36,1] and `3-cold-2` [37,1], type `storage`, facing the north shelves. Section 17's `COLD_AT` names them. The cart route is lift → galley back door `h,38,9` → galley → cold store door `h,36,3`, and the cart parks on row 2.
-- **Gym places** (Deck 6 architect's moving treadmill belts and rower seat, via `placeBusy(id)`): `3-gym-1..3` (treadmills) and `3-gym-4` (rower). Keep these ids.
+## State and loose ends at 0.31.13
 
-## State at 0.40.8
-
-- All checks pass on the combined build, per the lead.
-- **Stale line in DEV_NOTES:** the "Pillar 2 on Decks 1 and 3" section still says some machine kinds aren't in `MACHINE_KINDS`. That's no longer true: since 0.33.2 every kind I use is registered. Fix the line next time DEV_NOTES is touched.
+- All checks pass. `food_check`'s dinner-rush queue line failed on sim 0.26.11 itself (the real 18:00 handover moves the day-1 queue); the galley engineer is making that test robust.
+- **Kit name clashes:** I scanned every KIT/WALL_KIT name. Only `cableTray` (Deck 6 vs Deck 2) was left, and the lead has the command architect renaming Deck 2's to `crawlCableTray`. Re-scan after any merge (the snippet is in "How to test").
 - **Weak spots:**
-  - The cold store is tiny: 2 × 2 tiles you can walk on. A cart, two unloaders and a passer-by will jostle. If restocks look crowded, widen it into the galley plant's side, which would need a plan change and user sign-off.
-  - Deck 3 is the busiest deck for draw calls: day_check peaks around 417 of the ~450 budget. Any new Deck 3 kit should reuse existing materials (the utility kit does) or merge meshes.
-  - The machine panel places sit behind service hatches. Crew who aren't Works can't reach them, which is correct, but any new code that hands out places must skip `machine` places too, as `schedData` does.
-  - Some places use `walk` tiles up to 2.5 m away (booths, hull benches). They look fine in the crowd, but a full rig sliding in can clip a table edge.
-- **What I'd fix next:**
-  - Turn on `hull.byFace` for Decks 3–6 (fewer draw calls). It changes their hull-piece tables, so it needs its own regression pass and the lead's OK.
-  - Doors: group each leaf's six materials into two (identical pixels, about a third of the door draw calls). This is shared code, so it's the lead's call.
+  - **Deck 3 draw calls:** the busiest deck in day_check, peaking at about 402 of the ~450 budget. New Deck 3 kit should reuse existing materials.
+  - **Cold store:** only 2 × 2 walkable tiles. Watch it once restock carts are visible.
+  - **Panel places:** they sit behind service hatches. Any new code that hands out places must skip `machine` places.
+- **What I'd do next:**
+  - Group each door leaf's six materials into two. It's shared code, and doors cost about a third of a deck's draw calls.
+  - Machine `look.screen` dims for pieces with screens (only the recycler has one now).
 
 ## Gotchas (things that broke before)
 
-- **Random numbers.** Kit made at load must never call `R()`. If it does, every deck after it shifts and the regressions stop being pixel-identical. Utility floors use `still: true` for the same reason.
-- **"Pixel-identical with crew hidden" isn't quite enough.** Hidden crew still open doors. My comparison script also stubs `crewNearDoor = () => false`. Without that, doors on other decks can differ for no real reason.
-- **Panels handed out as desks.** Before the `if (!p.machine)` line, Works crew who'd run out of desks were sent to machine panels behind hatches, and day_check failed with "no way to their place".
-- **The hull splitter bug.** It made Deck 1 cost 589 draw calls empty; it's fixed by `byFace` on Deck 1 only (see DEV_NOTES "Deck 1").
-- **Merge traps.** Almost every merge from `ship-integration` clashes on two lines, the HUD build line and `GAME_BUILD`, plus the build table in DEV_NOTES. Keep your build number in both lines and keep both sides' DEV_NOTES rows, in order. Watch for a row the lead already copied across, which leaves a duplicate.
-- **Deck_check is strict about place types.** A new type has to be in its `TYPES` list (or match `work:…`). In 0.18.2, 14 places had to sit out a build for this.
-- **Machine kinds.** A kind the registry doesn't know is quietly dropped. Check `MACHINE_KINDS` in section 17 before inventing one.
+- **Kit names are global.** `Object.assign(KIT, …)` lets the last definition win silently, on every deck. Three of my pieces were overridden or did the overriding: `cableTray`, `relayRack`, `calendar` (fixed in 0.31.8 and 0.31.11). Pick distinctive names and scan for clashes.
+- **New places aren't automatically inert.** Adding 11 event places to schedData's lists shifted every crew member's day: cadet_test differed with crew shown, and food_check failed. Places nobody schedules must stay out of the schedule's lists. Check `cadet_test` with crew against the base.
+- **Random numbers.** Kit made at load must never call `R()`. Utility floors use `still: true`.
+- **"Pixel-identical with crew hidden" needs one more stub.** Hidden crew still open doors, so also stub `crewNearDoor = () => false`.
+- **Machine `face` and default spots.** Effects use the front direction and the panel tile. Real pieces rarely line up with `at`, so give each machine a `look`, measured from the piece's placement and size, not from hit boxes or raycasts. The deck's furniture is merged into shared meshes, so raycasts slip through.
+- **Merge traps.** Nearly every merge clashes on the HUD build line, `GAME_BUILD` and DEV_NOTES rows. Keep your number, keep both sides' rows in order, and take the other side's `SHIP_RATE` and engine lines.
+- **deck_check is strict.** New place types go in its `TYPES` list, and `face` must be a letter or a number.
 
-## How to test my area
+## How to test the decks
 
-Set `CADET_CHROME=/opt/pw-browsers/chromium`. Then, each turn:
+Set `CADET_CHROME=/opt/pw-browsers/chromium` and run the checks one at a time (several browsers at once can fail to start):
 
-1. `python3 cadet_test.py OLD.html NEW.html` should print **ALL IDENTICAL** (OLD is the current `ship-integration` build).
-2. `python3 deck_check.py NEW.html` should print **DECK CHECK OK**. On Decks 1 and 3: no unreachable tiles or items, no bad places, no bad machines, and machines 5 and 12. Deck 1 by the lift is about 309 draw calls, Deck 3 about 331.
-3. `python3 day_check.py NEW.html` should print **DAY CHECK OK**, with every deck's peak under about 450 (Deck 3 is the tightest).
-4. `machine_check.py`, `food_check.py` and `player_check.py` should all print OK. They belong to other sessions, but my data feeds them.
-5. **Other decks pixel-identical:** screenshot every deck you didn't touch in both builds, with crew hidden and `crewNearDoor` stubbed (see above), from the lift, zoomed out, rotated, walls down and at night. Zero differing pixels is the bar. If they differ, find out why before moving on.
+1. **`cadet_test.py BASE.html NEW.html`:** expect ALL IDENTICAL (crew included) against the current integration build.
+2. **`deck_check.py`:** expect DECK CHECK OK. Decks 1 and 3 have 5 and 12 machines; draw calls by the lift are about 313 and 332.
+3. **`day_check.py`:** expect DAY CHECK OK, with every deck's peak under about 450.
+4. **`machine_check.py`, `food_check.py`, `player_check.py`:** expect OK.
+5. **Other decks pixel-identical:** screenshot each deck in both builds with the crowd hidden and `crewNearDoor` stubbed, from the lift, zoomed out, rotated, walls down and at night. Zero differing pixels is the bar; find the cause of any difference.
+6. **Kit-name clash scan:** list the methods inside every `Object.assign(KIT|WALL_KIT, {` block and flag any name defined twice. A short Python regex over lines matching `^  name(g` works.
+7. **`?looks`** shows every machine effect at once, and **`?seats`** (the performance engineer's) shows a stand-in on every seat.
 
-## Ideas and open questions for the user
+## Questions answered by the user, and still open
 
-- **Deck 1 feels quiet.** Only about 10 crew work there. A shift handover at the command ring, or the Captain's evening walk through the observation room, would give it life without new rooms.
-- **The ready room is locked to everyone but the Captain.** Should the player ever get in, for example when summoned for a talk? That would be a nice progression moment.
-- **Utility rooms are reachable but plain to visit.** Do you want the player to be able to tap the machines for a line of text about each (as with furniture), or only see them through the job board?
-- **The cold store size** (see "Weak spots"): fine for now, but worth a look once restock carts are visible.
+- **Answered:**
+  - Deck 1 is livened up (handover, Captain's walk).
+  - Machines can be tapped and operated (systems and player own that).
+  - The ready room stays locked until Pillar 3 progression.
+- **Open:**
+  - Should the cold store grow once carts run? That would need a plan change and the user's sign-off.
+  - Should Deck 1 get the observatory-night style gatherings in its observation room too?
