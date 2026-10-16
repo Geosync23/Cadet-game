@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.17
+   STARSHIP CADET: CSV Wren                            build 0.35.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6912,7 +6912,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.17';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.18';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7969,16 +7969,20 @@ setTimeout(() => {
   try { if (typeof CHAT_SKIN !== 'undefined' && CHAT_SKIN && !CHAT_SKIN.draw) CHAT_SKIN.draw = DEVICE_SKIN.chat; } catch (e) { /* no section 20 */ }
 }, 0);
 // ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
-// and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
+// and Home. The player works the day shift, with Saturday and Sunday off (section 14's playerShiftOn). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
-// whether you work on day d: every day for now; a rota of your own drops in here
 // 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
 // Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
 const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
-const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
-  [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
-  [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
-  [{ at: 420, title: 'Bunk inspection', where: 'Bunk 1, Deck 4', len: 20 }, { at: 1290, title: 'The Captain at the piano', where: 'the music room, Deck 4', len: 60, tradition: 'piano' }],
+// the weekday shapes (section 14's WEEK_SHAPE) that really put people somewhere. 0.35.18 (the user: "the schedule says
+// there is a Works meeting but nothing happened"): Monday's "All-hands briefing in the Works bay" is gone, as section 14's
+// Monday only starts the day shift 10 minutes early and nobody gathers; the Captain's piano stand-in is gone too (only
+// section 18's traditions are listed). Wednesday's drill (off-duty crew muster by each deck's lift, tag 'drill') and
+// Thursday's bunk tidy for inspection (juniors in the Deck 4 bunk rooms, tag 'inspection') do happen
+const DEV_WEEK = [
+  [], [],
+  [{ at: 900, title: 'Drill: off-duty crew muster by the lift', where: 'the lift lobby on each deck', len: 15 }],
+  [{ at: 400, title: 'Bunk inspection: tidy your bunk', where: 'your bunk, Deck 4', len: 20 }],
   [], [], []];
 const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
 // the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
