@@ -8,6 +8,8 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
+#   and a drag up from the bottom edge leave it shut; only the Device button opens it
 #   0.35.14: { app: 'maps', do: 'person' }, the Maps plan kept between ship minutes, unknown appointment fields kept
 #   the phone review (0.35.12): tap the ship to close (a drag doesn't), the bezel's grip and swipe, no rebuild when unchanged
 #   Quiet off shift and the #seek chip's look (0.35.11)
@@ -262,6 +264,25 @@ def run(path):
             check(m1 == m2, f'opening again adds nothing (no leak): {m1} -> {m2}')
             ev = g.ev("__ev")
             check(ev == ['open', 'close', 'open', 'close', 'open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
+            # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
+            # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)
+            g.ev("deviceClose()"); g.step(2)
+            g.ev("""(() => { window.__opens = 0; deviceOn('open', () => { window.__opens++; });
+              const D = SHIP.device, save = { day: SHIP.time.day, min: SHIP.time.min }, t0 = shipNow(); D.tipsSeen = {}; D.calendarRemind.on = true;
+              D.appts.push({ id: 900, with: ['calder'], at: t0 + 600, len: 30, where: (apptPlaces()[0] || {}).id || 'x', kind: 'social', status: 'asked', by: 'calder' });
+              D.appts.push({ id: 901, with: ['calder'], at: t0 + 300, len: 30, where: (apptPlaces()[0] || {}).id || 'x', kind: 'social', status: 'yes', by: null });
+              for (let m = t0; m < t0 + 1440; m += 5) { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = m % 1440; devTickMin = -1; deviceTick(); device.refresh(); }
+              tipShow('auto1', 'A tip.'); deviceNotify({ app: 'jobs', text: 'A job broke.', urgent: true }); deviceNotify({ app: 'mail', text: 'Mail.' });
+              deviceAddress({ from: 'Captain', text: 'All hands.' }); deviceAddress(null);
+              deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Gather round.', choices: null, i: 0, n: 1 }, () => {}); deviceDialogue(null);
+              while (TIP_Q.length) tipDone(); D.appts = D.appts.filter(a => a.id < 900); D.tipsSeen = {};
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear(); for (const k in DEV.notes) delete DEV.notes[k]; })()""")
+            g.page.mouse.move(w / 2, h - 10); g.page.mouse.down(); g.page.mouse.move(w / 2, h - 200, steps=8); g.page.mouse.up(); g.step(2)
+            self_open = g.ev("[window.__opens, DEV.open, document.getElementById('device').hidden]")
+            check(self_open == [0, False, True], f'the device never opens by itself (a day of reminders, tips, notices, an address, a dialogue, an invitation; a drag up from the bottom): {self_open}')
+            g.page.click('#devBtn'); g.step(1)
+            check(g.ev("[window.__opens, DEV.open]") == [1, True], 'the Device button still opens it')
+            g.ev("deviceClose()"); g.step(1)
             # the phone review (0.35.12): a drag over the ship leaves it open, a tap closes it; a swipe down on the bezel
             # closes it, its grip is 44px tall; an unchanged screen isn't rebuilt
             if name == 'phone':
