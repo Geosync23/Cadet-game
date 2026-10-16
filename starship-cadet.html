@@ -75,6 +75,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device #devBody p{margin:4px 0 10px;color:var(--crt-ink)}
 .device #devBody p.big{font-size:22px;color:var(--crt-hot);font-variant-numeric:tabular-nums;letter-spacing:.04em;text-shadow:0 0 7px var(--crt-glow)}
 .device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
+.device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
+.device .row.hot{border-color:var(--crt-ink)}
+.device .row.past .rt{color:var(--crt-dim)}
 .device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
 .device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
 .device button:focus-visible{outline:2px solid var(--crt-hot);outline-offset:2px}
@@ -142,7 +145,7 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.1
+   STARSHIP CADET: CSV Wren                            build 0.35.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6604,7 +6607,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7562,10 +7565,81 @@ const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [] }, 
 const PHOSPHORS = { amber: 'Amber', green: 'Green', cyan: 'Wren cyan' };
 function deviceLoad(s) {
   const d = s && s.device && typeof s.device === 'object' ? s.device : {}, st = d.settings && typeof d.settings === 'object' ? d.settings : {};
-  return { settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false } };
+  const r = d.calendarRemind && typeof d.calendarRemind === 'object' ? d.calendarRemind : {}, per = {};
+  if (r.per && typeof r.per === 'object') for (const k in r.per) if (typeof r.per[k] === 'boolean' && k.length < 40) per[k] = r.per[k];
+  return { settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
+    calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
 SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
+setTimeout(() => { DEV.live = true; }, 0);
+// ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
+// and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
+const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
+const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
+  [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
+  [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
+  [{ at: 420, title: 'Bunk inspection', where: 'Bunk 1, Deck 4', len: 20 }, { at: 1290, title: 'The Captain at the piano', where: 'the music room, Deck 4', len: 60, tradition: 'piano' }],
+  [], [], []];
+const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
+// the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
+function devTraditions(a, b) {
+  if (typeof upcomingTraditions === 'function') {
+    try { return upcomingTraditions(a, b).map(x => ({ id: x.id + '@' + x.at, kind: x.kind || String(x.id).replace(/@.*$/, ''), title: x.title, at: x.at, where: x.where || 'aboard' })); }
+    catch (e) { DEV.errors.push('upcomingTraditions: ' + (e && e.message || e)); }
+  }
+  if (typeof eventsOn !== 'function') return [];
+  const out = [];
+  for (let d = Math.floor(a / 1440) + 1; d <= Math.floor(b / 1440) + 1; d++) {
+    for (const e of eventsOn(d)) {
+      const at = (d - 1) * 1440 + e.from; if (at < a || at > b) continue;
+      out.push({ id: e.id + '@' + d, kind: e.id, at, title: e.id === 'birthday' && e.names ? 'Birthday: ' + e.names : e.name, where: devDeckOf(e.ev) });
+    }
+    for (const x of DEV_WEEK[weekday(d)]) if (x.tradition) { const at = (d - 1) * 1440 + x.at; if (at >= a && at <= b) out.push({ id: x.tradition + '@' + d, kind: x.tradition, at, title: x.title, where: x.where }); }
+  }
+  return out.sort((x, y) => x.at - y.at);
+}
+// one day's items, in time order: [{ from, to, title, where, kind }] in minutes of that day
+function devDay(d) {
+  const B = (d - 1) * 1440, out = [
+    { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
+    { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
+    { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
+  for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
+  for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
+  return out.sort((x, y) => x.from - y.from);
+}
+const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
+const devDayName = d => d === SHIP.time.day ? 'Today' : d === SHIP.time.day + 1 ? 'Tomorrow' : WEEKDAYS[weekday(d)] + ', Day ' + d;
+function devNow() {                                      // the strip: where you're expected right now, and what's next
+  const d = SHIP.time.day, m = SHIP.time.min, items = devDay(d);
+  const now = items.filter(x => x.from <= m && m < x.to && x.kind !== 'tradition').pop(), next = items.find(x => x.from > m);
+  return { now: now ? now.title + ': ' + now.where : 'Free time', next: next ? 'Next: ' + next.title + ' at ' + hhmm(next.from) : null };
+}
+
+// ---- reminders (the user's addition): about 30 ship minutes before each tradition, a chirp (a toast) or, during your
+// shift, a quiet badge unless you marked it "Remind me". Each morning the Calendar gets a badge and Home a "Today
+// aboard" line. SHIP.device.calendarRemind = { on, ahead, morning, per: { <kind>: true | false } }, saved. ----
+const DEV_REMINDED = new Set();                          // id@day keys already reminded (this session)
+let devTickMin = -1, devMorning = SHIP.time.day;
+function deviceTick() {
+  if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
+  const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
+  if (typeof sleeping !== 'undefined' && sleeping) return;
+  const R = SHIP.device.calendarRemind;
+  if (SHIP.time.day !== devMorning && SHIP.time.min >= 360) {   // a new morning
+    devMorning = SHIP.time.day;
+    if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
+  }
+  if (!R.on) return;
+  for (const x of devTraditions(t + 1, t + R.ahead)) {
+    if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
+    DEV_REMINDED.add(x.id);
+    const m = SHIP.time.min, onShift = m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
+  }
+}
+
 function deviceApp(def) {
   if (!def || typeof def.id !== 'string') return;
   DEVICE_APPS.set(def.id, Object.assign({ title: def.id, icon: 'dot', order: 50 }, def));
@@ -7604,6 +7678,7 @@ function deviceShow(id) {
 }
 function deviceClose() { if (!DEV.open) return; DEV.open = false; DEVICE_SKIN.close(); deviceFire('close'); }
 function deviceRefresh() {
+  deviceTick();
   DEVICE_SKIN.button();
   if (DEV.open) DEVICE_SKIN.draw(DEV.app, deviceView(DEV.app));
 }
@@ -7679,7 +7754,7 @@ const DEVICE_SKIN = (() => {
       }
       body.scrollTop = keep; drawn = id;
     },
-    notify(n) { if (n && n.urgent && n.text) toast('Your device', n.text); },
+    notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
   };
   btn.onclick = () => (DEV.open ? deviceClose() : deviceShow('home'));
   $('devClose').onclick = deviceClose;
@@ -7720,7 +7795,9 @@ const device = {
 // ---- the apps. Home: the time and what you're doing (the old Now section), then the grid. ----
 deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const B = [{ kind: 'text', text: clockText(), mark: 'big' }];
-  const say = text => B.push({ kind: 'text', text });
+  const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
+  B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
+  if (today.length) say('Today aboard: ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');
   say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
     : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
@@ -7730,6 +7807,84 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
   return { title: 'Home', blocks: B };
 } });
+
+// Schedule: today as a timeline, with where you're expected right now; tomorrow below
+deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view: () => {
+  const d = SHIP.time.day, m = SHIP.time.min, n = devNow(), B = [{ kind: 'text', text: n.now, mark: 'hot' }];
+  if (n.next) B.push({ kind: 'text', text: n.next });
+  for (const day of [d, d + 1]) {
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
+    B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
+      mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
+  }
+  return { title: 'Schedule', blocks: B };
+} });
+
+// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't
+deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
+  act(verb, arg) {
+    const R = SHIP.device.calendarRemind;
+    if (verb === 'remind') R.per[arg] = R.per[arg] === false ? true : R.per[arg] === true ? false : false;   // default (on) -> Don't -> Remind me -> Don't
+    else if (verb === 'on') R.on = !!arg;
+    else if (verb === 'ahead' && [15, 30, 60].includes(arg)) R.ahead = arg;
+  },
+  view: () => {
+    const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [];
+    for (let d = d0; d < d0 + 14; d++) {
+      const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
+      if (!trad.length && !ship.length) continue;
+      B.push({ kind: 'text', text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), mark: 'head' });
+      const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
+      for (const x of trad) {
+        const p = R.per[x.kind];
+        rows.push({ text: devWhen(x.at) + '  ' + x.title, sub: x.where + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
+          button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
+      }
+      B.push({ kind: 'list', rows });
+    }
+    B.push({ kind: 'text', text: 'Reminders', mark: 'head' }, { kind: 'buttons', items: [
+      { label: 'On', on: R.on, action: { app: 'calendar', do: 'on', arg: true } }, { label: 'Off', on: !R.on, action: { app: 'calendar', do: 'on', arg: false } }] });
+    if (R.on) B.push({ kind: 'text', text: 'How long before:' }, { kind: 'buttons', items: [15, 30, 60].map(a => ({ label: a + ' min', on: R.ahead === a, action: { app: 'calendar', do: 'ahead', arg: a } })) });
+    return { title: 'Calendar', blocks: B };
+  } });
+
+// Jobs (0.35.2, tracks only): you take jobs and turn them in at the job board. Here: yours, its steps and parts, and
+// Track (SHIP.player.track: the tracked one drives the goal arrow, section 15b); what's on the board, to read
+deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
+  act(verb, id) {
+    if (verb === 'track') { SHIP.player.track = SHIP.player.track === null ? id : null; if (SHIP.player.track && typeof clearGoal === 'function') clearGoal(); }
+    else if (verb === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
+  },
+  view: () => {
+    const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
+    if (!jobsOn() || typeof jobsBoard !== 'function') { say('No jobs today.'); return { title: 'Jobs', blocks: B }; }
+    const board = jobsBoard(), mine = myJob();
+    if (mine) {
+      const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine), tracked = SHIP.player.track !== null;   // a taken job is tracked until you switch it off (null)
+      say('Yours: ' + title + ', ' + where + '.', 'hot');
+      if (mine.kind === 'chore') {
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+        say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
+      } else if (m) {
+        const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
+        : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
+      const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
+      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (Deck ' + step.deck + ')' : '') + '.');
+      B.push({ kind: 'buttons', items: [{ label: tracked ? 'Tracking' : 'Track', on: tracked, action: { app: 'jobs', do: 'track', arg: mine.id } }] });
+      say('Turn it in at the job board when it\'s done.');
+    } else say('You take jobs at the job board in the Works bay (Deck 5), and turn them in there when they\'re done.');
+    const open = board.filter(j => !j.claimedBy);
+    if (open.length) {
+      say('On the board', 'head');
+      B.push({ kind: 'list', rows: open.slice(0, 5).map(j => { const [title, where, state, pri] = jobCard(j);
+        return { text: (pri === 'urgent' ? '! ' : '') + title, sub: where + ' · ' + state + (jobTier(j) > PLAYER_TIER ? ' · tier ' + jobTier(j) : ''), mark: pri === 'urgent' ? 'urgent' : null }; }) });
+      if (open.length > 5) say('And ' + (open.length - 5) + ' more on the board.');
+    } else if (!mine) say('Nothing on the board. Enjoy it while it lasts.');
+    if (!mine) B.push({ kind: 'buttons', items: [{ label: 'Show me the board', action: { app: 'jobs', do: 'board' } }] });
+    return { title: 'Jobs', blocks: B };
+  } });
 
 // Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
 deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
@@ -7741,38 +7896,6 @@ deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   if (sp !== 1) B.push({ kind: 'text', text: 'Walking at ' + Math.round(sp * 100) + '% speed.' });
   return { title: 'Needs', blocks: B };
 } });
-
-// Jobs: yours, and the board in your pocket (take one, drop yours), as section 17's jobs section had it
-deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
-  act(verb, id) { if (verb === 'take') claimJob(id); else if (verb === 'drop') dropJob(id); },
-  view: () => {
-    const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
-    if (!jobsOn() || typeof jobsBoard !== 'function') { say('No jobs today.'); return { title: 'Jobs', blocks: B }; }
-    const board = jobsBoard(), mine = myJob();
-    if (mine) {
-      const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine);
-      say('Yours: ' + title + ', ' + where + '.', 'hot');
-      if (mine.kind === 'chore') {
-        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
-        say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
-      } else if (m) {
-        const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
-        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
-      } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
-        : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
-      B.push({ kind: 'buttons', items: [{ label: 'Drop it', action: { app: 'jobs', do: 'drop', arg: mine.id } }] });
-    }
-    const open = board.filter(j => !j.claimedBy), rows = [];
-    if (!open.length && !mine) say('Nothing on the board. Enjoy it while it lasts.');
-    for (const j of open.slice(0, 5)) {
-      const [title, where, state, pri] = jobCard(j), canTake = !mine && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
-      rows.push({ text: (pri === 'urgent' ? '! ' : '') + title + ' · ' + where + ' · ' + state + (canTake ? '' : jobTier(j) > PLAYER_TIER ? ' (tier ' + jobTier(j) + ')' : ''),
-        mark: pri === 'urgent' ? 'urgent' : null, button: canTake ? 'Take it' : null, action: canTake ? { app: 'jobs', do: 'take', arg: j.id } : null });
-    }
-    if (rows.length) B.push({ kind: 'list', rows });
-    if (open.length > 5) say('And ' + (open.length - 5) + ' more on the board in the Works bay.');
-    return { title: 'Jobs', blocks: B };
-  } });
 
 // Mail: newest first; tap one to read it (and mark it read)
 let mailOpen = null;                                     // the message shown in full

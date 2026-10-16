@@ -4,6 +4,7 @@
 #   the home screen shows the time and a tile for every app, with badges (unread mail on the Mail tile and the button)
 #   tapping a tile opens the app; Back goes home; Close and the button close it; deviceOn('open' / 'close') fire once each
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
+#   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
@@ -78,6 +79,29 @@ def run(path):
               const toast = document.getElementById('tx').textContent; deviceShow('wallet'); deviceShow('home');
               return [t, toast, !!document.querySelector('#devBody .app[data-app="wallet"] b')]; })()""")
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
+            # calendar reminders: about 30 ship minutes before a tradition; a toast off shift, a quiet badge on shift,
+            # none for one marked Don't; Remind me chirps even on shift
+            rm = g.ev("""(() => { const t0 = shipNow(), d = SHIP.time.day, R = SHIP.device.calendarRemind, out = {};
+              const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
+              const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min };
+              const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; DEV_REMINDED.clear(); delete DEV.notes.calendar;
+                document.getElementById('tx').textContent = ''; devTickMin = -1; f && f(); deviceTick(); return [DEV.notes.calendar || 0, document.getElementById('tx').textContent]; };
+              out.kind = x.kind; out.when = devWhen(x.at);
+              out.before = at(x.at - 25); out.early = at(x.at - 45);
+              R.per[x.kind] = false; out.dont = at(x.at - 25);
+              const onShift = (x.at % 1440) - 25 >= DEV_SHIFT.from && (x.at % 1440) - 25 < DEV_SHIFT.to;
+              R.per[x.kind] = true; out.remind = at(x.at - 25); delete R.per[x.kind];
+              out.onShift = onShift;
+              SHIP.time.day = save.day; SHIP.time.min = save.min; DEV_REMINDED.clear(); delete DEV.notes.calendar; devTickMin = -1; return out; })()""")
+            print('  reminders:', rm)
+            if check(isinstance(rm, dict), f'reminders: {rm}'):
+                check(rm['before'][0] == 1 and (rm['onShift'] or rm['when'] in rm['before'][1]), f'a reminder 25 minutes before (a toast unless on shift): {rm["before"]}')
+                check(rm['early'][0] == 0, f'nothing 45 minutes before: {rm["early"]}')
+                check(rm['dont'][0] == 0, f"nothing for one marked Don't: {rm['dont']}")
+                check(rm['remind'][0] == 1 and rm['when'] in rm['remind'][1], f'Remind me always chirps: {rm["remind"]}')
+            # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
+            jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
+            check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
             # the shim
             sh = g.ev("""(() => { device.addSection('test', 'Test', el => { el.textContent = 'shim works'; }); device.addSection('mail', 'Old inbox', el => { el.textContent = 'old'; });
               device.show('test'); const a = document.getElementById('devBody').textContent; device.show('mail'); const b = document.getElementById('devT').textContent;
