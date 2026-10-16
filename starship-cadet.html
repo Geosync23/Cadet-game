@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.27
+   STARSHIP CADET: CSV Wren                            build 0.33.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.27';                            // keep in step with the header's build line
+const GAME_BUILD = '0.33.28';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10397,6 +10397,7 @@ function jobStepDone(id, k) {
   const n = j ? jobStops(j).length : 0;
   if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
   j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
+  if (jobStops(j)[k].step === 'drop' && j.dropAt === undefined) j.dropAt = shipNow();   // a delivery's arrival (traysArrivedAt)
   const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; return { ok: true, left, done: !!j.workDone };
@@ -10521,6 +10522,17 @@ function cartTrays(o = {}) {
                    tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: to.deck, placeId: to.placeId, mins: 10, tag: 'drop', at: to.at || null }],
                    urgency: 1, leave: 30, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
   MACH_REV++; return key;
+}
+
+// when the day's trays reached `to` (0.33.28, for the galley's bridgeHungry score): the ship minute they arrived, or
+// null while they haven't. A crew run: the end of its drop-off (planned when it's claimed, so compare with the minute
+// you ask about); yours: when you ticked off the drop-off (jobStepDone) or finished the job. It reads the job list only
+function traysArrivedAt(day, to = 'bridge') {
+  const j = SHIP.jobs.find(x => x.id === 'trays:' + to + '@' + (day - 1));   // day: the ship day (1 = Day 1); cartTrays keys by day - 1
+  if (!j) return null;
+  if (j.claimedBy && j.claimedBy !== 'you') { const d = (j.segs || []).filter(sg => sg.tag === 'drop').pop(); return d ? d.to : j.doneAt ?? null; }
+  if (j.claimedBy === 'you') return j.dropAt ?? j.workDone ?? (j.status === 'done' ? j.doneAt : null);
+  return null;
 }
 
 // ---- favours (Pillar 3, C7, for the social engineer): personal jobs, accepted and handed back in person ----
