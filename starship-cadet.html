@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.13
+   STARSHIP CADET: CSV Wren                            build 0.26.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6562,7 +6562,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6760,7 +6760,7 @@ const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'gu
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = ROSTER.concat(ROSTER_GUESTS)
+  const people = ROSTER.concat(ROSTER_GUESTS, guestPeople())   // and the visitors aboard for a few days (Pillar 3)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
   // a machine's panel place isn't handed out as a desk (A5b). Event places (an `event` field) are listed by event
@@ -6949,6 +6949,43 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
   }
   return false;
 }
+// ---- guests (Pillar 3, C8): visitors aboard for a few days, from the crew designer's GUESTS (section 9) ----
+// GUESTS: [{ id, name, spec | looks, role, cabin (their bed place id), arrive, leave (ship days), template, habits? }].
+// A guest lives like an off-duty crew member (no work), with their template's favourite places: a scientist the
+// observatory, a delegate the observation room and lounges, a passenger the Commons, a survivor mostly resting in
+// their cabin. They come aboard at 10:00 on `arrive` (by the shuttle bay, Deck 5) and leave at 10:00 on `leave`;
+// before and after, they're 'away' (deck 0: on no deck, so no one draws them). Nothing changes without GUESTS.
+const GUEST_LEISURE = {
+  scientist: [[2, 'observatory', 8], [2, 'lounge-seat', 3], [2, 'common-room', 3]],
+  delegate: [[1, 'common-room', 5], [2, 'lounge-seat', 5], [3, 'lounge-seat', 3]],
+  passenger: [[3, 'lounge-seat', 6], [3, 'garden', 6], [3, 'bench', 3], [4, 'common-room', 2]],
+  survivor: [],
+};
+const GUEST_REST = { survivor: 4 };                      // a survivor rests in their cabin far more than anyone else
+const GUEST_AT = 600;                                    // arrivals and departures, 10:00
+const strSeed = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+function guestPeople() {
+  if (typeof GUESTS === 'undefined' || !Array.isArray(GUESTS)) return [];
+  return GUESTS.filter(g => g && g.id && (g.cabin || g.bed)).map(g => ({ ...g, looks: g.looks || g.spec, rank: 'guest', dept: g.dept || 'guest', shift: 'day',
+    rota: { offDays: [] }, work: null, bed: g.bed || g.cabin, habits: g.habits || [], seed: g.seed || strSeed(g.id), guest: true }));
+}
+const aboard = (p, d) => !p.guest || (d >= (p.arrive || 1) && (!p.leave || d <= p.leave));
+const aboardAllDay = (p, d) => !p.guest || (d > (p.arrive || 0) && (!p.leave || d < p.leave));
+// a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
+function guestTrim(p, d, segs) {
+  if (aboardAllDay(p, d)) return segs;
+  const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
+  if (!aboard(p, d)) return [away(B, B + 1440)];
+  const cut = B + GUEST_AT, arriving = d === p.arrive, out = [];
+  if (arriving) {
+    out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
+    for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
+  } else {
+    for (const s of segs) if (s.from < cut - 10) out.push({ ...s, to: Math.min(s.to, cut - 10) });
+    out.push({ from: cut - 10, to: cut, act: 'off', deck: 5, type: null, placeId: null, tag: 'leave' }, away(cut, B + 1440));
+  }
+  return out;
+}
 // ---- habits that change slowly (answer 18): a few changes a month, the same in every game ----
 // From the second week on, each week has 0, 1 or 2 changes (about 3.5 a month): someone takes up a habit
 // (a junior starts running, someone takes to the observatory) or drops one (stops going to the bar). Each is
@@ -6978,7 +7015,7 @@ const HABIT_WEEKS = [[]];                                // week w (days 7w+1 ..
 let HABIT_SAVED = null;                                  // the saved log, kept for the weeks it covers
 function habitWeek(w) {
   while (HABIT_WEEKS.length <= w) {
-    const k = HABIT_WEEKS.length, ppl = schedPeople(), out = [], d0 = 7 * k + 1;
+    const k = HABIT_WEEKS.length, ppl = schedPeople().filter(q => !q.guest), out = [], d0 = 7 * k + 1;
     if (HABIT_SAVED && HABIT_SAVED.some(c => c.day > 7 * k + 7)) { HABIT_WEEKS.push(HABIT_SAVED.filter(c => c.day >= d0 && c.day < d0 + 7)); continue; }
     const U = j => schedU(9100, k, j), n = U(0) < .35 ? 0 : U(0) < .8 ? 1 : 2;
     // the crew designer's own changes first (ROSTER[i].habitShifts: [{ add?, drop?, why }], why a whole sentence),
@@ -7196,7 +7233,8 @@ function schedBuild(p, d, occ, S) {
     const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest';
     const opts = LEISURE.concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
       .filter(([dk, type, w, who]) => (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
-      .concat([[bedDeck, 'rest', 3 * (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1)]])   // tired: rest more; lonely: less
+      .concat(GUEST_LEISURE[p.template] || [])          // a guest's favourite places (Pillar 3)
+      .concat([[bedDeck, 'rest', 3 * (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1) * (GUEST_REST[p.template] || 1)]])   // tired: rest more; lonely: less
       .map(([dk, type, w]) => [dk, type, w * (dk === deck ? 4 : 1) * (dk + '|' + type === lastLeisure ? .2 : 1)]);
     const tot = opts.reduce((a, o) => a + o[2], 0); let r = U(k) * tot, i = 0;
     while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
@@ -7228,6 +7266,7 @@ function schedBuild(p, d, occ, S) {
   };
   const specials = (k, offDay) => {                      // needs: the gym, a call home, the weekly wash
     const out = [];
+    if (p.template === 'survivor') return out;            // a rescued guest rests: no gym, no shopping
     // the gym is likelier the lower fitness is, a call home the lonelier someone is
     const gym = () => take('gym', [[3, 'gym']], 40 + Math.round(20 * U(61)), { wait: 15, min: 25 });
     if (schedU(p.seed, d, 60) < GYM_BASE(p, d) + (100 - N.fitness) / 100 * .9) out.push(gym);
@@ -7475,7 +7514,7 @@ function shipDay(d) {
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
   for (const p of order) {
-    const plan = schedBuild(p, d, occ, S); plans.set(p.id, plan);
+    const plan = guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : []); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
   const day = { d, plans, occ };
@@ -7528,6 +7567,7 @@ function runDay(day, step = 1, fn) {
 function dayReport(day) {
   const S = schedData(), B = (day - 1) * 1440, rep = { day, people: S.people.length, short: [], meals: [], work: [], double: [], gaps: [], unplaced: {}, peak: {} };
   for (const p of S.people) {
+    if (!aboardAllDay(p, day) || !aboardAllDay(p, day - 1)) continue;   // a guest arriving, leaving or away: not a full day to judge
     const segs = planDay(p, day - 1).concat(planDay(p, day));
     let sleep = 0;
     for (const s of segs) if (s.act === 'sleep' && s.placeId === p.bed) sleep += Math.max(0, Math.min(s.to, B + 1080) - Math.max(s.from, B - 360));
