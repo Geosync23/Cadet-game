@@ -4552,6 +4552,9 @@ DECKS[3] = {
     { id: '3-lights-1', kind: 'lights', at: [16, 15], room: 'R', face: 'w', panel: [16, 15] },
     { id: '3-nutrient-1', kind: 'nutrient', at: [5, 18], room: 'i', face: 'w', panel: [4, 18], look: { lamp: [0, 1.2, .7], drip: [0, .9, .74], light: [0, 2.1, .7] } },
     { id: '3-irrigation-1', kind: 'irrigation', at: [5, 20], room: 'i', face: 'w', panel: [4, 20], look: { lamp: [0, .96, .6], drip: [0, .9, .64], light: [0, 2.1, .6] } },
+    // the garden's grow racks (C9, 0.38.6, for the systems engineer): kind 'growlight', the north four racks and the south two
+    { id: '3-growlight-1', kind: 'growlight', at: [5, 0], room: 'G', face: 's', panel: [5, 1], look: { lamp: [-.4, 1.55, .17], drip: [-.4, .4, .2], light: [-.4, 2.05, .17] } },
+    { id: '3-growlight-2', kind: 'growlight', at: [8, 21], room: 'G', face: 'n', panel: [8, 20], look: { lamp: [.4, 1.55, .18], drip: [.4, .4, .21], light: [.4, 2.05, .18] } },
   ],
   places: [
     { id: '3-bench-1', type: 'bench', at: [22, 14], xy: [22.7, 14.15], walk: [22, 13], face: 'w', pose: 'sit', room: '+' },
@@ -4674,6 +4677,13 @@ DECKS[3] = {
     { id: '3-tend-15', type: 'garden', at: [10, 16], xy: [10.6, 16.25], walk: [10, 16], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-16', type: 'garden', at: [8, 19], xy: [8, 19.65], walk: [8, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-17', type: 'garden', at: [10, 19], xy: [10.6, 19.65], walk: [10, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
+    // gardeners at work (C9, 0.38.6): standing at the racks and beds, watering; free tiles that aren't tend spots
+    { id: '3-gardenwork-1', type: 'work:garden', at: [7, 1], xy: [7.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // the north racks
+    { id: '3-gardenwork-2', type: 'work:garden', at: [9, 1], xy: [9.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-3', type: 'work:garden', at: [4, 4], xy: [4.5, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },   // the beds
+    { id: '3-gardenwork-4', type: 'work:garden', at: [8, 4], xy: [8, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-5', type: 'work:garden', at: [5, 14], xy: [5, 14.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-crates-1', type: 'storage', at: [10, 12], face: 'e', pose: 'stand', room: 'G' },   // where garden crates are picked up, by the glass doors
     { id: '3-garden-1', type: 'garden', at: [6, 8], xy: [6.15, 8.45], walk: [5, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-2', type: 'garden', at: [6, 8], xy: [6.85, 8.45], walk: [7, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-3', type: 'garden', at: [6, 13], xy: [6.85, 13.55], walk: [7, 13], face: 'n', pose: 'sit', room: 'G' },
@@ -4739,6 +4749,8 @@ DECKS[3] = {
     { id: '3-lights-1-panel', type: 'work:works', at: [16, 15], xy: [16.7, 15.5], walk: [16, 15], face: 'e', pose: 'work', machine: '3-lights-1', room: 'R' },
     { id: '3-nutrient-1-panel', type: 'work:works', at: [4, 18], xy: [4.7, 18.5], walk: [4, 18], face: 'e', pose: 'work', machine: '3-nutrient-1', room: 'i' },
     { id: '3-irrigation-1-panel', type: 'work:works', at: [4, 20], xy: [4.7, 20.5], walk: [4, 20], face: 'e', pose: 'work', machine: '3-irrigation-1', room: 'i' },
+    { id: '3-growlight-1-panel', type: 'work:works', at: [5, 1], xy: [5.4, 1.15], walk: [5, 1], face: 'n', pose: 'work', machine: '3-growlight-1', room: 'G' },
+    { id: '3-growlight-2-panel', type: 'work:works', at: [8, 20], xy: [8.4, 20.8], walk: [8, 20], face: 's', pose: 'work', machine: '3-growlight-2', room: 'G' },
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
@@ -6673,7 +6685,7 @@ DECKS[3].gathers = {
 };
 DECKS[5].gathers = {
   'shuttle-bay': { name: 'the shuttle bay', focus: [6.0, 10.6], rooms: 'S', seats: [], also: [],
-    lead: [[6.0, 10.15, 0], [6.0, 11.3, 180], [5.0, 11.3, 180], [7.0, 11.3, 180]],   // the foot of the Tern's ramp: whoever arrives (lead 1), facing the Captain, the Envoy and the XO
+    lead: [[6.0, 11.3, 180], [5.0, 11.3, 180], [6.0, 10.15, 0]],   // the foot of the Tern's ramp: the Captain (lead 1) and Envoy Saruth, facing the Speaker or whoever arrives (lead 3)
     at: '4,10 4,11 5,12 6,12 4,12 7,12 3,10 8,10 7,8 3,11 8,11 3,9 8,9 5,13 8,8 4,13 7,7 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 2,8 5,6 6,6 4,14 7,14 4,6 7,6 1,10 1,11 1,9 2,7 3,6 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 2,6 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
   'works-bay': { name: 'the Works bay', focus: [16.5, 1.6], rooms: 'w', seats: [], also: [],
     lead: [[16.6, 0.7, 0], [17.6, 1.0, -25], [14.4, 0.8, 25]],   // the Chief beside the job board (lead 1), two techs either side
@@ -6817,6 +6829,18 @@ const DECK_DRESS = {
     dressBox(s, .78, .07, .006, '#e8c06a', 0, .55, .05).rotation.z = -.62;
     dressBox(s, .16, .11, .004, '#f4efe2', .18, .38, .062);         // a note
     return { t: 'Taped panel', x: 'An access panel taped shut with hazard tape. The note says DO NOT OPEN: WAITING ON PARTS. The ion storm cooked whatever is behind it.', wall: ['u', 'w', 1.5], y: .55 };
+  } },
+  veyliCordSculpture: { deck: 3, what: 'the Veyli delegation\'s gift: a cord sculpture hung on the bow lounge wall between the booths', make(g) {
+    const s = dressAt(g, 'L', 'w', 17.6), C = ['#c45a3f', '#e8c06a', '#2a9d8f'];   // the diplomatic visit's trace (section 18, when it goes smoothly)
+    dressBox(s, .05, .05, .16, '#c9a24a', 0, 2.3, .08);                // a bracket off the wall
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.3, .022, 8, 28), dressMat('#c9a24a')); ring.position.set(0, 2.0, .18); s.add(ring);   // the brass ring, upright
+    dressBox(s, .012, .14, .012, '#c9a24a', 0, 2.37, .18);             // and the cord it hangs by
+    for (let k = 0; k < 9; k++) {                                         // nine knotted cords from the ring's lower half, longest in the middle
+      const a = Math.PI * (1.12 + k * .095), x = Math.cos(a) * .3, y = 2.0 + Math.sin(a) * .3, len = .45 + .4 * Math.sin(Math.PI * (k + .5) / 9), z = .15 + (k % 3) * .03;
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, len, 5), dressMat(C[k % 3])); c.position.set(x, y - len / 2, z); s.add(c);
+      for (const f of [.45, 1]) { const b = new THREE.Mesh(new THREE.SphereGeometry(f === 1 ? .03 : .02, 8, 6), dressMat(C[(k + 1) % 3])); b.position.set(x, y - len * f, z); s.add(b); }
+    }
+    return { t: 'Veyli cord sculpture', x: 'A gift from the Veyli delegation: knotted cords in three colours, hung from a brass ring. Envoy Saruth says each knot is a promise, and that it would be rude to count them.', wall: ['L', 'w', 17.6], y: 1.9, w: .7, h: 1.0 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
