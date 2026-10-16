@@ -183,10 +183,13 @@ with sync_playwright() as pw:
         if not wait_ok(x): fail(f"busy: day {x['day']} waits {x['mealMax']} with {x['busy']}")
         if x['missed']: fail(f"busy: day {x['day']}: {x['missed']} gave up")
     if not rush or not any(x['waited'] for x in rush): fail('busy: no rush made a queue')
+    # the first rush day: 17:00 to 18:30 in 5-minute steps, for a minute with a queue the servery's text mentions
     q = g.ev(f"""(() => {{ const d = [...Array(28)].map((_, k) => {DAY} + k).find(d => galleyBusy(d).some(b => b.kind === 'rush'));
-      setShipNow((d - 1) * 1440 + 17 * 60 + 35); SHIP.galley = null; galleyAdvance(shipNow()); return [d, SHIP.galley.wait.length, galleyText('servery')]; }})()""")
-    print('A rush at 17:35:', q)
-    if not q[1] or 'waiting' not in q[2]: fail(f"busy: no queue in the servery's text during a rush: {q}")
+      SHIP.galley = null; let hit = null, seen = 0;
+      for (let t = 17 * 60; t <= 18 * 60 + 30 && !hit; t += 5) {{ setShipNow((d - 1) * 1440 + t); galleyAdvance(shipNow()); const n = SHIP.galley.wait.length, x = galleyText('servery'); if (n) seen++; if (n && x.includes('waiting')) hit = [hhmm(t), n, x]; }}
+      SHIP.galley = null; return [d, hit, seen]; }})()""")
+    print('A rush, 17:00-18:30 every 5 minutes (day, first queue the servery mentions, minutes with a queue):', q)
+    if not q[1]: fail(f"busy: no queue in the servery's text during a rush: {q}")
 
     # 4f. a birthday cake: the first birthday from DAY on (ROSTER's), else a stand-in on day DAY + 2 for the first crew member
     ck = g.ev(f"""(() => {{ const real = ROSTER.some(x => x.birthday), first = [...Array(364)].map((_, k) => {DAY} + k).find(d => galleyBirthdays(d).length);

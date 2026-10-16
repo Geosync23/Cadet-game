@@ -7734,7 +7734,7 @@ function playerTap(it, at, point) {
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player');
     actStart('queue', null, { title: it.t, ahead: j.ahead, turnAt: j.turnAt,
-      spot: { id: null, walk: j.at, x: j.xy[0] - OX, z: j.xy[1] - OZ, y: 0, face: FACE_ANGLE[j.face] || 0, pose: 'stand' } });
+      spot: { id: null, walk: j.at, x: j.xy[0] - OX, z: j.xy[1] - OZ, y: 0, face: typeof j.face === 'number' ? j.face * Math.PI / 180 : FACE_ANGLE[j.face] || 0, pose: 'stand' } });   // a number: degrees, as placeSpot (0 south, 90 east)
     return true;
   }
   if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
@@ -8694,7 +8694,7 @@ function takePortion(who = 'player') {
 // the player joins the servery queue: where to stand (the back of the line, by the tray return: a tile that's no
 // one's place) and when it's their turn: a minute, plus about 45 seconds for each crew member in the line or waiting.
 // galleyTurn(who) is true from then on while there's food; takePortion(who) serves them and ends it
-const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();
+const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();   // face: a letter, or degrees (0 south, 90 east)
 function galleyJoin(who = 'player') {
   const now = shipNow(), S = galleyAdvance(now);
   const ahead = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length + S.wait.length;
