@@ -14,7 +14,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `deck_check.py`: visits every built deck and checks reachability, crew, draw calls and memory.
 - `day_check.py`: fast-forwards one ship day and checks the crew's schedules (sleep, meals, shifts, places, nobody stuck, draw calls).
 - `player_check.py`: checks the player's needs, activities, walking speed and saving.
-- `plans/`: deck plan pages.
+- `plans/`: deck plan pages, pillar plans, and `handover-<role>.md` notes for each role.
 
 ## How we work
 - **One deck at a time, then review.** Work through all of a deck's turns, then stop and hand over for review: publish the build as a playable artifact, send screenshots, and summarise what was built, the judgement calls made and the test results. Don't start the next deck until the user signs off.
@@ -25,3 +25,4 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - Keep `DEV_NOTES.md` current so a fresh session can pick up from it.
 - **Update `design-doc.md` when a design decision is made,** in the same commit as the work that depends on it: edit the section it belongs to, and move answered questions out of its Open questions.
 - The user is new to Claude Code and git: explain in plain language, no jargon.
+- **Handover before auto-summarizing (the user's rule).** Warn early when your memory is getting full, or when the next task looks big enough to fill it: helpers tell the lead, and the lead tells the user in plain words. Don't wait for the automatic summary. Then write a handover note for a fresh session (`plans/handover-<role>.md`: role, branch and builds, what you own and built, shared formats, loose ends, gotchas, how to test, open questions for the user), push it, and stay idle. A fresh session taking over a role reads its predecessor's note first. The lead keeps `TEAM.md` current and writes its own handover brief the same way.
