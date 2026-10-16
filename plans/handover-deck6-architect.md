@@ -169,7 +169,7 @@ Containment proofs, which I wrote as scratch scripts. They're easy to rebuild wi
   - `window: true` on seats by hull windows; `DECKS[6].crawl` lists the crawl tiles ('c,r').
   - `DECKS[4].officer(num)` finds a cabin's officer from ROSTER; the `namePlate` wall kit and `lockedRoom` use it.
   - `healthBoard` (Works bay) reads `shipHealthRows()` or falls back to `shipSystems()`.
-  - `machineMarks(def)`, called last in each of my decks' dress(), draws lamps and drips from `machineLook(id)`. It is inert without that function. `MACHINE_MARKS` lists where each lamp went.
+  - (0.30.13) machine wear is drawn by section 8b (`machineFx`); my decks only carry `look: { lamp, drip }` overrides on machine entries, fitted to each piece's front.
 - **Tools I used (rebuild in a scratch folder):**
   - an all-deck pixel comparer (day, night, wide and rotated shots, crew hidden);
   - a close-up shooter (camera target at a room-local spot; `WALLS=auto` keeps wall decor visible, since lowered walls hide it);

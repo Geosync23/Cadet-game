@@ -68,6 +68,28 @@ Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) 
   - cart run segments carry `hold: 'cart' | 'cartfull'` for the crowd's cart.
 - **Saving:** `ship.machines`, `machineHour`, `machineNorm` (per build), `jobs`, `stores` and `hold`. `machinesLoad` refuses junk, and an old save gets fresh machines.
 
+## The answers pass (0.33.16–0.33.18, 2026-10-16, a fresh systems session)
+
+The user's answers 1–8 and 22 (`plans/answers-pass-plan.md`), all in section 17 and machine_check (DEV_NOTES has the detail):
+- **0.33.16:** jobs left for you. A small job at your tier waits `CREW_LEAVE` minutes of the day shift (`leaveEnd`); machine_check reports 3.7 a day. Daytime food runs that aren't urgent wait an hour for you (the cart run as your job), and `jobStops(j)` gives the stops for your walk.
+- **0.33.17:** `machineLook`, `deckLook`, `shipHealthRows`, `shipMoodAt` (pure) and `chillerAt` (pure).
+- **0.33.18:**
+    - `machineUse` (tapping machines);
+    - tier locks (`hatchTier`; section 4 takes `{ key, tier }` service entries);
+    - late deliveries and Stores' Mail (`suppliesHour`, `SHIP.short`).
+
+- **0.33.19:**
+    - 0.41.2 merged in;
+    - tier locks use the Deck 6 architect's `e.tier` (crew tiers stay `CREW_TIER`, agreed with the lead);
+    - `cartWaiting(h)` and `galleyCartLand` for the galley;
+    - `cartsOut` counts your cart;
+    - the `CHORES` table (lamps, vents, calibrations, deliveries, rounds, small faults; the crew's filters and seals), tuned to about 5.9 jobs a day left for you;
+    - `openJobs(forWho)` for the interactions engineer (session_01GGbtSiy4tDygCzrSUBDMYa).
+
+  Leads: session_01WHXNp9A1WHAD2EHJw384Qp, since 2026-10-16 04:20.
+
+**Known outside section 17:** player_check's job loop fails since 0.33.16. The galley plant's panel on Deck 3 (tile 39,1) can only be reached through Brennan's station tile 39,4 (`3-galley-2`). It's a layout or player-walking fix, reported to the lead.
+
 ## State at 0.40.8: loose ends and weak spots
 
 - **The crew are too good.** About 7–12 jobs a day get done, and nothing ever gets past worn, so the player rarely meets a real fault. The lead parked this for the user. The levers are `CREW_LEAVE`, the `found` delay of service jobs, `CREW_TIER`, and how many Works crew are free.

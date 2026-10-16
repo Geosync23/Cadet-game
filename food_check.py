@@ -13,7 +13,7 @@
 #   hover carts (B3): with FOOD.restock 'carts', a week fed by cartClaim never runs short; two days with none does
 #   with an empty cold store, people wait at the servery, each in their own spot (galleyHold)
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
-#   spoilage (0.29.11): nothing spoils with the chiller fine; with it broken (a stand-in shipEffectsAt), food is binned
+#   spoilage (0.29.11): nothing spoils with the chiller fine; with it broken (a stand-in chillerAt), food is binned
 #   at the 09:00 and 21:00 checks, the bin shows by the dish pit, Mail gets a note, and a week still never runs short
 #   the menu (0.29.11): Friday's treat has a pudding, Sunday's dinner is the crew's top vote, Wednesday's favourite isn't
 #   on the week's menu already, the servery and the menu board say what's on
@@ -89,7 +89,11 @@ with sync_playwright() as pw:
     b = json.dumps(g.ev(f"(() => {{ GALLEY_EV.clear(); GALLEY_ROTA.clear(); SHIP_DAYS.clear(); shipDay({DAY} + 4); galleyRota({DAY} + 2); return galleyReport({DAY}, {DAYS}); }})()"), sort_keys=True)
     print('The same days twice:', a == b)
     if a != b: fail('the galley came out differently the second time')
-    live = g.ev(f"(() => {{ SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); return {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }}; }})()")
+    # (with section 17's cartWaiting off: here the machines and jobs don't run, so a run left on the board for you
+    # would wait all day; holding it for you is checked in 4g)
+    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined');
+      SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); const out = {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }};
+      window.__sc('cartWaiting = window.__cw'); SHIP.galley = null; return out; }})()""")
     print('Live galley matches the report:', live == rep[0]['end'])
     if live != rep[0]['end']: fail(f"live {live} vs report {rep[0]['end']}")
 
@@ -140,13 +144,14 @@ with sync_playwright() as pw:
     if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
-    # 4c. spoilage: a broken chiller (shipEffectsAt's spoil at 2, its worst) for a week
-    sp = g.ev(f"""(() => {{ window.__keepFx = shipEffectsAt; window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx(deck, t), spoil: 2 }})");
+    # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
+    # at its worst), which the galley reads before shipEffectsAt
+    sp = g.ev(f"""(() => {{ window.__keepCh = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
       const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy }}));
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
       const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
-      window.__sc("shipEffectsAt = window.__keepFx; mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+      window.__sc("chillerAt = window.__keepCh; mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
     print('Chiller broken for a week, spoiled a day:', [w['spoiled'] for w in sp['week']], 'cold store low:', [w['coldMin'] for w in sp['week']])
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
@@ -182,14 +187,18 @@ with sync_playwright() as pw:
         if not wait_ok(x): fail(f"busy: day {x['day']} waits {x['mealMax']} with {x['busy']}")
         if x['missed']: fail(f"busy: day {x['day']}: {x['missed']} gave up")
     if not rush or not any(x['waited'] for x in rush): fail('busy: no rush made a queue')
+    # the first rush day: 17:00 to 18:30 in 5-minute steps, for a minute with a queue the servery's text mentions
     q = g.ev(f"""(() => {{ const d = [...Array(28)].map((_, k) => {DAY} + k).find(d => galleyBusy(d).some(b => b.kind === 'rush'));
-      setShipNow((d - 1) * 1440 + 17 * 60 + 35); SHIP.galley = null; galleyAdvance(shipNow()); return [d, SHIP.galley.wait.length, galleyText('servery')]; }})()""")
-    print('A rush at 17:35:', q)
-    if not q[1] or 'waiting' not in q[2]: fail(f"busy: no queue in the servery's text during a rush: {q}")
+      SHIP.galley = null; let hit = null, seen = 0;
+      for (let t = 17 * 60; t <= 18 * 60 + 30 && !hit; t += 5) {{ setShipNow((d - 1) * 1440 + t); galleyAdvance(shipNow()); const n = SHIP.galley.wait.length, x = galleyText('servery'); if (n) seen++; if (n && x.includes('waiting')) hit = [hhmm(t), n, x]; }}
+      SHIP.galley = null; return [d, hit, seen]; }})()""")
+    print('A rush, 17:00-18:30 every 5 minutes (day, first queue the servery mentions, minutes with a queue):', q)
+    if not q[1]: fail(f"busy: no queue in the servery's text during a rush: {q}")
 
-    # 4f. a birthday cake (a stand-in birthday on day DAY + 2 for the first crew member, until ROSTER has them)
-    ck = g.ev(f"""(() => {{ const p = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[0], had = p.birthday, d = {DAY} + 2, B = (d - 1) * 1440, out = {{}};
-      const real = ROSTER.some(x => x.birthday); p.birthday = ((d - 1) % 364) + 1;
+    # 4f. a birthday cake: the first birthday from DAY on (ROSTER's), else a stand-in on day DAY + 2 for the first crew member
+    ck = g.ev(f"""(() => {{ const real = ROSTER.some(x => x.birthday), first = [...Array(364)].map((_, k) => {DAY} + k).find(d => galleyBirthdays(d).length);
+      const p = real ? galleyBirthdays(first)[0] : schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[0], had = p.birthday, d = real ? first : {DAY} + 2, B = (d - 1) * 1440, out = {{ day: d }};
+      if (!real) p.birthday = ((d - 1) % 364) + 1;
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       for (const E of GALLEY_EV.values()) E.k = 0; out.cakes = galleyReport(d, 1)[0].cakes;
       SHIP.galley = null; goToDeck(3);
@@ -197,10 +206,49 @@ with sync_playwright() as pw:
         setShipNow(B + t); galleyTick(); out[k] = {{ cake: !!(SHIP.galley.cake && SHIP.galley.cake.out), shown: !!(GV && GV.cake && GV.cake.visible), candles: GV && GV.candles ? GV.candles.count : -1, text: galleyText('servery') }}; }}
       out.board = galleyBoard(d); out.mail = mail.map(x => x.subject + ': ' + x.body); out.name = p.name; out.real = real;
       window.__sc("mailSend = window.__keepMail"); if (had === undefined) delete p.birthday; else p.birthday = had; GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")
-    print('Birthday cake for', ck['name'] + (' (ROSTER has birthdays)' if ck['real'] else ' (stand-in birthday)') + ':', 'baked', ck['cakes'], '| 19:45:', ck['out']['text'])
+    print('Birthday cake for', ck['name'] + (f" on day {ck['day']} (ROSTER's birthdays)" if ck['real'] else ' (stand-in birthday)') + ':', 'baked', ck['cakes'], '| 19:45:', ck['out']['text'])
     print('  shown at 14:00/18:00/19:45/21:45:', [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')], '| mail:', ck['mail'][:1])
     if ck['cakes'] != 1 or [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')] != [False, False, True, False] or ck['out']['candles'] != 10: fail(f"cake: {ck}")
     if 'birthday' not in ck['board'] or 'cake' not in ck['out']['text'].lower() or not any('Cake tonight' in m for m in ck['mail']): fail(f"cake: board, text or mail: {ck}")
+
+    # 4f2. section 18's events (0.29.15): a cake for an event with cake: true (Founding Day) and the birthday gathering's
+    # time in the Mail; fresh salad on a harvest day's menu. A stand-in eventsOn when section 18 isn't in the build
+    ev = g.ev(f"""(() => {{ const real = typeof eventsOn === 'function', keep = real ? eventsOn : undefined, fd = {DAY} + 3, hv = {DAY} + 5;
+      if (!real) window.__sc(`eventsOn = d => d === ${{fd}} ? [{{ id: 'founding', name: 'Founding Day', from: 1170, to: 1290, ev: {{ cake: true }}, honorees: [] }}] : d === ${{hv}} ? [{{ id: 'harvest', name: 'Harvest morning', from: 570, to: 690, ev: {{}}, honorees: [] }}] : []`);
+      const days = real ? [...Array(364)].map((_, k) => {DAY} + k) : [fd, hv];
+      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => e.cake || (e.ev && e.ev.cake))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
+      GALLEY_MENU.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
+      const out = {{ real, f, h }};
+      if (f) {{ out.cakes = galleyReport(f, 1)[0].cakes; out.board = galleyBoard(f); const mail = []; window.__keepMail = window.mailSend; window.__mailBox = mail; window.__sc("mailSend = x => window.__mailBox.push(x)");
+        setShipNow((f - 1) * 1440 + 19 * 60 + 45); SHIP.galley = null; galleyAdvance(shipNow()); out.text = galleyText('servery'); out.mail = mail.map(x => x.body); window.__sc("mailSend = window.__keepMail"); }}
+      const b = [...Array(364)].map((_, k) => {DAY} + k).find(d => galleyBirthdays(d).length && eventsOn(d).some(e => e.id === 'birthday'));
+      out.gather = b ? galleyCake(b).gather : null;
+      if (h) out.salad = galleyMenu(h).note;
+      if (!real) window.__sc("eventsOn = undefined"); GALLEY_MENU.clear(); GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")
+    print('Events' + (' (section 18)' if ev['real'] else ' (stand-in eventsOn)') + ':', ev)
+    if ev['real'] and not ev['f']: print("  no event with cake: true in section 18 yet: the event cake isn't checked")
+    elif not ev['f'] or ev['cakes'] != 1 or 'cake' not in ev['text'].lower() or 'happy' not in ev['board'] or not ev['mail']: fail(f"event cake: {ev}")
+    if not ev['h'] or 'salad' not in (ev['salad'] or ''): fail(f"harvest salad: {ev}")
+    if ev['real'] and ev['gather'] is None: fail('birthday gathering time not read from eventsOn')
+
+    # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
+    # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
+    yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
+      window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
+      const D0 = {B} + 40 * 1440; if (typeof CART_RUNS !== 'undefined') CART_RUNS.clear();   // a day no other test has asked about
+      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      let h = null; for (let t = D0 + 9 * 60; t < D0 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
+      if (h === null) return {{ real, h }};
+      const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];
+      setShipNow(c[0] + 150); const before = galleyAdvance(shipNow()).cold.meals, waiting = SHIP.galley.carts.some(c => c[2] === h), runs = SHIP.galley.carts.length;
+      const landed = galleyCartLand(h), after = SHIP.galley.cold.meals, again = galleyCartLand(h);
+      window.__sc("cartWaiting = " + (real ? 'window.__keepWait' : 'undefined')); window.__keepWait = keep; if (real) cartWaiting = keep;
+      SHIP.galley = null; return {{ real, h, meals, waiting, runs, landed, gained: after - before, again }}; }})()""")
+    print('Your cart run (stand-in cartWaiting' + (', section 17 has its own' if yc['real'] else '') + '):', yc)
+    if yc['h'] is None or not yc['waiting'] or yc['runs'] != 1 or yc['landed'] != yc['meals'] or yc['gained'] != yc['meals'] or yc['again'] != 0: fail(f"your cart run: {yc}")
+    pb = g.ev("(() => { if (typeof ROSTER_PLAYER === 'undefined' || !ROSTER_PLAYER.birthday) return null; const d = ROSTER_PLAYER.birthday; return [d, galleyBoard(d).match(/happy birthday[^!]*!/)[0], galleyWhose(galleyBirthdays(d))]; })()")
+    print('Your birthday:', pb if pb else 'not in ROSTER_PLAYER yet')
+    if pb and pb[2] != 'your': fail(f"your birthday: {pb}")
 
     # 5. once the schedules use the rota: galley staff are at the rota's stations
     hooked = g.ev(f"galleyStaff().some(p => planDay(p, {DAY}).some(s => s.act === 'work' && s.from < {B} + 330))")
