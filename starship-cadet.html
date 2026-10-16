@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.4
+   STARSHIP CADET: CSV Wren                            build 0.38.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6510,6 +6510,69 @@ DECKS[1] = {
 };
 for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
 
+// ---- Big gatherings (Pillar 3, C9, 0.38.0; plans/pillar3-plan.md "Gatherings of more than 70 crew") ----
+// The venues where a crowd (an all-clear, a party, a greeting, a festival) can stand, one table per deck:
+//   <venue>: { name, focus: [x, z] (tile units: where the crowd looks), rooms (the venue's own room letters),
+//     seats (place types in those rooms that count too), also (venues to spill into after these),
+//     lead: [[x, z, face], ...] (the front: lead 1 is the speaker, the rest beside them; face in degrees from south toward east),
+//     at: 'c,r ...' (the standing spots: the venue's rooms nearest the focus first, then the rooms next door) }
+// Doorways, lift doors and every existing place's tile are left clear. At load each spot becomes a place
+// { id: '<deck>-<venue>-crowd-<n>' (or -lead-<n>), type: 'event', gather: venue, lead?, at, xy, face (toward the focus), pose: 'stand', room },
+// so deck_check checks them like any place. No `event` tag and type 'event': no plan uses them day to day.
+// gatherSpots(venue) -> the places in the order to fill them (leads, then nearest first, then the spill rooms and the
+// `also` venues), each with its deck. Section 14's gathering() and section 18's meetings read it; nothing else does.
+// Ship-wide event venues: 'works-bay' (Calder's storm briefing at the job board), 'observation' (the Captain's
+// all-clear), 'bow-lounge' (the party), 'shuttle-bay' (the greeting), and 'mess' and 'plaza' (the big ones).
+DECKS[3].gathers = {
+  'plaza': { name: 'the lift plaza and promenade', focus: [23.5, 10.5], rooms: '+=', seats: ['bench'], also: [],
+    lead: [[23.5, 10.5, 90]],   // on the plaza east of the lift, facing down the promenade
+    at: '23,9 23,11 24,9 25,10 23,12 22,8 25,11 22,12 24,12 21,8 21,12 25,12 26,10 26,11 21,7 20,8 26,12 21,13 27,10 27,9 27,11 20,7 21,6 19,8 19,7 19,13 20,14 18,8 18,12 21,15 19,14 18,7 18,13 29,9 17,12 29,12 18,6 18,14 19,15 17,13 16,10 16,9 16,11 18,15 16,12 15,10 31,10 15,11 31,11 31,12 32,10 32,11 32,12 13,10 33,10 33,9 13,11 33,11 35,9 35,12 37,10 37,9 37,11 37,12 38,10 38,11 39,10 39,9 39,11 39,12' },
+  'mess': { name: 'the mess hall', focus: [33.5, 8.2], rooms: 'M', seats: ['mess-seat'], also: ['plaza'],
+    lead: [[33.5, 8.25, -127]],   // by the servery, facing the tables
+    at: '32,6 32,5 30,8 29,8 29,6 28,8 33,2 32,2 27,8 31,2 27,5 33,1 26,6 28,2 33,0 27,2 24,8 23,8 23,6 23,5 24,2 23,2' },
+  'bow-lounge': { name: 'the bow lounge', focus: [44.5, 10.5], rooms: 'L', seats: ['lounge-seat'], also: ['plaza'],
+    lead: [[44.5, 10.5, 90]],   // the open floor between the bar and the windows
+    at: '44,9 43,10 45,10 44,11 43,9 45,9 43,11 45,11 44,8 42,10 46,10 44,12 45,8 42,9 46,9 42,11 46,11 43,12 45,12 42,12 46,12 44,13 47,9 43,13 45,13 47,8 47,12 44,14 48,9 43,14 47,7 47,13 42,6 46,6 48,8 48,12 48,13 47,14 44,15 45,5 42,5 49,8 46,15 41,5 49,7 49,13 44,4 50,10 44,16 45,4 50,9 50,11 43,16 45,16 42,4 50,12 48,5 49,6 49,14 47,4' },
+};
+DECKS[5].gathers = {
+  'shuttle-bay': { name: 'the shuttle bay', focus: [6.0, 10.6], rooms: 'S', seats: [], also: [],
+    lead: [[6.0, 10.15, 0], [6.0, 11.3, 180], [5.0, 11.3, 180], [7.0, 11.3, 180]],   // the foot of the Tern's ramp: whoever arrives (lead 1), facing the Captain, the Envoy and the XO
+    at: '4,10 4,11 5,12 6,12 4,12 7,12 3,10 8,10 7,8 3,11 8,11 3,9 8,9 5,13 8,8 4,13 7,7 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 2,8 5,6 6,6 4,14 7,14 4,6 7,6 1,10 1,11 1,9 2,7 3,6 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 2,6 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
+  'works-bay': { name: 'the Works bay', focus: [16.5, 1.6], rooms: 'w', seats: [], also: [],
+    lead: [[16.6, 0.7, 0], [17.6, 1.0, -25], [14.4, 0.8, 25]],   // the Chief beside the job board (lead 1), two techs either side
+    at: '16,1 16,2 17,2 15,0 17,0 16,3 14,1 18,1 17,3 18,0 16,4 15,4 17,4 13,2 13,0 19,0 14,4 18,4' },
+};
+DECKS[1].gathers = {
+  'observation': { name: 'the observation room', focus: [5.3, 2.5], rooms: 'O', seats: ['common-room', 'lounge-seat'], also: [],
+    lead: [[5.3, 2.5, -90], [5.3, 1.5, -110]],   // the Captain by the wall screen, the XO beside her
+    at: '4,2 4,1 4,3 3,2 5,4 3,1 3,3 4,0 2,2 2,3 5,7 3,8 5,9 1,8 3,9 2,9 5,10 4,10 3,10 4,11 6,3 7,2 8,2 9,3 6,7 9,7 8,8' },
+};
+for (const n of Object.keys(DECKS)) for (const [v, g] of Object.entries(DECKS[n].gathers || {})) {
+  const d = DECKS[n], P = d.places || (d.places = []), room = (c, r) => d.map[r][c];
+  const face = (x, z) => Math.round(Math.atan2(g.focus[0] - x, g.focus[1] - z) * 180 / Math.PI);
+  g.lead.forEach(([x, z, f], i) => P.push({ id: `${n}-${v}-lead-${i + 1}`, type: 'event', gather: v, lead: i + 1, at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', room: room(Math.floor(x), Math.floor(z)) }));
+  g.at.split(' ').forEach((s, i) => {
+    const [c, r] = s.split(',').map(Number), x = c + .5 + ((c * 37 + r * 11) % 7 - 3) * .04, z = r + .5 + ((c * 13 + r * 29) % 7 - 3) * .04;   // a little off centre, so a crowd doesn't stand in rows
+    P.push({ id: `${n}-${v}-crowd-${i + 1}`, type: 'event', gather: v, at: [c, r], xy: [+x.toFixed(2), +z.toFixed(2)], face: face(x, z), pose: 'stand', room: room(c, r) });
+  });
+}
+const GATHER_SPOTS = new Map();
+function gatherVenue(v) { for (const n of Object.keys(DECKS)) if ((DECKS[n].gathers || {})[v]) return { deck: +n, ...DECKS[n].gathers[v] }; return null; }
+function gatherSpots(v) {
+  if (GATHER_SPOTS.has(v)) return GATHER_SPOTS.get(v);
+  const g = gatherVenue(v); if (!g) return [];
+  const [fx, fz] = g.focus, P = DECKS[g.deck].places, seen = new Set(), out = [];
+  const near = l => l.map(p => [Math.hypot((p.xy ? p.xy[0] : p.at[0] + .5) - fx, (p.xy ? p.xy[1] : p.at[1] + .5) - fz), p])
+    .sort((a, b) => a[0] - b[0] || (a[1].id < b[1].id ? -1 : 1)).map(e => e[1]);
+  const add = l => { for (const p of l) if (!seen.has(p.id)) { seen.add(p.id); out.push({ ...p, deck: g.deck }); } };
+  const crowd = P.filter(p => p.gather === v && !p.lead || g.seats.includes(p.type) && g.rooms.includes(p.room) && !p.machine);
+  add(P.filter(p => p.gather === v && p.lead).sort((a, b) => a.lead - b.lead));
+  add(near(crowd.filter(p => g.rooms.includes(p.room)))); add(near(crowd.filter(p => !g.rooms.includes(p.room))));
+  for (const a of g.also) add(near(gatherSpots(a).filter(p => !p.lead)));
+  GATHER_SPOTS.set(v, out);
+  return out;
+}
+
 // =====================================================================
 // 5. LIGHTING
 // The sun casts all shadows and follows the camera, snapped to shadow
@@ -6561,7 +6624,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.38.0';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
