@@ -77,6 +77,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
 .device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .row.hot{border-color:var(--crt-ink)}
+.device .row.head{margin-top:14px}
+.device .row.head .rt{color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .devform label{display:block;margin:8px 0;color:var(--crt-ink)}
 .device .devform input,.device .devform textarea{display:block;width:100%;margin-top:4px;padding:8px 10px;min-height:44px;font:inherit;color:var(--crt-hot);background:rgba(0,0,0,.35);border:2px solid var(--crt-dim);border-radius:4px;-webkit-user-select:text;user-select:text;touch-action:auto;caret-color:var(--crt-hot);resize:vertical}
 .device .devform input:focus,.device .devform textarea:focus{outline:none;border-color:var(--crt-ink)}
@@ -183,7 +185,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.9
+   STARSHIP CADET: CSV Wren                            build 0.35.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6709,7 +6711,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.10';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7751,7 +7753,8 @@ function deviceLoad(s) {
   const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
     .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
-      kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null }));
+      kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
+      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
   return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
@@ -7796,8 +7799,8 @@ function devDay(d) {
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
-  for (const a of SHIP.device.appts) if ((a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)
-    out.push({ from: a.at - B, to: a.at - B + (a.len || 30), title: 'With ' + a.with.map(apptName).join(', '), where: apptWhereName(a.where), kind: 'appt' });
+  for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
   return out.sort((x, y) => x.from - y.from);
@@ -7824,9 +7827,11 @@ function deviceTick() {
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
   }
-  for (const a of SHIP.device.appts) if (a.status === 'yes' && a.at > t && a.at <= t + 10 && !DEV_REMINDED.has('appt' + a.id)) {
-    DEV_REMINDED.add('appt' + a.id); deviceNotify({ app: 'appointments', text: 'With ' + a.with.map(apptName).join(', ') + ' at ' + devWhen(a.at) + ', ' + apptWhereName(a.where) + '.', urgent: true });
+  for (const g of apptGroups(SHIP.device.appts.filter(a => a.status === 'yes' && a.at > t && a.at <= t + 10))) if (!DEV_REMINDED.has('appt' + (g.a.grp || g.a.id))) {
+    DEV_REMINDED.add('appt' + (g.a.grp || g.a.id)); deviceNotify({ app: 'appointments', text: 'With ' + g.names + ' at ' + devWhen(g.a.at) + ', ' + apptWhereName(g.a.where) + '.', urgent: true });
   }
+  for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
+    for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
   if (!R.on) return;
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
@@ -8143,11 +8148,17 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   return { title: 'Home', blocks: B };
 } });
 
-// Schedule: today as a timeline, with where you're expected right now; tomorrow below
-deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view: () => {
+// Schedule: today as a timeline, with where you're expected right now; tomorrow below. A day picked in the Calendar
+// (0.35.10: { app: 'schedule', day }) shows instead of tomorrow until the device closes.
+let schedDay = null;
+deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; });
+deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
+  act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null; },
+  view: () => {
   const d = SHIP.time.day, m = SHIP.time.min, n = devNow(), B = [{ kind: 'text', text: n.now, mark: 'hot' }];
   if (n.next) B.push({ kind: 'text', text: n.next });
-  for (const day of [d, d + 1]) {
+  if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
+  for (const day of schedDay ? [schedDay] : [d, d + 1]) {
     B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
@@ -8155,27 +8166,31 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view
   return { title: 'Schedule', blocks: B };
 } });
 
-// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't
+// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't.
+// Tap a day (0.35.10) for See the day (Schedule shows it) or Make an appointment (Appointments, on that day).
+let calDay = null;
 deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
   act(verb, arg) {
     const R = SHIP.device.calendarRemind;
     if (verb === 'remind') R.per[arg] = R.per[arg] === false ? true : R.per[arg] === true ? false : false;   // default (on) -> Don't -> Remind me -> Don't
     else if (verb === 'on') R.on = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) R.ahead = arg;
+    else if (verb === 'day') calDay = calDay === arg ? null : arg;
   },
   view: () => {
     const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [];
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
-      if (!trad.length && !ship.length) continue;
-      B.push({ kind: 'text', text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), mark: 'head' });
+      if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: calDay === d ? null : 'Tap to plan this day', mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
         const p = R.per[x.kind];
         rows.push({ text: devWhen(x.at) + '  ' + x.title, sub: x.where + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
           button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
-      B.push({ kind: 'list', rows });
+      if (rows.length) B.push({ kind: 'list', rows });
     }
     B.push({ kind: 'text', text: 'Reminders', mark: 'head' }, { kind: 'buttons', items: [
       { label: 'On', on: R.on, action: { app: 'calendar', do: 'on', arg: true } }, { label: 'Off', on: !R.on, action: { app: 'calendar', do: 'on', arg: false } }] });
@@ -8230,7 +8245,7 @@ const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLoc
 // acquaintances and up, or anyone on duty somewhere public; strangers show by their job). On your own deck a dot is
 // where they really are (the walkers); elsewhere it sits in the middle of their room. Tap a dot or a name to pick them;
 // "Go there" points the goal arrow at their room. { app: 'maps', who: crewId } opens Maps on them (the Crew app).
-let mapWho = null;
+let mapWho = null, mapFor = null;                         // mapFor: 'appointments' while picking a place to meet (0.35.10)
 const MAP_MID = new Map();                               // 'deck|room' -> [i, j], the room's middle tile
 function mapRoomTile(n, key) {
   const k = n + '|' + key; if (MAP_MID.has(k)) return MAP_MID.get(k);
@@ -8279,6 +8294,12 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
       deviceNotify({ app: 'maps', text: 'Follow the marker to ' + (q ? q.label : 'the ' + r.name.toLowerCase()) + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
+    else if (verb === 'meet' && mapFor === 'appointments') {
+      const id = mapPick && apptRoomPlace(mapDeck || deckDef.num, mapPick); mapFor = null;
+      if (id && apptDraft) apptDraft.where = id;
+      deviceShow('appointments');
+    }
+    else if (verb === 'unmeet') { mapFor = null; deviceShow('appointments'); }
   },
   view: () => {
     const n = mapDeck && DECKS[mapDeck] ? mapDeck : deckDef.num, def = DECKS[n], rooms = {};
@@ -8293,11 +8314,19 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
       { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
       { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' },
         people: mapDots(n, people), whoAction: { app: 'maps', do: 'who' } }];
+    if (mapFor === 'appointments') {
+      if (!apptDraft) mapFor = null;
+      else {
+        const id = mapPick && apptRoomPlace(n, mapPick);
+        B.splice(0, 0, { kind: 'text', text: mapPick ? id ? 'Meet in the ' + rooms[mapPick].name.toLowerCase() + '?' : 'Nowhere to sit and meet in there. Try a lounge, the mess or a garden.' : 'Tap a room to meet in.', mark: 'hot' },
+          { kind: 'buttons', items: (id ? [{ label: 'Meet here', action: { app: 'maps', do: 'meet' } }] : []).concat([{ label: 'Cancel', action: { app: 'maps', do: 'unmeet' } }]) });
+      }
+    }
     if (who) B.push({ kind: 'text', text: who.label + ': ' + (who.roomName ? 'the ' + who.roomName.toLowerCase() + ', ' : '') + 'Deck ' + who.deck + (MAP_ACT[who.act] ? ', ' + MAP_ACT[who.act] : '') + '.', mark: 'hot' });
     if (mapPick && rooms[mapPick]) {
       const r = rooms[mapPick];
       if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
-      if (r.kind !== 'locked' && r.kind !== 'void') B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
+      if (r.kind !== 'locked' && r.kind !== 'void' && !mapFor) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
     }
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
@@ -8403,21 +8432,33 @@ function apptPlaces() {                                  // [{ id, name, deck }]
     for (const pl of def.places || []) {
       const r = rooms[pl.room]; if (!r || seen.has(pl.room) || !APPT_PLACE_ROOMS.test(r.name || '') || mapLocked(n, pl.room)) continue;
       if (!APPT_SEATS.includes(pl.type) && !/office|infirmary/i.test(r.name)) continue;
-      seen.add(pl.room); out.push({ id: pl.id, name: r.name, deck: n });
+      seen.add(pl.room); out.push({ id: pl.id, name: r.name, deck: n, room: pl.room });
     }
   }
   return (apptPlacesCache = out);
 }
 // a free spot in that room at that time (the sim engineer's advice): a seat nobody's plan holds then (shipDay's occ),
 // and no other appointment; a room behind a locked door takes any place in it
-function apptSpot(where, at, len) {
-  const ref = apptPlaces().find(x => x.id === where); if (!ref) return where;
-  const def = DECKS[ref.deck], room = (def.places.find(q => q.id === where) || {}).room, office = /office|infirmary/i.test(ref.name);
+const apptSpot = (where, at, len) => apptSpots(where, at, len, 1)[0];
+function apptSpots(where, at, len, k = 1) {               // k free spots (0.35.10: a group gets a seat each), repeating the last if short
+  const n = apptDeckOf(where); if (n === null) return Array(k).fill(where);
+  const def = DECKS[n], room = def.places.find(q => q.id === where).room, office = /office|infirmary/i.test((def.rooms[room] || {}).name || '');
   const d = Math.floor(at / 1440) + 1, occ = typeof shipDay === 'function' ? shipDay(d).occ : null, over = (a, b) => a < at + len && at - 10 < b;
   const used = new Set(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && over(a.at, a.at + (a.len || 30))).map(a => a.where));
   const free = def.places.filter(q => q.room === room && (office || APPT_SEATS.includes(q.type)) && !used.has(q.id)
     && !(occ && (occ.get(q.id) || []).some(([a, b]) => over(a, b))));
-  return free.length ? free[0].id : where;
+  const ids = free.slice(0, k).map(q => q.id); if (!ids.length) ids.push(where);
+  while (ids.length < k) ids.push(ids[ids.length - 1]);
+  return ids;
+}
+const apptDeckOf = id => { for (const n of Object.keys(DECKS)) if ((DECKS[n].places || []).some(q => q.id === id)) return +n; return null; };
+// a place to meet in room key of deck n, for a room picked on Maps (0.35.10): its listed meeting spot, else any seat
+// in it; null for a locked room or one with nowhere to sit
+function apptRoomPlace(n, key) {
+  const ref = apptPlaces().find(x => x.deck === n && x.room === key); if (ref) return ref.id;
+  const r = (DECKS[n].rooms || {})[key]; if (!r || r.void || r.floor === 'lift' || mapLocked(n, key)) return null;
+  const q = (DECKS[n].places || []).find(x => x.room === key && APPT_SEATS.includes(x.type) && !x.machine);
+  return q ? q.id : null;
 }
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
@@ -8430,50 +8471,97 @@ function apptPeople() {                                  // who you can ask: peo
   const met = typeof relTier === 'function' ? all.filter(p => { try { return relTier(p.id) >= 1; } catch (e) { return false; } }) : [];
   return (met.length ? met : all.filter(p => p.story || p.dept === 'works')).slice().sort((a, b) => a.name < b.name ? -1 : 1);
 }
+// appointments as the player sees them: a group meeting (0.35.10) is one appointment per person (each with their own
+// seat, so section 14 walks each to a spot of their own) sharing a grp id; apptGroups gathers them: [{ a, all, names }]
+const APPT_MAX = 6;
+function apptGroups(list) {
+  const out = [], by = new Map();
+  for (const a of list) {
+    const g = a.grp ? by.get(a.grp) : null;
+    if (g) g.all.push(a); else { const n = { a, all: [a] }; out.push(n); if (a.grp) by.set(a.grp, n); }
+  }
+  for (const g of out) g.names = g.all.flatMap(x => x.with).map(apptName).join(', ');
+  return out;
+}
+const apptNames = ids => ids.length < 3 ? ids.map(id => apptName(id).split(' ')[0]).join(' and ') : ids.slice(0, -1).map(id => apptName(id).split(' ')[0]).join(', ') + ' and ' + apptName(ids[ids.length - 1]).split(' ')[0];
 function apptKind(where, withId) {
   const r = apptPlaces().find(x => x.id === where), p = apptPerson(withId);
   return r && /infirmary/i.test(r.name) ? 'checkup' : r && /office/i.test(r.name) || p && /chief/i.test(p.role || '') && r && /office/i.test(r.name) ? 'work' : 'social';
+}
+function apptBook(ids, at, len, kind) {                  // accepted: one appointment each, a seat each, one grp for a group
+  const D = SHIP.device, spots = apptSpots(apptDraft.where, at, len, ids.length), id0 = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+  ids.forEach((pid, i) => D.appts.push({ id: id0 + i, with: [pid], at, len, where: spots[i], kind, status: 'yes', by: null, ...(ids.length > 1 ? { grp: id0 } : {}) }));
 }
 deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'calendar', order: 12,
   badge: () => SHIP.device.appts.filter(a => a.by && a.status === 'asked').length || null,
   act(verb, arg) {
     const D = SHIP.device, now = shipNow();
-    if (verb === 'open' && arg && arg.with) { apptDraft = { with: arg.with, day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
-    else if (verb === 'new') { apptDraft = { with: null, day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
+    if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
+    else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
+      apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
+    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; mapWho = null; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
+    else if (verb === 'new') { apptDraft = { with: [], day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
     else if (verb === 'cancel') { apptDraft = null; apptSay = null; }
-    else if (verb === 'who' && apptDraft) apptDraft.with = arg;
+    else if (verb === 'who' && apptDraft && arg) {               // add or remove someone (a group meeting: up to APPT_MAX)
+      const W = apptDraft.with, i = W.indexOf(arg);
+      if (i >= 0) W.splice(i, 1); else if (W.length < APPT_MAX) W.push(arg);
+      apptDraft.adding = false; delete apptDraft.later; delete apptDraft.some;
+    }
+    else if (verb === 'adding' && apptDraft) apptDraft.adding = !apptDraft.adding;
     else if (verb === 'day' && apptDraft) apptDraft.day = arg;
     else if (verb === 'time' && apptDraft) apptDraft.min = Math.max(360, Math.min(22 * 60, apptDraft.min + arg));
     else if (verb === 'where' && apptDraft) apptDraft.where = arg;
-    else if (verb === 'ask' && apptDraft && apptDraft.with && apptDraft.where) {
-      const p = apptPerson(apptDraft.with), at = (apptDraft.day - 1) * 1440 + apptDraft.min;
+    else if (verb === 'ask' && apptDraft && apptDraft.with.length && apptDraft.where) {
+      const d = apptDraft, ids = d.with.slice(), at = (d.day - 1) * 1440 + d.min, len = 30, kind = apptKind(d.where, ids[0]);
       if (at <= now + 10) { apptSay = 'That\'s too soon. Pick a later time.'; return; }
-      const a = { id: D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1, with: [apptDraft.with], at, len: 30, where: apptSpot(apptDraft.where, at, 30), kind: apptKind(apptDraft.where, apptDraft.with), status: 'asked', by: null };
-      const r = typeof apptReply === 'function' ? apptReply(p, a) : { answer: 'yes', at, text: apptName(apptDraft.with) + ': "See you then."' };
-      apptSay = r.text;
-      if (r.answer === 'yes') { a.status = 'yes'; D.appts.push(a); apptDraft = null; }
-      else if (r.answer === 'later') apptDraft.later = r.at;
+      delete d.later; delete d.some;
+      const nextId = () => D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+      const ask = (pid, t, where) => { const a = { id: nextId(), with: [pid], at: t, len, where: where || apptSpot(d.where, t, len), kind, status: 'asked', by: null };
+        return { a, r: typeof apptReply === 'function' ? apptReply(apptPerson(pid), a) : { answer: 'yes', at: t, text: apptName(pid) + ': "See you then."' } }; };
+      if (ids.length === 1) {
+        const { a, r } = ask(ids[0], at);
+        apptSay = r.text;
+        if (r.answer === 'yes') { a.status = 'yes'; D.appts.push(a); apptDraft = null; }
+        else if (r.answer === 'later') d.later = r.at;
+        return;
+      }
+      const rs = ids.map(pid => ask(pid, at).r), yes = ids.filter((x, i) => rs[i].answer === 'yes');
+      if (yes.length === ids.length) { apptBook(ids, at, len, kind); apptSay = 'Everyone can come: ' + apptNames(ids) + ', ' + devWhen(at) + '.'; apptDraft = null; return; }
+      apptSay = rs.filter(x => x.answer !== 'yes').map(x => x.text).join(' ') + (yes.length ? ' (' + apptNames(yes) + (yes.length > 1 ? ' can.)' : ' can.)') : '');
+      const dayEnd = Math.floor(at / 1440) * 1440 + 22 * 60;   // a time later that day everyone can do
+      for (let t = Math.ceil((at + 30) / 30) * 30; t + len <= dayEnd; t += 30) if (ids.every(pid => ask(pid, t).r.answer === 'yes')) { d.later = t; break; }
+      if (yes.length) d.some = yes;
+      if (!d.later && !d.some) apptSay += ' Try another time or day.';
+    }
+    else if (verb === 'some' && apptDraft && apptDraft.some) {   // go ahead with those who can
+      const d = apptDraft, at = (d.day - 1) * 1440 + d.min, ids = d.some;
+      apptBook(ids, at, 30, apptKind(d.where, ids[0])); apptSay = 'Booked with ' + apptNames(ids) + ', ' + devWhen(at) + '.'; apptDraft = null;
     }
     else if (verb === 'later' && apptDraft && apptDraft.later) { apptDraft.min = apptDraft.later % 1440; apptDraft.day = Math.floor(apptDraft.later / 1440) + 1; delete apptDraft.later; DEVICE_APPS.get('appointments').act('ask'); }
     else if (verb === 'accept' || verb === 'decline') { const a = D.appts.find(x => x.id === arg); if (a) a.status = verb === 'accept' ? 'yes' : 'no'; }
-    else if (verb === 'drop') { const a = D.appts.find(x => x.id === arg); if (a && a.status === 'yes') a.status = 'no'; }
+    else if (verb === 'drop') { const a = D.appts.find(x => x.id === arg); if (a) for (const o of D.appts) if ((o === a || a.grp && o.grp === a.grp) && o.status === 'yes') o.status = 'no'; }
   },
   view: () => {
     const D = SHIP.device, now = shipNow(), B = [], d = apptDraft;
     if (d) {
       if (apptSay) B.push({ kind: 'text', text: apptSay, mark: 'hot' });
-      if (d.later) B.push({ kind: 'buttons', items: [{ label: 'OK, ' + devWhen(d.later), action: { app: 'appointments', do: 'later' } }, { label: 'Never mind', action: { app: 'appointments', do: 'cancel' } }] });
+      if (d.later || d.some) B.push({ kind: 'buttons', items: (d.later ? [{ label: 'OK, ' + devWhen(d.later) + (d.with.length > 1 ? ' for all' : ''), action: { app: 'appointments', do: 'later' } }] : [])
+        .concat(d.some ? [{ label: 'Just ' + apptNames(d.some), action: { app: 'appointments', do: 'some' } }] : [], [{ label: 'Never mind', action: { app: 'appointments', do: 'cancel' } }]) });
       B.push({ kind: 'text', text: 'Who', mark: 'head' });
-      if (d.with) B.push({ kind: 'list', rows: [{ text: apptName(d.with), sub: (apptPerson(d.with) || {}).role || '', mark: 'hot', button: 'Change', action: { app: 'appointments', do: 'who', arg: null } }] });
-      else B.push({ kind: 'list', rows: apptPeople().map(p => ({ text: p.name, sub: p.role || '', action: { app: 'appointments', do: 'who', arg: p.id } })) });
-      if (d.with) {
+      if (d.with.length) B.push({ kind: 'list', rows: d.with.map(id => ({ text: apptName(id), sub: (apptPerson(id) || {}).role || '', mark: 'hot', button: 'Remove', action: { app: 'appointments', do: 'who', arg: id } })) });
+      if (!d.with.length || d.adding) B.push({ kind: 'list', rows: apptPeople().filter(p => !d.with.includes(p.id)).map(p => ({ text: p.name, sub: p.role || '', action: { app: 'appointments', do: 'who', arg: p.id } })) });
+      else if (d.with.length < APPT_MAX) B.push({ kind: 'buttons', items: [{ label: 'Add someone', action: { app: 'appointments', do: 'adding' } }] });
+      if (d.with.length) {
         B.push({ kind: 'text', text: 'When', mark: 'head' },
-          { kind: 'buttons', items: [0, 1, 2].map(k => ({ label: k ? k === 1 ? 'Tomorrow' : WEEKDAYS[weekday(SHIP.time.day + 2)].slice(0, 3) : 'Today', on: d.day === SHIP.time.day + k, action: { app: 'appointments', do: 'day', arg: SHIP.time.day + k } })) },
+          { kind: 'buttons', items: [0, 1, 2].map(k => ({ label: k ? k === 1 ? 'Tomorrow' : WEEKDAYS[weekday(SHIP.time.day + 2)].slice(0, 3) : 'Today', on: d.day === SHIP.time.day + k, action: { app: 'appointments', do: 'day', arg: SHIP.time.day + k } }))
+            .concat(d.day > SHIP.time.day + 2 ? [{ label: WEEKDAYS[weekday(d.day)].slice(0, 3) + ' ' + d.day, on: true, action: { app: 'appointments', do: 'day', arg: d.day } }] : []) },
           { kind: 'text', text: hhmm(d.min), mark: 'big' },
           { kind: 'buttons', items: [[-60, '−1h'], [-15, '−15'], [15, '+15'], [60, '+1h']].map(([v, l]) => ({ label: l, action: { app: 'appointments', do: 'time', arg: v } })) },
           { kind: 'text', text: 'Where', mark: 'head' },
-          { kind: 'list', rows: apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } })) });
-        if (d.where) B.push({ kind: 'buttons', items: [{ label: 'Ask ' + apptName(d.with).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
+          { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
+          { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
+            .concat(apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
+        if (d.where) B.push({ kind: 'buttons', items: [{ label: d.with.length > 1 ? 'Ask all ' + d.with.length : 'Ask ' + apptName(d.with[0]).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
       }
       B.push({ kind: 'buttons', items: [{ label: 'Cancel', action: { app: 'appointments', do: 'cancel' } }] });
       return { title: 'New appointment', blocks: B };
@@ -8489,9 +8577,9 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
     B.push({ kind: 'text', text: 'Coming up', mark: 'head' });
     if (!up.length) B.push({ kind: 'text', text: 'Nothing booked.' });
-    for (const a of up) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + a.with.map(apptName).join(', '), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
-    const past = D.appts.filter(a => a.status === 'kept' || a.status === 'missed').slice(-4).reverse();
-    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(a => ({ text: a.with.map(apptName).join(', ') + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
+    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
+    const past = apptGroups(D.appts.filter(a => a.status === 'kept' || a.status === 'missed')).slice(-4).reverse();
+    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: names + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
     return { title: 'Appointments', blocks: B };
   } });
 

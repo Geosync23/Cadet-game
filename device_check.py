@@ -8,6 +8,8 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   Calendar days and group meetings (0.35.10): See the day, Make an appointment that day, pick the place on Maps,
+#   two or more people (a seat each, kept and cancelled together)
 #   people on Maps (0.35.9): who you may find (crewContacts), dots, { app: 'maps', who }, Go there
 #   Ship news (0.35.8): section 20's shipNews feed in the Ship app
 #   Appointments (0.35.6): ask someone for tomorrow at a meeting place; an answer, booked or offered; saved
@@ -169,6 +171,40 @@ def run(path):
               apptDraft = null; apptSay = null; SHIP.device.appts = []; deviceShow('home'); return out; })()""")
             print('  appointments:', at)
             check(at[0] >= 5 and at[1] == 'string' and at[2] == 1 and at[3] is True, f'appointments: places, an answer, booked or offered, saved: {at}')
+            # group meetings (0.35.10): two people, a seat each, one grp; one row in Coming up; cancelling drops both;
+            # meeting one of them keeps them all
+            gm = g.ev("""(() => { const D = SHIP.device; D.appts = []; deviceShow('appointments'); deviceDo({ app: 'appointments', do: 'new' });
+              const ps = apptPeople().slice(0, 2), pl = apptPlaces().find(x => /mess|lounge/i.test(x.name)) || apptPlaces()[0];
+              for (const p of ps) deviceDo({ app: 'appointments', do: 'who', arg: p.id });
+              deviceDo({ app: 'appointments', do: 'day', arg: SHIP.time.day + 1 }); deviceDo({ app: 'appointments', do: 'where', arg: pl.id });
+              const out = [apptDraft.with.length, [...document.querySelectorAll('#devBody .btns .act')].some(b => b.textContent === 'Ask all 2')];
+              deviceDo({ app: 'appointments', do: 'ask' });
+              out.push(typeof apptSay === 'string' && (apptDraft === null ? D.appts.length === 2 : !!(apptDraft.later || apptDraft.some || /another time/.test(apptSay))));
+              D.appts = []; apptDraft = { with: ps.map(p => p.id), day: SHIP.time.day + 1, min: 1140, where: pl.id }; const at = SHIP.time.day * 1440 + 1140;
+              apptBook(apptDraft.with, at, 30, 'social'); apptDraft = null; apptSay = null; deviceShow('appointments');
+              const A = D.appts; out.push(A.length, A[0].grp === A[1].grp && !!A[0].grp, A[0].where !== A[1].where);
+              const sv = JSON.parse(JSON.stringify({ device: D })); out.push(deviceLoad(sv).appts.every(a => a.grp === A[0].grp));
+              const t = document.getElementById('devBody').textContent; out.push(t.includes(apptName(ps[0].id) + ', ' + apptName(ps[1].id)));
+              const save = { day: SHIP.time.day, min: SHIP.time.min }; SHIP.time.day = Math.floor(at / 1440) + 1; SHIP.time.min = at % 1440 + 3;
+              A[0].status = 'kept'; devTickMin = -1; deviceTick(); out.push(A[1].status);
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear();
+              A[0].status = A[1].status = 'yes'; deviceDo({ app: 'appointments', do: 'drop', arg: A[0].id }); out.push(A.map(a => a.status).join());
+              D.appts = []; deviceShow('home'); return out; })()""")
+            print('  group meeting:', gm)
+            check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
+            # the Calendar's days (0.35.10): tap a day, See the day (Schedule shows it), Make an appointment (that day);
+            # Pick on the map, then Meet here sets the place
+            cd = g.ev("""(() => { const d = SHIP.time.day + 4, out = []; deviceShow('calendar'); deviceDo({ app: 'calendar', do: 'day', arg: d });
+              const bs = [...document.querySelectorAll('#devBody .btns .act')].map(b => b.textContent); out.push(bs.includes('See the day') && bs.includes('Make an appointment'));
+              deviceDo({ app: 'schedule', day: d }); out.push(DEV.app, document.getElementById('devBody').textContent.includes(WEEKDAYS[weekday(d)] + ', Day ' + d));
+              deviceDo({ app: 'appointments', day: d }); out.push(DEV.app, apptDraft && apptDraft.day === d, apptDraft && apptDraft.min);
+              deviceDo({ app: 'appointments', do: 'map' }); out.push(DEV.app, mapFor);
+              const k = Object.keys(DECKS[3].rooms).find(x => /mess/i.test(DECKS[3].rooms[x].name || '')); deviceDo({ app: 'maps', do: 'deck', arg: 3 }); deviceDo({ app: 'maps', do: 'pick', arg: k });
+              const meet = [...document.querySelectorAll('#devBody .btns .act')].find(b => b.textContent === 'Meet here'); meet && meet.click();
+              out.push(DEV.app, !!(apptDraft && apptDraft.where && apptDeckOf(apptDraft.where) === 3), mapFor);
+              apptDraft = null; calDay = null; schedDay = null; deviceShow('home'); return out; })()""")
+            print('  calendar days:', cd)
+            check(cd == [True, 'schedule', True, 'appointments', True, 1080, 'maps', 'appointments', 'appointments', True, None], f'Calendar days: see the day, an appointment that day, a place from Maps: {cd}')
             # the meeting panel and the Captain's address: they draw, and taps report back
             dl = g.ev("""(() => { const got = []; deviceDialogue({ title: 'Briefing', name: 'Chief Ines Calder', who: 'calder', text: 'Gather round.', choices: null, i: 0, n: 2 }, k => got.push(k === undefined ? 'next' : k));
               const p = document.getElementById('devDlg'); const out = [!p.hidden, p.textContent.includes('Gather round.')]; p.querySelector('.next').click();
