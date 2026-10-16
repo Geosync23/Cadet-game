@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.24
+   STARSHIP CADET: CSV Wren                            build 0.33.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.24';                            // keep in step with the header's build line
+const GAME_BUILD = '0.33.25';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9803,7 +9803,9 @@ function jobRun(p, j, t, makeMin) {
     // the crew stand at a stop's place only if it's a machine's panel or a storage spot nobody else's job is using;
     // anywhere else (someone's desk, a seat, a lobby) they work where they are, so they never take a person's place
     const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : null; };
+    const s0 = segs.length;
     for (const st of j.stops) { go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }
+    if (j.chore === 'trays') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -10147,6 +10149,24 @@ function postEventJob(spec, o = {}) {
   SHIP.jobs.push(j); MACH_REV++;
   if (o.forYou) claimJob(j.id);
   return j.id;
+}
+
+// trays by cart (Pillar 3, C7, with the galley engineer's 0.29.18): an event asks for trays, the galley plates them
+// and calls cartTrays({ trays, at, to: 'bridge' }) (live, once a day): a job to push them from the servery (Deck 3) to
+// `to` (a word in a room's name, 'bridge' by default). Left for you first (30 minutes of the day shift: they're hot),
+// then a crew member. Nothing lands anywhere: the galley has taken the portions already. -> the job's id, or null
+function cartTrays(o = {}) {
+  machinesNow();
+  const at = Number.isFinite(o.at) ? o.at : shipNow(), key = 'trays:' + (o.to || 'bridge') + '@' + Math.floor(at / 1440);
+  if (SHIP.jobs.some(j => j.id === key)) return key;
+  const from = placesOf(['grab-shelf', 'servery-queue'], [3])[0], to = eventStop({ where: o.to || 'bridge', deck: o.to ? undefined : 1 });
+  if (!from || !to) return null;
+  const n = Math.max(1, Math.round(o.trays || 1));
+  SHIP.jobs.push({ id: key, machine: null, deck: to.deck, room: to.room, kind: 'chore', chore: 'trays', target: o.to || 'bridge', event: o.event || null,
+                   title: 'Take ' + n + ' tray' + (n > 1 ? 's' : '') + ' up to the ' + (roomName(to.deck, to.room) || o.to || 'bridge'), bring: 'a cart of ' + n + ' hot trays',
+                   tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: to.deck, placeId: to.placeId, mins: 10, tag: 'drop', at: to.at || null }],
+                   urgency: 1, leave: 30, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
+  MACH_REV++; return key;
 }
 
 // ---- favours (Pillar 3, C7, for the social engineer): personal jobs, accepted and handed back in person ----

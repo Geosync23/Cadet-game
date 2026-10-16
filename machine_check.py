@@ -453,15 +453,20 @@ with sync_playwright() as pw:
       const s0 = jobStepDone(f, 0), tin = favourTurnIn(f), done = favourById(f).status === 'done' && favourById(f).doneBy === 'you';
       const g2 = favourPost({ from: schedPeople()[1].id, title: 'Find my datapad', where: 'gym' });
       setShipNow(shipNow() + 3000); machinesNow(); const lapsed = favourById(g2).status === 'done' && favourById(g2).lapsed;
+      // trays by cart (0.33.25): posted once a day, left for you half an hour, then the crew push a cart of trays to the bridge
+      const tid = cartTrays({ trays: 6, at: shipNow(), to: 'bridge' }), tid2 = cartTrays({ trays: 6, at: shipNow(), to: 'bridge' }), tj = SHIP.jobs.find(j => j.id === tid);
+      const trayOk = !!tj && tid === tid2 && tj.stops[1].deck === 1 && openJobs().some(x => x.id === tid);
+      let trayCrew = null; for (let n = 0; n < 30 && !(tj.claimedBy); n++) { setShipNow(shipNow() + 60); machinesNow(); }
+      trayCrew = !!tj.claimedBy && tj.claimedBy !== 'you' && (tj.segs || []).some(sg => sg.hold === 'cartfull');
       // put it all back
       window.__sc("eventNow = window.__keepEv[0]; eventMod = window.__keepEv[1]");
       if (Array.isArray(SHIP_EVENTS)) SHIP_EVENTS.splice(SHIP_EVENTS.indexOf(def), 1); else delete SHIP_EVENTS.mcStorm;
-      SHIP.jobs = SHIP.jobs.filter(j => j.event !== 'mcStorm' && j.kind !== 'favour'); setShipNow(t0); JOBS_ON = true;
-      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed };
+      SHIP.jobs = SHIP.jobs.filter(j => j.event !== 'mcStorm' && j.kind !== 'favour' && j.chore !== 'trays'); setShipNow(t0); JOBS_ON = true;
+      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed, trayOk, trayCrew };
     })()""")
     print(f"Event hooks and favours: {evr}")
     if not (evr['fasterPower'] and evr['othersSame'] and evr['once'] and evr['tagged'] and evr['after'] == 3 and evr['offBoard'] and evr['crewLeft'] and evr['acc']
-            and evr['steps'].endswith('return') and not evr['backEarly'] and evr['s0'] and evr['tin'] and evr['done'] and evr['lapsed']): fail('event hooks and favours')
+            and evr['steps'].endswith('return') and not evr['backEarly'] and evr['s0'] and evr['tin'] and evr['done'] and evr['lapsed'] and evr['trayOk'] and evr['trayCrew']): fail('event hooks and favours')
 
     # 5f. food runs in live play (0.33.21): the galley stepping live and the job list together for six days, nobody
     # pushing carts for you: every food run is taken by the crew (or goes unseen) within 2 hours of its hour's wait,
