@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.38.2
+   STARSHIP CADET: CSV Wren                            build 0.38.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6619,7 +6619,10 @@ DECKS[1].places.push(
   { id: '1-ready-visit-3', type: 'event', visit: 'ready-room', at: [12, 3], xy: [12.4, 3.2], face: 'n', pose: 'sit', y: .5, room: 'R' },
   { id: '1-ready-visit-4', type: 'event', visit: 'ready-room', at: [10, 2], xy: [10.5, 1.9], face: 'n', pose: 'stand', room: 'R' },      // looking into the Admiral's tank
 );
-DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R', door: 'h,11,4', host: '1-ready-1', places: ['1-ready-visit-1', '1-ready-visit-2', '1-ready-visit-3', '1-ready-visit-4'] } };
+DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R', door: 'h,11,4', host: '1-ready-1', places: ['1-ready-visit-1', '1-ready-visit-2', '1-ready-visit-3', '1-ready-visit-4'] },
+  // the conference table (Part 4): a briefing at the observation room's table, whoever presents standing by the wall screen,
+  // you at the far end. The room has open glass doors, so there's nothing to unlock (door: null)
+  conference: { name: 'the conference table', room: 'O', door: null, host: '1-observation-lead-1', places: ['1-conf-10', '1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8', '1-conf-9'] } };
 DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
@@ -6817,7 +6820,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.38.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
