@@ -10977,6 +10977,7 @@ const MACHINE_KINDS = {
   uv:          { name: 'UV steriliser',     sys: 'water',      life: 20, time: .5, use: 'water',  scope: 'ship', w: 1, tier: 2, part: 'uv lamp' },
   irrigation:  { name: 'Irrigation pumps',  sys: 'water',      life: 18, time: .8, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'pump' },
   nutrient:    { name: 'Nutrient dosing',   sys: 'food',       life: 16, time: .6, use: 'garden', scope: 'ship', w: 1, tier: 2, part: 'nutrient pack' },
+  growlight:   { name: 'Grow lights',       sys: 'food',       life: 14, time: .9, use: 'garden', scope: 'ship', w: 1, tier: 1, part: 'lamp' },   // the garden's grow racks (0.33.34)
   airplant:    { name: 'Air plant',         sys: 'air',        life: 20, time: 1,                 scope: 'ship', w: 3, tier: 2, part: 'filter' },
   fan:         { name: 'Main fan',          sys: 'air',        life: 24, time: 1,                 scope: 'ship', w: 2, tier: 2, part: 'bearing' },
   manifold:    { name: 'Manifold',          sys: 'heat',       life: 24, time: 1,                 scope: 'ship', w: 2, tier: 2, part: 'valve' },
@@ -11004,7 +11005,7 @@ const STUB_MACHINES = {
   2: [['2-lights-1', 'lights', 'u'], ['2-gasplant-1', 'gasplant', 'g'], ['2-array-1', 'array', 'A']],
   3: [['3-oven-1', 'oven', 'K'], ['3-oven-2', 'oven', 'K'], ['3-range-1', 'range', 'K'], ['3-extractor-1', 'extractor', 'g'], ['3-chiller-1', 'chiller', 'g'],
       ['3-recycler-1', 'recycler', 'R'], ['3-filter-1', 'filter', 'R'], ['3-pump-1', 'pump', 'R'], ['3-uv-1', 'uv', 'R'], ['3-lights-1', 'lights', 'R'],
-      ['3-irrigation-1', 'irrigation', 'i'], ['3-nutrient-1', 'nutrient', 'i']],
+      ['3-irrigation-1', 'irrigation', 'i'], ['3-nutrient-1', 'nutrient', 'i'], ['3-growlight-1', 'growlight', 'G'], ['3-growlight-2', 'growlight', 'G']],
   4: [['4-scrubber-1', 'scrubber', 's'], ['4-scrubber-2', 'scrubber', 's'], ['4-heater-1', 'heater', 't'], ['4-lights-1', 'lights', 'k'],
       ['4-washer-1', 'washer', 'l'], ['4-washer-2', 'washer', 'l'], ['4-washer-3', 'washer', 'l'], ['4-washer-4', 'washer', 'l']],
   5: [['5-lift-1', 'lift', null], ['5-airplant-1', 'airplant', 'a'], ['5-airplant-2', 'airplant', 'a'], ['5-fan-1', 'fan', 'F'],
@@ -11224,6 +11225,7 @@ const MACHINE_FX = {
   uv:          { mood: 2, text: 'The water tastes of chlorine' },
   irrigation:  { mood: 2, text: 'The garden droops' },
   nutrient:    { mood: 2, text: 'The garden wilts' },
+  growlight:   { mood: 1, text: 'The garden lights are dim' },
   relay:       { mood: 1, text: 'Bridge stations flicker', local: true },
   databus:     { mood: 1, text: 'Bridge stations flicker', local: true },
 };
@@ -11334,7 +11336,7 @@ function deckLook(deck) {
     const L = machineLook(m.id); if (!L) continue;
     if (L.flicker && m.deck === deck) flicker = Math.max(flicker, L.flicker);
     if (L.drip && m.deck === deck) drip = true;
-    if ((m.kind === 'irrigation' || m.kind === 'nutrient') && m.deck === deck) wilt = Math.max(wilt, MACHINE_SEV[machinesNow()[m.id].state]);
+    if ((m.kind === 'irrigation' || m.kind === 'nutrient' || m.kind === 'growlight') && m.deck === deck) wilt = Math.max(wilt, MACHINE_SEV[machinesNow()[m.id].state]);
   }
   const look = { dim: Math.round((1 - fx.walk) * 300) / 100, flicker, spray: Math.round(fx.restore.hygiene * 100) / 100, wilt, drip, dark };
   look.dim = Math.min(1, look.dim);
@@ -11365,7 +11367,7 @@ const GRUMBLE = { recycler: 'the showers', pump: 'the showers', filter: 'the clo
   scrubber: 'the stuffy air', airplant: 'the stale air', fan: 'the stale air', o2cell: 'the thin air', electrolyser: 'the thin air',
   heater: 'the cold cabins', heatpump: 'the cold', washer: 'the laundry', oven: 'late meals', range: 'late meals', galleyplant: 'the galley',
   extractor: 'the galley', chiller: 'the food', lights: 'the lights', junction: 'the brownouts', powerjunction: 'the brownouts', lift: 'the slow lift',
-  irrigation: 'the garden', nutrient: 'the garden', relay: 'the bridge stations', databus: 'the bridge stations', valve: 'the dripping pipes' };
+  irrigation: 'the garden', nutrient: 'the garden', growlight: 'the garden', relay: 'the bridge stations', databus: 'the bridge stations', valve: 'the dripping pipes' };
 const STAGE_RANK = { minor: 1, noticeable: 2, serious: 3 };
 function shipMoodAt(deck, t) {
   const fx = shipEffectsAt(deck, t);
@@ -11382,6 +11384,19 @@ function chillerAt(t) {
   const ms = machineList().filter(m => m.kind === 'chiller'); if (!ms.length) return { cond: 100, state: 'healthy', spoil: 0 };
   const c = MACH_HIST.get(histHour(t)), cond = Math.min(...ms.map(m => c ? c[m.id] ?? 100 : 100)), w = machWorks(cond);
   return { cond: Math.round(cond * 10) / 10, state: machineState(cond), spoil: w >= 85 ? 0 : Math.round(CHILL_SPOIL * (85 - w) / 85 * 10000) / 10000 };
+}
+
+// the garden's growing conditions (0.33.34, for the galley engineer's working garden): gardenAt(t) -> { water, feed,
+// light }, each 0-1 (1: all good). water: the irrigation pumps, held back by the rest of the water system once it's
+// below 75 ("water feeds the garden"); feed: the nutrient dosing; light: the grow racks' lights, held back by power
+// the same way. Each by how well its worst machine works (machWorks: 1 healthy, .85 at the worst of worn, .5 faulty, .2 failing, 0 broken).
+// Pure: it reads the hour-by-hour record (all good with none yet), so it's safe in the galley's replays
+function gardenAt(t) {
+  const c = MACH_HIST.get(histHour(t)) || {}, ms = machineList();
+  const works = kind => { const xs = ms.filter(m => m.kind === kind); return xs.length ? Math.min(...xs.map(m => machWorks(c[m.id] ?? 100))) / 100 : 1; };
+  const feeds = (sys, own) => { const c2 = { ...c }; for (const m of ms) if (m.kind === own) c2[m.id] = 100; return Math.min(1, systemOwn(sys, c2) / 75); };
+  const r = x => Math.round(x * 1000) / 1000;
+  return { water: r(works('irrigation') * feeds('water', 'irrigation')), feed: r(works('nutrient')), light: r(works('growlight') * feeds('power', 'growlight')) };
 }
 
 // ---- tapping a machine (answer 5, 0.33.18): machineUse(id, who) -> { text, ran, until } ----
@@ -11594,7 +11609,7 @@ function jobRun(p, j, t, makeMin) {
     const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : null; };
     const s0 = segs.length;
     for (const st of j.stops) { go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }
-    if (j.chore === 'trays') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
+    if (j.chore === 'trays' || j.chore === 'garden') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -11614,6 +11629,7 @@ function jobFinish(j, t, by) {
 }
 // what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
 function jobEffect(j, t, by) {
+  if (j.chore === 'garden' && by === 'you' && j.dropAt === undefined && typeof galleyCarryLand === 'function') galleyCarryLand(j.id);   // finished without ticking off the drop: they land now
   if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
   if (j.machine) {
     const s = SHIP.machines[j.machine];
@@ -11658,7 +11674,7 @@ function jobsHour(h) {
   choresHour(h, jobs);
   eventJobsHour(h, jobs);
   // a food run nobody took goes unseen (its meals landed long ago, in the galley's books): before the claims
-  for (const j of jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
+  for (const j of jobs) if ((j.cargo === 'meals' || j.chore === 'garden') && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
@@ -11882,7 +11898,10 @@ function jobStepDone(id, k) {
   const n = j ? jobStops(j).length : 0;
   if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
   j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
-  if (jobStops(j)[k].step === 'drop' && j.dropAt === undefined) j.dropAt = shipNow();   // a delivery's arrival (traysArrivedAt)
+  if (jobStops(j)[k].step === 'drop' && j.dropAt === undefined) {
+    j.dropAt = shipNow();                                // a delivery's arrival (traysArrivedAt, carryArrivedAt)
+    if (j.chore === 'garden' && typeof galleyCarryLand === 'function') galleyCarryLand(j.id);   // the crates land in the cold store now (section 16)
+  }
   const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; return { ok: true, left, done: !!j.workDone };
@@ -12020,6 +12039,47 @@ function cartTrays(o = {}) {
                    tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: to.deck, placeId: to.placeId, mins: 10, tag: 'drop', at: to.at || null }],
                    urgency: 1, leave: 30, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
   MACH_REV++; return key;
+}
+
+// garden crates (0.33.34, for the galley engineer's working garden): the galley harvests and calls gardenCarry({ at,
+// crates, title? }) (live): a job to carry the crates by hover cart from the garden to the cold store (3-cold-1/2).
+// Left for you first (60 minutes of the day shift; none on your days off), then a crew member; one nobody takes in
+// CART_GONE minutes counts as carried. -> the job's id ('garden@<minute>'), or null. carryWaiting(id, t) says whether
+// the crates are still on their way (the galley holds them till then); carryArrivedAt(id) when they got there. When
+// you tick off the drop at the cold store, the galley's galleyCarryLand(id) lands them at once (jobStepDone)
+const GARDEN_PICKUP = ['3-crates-1'];                    // the architect's pickup place, when it's in; else the garden spot nearest the glass doors
+function gardenPickup() {
+  const ps = DECKS[3] && DECKS[3].places || [], own = ps.find(p => GARDEN_PICKUP.includes(p.id));
+  if (own) return own;
+  const g = ps.filter(p => p.type === 'garden' && !p.machine && p.pose !== 'sit'), d = p => (p.at[0] - 11) ** 2 + (p.at[1] - 10) ** 2;
+  return g.sort((a, b) => d(a) - d(b) || (a.id < b.id ? -1 : 1))[0] || null;
+}
+function gardenCarry(o = {}) {
+  machinesNow();
+  const at = Math.floor(Number.isFinite(o.at) ? o.at : shipNow()), key = 'garden@' + at;
+  if (SHIP.jobs.some(j => j.id === key)) return key;
+  const from = gardenPickup(), to = placeById(COLD_AT[0]) ? COLD_AT[0] : null;
+  if (!from || !to) return null;
+  const n = Math.max(1, Math.round(o.crates || 1));
+  SHIP.jobs.push({ id: key, machine: null, deck: 3, room: placeById(to).room, kind: 'chore', chore: 'garden', target: 'cold', crates: n,
+                   title: o.title || 'Carry ' + n + ' crate' + (n > 1 ? 's' : '') + ' from the garden to the cold store', bring: 'a hover cart for ' + n + ' crate' + (n > 1 ? 's' : ''),
+                   tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: 3, placeId: to, mins: 8, tag: 'drop' }],
+                   urgency: 0, leave: 60, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
+  MACH_REV++; return key;
+}
+// when a garden run's crates reached the cold store: a crew run, the end of its drop-off; yours, when you ticked it
+// off; one nobody took, when it was given up. null while on the way. Reads the job list only
+function carryArrivedAt(id) {
+  const j = SHIP.jobs.find(x => x.id === id && x.chore === 'garden');
+  if (!j) return null;
+  if (j.claimedBy && j.claimedBy !== 'you') { const d = (j.segs || []).filter(sg => sg.tag === 'drop').pop(); return d ? d.to : j.doneAt ?? null; }
+  if (j.claimedBy === 'you') return j.dropAt ?? j.workDone ?? (j.status === 'done' ? j.doneAt : null);
+  return j.status === 'done' ? j.doneAt : null;
+}
+// carryWaiting(id, t = now) -> true while the crates aren't at the cold store yet (an unknown id: false)
+function carryWaiting(id, t = shipNow()) {
+  if (!SHIP.jobs.some(x => x.id === id && x.chore === 'garden')) return false;
+  const a = carryArrivedAt(id); return a === null || a > t;
 }
 
 // when the day's trays reached `to` (0.33.28, for the galley's bridgeHungry score): the ship minute they arrived, or
