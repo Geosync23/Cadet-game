@@ -254,6 +254,19 @@ with sync_playwright() as pw:
     if evg['storm']['missed'] or evg['storm']['maxWait'] > BUSY_WAIT_MAX: fail(f"storm: waits {evg['storm']}")
     if evg['dinner']['batch'] != 12 or 'Envoy' not in evg['batchText']: fail(f"formal dinner: {evg['dinner']} {evg['batchText']}")
 
+    # 4i. the storm's galley threads (0.29.21), with section 18: a real event started on day DAY + 20, its galley read
+    # through GALLEY_TEST (trays on that day, a broken chiller): spoiled meals and hours the bridge waits for trays are scored
+    if g.ev("typeof eventStart === 'function' && typeof eventScore === 'function' && typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.ionStorm"):
+        th = g.ev(f"""(() => {{ const d = {DAY} + 20, keep = SHIP.event; eventStart('ionStorm', d - 2);
+          GALLEY_TEST.eventMod = (kind, key, t) => kind === 'galley' && key === 'trays' && Math.floor(t / 1440) + 1 === d ? 6 : null;
+          window.__keepCh2 = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
+          SHIP.galley = null; setShipNow((d - 1) * 1440 + 22 * 60); galleyAdvance(shipNow()); const once = JSON.stringify(SHIP.event.threads);
+          SHIP.galley = null; galleyAdvance(shipNow()); const out = {{ threads: SHIP.event.threads, again: JSON.stringify(SHIP.event.threads) === once }};
+          window.__sc("chillerAt = window.__keepCh2"); GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; return out; }})()""")
+        print('Storm threads scored by the galley on one day (spoiled meals, hours the bridge waited for trays; the same again after a fresh start):', th)
+        if not th['threads'].get('spoiled') or th['threads'].get('bridgeHungry') != 6 or not th['again']: fail(f"storm threads: {th}")
+    else: print('Storm threads: no section 18 with the ion storm in this build; skipped')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();

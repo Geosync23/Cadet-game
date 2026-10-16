@@ -9753,11 +9753,16 @@ function galleyStep(S, m, st) {
     const n = Math.min(S.cold.meals, Math.floor(S.rot));
     S.rot -= Math.floor(S.rot); S.cold.meals -= n; S.bin = (S.bin || 0) + n;
     if (st) st.spoiled += n;
-    else if (n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
+    else if (n && typeof eventNow === 'function' && eventNow(m)) galleyScore(m, 'spoiled', n);   // an event's "Nothing spoiled" thread
+    if (!st && n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
   }
   if (md === FOOD.binOut) S.bin = 0;
   // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
+  // an event's "A fed bridge" thread: on a day it wants trays for the bridge, each hour from noon until they go up at
+  // 18:00: 6 hours a day, the thread's "good" (a day's trays that never go, from an empty servery, still count 6)
+  // (live only: replays never score)
+  if (!st && md % 60 === 0 && md >= 720 && md < FOOD.trayAt && S.ev && S.ev.trays && !(S.trays && S.trays.d === d)) galleyScore(m, 'bridgeHungry', 1);
   if (md === 900 && S.ev && S.ev.batch) {
     const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
     if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
@@ -9869,6 +9874,13 @@ function galleyCartLand(h) {
   let n = 0; const keep = [];
   for (const c of S.carts) if (c[2] === h) { const k = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += k; n += k; } else keep.push(c);
   S.carts = keep; return n;
+}
+// an event's thread (section 18's eventScore), once for each minute and thread: the live galley can step the same
+// minutes again after a fresh start
+const GALLEY_SCORED = new Set();
+function galleyScore(m, thread, n) {
+  const k = m + '|' + thread; if (typeof eventScore !== 'function' || GALLEY_SCORED.has(k)) return;
+  GALLEY_SCORED.add(k); eventScore(thread, n);
 }
 // a note to the device's Mail tab (section 15's mailSend, when it's there), once: never twice for the same minute and subject
 const GALLEY_MAILED = new Set();
