@@ -10,7 +10,7 @@
 # and plans/crew-roster.html.
 # The same seed always gives the same crew, so re-running without edits changes nothing.
 #
-# Story crew and provisional names are written out by hand below; only the other crew are generated.
+# Story crew and the senior names (approved by the user) are written out by hand below; only the other crew are generated.
 
 import json, random, hashlib, html, os
 
@@ -59,7 +59,7 @@ WORK_WORDS = {
     'work:store': 'the crew store',
 }
 
-# ---------------------------------------------------------------- story crew and provisional names (by hand)
+# ---------------------------------------------------------------- story crew and senior names (by hand)
 # looks and bios of the existing crew are copied exactly from CREW in section 9
 STORY = [
     dict(id='marrow', name='Captain Odile Marrow', story=True, rank='captain', dept='command', role='Captain', shift='day', bed='2-C', job='command',
@@ -82,7 +82,7 @@ STORY = [
          bio='Head of Watch. Does not trust the Veyli, and says so.',
          habits=['early-riser', 'late-diner'], traits=['suspicious', 'dependable', 'gruff'],
          life=['Asked for the cabin next door to the Envoy\'s.', 'Only his deputy can make him laugh.']),
-    dict(id='calder', name='Chief Ines Calder', story=True, provisional=True, rank='chief', dept='works', role='Head of Works', shift='day', bed='2-O', job='works',
+    dict(id='calder', name='Chief Ines Calder', story=True, rank='chief', dept='works', role='Head of Works', shift='day', bed='2-O', job='works',
          looks=dict(skin=3, hair='short', hairColor='grey', height=1.02, build='average', acc=['glasses']),
          bio='Head of Works. Remembers every repair you got wrong, and every one you got right.',
          habits=['early-riser', 'workaholic', 'tea-break'], traits=['exacting', 'fair', 'dry'],
@@ -107,38 +107,38 @@ STORY = [
          bio='New to Watch, and your bunkmate. Still learning where everything is.',
          habits=['common-room', 'window-seat'], traits=['earnest', 'curious', 'a little lost'],
          life=['Taped a star map to the underside of the top bunk.', 'Joined the Wren a week before you did.']),
-    # provisional: the Infirmary Chief and the six senior officers (placeholders by role until now)
-    dict(id='nandakumar', name='Dr. Priya Nandakumar', provisional=True, rank='chief', dept='infirmary', role='Head of Infirmary', shift='day', bed='2-I', job='infirmary',
+    # the Infirmary Chief and the six senior officers (names approved by the user, 2026-10-16)
+    dict(id='nandakumar', name='Dr. Priya Nandakumar', rank='chief', dept='infirmary', role='Head of Infirmary', shift='day', bed='2-I', job='infirmary',
          looks=dict(skin=4, hair='long', hairColor='black', height=.97, build='slim', acc=['glasses', 'earrings']),
          bio='Head of Infirmary. Says "drink some water" in a way that ends the argument.',
          habits=['early-riser', 'garden-lover'], traits=['calm', 'brisk', 'kind'],
          life=['Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3.', 'Grows chillies in a corner of the garden.']),
-    dict(id='kowalczyk', name='Anja Kowalczyk', provisional=True, rank='senior', dept='command', role='Second Officer', shift='night', bed='2-S', job='command',
+    dict(id='kowalczyk', name='Anja Kowalczyk', rank='senior', dept='command', role='Second Officer', shift='night', bed='2-S', job='command',
          looks=dict(skin=0, hair='ponytail', hairColor='brown', height=1.04, build='average', acc=[]),
          bio='Second Officer. Runs the bridge at night, when the ship is hers.',
          habits=['night-owl', 'quiet-corner'], traits=['steady', 'private', 'wry'],
          life=['Third in command, and first to be woken.', 'Reads old paper novels on the bridge during quiet nights.']),
-    dict(id='raman', name='Dev Raman', provisional=True, rank='senior', dept='helm', role='Senior Helm Officer', shift='day', bed='2-H', job='helm',
+    dict(id='raman', name='Dev Raman', rank='senior', dept='helm', role='Senior Helm Officer', shift='day', bed='2-H', job='helm',
          looks=dict(skin=3, hair='short', hairColor='black', height=1.06, build='slim', acc=['moustache']),
          bio='Senior Helm Officer. Flies the Wren like it might spill.',
          habits=['early-riser', 'window-seat'], traits=['careful', 'proud', 'gentle'],
          life=['Keeps a model of the Wren on the shelf by his door.', 'Has flown survey ships for twenty years.']),
-    dict(id='ferreira', name='Lucia Ferreira', provisional=True, rank='senior', dept='comms', role='Comms Chief', shift='day', bed='2-R', job='comms',
+    dict(id='ferreira', name='Lucia Ferreira', rank='senior', dept='comms', role='Comms Chief', shift='day', bed='2-R', job='comms',
          looks=dict(skin=2, hair='curls', hairColor='dark', height=.98, build='average', acc=['earrings']),
          bio='Comms Chief. Every message home passes through her hands, and she never reads them.',
          habits=['lounge-regular', 'calls-home'], traits=['sociable', 'discreet', 'quick'],
          life=['Hangs a headset on her door handle, just in case.', 'Speaks four languages and some Veyli.']),
-    dict(id='oduya', name='Matthias Oduya', provisional=True, rank='senior', dept='infirmary', role='Ship\'s Counsellor', shift='day', bed='2-N', job='infirmary',
+    dict(id='oduya', name='Matthias Oduya', rank='senior', dept='infirmary', role='Ship\'s Counsellor', shift='day', bed='2-N', job='infirmary',
          looks=dict(skin=5, hair='short', hairColor='grey', height=1.07, build='broad', acc=['glasses', 'beard']),
          bio='Ship\'s Counsellor. Seventy-five people a long way from home keep him busy.',
          habits=['garden-lover', 'lingers-at-meals'], traits=['warm', 'perceptive', 'unhurried'],
          life=['Keeps office hours on Deck 3 and a bowl of sweets on his desk.', 'Knows everyone\'s birthday.']),
-    dict(id='mensah', name='Kofi Mensah', provisional=True, rank='senior', dept='watch', role='Senior Watch Officer', shift='night', bed='2-G', job='watch',
+    dict(id='mensah', name='Kofi Mensah', rank='senior', dept='watch', role='Senior Watch Officer', shift='night', bed='2-G', job='watch',
          looks=dict(skin=5, hair='buzz', hairColor='black', height=1.1, build='broad', acc=[]),
          bio='Senior Watch Officer. Holt\'s deputy, in charge of the Watch at night.',
          habits=['night-owl', 'gym-regular'], traits=['easy laugh', 'watchful', 'patient'],
          life=['The only one who can make Holt laugh.', 'Walks the whole ship once a night, deck by deck.']),
-    dict(id='mori', name='Hana Mori', provisional=True, rank='senior', dept='survey', role='Deputy Survey Chief', shift='day', bed='2-D', job='survey',
+    dict(id='mori', name='Hana Mori', rank='senior', dept='survey', role='Deputy Survey Chief', shift='day', bed='2-D', job='survey',
          looks=dict(skin=0, hair='bun', hairColor='black', height=.93, build='slim', acc=['glasses']),
          bio='Deputy Survey Chief. Runs the labs while Sato runs everyone.',
          habits=['workaholic', 'quiet-corner'], traits=['organised', 'shy', 'meticulous'],
@@ -150,6 +150,7 @@ PLAYER = dict(id='you', name='You', player=True, rank='junior', dept='works', ro
               rota={'offDays': [5, 6]}, looks=dict(skin=2, hair='short', hairColor='dark', height=1.05, build='average', acc=[]),
               bio='New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.', habits=[], traits=[], life=[])
 
+HAND = {p['id'] for p in STORY}   # written by hand: the habit and birthday streams skip or treat them apart
 GUESTS = [
     dict(id='saruth', name='Envoy Saruth', story=True, rank='guest', dept='guest', role='Veyli Envoy (guest)', shift='day', bed='2-E', job=None,
          looks=dict(skin=2, hair='long', hairColor='white', height=1.09, build='slim', acc=['headband']),
@@ -252,6 +253,10 @@ P2_LIKES = {'runner': ['gym-regular', 'early-riser'], 'shopper': ['calls-home', 
             'gardener': ['garden-lover', 'early-riser'], 'musician': ['music', 'night-owl'], 'stargazer': ['quiet-corner', 'window-seat']}
 P2_DISLIKES = {'bar-regular': ['early-to-bed'], 'stargazer': ['early-to-bed'], 'runner': ['late-sleeper']}
 NEW_R = random.Random(20261016)
+BDAY_R = random.Random(20261017)   # birthdays (0.16.6)
+# the rank line on a door plate (the ranks of design-doc "The crew", as the game's RANK_NAME says them)
+PLATE_RANK = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer',
+              'officer': 'Officer', 'guest': 'Veyli Envoy'}
 # the galley staff: team and days off (0 = Monday)
 GALLEY_TEAMS = {'brennan': ('chef', [4, 5]), 'varga-tariq': ('early', [0, 1]), 'haddad-tamsin': ('early', [2, 3]),
                 'dlamini-lukas': ('early', [1, 2]), 'walsh-esme': ('late', [5, 6]), 'madsen-ivo': ('late', [0, 1])}
@@ -323,7 +328,7 @@ def main():
     # people whose habits go with it and away from departments it already has, so every room gets a mix
     for p in crew:
         if p['id'] in STORY_P2: p['habits'] = p['habits'] + [STORY_P2[p['id']]]
-    gen = [p for p in crew if not p.get('story') and not p.get('provisional')]
+    gen = [p for p in crew if p['id'] not in HAND]
     for h, n in P2_COUNT.items():
         depts = {}
         for _ in range(n):
@@ -355,12 +360,29 @@ def main():
         deck, place = WORK[p['job']] if p['job'] else (None, None)
         e = dict(id=p['id'], name=p['name'])
         if p.get('story'): e['story'] = True
-        if p.get('provisional'): e['provisional'] = True
         if p.get('player'): e['player'] = True
         e.update(rank=p['rank'], dept=p['dept'], uniform=UNIFORM.get(p['dept']), role=p['role'], shift=p['shift'], rota=p['rota'], bed=p['bed'],
                  work=dict(deck=deck, place=place) if deck else None, habits=p['habits'], traits=p['traits'], looks=p['looks'],
                  bio=p['bio'], life=p['life'], seed=seed_of(p['id']))
         out.append(e)
+    # ---- birthdays (0.16.6): a ship day of the year, 1-364 (52 weeks of 7 days; day 1 is the game's Day 1, a Monday).
+    # Everyone gets one, you and the Envoy included: every week has at least one, 24 weeks have two (on different
+    # days), so about one a week. Their own random stream, so nothing above moves
+    weeks = list(range(52)) + BDAY_R.sample(range(52), len(out) - 52)
+    BDAY_R.shuffle(weeks)
+    taken = set()
+    for e, w in zip(out, weeks):
+        d = BDAY_R.randrange(7)
+        while w * 7 + d in taken: d = (d + 1) % 7
+        taken.add(w * 7 + d); e['birthday'] = w * 7 + d + 1
+    # ---- door plates (0.16.6): everyone with a cabin of their own (officers and up, and guests) gets
+    # plate: { rank, name }, the two lines the architects print on the door; titles that are ranks move to the rank line
+    for e in out:
+        if e['rank'] != 'junior':
+            name = e['name']
+            for t in ('Captain ', 'Commander ', 'Chief ', 'Envoy '):
+                if name.startswith(t): name = name[len(t):]
+            e['plate'] = {'rank': PLATE_RANK[e['rank']], 'name': name}
     ids = [p['id'] for p in out]
     assert len(ids) == len(set(ids)), 'duplicate ids'
     beds = [p['bed'] for p in out]
@@ -424,7 +446,6 @@ h2 .n{font-size:12.5px;color:var(--muted);font-weight:400;margin-left:6px}
 .role{display:block;color:var(--muted);font-size:12.5px}
 .b{display:inline-block;font-size:11px;border-radius:999px;padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
 .b.story{background:rgba(76,195,181,.18);color:#bdeee6;border:1px solid rgba(76,195,181,.5)}
-.b.prov{background:rgba(233,196,106,.14);color:#f0d88e;border:1px dashed rgba(233,196,106,.7)}
 .b.night{background:rgba(122,143,208,.18);color:#c3cff2;border:1px solid rgba(122,143,208,.5)}
 .b.you{background:rgba(214,165,58,.2);color:#f3d58f;border:1px solid rgba(214,165,58,.6)}
 .bio{margin:6px 0;color:#dfe7e9}
@@ -441,7 +462,7 @@ footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var
 <body>
 <header>
   <h1>The crew of the CSV Wren</h1>
-  <p class="sub">Everyone aboard, for Pillar 1 of the Living Ship. Grouped by department, most senior first. Each card shows when they work, their days off, where they sleep and where they work. Names marked <span class="b prov">Provisional name</span> are first ideas and can still change. <span class="b story">Story crew</span> are the hand-written characters. The coloured dot is their uniform: red for command, gold for operations, blue-green for sciences.</p>
+  <p class="sub">Everyone aboard, for Pillar 1 of the Living Ship. Grouped by department, most senior first. Each card shows when they work, their days off, where they sleep and where they work. <span class="b story">Story crew</span> are the hand-written characters. The coloured dot is their uniform: red for command, gold for operations, blue-green for sciences.</p>
 '''
 PAGE_TAIL = '''<footer>Made by the crew designer from the roster in the game file (section 9). The other crew come from plans/crew-roster-gen.py and are stored in the game as fixed data, so they only change when someone means them to.</footer>
 <script>
@@ -471,6 +492,9 @@ HABIT_WORDS = {'early-riser': 'early riser', 'late-sleeper': 'late sleeper', 'ea
                'stargazer': 'stargazes in the observatory'}
 assert set(HABIT_WORDS) == set(HABITS)
 
+def bday_words(d):
+    return 'Day %d: the %s of week %d' % (d, ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][(d - 1) % 7], (d - 1) // 7 + 1)
+
 def page(entries):
     e = lambda s: html.escape(str(s))
     from collections import Counter
@@ -479,7 +503,7 @@ def page(entries):
     rc = Counter(x['rank'] for x in crew); sc = Counter(x['shift'] for x in crew)
     beds = Counter('d2' if x['bed'].startswith('2-') else 'cab' if not x['bed'].startswith('4-B') else 'bunk' for x in crew)
     out.append('  <div class="summary"><b>%d crew</b>, you included, plus Envoy Saruth as a guest. %d Captain, %d Executive Officer, %d Department Chiefs, %d Senior Officers, %d Officers and %d Junior Officers. '
-               '%d work days and %d work nights. Everyone has two days off in a row, staggered round the week so every department always has people on. '
+               '%d work days and %d work nights. Everyone has two days off in a row, staggered round the week so every department always has people on, and a birthday: about one falls each week. '
                'Beds: %d in the senior quarters on Deck 2, %d in officers\' cabins on Deck 4 and %d in the junior bunk rooms on Deck 4 (eight rooms of six berths, with one spare berth in Bunk 1).</div>\n</header>\n'
                % (len(crew), rc['captain'], rc['xo'], rc['chief'], rc['senior'], rc['officer'], rc['junior'], sc['day'], sc['night'], beds['d2'], beds['cab'], beds['bunk']))
     out.append('<div class="bar">' + ' '.join('<a href="#%s">%s</a>' % (k, e(t)) for k, t, _ in GROUPS) + '</div>\n')
@@ -489,7 +513,7 @@ def page(entries):
         if not ppl: continue
         out.append('<section class="dept" id="%s"><h2>%s <span class="n">%d %s</span></h2><p class="blurb">%s</p><div class="grid">\n' % (key, e(title), len(ppl), 'person' if len(ppl) == 1 else 'people', e(blurb)))
         for x in ppl:
-            badges = (' <span class="b you">You</span>' if x.get('player') else '') + (' <span class="b story">Story crew</span>' if x.get('story') else '') + (' <span class="b prov">Provisional name</span>' if x.get('provisional') else '') + \
+            badges = (' <span class="b you">You</span>' if x.get('player') else '') + (' <span class="b story">Story crew</span>' if x.get('story') else '') + \
                      (' <span class="b night">Night shift</span>' if x['shift'] == 'night' else '')
             off = ' and '.join(DAYS[d] for d in x['rota']['offDays']) or 'none'
             work = (WORK_WORDS[x['work']['place']] + ' (Deck %d)' % x['work']['deck']) if x['work'] else 'no ship duties'
@@ -499,10 +523,10 @@ def page(entries):
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
-                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
+                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
-                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
+                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
