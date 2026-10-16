@@ -12,6 +12,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
+**New tweaks from the user (2026-10-16 ~21:10):** zoom-out limit (performance engineer, last job), bathroom need + feedback + progress bars (player engineer 2), a garden that grows food for the galley (galley engineer leads; sim, crew designer, systems help). The user also allowed extra check-runner sessions to speed up testing.
+
 **The user's focus (2026-10-16 ~20:25):** the events engineer finishes the diplomatic visit (kept draft) and then stops; the comet viewing and the remaining events wait for later. Everyone else finishes the user's tweaks (job board, ship health panel, days off, Roster, device pop-up bug) and the personal device. Then the Pillar 3 check-in.
 
 **Closed sessions (2026-10-16 ~16:40, the user's clean-up):** all retired leads and helpers were archived (their work is pushed and their handover notes are on their branches): the three earlier leads, the first sim and device engineers, events 1, the Pillar 3 planner, and the bridge, command and Deck 6 architects. An archived session can be reopened if ever needed. Check-runner sessions are archived as soon as they report.
@@ -50,7 +52,8 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: machines, wear, jobs, supplies, carts (section 17) | `claude/ship-systems` | 0.33.x | Retired 2026-10-16 (~600k) | `plans/handover-systems.md` |
 | session_01MiQtjmdEa4CXsCsiCh6zWV | Deck 6 architect (new, answers pass): Decks 4-6, hull byFace 4-5, health board, tiers, plates, crawl tiles, cargo hatch, touches | `claude/deck-architect` | 0.30.11+ | Retired 2026-10-16 (Pillar 3 restaffing) | `plans/handover-deck6-architect.md` |
 | session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: Decks 4, 5, 6, utility kit, deck_check | `claude/deck-architect` | 0.17, 0.30.x | Retired 2026-10-16 (~690k) | `plans/handover-deck6-architect.md` |
-| session_01BQjtEzvKXuvPZNzGRRRwpZ | Player engineer (new, answers pass): long days, bed skips night, need bonuses, Mail, social, shopping, crouch (section 15) | `claude/player-needs` | 0.28.9+ | Active: 0.28.17 treadmill fix (user's report on 0.41.5: can't use the treadmill; tap it, watch your character run, fitness up, energy down) | `plans/handover-player.md` |
+| session_012J4ctzJgFRBaUFU5sJvega | Player engineer 2 (hired 2026-10-16 ~21:14): bathroom need, need-fill feedback, progress bars for timed activities (section 15) | `claude/player-needs` | 0.28.19+ | Active | — |
+| session_01BQjtEzvKXuvPZNzGRRRwpZ | Player engineer (new, answers pass): long days, bed skips night, need bonuses, Mail, social, shopping, crouch (section 15) | `claude/player-needs` | 0.28.9+ | Retired 2026-10-16 ~21:15 (~57%; handover current at c7aab82/bf5b5af) | `plans/handover-player.md` |
 | session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer: player needs, device, job loop, save (section 15) | `claude/player-needs` | 0.28.x | Retired 2026-10-16 (~560k) | `plans/handover-player.md` |
 | session_01AVGVnj4Q1jFmVoD6xi5asT | Galley engineer (new, answers pass): spoilage, menus, queues, birthday cakes (section 16) | `claude/galley-food` | 0.29.11+ | Working | `plans/handover-galley.md` |
 | session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer: cooking, servery, food by cart (section 16) | `claude/galley-food` | 0.29.x | Retired 2026-10-16 (~490k) | `plans/handover-galley.md` |
