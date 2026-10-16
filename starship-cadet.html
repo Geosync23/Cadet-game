@@ -11748,8 +11748,9 @@ function bake(root) {
 function makeCharacter(spec, finish = bake) {          // finish: what to do with the queued parts (the crowd keeps them)
   const s = Object.assign({ dept: 'survey', rank: 0, skin: 2, hair: 'short', hairColor: 'dark', height: 1, build: 'average', acc: [] }, spec);
   const bw = BUILD[s.build] || 1, skin = SKIN[s.skin] || s.skin, hc = HAIR[s.hairColor] || s.hairColor;
-  const uni = DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66), has = a => s.acc.includes(a);
-  const suit = '#27313a', pants = '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
+  const civ = s.dept === 'civilian';                     // 0.27.14: guests in plain clothes, a top in their outfit colour, no badge or pips
+  const uni = civ ? s.outfit || '#7a6a5a' : DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66), has = a => s.acc.includes(a);
+  const suit = civ ? shade(uni, .82) : '#27313a', pants = civ ? '#454a52' : '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
   const root = new THREE.Group(); root.scale.setScalar(s.height);
   const rig = { root, legs: [], arms: [], spec: s };
   const pv = (p, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); p.add(g); return g; };
@@ -11783,7 +11784,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   part(rig.chest, cylG(.175 * bw, .175 * bw, .015, 20), uniDk, 0, .16, 0);
   part(rig.chest, GEO.sph, uni, 0, .28, 0, .2 * bw, .07, .15 * bw);
   if (has('apron')) part(rig.chest, GEO.box, '#e8e0cf', 0, .06, .162 * bw, .2 * bw, .2, .02);
-  else {                                               // department badge, left breast
+  else if (!civ) {                                     // department badge, left breast
     const bd = BADGE[s.dept] || BADGE.survey, bx = .085 * bw, bz = .168 * bw, silver = '#dfe4e6';
     if (bd.shape === 'diamond') {
       part(rig.chest, GEO.box, silver, bx, .2, bz, .045, .045, .015, 0, 0, Math.PI / 4);
@@ -11802,7 +11803,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     }
   }
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
-  for (let i = 0; i < Math.min(4, s.rank + 1); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
+  for (let i = 0; i < (civ ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);
   // head and face
   const h = rig.head = pv(rig.chest, 0, .4, 0);
@@ -12152,6 +12153,18 @@ const ACTS = {
     const turn = pulse(t, 14, .8, ph);
     for (const a of r.arms) armTo(a, s, -.55, -1.7 + (a.side > 0 ? .3 * turn : 0), -.14, .35);
     r.head.rotation.x = L(r.head.rotation.x, .45, s);
+  } },
+  punch: { f(r, s, t, b, ph) {                          // 0.27.15: at the punch bag, guard up, jabs one hand then the other, a little bounce
+    const u = (t * 1.6 + ph) % 2, side = u < 1 ? -1 : 1, jab = pulse(u % 1, 1, .35);
+    for (const a of r.arms) { const j = a.side === side ? jab : 0; armTo(a, s, L(-1.05, -1.5, j), L(-2.1, -.15, j), .18, .2); }
+    r.chest.rotation.y = L(r.chest.rotation.y, side * -.25 * jab, s); r.torso.rotation.x = L(r.torso.rotation.x, .12, s);
+    r.hips.position.y += Math.abs(Math.sin(t * 6 + ph)) * .012 * s; r.head.rotation.x = L(r.head.rotation.x, .1, s);
+  } },
+  stretch: { f(r, s, t, b, ph) {                         // 0.27.15: on the mat, a slow reach overhead with a lean to each side, then a fold to the toes
+    const u = ((t + ph) % 12) / 12, fold = u > .62 ? Math.sin(Math.PI * (u - .62) / .38) : 0, lean = u < .62 ? Math.sin(u / .62 * Math.PI * 2) : 0;
+    for (const a of r.arms) armTo(a, s, L(L(-2.9, -2.6, Math.abs(lean)), -.25, fold), L(-.15, -.05, fold), L(.08, 0, fold), 0);
+    r.torso.rotation.z = L(r.torso.rotation.z, .28 * lean, s); r.torso.rotation.x = L(r.torso.rotation.x, 1.15 * fold, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.15 + .3 * fold, s);
   } },
   talk: { f(r, s, t, b, ph) {
     for (const a of r.arms) {
@@ -12599,6 +12612,13 @@ function deviceHook() {
   if (deviceHooked || typeof deviceOn !== 'function' || typeof player === 'undefined' || !player) return;
   deviceHooked = true;
   deviceOn('open', () => { player.deviceOut = true; }); deviceOn('close', () => { player.deviceOut = false; });
+  try { deviceOn('phosphor', devicePropRecolour); } catch (e) {}   // 0.27.16: the screen follows a phosphor change in Settings
+}
+function devicePropRecolour() {                          // forget the built prop; anyone holding it gets the new one next frame
+  if (_propGeos.device) _propGeos.device.dispose(); delete _propParts.device; delete _propGeos.device;
+  for (const k of Object.keys(_propPacks)) if (k.startsWith('device')) delete _propPacks[k];
+  if (typeof player !== 'undefined' && player && /device/.test(player.propKey || '')) player.propKey = null;
+  for (const p of crowd.people) if (/device/.test(p.propKey || '') && p.chunk) p.chunk.dirty = true;
 }
 
 // ---- chatter bubbles (0.27.13, Pillar 3 C5, for section 20): bubbleSay(who, text, secs) shows a small speech bubble
@@ -12640,7 +12660,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
