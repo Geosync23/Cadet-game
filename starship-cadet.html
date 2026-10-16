@@ -3372,8 +3372,9 @@ function healthRows() {
   const sys = shipSystems(); return SYSTEMS.map(k => ({ name: HEALTH_NAME[k] || k, value: sys[k] }));
 }
 function drawHealthBoard(t) {
-  const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height, rows = healthRows().slice(0, 10);
-  const all = typeof shipHealth === 'function' && typeof shipSystems === 'function' ? shipHealth() : null;
+  const got = healthRows(), ship = got.find(r => r.key === 'ship'), rows = got.filter(r => r.key !== 'ship').slice(0, 10);   // the whole ship is the header
+  const { g: c, c: cv } = t.userData, w = cv.width, h = cv.height;
+  const all = ship ? ship.value : typeof shipHealth === 'function' && typeof shipSystems === 'function' ? shipHealth() : null;
   const tone = v => v >= 75 ? '#5fd6c6' : v >= 50 ? '#e8c06a' : v >= 25 ? '#e8873a' : '#e0503f';
   c.textAlign = 'left'; c.fillStyle = '#0c1a1f'; c.fillRect(0, 0, w, h);
   c.fillStyle = '#e8c06a'; c.font = '700 24px system-ui,sans-serif'; c.fillText('SHIP HEALTH', 16, 34);
@@ -3385,7 +3386,8 @@ function drawHealthBoard(t) {
     c.textAlign = 'right'; c.fillStyle = tone(v); c.font = '600 16px system-ui,sans-serif'; c.fillText(Math.round(v) + '%', w - 16, y + 16); c.textAlign = 'left';
     c.fillStyle = '#16303a'; c.fillRect(16, y + 22, w - 32, 8);
     c.fillStyle = tone(v); c.fillRect(16, y + 22, (w - 32) * v / 100, 8);
-    if (r.note) { c.fillStyle = '#93b8b2'; c.font = '500 12px system-ui,sans-serif'; c.textAlign = 'right'; c.fillText(r.note, w - 70, y + 16, w - 200); c.textAlign = 'left'; }
+    const note = r.note || r.worst;                          // section 17's rows name their worst machine
+    if (note) { c.fillStyle = '#93b8b2'; c.font = '500 12px system-ui,sans-serif'; c.textAlign = 'right'; c.fillText(note, w - 70, y + 16, w - 200); c.textAlign = 'left'; }
   });
   if (!rows.length) { c.fillStyle = '#7fa9a3'; c.font = '500 18px system-ui,sans-serif'; c.fillText('No readings yet.', 16, 90); }
   t.needsUpdate = true;
