@@ -109,3 +109,4 @@ Read this section first; the lines above are the running log.
 5. Then Pillar 3 check-in 1 with the user; then storm visuals → check-in 2.
 6. Close the events engineer session_01GW9QtevJxaMQzzCGPBHaxb (its handover note is final) now that 0.41.8 passed.
 - **21:40 UTC: new lead session_01PxXKwc5mkC7tV5MPi3p7PP took over.** Old check-in deleted; new hourly check-in trig_01U315RUDEiSDA2ZsKUf8Xf4 (:39). All active/standby helpers told. Events engineer 2 is idle and finished; closing it needs the user's OK (the lead's archive was blocked).
+- **~22:30 UTC: the user answered zoom: keep 0.27.18's limit, thin decor when zoomed out later** (sent to performance engineer 2; design-doc Camera line updated). 0.41.9 attempt 1 = integration-test 47e9ffd: all checks OK but food_check 'garden, good' (feed 0.973 from real gardenAt; galley + systems settling). Waiting on player 73040ba green.
