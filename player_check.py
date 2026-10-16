@@ -70,7 +70,7 @@ TAP = r"""(({ title, near }) => {
   if (!done) { it[0].hit.getWorldPosition(_wp); approach(_wp.clone(), it[0].front, it[0].depth, () => toast(it[0].t, it[0].x)); }
   return done;
 })"""
-STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10],
+STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10, player.holding === undefined ? null : player.holding, typeof TRAY_ON !== 'undefined' && TRAY_ON.visible],
   needs: Object.fromEntries(NEED_KEYS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
   visible: player.obj.visible, toast: document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent,
   time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num })"""
@@ -214,6 +214,12 @@ with sync_playwright() as pw:
     check(tp is True and ('queue' if joins else 'tray') in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'servery: should sit at a mess seat to eat')
     body_check('eat', 'hunger', 55, b, e, seen, None)
+    if g.ev("typeof TRAY_ON !== 'undefined'"):              # your tray (0.28.15): carried to the seat, on the table while you eat, gone after
+        carried = any(a[0] == 'eat' and a[2] == 'walk' and a[5] == 'tray' for a in seen)
+        on_table = any(a[0] == 'eat' and a[2] == 'do' and a[6] for a in seen)
+        after = g.ev("[TRAY_ON.visible, player.holding]")
+        print('  the tray: carried to the seat', carried, '| on the table while eating', on_table, '| after: on the table, in hand', after)
+        check(carried and on_table and after == [False, False], f'the tray: carried {carried}, on the table {on_table}, after {after}')
     check(peak < BUDGET, f'draw calls {peak} over {BUDGET}')
     # the galley's queue (section 16, 0.29.6): galleyJoin gives the back of the line and your turn. The real galley when the
     # build has it (a combined build), else stand-ins shaped like it
@@ -310,6 +316,10 @@ with sync_playwright() as pw:
     if not real_use: mt.append(g.ev("window.__used")); g.ev("delete window.machineUse; delete window.__used")
     print(' ', mt)
     check(mt[1] is True and mt[2] and len(mt[3]) > len(mt[0]) + 2 and ('Stand-in' in mt[3] if not real_use else True) and (real_use or mt[4] == [mt[2], 'player']), f'a machine tap should ask machineUse: {mt}')
+    wt = g.ev(r"""(() => { const it = ITEMS.find(i => /^washer \d/i.test(i.t)); if (!it) return null; it.hit.getWorldPosition(_wp);   // a stub machine (0.28.14): by room and name
+      const m = stubTap(it, _wp.clone()); return [it.t, m && m[0].id]; })()""")
+    print('  a washer (a stub machine, matched by name and number):', wt)
+    check(wt is None or (wt[1] and wt[1].endswith('-' + wt[0].split()[-1]) and 'washer' in wt[1]), f'a washer tap should find its stub machine: {wt}')
     no = g.ev("(() => { const it = ITEMS.find(i => /^bunk/i.test(i.t)); it.hit.getWorldPosition(_wp); return machineTap(it, _wp.clone()); })()")
     check(no is False, 'a bunk is no machine: the tap does what it always did')
 
@@ -457,6 +467,7 @@ with sync_playwright() as pw:
             sv = json.loads(g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return JSON.stringify(s.player); })()"))
             check(sv.get('work', {}).get('done', 0) >= 4 and sv.get('carry') == [], f"job loop: the save should hold the work ({sv.get('work')})")
             g.step(60); check(g.ev(TAPI) is True, 'job loop: resume'); s3 = jrun(160)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             done = json.loads(g.ev(f"JSON.stringify([myJob(), SHIP.jobs.find(j => j.id === {json.dumps(jid)}).status, SHIP.machines[{json.dumps(mj[2])}].cond])"))
             print('  repaired:', s3[3][:80], '| job', done[1], '| condition', round(done[2]))
             check(done[0] is None and done[1] == 'done' and done[2] >= 99 and s3[2] is None, f'job loop: the job should be done and the machine as new ({done})')
@@ -515,6 +526,7 @@ with sync_playwright() as pw:
             g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
             pre = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")   # the hourly job list may have moved stock meanwhile: compare across the docking
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             fin = g.ev(f"[SHIP.jobs.find(j => j.id === {json.dumps(cj[0])}).status, SHIP.stores.filter, myJob()]")
             for st in steps: print('   ', st[0], st[1], '|', st[2][:90])
             print('    job', fin[0], '| filters on the shelf, in the hold before docking:', pre, '| on the shelf after:', fin[1])
