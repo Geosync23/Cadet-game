@@ -2,9 +2,9 @@
 
 The project lead session keeps this file current. A new lead session reads it first, together with CLAUDE.md and DEV_NOTES.md.
 
-**Lead:** session_015QoyPWBdMPM4ywf5W2jMMs, branch `claude/lead-pillar1` (took over 2026-10-16 ~15:15 UTC, mid Pillar 3, from session_01WHXNp9A1WHAD2EHJw384Qp; brief: `plans/handover-lead.md`). Repeating hourly check-in: trig_01Kr24HNvp976B4MapBpEqRo (fires :15). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
+**Lead:** session_01PxXKwc5mkC7tV5MPi3p7PP, branch `claude/lead-pillar1` (took over 2026-10-16 ~21:40 UTC, mid Pillar 3, from session_015QoyPWBdMPM4ywf5W2jMMs; brief: `plans/handover-lead.md`). Repeating hourly check-in: trig_01U315RUDEiSDA2ZsKUf8Xf4 (fires :39). Starts and briefs helper sessions, reviews their branches, merges, and keeps this board and the dev notes up to date.
 
-**Retired leads:** session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:20, answers pass and Pillar 3 start, handed over because its memory was full; `plans/handover-lead.md`); session_0158BCCswtdujm3t5d2LXsFz (handed over 2026-10-16 ~04:20 to keep a clean memory; `plans/handover-lead.md`); session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
+**Retired leads:** session_015QoyPWBdMPM4ywf5W2jMMs (2026-10-16 ~15:20 to ~21:40, Pillar 3 to 0.41.8, handed over at ~58% memory before 0.41.9; `plans/handover-lead.md`); session_01WHXNp9A1WHAD2EHJw384Qp (2026-10-16 ~04:20 to ~15:20, answers pass and Pillar 3 start, handed over because its memory was full; `plans/handover-lead.md`); session_0158BCCswtdujm3t5d2LXsFz (handed over 2026-10-16 ~04:20 to keep a clean memory; `plans/handover-lead.md`); session_01HV1JuhWgKASQNmvLA2AXD3 (branch `claude/mobile-session-linking-3es9z2`), handed over 2026-10-15 because its context was getting long. Helpers report to the new lead.
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
@@ -43,7 +43,8 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 
 | Session | Job | Branch it pushes to | Builds | Status | Handover note |
 | --- | --- | --- | --- | --- | --- |
-| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (from 2026-10-16 ~15:20). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 16 = 0.41.8; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
+| session_01PxXKwc5mkC7tV5MPi3p7PP | Lead (from 2026-10-16 ~21:40). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 16 = 0.41.8; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
+| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (2026-10-16 ~15:20 to ~21:40) | `claude/lead-pillar1` | 0.41.5–0.41.8 (combined) | Retired 2026-10-16 (~58%) | `plans/handover-lead.md` |
 | session_01WHXNp9A1WHAD2EHJw384Qp | Lead (2026-10-16 ~04:20 to ~15:20) | `claude/lead-pillar1` | 0.41.x (combined) | Retired 2026-10-16 (memory full) | `plans/handover-lead.md` |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead (2026-10-15 to 2026-10-16 ~04:20) | `claude/lead-pillar1` | 0.40.x–0.41.2 (combined) | Retired 2026-10-16 (~460k) | `plans/handover-lead.md` |
 | session_01TqLepvhqDZRwFj7ZuLb6Xa | Systems engineer 3 (hired 2026-10-16 ~20:22): empty job board (with interactions), days-off jobs to crew (section 17) | `claude/ship-systems` | 0.33.32+ | Active | — |
@@ -70,7 +71,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_014TpEMbWarRFJM8BHC9WM8c | Device engineer (Pillar 3, new): the device's two layers, the old-school CRT skin, apps, tips look, calendar reminders (section 19, C1/C2/C11/C13) | `claude/device` | 0.35.0–0.35.7 | Retired 2026-10-16 (memory ~410k; final 985ff28) | `plans/handover-device.md` |
 | session_01LGbDXmiNuSmR6dPGjRj8mX | Device engineer 2 (hired 2026-10-16 ~15:48): Ship news, people on Maps, Calendar appointments and group meetings, Quiet off shift, phone review (section 19) | `claude/device` | 0.35.8+ | Active | — |
 | session_01DzZ669spGpdSdVMYzUog2N | Social engineer (Pillar 3, new): relationships, affinity, news, chat cards, favours, crew seeking you out (section 20, C4/C5) | `claude/social` | 0.36.x | Working (wave 1) | — |
-| session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Working (wave 2) | `plans/handover-events.md` |
+| session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Done (idle; to be closed; events paused by the user) | `plans/handover-events.md` |
 | session_014PT5L2QxXYoVhqFP7qhj3y | Deck architect (Pillar 3, all six decks; replaces the bridge, command and Deck 6 architects): gather places, event dressing and traces, ready room, gym kit (C9) | `claude/decks-p3` | 0.38.x | Standby (0.38.3 done) | the three architect handovers |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
