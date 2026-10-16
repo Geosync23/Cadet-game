@@ -1013,7 +1013,7 @@ The bridge architect's places, for the sim engineer's schedules (see plans/pilla
 - **Utility rooms (0.31.3):** built as planned in the deck plan pages' "Utility rooms" sections (updated to the built positions). Kit in the Deck 3 kit block: `recyclerTanks`, `filterBank`, `pumpSkid`, `uvUnit`, `cleanTank`, `risers`, `sump`, `extractorUnit`, `chillerUnit`, `nutrientTanks`, `irrigationPump`, `headerPipes`, `relayRack` (`o.w`), `cabinet` (`o.breakers`), `dataBus`, `cableTray`, and wall kit `relayBox`. They use only materials these decks already draw (Deck 3 by the lift: 329 draw calls; day_check peak 417).
     - Rooms: R, g, i (Deck 3) and k, u, c (Deck 1) have `floor` and `still: true` instead of `void`; their hatches are listed in `service`, so the player and Works crew pass. Deck 1 gains the hatch `v,10,10` (relay room to crawl).
     - `machines` (Deck 3, 12): `3-oven-1`, `3-oven-2`, `3-range-1` (galley), `3-galleyplant-1` (the extractor), `3-chiller-1`, `3-recycler-1`, `3-filter-1`, `3-pump-1`, `3-uv-1`, `3-lights-1`, `3-nutrient-1`, `3-irrigation-1`. (Deck 1, 5): `1-relay-1`, `1-relay-2`, `1-junction-1`, `1-lights-1`, `1-databus-1`. Each has a place `<id>-panel` (`work:works`, `machine: '<id>'`) on its panel tile, standing a little towards the machine.
-    - Kinds not yet in `MACHINE_KINDS` (chiller, filter, pump, uv, lights, nutrient, databus) are skipped by the registry until the systems engineer adds them.
+    - Kinds (chiller, filter, pump, uv, lights, nutrient, databus) are all in `MACHINE_KINDS` since 0.33.2, so the registry builds every one.
     - Section 14 (shared, one line): `schedData` skips places with `machine`, so a panel is never handed out as a desk.
 
 ## Known issues
