@@ -7903,7 +7903,8 @@ function deviceFrameStep(now) {
 requestAnimationFrame(deviceFrameStep);
 // ---- the meeting dialogue panel (Part 2, "meetings with dialogue"): section 18 owns the scripts and their flow
 // (advancing, replies, walking away); this only draws and reports taps. deviceDialogue(view, onTap): view = { title,
-// name, who, text, to, pose, choices: null | [text], i, n }; onTap() goes on, onTap(k) picks reply k. null closes it.
+// name or who (a name), text, to, pose, choices: null | [text], i, n }; onTap() goes on, onTap(k) picks reply k; with
+// no onTap the taps call section 18's dialogueNext() and dialogueChoose(k). null closes it.
 // the Captain's ship-wide address (section 18's captainAddress calls this first): a banner across the top in the
 // screen's style, about 20 real seconds, a tap dismisses it. deviceAddress(null) hides it.
 function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); return true; }
@@ -7917,7 +7918,10 @@ function deviceDialogue(v, onTap) {
 function devDialogueDo(what, k) {
   try {
     if (what === 'close') { DEVICE_SKIN.dialogue(null); devDlgTap = null; if (typeof dialogueClose === 'function') dialogueClose(); return; }
-    if (devDlgTap) devDlgTap(what === 'choose' ? k : undefined); else DEVICE_SKIN.dialogue(null);
+    if (devDlgTap) devDlgTap(what === 'choose' ? k : undefined);
+    else if (what === 'choose' && typeof dialogueChoose === 'function') dialogueChoose(k);   // section 18's own flow (0.34.10)
+    else if (what === 'next' && typeof dialogueNext === 'function') dialogueNext();
+    else DEVICE_SKIN.dialogue(null);
   } catch (e) { DEV.errors.push('dialogue: ' + (e && e.message || e)); DEVICE_SKIN.dialogue(null); }
 }
 function deviceRefresh() {
