@@ -156,7 +156,7 @@ with sync_playwright() as pw:
     check(ne['high'][:4] == [1.05, 1.265, .902, 1.5] and ne['high'][4] == 'energy,fitness,hunger,hygiene,social', f"all high: {ne['high']}")
     check(ne['low'][:4] == [.64, .85, 1.113, .5] and ne['low'][4] == 'energy,fitness,hunger,hygiene,social', f"all low: {ne['low']}")
     check(ne['edge'] == [.8, 1, 1.018, 1, 'fitness,hunger'], f"75 counts as high, 25 isn't low: {ne['edge']}")
-    dv = g.ev(r"""(() => { Object.assign(SHIP.player.needs, { hunger: 80, energy: 50, hygiene: 10, fitness: 50, social: 50 }); device.open();
+    dv = g.ev(r"""(() => { Object.assign(SHIP.player.needs, { hunger: 80, energy: 50, hygiene: 10, fitness: 50, social: 50 }); device.open('needs');
       const b = document.getElementById('devBody'), out = [[...b.querySelectorAll('.need em')].map(e => e.className + ':' + e.textContent), [...b.querySelectorAll('p.fx')].map(p => p.textContent)];
       device.close(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return out; })()""")
     print('  the device:', dv)
@@ -287,13 +287,13 @@ with sync_playwright() as pw:
     ml = g.ev(r"""(() => { SHIP.mail = []; device.refresh(); const b = document.getElementById('devMail'), out = [b.hidden];
       mailSend({ from: 'Stores', subject: 'Filters low', body: 'Two left.' }); mailSend({ at: shipNow() - 5, from: 'Galley', subject: 'Cake tonight', body: 'Tomas turns 24.' });
       out.push(b.hidden, b.textContent, mailUnread(), SHIP.mail.map(m => m.subject));
-      device.open(); device.show('mail'); const body = document.getElementById('devBody');
-      out.push([...body.querySelectorAll('.tabs button')].map(x => x.textContent), body.querySelectorAll('button.mail').length);
-      body.querySelector('button.mail').click(); out.push(mailUnread(), document.getElementById('devBody').textContent.includes('Two left.'));
+      device.open(); const tile = document.querySelector('#devBody .app[data-app="mail"]'); device.show('mail'); const body = document.getElementById('devBody');
+      out.push([tile.querySelector('span').textContent, tile.querySelector('b').textContent], body.querySelectorAll('button.row').length);
+      body.querySelector('button.row').click(); out.push(mailUnread(), document.getElementById('devBody').textContent.includes('Two left.'));
       device.show('status'); device.close(); return out; })()""")
     print(' ', ml)
     check(ml[0] is True and ml[1] is False and ml[2] == '2' and ml[3] == 2, f'mail: the unread count on the button: {ml[:4]}')
-    check(ml[4] == ['Filters low', 'Cake tonight'] and ml[5] == ['Status', 'Mail (2)'] and ml[6] == 2, f'mail: the Mail tab, newest first: {ml[4:7]}')
+    check(ml[4] == ['Filters low', 'Cake tonight'] and ml[5] == ['Mail', '2'] and ml[6] == 2, f'mail: the Mail app (its tile shows 2), newest first: {ml[4:7]}')
     check(ml[7] == 1 and ml[8] is True, f'mail: opening one shows it and marks it read: {ml[7:]}')
 
     print('A machine tap (machineUse):')

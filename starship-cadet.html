@@ -40,25 +40,82 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
-.device .tabs{display:flex;gap:6px;margin:4px 2px 2px}
-.device .tabs button{padding:4px 10px;font-size:12.5px}
-.device .tabs button.on{border-color:var(--teal);color:#cfe9e4}
-.device .mail{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;font-size:13px}
-.device .mail.new{border-color:var(--teal)}
-.device .mail small{display:block;color:var(--muted);font-size:11.5px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
-.device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
-.device .devtime{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
-.device .need{display:grid;grid-template-columns:78px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
-.device .need i{height:8px;border-radius:4px;background:#26343a;overflow:hidden}
-.device .need b{display:block;height:100%;background:var(--teal)}
-.device .need.mid b{background:#d9b25a}
-.device .need.low b{background:#e07a5f}
-.device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
-.device .need em{font-style:normal;font-size:10px;margin-left:5px}
-.device .need em.up,.device #devBody p.fx.up{color:var(--teal)}
-.device .need em.down,.device #devBody p.fx.down{color:#e07a5f}
+/* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
+.device{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
+  left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+.device[hidden]{display:none}
+.device.wide{left:12px;top:12px;bottom:12px;right:auto;width:min(420px,40vw);height:auto;border-radius:24px;padding:8px 12px 10px}
+.device .bez{display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device .bez .grip{flex:1;display:flex;justify-content:center}
+.device .bez .grip::before{content:"";width:44px;height:4px;border-radius:2px;background:#3a4148}
+.device.wide .bez .grip::before{display:none}
+.device .led{width:8px;height:8px;border-radius:50%;background:#2c3a33;box-shadow:inset 0 0 2px #000}
+.device .led.on{background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.device .led.blink{animation:devled 1.2s steps(2) infinite}
+@keyframes devled{50%{background:#2c3a33;box-shadow:none}}
+.device .crt{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--crt-bg);border-radius:var(--crt-radius);overflow:hidden;
+  box-shadow:inset 0 0 0 2px #0a0d10,inset 0 0 28px rgba(0,0,0,.85)}
+.device .crt::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:2;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 2px,var(--crt-scan) 2px,var(--crt-scan) 3px),
+  radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
+.device .crt::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;pointer-events:none;z-index:3;opacity:0;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.035),transparent)}
+.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite}
+.device.fx .crt{animation:devflick 4s steps(1) infinite}
+@keyframes devroll{from{transform:translateY(-100%)}to{transform:translateY(560%)}}
+@keyframes devflick{0%{opacity:1}31%{opacity:.985}32%{opacity:1}77%{opacity:.99}78%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
+.device .devhead{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;flex:none}
+.device h2{margin:0;font:inherit;font-size:var(--crt-size);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
+.device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);-webkit-user-select:text;user-select:text;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
+.device #devBody p{margin:4px 0 10px;color:var(--crt-ink)}
+.device #devBody p.big{font-size:22px;color:var(--crt-hot);font-variant-numeric:tabular-nums;letter-spacing:.04em;text-shadow:0 0 7px var(--crt-glow)}
+.device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
+.device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
+.device .row.hot{border-color:var(--crt-ink)}
+.device .devmap{display:block;width:100%;height:auto;max-height:46vh;margin:6px 0 10px;touch-action:manipulation}
+.device .devmap rect{fill:var(--crt-dim);opacity:.3;cursor:pointer}
+.device .devmap .m-hall,.device .devmap .m-service{opacity:.14}
+.device .devmap .m-lift{fill:var(--crt-ink);opacity:.5}
+.device .devmap .m-void{fill:#000;opacity:.55}
+.device .devmap .m-locked{fill:url(#devhatch);opacity:1}
+.device .devmap .m-hbg{fill:var(--crt-bg);opacity:1}
+.device .devmap .m-hl{stroke:var(--crt-dim);stroke-width:.22}
+.device .devmap .goal{fill:var(--crt-ink);opacity:.55}
+.device .devmap .pick{fill:var(--crt-hot);opacity:.8}
+.device .devmap .m-wall{fill:none;stroke:var(--crt-ink);stroke-width:.14;stroke-linecap:square}
+.device .devmap .m-you{fill:var(--crt-hot);stroke:var(--crt-bg);stroke-width:.3}
+.device .row.past .rt{color:var(--crt-dim)}
+.device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
+.device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
+.device button:focus-visible{outline:2px solid var(--crt-hot);outline-offset:2px}
+.device .row{display:block;width:100%;text-align:left;margin:6px 0;padding:8px 10px;min-height:44px;border:2px solid transparent;border-bottom-color:rgba(255,255,255,.06)}
+.device button.row{border-color:var(--crt-dim) transparent transparent;border-width:0 0 2px;border-radius:0}
+.device .row.new .rt,.device .row.urgent .rt{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
+.device .row small{display:block;color:var(--crt-dim);font-size:15px;margin-top:2px}
+.device .act{margin:8px 0 4px;text-transform:uppercase;letter-spacing:.08em}
+.device .btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
+.device .need{display:grid;grid-template-columns:7.5em 1fr 2.5em;align-items:center;gap:10px;margin:10px 0}
+.device .need i{height:14px;border:2px solid var(--crt-dim);border-radius:2px;overflow:hidden;background:transparent}
+.device .need b{display:block;height:100%;background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.device .need.low b{background:repeating-linear-gradient(90deg,var(--crt-hot) 0 6px,transparent 6px 9px)}
+.device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
+.device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
+.device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
+.device .app i{font-style:normal;font-size:26px;line-height:1;color:var(--crt-hot)}
+.device .app b{position:absolute;top:3px;right:4px;min-width:22px;padding:0 5px;border-radius:4px;background:var(--crt-hot);color:var(--crt-bg);font-size:15px;line-height:22px;text-shadow:none}
+.device .keys{display:flex;gap:10px;padding-top:10px;flex:none}
+.device .keys button{flex:1;justify-content:center;min-height:48px;font-family:var(--crt-font);font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#c3ccd3;text-shadow:none;border:0;border-radius:10px;
+  background:linear-gradient(#30363d,#22272d);box-shadow:0 3px 0 #0d1013,inset 0 1px 0 rgba(255,255,255,.08)}
+.device .keys button:active{transform:translateY(2px);box-shadow:0 1px 0 #0d1013}
+.device .keys button:disabled{opacity:.45}
+body.devsheet .toast{bottom:calc(66vh + 12px)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -89,10 +146,10 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
-<div class="lift device" id="device" role="dialog" aria-labelledby="devT" hidden>
-  <h2 id="devT">Your device</h2><p>A placeholder: the real device is still being designed.</p>
-  <div id="devBody"></div>
-  <button class="stay" id="devClose">Close</button>
+<div class="device" id="device" role="dialog" aria-labelledby="devT" data-ph="cyan" hidden>
+  <div class="bez" id="devBez"><span class="led" id="devLed" title="New mail"></span><span>CSV WREN · CREW PDA</span><span class="grip"></span></div>
+  <div class="crt"><div class="devhead"><h2 id="devT">Your device</h2></div><div id="devBody"></div></div>
+  <div class="keys"><button id="devBack" aria-label="Back">Back</button><button id="devHome" aria-label="Home screen">Home</button><button id="devClose" aria-label="Close your device">Close</button></div>
 </div>
 <div id="fade"></div>
 
@@ -123,6 +180,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
    15b. INTERACTIONS    more places to use, the job board, the goal pointer (after 15)
    16. GALLEY & FOOD    the galley rota, cooking, the servery, plates (after 14)
    17. MACHINES & JOBS  machines, wear, systems, ship health, effects on people (after 14)
+   19. DEVICE           your device: apps (deviceApp) and the skin that draws them (before 15)
 
    RULES THAT KEEP IT WORKING ON PHONES
    - Never let two surfaces share a plane. Overlap solids instead, or keep
@@ -7637,6 +7695,458 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // =====================================================================
+// 19. DEVICE
+// Your personal device (Pillar 3, the device engineer, 0.35.x): the game's one
+// menu. Two layers. The APPS describe: deviceApp({ id, title, icon, order,
+// badge, view, act }) registers one; view(ctx) returns plain content (a VIEW,
+// below) and act(verb, arg) handles its buttons. The SKIN draws: DEVICE_SKIN is
+// the only code here that touches the DOM, so the look can change without
+// touching an app. deviceDo(action) runs a tapped action; deviceNotify({ app,
+// text, urgent }) puts a badge on an app (and a toast if urgent); deviceOn('open'
+// | 'close', fn) for the pose and the camera. device.addSection(id, title,
+// render) stays as a shim: render(el) draws into a box, as before.
+// VIEW: { title, blocks: [ { kind: 'text', text, mark }, { kind: 'list', rows:
+//   [{ text, sub, mark, action, button }] }, { kind: 'bars', items: [{ label,
+//   value, mark, note, level }] }, { kind: 'buttons', items: [{ label, action }] } ] }
+// action: { app, do, arg }. mark: 'up' | 'down' | 'new' | 'urgent' | 'hot' | 'big'.
+// Sits before 15 (after 14), so 15 and 17 can register at load; apps only read
+// other sections when drawn. Nothing here calls R() or makes 3D objects.
+// =====================================================================
+const DEVICE_APPS = new Map();                 // id -> { id, title, icon, order, badge, view, act }
+const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [] }, errors: [] };
+// what the device keeps (saved, SAVE_EXTRA): settings now; memos, appointments, pins and tips as their apps arrive
+const PHOSPHORS = { amber: 'Amber', green: 'Green', cyan: 'Wren cyan' };
+function deviceLoad(s) {
+  const d = s && s.device && typeof s.device === 'object' ? s.device : {}, st = d.settings && typeof d.settings === 'object' ? d.settings : {};
+  const r = d.calendarRemind && typeof d.calendarRemind === 'object' ? d.calendarRemind : {}, per = {};
+  if (r.per && typeof r.per === 'object') for (const k in r.per) if (typeof r.per[k] === 'boolean' && k.length < 40) per[k] = r.per[k];
+  return { settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
+    calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
+}
+SHIP.device = deviceLoad(SAVED);
+SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
+setTimeout(() => { DEV.live = true; }, 0);
+// ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
+// and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
+const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
+const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
+  [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
+  [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
+  [{ at: 420, title: 'Bunk inspection', where: 'Bunk 1, Deck 4', len: 20 }, { at: 1290, title: 'The Captain at the piano', where: 'the music room, Deck 4', len: 60, tradition: 'piano' }],
+  [], [], []];
+const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
+// the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
+function devTraditions(a, b) {
+  if (typeof upcomingTraditions === 'function') {
+    try { return upcomingTraditions(a, b).map(x => ({ id: x.id + '@' + x.at, kind: x.kind || String(x.id).replace(/@.*$/, ''), title: x.title, at: x.at, where: x.where || 'aboard' })); }
+    catch (e) { DEV.errors.push('upcomingTraditions: ' + (e && e.message || e)); }
+  }
+  if (typeof eventsOn !== 'function') return [];
+  const out = [];
+  for (let d = Math.floor(a / 1440) + 1; d <= Math.floor(b / 1440) + 1; d++) {
+    for (const e of eventsOn(d)) {
+      const at = (d - 1) * 1440 + e.from; if (at < a || at > b) continue;
+      out.push({ id: e.id + '@' + d, kind: e.id, at, title: e.id === 'birthday' && e.names ? 'Birthday: ' + e.names : e.name, where: devDeckOf(e.ev) });
+    }
+    for (const x of DEV_WEEK[weekday(d)]) if (x.tradition) { const at = (d - 1) * 1440 + x.at; if (at >= a && at <= b) out.push({ id: x.tradition + '@' + d, kind: x.tradition, at, title: x.title, where: x.where }); }
+  }
+  return out.sort((x, y) => x.at - y.at);
+}
+// one day's items, in time order: [{ from, to, title, where, kind }] in minutes of that day
+function devDay(d) {
+  const B = (d - 1) * 1440, out = [
+    { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
+    { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
+    { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
+  for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
+  for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
+  return out.sort((x, y) => x.from - y.from);
+}
+const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
+const devDayName = d => d === SHIP.time.day ? 'Today' : d === SHIP.time.day + 1 ? 'Tomorrow' : WEEKDAYS[weekday(d)] + ', Day ' + d;
+function devNow() {                                      // the strip: where you're expected right now, and what's next
+  const d = SHIP.time.day, m = SHIP.time.min, items = devDay(d);
+  const now = items.filter(x => x.from <= m && m < x.to && x.kind !== 'tradition').pop(), next = items.find(x => x.from > m);
+  return { now: now ? now.title + ': ' + now.where : 'Free time', next: next ? 'Next: ' + next.title + ' at ' + hhmm(next.from) : null };
+}
+
+// ---- reminders (the user's addition): about 30 ship minutes before each tradition, a chirp (a toast) or, during your
+// shift, a quiet badge unless you marked it "Remind me". Each morning the Calendar gets a badge and Home a "Today
+// aboard" line. SHIP.device.calendarRemind = { on, ahead, morning, per: { <kind>: true | false } }, saved. ----
+const DEV_REMINDED = new Set();                          // id@day keys already reminded (this session)
+let devTickMin = -1, devMorning = SHIP.time.day;
+function deviceTick() {
+  if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
+  const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
+  if (typeof sleeping !== 'undefined' && sleeping) return;
+  const R = SHIP.device.calendarRemind;
+  if (SHIP.time.day !== devMorning && SHIP.time.min >= 360) {   // a new morning
+    devMorning = SHIP.time.day;
+    if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
+  }
+  if (!R.on) return;
+  for (const x of devTraditions(t + 1, t + R.ahead)) {
+    if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
+    DEV_REMINDED.add(x.id);
+    const m = SHIP.time.min, onShift = m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
+  }
+}
+
+function deviceApp(def) {
+  if (!def || typeof def.id !== 'string') return;
+  DEVICE_APPS.set(def.id, Object.assign({ title: def.id, icon: 'dot', order: 50 }, def));
+  deviceRefresh();
+}
+function deviceDo(action) {
+  if (!action) return;
+  const a = DEVICE_APPS.get(action.app);
+  if (action.do === 'open') { deviceShow(action.arg || action.app); return; }
+  try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
+  deviceRefresh();
+}
+function deviceNotify({ app, text, urgent } = {}) {
+  if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
+  DEVICE_SKIN.notify({ app, text, urgent });
+  deviceRefresh();
+}
+function deviceOn(ev, fn) { if (DEV.on[ev] && typeof fn === 'function') DEV.on[ev].push(fn); }
+function deviceFire(ev) { for (const fn of DEV.on[ev] || []) try { fn(DEV.app); } catch (e) { DEV.errors.push(String(e && e.message || e)); } }
+function deviceBadge(a) {
+  let n = null; try { n = a.badge ? a.badge() : null; } catch (e) { n = null; }
+  return (n || 0) + (DEV.notes[a.id] || 0) || null;
+}
+function deviceView(id) {                      // the app's VIEW, or a stand-in if it fails
+  const a = DEVICE_APPS.get(id);
+  if (!a) return { title: 'Your device', blocks: [{ kind: 'text', text: 'No such app.' }] };
+  try { const v = a.view({ t: shipNow(), wide: DEVICE_SKIN.wide() }) || {}; return { title: v.title || a.title, blocks: v.blocks || [] }; }
+  catch (e) { DEV.errors.push(id + ': ' + String(e && e.message || e)); return { title: a.title, blocks: [{ kind: 'text', text: '(this app failed to draw)' }] }; }
+}
+function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home').sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+function deviceShow(id) {
+  if (!DEVICE_APPS.has(id)) id = 'home';
+  DEV.app = id; delete DEV.notes[id];
+  if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFire('open'); }
+  deviceRefresh();
+}
+function deviceClose() { if (!DEV.open) return; DEV.open = false; DEVICE_SKIN.close(); deviceFire('close'); }
+function deviceRefresh() {
+  deviceTick();
+  DEVICE_SKIN.button();
+  if (DEV.open) DEVICE_SKIN.draw(DEV.app, deviceView(DEV.app));
+}
+
+// ---- the skin: the only DOM code. It draws a VIEW into #devBody, the home grid, the button's badge. ----
+const DEVICE_SKIN = (() => {
+  const $ = id => document.getElementById(id);
+  const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
+  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
+  const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
+  let back = null, drawn = null;
+  const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
+    const st = SHIP.device.settings, w = skin.wide();
+    el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
+    document.body.classList.toggle('devsheet', DEV.open && !w);
+  };
+  const blocks = {
+    text(b) { return mk('p', b.mark ? (b.mark === 'up' || b.mark === 'down' ? 'fx ' + b.mark : b.mark) : '', b.text); },
+    list(b) {
+      const box = mk('div', 'list');
+      for (const r of b.rows || []) {
+        const whole = r.action && !r.button, row = mk(whole ? 'button' : 'div', 'row' + (r.mark ? ' ' + r.mark : ''));
+        row.appendChild(mk('span', 'rt', r.text));
+        if (r.sub) row.appendChild(mk('small', '', r.sub));
+        if (whole) act(row, r.action);
+        if (r.button) row.appendChild(act(mk('button', 'act', r.button), r.action));
+        box.appendChild(row);
+      }
+      return box;
+    },
+    bars(b) {
+      const box = mk('div', 'bars');
+      for (const it of b.items || []) {
+        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
+        fill.style.width = v.toFixed(1) + '%';
+        if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
+        row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
+        row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
+        bar.appendChild(fill); row.append(lab, bar, mk('span', '', Math.round(v))); box.appendChild(row);
+      }
+      return box;
+    },
+    buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
+    map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
+      const NS = 'http://www.w3.org/2000/svg', g = b.grid || [], H = g.length, W = Math.max(0, ...g.map(r => r.length)), at = (i, j) => (g[j] || '')[i] || '.';
+      const sv = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
+      const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
+      pat.appendChild(sv('rect', { width: .8, height: .8, class: 'm-hbg' })); pat.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: .8, class: 'm-hl' }));
+      const defs = sv('defs', {}); defs.appendChild(pat); svg.appendChild(defs);
+      for (let j = 0; j < H; j++) for (let i = 0; i < W;) {
+        const k = at(i, j); let e = i; while (e < W && at(e, j) === k) e++;
+        const r = b.rooms[k];
+        if (k !== '.' && r) { const x = sv('rect', { x: i, y: j, width: e - i, height: 1, class: 'm-' + r.kind + (k === b.pick ? ' pick' : '') + (k === b.goal ? ' goal' : '') }); x.dataset.room = k; svg.appendChild(x); }
+        i = e;
+      }
+      let d = '';
+      for (let j = -1; j < H; j++) for (let i = -1; i < W; i++) {
+        const k = at(i, j);
+        if (k !== at(i + 1, j) && (k !== '.' || at(i + 1, j) !== '.')) d += 'M' + (i + 1) + ' ' + j + 'v1';
+        if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
+      }
+      svg.appendChild(sv('path', { d, class: 'm-wall' }));
+      if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
+      svg.onclick = e => { const k = e.target && e.target.dataset && e.target.dataset.room; if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+      return svg;
+    },
+    dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
+  };
+  const skin = {
+    wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
+    open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
+    close() { el.hidden = true; drawn = null; layout(); if (back && back.focus) back.focus(); },
+    button() {
+      let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
+      btn.classList.toggle('low', low);
+      let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
+      if (badge) { badge.hidden = !un; badge.textContent = un; }
+      led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
+    },
+    draw(id, v) {
+      const keep = drawn === id ? body.scrollTop : 0;
+      layout(); head.textContent = id === 'home' ? 'Your device' : v.title; backB.disabled = id === 'home';
+      body.textContent = ''; body.dataset.app = id;
+      for (const b of v.blocks) { const f = blocks[b && b.kind]; if (f) body.appendChild(f(b)); }
+      if (id === 'home') {                     // the app grid, with badges
+        const grid = mk('div', 'apps');
+        for (const a of deviceApps()) {
+          const t = act(mk('button', 'app'), { app: a.id, do: 'open' }), n = deviceBadge(a);
+          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '︎'), mk('span', '', a.title));
+          if (n) t.appendChild(mk('b', '', n));
+          t.setAttribute('aria-label', a.title + (n ? ', ' + n + ' new' : ''));
+          grid.appendChild(t);
+        }
+        body.appendChild(grid);
+      }
+      body.scrollTop = keep; drawn = id;
+    },
+    notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
+  };
+  btn.onclick = () => (DEV.open ? deviceClose() : deviceShow('home'));
+  $('devClose').onclick = deviceClose;
+  backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
+  addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
+  addEventListener('resize', () => { if (DEV.open) layout(); });
+  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it
+  let swipe = null;
+  addEventListener('pointerdown', e => {
+    const cv = e.target && e.target.tagName === 'CANVAS';
+    if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
+    else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
+    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); deviceClose(); }
+  }, true);
+  addEventListener('pointerup', e => {
+    if (!swipe) return; const dy = e.clientY - swipe.y;
+    if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    swipe = null;
+  }, true);
+  return skin;
+})();
+
+// ---- the shim: the old device object. addSection(id, title, render) becomes an app drawn by render(el); an app
+// already registered with deviceApp keeps its id (the native one wins). show('status') is the home screen. ----
+const device = {
+  addSection(id, title, render) {
+    const a = DEVICE_APPS.get(id); if (a && !a.legacy) return;
+    deviceApp({ id, title, order: 70, legacy: true, view: () => ({ title, blocks: [{ kind: 'dom', render }] }) });
+  },
+  open(id) { deviceShow(id || 'home'); },
+  close() { deviceClose(); },
+  show(id) { deviceShow(id === 'status' ? 'home' : id); },
+  refresh() { deviceRefresh(); },
+  get isOpen() { return DEV.open; },
+  get tab() { return DEV.app; },
+};
+
+// ---- the apps. Home: the time and what you're doing (the old Now section), then the grid. ----
+deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
+  const B = [{ kind: 'text', text: clockText(), mark: 'big' }];
+  const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
+  B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
+  if (today.length) say('Today aboard: ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');
+  say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
+  const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
+  if (P.carry.length) say('Carrying: ' + P.carry.join(', ') + '.');
+  if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
+  if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
+  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  return { title: 'Home', blocks: B };
+} });
+
+// Schedule: today as a timeline, with where you're expected right now; tomorrow below
+deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view: () => {
+  const d = SHIP.time.day, m = SHIP.time.min, n = devNow(), B = [{ kind: 'text', text: n.now, mark: 'hot' }];
+  if (n.next) B.push({ kind: 'text', text: n.next });
+  for (const day of [d, d + 1]) {
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
+    B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
+      mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
+  }
+  return { title: 'Schedule', blocks: B };
+} });
+
+// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't
+deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
+  act(verb, arg) {
+    const R = SHIP.device.calendarRemind;
+    if (verb === 'remind') R.per[arg] = R.per[arg] === false ? true : R.per[arg] === true ? false : false;   // default (on) -> Don't -> Remind me -> Don't
+    else if (verb === 'on') R.on = !!arg;
+    else if (verb === 'ahead' && [15, 30, 60].includes(arg)) R.ahead = arg;
+  },
+  view: () => {
+    const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [];
+    for (let d = d0; d < d0 + 14; d++) {
+      const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
+      if (!trad.length && !ship.length) continue;
+      B.push({ kind: 'text', text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), mark: 'head' });
+      const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
+      for (const x of trad) {
+        const p = R.per[x.kind];
+        rows.push({ text: devWhen(x.at) + '  ' + x.title, sub: x.where + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
+          button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
+      }
+      B.push({ kind: 'list', rows });
+    }
+    B.push({ kind: 'text', text: 'Reminders', mark: 'head' }, { kind: 'buttons', items: [
+      { label: 'On', on: R.on, action: { app: 'calendar', do: 'on', arg: true } }, { label: 'Off', on: !R.on, action: { app: 'calendar', do: 'on', arg: false } }] });
+    if (R.on) B.push({ kind: 'text', text: 'How long before:' }, { kind: 'buttons', items: [15, 30, 60].map(a => ({ label: a + ' min', on: R.ahead === a, action: { app: 'calendar', do: 'ahead', arg: a } })) });
+    return { title: 'Calendar', blocks: B };
+  } });
+
+// Jobs (0.35.2, tracks only): you take jobs and turn them in at the job board. Here: yours, its steps and parts, and
+// Track (SHIP.player.track: the tracked one drives the goal arrow, section 15b); what's on the board, to read
+deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
+  act(verb, id) {
+    if (verb === 'track') { SHIP.player.track = SHIP.player.track === null ? id : null; if (SHIP.player.track && typeof clearGoal === 'function') clearGoal(); }
+    else if (verb === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
+  },
+  view: () => {
+    const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
+    if (!jobsOn() || typeof jobsBoard !== 'function') { say('No jobs today.'); return { title: 'Jobs', blocks: B }; }
+    const board = jobsBoard(), mine = myJob();
+    if (mine) {
+      const [title, where] = jobCard(mine), m = mine.machine && machineById(mine.machine), tracked = SHIP.player.track !== null;   // a taken job is tracked until you switch it off (null)
+      say('Yours: ' + title + ', ' + where + '.', 'hot');
+      if (mine.kind === 'chore') {
+        const stops = mine.stops.map(st => { const p = placeById(st.placeId); return (st.tag === 'pickup' ? 'pick up ' + (mine.bring || 'the load') + ' in the ' : st.tag === 'drop' ? 'drop it in the ' : '') + (p ? roomName(p.deck, p.room) || 'room' : 'room') + ' on Deck ' + st.deck; });
+        say(mine.title + '. ' + (mine.parts.length ? 'Bring ' + mine.parts.map(k => 'a ' + k).join(', ') + ' from main storage on Deck 5. ' : '') + 'Go to: ' + stops.join(', then ') + '.');
+      } else if (m) {
+        const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
+        say('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
+      } else say(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
+        : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
+      const step = typeof ixJobStep === 'function' ? ixJobStep() : null;
+      if (step && step.label) say('Next step: ' + step.label + (step.deck ? ' (Deck ' + step.deck + ')' : '') + '.');
+      B.push({ kind: 'buttons', items: [{ label: tracked ? 'Tracking' : 'Track', on: tracked, action: { app: 'jobs', do: 'track', arg: mine.id } }] });
+      say('Turn it in at the job board when it\'s done.');
+    } else say('You take jobs at the job board in the Works bay (Deck 5), and turn them in there when they\'re done.');
+    const open = board.filter(j => !j.claimedBy);
+    if (open.length) {
+      say('On the board', 'head');
+      B.push({ kind: 'list', rows: open.slice(0, 5).map(j => { const [title, where, state, pri] = jobCard(j);
+        return { text: (pri === 'urgent' ? '! ' : '') + title, sub: where + ' · ' + state + (jobTier(j) > PLAYER_TIER ? ' · tier ' + jobTier(j) : ''), mark: pri === 'urgent' ? 'urgent' : null }; }) });
+      if (open.length > 5) say('And ' + (open.length - 5) + ' more on the board.');
+    } else if (!mine) say('Nothing on the board. Enjoy it while it lasts.');
+    if (!mine) B.push({ kind: 'buttons', items: [{ label: 'Show me the board', action: { app: 'jobs', do: 'board' } }] });
+    return { title: 'Jobs', blocks: B };
+  } });
+
+// Maps (0.35.3): each deck as a plan drawn from its deck data (DECKS[n].map and rooms): halls, rooms, locked rooms
+// hatched, the lift, you as a dot on your deck, the goal as a pin. Tap a room on the plan or in the list to pick it;
+// "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
+let mapDeck = null, mapPick = null;
+const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
+deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
+  act(verb, arg) {
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
+    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
+    else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
+    }
+    else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
+  },
+  view: () => {
+    const n = mapDeck && DECKS[mapDeck] ? mapDeck : deckDef.num, def = DECKS[n], rooms = {};
+    for (const [k, r] of Object.entries(def.rooms || {})) {
+      const kind = r.void ? 'void' : r.floor === 'lift' ? 'lift' : r.hall ? 'hall' : mapLocked(n, k) ? 'locked' : r.still || r.spine ? 'service' : 'room';
+      rooms[k] = { name: r.name || k, kind };
+    }
+    const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
+    const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
+    const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
+      { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
+    if (mapPick && rooms[mapPick]) {
+      const r = rooms[mapPick];
+      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      if (r.kind !== 'locked' && r.kind !== 'void') B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
+    }
+    const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
+      .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
+    B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
+    return { title: 'Maps', blocks: B };
+  } });
+
+// Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
+deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
+  const n = SHIP.player.needs, fx = needEffects(n), B = [];
+  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '',
+    mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null })) });
+  for (const k of NEED_KEYS) if (fx.marks[k]) B.push({ kind: 'text', text: (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1], mark: fx.marks[k][0] });
+  const sp = playerSpeed();
+  if (sp !== 1) B.push({ kind: 'text', text: 'Walking at ' + Math.round(sp * 100) + '% speed.' });
+  return { title: 'Needs', blocks: B };
+} });
+
+// Mail: newest first; tap one to read it (and mark it read)
+let mailOpen = null;                                     // the message shown in full
+deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mailUnread() || null,
+  act(verb, id) { if (verb === 'read') { mailOpen = mailOpen === id ? null : id; const m = SHIP.mail.find(x => x.id === id); if (m) m.read = true; } },
+  view: () => {
+    if (!SHIP.mail.length) return { title: 'Mail', blocks: [{ kind: 'text', text: 'No mail.' }] };
+    const B = [];
+    for (const m of SHIP.mail) {
+      B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '● ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
+        mark: m.read ? null : 'new', action: { app: 'mail', do: 'read', arg: m.id } }] });
+      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body });
+    }
+    return { title: 'Mail', blocks: B };
+  } });
+
+// Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
+// phone asks for reduced motion), tips on or off
+deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) st.phosphor = arg; else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
+  view: () => {
+    const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
+    return { title: 'Settings', blocks: [
+      { kind: 'text', text: 'Screen colour' },
+      { kind: 'buttons', items: Object.entries(PHOSPHORS).map(([k, label]) => ({ label, action: { app: 'settings', do: 'phosphor', arg: k }, on: st.phosphor === k })) },
+      { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
+      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') }] };
+  } });
+
+// Wallet: credits and your locker (0.28.10)
+deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () => {
+  const P = SHIP.player;
+  return { title: 'Wallet', blocks: [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }] };
+} });
+
+// =====================================================================
 // 15. PLAYER NEEDS & DEVICE
 // Your needs (hunger, energy, hygiene, fitness, social; 0-100, 100 = fully
 // met) in SHIP.player.needs. They drain with ship time and come back by
@@ -7647,8 +8157,8 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
 // bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
 // There is no fail state.
-// The device is a PLACEHOLDER for the user's design: a button opens a plain
-// panel of sections, added with device.addSection(id, title, render).
+// The device's screens are section 19's apps (0.35.0); device.addSection(id,
+// title, render) still works there as a shim.
 // Sits after 14 like 13 and 14 do; it only touches the player, the deck and
 // the HUD at run time (section 10 and on). Nothing here calls R().
 // Mail (0.28.10): mailSend({ at, from, subject, body }) from any section puts a
@@ -8395,93 +8905,7 @@ function cartLoad(s) {
 SHIP.player.cart = cartLoad(SAVED);
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.player.cart && { ...SHIP.player.cart }; });
 
-// ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
-// device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
-// jobs live in their own data; this only shows them. ----
-// Tabs (0.28.10): a section belongs to a tab (addSection's fourth argument, 'status' if left out); the Mail tab is
-// one section of its own, with the unread count on its tab and the device button.
-const device = (() => {
-  const el = document.getElementById('device'), body = document.getElementById('devBody'), btn = document.getElementById('devBtn'), sections = [];
-  const badge = document.getElementById('devMail'), TABS = [['status', 'Status'], ['mail', 'Mail']];
-  let back = null, tab = 'status';
-  const api = {
-    addSection(id, title, render, inTab = 'status') { const i = sections.findIndex(s => s.id === id); const s = { id, title, render, tab: inTab }; if (i < 0) sections.push(s); else sections[i] = s; api.refresh(); },
-    show(t) { tab = t; api.refresh(); },
-    get tab() { return tab; },
-    open() { back = document.activeElement; el.hidden = false; api.refresh(); document.getElementById('devClose').focus(); },
-    close() { el.hidden = true; if (back && back.focus) back.focus(); },
-    get isOpen() { return !el.hidden; },
-    refresh() {
-      const n = SHIP.player.needs;
-      btn.classList.toggle('low', NEED_KEYS.some(k => n[k] < SLOW_BELOW));
-      const un = mailUnread();
-      if (badge) { badge.hidden = !un; badge.textContent = un; }
-      if (el.hidden) return;
-      body.textContent = '';
-      const bar = document.createElement('div'); bar.className = 'tabs'; bar.setAttribute('role', 'tablist');
-      for (const [id, name] of TABS) {
-        const b = document.createElement('button'); b.className = id === tab ? 'on' : ''; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === tab);
-        b.textContent = name + (id === 'mail' && un ? ' (' + un + ')' : ''); b.onclick = () => api.show(id); bar.appendChild(b);
-      }
-      body.appendChild(bar);
-      for (const s of sections) {
-        if (s.tab !== tab) continue;
-        const box = document.createElement('section'), h = document.createElement('h3'), inner = document.createElement('div');
-        h.textContent = s.title; box.append(h, inner); body.appendChild(box);
-        try { s.render(inner); } catch (e) { inner.textContent = '(this section failed to draw)'; }
-      }
-    },
-  };
-  btn.onclick = () => (el.hidden ? api.open() : api.close());
-  document.getElementById('devClose').onclick = api.close;
-  addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) api.close(); });
-  return api;
-})();
-device.addSection('now', 'Now', el => {
-  const p = document.createElement('p'), q = document.createElement('p');
-  p.className = 'devtime'; p.textContent = clockText();
-  q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
-    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine();
-  el.append(p, q);
-  const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
-  if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
-  if (P.cart) { const r = document.createElement('p'); r.textContent = 'Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')); el.appendChild(r); }
-  if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) { const r = document.createElement('p'); r.textContent = 'Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.'; el.appendChild(r); }
-  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
-});
-device.addSection('wallet', 'Wallet', el => {      // credits and your locker (0.28.10)
-  const P = SHIP.player, p = document.createElement('p');
-  p.textContent = P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.');
-  el.appendChild(p);
-});
-let mailOpen = null;                                     // the message shown in full
-device.addSection('mail', 'Inbox', el => {
-  if (!SHIP.mail.length) { const p = document.createElement('p'); p.textContent = 'No mail.'; el.appendChild(p); return; }
-  for (const m of SHIP.mail) {
-    const b = document.createElement('button'), sm = document.createElement('small');
-    b.className = 'mail' + (m.read ? '' : ' new'); b.textContent = (m.read ? '' : '● ') + m.subject;
-    sm.textContent = m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440); b.appendChild(sm);
-    b.onclick = () => { mailOpen = mailOpen === m.id ? null : m.id; m.read = true; device.refresh(); };
-    el.appendChild(b);
-    if (mailOpen === m.id) { const p = document.createElement('p'); p.textContent = m.body; el.appendChild(p); }
-  }
-}, 'mail');
-device.addSection('needs', 'Needs', el => {
-  const n = SHIP.player.needs, fx = needEffects(n);
-  for (const k of NEED_KEYS) {
-    const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
-    row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
-    lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
-    const mk = fx.marks[k];                              // a bonus (up) or a penalty (down), with its reason below the bars
-    if (mk) { const em = document.createElement('em'); em.className = mk[0]; em.textContent = mk[0] === 'up' ? '▲' : '▼'; em.title = mk[1]; em.setAttribute('aria-label', mk[0] === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
-    row.setAttribute('role', 'meter'); row.setAttribute('aria-label', NEED_LABEL[k]); row.setAttribute('aria-valuenow', Math.round(n[k]));
-    row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
-    bar.appendChild(fill); row.append(lab, bar, num); el.appendChild(row);
-  }
-  for (const k of NEED_KEYS) if (fx.marks[k]) { const p = document.createElement('p'); p.className = 'fx ' + fx.marks[k][0]; p.textContent = (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1]; el.appendChild(p); }
-  const sp = playerSpeed();
-  if (sp !== 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
-});
+// ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // =====================================================================
 // 15b. PLAYER INTERACTIONS
