@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.14
+   STARSHIP CADET: CSV Wren                            build 0.28.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.14';                            // keep in step with the header's build line
+const GAME_BUILD = '0.28.15';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7660,7 +7660,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
     if (!galleyTurn('player')) return false;
     const f = foodFrom('servery'); A.o.dish = f.ok ? f.dish : null; A.o.why = f.why; return true;
   } },
-  eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
+  eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return by the servery.' },
   grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
   fetch:  { mins: 4, pose: 'browse', title: 'Main storage' },   // the job loop (B2): parts off the shelf, the machine's panel, parts back
   job:    { mins: 3, pose: 'work', title: 'Your job' },
@@ -7851,7 +7851,7 @@ function actBegin() {
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
-  const A = ACT; if (!A) return; ACT = null;
+  const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if (abort) return;
   player.face = player.obj.rotation.y = A.face;
@@ -7903,6 +7903,20 @@ function playerChat(p) {
   device.refresh();
   return gain;
 }
+// your tray (0.28.15, the user's note): like the crew, you carry a tray from the servery (or the queue) to your mess
+// seat ('+tray', section 8b's prop: Walker.update, then the stand-in sliding in); seated, it sits on the table in
+// front of you while you eat (one small mesh made at load in the mess's own tray colours, shown only then); when
+// you're done it goes to the return with you. The grab shelf has no tray.
+const TRAY_ON = (() => {
+  const g = new THREE.Group(); box(.42, .02, .3, MESS.trays[0], 0, 0, 0, g); cyl(.09, .09, .016, MESS.white, -.06, .018, .02, g, 16);
+  cyl(.035, .03, .08, MESS.white, .13, .05, -.07, g, 10); g.visible = false; scene.add(g); return g;
+})();
+const TRAY_REACH = .42;                                  // from your seat's spot toward the table (the long tables' benches and the round tables' chairs)
+function trayOnTable(A) {
+  if (!A) { TRAY_ON.visible = false; return; }
+  const f = A.to.face || 0; TRAY_ON.position.set(A.to.x + Math.sin(f) * TRAY_REACH, .78, A.to.z + Math.cos(f) * TRAY_REACH);
+  TRAY_ON.rotation.y = f; TRAY_ON.visible = true;
+}
 // once a frame: the walk there, sliding into the place, the time it takes, and stepping back out
 function actUpdate(dt, t) {
   const A = ACT;
@@ -7916,7 +7930,7 @@ function actUpdate(dt, t) {
   };
   let pose = A.pose;
   if (A.phase === 'in') {
-    if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = 'walk';
+    if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = A.kind === 'eat' && A.o.fed ? 'walk+tray' : 'walk';
   } else if (A.phase === 'do') {
     if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
   }
@@ -7925,6 +7939,7 @@ function actUpdate(dt, t) {
     if (go(p.x, p.z)) { actEnd(false); return; }
     pose = 'walk';
   }
+  trayOnTable(A.kind === 'eat' && A.phase === 'do' && A.spot && A.spot.pose === 'sit' ? A : null);
   A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
   A.body.update(dt, t);
 }
@@ -7953,7 +7968,8 @@ function playerUpdate(dt, t) {
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
-  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0;
+  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : false;   // a tray from the servery to your seat (0.28.15)
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower

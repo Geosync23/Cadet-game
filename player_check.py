@@ -70,7 +70,7 @@ TAP = r"""(({ title, near }) => {
   if (!done) { it[0].hit.getWorldPosition(_wp); approach(_wp.clone(), it[0].front, it[0].depth, () => toast(it[0].t, it[0].x)); }
   return done;
 })"""
-STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10],
+STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.pose, Math.round(ACT.done * 10) / 10, player.holding === undefined ? null : player.holding, typeof TRAY_ON !== 'undefined' && TRAY_ON.visible],
   needs: Object.fromEntries(NEED_KEYS.map(k => [k, Math.round(SHIP.player.needs[k] * 10) / 10])), basket,
   visible: player.obj.visible, toast: document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent,
   time: hhmm(SHIP.time.min), calls: renderer.info.render.calls, deck: deckDef.num })"""
@@ -214,6 +214,12 @@ with sync_playwright() as pw:
     check(tp is True and ('queue' if joins else 'tray') in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'servery: should sit at a mess seat to eat')
     body_check('eat', 'hunger', 55, b, e, seen, None)
+    if g.ev("typeof TRAY_ON !== 'undefined'"):              # your tray (0.28.15): carried to the seat, on the table while you eat, gone after
+        carried = any(a[0] == 'eat' and a[2] == 'walk' and a[5] == 'tray' for a in seen)
+        on_table = any(a[0] == 'eat' and a[2] == 'do' and a[6] for a in seen)
+        after = g.ev("[TRAY_ON.visible, player.holding]")
+        print('  the tray: carried to the seat', carried, '| on the table while eating', on_table, '| after: on the table, in hand', after)
+        check(carried and on_table and after == [False, False], f'the tray: carried {carried}, on the table {on_table}, after {after}')
     check(peak < BUDGET, f'draw calls {peak} over {BUDGET}')
     # the galley's queue (section 16, 0.29.6): galleyJoin gives the back of the line and your turn. The real galley when the
     # build has it (a combined build), else stand-ins shaped like it
