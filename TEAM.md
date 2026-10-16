@@ -18,6 +18,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 - Report to the lead with `send_message` after each push: files, what changed, open questions.
 - The user sends every request through the lead, and the lead hands out the work.
 - Before closing a session, the lead checks that it's idle and has no unfinished request.
+- **Handover before auto-summarizing (the user's rule, 2026-10-16).** The user prefers our handover method to the automatic summary. Every session (lead and helpers) warns early when its memory is getting full, or when the next task looks big enough to fill it: helpers tell the lead, and the lead tells the user in plain words. Don't wait for the automatic summary. Then write a handover brief for a fresh session in our usual style (role, branch, build numbers, current state, open work, the user's decisions, how to test) and keep TEAM.md current, so the new session starts clean.
 
 ## Roster
 
