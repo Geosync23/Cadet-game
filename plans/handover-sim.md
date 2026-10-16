@@ -1,6 +1,6 @@
 # Handover: the sim engineer
 
-Written at build 0.40.8 so a fresh session can take over. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
+Written at build 0.40.8 and brought up to date at 0.26.14 (Pillar 3, 16 October), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
 ## Role, branch, builds
 
@@ -9,7 +9,9 @@ Written at build 0.40.8 so a fresh session can take over. The detailed notes are
   - 0.15.1: time and saving;
   - 0.21.x: schedules;
   - 0.22.x: crew on deck and day_check;
-  - 0.26.1 to 0.26.7: Pillar 2 A1, "every room in use".
+  - 0.26.1 to 0.26.7: Pillar 2 A1, "every room in use";
+  - 0.26.8 to 0.26.12: the answers pass (time, feelings, habits, window seats, held things, Deck 1 routines, event hooks, event seats held);
+  - 0.26.13 and 0.26.14: Pillar 3 appointments, doors and guests.
   - Combined builds come from the lead on `claude/ship-integration`.
 - **Sections I own in `starship-cadet.html`:**
   - **13. SHIP TIME & SAVE.** It sits after section 5, not at the end, because the clock drives the light and the save is read before the first deck is built.
@@ -22,7 +24,7 @@ Written at build 0.40.8 so a fresh session can take over. The detailed notes are
 ### Time (section 13)
 
 - `SHIP.time = { day, min }`. Day 1 is a Monday, and `min` is fractional.
-- `SHIP_RATE = 1440 / 1800`: one ship day is 30 real minutes.
+- `SHIP_RATE = 1080 / 1800` since 0.26.8: 18 ship hours take 30 real minutes, so a whole day is 40.
 - Helpers:
   - `shipNow()` gives absolute ship minutes, which is the unit everything else uses;
   - `setShipNow(abs)` sets the clock;
@@ -144,3 +146,95 @@ Written at build 0.40.8 so a fresh session can take over. The detailed notes are
 - What is a window seat? If a few places get marked as by a window, the habit starts working.
 - Should the gym get a morning slot, or more equipment, so the fitness-minded crew actually go?
 - A lunch? The design says two meals, and hunger is fine with two, but the galley is quiet from 10:00 to 16:00.
+
+## Pillar 3 (0.26.13 and 0.26.14) and what's left
+
+The details are in DEV_NOTES, under "The answers pass", "Pillar 3: appointments and doors" and "Pillar 3: guests". The plan is `plans/pillar3-plan.md` on `claude/lead-pillar1`, rows C3, C7, C8 and C10.
+
+### Built
+
+- **Appointments (C3, the crew side):**
+    - `apptReply(p, a)` answers from the person's real day (`planWhere`): yes, `later` with a time, or no.
+    - `apptWhere` lays an accepted appointment over the plan, first in `whereIs`: the person leaves in time for the lift and the walk, then waits `APPT_WAIT` (15) minutes.
+    - `apptTick`, run from section 13's clock, sets `kept` or `missed`. The sim engineer owns those two statuses; the device engineer (session_014TpEMbWarRFJM8BHC9WM8c, 0.35.6) sets 'yes' and reads the rest.
+    - `SHIP.device` is saved by the device in `save.device`.
+- **The device engineer's open question:** which place to meet at. I answered: any free placeId. Take the seats in the room the player picked from `schedData().shared`, and skip any that `shipDay(d).occ` holds at that time. A helper for this, say `apptPlaces(room, at, len)`, would be a good small first build for you.
+- **Doors (C10):**
+    - `doorOpenFor(room, who, t, deck)` is true from 15 minutes before an accepted appointment in that room to 15 after, for the player and the crew in `with`.
+    - Section 4's `edgeBlocks` asks it for 'closed' doors (one inert line), and section 10's `crewNearDoor` slides the door open for you.
+    - The room's inside must be walkable. The Captain's quarters is.
+- **Guests (C8):**
+    - `guestPeople()` adds `GUESTS` to `schedPeople()`.
+    - `guestTrim` handles arrival and departure at 10:00 by the Deck 5 lift, with the guest 'away' (deck 0) outside their stay.
+    - `GUEST_LEISURE` and `GUEST_REST` hold the template weights.
+    - `dayReport` judges only whole days aboard.
+
+### Loose ends with guests (do these first)
+
+The crew designer's real data arrived after 0.26.14 (0.16.8 and 0.16.9, `claude/deck-plans-1-2-6` 6c895ba), and it differs from what 0.26.14 assumes:
+
+1. **`arrive` and `leave` are days of the year (1–364), not ship days.** Map with `(d - 1) % 364 + 1` in `aboard`, `aboardAllDay` and `guestTrim`. A stay might cross the year end, where `leave` is less than `arrive`.
+2. **Event guests have `arrive` and `leave` as null, plus `event` and `stay` (days).** Section 18 sets their day. Until it does, `aboard` must treat them as away; today `!p.arrive` reads as "always aboard". Fix that before merging 0.16.9.
+3. **`GUEST_TEMPLATES`** (section 9) replace my `GUEST_LEISURE`. Each is `{ label, day, evening, meals, wake, bed }`.
+    - `day` and `evening` are `[deck, type, weight]` lists.
+    - `['cabin', w]` means the guest's own cabin, which is my rest option.
+    - `['work', w]` means the entry's own `work` place.
+    - Survivors also have `first` (days) and `firstDay` (the infirmary for the first days). Delegates have `formal: true`, for the events' formal dinners.
+    - Skip types with no places, as LEISURE does.
+4. **Draw calls:** 60 guests a year means 1–2 aboard at a time, so draw calls aren't a worry. Still, run day_check on a day with a guest aboard.
+
+### Still to do: event routines (C7)
+
+The events engineer is now session_01GW9QtevJxaMQzzCGPBHaxb (section 18, `claude/ship-events`, 0.34.8 492c03c). I asked for:
+- `eventOn(d)`: the event and phase in force on ship day d, with the minute each phase starts. Plans are cached per day, so `eventNow()` (today only) isn't enough.
+- The routines as data.
+
+Agree the field names with them. What exists in 0.34.7 and later:
+- `eventNow(t)` and `eventMod(kind, key, t)`;
+- `SHIP_EVENTS[id].routines[phase]`;
+- `SHIP.event.startDay` and `eventDueDay()`.
+
+The ion storm's routine keys (from the lead):
+- `eventMod('routine', rule)` with these rules:
+    - `doubleShift` for dept:command and dept:helm;
+    - `patrol` for dept:watch;
+    - `closed` for '3|Bow lounge' and 'type:callhome';
+    - `stayIn` for everyone, with shares .4 and .5;
+    - `rush` for type:callhome, at [600, 1080] on the resolution day.
+- `eventMod('needs', 'sleep' | 'social')`, for `crewNeeds` and `needsEst`.
+- The party gathering in the event's moments: the bow lounge, day 3 at 19:00, for 120 minutes, who .7. Fill it from the deck architect's `gatherSpots('bow-lounge')` (0.38.0, `claude/decks-p3`). Venues are type 'event' places with `gather: '<venue>'`, in fill order: leads first, then their own room nearest, then the spill rooms.
+
+The details are on that branch, in DEV_NOTES "Ship-wide events" → "The ion storm (0.34.8)".
+
+How I'd fit them into section 14:
+- **Gatherings:** `gatherings(p, d, F)` is the slot. Return `{ at, dur, where: [[deck, key]], tag }` entries for the person. `leisureUntil` already stops for them, as for section 18's `eventPlan`.
+    - A gathering of 70+ needs every spot from `gatherSpots`. One way is a pool key per venue in `schedData`, as `'n|@<event>'` does for `event` places.
+    - Hold the venue's spots in `occ.res`, as 0.26.12 does for event seats.
+- **Rules:**
+    - `closed`: drop the places in that room or type from `take`'s pools for the day (filter in `take`, by `pl.room` and `pl.type`).
+    - `doubleShift`: lengthen `F.workEnd` in `schedFrame` for that department.
+    - `stayIn`: weight `[bedDeck, 'rest']` up, by the share.
+    - `rush`: pull the call-home special forward into the window.
+- **Caches:** an event changes the plans of days already planned. Clear `SHIP_DAYS` and `SCHED_DATA` when the event starts or changes phase. Section 18 already clears them once at load.
+- **Testing:** day_check on an event day (set `SHIP.event` by hand), dayReport over the event's days, and the draw calls at the party, which must stay under 450.
+
+### Gotchas from this round
+
+- **One-minute checks break when schedules move.** food_check's rush test once looked at the single minute 17:35, and the Deck 1 handover moved the queue by 10 minutes. When a check fails after a schedule change, compare with a copy that has the change switched off. If that copy is identical, the check is too narrow.
+- **Merging the bridge architect's branch:** keep section 14's `EVENT_ONLY` line in `schedData`, not their `!p.event` or `p.type !== 'event'` filter. Theirs also hides the event places from the per-event lists.
+- **Running checks in parallel times out.** machine_check and the scratch tests fail to load when three browsers run at once. Run at most two together, and rerun a "failed to start" alone.
+- **edgeBlocks (section 4) runs at load**, before section 10's helpers exist, so it works out the edge's tiles inline rather than calling `edgeTiles`.
+
+### Seating by friendship (asked by the social engineer after the handover)
+
+The social engineer (session_01DzZ669spGpdSdVMYzUog2N, section 20, `claude/social`) has two affinity functions:
+- `affinity(a, b)` is live. It drifts each hour from the plans, so section 14 must not plan from it: that would be a loop.
+- `affStart(p, q)` is pure. It comes from roster data and a seed only.
+
+My answer to them:
+- **Seat from `affStart`,** through an `affinityPlan(a, b, d)` they'll provide.
+- **A weekly snapshot is unsafe,** because days get planned before their first hour runs and are re-planned after a reload. That happens through tomorrow's `shiftBlocks`, the sleep skips, the week-back needs, and day_check planning d+3 first.
+- **Where it goes:** in `take()`'s loop over `pool`, for mess-seat and lounge-seat only.
+    - First, seats within about 2 tiles of an already-planned person with affinity ≥ 30.
+    - Skip seats next to anyone at ≤ −30.
+    - `occ` must then store who holds a place: `[from, to, personId]`. `isFree` reads only the first two fields, so that's compatible.

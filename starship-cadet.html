@@ -7115,7 +7115,7 @@ const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'gu
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = ROSTER.concat(ROSTER_GUESTS)
+  const people = ROSTER.concat(ROSTER_GUESTS, guestPeople())   // and the visitors aboard for a few days (Pillar 3)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
   // a machine's panel place isn't handed out as a desk (A5b). Event places (an `event` field) are listed by event
@@ -7296,6 +7296,7 @@ function apptTick() {
 // accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
 // with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
 function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -7303,6 +7304,60 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
     if (who === 'player' || (who && who.isPlayer) || a.with.includes((who && (who.p || who).id) || who)) return true;
   }
   return false;
+}
+// ---- guests (Pillar 3, C8): visitors aboard for a few days, from the crew designer's GUESTS (section 9) ----
+// GUESTS: [{ id, name, spec | looks, role, cabin (their bed place id), arrive, leave (days of the year, 1-364; a
+// stay may cross the year's end), template, work?, habits? }]. Event guests have arrive and leave null, and `event`
+// and `stay` (days) instead: section 18 says when they're aboard through eventGuestDays(g) -> [arrive, leave] in
+// ship days, or null; until it does, they're away. A guest lives off duty, from their GUEST_TEMPLATES entry
+// (section 9): `day` places until 17:00 and `evening` ones after, as [deck, type, weight] (types with no places
+// skipped), ['cabin', w] (resting in their own cabin) or ['work', w] (their own `work` place); a survivor has
+// `firstDay` for their first `first` days; `wake` and `bed` are the times they get up and turn in. They come aboard
+// at 10:00 on `arrive` (by the shuttle bay, Deck 5) and leave at 10:00 on `leave`; before and after, they're 'away'
+// (deck 0: on no deck, so no one draws them). Nothing changes without GUESTS.
+const GUEST_AT = 600;                                    // arrivals and departures, 10:00
+const guestTpl = p => p.guest && typeof GUEST_TEMPLATES !== 'undefined' && GUEST_TEMPLATES[p.template] || null;
+const strSeed = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+function guestPeople() {
+  if (typeof GUESTS === 'undefined' || !Array.isArray(GUESTS)) return [];
+  return GUESTS.filter(g => g && g.id && (g.cabin || g.bed)).map(g => ({ ...g, looks: g.looks || g.spec, rank: 'guest', dept: g.dept || 'guest', shift: 'day',
+    rota: { offDays: [] }, work: null, guestWork: g.work || null, bed: g.bed || g.cabin, habits: g.habits || [], seed: g.seed || strSeed(g.id), guest: true }));
+}
+// where a guest's stay stands on ship day d: 'away', 'arrive', 'leave' or 'in' (aboard all day); crew are always 'in'.
+// Stays from the data are days of the year; an event guest's are ship days from section 18
+function guestStay(p, d) {
+  if (!p.guest) return 'in';
+  let a = p.arrive, l = p.leave, y = d;
+  if (a == null) { const ev = typeof eventGuestDays === 'function' ? eventGuestDays(p) : null; if (!ev) return 'away'; [a, l] = ev; }
+  else y = (d - 1) % 364 + 1;                            // the day of the year
+  if (y === a) return 'arrive';
+  if (y === l) return 'leave';
+  return (a <= l ? y > a && y < l : y > a || y < l) ? 'in' : 'away';   // a <= l, or across the year's end
+}
+const aboard = (p, d) => guestStay(p, d) !== 'away';
+const aboardAllDay = (p, d) => guestStay(p, d) === 'in';
+// a guest template's list as leisure options: 'cabin' is rest, 'work' their own work place. Weights count double,
+// so the template outweighs a habit or two (a window-seat habit alone weighs 20)
+const guestOpts = (p, list, bedDeck) => (list || []).map(o => o[0] === 'cabin' ? [bedDeck, 'rest', 2 * o[1]]
+  : o[1] === 'work:infirmary' && p.template === 'survivor' && guestWard(o[0]) ? [o[0], 'patient-bed', 2 * o[2]]   // a patient: the ward's beds when the deck has them
+  : o[0] === 'work' ? (p.guestWork ? [p.guestWork.deck, p.guestWork.place, 2 * o[1]] : null) : [o[0], o[1], 2 * o[2]]).filter(Boolean);
+const guestWard = n => (schedData().shared.get(n + '|patient-bed') || []).length > 0;
+// which day of their stay day d is for a guest: 1 on the day they arrive (counted up to `max`; past it, max + 1)
+const guestDayNo = (p, d, max = 7) => { for (let i = 0; i < max; i++) if (guestStay(p, d - i) === 'arrive') return i + 1; return max + 1; };
+// a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
+function guestTrim(p, d, segs) {
+  if (aboardAllDay(p, d)) return segs;
+  const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
+  if (!aboard(p, d)) return [away(B, B + 1440)];
+  const cut = B + GUEST_AT, arriving = guestStay(p, d) === 'arrive', out = [];
+  if (arriving) {
+    out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
+    for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
+  } else {
+    for (const s of segs) if (s.from < cut - 10) out.push({ ...s, to: Math.min(s.to, cut - 10) });
+    out.push({ from: cut - 10, to: cut, act: 'off', deck: 5, type: null, placeId: null, tag: 'leave' }, away(cut, B + 1440));
+  }
+  return out;
 }
 // ---- habits that change slowly (answer 18): a few changes a month, the same in every game ----
 // From the second week on, each week has 0, 1 or 2 changes (about 3.5 a month): someone takes up a habit
@@ -7333,7 +7388,7 @@ const HABIT_WEEKS = [[]];                                // week w (days 7w+1 ..
 let HABIT_SAVED = null;                                  // the saved log, kept for the weeks it covers
 function habitWeek(w) {
   while (HABIT_WEEKS.length <= w) {
-    const k = HABIT_WEEKS.length, ppl = schedPeople(), out = [], d0 = 7 * k + 1;
+    const k = HABIT_WEEKS.length, ppl = schedPeople().filter(q => !q.guest), out = [], d0 = 7 * k + 1;
     if (HABIT_SAVED && HABIT_SAVED.some(c => c.day > 7 * k + 7)) { HABIT_WEEKS.push(HABIT_SAVED.filter(c => c.day >= d0 && c.day < d0 + 7)); continue; }
     const U = j => schedU(9100, k, j), n = U(0) < .35 ? 0 : U(0) < .8 ? 1 : 2;
     // the crew designer's own changes first (ROSTER[i].habitShifts: [{ add?, drop?, why }], why a whole sentence),
@@ -7393,12 +7448,46 @@ function gatherings(p, d, F) {
   if (p.rank === 'captain' && !(F.night && F.works) && U(514) < .75) out.push({ at: 1170 + Math.round(30 * U(515)), dur: 4, where: [[1, '@walk']], tag: 'stroll', walk: true });
   return out;
 }
+// ---- ship-wide events' routines (Pillar 3, C7): section 18's SHIP_EVENTS[id].routines and needs ----
+// evDay(d): the day in 10-minute slots (an event's phases start on the 10 minutes), each null or { rules, sleep, social,
+// startDay }: rules is section 18's eventRoutines(t), the whole list in force (eventMod('routine', key) finds only
+// the first match), sleep and social the needs' multipliers (eventMod('needs', ...)). Read through eventNow, which is pure for any minute, so a day planned ahead or again agrees with play.
+// Cached per day; shipDay clears the cache and the plans when the running event or the log of past ones changes.
+// The rules: doubleShift (schedFrame: the day shift works on to 20:30 with dinner at the station, the night shift to
+// 07:15, so the bridge is never empty and the two never meet at a shared desk), patrol (the Watch walks the decks in turn), closed (take() passes those places by), stayIn (that
+// share of free time in their own quarters), rush (a call owed: a booth at the first chance in `at`). Inert with no event.
+const EV_DAY = new Map(); let EV_SIG = '';
+const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0);
+function evDay(d) {
+  if (EV_DAY.has(d)) return EV_DAY.get(d);
+  let out = null;
+  try {                                                  // before section 18 has run: nothing, and nothing kept
+    if (typeof eventNow !== 'function' || typeof EV_READY === 'undefined') return null;
+    for (let i = 0; i < 144; i++) {
+      const t = (d - 1) * 1440 + i * 10, now = eventNow(t); if (!now) continue;
+      const rules = typeof eventRoutines === 'function' && eventRoutines(t).length ? eventRoutines(t) : null;
+      const sleep = eventMod('needs', 'sleep', t), social = eventMod('needs', 'social', t);
+      if (rules || sleep || social) (out || (out = new Array(144).fill(null)))[i] = { rules: rules || [], sleep: sleep || 1, social: social || 1, startDay: d - now.day };
+    }
+  } catch (e) { return null; }
+  EV_DAY.set(d, out);
+  if (EV_DAY.size > 40) EV_DAY.delete(EV_DAY.keys().next().value);
+  return out;
+}
+const evAt = abs => { const d = Math.floor(abs / 1440) + 1, sl = evDay(d); return sl ? sl[Math.max(0, Math.min(143, Math.floor((abs - (d - 1) * 1440) / 10)))] : null; };
+const evWho = (who, p) => !who || who === 'all' || who === 'dept:' + p.dept;
+const evRule = (abs, rule, p) => { const e = evAt(abs); return e && e.rules.find(r => r.rule === rule && (!p || evWho(r.who, p))) || null; };
+// a place closed at ship minute abs: where 'type:<type>' or '<deck>|<room key>'
+const evClosed = (pl, abs) => { const e = evAt(abs); return !!e && e.rules.some(r => r.rule === 'closed' && (r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room)); };
+// owed a call when comms come back: section 18's callOwed (the calls-home crew and about a third of the rest)
+const evOwed = (p, e, d) => p.rank !== 'guest' && (typeof callOwed === 'function' ? callOwed(p, e.startDay) : habitsOn(p, d).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33);
 function schedFrame(p, d) {
   const U = k => schedU(p.seed, d, k), H = new Set(habitsOn(p, d)), shape = WEEK_SHAPE[weekday(d)];
   const gp = shiftBlocks(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
-  let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
+  const gt = guestTpl(p);                                                   // a guest keeps their template's hours
+  let bed = (gt ? gt.bed : 1365) + jit(3) + (shape.late || 0);              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
   const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
@@ -7408,7 +7497,10 @@ function schedFrame(p, d) {
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
   else { f.workStart = 480 - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 1020 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
-  let wake = 375 + jit(10);                                                 // about 06:15
+  if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
+    f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
+  }
+  let wake = (gt ? gt.wake - 45 - 45 * U(13) : 375) + jit(10);            // about 06:15 (a guest's lie-in is in their template)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
@@ -7443,6 +7535,7 @@ function schedBuild(p, d, occ, S) {
   const bedDeck = deckOf(p.bed), desk = rot ? rot.id : S.desks.get(p.id) || null, wd = rot ? rot.deck : p.work && p.work.deck;
   const wtype = rot ? rot.type : p.work && p.work.place, deskAnim = placeAnim(desk && S.byId.get(desk));
   const N = needsEst(p, d);                               // the needs that steer today's choices
+  const EVD = evDay(d), shut = EVD && EVD.some(e => e && e.rules.some(r => r.rule === 'closed'));   // a ship-wide event today (C7)
   const segs = []; let t = 0, deck = bedDeck;
   const deck3Full = (a, b) => { const h = occ.heads; for (let m = Math.max(a, 1020); m < Math.min(b, 1440); m++) if (h[m] >= DECK3_EVENING_MAX) return true; return false; };
   // free from a to b (minutes from midnight). An event's own places are held for it from 5 minutes before it starts
@@ -7472,6 +7565,7 @@ function schedBuild(p, d, occ, S) {
     } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
   };
   // take a free place of one of `opts` ([deck, type] pairs, best first) for `dur` minutes, waiting up to `wait`
+  // (a gathering's crowd spots, `gather` places from the deck architect, fill in their order: nearest the focus first)
   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
   const take = (act, opts, dur, o = {}) => {
     for (const [dk, type] of opts) {
@@ -7479,7 +7573,7 @@ function schedBuild(p, d, occ, S) {
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
-      const fav = Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
+      const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       for (let s = arrive; s <= arrive + wait; s++) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
@@ -7487,6 +7581,7 @@ function schedBuild(p, d, occ, S) {
         for (let i = 0; i < pool.length; i++) {
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
+          if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
@@ -7497,7 +7592,22 @@ function schedBuild(p, d, occ, S) {
     }
     return null;
   };
-  const work = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
+  const desk1 = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
+  // a ship-wide event's patrol (C7): spells at their own station, between them a quarter of an hour at another deck's
+  // lift lobby or a bench, the decks in turn. The rides count as the shift (tag 'patrol')
+  const patrolTag = () => { const l = segs[segs.length - 1]; if (l && l.act === 'commute') l.tag = 'patrol'; };
+  const patrol = to => {
+    const ring = [3, 4, 5, 1, 6, 2], k0 = Math.floor(6 * U(119));
+    for (let n = 0; t < to; n++) {
+      desk1(Math.min(to, t + 30 + Math.round(20 * U(120 + n % 20))));
+      if (to - t < 2 * C + 25) { desk1(to); break; }
+      const dk = ring[(k0 + n) % 6]; if (dk === wd) continue;
+      go(dk); patrolTag();
+      if (!take('work', [[dk, 'lift-wait'], [dk, 'bench']], 15, { tag: 'patrol', min: 5, by: to - C })) seg('work', t + 10, null, null, { tag: 'patrol' });
+      go(wd); patrolTag();
+    }
+  };
+  const work = to => (EVD && to > t && evRule(B + t, 'patrol', p) ? patrol(to) : desk1(to));
   const workAt = (pid, task, to) => {                    // a galley stint: its own station and task
     const pl = pid && S.byId.get(pid);                   // tea on the stool takes the stool's own pose; the dish pit is 'wash'
     const an = pl && pl.anim || (task === 'tea' ? null : task === 'wash' ? 'wash' : placeAnim(pl) || (p.dept === 'galley' ? 'cook' : null)), ex = {};
@@ -7515,10 +7625,19 @@ function schedBuild(p, d, occ, S) {
     const br = [];
     if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
+    if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
+    const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
+    if (ru && !called && evOwed(p, evAt(B + 600), d)) br.push([Math.max(ra[0], t + 15) + Math.round((Math.min(ra[1], to) - 60 - Math.max(ra[0], t + 15)) * U(37)), 'call']);
     for (const [bt, kind] of br.sort((a, b) => a[0] - b[0])) {
       if (bt <= t + 10 || bt >= to - 25) continue;
       work(bt);
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
+      else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
+      else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
+        called = true; const n0 = segs.length;
+        if (take('callhome', [[3, 'callhome']], 20, { wait: 20, min: 10, tag: 'rush' })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = 'rush'; }
+        else work(t + 5);
+      }
       else toilet(34);
     }
     work(to);
@@ -7546,12 +7665,15 @@ function schedBuild(p, d, occ, S) {
   };
   // leisure options for this person, weighted: places on the deck you're on count four times, the one you just
   // left counts for little; [bedDeck, 'rest'] is time in your own bunk or cabin
-  let lastLeisure = null;
+  let lastLeisure = null, called = false;
   const leisureOpts = k => {
-    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest';
-    const opts = LEISURE.concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
-      .filter(([dk, type, w, who]) => (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
-      .concat([[bedDeck, 'rest', 3 * (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1)]])   // tired: rest more; lonely: less
+    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest', gt = guestTpl(p);
+    const tired = (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1);   // tired: rest more; lonely: less
+    const opts = (gt ? guestOpts(p, t >= 1020 ? gt.evening : gt.first && guestDayNo(p, d) <= gt.first && gt.firstDay || gt.day, bedDeck) : LEISURE)   // a guest: their template's places (Pillar 3)
+      .concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
+      .filter(([dk, type, w, who]) => type === 'rest' || (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
+      .map(o => o[1] === 'rest' ? [o[0], o[1], o[2] * tired] : o)
+      .concat(gt ? [] : [[bedDeck, 'rest', 3 * tired]])
       .map(([dk, type, w]) => [dk, type, w * (dk === deck ? 4 : 1) * (dk + '|' + type === lastLeisure ? .2 : 1)]);
     const tot = opts.reduce((a, o) => a + o[2], 0); let r = U(k) * tot, i = 0;
     while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
@@ -7569,7 +7691,13 @@ function schedBuild(p, d, occ, S) {
       if (U(k + n * 3 + 2) < .12) toilet(k + n * 3 + 2);
       const opts = leisureOpts(k + n * 3 + 1), pick = opts[0];
       lastLeisure = pick[0] + '|' + pick[1];
-      if (pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 })) {
+      let rang = false;                                  // a ship-wide event (C7): a call owed when comms come back, or staying in
+      if (EVD) {
+        const ru = evRule(B + t, 'rush'), ra = ru && (ru.at || [600, 1080]);
+        if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush' }); }
+      }
+      const si = !rang && EVD && evRule(B + t, 'stayIn', p);
+      if (!rang && ((si && schedU(p.seed, d, 700 + k + n) < si.share) || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
         if (deck !== bedDeck && to - t < C + 15) linger(to); else { go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }
       }
       if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
@@ -7583,6 +7711,7 @@ function schedBuild(p, d, occ, S) {
   };
   const specials = (k, offDay) => {                      // needs: the gym, a call home, the weekly wash
     const out = [];
+    if (p.template === 'survivor') return out;            // a rescued guest rests: no gym, no shopping
     // the gym is likelier the lower fitness is, a call home the lonelier someone is
     const gym = () => take('gym', [[3, 'gym']], 40 + Math.round(20 * U(61)), { wait: 15, min: 25 });
     if (schedU(p.seed, d, 60) < GYM_BASE(p, d) + (100 - N.fitness) / 100 * .9) out.push(gym);
@@ -7669,7 +7798,7 @@ function schedBuild(p, d, occ, S) {
       morning(20, ws - (wd !== 3 ? C : 0) - 1);          // a minute in hand for the wait by the lift
       go(wd);
       shiftWithBreaks(we);
-      evening(specials(50, false), F.bed, false);
+      evening(specials(50, false), F.bed, false, F.double);
     } else {
       morning(20, MEALS.breakfast[1]);
       const sp = specials(50, true);
@@ -7730,13 +7859,14 @@ function crewNeeds(p, t) {
     const dr = k => fx && fx.drain && fx.drain[k] || 1, rs = k => fx && fx.restore && fx.restore[k] !== undefined ? fx.restore[k] : 1;
     const up = (k, to) => { n[k] = cl(n[k] + Math.max(0, to - n[k]) * rs(k)); };   // restore toward `to`, scaled
     n.hunger = cl(n.hunger - 5.5 * h * dr('hunger')); n.fitness = cl(n.fitness - .35 * h * dr('fitness'));
-    if (s.act === 'sleep') up('energy', n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
+    const ev = evAt(s.from);                              // a ship-wide event: sleep refills slower, company is missed sooner (C7)
+    if (s.act === 'sleep') up('energy', n.energy + 14 * h * (ev ? ev.sleep : 1)); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
     n.hygiene = cl(n.hygiene - 2.1 * h * dr('hygiene'));
     if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') up('hunger', tag === 'grab' ? 50 : 100);
     if (s.act === 'wash' && tag !== 'toilet') up('hygiene', type === 'shower' ? 100 : n.hygiene + 15);
     if (s.act === 'gym') { up('fitness', n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
     if (s.act === 'callhome') up('social', n.social + 35);
-    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social'));
+    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social') * (ev ? ev.social : 1));
   }
   for (const k of NEEDS) n[k] = Math.round(n[k]);
   return n;
@@ -7807,6 +7937,7 @@ function jobVisits() {
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
+  if (EV_SIG !== evSig()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
   if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
@@ -7816,7 +7947,9 @@ function shipDay(d) {
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
-  const order = S.people.slice().sort((a, b) => wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
+  // an event's host (section 18's eventPlan, host: true: Pell at his own show) is planned first, so their seat is theirs
+  const host = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.host) ? new Set(S.people.filter(p => eventPlan(p, d).some(e => e.host)).map(p => p.id)) : null;
+  const order = S.people.slice().sort((a, b) => (host ? host.has(b.id) - host.has(a.id) : 0) || wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
   occ.heads = new Int16Array(1440);                      // how many the plans so far put on Deck 3, minute by minute
   // section 18's events: each event's own places are held for it (occ.res: placeId -> [[from, to, eventId]], not a
   // booking, so dayReport never counts them) from 5 minutes before it starts until it ends (releasing them 15 minutes
@@ -7830,7 +7963,7 @@ function shipDay(d) {
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
   for (const p of order) {
-    const plan = schedBuild(p, d, occ, S); plans.set(p.id, plan);
+    const plan = guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : []); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
   const day = { d, plans, occ };
@@ -7883,6 +8016,7 @@ function runDay(day, step = 1, fn) {
 function dayReport(day) {
   const S = schedData(), B = (day - 1) * 1440, rep = { day, people: S.people.length, short: [], meals: [], work: [], double: [], gaps: [], unplaced: {}, peak: {} };
   for (const p of S.people) {
+    if (!aboardAllDay(p, day) || !aboardAllDay(p, day - 1)) continue;   // a guest arriving, leaving or away: not a full day to judge
     const segs = planDay(p, day - 1).concat(planDay(p, day));
     let sleep = 0;
     for (const s of segs) if (s.act === 'sleep' && s.placeId === p.bed) sleep += Math.max(0, Math.min(s.to, B + 1080) - Math.max(s.from, B - 360));
@@ -7893,7 +8027,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff'].includes(s.tag));
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag));
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -12694,13 +12828,14 @@ function dialogueStep(k) {
   D.i++; dialogueDraw();
 }
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
-// a job offered in a meeting: claimed for you if section 17 has posted it (tagged event and eventJob), else remembered
-// in SHIP.event.mine ('wants:<job>') for section 17 to give you when it posts
+// a job offered in a meeting: remembered in SHIP.event.mine ('wants:<job>'), and claimed for you if section 17 has
+// posted it (tagged event and eventJob), else section 17 gives it to you when it posts
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
+  e.mine['wants:' + job] = 1;   // always remembered (the sign-up sheet reads it), even when it's claimed at once (0.41.7)
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
   if (j && typeof claimJob === 'function') return claimJob(j.id);
-  e.mine['wants:' + job] = 1; return false;
+  return false;
 }
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
