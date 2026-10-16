@@ -65,11 +65,12 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
   radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
 .device .crt::before{content:"";position:absolute;left:0;right:0;top:0;height:22%;pointer-events:none;z-index:3;opacity:0;
   background:linear-gradient(to bottom,transparent,rgba(255,255,255,.035),transparent)}
-.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite}
-.device.fx .crt{animation:devflick 4s steps(1) infinite}
+.device.fx .crt::before{opacity:1;animation:devroll 7s linear infinite;will-change:transform}
+.device.fx .crt::after{animation:devflick 4s steps(1) infinite}
+.device .crt,.device #devBody{contain:paint}
 @keyframes devroll{from{transform:translateY(-100%)}to{transform:translateY(560%)}}
-@keyframes devflick{0%{opacity:1}31%{opacity:.985}32%{opacity:1}77%{opacity:.99}78%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
+@keyframes devflick{0%{opacity:1}31%{opacity:.55}32%{opacity:1}77%{opacity:.7}78%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.device.fx .crt::before,.device.fx .crt::after,.device .led.blink{animation:none}.device.fx .crt::before{opacity:0}}
 .device .devhead{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;flex:none}
 .device h2{margin:0;font:inherit;font-size:var(--crt-size);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
 .device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);-webkit-user-select:text;user-select:text;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
@@ -7202,6 +7203,12 @@ function schedU(seed, day, k) {
   return (h >>> 0) / 4294967296;
 }
 const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+// whether you (the player) are on shift on day d: your own rota, like a Works junior's (ROSTER_PLAYER.rota.offDays,
+// section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
+// when used (ROSTER_PLAYER comes later in the file); before it exists, Saturday and Sunday are the days off
+function playerShiftOn(d) {
+  try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; }
+}
 // The galley rota (section 16, the galley engineer). galleyDay(person, day) -> null | { role, wake, bedBy,
 // blocks: [{ from, to, placeId, task }], meals: { breakfast: [from, to], dinner: [from, to] } }, minutes from that
 // day's midnight. role null is a day off. Each block (a stint at one station) is a work segment there; touching
@@ -7529,6 +7536,24 @@ function schedWants(p, d, k, base) {
   return did(d) || (base(d) > .2 && !did(d - 1) && !did(d - 2) && !did(d - 3));
 }
 
+// ---- seating by friendship: section 20's affinityPlan (pure, memoised); nothing changes without it ----
+const SEAT_SOCIAL = new Set(['mess-seat', 'lounge-seat', 'bench']);
+// a person's friends (affinity 30+) and those they don't get on with (-30 or less), aboard or not; guests have none
+function seatMates(p, S) {
+  if (typeof affinityPlan !== 'function' || p.guest) return null;
+  const c = S.mates || (S.mates = new Map()); if (c.has(p.id)) return c.get(p.id);
+  const m = { fr: [], foe: [] };
+  try { for (const q of S.people) if (q !== p && !q.guest) { const a = affinityPlan(p, q); if (a >= 30) m.fr.push(q.id); else if (a <= -30) m.foe.push(q.id); } }
+  catch (e) { return null; }                             // section 20 not loaded yet: seat as before
+  c.set(p.id, m); return m;
+}
+// the seats (mess, lounge, bench) within 2 tiles of a place, on its deck
+function seatNear(S, id) {
+  const c = S.seatNear || (S.seatNear = new Map()); if (c.has(id)) return c.get(id);
+  const pl = S.byId.get(id), xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], out = [];
+  if (pl) { const [x, z] = xy(pl); for (const t of SEAT_SOCIAL) for (const q of S.shared.get(pl.deck + '|' + t) || []) { const [qx, qz] = xy(q); if (Math.hypot(qx - x, qz - z) <= 2) out.push(q.id); } }
+  c.set(id, out); return out;
+}
 // ---- one person's day, taking places from `occ` (placeId -> [[from, to], ...] in absolute minutes) ----
 function schedBuild(p, d, occ, S) {
   const F = schedFrame(p, d), P = schedFrame(p, d - 1), U = F.U, H = F.H, B = (d - 1) * 1440, C = SCHED_COMMUTE;
@@ -7544,7 +7569,14 @@ function schedBuild(p, d, occ, S) {
   // use them then, so ordinary free time doesn't fill the room before the guests are planned
   const isFree = (id, a, b, tag) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y)
     && !(occ.res && (occ.res.get(id) || []).some(([x, y, ev]) => x < B + b && B + a < y && !(tag && (tag === 'ev-' + ev || tag.startsWith('ev-' + ev + '-')))));
-  const hold = (id, a, b) => { if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b]); };
+  const hold = (id, a, b) => {                           // [from, to, who]; occ.who: who -> [[from, to, placeId]] (seating by friendship)
+    if (!occ.has(id)) occ.set(id, []); occ.get(id).push([B + a, B + b, p.id]);
+    if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([B + a, B + b, id]);
+  };
+  // seating by friendship (Pillar 3, with section 20's affinityPlan, pure): at a mess table, a lounge or a bench, a
+  // seat within 2 tiles of a friend already planned there (affinity 30+) comes first, and one next to someone they
+  // don't get on with (-30 or less) last. Without affinityPlan, or with nobody either way, seats are chosen as before
+  const mates = SEAT_SOCIAL && occ.who && seatMates(p, S);
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
   const go = dk => {
     if (dk === deck) return;
@@ -7574,13 +7606,22 @@ function schedBuild(p, d, occ, S) {
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
+      const soc = mates && SEAT_SOCIAL.has(type) && (mates.fr.length || mates.foe.length);
       const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       for (let s = arrive; s <= arrive + wait; s++) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
         if (end - s < (o.min || Math.min(dur, 10))) break;
-        for (let i = 0; i < pool.length; i++) {
+        let pref = null, avoid = null;
+        if (soc) {                                       // the seats beside friends (pref) and beside people to avoid, now
+          const near = (ids, set) => { for (const q of ids) for (const [x, y, pid] of occ.who.get(q) || []) if (x < B + end && B + s < y) for (const n of seatNear(S, pid)) set.add(n); return set; };
+          pref = near(mates.fr, new Set()); avoid = near(mates.foe, new Set());
+          if (!pref.size && !avoid.size) pref = avoid = null;
+        }
+        for (let j = 0; j < (pref ? 3 * pool.length : pool.length); j++) {
+          const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
+          if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           linger(s - (dk !== deck ? C : 0)); go(dk);
@@ -7943,6 +7984,7 @@ function shipDay(d) {
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
+  occ.who = new Map();                                   // who -> the places they hold (seating by friendship)
   S.spare.forEach((pl, i) => {
     const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
@@ -8092,7 +8134,7 @@ function deviceLoad(s) {
     .map((m, i) => ({ id: Number.isInteger(m.id) ? m.id : 1000 + i, title: m.title.slice(0, 80), text: typeof m.text === 'string' ? m.text.slice(0, 2000) : '', at: isFinite(m.at) ? +m.at : 0, pinned: !!m.pinned }));
   const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
-    .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
+    .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
   return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
@@ -8108,14 +8150,20 @@ setTimeout(() => {
   try { if (typeof CHAT_SKIN !== 'undefined' && CHAT_SKIN && !CHAT_SKIN.draw) CHAT_SKIN.draw = DEVICE_SKIN.chat; } catch (e) { /* no section 20 */ }
 }, 0);
 // ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
-// and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
+// and Home. The player works the day shift, with Saturday and Sunday off (section 14's playerShiftOn). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
-// whether you work on day d: every day for now; a rota of your own drops in here
-function playerShiftOn(d) { return true; }
-const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
-  [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
-  [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
-  [{ at: 420, title: 'Bunk inspection', where: 'Bunk 1, Deck 4', len: 20 }, { at: 1290, title: 'The Captain at the piano', where: 'the music room, Deck 4', len: 60, tradition: 'piano' }],
+// 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
+// Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
+const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
+// the weekday shapes (section 14's WEEK_SHAPE) that really put people somewhere. 0.35.18 (the user: "the schedule says
+// there is a Works meeting but nothing happened"): Monday's "All-hands briefing in the Works bay" is gone, as section 14's
+// Monday only starts the day shift 10 minutes early and nobody gathers; the Captain's piano stand-in is gone too (only
+// section 18's traditions are listed). Wednesday's drill (off-duty crew muster by each deck's lift, tag 'drill') and
+// Thursday's bunk tidy for inspection (juniors in the Deck 4 bunk rooms, tag 'inspection') do happen
+const DEV_WEEK = [
+  [], [],
+  [{ at: 900, title: 'Drill: off-duty crew muster by the lift', where: 'the lift lobby on each deck', len: 15 }],
+  [{ at: 400, title: 'Bunk inspection: tidy your bunk', where: 'your bunk, Deck 4', len: 20 }],
   [], [], []];
 const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'Deck ' + w.deck : 'aboard'; };
 // the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
@@ -8141,7 +8189,7 @@ function devDay(d) {
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
-  if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
+  if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
     out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
@@ -8179,7 +8227,7 @@ function deviceTick() {
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
     DEV_REMINDED.add(x.id);
-    const m = SHIP.time.min, onShift = playerShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    const m = SHIP.time.min, onShift = devShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
     deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
   }
 }
@@ -8193,15 +8241,16 @@ function deviceDo(action) {
   if (!action) return;
   const a = DEVICE_APPS.get(action.app);
   if (action.do === 'open' || action.do === undefined) {   // open an app; one with no verb (e.g. { app, with }) hands the app the action
-    if (action.do === undefined && a && a.act) try { a.act('open', action); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
-    deviceShow(action.do === 'open' ? action.arg || action.app : action.app); return;
+    let to = action.do === 'open' ? action.arg || action.app : action.app;   // an app's act may name another app to show (Maps → Roster)
+    if (action.do === undefined && a && a.act) try { const r = a.act('open', action); if (typeof r === 'string' && DEVICE_APPS.has(r)) to = r; } catch (e) { DEV.errors.push(String(e && e.message || e)); }
+    deviceShow(to); return;
   }
   try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
   deviceRefresh();
 }
 // Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
 const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
-const devOnShift = () => playerShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
+const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
 function deviceNotify({ app, text, urgent } = {}) {
   if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
@@ -8291,7 +8340,7 @@ const DEVICE_SKIN = (() => {
   const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
-  let back = null, drawn = null, drawnKey = null;
+  let back = null, drawn = null, drawnKey = null, mapCache = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
     el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
@@ -8325,8 +8374,22 @@ const DEVICE_SKIN = (() => {
     },
     buttons(b) { const box = mk('div', 'btns'); for (const it of b.items || []) { const x = act(mk('button', 'act' + (it.on ? ' on' : ''), it.label), it.action); if (it.on != null) x.setAttribute('aria-pressed', !!it.on); box.appendChild(x); } return box; },
     map(b) {                                   // a deck plan as SVG (DOM, not a canvas): room runs, walls, you, the pick and the goal
+      // 0.35.14 (the performance engineer's advice): the plan is kept while its deck, rooms, pick and goal stay the same,
+      // and only the dots (people, you) are drawn again, so a ship minute with Maps open costs a few circles
       const NS = 'http://www.w3.org/2000/svg', g = b.grid || [], H = g.length, W = Math.max(0, ...g.map(r => r.length)), at = (i, j) => (g[j] || '')[i] || '.';
       const sv = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+      const dots = svg => {
+        const old = svg.querySelector('g.m-dots'); if (old) old.remove();
+        const dg = sv('g', { class: 'm-dots' });
+        for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; dg.appendChild(c); }
+        if (b.you) dg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
+        svg.appendChild(dg);
+        svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
+          if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+        return svg;
+      };
+      const pk = JSON.stringify([b.rooms, b.pick, b.goal]);
+      if (mapCache && mapCache.grid === g && mapCache.key === pk) return dots(mapCache.svg);
       const svg = sv('svg', { viewBox: '-0.5 -0.5 ' + (W + 1) + ' ' + (H + 1), class: 'devmap', role: 'img', 'aria-label': 'Deck plan' });
       const pat = sv('pattern', { id: 'devhatch', patternUnits: 'userSpaceOnUse', width: .8, height: .8, patternTransform: 'rotate(45)' });
       pat.appendChild(sv('rect', { width: .8, height: .8, class: 'm-hbg' })); pat.appendChild(sv('line', { x1: 0, y1: 0, x2: 0, y2: .8, class: 'm-hl' }));
@@ -8344,11 +8407,8 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
-      for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; svg.appendChild(c); }
-      if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
-      svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
-        if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
-      return svg;
+      mapCache = { grid: g, key: pk, svg };
+      return dots(svg);
     },
     form(b) {                                  // text fields; the submit action gets { field id: value }
       const box = mk('form', 'devform'), ins = {};
@@ -8452,21 +8512,22 @@ const DEVICE_SKIN = (() => {
   backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
   addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
   addEventListener('resize', () => { if (DEV.open) layout(); });
-  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it.
+  // 0.35.15 (the user: "sometimes it just pops up"): only the Device button opens it. The swipe up from the bottom edge
+  // is gone, as a drag that began low on the screen (steering) opened it. On a phone a swipe down on the bezel or a
+  // tap on the ship closes it.
   // 0.35.12 (the phone review): the ship closes it on a tap (lifted within 12px and 0.4 s), not at the first touch, so a
   // drag or a pinch over the ship doesn't close it (it doesn't steer or zoom either while the sheet is up); a cancelled
   // touch (the phone took the gesture) forgets the swipe
   let swipe = null;
   addEventListener('pointerdown', e => {
     const cv = e.target && e.target.tagName === 'CANVAS';
-    if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
-    else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
+    if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
     else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); swipe = { x: e.clientX, y: e.clientY, tap: performance.now() }; }
   }, true);
   addEventListener('pointerup', e => {
     if (!swipe) return; const dy = e.clientY - swipe.y;
     if (swipe.tap) { if (Math.hypot(e.clientX - swipe.x, dy) < 12 && performance.now() - swipe.tap < 400) { e.stopPropagation(); deviceClose(); } }
-    else if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    else if (dy > 40) deviceClose();
     swipe = null;
   }, true);
   addEventListener('pointercancel', () => { swipe = null; }, true);
@@ -8517,7 +8578,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   if (n.next) B.push({ kind: 'text', text: n.next });
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
-    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
   }
@@ -8540,7 +8601,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
       if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
-      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: calDay === d ? null : 'Tap to plan this day', mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: (devShiftOn(d) ? '' : 'Day off') + (calDay === d ? '' : (devShiftOn(d) ? '' : ' · ') + 'Tap to plan this day') || null, mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
       if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
@@ -8599,57 +8660,19 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
 // "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
 let mapDeck = null, mapPick = null;
 const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
-// people on Maps (0.35.9): only those whose whereabouts you may know (section 20's crewContacts and its rule:
-// acquaintances and up, or anyone on duty somewhere public; strangers show by their job). On your own deck a dot is
-// where they really are (the walkers); elsewhere it sits in the middle of their room. Tap a dot or a name to pick them;
-// "Go there" points the goal arrow at their room. { app: 'maps', who: crewId } opens Maps on them (the Crew app).
-let mapWho = null, mapFor = null;                         // mapFor: 'appointments' while picking a place to meet (0.35.10)
-const MAP_MID = new Map();                               // 'deck|room' -> [i, j], the room's middle tile
-function mapRoomTile(n, key) {
-  const k = n + '|' + key; if (MAP_MID.has(k)) return MAP_MID.get(k);
-  const g = DECKS[n].map || [], t = []; let sx = 0, sz = 0;
-  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[j].length; i++) if (g[j][i] === key) { t.push([i, j]); sx += i; sz += j; }
-  const c = t.length ? t.sort((a, b) => Math.hypot(a[0] - sx / t.length, a[1] - sz / t.length) - Math.hypot(b[0] - sx / t.length, b[1] - sz / t.length))[0] : null;
-  MAP_MID.set(k, c); return c;
-}
-function mapPeople() {                                   // [{ id, name, label, tierName, role, deck, room, roomName, act }]
-  if (typeof crewContacts !== 'function') return [];
-  let cs; try { cs = crewContacts({ all: true }); } catch (e) { DEV.errors.push('crewContacts: ' + (e && e.message || e)); return []; }
-  const out = [];
-  for (const c of cs || []) {
-    const w = c && c.where; if (!w || !DECKS[w.deck] || w.act === 'sleep' || w.act === 'wash') continue;   // never in their bunk or the shower
-    const rooms = DECKS[w.deck].rooms || {}, room = Object.keys(rooms).find(k => rooms[k].name === w.room) || null;
-    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', named: c.tier >= 1, tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
-  }
-  return out;
-}
-const MAP_ACT = { work: 'at work', breakfast: 'at breakfast', dinner: 'at dinner', lunch: 'at lunch', leisure: 'off duty', off: 'off duty', gym: 'at the gym', sleep: 'asleep', wash: 'washing' };
-const MAP_NEAR = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1], [2, 0], [-2, 0], [0, 2]];   // people sharing a room's middle spread out
-function mapDots(n, people) {                            // the dots on deck n: [{ id, x, y, pick }]
-  const live = new Map(), used = new Map(), out = [];
-  if (n === deckDef.num && typeof DECK_CREW !== 'undefined') for (const a of DECK_CREW) if (a && a.p) live.set(a.p.id, a);
-  for (const q of people) {
-    if (q.deck !== n) continue;
-    const a = live.get(q.id); let c = a ? cellAt(a.x, a.z) : null;
-    if (!c && q.room) { const m = mapRoomTile(n, q.room); if (m) { const k = used.get(q.room) || 0; used.set(q.room, k + 1); const o = MAP_NEAR[k % MAP_NEAR.length]; c = [m[0] + o[0], m[1] + o[1]]; } }
-    if (c) out.push({ id: q.id, x: c[0], y: c[1], pick: q.id === mapWho });
-  }
-  return out;
-}
+// Maps shows no people (0.35.16, the user's answer): where someone is lives in the Roster app below.
+let mapFor = null;                                       // 'appointments' while picking a place to meet (0.35.10)
 deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
   act(verb, arg) {
-    if (verb === 'open' && arg && arg.who) verb = 'who', arg = arg.who;   // { app: 'maps', who } from another app
-    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; mapWho = null; }
-    else if (verb === 'pick') { mapPick = mapPick === arg ? null : arg; mapWho = null; }
-    else if (verb === 'who') {
-      const q = mapPeople().find(x => x.id === arg);
-      if (!q || mapWho === arg) mapWho = null;
-      else { mapWho = q.id; mapDeck = q.deck; mapPick = q.room; }
-    }
+    // someone's whereabouts (section 20's Crew app: { app: 'maps', do: 'person', arg } or { app: 'maps', who }) go to the Roster
+    if (verb === 'open' && arg && arg.who) { rosterPick = arg.who; return 'roster'; }
+    if (verb === 'person' || verb === 'who') { rosterPick = arg; deviceShow('roster'); return; }
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
+    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
-      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick], q = mapWho && mapPeople().find(x => x.id === mapWho && x.room === mapPick);
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: (q ? q.label + ', ' + r.name.toLowerCase() : r.name) + (n !== deckDef.num ? ', Deck ' + n : '') });
-      deviceNotify({ app: 'maps', text: 'Follow the marker to ' + (q ? q.label : 'the ' + r.name.toLowerCase()) + '.', urgent: true }); delete DEV.notes.maps;
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
     else if (verb === 'meet' && mapFor === 'appointments') {
@@ -8667,11 +8690,9 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
-    const people = mapPeople(), who = mapWho && people.find(x => x.id === mapWho);
     const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
       { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
-      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' },
-        people: mapDots(n, people), whoAction: { app: 'maps', do: 'who' } }];
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
     if (mapFor === 'appointments') {
       if (!apptDraft) mapFor = null;
       else {
@@ -8680,26 +8701,75 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
           { kind: 'buttons', items: (id ? [{ label: 'Meet here', action: { app: 'maps', do: 'meet' } }] : []).concat([{ label: 'Cancel', action: { app: 'maps', do: 'unmeet' } }]) });
       }
     }
-    if (who) B.push({ kind: 'text', text: who.label + ': ' + (who.roomName ? 'the ' + who.roomName.toLowerCase() + ', ' : '') + 'Deck ' + who.deck + (MAP_ACT[who.act] ? ', ' + MAP_ACT[who.act] : '') + '.', mark: 'hot' });
     if (mapPick && rooms[mapPick]) {
       const r = rooms[mapPick];
-      if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
       if (r.kind !== 'locked' && r.kind !== 'void' && !mapFor) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
-    }
-    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
-      B.push({ kind: 'text', text: 'People', mark: 'head' });
-      const ps = people.filter(q => q.named).sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck), duty = {};
-      for (const q of people) if (!q.named && q.deck === n) duty[q.role] = (duty[q.role] || 0) + 1;
-      const dl = Object.entries(duty).map(([r, k]) => k + ' ' + r.toLowerCase() + (k > 1 ? 's' : ''));
-      if (dl.length) B.push({ kind: 'text', text: 'On duty on this deck: ' + dl.join(', ') + '.' });
-      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
-      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });   // strangers on duty: dots only
     }
     B.push({ kind: 'text', text: 'Rooms', mark: 'head' });
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
     B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
     return { title: 'Maps', blocks: B };
+  } });
+
+// Roster (0.35.16, the user's answer): everyone aboard by department, people you know first (section 20's relTier;
+// section 20's Crew app is the people you know and what you know about them). Tap a name for one line on where they
+// are now, from section 14's whereIs; asleep or washing reads "In their quarters" (privacy). Go there points the goal
+// arrow at that room. { app: 'roster', who: crewId } opens it on someone. Guests show only while aboard.
+const ROSTER_DEPTS = [['command', 'Command'], ['helm', 'Helm'], ['comms', 'Comms'], ['survey', 'Survey'], ['works', 'Works'], ['watch', 'Watch'],
+  ['infirmary', 'Infirmary'], ['galley', 'Galley'], ['store', 'Ship\'s store'], ['civilian', 'Civilians'], ['guest', 'Guests']];
+const ROSTER_ACT = { work: 'On duty', breakfast: 'At breakfast', lunch: 'At lunch', dinner: 'At dinner', gym: 'At the gym', appt: 'At an appointment' };
+let rosterPick = null;
+const rosterTier = id => { if (typeof relTier !== 'function') return 0; try { return relTier(id) || 0; } catch (e) { return 0; } };
+const rosterRoomName = n => /\d/.test(n) ? n : 'the ' + n.charAt(0).toLowerCase() + n.slice(1);
+function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }: room only when Go there makes sense
+  let w = null; try { w = typeof whereIs === 'function' ? whereIs(p, t) : null; } catch (e) { w = null; }
+  if (!w) return { line: 'Not aboard right now.' };
+  if (w.act === 'sleep' || w.act === 'wash') return { line: 'In their quarters.' };
+  if (w.moving) return { line: 'On the move' + (w.deck ? ', heading for Deck ' + w.deck : '') + '.' };
+  const S = typeof schedData === 'function' ? schedData() : null, pl = w.placeId && S ? S.byId.get(w.placeId) : null;
+  const room = pl && pl.deck === w.deck ? pl.room : null, r = room && DECKS[w.deck] && (DECKS[w.deck].rooms || {})[room], rn = r && r.name;
+  if (rn && mapLocked(w.deck, room) && w.act !== 'work') return { line: 'In their quarters.' };   // a private cabin
+  const at = 'Deck ' + w.deck + (rn ? ', ' + rosterRoomName(rn) : '');
+  return { line: (ROSTER_ACT[w.act] ? ROSTER_ACT[w.act] + ': ' : '') + at + '.', deck: w.deck, room: rn ? room : null, roomName: rn };
+}
+function rosterPeople() {                                // everyone aboard: [{ p, tier }]; guests only while aboard
+  const all = typeof schedPeople === 'function' ? schedPeople() : [], t = shipNow();
+  return all.filter(p => !p.player && (p.rank !== 'guest' && p.dept !== 'guest' || (() => { try { return !!whereIs(p, t); } catch (e) { return false; } })()))
+    .map(p => ({ p, tier: rosterTier(p.id) }));
+}
+deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
+  act(verb, arg) {
+    if (verb === 'open' && arg && arg.who) rosterPick = arg.who;
+    else if (verb === 'pick') rosterPick = rosterPick === arg ? null : arg;
+    else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
+      const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
+      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', Deck ' + w.deck : '') });
+      deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
+    }
+  },
+  view: () => {
+    const B = [], ps = rosterPeople(), byName = (a, b) => a.p.name < b.p.name ? -1 : 1;
+    const group = (title, list) => {
+      if (!list.length) return;
+      B.push({ kind: 'text', text: title, mark: 'head' });
+      let rows = [];
+      for (const x of list) {
+        rows.push({ text: x.p.name, sub: (x.p.role || '') + (x.tier >= 1 && typeof REL_NAMES !== 'undefined' ? ' · ' + REL_NAMES[x.tier] : ''), mark: x.p.id === rosterPick ? 'hot' : null, action: { app: 'roster', do: 'pick', arg: x.p.id } });
+        if (x.p.id !== rosterPick) continue;
+        const w = rosterWhere(x.p); B.push({ kind: 'list', rows }); rows = [];
+        B.push({ kind: 'text', text: w.line, mark: 'hot' });
+        if (w.room) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'roster', do: 'go' } }] });
+      }
+      if (rows.length) B.push({ kind: 'list', rows });
+    };
+    group('People you know', ps.filter(x => x.tier >= 1).sort((a, b) => b.tier - a.tier || byName(a, b)));
+    const rest = ps.filter(x => x.tier < 1), known = new Set(ROSTER_DEPTS.map(d => d[0]));
+    for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
+    group('Others aboard', rest.filter(x => !known.has(x.p.dept)).sort(byName));
+    if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
+    return { title: 'Roster', blocks: B };
   } });
 
 // Memos (0.35.4): notes you write (a title and plain text, dated), saved in SHIP.device.memos. Pin one to Home.
@@ -8861,7 +8931,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
     else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
       apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
-    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; mapWho = null; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
+    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
     else if (verb === 'new') { apptDraft = { with: [], day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
     else if (verb === 'cancel') { apptDraft = null; apptSay = null; }
     else if (verb === 'who' && apptDraft && arg) {               // add or remove someone (a group meeting: up to APPT_MAX)
@@ -9939,6 +10009,7 @@ function ixStopDone(A) {
 // the tap (section 15's playerTap, through PLAYER_TAPS): the job board, or a place to use
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
+  if (/^ship health$/i.test(it.t) && typeof shipHealthRows === 'function') { approach(at.clone(), it.front, it.depth, () => ixHealth.open()); return true; }
   if (ixChoreTap(it, at)) return true;                   // a stop of the chore you hold
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
@@ -9961,8 +10032,18 @@ PLAYER_TAPS.push(ixTap);
   const st = document.createElement('style');
   st.textContent = '.ixboard .ixjob{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(38,52,58,.55)}'
     + '.ixboard .ixjob i{flex:none;width:6px;align-self:stretch;border-radius:3px;background:#5fd6c6}.ixboard .ixjob.soon i{background:#e8c06a}.ixboard .ixjob.urgent i{background:#e0503f}'
-    + '.ixboard .ixjob div{flex:1;min-width:0}.ixboard .ixjob b{display:block;font-size:13.5px;font-weight:600}.ixboard .ixjob small{display:block;font-size:12px;color:var(--muted);margin-top:1px}'
-    + '.ixboard .ixjob button{flex:none;padding:6px 11px;font-size:12.5px}.ixboard .ixlist{max-height:min(52vh,420px);overflow-y:auto;touch-action:pan-y}'
+    + '.ixboard .ixjob.taken{opacity:.55}.ixboard .ixjob div{flex:1;min-width:0}.ixboard .ixjob b{display:block;font-size:13.5px;font-weight:600}.ixboard .ixjob small{display:block;font-size:12px;color:var(--muted);margin-top:1px}'
+    + '.ixboard .ixjob button{flex:none;padding:6px 11px;font-size:12.5px}.ixboard .ixlist{flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch}'
+    // the panel's own box (0.37.6): centred, always inside the screen and its safe areas, scrolling inside when tall
+    + '.ixpanel{left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;width:min(380px,calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));'
+    + 'max-height:calc(100vh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}.ixpanel[hidden]{display:none}'
+    + '.ixpanel h2,.ixpanel>p,.ixpanel .stay{flex:none}'
+    // the ship health panel's rows (0.37.6): a label, its bar and number, the condition word; colours by state
+    + '.ixbar{display:grid;grid-template-columns:minmax(0,1fr) 34px 58px;grid-template-areas:"n v w" "b b b";gap:3px 8px;align-items:center;margin:0 0 9px;font-size:13.5px}'
+    + '.ixbar span{grid-area:n}.ixbar b{grid-area:v;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}.ixbar em{grid-area:w;font-style:normal;font-size:12px;color:var(--muted);text-align:right}'
+    + '.ixbar i{grid-area:b;height:7px;border-radius:4px;background:#26343a;overflow:hidden}.ixbar i u{display:block;height:100%;background:#4cc3b5}'
+    + '.ixbar.worn i u{background:#d9b25a}.ixbar.poor i u{background:#e0904f}.ixbar.failing i u{background:#e0503f}.ixbar.whole{font-size:15px;padding-bottom:8px;border-bottom:1px solid var(--line)}'
+    + '.ixnote{margin:0 2px 6px;font-size:12.5px;color:#cfd9dc;line-height:1.4}.ixnote.head{margin-top:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-size:11.5px}'
     + '#ixGoal{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:0;height:0}#ixGoal[hidden]{display:none}'
     + '#ixGoal .ixarr{position:absolute;left:-19px;top:-19px;width:38px;height:38px;border-radius:50%;background:rgba(13,21,33,.82);border:2px solid #e8c06a;box-shadow:0 2px 10px rgba(0,0,0,.45)}'
     + '#ixGoal .ixarr::after{content:"";position:absolute;left:13px;top:10px;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent #e8c06a}'
@@ -9974,10 +10055,53 @@ PLAYER_TAPS.push(ixTap);
   const g = document.createElement('div'); g.id = 'ixGoal'; g.hidden = true; g.setAttribute('aria-live', 'polite');
   g.innerHTML = '<div class="ixarr"></div><div class="ixpin"></div><div class="ixlab"></div>';
   document.body.appendChild(g);
-  const b = document.createElement('div'); b.className = 'lift device ixboard'; b.id = 'ixBoard'; b.hidden = true;
+  const b = document.createElement('div'); b.className = 'lift ixboard ixpanel';   // not .device: that's the device's own sheet (section 19)
+  b.id = 'ixBoard'; b.hidden = true;
   b.setAttribute('role', 'dialog'); b.setAttribute('aria-labelledby', 'ixBoardT');
   b.innerHTML = '<h2 id="ixBoardT">Job board</h2><p id="ixBoardX">Pick a job and take it.</p><div class="ixlist" id="ixBoardL"></div><button class="stay" id="ixBoardC">Close</button>';
   document.body.appendChild(b);
+  const hp = document.createElement('div'); hp.className = 'lift ixboard ixpanel'; hp.id = 'ixHealth'; hp.hidden = true;   // the ship health panel, the same family
+  hp.setAttribute('role', 'dialog'); hp.setAttribute('aria-labelledby', 'ixHealthT');
+  hp.innerHTML = '<h2 id="ixHealthT">Ship health</h2><p id="ixHealthX">Every system aboard, how well it\'s running right now.</p><div class="ixlist" id="ixHealthL"></div><button class="stay" id="ixHealthC">Close</button>';
+  document.body.appendChild(hp);
+  // a tap outside an open panel closes it, and goes no further (no walk), like the lift's panel
+  addEventListener('pointerdown', e => {
+    for (const id of ['ixBoard', 'ixHealth']) { const el = document.getElementById(id);
+      if (!el.hidden && !el.contains(e.target)) { e.stopPropagation(); e.preventDefault(); (id === 'ixBoard' ? ixBoard : ixHealth).close(); } }
+  }, true);
+})();
+// ---- the ship health board (Deck 1's vestibule, the Works bay): tap it for every system's condition (section 17's
+// shipHealthRows, read only), the ship's overall health, what's worst in each, and the jobs on the board ----
+const IX_STATE = { fine: 'Good', worn: 'Worn', poor: 'Poor', failing: 'Failing' };
+const ixHealth = (() => {
+  const el = document.getElementById('ixHealth'), list = document.getElementById('ixHealthL'); let back = null, drawnAt = -1;
+  const bar = (r, whole) => { const d = document.createElement('div'), n = document.createElement('span'), v = document.createElement('b'), w = document.createElement('em'), i = document.createElement('i'), u = document.createElement('u');
+    d.className = 'ixbar ' + r.state + (whole ? ' whole' : ''); n.textContent = r.name; v.textContent = r.value; w.textContent = IX_STATE[r.state] || r.state; u.style.width = Math.max(0, Math.min(100, r.value)) + '%';
+    i.appendChild(u); d.append(n, v, w, i); d.setAttribute('role', 'meter'); d.setAttribute('aria-label', r.name + ', ' + (IX_STATE[r.state] || r.state)); d.setAttribute('aria-valuenow', r.value); d.setAttribute('aria-valuemin', 0); d.setAttribute('aria-valuemax', 100); list.appendChild(d); };
+  const note = (t, head) => { const p = document.createElement('p'); p.className = 'ixnote' + (head ? ' head' : ''); p.textContent = t; list.appendChild(p); };
+  const api = {
+    open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixHealthC').focus(); },
+    close() { el.hidden = true; if (back && back.focus) back.focus(); },
+    get isOpen() { return !el.hidden; },
+    draw() {
+      if (el.hidden) return; drawnAt = Math.floor(shipNow()); list.textContent = '';
+      const rows = shipHealthRows(), [ship, ...sys] = rows;
+      bar(ship, true); for (const r of sys) bar(r);
+      const faults = sys.filter(r => r.worst && r.state !== 'fine');
+      note('Faults', true);
+      if (faults.length) for (const r of faults) note(r.name + ': ' + (IX_STATE[r.state] || r.state).toLowerCase() + '. Worst is the ' + r.worst + '.');
+      else note('Nothing out of order. Everything is running as it should.');
+      if (typeof jobsBoard === 'function') {
+        const b = jobsBoard(), open = b.filter(j => !j.claimedBy).length, mine = typeof myJob === 'function' && myJob();
+        note('Jobs', true);
+        note(b.length ? b.length + (b.length === 1 ? ' job' : ' jobs') + ' on the board: ' + open + ' open, ' + (b.length - open) + ' being done.' + (mine ? ' One of them is yours.' : '') + ' The job board is in the Works bay, Deck 5.' : 'No jobs on the board.');
+      }
+    },
+    tick() { if (!el.hidden && Math.floor(shipNow()) !== drawnAt) api.draw(); },   // kept live while open (ixFrame)
+  };
+  document.getElementById('ixHealthC').onclick = api.close;
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) api.close(); });
+  return api;
 })();
 
 // ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
@@ -10006,7 +10130,9 @@ const ixBoard = (() => {
       // yours to take: section 17's openJobs('you') when it's there (its titles and wording), else the device's rule
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id));
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : open.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.' : 'Nothing on the board. The Chief says it never lasts.';
+      const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : yours.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.'
+        : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
         row(mine.title || title, where + ' · ' + (done ? 'done: turn it in' : state), pri, done ? button('Turn it in', () => api.turnIn(mine.id))
@@ -10020,6 +10146,7 @@ const ixBoard = (() => {
         const [title, where, state, pri] = jobCard(j), why = jobTier(j) > PLAYER_TIER ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
         row(j.title || title, where + ' · ' + state + (why ? ' · ' + why : ''), pri, null);
       }
+      for (const j of crew) { const [title, where, state, pri] = jobCard(j); row(j.title || title, where + ' · ' + state, pri + ' taken', null); }
     },
     take(id) {
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
@@ -10118,7 +10245,7 @@ function ixFrame() {
   // a chore's stop is done once its minutes are in: seen as it steps out, or (if it ended between our frames) once it's gone
   const L = ixStopLast; ixStopLast = ACT && ACT.kind === 'ixStop' ? ACT : null;
   for (const A of [ACT, L]) if (A && A.kind === 'ixStop' && !A.o.ixDone && (A.phase === 'out' || A !== ACT && A.done >= A.def.mins)) { A.o.ixDone = true; ixStopDone(A); }
-  ixTips();
+  ixTips(); ixHealth.tick();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
@@ -12534,7 +12661,7 @@ function eventsDress(now) {
 //   captainAddress({ lines, at }), MEETING_SCRIPTS, meeting(), dialogueShow(), dialogueClose(), upcomingTraditions()
 // Nothing here calls R(); when an event starts comes from schedU and the day, so a replay is identical.
 const SHIP_EVENTS = {};
-const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
+const EVENT_ORDER = ['ionStorm', 'diplomatic'];   // the main events with the short ones between (Part 2, "The full order")                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
@@ -12647,16 +12774,102 @@ const STORM_RETELL = {
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
 // who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
-const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 336) < .33;
 function stormCallBacklog(e) {
   const ppl = schedPeople().filter(p => p.rank !== 'guest');
   const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
   return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
 }
-// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+// ---- the diplomatic visit (event 2; plans/pillar3-plan.md, "The main events"): a Veyli delegation of four (GUESTS with
+// event 'diplomatic', section 9) aboard for five days. Day 0 Vance's warning; day 2 10:00 the greeting in the shuttle
+// bay; formal dinners on days 3 and 5 in the Captain's quarters; day 7 the gift exchange at 09:00 and the farewell at
+// 10:00, when the guests leave (eventGuestDays: guestsArrive 2, their stay 5); the afterglow to the end of day 8
+SHIP_EVENTS.diplomatic = {
+  title: 'Diplomatic visit', days: 9, gap: 7, need: ['vance'], guestsArrive: 2, draft: true,   // on when the lead says (events_check runs it)
+  phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [2, 600] }, { id: 'escalation', at: [3, 360] },
+    { id: 'resolution', at: [7, 540], clears: true }, { id: 'afterglow', at: [7, 720], clears: true }],
+  pause: ['onset'], keep: ['birthday'],                  // the greeting day is all hands; traditions carry on after it
+  systems: {
+    warning: { wear: { washer: 1.5 } },                  // dress uniforms through the laundry
+    onset: { effects: ['guests'] },                      // eventMod('effect', 'guests'): the delegation is aboard (section 17's coldCabins)
+    escalation: { wear: { heat: 1.3, heater: 1.5 }, effects: ['guests'] },   // the guest cabins' heaters turned up: the Veyli like it warm
+  },
+  routines: {
+    onset: [{ who: 'dept:watch', rule: 'patrol' }],
+    escalation: [{ where: '2|C', name: 'the Captain\'s quarters', rule: 'closed' }],   // set for the formal dinners
+  },
+  // the galley: guests at the servery all visit long; the formal dinners on days 3 and 5 (a function of eventNow: { day })
+  galley: {
+    onset: { extra: 4 },
+    escalation: { extra: 4, batch: n => n.day === 3 || n.day === 5 ? { meals: 10, label: 'the Veyli dinner in the Captain\'s quarters' } : null, herbs: true },
+  },
+  jobs: {
+    warning: [
+      { id: 'veyliSuite', title: 'Visit prep: make up the visitors\' cabin and turn its heater up', tier: 1, at: 600,
+        stops: [{ placeId: '2-armchair-8', mins: 25, tag: 'tidy' }] },
+      { id: 'veyliLamp', title: 'Visit prep: fix the lamp in the Captain\'s dining room', tier: 1, at: 600, parts: ['lamp'],
+        stops: [{ placeId: '2-captable-1', mins: 15, tag: 'lamp' }] },
+      { id: 'veyliGifts', title: 'Visit prep: bring the gift crates up from the hold', tier: 1, at: 660, bring: 'a crate of gifts',
+        stops: [{ placeId: '5-hold-1', mins: 5, tag: 'pickup' }, { placeId: '1-conf-1', mins: 10, tag: 'drop' }] },
+    ],
+    escalation: [
+      { id: 'veyliHerbs', title: 'Pick herbs in the garden for the Veyli dinner', tier: 1, at: 840,
+        stops: [{ placeId: '3-tend-1', mins: 20, tag: 'pick' }, { placeId: '3-cold-1', mins: 5, tag: 'drop' }] },
+    ],
+  },
+  news: [
+    { id: 'veyli-coming', from: 'vance', phase: 'warning', at: [0, 540], seed: ['dept:command'], weight: 3,
+      lines: ['A Veyli delegation is coming aboard. Four of them.', 'Dress uniforms. Everyone. Vance was very clear.'] },
+    { id: 'veyli-holt', from: 'holt', phase: 'warning', at: [0, 780], seed: ['dept:watch'], weight: 2,
+      lines: ['Holt says he\'ll be polite. Holt says a lot of things.', 'Watch is doubling up on the Deck 2 corridor.'] },
+    { id: 'veyli-moleth', phase: 'escalation', at: [3, 600], seed: ['dept:works'], weight: 2,
+      lines: ['One of the Veyli has forty questions for Calder. Forty.', 'Their scholar wants to see the engine room. Torres is thrilled.'] },
+    { id: 'veyli-clash', from: 'holt', phase: 'escalation', at: [4, 1260], seed: ['dept:watch', 'dept:command'], weight: 3,
+      lines: ['Holt and the Veyli pilot had words about the Watch rota.', 'Something about who stands where at the door. It got frosty.'] },
+    { id: 'veyli-told', phase: 'afterglow', at: [7, 720], seed: ['all'], weight: 2, lines: c => VEYLI_RETELL[c.band] },
+  ],
+  moments: [
+    { id: 'farewell', phase: 'resolution', at: [7, 600], len: 30, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: .8, anim: null,   // mid-morning: only those off shift can come
+      name: 'The Veyli farewell', ask: 'The Veyli leave at ten. I want to see them off.', here: 'Safe travels.', thanks: 'You line the shuttle bay to see the delegation off.' },
+  ],
+  meetings: [
+    { id: 'veyliGreeting', phase: 'onset', at: [2, 600], len: 20, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'veyliGreeting',
+      who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], notify: 'The Veyli delegation arrives in the shuttle bay (Deck 5) at 10:00.' },
+    { id: 'veyliGifts', phase: 'resolution', at: [7, 540], len: 20, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'veyliGiftExchange',
+      who: ['marrow', 'saruth', 'teshavi', 'moleth'] },
+  ],
+  address: {
+    onset: ['This is the Captain. Our Veyli guests are aboard.', 'They are here as friends. Make them welcome, answer their questions, and mind your manners.', 'Marrow out.'],
+    resolution: c => ['This is the Captain. The delegation leaves us this morning.',
+      { smooth: 'Speaker Teshavi tells me she has rarely been made so welcome. Thank you.', bumpy: 'It was a busy five days, and you carried it well. Thank you.',
+        rough: 'Not everything went to plan. They leave as friends all the same, and we\'ll do better next time.' }[c.band], 'Marrow out.'],
+  },
+  mail: {
+    warning: { from: 'Commander Teo Vance', subject: 'A Veyli delegation', body: 'A Veyli delegation of four arrives in two days, 10:00 in the shuttle bay. Dress uniforms for the greeting. The visitors\' cabin and the guest cabins on Deck 4 need making up, and the Veyli like it warm: heaters up. Visit jobs are on the Works board.' },
+  },
+  // lower is better. Who scores what (to agree with the lead): late dinners (minutes, galley 16), cold guest cabins
+  // (hours below comfort, systems 17), dinners without herbs (galley 16, from the garden), discourtesy (section 20 from
+  // crew mood toward the guests, Holt above all; plus meeting choices here)
+  threads: [{ id: 'dinnersLate', label: 'Dinners on time', good: 10, bad: 60 }, { id: 'coldCabins', label: 'Warm guest cabins', good: 4, bad: 16 },
+    { id: 'noHerbs', label: 'Herbs from the garden', good: 0, bad: 2 }, { id: 'discourtesy', label: 'Courtesy', good: 2, bad: 6 }],
+  dressing: { warning: [{ id: 'signupMess', title: 'The greeting line: volunteers', lines: c => ['T. Vance', 'B. Holt (under protest)'].concat(c.mine['wants:veyliSuite'] ? [c.you] : []) }] },
+  traces: { smooth: ['veyliCordSculpture'], bumpy: [], rough: [] },
+  debrief: { from: 'Commander Teo Vance',
+    smooth: 'The delegation left delighted. Dinners on time, warm cabins, and not one incident at the door. The Speaker\'s gift hangs in the bow lounge.',
+    bumpy: 'The delegation left on good terms. A cold cabin and a late dinner, but nothing that will make the Concord\'s reports.',
+    rough: 'The delegation left politely, which is the most I can say. Cold cabins, a bare herb rack and Chief Holt\'s remarks. We will do better.',
+    mine: c => c.mine.jobs ? ' Your work on the visit was noticed.' : '' },
+};
+const VEYLI_RETELL = {
+  smooth: ['Did you see the cord sculpture? It moves when the vents come on.', 'The Speaker laughed at one of Brennan\'s jokes. Actually laughed.'],
+  bumpy: ['The Veyli dinner was late. Brennan blamed the herbs.', 'Holt\'s still telling the door story. It gets longer every time.'],
+  rough: ['Their cabin was freezing the first night. Nobody\'s owning up.', 'Holt and their pilot still won\'t look at each other.'],
+};
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
+// hash key k (the storm's party 340, then 351 up)
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
-  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  id: m.id, name: m.name || 'All-clear party', k: EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
   who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
@@ -12698,6 +12911,7 @@ function eventMod(kind, key, t) {
     else if (kind === 'effect') v = def.systems && def.systems[ph] && def.systems[ph].effects ? (def.systems[ph].effects.includes(key) ? true : undefined) : undefined;
     else if (kind === 'routine') v = def.routines && def.routines[ph] ? def.routines[ph].find(r => r.rule === key || r.where === key || r.who === key) : undefined;
     else { const tb = def[kind === 'jobs' ? 'jobs' : kind]; v = tb && tb[ph] ? (key === undefined ? tb[ph] : tb[ph][key]) : undefined; }
+    if (typeof v === 'function' && key !== undefined) v = v(now, t);   // a value by day (the diplomatic visit's dinners)
     if (v !== undefined && v !== null) return v;
     if (def.phases[k].clears) return null;
   }
@@ -12864,14 +13078,15 @@ function meetingCast(m) {
   const d = Math.floor(m.at / 1440) + 1, ppl = schedPeople(), cast = {};
   for (const w of m.who || []) {
     const mm = /^(\w+):(\d+)$/.exec(w);
-    if (!mm) { const p = ppl.find(q => q.id === w); if (p) cast[w] = p; continue; }
+    if (!mm) { const p = evPerson(w); if (p) cast[w] = p; continue; }
     const pool = ppl.filter(p => p.dept === mm[1] && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !(m.who || []).includes(p.id))
-      .sort((a, b) => schedU(a.seed, d, 602) - schedU(b.seed, d, 602));
+      .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337));
     pool.slice(0, +mm[2]).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
   }
   return cast;
 }
-const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[who].name : (schedPeople().find(p => p.id === who) || { name: who }).name;
+const evPerson = id => schedPeople().find(p => p.id === id) || (typeof GUESTS !== 'undefined' && GUESTS.find(g => g.id === id)) || null;   // crew, Saruth, event guests
+const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[who].name : (evPerson(who) || { name: who }).name;
 function dialogueShow(scriptId, m) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
   m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
@@ -12882,7 +13097,7 @@ function dialogueShow(scriptId, m) {
 function dialogueView() {
   const D = DIALOGUE, sc = MEETING_SCRIPTS[D.id], l = D.queue[D.i]; if (!l) return null;
   if (l.choice) return { title: sc.title, name: D.ctx.you, who: D.ctx.you, id: 'you', role: '', text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
-  const p = D.cast[l.who] || schedPeople().find(q => q.id === l.who);
+  const p = D.cast[l.who] || evPerson(l.who);
   return { title: sc.title, name: castName(D, l.who), who: castName(D, l.who), id: p ? p.id : l.who, role: p ? p.role || '' : '', text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
 }
 function dialogueDraw() {
@@ -12917,16 +13132,18 @@ function dialogueStep(k) {
     eventMine('choice:' + D.id, k + 1);
     for (const [who, pts] of Object.entries(c.rel || {})) { const p = D.cast[who] || schedPeople().find(q => q.id === who); if (p && typeof relAdd === 'function') relAdd(p.id, 'meeting:' + D.m.id, pts); }
     if (c.job) eventTakeJob(c.job);
+    for (const [th, n] of Object.entries(c.thread || {})) eventScore(th, n);   // a small nudge to the event's thread
     if (c.reply) D.queue.splice(D.i + 1, 0, c.reply);
   }
   D.i++; dialogueDraw();
 }
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
-// a job offered in a meeting: remembered in SHIP.event.mine ('wants:<job>'), and claimed for you if section 17 has
-// posted it (tagged event and eventJob), else section 17 gives it to you when it posts
+// a job offered in a meeting: always remembered in SHIP.event.mine ('wants:<job>': the sign-up sheet reads it, and
+// section 17 claims it for you when it posts it later), and claimed at once if section 17 has already posted it
+// (tagged event and eventJob). The lead's 0.41.7 merge fix: the battery job is already up at the 08:15 briefing
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
-  e.mine['wants:' + job] = 1;   // always remembered (the sign-up sheet reads it), even when it's claimed at once (0.41.7)
+  e.mine['wants:' + job] = 1;
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
   if (j && typeof claimJob === 'function') return claimJob(j.id);
   return false;
@@ -13162,6 +13379,41 @@ MEETING_SCRIPTS.calderProgress = {
   ],
 };
 
+// the diplomatic visit's two meetings (its data is with the storm's, above)
+MEETING_SCRIPTS.veyliGreeting = {
+  title: 'The Veyli greeting', from: 'Commander Teo Vance',
+  gist: 'The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They\'re in the visitors\' cabin and the guest cabins on Deck 4 for five days.',
+  lines: [
+    { who: 'marrow', text: 'Speaker Teshavi. Welcome aboard the Wren.', pose: 'gesture' },
+    { who: 'teshavi', text: 'Captain. Your ship is warmer than the reports said. That is a compliment.', pose: 'nod' },
+    { who: 'saruth', text: 'Speaker. It has been too long.' },
+    { who: 'teshavi', text: 'Saruth. You look well fed. The humans are treating you kindly, then.' },
+    { who: 'kesrin', text: 'The Speaker would like to meet the crew who keep the ship running. Informally.', to: 'you' },
+    { who: 'teshavi', text: 'You. The young one in Works grey. What do you do aboard?', to: 'you' },
+    { choice: [
+      { text: 'I keep the lights on, Speaker. Mostly.', rel: { marrow: 1 }, reply: { who: 'teshavi', text: 'Mostly. An honest answer. I like it.', pose: 'nod' } },
+      { text: 'Welcome aboard. Ask me anything about the ship.', rel: { vance: 1 }, thread: { discourtesy: -1 }, reply: { who: 'kesrin', text: 'Careful. Moleth has forty questions.' } },
+      { text: '(A respectful nod)', reply: { who: 'teshavi', text: 'Quiet. Good. Most of your crew talk too much.' } },
+    ] },
+    { who: 'marrow', text: 'Commander Vance will show you to your cabins. Dinner is tomorrow, in my quarters.' },
+  ],
+};
+MEETING_SCRIPTS.veyliGiftExchange = {
+  title: 'The gift exchange', from: 'Commander Teo Vance',
+  gist: c => 'The gift exchange in the observation room this morning. ' + (c.band === 'smooth' ? 'The Speaker gave the Wren a cord sculpture; it hangs in the bow lounge.' : 'The Speaker thanked the Captain with a few formal words.') + ' The delegation left from the shuttle bay at 10:00.',
+  lines: [
+    { who: 'teshavi', text: 'Captain. It is our custom to leave something of ourselves behind.', pose: 'gesture' },
+    { who: 'teshavi', text: c => c.band === 'smooth' ? 'Seven knots, tied by seven hands. Hang it where your crew gather.' : 'Please accept our thanks. They are sincere.' },
+    { who: 'marrow', text: 'Thank you, Speaker. And from us: charts of every system we\'ve crossed. Dr. Sato insisted.', pose: 'nod' },
+    { who: 'moleth', text: 'I have thirty-one questions left. I will write.', to: 'you' },
+    { choice: [
+      { text: 'Write to me. I\'ll ask Calder for the answers.', rel: { calder: 1 }, thread: { discourtesy: -1 }, reply: { who: 'moleth', text: 'I will hold you to that.', pose: 'nod' } },
+      { text: 'Safe travels.', reply: { who: 'moleth', text: 'And to you. Keep the lights on. Mostly.' } },
+    ] },
+    { who: 'saruth', text: 'Speaker. Travel well.' },
+  ],
+};
+
 // ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
 function upcomingTraditions(fromMin, toMin) {
   const out = [], S = schedData();
@@ -13209,7 +13461,7 @@ const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing
   heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
 const NEWS = [];
 let SOC = null, SOC_MIN = -1;
-SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {} };
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {} };
 const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
 const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
 const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
@@ -13234,7 +13486,7 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
-  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {} };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
 // rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay] } }, mail (story Mail to come). A save made with a different crew list starts the crew's side afresh
@@ -13245,14 +13497,14 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, rel };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {} };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {} };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
@@ -13402,9 +13654,39 @@ function socialHour(h) {
   }
   for (const [K, id] of learnt) K.add(id);
   socBorn(h, rooms);
+  socCourtesy(h, rooms);
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
   for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
+}
+// the diplomatic visit's 'discourtesy' thread (0.36.16, for section 18; lower is better). guestWarmth(p, t): how kindly
+// someone feels toward the guests, from their mood, less for prickly traits (suspicious 30, gruff, blunt, sarcastic
+// 15), more if they're your friend (tier 3+, 15) and if you chatted with them today (10): you can soften Holt. While the
+// guests are aboard (eventMod('effect', 'guests')), at 20:00 each day Holt under 45 adds 1, and so does a day when a
+// guest of the event shared a room with a crew member under 35. At most one of each a day (SHIP.social.courtesy,
+// saved). Inert without section 18's eventScore and eventMod
+const COURTESY_PRICKLY = { suspicious: 30, gruff: 15, blunt: 15, sarcastic: 15 };
+function guestWarmth(p, t) {
+  const r = SHIP.rel[p.id];
+  return crewMood(p, t) - (p.traits || []).reduce((a, x) => a + (COURTESY_PRICKLY[x] || 0), 0) + (r && r.tier >= 3 ? 15 : 0) + (r && r.chatDay === Math.floor(t / 1440) + 1 ? 10 : 0);
+}
+function socCourtesy(h, rooms) {
+  if (typeof eventScore !== 'function' || typeof eventMod !== 'function') return;
+  const t = h * 60 + 30, d = Math.floor(h / 24) + 1, C = SHIP.social.courtesy;
+  let on = null; try { on = eventMod('effect', 'guests', t); } catch (e) { on = null; }
+  if (!on) return;
+  const ev = typeof eventNow === 'function' ? eventNow(t) : null;
+  const guests = typeof GUESTS !== 'undefined' ? schedPeople().filter(q => GUESTS.some(g => g.id === q.id && (!ev || !g.event || g.event === ev.id))) : [];
+  if (guests.length && C.meet !== d) {                   // a guest in a room with someone prickly or low, this hour
+    const S = schedData();
+    for (const g of guests) {
+      const w = planWhere(g, t); if (!w || w.moving || !w.placeId) continue;
+      const pl = S.byId.get(w.placeId), here = rooms.get(w.deck + '|' + (pl && pl.room || w.placeId)) || [];
+      const sour = here.map(i => SOC.crew[i]).find(q => guestWarmth(q, t) < 35);
+      if (sour) { C.meet = d; eventScore('discourtesy', 1); break; }
+    }
+  }
+  if (h % 24 === 20 && C.holt !== d && SOC.idx.has('holt') && guestWarmth(SOC.crew[SOC.idx.get('holt')], t) < 45) { C.holt = d; eventScore('discourtesy', 1); }
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
@@ -13538,7 +13820,7 @@ function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // s
 // newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
 const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
 function crewWhere(p, t = shipNow()) {
-  const w = whereIs(p, t); if (!w || w.moving) return null;
+  const w = whereIs(p, t); if (!w || w.moving || w.act === 'sleep' || w.act === 'wash') return null;   // asleep or washing: private (as the device's Maps)
   const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
   return { deck: w.deck, room: rm ? rm.name : null, act: w.act, placeId: w.placeId || null };
 }
@@ -13567,9 +13849,8 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
       { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
-      { kind: 'text', text: c.where ? 'Now: Deck ' + c.where.deck + (c.where.room ? ', ' + c.where.room : '') + '.' : 'Where they are: you don\'t know them well enough yet.' },
       { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
-      { kind: 'buttons', items: (c.where ? [{ label: 'On the map', action: { app: 'maps', do: 'person', arg: c.id } }] : []).concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
+      { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts();
     return { title: 'Crew', blocks: cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
       : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }] };
@@ -13698,6 +13979,8 @@ function chatLine(p, t = shipNow()) {
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
+  if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
+    return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
   const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
   const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
     return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
