@@ -16,6 +16,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Closing sessions (the user, 2026-10-16 ~22:30):** the lead may archive finished, idle helpers whose work and handover notes are pushed (`.claude/settings.json` allows it). Archived sessions are kept and can be reopened.
 
+**Pillar 4 direction (the user, 2026-10-16 ~23:00):** a massive pass: full arrival and first week, much more dialogue, a deep social system, many more traditions; ~15 helpers. Notes: `plans/pillar4-notes.md`. The Pillar 4 planner and the social system designer plan it now; nothing is built until the user approves the plan.
+
 **Helper limit raised (the user, 2026-10-16 ~21:33, after upgrading their plan):** up to about a dozen helpers working at once, plus extra check runners, to finish faster.
 
 **New tweaks from the user (2026-10-16 ~21:10):** zoom-out limit (performance engineer, last job), bathroom need + feedback + progress bars (player engineer 2), a garden that grows food for the galley (galley engineer leads; sim, crew designer, systems help). The user also allowed extra check-runner sessions to speed up testing.
@@ -75,6 +77,8 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01DzZ669spGpdSdVMYzUog2N | Social engineer (Pillar 3, new): relationships, affinity, news, chat cards, favours, crew seeking you out (section 20, C4/C5) | `claude/social` | 0.36.x | Working (wave 1) | — |
 | session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Archived 2026-10-16 ~22:30 (done; events paused by the user) | `plans/handover-events.md` |
 | session_014PT5L2QxXYoVhqFP7qhj3y | Deck architect (Pillar 3, all six decks; replaces the bridge, command and Deck 6 architects): gather places, event dressing and traces, ready room, gym kit (C9) | `claude/decks-p3` | 0.38.x | Standby (0.38.3 done) | the three architect handovers |
+| session_01KLFXcNJztCSVLXunD8Jt7R | Pillar 4 planner (hired 2026-10-16 ~23:00): drafts plans/pillar4-plan.md + .html (arrival and first week, dialogue at scale, traditions, staffing); no game code | `claude/pillar4-plan` | — | Active | — |
+| session_01SMfS1WKqzQ93X6zyZ7NFpJ | Social system designer (hired 2026-10-16 ~23:00): designs the deep social system, plans/social-deep-plan.md, with the Pillar 4 planner; no game code yet | `claude/social-design` | — | Active | — |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
 **Hiring for a retired role:** start a fresh session on `claude/ship-integration`, have it read its predecessor's handover note first, and give it a new branch and build range (the old branch can be reused if the new session is created with it).
