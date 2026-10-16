@@ -9348,7 +9348,14 @@ function machUse(m, h) {
 function machWear(m, h, c) {
   const K = MACHINE_KINDS[m.kind];
   const base = 100 / (K.life * 24), use = K.time + (1 - K.time) * machUse(m, h);
-  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7));
+  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7)) * eventWear(K.sys, h);
+}
+// a ship-wide event's wear on a system (Pillar 3, C7: section 18's eventMod('wear', system) -> a multiplier, null for
+// no change; the hour is passed too, for an eventMod that can answer for past hours). 1 with no event
+function eventWear(sys, h) {
+  if (typeof eventMod !== 'function') return 1;
+  const v = eventMod('wear', sys, h * 60);
+  return typeof v === 'number' && v > 0 && v < 20 ? v : 1;
 }
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
@@ -9837,7 +9844,11 @@ function jobRun(p, j, t, makeMin) {
 // a job is finished: its machine put right, or its cargo moved
 function jobFinish(j, t, by) {
   j.status = 'done'; j.doneAt = t; j.doneBy = by;
-  if (j.kind === 'chore') { choreDone(j, t); return; }
+  if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
+}
+// what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
+function jobEffect(j, t, by) {
+  if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
   if (j.machine) {
     const s = SHIP.machines[j.machine];
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
@@ -9854,14 +9865,15 @@ function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
+  for (const j of jobs) if (j.kind === 'favour' && j.status !== 'done' && j.expires && t >= j.expires && !j.workDone) { j.status = 'done'; j.doneAt = t; j.doneBy = null; j.lapsed = true; }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour' && !j.workDone && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day + deliveryLate(d) && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
     if (cartsCarryFood()) SHIP.hold.meals = Math.max(SHIP.hold.meals || 0, DELIVERY.meals);
   }
   // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
-  const open = new Map(); for (const j of jobs) if (j.status !== 'done' && j.kind !== 'chore') open.set(j.machine || 'restock:' + j.cargo, j);
+  const open = new Map(); for (const j of jobs) if (j.status !== 'done' && j.kind !== 'chore' && j.kind !== 'favour') open.set(j.machine || 'restock:' + j.cargo, j);
   for (const m of machineList()) {
     const st = SHIP.machines[m.id].state, kind = JOB_FOR[st], j = open.get(m.id);
     if (j && j.status === 'claimed') continue;
@@ -9878,6 +9890,7 @@ function jobsHour(h) {
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
+  eventJobsHour(h, jobs);
   // a food run nobody took goes unseen (its meals landed long ago, in the galley's books): before the claims
   for (const j of jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
@@ -10039,7 +10052,7 @@ function cartPost() {
 // only while it's yours and not yet unloaded; then the galley holds its meals past arriveAt. A run just sitting on the
 // board lands at arriveAt as in the galley's replays (0.33.20: holding those too kept the cold store low, so every
 // hour ordered another run and the hold ran dry). Live play only: never in replays
-const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you') || null;
+const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you' && !x.workDone) || null;
 function cartWaiting(h) { return !!yourCartRun(h); }
 // (meals on their way, yours included, are counted by the galley when it asks cartClaim: section 16's 0.29.17; the
 // galley owns the cold store's accounting, so section 17 doesn't add them too: 0.33.22)
@@ -10060,10 +10073,10 @@ function jobWhere(person, t) {
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
 // the board: jobs found and not done, the most urgent first
-function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
+function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -10077,20 +10090,137 @@ function returnPart(part) { if (typeof part !== 'string' || !part) return false;
 function touchJob(id) { const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return false; j.touched = shipNow(); return true; }
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
-  if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+  if (!j) return false;
+  if (TURN_IN) { if (!j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); } }   // done, awaiting turn-in
+  else jobFinish(j, shipNow(), 'you');
+  machRecord(MACH_HOUR - 1); MACH_REV++; return true;
 }
+// turning jobs in at the board (0.33.23, for the interactions engineer and plans/pillar3-plan.md "Jobs: take and turn in
+// at the board"). Your job's stops are ticked off with jobStepDone; after the last one (or finishJob) its work is done:
+// the machine is put right, the lamp works, the meals land (j.workDone, the minute). It stays yours (no 12-hour
+// lapse), off the board, and myJob() still gives it, until you turn it in at a job board (turnInJob), which completes
+// it. TURN_IN off (for now): finishJob completes your job at once, as before, so section 15 needn't change; on:
+// finishJob only does the work, and turnInJob completes it. The lead turns it on when the board's Turn in lands.
+let TURN_IN = false;
+// jobStepDone(id, stepIndex) -> { ok, left, done }: a stop of your job done (stepIndex into jobStops(j), fetch
+// included); left: stops still to do; done: its work is done (after the last stop), awaiting turn-in
+function jobStepDone(id, k) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
+  const n = j ? jobStops(j).length : 0;
+  if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
+  j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
+  const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
+  if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
+  MACH_REV++; return { ok: true, left, done: !!j.workDone };
+}
+// turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
+function turnInJob(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed' && x.workDone && x.kind !== 'favour');
+  if (!j) return false; jobFinish(j, shipNow(), 'you'); MACH_REV++; return true;
+}
+
+// ---- event jobs (Pillar 3, C7): a ship-wide event's `jobs` data, posted on the job board for its phase ----
+// SHIP_EVENTS.<id>.jobs = { <phase>: [ { id?, kind, title?, where?, place?, machine?, deck?, tier?, mins?, parts?,
+// urgency?, leave? }, ... ] } (section 18, the events engineer). Each is posted once per event and phase when
+// eventNow() says so, tagged `event: <id>`, as a chore: a kind from CHORES with no place picks one of its own places;
+// otherwise `place` (a place id), `machine` (its panel) or `where` (a word in a room's name, or a place type) says where.
+// The crew take them as usual; small ones at your tier wait `leave` minutes (default 60) of the day shift for you.
+// postEventJob(spec, { event, forYou }) posts one now (a meeting's choice: forYou claims it for you).
+const eventDef = id => typeof SHIP_EVENTS === 'undefined' ? null : Array.isArray(SHIP_EVENTS) ? SHIP_EVENTS.find(e => e.id === id) || null : SHIP_EVENTS[id] || null;
+const EVENT_JOB_TEXT = { secure: 'Secure loose things', check: 'Check', fetch: 'Fetch', carry: 'Carry', clean: 'Clean up', set: 'Set up', patch: 'Patch', tea: 'Bring tea' };
+function eventStop(spec) {
+  const pl = spec.place && placeById(spec.place); if (pl) return { deck: pl.deck, placeId: pl.id, room: pl.room };
+  const m = spec.machine && machineById(spec.machine); if (m) return { deck: m.deck, placeId: panelPlace(m.id), room: m.room, machine: m.id, at: m.panel.slice() };
+  const w = String(spec.where || '').toLowerCase(); if (!w) return null;
+  for (const n of Object.keys(DECKS).map(Number).filter(n => !spec.deck || n === spec.deck)) {
+    const D = DECKS[n], rooms = Object.keys(D.rooms).filter(r => (D.rooms[r].name || '').toLowerCase().includes(w));
+    const ps = (D.places || []).filter(p => !p.machine && (rooms.includes(p.room) || p.type === w));
+    const stand = ps.find(p => /lift-wait|storage|laundry|garden|shop/.test(p.type)) || ps[0];
+    if (stand) return { deck: n, placeId: stand.id, room: stand.room };
+    if (rooms.length) { const at = machRoomTile(n, rooms[0]); if (at) return { deck: n, placeId: null, room: rooms[0], at }; }
+  }
+  return null;
+}
+function eventJob(spec, ev, t, key) {
+  let where = null, title = spec.title, machine = null, stops;
+  if (CHORES[spec.kind] && !spec.place && !spec.machine && !spec.where) {
+    const cs = choreWhere(spec.kind); if (!cs.length) return null;
+    const c = cs[Math.abs(machSeed(key)) % cs.length]; title = title || c.title; machine = c.machine || null; where = { deck: c.deck, room: c.room }; stops = c.stops.map(x => ({ ...x }));
+  } else {
+    const st = eventStop(spec); if (!st) return null;
+    machine = st.machine || null; where = st;
+    stops = [{ deck: st.deck, placeId: st.placeId, mins: spec.mins || 20, tag: spec.kind || 'event', at: st.at || null }];
+    title = title || (EVENT_JOB_TEXT[spec.kind] || 'Event job') + (st.room ? ': ' + roomName(st.deck, st.room) : '');
+  }
+  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, title,
+           bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
+           claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
+}
+function eventJobsHour(h, jobs) {
+  if (typeof eventNow !== 'function') return;
+  const ev = eventNow(); if (!ev || !ev.id) return;
+  const def = eventDef(ev.id), list = def && def.jobs && def.jobs[ev.phase]; if (!Array.isArray(list)) return;
+  list.forEach((spec, k) => {
+    const key = 'event:' + ev.id + ':' + ev.phase + ':' + (spec.id || k) + '@' + (ev.day ?? '');
+    if (jobs.some(j => j.id === key)) return;
+    const j = eventJob(spec, ev.id, h * 60, key); if (j) jobs.push(j);
+  });
+}
+function postEventJob(spec, o = {}) {
+  machinesNow(); const ev = o.event || (typeof eventNow === 'function' && eventNow() ? eventNow().id : 'event');
+  const key = 'event:' + ev + ':' + (spec.id || spec.kind) + '@' + Math.floor(shipNow());
+  const j = eventJob(spec, ev, shipNow(), key); if (!j) return null;
+  SHIP.jobs.push(j); MACH_REV++;
+  if (o.forYou) claimJob(j.id);
+  return j.id;
+}
+
+// ---- favours (Pillar 3, C7, for the social engineer): personal jobs, accepted and handed back in person ----
+// favourPost({ from: crewId, title, kind?, place?, machine?, where?, deck?, stops?, parts?, mins?, bring?, expires? })
+// -> id: a favour someone asks of you, offered (never on the board, never taken by the crew). favourAccept(id) makes it
+// yours (alongside a board job: the one-at-a-time rule is for board jobs). Its stops are done with jobStepDone, the
+// last step being 'return' to the person (jobStops gives { step: 'return', person }); once the stops are done its
+// work is done (j.workDone), and favourTurnIn(id) at the person completes it. favoursOf(crewId), myFavours().
+// An offered or accepted favour not done by `expires` (default a day and a half) lapses. Saved with the jobs.
+function favourPost(o = {}) {
+  machinesNow(); if (!o.from) return null;
+  const t = shipNow(), key = 'favour:' + o.from + '@' + Math.floor(t);
+  const st = o.stops ? null : eventStop(o);
+  const stops = o.stops ? o.stops.map(x => ({ ...x })) : st ? [{ deck: st.deck, placeId: st.placeId, mins: o.mins || 10, tag: o.kind || 'favour', at: st.at || null }] : [];
+  SHIP.jobs.push({ id: key, machine: st && st.machine || o.machine || null, deck: stops[0] ? stops[0].deck : null, room: st && st.room || null, kind: 'favour', chore: o.kind || null,
+                   from: o.from, title: o.title || 'A favour', bring: o.bring || null, tier: 1, stops, urgency: 0, posted: t, found: t, claimedBy: null,
+                   parts: (o.parts || []).slice(), status: 'offered', expires: o.expires || t + 2160 });
+  MACH_REV++; return key;
+}
+const favourById = id => SHIP.jobs.find(j => j.id === id && j.kind === 'favour') || null;
+function favourAccept(id) { machinesNow(); const j = favourById(id); if (!j || j.status !== 'offered') return false; j.status = 'claimed'; j.claimedBy = 'you'; j.start = shipNow(); MACH_REV++; return true; }
+function favourDecline(id) { const j = favourById(id); if (!j || j.status !== 'offered') return false; j.status = 'done'; j.doneAt = shipNow(); j.doneBy = null; j.declined = true; MACH_REV++; return true; }
+function favourTurnIn(id) {
+  machinesNow(); const j = favourById(id);
+  if (!j || j.status !== 'claimed' || j.claimedBy !== 'you') return false;
+  if (!j.workDone) { if (j.stops.length) return false; jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); }   // a favour with no stops (a word, a hand)
+  j.stepsDone = [...new Set([...(j.stepsDone || []), jobStops(j).length - 1])]; jobFinish(j, shipNow(), 'you'); MACH_REV++; return true;
+}
+const favoursOf = crewId => SHIP.jobs.filter(j => j.kind === 'favour' && j.from === crewId && j.status !== 'done');
+const myFavours = () => SHIP.jobs.filter(j => j.kind === 'favour' && j.claimedBy === 'you' && j.status === 'claimed');
 
 // ---- the device's jobs section (0.33.9): the board in your pocket. The device itself is section 15's placeholder
 // (device.addSection); this only lists jobs and lets you claim or drop one. Doing it, at the machine's panel,
 // comes with the player engineer's repair activity (finishJob). ----
-function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed') || null; }
+function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour') || null; }
 // where your job takes you, in order (0.33.16, for the player engineer's walk): [{ step, places: [place ids, the
 // first free one best], deck }]. A machine job: parts from the shelves, then its panel. A cart run: a cart from a
 // dock, load in the hold, unload at the cold store (or the shelves), the cart back. Places not built yet are left out.
 function jobStops(j) {
+  const out = jobStopsOf(j), done = new Set((j && j.stepsDone) || []);
+  out.forEach((x, k) => { x.done = done.has(k) || !!(j && j.workDone); });
+  return out;
+}
+function jobStopsOf(j) {
   const known = new Set(Object.values(DECKS).flatMap(d => (d.places || []).map(p => p.id))), st = (step, ids, deck) => ({ step, places: ids.filter(id => known.has(id)), deck });
   if (!j) return [];
-  if (j.kind === 'chore') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins })));
+  if (j.kind === 'chore' || j.kind === 'favour') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins, at: x.at || null })),
+    j.kind === 'favour' ? [{ step: 'return', places: [], deck: null, person: j.from }] : []);
   if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', HOLD_AT, 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
   const m = machineById(j.machine); if (!m) return [];
   const pp = panelPlace(m.id);
@@ -10136,8 +10266,8 @@ function openJobs(forWho = 'you') {
     const place = main && main.places[0] || null, pl = placeById(place);
     const mins = j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (jobTier(j) - 1)));
     const verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind];
-    return { id: j.id, title: j.kind === 'chore' ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : null,
-             room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where };
+    return { id: j.id, title: j.kind === 'chore' ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
+             room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where, event: j.event || null };
   });
 }
 
@@ -10236,7 +10366,7 @@ function machinesLoad(s) {
   // jobs and supplies (0.33.1): a save before them starts with an empty list and full shelves
   const obj = o => o && typeof o === 'object' && !Array.isArray(o);
   machRecord(sh.machineHour - 1);
-  if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock' || j.kind === 'chore'));
+  if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock' || j.kind === 'chore' || j.kind === 'favour'));
   for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
   if (obj(sh.short)) for (const [p, n] of Object.entries(sh.short)) if (Number.isFinite(n)) SHIP.short[p] = n;
   if (obj(sh.machineUse)) for (const [id, n] of Object.entries(sh.machineUse)) if (SHIP.machines[id] && n > 0 && n < 50) MACH_EXTRA[id] = n;
