@@ -91,9 +91,9 @@ with sync_playwright() as pw:
     if a != b: fail('the galley came out differently the second time')
     # (with section 17's cartWaiting off: here the machines and jobs don't run, so a run left on the board for you
     # would wait all day; holding it for you is checked in 4g)
-    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined');
+    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined'); GALLEY_TEST.gardenCarry = () => null;
       SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); const out = {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }};
-      window.__sc('cartWaiting = window.__cw'); SHIP.galley = null; return out; }})()""")
+      window.__sc('cartWaiting = window.__cw'); GALLEY_TEST.gardenCarry = null; SHIP.galley = null; return out; }})()""")
     print('Live galley matches the report:', live == rep[0]['end'])
     if live != rep[0]['end']: fail(f"live {live} vs report {rep[0]['end']}")
 
@@ -291,12 +291,30 @@ with sync_playwright() as pw:
     if Gd['delivered'] <= G0['delivered']: fail(f"garden: a dry garden should need more meals by cart ({Gd['delivered']} vs {G0['delivered']})")
     if any(x['missed'] or x['coldOut'] for x in (G0, Gd, Ga)): fail('garden: someone went without food')
 
+    # 4k. the garden's carry, crew and Mail (0.29.24): the crates wait while the carry job (a stand-in) says so and land
+    # when it's done or when you unload (galleyCarryLand); no gardener on duty means no daily pick; a dry harvest morning
+    # sends a Mail
+    gk = g.ev(f"""(() => {{ const d = {DAY} + 1, B = (d - 1) * 1440, posted = [], held = new Set(); const mail = []; window.__mailBox = mail; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)");
+      GALLEY_TEST.gardenCarry = o => {{ posted.push(o); const id = 'garden@' + o.at; held.add(id); return id; }}; GALLEY_TEST.carryWaiting = id => held.has(id);
+      SHIP.galley = null; setShipNow(B + 11 * 60); galleyAdvance(shipNow()); const out = {{ posted: posted.map(o => o.title), waiting: SHIP.galley.garden.crates.length, produce: produceMeals(SHIP.galley) }};
+      out.landed = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.again = galleyCarryLand(posted.length ? 'garden@' + posted[0].at : 'none'); out.text = galleyText('garden');
+      GALLEY_TEST.gardenCarry = GALLEY_TEST.carryWaiting = null; GALLEY_TEST.gardenCrew = () => [];
+      SHIP.galley = null; GARDEN_COND.clear(); galleyAdvance(shipNow()); out.noCrew = SHIP.galley.garden.crates.length + produceMeals(SHIP.galley);
+      GALLEY_TEST.gardenCrew = null; GALLEY_TEST.gardenAt = () => ({{ water: .2, feed: 1, light: 1 }}); GARDEN_COND.clear();
+      const h = [...Array(28)].map((_, k) => {DAY} + k).find(x => gardenHarvestDay(x) && x > {DAY} + 7);
+      SHIP.galley = null; setShipNow((h - 15) * 1440); galleyAdvance(shipNow()); setShipNow((h - 1) * 1440 + 12 * 60); galleyAdvance(shipNow()); out.thin = mail.filter(x => x.subject === 'A thin harvest').map(x => x.body);
+      GALLEY_TEST.gardenAt = null; GARDEN_COND.clear(); window.__sc("mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+    print('Garden carry:', gk['posted'][:1], '| crates waiting', gk['waiting'], '| landed', gk['landed'], 'then', gk['again'], '| no gardener on duty:', gk['noCrew'])
+    print('  ', gk['text'], '| thin harvest Mail:', gk['thin'][:1])
+    if not gk['posted'] or not gk['waiting'] or gk['landed'] <= 0 or gk['again'] != 0 or gk['noCrew'] != 0 or not gk['thin']: fail(f"garden carry: {gk}")
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
       window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
       const D0 = {B} + 40 * 1440; if (typeof CART_RUNS !== 'undefined') CART_RUNS.clear();   // a day no other test has asked about
-      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      if (SHIP.hold) SHIP.hold.meals = 1200;                 // earlier live tests may have used the hold's meals
+      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200; SHIP.galley.cold.produce = [];
       let h = null; for (let t = D0 + 9 * 60; t < D0 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
       if (h === null) return {{ real, h }};
       const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];

@@ -190,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.29.23
+   STARSHIP CADET: CSV Wren                            build 0.29.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.23';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.24';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10343,7 +10343,8 @@ const GARDEN_CROPS = [
   { id: 'roots', name: 'root vegetables', beds: 3, days: 28, yield: 72, keep: 14 },
 ];
 const GARDEN = {
-  pick: 600, harvest: 690, carry: 30,     // the daily pick at 10:00; the harvest morning's pick ends at 11:30; the crates reach the cold store 30 minutes later
+  pick: 645, harvest: 690, carry: 30,     // the daily pick (10:00-10:45) and the harvest morning's (to 11:30) are taken at their end; the
+                                          // crates reach the cold store by section 17's gardenCarry job, else 30 minutes later
   tendHours: 8, untended: .4,             // gardener hours a day for a fully tended garden; growth with nobody tending
   potShare: .5,                           // at most half of a pot is fresh produce
 };
@@ -10368,6 +10369,18 @@ function gardenCond(d) {
 const gardenHarvestDay = d => typeof eventsOn === 'function' ? eventsOn(d).some(e => e.id === 'harvest') : d % 14 === 6;
 // a fresh garden on day d: every bed part-grown, staggered so something is always coming ripe. Beds: [crop, grown, days]
 const GARDEN_START = d => ({ beds: GARDEN_CROPS.flatMap((c, ci) => [...Array(c.beds)].map((_, b) => { const g = Math.floor(c.days * ((b + .5) / c.beds + (d % c.days) / c.days) % c.days); return [ci, g, g]; })), crates: [] });
+const GARDEN_HARVEST = GARDEN_CROPS.reduce((a, c) => a + (c.daily ? 0 : c.beds * c.yield * 14 / c.days), 0);   // a usual harvest morning's slow crops
+const GARDEN_WHY = { water: 'The irrigation is struggling.', feed: 'The nutrient dosing is off.', light: 'The grow lights are failing.', tend: 'There haven\'t been enough hands in the garden.' };
+const gardenNames = items => { const n = items.map(x => GARDEN_CROPS[x[0]].name); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0] || 'produce'; };
+// the player unloads the garden's crates at the cold store: section 17 calls this with the carry job's id; they land now
+function galleyCarryLand(id) {
+  const S = galleyAdvance(shipNow()), G = S.garden; if (!G || !id) return 0;
+  const d = Math.floor(shipNow() / 1440) + 1; let n = 0;
+  G.crates = G.crates.filter(c => { if (c.id !== id) return true; for (const [ci, k] of c.items) { S.cold.produce.push([ci, k, d]); n += k; } return false; });
+  return n;
+}
+// what's fresh in the cold store, by crop (most first)
+const produceByCrop = S => { const m = new Map(); for (const b of S.cold.produce || []) m.set(b[0], (m.get(b[0]) || 0) + b[1]); return [...m].sort((a, b) => b[1] - a[1]); };
 const produceMeals = S => (S.cold.produce || []).reduce((n, b) => n + b[1], 0);
 // take up to n meal units of produce, oldest first; returns how many
 function produceTake(S, n) {
@@ -10409,7 +10422,7 @@ const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains wi
 const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
 // can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
-const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null, gardenAt: null, gardenDay: null };
+const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null, gardenAt: null, gardenDay: null, gardenCrew: null, gardenCarry: null, carryWaiting: null };
 function galleyEvRead(m, replay) {
   let get = null;
   if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
@@ -10501,19 +10514,45 @@ function galleyStep(S, m, st) {
   // the garden: a day's growth at midnight; the morning pick (salad, herbs) and the harvest morning (the rest); the
   // crates reach the cold store GARDEN.carry minutes later; produce past its keeping days is binned at the bin checks
   if (!S.garden) S.garden = GARDEN_START(d);
+  if (S.garden.crates.length && Array.isArray(S.garden.crates[0])) S.garden.crates = S.garden.crates.map(c => ({ at: c[0] - GARDEN.carry, items: [[c[1], c[2]]], id: null }));   // a 0.29.23 save
   if (!S.cold.produce) S.cold.produce = [];
   const G = S.garden;
   if (md === 0) { const c = gardenCond(d).grow; for (const b of G.beds) if (b[1] < GARDEN_CROPS[b[0]].days) { b[2]++; b[1] = Math.min(GARDEN_CROPS[b[0]].days, b[1] + c); } }   // a ripe bed waits for its pick
-  const pickNow = md === GARDEN.pick ? 'daily' : md === GARDEN.harvest && gardenHarvestDay(d) ? 'harvest' : null;
+  // the daily pick needs a gardener on duty (section 14's gardenCrew(d), when it's there); the harvest morning has
+  // volunteers. One carry for each pick: G.crates = [{ at, items: [[crop, meals]], id }]
+  let pickNow = md === GARDEN.pick ? 'daily' : md === GARDEN.harvest && gardenHarvestDay(d) ? 'harvest' : null;
+  const crew = GALLEY_TEST.gardenCrew || (typeof gardenCrew === 'function' ? gardenCrew : null);
+  if (pickNow === 'daily' && (gardenHarvestDay(d) || (crew && !(crew(d) || []).length))) pickNow = null;
   if (pickNow) {
+    const items = [];
     for (const b of G.beds) {
-      const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily') !== !!c.daily) continue;
+      const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily' && !c.daily)) continue;   // the harvest morning picks everything ripe
       const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])));
-      if (n > 0) { G.crates.push([m + GARDEN.carry, b[0], n]); if (st) st.picked += n; }
+      if (n > 0) { const it = items.find(x => x[0] === b[0]); if (it) it[1] += n; else items.push([b[0], n]); if (st) st.picked += n; }
       b[1] = 0; b[2] = 0;
     }
+    const got = items.reduce((a, x) => a + x[1], 0);
+    if (got) {
+      const cr = { at: m, items, id: null };
+      if (!st) {                                         // live: section 17's carry job (the player first, then the crew)
+        const gc = GALLEY_TEST.gardenCarry || (typeof gardenCarry === 'function' ? gardenCarry : null);
+        if (gc) cr.id = gc({ at: m, crates: Math.ceil(got / 10), title: `Carry ${Math.ceil(got / 10)} crate${got > 10 ? 's' : ''} of ${gardenNames(items)} from the garden to the cold store` }) || null;
+      }
+      G.crates.push(cr);
+    }
+    if (pickNow === 'harvest' && !st && got < GARDEN_HARVEST / 2) {   // half a usual harvest morning or less: Brennan writes
+      const c = gardenCond(d), worst = ['water', 'feed', 'light', 'tend'].sort((a, b) => c[a] - c[b])[0];
+      galleyMail(m, 'A thin harvest', `Only ${got} meals' worth came in from the garden this morning (a good harvest is about ${Math.round(GARDEN_HARVEST / 10) * 10}). ${GARDEN_WHY[worst]} We'll lean on the stores until it picks up.`);
+    }
   }
-  if (G.crates.length) { const keep = []; for (const c of G.crates) if (c[0] <= m) S.cold.produce.push([c[1], c[2], d]); else keep.push(c); G.crates = keep; }
+  if (G.crates.length) {
+    const keep = [], cw = GALLEY_TEST.carryWaiting || (typeof carryWaiting === 'function' ? carryWaiting : null);
+    for (const c of G.crates) {
+      const waiting = !st && c.id && cw ? cw(c.id, m) : m < c.at + GARDEN.carry;
+      if (waiting) keep.push(c); else for (const [ci, n] of c.items) S.cold.produce.push([ci, n, d]);
+    }
+    G.crates = keep;
+  }
   if (FOOD.binAt.includes(md) && S.cold.produce.length) {
     const keep = []; let n = 0;
     for (const b of S.cold.produce) if (d - b[2] > GARDEN_CROPS[b[0]].keep) n += b[1]; else keep.push(b);
@@ -10713,6 +10752,14 @@ function galleyText(what = 'servery') {
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
   if (what === 'cold') return `About ${S.cold.meals} meals in the cold store` + (produceMeals(S) ? `, and ${produceMeals(S)} of fresh produce from the garden.` : '.') + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
   if (what === 'menu') return galleyBoard();
+  if (what === 'garden') {
+    const G = S.garden || { beds: [], crates: [] }, ripe = new Map(), c = gardenCond(SHIP.time.day);
+    for (const b of G.beds) if (b[1] >= GARDEN_CROPS[b[0]].days) ripe.set(b[0], (ripe.get(b[0]) || 0) + 1);
+    const r = [...ripe].map(([ci, k]) => `${GARDEN_CROPS[ci].name} (${k} bed${k > 1 ? 's' : ''})`);
+    let next = SHIP.time.day; while (!gardenHarvestDay(next) && next < SHIP.time.day + 15) next++;
+    return (r.length ? `Ripe: ${r.join(', ')}.` : 'Nothing ripe just now.') + (c.grow < .7 ? ' ' + GARDEN_WHY[['water', 'feed', 'light', 'tend'].sort((a, b) => c[a] - c[b])[0]] : ' Growing well.')
+      + ` Next harvest morning: ${next === SHIP.time.day ? 'today' : WEEKDAYS[weekday(next)]}.` + (G.crates.length ? ' Crates waiting to go to the cold store.' : '');
+  }
   if (what === 'event') return S.batch && S.batch.d === SHIP.time.day ? `Brennan is cooking for ${S.batch.label} (${S.batch.meals} meals).` : '';
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
   const evd = galleyEvDish(S.ev && S.ev.menu), M = evd ? { dinner: evd, note: '' } : galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
@@ -10720,6 +10767,8 @@ function galleyText(what = 'servery') {
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
   if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ` A ${ck.name} cake on the end of the counter.`;
   else if (ck && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyCakeFor(ck)}.`;
+  const fresh = produceByCrop(S).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name);
+  if (fresh.length && (S.servery.portions || open)) extra += ` Fresh from the garden: ${fresh.join(' and ')}.`;
   if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}.`;
   if (S.trays && S.trays.d === SHIP.time.day && md >= FOOD.trayAt && md < FOOD.trayAt + 60) extra += ` ${S.trays.n} trays have gone up to the bridge.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
@@ -10846,7 +10895,10 @@ function galleyBoardDraw(t, d) {
   if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
   const ck = galleyCake(d);
   if (ck) line('Cake after dinner: ' + (ck.who.length ? 'happy birthday, ' + galleyNames(ck.who) + '!' : 'happy ' + ck.name + '!'), 148, '600 15px system-ui,sans-serif', '#e8c06a');
-  else line('Fresh rolls, garden greens', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  else {
+    const fr = d === SHIP.time.day && SHIP.galley ? produceByCrop(SHIP.galley).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name) : [];
+    line(fr.length ? 'Fresh from the garden: ' + fr.join(' and ') : 'Fresh rolls from the galley', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  }
   line('Grab & go by the line', 172, '500 15px system-ui,sans-serif', '#e8eef0');
   c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
   t.needsUpdate = true;
