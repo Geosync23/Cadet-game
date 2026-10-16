@@ -57,3 +57,14 @@ Ship traditions = official name (Calendar reminds ~30 ship min ahead); jobs take
 - Clean merges carry helper build numbers: always reset build lines.
 - `const` functions can't be stubbed by tests; tests should use a test hook (the galley's GALLEY_TEST pattern).
 - Two helpers adding the same safeguard (double counting) or the same job (storm trays): decide one owner fast.
+
+## Update by the new lead (session_015QoyPWBdMPM4ywf5W2jMMs, 16:20 UTC)
+
+- Lead check-in: trig_01Kr24HNvp976B4MapBpEqRo (hourly at :15, into the new lead's session). The old one is deleted.
+- Playable link: version 13 = 0.41.5 (done by the old lead's worker).
+- **0.41.6 attempt on `claude/integration-test` = 5555236**, built on 8027d4b in /home/user/si-work (branch lead-wip): crew designer a56b3a1, crowd-render 5add99d, device 985ff28 (0.35.7, final), player-needs 72f5646 (0.28.17 = the user's treadmill fix), social 944dbc7 (0.36.6), ship-systems 7b12687, ship-events 78c6062 (0.34.10), decks-p3 01852f5 (0.38.3), galley 7ab48d1 (0.29.21), player-interactions 6368760 (0.37.4). stormTrays removed; events_check.py test-only fixes (stand-ins in game scope, #devDlg accepted). Passed: deck, day 1, food, machine, events, device. Running in check-runner sessions: player_check (session_01CHiFN5aUx65yS32e2ocPkp), interactions + social (session_0137d9jfVTbwg51LjFmuj5RK), cadet_test vs 8027d4b (session_01UFMJTiPJvYGpZoTSnYAjNA). All pass → push to ship-integration, republish the link, ping the user (they're waiting for the treadmill fix), archive the runners.
+- **Queue for 0.41.7:** ship-events 0.34.11 (occasions) + **0.34.12 storm switch-on** (head of claude/ship-events after 3da517b); social 267d881 (0.36.7-0.36.12); ship-systems 155c95f (0.33.28 traysArrivedAt, 0.33.29 volunteered storm jobs); player-needs 4fbdd17 (ixHold hook, PNGs); galley 0.29.22 (bridgeHungry until trays arrive; coming); player-interactions 0.37.5 (chore props; coming); sim 0.26.15 (guest fix; coming — the sim brief says merge it only once fixed).
+- New hires: sim engineer 2 session_01R6RBwwBM9aorpsqDCrztDU (guest fix → storm routines → friendship seating), device engineer 2 session_01LGbDXmiNuSmR6dPGjRj8mX (Ship news, people on Maps, Calendar appointments, Quiet off shift, phone review). Retired: first device engineer (handover-device.md), old lead.
+- Decisions: bridgeHungry counts until trays arrive (fallback: until 18:00); the deck architect added a 'conference' visit; social holds officer arcs and tuning until the user has played the check-in build.
+- Still open with the user: days off for the player.
+- The account showed a seven-day usage warning (resets Sat 08:00 UTC). If work stops, the hourly check-in resumes it.
