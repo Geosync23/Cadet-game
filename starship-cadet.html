@@ -6603,7 +6603,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.41.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6841,6 +6841,7 @@ function schedData() {
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
+  if (typeof eventPools === 'function' && EV_READY) eventPools(shared, desks);   // section 18: each ship event's places
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -7051,6 +7052,7 @@ function schedBuild(p, d, occ, S) {
   const bedDeck = deckOf(p.bed), desk = rot ? rot.id : S.desks.get(p.id) || null, wd = rot ? rot.deck : p.work && p.work.deck;
   const wtype = rot ? rot.type : p.work && p.work.place, deskAnim = placeAnim(desk && S.byId.get(desk));
   const N = needsEst(p, d);                               // the needs that steer today's choices
+  const EV = typeof eventPlan === 'function' && EV_READY ? eventPlan(p, d) : [];   // section 18: the ship's events this person goes to, in leisure time
   const segs = []; let t = 0, deck = bedDeck;
   const deck3Full = (a, b) => { const h = occ.heads; for (let m = Math.max(a, 1020); m < Math.min(b, 1440); m++) if (h[m] >= DECK3_EVENING_MAX) return true; return false; };
   const isFree = (id, a, b) => !(occ.get(id) || []).some(([x, y]) => x < B + b && B + a < y);
@@ -7166,10 +7168,14 @@ function schedBuild(p, d, occ, S) {
   const meet = gatherings(p, d, F);
   const leisureUntil = (end, k) => {
     for (let n = 0; end - t >= 20 && n < 12; n++) {
+      const ev = EV.find(e => !e.done && e.from < end && t < e.to - e.min);   // section 18: an event in this stretch
+      if (ev && t >= ev.from) { ev.done = true; if (take('leisure', ev.opts, ev.to - t, { wait: 5, by: Math.min(ev.to, end), min: ev.min, tag: ev.tag, anim: ev.anim })) continue; }
+      if (ev && t < ev.from && ev.from - t < 15) { linger(ev.from); continue; }
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
       if (end - to < 20) to = end;
       if (F.shape.drill && t < F.shape.drill && to > F.shape.drill) to = F.shape.drill;
       for (const e of meet) if (!e.done && t < e.at && to > e.at) to = e.at;
+      if (ev && t < ev.from && to > ev.from) to = ev.from;
       if (U(k + n * 3 + 2) < .12) toilet(k + n * 3 + 2);
       const opts = leisureOpts(k + n * 3 + 1), pick = opts[0];
       lastLeisure = pick[0] + '|' + pick[1];
@@ -9429,6 +9435,293 @@ machinesLoad(SAVED);
 jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // =====================================================================
+// 18. SHIP EVENTS
+// The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
+// Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
+//   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
+//   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
+//   eventPlan(p, day)  -> [{ id, from, to, opts: [[deck, pool], ...], tag, anim, min }] what section 14 slots into
+//                         that person's leisure time (minutes from midnight; [] most days). Read once per schedBuild
+//   eventPools(shared) adds each event's pools ('deck|ev:<id>:<n>') to schedData's shared places (section 14 hook)
+//   eventLine(p, t)    -> a line for the tap toast ("Coming to the quiz tonight?"), or null
+//   eventsTick()       the main loop: the Mail the evening before, decor on the deck during an event, the player joining
+// Every choice is a hash (schedU, with k from 500 to 520: 300-312 are the galley's); nothing here calls R(), and nothing reads planDay or whereIs
+// while plans are being made. Events only ever take leisure time: shifts, meals and sleep are untouched, and anyone
+// who finds the room full just carries on with their evening.
+// =====================================================================
+const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year: 52 weeks of 7 days, Day 1 a Monday
+// when: { weekday } (0 = Monday) | { every, on } (days with d % every === on) | { yearDay } | { birthday: true }
+// at: [from, to] in minutes from midnight. where: [{ deck, pool } | { deck, room, types, ids? }, ...], best first;
+// `room` is a regexp on the room's name, `types` the place types taken from it, `ids` an optional regexp on place ids,
+// `who: 'officer'` keeps a pool to officers and up (Deck 1). Places tagged event: '<id>' come first, when there are any.
+// who(p, d, ctx): the chance (0-1) a person who's free goes. anim(p): what they do there (an activity in 8b's ACTS),
+// or null for the place's own pose. k: the event's own hash key (never reuse one). prio: the higher wins a clash.
+// decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
+// line before it; here: the tap line during it; thanks: the toast when the player joins.
+const SHIP_EVENTS = [
+  { id: 'running', name: 'Running club', k: 500, when: { weekday: 0 }, at: [1155, 1200], min: 20,
+    where: [{ deck: 3, pool: 'gym' }],
+    who: p => evHas(p, 'runner') ? .9 : evHas(p, 'gym-regular') ? .55 : .06, anim: () => null,
+    from: 'Rina Deshi', mail: 'Running club tomorrow, 19:15 in the gym. All paces welcome; the slowest lap gets the first cup of water.',
+    ask: 'Running club after dinner. You coming?', here: 'Two more laps. Then water.', thanks: 'You run a few laps with the club. Good for the legs, better for the company.' },
+  { id: 'observatory', name: 'Observatory night', k: 501, when: { weekday: 1 }, at: [1230, 1320], min: 25,
+    where: [{ deck: 2, room: /^Observatory$/, types: ['common-room', 'lounge-seat', 'bench'] }, { deck: 2, room: /^Chart room$/, types: ['common-room', 'lounge-seat'] },
+      { deck: 2, room: /^Science corridor$/, types: ['bench'] }],
+    who: p => evHas(p, 'stargazer') ? .95 : p.dept === 'survey' ? .45 : .08, anim: () => null,
+    from: 'Dr. Imra Sato', mail: 'Observatory night tomorrow from 20:30, Deck 2. The scopes are open to everyone. Dress warm; the observatory never is.',
+    ask: 'Observatory night later. Sato says the nebula is showing off.', here: 'Look at that. Never gets old.', thanks: 'You join the stargazers in the dark. Someone points out a pulsar.' },
+  { id: 'quiz', name: 'Quiz night', k: 502, when: { weekday: 3 }, at: [1200, 1290], min: 25,
+    where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
+    who: p => evHas(p, 'bar-regular') ? .8 : evHas(p, 'lounge-regular') ? .7 : .25, anim: p => evHas(p, 'bar-regular') ? 'drink' : 'talk',
+    from: 'Tomas Lind', mail: 'Quiz night tomorrow, 20:00 in the bow lounge. Teams of four. Question master: me. No looking things up on the ship\'s library, Survey.',
+    ask: 'Coming to the quiz tonight? We need someone who knows the engines.', here: 'Shh, the next question is the tie-breaker.', thanks: 'You squeeze onto a quiz team. You get one right about the reactor, and the table cheers.' },
+  { id: 'works-tea', name: 'Works Friday tea', k: 503, when: { weekday: 4 }, at: [1125, 1170], min: 20,
+    where: [{ deck: 5, room: /^Tea corner$/, types: ['lounge-seat'] }, { deck: 5, room: /^(Works bay|Machine shop|Main storage)$/, types: ['work:works'], free: true }],
+    who: p => p.dept === 'works' ? .8 : 0, anim: p => p.seed % 3 ? 'drink' : 'wash',
+    from: 'Chief Ines Calder', mail: 'Friday tea in the Works bay after dinner: tools cleaned, the week\'s jobs off the board, and the good biscuits.',
+    ask: 'Friday tea after dinner. Bring your spanners; they need a wipe.', here: 'Pass the rag. And a biscuit.', thanks: 'You wipe down tools with the Works crew over tea. Calder nods at the clean board.' },
+  { id: 'jam', name: 'Music jam', k: 504, when: { weekday: 4 }, at: [1185, 1275], min: 25,
+    where: [{ deck: 4, pool: 'music' }],
+    who: p => evHas(p, 'musician') ? .95 : evHas(p, 'music') ? .65 : .04, anim: p => evHas(p, 'musician') ? 'play' : null,
+    from: 'The music room', mail: 'Friday jam tomorrow from 19:45 in the music room, Deck 4. Bring an instrument, or just your ears.',
+    ask: 'Jam in the music room tonight. Come and listen.', here: 'This is the good bit.', thanks: 'You sit in on the Friday jam. Somebody hands you a tambourine.' },
+  { id: 'film', name: 'Film night', k: 505, when: { weekday: 5 }, at: [1200, 1320], min: 30,
+    where: [{ deck: 4, pool: 'common-room' }],
+    who: p => p.rank !== 'junior' ? 0 : evHas(p, 'common-room') ? .8 : .3, anim: () => null,
+    from: 'Pell Okafor', mail: 'Film night tomorrow, 20:00 in the junior common room. It\'s my turn to choose, so: the one with the space whales again.',
+    ask: 'Film night later. Pell picked the space whales one again.', here: 'Shh. This is the whale bit.', thanks: 'You find a spot for film night. The space whales are as good as Pell said.' },
+  { id: 'market', name: 'Sunday swap meet', k: 506, when: { weekday: 6 }, at: [630, 750], min: 20,
+    where: [{ deck: 3, room: /^Promenade$/, types: ['bench'] }, { deck: 3, room: /^Lift plaza$/, types: ['bench'] }],
+    who: p => evHas(p, 'shopper') ? .8 : .22, anim: () => 'talk', decor: 'stalls',
+    from: 'The crew store', mail: 'Sunday swap meet on the promenade tomorrow, 10:30 to 12:30. Bring what you don\'t need; take what you do.',
+    ask: 'Swap meet on Sunday. I\'m trading my spare socks for anything.', here: 'Anyone want a slightly used chess set?', thanks: 'You browse the swap meet stalls and come away with a slightly bent paperback.' },
+  { id: 'harvest', name: 'Harvest morning', k: 507, when: { every: 14, on: 6 }, at: [570, 690], min: 25,
+    where: [{ deck: 3, pool: 'garden-tend' }, { deck: 3, pool: 'garden' }],
+    who: p => evHas(p, 'gardener') ? .95 : evHas(p, 'garden-lover') ? .8 : .12, anim: () => 'water',
+    from: 'Chef Auda Brennan', mail: 'Harvest morning in the hydroponics garden tomorrow, 09:30. Many hands, quick picking. Fresh salad with dinner.',
+    ask: 'Harvest in the garden this morning. Fresh salad tonight.', here: 'These tomatoes are huge this time.', thanks: 'You help pick the harvest. Your hands smell of tomato leaves all morning.' },
+  { id: 'birthday', name: 'Birthday', k: 508, when: { birthday: true }, at: [1200, 1245], min: 20, prio: 2,
+    where: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'], ids: /^3-mess-([1-9]|1[0-6])$/ }],
+    who: (p, d, c) => c.honorees.includes(p) ? 1 : c.honorees.some(h => h.dept === p.dept) ? .55 : c.honorees.some(h => bedRoom(h) === bedRoom(p)) ? .7 : .03,
+    anim: () => 'talk', decor: 'cake',
+    from: 'Matthias Oduya', mail: c => 'Tomorrow is ' + c.names + '\'s birthday. Chef Brennan is baking; cake in the mess hall at 20:00.',
+    ask: c => 'Cake in the mess at eight, for ' + c.names + '.', here: c => 'Happy birthday, ' + c.first + '!', thanks: c => 'You join the birthday table and sing for ' + c.names + '. The cake is lemon.' },
+  { id: 'hull-lights', name: 'Hull-lights evening', k: 509, when: { every: 28, on: 24 }, at: [1260, 1320], min: 25,
+    where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 1, room: /^Observation room$/, types: ['common-room', 'lounge-seat'], who: 'officer' },
+      { deck: 3, room: /^Promenade$/, types: ['bench'] }],
+    who: () => .4, anim: () => null,
+    from: 'Commander Teo Vance', mail: 'Hull-lights evening tomorrow at 21:00: the running lights cycle through every colour they have. Best seen from the bow lounge windows.',
+    ask: 'Hull lights tonight. The bow windows are the best seats.', here: 'There goes the green. My favourite.', thanks: 'You watch the hull lights run through their colours from the window.' },
+  { id: 'founding', name: 'Founding Day', k: 510, when: { yearDay: 100 }, at: [1170, 1290], min: 30, prio: 3,
+    where: [{ deck: 3, pool: 'mess-seat' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
+    who: () => .85, anim: () => 'talk', decor: 'cake',
+    from: 'Captain Odile Marrow', mail: 'Tomorrow is the Wren\'s Founding Day. Everyone off duty to the mess hall at 19:30 for cake and a few words. I promise to keep them few.',
+    ask: 'Founding Day! Cake in the mess at half seven.', here: 'To the Wren.', thanks: 'You raise a cup in the mess hall. To the Wren.' },
+  { id: 'quiet-watch', name: 'The quiet watch', k: 511, when: { yearDay: 300 }, at: [1290, 1335], min: 25,
+    where: [{ deck: 1, room: /^Observation room$/, types: ['common-room', 'lounge-seat'], who: 'officer' }, { deck: 2, room: /^Observatory$/, types: ['common-room'] },
+      { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
+    who: () => .55, anim: () => null,
+    from: 'Matthias Oduya', mail: 'The quiet watch is tomorrow evening at 21:30: a little while at the windows for the people we miss. Come if you like; nobody needs to say anything.',
+    ask: 'The quiet watch is tonight. I\'ll be at the bow windows.', here: '...', thanks: 'You sit quietly at the window with the others for a while.' },
+];
+const evHas = (p, h) => (p.habits || []).includes(h);
+const bedRoom = p => String(p.bed).replace(/-\d+$/, '');   // '4-B1-2' -> '4-B1': bunkmates
+const evText = (x, c) => typeof x === 'function' ? x(c) : x;
+// birthdays: ROSTER[i].birthday (a day of the year, 1-364, section 9) when it's there; until then a stand-in, spread
+// so about one falls each week, in id order
+let EV_BDAYS = null;
+function birthdayOf(p) {
+  if (Number.isInteger(p.birthday) && p.birthday >= 1 && p.birthday <= 364) return p.birthday;
+  if (!EV_BDAYS) {
+    const ppl = schedPeople().filter(q => q.rank !== 'guest').slice().sort((a, b) => a.id < b.id ? -1 : 1);
+    EV_BDAYS = new Map(ppl.map((q, i) => [q.id, 1 + Math.floor((i + .5) * 364 / ppl.length + 3 * schedU(q.seed, 0, 520)) % 364]));
+  }
+  return EV_BDAYS.get(p.id) || null;
+}
+// the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
+const EV_DAYS = new Map();
+function eventsOn(d) {
+  if (EV_DAYS.has(d)) return EV_DAYS.get(d);
+  const out = [], wd = weekday(d), yd = shipYearDay(d);
+  for (const ev of SHIP_EVENTS) {
+    const w = ev.when; let honorees = [];
+    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
+    const names = honorees.map(p => p.name).join(' and ');
+    out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
+  }
+  EV_DAYS.set(d, out);
+  for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
+  return out;
+}
+// the pools: for each `where` with a room, the shared places of those types in that room (not in a locked room; with
+// `free`, not anyone's work station), as 'deck|ev:<id>:<n>'; places tagged event: '<id>' as 'deck|ev:<id>'
+function eventPools(shared, desks) {
+  const taken = new Set(desks ? desks.values() : []);
+  for (const ev of SHIP_EVENTS) {
+    const tagged = new Map();
+    for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
+    for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
+    ev.where.forEach((w, i) => {
+      if (!w.room) return;
+      const rooms = DECKS[w.deck].rooms || {};
+      const l = w.types.flatMap(t => shared.get(w.deck + '|' + t) || []).filter(pl => rooms[pl.room] && w.room.test(rooms[pl.room].name || '')
+        && !schedRoomLocked(w.deck, pl.room) && (!w.ids || w.ids.test(pl.id)) && !(w.free && taken.has(pl.id)) && !pl.machine);
+      if (l.length) shared.set(w.deck + '|ev:' + ev.id + ':' + i, l);
+    });
+  }
+}
+// the pools an event uses for a person, best first: [[deck, key], ...]
+function eventOpts(ev, p) {
+  const S = schedData(), senior = p.rank !== 'junior' && p.rank !== 'guest', out = [];
+  for (const n of Object.keys(DECKS).map(Number)) if (S.shared.has(n + '|ev:' + ev.id)) out.push([n, 'ev:' + ev.id]);
+  ev.where.forEach((w, i) => {
+    if (w.who === 'officer' && !senior) return;
+    const key = w.room ? 'ev:' + ev.id + ':' + i : w.pool;
+    if ((S.shared.get(w.deck + '|' + key) || []).length) out.push([w.deck, key]);
+  });
+  return out;
+}
+// free for the whole window: awake, off duty (the shift, the galley rota's stints, a night worker's day's sleep)
+function eventFree(p, d, a, b) {
+  const F = schedFrame(p, d), P = schedFrame(p, d - 1), over = (x, y) => a < y && x < b;
+  if (b > F.bed - 20) return false;
+  if (F.night) { if (P.works && (over(0, P.workEnd) || a < 900)) return false; if (F.works && over(F.workStart - 10, 1440)) return false; }
+  else {
+    if (a < F.wake + 60) return false;
+    const gp = shiftBlocks(p, d);
+    if (gp && gp.blocks) { if (gp.blocks.some(([x, y]) => over(x - 15, y + 15))) return false; }
+    else if (F.works && over(F.workStart - 15, F.workEnd + 15)) return false;
+  }
+  return true;
+}
+// a person's events on day d: who goes is a hash per person, day and event; a clash keeps the higher prio (then the earlier)
+function eventPlan(p, d) {
+  const out = [];
+  for (const e of eventsOn(d)) {
+    const ev = e.ev, ctx = e;
+    if (!eventFree(p, d, e.from, e.to)) continue;
+    if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, ctx))) continue;
+    const opts = eventOpts(ev, p); if (!opts.length) continue;
+    const anim = ev.anim(p) || null;
+    out.push({ id: ev.id, from: e.from, to: e.to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0 });
+  }
+  out.sort((x, y) => y.prio - x.prio || x.from - y.from);
+  const keep = [];
+  for (const x of out) if (!keep.some(k => x.from < k.to && k.from < x.to)) keep.push(x);
+  return keep.sort((x, y) => x.from - y.from);
+}
+// section 10's poses: an event's tag says what they do there (TAG_ACT), registered once section 10 has run
+let EV_TAGS = false;
+function eventTags() {
+  if (EV_TAGS) return;
+  try { for (const ev of SHIP_EVENTS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+}
+// the event someone is at, or going to later today, from their plan: { e, seg, now }
+function eventOf(p, t) {
+  const d = Math.floor(t / 1440) + 1;
+  for (const s of planDay(p, d)) if (s.tag && /^ev-/.test(s.tag) && s.to > t) {
+    const e = eventsOn(d).find(x => s.tag === 'ev-' + x.id || s.tag.startsWith('ev-' + x.id + '-'));
+    if (e) return { e, seg: s, now: s.from <= t };
+  }
+  return null;
+}
+function eventLine(p, t) {
+  const o = eventOf(p, t); if (!o) return null;
+  return evText(o.now ? o.e.ev.here : o.e.ev.ask, o.e);
+}
+
+// ---- on the deck: Mail the evening before, decor while it's on, the player joining ----
+// SHIP.events = { sent: ['id@day', ...], joined: ['id@day', ...] } (saved as ship.events)
+SHIP.events = (() => {
+  const s = SAVED && SAVED.ship && SAVED.ship.events, ok = a => Array.isArray(a) && a.every(x => typeof x === 'string');
+  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [] };
+})();
+SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60) }; });
+const EV_MAIL_AT = 1080;                                 // 18:00 the evening before
+let EV_LAST = null;                                      // the last minute the Mail was checked to
+// the announcements due in (from, to]: at most three days' worth after a long skip. EV_MAILBOX keeps the last 20
+// (for the device's calendar later, and events_check); they go to the Mail tab when it's there (section 15)
+const EV_MAILBOX = [];
+function eventsMail(from, to) {
+  from = Math.max(from, to - 3 * 1440);
+  for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
+    const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
+    if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
+    SHIP.events.sent.push(key);
+    const m = { at, from: e.ev.from, subject: e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };
+    EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
+    if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body });
+  }
+}
+SIM_ADVANCE.push((from, to) => { eventsMail(from, to); EV_LAST = to; });
+// the player joins by being in one of the event's rooms for 5 ship minutes while it's on: a little social, a toast,
+// and a thank-you in the Mail
+let EV_IN = { key: null, since: 0 };
+function eventRooms(ev) {
+  const S = schedData(), rooms = new Set();
+  for (const [k, l] of S.shared) { const [n, key] = [+k.split('|')[0], k.split('|')[1]]; if (key === 'ev:' + ev.id || key.startsWith('ev:' + ev.id + ':') || ev.where.some(w => w.pool === key && w.deck === n)) for (const pl of l) rooms.add(n + '|' + pl.room); }
+  return rooms;
+}
+function eventsPlayer(now) {
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, here = deckDef.num + '|' + roomAt(...player.here());
+  const e = eventsOn(d).find(x => m >= x.from && m < x.to && (x.rooms || (x.rooms = eventRooms(x.ev))).has(here));
+  const key = e ? e.id + '@' + d : null;
+  if (key !== EV_IN.key) EV_IN = { key, since: now };
+  if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key)) return;
+  SHIP.events.joined.push(key);
+  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12);
+  toast(e.name, evText(e.ev.thanks, e));
+  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?' });
+}
+// decor: a few cheap props on the deck while an event is on (from 30 minutes before to 15 after), built on demand,
+// added to the deck's root (so a deck change takes them away), colours through col(), no R(), no shadows
+const EV_DECOR = { key: '', g: null, root: null };
+const EV_MATS = {};
+const evMat = c => EV_MATS[c] || (EV_MATS[c] = new THREE.MeshStandardMaterial({ color: col(c), roughness: .6 }));
+const EV_KIT = {
+  cake(g) {                                              // on the first long table in the mess hall
+    if (deckDef.num !== 3 || !ROOM_BOX.M) return;
+    const b = ROOM_BOX.M, x = X0(b.i0) + 2.6, z = Z0(b.j0) + 1.0, add = (geo, c, y) => { const m = new THREE.Mesh(geo, evMat(c)); m.position.set(x, y, z); g.add(m); return m; };
+    add(new THREE.CylinderGeometry(.22, .22, .02, 20), '#e6e0d3', .783);                       // the plate
+    add(new THREE.CylinderGeometry(.16, .16, .13, 20), '#f2d7a0', .858);                       // the cake
+    add(new THREE.CylinderGeometry(.165, .165, .03, 20), '#f7f1e8', .917);                     // the icing
+    const c = add(new THREE.CylinderGeometry(.008, .008, .07, 6), '#c45a3f', .962);            // a candle, and its flame
+    const f = new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 6), new THREE.MeshBasicMaterial({ color: col('#ffd27a') })); f.position.set(x, 1.005, z); g.add(f);
+  },
+  stalls(g) {                                            // two trestle stalls at the promenade's east end
+    if (deckDef.num !== 3) return;
+    for (const [i, j, s, c] of [[39, 9, 1, '#c45a3f'], [39, 12, -1, '#5fd6c6']]) {
+      const x = X0(i) + 1, z = (s > 0 ? Z0(j) : Z0(j + 1)) + s * (T / 2 + .22), add = (w, h, d, cc, y, dz = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), evMat(cc)); m.position.set(x, y, z + dz); g.add(m); };
+      add(1.5, .05, .4, '#a07a4f', .74);                 // the top
+      add(1.5, .6, .02, c, .4, -s * .19);                // the cloth front, toward the promenade
+      add(.5, .12, .25, '#d9a441', .83); add(.3, .2, .2, '#7a8fb0', .87);   // things to swap
+    }
+  },
+};
+function eventsDecor(now) {
+  if (EV_DECOR.root !== deckRoot) { EV_DECOR.root = deckRoot; EV_DECOR.g = null; EV_DECOR.key = ''; }
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const on = eventsOn(d).filter(e => e.ev.decor && m >= e.from - 30 && m < e.to + 15).map(e => e.ev.decor), key = deckDef.num + ':' + [...new Set(on)].sort().join(',');
+  if (key === EV_DECOR.key) return;
+  EV_DECOR.key = key;
+  if (EV_DECOR.g) { deckRoot.remove(EV_DECOR.g); EV_DECOR.g.traverse(o => o.geometry && o.geometry.dispose()); EV_DECOR.g = null; }
+  if (!on.length) return;
+  const g = new THREE.Group(); for (const k of new Set(on)) EV_KIT[k](g);
+  if (g.children.length) { deckRoot.add(g); EV_DECOR.g = g; }
+}
+let EV_MIN = -1;
+function eventsTick() {
+  const now = shipNow(), m = Math.floor(now);
+  if (m === EV_MIN) return;
+  EV_MIN = m; eventTags();
+  if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
+  eventsDecor(now); eventsPlayer(now);
+}
+var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
+if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
+
+// =====================================================================
 // 6. CAMERA
 // =====================================================================
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 16, 46);
@@ -11083,7 +11376,8 @@ function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   const f = crewFeeling(a.p, shipNow());               // section 14: "Tomas looks tired"
-  toast(a.p.name, a.p.role + '. ' + (f ? f + ' ' : '') + a.p.bio);
+  const el = typeof eventLine === 'function' ? eventLine(a.p, shipNow()) : null;   // section 18: "Coming to the quiz tonight?"
+  toast(a.p.name, a.p.role + '. ' + (f ? f + ' ' : '') + (el ? '"' + el + '"' : a.p.bio));
   if (typeof playerChat === 'function') playerChat(a.p);  // section 15: chatting raises social
   return true;
 }
@@ -11420,6 +11714,7 @@ function loop() {
   tickShip(dt);                                          // section 13: the ship's clock
   galleyTick();                                          // section 16: the galley, on paper and on Deck 3
   worksTick();                                           // section 17: the Works bay job board
+  eventsTick();                                          // section 18: the ship's events (Mail, decor, joining in)
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);

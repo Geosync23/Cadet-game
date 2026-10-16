@@ -367,6 +367,17 @@ What higher tiers unlock:
 
 **Romance** is out for now.
 
+### Ship traditions
+
+*Decided 2026-10-16 (the answers pass; built in 0.34.0).* Alongside the big ship-wide events, the Wren has small, recurring traditions, "lots of little holiday-like things, almost like Stardew Valley". The crew who are free simply go, and talk about them; nothing stops daily life, and there are no menus or cutscenes.
+
+- **Weekly:** running club (Monday evening, the gym), observatory night (Tuesday, Deck 2), quiz night (Thursday, the bow lounge), Works Friday tea and tool cleaning (Deck 5) and the Friday music jam (Deck 4), film night (Saturday, the junior common room), and the Sunday swap meet on the promenade.
+- **Every few weeks:** harvest morning in the garden (every other Saturday, fresh salad at dinner) and the hull-lights evening (every four weeks).
+- **Birthdays:** each crew member's day; the galley bakes a cake and their department and bunkmates gather in the mess after dinner.
+- **Once a year** (a ship year is 52 weeks): Founding Day (day 100: cake and a few words from the Captain) and the quiet watch (day 300: a quiet while at the windows for the people they miss).
+- **Hearing about them:** a Mail the evening before (on the device's calendar later), and crew mention them when you talk to them ("Coming to the quiz tonight?").
+- **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you.
+
 
 ## The player: Works technician
 
@@ -439,7 +450,7 @@ Story arrives without stopping daily life, like a TNG episode where a phenomenon
 - commendations toward promotion;
 - small permanent traces, such as a scorch mark, a plaque or a new pet.
 
-**Pacing:** roughly one main event every 1–2 ship weeks (3½–7 real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday in the bow lounge.
+**Pacing:** roughly one main event every 1–2 ship weeks (3½–7 real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday gathering in the mess (see "Ship traditions").
 
 **What the player sees depends on rank.** A junior carries filters during the storm. A senior is in the Captain's briefing about it.
 
