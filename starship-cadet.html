@@ -6733,6 +6733,7 @@ newBtn.onclick = () => {
   player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = Math.PI;
   target.copy(player.obj.position).setY(.7); lastRoom = null;
   playerNew();                                           // section 15: fresh needs
+  if (typeof socialNew === 'function') socialNew();      // section 20: strangers again
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
@@ -11046,6 +11047,238 @@ var EV_READY = true;                                     // section 14's hooks w
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
 // =====================================================================
+// 20. SOCIAL
+// The crew as people you know, and as people who know each other (plans/pillar3-plan.md, Part 3 and "How news
+// spreads"). On paper so far (0.36.0): nothing here draws anything or calls R().
+//   SHIP.rel[crewId] = { pts, tier, met, lastTalk, known: [] }   you and each crew member, made on first use (saved)
+//   relAdd(crewId, why, pts) -> the tier after; relTier(crewId) -> 0..4 (REL_NAMES); points never drop
+//   SHIP.aff: Int8Array, one number per pair of crew (pairIdx, i < j in ROSTER order), -100..100; affinity(a, b)
+//   NEWS: [{ id, about, lines, weight, seed, born, kind, event, life }]; SHIP.knows[newsId] = Set of crew ids
+//   newsAdd(item)            a piece of news (the events engineer's too): its seed know it at once; [] if it's known
+//   newsKnownBy(p, t)        -> the news that person knows at minute t, the freshest and weightiest first
+//   playerHeard(newsId, from)  you heard it: SHIP.heard (the Ship app's feed); told first by a crew member, +1
+//   socialTo(t)              run the ship's social hours up to minute t (the main loop, every time jump, social_check)
+// Hour by hour, from who is where (planWhere, section 14, at the half hour): people awake in the same room spend
+// time together, though in a big room each hour only a few of them do. Affinity drifts with that time (most pairs
+// slowly friendlier, pairs with clashing traits the other way) and news passes on (friends more readily). Gossip is
+// born from the ship: a machine going faulty (section 17's hourly record), habit changes (habitWeek, 09:00 that
+// day), birthdays and the day's ship traditions (07:00, section 18), and pairs becoming friends or falling out.
+// Every choice is schedU (k 600-619), so the same ship gives the same social life however it's played (one big jump
+// or hour by hour); the hours already run are kept in the save (SHIP.social.hour), and a clock earlier than that
+// (New game) starts afresh. Everything waits for its first use: ROSTER (section 9) comes later in the file.
+// =====================================================================
+const REL_TIERS = [0, 10, 30, 60, 100], REL_NAMES = ['stranger', 'acquaintance', 'colleague', 'friend', 'close friend'];
+const REL_PTS = { work: 6, meal: 3, chat: 2, favour: 8, news: 1, appt: 3, birthday: 3 };   // the plan's starting numbers, to tune
+// traits that rub each other up the wrong way: anyone with one from the first list and one from the second
+const SOC_CLASH = [[['meticulous', 'precise', 'exacting', 'tidy', 'organised', 'formal'], ['messy', 'easygoing', 'forgetful', 'absent-minded', 'dreamy', 'unhurried', 'playful']],
+  [['blunt', 'sarcastic', 'gruff'], ['nervous', 'shy', 'gentle']], [['competitive'], ['competitive']], [['chatty', 'sociable'], ['private', 'quiet']]];
+const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing', lights: 'flickering', junction: 'buzzing', relay: 'buzzing', databus: 'dropping out',
+  washer: 'leaving the laundry damp', oven: 'running cold', range: 'running cold', chiller: 'struggling to keep cold', lift: 'juddering', heater: 'clanking',
+  heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
+const NEWS = [];
+let SOC = null, SOC_MIN = -1;
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {} };
+const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
+const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
+const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
+const pairSeed = (i, j) => (SOC.crew[i].seed * 31 + SOC.crew[j].seed) | 0;
+const socPick = (a, n, seed, h, k) => a.map(x => [schedU(seed ^ socHash(x.id || x), h, k), x]).sort((x, y) => x[0] - y[0]).slice(0, n).map(x => x[1]);
+function socClash(p, q) {
+  const a = p.traits || [], b = q.traits || [], has = (t, l) => t.some(x => l.includes(x));
+  return SOC_CLASH.some(([x, y]) => (has(a, x) && has(b, y)) || (has(a, y) && has(b, x)));
+}
+function affStart(p, q) {                                // where a pair starts: work, bunk, habits and traits in common
+  let v = 0;
+  if (p.dept === q.dept) v += 12;
+  if (socRoom(p) === socRoom(q)) v += 18;
+  if (p.shift === q.shift) v += 3;
+  for (const h of p.habits || []) if ((q.habits || []).includes(h)) v += 5;
+  for (const t of p.traits || []) if ((q.traits || []).includes(t) && t !== 'competitive') v += 4;
+  if (socClash(p, q)) v -= 12;
+  v += Math.round(16 * (schedU((p.seed * 31 + q.seed) | 0, 0, 600) - .5));
+  return Math.max(-100, Math.min(100, v));
+}
+function socReset(hour) {
+  const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
+  SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
+  SHIP.social = { hour, fault: {}, pairs: {} };
+}
+// the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
+// rel: { id: [pts, met, lastTalk, known] } }. A save made with a different crew list starts the crew's side afresh
+const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
+const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
+function socSave() {
+  socInit();
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice()]; }
+  let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
+  return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
+}
+function socLoad(s) {
+  try {
+    if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
+    const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
+    for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) } };
+    NEWS.length = 0; SHIP.knows = {};
+    for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
+      const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
+    }
+    SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
+    SHIP.rel = {};
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [] }; }
+    for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
+    return true;
+  } catch (e) { return false; }
+}
+function socInit() {
+  if (SOC) return SOC;
+  const crew = ROSTER.filter(p => !p.player);
+  SOC = { crew, n: crew.length, idx: new Map(crew.map((p, i) => [p.id, i])), ids: crew.map(p => p.id).join(',') };
+  if (!socLoad(SAVED && SAVED.social)) socReset(Math.floor(shipNow() / 60));
+  return SOC;
+}
+SAVE_EXTRA.push(s => { s.social = socSave(); });
+
+// ---- you and the crew ----
+const relTierOf = pts => { let t = 0; while (t < 4 && pts >= REL_TIERS[t + 1]) t++; return t; };
+function relGet(id) { socInit(); return SHIP.rel[id] || (SHIP.rel[id] = { pts: 0, tier: 0, met: null, lastTalk: null, known: [] }); }
+const relTier = id => (socInit(), SHIP.rel[id] ? SHIP.rel[id].tier : 0);
+function relAdd(id, why, pts) {
+  socInit(); if (!SOC.idx.has(id)) return -1;
+  const r = relGet(id), now = Math.floor(shipNow());
+  // friends of your friends warm to you a little faster
+  if (pts > 0 && Object.keys(SHIP.rel).some(f => f !== id && SHIP.rel[f].tier >= 3 && affinity(f, id) >= 40)) pts *= 1.25;
+  r.pts = Math.max(REL_TIERS[r.tier], Math.round((r.pts + pts) * 100) / 100);   // never below the tier you've reached
+  if (r.met === null) r.met = now;
+  if (why !== 'news') r.lastTalk = now;
+  r.tier = relTierOf(r.pts);
+  return r.tier;
+}
+function affinity(a, b) {
+  socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
+  return i === undefined || j === undefined || i === j ? 0 : SHIP.aff[pairIdx(i, j)];
+}
+
+// ---- news ----
+function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
+  socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
+  const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s)), born, kind, event, life };
+  NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
+  return it;
+}
+function newsKnownBy(p, t = shipNow()) {
+  socInit(); const id = p && p.id || p;
+  return NEWS.filter(x => x.born <= t && SHIP.knows[x.id] && SHIP.knows[x.id].has(id))
+    .sort((a, b) => (b.weight - (t - b.born) / 1440 * .2) - (a.weight - (t - a.born) / 1440 * .2) || (a.id < b.id ? -1 : 1));
+}
+function playerHeard(newsId, from) {
+  socInit(); const it = NEWS.find(x => x.id === newsId);
+  if (!it || SHIP.heard.some(x => x.id === newsId)) return false;
+  SHIP.heard.push({ id: newsId, from: from || null, at: Math.floor(shipNow()), line: it.lines[0] });
+  if (SHIP.heard.length > 60) SHIP.heard.splice(0, SHIP.heard.length - 60);
+  if (from && SOC.idx.has(from)) relAdd(from, 'news', REL_PTS.news);
+  return true;
+}
+// the day's gossip, born at its hour: birthdays and ship traditions at 07:00, habit changes at 09:00
+function socBorn(h, rooms) {
+  const d = Math.floor(h / 24) + 1, hr = h % 24, t = h * 60 + 30, crew = SOC.crew;
+  const near = p => crew.filter(q => q !== p && (socRoom(q) === socRoom(p) || q.dept === p.dept));   // who'd know first
+  if (hr === 7 && typeof birthdaysOn === 'function') for (const p of birthdaysOn(d)) if (SOC.idx.has(p.id)) {
+    const n = shortName(p);
+    newsAdd({ id: 'bday:' + p.id + ':' + d, about: p.id, kind: 'birthday', weight: .8, life: 1, born: t, seed: socPick(near(p), 4, p.seed, d, 601).map(q => q.id),
+      lines: ['It\'s ' + n + '\'s birthday today.', 'Did you know it\'s ' + n + '\'s birthday?', 'Don\'t forget, it\'s ' + n + '\'s birthday.'] });
+  }
+  if (hr === 9 && d > 7 && typeof habitWeek === 'function') for (const c of habitWeek(Math.floor((d - 1) / 7))) if (c.day === d && SOC.idx.has(c.id)) {
+    const p = crew[SOC.idx.get(c.id)];
+    newsAdd({ id: 'habit:' + c.id + ':' + d, about: c.id, kind: 'habit', weight: .5, life: 5, born: t, seed: socPick(near(p), 2, p.seed, d, 602).map(q => q.id),
+      lines: [c.text, 'Have you noticed? ' + c.text, 'Funny thing: ' + c.text] });
+  }
+  if (hr === 7 && typeof eventsOn === 'function') for (const e of eventsOn(d)) if (!e.honorees.length) {
+    const going = crew.filter(p => planDay(p, d).some(s => s.tag && (s.tag === 'ev-' + e.id || s.tag.startsWith('ev-' + e.id + '-')))), when = e.from >= 1020 ? 'tonight' : 'today';
+    newsAdd({ id: 'trad:' + e.id + ':' + d, about: e.id, kind: 'tradition', weight: .4, life: 1, born: t, seed: socPick(going, 4, socHash(e.id), d, 603).map(q => q.id),
+      lines: [e.name + ' ' + when + ' at ' + hhmm(e.from) + '.', 'Are you coming? ' + e.name + ' starts at ' + hhmm(e.from) + '.', e.id === 'quiz' ? 'Quiz night tonight. I\'ve been revising.' : e.name + ' ' + when + '. Should be good.'] });
+  }
+  // machines going faulty or worse (section 17's record of the hour); whoever is on that deck notices first
+  const rec = typeof MACH_HIST !== 'undefined' ? MACH_HIST.get(h) : null;
+  if (rec && typeof machineList === 'function') for (const m of machineList()) {
+    const st = machineState(rec[m.id] ?? 100), lvl = MACHINE_SEV[st] ? st : null, seen = SHIP.social.fault[m.id];
+    if (!lvl) { if (seen) delete SHIP.social.fault[m.id]; continue; }
+    if (seen === lvl || (seen && MACHINE_SEV[seen] > MACHINE_SEV[lvl])) continue;
+    const there = []; for (const [k, l] of rooms) if (k.startsWith(m.deck + '|')) there.push(...l.map(i => crew[i]));
+    if (!there.length) continue;                         // nobody about to notice: it's news when someone is
+    SHIP.social.fault[m.id] = lvl;
+    const name = MACHINE_KINDS[m.kind].name.toLowerCase(), s = SOC_SYMPTOM[m.kind] || 'playing up', where = 'the ' + name + ' on Deck ' + m.deck;
+    newsAdd({ id: 'fault:' + m.id + ':' + h, about: m.id, kind: 'fault', weight: lvl === 'faulty' ? .5 : lvl === 'failing' ? .7 : .9, life: 3, born: t,
+      seed: socPick(there, 3, socHash(m.id), h, 604).map(q => q.id),
+      lines: ['The ' + name + ' on Deck ' + m.deck + ' has been ' + s + ' all week.', 'Someone should look at ' + where + '. It keeps ' + s + '.', 'Have you heard? ' + where[0].toUpperCase() + where.slice(1) + ' is ' + s + ' again.'] });
+  }
+}
+// ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
+function socialHour(h) {
+  const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
+  if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
+  for (let i = 0; i < n; i++) {
+    const w = planWhere(crew[i], t); if (!w || w.moving || w.act === 'sleep' || !w.placeId) continue;
+    const pl = S.byId.get(w.placeId), k = w.deck + '|' + (pl && pl.room || w.placeId);
+    (rooms.get(k) || rooms.set(k, []).get(k)).push(i);
+  }
+  const pairs = [];                                      // [i, j] who spent time together this hour
+  for (const g of rooms.values()) {
+    if (g.length < 2) continue;
+    const q = Math.min(1, 3 / (g.length - 1));           // in a crowd, each person really talks to about three
+    for (let a = 0; a < g.length; a++) for (let b = a + 1; b < g.length; b++) {
+      const i = Math.min(g[a], g[b]), j = Math.max(g[a], g[b]), ps = pairSeed(i, j);
+      if (q < 1 && schedU(ps, h, 605) >= q) continue;
+      pairs.push([i, j]);
+      const x = pairIdx(i, j), v0 = aff[x], u = schedU(ps, h, 606), clash = socClash(crew[i], crew[j]);
+      let v = v0;
+      if (!clash && v < 70 && u < .3) v++; else if (clash && v > -60 && u < .25) v--;
+      aff[x] = v;
+      const key = i + '-' + j, P = SHIP.social.pairs;
+      if (v0 < 60 && v >= 60 && P[key] !== 'f') { P[key] = 'f'; socPairNews(i, j, true, t); }
+      if (v0 > -40 && v <= -40 && P[key] !== 'r') { P[key] = 'r'; socPairNews(i, j, false, t); }
+    }
+  }
+  // news passes on between people who spent time together (decided against the hour's start, so it never runs
+  // through a whole room in one hour); friends tell each other more readily, people who don't get on hardly at all
+  const learnt = [];
+  for (const it of NEWS) {
+    if (it.born > t) continue;
+    const K = SHIP.knows[it.id], hs = socHash(it.id);
+    for (const [i, j] of pairs) {
+      const ki = K.has(crew[i].id), kj = K.has(crew[j].id); if (ki === kj) continue;
+      const a = aff[pairIdx(i, j)], c = .2 * it.weight * (a >= 40 ? 1.5 : a <= -20 ? .3 : 1);
+      if (schedU(pairSeed(i, j) ^ hs, h, 607) < c) learnt.push([K, crew[ki ? j : i].id]);
+    }
+  }
+  for (const [K, id] of learnt) K.add(id);
+  socBorn(h, rooms);
+  for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
+  while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
+}
+function socPairNews(i, j, friends, t) {
+  const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
+  newsAdd({ id: (friends ? 'friends:' : 'rivals:') + SOC.crew[i].id + ':' + SOC.crew[j].id, about: SOC.crew[i].id + ',' + SOC.crew[j].id, kind: friends ? 'friends' : 'rivals',
+    weight: .6, life: 4, born: t, seed: [SOC.crew[i].id, SOC.crew[j].id],
+    lines: friends ? [a + ' and ' + b + ' are always together these days.', 'Have you noticed ' + a + ' and ' + b + '? Best of friends now.', a + ' and ' + b + ' have become thick as thieves.']
+                   : [a + ' and ' + b + ' aren\'t speaking.', 'There\'s a chill between ' + a + ' and ' + b + ' lately.', 'Did you hear ' + a + ' and ' + b + ' had words?'] });
+}
+function socialTo(t) {
+  socInit(); const h1 = Math.floor(t / 60);
+  if (h1 < SHIP.social.hour) { socReset(h1); return; }   // a clock earlier than ours: a new game
+  if (h1 - SHIP.social.hour > 24 * 14) SHIP.social.hour = h1 - 24 * 14;   // never more than two weeks at once
+  while (SHIP.social.hour < h1) socialHour(SHIP.social.hour++);
+}
+function socialTick() {                                  // the main loop: once a ship minute
+  const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
+  SOC_MIN = m; socialTo(m);
+}
+function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // section 13's New game
+SIM_ADVANCE.push((from, to) => { socialTo(to); });
+
+// =====================================================================
 // 6. CAMERA
 // =====================================================================
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 16, 46);
@@ -13138,6 +13371,7 @@ function loop() {
   galleyTick();                                          // section 16: the galley, on paper and on Deck 3
   worksTick();                                           // section 17: the Works bay job board
   eventsTick();                                          // section 18: the ship's events (Mail, decor, joining in)
+  socialTick();                                          // section 20: the crew's social life, on paper
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
