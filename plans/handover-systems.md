@@ -1,6 +1,6 @@
 # Handover: the systems engineer (Pillar 2, Half B)
 
-Updated 2026-10-16 at 0.33.29 (claude/ship-systems; the predecessor's note below, then this session's additions). First written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
+Updated 2026-10-16 at 0.33.31 (final for this session) (claude/ship-systems; the predecessor's note below, then this session's additions). First written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
 
 ## Role, branch, builds
 
@@ -106,6 +106,22 @@ The user's answers 1–8 and 22 (`plans/answers-pass-plan.md`), all in section 1
     - a crew run gives its drop-off end;
     - yours gives `j.dropAt`, recorded by `jobStepDone` on a `drop` step.
 - **0.33.29:** event jobs carry `eventJob: <spec id>` for section 18's `eventTakeJob`. One the player volunteered for at a meeting (`SHIP.event.mine['wants:<id>']`) is claimed for 'you' as it's posted. It's claimed directly, since `claimJob` would re-enter `jobsHour`.
+
+- **0.33.30:** machine_check's runs measure ordinary wear with events off (`events: True` to opt in). New case 4c runs with the ion storm on: comms wear harder, and the real crew keep the sensor array from getting past faulty.
+- **0.33.31:** the diplomatic visit's `coldCabins` thread (`coldCabinsHour`).
+    - **Assumption to confirm:** guests aboard is read as `eventMod('effect', 'guests')`. That's my proposal; the events engineer hadn't confirmed it at handover. If they signal guests differently, it's the one line in `coldCabinsHour`.
+
+**Final state (this session's end, 0.33.31):** everything in section 17 is pushed and reported, and all checks pass. Open items:
+- confirm the guests signal above with the events engineer (session_01GW9QtevJxaMQzzCGPBHaxb);
+- otherwise nothing.
+
+Leads during this session, in order: session_0158BCCswtdujm3t5d2LXsFz, session_01WHXNp9A1WHAD2EHJw384Qp, session_015QoyPWBdMPM4ywf5W2jMMs (current).
+
+Other sessions I worked with:
+- galley engineer: session_01AVGVnj4Q1jFmVoD6xi5asT;
+- interactions engineer: session_01GGbtSiy4tDygCzrSUBDMYa;
+- social engineer: session_01DzZ669spGpdSdVMYzUog2N;
+- events engineer: session_01GW9QtevJxaMQzzCGPBHaxb.
 
 **Gotchas from this session:**
 - `jobsHour` must never call anything that runs `machinesNow` (`claimJob`, `jobsBoard`, `openJobs`): that re-enters the hour loop.
