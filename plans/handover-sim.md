@@ -224,3 +224,17 @@ How I'd fit them into section 14:
 - **Merging the bridge architect's branch:** keep section 14's `EVENT_ONLY` line in `schedData`, not their `!p.event` or `p.type !== 'event'` filter. Theirs also hides the event places from the per-event lists.
 - **Running checks in parallel times out.** machine_check and the scratch tests fail to load when three browsers run at once. Run at most two together, and rerun a "failed to start" alone.
 - **edgeBlocks (section 4) runs at load**, before section 10's helpers exist, so it works out the edge's tiles inline rather than calling `edgeTiles`.
+
+### Seating by friendship (asked by the social engineer after the handover)
+
+The social engineer (session_01DzZ669spGpdSdVMYzUog2N, section 20, `claude/social`) has two affinity functions:
+- `affinity(a, b)` is live. It drifts each hour from the plans, so section 14 must not plan from it: that would be a loop.
+- `affStart(p, q)` is pure. It comes from roster data and a seed only.
+
+My answer to them:
+- **Seat from `affStart`,** through an `affinityPlan(a, b, d)` they'll provide.
+- **A weekly snapshot is unsafe,** because days get planned before their first hour runs and are re-planned after a reload. That happens through tomorrow's `shiftBlocks`, the sleep skips, the week-back needs, and day_check planning d+3 first.
+- **Where it goes:** in `take()`'s loop over `pool`, for mess-seat and lounge-seat only.
+    - First, seats within about 2 tiles of an already-planned person with affinity ≥ 30.
+    - Skip seats next to anyone at ≤ −30.
+    - `occ` must then store who holds a place: `[from, to, personId]`. `isFree` reads only the first two fields, so that's compatible.
