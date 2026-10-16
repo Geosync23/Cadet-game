@@ -9691,6 +9691,7 @@ const ixBoard = (() => {
     take(id) {
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
       const j = myJob(), [title, where] = jobCard(j);
+      SHIP.player.track = j.id;                          // a job taken is tracked (the device's Track switch: null = off)
       api.close(); device.refresh(); ixGoalAt = -1;
       toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
@@ -9713,6 +9714,10 @@ const ixBoard = (() => {
 
 // ---- the goal pointer: setGoal / clearGoal for any section; with no goal set, your job's next step ----
 let IX_GOAL = null, ixJobGoal = null, ixGoalAt = -1;
+// SHIP.player.track (Pillar 3, the device's Jobs app): null = tracking switched off (no job arrow); a job id or
+// undefined = on. Taking a job at the board turns it on. Saved here (15b's field), read back defensively.
+{ const t = SAVED && SAVED.player && SAVED.player.track; SHIP.player.track = t === null ? null : typeof t === 'string' || typeof t === 'number' ? t : undefined; }
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); if (SHIP.player.track !== undefined) p.track = SHIP.player.track; });
 function setGoal(g) { IX_GOAL = g && g.deck ? { ...g } : null; }
 function clearGoal() { IX_GOAL = null; }
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
@@ -9785,7 +9790,7 @@ function ixFrame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
-  const g = IX_GOAL || ixJobGoal;
+  const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
