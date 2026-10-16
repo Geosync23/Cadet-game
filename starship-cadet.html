@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.9
+   STARSHIP CADET: CSV Wren                            build 0.26.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.10';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6541,6 +6541,7 @@ function schedData() {
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
+  if (typeof eventPools === 'function') eventPools(shared);   // section 18: the events' own place lists
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -6686,12 +6687,16 @@ function birthdaysOn(d) {                                // everyone (not the pl
 }
 function gatherings(p, d, F) {
   if (F.night && F.works) return [];                     // on the night shift tonight
-  const U = k => schedU(p.seed, d, k), out = [], bd = birthdaysOn(d);
-  if (bd.length) {
+  const U = k => schedU(p.seed, d, k), out = [], bd = birthdaysOn(d), EV = typeof eventPlan === 'function';
+  // section 18 (the events engineer) owns the ship's events when it's there: its eventPlan(p, d) gives
+  // [{ id, from, to, opts, tag, anim, min }] in minutes from midnight, already filtered to who goes; it replaces
+  // the birthday and observatory night below. The Deck 1 routines further down stay here.
+  if (EV) for (const e of eventPlan(p, d) || []) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20 });
+  if (!EV && bd.length) {
     const mine = bd.includes(p), mate = bd.some(b => b.dept === p.dept);
     if (mine || U(510) < (mate ? .8 : .45)) out.push({ at: BIRTHDAY_AT - (mine ? 5 : 0), dur: 40 + Math.round(15 * U(511)), where: [[3, 'mess-seat'], [3, 'lounge-seat'], [3, 'bench']], tag: 'party' });
   }
-  if (weekday(d) === STARS_NIGHT.day && (habitsOn(p, d).includes('stargazer') || U(512) < .3))
+  if (!EV && weekday(d) === STARS_NIGHT.day && (habitsOn(p, d).includes('stargazer') || U(512) < .3))
     out.push({ at: STARS_NIGHT.at, dur: 50 + Math.round(30 * U(513)), where: [[2, '@observatory-night'], [2, 'observatory'], [2, 'lounge-seat'], [2, 'bench']], tag: 'stars' });
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
   // Captain and the Commander on their work days and any bridge crew who work late; and the Captain's evening walk
@@ -6880,7 +6885,7 @@ function schedBuild(p, d, occ, S) {
       for (const e of meet) if (!e.done && t >= e.at && t < e.at + 10 && end - t >= Math.min(25, e.dur)) {
         e.done = true;
         if (e.walk) { for (const pl of S.shared.get(e.where[0].join('|')) || []) if (isFree(pl.id, t + (deck !== pl.deck ? C : 0), t + (deck !== pl.deck ? C : 0) + e.dur) && end - t > e.dur + C) { go(pl.deck); hold(pl.id, t, t + e.dur); seg('leisure', t + e.dur, pl.type, pl.id, { tag: e.tag }); } }
-        else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.dur < 20 ? 5 : 15, tag: e.tag, event: true });
+        else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
       }
     }
     linger(end);
