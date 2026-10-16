@@ -8983,7 +8983,8 @@ const L = (a, b, k) => a + (b - a) * k;
 const STRIDE = .46, STANCE = .6, CYCLE = STRIDE / STANCE, LIFT = .12;
 function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes each person's own stream, so it never draws on R()
   const w = g.w, p = g.p % 1, TAU = Math.PI * 2;
-  const hipY = L(HIP_Y + Math.sin(t * 1.7) * .004, HIP_W + .024 * Math.cos(2 * TAU * (p - .3)), w);
+  const cr = g.crouch || 0;                             // 0.27.7: crouching (animateActivity sets it), the hips lower and the body leans
+  const hipY = L(HIP_Y + Math.sin(t * 1.7) * .004, HIP_W + .024 * Math.cos(2 * TAU * (p - .3)), w) - .2 * cr;
   const hipX = L(Math.sin(t * .45) * .012, .026 * Math.cos(TAU * (p - .3)), w);
   rig.hips.position.set(hipX, hipY, 0);
   rig.hips.rotation.z = L(Math.sin(t * .45) * .02, .05 * Math.cos(TAU * (p - .3)), w);
@@ -9009,7 +9010,7 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
   const fl = zL / (STRIDE / 2) * w;
   rig.hips.rotation.y = -.16 * fl;
   rig.chest.rotation.y = .3 * fl;
-  g.lean += ((.09 * sk * w) - g.lean) * Math.min(1, dt * 4);
+  g.lean += ((.09 * sk * w + .34 * cr) - g.lean) * Math.min(1, dt * 4);
   rig.torso.rotation.x = g.lean;
   rig.chest.rotation.z = -rig.hips.rotation.z * .7;
   rig.chest.scale.y = 1 + Math.sin(t * 1.7) * .012 * (1 - w);
@@ -9056,8 +9057,10 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 // drawn with even fewer polygons. Nothing here calls R(): each person has their own random stream.
 // =====================================================================
 const CROWD_JOINTS = 17, CROWD_BONES = 21;               // per person: 17 joints (hips, legs 6, torso, chest, head, arms 6, ponytail), then 4 prop bones
-const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] }];
+const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] },
+  { sph: [5, 4], cap: [5, 3], cyl: 4, tor: [3, 5], min: .03 }];   // 2 (0.27.8): coarse, for big crowds; parts smaller than min (eyes, badges) left out
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
+const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -9074,7 +9077,12 @@ function crowdGeo(geo, lod) {                            // the same shape, fewe
 // one person's parts at one level of detail, in their joints' own space: positions, normals, colours, joint numbers, triangles
 function crowdPack(joints, lod) {
   const list = []; let nv = 0, ni = 0;
-  joints.forEach((j, b) => { for (const p of j.userData.parts) { const g = crowdGeo(p.geo, lod); list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count; } });
+  const min = CROWD_DETAIL[lod].min || 0;
+  joints.forEach((j, b) => { for (const p of j.userData.parts) {
+    const g = crowdGeo(p.geo, lod);
+    if (min) { if (!g.boundingSphere) g.computeBoundingSphere(); if (g.boundingSphere.radius * p.m.getMaxScaleOnAxis() < min) continue; }
+    list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count;
+  } });
   const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3), B = new Uint8Array(nv), I = new Uint32Array(ni);
   const nm = new THREE.Matrix3(), v = new THREE.Vector3(); let o = 0, oi = 0;
   for (const [g, p, b] of list) {
@@ -9099,10 +9107,15 @@ function crowdPack(joints, lod) {
 // "Activities on places"). animateActivity(o, pose, dt, t, sk, y) poses any rig: the crowd, a FullPerson, or a Walker.
 // what a '+modifier' holds: its prop (on the body bone) and how the arms hold it
 const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 }, cartfull: { prop: 'cartfull', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
-  carry: { prop: 'parts', sx: -.42, ex: -1.25, sz: .16, lean: -.04 } };
+  carry: { prop: 'parts', sx: -.42, ex: -1.25, sz: .16, lean: -.04 },
+  // 0.27.7: one: only that arm holds it (1 left, -1 right; the other keeps swinging); bone: the prop rides that hand; hx: the
+  // wrist; look: the head bends to it. A tray in the mess, a toolbox for the Works crew on a job, a datapad for officers.
+  tray: { prop: 'tray', sx: -.36, ex: -1.2, sz: .14, lean: -.02 },
+  toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
+  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
-const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work']);
+const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
 function poseOf(pl) {
   const act = pl.anim || ACT_OF_TYPE[pl.type], base = pl.type === 'bed' ? 'lie' : pl.pose || 'stand';
   if (!act || !ACTS[act]) return base;
@@ -9117,7 +9130,7 @@ const _parsed = new Map();
 function parsePose(pose = 'stand', y = 0) {
   const k = pose + (y >= .3 ? '^' : ''); let r = _parsed.get(k); if (r) return r;
   const plus = pose.indexOf('+'), mod = plus < 0 ? '' : pose.slice(plus + 1), bare = plus < 0 ? pose : pose.slice(0, plus);
-  const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts)
+  const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts), '+tray', '+toolbox', '+datapad'
   const i = bare.indexOf(':'); let base = i < 0 ? bare : bare.slice(0, i), act = i < 0 ? null : bare.slice(i + 1);
   if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
   if (!BASES.has(base)) base = 'stand';
@@ -9259,6 +9272,17 @@ const PROP_KIT = {
     part(p, GEO.box, '#7a6a52', 0, .98, .36, .34, .22, .24); part(p, GEO.box, '#e9c46a', 0, .98, .484, .14, .07, .008); part(p, GEO.box, '#a4aeb4', .06, 1.1, .34, .06, .04, .14);
   },
   cartfull(p) { PROP_KIT.cart(p); part(p, GEO.box, '#7a6a52', -.1, .7, .7, .3, .24, .3); part(p, GEO.box, '#e3eff4', .12, .67, .92, .26, .18, .26); part(p, GEO.box, '#e9c46a', .02, .67, .7, .1, .06, .01); },
+  tray(p) {                                              // a mess tray carried at the waist: a plate of dinner and a mug
+    part(p, GEO.box, '#c9ccc4', 0, .97, .38, .46, .025, .32); part(p, cylG(.09, .09, .012, 14), '#e8ebe8', -.08, .99, .38);
+    part(p, GEO.sph, '#c88a3a', -.08, 1.0, .38, .06, .018, .05); part(p, cylG(.03, .028, .07, 10), '#d06a3a', .13, 1.017, .35);
+  },
+  toolbox(p) {                                           // a red toolbox hanging from the hand by its handle
+    part(p, GEO.box, '#c0392b', 0, -.23, .01, .1, .15, .34); part(p, GEO.box, '#8e2a20', 0, -.165, .01, .104, .03, .344);
+    part(p, GEO.box, '#2b2f33', 0, -.105, .01, .03, .025, .17); for (const z of [-.06, .08]) part(p, GEO.box, '#2b2f33', 0, -.13, z, .02, .05, .02);
+  },
+  datapad(p) {                                           // a datapad on the palm, its screen lit
+    part(p, GEO.box, '#2b2f33', 0, -.1, .03, .14, .2, .015); part(p, GEO.box, '#7fd4e6', 0, -.1, .039, .12, .17, .006);
+  },
   book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
 };
 const _propParts = {}, _propPacks = {}, _propGeos = {};
@@ -9309,6 +9333,7 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
   if (act === 'run') {                                   // running in place: the gait at a run, with nowhere to go
     g.w = o.fresh ? 1 : g.w + (1 - g.w) * Math.min(1, dt * 6); g.p += dt * 1.9; sk = 1;
   }
+  g.crouch = k.crouch ? ss(k.crouch) : 0;
   animateRig(rig, g, dt, t, sk, o.rnd || R);
   const cartKey = cart ? '+' + cart : null;
   for (const key of [base, act, cartKey]) if (key && k[key] === undefined) k[key] = 0;
@@ -9351,13 +9376,19 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
     rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
   }
+  if (k.crouch > .001) {                                 // crouched: arms a little forward and out, the head up to see ahead
+    const s = ss(k.crouch);
+    for (const a of rig.arms) { a.sh.rotation.x -= .3 * s; a.el.rotation.x -= .45 * s; a.sh.rotation.z += a.side * .1 * s; }
+    rig.head.rotation.x -= .32 * s;
+  }
   for (const key in k) if (ACTS[key] && k[key] > .001) ACTS[key].f(rig, ss(k[key]), t, base, ph, h, seat || CROWD_SEAT.sit);
   for (const hk in HOLDS) if (k['+' + hk] > .001 && base !== 'sit' && base !== 'lie') {   // hands on the cart's handle, or round the box
     const H = HOLDS[hk], s = ss(k['+' + hk]), busy = act ? ss(k[act] || 0) : base === 'work' ? ss(k.work || 0) : 0, w = s * (1 - busy);   // loading or unloading ('work+cart') keeps its own arms
-    for (const a of rig.arms) armTo(a, w, H.sx, H.ex, H.sz, .35);
-    rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
+    for (const a of rig.arms) if (!H.one || a.side === H.one) armTo(a, w, H.sx, H.ex, H.sz, H.hx !== undefined ? H.hx : .35);
+    if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
+    if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
   }
-  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? 'B:' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
+  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
     o.propKey = key;
     if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
@@ -9372,6 +9403,7 @@ class CrowdPerson {
     this.rig.root.rotation.order = 'YXZ';                // turn to face, after lying down
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
     this.geo = [0, 1].map(l => crowdPack(this.joints, l));
+    this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
     for (const j of this.joints) delete j.userData.parts;
     const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
     this.propBones = [hand(-1), hand(1), this.rig.chest, this.rig.root].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
@@ -9383,12 +9415,13 @@ class CrowdPerson {
     this.pos = new THREE.Vector3(); this.face = 0; this.rot = 0; this.pose = 'stand'; this.phase = undefined;
     this.moved = 0; this.fresh = true; this.lod = 0; this.chunk = null; this.slot = -1;
   }
+  packOf(l) { return this.geo[l] || (this.geo[l] = crowdPack(this.jparts.map(parts => ({ userData: { parts } })), l)); }
   set(pos, face, pose = 'stand', walkPhase) {
     if (!this.fresh) this.moved += Math.hypot(pos.x - this.pos.x, pos.z - this.pos.z);
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
   }
   update(dt, t) {
-    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk';
+    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk' || base === 'crouch';
     const prev = this.rot; let df = this.face - this.rot; df = Math.atan2(Math.sin(df), Math.cos(df));
     this.rot = this.fresh ? this.face : this.rot + df * Math.min(1, dt * 8);
     g.turn += ((this.rot - prev) / Math.max(dt, 1e-3) - g.turn) * Math.min(1, dt * 10);
@@ -9428,7 +9461,7 @@ class CrowdChunk {
   rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
     this.dirty = false;
     const old = this.mesh.geometry; let nv = 0, ni = 0;
-    const packs = p => [p.geo[p.lod], ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
+    const packs = p => [p.packOf(p.lod), ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
     for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
     if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
     const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
@@ -9480,10 +9513,11 @@ const crowd = {
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
-    const allFar = camera.zoom < CROWD_FAR_ZOOM;
+    const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
     for (const p of this.people) {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
-      const lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      if (many && lod && (allFar || d > CROWD_FAR2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
       p.update(dt, t);
     }
@@ -9499,7 +9533,7 @@ const crowd = {
   stats() {
     let verts = 0, tris = 0;
     for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.mesh.geometry.attributes.position.count; tris += c.mesh.geometry.index.count / 3; }
-    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length };
+    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length, coarse: this.people.filter(p => p.lod === 2).length };
   },
 };
 
@@ -9509,7 +9543,8 @@ const crowd = {
 const POSE_DEMO = (() => {
   if (!/[?&]poses\b/.test(location.search)) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
-    'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk'];
+    'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -9521,7 +9556,7 @@ const POSE_DEMO = (() => {
     let n = 0, m = 0;                                    // upright poses in two rows east of the lift; the two lying ones on benches to the west
     here = POSES.map(pose => {
       const { base, act } = parsePose(pose, 0), lie = base === 'lie', k = lie ? m++ : n++;
-      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 11) * 1.5, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 11 ? 9 : 12) + .5;
+      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 13) * 1.35, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 13 ? 9 : 12) + .5;
       const seated = base === 'sit' || act === 'row', lying = base === 'lie';
       const g = new THREE.Group(); g.position.set(x, 0, z); furn.add(g);
       if (lying) KIT.bench(g, { w: 1.6 }); else if (seated) { const st = new THREE.Group(); st.position.z = act === 'row' ? -.05 : 0; g.add(st); KIT.stool(st); }
@@ -9549,7 +9584,7 @@ const POSE_DEMO = (() => {
       const on = deckDef.num === 3;
       if (on && !here.length) fill(); else if (!on && here.length) clear();
       for (const e of here) {
-        e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, e.pose === 'walk' ? t * 1.1 : undefined);   // walking in place
+        e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, /^(walk|crouch)/.test(e.pose) ? t * 1.1 : undefined);   // walking in place
         v.set(e.x, 1.85, e.z).project(camera);
         const vis = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
         e.el.style.display = vis ? '' : 'none';
@@ -9559,14 +9594,16 @@ const POSE_DEMO = (() => {
   };
 })();
 
-// ---- crowd demo: ?crowd=40 in the address (any number up to 76) puts that many of the real crew in Deck 3 at dinner,
+// ---- crowd demo: ?crowd=40 in the address (any number up to 76, or up to 151 for a ship-wide event) puts that many of the real crew in Deck 3 at dinner,
 // and starts you there by the lift at 18:30. The demo never touches your save: ?crowd works as ?nosave does (section 13).
 // Who: ROSTER (section 9) through rosterSpec, leaving out Rina and Brennan, who are already on Deck 3 as full rigs.
 // Where: Deck 3's own places, in this order: the servery queue, the grab shelf, two galley stations, three people
-// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches. Without the flag none of this exists. ----
+// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches; past 76 (0.27.8), the lounge seats, the
+// garden, the gym and the store, doing what's done there, and some crew twice. Over 70, the far ones go coarse
+// (CROWD_MANY). Without the flag none of this exists. ----
 const CROWD_DEMO = (() => {
   const m = /[?&]crowd=(\d+)/.exec(location.search); if (!m) return null;
-  const want = Math.min(+m[1], 76);
+  const want = Math.min(+m[1], 151);
   let sd = 4242; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const shuffle = a => { for (let i = 0; i < a.length; i++) { const j = i + Math.floor(rnd() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   // real crew, day shift first; read when the demo starts, since the roster is defined after this section
@@ -9586,7 +9623,8 @@ const CROWD_DEMO = (() => {
     };
     return [...of('servery-queue'), ...of('grab-shelf'), ...of('work:galley', 2)].map(at)
       .concat([0, 1, 2].map(i => ({ loop: i / 3, pose: 'walk' })))
-      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at));
+      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at))
+      .concat(['lounge-seat', 'garden', 'gym', 'shop'].flatMap(t => of(t, 99)).map(p => ({ ...at(p), pose: poseOf(p) })));
   }
   // the walkers' loop round the mess hall's aisles, in room tiles
   const LOOP = [[.5, 2.5], [9.6, 2.5], [9.6, 5.3], [.5, 5.3]];
@@ -9618,7 +9656,7 @@ const CROWD_DEMO = (() => {
         else e.h.set({ x: e.s.x, y: e.s.y || 0, z: e.s.z }, e.s.face, e.s.pose);
       }
       const now = performance.now(); ft += (now - last - ft) * .05; last = now;
-      if (hud) hud.textContent = `Crowd ${crowd.people.length} · ${renderer.info.render.calls} draw calls · ${ft.toFixed(1)} ms a frame`;
+      if (hud) { const st = crowd.stats(); hud.textContent = `Crowd ${st.people} (${st.coarse} coarse) · ${renderer.info.render.calls} draw calls · ${(st.tris / 1000).toFixed(0)}k triangles · ${ft.toFixed(1)} ms a frame`; }
     },
   };
 })();
