@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.7
+   STARSHIP CADET: CSV Wren                            build 0.36.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11691,6 +11691,22 @@ function newsFeed() {
   return SHIP.heard.slice().reverse().map(h => { const it = NEWS.find(x => x.id === h.id), p = h.from && SOC.idx.has(h.from) ? SOC.crew[SOC.idx.get(h.from)] : null;
     return { id: h.id, line: h.line, from: p ? p.name : null, at: h.at, kind: it ? it.kind : (h.id.split(':')[0] || 'news') }; });
 }
+// the Crew app (0.36.8), on the device engineer's deviceApp (section 19; nothing without it): the people you've met,
+// closest first, with where they are when you may know it; tap one for what you know about them
+let CREW_PICK = null;
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'people', order: 30,
+  view: () => {
+    const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
+    if (c) return { title: c.name, blocks: [
+      { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: c.where ? 'Now: Deck ' + c.where.deck + (c.where.room ? ', ' + c.where.room : '') + '.' : 'Where they are: you don\'t know them well enough yet.' },
+      { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
+      { kind: 'buttons', items: [{ label: 'Back', action: { app: 'crew', do: 'back' } }] }] };
+    const cs = crewContacts();
+    return { title: 'Crew', blocks: cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+      : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }] };
+  },
+  act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
