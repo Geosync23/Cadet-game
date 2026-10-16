@@ -457,6 +457,7 @@ with sync_playwright() as pw:
             sv = json.loads(g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return JSON.stringify(s.player); })()"))
             check(sv.get('work', {}).get('done', 0) >= 4 and sv.get('carry') == [], f"job loop: the save should hold the work ({sv.get('work')})")
             g.step(60); check(g.ev(TAPI) is True, 'job loop: resume'); s3 = jrun(160)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             done = json.loads(g.ev(f"JSON.stringify([myJob(), SHIP.jobs.find(j => j.id === {json.dumps(jid)}).status, SHIP.machines[{json.dumps(mj[2])}].cond])"))
             print('  repaired:', s3[3][:80], '| job', done[1], '| condition', round(done[2]))
             check(done[0] is None and done[1] == 'done' and done[2] >= 99 and s3[2] is None, f'job loop: the job should be done and the machine as new ({done})')
@@ -507,19 +508,23 @@ with sync_playwright() as pw:
             IN_ROOM = "(r => { const it = ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === r && !/tarp/i.test(i.t)); it.hit.getWorldPosition(_wp); return [it.t, playerTap(it, _wp.clone(), _wp.clone())]; })"
             CST = "JSON.stringify([SHIP.player.cart, player.holding, document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent])"
             steps = []
-            g.ev(TAPS % '"Cart dock 1"'); r1 = json.loads(g.ev(CST)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
+            dock = g.ev("[1, 2].find(n => !(typeof cartsOut === 'function' ? cartsOut(shipNow()) : new Set()).has(n)) || 1")   # a crew run may have the other cart out
+            print('    taking the cart at dock', dock)
+            g.ev(TAPS % json.dumps('Cart dock %d' % dock)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
             hold_room = g.ev("placeRoom('5-hold-1')")
             g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
             g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
-            g.ev(TAPS % '"Cart dock 1"'); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
+            pre = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")   # the hourly job list may have moved stock meanwhile: compare across the docking
+            g.ev(TAPS % json.dumps('Cart dock %d' % dock)); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             fin = g.ev(f"[SHIP.jobs.find(j => j.id === {json.dumps(cj[0])}).status, SHIP.stores.filter, myJob()]")
             for st in steps: print('   ', st[0], st[1], '|', st[2][:90])
-            print('    job', fin[0], '| filters', cj[1], '->', fin[1])
+            print('    job', fin[0], '| filters on the shelf, in the hold before docking:', pre, '| on the shelf after:', fin[1])
             check(c1[0] and c1[0]['stage'] == 'empty' and c1[1] == 'cart', f'cart run: taking the cart ({c1})')
             check(c2[0] and c2[0]['stage'] == 'full' and c2[1] == 'cartfull', f'cart run: loading in the hold ({c2})')
             check(c3[0] and c3[0]['stage'] == 'done' and c3[1] == 'cart', f'cart run: unloading in storage ({c3})')
             check(c4[0] is None and not c4[1] and 'Job done' in c4[2], f'cart run: docking the cart finishes the job ({c4})')
-            check(fin[0] == 'done' and fin[1] == cj[1] + 3 and fin[2] is None, f'cart run: the delivery is on the shelves ({fin})')
+            check(fin[0] == 'done' and pre[1] > 0 and fin[1] == pre[0] + pre[1] and fin[2] is None, f'cart run: the delivery is on the shelves ({pre} -> {fin})')
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
 

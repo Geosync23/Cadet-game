@@ -10154,7 +10154,7 @@ function finishJob(id) {
 // lapse), off the board, and myJob() still gives it, until you turn it in at a job board (turnInJob), which completes
 // it. TURN_IN off (for now): finishJob completes your job at once, as before, so section 15 needn't change; on:
 // finishJob only does the work, and turnInJob completes it. The lead turns it on when the board's Turn in lands.
-let TURN_IN = false;
+let TURN_IN = true;                                      // on from 0.37.3: 15b's job board has Turn it in (the lead)
 // jobStepDone(id, stepIndex) -> { ok, left, done }: a stop of your job done (stepIndex into jobStops(j), fetch
 // included); left: stops still to do; done: its work is done (after the last stop), awaiting turn-in
 function jobStepDone(id, k) {
@@ -10345,6 +10345,7 @@ jobWhere.on = true;                                      // crew go to their job
 // =====================================================================
 // 18. SHIP EVENTS
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
+// To the player they're "ship traditions" (the user's name, 2026-10-16); the big story ones are "ship-wide events".
 // Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
 //   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
 //   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
@@ -10574,7 +10575,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
     if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
     SHIP.events.sent.push(key);
-    const m = { at, from: e.ev.from, subject: e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };
+    const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
     if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet || to < 390 });
   }

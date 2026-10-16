@@ -140,7 +140,7 @@ with sync_playwright() as pw:
     # chores without a machine (0.37.3): fetch, each stop, work done, turn it in at the board
     if g.ev("typeof jobStepDone === 'function' && typeof CHORES !== 'undefined'"):
         print('== chores')
-        g.ev("TURN_IN = true")
+        g.ev("TURN_IN = true")   # on in the build from 0.37.3; set anyway, so the check also works on older builds
         # stand by the thing nearest a place and tap it, the way a player would
         TAPAT = r"""(({ place }) => { const s = placeSpot(place); if (!s) return 'no spot';
           const it = ITEMS.filter(i => !i.lift && !i.see).map(i => [i, ixDist(i, s)]).sort((a, b) => a[1] - b[1])[0][0];
@@ -191,7 +191,6 @@ with sync_playwright() as pw:
             check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
             check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
             g.ev("ixBoard.close()")
-        g.ev("TURN_IN = false")
     # real machines: their taps are section 15's machineTap (machineUse), never one of ours
     over = []
     for n in g.ev("Object.keys(DECKS).map(Number)"):
