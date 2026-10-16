@@ -105,21 +105,30 @@ STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0;
-    eventStart('ionStorm', 10);
+    eventStart('ionStorm', 10); EV_DAYS.clear();
+    const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
+    if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
     const steps = [], sig = [], mods = {};
-    for (let t = 9 * 1440; t <= 15 * 1440; t += 10) {
+    const paused = [9, 10, 11, 12, 13, 14].map(d => d + ':' + eventsOn(d).map(e => e.id).join('+'));
+    for (let t = 9 * 1440; t <= 17 * 1440; t += 10) {
       const n = eventNow(t);
       const o = eventAdvance(t, true); if (o.length) steps.push('day ' + (Math.floor(t / 1440) + 1) + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
       const k = n ? n.phase : '-', m = [eventMod('wear', 'power', t), eventMod('wear', 'comms', t), eventMod('effect', 'flicker', t)];
       sig.push(k + ':' + m.join(',')); mods[k] = m;
       if (n && n.phase === 'escalation') eventScore('blackout', 1);   // a stand-in: a minute of blackout per step of the escalation
+      const g = eventModAt(t, 'galley', 'menu'); if (g) mods.menu = g;
     }
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event };
+    if (send) mailSend = send;
+    const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
+    const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
+    ADDRESSES.length = a0; MEETINGS.length = ms; EV_DAYS.clear();
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused,
+      scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventModAt(12 * 1440, 'wear', 'power') };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     return res;
   };
   const a = run(), b = run();
-  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log), due: eventDueDay(), cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
+  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log) && a.addr.join() === b.addr.join() && a.mails.join() === b.mails.join(), due: eventDueDay(), cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
 })()"""
 
 ok = True
@@ -207,16 +216,27 @@ with sync_playwright() as pw:
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
     st = g.ev(STORM); a = st['a']
-    print('Ion storm on paper (days 10-14):'); [print('  ' + x) for x in a['steps']]
+    print('Ion storm on paper (days 10-16):'); [print('  ' + x) for x in a['steps']]
     print(f"  wear and flicker by phase: {a['mods']}; result {a['log'][0]['band'] if a['log'] else '-'}, threads {a['log'][0]['threads'] if a['log'] else '-'}, traces {a['traces']}")
+    print('  addresses:'); [print('    ' + x) for x in a['addr']]
+    print('  Mail:', a['mails'])
+    print('  meetings:', a['meets'], '| scripts', a['scripts'], a['lines'])
+    print('  traditions by day (storm from day 10):', a['paused'], '| menu', a['mods'].get('menu'))
     print('  the same twice:', st['same'], '| due in play:', st['due'], '(None while the storm is a draft)')
     print('  upcoming traditions:', [(c['title'], c['at'], c['where']) for c in st['cal']])
     want = ['start', 'warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
     got = [w for x in a['steps'] for w in want if (' ' + w) in (' ' + x.split(' ', 3)[3]).replace('phase ', ' ').replace('end ', ' end ')]
     if [w for w in want if w != 'start'] != [w for w in got if w != 'start']: fail(f"storm phases out of order: {a['steps']}")
     m = a['mods']
-    if m.get('-') != [None, None, None] or m.get('onset') != [2, 3, True] or m.get('escalation') != [4, 6, True] or m.get('resolution') != [None, None, None]: fail(f"eventMod by phase: {m}")
+    if m.get('-') != [None, None, None] or m.get('onset') != [1.5, 2, True] or m.get('escalation') != [2, 3, True] or m.get('resolution') != [None, None, None]: fail(f"eventMod by phase: {m}")
     if not st['same']: fail('the storm ran differently the second time')
+    if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
+    if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
+    if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
+    if m.get('menu') != 'stormStew': fail('eventModAt: no storm stew in the escalation')
+    if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')
+    pd = dict(x.split(':') for x in a['paused'])
+    if 'quiz' in pd['11'] or 'works-tea' in pd['12']: fail(f"traditions in the storm: {a['paused']}")
     if len(a['log']) != 1 or a['log'][0]['band'] not in ('smooth', 'bumpy', 'rough') or a['left'] is not None: fail(f"the storm didn't end cleanly: {a['log']} {a['left']}")
     if not st['cal']: fail('upcomingTraditions found nothing in the first week')
 
