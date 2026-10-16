@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.29.12
+   STARSHIP CADET: CSV Wren                            build 0.29.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.12';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.13';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7717,8 +7717,10 @@ function galleyBusy(d) {
 // cakes). On the day the galley bakes a cake at 15:00 (4 meals from the cold store), puts it out on the servery's tray
 // slide after dinner (19:30) and it's gone by 21:30; Mail says so at 12:00
 const CAKE = { mail: 720, bake: 900, out: 1170, gone: 1290, meals: 4 };
-const galleyBirthdays = d => ROSTER.filter(p => p.birthday && p.birthday === ((d - 1) % 364 + 364) % 364 + 1);
-const galleyNames = ps => ps.map(galleyFirst).join(' and ');
+// (yours too: ROSTER_PLAYER's birthday, when it's there)
+const galleyBirthdays = d => ROSTER.concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER ? [ROSTER_PLAYER] : []).filter(p => p.birthday && p.birthday === ((d - 1) % 364 + 364) % 364 + 1);
+const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' and ');
+const galleyWhose = ps => ps.length === 1 && ps[0].player ? 'your' : galleyNames(ps) + '\'s';
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
 const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
@@ -7768,8 +7770,11 @@ function galleyStep(S, m, st) {
   // cart sets off from the Deck 5 hold, and when it arrives; the meals land here, in replays and live alike
   if (carts) {
     if (!S.carts) S.carts = [];
-    if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals]); }
-    if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
+    if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]); }
+    // a run that's yours (section 17's cartWaiting(hour): on the board for you, or yours and not unloaded yet) waits
+    // past its arriveAt: its meals land when you unload at the cold store (galleyCartLand). Live only; replays never wait
+    const held = c => !st && c[2] !== undefined && typeof cartWaiting === 'function' && cartWaiting(c[2]);
+    if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m && !held(c)) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
   }
   // spoilage (answer 7): section 17's shipEffectsAt(3, m).spoil is 1 while the cold store's chiller is fine, up to 2
   // when it's broken (read on the hour; pure, so replays agree). A warm store's food goes off bit by bit (S.rot);
@@ -7788,7 +7793,7 @@ function galleyStep(S, m, st) {
     const who = galleyBirthdays(d);
     if (md === CAKE.gone) S.cake = null;
     else if (who.length) {
-      if (md === CAKE.mail && !st) galleyMail(m, 'Cake tonight', `It's ${galleyNames(who)}'s birthday. There's cake in the mess after dinner, from 19:30. Everyone welcome.`);
+      if (md === CAKE.mail && !st) galleyMail(m, 'Cake tonight', `It's ${galleyWhose(who)} birthday. There's cake in the mess after dinner, from 19:30. Everyone welcome.`);
       if (md === CAKE.bake) { const n = Math.min(CAKE.meals, S.cold.meals); S.cold.meals -= n; S.cake = n ? { d, who: who.map(p => p.id), out: false } : null; if (st && n) st.cakes++; }
       if (md === CAKE.out && S.cake) S.cake.out = true;
     }
@@ -7874,6 +7879,14 @@ function galleyStep(S, m, st) {
   }
 }
 // step SHIP.galley up to ship minute `to` (absolute); a fresh start when there's no state or time went backwards
+// you unload a cart at the cold store (3-cold-1/2): section 17 calls this with the run's hour (the hour in its job id,
+// restock-meals@<hour>), and its meals land now. Returns the meals landed (0: nothing of that run is waiting)
+function galleyCartLand(h) {
+  const S = galleyAdvance(shipNow()); if (!S.carts) return 0;
+  let n = 0; const keep = [];
+  for (const c of S.carts) if (c[2] === h) { const k = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += k; n += k; } else keep.push(c);
+  S.carts = keep; return n;
+}
 // a note to the device's Mail tab (section 15's mailSend, when it's there), once: never twice for the same minute and subject
 const GALLEY_MAILED = new Set();
 function galleyMail(at, subject, body) {
@@ -7942,7 +7955,7 @@ function galleyText(what = 'servery') {
   let extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
   if (S.cake && S.cake.out) extra += ` Birthday cake for ${galleyNames(bd)} on the end of the counter.`;
-  else if (bd.length && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyNames(bd)}'s birthday.`;
+  else if (bd.length && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyWhose(bd)} birthday.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
   return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
 }

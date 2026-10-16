@@ -187,9 +187,10 @@ with sync_playwright() as pw:
     print('A rush at 17:35:', q)
     if not q[1] or 'waiting' not in q[2]: fail(f"busy: no queue in the servery's text during a rush: {q}")
 
-    # 4f. a birthday cake (a stand-in birthday on day DAY + 2 for the first crew member, until ROSTER has them)
-    ck = g.ev(f"""(() => {{ const p = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[0], had = p.birthday, d = {DAY} + 2, B = (d - 1) * 1440, out = {{}};
-      const real = ROSTER.some(x => x.birthday); p.birthday = ((d - 1) % 364) + 1;
+    # 4f. a birthday cake: the first birthday from DAY on (ROSTER's), else a stand-in on day DAY + 2 for the first crew member
+    ck = g.ev(f"""(() => {{ const real = ROSTER.some(x => x.birthday), first = [...Array(364)].map((_, k) => {DAY} + k).find(d => galleyBirthdays(d).length);
+      const p = real ? galleyBirthdays(first)[0] : schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[0], had = p.birthday, d = real ? first : {DAY} + 2, B = (d - 1) * 1440, out = {{ day: d }};
+      if (!real) p.birthday = ((d - 1) % 364) + 1;
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       for (const E of GALLEY_EV.values()) E.k = 0; out.cakes = galleyReport(d, 1)[0].cakes;
       SHIP.galley = null; goToDeck(3);
@@ -197,10 +198,28 @@ with sync_playwright() as pw:
         setShipNow(B + t); galleyTick(); out[k] = {{ cake: !!(SHIP.galley.cake && SHIP.galley.cake.out), shown: !!(GV && GV.cake && GV.cake.visible), candles: GV && GV.candles ? GV.candles.count : -1, text: galleyText('servery') }}; }}
       out.board = galleyBoard(d); out.mail = mail.map(x => x.subject + ': ' + x.body); out.name = p.name; out.real = real;
       window.__sc("mailSend = window.__keepMail"); if (had === undefined) delete p.birthday; else p.birthday = had; GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")
-    print('Birthday cake for', ck['name'] + (' (ROSTER has birthdays)' if ck['real'] else ' (stand-in birthday)') + ':', 'baked', ck['cakes'], '| 19:45:', ck['out']['text'])
+    print('Birthday cake for', ck['name'] + (f" on day {ck['day']} (ROSTER's birthdays)" if ck['real'] else ' (stand-in birthday)') + ':', 'baked', ck['cakes'], '| 19:45:', ck['out']['text'])
     print('  shown at 14:00/18:00/19:45/21:45:', [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')], '| mail:', ck['mail'][:1])
     if ck['cakes'] != 1 or [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')] != [False, False, True, False] or ck['out']['candles'] != 10: fail(f"cake: {ck}")
     if 'birthday' not in ck['board'] or 'cake' not in ck['out']['text'].lower() or not any('Cake tonight' in m for m in ck['mail']): fail(f"cake: board, text or mail: {ck}")
+
+    # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
+    # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
+    yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
+      window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
+      setShipNow({B} + 1440); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      let h = null; for (let t = {B} + 1440 + 9 * 60; t < {B} + 1440 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
+      if (h === null) return {{ real, h }};
+      const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];
+      setShipNow(c[0] + 30); const before = galleyAdvance(shipNow()).cold.meals, waiting = SHIP.galley.carts.some(c => c[2] === h);
+      const landed = galleyCartLand(h), after = SHIP.galley.cold.meals, again = galleyCartLand(h);
+      window.__sc("cartWaiting = " + (real ? 'window.__keepWait' : 'undefined')); window.__keepWait = keep; if (real) cartWaiting = keep;
+      SHIP.galley = null; return {{ real, h, meals, waiting, landed, gained: after - before, again }}; }})()""")
+    print('Your cart run (stand-in cartWaiting' + (', section 17 has its own' if yc['real'] else '') + '):', yc)
+    if yc['h'] is None or not yc['waiting'] or yc['landed'] != yc['meals'] or yc['gained'] != yc['meals'] or yc['again'] != 0: fail(f"your cart run: {yc}")
+    pb = g.ev("(() => { if (typeof ROSTER_PLAYER === 'undefined' || !ROSTER_PLAYER.birthday) return null; const d = ROSTER_PLAYER.birthday; return [d, galleyBoard(d).match(/happy birthday[^!]*!/)[0], galleyWhose(galleyBirthdays(d))]; })()")
+    print('Your birthday:', pb if pb else 'not in ROSTER_PLAYER yet')
+    if pb and pb[2] != 'your': fail(f"your birthday: {pb}")
 
     # 5. once the schedules use the rota: galley staff are at the rota's stations
     hooked = g.ev(f"galleyStaff().some(p => planDay(p, {DAY}).some(s => s.act === 'work' && s.from < {B} + 330))")
