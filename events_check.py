@@ -143,7 +143,9 @@ STORM = r"""(() => {
 # all-clear in the observation room (walking out mails the gist), then on to the end (the log, the traces, the debrief)
 LIVE = r"""(() => {
   const dress = [], hadDress = typeof dressShow === 'function', ds = hadDress ? dressShow : null;
-  window.dressShow = l => { const k = l.map(x => typeof x === 'string' ? x : x.id + (x.lines ? '[' + x.lines.length + ']' : '')).join('+'); if (dress[dress.length - 1] !== k) dress.push(k); };
+  const spy = l => { const k = l.map(x => typeof x === 'string' ? x : x.id + (x.lines ? '[' + x.lines.length + ']' : '')).join('+'); if (dress[dress.length - 1] !== k) dress.push(k); };
+  // with the deck architect's dressShow in the game's own scope, a window stand-in is never seen: wrap the real one there
+  if (hadDress) dressShow = l => { spy(l); return ds(l); }; else window.dressShow = spy;
   const D = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
   const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
   SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
@@ -155,7 +157,8 @@ LIVE = r"""(() => {
   // the briefing: day 10, 08:15, the Works bay
   put(5, '5-jobboard-1'); tick(9 * 1440 + 7 * 60 + 50, 9 * 1440 + 8 * 60 + 16);
   D.briefing = DIALOGUE ? { open: true, cast: Object.fromEntries(Object.entries(DIALOGUE.cast).map(([k, p]) => [k, p.name])), first: dialogueView() } : { open: false };
-  D.panel = !!(DIALOGUE_EL && !DIALOGUE_EL.hidden && DIALOGUE_EL.textContent.length > 5);
+  const devDlg = document.getElementById('devDlg');   // section 19's panel (deviceDialogue) when the device is merged, else the plain strip
+  D.panel = !!(DIALOGUE_EL && !DIALOGUE_EL.hidden && DIALOGUE_EL.textContent.length > 5) || !!(devDlg && !devDlg.hidden && devDlg.textContent.length > 5);
   D.calls1 = frames();
   const seen = []; let n = 0;
   while (DIALOGUE && n++ < 30) { const v = dialogueView(); seen.push((v.choices ? '[choice] ' + v.choices.join(' / ') : v.name + ': ' + v.text)); dialogueStep(v.choices ? 0 : undefined); }
@@ -169,7 +172,7 @@ LIVE = r"""(() => {
   put(1, '1-works-1'); tick(12 * 1440 + 10 * 60 + 2, 12 * 1440 + 10 * 60 + 2); D.walked = !DIALOGUE;
   skipTo(15 * 1440 + 10);
   D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
-  D.dress = dress; if (hadDress) window.dressShow = ds; else delete window.dressShow;
+  D.dress = dress; if (hadDress) dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
   MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
   return D;
