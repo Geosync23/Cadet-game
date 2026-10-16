@@ -257,9 +257,17 @@ DIPLO = r"""(() => {
   const a = run(), b = run();
   const sc = MEETING_SCRIPTS.veyliGreeting; dialogueShow('veyliGreeting', { id: 'veyliGreeting', who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], at: shipNow() });
   const names = []; let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); names.push(v.choices ? '[choice]' : v.who); dialogueStep(v.choices ? 1 : undefined); }
+  // live: the greeting plays when you're in the shuttle bay at 10:00 on the visit's day 2
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
+  const sd = a.due.day; eventStart('diplomatic', sd); EV_DAYS.clear();
+  skipTo((sd + 1) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
+  player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
+  for (let t = (sd + 1) * 1440 + 581; t <= (sd + 1) * 1440 + 602; t++) { setShipNow(t); eventsTick(); }
+  const live = { room: roomAt(...player.here()), open: DIALOGUE ? DIALOGUE.id : null, first: DIALOGUE ? dialogueView().who : null };
+  if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
   SHIP_EVENTS.diplomatic.draft = keep.draft;
   SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear();
-  return { a, same: JSON.stringify(a) === JSON.stringify(b), names };
+  return { a, same: JSON.stringify(a) === JSON.stringify(b), names, live };
 })()"""
 
 ok = True
@@ -429,6 +437,8 @@ with sync_playwright() as pw:
     print('  addresses:', a['addr']); print('  Mail:', a['mails']); print('  meetings:', a['meets'])
     print('  farewell:', a['farewell'], 'going', a['going'], '| result', a['log'], a['traces'])
     print('  greeting speakers:', V['names'], '| guests flag on days', a['guestsOn'])
+    print('  live greeting (in the shuttle bay at 10:00):', V['live'])
+    if V['live']['open'] != 'veyliGreeting' or V['live']['first'] != 'Captain Odile Marrow': fail(f"the live greeting: {V['live']}")
     if a['guestsOn'] != [2, 3, 4, 5, 6]: fail(f"the 'guests' effect: {a['guestsOn']}")
     if not a['due'] or a['due']['id'] != 'diplomatic' or a['due']['day'] < 23 or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
     want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
