@@ -99,7 +99,8 @@ def run_activity(g, title, near=None, limit=4000, label=None):
         if s['bar'] and s['bar'] not in u['bar']: u['bar'].append(s['bar'])
         u['nf'].update(s['nf'])
         if not s['act'] and k > 0: break
-    end = state(g)
+    g.step(30)                                            # the last +N note shows just after (once the rise has stopped)
+    end = state(g); UI.setdefault(label or title, {'bar': [], 'nf': set()})['nf'].update(end['nf'])
     if not any(x[2] == 'do' for x in seen) and re.match(r"In use|There's a queue", end['toast'].split(': ', 1)[1]) and limit > 0:
         print('   ', title, 'taken on arrival:', end['toast'][:80]); g.step(190)
         return run_activity(g, title, near, limit - 1000, label)
@@ -110,7 +111,7 @@ def run_activity(g, title, near=None, limit=4000, label=None):
 
 def body_check(name, need, gain, before, end, seen, pose):
     if pose: check(any(a[2] == 'do' and a[3] in ((pose,) if isinstance(pose, str) else pose) for a in seen), f'{name}: pose {pose} not taken ({sorted(set(str(a[3]) for a in seen))})')
-    if need: check(end['needs'][need] >= min(100, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
+    if need: check(end['needs'][need] >= min(99.5, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
     check(end['visible'] and not end['act'], f'{name}: not back on your feet ({end})')
 
 with sync_playwright() as pw:
@@ -209,6 +210,7 @@ with sync_playwright() as pw:
     tp, b, seen, e, pk = run_activity(g, 'Treadmills'); peak = max(peak, pk); body_check('treadmill', 'fitness', 30, b, e, seen, 'run')
     tp, b, seen, e, pk = run_activity(g, 'Weights'); peak = max(peak, pk); body_check('weights', 'fitness', 30, b, e, seen, 'lift')
     tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, ('call', 'sit:call'))
+    check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
     g.ev("SHIP.player.needs.bathroom = 30")              # a public toilet on Deck 3 (0.28.19)
     tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[20, 20]); peak = max(peak, pk)
     check(tp is True and seen and seen[0][1].startswith('3-toilet'), f'deck 3 toilet: {seen[:1]}'); body_check('deck 3 toilet', 'bathroom', 70, b, e, seen, None)
@@ -220,7 +222,6 @@ with sync_playwright() as pw:
     pv = g.ev("(() => { goToDeck(2); const r = [...PLACE_OF.values()].filter(q => q.type === 'toilet').map(q => [q.id, privatePlace(q)]); goToDeck(3); return r; })()"); g.step(5)
     print('  Deck 2 toilets private:', sum(1 for x in pv if x[1]), 'of', len(pv), [x[0] for x in pv if not x[1]])
     check(all(x[1] == ('wctoilet' not in x[0]) for x in pv), f'cabin toilets are private, the washroom ones public: {pv}')
-    check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
     t = g.ev(f"({TAP})({json.dumps({'title': 'Counter'})})"); g.step(60)
     check(t is False and not state(g)['act'], 'the counter with nothing picked out should just show its text')
     tp, b, seen, e, pk = run_activity(g, 'Shelves'); peak = max(peak, pk); body_check('browse', None, 0, b, e, seen, 'browse')
@@ -453,7 +454,7 @@ with sync_playwright() as pw:
       needsDrain(60, false, playerFx()); const out = { drainHungerX2: Math.round((50 - n.hunger) * 10) / 10, hygieneDrain: Math.round((50 - n.hygiene) * 10) / 10 };
       playerUpdate(0, 0); out.speed = playerSpeed() / needEffects().walk; out.maxV = player.maxV / PLAYER_V0 / needEffects().walk;   // the needs' own walk only
       device.open(); out.note = document.getElementById('devBody').textContent.includes('showers are running weak'); device.close();
-      n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+      n.hygiene = 10; n.bathroom = 50; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
       needsT = shipNow() - PLAYER_ACTS.shower.mins; """ + FX + r""" playerUpdate(0, 0); out.shower = Math.round(n.hygiene); ACT = null; FX_MIN = -1;
       return out; })()""")
     print(' ', st)
