@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.4
+   STARSHIP CADET: CSV Wren                            build 0.27.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.13';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10990,7 +10990,9 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   // wrist; look: the head bends to it. A tray in the mess, a toolbox for the Works crew on a job, a datapad for officers.
   tray: { prop: 'tray', sx: -.36, ex: -1.2, sz: .14, lean: -.02 },
   toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
-  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 } };
+  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 },
+  // 0.27.13 (Pillar 3, C11): your own device, held in both hands at the chest and read, head down, standing or walking
+  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
 const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
@@ -11158,11 +11160,23 @@ const PROP_KIT = {
     part(p, GEO.box, '#c0392b', 0, -.23, .01, .1, .15, .34); part(p, GEO.box, '#8e2a20', 0, -.165, .01, .104, .03, .344);
     part(p, GEO.box, '#2b2f33', 0, -.105, .01, .03, .025, .17); for (const z of [-.06, .08]) part(p, GEO.box, '#2b2f33', 0, -.13, z, .02, .05, .02);
   },
+  device(p) {                                            // the player's handheld: a dark bezel, its screen glowing in the device's phosphor colour
+    part(p, GEO.box, '#1b1f24', -.03, -.1, .035, .17, .21, .02); part(p, GEO.box, devicePhosphor(), -.03, -.1, .046, .14, .15, .006);
+    part(p, GEO.box, '#e8a04c', .035, -.19, .046, .012, .012, .006);   // the power light
+  },
   datapad(p) {                                           // a datapad on the palm, its screen lit
     part(p, GEO.box, '#2b2f33', 0, -.1, .03, .14, .2, .015); part(p, GEO.box, '#7fd4e6', 0, -.1, .039, .12, .17, .006);
   },
   book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
 };
+// the device's screen colour: one shared value, the device skin's ink (section 19's DEVICE_SKIN.ink, else the CSS
+// --crt-ink on the page), else the Wren's cyan. Read when the prop is first built.
+function devicePhosphor() {
+  const v = typeof DEVICE_SKIN !== 'undefined' && DEVICE_SKIN && DEVICE_SKIN.ink || getComputedStyle(document.documentElement).getPropertyValue('--crt-ink').trim();
+  return /^#[0-9a-f]{6}$/i.test(v) ? v : '#6ff0dc';
+}
+const PROP_UNLIT = { device: true };                     // full rigs draw these props unlit, so the screen glows (still one mesh)
+let PROP_BASIC = null;
 const _propParts = {}, _propPacks = {}, _propGeos = {};
 function propParts(kind) {
   if (_propParts[kind]) return _propParts[kind];
@@ -11195,7 +11209,8 @@ function rigProps(o, key) {
   if (!o.bodyProps) { o.bodyProps = new THREE.Group(); o.bodyProps.scale.setScalar(1 / o.rig.spec.height); o.rig.root.add(o.bodyProps); }
   const at = [R_, L_, o.rig.chest, o.bodyProps];
   for (const [b, kind] of propList(key)) {
-    const m = new THREE.Mesh(propGeo(kind).clone(), CHAR_MAT); m.castShadow = m.receiveShadow = true;
+    const unlit = PROP_UNLIT[kind] && (PROP_BASIC || (PROP_BASIC = new THREE.MeshBasicMaterial({ vertexColors: true })));
+    const m = new THREE.Mesh(propGeo(kind).clone(), unlit || CHAR_MAT); m.castShadow = true; m.receiveShadow = !unlit;
     if (o.obj) m.userData.walker = o;                   // a Walker's prop taps as the Walker
     at[b].add(m); o.propMeshes.push(m);
   }
@@ -11389,6 +11404,7 @@ const crowd = {
   },
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
+    deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
@@ -11535,6 +11551,48 @@ const machineFx = {
   },
 };
 
+// ---- seeing yourself use the device (0.27.13, Pillar 3 C11): when section 19's deviceOn('open'|'close', fn) exists,
+// opening the device sets player.deviceOut and the player raises it ('+device', HOLDS), closing puts it away. Hooked
+// on the first frame it's there, so nothing happens without it. Something already in your hands wins.
+let deviceHooked = false;
+function deviceHook() {
+  if (deviceHooked || typeof deviceOn !== 'function' || typeof player === 'undefined' || !player) return;
+  deviceHooked = true;
+  deviceOn('open', () => { player.deviceOut = true; }); deviceOn('close', () => { player.deviceOut = false; });
+}
+
+// ---- chatter bubbles (0.27.13, Pillar 3 C5, for section 20): bubbleSay(who, text, secs) shows a small speech bubble
+// over someone's head for a few seconds. who: a crowd handle, a FullPerson or a Walker (anything with pos or obj, and
+// h), or a point { x, y, z }. At most BUBBLE_MAX on screen (the oldest goes); a new line from the same person
+// replaces theirs. Plain DOM (no draw calls), placed each frame from the 3D position; hidden off screen, when zoomed far
+// out, or while bubbles.hidden (a dialogue panel). bubbleClear() removes them all. ----
+const BUBBLE_MAX = 2;
+const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(),
+  tick(dt) {
+    if (!this.list.length) return;
+    for (const b of this.list.slice()) {
+      b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); continue; }
+      const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
+      const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
+      this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
+      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1 && camera.zoom > .6;
+      b.el.style.display = vis ? '' : 'none';
+      if (vis) { b.el.style.left = ((this.v.x + 1) / 2 * innerWidth).toFixed(0) + 'px'; b.el.style.top = ((1 - this.v.y) / 2 * innerHeight).toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2); }
+    }
+  },
+};
+function bubbleSay(who, text, secs = 4.5) {
+  if (!who || !text) return null;
+  if (!bubbles.el) { bubbles.el = document.createElement('div'); bubbles.el.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden'; document.body.appendChild(bubbles.el); }
+  for (const b of bubbles.list.filter(b => b.who === who)) { b.el.remove(); bubbles.list.splice(bubbles.list.indexOf(b), 1); }
+  while (bubbles.list.length >= BUBBLE_MAX) bubbles.list.shift().el.remove();
+  const el = document.createElement('div'); el.textContent = text;
+  el.style.cssText = 'position:absolute;transform:translate(-50%,-100%);max-width:min(220px,60vw);font-size:15px;line-height:1.3;padding:6px 10px;border-radius:12px;background:rgba(244,247,248,.94);color:#14202c;box-shadow:0 2px 6px rgba(0,0,0,.25);display:none';
+  bubbles.el.appendChild(el);
+  const b = { who, text, el, t: secs, life: secs }; bubbles.list.push(b); return b;
+}
+function bubbleClear() { for (const b of bubbles.list) b.el.remove(); bubbles.list.length = 0; }
+
 // ---- pose lineup: ?poses in the address starts you on Deck 3's promenade at 10:30, with one of the crew doing each
 // pose and activity in two rows, labelled, on stools and benches where they sit or lie. Like ?crowd, it never touches
 // your save. Without the flag none of this exists. ----
@@ -11542,7 +11600,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -11554,7 +11612,7 @@ const POSE_DEMO = (() => {
     let n = 0, m = 0;                                    // upright poses in two rows east of the lift; the two lying ones on benches to the west
     here = POSES.map(pose => {
       const { base, act } = parsePose(pose, 0), lie = base === 'lie', k = lie ? m++ : n++;
-      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 13) * 1.35, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 13 ? 9 : 12) + .5;
+      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 15) * 1.15, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 15 ? 9 : 12) + .5;
       const seated = base === 'sit' || act === 'row', lying = base === 'lie';
       const g = new THREE.Group(); g.position.set(x, 0, z); furn.add(g);
       if (lying) KIT.bench(g, { w: 1.6 }); else if (seated) { const st = new THREE.Group(); st.position.z = act === 'row' ? -.05 : 0; g.add(st); KIT.stool(st); }
@@ -11957,7 +12015,7 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined || this.crouch !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
+    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
