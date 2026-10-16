@@ -21,7 +21,7 @@ Written by session_01DzZ669spGpdSdVMYzUog2N while still working (ahead of the 70
 - schedU keys 600-642 are section 20's.
 
 ## Loose ends
-- **Pell's show:** the events engineer (session_01GW9QtevJxaMQzzCGPBHaxb) is adding `eventOneOff({ id, name, day, at, where, who, host, mail })`. Call it from `arcTold` when Pell's beat 3 (index 2) is told: the Deck 4 music room the next evening, host 'pell', who ≈ affinity with Pell or habit 'music'.
+- **Pell's show:** done in 0.36.14 on the events engineer's eventOneOff (0.34.13). Re-test it once their build is merged into the integration.
 - Merge ship integration 0.41.6 when published (it has Appointments and the device).
 - On hold until the user plays the check-in build (the lead's call): arcs for the officers, tuning numbers.
 - Friends who wave you over don't walk over yet (it needs a hook in section 10's crew agents, the sim engineer).

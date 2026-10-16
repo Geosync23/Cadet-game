@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.13
+   STARSHIP CADET: CSV Wren                            build 0.36.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11400,7 +11400,7 @@ const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (con
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
@@ -11417,7 +11417,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -11793,8 +11793,12 @@ const STORY_ARCS = {
     { say: 'Want to see something? I made this out of my tin of spare screws. It plays a tune. Badly.' },
     { say: 'I found an old music box at the swap meet. Rusted solid. I\'ve nearly got the chime working again.' },
     { say: 'Brennan says I can show my music boxes in the music room after dinner one night. Is that mad? You\'d come, right?',
-      mail: { after: 120, subject: 'Music boxes!', body: 'It\'s happening: my music boxes, in the Deck 4 music room after dinner some night this week. Bring people. Or just you. Pell' } },
-    { say: 'Eleven people came to see the music boxes. Eleven! Even Chief Calder stayed for the whole thing. I think she smiled.' },
+      mail: { after: 120, subject: 'Music boxes!', body: 'It\'s happening: my music boxes, in the Deck 4 music room after dinner some night this week. Bring people. Or just you. Pell' },
+      show: { id: 'pell-show', name: 'Pell\'s music boxes', at: [1230, 1290], where: [{ deck: 4, pool: 'music' }], hostAnim: 'play', chance: .12,
+              mail: 'Tomorrow at 20:30 in the Deck 4 music room: my music boxes, all of them, wound up at once. Bring people. Or just you. Pell',
+              ask: 'Coming to see my music boxes tonight?', here: 'This one plays a waltz. Mostly.', thanks: 'You watch Pell wind up his music boxes one by one. The little room laughs and claps.' } },
+    { afterShow: true, say: p => { const n = showCrowd(p, 'pell-show'), w = n > 12 ? n : ['Nobody', 'One person', 'Two people', 'Three people', 'Four people', 'Five people', 'Six people', 'Seven people', 'Eight people', 'Nine people', 'Ten people', 'Eleven people', 'Twelve people'][n];
+      return n ? w + (n > 12 ? ' people' : '') + ' came to see the music boxes. ' + (n > 3 ? n + '! ' : '') + 'I think they actually liked them.' + (showJoined(p, 'pell-show') ? ' And you came. That meant a lot.' : '') : 'Hardly anyone came to the music boxes. That\'s fine. I\'ll try again some time.'; } },
   ],
   rina: [
     { say: 'My gran taught me Tiles. Cheated the whole time. She hasn\'t been well lately.' },
@@ -11805,14 +11809,23 @@ const STORY_ARCS = {
       mail: { after: 30, subject: 'Tiles?', body: 'Gran sends her love, apparently, to "the friend who listened". Come and lose to me at Tiles in the common room some evening. Rina' } },
   ],
 };
+// how many crew went to a beat's show (their plans that day), and whether you joined in (section 18's SHIP.events.joined)
+function showCrowd(p, id) {
+  const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; if (!d) return 0;
+  return SOC.crew.filter(q => q !== p && planDay(q, d).some(s => s.tag && (s.tag === 'ev-' + id || s.tag.startsWith('ev-' + id + '-')))).length;
+}
+const showJoined = (p, id) => { const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; return !!(d && SHIP.events && SHIP.events.joined.includes(id + '@' + d)); };
 function arcBeat(p, t = shipNow()) {
   const arc = STORY_ARCS[p.id], r = SHIP.rel[p.id]; if (!arc || !r) return null;
   const n = r.arc || 0, day = Math.floor(t / 1440) + 1;
+  if (arc[n] && arc[n].afterShow && r.showDay && day <= r.showDay) return null;   // Pell's last beat waits for his show
   return n < arc.length && r.tier >= n + 1 && (r.arcDay || 0) < day ? arc[n] : null;
 }
 function arcTold(p) {                                    // the card showed their next beat
   const beat = arcBeat(p); if (!beat) return;
   const r = SHIP.rel[p.id]; r.arc = (r.arc || 0) + 1; r.arcDay = SHIP.time.day;
+  // a beat with a show: a real one-off gathering the next evening (section 18's eventOneOff), which sends its own Mail
+  if (beat.show && typeof eventOneOff === 'function' && eventOneOff({ ...beat.show, day: SHIP.time.day + 1, host: p.id, from: p.name })) { r.showDay = SHIP.time.day + 1; return; }
   if (beat.mail) SHIP.social.mail.push({ at: Math.floor(shipNow()) + beat.mail.after, from: p.name, subject: beat.mail.subject, body: beat.mail.body });
 }
 // appointments (0.36.13; the device's Appointments, section 19, and the crew side, section 14's apptList): one you
@@ -11843,7 +11856,7 @@ function chatLine(p, t = shipNow()) {
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
-  const beat = arcBeat(p, t); if (beat) return { text: beat.say, kind: 'story', say: true };
+  const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
   const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
     return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
   if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
