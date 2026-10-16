@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.40.8
+   STARSHIP CADET: CSV Wren                            build 0.33.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.40.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.16';                            // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8133,6 +8133,7 @@ function machinesNow() {
     }
     machRecord(MACH_HOUR);
   }
+  if (CART_PENDING.length) cartPost();
   return SHIP.machines;
 }
 // put a machine right: condition back to `to` (100: as new), serviced now
@@ -8327,6 +8328,22 @@ function panelPlace(id) {
   return PANELS.get(id) || null;
 }
 const jobTier = j => { const m = j.machine && machineById(j.machine); return m ? m.tier || MACHINE_KINDS[m.kind].tier : 1; };
+// jobs left for you (0.33.16): the crew take urgent and big jobs, and everything above your tier, at once; a small
+// job at your tier waits CREW_LEAVE minutes of the day shift after it's found (one found in the evening waits for
+// your morning), a food run an hour. leaveEnd(j): the minute the crew may take it
+const DAY_SHIFT = [480, 1020];                           // 08:00-17:00, when you're on shift
+const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
+function leaveEnd(j) {
+  if (!forYou(j)) return j.found;
+  if (j.cargo === 'meals') return j.found + 60;
+  let t = j.found, left = CREW_LEAVE;
+  while (left > 0) {
+    const d0 = Math.floor(t / 1440) * 1440, a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
+    if (n > 0) { left -= n; t = a + n; }
+    if (left > 0) t = d0 + 1440;
+  }
+  return t;
+}
 // a person's job laid over their plan: the segments of a claim at minute t, or null if it doesn't fit inside the
 // work block they're in (not mid-ride, not on a tea break)
 // jobRun reads planWhere (section 14): the plan alone, without jobs, so claiming never asks whereIs
@@ -8421,8 +8438,7 @@ function jobsHour(h) {
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
-  const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t
-    && !(jobTier(j) <= PLAYER_TIER && j.urgency < 2 && t < j.found + CREW_LEAVE))
+  const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
   for (const j of todo) {
     const missing = [], have = { ...SHIP.stores };
@@ -8439,6 +8455,8 @@ function jobsHour(h) {
       break;
     }
   }
+  // a food run nobody took goes unseen (its meals landed long ago, in the galley's books)
+  for (const j of SHIP.jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -8463,17 +8481,22 @@ function cartClaim(t, cold, o = {}) {
   if (o.replay) return run;
   CART_RUNS.set(h, run);
   for (const k of CART_RUNS.keys()) if (k < h - 6) CART_RUNS.delete(k);
-  if (run) { SHIP.hold.meals -= run.meals; CART_PENDING.push({ h, ...run }); }
+  if (run) { SHIP.hold.meals -= run.meals; CART_PENDING.push({ h, ...run, urgent: cold < CART_URGENT }); }
   return run;
 }
 // the run on the job list: the free Works crew member on shift with the lowest tier pushes the cart (dock, hold,
-// lift, cold store, back); with nobody free it goes unseen
+// lift, cold store, back); with nobody free it goes unseen. Since 0.33.16 a run that isn't urgent, set off on the
+// day shift, waits an hour on the board for you (leaveEnd); then the crew take it (jobsHour), and one nobody takes
+// in CART_GONE minutes goes unseen. The galley's books land the meals at arriveAt whoever pushes the cart.
+const CART_GONE = 240;
 function cartPost() {
   while (CART_PENDING.length) {
     const r = CART_PENDING.shift(), t = r.h * 60, id = 'restock-meals@' + r.h;
     if (SHIP.jobs.some(j => j.id === id)) continue;
-    const j = { id, machine: null, deck: 3, kind: 'restock', cargo: 'meals', meals: r.meals, urgency: 2, posted: t, found: t, claimedBy: null, parts: [], status: 'open' };
+    const j = { id, machine: null, deck: 3, kind: 'restock', cargo: 'meals', meals: r.meals, urgency: r.urgent ? 2 : 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', lands: r.arriveAt };
     SHIP.jobs.push(j);
+    const md = t % 1440;
+    if (!r.urgent && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { MACH_REV++; continue; }   // left for you first
     const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
     const crew = schedPeople().filter(p => jobCrew(p) === 'works').sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
     for (const p of crew) {
@@ -8527,6 +8550,17 @@ function finishJob(id) {
 // (device.addSection); this only lists jobs and lets you claim or drop one. Doing it, at the machine's panel,
 // comes with the player engineer's repair activity (finishJob). ----
 function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed') || null; }
+// where your job takes you, in order (0.33.16, for the player engineer's walk): [{ step, places: [place ids, the
+// first free one best], deck }]. A machine job: parts from the shelves, then its panel. A cart run: a cart from a
+// dock, load in the hold, unload at the cold store (or the shelves), the cart back. Places not built yet are left out.
+function jobStops(j) {
+  const known = new Set(Object.values(DECKS).flatMap(d => (d.places || []).map(p => p.id))), st = (step, ids, deck) => ({ step, places: ids.filter(id => known.has(id)), deck });
+  if (!j) return [];
+  if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', HOLD_AT, 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
+  const m = machineById(j.machine); if (!m) return [];
+  const pp = panelPlace(m.id);
+  return [st('fetch', shelvesFor(j.parts[0]), 5), { step: 'job', places: pp ? [pp] : [], deck: m.deck, at: m.panel, room: m.room }];
+}
 function jobsSection(el) {
   const line = (txt, cls) => { const p = document.createElement('p'); p.textContent = txt; if (cls) p.className = cls; el.appendChild(p); return p; };
   const button = (txt, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.style.cssText = 'margin:0 2px 8px;padding:4px 10px;font-size:12.5px'; b.onclick = () => { fn(); device.refresh(); }; el.appendChild(b); return b; };
@@ -8537,7 +8571,8 @@ function jobsSection(el) {
     if (m) {
       const need = {}; for (const k of mine.parts) need[k] = (need[k] || 0) + 1;
       line('Needs ' + Object.entries(need).map(([k, n]) => n + ' × ' + k + ' (' + (SHIP.stores[k] || 0) + ' in storage)').join(', ') + '. Parts are in main storage on Deck 5; the job is in the ' + ((DECKS[m.deck].rooms[m.room] || {}).name || 'room').toLowerCase() + ' on Deck ' + m.deck + '.');
-    } else line('Hover cart from the cargo hold, Deck 5.');
+    } else line(mine.cargo === 'meals' ? 'Take a hover cart from the Cart bay on Deck 5, load ' + (mine.meals || 'the') + ' meals in the cargo hold, and take them up to the cold store on Deck 3. Then bring the cart back.'
+      : 'Take a hover cart from the Cart bay on Deck 5, load the delivery in the cargo hold, and take it to main storage. Then bring the cart back.');
     button('Drop it', () => dropJob(mine.id));
   }
   const open = board.filter(j => !j.claimedBy);
