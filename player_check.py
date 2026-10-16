@@ -4,6 +4,9 @@
 #   keeps every need at 30 or more and the walking speed at 100%; a week of neglect never goes below 0 or above 100
 #   the speed rule: fitness or energy under 25 walks at 80%, both at 64%, and you really do cover less ground
 #   sleep: the bunk's Sleep refills energy; a time skip awake drains it; a night without sleep slows you
+#   long days (0.28.9): a rested player stays up 16 to 18 ship hours before energy hits the tired line (17 at average
+#   fitness); your bunk from 20:00 fades out and wakes you at 06:00 with no dialog, and earlier says it's too early
+#   bonuses and penalties (needEffects, 0.28.9): the table, stacking, the device's marks, and tasks really going faster
 #   in the game, one player day on the real decks, by tapping the real things: shower (Deck 4), servery tray then a
 #   mess seat, grab shelf, treadmill (run), weights (lift), call-home booth (call), shelves then the counter
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
@@ -98,7 +101,7 @@ with sync_playwright() as pw:
 
     print('On paper, a week of normal days:')
     p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'])
-    for k, v in p['lo'].items(): check(v >= 30, f'normal week: {k} fell to {v}')
+    for k, v in p['lo'].items(): check(v >= (25 if k == 'energy' else 30), f'normal week: {k} fell to {v}')
     check(p['slowMins'] == 0, f"normal week: slowed for {p['slowMins']} minutes")
     print('On paper, a week of neglect:')
     p = g.ev(f"({PAPER})({{ normal: false }})"); print('  end', p['end'], 'lowest', p['lo'], 'highest', p['hi'])
@@ -113,7 +116,7 @@ with sync_playwright() as pw:
         out[f + '/' + e] = [Math.round(playerSpeed() * 1000) / 1000, Math.round(player.maxV / PLAYER_V0 * 1000) / 1000, Math.round(walk() / PLAYER_V0 * 1000) / 1000]; }
       Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return out; })()""")
     print('  fitness/energy: [speed, top speed ratio, walking speed reached after 1 s, as a ratio]', sp)
-    for key, want in [('80/80', 1), ('20/80', .8), ('80/20', .8), ('20/20', .64), ('25/25', 1)]:
+    for key, want in [('80/80', 1.05), ('20/80', .8), ('80/20', .84), ('20/20', .64), ('25/25', 1)]:   # fit (75+): 105% (0.28.9)
         check(abs(sp[key][0] - want) < 1e-9 and abs(sp[key][1] - want) < 1e-3, f'speed {key}: {sp[key]} want {want}')
     for key in sp: check(abs(sp[key][2] - sp[key][0]) < .01, f'speed {key}: walking at {sp[key][2]}, want {sp[key][0]}')
 
@@ -125,6 +128,50 @@ with sync_playwright() as pw:
     print(' ', sl)
     check(sl['slept'] == 100, 'sleep should refill energy')
     check(sl['awake21h'] < 25 and abs(sl['speed'] - .8) < 1e-9, 'twenty-one hours awake should slow you')
+
+    print('Long days (energy from 100 to the tired line, awake):')
+    ld = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
+      for (const f of [20, 50, 80]) { Object.assign(n, { hunger: 50, energy: 100, hygiene: 50, fitness: f, social: 50 }); let m = 0;
+        while (n.energy >= 25 && m < 2000) { const keep = { hunger: 50, hygiene: 50, fitness: f, social: 50 }; needsDrain(1, false); Object.assign(n, keep); m++; }
+        out[f] = Math.round(m / 6) / 10; }
+      Object.assign(n, NEEDS_FRESH); return out; })()""")
+    print('  hours awake by fitness (food, hygiene, social held at 50):', ld)
+    check(abs(ld['50'] - 17) <= .3, f"average fitness should last about 17 hours, not {ld['50']}")
+    check(15.8 <= ld['20'] <= 18.2 and 15.8 <= ld['80'] <= 18.2 and ld['20'] < ld['50'] < ld['80'], f'16 to 18 hours whatever your fitness: {ld}')
+
+    print('Needs give bonuses and penalties (needEffects):')
+    ne = g.ev(r"""(() => { const r = x => Math.round(x * 1000) / 1000, f = n => { const e = needEffects(n); return [r(e.walk), r(e.task), r(e.drain), r(e.socialGain), Object.keys(e.marks).sort().join(',')]; };
+      return { mid: f({ hunger: 50, energy: 50, hygiene: 50, fitness: 50, social: 50 }), high: f({ hunger: 80, energy: 80, hygiene: 80, fitness: 80, social: 80 }),
+        low: f({ hunger: 10, energy: 10, hygiene: 10, fitness: 10, social: 10 }), edge: f({ hunger: 75, energy: 25, hygiene: 74.9, fitness: 24.9, social: 50 }) }; })()""")
+    print('  [walk, task, drain, socialGain, marks]', ne)
+    check(ne['mid'] == [1, 1, 1, 1, ''], f"in between, nothing: {ne['mid']}")
+    check(ne['high'][:4] == [1.05, 1.265, .902, 1.5] and ne['high'][4] == 'energy,fitness,hunger,hygiene,social', f"all high: {ne['high']}")
+    check(ne['low'][:4] == [.64, .85, 1.113, .5] and ne['low'][4] == 'energy,fitness,hunger,hygiene,social', f"all low: {ne['low']}")
+    check(ne['edge'] == [.8, 1, 1.018, 1, 'fitness,hunger'], f"75 counts as high, 25 isn't low: {ne['edge']}")
+    dv = g.ev(r"""(() => { Object.assign(SHIP.player.needs, { hunger: 80, energy: 50, hygiene: 10, fitness: 50, social: 50 }); device.open();
+      const b = document.getElementById('devBody'), out = [[...b.querySelectorAll('.need em')].map(e => e.className + ':' + e.textContent), [...b.querySelectorAll('p.fx')].map(p => p.textContent)];
+      device.close(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return out; })()""")
+    print('  the device:', dv)
+    check(dv[0] == ['up:▲', 'down:▼'] and len(dv[1]) == 2 and 'fed' in dv[1][0] and 'wash' in dv[1][1], f'device marks: {dv}')
+
+    tk = g.ev(r"""(() => { const n = SHIP.player.needs, out = [];
+      for (const st of [{ energy: 100, social: 50, hunger: 50 }, { energy: 50, social: 50, hunger: 10 }, { energy: 50, social: 50, hunger: 50 }]) {
+        Object.assign(n, st); ACT = { kind: 'gym', def: PLAYER_ACTS.gym, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+        needsT = shipNow() - 10; playerUpdate(0, 0); out.push(Math.round(ACT.done * 100) / 100); }
+      ACT = null; Object.assign(n, NEEDS_FRESH); return out; })()""")
+    print('  ten ship minutes of a workout count as (rested, hungry, neither):', tk)
+    check(tk == [11.5, 8.5, 10], f'tasks should go 15% faster rested and 15% slower hungry: {tk}')
+
+    print('Going to bed (your bunk, no dialog):')
+    BED = "(() => { const id = playerBed(), b = DECKS[4].places.find(p => p.id === id); return offerSleep(cellPos(...b.at)); })()"
+    g.ev("goToDeck(4); setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 14 * 60); needsT = null"); g.step(3)
+    early = [g.ev(BED), g.ev("document.getElementById('tx').textContent"), g.ev("clockText()")]; print('  at 14:00:', early)
+    check(early[0] is True and 'Too early' in early[1] and early[2].endswith('14:00'), f'the bunk before 20:00 should say it is too early: {early}')
+    g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
+    day0 = g.ev("SHIP.time.day"); g.ev(BED); asked = g.ev("!sleepEl.hidden")
+    g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
+    bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent]"); print('  at 21:00:', bed, 'dialog shown:', asked)
+    check(not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning', f'the bunk at 21:00 should sleep you to 06:00: {bed}')
 
     print('One player day, tapping the real things:')
     g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20 }); basket = false")
@@ -211,7 +258,7 @@ with sync_playwright() as pw:
     st = g.ev(r"""(() => { """ + FX + r"""
       const n = SHIP.player.needs; Object.assign(n, { hunger: 50, hygiene: 50 });
       needsDrain(60, false, playerFx()); const out = { drainHungerX2: Math.round((50 - n.hunger) * 10) / 10, hygieneDrain: Math.round((50 - n.hygiene) * 10) / 10 };
-      playerUpdate(0, 0); out.speed = playerSpeed(); out.maxV = player.maxV / PLAYER_V0;
+      playerUpdate(0, 0); out.speed = playerSpeed() / needEffects().walk; out.maxV = player.maxV / PLAYER_V0 / needEffects().walk;   // the needs' own walk only
       device.open(); out.note = document.getElementById('devBody').textContent.includes('showers are running weak'); device.close();
       n.hygiene = 10; ACT = { kind: 'shower', def: PLAYER_ACTS.shower, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
       needsT = shipNow() - PLAYER_ACTS.shower.mins; """ + FX + r""" playerUpdate(0, 0); out.shower = Math.round(n.hygiene); ACT = null; FX_MIN = -1;

@@ -394,6 +394,8 @@ What makes it interesting:
 
 **Off shift**, you are free: eat, wash, socialise, explore, sleep. Some crew will ask for small favours, like fixing a lamp in their cabin, which build friendships and earn goodwill. Sleeping skips time to morning.
 
+**Your needs** (decided 2026-10-16). Food, energy, hygiene, fitness and social, from 0 to 100. A rested player stays up 16 to 18 ship hours before energy runs low (about 17 at average fitness). Getting into your bunk from 20:00 fades out and wakes you at 06:00, with no question asked; earlier, the bunk says it's too early. Needs give bonuses as well as penalties: at 75 or more a bonus, under 25 a penalty, in between nothing, and the effects multiply. Well rested: tasks go faster; fit: you walk a little faster and tire more slowly; well fed: you tire more slowly; clean: chatting does you more good; in good spirits: tasks go faster. Tired or out of shape: you walk slower; hungry: tasks go slower; unwashed: chatting does less good; lonely: you tire sooner. The device marks each need giving a bonus or a penalty, with a one-line reason. Faulty machines slow only the crew, not you. The exact numbers are in DEV_NOTES ("Player needs and the device").
+
 **Thirty seconds of play.** Your wrist comm chirps: scrubber 2 on Deck 4 is at 60%. You head out of the junior wing, passing Rina and Pell arguing in the corridor. You open the scrubber panel; it needs a filter, so it's down the lift to storage on Deck 5. On the way back, Chef Brennan calls: the oven on Deck 3 is acting up again. Now, or after the scrubber? You choose, and the ship reacts.
 
 
