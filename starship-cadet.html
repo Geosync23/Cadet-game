@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.0
+   STARSHIP CADET: CSV Wren                            build 0.41.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6293,7 +6293,7 @@ function applyLight(k) {
 // 13. SHIP TIME & SAVE
 // Sits here, after lighting and before the first deck is built (section 10):
 // the clock drives the light, and the save decides where you wake.
-// The ship day lasts 30 real minutes. SHIP.time is the ship's clock: day 1 is
+// 18 ship hours take 30 real minutes (a whole day 40). SHIP.time is the ship's clock: day 1 is
 // a Monday, min counts ship minutes since midnight. It only runs while the
 // game is on screen; the ship doesn't run while the game is closed.
 // The game saves itself in the browser (localStorage, one save per device):
@@ -6303,8 +6303,8 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.0';                             // keep in step with the header's build line
-const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
+const GAME_BUILD = '0.41.1';                             // keep in step with the header's build line
+const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
