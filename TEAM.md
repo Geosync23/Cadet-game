@@ -10,6 +10,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
+**The user's focus (2026-10-16 ~20:25):** the events engineer finishes the diplomatic visit (kept draft) and then stops; the comet viewing and the remaining events wait for later. Everyone else finishes the user's tweaks (job board, ship health panel, days off, Roster, device pop-up bug) and the personal device. Then the Pillar 3 check-in.
+
 **Closed sessions (2026-10-16 ~16:40, the user's clean-up):** all retired leads and helpers were archived (their work is pushed and their handover notes are on their branches): the three earlier leads, the first sim and device engineers, events 1, the Pillar 3 planner, and the bridge, command and Deck 6 architects. An archived session can be reopened if ever needed. Check-runner sessions are archived as soon as they report.
 
 **Test branch (approved by the user 2026-10-16):** `claude/integration-test` holds unfinished, unchecked combined attempts (the lead's lead-wip) so helpers can reproduce and fix failures on their own machines in parallel, and check-runner sessions can run one check each at the same time. Helpers never push to it. Only builds that pass every check go to `claude/ship-integration`.
