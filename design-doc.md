@@ -240,7 +240,7 @@ Every machine aboard has a condition that wears down with use and time, and wear
 - **Condition:** each system has a score from 0 to 100 that wears down with use and time. Each is made of parts that can fail, such as filters, pumps, relays and seals.
 - **Dependencies:**
   - Power feeds everything.
-  - Water feeds the garden, and the garden feeds the galley.
+  - Water feeds the garden, and the garden feeds the galley. **The garden really grows food** (the user, 2026-10-16: "everything simulated, as far as we can"): gardeners on a rota tend the beds and racks, crops grow over ship days, harvests go into the cold store, and crew carry the produce to the galley, where the menus use it. A poor garden (low water, dim lights, no gardeners) means smaller harvests and the galley falls back on stores.
   - Air needs scrubbers, and scrubbers need filters from the Deck 5 hold.
 - **Ship health** is a blend of all the systems. A Ship health board on the bridge (Deck 1) and in the Works bay (Deck 5) lists each system and its condition.
 
@@ -451,6 +451,10 @@ What makes it interesting:
 
 **Your needs and activities** (agreed 2026-10-15). You have the same needs as the crew, including fitness and social, and the same rooms to meet them: eat in the mess or grab from the shelf, shower, sleep in your bunk, work out at the gym (a treadmill and weights), call home from a booth, shop at the crew store. Needs drain with ship time and come back by doing things: a meal +55, the grab shelf +25, a shower +80, a workout +30, a call home +40, and 8 hours' sleep fills energy. Social rises when you talk to crew and when you eat at a table with others. A rested player can stay up 16 to 18 ship hours before energy runs low (about 17 at average fitness).
 
+**Bathroom** (the user, 2026-10-16): a need like the others, filled by using a toilet in any washroom (yours on Deck 4, the public ones elsewhere). Crew already use them.
+
+**You can see it working** (the user, 2026-10-16): anything that fills a need shows it as it happens (the need's mark rising, a small "+25 Food" style note), and anything that takes time (eating, showering, the toilet, a workout, a call home, a job step) shows a progress bar for how long is left, like the workout already does.
+
 **Needs give bonuses as well as penalties** (agreed 2026-10-16). A need at 75 or over gives a bonus, one under 25 a penalty, and anything in between does nothing. Effects multiply when they stack, so low fitness and low energy together make you walk at 64%. Your device shows a small up or down mark beside a need that's giving a bonus or a penalty, with a one-line reason. Needs never punish you harder than this (no fail state). The starting numbers (tuned in play; the build's exact values are in DEV_NOTES):
 
 | Need | High (75 and over) | Low (under 25) |
@@ -590,7 +594,7 @@ Other jobs come after the Works game works. Version 1 is Works only.
 
 The look is locked: textured low-poly in a cozy isometric cutaway, with every texture drawn in code. The old living deck from builds 0.3.x is kept in the build as the style reference.
 
-- **Camera:** orthographic isometric view that follows you. Walls between you and the camera drop to knee height, a straight run at a time; tall furniture fades a room at a time. Rotate in 90° steps; pinch or scroll to zoom.
+- **Camera:** orthographic isometric view that follows you. Walls between you and the camera drop to knee height, a straight run at a time; tall furniture fades a room at a time. Rotate in 90° steps; pinch or scroll to zoom. Zooming out stops before the edges of the drawn area show (the user, 2026-10-16: no visible culling), while still giving a good wide view.
 - **Materials:** procedural textures (deck plating, carpet, wall panels, fabrics, wood, rugs, screens), soft shadows and warm lamps. Lighting shifts from cool white by day to amber at night.
 - **Each deck has its own character.** Deck 4 is homey: carpet and warm lamps in the officers' corridor, plate floors and work lights in the junior wing. Deck 5 is a workshop: steel plate, grating, hazard striping, pipe runs and cool work lights. Deck 3 is the warm heart of the ship, with a planked promenade, the garden and the lounge. Deck 6 is warmer and dimmer, and the bridge is cooler.
 - **Curved hull:** the deck keeps its tile grid for walking, but the outer hull follows the ship's curved shape, with rounded corners and an elliptical bow. Every deck draws its hull in one smooth piece per facing, so the stripes run unbroken (Decks 3 to 5 joined the others on 2026-10-16). Windows are openings in the curved hull, onto the stars. Inner glass walls let you see into sealed rooms and machine rooms.
