@@ -16,7 +16,7 @@ After Pillar 2 the Wren works: the galley cooks, machines wear, the Works crew f
 
 **Progression hooks:** your first time inside the Captain's ready room (summoned after a commendation), sitting in on a briefing at the conference table, tea in a friend's cabin, and an invitation to the Captain's table.
 
-**How it's built:** three new helpers (device, social, and the events engineer you already have, who grows from traditions into ship-wide events), with the existing helpers doing small parts. Two check-ins with you: one after the device and social basics, one after the ion storm. Combined builds are **0.50.x**.
+**How it's built:** three new helpers (device, social, and the events engineer you already have, who grows from ship traditions into ship-wide events), with the existing helpers doing small parts. Two check-ins with you: one after the device and social basics, one after the ion storm. Combined builds are **0.50.x**.
 
 **What the user decided (2026-10-16):** yes to everything in "everything else"; the device's two layers, but with the real CRT-style skin built now and no Camera; ambient events, with meetings with dialogue added; and the full event list kept, in order. See "The user's decisions" at the end.
 
@@ -26,11 +26,12 @@ After Pillar 2 the Wren works: the galley cooks, machines wear, the Works crew f
 
 - **Pillars 3 and 4 meet here.** The design doc's milestones list Social as Pillar 3 and Events as Pillar 4. **Agreed (2026-10-16):** Pillar 3 builds the social basics and the *start* of events (the framework and the ion storm) together, because events are mostly people talking; the later events then follow as their own pillar.
 
-- **The build** (0.41.x tonight, on `claude/ship-integration`): 75 crew on schedules (section 14), needs for crew and player (14, 15), the galley (16), machines, jobs and supplies (17), and section 18 `SHIP EVENTS`, small recurring traditions from the events engineer.
+- **The build** (0.41.x tonight, on `claude/ship-integration`): 75 crew on schedules (section 14), needs for crew and player (14, 15), the galley (16), machines, jobs and supplies (17), and section 18 `SHIP EVENTS`, the small recurring **ship traditions** from the events engineer.
+- **Naming (Agreed, 2026-10-16):** the small recurring calendar happenings (music jam, quiz night, observatory night, swap meet, running club, film night, harvest, birthdays, Founding Day and the like) are officially **ship traditions**. **Ship-wide events** means only the big ones (the ion storm and the rest of Part 2). This plan uses the two names that way throughout.
 - **The device today** is a placeholder panel (section 15) with registered sections: `device.addSection(id, title, render)`. It has Now, Needs (with tonight's bonus and penalty marks) and Jobs, plus Mail (`mailSend`, `SHIP.mail`).
 - **Crew feelings:** `crewMood(p, t)` and `crewFeeling(p, t)` give the tap line. Birthdays (`ROSTER[i].birthday`), habits that change (`SHIP.habitLog`), observatory night, the Deck 1 shift handover and the Captain's evening walk all exist or arrive tonight.
 - **Tonight's interactions work** (the interactions engineer, section 15b, builds 0.37.x): the player can use everything the crew use (treadmill, rower, bar, music, garden, laundry, games and more); job-board pick-and-take; an on-screen goal arrow, `setGoal(target)` and `clearGoal()`; sit anywhere (tap a free seat); and squeezing past crew who are settled in a spot.
-- **Not there yet:** no relationships, no conversation, no way to talk to crew beyond a toast, no guests, no events beyond traditions, no map, no appointments. The ready room and private bedrooms are locked. No sound at all (the game has no audio code).
+- **Not there yet:** no relationships, no conversation, no way to talk to crew beyond a toast, no guests, no ship-wide events beyond ship traditions, no map, no appointments. The ready room and private bedrooms are locked. No sound at all (the game has no audio code).
 - **Crowds:** the crowd draws all 75 cheaply; tonight adds a third, coarse level of detail and a `?crowd=120` demo (performance engineer).
 
 ---
@@ -113,7 +114,7 @@ Your eight first, then the extras. **Changed (2026-10-16):** all the proposed ex
 | **Maps** | Each deck as a clean plan drawn from its deck data: rooms named, you as a dot, locked rooms hatched. Search a room or a person; a person shows where they are now, if you know them well enough (see below). "Show on map" and "Go there" point the goal arrow (`setGoal`) at the room or person; on another deck the arrow leads to the lift first. | The deck text maps in `DECKS`, `whereIs` |
 | **Memos** | Notes you write. Plain text, a title, the date. Pin one to the home screen. **Agreed (2026-10-16):** a "remember this" button on chats, Mail and job lines copies the line into a new memo. | New, saved |
 | **Mail** | Tonight's inbox, grown: from the ship (shortages, spoilage), crew (invitations, thanks), departments (event notices), the Captain (addresses, in writing), and home (replies to your calls). Read and unread, delete, "remember this". | `mailSend`, `SHIP.mail` |
-| **Calendar** | A month of ship life ahead: the weekday shapes (Monday briefing, Wednesday drill, Thursday inspection, Friday treat, Sunday vote dinner), the Captain's piano on Thursdays, observatory night, birthdays, traditions, holidays, and announced events once they're known. Tap a day to add it to Schedule or make an appointment that day. | Section 18, `ROSTER.birthday`, events |
+| **Calendar** | A month of ship life ahead: the weekday shapes (Monday briefing, Wednesday drill, Thursday inspection, Friday treat, Sunday vote dinner), the Captain's piano on Thursdays, the **ship traditions** (observatory night, birthdays, quiz night, film night and the rest), and announced ship-wide events once they're known. Tap a day to add it to Schedule or make an appointment that day. **Changed (2026-10-16): it reminds you** of upcoming ship traditions (see "Calendar reminders"). | Section 18, `ROSTER.birthday`, events |
 | **Needs** | Your five needs as bars, each with its bonus or penalty mark and a one-line reason ("Fed: energy drains 10% slower"), from tonight's `needEffects`. A line suggests what would help and where. | Section 15 |
 | **Jobs** | **Changed (2026-10-16): tracks only.** Your jobs and favours: list, details, parts needed, which step you're on, and a **Track** toggle. The tracked one drives the goal arrow and the pins in Maps. No taking or dropping from the device: see "Jobs: take and turn in at the board". Event jobs carry the event's tag. | Section 17, social favours, 15b |
 | **Crew** | Your contacts: everyone you've met, with face, name, rank, department, relationship tier, birthday, and what you know about them (filled in as they tell you). Friends show where they usually are at this hour. Message a friend; make an appointment from here. | Section 20 social, `ROSTER` |
@@ -162,6 +163,16 @@ Your eight first, then the extras. **Changed (2026-10-16):** all the proposed ex
 - **A settings switch** turns tips off.
 - **Owners:** the interactions engineer (when tips fire), the device engineer (how they look).
 
+### Calendar reminders for ship traditions
+
+**Changed (2026-10-16):** the user's addition.
+
+- **Before each ship tradition,** the Calendar sends a reminder through `deviceNotify`, by default about **30 ship minutes** ahead ("Quiz night in the bow lounge at 19:30").
+- **A morning line:** when you wake, a short "Today aboard" note lists the day's traditions (and any birthdays).
+- **Your choice per tradition:** each Calendar entry has a **Remind me / Don't** toggle, and a global setting turns reminders off or changes how far ahead they come.
+- **During your shift,** reminders are quiet badges only, unless it's a tradition you've marked "Remind me" (those still chirp).
+- **Owners:** the device engineer (the Calendar app and reminders), the events engineer (the list of upcoming traditions, from section 18).
+
 ### Appointments in detail (the user's request)
 
 - **Making one:** Appointments → New → who or what → when (the next three days; times in 15-minute steps) → where (a suggested place, or pick one from the map).
@@ -203,7 +214,7 @@ What that means in practice:
 **Agreed (2026-10-16):** each event is one block of data (like a deck definition), so new events are mostly writing, not code.
 
 ```js
-// section 18. SHIP EVENTS (the events engineer; ship-wide events join tonight's traditions)
+// section 18. SHIP EVENTS (the events engineer; ship-wide events join tonight's ship traditions)
 SHIP_EVENTS.ionStorm = {
   title: 'Ion storm', days: 4, earliest: 8,           // ship days; the soonest day it can happen
   // at: [day, minute] with day counted from 0 (the warning's day); the prose calls these Days 1-4
@@ -378,7 +389,7 @@ All kept (the user, 2026-10-16). Pillar 3 builds the framework and event 1 first
 
 All kept, and slotted between the main events from the start (Agreed, 2026-10-16):
 
-- **Founders' Day festival** (a happy event, and the crowd test; built once the phone test says big crowds are OK): the plaza decorated, the galley's big feast, a talent night in the bow lounge, the whole crew together. Good for showing off crowds over 70.
+- **Founding Day festival** (a happy one, and the crowd test; built once the phone test says big crowds are OK). Founding Day itself is a **ship tradition**; this is the year it grows into a ship-wide festival: the plaza decorated, the galley's big feast, a talent night in the bow lounge, the whole crew together. Good for showing off crowds over 70.
 - **Power surge:** a one-day event centred on Deck 6; a junction trips and two decks lose power for a while.
 - **A Veyli vessel needs help:** their ship limps alongside; Works sends parts; one Veyli engineer comes aboard (a guest). A seed for later away jobs.
 - **The late supply shuttle:** rationing, a bland menu, filters short, the machine shop busy. Fully from the numbers (tonight's shortage Mail grows into this).
@@ -396,7 +407,7 @@ All kept, and slotted between the main events from the start (Agreed, 2026-10-16
 | 3 | Something in the garden | main |
 | — | Power surge | short |
 | 4 | Shipboard illness | main |
-| — | Founders' Day festival | short (once the phone test says big crowds are OK) |
+| — | Founding Day festival | short (once the phone test says big crowds are OK) |
 | 5 | Nebula drift | main |
 | — | The late supply shuttle | short |
 | 6 | Salvage | main (can lead into the garden creature in later playthroughs) |
@@ -415,7 +426,7 @@ The short events' exact slots are the events engineer's to tune; the main events
 | Galley (16) | Menu changes, extra batches for guests and dinners, trays by cart, spoilage when the chiller strains |
 | Needs and mood (14, 15) | Small multipliers (worse sleep, chattier crew); mood follows threads ("grumbling about the dark") |
 | Mail (15) | Notices, addresses, debriefs, commendations |
-| Traditions (18) | Pause or change during an event (no observatory night in a storm); a party after |
+| Ship traditions (18) | Pause or change during a ship-wide event (no observatory night in a storm); a party after |
 | Crowd (8b) | Gatherings, the coarse level of detail, poses for "looking up", clapping and meeting talk (nod, gesture) |
 | Decks (4d) | Event dressing as optional places and props (traps, sign-up sheets, decorations, traces) |
 
@@ -423,7 +434,7 @@ The short events' exact slots are the events engineer's to tune; the main events
 
 ## Part 3: social life basics
 
-Built on what exists: crew needs, feelings on tap, habits that change, birthdays and tonight's traditions.
+Built on what exists: crew needs, feelings on tap, habits that change, birthdays and tonight's ship traditions.
 
 ### Relationships with you
 
@@ -459,7 +470,7 @@ Built on what exists: crew needs, feelings on tap, habits that change, birthdays
 
 ### Mood
 
-- **Agreed (2026-10-16):** mood stays `crewMood(p, t)` (tonight), blended from needs, ship health, the event's threads, recent time with friends, and birthdays and traditions. It shows in tap lines, chat lines, posture (a slower walk when low) and who goes to the lounge.
+- **Agreed (2026-10-16):** mood stays `crewMood(p, t)` (tonight), blended from needs, ship health, the event's threads, recent time with friends, and birthdays and ship traditions. It shows in tap lines, chat lines, posture (a slower walk when low) and who goes to the lounge.
 
 ### Story crew arcs (the first three)
 
@@ -526,7 +537,7 @@ The lead turns the user's answers into fixes for the performance engineer and th
 | C3 | Appointments and invitations: the app (C1) and crew keeping them in `planDay`; `doorOpenFor` | Device engineer (the app), **sim engineer** (crew side, doors) | 19, 14 | 0.35.x, 0.26.x |
 | C4 | Social: relationships, chat cards and line templates, crew affinity, seating by friendship, crew seeking you out, favours, the first three arcs | **Social engineer (new)** | new `// 20. SOCIAL` | 0.36.x |
 | C5 | The news model: items, spreading on paper, chatter bubbles, the Ship news feed; gossip from faults, habits, birthdays and guests | Social engineer, with the performance engineer (the bubble) | 20, 8b | 0.36.x |
-| C6 | Ship-wide events: the event format, phases, `eventNow` and `eventMod`, threads and bands, traces, the Captain's address, moments, **meetings and their script format**; then the ion storm (with Calder's briefing and the Captain's all-clear), then down the event list | **Events engineer** (grows from tonight's traditions) | 18 | 0.34.x |
+| C6 | Ship-wide events: the event format, phases, `eventNow` and `eventMod`, threads and bands, traces, the Captain's address, moments, **meetings and their script format**; then the ion storm (with Calder's briefing and the Captain's all-clear), then down the event list | **Events engineer** (grows from tonight's ship traditions) | 18 | 0.34.x |
 | C7 | Event hooks in each system: wear and jobs (systems), routines and gatherings (sim), menus and batches (galley), shake, flicker and sky moods, the coarse crowd at gatherings (performance) | Systems, sim, galley, performance engineers | 17, 14, 16, 8/8b, 5 | their ranges |
 | C8 | Guests: templates, event guests, everyday visitors, guest schedules | **Crew designer** (data), sim engineer (schedules) | 9, 14 | 0.16.x, 0.26.x |
 | C9 | Places for gatherings (`gather` groups), event dressing and traces, the ready room and Captain's dining room as visitable places, the extra gym kit | **Architects** (bridge: 1, 3; command: 2; Deck 6 architect: 4, 5, 6) | `DECKS[n]`, kit | 0.31.x, 0.32.x, 0.30.x |
@@ -556,6 +567,8 @@ deviceDo(action)  deviceNotify({ app, text, urgent })  DEVICE_SKIN
 deviceOn('open' | 'close', fn)                      // events: deviceOpen / deviceClose; the player pose and the camera listen
 deviceFrame(on)                                      // the camera eases the player into the visible top part (phone sheet)
 tipShow(id, text)  SHIP.device.tipsSeen = { id: true }  SHIP.device.settings.tips   // shown once each; saved
+SHIP.device.calendarRemind = { on: true, ahead: 30, morning: true, per: { <traditionId>: true | false } }   // saved
+upcomingTraditions(fromMin, toMin) -> [ { id, title, at, where } ]   // section 18 (events engineer); the Calendar reads it
 
 // 15b. INTERACTIONS (interactions engineer)
 SHIP.player.track = jobId | favourId | null          // the tracked one drives setGoal and the Maps pins
@@ -640,6 +653,7 @@ The user answered the pitch; the lead interpreted the answers.
 5. **Seeing yourself use the device:** **changed** (added). Your character raises and looks at the glowing handheld when it opens, reads while walking, and puts it away on close; on a phone the camera eases to keep you in view above the sheet.
 6. **Jobs at the board:** **changed** (a new rule). Take and turn in jobs at the job board; the device's Jobs app only tracks (with a Track toggle that drives the arrow and the map, step by step). Favours are accepted and turned in in person (the lead's interpretation).
 7. **Light onboarding:** **changed** (added). Five short job-loop tips, once each, in the CRT style, never pausing time, with a switch to turn them off. Pillar 4 does the full onboarding and tutorials.
+8. **Ship traditions, by name, with reminders:** **changed** (added). The small recurring happenings are "ship traditions"; "ship-wide events" are the big ones. The Calendar reminds you about 30 ship minutes before each tradition, with a morning "Today aboard" line, a per-tradition toggle and a global setting; during your shift only quiet badges, unless you marked it.
 
 **Design-doc updates** (the lead, on the lead branch, from this agreed plan): "The player" (the device, its CRT look and its apps), "Social life" (numbers, chats, affinity, news), "Ship-wide events" (ambient rule, shape, threads and bands, the four kinds of moment including meetings with dialogue, guests, the full event list and order), "Works progression" (the hooks), "Milestones" (Pillar 3 as planned here, and a note that Pillar 4 expands onboarding and tutorials), "The player" job loop (take and turn in at the board), and move these answered questions out of "Open questions": the device; which event comes after the ion storm; the second visitors' cabin (already answered: kept for event visitors); how often Deck 4's guests change.
 
@@ -661,3 +675,4 @@ The user answered the pitch; the lead interpreted the answers.
 14. **Changed (2026-10-16):** **you see your character use the device** (pose, prop, walk-and-read, gentle camera framing on a phone).
 15. **Changed (2026-10-16):** **jobs are taken and turned in at the board**; the Jobs app only tracks; favours are taken and turned in in person.
 16. **Changed (2026-10-16):** **light onboarding**: five job-loop tips, once each, with a switch; full onboarding in Pillar 4.
+17. **Changed (2026-10-16):** **ship traditions** is the name for the small recurring happenings, and the Calendar reminds you of them (30 ship minutes ahead, a morning line, per-tradition and global switches, quiet during your shift unless marked).

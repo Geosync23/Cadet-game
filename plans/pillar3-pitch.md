@@ -29,7 +29,7 @@ It opens from a corner button or a swipe up. **You see your character take it ou
 | Maps | Every deck, where you are, find a room or a friend; the on-screen arrow points the way |
 | Memos | Your own notes |
 | Mail | Messages from the ship, the crew, the Captain and home |
-| Calendar | Ship traditions, birthdays, and events once they're announced |
+| Calendar | Ship traditions (quiz night, film night, birthdays and the rest) and ship-wide events once announced. It reminds you before each tradition, with a "Today aboard" line each morning; switch reminders on or off for each one |
 | Needs | Your five needs, with their bonuses and penalties |
 | Jobs | Tracks your work and favours: details, parts, the next step, and a Track switch that drives the arrow and the map. You take and turn in jobs at the job board, not here |
 | Crew | Everyone you've met, how well you know them, what they've told you |
@@ -70,7 +70,7 @@ Pillar 3 builds the ion storm first, then works down the list. Nothing is droppe
 3. **Something in the garden:** a creature eats the crops and ends up as the ship's pet
    - *Power surge*
 4. **Shipboard illness**
-   - *Founders' Day festival, once your phone test says big crowds are fine*
+   - *Founding Day festival, once your phone test says big crowds are fine*
 5. **Nebula drift**
    - *The late supply shuttle*
 6. **Salvage:** in later playthroughs it can lead into the garden creature
@@ -111,3 +111,4 @@ The main events are in bold; the shorter ones between them are in italics.
 - **Seeing yourself use the device:** your character takes out the glowing handheld and reads it.
 - **Jobs at the board:** take and turn in jobs at the board; the device only tracks them. Favours are taken and handed back in person.
 - **First tips:** a few short tips for the job loop; full onboarding in Pillar 4.
+- **Names:** the small recurring happenings (quiz night, film night, observatory night, birthdays, Founding Day...) are **ship traditions**; the big ones like the ion storm are **ship-wide events**. The Calendar reminds you before each tradition.
