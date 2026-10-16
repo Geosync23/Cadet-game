@@ -10,6 +10,9 @@
 #   mail (0.28.10): mailSend, the unread count on the button and the Mail tab, reading marks it read, the welcome on a
 #   fresh start, saved and loaded; social from chatting (first chat a day, then a little, times socialGain) and from
 #   company at the mess table; the store sells what you picked out for credits (snacks: food; comforts: the locker)
+#   machines, carts, crawlways (0.28.11): a tap on a machine walks you up and shows machineUse's text; a restock job is a
+#   hover-cart run you push (dock, hold, storage, dock: the hold lands on the shelves, you're paid, the cart in your
+#   hands on the way); a crawl tile slows you to half speed in a crouch
 #   in the game, one player day on the real decks, by tapping the real things: shower (Deck 4), servery tray then a
 #   mess seat, grab shelf, treadmill (run), weights (lift), call-home booth (call), shelves then the counter
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
@@ -285,6 +288,38 @@ with sync_playwright() as pw:
     check(ml[4] == ['Filters low', 'Cake tonight'] and ml[5] == ['Status', 'Mail (2)'] and ml[6] == 2, f'mail: the Mail tab, newest first: {ml[4:7]}')
     check(ml[7] == 1 and ml[8] is True, f'mail: opening one shows it and marks it read: {ml[7:]}')
 
+    print('A machine tap (machineUse):')
+    real_use = g.ev("typeof machineUse === 'function'")
+    if not real_use: g.ev("window.machineUse = (id, who) => (window.__used = [id, who], { text: 'Stand-in: ' + id + ' looked at.', ran: false })")
+    g.ev("goToDeck(4); Object.assign(player.obj.position, cellPos(7, 3)); player.stop()"); g.step(5)
+    mt = g.ev(r"""(() => { const here = player.here();   // a machine in a room you can walk into, and the thing nearest it
+      for (const m of machineList().filter(m => m.deck === 4 && !m.stub)) {
+        const c = cellPos(...m.at), it = ITEMS.filter(i => !i.see && !i.lift).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; }).sort((a, b) => Math.hypot(a[1].x - c.x, a[1].z - c.z) - Math.hypot(b[1].x - c.x, b[1].z - c.z))[0];
+        if (!it || Math.hypot(it[1].x - c.x, it[1].z - c.z) > .8 || ACT_TAP.some(r => r[0].test(it[0].t))) continue;
+        const fx = Math.sin(it[0].front), fz = Math.cos(it[0].front), goal = nearestOpen(it[1].x + fx * (it[0].depth / 2 + .55), it[1].z + fz * (it[0].depth / 2 + .55), player);
+        if (!goal || !findPath(here, goal, null, player)) continue;
+        return [it[0].t, playerTap(it[0], it[1].clone(), it[1].clone()), m.id];
+      }
+      return ['none', false, null]; })()""")
+    for k in range(60):
+        g.step(30)
+        if not g.ev("player.path.length > 0"): break
+    mt.append(g.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent"))
+    if not real_use: mt.append(g.ev("window.__used")); g.ev("delete window.machineUse; delete window.__used")
+    print(' ', mt)
+    check(mt[1] is True and mt[2] and len(mt[3]) > len(mt[0]) + 2 and ('Stand-in' in mt[3] if not real_use else True) and (real_use or mt[4] == [mt[2], 'player']), f'a machine tap should ask machineUse: {mt}')
+    no = g.ev("(() => { const it = ITEMS.find(i => /^bunk/i.test(i.t)); it.hit.getWorldPosition(_wp); return machineTap(it, _wp.clone()); })()")
+    check(no is False, 'a bunk is no machine: the tap does what it always did')
+
+    print('Crawlways (crouch-walk):')
+    cw = g.ev(r"""(() => { const t = nearestOpen(LIFT_AT[0], LIFT_AT[1], player), was = deckDef.crawl; deckDef.crawl = [K(t)]; CRAWL.def = null;
+      Object.assign(player.obj.position, cellPos(...t)); Object.assign(SHIP.player.needs, { fitness: 50, energy: 50 }); playerUpdate(0, 0);
+      const out = [player.maxV / PLAYER_V0, player.crouch, document.getElementById('tx').textContent];
+      deckDef.crawl = was; CRAWL.def = null; playerUpdate(0, 0); out.push(player.maxV / PLAYER_V0, player.crouch); return out; })()""")
+    print('  on a crawl tile [speed, crouching, toast], then off it [speed, crouching]:', cw)
+    check(cw[0] == .5 and cw[1] is True and 'crouch' in cw[2] and cw[3] == 1 and cw[4] is False, f'crawlway: {cw}')
+    g.ev("goToDeck(3)"); g.step(5)                      # back where the next checks expect you
+
     print('Places held by crew, closed servery, walking away:')
     held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
       const fake = ids.map(id => ({ goalId: id, p: { name: 'Test ' + id } })); DECK_CREW.push(...fake);
@@ -419,6 +454,30 @@ with sync_playwright() as pw:
                 print('  put back:', s7[1], '|', s7[3][:60], '| filters on the shelf', f0, '->', g.ev("SHIP.stores.filter"))
                 check(s7[1] == [] and g.ev("SHIP.stores.filter") == f0 + 2, 'job loop: with no job, parts go back on the shelf')
         else: print('  (no job left to try carrying with)')
+        # the cart run: a restock job (stores) is a hover cart you push: dock, cargo hold, main storage, dock
+        print('  the cart run:')
+        g.ev("goToDeck(5); SHIP.player.carry = []; SHIP.player.cart = null"); g.step(5)
+        cj = g.ev(r"""(() => { machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') dropJob(j.id);
+          SHIP.hold = { filter: 3 }; const id = 'restock-stores@test'; SHIP.jobs.push({ id, machine: null, deck: 5, kind: 'restock', cargo: 'stores', urgency: 1, posted: shipNow(), found: shipNow(), claimedBy: null, parts: [], status: 'open' });
+          MACH_REV++; return claimJob(id) ? [id, SHIP.stores.filter] : null; })()""")
+        check(cj is not None, 'cart run: a restock job to take')
+        if cj:
+            IN_ROOM = "(r => { const it = ITEMS.find(i => roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === r && !/tarp/i.test(i.t)); it.hit.getWorldPosition(_wp); return [it.t, playerTap(it, _wp.clone(), _wp.clone())]; })"
+            CST = "JSON.stringify([SHIP.player.cart, player.holding, document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent])"
+            steps = []
+            g.ev(TAPS % '"Cart dock 1"'); r1 = json.loads(g.ev(CST)); c1 = jrun(); c1 = json.loads(g.ev(CST)); steps.append(c1)
+            hold_room = g.ev("placeRoom('5-hold-1')")
+            g.ev("playerGo(placeSpot('5-hold-2').walk)"); jrun(); g.step(90); jrun(); c2 = json.loads(g.ev(CST)); steps.append(c2)   # nothing to tap in the hold: stop there
+            g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
+            g.ev(TAPS % '"Cart dock 1"'); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
+            fin = g.ev(f"[SHIP.jobs.find(j => j.id === {json.dumps(cj[0])}).status, SHIP.stores.filter, myJob()]")
+            for st in steps: print('   ', st[0], st[1], '|', st[2][:90])
+            print('    job', fin[0], '| filters', cj[1], '->', fin[1])
+            check(c1[0] and c1[0]['stage'] == 'empty' and c1[1] == 'cart', f'cart run: taking the cart ({c1})')
+            check(c2[0] and c2[0]['stage'] == 'full' and c2[1] == 'cartfull', f'cart run: loading in the hold ({c2})')
+            check(c3[0] and c3[0]['stage'] == 'done' and c3[1] == 'cart', f'cart run: unloading in storage ({c3})')
+            check(c4[0] is None and not c4[1] and 'Job done' in c4[2], f'cart run: docking the cart finishes the job ({c4})')
+            check(fin[0] == 'done' and fin[1] == cj[1] + 3 and fin[2] is None, f'cart run: the delivery is on the shelves ({fin})')
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')
 
