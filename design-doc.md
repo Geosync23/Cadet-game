@@ -287,7 +287,7 @@ One list for the whole ship, shown on the big job board in the Works bay and on 
 3. They fetch parts, using hover carts from the Deck 5 hold for supplies, walk to the fault and fix it.
 4. The player gets the skilled or interesting jobs for their rank. Routine jobs get done by the crew if the player leaves them, but more slowly. Jobs nobody claims pile up and get worse.
 
-**Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs wait 3 day-shift hours for the player before the crew step in. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
+**Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs left for the player are held until the end of your shift that day (at least 3 hours, so one found late carries into the next morning), at most 6 held at once (extras go to the crew as usual), and on day 1 a couple of chores are ready at 08:00 (changed 2026-10-16: at the real clock, 3 ship hours was only about 5 real minutes, so the crew swept the board before you got there). On your days off nothing is held for you; the crew take them, and the board stays open. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
 
 ### Consequences
 
