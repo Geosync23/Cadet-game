@@ -1,0 +1,208 @@
+<title>Wren Morning Report</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column, like a ship's morning bulletin on a duty pad; sections stacked, checklist interactive. */
+:root{
+  --bg:#eef3f4; --panel:#ffffff; --ink:#152230; --muted:#56687a; --line:#c9d7dc;
+  --teal:#137d73; --teal-soft:#d9efec; --amber:#9a6a12; --amber-soft:#f6ecd6;
+  --display:"Saira Semi Condensed","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1622; --panel:#16202f; --ink:#e3ebee; --muted:#93a6ae; --line:#2a3a4c;
+  --teal:#4cc3b5; --teal-soft:#173a3a; --amber:#e9c46a; --amber-soft:#3a3120; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --panel:#16202f; --ink:#e3ebee; --muted:#93a6ae; --line:#2a3a4c;
+  --teal:#4cc3b5; --teal-soft:#173a3a; --amber:#e9c46a; --amber-soft:#3a3120; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding-block:28px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:2.1rem;font-weight:700;letter-spacing:.01em}
+h2{font-size:1.45rem;font-weight:600;margin-bottom:12px}
+h3{font-size:1.08rem;font-weight:600;margin:20px 0 6px;color:var(--teal)}
+p{margin:0 0 10px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.08rem;color:var(--ink);max-width:62ch}
+a{color:var(--teal);font-weight:700}
+a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.todo{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.todo li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.todo .n{font-family:var(--mono);color:var(--teal);font-size:.9rem}
+.todo b{font-family:var(--display);font-size:1.1rem;font-weight:600}
+.todo span.d{grid-column:2;color:var(--muted)}
+ul.plain{margin:0;padding-left:1.1em}
+ul.plain li{margin:0 0 6px}
+.t{font-family:var(--mono);font-size:.88em;white-space:nowrap}
+.dec{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:3px}
+.dec:last-child{border-bottom:1px solid var(--line)}
+.dec .q{font-size:.86rem;color:var(--muted)}
+.dec .a{font-weight:700}
+.dec .why{font-size:.93rem;color:var(--muted)}
+.soon{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;background:var(--amber-soft);color:var(--amber);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.check{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.check li{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.check label{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 14px;cursor:pointer;align-items:start}
+.check input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--teal)}
+.check .how{display:block;color:var(--muted);font-size:.93rem}
+.check li:has(input:checked){background:var(--teal-soft);border-color:var(--teal)}
+.note{background:var(--amber-soft);border-radius:10px;padding:12px 16px;font-size:.95rem}
+.shots{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.shots figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.shots img{display:block;width:100%;height:auto;max-width:100%}
+.shots figcaption{padding:8px 12px;font-size:.9rem;color:var(--muted)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.check li{transition:background .2s}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">CSV Wren · morning bulletin · 16 October</div>
+  <h1>Good morning, Cadet</h1>
+  <p class="lede">The crew worked through the night on your answers. Here is what's new to try, every decision we made for you while you slept, and a short test for your phone.</p>
+</header>
+
+<section aria-labelledby="todo-h">
+  <h2 id="todo-h">Three things for this morning</h2>
+  <ol class="todo">
+    <li><span class="n">1</span><b>Play the new build</b><span class="d">Same link as always: <a href="https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y">Starship Cadet</a>. It's build <span class="t" id="build">0.41.4</span>, live now, and it passed all eight checks. The list below says what to look for.</span></li>
+    <li><span class="n">2</span><b>Try it on your phone</b><span class="d">Ten quick checks at the bottom of this page. Only you can do these, and Pillar 3 starts from what they show.</span></li>
+    <li><span class="n">3</span><b>Pillar 3, as you agreed it</b><span class="d">Your device with an old-school screen, getting to know the crew, and ambient ship-wide events with meetings, in full order: <a href="https://claude.ai/artifact/A3HL2vuWXa1cguTQxnBbiZ" id="pitchlink">the agreed plan</a>. Added since: you see your character using the device, jobs are taken and turned in at the board and tracked on the device, and first pop-up tips for the job loop.</span></li>
+  </ol>
+</section>
+
+<section aria-labelledby="new-h">
+  <h2 id="new-h">What's new to try</h2>
+
+  <h3>Days and sleep</h3>
+  <ul class="plain">
+    <li>Days are longer: a whole ship day takes 40 real minutes, and a working day (06:00 to midnight) about 30.</li>
+    <li>You can stay up 16 to 18 ship hours before you feel tired.</li>
+    <li>Get into your bunk after <span class="t">20:00</span> and the night passes by itself: the screen fades and you wake at <span class="t">06:00</span>. Earlier than that, the game tells you it's too early.</li>
+  </ul>
+
+  <h3>Your needs and your device</h3>
+  <ul class="plain">
+    <li>Needs now help as well as hurt. When a need is high (75 or more) you get a bonus; when it's low (under 25), a penalty. The device shows a small up or down mark beside each one, with the reason.</li>
+    <li>A <b>Mail</b> tab on your device: notices about shortages, spoiled food, birthdays and ship traditions.</li>
+    <li>The store sells snacks and small comforts. You have a credit balance on the device.</li>
+    <li>Chatting with crew, and eating at a table with others, raises your social need.</li>
+  </ul>
+
+  <h3>Getting around</h3>
+  <ul class="plain">
+    <li>Tap any free chair or bench to sit down. Resting slows tiredness, and sitting near people chatting cheers you up a little.</li>
+    <li>You can squeeze past crew who are sitting or working at a station (they say something polite). People walking still block you.</li>
+    <li>Crawlways make you crouch.</li>
+    <li>The cargo hatch to the shuttle bay on Deck 5 is open.</li>
+  </ul>
+
+  <h3>Machines and jobs</h3>
+  <ul class="plain">
+    <li>You can see when machines are in trouble: worn screens dim, failing ones blink red, lights flicker, showers spray weakly, plants wilt.</li>
+    <li>Ship health boards in the Works bay (Deck 5) and on the bridge (Deck 1) list every system and how it's doing.</li>
+    <li>The Works crew now leave you about 6 small jobs a day on the day shift, of many kinds: swapping lamps, cleaning vents, calibrating galley machines, deliveries between decks, inspection rounds, small faults. Bigger and urgent ones they take straight away.</li>
+    <li>You can take the food cart run yourself from the job board. Meals you deliver go into the cold store when you unload them.</li>
+    <li>Tapping a machine tells you how it is and, where it makes sense, uses it (a washer, an oven).</li>
+    <li>You can use everything the crew use: the bar and tea table, reading seats, lounges, the garden beds, beanbags, the piano, guitars and record player, the laundry, the telescope and both observatories. Tap the Works bay job board to take or drop a job, and an arrow on screen shows you the way, even across decks ("Take the lift to Deck 5").</li>
+  </ul>
+
+  <h3>Life aboard</h3>
+  <ul class="plain">
+    <li>Tap a crew member and you'll see how they feel ("Tomas looks tired"), sometimes grumbling when the ship is in poor shape.</li>
+    <li>Everyone has a birthday, about one a week. The galley bakes a cake and the mess gathers after dinner. You have one too.</li>
+    <li>Small ship traditions, the Stardew kind: a weekly observatory night on Deck 2 and other little rituals through the week. Mail tells you what's on.</li>
+    <li>On the bridge, the watch changes over at <span class="t">06:00</span> and <span class="t">18:00</span>, and the Captain takes an evening walk through the observation room.</li>
+    <li>The galley has a menu cycle: crew favourites, a Friday treat, and a Sunday dinner the crew voted for. Queues happen more often.</li>
+    <li>Officers' door plates show their names on Decks 2 and 4. Crew now carry trays, toolboxes and datapads.</li>
+    <li>Seated crew sit properly on their chairs now, at the right height and facing their tables: all 267 seats on six decks were measured and fixed.</li>
+    <li>Machines run late sometimes: about one delivery in five is late, and Stores sends you Mail when it is, or when a part runs out.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="trad-h">
+  <h2 id="trad-h">The new traditions</h2>
+  <p>Screenshots from the test runs. Each happens on its own day and time; Mail tells you what's on.</p>
+  <div class="shots">
+    <figure><img src="shots/events-quiz.png" alt="Quiz night in the bow lounge, crew at the tables" loading="lazy"><figcaption>Quiz night, bow lounge</figcaption></figure>
+    <figure><img src="shots/events-birthday.png" alt="A birthday gathering at the long tables in the mess" loading="lazy"><figcaption>A birthday in the mess</figcaption></figure>
+    <figure><img src="shots/events-observatory.png" alt="Observatory night on Deck 2, crew on the window seats" loading="lazy"><figcaption>Observatory night, Saturday 21:15</figcaption></figure>
+    <figure><img src="shots/events-jam.png" alt="A music jam in the music room" loading="lazy"><figcaption>The music jam</figcaption></figure>
+    <figure><img src="shots/events-market.png" alt="The swap-meet stall on the promenade" loading="lazy"><figcaption>Swap meet on the promenade</figcaption></figure>
+  </div>
+</section>
+
+<section aria-labelledby="dec-h">
+  <h2 id="dec-h">Decisions we made for you</h2>
+  <p>You asked the lead to interpret your answers overnight. These are the choices that needed a call, and why. Tell us if any is wrong and we'll change it.</p>
+
+  <div class="dec"><span class="q">You said: days feel too short</span><span class="a">18 ship hours now take 30 real minutes.</span><span class="why">A full day is 40 minutes. Long enough to do a few jobs and have an evening, short enough that days still pass.</span></div>
+  <div class="dec"><span class="q">You said: going to bed should skip the night</span><span class="a">From 20:00, your bunk fades straight to 06:00, with no question asked.</span><span class="why">Before 20:00 it says it's too early, so you can't skip the whole day by accident. The crew catch up on their night as they did before.</span></div>
+  <div class="dec"><span class="q">You said: needs should give bonuses too</span><span class="a">High needs give a bonus, low ones a penalty, nothing in between.</span><span class="why">For example, high energy makes tasks 15% faster and being well fed makes you tire a little slower. We softened a few numbers so that "16 to 18 hours awake" still holds: an unfit cadet lasts about 16 hours, an average one 17, a fit one 18.</span></div>
+  <div class="dec"><span class="q">Not answered: should broken machines slow you down?</span><span class="a">No. Faulty machines slow the crew, never you.</span><span class="why">Kept as before, so faults feel like work to do rather than a punishment.</span></div>
+  <div class="dec"><span class="q">You said: faults for me, but balanced</span><span class="a">About 6 small jobs a day are left for you on the day shift.</span><span class="why">We aimed for 3 to 6 and landed at the top, because you also asked for more kinds of jobs. Small jobs wait three hours for you before the crew take them; the cart run waits one hour. Big and urgent ones the crew handle at once.</span></div>
+  <div class="dec"><span class="q">You said: tier locks, yes</span><span class="a">You're Tier 1, a Works junior.</span><span class="why">Closets open for you; plant rooms (Tier 2) and batteries and junctions (Tier 3) come with promotion later.</span></div>
+  <div class="dec"><span class="q">You said: shortages simulated, and the game must tell me</span><span class="a">They arrive in a simple Mail inbox on your device.</span><span class="why">The full device comes in Pillar 3; Mail is built so it carries over.</span></div>
+  <div class="dec"><span class="q">You asked: small traditions, like Stardew</span><span class="a">One new system runs every ship tradition, including observatory night and birthdays.</span><span class="why">Two helpers had built birthdays and observatory night separately; we merged them into one so nothing happens twice. It's also the base the Pillar 3 events will grow from.</span></div>
+  <div class="dec"><span class="q">You asked: let me sit anywhere</span><span class="a">Tap a free seat to sit. Resting slows tiredness; company cheers you up.</span><span class="why">It uses the same seats and pose the crew use.</span></div>
+  <div class="dec"><span class="q">You asked: I should be able to use everything the crew use</span><span class="a">A new helper is giving you everything the crew use, plus taking jobs from the board with an arrow to guide you.</span><span class="why">The arrow is built so the future map on your device can use it too.</span></div>
+  <div class="dec"><span class="q">We found: you could get stuck behind a busy chef</span><span class="a">You can now squeeze past anyone sitting or working at a station.</span><span class="why">Chef Brennan's station blocked the only way to the galley plant panel. People walking still block you, so the crowd still feels solid.</span></div>
+  <div class="dec"><span class="q">You said: the crew sitting looked wrong</span><span class="a">Every seat was checked. 176 of 264 were off, and all are fixed.</span><span class="why">Some were too low, some beside the chair, some facing the wrong way at angled tables. Tall stools now have a footrest ring.</span></div>
+  <div class="dec"><span class="q">You said: show me faults on the decks</span><span class="a">One shared system draws machine trouble on every deck.</span><span class="why">At first each deck builder made their own warning lamps, which clashed. One system is consistent and cheaper for your phone.</span></div>
+  <div class="dec"><span class="q">You said: birthdays, yes</span><span class="a">Everyone's birthday falls on a ship day; about one a week, yours included.</span><span class="why">A ship year is 52 weeks of 7 days, starting on your first day.</span></div>
+  <div class="dec"><span class="q">You said: shopping should buy things</span><span class="a">A credit balance on your device; the store sells snacks and small comforts.</span><span class="why">Snacks help a little with hunger, comforts with your mood, and they're kept in your locker.</span></div>
+
+  <div class="dec"><span class="q">We found: two helpers both drew a birthday cake</span><span class="a">One cake: the galley bakes it, the traditions side runs the gathering.</span><span class="why">The cake sits on the servery from 19:30 and everyone gathers in the mess at 20:15. The galley also bakes for Founding Day, and harvest days get fresh garden salad with dinner.</span></div>
+  <div class="dec"><span class="q">We found: small events were crowded out</span><span class="a">An event's own seats are kept free for its guests while it's on.</span><span class="why">On one test day nobody got into the music jam because evening regulars had every seat. Holding only each event's own seats also stops a birthday from emptying quiz night when the two overlap.</span></div>
+  <div class="dec"><span class="q">Rank and locked rooms</span><span class="a">You're Tier 1; junior Works crew are Tier 2.</span><span class="why">Plant rooms hold junior work (scrubbers, heating), so junior crew need to get in. You'll reach them with promotion.</span></div>
+
+  <h3>Things you said no to, or "later"</h3>
+  <ul class="plain">
+    <li>No helping in the galley, no lunch, no grab shelf cleared overnight, store not open every day, the ship doesn't run while the game is closed.</li>
+    <li>Gym time slots and new gym kit: later (the Pillar 3 pitch suggests some).</li>
+    <li>The visitors' cabin stays a cabin, kept for guests during ship-wide events.</li>
+    <li>The ready room, officers' quarters and meetings: in the Pillar 3 pitch.</li>
+    <li>Your full device: its own big part of Pillar 3.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="phone-h">
+  <h2 id="phone-h">Phone test</h2>
+  <p>Use your TriFold. Do each check folded (phone size), and the ones marked "both" unfolded too. Ticks are kept on this phone only. When you're done, just tell me what you saw in plain words, like "all fine, but Deck 4 felt jumpy".</p>
+  <ul class="check" id="checks">
+    <li><label><input type="checkbox" id="c1"><span><b>Loading.</b> <span class="how">Tap the game link and count the seconds until you see the ship. Both.</span></span></label></li>
+    <li><label><input type="checkbox" id="c2"><span><b>Smooth walking.</b> <span class="how">Walk around Deck 3 near the lift, then zoom right out. Does it stutter? Try Deck 4 and Deck 6 the same way.</span></span></label></li>
+    <li><label><input type="checkbox" id="c3"><span><b>Busiest moment.</b> <span class="how">Be in the mess hall (Deck 3) at dinner, around 18:00 ship time, when everyone is eating.</span></span></label></li>
+    <li><label><input type="checkbox" id="c4"><span><b>Big crowd.</b> <span class="how">Open the game link with <span class="t">#crowd-120</span> added at the end. It shows 120 crew at once, to see how big ship-wide events will feel.</span></span></label></li>
+    <li><label><input type="checkbox" id="c5"><span><b>The lift.</b> <span class="how">Ride to every deck. Is the pause hidden by the fade, or do you see a freeze?</span></span></label></li>
+    <li><label><input type="checkbox" id="c6"><span><b>Tapping.</b> <span class="how">Tap a crew member, a machine, a free chair, and the device button. Anything hard to hit or tapped by mistake?</span></span></label></li>
+    <li><label><input type="checkbox" id="c7"><span><b>The device.</b> <span class="how">Open it, read Mail, look at Needs and Jobs, scroll. Is the text big enough? Both.</span></span></label></li>
+    <li><label><input type="checkbox" id="c8"><span><b>Fold and unfold.</b> <span class="how">While playing, unfold the phone, then fold it again. Does the game fit the new screen?</span></span></label></li>
+    <li><label><input type="checkbox" id="c9"><span><b>Heat and battery.</b> <span class="how">Note the battery, play for 20 minutes, then check it again. Did the phone get warm?</span></span></label></li>
+    <li><label><input type="checkbox" id="c10"><span><b>Coming back.</b> <span class="how">Close the browser completely, open the link again. Are you back where you left off?</span></span></label></li>
+  </ul>
+</section>
+
+<footer>From the project lead. Every decision above is also written into the design document, so the whole team works from the same answers.</footer>
+
+</div>
+<script>
+(function(){
+  var boxes=document.querySelectorAll('#checks input');
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem('wren-phone-test')||'{}')||{}}catch(e){saved={}}
+  boxes.forEach(function(b){
+    if(saved[b.id])b.checked=true;
+    b.addEventListener('change',function(){
+      saved[b.id]=b.checked;
+      try{localStorage.setItem('wren-phone-test',JSON.stringify(saved))}catch(e){}
+    });
+  });
+})();
+</script>

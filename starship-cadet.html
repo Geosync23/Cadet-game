@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.6
+   STARSHIP CADET: CSV Wren                            build 0.36.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -453,7 +453,8 @@ function roomLocked(rk) {
   return true;
 }
 // who: the player (or a crew member) a path or a collision is for; a service hatch is open only to those it lets through
-const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who));
+const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.type !== 'lift' && !(e.service && hatchPassable(e.key, who))
+  && !(e.type === 'closed' && who && typeof doorOpenFor === 'function' && (e.horiz ? [[e.i, e.j - 1], [e.i, e.j]] : [[e.i - 1, e.j], [e.i, e.j]]).some(c => doorOpenFor(roomAt(...c), who)));   // section 14: invited in
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
 // crewPath (section 10) asks this for each person. Tier locks (answer 4): a hatch with a `tier` lets through only
@@ -6510,6 +6511,69 @@ DECKS[1] = {
 };
 for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
 
+// ---- Big gatherings (Pillar 3, C9, 0.38.0; plans/pillar3-plan.md "Gatherings of more than 70 crew") ----
+// The venues where a crowd (an all-clear, a party, a greeting, a festival) can stand, one table per deck:
+//   <venue>: { name, focus: [x, z] (tile units: where the crowd looks), rooms (the venue's own room letters),
+//     seats (place types in those rooms that count too), also (venues to spill into after these),
+//     lead: [[x, z, face], ...] (the front: lead 1 is the speaker, the rest beside them; face in degrees from south toward east),
+//     at: 'c,r ...' (the standing spots: the venue's rooms nearest the focus first, then the rooms next door) }
+// Doorways, lift doors and every existing place's tile are left clear. At load each spot becomes a place
+// { id: '<deck>-<venue>-crowd-<n>' (or -lead-<n>), type: 'event', gather: venue, lead?, at, xy, face (toward the focus), pose: 'stand', room },
+// so deck_check checks them like any place. No `event` tag and type 'event': no plan uses them day to day.
+// gatherSpots(venue) -> the places in the order to fill them (leads, then nearest first, then the spill rooms and the
+// `also` venues), each with its deck. Section 14's gathering() and section 18's meetings read it; nothing else does.
+// Ship-wide event venues: 'works-bay' (Calder's storm briefing at the job board), 'observation' (the Captain's
+// all-clear), 'bow-lounge' (the party), 'shuttle-bay' (the greeting), and 'mess' and 'plaza' (the big ones).
+DECKS[3].gathers = {
+  'plaza': { name: 'the lift plaza and promenade', focus: [23.5, 10.5], rooms: '+=', seats: ['bench'], also: [],
+    lead: [[23.5, 10.5, 90]],   // on the plaza east of the lift, facing down the promenade
+    at: '23,9 23,11 24,9 25,10 23,12 22,8 25,11 22,12 24,12 21,8 21,12 25,12 26,10 26,11 21,7 20,8 26,12 21,13 27,10 27,9 27,11 20,7 21,6 19,8 19,7 19,13 20,14 18,8 18,12 21,15 19,14 18,7 18,13 29,9 17,12 29,12 18,6 18,14 19,15 17,13 16,10 16,9 16,11 18,15 16,12 15,10 31,10 15,11 31,11 31,12 32,10 32,11 32,12 13,10 33,10 33,9 13,11 33,11 35,9 35,12 37,10 37,9 37,11 37,12 38,10 38,11 39,10 39,9 39,11 39,12' },
+  'mess': { name: 'the mess hall', focus: [33.5, 8.2], rooms: 'M', seats: ['mess-seat'], also: ['plaza'],
+    lead: [[33.5, 8.25, -127]],   // by the servery, facing the tables
+    at: '32,6 32,5 30,8 29,8 29,6 28,8 33,2 32,2 27,8 31,2 27,5 33,1 26,6 28,2 33,0 27,2 24,8 23,8 23,6 23,5 24,2 23,2' },
+  'bow-lounge': { name: 'the bow lounge', focus: [44.5, 10.5], rooms: 'L', seats: ['lounge-seat'], also: ['plaza'],
+    lead: [[44.5, 10.5, 90]],   // the open floor between the bar and the windows
+    at: '44,9 43,10 45,10 44,11 43,9 45,9 43,11 45,11 44,8 42,10 46,10 44,12 45,8 42,9 46,9 42,11 46,11 43,12 45,12 42,12 46,12 44,13 47,9 43,13 45,13 47,8 47,12 44,14 48,9 43,14 47,7 47,13 42,6 46,6 48,8 48,12 48,13 47,14 44,15 45,5 42,5 49,8 46,15 41,5 49,7 49,13 44,4 50,10 44,16 45,4 50,9 50,11 43,16 45,16 42,4 50,12 48,5 49,6 49,14 47,4' },
+};
+DECKS[5].gathers = {
+  'shuttle-bay': { name: 'the shuttle bay', focus: [6.0, 10.6], rooms: 'S', seats: [], also: [],
+    lead: [[6.0, 10.15, 0], [6.0, 11.3, 180], [5.0, 11.3, 180], [7.0, 11.3, 180]],   // the foot of the Tern's ramp: whoever arrives (lead 1), facing the Captain, the Envoy and the XO
+    at: '4,10 4,11 5,12 6,12 4,12 7,12 3,10 8,10 7,8 3,11 8,11 3,9 8,9 5,13 8,8 4,13 7,7 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 2,8 5,6 6,6 4,14 7,14 4,6 7,6 1,10 1,11 1,9 2,7 3,6 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 2,6 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
+  'works-bay': { name: 'the Works bay', focus: [16.5, 1.6], rooms: 'w', seats: [], also: [],
+    lead: [[16.6, 0.7, 0], [17.6, 1.0, -25], [14.4, 0.8, 25]],   // the Chief beside the job board (lead 1), two techs either side
+    at: '16,1 16,2 17,2 15,0 17,0 16,3 14,1 18,1 17,3 18,0 16,4 15,4 17,4 13,2 13,0 19,0 14,4 18,4' },
+};
+DECKS[1].gathers = {
+  'observation': { name: 'the observation room', focus: [5.3, 2.5], rooms: 'O', seats: ['common-room', 'lounge-seat'], also: [],
+    lead: [[5.3, 2.5, -90], [5.3, 1.5, -110]],   // the Captain by the wall screen, the XO beside her
+    at: '4,2 4,1 4,3 3,2 5,4 3,1 3,3 4,0 2,2 2,3 5,7 3,8 5,9 1,8 3,9 2,9 5,10 4,10 3,10 4,11 6,3 7,2 8,2 9,3 6,7 9,7 8,8' },
+};
+for (const n of Object.keys(DECKS)) for (const [v, g] of Object.entries(DECKS[n].gathers || {})) {
+  const d = DECKS[n], P = d.places || (d.places = []), room = (c, r) => d.map[r][c];
+  const face = (x, z) => Math.round(Math.atan2(g.focus[0] - x, g.focus[1] - z) * 180 / Math.PI);
+  g.lead.forEach(([x, z, f], i) => P.push({ id: `${n}-${v}-lead-${i + 1}`, type: 'event', gather: v, lead: i + 1, at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', room: room(Math.floor(x), Math.floor(z)) }));
+  g.at.split(' ').forEach((s, i) => {
+    const [c, r] = s.split(',').map(Number), x = c + .5 + ((c * 37 + r * 11) % 7 - 3) * .04, z = r + .5 + ((c * 13 + r * 29) % 7 - 3) * .04;   // a little off centre, so a crowd doesn't stand in rows
+    P.push({ id: `${n}-${v}-crowd-${i + 1}`, type: 'event', gather: v, at: [c, r], xy: [+x.toFixed(2), +z.toFixed(2)], face: face(x, z), pose: 'stand', room: room(c, r) });
+  });
+}
+const GATHER_SPOTS = new Map();
+function gatherVenue(v) { for (const n of Object.keys(DECKS)) if ((DECKS[n].gathers || {})[v]) return { deck: +n, ...DECKS[n].gathers[v] }; return null; }
+function gatherSpots(v) {
+  if (GATHER_SPOTS.has(v)) return GATHER_SPOTS.get(v);
+  const g = gatherVenue(v); if (!g) return [];
+  const [fx, fz] = g.focus, P = DECKS[g.deck].places, seen = new Set(), out = [];
+  const near = l => l.map(p => [Math.hypot((p.xy ? p.xy[0] : p.at[0] + .5) - fx, (p.xy ? p.xy[1] : p.at[1] + .5) - fz), p])
+    .sort((a, b) => a[0] - b[0] || (a[1].id < b[1].id ? -1 : 1)).map(e => e[1]);
+  const add = l => { for (const p of l) if (!seen.has(p.id)) { seen.add(p.id); out.push({ ...p, deck: g.deck }); } };
+  const crowd = P.filter(p => p.gather === v && !p.lead || g.seats.includes(p.type) && g.rooms.includes(p.room) && !p.machine);
+  add(P.filter(p => p.gather === v && p.lead).sort((a, b) => a.lead - b.lead));
+  add(near(crowd.filter(p => g.rooms.includes(p.room)))); add(near(crowd.filter(p => !g.rooms.includes(p.room))));
+  for (const a of g.also) add(near(gatherSpots(a).filter(p => !p.lead)));
+  GATHER_SPOTS.set(v, out);
+  return out;
+}
+
 // =====================================================================
 // 5. LIGHTING
 // The sun casts all shadows and follows the camera, snapped to shadow
@@ -6561,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.6';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -6599,7 +6663,7 @@ function tickShip(dt) {
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
   SHIP.time.min += dt * SHIP_RATE;
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
-  if (Math.floor(SHIP.time.min) !== m) updateClock();
+  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); }   // section 14: appointments kept or missed
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
@@ -6874,6 +6938,81 @@ function shiftBlocks(p, d) {
 }
 const galleyRotaOn = () => typeof galleyDay === 'function';   // the galley books its own stations
 // a person's plans for a day before anyone else is considered: when they mean to wake and go to bed, and whether they work
+// ---- appointments (Pillar 3, C3): the crew side of the device's Appointments ----
+// SHIP.device.appts (section 19, the device engineer; saved there): { id, with: [crewId | 'guest:id' | 'place:id'],
+// at: absolute ship minutes, len, where: placeId, kind: 'social'|'work'|'checkup'|'meeting'|'summons'|'invite',
+// status: 'asked'|'yes'|'no'|'kept'|'missed', by }.
+// apptReply(p, a): what someone says when asked, from their real day: { answer: 'yes'|'later'|'no', at, text }.
+// An accepted one ('yes') is laid over their plan by whereIs (apptWhere): they go there, ride the lift if need be,
+// and wait APPT_WAIT ship minutes; if you come ('kept', apptTick) they stay the whole `len`, else they go back to
+// their day ('missed'). Nobody is punished for a missed one. Nothing here touches the plans (planWhere, dayReport).
+const APPT_WAIT = 15;
+const apptList = () => typeof SHIP !== 'undefined' && SHIP.device && Array.isArray(SHIP.device.appts) ? SHIP.device.appts : [];
+const apptOn = a => !!a && (a.status === 'yes' || a.status === 'kept') && isFinite(a.at) && !!a.where && Array.isArray(a.with);
+const apptPlace = a => { const d = deckOf(a.where), pl = (DECKS[d] && DECKS[d].places || []).find(q => q.id === a.where); return pl ? { ...pl, deck: d } : null; };
+// is p free from a to b (absolute minutes)? Free time, standing about, or (for work, a check-up or a summons) their
+// own shift on the appointment's deck; never asleep, eating, at an event or at another appointment
+function apptFree(p, a, from, to) {
+  const pl = apptPlace(a), workOk = /^(work|checkup|summons|meeting)$/.test(a.kind || '');
+  for (let t = from; t < to; t += 5) {
+    const w = planWhere(p, t); if (!w) return false;
+    const ok = (w.act === 'leisure' || w.act === 'off') && !(w.tag && /^ev-|^(drill|handover|stroll)$/.test(w.tag))
+      || workOk && w.act === 'work' && pl && w.deck === pl.deck;
+    if (!ok) return false;
+  }
+  return !apptList().some(o => o !== a && o.id !== a.id && apptOn(o) && o.with.includes(p.id) && o.at < to && from < o.at + (o.len || 30));
+}
+function apptReply(p, a) {
+  const len = a.len || 30, C = SCHED_COMMUTE + 10, who = shortName(p);   // the lift and most of a walk
+  if (!p || !apptPlace(a)) return { answer: 'no', at: null, text: who + ': "Where\'s that?"' };
+  if (apptFree(p, a, a.at - C, a.at + len)) return { answer: 'yes', at: a.at, text: who + ': "See you at ' + hhmm(a.at % 1440) + '."' };
+  const dayEnd = Math.floor(a.at / 1440) * 1440 + 22 * 60;
+  for (let t = Math.ceil((a.at + 30) / 30) * 30; t + len <= dayEnd; t += 30)
+    if (apptFree(p, a, t - C, t + len)) return { answer: 'later', at: t, text: who + ': "Can\'t then. How about ' + hhmm(t % 1440) + '?"' };
+  return { answer: 'no', at: null, text: who + ': "Sorry, not today."' };
+}
+// where someone with an accepted appointment is (whereIs asks this first); null when none applies at t
+function apptWhere(p, t) {
+  for (const a of apptList()) {
+    if (!apptOn(a) || !a.with.includes(p.id)) continue;
+    const end = a.at + (a.status === 'kept' ? (a.len || 30) : APPT_WAIT), pl = apptPlace(a); if (!pl) continue;
+    // they set off in time to be there at a.at: the walk from the lift (about 1.3 x the straight line, at CREW_SPEED)
+    const lift = DECKS[pl.deck].lift || pl.at, walk = Math.ceil(1.3 * Math.hypot(pl.at[0] - lift[0], pl.at[1] - lift[1]) / 1.15 * SHIP_RATE) + 1;   // ship minutes
+    const go = a.at - walk, C = SCHED_COMMUTE;
+    if (t < go - C - 3 || t >= end) continue;
+    if (t < go - C) return null;                         // still finishing what they were doing
+    const w = planWhere(p, go - C - 1);
+    if (t < go && w && w.deck !== pl.deck)               // a lift ride if they're on another deck
+      return { deck: pl.deck, act: 'commute', type: 'lift', placeId: null, moving: true, fromDeck: w.deck, from: go - C, until: go, tag: 'appt' };
+    return { deck: pl.deck, act: 'appt', type: pl.type, placeId: pl.id, moving: false, fromDeck: undefined, from: go, until: end, tag: 'appt', anim: pl.anim || null };
+  }
+  return null;
+}
+// every ship minute (section 13's clock): you came (within 2 tiles of the place, on its deck, before they gave up) -> 'kept'; else 'missed'
+function apptTick() {
+  const now = shipNow();
+  for (const a of apptList()) {
+    if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2) continue;
+    const pl = apptPlace(a);
+    if (pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {
+      const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; continue; }
+    }
+    if (now >= a.at + APPT_WAIT) a.status = 'missed';
+  }
+}
+// ---- doors for invitations and summons (C3, C10): the ready room, Deck 2 bedrooms, officers' cabins ----
+// doorOpenFor(room, who, t, deck): a locked room is open to you ('player') and to the crew in the appointment while an
+// accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
+// with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
+function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
+  for (const a of apptList()) {
+    if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
+    const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
+    if (t < a.at - 15 || t > a.at + (a.len || 30) + 15) continue;
+    if (who === 'player' || (who && who.isPlayer) || a.with.includes((who && (who.p || who).id) || who)) return true;
+  }
+  return false;
+}
 // ---- habits that change slowly (answer 18): a few changes a month, the same in every game ----
 // From the second week on, each week has 0, 1 or 2 changes (about 3.5 a month): someone takes up a habit
 // (a junior starts running, someone takes to the observatory) or drops one (stops going to the bar). Each is
@@ -7415,6 +7554,7 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
 let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
+  const ap = apptWhere(person, t); if (ap) return withHold(person, ap, false);   // an accepted appointment comes first
   if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
     JOB_WHERE_BUSY = true; let j;
     try { j = jobWhere(person, t); } finally { JOB_WHERE_BUSY = false; }
@@ -7661,7 +7801,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
     if (!galleyTurn('player')) return false;
     const f = foodFrom('servery'); A.o.dish = f.ok ? f.dish : null; A.o.why = f.why; return true;
   } },
-  eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return.' },
+  eat:    { need: 'hunger', gain: 55, mins: 20, title: 'Eating', done: 'You clear your tray and take it to the return by the servery.' },
   grab:   { need: 'hunger', gain: 25, mins: 3, pose: 'browse', title: 'Grab and go', done: 'Something to eat on the way.' },
   fetch:  { mins: 4, pose: 'browse', title: 'Main storage' },   // the job loop (B2): parts off the shelf, the machine's panel, parts back
   job:    { mins: 3, pose: 'work', title: 'Your job' },
@@ -7797,13 +7937,23 @@ const MACHINE_NEAR = 1.2;
 function machineTap(it, at) {
   if (typeof machineUse !== 'function' || typeof machineList !== 'function' || typeof deckDef === 'undefined') return false;
   const m = machineList().filter(m => m.deck === deckDef.num && !m.stub && m.at).map(m => [m, cellPos(...m.at)])
-    .filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < MACHINE_NEAR).sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z))[0];
+    .filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < MACHINE_NEAR).sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z))[0]
+    || stubTap(it, at);
   if (!m) return false;
   approach(at.clone(), it.front, it.depth, () => {
     let r = null; try { r = machineUse(m[0].id, 'player'); } catch (e) { r = null; }
     toast(it.t, r && r.text ? r.text : it.x);
   });
   return true;
+}
+// a stub machine (0.28.14): one section 17 knows only by its room (the washers), so no tile to be near. Matched by
+// the thing you tapped instead: in the stub's room, titled with its kind's name, and with its number if the title
+// has one ('Washer 3' -> 4-washer-3)
+function stubTap(it, at) {
+  const rm = roomAt(...cellAt(at.x, at.z)), num = (it.t.match(/\d+/) || [])[0];
+  const m = machineList().find(m => m.stub && m.deck === deckDef.num && m.room && m.room === rm && MACHINE_KINDS[m.kind]
+    && it.t.toLowerCase().startsWith(MACHINE_KINDS[m.kind].name.toLowerCase()) && (!num || m.id.endsWith('-' + num)));
+  return m ? [m, null] : null;
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
@@ -7842,7 +7992,7 @@ function actBegin() {
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
-  const A = ACT; if (!A) return; ACT = null;
+  const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if (abort) return;
   player.face = player.obj.rotation.y = A.face;
@@ -7894,6 +8044,20 @@ function playerChat(p) {
   device.refresh();
   return gain;
 }
+// your tray (0.28.15, the user's note): like the crew, you carry a tray from the servery (or the queue) to your mess
+// seat ('+tray', section 8b's prop: Walker.update, then the stand-in sliding in); seated, it sits on the table in
+// front of you while you eat (one small mesh made at load in the mess's own tray colours, shown only then); when
+// you're done it goes to the return with you. The grab shelf has no tray.
+const TRAY_ON = (() => {
+  const g = new THREE.Group(); box(.42, .02, .3, MESS.trays[0], 0, 0, 0, g); cyl(.09, .09, .016, MESS.white, -.06, .018, .02, g, 16);
+  cyl(.035, .03, .08, MESS.white, .13, .05, -.07, g, 10); g.visible = false; scene.add(g); return g;
+})();
+const TRAY_REACH = .42;                                  // from your seat's spot toward the table (the long tables' benches and the round tables' chairs)
+function trayOnTable(A) {
+  if (!A) { TRAY_ON.visible = false; return; }
+  const f = A.to.face || 0; TRAY_ON.position.set(A.to.x + Math.sin(f) * TRAY_REACH, .78, A.to.z + Math.cos(f) * TRAY_REACH);
+  TRAY_ON.rotation.y = f; TRAY_ON.visible = true;
+}
 // once a frame: the walk there, sliding into the place, the time it takes, and stepping back out
 function actUpdate(dt, t) {
   const A = ACT;
@@ -7907,7 +8071,7 @@ function actUpdate(dt, t) {
   };
   let pose = A.pose;
   if (A.phase === 'in') {
-    if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = 'walk';
+    if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = A.kind === 'eat' && A.o.fed ? 'walk+tray' : 'walk';
   } else if (A.phase === 'do') {
     if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
   }
@@ -7916,6 +8080,7 @@ function actUpdate(dt, t) {
     if (go(p.x, p.z)) { actEnd(false); return; }
     pose = 'walk';
   }
+  trayOnTable(A.kind === 'eat' && A.phase === 'do' && A.spot && A.spot.pose === 'sit' ? A : null);
   A.body.set({ x: A.x, y: A.y, z: A.z }, A.face, pose);
   A.body.update(dt, t);
 }
@@ -7944,7 +8109,8 @@ function playerUpdate(dt, t) {
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
-  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0;
+  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : false;   // a tray from the servery to your seat (0.28.15)
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -8409,9 +8575,63 @@ function ixTheirs(it, at) {
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
   return [...PLACE_OF.values()].some(pl => rule[1].includes(pl.type) && (() => { const s = placeSpot(pl.id); return s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR; })());
 }
+// ---- chores without a machine (section 17's CHORES: a lamp, a vent, a delivery, an inspection round): tap something at
+// the next stop and do its minutes; jobStepDone (17) marks the stop. Parts first, from main storage, when it needs any.
+// After the last stop the work is done (17 sets workDone) and the job waits to be turned in at the job board (Pillar 3:
+// "take and turn in at the board"). Chores on a machine (calibrate, faults, filters) go through section 15's repair. ----
+const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
+  inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'] };
+Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
+const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && j.kind === 'chore' && !j.machine ? j : null; };
+function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
+// first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
+function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
+function ixChoreTap(it, at) {
+  const j = ixChore(); if (!j || j.workDone) return false;
+  const nx = ixNextStop(j); if (!nx) return false;
+  const { k, s: st } = nx, room = roomAt(...cellAt(at.x, at.z)), P = SHIP.player, o = { title: it.t, flavour: it.x, job: j.id, ixStep: k };
+  if (st.step === 'fetch') {                             // parts off the shelves in main storage, Deck 5
+    if (deckDef.num !== 5 || room !== 'r') return false;
+    const need = jobNeeds(j, { fitted: [] }, P.carry);
+    if (!need.length) { jobStepDone(j.id, k); ixGoalAt = -1; toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '.'); return true; }
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Put something back first.'); return true; }
+    const pl = jobPlaceNear('storage', 'r', at);
+    actStart('ixStop', pl ? pl.id : null, { ...o, ixFetch: true, pose: 'browse', after: 'You look for ' + partList(need) + '.' });
+    if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = PLAYER_ACTS.fetch ? PLAYER_ACTS.fetch.mins : 4; ACT.def.title = 'Main storage'; }
+    return true;
+  }
+  if (st.deck !== deckDef.num) return false;
+  const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+  if (!spot || !(ixDist(it, spot) < IX_NEAR + .6 || PLACE_OF.get(pid).room === room)) return false;
+  const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
+  // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
+  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
+  if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
+  return true;
+}
+// a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
+function ixStopDone(A) {
+  const j = ixChore(), P = SHIP.player; if (!j || j.id !== A.o.job) return;
+  if (A.o.ixFetch) {
+    const got = [], none = [];
+    for (const p of jobNeeds(j, { fitted: [] }, P.carry)) { if (P.carry.length >= CARRY_MAX) break; if (takePart(p)) { P.carry.push(p); got.push(p); } else none.push(p); }
+    if (!got.length) { toast('Main storage', 'None on the shelves: ' + none.join(', ') + '. The next delivery is on Wednesday.'); return; }
+    jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
+    toast('Main storage', 'You take ' + partList(got) + '. Now ' + j.title.charAt(0).toLowerCase() + j.title.slice(1) + '.'); return;
+  }
+  const r = jobStepDone(j.id, A.o.ixStep); ixGoalAt = -1;
+  if (!r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
+  if (r.done) {
+    for (const p of j.parts) { const i = P.carry.indexOf(p); if (i >= 0) P.carry.splice(i, 1); }   // the lamp went in: it's used
+    toast('Work done', j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.');
+    ixTip('turnin', 'Head back to the board to turn it in.');
+  } else toast(A.def.title, 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.');
+  device.refresh();
+}
 // the tap (section 15's playerTap, through PLAYER_TAPS): the job board, or a place to use
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
+  if (ixChoreTap(it, at)) return true;                   // a stop of the chore you hold
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
@@ -8465,7 +8685,7 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const doable = j => !!(j && (j.machine || j.kind === 'restock'));
+  const doable = j => !!(j && (j.machine || j.kind === 'restock' || j.kind === 'chore' && typeof jobStepDone === 'function'));
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
@@ -8479,7 +8699,11 @@ const ixBoard = (() => {
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
       const ids = new Set(yours.map(o => o.id));
       sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : open.length ? 'Pick a job and take it. Tier ' + PLAYER_TIER + ' work is yours to take.' : 'Nothing on the board. The Chief says it never lasts.';
-      if (mine) { const [title, where, state, pri] = jobCard(mine); row(mine.title || title, where + ' · ' + state, pri, button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); })); }
+      if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
+        const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
+        row(mine.title || title, where + ' · ' + (done ? 'done: turn it in' : state), pri, done ? button('Turn it in', () => api.turnIn(mine.id))
+          : button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }));
+      }
       for (const o of yours) {
         const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
         row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null);
@@ -8493,7 +8717,17 @@ const ixBoard = (() => {
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
       const j = myJob(), [title, where] = jobCard(j);
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', title + ', ' + where + '. Follow the marker' + (j.machine ? ': parts first, from main storage on Deck 5.' : '.'));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
+      ixTip('taken', 'Track it on your device; the marker shows the way.');
+      return true;
+    },
+    turnIn(id) {
+      const j = myJob(); if (!j || j.id !== id || !turnInJob(id)) { toast('Job board', 'Nothing to turn in.'); api.draw(); return false; }
+      // pay: section 15 pays machine jobs and cart runs when it finishes them; chores are paid here
+      const pay = j.kind === 'chore' && !j.machine && typeof JOB_PAY !== 'undefined' ? JOB_PAY : 0;
+      if (pay) SHIP.player.credits = (SHIP.player.credits || 0) + pay;
+      api.draw(); device.refresh(); ixGoalAt = -1;
+      toast('Job complete', (j.title || jobCard(j)[0]) + ': signed off on the board.' + (pay ? ' +' + pay + ' credits.' : '') + ' That\'s one more on your record.');
       return true;
     },
   };
@@ -8510,6 +8744,7 @@ function clearGoal() { IX_GOAL = null; }
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
   const j = myJob(); if (!j) return null;
+  if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
     const c = SHIP.player.cart && SHIP.player.cart.job === j.id ? SHIP.player.cart : null, step = !c ? 'cart' : c.stage === 'empty' ? 'load' : c.stage === 'full' ? 'unload' : 'return';
     const st = typeof jobStops === 'function' ? jobStops(j).find(x => x.step === step) : null, meals = j.cargo === 'meals';
@@ -8517,9 +8752,10 @@ function ixJobStep() {
     return st ? { deck: st.deck, place: st.places[0] || null, room: !st.places.length && step === 'load' ? /cargo/i : null, label: lab } : { deck: 5, room: /cargo/i, label: lab };
   }
   if (!j.machine) {                                      // a chore (section 17): parts first if it needs any, then its stops
-    const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), st = typeof jobStops === 'function' ? jobStops(j).filter(x => x.step !== 'fetch') : [];
-    if (need.length && need.some(p => SHIP.stores[p] > 0)) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
-    return st[0] ? { deck: st[0].deck, place: st[0].places[0] || null, label: j.title || 'Your job' } : null;
+    const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), nx = typeof jobStops === 'function' ? ixNextStop(j) : null;
+    if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
+    const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
+    return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
   }
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
@@ -8534,6 +8770,7 @@ function ixJobStep() {
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
+  if (g.item) { const it = ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item); if (it) { it.hit.getWorldPosition(ixP); return { x: ixP.x, z: ixP.z }; } }
   if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
   if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
   if (g.room) {
@@ -8547,14 +8784,31 @@ function ixGoalWorld(g) {
   }
   return null;
 }
+// the first tips that depend on where you are (once a second at most): near the job board; at your job's machine
+let ixTipAt = 0, ixStopLast = null;
+function ixTips() {
+  if (typeof tipShow !== 'function' || typeof deckDef === 'undefined' || !deckDef) return;
+  const now = performance.now(); if (now - ixTipAt < 1000) return; ixTipAt = now;
+  const p = player.obj.position, j = typeof myJob === 'function' ? myJob() : null;
+  if (deckDef.num === 5) { const b = ITEMS.find(i => /job board/i.test(i.t)); if (b) { b.hit.getWorldPosition(ixP); if (Math.hypot(ixP.x - p.x, ixP.z - p.z) < 3.5) ixTip('board', 'Take jobs here, and turn them in here when they\'re done.'); } }
+  if (j && j.machine && !j.workDone && typeof machineById === 'function') {
+    const m = machineById(j.machine), pid = m && m.deck === deckDef.num && typeof panelPlace === 'function' ? panelPlace(m.id) : null, s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
+    if (s && Math.hypot(s.x - p.x, s.z - p.z) < 2.5) ixTip('machine', 'Tap the machine to inspect. You may need parts from storage or the machine shop.');
+  }
+  if (j && j.workDone) ixTip('turnin', 'Head back to the board to turn it in.');
+}
 const ixV = new THREE.Vector3();
 let ixLast = '';
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
+  // a chore's stop is done once its minutes are in: seen as it steps out, or (if it ended between our frames) once it's gone
+  const L = ixStopLast; ixStopLast = ACT && ACT.kind === 'ixStop' ? ACT : null;
+  for (const A of [ACT, L]) if (A && A.kind === 'ixStop' && !A.o.ixDone && (A.phase === 'out' || A !== ACT && A.done >= A.def.mins)) { A.o.ixDone = true; ixStopDone(A); }
+  ixTips();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
-  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
+  const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = IX_GOAL || ixJobGoal;
   if (!g) { if (!el.hidden) el.hidden = true; return; }
@@ -8697,6 +8951,7 @@ const FOOD = {
   giveUp: 30,                             // minutes after the close that anyone still waiting gives up
   spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken (without chillerAt)
   binAt: [540, 1260], binOut: 630,        // spoiled food is binned at the 09:00 and 21:00 checks; the bin goes at 10:30
+  trayAt: 1080,                           // an event's trays for the bridge go up at 18:00
   rushRate: 1, slowOven: 1.75,             // in a rush the line serves this many a minute; a slow oven's pots take this much longer
 };
 // the menu (answer 10): a week's cycle. Breakfasts by weekday. Dinners on Monday, Tuesday, Thursday and Saturday from
@@ -8777,6 +9032,37 @@ const galleyCakeFor = c => c.who.length ? galleyWhose(c.who) + ' birthday' : c.n
 const galleyWhose = ps => ps.length === 1 && ps[0].player ? 'your' : galleyNames(ps) + '\'s';
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
 const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
+// ship-wide events (Pillar 3, C7): section 18's eventMod('galley', key) changes the galley while an event runs;
+// null (no event, or no section 18) means no change. Read on the hour into S.ev (galleyStep):
+//   menu:  a dish (an id in GALLEY_EV_DISH, or the dish's own name) instead of the menu's, at both meals
+//   cook:  hot pots take this many times as long (storm stew: one pot, quicker)
+//   grab:  the grab shelf is stocked for this many times the usual
+//   extra: this many more portions at each meal (guests at the servery)
+//   batch: meals for a dinner away from the mess (a formal dinner in the Captain's quarters, a feast): a number, or
+//          { meals, label }; cooked from the cold store from 15:00
+//   trays: trays for the bridge at dinner: cooked with the dinner, plated at 18:00 and sent up by hover cart (section
+//          17's cartTrays({ trays, at, to: 'bridge' }) posts the run, when it's there)
+// Section 18's eventModAt(t, kind, key) (0.34.8), or its eventMod(kind, key, t) (0.34.7), answers for ship minute t, so
+// replays agree with the live galley; an eventMod without the third argument is read live only (eventNow / eventMod:
+// now), and replays run as if there were none.
+const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
+const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
+// GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
+// can't replace: eventMod(kind, key, t) and cartTrays(o). null in the game
+const GALLEY_TEST = { eventMod: null, cartTrays: null };
+function galleyEvRead(m, replay) {
+  let get = null;
+  if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
+  else if (typeof eventModAt === 'function') get = k => eventModAt(m, 'galley', k);
+  else if (typeof eventMod === 'function' && eventMod.length >= 3) get = k => eventMod('galley', k, m);
+  else if (!replay && typeof eventMod === 'function' && typeof eventNow === 'function' && eventNow()) get = k => eventMod('galley', k);
+  if (!get) return null;
+  const o = {}; let any = false;
+  for (const k of GALLEY_EV_KEYS) { const v = get(k); if (v !== null && v !== undefined) { o[k] = v; any = true; } }
+  return any ? o : null;
+}
+const galleyEvDish = v => typeof v === 'string' && v ? GALLEY_EV_DISH[v] || v : null;
+const galleyEvNum = (v, dflt) => typeof v === 'number' && isFinite(v) && v >= 0 ? v : dflt;
 // a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
 const GALLEY_EV = new Map();
 function galleyEvents(d) {
@@ -8851,6 +9137,13 @@ function galleyStep(S, m, st) {
     else if (n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
   }
   if (md === FOOD.binOut) S.bin = 0;
+  // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
+  if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
+  if (md === 900 && S.ev && S.ev.batch) {
+    const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
+    if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
+  }
+  if (md === FOOD.open.breakfast) S.batch = null;
   // a cake: a birthday, or one of section 18's events with cake: true (Founding Day)
   if (md === CAKE.mail || md === CAKE.bake || md === CAKE.out || md === CAKE.gone) {
     const c = galleyCake(d);
@@ -8871,15 +9164,18 @@ function galleyStep(S, m, st) {
   const busy = k => E.busy.some(b => b.kind === k && md >= b.from && md < b.to);
   const potsOf = kind => S.pots.filter(p => p[2] === kind).length;
   if (meal && md >= FOOD.open[meal] - FOOD.lead) {
-    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = galleyMenu(d)[meal]; S.servery.meal = meal; }
-    let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack) - S.servery.portions - inPots('hot');
+    const ev = S.ev || {}, evDish = galleyEvDish(ev.menu);
+    if (!S.servery.dish || S.servery.meal !== meal || (evDish && S.servery.dish !== evDish && !S.servery.portions)) { S.servery.dish = evDish || galleyMenu(d)[meal]; S.servery.meal = meal; }
+    const more = Math.round(galleyEvNum(ev.extra, 0)) + (meal === 'dinner' && md < FOOD.trayAt ? Math.round(galleyEvNum(ev.trays, 0)) : 0);
+    let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack + more) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
-      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
+      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1) * galleyEvNum(ev.cook, 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
     }
   }
   {
-    let need = Math.min(FOOD.grabCap, countFrom(E.grabs, m) + FOOD.grabSlack) - S.grab.items - inPots('grab');
+    const g = galleyEvNum(S.ev && S.ev.grab, 1);
+    let need = Math.min(FOOD.grabCap, Math.round((countFrom(E.grabs, m) + FOOD.grabSlack) * g)) - S.grab.items - inPots('grab');
     for (let idle = bakers + Math.max(0, cooks - potsOf('hot')) - potsOf('grab'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.bake, S.cold.meals); if (n <= 0) break;
       S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.bakeT, m), n, 'grab']); need -= n; if (st) st.baked += n;
@@ -8896,6 +9192,11 @@ function galleyStep(S, m, st) {
     S.pots.splice(S.pots.indexOf(p), 1);
     if (p[2] === 'hot') S.servery.portions += p[1];
     else { const n = Math.min(p[1], FOOD.grabCap - S.grab.items); S.grab.items += n; if (st) st.waste += p[1] - n; }
+  }
+  // trays for the bridge (an event): plated from the servery at 18:00 and sent up by hover cart
+  if (md === FOOD.trayAt && S.ev && S.ev.trays) {
+    const n = Math.min(Math.round(galleyEvNum(S.ev.trays, 0)), S.servery.portions);
+    if (n > 0) { S.servery.portions -= n; S.trays = { d, n }; if (st) st.trays += n; else (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }); }
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
@@ -9013,12 +9314,15 @@ function galleyText(what = 'servery') {
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
   if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
   if (what === 'menu') return galleyBoard();
+  if (what === 'event') return S.batch && S.batch.d === SHIP.time.day ? `Brennan is cooking for ${S.batch.label} (${S.batch.meals} meals).` : '';
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
-  const M = galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
+  const evd = galleyEvDish(S.ev && S.ev.menu), M = evd ? { dinner: evd, note: '' } : galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
   let extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
   if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ` A ${ck.name} cake on the end of the counter.`;
   else if (ck && md < CAKE.out) extra += ` Cake after dinner: it's ${galleyCakeFor(ck)}.`;
+  if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}.`;
+  if (S.trays && S.trays.d === SHIP.time.day && md >= FOOD.trayAt && md < FOOD.trayAt + 60) extra += ` ${S.trays.n} trays have gone up to the bridge.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
   return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
 }
@@ -9034,7 +9338,7 @@ function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, spoiled: 0, cakes: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
@@ -9098,7 +9402,8 @@ function galleyShow() {
   if (!deckDef || deckDef.num !== 3) { GV = null; return; }
   if (!GV || GV.root !== deckRoot) GV = galleyVisuals();
   const S = SHIP.galley, p = S.servery.portions, g = Math.ceil(S.grab.items / 2), dirty = Math.min(24, Math.ceil(S.dirty / 3));
-  if (GV.board && GV.boardDay !== SHIP.time.day) { GV.boardDay = SHIP.time.day; galleyBoardDraw(GV.board, SHIP.time.day); }
+  const bk = SHIP.time.day + '|' + (galleyEvDish(S.ev && S.ev.menu) || '');   // redrawn each day, and when an event changes the menu
+  if (GV.board && GV.boardDay !== bk) { GV.boardDay = bk; galleyBoardDraw(GV.board, SHIP.time.day); }
   const bags = Math.min(3, Math.ceil((S.bin || 0) / 10)), cake = !!(S.cake && S.cake.out);
   const key = p + '|' + g + '|' + dirty + '|' + bags + '|' + cake; if (key === GV.key) return; GV.key = key;
   const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
@@ -9129,7 +9434,9 @@ function galleyShow() {
 // the menu board (section 4b's menuBoard canvas, 320 x 200), in its own style: the day's breakfast and dinner, and the
 // dinner's note (a favourite, the Friday treat, the Sunday vote)
 function galleyBoardDraw(t, d) {
-  const c = t.image.getContext('2d'), w = t.image.width, h = t.image.height, M = galleyMenu(d), cap = x => x[0].toUpperCase() + x.slice(1);
+  const c = t.image.getContext('2d'), w = t.image.width, h = t.image.height, cap = x => x[0].toUpperCase() + x.slice(1);
+  const evd = d === SHIP.time.day && SHIP.galley ? galleyEvDish(SHIP.galley.ev && SHIP.galley.ev.menu) : null;   // an event's menu
+  const M = evd ? { breakfast: evd, dinner: evd, note: '' } : galleyMenu(d);
   const line = (txt, y, font, colour) => { let px = parseInt(font.split(' ')[1]); c.fillStyle = colour; do c.font = font.replace(/\d+px/, px + 'px'); while (c.measureText(txt).width > w - 30 && --px > 9); c.fillText(txt, 18, y); };
   c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
   line('MESS', 34, '700 24px system-ui,sans-serif', '#e8c06a');
@@ -9323,7 +9630,14 @@ function machUse(m, h) {
 function machWear(m, h, c) {
   const K = MACHINE_KINDS[m.kind];
   const base = 100 / (K.life * 24), use = K.time + (1 - K.time) * machUse(m, h);
-  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7));
+  return base * use * (1 + .5 * (1 - c / 100)) * (.6 + .8 * schedU(m.seed, h, 7)) * eventWear(K.sys, h);
+}
+// a ship-wide event's wear on a system (Pillar 3, C7: section 18's eventMod('wear', system) -> a multiplier, null for
+// no change; the hour is passed too, for an eventMod that can answer for past hours). 1 with no event
+function eventWear(sys, h) {
+  if (typeof eventMod !== 'function') return 1;
+  const v = eventMod('wear', sys, h * 60);
+  return typeof v === 'number' && v > 0 && v < 20 ? v : 1;
 }
 
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
@@ -9797,7 +10111,9 @@ function jobRun(p, j, t, makeMin) {
     // the crew stand at a stop's place only if it's a machine's panel or a storage spot nobody else's job is using;
     // anywhere else (someone's desk, a seat, a lobby) they work where they are, so they never take a person's place
     const crewAt = (id, a, b) => { const pl = placeById(id); return !pl ? null : pl.machine ? id : pl.type === 'storage' ? storagePlace([id], a, b) : null; };
+    const s0 = segs.length;
     for (const st of j.stops) { go(st.deck); at(st.mins, st.tag, crewAt(st.placeId, c, c + st.mins)); }
+    if (j.chore === 'trays') { const p0 = segs.findIndex((sg, i) => i >= s0 && sg.tag === 'pickup'); if (p0 >= 0) segs.forEach((sg, i) => { if (i > p0) sg.hold = 'cartfull'; }); }   // a cart of trays in hand
   } else {
     const m = machineById(j.machine), K = MACHINE_KINDS[m.kind];
     go(5);
@@ -9812,7 +10128,11 @@ function jobRun(p, j, t, makeMin) {
 // a job is finished: its machine put right, or its cargo moved
 function jobFinish(j, t, by) {
   j.status = 'done'; j.doneAt = t; j.doneBy = by;
-  if (j.kind === 'chore') { choreDone(j, t); return; }
+  if (!j.workDone) jobEffect(j, t, by);                  // a job you turn in already did its work (0.33.23)
+}
+// what finishing a job does to the ship: its machine put right, its cargo moved, a chore's effect
+function jobEffect(j, t, by) {
+  if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
   if (j.machine) {
     const s = SHIP.machines[j.machine];
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
@@ -9829,14 +10149,15 @@ function jobsHour(h) {
   const t = h * 60, jobs = SHIP.jobs, d = Math.floor(h / 24) + 1;
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
+  for (const j of jobs) if (j.kind === 'favour' && j.status !== 'done' && j.expires && t >= j.expires && !j.workDone) { j.status = 'done'; j.doneAt = t; j.doneBy = null; j.lapsed = true; }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour' && !j.workDone && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; }
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day + deliveryLate(d) && h % 24 === DELIVERY.hour) {
     for (const k in STOCK) { const n = STOCK[k] - (SHIP.stores[k] || 0) - (SHIP.hold[k] || 0); if (n > 0) SHIP.hold[k] = (SHIP.hold[k] || 0) + n; }
     if (cartsCarryFood()) SHIP.hold.meals = Math.max(SHIP.hold.meals || 0, DELIVERY.meals);
   }
   // 3. post a job for each machine that needs one, or bring an unclaimed one up to date
-  const open = new Map(); for (const j of jobs) if (j.status !== 'done' && j.kind !== 'chore') open.set(j.machine || 'restock:' + j.cargo, j);
+  const open = new Map(); for (const j of jobs) if (j.status !== 'done' && j.kind !== 'chore' && j.kind !== 'favour') open.set(j.machine || 'restock:' + j.cargo, j);
   for (const m of machineList()) {
     const st = SHIP.machines[m.id].state, kind = JOB_FOR[st], j = open.get(m.id);
     if (j && j.status === 'claimed') continue;
@@ -9853,6 +10174,7 @@ function jobsHour(h) {
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
+  eventJobsHour(h, jobs);
   // a food run nobody took goes unseen (its meals landed long ago, in the galley's books): before the claims
   for (const j of jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
@@ -10014,7 +10336,7 @@ function cartPost() {
 // only while it's yours and not yet unloaded; then the galley holds its meals past arriveAt. A run just sitting on the
 // board lands at arriveAt as in the galley's replays (0.33.20: holding those too kept the cold store low, so every
 // hour ordered another run and the hold ran dry). Live play only: never in replays
-const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you') || null;
+const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you' && !x.workDone) || null;
 function cartWaiting(h) { return !!yourCartRun(h); }
 // (meals on their way, yours included, are counted by the galley when it asks cartClaim: section 16's 0.29.17; the
 // galley owns the cold store's accounting, so section 17 doesn't add them too: 0.33.22)
@@ -10035,10 +10357,10 @@ function jobWhere(person, t) {
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
 // the board: jobs found and not done, the most urgent first
-function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
+function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
-  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
+  if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
   j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; return true;   // no crew route left on it
 }
 function dropJob(id) {
@@ -10052,20 +10374,155 @@ function returnPart(part) { if (typeof part !== 'string' || !part) return false;
 function touchJob(id) { const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed'); if (!j) return false; j.touched = shipNow(); return true; }
 function finishJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
-  if (!j) return false; jobFinish(j, shipNow(), 'you'); machRecord(MACH_HOUR - 1); MACH_REV++; return true;
+  if (!j) return false;
+  if (TURN_IN) { if (!j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); } }   // done, awaiting turn-in
+  else jobFinish(j, shipNow(), 'you');
+  machRecord(MACH_HOUR - 1); MACH_REV++; return true;
 }
+// turning jobs in at the board (0.33.23, for the interactions engineer and plans/pillar3-plan.md "Jobs: take and turn in
+// at the board"). Your job's stops are ticked off with jobStepDone; after the last one (or finishJob) its work is done:
+// the machine is put right, the lamp works, the meals land (j.workDone, the minute). It stays yours (no 12-hour
+// lapse), off the board, and myJob() still gives it, until you turn it in at a job board (turnInJob), which completes
+// it. TURN_IN off (for now): finishJob completes your job at once, as before, so section 15 needn't change; on:
+// finishJob only does the work, and turnInJob completes it. The lead turns it on when the board's Turn in lands.
+let TURN_IN = true;                                      // on from 0.37.3: 15b's job board has Turn it in (the lead)
+// jobStepDone(id, stepIndex) -> { ok, left, done }: a stop of your job done (stepIndex into jobStops(j), fetch
+// included); left: stops still to do; done: its work is done (after the last stop), awaiting turn-in
+function jobStepDone(id, k) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
+  const n = j ? jobStops(j).length : 0;
+  if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
+  j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
+  const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
+  if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
+  MACH_REV++; return { ok: true, left, done: !!j.workDone };
+}
+// turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
+function turnInJob(id) {
+  machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed' && x.workDone && x.kind !== 'favour');
+  if (!j) return false; jobFinish(j, shipNow(), 'you'); MACH_REV++; return true;
+}
+
+// ---- event jobs (Pillar 3, C7): a ship-wide event's `jobs` data, posted on the job board for its phase ----
+// SHIP_EVENTS.<id>.jobs = { <phase>: [ { id?, kind, title?, where?, place?, machine?, deck?, tier?, mins?, parts?,
+// urgency?, leave? }, ... ] } (section 18, the events engineer). Each is posted once per event and phase when
+// eventNow() says so, tagged `event: <id>`, as a chore: a kind from CHORES with no place picks one of its own places;
+// otherwise `place` (a place id), `machine` (its panel) or `where` (a word in a room's name, or a place type) says where.
+// The crew take them as usual; small ones at your tier wait `leave` minutes (default 60) of the day shift for you.
+// postEventJob(spec, { event, forYou }) posts one now (a meeting's choice: forYou claims it for you).
+const eventDef = id => typeof SHIP_EVENTS === 'undefined' ? null : Array.isArray(SHIP_EVENTS) ? SHIP_EVENTS.find(e => e.id === id) || null : SHIP_EVENTS[id] || null;
+const EVENT_JOB_TEXT = { secure: 'Secure loose things', check: 'Check', fetch: 'Fetch', carry: 'Carry', clean: 'Clean up', set: 'Set up', patch: 'Patch', tea: 'Bring tea' };
+function eventStop(spec) {
+  const pl = spec.place && placeById(spec.place); if (pl) return { deck: pl.deck, placeId: pl.id, room: pl.room };
+  const m = spec.machine && machineById(spec.machine); if (m) return { deck: m.deck, placeId: panelPlace(m.id), room: m.room, machine: m.id, at: m.panel.slice() };
+  const w = String(spec.where || '').toLowerCase(); if (!w) return null;
+  for (const n of Object.keys(DECKS).map(Number).filter(n => !spec.deck || n === spec.deck)) {
+    const D = DECKS[n], rooms = Object.keys(D.rooms).filter(r => (D.rooms[r].name || '').toLowerCase().includes(w));
+    const ps = (D.places || []).filter(p => !p.machine && (rooms.includes(p.room) || p.type === w));
+    const stand = ps.find(p => /lift-wait|storage|laundry|garden|shop/.test(p.type)) || ps[0];
+    if (stand) return { deck: n, placeId: stand.id, room: stand.room };
+    if (rooms.length) { const at = machRoomTile(n, rooms[0]); if (at) return { deck: n, placeId: null, room: rooms[0], at }; }
+  }
+  return null;
+}
+function eventJob(spec, ev, t, key) {
+  let where = null, title = spec.title, machine = null, stops;
+  if (CHORES[spec.kind] && !spec.place && !spec.machine && !spec.where) {
+    const cs = choreWhere(spec.kind); if (!cs.length) return null;
+    const c = cs[Math.abs(machSeed(key)) % cs.length]; title = title || c.title; machine = c.machine || null; where = { deck: c.deck, room: c.room }; stops = c.stops.map(x => ({ ...x }));
+  } else {
+    const st = eventStop(spec); if (!st) return null;
+    machine = st.machine || null; where = st;
+    stops = [{ deck: st.deck, placeId: st.placeId, mins: spec.mins || 20, tag: spec.kind || 'event', at: st.at || null }];
+    title = title || (EVENT_JOB_TEXT[spec.kind] || 'Event job') + (st.room ? ': ' + roomName(st.deck, st.room) : '');
+  }
+  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, title,
+           bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
+           claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
+}
+function eventJobsHour(h, jobs) {
+  if (typeof eventNow !== 'function') return;
+  const ev = eventNow(); if (!ev || !ev.id) return;
+  const def = eventDef(ev.id), list = def && def.jobs && def.jobs[ev.phase]; if (!Array.isArray(list)) return;
+  list.forEach((spec, k) => {
+    const key = 'event:' + ev.id + ':' + ev.phase + ':' + (spec.id || k) + '@' + (ev.day ?? '');
+    if (jobs.some(j => j.id === key)) return;
+    const j = eventJob(spec, ev.id, h * 60, key); if (j) jobs.push(j);
+  });
+}
+function postEventJob(spec, o = {}) {
+  machinesNow(); const ev = o.event || (typeof eventNow === 'function' && eventNow() ? eventNow().id : 'event');
+  const key = 'event:' + ev + ':' + (spec.id || spec.kind) + '@' + Math.floor(shipNow());
+  const j = eventJob(spec, ev, shipNow(), key); if (!j) return null;
+  SHIP.jobs.push(j); MACH_REV++;
+  if (o.forYou) claimJob(j.id);
+  return j.id;
+}
+
+// trays by cart (Pillar 3, C7, with the galley engineer's 0.29.18): an event asks for trays, the galley plates them
+// and calls cartTrays({ trays, at, to: 'bridge' }) (live, once a day): a job to push them from the servery (Deck 3) to
+// `to` (a word in a room's name, 'bridge' by default). Left for you first (30 minutes of the day shift: they're hot),
+// then a crew member. Nothing lands anywhere: the galley has taken the portions already. -> the job's id, or null
+function cartTrays(o = {}) {
+  machinesNow();
+  const at = Number.isFinite(o.at) ? o.at : shipNow(), key = 'trays:' + (o.to || 'bridge') + '@' + Math.floor(at / 1440);
+  if (SHIP.jobs.some(j => j.id === key)) return key;
+  const from = placesOf(['grab-shelf', 'servery-queue'], [3])[0], to = eventStop({ where: o.to || 'bridge', deck: o.to ? undefined : 1 });
+  if (!from || !to) return null;
+  const n = Math.max(1, Math.round(o.trays || 1));
+  SHIP.jobs.push({ id: key, machine: null, deck: to.deck, room: to.room, kind: 'chore', chore: 'trays', target: o.to || 'bridge', event: o.event || null,
+                   title: 'Take ' + n + ' tray' + (n > 1 ? 's' : '') + ' up to the ' + (roomName(to.deck, to.room) || o.to || 'bridge'), bring: 'a cart of ' + n + ' hot trays',
+                   tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: to.deck, placeId: to.placeId, mins: 10, tag: 'drop', at: to.at || null }],
+                   urgency: 1, leave: 30, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
+  MACH_REV++; return key;
+}
+
+// ---- favours (Pillar 3, C7, for the social engineer): personal jobs, accepted and handed back in person ----
+// favourPost({ from: crewId, title, kind?, place?, machine?, where?, deck?, stops?, parts?, mins?, bring?, expires? })
+// -> id: a favour someone asks of you, offered (never on the board, never taken by the crew). favourAccept(id) makes it
+// yours (alongside a board job: the one-at-a-time rule is for board jobs). Its stops are done with jobStepDone, the
+// last step being 'return' to the person (jobStops gives { step: 'return', person }); once the stops are done its
+// work is done (j.workDone), and favourTurnIn(id) at the person completes it. favoursOf(crewId), myFavours().
+// An offered or accepted favour not done by `expires` (default a day and a half) lapses. Saved with the jobs.
+function favourPost(o = {}) {
+  machinesNow(); if (!o.from) return null;
+  const t = shipNow(), key = 'favour:' + o.from + '@' + Math.floor(t);
+  const st = o.stops ? null : eventStop(o);
+  const stops = o.stops ? o.stops.map(x => ({ ...x })) : st ? [{ deck: st.deck, placeId: st.placeId, mins: o.mins || 10, tag: o.kind || 'favour', at: st.at || null }] : [];
+  SHIP.jobs.push({ id: key, machine: st && st.machine || o.machine || null, deck: stops[0] ? stops[0].deck : null, room: st && st.room || null, kind: 'favour', chore: o.kind || null,
+                   from: o.from, title: o.title || 'A favour', bring: o.bring || null, tier: 1, stops, urgency: 0, posted: t, found: t, claimedBy: null,
+                   parts: (o.parts || []).slice(), status: 'offered', expires: o.expires || t + 2160 });
+  MACH_REV++; return key;
+}
+const favourById = id => SHIP.jobs.find(j => j.id === id && j.kind === 'favour') || null;
+function favourAccept(id) { machinesNow(); const j = favourById(id); if (!j || j.status !== 'offered') return false; j.status = 'claimed'; j.claimedBy = 'you'; j.start = shipNow(); MACH_REV++; return true; }
+function favourDecline(id) { const j = favourById(id); if (!j || j.status !== 'offered') return false; j.status = 'done'; j.doneAt = shipNow(); j.doneBy = null; j.declined = true; MACH_REV++; return true; }
+function favourTurnIn(id) {
+  machinesNow(); const j = favourById(id);
+  if (!j || j.status !== 'claimed' || j.claimedBy !== 'you') return false;
+  if (!j.workDone) { if (j.stops.length) return false; jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); }   // a favour with no stops (a word, a hand)
+  j.stepsDone = [...new Set([...(j.stepsDone || []), jobStops(j).length - 1])]; jobFinish(j, shipNow(), 'you'); MACH_REV++; return true;
+}
+const favoursOf = crewId => SHIP.jobs.filter(j => j.kind === 'favour' && j.from === crewId && j.status !== 'done');
+const myFavours = () => SHIP.jobs.filter(j => j.kind === 'favour' && j.claimedBy === 'you' && j.status === 'claimed');
 
 // ---- the device's jobs section (0.33.9): the board in your pocket. The device itself is section 15's placeholder
 // (device.addSection); this only lists jobs and lets you claim or drop one. Doing it, at the machine's panel,
 // comes with the player engineer's repair activity (finishJob). ----
-function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed') || null; }
+function myJob() { return SHIP.jobs.find(j => j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour') || null; }
 // where your job takes you, in order (0.33.16, for the player engineer's walk): [{ step, places: [place ids, the
 // first free one best], deck }]. A machine job: parts from the shelves, then its panel. A cart run: a cart from a
 // dock, load in the hold, unload at the cold store (or the shelves), the cart back. Places not built yet are left out.
 function jobStops(j) {
+  const out = jobStopsOf(j), done = new Set((j && j.stepsDone) || []);
+  out.forEach((x, k) => { x.done = done.has(k) || !!(j && j.workDone); });
+  return out;
+}
+function jobStopsOf(j) {
   const known = new Set(Object.values(DECKS).flatMap(d => (d.places || []).map(p => p.id))), st = (step, ids, deck) => ({ step, places: ids.filter(id => known.has(id)), deck });
   if (!j) return [];
-  if (j.kind === 'chore') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins })));
+  if (j.kind === 'chore' || j.kind === 'favour') return (j.parts.length ? [st('fetch', shelvesFor(j.parts[0]), 5)] : []).concat(j.stops.map(x => ({ step: x.tag, places: x.placeId && known.has(x.placeId) ? [x.placeId] : [], deck: x.deck, mins: x.mins, at: x.at || null })),
+    j.kind === 'favour' ? [{ step: 'return', places: [], deck: null, person: j.from }] : []);
   if (j.kind === 'restock') { const meals = j.cargo === 'meals'; return [st('cart', CART_AT, 5), st('load', HOLD_AT, 5), st('unload', meals ? COLD_AT : FETCH_AT, meals ? 3 : 5), st('return', CART_AT, 5)]; }
   const m = machineById(j.machine); if (!m) return [];
   const pp = panelPlace(m.id);
@@ -10111,8 +10568,8 @@ function openJobs(forWho = 'you') {
     const place = main && main.places[0] || null, pl = placeById(place);
     const mins = j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (jobTier(j) - 1)));
     const verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind];
-    return { id: j.id, title: j.kind === 'chore' ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : null,
-             room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where };
+    return { id: j.id, title: j.kind === 'chore' ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
+             room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where, event: j.event || null };
   });
 }
 
@@ -10211,7 +10668,7 @@ function machinesLoad(s) {
   // jobs and supplies (0.33.1): a save before them starts with an empty list and full shelves
   const obj = o => o && typeof o === 'object' && !Array.isArray(o);
   machRecord(sh.machineHour - 1);
-  if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock' || j.kind === 'chore'));
+  if (Array.isArray(sh.jobs)) SHIP.jobs = sh.jobs.filter(j => obj(j) && typeof j.id === 'string' && (j.machine === null || SHIP.machines[j.machine]) && (j.machine !== null || j.kind === 'restock' || j.kind === 'chore' || j.kind === 'favour'));
   for (const k of ['stores', 'hold']) if (obj(sh[k])) for (const [p, n] of Object.entries(sh[k])) if (Number.isInteger(n) && n >= 0) SHIP[k][p] = n;
   if (obj(sh.short)) for (const [p, n] of Object.entries(sh.short)) if (Number.isFinite(n)) SHIP.short[p] = n;
   if (obj(sh.machineUse)) for (const [id, n] of Object.entries(sh.machineUse)) if (SHIP.machines[id] && n > 0 && n < 50) MACH_EXTRA[id] = n;
@@ -10225,13 +10682,14 @@ jobWhere.on = true;                                      // crew go to their job
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
 // To the player they're "ship traditions" (the user's name, 2026-10-16); the big story ones are "ship-wide events".
 // Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
-//   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
+//   SHIP_TRADITIONS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
 //   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
 //   eventPlan(p, day)  -> [{ id, from, to, opts: [[deck, pool], ...], tag, anim, min }] what section 14 slots into
 //                         that person's leisure time (minutes from midnight; [] most days). Read once per schedBuild
 //   eventPools(shared) adds each event's pools ('deck|ev:<id>:<n>') to schedData's shared places (section 14 hook)
 //   eventPlaces(e)     -> the place ids section 14 holds for the event's window (tagged, and `hold`: default the first pool)
 //   eventLine(p, t)    -> a line for the tap toast ("Coming to the quiz tonight?"), or null
+//   SHIP_EVENTS        the ship-wide events (Pillar 3), an object by id; see "ship-wide events" below
 //   eventsTick()       the main loop: the Mail the evening before, decor on the deck during an event, the player joining
 // Every choice is a hash (schedU, k 320-333: section 14 uses 500-515 and 9100/9200, section 16 301 and 310 up); nothing here calls R(), and nothing reads planDay or whereIs
 // while plans are being made. Events only ever take leisure time: shifts, meals and sleep are untouched, and anyone
@@ -10249,7 +10707,7 @@ const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year:
 // cake: true asks the galley (section 16) to bake that day; its cake replaces our decor 'cake' prop.
 // decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
 // line before it; here: the tap line during it; thanks: the toast when the player joins.
-const SHIP_EVENTS = [
+const SHIP_TRADITIONS = [
   { id: 'running', name: 'Running club', k: 320, when: { weekday: 0 }, at: [1155, 1200], min: 20,
     where: [{ deck: 3, pool: 'gym' }],
     who: (p, d) => evHas(p, d, 'runner') ? .9 : evHas(p, d, 'gym-regular') ? .55 : .06, anim: () => null,
@@ -10334,10 +10792,11 @@ const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], wd = weekday(d), yd = shipYearDay(d);
-  for (const ev of SHIP_EVENTS) {
+  for (const ev of SHIP_TRADITIONS) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
+    if (typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
@@ -10351,7 +10810,7 @@ function eventPools(shared, desks) {
   if (!EV_READY) return;                                 // called before section 18 has run: the caches are cleared at its end
   if (!desks) desks = schedDesks(ROSTER.concat(ROSTER_GUESTS).filter(p => !p.player), shared);
   const taken = new Set(desks.values());
-  for (const ev of SHIP_EVENTS) {
+  for (const ev of SHIP_TRADITIONS) {
     const tagged = new Map();
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
@@ -10419,7 +10878,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of SHIP_EVENTS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of SHIP_TRADITIONS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -10524,7 +10983,355 @@ function eventsTick() {
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now);
+  eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
 }
+// ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
+// The format (plans/pillar3-plan.md, "How an event is put together" and "Shared formats"):
+//   SHIP_EVENTS.<id> = { title, days, earliest, gap?, draft?,
+//     phases: [{ id, at: [day, minute], clears? }],       // day 0 is the warning's day; phases in order. A phase marked
+//                                                          // `clears` drops what earlier phases changed (resolution, afterglow)
+//     systems:  { <phase>: { wear: { power: 2 }, effects: ['flicker'] } },   // read by section 17 through eventMod
+//     routines: { <phase>: [{ who, where, rule }] },        // section 14
+//     galley:   { <phase>: { menu, grab } },                // section 16
+//     jobs:     { <phase>: [{ kind, where, tier }] },       // section 17
+//     news:     [{ id, from, phase, seed, lines }],         // section 20 (social)
+//     moments:  [{ id, phase, where, feel }],               // felt everywhere (5, 8b)
+//     meetings: [{ id, phase, at: [day, min], where, script }],
+//     address:  { <phase>: ['line', ...] },                 // the Captain's ship-wide address as that phase starts
+//     mail:     { <phase>: { from, subject, body } },       // a notice as that phase starts
+//     threads:  [{ id, label, good, bad }],                 // lower is better: <= good smoothly, >= bad roughly, else bumpily
+//     traces:   { smooth: [...], bumpy: [...], rough: [...] } }
+//   eventNow(t?)        -> { id, phase, day } | null          anyone may ask; null means no event
+//   eventMod(kind, key) -> number | rule | true | null        null means "no change" (every reader treats it so)
+//   eventScore(thread, n) / eventMine(what, n)                the simulation's and the player's part, added up
+//   eventStart(id, day) / eventAdvance(t)                     start one; move it on (phases, the end, the log)
+//   SHIP.event = { id, startDay, phase, threads: {}, mine: {} } | null; SHIP.eventLog; SHIP.traces   (saved)
+//   captainAddress({ lines, at }), MEETING_SCRIPTS, meeting(), dialogueShow(), dialogueClose(), upcomingTraditions()
+// Nothing here calls R(); when an event starts comes from schedU and the day, so a replay is identical.
+const SHIP_EVENTS = {};
+const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
+const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
+// ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
+// the afterglow runs on to the end of day 5. `draft: true` keeps it from starting on its own until events_check has
+// passed a full live storm.
+SHIP_EVENTS.ionStorm = {
+  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'], draft: true,   // need: on shift on the warning day (Calder's briefing)
+  phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
+    { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
+  scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
+  // ship traditions don't happen in these phases (no observatory night or quiz in a storm), except those in `keep`
+  pause: ['onset', 'escalation'], keep: ['birthday'],
+  // section 17: wear by system or machine kind; effects: 'flicker' (lights flicker), 'blackouts' (a deck at a time goes to
+  // emergency lighting for 15-60 minutes, scored as the 'blackout' thread), 'commsDown' (no calls home, no outside Mail)
+  systems: {
+    onset: { wear: { power: 1.5, comms: 2 }, effects: ['flicker', 'commsDown'] },
+    escalation: { wear: { power: 2, comms: 3, chiller: 1.5 }, effects: ['flicker', 'blackouts', 'commsDown'] },
+  },
+  // section 14: who: 'dept:<d>' | 'all'; where: '<deck>|<room name>' | 'type:<place type>'. rules: doubleShift (on
+  // shift twice as long), patrol (Watch walks the decks), closed (nobody goes there), stayIn (that share of leisure in
+  // their own quarters), rush (everyone with a call owed goes, in `at` minutes)
+  routines: {
+    onset: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
+      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .4 }],
+    escalation: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
+      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .5 }],
+    resolution: [{ where: 'type:callhome', rule: 'rush', at: [600, 1080] }],
+  },
+  needs: { escalation: { sleep: .8, social: 1.2 } },    // sections 14 and 15: energy refills slower, social drains faster
+  // section 16 (the galley's keys, 0.29.18): menu, cook (time multiplier), grab (shelf multiplier), trays (to the bridge)
+  galley: { escalation: { menu: 'stormStew', cook: .75, grab: 1.5, trays: 6 } },
+  // section 17 posts them, tagged event: 'ionStorm'. at: the minute that phase's day they go up. stops: a place id,
+  // or a room and place types, or a machine kind on a deck (the nearest of that kind)
+  jobs: {
+    warning: [
+      { id: 'stormLounge', title: 'Storm prep: secure the lounge glassware and bar', tier: 1, at: 510,
+        stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 30, tag: 'secure' }] },
+      { id: 'stormBallasts', title: 'Storm prep: fit shielded lamp ballasts', tier: 1, at: 510, parts: ['lamp', 'lamp'],
+        stops: [{ deck: 3, machine: 'lights', mins: 20, tag: 'lamp' }, { deck: 4, machine: 'lights', mins: 20, tag: 'lamp' }] },
+      { id: 'stormBatteries', title: 'Storm prep: carry battery packs to the bridge', tier: 1, at: 510, bring: 'two battery packs',
+        stops: [{ placeId: '5-parts-1', mins: 5, tag: 'pickup' }, { placeId: '1-works-1', mins: 10, tag: 'drop' }] },
+      { id: 'stormJunctions', title: 'Storm prep: service the power junctions', tier: 3, at: 540,
+        stops: [{ deck: 5, machine: 'junction', mins: 30, tag: 'service' }] },
+    ],
+    escalation: [
+      { id: 'stormTrays', title: 'Take storm stew up to the bridge', tier: 1, at: 1080, bring: 'a tray of storm stew',
+        stops: [{ placeId: '3-grab-1', mins: 5, tag: 'pickup' }, { placeId: '1-works-1', mins: 10, tag: 'drop' }] },
+    ],
+    afterglow: [
+      { id: 'stormTidy', title: 'Put the bow lounge back together', tier: 1, at: 480,
+        stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 25, tag: 'tidy' }] },
+    ],
+  },
+  // section 20 spreads them: at [day, minute] the seed people know it (who would know first); lines may be a function of
+  // the event's context (c.band, c.dark: a deck that went dark)
+  news: [
+    { id: 'storm-readings', from: 'sato', phase: 'warning', at: [0, 360], seed: ['dept:survey'], weight: 3,
+      lines: ['Sato hasn\'t left the chart room since last night.', 'Survey says something big is coming our way.', 'They say the storm\'s the size of a moon.'] },
+    { id: 'storm-prep', from: 'calder', phase: 'warning', at: [0, 540], seed: ['dept:works'], weight: 2,
+      lines: ['Works is tying down everything that isn\'t bolted.', 'Calder says the lights will flicker for two days.', 'Top up your water bottle. Just in case.'] },
+    { id: 'storm-bridge', from: 'vance', phase: 'onset', at: [1, 900], seed: ['dept:command', 'dept:helm'], weight: 2,
+      lines: ['The bridge is on double shifts.', 'Vance hasn\'t slept. You can tell.'] },
+    { id: 'storm-dark', phase: 'escalation', at: [2, 420], seed: ['dept:watch'], weight: 2,
+      lines: c => [c.dark ? 'Deck ' + c.dark + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
+    { id: 'storm-stew', from: 'brennan', phase: 'escalation', at: [2, 660], seed: ['dept:galley'], weight: 1,
+      lines: ['Storm stew again. One pot, no complaints.', 'Brennan\'s sending trays up to the bridge.'] },
+    { id: 'storm-clear', from: 'marrow', phase: 'resolution', at: [3, 600], seed: ['all'], weight: 3,
+      lines: ['It\'s over. Comms are back.', 'The queue at the booths goes round the plaza.', 'Party in the bow lounge tonight!'] },
+    { id: 'storm-told', phase: 'afterglow', at: [3, 1320], seed: ['all'], weight: 2, lines: c => STORM_RETELL[c.band] },
+  ],
+  // felt everywhere (sections 5 and 8b: the performance engineer) and the gathering after; the addresses are below
+  moments: [
+    { id: 'front', phase: 'onset', at: [1, 840], where: 'shipwide', feel: ['jolt', 'lightsDip', 'flicker'], len: 6 },
+    { id: 'surge', phase: 'escalation', at: [2, 680], where: 'shipwide', feel: ['jolt', 'lightsDip'], len: 4 },
+    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, where: { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, gathering: true, who: .7, anim: 'talk' },
+  ],
+  // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
+  meetings: [
+    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { deck: 5, placeId: '5-jobboard-1', room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'] },
+    { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
+  ],
+  address: {
+    onset: ['This is the Captain. We\'re in it.', 'Expect flickers, and no calls home for a while.', 'Look after each other. Marrow out.'],
+    resolution: c => ['This is the Captain. The storm has passed.',
+      { smooth: 'You kept this ship bright and fed through two hard days. Thank you, all of you.', bumpy: 'It wasn\'t smooth, but we came through it together. Thank you.',
+        rough: 'It was a hard storm, and you got us through it. Rest when you can; we\'ll put the ship right together.' }[c.band],
+      'Comms are back and the booths are open. And there\'s a party in the bow lounge at 19:00. Marrow out.'],
+  },
+  mail: {
+    warning: { from: 'Chief Ines Calder', subject: 'Storm prep', body: 'Ion storm due tomorrow afternoon. Before then: secure loose fittings, top up the filters, check the battery packs. Storm jobs are on the board.' },
+    onset: { from: 'Commander Teo Vance', subject: 'Storm stations', body: 'The bridge is on double shifts and the bow lounge is closed. The call-home booths are off line until it\'s over.' },
+  },
+  // lower is better. Who scores what (the lead, 2026-10-16): blackout minutes, section 17; meals spoiled and the bridge
+  // crew's hours on double shift without a hot meal, section 16; the call-home backlog (hours of queue), section 18
+  threads: [{ id: 'blackout', label: 'Keep the lights on', good: 60, bad: 200 }, { id: 'spoiled', label: 'Nothing spoiled', good: 10, bad: 60 },
+    { id: 'bridgeHungry', label: 'A fed bridge', good: 6, bad: 14 }, { id: 'calls', label: 'Calls home', good: 3, bad: 6 }],
+  traces: { smooth: ['stormRoster'], bumpy: ['relayScorch'], rough: ['relayScorch', 'tapedPanel'] },
+  debrief: { from: 'Chief Ines Calder',
+    smooth: 'We came through the storm in good order: short blackouts, nothing lost from the cold store, and a bridge crew that ate on time.',
+    bumpy: 'We came through. A relay burnt out on the bridge and a few decks spent time on emergency lights. I\'ll have it patched by the end of the week.',
+    rough: 'That was a hard one. Long blackouts, a scorched relay room, food binned. We\'ll be putting the ship right for a while. Rest first.',
+    mine: c => c.mine.jobs ? ' Thanks for the ' + (c.mine.jobs > 1 ? c.mine.jobs + ' storm jobs' : 'storm job') + ' you took on; it showed.' : '' },
+};
+const STORM_RETELL = {
+  smooth: ['The lights only went once on our deck, thanks to Works.', 'Best storm I\'ve been through. Is that a thing you can say?', 'Somebody pinned the storm roster up in the tea corner.'],
+  bumpy: ['We lost a relay on the bridge. Calder was not pleased.', 'An hour on emergency lights. I read by torch.', 'Could\'ve been worse. Could\'ve been a lot better.'],
+  rough: ['The relay room got scorched. You can still smell it.', 'I didn\'t sleep for two nights.', 'Half the cold store went in the bin.'],
+};
+// the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
+// minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
+function stormCallBacklog(e) {
+  const d = e.startDay + 3, ppl = schedPeople().filter(p => p.rank !== 'guest');
+  const owed = ppl.filter(p => (habitsOn(p, d) || []).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33).length;
+  const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
+  return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
+}
+// the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
+SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
+(() => {
+  const s = SAVED && SAVED.ship, e = s && s.event;
+  if (e && typeof e === 'object' && SHIP_EVENTS[e.id] && Number.isInteger(e.startDay)) SHIP.event = { id: e.id, startDay: e.startDay, phase: e.phase || null, threads: { ...(e.threads || {}) }, mine: { ...(e.mine || {}) } };
+  if (s && Array.isArray(s.eventLog)) SHIP.eventLog = s.eventLog.filter(x => x && typeof x.id === 'string');
+  if (s && Array.isArray(s.traces)) SHIP.traces = s.traces.filter(x => typeof x === 'string');
+})();
+SAVE_EXTRA.push(s => { s.ship.event = SHIP.event; s.ship.eventLog = SHIP.eventLog; s.ship.traces = SHIP.traces; });
+// where a running event is at minute t: its day (0 = the warning's) and the last phase begun
+// Pure for any t: it reads the running event, the log of past ones and the next one due, so a replay of a past or
+// future day (the galley's, the schedules') sees the same event as play did or will
+function eventNow(t = shipNow()) {
+  const e = typeof SHIP !== 'undefined' && SHIP.event, spans = [];
+  if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay, open: true });
+  if (typeof SHIP !== 'undefined' && SHIP.eventLog) for (const l of SHIP.eventLog) spans.push(l);
+  if (!e) { const due = eventDueDay(); if (due) spans.push({ id: due.id, startDay: due.day }); }
+  for (const sp of spans) {
+    const def = SHIP_EVENTS[sp.id]; if (!def) continue;
+    const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || (!sp.open && rel >= def.days * 1440)) continue;
+    let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
+    if (ph) return { id: sp.id, phase: ph, day: Math.floor(rel / 1440) };
+  }
+  return null;
+}
+// what the event changes now: a phase's value, else an earlier phase's (an onset's wear carries into the escalation),
+// stopping at a phase that `clears`. kinds: 'wear' and 'effect' (systems), 'routine', 'galley', 'jobs', or any other
+// table on the event (def[kind][phase][key]). null: no change.
+function eventMod(kind, key, t) {
+  const now = eventNow(t); if (!now) return null;
+  const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
+  for (let k = i; k >= 0; k--) {
+    const ph = def.phases[k].id;
+    let v = null;
+    if (kind === 'wear') v = def.systems && def.systems[ph] && def.systems[ph].wear ? def.systems[ph].wear[key] : undefined;
+    else if (kind === 'effect') v = def.systems && def.systems[ph] && def.systems[ph].effects ? (def.systems[ph].effects.includes(key) ? true : undefined) : undefined;
+    else if (kind === 'routine') v = def.routines && def.routines[ph] ? def.routines[ph].find(r => r.rule === key || r.where === key || r.who === key) : undefined;
+    else { const tb = def[kind === 'jobs' ? 'jobs' : kind]; v = tb && tb[ph] ? (key === undefined ? tb[ph] : tb[ph][key]) : undefined; }
+    if (v !== undefined && v !== null) return v;
+    if (def.phases[k].clears) return null;
+  }
+  return null;
+}
+const eventModAt = (t, kind, key) => eventMod(kind, key, t);   // the galley's replays (0.29.18): the same, at ship minute t
+// a ship tradition paused by a ship-wide event (no observatory night or quiz in a storm): its start or end falls in one
+// of the event's `pause` phases, and it isn't in `keep`. From eventNow, so plans made on any day agree
+function eventPauses(ev, d) {
+  for (const m of [ev.at[0], ev.at[1] - 1]) {
+    const n = eventNow((d - 1) * 1440 + m), def = n && SHIP_EVENTS[n.id];
+    if (def && (def.pause || []).includes(n.phase) && !(def.keep || []).includes(ev.id)) return true;
+  }
+  return false;
+}
+// the context an event's texts are written against: c.band (as things stand), c.mine, c.you
+const evCtx = e => ({ band: eventBand(e.id, e.threads || {}), mine: e.mine || {}, threads: e.threads || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet' });
+// the threads and the player's part: other sections add to them (inert while no event runs)
+function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
+function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
+const threadBand = (th, v) => v <= th.good ? 'smooth' : v >= th.bad ? 'rough' : 'bumpy';
+// the overall result: the threads' bands blended (their average, rounded)
+function eventBand(id, threads) {
+  const def = SHIP_EVENTS[id]; if (!def || !def.threads.length) return 'smooth';
+  const v = def.threads.reduce((a, th) => a + EVENT_BANDS.indexOf(threadBand(th, threads[th.id] || 0)), 0) / def.threads.length;
+  return EVENT_BANDS[Math.round(v)];
+}
+function eventStart(id, day) {
+  if (!SHIP_EVENTS[id]) return false;
+  SHIP.event = { id, startDay: day, phase: null, threads: {}, mine: {} }; return true;
+}
+// when the next event starts, if none is running: the first in EVENT_ORDER not yet in the log, not a draft, from its
+// `earliest` day plus 0-2 days by hash, at least `gap` days (default 7) after the last one ended, then on to the first
+// day its `need` people are all on shift
+function eventDueDay() {
+  const id = EVENT_ORDER.find(x => SHIP_EVENTS[x] && !SHIP_EVENTS[x].draft && !SHIP.eventLog.some(l => l.id === x));
+  if (!id) return null;
+  const def = SHIP_EVENTS[id], last = SHIP.eventLog[SHIP.eventLog.length - 1];
+  const from = Math.max(def.earliest || 1, last ? last.endDay + (def.gap || 7) : 1);
+  let day = from + Math.floor(3 * schedU(4242, from, EVENT_ORDER.indexOf(id)));
+  const need = (def.need || []).map(n => ROSTER.find(p => p.id === n)).filter(Boolean);   // on shift on the warning day
+  for (let k = 0; k < 7 && !need.every(p => isWorkDay(p, day)); k++) day++;
+  return { id, day };
+}
+// move the event on to minute t: start one when due, run each phase's actions as it begins (the address, a notice),
+// and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
+function eventAdvance(t = shipNow(), quiet) {
+  const out = [];
+  if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script });
+  const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
+  if (now && now.phase !== e.phase) {
+    const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
+    for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
+      const ph = def.phases[k].id; out.push('phase ' + ph);
+      for (const [th, f] of Object.entries((def.scores && def.scores[ph]) || {})) eventScore(th, f(e));
+      if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: (e.startDay - 1) * 1440 + def.phases[k].at[0] * 1440 + def.phases[k].at[1], quiet: quiet || k < to });
+      const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
+    }
+    e.phase = now.phase;
+  }
+  if (t >= end) {
+    const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
+    for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
+    SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
+    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+    SHIP.event = null; out.push('end ' + band);
+  }
+  return out;
+}
+const traceOn = id => SHIP.traces.includes(id);         // for the architects' trace props: a scorch mark, a plaque, a pet
+SIM_ADVANCE.push((from, to) => { eventAdvance(to, true); });
+
+// ---- the Captain's ship-wide address: a banner across the top on every deck for about 20 seconds, copied to Mail.
+// The device engineer owns the look; this is the plain stand-in. Time never stops.
+let ADDRESS_EL = null, ADDRESS_T = 0;
+const ADDRESSES = [];                                    // every address so far (for the checks and the Ship app)
+function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', quiet = false }) {
+  const text = (lines || []).join(' ');
+  ADDRESSES.push({ at, from, text });
+  if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
+  if (quiet || typeof document === 'undefined') return;
+  if (!ADDRESS_EL) {
+    ADDRESS_EL = document.createElement('div');
+    ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+    document.body.appendChild(ADDRESS_EL);
+  }
+  ADDRESS_EL.innerHTML = '<div style="font-weight:600;color:#9fe0cf;margin-bottom:2px">' + from + ', to all hands</div>';
+  ADDRESS_EL.appendChild(document.createTextNode(text));
+  ADDRESS_EL.hidden = false; clearTimeout(ADDRESS_T); ADDRESS_T = setTimeout(() => { if (ADDRESS_EL) ADDRESS_EL.hidden = true; }, 20000);
+}
+
+// ---- meetings with dialogue (the fourth kind of moment): scripts are data; section 19 (the device engineer) draws
+// the panel. These are stand-ins: until section 19 provides deviceDialogue(script, i), a line shows as a toast.
+// MEETING_SCRIPTS.<id> = { title, gist, lines: [{ who, text, pose? } | { choice: [{ text, rel?, job? }, ...] }] }
+const MEETING_SCRIPTS = {};
+const MEETINGS = [];                                     // meetings registered by events: { id, where, at, who, script }
+function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at === m.at)) MEETINGS.push(m); return m; }
+let DIALOGUE = null;                                     // { id, i }: the script being shown, and the line
+function dialogueShow(scriptId) {
+  const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
+  DIALOGUE = { id: scriptId, i: 0 };
+  if (typeof deviceDialogue === 'function') return deviceDialogue(sc, 0);
+  const l = sc.lines.find(x => x.text); if (l) toast(sc.title + ': ' + l.who, l.text);
+  return true;
+}
+function dialogueClose() {                               // walking away: the gist arrives in Mail
+  if (!DIALOGUE) return;
+  const sc = MEETING_SCRIPTS[DIALOGUE.id]; DIALOGUE = null;
+  if (sc && sc.gist && typeof mailSend === 'function') mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });
+}
+
+// the ion storm's two meetings. who: a ROSTER id, or a cast slot the meeting fills from who's there ('tech1', 'tech2':
+// its 'works:2'). text and to may be functions of the context: c.band, c.mine (the player's part), c.you (your name).
+// A choice's reply is said back; rel nudges relationships (section 20's relAdd), job puts that event job on your list
+MEETING_SCRIPTS.calderStorm = {
+  title: 'Storm briefing', from: 'Chief Ines Calder',
+  gist: 'Briefing notes: the ion storm is due tomorrow about 14:00, and Survey says it\'s a big one. In order: the lounge glassware and bar, shielded ballasts on the main lamps, battery packs up to the bridge. Storm jobs are on the board.',
+  lines: [
+    { who: 'calder', text: 'Gather round. Coffee can wait two minutes.', pose: 'gesture' },
+    { who: 'calder', text: 'Survey\'s tracking an ion storm. Dr. Sato says it reaches us tomorrow afternoon, and it\'s a big one.' },
+    { who: 'tech1', text: 'How big is big?', pose: 'nod' },
+    { who: 'calder', text: 'Big enough that the lights flicker for two days and comms go dark. So we get ahead of it.' },
+    { who: 'calder', text: 'Loose fittings secured. Shielded ballasts on the lamps that matter. Battery packs where they\'re needed.', pose: 'gesture' },
+    { who: 'tech2', text: 'The lounge bar\'s the worst for loose glass. Last storm we were sweeping it up for a week.' },
+    { who: 'calder', text: 'Then the lounge goes first. And somebody takes battery packs up to the bridge before the front hits.' },
+    { who: 'calder', text: c => c.you + ', you\'re new to this. Anything you want to take on?', to: 'you' },
+    { choice: [
+      { text: 'I\'ll take the battery run to the bridge.', rel: { calder: 2 }, job: 'stormBatteries', reply: { who: 'calder', text: 'Good. The packs are in main storage. Mind the lift.', pose: 'nod' } },
+      { text: 'I can do the lounge.', rel: { calder: 1, tech2: 1 }, job: 'stormLounge', reply: { who: 'tech2', text: 'I\'ll show you where the bar keeps the good glasses.', pose: 'nod' } },
+      { text: '(Say nothing)', reply: { who: 'calder', text: 'Fine. The board\'s there when you want it.' } },
+    ] },
+    { who: 'calder', text: 'Right. Storm jobs are on the board. Off you go.', pose: 'gesture' },
+  ],
+};
+MEETING_SCRIPTS.captainAllClear = {
+  title: 'The all-clear', from: 'Commander Teo Vance',
+  gist: c => 'Notes from the observation room: the storm passed at 09:40. ' + SHIP_EVENTS.ionStorm.debrief[c.band] + ' Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.',
+  lines: [
+    { who: 'marrow', text: 'Dr. Sato?' },
+    { who: 'sato', text: 'The front passed us at 09:40. Readings are back to background. It\'s over.' },
+    { who: 'marrow', text: c => ({ smooth: 'Then let\'s say so. That went about as well as a storm can.', bumpy: 'Then let\'s say so. Not our smoothest two days, but nobody got hurt.',
+      rough: 'Then let\'s say so. That was a hard one, and the ship shows it.' })[c.band], pose: 'nod' },
+    { who: 'calder', text: c => ({ smooth: 'The lights only went a few times. The prep paid off.', bumpy: 'We lost a relay on the bridge. I\'ll have it patched by the end of the week.',
+      rough: 'The relay room\'s a mess. We\'ll be patching for a week.' })[c.band] },
+    { who: 'holt', text: 'Watch reports no injuries. Some short tempers. Mine included.' },
+    { who: 'marrow', text: c => c.mine.jobs ? 'And I\'m told our newest Works hand did their share. Thank you, ' + c.you + '.' : 'Comms are back. Expect a queue at the booths.', to: c => c.mine.jobs ? 'you' : null },
+    { choice: [
+      { text: 'It was good to be useful.', rel: { marrow: 1, calder: 1 }, reply: { who: 'marrow', text: 'It always is. Remember that on the dull days.', pose: 'nod' } },
+      { text: 'Is there a party?', rel: { vance: 1 }, reply: { who: 'vance', text: 'Bow lounge, 19:00. The Captain insists.', pose: 'gesture' } },
+      { text: '(Just nod)' },
+    ] },
+    { who: 'marrow', text: 'Right. I\'ll tell the ship.', pose: 'gesture' },
+  ],
+};
+
+// ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
+function upcomingTraditions(fromMin, toMin) {
+  const out = [], S = schedData();
+  for (let d = Math.floor(fromMin / 1440) + 1; d <= Math.floor(toMin / 1440) + 1; d++) for (const e of eventsOn(d)) {
+    const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
+    const w = e.ev.where[0], pl = (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [])[0];
+    const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
+    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck });
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+
 var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
@@ -10642,6 +11449,15 @@ function relAdd(id, why, pts) {
 function affinity(a, b) {
   socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
   return i === undefined || j === undefined || i === j ? 0 : SHIP.aff[pairIdx(i, j)];
+}
+// what section 14 plans with (seating by friendship): pure, so a day planned early or again after a reload comes out
+// the same. For now the pair's starting affinity (affStart: roster data and a seed only); d is kept for later
+const AFF_PLAN = new Map();
+function affinityPlan(a, b, d) {
+  socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
+  if (i === undefined || j === undefined || i === j) return 0;
+  const k = pairIdx(i, j); if (!AFF_PLAN.has(k)) AFF_PLAN.set(k, affStart(SOC.crew[Math.min(i, j)], SOC.crew[Math.max(i, j)]));
+  return AFF_PLAN.get(k);
 }
 
 // ---- news ----
@@ -11536,7 +12352,9 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   // wrist; look: the head bends to it. A tray in the mess, a toolbox for the Works crew on a job, a datapad for officers.
   tray: { prop: 'tray', sx: -.36, ex: -1.2, sz: .14, lean: -.02 },
   toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
-  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 } };
+  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 },
+  // 0.27.13 (Pillar 3, C11): your own device, held in both hands at the chest and read, head down, standing or walking
+  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
 const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
@@ -11704,11 +12522,23 @@ const PROP_KIT = {
     part(p, GEO.box, '#c0392b', 0, -.23, .01, .1, .15, .34); part(p, GEO.box, '#8e2a20', 0, -.165, .01, .104, .03, .344);
     part(p, GEO.box, '#2b2f33', 0, -.105, .01, .03, .025, .17); for (const z of [-.06, .08]) part(p, GEO.box, '#2b2f33', 0, -.13, z, .02, .05, .02);
   },
+  device(p) {                                            // the player's handheld: a dark bezel, its screen glowing in the device's phosphor colour
+    part(p, GEO.box, '#1b1f24', -.03, -.1, .035, .17, .21, .02); part(p, GEO.box, devicePhosphor(), -.03, -.1, .046, .14, .15, .006);
+    part(p, GEO.box, '#e8a04c', .035, -.19, .046, .012, .012, .006);   // the power light
+  },
   datapad(p) {                                           // a datapad on the palm, its screen lit
     part(p, GEO.box, '#2b2f33', 0, -.1, .03, .14, .2, .015); part(p, GEO.box, '#7fd4e6', 0, -.1, .039, .12, .17, .006);
   },
   book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
 };
+// the device's screen colour: one shared value, the device skin's ink (section 19's DEVICE_SKIN.ink, else the CSS
+// --crt-ink on the page), else the Wren's cyan. Read when the prop is first built.
+function devicePhosphor() {
+  const v = typeof DEVICE_SKIN !== 'undefined' && DEVICE_SKIN && DEVICE_SKIN.ink || getComputedStyle(document.documentElement).getPropertyValue('--crt-ink').trim();
+  return /^#[0-9a-f]{6}$/i.test(v) ? v : '#6ff0dc';
+}
+const PROP_UNLIT = { device: true };                     // full rigs draw these props unlit, so the screen glows (still one mesh)
+let PROP_BASIC = null;
 const _propParts = {}, _propPacks = {}, _propGeos = {};
 function propParts(kind) {
   if (_propParts[kind]) return _propParts[kind];
@@ -11741,7 +12571,8 @@ function rigProps(o, key) {
   if (!o.bodyProps) { o.bodyProps = new THREE.Group(); o.bodyProps.scale.setScalar(1 / o.rig.spec.height); o.rig.root.add(o.bodyProps); }
   const at = [R_, L_, o.rig.chest, o.bodyProps];
   for (const [b, kind] of propList(key)) {
-    const m = new THREE.Mesh(propGeo(kind).clone(), CHAR_MAT); m.castShadow = m.receiveShadow = true;
+    const unlit = PROP_UNLIT[kind] && (PROP_BASIC || (PROP_BASIC = new THREE.MeshBasicMaterial({ vertexColors: true })));
+    const m = new THREE.Mesh(propGeo(kind).clone(), unlit || CHAR_MAT); m.castShadow = true; m.receiveShadow = !unlit;
     if (o.obj) m.userData.walker = o;                   // a Walker's prop taps as the Walker
     at[b].add(m); o.propMeshes.push(m);
   }
@@ -11935,6 +12766,7 @@ const crowd = {
   },
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
+    deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (SEAT_DEMO) SEAT_DEMO.tick(dt, t);
@@ -12081,6 +12913,48 @@ const machineFx = {
   },
 };
 
+// ---- seeing yourself use the device (0.27.13, Pillar 3 C11): when section 19's deviceOn('open'|'close', fn) exists,
+// opening the device sets player.deviceOut and the player raises it ('+device', HOLDS), closing puts it away. Hooked
+// on the first frame it's there, so nothing happens without it. Something already in your hands wins.
+let deviceHooked = false;
+function deviceHook() {
+  if (deviceHooked || typeof deviceOn !== 'function' || typeof player === 'undefined' || !player) return;
+  deviceHooked = true;
+  deviceOn('open', () => { player.deviceOut = true; }); deviceOn('close', () => { player.deviceOut = false; });
+}
+
+// ---- chatter bubbles (0.27.13, Pillar 3 C5, for section 20): bubbleSay(who, text, secs) shows a small speech bubble
+// over someone's head for a few seconds. who: a crowd handle, a FullPerson or a Walker (anything with pos or obj, and
+// h), or a point { x, y, z }. At most BUBBLE_MAX on screen (the oldest goes); a new line from the same person
+// replaces theirs. Plain DOM (no draw calls), placed each frame from the 3D position; hidden off screen, when zoomed far
+// out, or while bubbles.hidden (a dialogue panel). bubbleClear() removes them all. ----
+const BUBBLE_MAX = 2;
+const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(),
+  tick(dt) {
+    if (!this.list.length) return;
+    for (const b of this.list.slice()) {
+      b.t -= dt; if (b.t <= 0) { b.el.remove(); this.list.splice(this.list.indexOf(b), 1); continue; }
+      const w = b.who, p = w.pos || (w.obj && w.obj.position) || w, h = w.h || 1;
+      const seat = w.pos && w.pos.y >= .3 ? w.pos.y : 0;   // seated: above the head on the seat; standing: above a standing head
+      this.v.set(p.x, seat ? seat + 1.15 * h : (w.pos ? w.pos.y : w.obj ? w.obj.position.y : p.y || 0) + 2.0 * h, p.z).project(camera);
+      const vis = !this.hidden && this.v.z < 1 && Math.abs(this.v.x) < 1 && this.v.y < .95 && this.v.y > -1 && camera.zoom > .6;
+      b.el.style.display = vis ? '' : 'none';
+      if (vis) { b.el.style.left = ((this.v.x + 1) / 2 * innerWidth).toFixed(0) + 'px'; b.el.style.top = ((1 - this.v.y) / 2 * innerHeight).toFixed(0) + 'px'; b.el.style.opacity = Math.min(1, b.t * 2, (b.life - b.t) * 4).toFixed(2); }
+    }
+  },
+};
+function bubbleSay(who, text, secs = 4.5) {
+  if (!who || !text) return null;
+  if (!bubbles.el) { bubbles.el = document.createElement('div'); bubbles.el.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden'; document.body.appendChild(bubbles.el); }
+  for (const b of bubbles.list.filter(b => b.who === who)) { b.el.remove(); bubbles.list.splice(bubbles.list.indexOf(b), 1); }
+  while (bubbles.list.length >= BUBBLE_MAX) bubbles.list.shift().el.remove();
+  const el = document.createElement('div'); el.textContent = text;
+  el.style.cssText = 'position:absolute;transform:translate(-50%,-100%);max-width:min(220px,60vw);font-size:15px;line-height:1.3;padding:6px 10px;border-radius:12px;background:rgba(244,247,248,.94);color:#14202c;box-shadow:0 2px 6px rgba(0,0,0,.25);display:none';
+  bubbles.el.appendChild(el);
+  const b = { who, text, el, t: secs, life: secs }; bubbles.list.push(b); return b;
+}
+function bubbleClear() { for (const b of bubbles.list) b.el.remove(); bubbles.list.length = 0; }
+
 // ---- pose lineup: ?poses in the address starts you on Deck 3's promenade at 10:30, with one of the crew doing each
 // pose and activity in two rows, labelled, on stools and benches where they sit or lie. Like ?crowd, it never touches
 // your save. Without the flag none of this exists. ----
@@ -12088,7 +12962,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -12100,7 +12974,7 @@ const POSE_DEMO = (() => {
     let n = 0, m = 0;                                    // upright poses in two rows east of the lift; the two lying ones on benches to the west
     here = POSES.map(pose => {
       const { base, act } = parsePose(pose, 0), lie = base === 'lie', k = lie ? m++ : n++;
-      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 13) * 1.35, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 13 ? 9 : 12) + .5;
+      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 15) * 1.15, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 15 ? 9 : 12) + .5;
       const seated = base === 'sit' || act === 'row', lying = base === 'lie';
       const g = new THREE.Group(); g.position.set(x, 0, z); furn.add(g);
       if (lying) KIT.bench(g, { w: 1.6 }); else if (seated) { const st = new THREE.Group(); st.position.z = act === 'row' ? -.05 : 0; g.add(st); KIT.stool(st); }
@@ -12295,15 +13169,15 @@ const HABITS = {
   "stargazer": "Evenings in the Deck 2 observatory at the bow windows, on the observatory-night list."
 };
 const ROSTER = [
-  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "music", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542, "birthday": 335, "plate": {"rank": "Captain", "name": "Odile Marrow"}, "habitShifts": [{"add": "stargazer", "why": "Captain Marrow has started coming to observatory night, to see what the juniors see."}]},
-  {"id": "vance", "name": "Commander Teo Vance", "story": true, "rank": "xo", "dept": "command", "uniform": "command", "role": "Executive Officer", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-X", "work": {"deck": 1, "place": "work:command"}, "habits": ["workaholic", "gym-regular"], "traits": ["precise", "competitive", "loyal"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 1.08, "build": "average", "acc": []}, "bio": "By the book. Every page of it.", "life": ["Top of the rowing leaderboard in the gym, and taped the leaderboard there himself.", "Keeps the waiting list for the good records.", "Has two messages from home waiting."], "seed": 826440, "birthday": 179, "plate": {"rank": "Executive Officer", "name": "Teo Vance"}, "habitShifts": [{"add": "runner", "drop": "gym-regular", "why": "Commander Vance has moved from the rowing machine to the treadmills, to start a new leaderboard."}, {"drop": "workaholic", "why": "Commander Vance has started leaving the bridge on time, on the Counsellor's advice."}]},
-  {"id": "sato", "name": "Dr. Imra Sato", "story": true, "rank": "chief", "dept": "survey", "uniform": "survey", "role": "Head of Survey", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-V", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "tea-break"], "traits": ["brilliant", "absent-minded", "stubborn"], "looks": {"skin": 0, "hair": "long", "hairColor": "grey", "height": 0.94, "build": "slim", "acc": ["glasses"]}, "bio": "Head of Survey. Her lab, her rules, her terrible tea.", "life": ["Brews a tea nobody else will drink.", "Labels every sample in the specimen store in her own handwriting."], "seed": 8968, "birthday": 47, "plate": {"rank": "Department Chief", "name": "Dr. Imra Sato"}, "habitShifts": [{"add": "gardener", "why": "Dr. Sato has started growing sample plants in the garden, and tends them every evening."}]},
-  {"id": "holt", "name": "Chief Bram Holt", "story": true, "rank": "chief", "dept": "watch", "uniform": "watch", "role": "Head of Watch", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "2-T", "work": {"deck": 2, "place": "work:watch"}, "habits": ["early-riser", "late-diner"], "traits": ["suspicious", "dependable", "gruff"], "looks": {"skin": 2, "hair": "bald", "hairColor": "grey", "height": 1.05, "build": "broad", "acc": ["moustache"]}, "bio": "Head of Watch. Does not trust the Veyli, and says so.", "life": ["Asked for the cabin next door to the Envoy's.", "Only his deputy can make him laugh."], "seed": 682911, "birthday": 267, "plate": {"rank": "Department Chief", "name": "Bram Holt"}, "habitShifts": [{"add": "gym-regular", "why": "Chief Holt has started training in the gym after shift."}]},
-  {"id": "calder", "name": "Chief Ines Calder", "story": true, "rank": "chief", "dept": "works", "uniform": "works", "role": "Head of Works", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-O", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "workaholic", "tea-break"], "traits": ["exacting", "fair", "dry"], "looks": {"skin": 3, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["glasses"]}, "bio": "Head of Works. Remembers every repair you got wrong, and every one you got right.", "life": ["Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard.", "Keeps a battered toolbox that belonged to her first chief."], "seed": 211686, "birthday": 211, "plate": {"rank": "Department Chief", "name": "Ines Calder"}, "habitShifts": [{"drop": "tea-break", "why": "Chief Calder has given up her tea break: there's always one more job on the board."}]},
-  {"id": "pell", "name": "Pell Okafor", "story": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-2", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "tea-break", "gym-regular"], "traits": ["easygoing", "handy", "chatty"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": ["beard"]}, "bio": "Works, like you, and two years ahead. Can fix anything except his sleep schedule.", "life": ["Talks in his sleep, mostly about engines.", "Has three messages from his mum waiting."], "seed": 841867, "birthday": 331, "habitShifts": [{"add": "calls-home", "why": "Pell has started calling his mum back on rest days."}, {"drop": "late-sleeper", "why": "Pell is trying to get up on time, after one too many late starts in the Works bay."}]},
-  {"id": "rina", "name": "Rina Deshi", "story": true, "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-3", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["common-room", "calls-home"], "traits": ["dry humour", "steady", "competitive"], "looks": {"skin": 3, "hair": "curls", "hairColor": "black", "height": 0.95, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Dry humour, steady hands, undefeated at Tiles.", "life": ["Uses a stack of medical journals as a pillow.", "Has a message from her sister waiting.", "Undefeated at Tiles in the junior common room."], "seed": 104849, "birthday": 315, "habitShifts": [{"add": "stargazer", "why": "Rina has started going up to observatory night with Tomas."}]},
-  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5], "team": "chef"}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728, "birthday": 252, "plate": {"rank": "Officer", "name": "Chef Auda Brennan"}, "habitShifts": [{"add": "gardener", "why": "Chef Brennan has started picking her own herbs in the garden."}]},
-  {"id": "tomas", "name": "Tomas Lind", "story": true, "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B1-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["common-room", "window-seat", "stargazer"], "traits": ["earnest", "curious", "a little lost"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": []}, "bio": "New to Watch, and your bunkmate. Still learning where everything is.", "life": ["Taped a star map to the underside of the top bunk.", "Joined the Wren a week before you did."], "seed": 754367, "birthday": 105, "habitShifts": [{"add": "runner", "why": "Tomas has taken up running: Vance talked him into the treadmill."}]},
+  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "music", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542, "birthday": 335, "plate": {"rank": "Captain", "name": "Odile Marrow"}, "habitShifts": [{"add": "stargazer", "why": "Captain Marrow has started coming to observatory night, to see what the juniors see."}], "about": [{"tier": 0, "text": "Asks every new junior one question about the ship, and remembers the answer."}, {"tier": 1, "text": "Learnt the piano as a girl and took it up again on her first command."}, {"tier": 2, "text": "Has a daughter at the Concord academy who doesn't write often enough."}, {"tier": 3, "text": "Thinks about retiring, and can't imagine anyone else in the ready room."}]},
+  {"id": "vance", "name": "Commander Teo Vance", "story": true, "rank": "xo", "dept": "command", "uniform": "command", "role": "Executive Officer", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-X", "work": {"deck": 1, "place": "work:command"}, "habits": ["workaholic", "gym-regular"], "traits": ["precise", "competitive", "loyal"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 1.08, "build": "average", "acc": []}, "bio": "By the book. Every page of it.", "life": ["Top of the rowing leaderboard in the gym, and taped the leaderboard there himself.", "Keeps the waiting list for the good records.", "Has two messages from home waiting."], "seed": 826440, "birthday": 179, "plate": {"rank": "Executive Officer", "name": "Teo Vance"}, "habitShifts": [{"add": "runner", "drop": "gym-regular", "why": "Commander Vance has moved from the rowing machine to the treadmills, to start a new leaderboard."}, {"drop": "workaholic", "why": "Commander Vance has started leaving the bridge on time, on the Counsellor's advice."}], "about": [{"tier": 0, "text": "Has read the ship's regulations cover to cover, twice."}, {"tier": 1, "text": "Rowed for his academy, and still checks the gym leaderboard every morning."}, {"tier": 2, "text": "Keeps a list of every junior he has recommended for promotion."}, {"tier": 3, "text": "Was a junior who broke every rule once, which is why he knows them all."}]},
+  {"id": "sato", "name": "Dr. Imra Sato", "story": true, "rank": "chief", "dept": "survey", "uniform": "survey", "role": "Head of Survey", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-V", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "tea-break"], "traits": ["brilliant", "absent-minded", "stubborn"], "looks": {"skin": 0, "hair": "long", "hairColor": "grey", "height": 0.94, "build": "slim", "acc": ["glasses"]}, "bio": "Head of Survey. Her lab, her rules, her terrible tea.", "life": ["Brews a tea nobody else will drink.", "Labels every sample in the specimen store in her own handwriting."], "seed": 8968, "birthday": 47, "plate": {"rank": "Department Chief", "name": "Dr. Imra Sato"}, "habitShifts": [{"add": "gardener", "why": "Dr. Sato has started growing sample plants in the garden, and tends them every evening."}], "about": [{"tier": 0, "text": "Will explain the tea to anyone, at length."}, {"tier": 1, "text": "Named three comets, and pretends not to care about the third."}, {"tier": 2, "text": "Turned down a university post to stay on the frontier."}, {"tier": 3, "text": "Worries the survey she is proudest of was mostly luck."}]},
+  {"id": "holt", "name": "Chief Bram Holt", "story": true, "rank": "chief", "dept": "watch", "uniform": "watch", "role": "Head of Watch", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "2-T", "work": {"deck": 2, "place": "work:watch"}, "habits": ["early-riser", "late-diner"], "traits": ["suspicious", "dependable", "gruff"], "looks": {"skin": 2, "hair": "bald", "hairColor": "grey", "height": 1.05, "build": "broad", "acc": ["moustache"]}, "bio": "Head of Watch. Does not trust the Veyli, and says so.", "life": ["Asked for the cabin next door to the Envoy's.", "Only his deputy can make him laugh."], "seed": 682911, "birthday": 267, "plate": {"rank": "Department Chief", "name": "Bram Holt"}, "habitShifts": [{"add": "gym-regular", "why": "Chief Holt has started training in the gym after shift."}], "about": [{"tier": 0, "text": "Walks every deck before breakfast, the long way."}, {"tier": 1, "text": "Served on a border patrol before the Wren, and doesn't talk about it much."}, {"tier": 2, "text": "Distrusts the Veyli because of one bad day years ago, and knows it isn't fair."}, {"tier": 3, "text": "Asked for the cabin next to the Envoy's so he could keep an eye out, and has started to like the Envoy."}]},
+  {"id": "calder", "name": "Chief Ines Calder", "story": true, "rank": "chief", "dept": "works", "uniform": "works", "role": "Head of Works", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-O", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "workaholic", "tea-break"], "traits": ["exacting", "fair", "dry"], "looks": {"skin": 3, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["glasses"]}, "bio": "Head of Works. Remembers every repair you got wrong, and every one you got right.", "life": ["Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard.", "Keeps a battered toolbox that belonged to her first chief."], "seed": 211686, "birthday": 211, "plate": {"rank": "Department Chief", "name": "Ines Calder"}, "habitShifts": [{"drop": "tea-break", "why": "Chief Calder has given up her tea break: there's always one more job on the board."}], "about": [{"tier": 0, "text": "Can tell you what's wrong with a fan by the sound."}, {"tier": 1, "text": "Started as a junior in a shipyard, sweeping up swarf."}, {"tier": 2, "text": "Keeps a list of every Works tech she has certified, with a note on each."}, {"tier": 3, "text": "The toolbox was her first chief's, who taught her everything and never said well done."}]},
+  {"id": "pell", "name": "Pell Okafor", "story": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-2", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "tea-break", "gym-regular"], "traits": ["easygoing", "handy", "chatty"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": ["beard"]}, "bio": "Works, like you, and two years ahead. Can fix anything except his sleep schedule.", "life": ["Talks in his sleep, mostly about engines.", "Has three messages from his mum waiting."], "seed": 841867, "birthday": 331, "habitShifts": [{"add": "calls-home", "why": "Pell has started calling his mum back on rest days."}, {"drop": "late-sleeper", "why": "Pell is trying to get up on time, after one too many late starts in the Works bay."}], "about": [{"tier": 0, "text": "Has been in Works two years, and knows which panel on Deck 5 sticks."}, {"tier": 0, "text": "Can sleep anywhere, any time, except at night."}, {"tier": 1, "text": "Keeps a tin of spare screws from every ship he has fixed something on."}, {"tier": 1, "text": "His mum sends the same three messages every week: eat, sleep, call."}, {"tier": 2, "text": "Wants Chief Calder's certification more than anything, and is scared of the practical."}, {"tier": 2, "text": "Taught himself engines from an old manual he found in a scrapyard."}, {"tier": 3, "text": "Nearly left the Wren in his first month, and is glad every day that he didn't."}]},
+  {"id": "rina", "name": "Rina Deshi", "story": true, "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-3", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["common-room", "calls-home"], "traits": ["dry humour", "steady", "competitive"], "looks": {"skin": 3, "hair": "curls", "hairColor": "black", "height": 0.95, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Dry humour, steady hands, undefeated at Tiles.", "life": ["Uses a stack of medical journals as a pillow.", "Has a message from her sister waiting.", "Undefeated at Tiles in the junior common room."], "seed": 104849, "birthday": 315, "habitShifts": [{"add": "stargazer", "why": "Rina has started going up to observatory night with Tomas."}], "about": [{"tier": 0, "text": "Works in the infirmary, and will tell you to drink some water."}, {"tier": 0, "text": "Has never lost a game of Tiles in the junior common room, and keeps count."}, {"tier": 1, "text": "Studies for her medical exams at night, with the journals she uses as a pillow."}, {"tier": 1, "text": "Her sister is a doctor on a station, and they argue about everything by message."}, {"tier": 2, "text": "Wants to be a ship's doctor one day, and quietly thinks she'd be good at it."}, {"tier": 2, "text": "Learnt to play Tiles from her grandmother, who cheated."}, {"tier": 3, "text": "Joined the Wren after a hard year at home, and the routine helped more than she expected."}]},
+  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5], "team": "chef"}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728, "birthday": 252, "plate": {"rank": "Officer", "name": "Chef Auda Brennan"}, "habitShifts": [{"add": "gardener", "why": "Chef Brennan has started picking her own herbs in the garden."}], "about": [{"tier": 0, "text": "Cooks by ear: she listens to the pans."}, {"tier": 1, "text": "Ran a restaurant on Port Halloran before the Wren."}, {"tier": 2, "text": "Keeps a book of every crew member's favourite dish."}, {"tier": 3, "text": "Left the restaurant after a fire, and finds the galley's order comforting."}]},
+  {"id": "tomas", "name": "Tomas Lind", "story": true, "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B1-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["common-room", "window-seat", "stargazer"], "traits": ["earnest", "curious", "a little lost"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": []}, "bio": "New to Watch, and your bunkmate. Still learning where everything is.", "life": ["Taped a star map to the underside of the top bunk.", "Joined the Wren a week before you did."], "seed": 754367, "birthday": 105, "habitShifts": [{"add": "runner", "why": "Tomas has taken up running: Vance talked him into the treadmill."}], "about": [{"tier": 0, "text": "Joined the Wren a week before you did, and still takes the long way round Deck 2."}, {"tier": 0, "text": "Thinks the Watch office has the best view of the lift, and therefore of everyone."}, {"tier": 1, "text": "Grew up on a farm moon where the sky was always the same grey."}, {"tier": 1, "text": "Taped the star map up so the first thing he sees each morning is somewhere he has never been."}, {"tier": 2, "text": "Failed the Watch exam once before passing, and hasn't told Chief Holt."}, {"tier": 2, "text": "Writes to his little brother every week and pretends the job is more exciting than it is."}, {"tier": 3, "text": "Signed up because he was afraid of staying home for the rest of his life."}]},
   {"id": "nandakumar", "name": "Dr. Priya Nandakumar", "rank": "chief", "dept": "infirmary", "uniform": "infirmary", "role": "Head of Infirmary", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-I", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["early-riser", "garden-lover", "gardener"], "traits": ["calm", "brisk", "kind"], "looks": {"skin": 4, "hair": "long", "hairColor": "black", "height": 0.97, "build": "slim", "acc": ["glasses", "earrings"]}, "bio": "Head of Infirmary. Says \"drink some water\" in a way that ends the argument.", "life": ["Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3.", "Grows chillies in a corner of the garden."], "seed": 779824, "birthday": 54, "plate": {"rank": "Department Chief", "name": "Dr. Priya Nandakumar"}, "habitShifts": [{"add": "runner", "why": "Dr. Nandakumar has started running before breakfast, and recommends it to everyone."}]},
   {"id": "kowalczyk", "name": "Anja Kowalczyk", "rank": "senior", "dept": "command", "uniform": "command", "role": "Second Officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "2-S", "work": {"deck": 1, "place": "work:command"}, "habits": ["night-owl", "quiet-corner"], "traits": ["steady", "private", "wry"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "brown", "height": 1.04, "build": "average", "acc": []}, "bio": "Second Officer. Runs the bridge at night, when the ship is hers.", "life": ["Third in command, and first to be woken.", "Reads old paper novels on the bridge during quiet nights."], "seed": 876932, "birthday": 241, "plate": {"rank": "Senior Officer", "name": "Anja Kowalczyk"}, "habitShifts": [{"add": "stargazer", "why": "Anja Kowalczyk has started spending evenings off in the observatory."}]},
   {"id": "raman", "name": "Dev Raman", "rank": "senior", "dept": "helm", "uniform": "command", "role": "Senior Helm Officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "2-H", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "window-seat"], "traits": ["careful", "proud", "gentle"], "looks": {"skin": 3, "hair": "short", "hairColor": "black", "height": 1.06, "build": "slim", "acc": ["moustache"]}, "bio": "Senior Helm Officer. Flies the Wren like it might spill.", "life": ["Keeps a model of the Wren on the shelf by his door.", "Has flown survey ships for twenty years."], "seed": 958213, "birthday": 126, "plate": {"rank": "Senior Officer", "name": "Dev Raman"}, "habitShifts": [{"add": "musician", "why": "Dev Raman has started playing an old guitar in the music room."}]},
@@ -12371,9 +13245,73 @@ const ROSTER = [
   {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2], "team": "early", "cover": {"for": "brennan", "days": [4, 5]}}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406, "birthday": 123, "habitShifts": [{"add": "quiet-corner", "why": "Lukas has been looking for quiet corners lately."}]},
 ];
 const ROSTER_GUESTS = [
-  {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695, "birthday": 287, "plate": {"rank": "Veyli Envoy", "name": "Saruth"}, "habitShifts": [{"add": "gardener", "why": "Envoy Saruth has asked for a corner of the garden, and tends Veyli seedlings there."}]},
+  {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695, "birthday": 287, "plate": {"rank": "Veyli Envoy", "name": "Saruth"}, "habitShifts": [{"add": "gardener", "why": "Envoy Saruth has asked for a corner of the garden, and tends Veyli seedlings there."}], "about": [{"tier": 0, "text": "Takes tea at the same hour every day, and will sometimes invite you."}, {"tier": 1, "text": "Ties a new knot in the cord on the cabin door for every month aboard."}, {"tier": 2, "text": "Finds humans exhausting and very kind, often at once."}, {"tier": 3, "text": "Was sent to the Wren because no one at home expected the posting to work."}]},
 ];
 const ROSTER_PLAYER = {"id": "you", "name": "You", "player": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician (you)", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-4", "work": {"deck": 5, "place": "work:works"}, "habits": [], "traits": [], "looks": {"skin": 2, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}, "bio": "New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.", "life": [], "seed": 554340, "birthday": 50};
+// visitors (Pillar 3, C8): inert data; the sim engineer schedules them, the events engineer sets event guests' days
+const GUEST_TEMPLATES = {"scientist": {"label": "A visiting scientist or specialist: works by day, the observatory or the lounge in the evening", "day": [["work", 6], [2, "work:survey", 2]], "evening": [[2, "observatory", 3], [3, "lounge-seat", 2], [3, "bar", 1], ["cabin", 2]], "meals": "mess", "wake": 390, "bed": 1350}, "delegate": {"label": "A member of a delegation: tours, formal dinners (the event decides), the observation room, their cabin", "day": [["cabin", 3], [1, "common-room", 2], [3, "garden", 2], [2, "observatory", 1]], "evening": [["cabin", 3], [3, "lounge-seat", 1]], "meals": "mess", "formal": true, "wake": 360, "bed": 1320}, "passenger": {"label": "A passenger or a transfer waiting for their ship: the lounge, the mess, the garden, the store", "day": [[3, "lounge-seat", 3], [3, "garden", 2], [3, "shop", 1], [3, "bench", 1], ["cabin", 1]], "evening": [[3, "lounge-seat", 3], [3, "bar", 2], [2, "observatory", 1], ["cabin", 1]], "meals": "mess", "wake": 450, "bed": 1380}, "survivor": {"label": "Rescued: the infirmary for the first days, then rest, the garden and the mess", "first": 2, "firstDay": [[3, "work:infirmary", 1]], "day": [["cabin", 3], [3, "garden", 2], [3, "lounge-seat", 1]], "evening": [["cabin", 3], [3, "lounge-seat", 1]], "meals": "mess", "wake": 480, "bed": 1260}};
+const GUESTS = [
+  {"id": "teshavi", "name": "Speaker Teshavi", "rank": "guest", "dept": "guest", "uniform": null, "role": "Leader of the Veyli delegation", "template": "delegate", "cabin": "2-U", "event": "diplomatic", "stay": 5, "arrive": null, "leave": null, "work": null, "habits": ["quiet-corner", "early-riser"], "bio": "Speaks for the Veyli council. Patient, precise, and fond of long silences.", "life": ["Has known Envoy Saruth since they were both students of the cord.", "Brought a gift for the Captain wrapped in seven knots."], "seed": 44956, "spec": {"name": "Speaker Teshavi", "dept": "civilian", "rank": 0, "bio": "Speaks for the Veyli council. Patient, precise, and fond of long silences.", "outfit": "#6b4a8a", "skin": 3, "hair": "bun", "hairColor": "grey", "height": 1.12, "build": "slim", "acc": ["headband"]}},
+  {"id": "kesrin", "name": "Kesrin", "rank": "guest", "dept": "guest", "uniform": null, "role": "Aide to the Speaker", "template": "delegate", "cabin": "4-01", "event": "diplomatic", "stay": 5, "arrive": null, "leave": null, "work": null, "habits": ["window-seat"], "bio": "Carries the Speaker's schedule in their head and their tea set in a satchel.", "life": ["Is secretly delighted by the vending machine on Deck 3.", "Writes everything down, including the jokes."], "seed": 659145, "spec": {"name": "Kesrin", "dept": "civilian", "rank": 0, "bio": "Carries the Speaker's schedule in their head and their tea set in a satchel.", "outfit": "#6b4a8a", "skin": 1, "hair": "bun", "hairColor": "grey", "height": 1.06, "build": "slim", "acc": ["headband"]}},
+  {"id": "moleth", "name": "Moleth", "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli scholar", "template": "delegate", "cabin": "4-02", "event": "diplomatic", "stay": 5, "arrive": null, "leave": null, "work": null, "habits": ["garden-lover", "stargazer"], "bio": "Studies human ships, and asks the crew questions nobody has asked before.", "life": ["Wants to see the engine room more than anything.", "Has a list of forty questions for Chief Calder."], "seed": 691981, "spec": {"name": "Moleth", "dept": "civilian", "rank": 0, "bio": "Studies human ships, and asks the crew questions nobody has asked before.", "outfit": "#7a5a3a", "skin": 3, "hair": "long", "hairColor": "teal", "height": 1.05, "build": "slim", "acc": ["headband"]}},
+  {"id": "ithra", "name": "Ithra", "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli pilot and guard", "template": "delegate", "cabin": "4-03", "event": "diplomatic", "stay": 5, "arrive": null, "leave": null, "work": null, "habits": ["early-riser", "runner"], "bio": "Flies the delegation's shuttle and watches every door. Says very little.", "life": ["Has asked Chief Holt about the Watch rota, twice.", "Runs laps of the plaza at dawn."], "seed": 238876, "spec": {"name": "Ithra", "dept": "civilian", "rank": 0, "bio": "Flies the delegation's shuttle and watches every door. Says very little.", "outfit": "#3a4a5a", "skin": 3, "hair": "ponytail", "hairColor": "teal", "height": 1.08, "build": "slim", "acc": ["headband"]}},
+  {"id": "lindgren", "name": "Dr. Soraya Lindgren", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting astrophysicist", "template": "scientist", "cabin": "4-04", "event": "nebula", "stay": 6, "arrive": null, "leave": null, "work": {"deck": 2, "place": "work:survey"}, "habits": ["stargazer", "night-owl"], "bio": "Chases nebulae across the frontier, and has finally caught one.", "life": ["Gives a talk in the observation room before she leaves.", "Lives on tea and star charts."], "seed": 887890, "spec": {"name": "Dr. Soraya Lindgren", "dept": "survey", "rank": 0, "bio": "Chases nebulae across the frontier, and has finally caught one.", "outfit": null, "skin": 2, "hair": "buzz", "hairColor": "blonde", "height": 0.92, "build": "broad", "acc": ["beard"]}},
+  {"id": "taavek", "name": "Taavek", "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli engineer", "template": "scientist", "cabin": "4-04", "event": "veyliVessel", "stay": 3, "arrive": null, "leave": null, "work": {"deck": 5, "place": "work:works"}, "habits": ["workaholic"], "bio": "Came aboard with a crate of parts and no common words for most of them.", "life": ["Sketches every machine in the Works bay.", "Trades Veyli sweets for coffee."], "seed": 193659, "spec": {"name": "Taavek", "dept": "civilian", "rank": 0, "bio": "Came aboard with a crate of parts and no common words for most of them.", "outfit": "#3a4a5a", "skin": 2, "hair": "long", "hairColor": "white", "height": 1.07, "build": "slim", "acc": ["headband"]}},
+  {"id": "quill", "name": "Mara Quill", "rank": "guest", "dept": "guest", "uniform": null, "role": "Survivor from the derelict", "template": "survivor", "cabin": "4-01", "event": "salvage", "stay": 7, "arrive": null, "leave": null, "work": null, "habits": ["early-riser"], "bio": "Was the derelict's cook. Has not stopped thanking people.", "life": ["Wants to help in the galley as soon as Dr. Nandakumar lets her.", "Lost everything but a photo of a dog."], "seed": 700206, "spec": {"name": "Mara Quill", "dept": "civilian", "rank": 0, "bio": "Was the derelict's cook. Has not stopped thanking people.", "outfit": "#8a8f9a", "skin": 2, "hair": "ponytail", "hairColor": "blonde", "height": 0.95, "build": "average", "acc": ["glasses", "moustache"]}},
+  {"id": "petrie", "name": "Jonah Petrie", "rank": "guest", "dept": "guest", "uniform": null, "role": "Survivor from the derelict", "template": "survivor", "cabin": "4-02", "event": "salvage", "stay": 7, "arrive": null, "leave": null, "work": null, "habits": ["window-seat", "night-owl"], "bio": "Was the derelict's navigator. Quiet, and watches the stars from any window.", "life": ["Keeps asking what day it is.", "Is good at cards, and better at losing on purpose."], "seed": 857976, "spec": {"name": "Jonah Petrie", "dept": "civilian", "rank": 0, "bio": "Was the derelict's navigator. Quiet, and watches the stars from any window.", "outfit": "#8a8f9a", "skin": 4, "hair": "ponytail", "hairColor": "grey", "height": 0.9, "build": "average", "acc": ["earrings"]}},
+  {"id": "v-jaramillo-ulla", "name": "Ulla Jaramillo", "rank": "guest", "dept": "guest", "uniform": null, "role": "Musician on tour", "template": "passenger", "cabin": "4-07", "arrive": 5, "leave": 9, "work": null, "habits": ["stargazer", "calls-home"], "bio": "Plays the stations of the frontier, one lounge at a time.", "life": ["Can play anything you hum."], "seed": 141712, "spec": {"name": "Ulla Jaramillo", "dept": "civilian", "rank": 0, "bio": "Plays the stations of the frontier, one lounge at a time.", "outfit": "#7a6a5a", "skin": 2, "hair": "bun", "hairColor": "dark", "height": 1.03, "build": "average", "acc": ["earrings"]}},
+  {"id": "v-wexley-hale", "name": "Hale Wexley", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Transfer to Marra Station", "template": "passenger", "cabin": "4-08", "arrive": 9, "leave": 11, "work": null, "habits": ["window-seat", "early-riser"], "bio": "Between postings, and itching for something to fix.", "life": ["Offers to help in the Works bay every morning."], "seed": 45015, "spec": {"name": "Hale Wexley", "dept": "works", "rank": 0, "bio": "Between postings, and itching for something to fix.", "outfit": null, "skin": 4, "hair": "short", "hairColor": "brown", "height": 0.98, "build": "average", "acc": []}},
+  {"id": "v-nash-odo", "name": "Odo Nash", "rank": "guest", "dept": "guest", "uniform": null, "role": "Musician on tour", "template": "passenger", "cabin": "4-07", "arrive": 17, "leave": 22, "work": null, "habits": ["garden-lover", "bar-regular"], "bio": "A travelling musician on the way to the next station.", "life": ["Can play anything you hum."], "seed": 658127, "spec": {"name": "Odo Nash", "dept": "civilian", "rank": 0, "bio": "A travelling musician on the way to the next station.", "outfit": "#5a6a7a", "skin": 0, "hair": "buzz", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}},
+  {"id": "v-xu-yuki", "name": "Yuki Xu", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-08", "arrive": 25, "leave": 32, "work": {"deck": 2, "place": "work:survey"}, "habits": ["early-riser", "night-owl"], "bio": "Draws the charts other ships fly by.", "life": ["Is trying to map the Wren's corridors by memory."], "seed": 595523, "spec": {"name": "Yuki Xu", "dept": "survey", "rank": 0, "bio": "Draws the charts other ships fly by.", "outfit": null, "skin": 5, "hair": "ponytail", "hairColor": "blonde", "height": 0.91, "build": "average", "acc": ["beard", "earrings"]}},
+  {"id": "v-varela-edda", "name": "Edda Varela", "rank": "guest", "dept": "guest", "uniform": null, "role": "Trader's apprentice", "template": "passenger", "cabin": "4-07", "arrive": 31, "leave": 33, "work": null, "habits": ["bar-regular", "calls-home"], "bio": "Travels with a case of samples and a big smile.", "life": ["Has already sold two kettles."], "seed": 942169, "spec": {"name": "Edda Varela", "dept": "civilian", "rank": 0, "bio": "Travels with a case of samples and a big smile.", "outfit": "#5a6a7a", "skin": 2, "hair": "short", "hairColor": "dark", "height": 0.9, "build": "average", "acc": []}},
+  {"id": "v-orme-ronan", "name": "Ronan Orme", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting botanist", "template": "scientist", "cabin": "4-08", "arrive": 38, "leave": 44, "work": {"deck": 2, "place": "work:survey"}, "habits": ["shopper", "bar-regular"], "bio": "Studies plants grown in space, and has opinions about the garden.", "life": ["Talks to the tomatoes."], "seed": 885749, "spec": {"name": "Ronan Orme", "dept": "survey", "rank": 0, "bio": "Studies plants grown in space, and has opinions about the garden.", "outfit": null, "skin": 1, "hair": "short", "hairColor": "teal", "height": 1.06, "build": "slim", "acc": ["glasses"]}},
+  {"id": "v-bjork-ines", "name": "Ines Bjork", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting astronomer", "template": "scientist", "cabin": "4-07", "arrive": 47, "leave": 52, "work": {"deck": 2, "place": "work:survey"}, "habits": ["calls-home", "night-owl"], "bio": "Here to borrow the observatory for a week of measurements.", "life": ["Has a habit of naming stars after cafes."], "seed": 981163, "spec": {"name": "Ines Bjork", "dept": "survey", "rank": 0, "bio": "Here to borrow the observatory for a week of measurements.", "outfit": null, "skin": 0, "hair": "short", "hairColor": "black", "height": 0.92, "build": "broad", "acc": []}},
+  {"id": "v-mbatha-zora", "name": "Zora Mbatha", "rank": "guest", "dept": "guest", "uniform": null, "role": "Musician on tour", "template": "passenger", "cabin": "4-08", "arrive": 56, "leave": 61, "work": null, "habits": ["garden-lover", "night-owl"], "bio": "A travelling musician on the way to the next station.", "life": ["Plays in the music room every evening."], "seed": 369297, "spec": {"name": "Zora Mbatha", "dept": "civilian", "rank": 0, "bio": "A travelling musician on the way to the next station.", "outfit": "#6a7a5a", "skin": 4, "hair": "curls", "hairColor": "auburn", "height": 1.08, "build": "average", "acc": ["beard"]}},
+  {"id": "v-yarrow-ulla", "name": "Ulla Yarrow", "rank": "guest", "dept": "guest", "uniform": null, "role": "Concord courier", "template": "passenger", "cabin": "4-07", "arrive": 59, "leave": 61, "work": null, "habits": ["shopper", "stargazer"], "bio": "A courier with a locked case and a tired face.", "life": ["Sleeps with the case."], "seed": 723947, "spec": {"name": "Ulla Yarrow", "dept": "civilian", "rank": 0, "bio": "A courier with a locked case and a tired face.", "outfit": "#5a6a7a", "skin": 0, "hair": "short", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}},
+  {"id": "v-brandt-esra", "name": "Esra Brandt", "rank": "guest", "dept": "guest", "uniform": null, "role": "Concord courier", "template": "passenger", "cabin": "4-07", "arrive": 69, "leave": 71, "work": null, "habits": ["lounge-regular", "night-owl"], "bio": "Carries sealed pouches between ships, and says nothing about them.", "life": ["Sleeps with the case."], "seed": 462263, "spec": {"name": "Esra Brandt", "dept": "civilian", "rank": 0, "bio": "Carries sealed pouches between ships, and says nothing about them.", "outfit": "#7a5a6a", "skin": 3, "hair": "curls", "hairColor": "dark", "height": 1.03, "build": "slim", "acc": ["glasses"]}},
+  {"id": "v-thorne-kaito", "name": "Kaito Thorne", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-08", "arrive": 76, "leave": 81, "work": {"deck": 2, "place": "work:survey"}, "habits": ["garden-lover", "bar-regular"], "bio": "On loan from the Concord charts office.", "life": ["Is trying to map the Wren's corridors by memory."], "seed": 623688, "spec": {"name": "Kaito Thorne", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 2, "hair": "long", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["headband"]}},
+  {"id": "v-lindahl-milo", "name": "Milo Lindahl", "rank": "guest", "dept": "guest", "uniform": null, "role": "Trader's apprentice", "template": "passenger", "cabin": "4-07", "arrive": 82, "leave": 85, "work": null, "habits": ["shopper", "garden-lover"], "bio": "Learning the trade, and trying to sell everyone a better kettle.", "life": ["Has already sold two kettles."], "seed": 344351, "spec": {"name": "Milo Lindahl", "dept": "civilian", "rank": 0, "bio": "Learning the trade, and trying to sell everyone a better kettle.", "outfit": "#5a5a5a", "skin": 5, "hair": "long", "hairColor": "auburn", "height": 0.99, "build": "average", "acc": []}},
+  {"id": "v-lowe-adaeze", "name": "Adaeze Lowe", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Transfer to Marra Station", "template": "passenger", "cabin": "4-08", "arrive": 87, "leave": 92, "work": null, "habits": ["window-seat", "stargazer"], "bio": "Between postings, and itching for something to fix.", "life": ["Offers to help in the Works bay every morning."], "seed": 156482, "spec": {"name": "Adaeze Lowe", "dept": "works", "rank": 0, "bio": "Between postings, and itching for something to fix.", "outfit": null, "skin": 2, "hair": "buzz", "hairColor": "grey", "height": 1.01, "build": "average", "acc": ["moustache"]}},
+  {"id": "v-pacheco-ines", "name": "Ines Pacheco", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Concord hull inspector", "template": "scientist", "cabin": "4-07", "arrive": 95, "leave": 101, "work": {"deck": 5, "place": "work:works"}, "habits": ["stargazer", "calls-home"], "bio": "Inspects survey ships for the Concord, clipboard first.", "life": ["Collects mission patches."], "seed": 982911, "spec": {"name": "Ines Pacheco", "dept": "works", "rank": 0, "bio": "Inspects survey ships for the Concord, clipboard first.", "outfit": null, "skin": 2, "hair": "ponytail", "hairColor": "brown", "height": 1.03, "build": "average", "acc": ["earrings", "headband"]}},
+  {"id": "v-saarinen-teo", "name": "Teo Saarinen", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting astronomer", "template": "scientist", "cabin": "4-08", "arrive": 101, "leave": 106, "work": {"deck": 2, "place": "work:survey"}, "habits": ["window-seat", "calls-home"], "bio": "Brought a telescope lens the size of a dinner plate.", "life": ["Has a habit of naming stars after cafes."], "seed": 726877, "spec": {"name": "Teo Saarinen", "dept": "survey", "rank": 0, "bio": "Brought a telescope lens the size of a dinner plate.", "outfit": null, "skin": 4, "hair": "buzz", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["earrings"]}},
+  {"id": "v-quinlan-yuki", "name": "Yuki Quinlan", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-07", "arrive": 109, "leave": 114, "work": {"deck": 2, "place": "work:survey"}, "habits": ["bar-regular", "window-seat"], "bio": "Draws the charts other ships fly by.", "life": ["Carries a pencil behind each ear."], "seed": 296221, "spec": {"name": "Yuki Quinlan", "dept": "survey", "rank": 0, "bio": "Draws the charts other ships fly by.", "outfit": null, "skin": 0, "hair": "short", "hairColor": "grey", "height": 0.95, "build": "average", "acc": ["glasses"]}},
+  {"id": "v-tamura-keira", "name": "Keira Tamura", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting botanist", "template": "scientist", "cabin": "4-08", "arrive": 116, "leave": 121, "work": {"deck": 2, "place": "work:survey"}, "habits": ["calls-home", "stargazer"], "bio": "Here to test new seeds in the garden.", "life": ["Brought cuttings from a Kesh orchard."], "seed": 158269, "spec": {"name": "Keira Tamura", "dept": "survey", "rank": 0, "bio": "Here to test new seeds in the garden.", "outfit": null, "skin": 1, "hair": "curls", "hairColor": "blonde", "height": 1.03, "build": "average", "acc": ["beard", "earrings"]}},
+  {"id": "v-kalnins-zora", "name": "Zora Kalnins", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-07", "arrive": 125, "leave": 130, "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "stargazer"], "bio": "Draws the charts other ships fly by.", "life": ["Carries a pencil behind each ear."], "seed": 756711, "spec": {"name": "Zora Kalnins", "dept": "survey", "rank": 0, "bio": "Draws the charts other ships fly by.", "outfit": null, "skin": 1, "hair": "long", "hairColor": "dark", "height": 0.9, "build": "slim", "acc": ["beard", "earrings"]}},
+  {"id": "v-delacroix-teo", "name": "Teo Delacroix", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-08", "arrive": 127, "leave": 135, "work": {"deck": 2, "place": "work:survey"}, "habits": ["stargazer", "garden-lover"], "bio": "On loan from the Concord charts office.", "life": ["Is trying to map the Wren's corridors by memory."], "seed": 918571, "spec": {"name": "Teo Delacroix", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 3, "hair": "ponytail", "hairColor": "auburn", "height": 1.06, "build": "average", "acc": ["beard", "earrings"]}},
+  {"id": "v-ferro-rhea", "name": "Rhea Ferro", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-07", "arrive": 140, "leave": 146, "work": {"deck": 2, "place": "work:survey"}, "habits": ["lounge-regular", "stargazer"], "bio": "On loan from the Concord charts office.", "life": ["Is trying to map the Wren's corridors by memory."], "seed": 422145, "spec": {"name": "Rhea Ferro", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 2, "hair": "long", "hairColor": "black", "height": 0.95, "build": "broad", "acc": []}},
+  {"id": "v-upton-iver", "name": "Iver Upton", "rank": "guest", "dept": "guest", "uniform": null, "role": "Retired captain", "template": "passenger", "cabin": "4-08", "arrive": 142, "leave": 148, "work": null, "habits": ["window-seat", "calls-home"], "bio": "Commanded a freighter for thirty years, and is on the way home.", "life": ["Gives Captain Marrow advice she never asked for."], "seed": 45764, "spec": {"name": "Iver Upton", "dept": "civilian", "rank": 0, "bio": "Commanded a freighter for thirty years, and is on the way home.", "outfit": "#5a6a7a", "skin": 1, "hair": "buzz", "hairColor": "grey", "height": 1.06, "build": "broad", "acc": ["earrings", "headband"]}},
+  {"id": "v-ekwueme-celeste", "name": "Celeste Ekwueme", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-07", "arrive": 148, "leave": 156, "work": {"deck": 2, "place": "work:survey"}, "habits": ["garden-lover", "early-riser"], "bio": "Draws the charts other ships fly by.", "life": ["Carries a pencil behind each ear."], "seed": 591059, "spec": {"name": "Celeste Ekwueme", "dept": "survey", "rank": 0, "bio": "Draws the charts other ships fly by.", "outfit": null, "skin": 0, "hair": "short", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["glasses", "moustache"]}},
+  {"id": "v-mercer-aleksi", "name": "Aleksi Mercer", "rank": "guest", "dept": "guest", "uniform": null, "role": "Retired captain", "template": "passenger", "cabin": "4-08", "arrive": 161, "leave": 167, "work": null, "habits": ["early-riser", "night-owl"], "bio": "A retired captain hitching a ride to see family.", "life": ["Gives Captain Marrow advice she never asked for."], "seed": 293951, "spec": {"name": "Aleksi Mercer", "dept": "civilian", "rank": 0, "bio": "A retired captain hitching a ride to see family.", "outfit": "#6a7a5a", "skin": 1, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "broad", "acc": ["beard", "headband"]}},
+  {"id": "v-kessler-lio", "name": "Lio Kessler", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Student on placement", "template": "passenger", "cabin": "4-07", "arrive": 162, "leave": 168, "work": null, "habits": ["bar-regular", "night-owl"], "bio": "Here to learn how a survey ship works.", "life": ["Asks the juniors for advice."], "seed": 288399, "spec": {"name": "Lio Kessler", "dept": "survey", "rank": 0, "bio": "Here to learn how a survey ship works.", "outfit": null, "skin": 0, "hair": "curls", "hairColor": "grey", "height": 0.95, "build": "broad", "acc": ["glasses"]}},
+  {"id": "v-ellery-teo", "name": "Teo Ellery", "rank": "guest", "dept": "guest", "uniform": null, "role": "Trader's apprentice", "template": "passenger", "cabin": "4-08", "arrive": 175, "leave": 178, "work": null, "habits": ["garden-lover", "shopper"], "bio": "Learning the trade, and trying to sell everyone a better kettle.", "life": ["Has already sold two kettles."], "seed": 889093, "spec": {"name": "Teo Ellery", "dept": "civilian", "rank": 0, "bio": "Learning the trade, and trying to sell everyone a better kettle.", "outfit": "#7a5a6a", "skin": 0, "hair": "buzz", "hairColor": "brown", "height": 1.09, "build": "slim", "acc": []}},
+  {"id": "v-rocha-dilan", "name": "Dilan Rocha", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-07", "arrive": 176, "leave": 181, "work": {"deck": 2, "place": "work:survey"}, "habits": ["stargazer", "window-seat"], "bio": "On loan from the Concord charts office.", "life": ["Carries a pencil behind each ear."], "seed": 160949, "spec": {"name": "Dilan Rocha", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 0, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["beard"]}},
+  {"id": "v-aalto-talia", "name": "Talia Aalto", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-08", "arrive": 189, "leave": 196, "work": {"deck": 2, "place": "work:survey"}, "habits": ["shopper", "lounge-regular"], "bio": "On loan from the Concord charts office.", "life": ["Carries a pencil behind each ear."], "seed": 438025, "spec": {"name": "Talia Aalto", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 1, "hair": "short", "hairColor": "dark", "height": 1.04, "build": "average", "acc": []}},
+  {"id": "v-gunn-kaito", "name": "Kaito Gunn", "rank": "guest", "dept": "guest", "uniform": "infirmary", "role": "Relief doctor", "template": "scientist", "cabin": "4-07", "arrive": 196, "leave": 203, "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["shopper", "early-riser"], "bio": "Covers the infirmary on rotation between ships.", "life": ["Has worked on eleven ships and remembers every galley."], "seed": 603440, "spec": {"name": "Kaito Gunn", "dept": "infirmary", "rank": 0, "bio": "Covers the infirmary on rotation between ships.", "outfit": null, "skin": 0, "hair": "ponytail", "hairColor": "auburn", "height": 0.99, "build": "average", "acc": []}},
+  {"id": "v-dunmore-rhea", "name": "Rhea Dunmore", "rank": "guest", "dept": "guest", "uniform": null, "role": "Musician on tour", "template": "passenger", "cabin": "4-08", "arrive": 197, "leave": 200, "work": null, "habits": ["early-riser", "bar-regular"], "bio": "Plays the stations of the frontier, one lounge at a time.", "life": ["Can play anything you hum."], "seed": 955504, "spec": {"name": "Rhea Dunmore", "dept": "civilian", "rank": 0, "bio": "Plays the stations of the frontier, one lounge at a time.", "outfit": "#5a5a5a", "skin": 0, "hair": "short", "hairColor": "grey", "height": 0.98, "build": "average", "acc": []}},
+  {"id": "v-grimaldi-iver", "name": "Iver Grimaldi", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting botanist", "template": "scientist", "cabin": "4-08", "arrive": 206, "leave": 213, "work": {"deck": 2, "place": "work:survey"}, "habits": ["shopper", "early-riser"], "bio": "Here to test new seeds in the garden.", "life": ["Talks to the tomatoes."], "seed": 175405, "spec": {"name": "Iver Grimaldi", "dept": "survey", "rank": 0, "bio": "Here to test new seeds in the garden.", "outfit": null, "skin": 3, "hair": "long", "hairColor": "grey", "height": 1.01, "build": "broad", "acc": ["beard", "earrings"]}},
+  {"id": "v-abbas-nyla", "name": "Nyla Abbas", "rank": "guest", "dept": "guest", "uniform": "infirmary", "role": "Relief doctor", "template": "scientist", "cabin": "4-07", "arrive": 213, "leave": 219, "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["garden-lover", "bar-regular"], "bio": "A doctor on rotation, here to give Dr. Nandakumar a few days off.", "life": ["Has worked on eleven ships and remembers every galley."], "seed": 333283, "spec": {"name": "Nyla Abbas", "dept": "infirmary", "rank": 0, "bio": "A doctor on rotation, here to give Dr. Nandakumar a few days off.", "outfit": null, "skin": 0, "hair": "bun", "hairColor": "teal", "height": 1.01, "build": "average", "acc": []}},
+  {"id": "v-marsh-kaito", "name": "Kaito Marsh", "rank": "guest", "dept": "guest", "uniform": "infirmary", "role": "Relief doctor", "template": "scientist", "cabin": "4-08", "arrive": 222, "leave": 228, "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["bar-regular", "calls-home"], "bio": "A doctor on rotation, here to give Dr. Nandakumar a few days off.", "life": ["Has worked on eleven ships and remembers every galley."], "seed": 342926, "spec": {"name": "Kaito Marsh", "dept": "infirmary", "rank": 0, "bio": "A doctor on rotation, here to give Dr. Nandakumar a few days off.", "outfit": null, "skin": 2, "hair": "short", "hairColor": "auburn", "height": 0.91, "build": "broad", "acc": []}},
+  {"id": "v-szabo-rhea", "name": "Rhea Szabo", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Student on placement", "template": "passenger", "cabin": "4-07", "arrive": 230, "leave": 234, "work": null, "habits": ["garden-lover", "shopper"], "bio": "Here to learn how a survey ship works.", "life": ["Keeps a notebook of everyone's names."], "seed": 273716, "spec": {"name": "Rhea Szabo", "dept": "survey", "rank": 0, "bio": "Here to learn how a survey ship works.", "outfit": null, "skin": 1, "hair": "curls", "hairColor": "dark", "height": 1.05, "build": "average", "acc": ["beard"]}},
+  {"id": "v-holm-kaito", "name": "Kaito Holm", "rank": "guest", "dept": "guest", "uniform": null, "role": "Trader's apprentice", "template": "passenger", "cabin": "4-08", "arrive": 234, "leave": 237, "work": null, "habits": ["early-riser", "lounge-regular"], "bio": "Learning the trade, and trying to sell everyone a better kettle.", "life": ["Misses home and calls every night."], "seed": 153181, "spec": {"name": "Kaito Holm", "dept": "civilian", "rank": 0, "bio": "Learning the trade, and trying to sell everyone a better kettle.", "outfit": "#5a5a5a", "skin": 1, "hair": "short", "hairColor": "grey", "height": 0.97, "build": "broad", "acc": []}},
+  {"id": "v-sandoval-milo", "name": "Milo Sandoval", "rank": "guest", "dept": "guest", "uniform": null, "role": "Concord courier", "template": "passenger", "cabin": "4-07", "arrive": 243, "leave": 245, "work": null, "habits": ["stargazer", "early-riser"], "bio": "Carries sealed pouches between ships, and says nothing about them.", "life": ["Sleeps with the case."], "seed": 171635, "spec": {"name": "Milo Sandoval", "dept": "civilian", "rank": 0, "bio": "Carries sealed pouches between ships, and says nothing about them.", "outfit": "#7a5a6a", "skin": 3, "hair": "short", "hairColor": "black", "height": 0.93, "build": "broad", "acc": ["earrings", "headband"]}},
+  {"id": "v-valdez-cato", "name": "Cato Valdez", "rank": "guest", "dept": "guest", "uniform": null, "role": "Musician on tour", "template": "passenger", "cabin": "4-08", "arrive": 247, "leave": 252, "work": null, "habits": ["calls-home", "early-riser"], "bio": "Plays the stations of the frontier, one lounge at a time.", "life": ["Plays in the music room every evening."], "seed": 400147, "spec": {"name": "Cato Valdez", "dept": "civilian", "rank": 0, "bio": "Plays the stations of the frontier, one lounge at a time.", "outfit": "#6a7a5a", "skin": 2, "hair": "buzz", "hairColor": "blonde", "height": 0.9, "build": "slim", "acc": ["headband"]}},
+  {"id": "v-whitlock-lio", "name": "Lio Whitlock", "rank": "guest", "dept": "guest", "uniform": "infirmary", "role": "Relief doctor", "template": "scientist", "cabin": "4-07", "arrive": 258, "leave": 265, "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["early-riser", "lounge-regular"], "bio": "Covers the infirmary on rotation between ships.", "life": ["Has worked on eleven ships and remembers every galley."], "seed": 882977, "spec": {"name": "Lio Whitlock", "dept": "infirmary", "rank": 0, "bio": "Covers the infirmary on rotation between ships.", "outfit": null, "skin": 0, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": []}},
+  {"id": "v-corwin-elio", "name": "Elio Corwin", "rank": "guest", "dept": "guest", "uniform": null, "role": "Concord courier", "template": "passenger", "cabin": "4-08", "arrive": 261, "leave": 263, "work": null, "habits": ["lounge-regular", "calls-home"], "bio": "A courier with a locked case and a tired face.", "life": ["Sleeps with the case."], "seed": 642380, "spec": {"name": "Elio Corwin", "dept": "civilian", "rank": 0, "bio": "A courier with a locked case and a tired face.", "outfit": "#5a5a5a", "skin": 2, "hair": "ponytail", "hairColor": "teal", "height": 0.99, "build": "average", "acc": ["glasses", "moustache"]}},
+  {"id": "v-baptiste-bastian", "name": "Bastian Baptiste", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting botanist", "template": "scientist", "cabin": "4-08", "arrive": 271, "leave": 278, "work": {"deck": 2, "place": "work:survey"}, "habits": ["window-seat", "lounge-regular"], "bio": "Here to test new seeds in the garden.", "life": ["Talks to the tomatoes."], "seed": 422815, "spec": {"name": "Bastian Baptiste", "dept": "survey", "rank": 0, "bio": "Here to test new seeds in the garden.", "outfit": null, "skin": 3, "hair": "long", "hairColor": "blonde", "height": 0.99, "build": "broad", "acc": []}},
+  {"id": "v-royce-juno", "name": "Juno Royce", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Transfer to Marra Station", "template": "passenger", "cabin": "4-07", "arrive": 277, "leave": 279, "work": null, "habits": ["lounge-regular", "window-seat"], "bio": "Between postings, and itching for something to fix.", "life": ["Offers to help in the Works bay every morning."], "seed": 895364, "spec": {"name": "Juno Royce", "dept": "works", "rank": 0, "bio": "Between postings, and itching for something to fix.", "outfit": null, "skin": 0, "hair": "curls", "hairColor": "brown", "height": 1.03, "build": "slim", "acc": ["glasses"]}},
+  {"id": "v-oyelaran-teo", "name": "Teo Oyelaran", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Survey cartographer", "template": "scientist", "cabin": "4-08", "arrive": 284, "leave": 290, "work": {"deck": 2, "place": "work:survey"}, "habits": ["garden-lover", "early-riser"], "bio": "On loan from the Concord charts office.", "life": ["Carries a pencil behind each ear."], "seed": 977450, "spec": {"name": "Teo Oyelaran", "dept": "survey", "rank": 0, "bio": "On loan from the Concord charts office.", "outfit": null, "skin": 2, "hair": "short", "hairColor": "teal", "height": 0.9, "build": "broad", "acc": ["beard", "headband"]}},
+  {"id": "v-hovland-talia", "name": "Talia Hovland", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Transfer to Marra Station", "template": "passenger", "cabin": "4-07", "arrive": 293, "leave": 295, "work": null, "habits": ["calls-home", "early-riser"], "bio": "Between postings, and itching for something to fix.", "life": ["Has never seen a nebula."], "seed": 60632, "spec": {"name": "Talia Hovland", "dept": "works", "rank": 0, "bio": "Between postings, and itching for something to fix.", "outfit": null, "skin": 1, "hair": "curls", "hairColor": "blonde", "height": 0.92, "build": "broad", "acc": []}},
+  {"id": "v-faraday-wilf", "name": "Wilf Faraday", "rank": "guest", "dept": "guest", "uniform": "survey", "role": "Visiting botanist", "template": "scientist", "cabin": "4-08", "arrive": 296, "leave": 304, "work": {"deck": 2, "place": "work:survey"}, "habits": ["garden-lover", "window-seat"], "bio": "Here to test new seeds in the garden.", "life": ["Brought cuttings from a Kesh orchard."], "seed": 5895, "spec": {"name": "Wilf Faraday", "dept": "survey", "rank": 0, "bio": "Here to test new seeds in the garden.", "outfit": null, "skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "average", "acc": ["headband"]}},
+  {"id": "v-ingram-ayla", "name": "Ayla Ingram", "rank": "guest", "dept": "guest", "uniform": null, "role": "Retired captain", "template": "passenger", "cabin": "4-07", "arrive": 304, "leave": 308, "work": null, "habits": ["bar-regular", "early-riser"], "bio": "Commanded a freighter for thirty years, and is on the way home.", "life": ["Tells stories in the lounge until late."], "seed": 980221, "spec": {"name": "Ayla Ingram", "dept": "civilian", "rank": 0, "bio": "Commanded a freighter for thirty years, and is on the way home.", "outfit": "#5a6a7a", "skin": 3, "hair": "long", "hairColor": "brown", "height": 1.01, "build": "slim", "acc": []}},
+  {"id": "v-fairweather-alba", "name": "Alba Fairweather", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Transfer to Marra Station", "template": "passenger", "cabin": "4-08", "arrive": 310, "leave": 313, "work": null, "habits": ["garden-lover", "night-owl"], "bio": "Between postings, and itching for something to fix.", "life": ["Offers to help in the Works bay every morning."], "seed": 393101, "spec": {"name": "Alba Fairweather", "dept": "works", "rank": 0, "bio": "Between postings, and itching for something to fix.", "outfit": null, "skin": 3, "hair": "curls", "hairColor": "dark", "height": 0.96, "build": "average", "acc": []}},
+  {"id": "v-iwasaki-amir", "name": "Amir Iwasaki", "rank": "guest", "dept": "guest", "uniform": null, "role": "Retired captain", "template": "passenger", "cabin": "4-07", "arrive": 321, "leave": 327, "work": null, "habits": ["calls-home", "shopper"], "bio": "A retired captain hitching a ride to see family.", "life": ["Tells stories in the lounge until late."], "seed": 351572, "spec": {"name": "Amir Iwasaki", "dept": "civilian", "rank": 0, "bio": "A retired captain hitching a ride to see family.", "outfit": "#7a6a5a", "skin": 0, "hair": "bun", "hairColor": "brown", "height": 1.08, "build": "average", "acc": ["moustache"]}},
+  {"id": "v-danek-kaito", "name": "Kaito Danek", "rank": "guest", "dept": "guest", "uniform": null, "role": "Concord courier", "template": "passenger", "cabin": "4-08", "arrive": 327, "leave": 329, "work": null, "habits": ["bar-regular", "garden-lover"], "bio": "Carries sealed pouches between ships, and says nothing about them.", "life": ["Sleeps with the case."], "seed": 894186, "spec": {"name": "Kaito Danek", "dept": "civilian", "rank": 0, "bio": "Carries sealed pouches between ships, and says nothing about them.", "outfit": "#7a5a6a", "skin": 1, "hair": "bun", "hairColor": "black", "height": 0.91, "build": "average", "acc": []}},
+  {"id": "v-ashby-dario", "name": "Dario Ashby", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Chef on exchange", "template": "passenger", "cabin": "4-07", "arrive": 331, "leave": 335, "work": null, "habits": ["stargazer", "garden-lover"], "bio": "Swapping recipes with the galley for a few days.", "life": ["Brennan let them near the ovens once."], "seed": 871046, "spec": {"name": "Dario Ashby", "dept": "works", "rank": 0, "bio": "Swapping recipes with the galley for a few days.", "outfit": null, "skin": 2, "hair": "long", "hairColor": "blonde", "height": 1.07, "build": "broad", "acc": ["earrings", "headband"]}},
+  {"id": "v-calloway-mads", "name": "Mads Calloway", "rank": "guest", "dept": "guest", "uniform": null, "role": "Retired captain", "template": "passenger", "cabin": "4-08", "arrive": 340, "leave": 344, "work": null, "habits": ["garden-lover", "shopper"], "bio": "A retired captain hitching a ride to see family.", "life": ["Gives Captain Marrow advice she never asked for."], "seed": 472006, "spec": {"name": "Mads Calloway", "dept": "civilian", "rank": 0, "bio": "A retired captain hitching a ride to see family.", "outfit": "#6a7a5a", "skin": 0, "hair": "bun", "hairColor": "brown", "height": 1.05, "build": "broad", "acc": []}},
+  {"id": "v-adeyemi-gael", "name": "Gael Adeyemi", "rank": "guest", "dept": "guest", "uniform": null, "role": "Trader's apprentice", "template": "passenger", "cabin": "4-07", "arrive": 347, "leave": 350, "work": null, "habits": ["shopper", "lounge-regular"], "bio": "Travels with a case of samples and a big smile.", "life": ["Misses home and calls every night."], "seed": 280520, "spec": {"name": "Gael Adeyemi", "dept": "civilian", "rank": 0, "bio": "Travels with a case of samples and a big smile.", "outfit": "#8a7a5a", "skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.07, "build": "average", "acc": ["earrings", "headband"]}},
+  {"id": "v-hadley-wilf", "name": "Wilf Hadley", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Chef on exchange", "template": "passenger", "cabin": "4-08", "arrive": 351, "leave": 354, "work": null, "habits": ["stargazer", "lounge-regular"], "bio": "A chef from Port Halloran, here to trade recipes with Brennan.", "life": ["Brought spices nobody can pronounce."], "seed": 520873, "spec": {"name": "Wilf Hadley", "dept": "works", "rank": 0, "bio": "A chef from Port Halloran, here to trade recipes with Brennan.", "outfit": null, "skin": 5, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}},
+  {"id": "v-kirby-cato", "name": "Cato Kirby", "rank": "guest", "dept": "guest", "uniform": "works", "role": "Concord hull inspector", "template": "scientist", "cabin": "4-07", "arrive": 359, "leave": 364, "work": {"deck": 5, "place": "work:works"}, "habits": ["night-owl", "calls-home"], "bio": "Knocks on bulkheads and listens.", "life": ["Says the Wren is the tidiest ship this quarter, and means it."], "seed": 785411, "spec": {"name": "Cato Kirby", "dept": "works", "rank": 0, "bio": "Knocks on bulkheads and listens.", "outfit": null, "skin": 1, "hair": "bun", "hairColor": "dark", "height": 1.07, "build": "slim", "acc": ["earrings"]}},
+];
 // ---- END ROSTER ----
 // a roster entry as makeCharacter takes it
 const ROSTER_RANK = { junior: 0, officer: 1, senior: 1, chief: 2, xo: 3, captain: 4, guest: 0 };
@@ -12503,7 +13441,7 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined || this.crouch !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
+    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
@@ -12746,6 +13684,9 @@ function crewNearDoor(d) {
   for (const a of DECK_CREW) {
     if (a.settled || Math.abs(a.x - d.cx) > r || Math.abs(a.z - d.cz) > r || Math.hypot(a.x - d.cx, a.z - d.cz) > r) continue;
     if (d.passable || d.rooms.some(rm => a.rooms.has(rm))) return true;
+  }
+  if (d.e.type === 'closed' && d.rooms.some(rm => doorOpenFor(rm, 'player'))) {   // an invitation or summons: the door opens for you
+    const p = player.obj.position; if (Math.hypot(p.x - d.cx, p.z - d.cz) < r) return true;
   }
   return false;
 }
