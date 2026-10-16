@@ -96,6 +96,8 @@ with sync_playwright() as pw:
     check(not s['act'] and s['visible'], 'walking away stops it')
 
     print('== the job board and the goal pointer')
+    # the first tips (C13): a stand-in tipShow records which fire, when the build has none of its own (the device's, 19)
+    g.ev("if (typeof tipShow === 'undefined') window.tipShow = (id, text) => { (window.__tips = window.__tips || []).push(id); return true; }")
     g.ev("goToDeck(5)"); g.step(3)
     r = tap('Job board'); g.step(150); s = st()
     check(r is True and s['board'], 'tapping the job board opens the list')
@@ -110,14 +112,22 @@ with sync_playwright() as pw:
     check(rows >= 1, f'the board lists jobs ({rows})')
     took = g.ev("ixBoard.take('ixtest@1')"); g.step(3); s = st()
     check(took and g.ev("(myJob() || {}).id") == 'ixtest@1' and not s['board'], 'Take it: the job is yours and the board closes')
+    g.step(2); check(g.ev("player.holding") == 'toolbox', f'a repair job: a toolbox in hand ({g.ev("player.holding")!r})')
     print('   goal:', s['goal'])
     check(s['goal'] and 'storage' in s['goal'], f'the pointer: fetch from main storage ({s["goal"]})')
+    check(g.ev("SHIP.player.track") == 'ixtest@1', f'taking a job tracks it ({g.ev("SHIP.player.track")})')
+    g.ev("SHIP.player.track = null"); g.step(3); s = st()
+    check(s['goal'] is None, f'tracking switched off (the device): no job arrow ({s["goal"]})')
+    sv = g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return s.player.track; })()")
+    check(sv is None and g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return 'track' in s.player; })()"), 'the save keeps tracking off')
+    g.ev("SHIP.player.track = myJob().id"); g.step(3); s = st()
     g.ev("goToDeck(4)"); g.step(3); s = st()
     check(s['goal'] and s['goal'].startswith('Take the lift to Deck 5'), f'another deck: take the lift ({s["goal"]})')
     g.ev("SHIP.player.carry = [" + json.dumps(job[1]) + "]"); g.step(40); s = st()
     check(s['goal'] and s['goal'].startswith('Take the lift to Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
     g.ev("goToDeck(3)"); g.step(3); s = st()
     check(s['goal'] and s['goal'].startswith('Repair the'), f'on its deck: repair it ({s["goal"]})')
+    g.ev("(() => { const m = machineById(myJob().machine), sp = placeSpot(panelPlace(m.id)); player.obj.position.copy(cellPos(...sp.walk)); player.stop(); })()"); g.step(45)
     # off screen: an arrow; on screen: the marker
     g.ev("setGoal({ deck: 3, at: [0, 0], label: 'Far corner' })"); g.step(2); s = st()
     check(s['goal'] == 'Far corner', 'setGoal overrides the job\'s goal')
@@ -179,6 +189,9 @@ with sync_playwright() as pw:
                 s = walk_stop(step); g.step(3); s = st()
                 done = g.ev(f"jobStops(myJob() || {{}}).map(x => !!x.done)") if g.ev("!!myJob()") else []
                 check(len(done) > i and done[i], f'{kind} {step}: marked done ({done}, {s["toast"][:80]})')
+                hold = g.ev("player.holding")
+                want = ('carry' if kind == 'delivery' and step == 'pickup' else None if kind == 'delivery' else True if g.ev("SHIP.player.carry.length") else 'toolbox') if i < len(stops) - 1 else False
+                if want is not None: check(hold == want, f'{kind} after {step}: in hand {hold!r}, want {want!r}')
             s = st()
             check(g.ev("!!(myJob() && myJob().workDone)") and s['goal'] and 'turn it in' in s['goal'].lower(), f'{kind}: work done, the pointer says turn it in ({s["goal"]})')
             check(not g.ev("SHIP.player.carry.length"), f'{kind}: the parts were used')
@@ -201,6 +214,10 @@ with sync_playwright() as pw:
             const r = ixTap(it, at.clone(), at.clone()); actEnd(true); if (r) out.push(deckDef.num + ' ' + it.t); }
           return out; })()""")
     check(not over, f'no tap near a real machine is ours ({over[:5]})')
+    tips = g.ev("window.__tips || null")
+    if tips is not None:
+        print('   tips fired:', tips)
+        check(all(t in tips for t in ['board', 'taken', 'machine', 'turnin']), f'the four job-loop tips fire (board, taken, machine, turn in): {tips}')
     print('   draw-call peak while doing things:', peak)
     check(peak < BUDGET, f'draw calls under {BUDGET} ({peak})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')

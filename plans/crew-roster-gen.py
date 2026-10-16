@@ -330,60 +330,61 @@ def looks():
                 height=round(R.uniform(.9, 1.1), 2), build=R.choice(['slim', 'average', 'average', 'broad']),
                 acc=sorted(R.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], R.choice([0, 0, 1, 1, 2]))))
 
-# ---------------------------------------------------------------- what the story crew tell you (0.16.8, Pillar 3)
-# about: [{ tier, text }]: things a story crew member tells you as you get to know them, for the social engineer's
-# chat lines and the Crew app's "what you know". tier 0 is small talk with a stranger, then 1, 2, 3 as you get closer.
-# Third person, one sentence each; they add to the bio and life lines and never contradict them
+# ---------------------------------------------------------------- what the story crew tell you (0.16.8-0.16.9, Pillar 3)
+# about: [{ tier, topic, text }]: things a story crew member tells you as you get to know them, for the social engineer's
+# chat lines ("Ask about...") and the Crew app's "what you know". tier is section 20's relationship tier (0 stranger,
+# 1 acquaintance, 2 colleague, 3 friend, 4 close friend, kept for a real confidence); topic is home, work, hobby, past or
+# secret. Third person, one sentence each; they add to the bio and life lines and never contradict them
 ABOUT = {
-    'tomas': [(0, 'Joined the Wren a week before you did, and still takes the long way round Deck 2.'),
-              (0, 'Thinks the Watch office has the best view of the lift, and therefore of everyone.'),
-              (1, 'Grew up on a farm moon where the sky was always the same grey.'),
-              (1, 'Taped the star map up so the first thing he sees each morning is somewhere he has never been.'),
-              (2, 'Failed the Watch exam once before passing, and hasn\'t told Chief Holt.'),
-              (2, 'Writes to his little brother every week and pretends the job is more exciting than it is.'),
-              (3, 'Signed up because he was afraid of staying home for the rest of his life.')],
-    'pell': [(0, 'Has been in Works two years, and knows which panel on Deck 5 sticks.'),
-             (0, 'Can sleep anywhere, any time, except at night.'),
-             (1, 'Keeps a tin of spare screws from every ship he has fixed something on.'),
-             (1, 'His mum sends the same three messages every week: eat, sleep, call.'),
-             (2, 'Wants Chief Calder\'s certification more than anything, and is scared of the practical.'),
-             (2, 'Taught himself engines from an old manual he found in a scrapyard.'),
-             (3, 'Nearly left the Wren in his first month, and is glad every day that he didn\'t.')],
-    'rina': [(0, 'Works in the infirmary, and will tell you to drink some water.'),
-             (0, 'Has never lost a game of Tiles in the junior common room, and keeps count.'),
-             (1, 'Studies for her medical exams at night, with the journals she uses as a pillow.'),
-             (1, 'Her sister is a doctor on a station, and they argue about everything by message.'),
-             (2, 'Wants to be a ship\'s doctor one day, and quietly thinks she\'d be good at it.'),
-             (2, 'Learnt to play Tiles from her grandmother, who cheated.'),
-             (3, 'Joined the Wren after a hard year at home, and the routine helped more than she expected.')],
-    'marrow': [(0, 'Asks every new junior one question about the ship, and remembers the answer.'),
-               (1, 'Learnt the piano as a girl and took it up again on her first command.'),
-               (2, 'Has a daughter at the Concord academy who doesn\'t write often enough.'),
-               (3, 'Thinks about retiring, and can\'t imagine anyone else in the ready room.')],
-    'vance': [(0, 'Has read the ship\'s regulations cover to cover, twice.'),
-              (1, 'Rowed for his academy, and still checks the gym leaderboard every morning.'),
-              (2, 'Keeps a list of every junior he has recommended for promotion.'),
-              (3, 'Was a junior who broke every rule once, which is why he knows them all.')],
-    'sato': [(0, 'Will explain the tea to anyone, at length.'),
-             (1, 'Named three comets, and pretends not to care about the third.'),
-             (2, 'Turned down a university post to stay on the frontier.'),
-             (3, 'Worries the survey she is proudest of was mostly luck.')],
-    'holt': [(0, 'Walks every deck before breakfast, the long way.'),
-             (1, 'Served on a border patrol before the Wren, and doesn\'t talk about it much.'),
-             (2, 'Distrusts the Veyli because of one bad day years ago, and knows it isn\'t fair.'),
-             (3, 'Asked for the cabin next to the Envoy\'s so he could keep an eye out, and has started to like the Envoy.')],
-    'calder': [(0, 'Can tell you what\'s wrong with a fan by the sound.'),
-               (1, 'Started as a junior in a shipyard, sweeping up swarf.'),
-               (2, 'Keeps a list of every Works tech she has certified, with a note on each.'),
-               (3, 'The toolbox was her first chief\'s, who taught her everything and never said well done.')],
-    'brennan': [(0, 'Cooks by ear: she listens to the pans.'),
-                (1, 'Ran a restaurant on Port Halloran before the Wren.'),
-                (2, 'Keeps a book of every crew member\'s favourite dish.'),
-                (3, 'Left the restaurant after a fire, and finds the galley\'s order comforting.')],
-    'saruth': [(0, 'Takes tea at the same hour every day, and will sometimes invite you.'),
-               (1, 'Ties a new knot in the cord on the cabin door for every month aboard.'),
-               (2, 'Finds humans exhausting and very kind, often at once.'),
-               (3, 'Was sent to the Wren because no one at home expected the posting to work.')],
+    'tomas': [(0, 'work', 'Joined the Wren a week before you did, and still takes the long way round Deck 2.'),
+              (0, 'work', 'Thinks the Watch office has the best view of the lift, and therefore of everyone.'),
+              (1, 'home', 'Grew up on a farm moon where the sky was always the same grey.'),
+              (1, 'hobby', 'Taped the star map up so the first thing he sees each morning is somewhere he has never been.'),
+              (2, 'work', 'Failed the Watch exam once before passing, and hasn\'t told Chief Holt.'),
+              (3, 'home', 'Writes to his little brother every week and pretends the job is more exciting than it is.'),
+              (4, 'secret', 'Signed up because he was afraid of staying home for the rest of his life.')],
+    'pell': [(0, 'work', 'Has been in Works two years, and knows which panel on Deck 5 sticks.'),
+             (0, 'hobby', 'Can sleep anywhere, any time, except at night.'),
+             (1, 'hobby', 'Keeps a tin of spare screws from every ship he has fixed something on.'),
+             (1, 'home', 'His mum sends the same three messages every week: eat, sleep, call.'),
+             (2, 'work', 'Wants Chief Calder\'s certification more than anything, and is scared of the practical.'),
+             (3, 'past', 'Taught himself engines from an old manual he found in a scrapyard.'),
+             (4, 'secret', 'Nearly left the Wren in his first month, and is glad every day that he didn\'t.')],
+    'rina': [(0, 'work', 'Works in the infirmary, and will tell you to drink some water.'),
+             (0, 'hobby', 'Has never lost a game of Tiles in the junior common room, and keeps count.'),
+             (1, 'work', 'Studies for her medical exams in the evenings, with the journals she uses as a pillow.'),
+             (1, 'home', 'Her sister is a doctor on a station, and they argue about everything by message.'),
+             (2, 'work', 'Wants to be a ship\'s doctor one day, and quietly thinks she\'d be good at it.'),
+             (3, 'past', 'Learnt to play Tiles from her grandmother, who cheated.'),
+             (4, 'secret', 'Joined the Wren after a hard year at home, and the routine helped more than she expected.')],
+    'marrow': [(0, 'work', 'Asks every new junior one question about the ship, and remembers the answer.'),
+               (1, 'hobby', 'Learnt the piano as a girl and took it up again on her first command.'),
+               (3, 'home', 'Has a daughter at the Concord academy who doesn\'t write often enough.'),
+               (4, 'secret', 'Thinks about retiring, and can\'t imagine anyone else in the ready room.')],
+    'vance': [(0, 'work', 'Has read the ship\'s regulations cover to cover, twice.'),
+              (1, 'hobby', 'Rowed for his academy, and still checks the gym leaderboard every morning.'),
+              (2, 'work', 'Keeps a list of every junior he has recommended for promotion.'),
+              (4, 'past', 'Was a junior who broke every rule once, which is why he knows them all.')],
+    'sato': [(0, 'hobby', 'Will explain the tea to anyone, at length.'),
+             (1, 'work', 'Named three comets, and pretends not to care about the third.'),
+             (2, 'past', 'Turned down a university post to stay on the frontier.'),
+             (4, 'secret', 'Worries the survey she is proudest of was mostly luck.')],
+    'holt': [(0, 'work', 'Walks every deck before breakfast, the long way.'),
+             (1, 'past', 'Served on a border patrol before the Wren, and doesn\'t talk about it much.'),
+             (3, 'past', 'Distrusts the Veyli because of one bad day years ago, and knows it isn\'t fair.'),
+             (4, 'secret', 'Asked for the cabin next to the Envoy\'s so he could keep an eye out, and has started to like the Envoy.')],
+    'calder': [(0, 'work', 'Can tell you what\'s wrong with a fan by the sound.'),
+               (1, 'past', 'Started as a junior in a shipyard, sweeping up swarf.'),
+               (2, 'work', 'Keeps a list of every Works tech she has certified, with a note on each.'),
+               (4, 'past', 'The toolbox was her first chief\'s, who taught her everything and never said well done.')],
+    'brennan': [(0, 'work', 'Cooks by ear: she listens to the pans.'),
+                (1, 'past', 'Ran a restaurant on Port Halloran before the Wren.'),
+                (2, 'work', 'Keeps a book of every crew member\'s favourite dish.'),
+                (4, 'secret', 'Left the restaurant after a fire, and finds the galley\'s order comforting.')],
+    'saruth': [(0, 'home', 'Takes tea at the same hour every day, and will sometimes invite you.'),
+               (1, 'home', 'Ties a new knot in the cord on the cabin door for every month aboard.'),
+               (3, 'work', 'Finds humans exhausting and very kind, often at once.'),
+               (4, 'secret', 'Was sent to the Wren because no one at home expected the posting to work.')],
 }
 
 def looks_with(rng):                               # looks() from another random stream (visitors)
@@ -523,6 +524,7 @@ def visitors(out):
         assert all(a[1] < b[0] for a, b in zip(st, st[1:])), c
     assert len({(e['arrive'] - 1) // 7 for e in every}) >= 50
     assert len({e['id'] for e in res}) == len(res) and not {e['id'] for e in res} & {p['id'] for p in out}
+    assert not {e['cabin'] for e in res} & {p['bed'] for p in out}, 'a guest in a crew bed'
     for e in res:
         if any(a in e['habits'] and b in e['habits'] for a, b in CLASH): e['habits'] = e['habits'][:1]
     return res
@@ -668,7 +670,8 @@ def main():
         assert e['habitShifts'] and all(ok(e, it) for it in e['habitShifts']), e['id']
         for it in e['habitShifts']: assert e['name'].split()[0] in it['why'] or e['name'] in it['why'] or e['id'] in it['why'].lower(), (e['id'], it['why'])
     for e in out:
-        if e['id'] in ABOUT: e['about'] = [dict(tier=t, text=x) for t, x in ABOUT[e['id']]]
+        if e['id'] in ABOUT: e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT[e['id']]]
+    assert all(a['tier'] in range(5) and a['topic'] in ('home', 'work', 'hobby', 'past', 'secret') for e in out for a in e.get('about', []))
     ids = [p['id'] for p in out]
     assert len(ids) == len(set(ids)), 'duplicate ids'
     beds = [p['bed'] for p in out]
@@ -815,7 +818,7 @@ def page(entries, visits=None):
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
                           e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'), e(' '.join(i['why'] for i in x.get('habitShifts', [])) or 'you decide'),
-                          ''.join('<div class="wide"><dt>Tells you%s</dt><dd>%s</dd></div>' % (' (tier %d)' % t if t else '', e(' '.join(a['text'] for a in x['about'] if a['tier'] == t))) for t in sorted({a['tier'] for a in x.get('about', [])})),
+                          ''.join('<div class="wide"><dt>Tells %s</dt><dd>%s</dd></div>' % (['anyone', 'an acquaintance', 'a colleague', 'a friend', 'a close friend'][t], e(' '.join(a['text'] for a in x['about'] if a['tier'] == t))) for t in sorted({a['tier'] for a in x.get('about', [])})),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     if visits:

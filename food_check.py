@@ -254,6 +254,26 @@ with sync_playwright() as pw:
     if evg['storm']['missed'] or evg['storm']['maxWait'] > BUSY_WAIT_MAX: fail(f"storm: waits {evg['storm']}")
     if evg['dinner']['batch'] != 12 or 'Envoy' not in evg['batchText']: fail(f"formal dinner: {evg['dinner']} {evg['batchText']}")
 
+    # 4i. the storm's galley threads (0.29.21), with section 18: a real event started on day DAY + 20, its galley read
+    # through GALLEY_TEST (trays on that day, a broken chiller): spoiled meals and hours the bridge waits for trays are scored
+    if g.ev("typeof eventStart === 'function' && typeof eventScore === 'function' && typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.ionStorm"):
+        th = g.ev(f"""(() => {{ const d = {DAY} + 20, keep = SHIP.event; eventStart('ionStorm', d - 2);
+          GALLEY_TEST.eventMod = (kind, key, t) => kind === 'galley' && key === 'trays' && Math.floor(t / 1440) + 1 === d ? 6 : null;
+          window.__keepCh2 = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
+          GALLEY_TEST.cartTrays = () => null;                  // no cart run, so no delivery report: the count stops at 18:00
+          SHIP.galley = null; setShipNow((d - 1) * 1440 + 22 * 60); galleyAdvance(shipNow()); const once = JSON.stringify(SHIP.event.threads);
+          SHIP.galley = null; galleyAdvance(shipNow()); const out = {{ threads: {{ ...SHIP.event.threads }}, again: JSON.stringify(SHIP.event.threads) === once }};
+          // with a run and its delivery report: the trays reach the bridge at 18:45, or never
+          const hungry = arrive => {{ eventStart('ionStorm', d - 2); GALLEY_SCORED.clear(); GALLEY_TEST.cartTrays = () => 'trays:bridge@test'; GALLEY_TEST.traysArrivedAt = () => arrive;
+            SHIP.galley = null; galleyAdvance(shipNow()); return SHIP.event.threads.bridgeHungry || 0; }};
+          out.late = hungry((d - 1) * 1440 + 18 * 60 + 45); out.never = hungry(null);
+          GALLEY_TEST.cartTrays = GALLEY_TEST.traysArrivedAt = null; GALLEY_SCORED.clear();
+          window.__sc("chillerAt = window.__keepCh2"); GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; return out; }})()""")
+        print('Storm threads scored by the galley on one day (spoiled meals, hours the bridge waited for trays; the same again after a fresh start):', th)
+        print('  bridgeHungry by 22:00 with a delivery report: trays at 18:45', th['late'], '| never', th['never'])
+        if not th['threads'].get('spoiled') or th['threads'].get('bridgeHungry') != 6 or not th['again'] or th['late'] != 7 or th['never'] != 11: fail(f"storm threads: {th}")
+    else: print('Storm threads: no section 18 with the ion storm in this build; skipped')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
