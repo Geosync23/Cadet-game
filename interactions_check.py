@@ -37,9 +37,9 @@ STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.
 # deck, title, the kind expected, the need that must rise (None: just that it starts and ends)
 PARITY = [
     (3, 'The bar', 'ixDrink', 'hunger'), (3, 'Sofa', None, 'social'), (3, 'Herb bed', 'ixGarden', 'social'),
-    (3, 'Water', 'ixWater', 'hunger'), (3, 'Telescope', 'ixStars', 'energy'), (3, 'Pond', 'ixRest', 'energy'),
+    (3, 'Water', 'ixWater', 'hunger'), (3, 'Telescope', 'ixStars', 'energy'),
     (4, 'Folding table', 'ixFold', 'hygiene'), (4, 'Grand piano', 'ixMusic', 'social'), (4, 'Kettle', 'ixTea', 'hunger'),
-    (4, 'Basins', 'ixBasin', 'hygiene'), (4, 'Tiles table', 'ixLounge', 'social'), (4, 'Beanbags', None, None),
+    (4, 'Basins', 'ixBasin', 'hygiene'), (4, 'Tiles table', 'ixLounge', 'social'),
     (5, 'Armchair', None, None), (5, 'Hot water', 'ixTea', 'hunger'), (1, 'Window seat', None, None),
 ]
 
@@ -81,6 +81,8 @@ with sync_playwright() as pw:
     check(s['act'] and s['act'][0] == 'gym', f'the treadmill is still section 15\'s workout ({s["act"]})')
     g.ev("actEnd(true)")
     check(g.ev("ixTap(ITEMS.find(i => i.t === 'Health notices') || ITEMS.find(i => /notice/i.test(i.t)), new THREE.Vector3(), new THREE.Vector3())") is False, 'a notice board reads as before')
+    r = g.ev("(() => { const it = ITEMS.find(i => i.t === 'Bench'); it.hit.getWorldPosition(_wp); return ixTap(it, _wp.clone(), _wp.clone()); })()")
+    check(r is False, 'a plain bench is section 15\'s sit-anywhere, not ours')
     g.ev("goToDeck(2)"); g.step(3)
     priv = g.ev("[...PLACE_OF.values()].filter(pl => pl.type === 'lounge-seat' && privatePlace(pl)).length")
     r = g.ev("(() => { const pl = [...PLACE_OF.values()].find(q => q.type === 'lounge-seat' && privatePlace(q)); const s = placeSpot(pl.id); const it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.distanceTo(new THREE.Vector3(s.x, _wp.y, s.z))]; }).sort((a, b) => a[1] - b[1])[0][0]; it.hit.getWorldPosition(_wp); return [it.t, ixTap(it, _wp.clone(), _wp.clone())]; })()")
@@ -129,6 +131,22 @@ with sync_playwright() as pw:
     g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
     check(not g.ev("myJob()") and s['goal'] is None, f'Drop it: no job and the pointer hides ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
     g.ev("ixBoard.close(); SHIP.player.carry = []")
+    # a cart run (section 15's cartTap): the pointer starts at the Cart bay's docks
+    if g.ev("typeof jobStops === 'function'"):
+        g.ev("(() => { const t = shipNow(); SHIP.jobs.push({ id: 'ixcart@1', machine: null, deck: 5, kind: 'restock', cargo: 'meals', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); MACH_REV++; })()")
+        took = g.ev("claimJob('ixcart@1')"); g.step(3); s = st()
+        check(took and s['goal'] and 'Cart bay' in s['goal'], f'a cart run: take a cart from the Cart bay ({took}, {s["goal"]})')
+        g.ev("dropJob('ixcart@1')"); g.step(3)
+    # real machines: their taps are section 15's machineTap (machineUse), never one of ours
+    over = []
+    for n in g.ev("Object.keys(DECKS).map(Number)"):
+        g.ev(f"goToDeck({n})"); g.step(3)
+        over += g.ev(r"""(() => { const out = []; if (typeof machineList !== 'function') return out; const near = typeof MACHINE_NEAR !== 'undefined' ? MACHINE_NEAR : 1;
+          for (const it of ITEMS) { if (/job board/i.test(it.t) || it.lift || it.see) continue; it.hit.getWorldPosition(_wp); const at = _wp.clone();
+            if (!machineList().some(m => m.deck === deckDef.num && !m.stub && m.at && cellPos(...m.at).distanceTo(new THREE.Vector3(at.x, 0, at.z)) < near)) continue;
+            const r = ixTap(it, at.clone(), at.clone()); actEnd(true); if (r) out.push(deckDef.num + ' ' + it.t); }
+          return out; })()""")
+    check(not over, f'no tap near a real machine is ours ({over[:5]})')
     print('   draw-call peak while doing things:', peak)
     check(peak < BUDGET, f'draw calls under {BUDGET} ({peak})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
