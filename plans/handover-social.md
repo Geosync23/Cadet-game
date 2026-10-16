@@ -21,7 +21,8 @@ Written by session_01DzZ669spGpdSdVMYzUog2N while still working (ahead of the 70
 - schedU keys 600-642 are section 20's.
 
 ## Loose ends
-- Privacy match with the device's Maps (0.35.9): Maps hides anyone asleep or washing; my Crew app's detail page and `crewContacts().where` still show them. Make `crewWhere` return null for act `sleep`/`wash` (one line) when the lead next gives work.
+- Privacy match with Maps: done in 0.36.16 (`crewWhere` is null when someone is asleep or washing). The user chose a Roster tab on the device instead of people dots on Maps; the device engineer builds it on `crewContacts`.
+- Discourtesy (0.36.16): the guest-meeting half only works once section 14 plans the Veyli guests (they weren't in `schedPeople()` on the 0.34.16 merge).
 - Seating by friendship is live in the sim engineer's 0.26.18: about 19% of seats are next to a friend. No starting pair is at <= -30, so their "keep rivals apart" rule never fires; if the user wants visible rivalries, make the clash penalty in `affStart` bigger (for example -12 to -30) and re-run social_check. `shipDay(d).occ.who` (person -> [[from, to, placeId]]) can tell who sat with whom.
 - **Pell's show:** done in 0.36.14 on the events engineer's eventOneOff (0.34.13). Re-test it once their build is merged into the integration.
 - Merge ship integration 0.41.6 when published (it has Appointments and the device).

@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.15
+   STARSHIP CADET: CSV Wren                            build 0.36.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.15';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.16';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12572,7 +12572,7 @@ const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing
   heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
 const NEWS = [];
 let SOC = null, SOC_MIN = -1;
-SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {} };
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {} };
 const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
 const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
 const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
@@ -12597,7 +12597,7 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
-  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {} };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
 // rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay] } }, mail (story Mail to come). A save made with a different crew list starts the crew's side afresh
@@ -12608,14 +12608,14 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, rel };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {} };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {} };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
@@ -12765,9 +12765,39 @@ function socialHour(h) {
   }
   for (const [K, id] of learnt) K.add(id);
   socBorn(h, rooms);
+  socCourtesy(h, rooms);
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
   for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
+}
+// the diplomatic visit's 'discourtesy' thread (0.36.16, for section 18; lower is better). guestWarmth(p, t): how kindly
+// someone feels toward the guests, from their mood, less for prickly traits (suspicious 30, gruff, blunt, sarcastic
+// 15), more if they're your friend (tier 3+, 15) and if you chatted with them today (10): you can soften Holt. While the
+// guests are aboard (eventMod('effect', 'guests')), at 20:00 each day Holt under 45 adds 1, and so does a day when a
+// guest of the event shared a room with a crew member under 35. At most one of each a day (SHIP.social.courtesy,
+// saved). Inert without section 18's eventScore and eventMod
+const COURTESY_PRICKLY = { suspicious: 30, gruff: 15, blunt: 15, sarcastic: 15 };
+function guestWarmth(p, t) {
+  const r = SHIP.rel[p.id];
+  return crewMood(p, t) - (p.traits || []).reduce((a, x) => a + (COURTESY_PRICKLY[x] || 0), 0) + (r && r.tier >= 3 ? 15 : 0) + (r && r.chatDay === Math.floor(t / 1440) + 1 ? 10 : 0);
+}
+function socCourtesy(h, rooms) {
+  if (typeof eventScore !== 'function' || typeof eventMod !== 'function') return;
+  const t = h * 60 + 30, d = Math.floor(h / 24) + 1, C = SHIP.social.courtesy;
+  let on = null; try { on = eventMod('effect', 'guests', t); } catch (e) { on = null; }
+  if (!on) return;
+  const ev = typeof eventNow === 'function' ? eventNow(t) : null;
+  const guests = typeof GUESTS !== 'undefined' ? schedPeople().filter(q => GUESTS.some(g => g.id === q.id && (!ev || !g.event || g.event === ev.id))) : [];
+  if (guests.length && C.meet !== d) {                   // a guest in a room with someone prickly or low, this hour
+    const S = schedData();
+    for (const g of guests) {
+      const w = planWhere(g, t); if (!w || w.moving || !w.placeId) continue;
+      const pl = S.byId.get(w.placeId), here = rooms.get(w.deck + '|' + (pl && pl.room || w.placeId)) || [];
+      const sour = here.map(i => SOC.crew[i]).find(q => guestWarmth(q, t) < 35);
+      if (sour) { C.meet = d; eventScore('discourtesy', 1); break; }
+    }
+  }
+  if (h % 24 === 20 && C.holt !== d && SOC.idx.has('holt') && guestWarmth(SOC.crew[SOC.idx.get('holt')], t) < 45) { C.holt = d; eventScore('discourtesy', 1); }
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
@@ -12901,7 +12931,7 @@ function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // s
 // newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
 const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
 function crewWhere(p, t = shipNow()) {
-  const w = whereIs(p, t); if (!w || w.moving) return null;
+  const w = whereIs(p, t); if (!w || w.moving || w.act === 'sleep' || w.act === 'wash') return null;   // asleep or washing: private (as the device's Maps)
   const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
   return { deck: w.deck, room: rm ? rm.name : null, act: w.act, placeId: w.placeId || null };
 }
@@ -13061,6 +13091,8 @@ function chatLine(p, t = shipNow()) {
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
+  if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
+    return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
   const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
   const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
     return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
