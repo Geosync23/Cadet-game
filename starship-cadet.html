@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.32.4
+   STARSHIP CADET: CSV Wren                            build 0.32.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4703,11 +4703,14 @@ Object.assign(WALL_KIT, {
     p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
   },
 });
-// a bedroom's plate (0.32.3, answer 27): an officer's name and rank from the roster (read at dress time, so section 9 is in);
-// rooms without an officer (the Envoy, the visitors) keep the plate's own text
+// a bedroom's plate (0.32.3, answer 27): name over rank from the roster (read at dress time, so section 9 is in). The crew
+// designer's `plate: { rank, name }` (0.16.6) wins where a roster entry has one; before that, the rank and name are worked out
+// here. Rooms with nobody's plate (the visitors' rooms) keep the plate's own text.
 const D2_RANK = { captain: 'Captain', xo: 'Executive Officer', chief: 'Department Chief', senior: 'Senior Officer' };
 function d2Plate(room, text) {
-  const p = typeof ROSTER !== 'undefined' && ROSTER.find(q => q.bed === '2-' + room);
+  const all = typeof ROSTER !== 'undefined' ? ROSTER.concat(typeof ROSTER_GUESTS !== 'undefined' ? ROSTER_GUESTS : []) : [];
+  const p = all.find(q => q.bed === '2-' + room);
+  if (p && p.plate && p.plate.name) return { text: p.plate.name, sub: p.plate.rank };
   return p && D2_RANK[p.rank] ? { text: p.name.replace(/^(Captain|Commander|Chief) /, ''), sub: D2_RANK[p.rank] } : { text };
 }
 // bedrooms (0.9.2): shared materials only, so fifteen furnished rooms merge into a handful of draw calls
@@ -5206,7 +5209,7 @@ Object.assign(KIT, {
     return { w: .9, d: .5, tall: true };
   },
   // the light relay rack: rows of relays with a lamp each, ticking over at dusk and dawn
-  relayRack(g) {
+  lightRelayRack(g) {
     box(.8, 1.8, .5, M.slateDark, 0, .9, 0, g);
     for (let r = 0; r < 8; r++) { box(.66, .14, .04, M.slate, 0, .3 + r * .19, .26, g); for (let q = 0; q < 4; q++) box(.04, .04, .02, (r + q) % 5 ? D2.led : D2.amber, -.24 + q * .16, .3 + r * .19, .29, g); }
     return { w: .8, d: .5, tall: true };
@@ -5218,7 +5221,7 @@ Object.assign(KIT, {
     return { w: .6, d: .2 };
   },
   // cable trays along a wall at knee and shoulder height, the array's cables in them: the crawl's low ceiling
-  cableTray(g, o = {}) {
+  crawlCableTray(g, o = {}) {
     const w = o.w || 2;
     for (const y of [.45, 1.35]) {
       box(w, .03, .32, D2.steel, 0, y, 0, g); box(w, .1, .02, D2.steel, 0, y + .05, .16, g);
@@ -5248,29 +5251,6 @@ Object.assign(KIT, {
     return { w: .12, d: .12, noBlock: true };
   },
 });
-// machine wear (0.32.4, answers 2 and 3): a tell-tale lamp on top of each machine (it reads from any side), from section 17's
-// machineLook(id) -> { state: 'fine'|'worn'|'poor'|'failing', blink, dim }. fine: green; worn: amber, dimmed; poor: amber,
-// slow blink; failing: red, quick blink. Without machineLook the lamp stays green (inert). The lamp keeps its own material
-// (noMerge, so merging and the fade's copies leave it alone; made at dress time, freed with the deck) and reads the look
-// at most once a second as it's drawn: nothing in the main loop, about one draw call per machine in view.
-const D2_LOOK = { fine: col('#46d37e'), worn: col('#ffb02e'), poor: col('#ff8a2a'), failing: col('#ff3b30') };
-function d2TellTale(g, id, x, y, z) {
-  const m = new THREE.MeshBasicMaterial({ color: D2_LOOK.fine.clone(), toneMapped: false });
-  const p = new THREE.Mesh(new THREE.BoxGeometry(.1, .04, .1), m); p.position.set(x, y, z); p.userData.noMerge = true; g.add(p);
-  let next = 0, base = D2_LOOK.fine, k = 1, rate = 0;
-  p.onBeforeRender = () => {
-    const t = performance.now();
-    if (t >= next) {
-      next = t + 1000;
-      const l = typeof machineLook === 'function' ? machineLook(id) : null, st = l && D2_LOOK[l.state] ? l.state : 'fine';
-      base = D2_LOOK[st]; k = l && (l.dim || st === 'worn') ? .45 : 1;
-      rate = st === 'failing' ? 1.6 : st === 'poor' || (l && l.blink) ? .6 : 0;   // blinks a second
-    }
-    const on = !rate || (t / 1000 * rate) % 1 < .5;
-    m.color.copy(base).multiplyScalar(on ? k : .12);
-  };
-  return g;
-}
 // made at load from fixed text, no R(): each is one shared material
 const d2Paper = (w, h, draw) => new THREE.MeshBasicMaterial({ map: tex(w, h, draw), toneMapped: false });
 const d2SignMat = (text, bg, fg) => d2Paper(256, 96, (c, w, h) => {
@@ -5729,9 +5709,9 @@ DECKS[2] = {
     for (const x of [.8, 2.0, 3.2]) place('P', 'launchTube', x, 7.6, 's');
     // ---- the sensor array (locked, seen through the window at the end of the corridor) ----
     NO_FADE.add('A');
-    d2TellTale(place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once. Tier 3, when the array opens.') }), '2-array-1', 0, .42, -.8);
-    d2TellTale(place('A', 'signalRacks', 1.9, 3.8, 'n', { n: 3, it: SEE('Signal processors', 'Racks of them, blinking. Everything the dish hears goes through here before anyone on the bridge sees it.') }), '2-racks-1', .5, 2.02, .1);
-    d2TellTale(place('A', 'signalRacks', 1.9, 16.2, 's', { n: 3 }), '2-racks-2', .5, 2.02, .1);
+    place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once. Tier 3, when the array opens.') });
+    place('A', 'signalRacks', 1.9, 3.8, 'n', { n: 3, it: SEE('Signal processors', 'Racks of them, blinking. Everything the dish hears goes through here before anyone on the bridge sees it.') });
+    place('A', 'signalRacks', 1.9, 16.2, 's', { n: 3 });
     place('A', 'mastBase', 5.4, 10.5, 'n', { it: SEE('Comms mast', 'The base of the comms mast, running up through the bridge to the outside. Every call home leaves the ship up this.') });
     // ---- the science corridor: benches, plants and two notice boards ----
     place('=', 'bench', 2.0, .3, 'n', { snug: true, it: IT('Bench', 'Outside the Watch office. People who sit here tend to get asked what they\'re waiting for.') });
@@ -5743,17 +5723,17 @@ DECKS[2] = {
     // the service hatches. Each machine has a panel tile in front of it, where someone stands to service it.
     // the lab gas plant: bottle racks along the observatory side, the regulator manifold and the labs' extractor fan
     for (const z of [.5, 1.5, 2.5, 5.5, 6.5]) place('g', 'gasRack', 1.675, z, 'e', { it: z === 1.5 ? IT('Gas bottles', 'Nitrogen, argon and a calibration mix, chained in racks. Empty ones get a chalk cross and go down to the hold.') : undefined });
-    d2TellTale(place('g', 'gasManifold', 1.7, 3.5, 'e', { it: IT('Regulator manifold', 'Three gauges and three valves: the lab gas lines for the Survey lab and the sample lab. The middle needle sits a little low. It always has.') }), '2-gasplant-1', .3, 1.72, -.18);
-    d2TellTale(place('g', 'extractor', 1.625, 7.5, 'e', { it: IT('Extractor fan', 'Pulls the fumes out of both labs\' hoods and up the duct. When it labours, the sample lab smells of whatever Survey is cooking.') }), '2-extractor-1', .3, 1.22, .15);
+    place('g', 'gasManifold', 1.7, 3.5, 'e', { it: IT('Regulator manifold', 'Three gauges and three valves: the lab gas lines for the Survey lab and the sample lab. The middle needle sits a little low. It always has.') });
+    place('g', 'extractor', 1.625, 7.5, 'e', { it: IT('Extractor fan', 'Pulls the fumes out of both labs\' hoods and up the duct. When it labours, the sample lab smells of whatever Survey is cooking.') });
     place('g', 'conduits', 1.8, 8.5, 'e');
     // the utility closet: Deck 2's breaker cabinet and the light relays, conduits at both ends
-    d2TellTale(place('u', 'powerCabinet', 1.65, 1.5, 'e', { it: IT('Breaker cabinet', 'Every circuit on Deck 2, labelled in two hands. One breaker is taped over: CAPTAIN\'S KETTLE. DO NOT.') }), '2-breaker-1', .25, 2.02, .1);
-    d2TellTale(place('u', 'relayRack', 1.65, 3.5, 'e', { it: IT('Light relays', 'They click over at dusk and dawn and run every lamp on the deck. A lazy one leaves a corridor flickering.') }), '2-junction-1', .25, 1.82, .1);
+    place('u', 'powerCabinet', 1.65, 1.5, 'e', { it: IT('Breaker cabinet', 'Every circuit on Deck 2, labelled in two hands. One breaker is taped over: CAPTAIN\'S KETTLE. DO NOT.') });
+    place('u', 'lightRelayRack', 1.65, 3.5, 'e', { it: IT('Light relays', 'They click over at dusk and dawn and run every lamp on the deck. A lazy one leaves a corridor flickering.') });
     for (const z of [.5, 4.5]) place('u', 'conduits', 1.8, z, 'e');
     // the cable crawl: trays along the hull carrying the array's cables aft, the repeater at one end, the feed at the other
-    place('n', 'cableTray', 3.5, .73, 's', { w: 5.0 });
-    d2TellTale(place('n', 'signalRepeater', .35, .5, 'w', { it: IT('Signal repeater', 'Lifts the array\'s signal for the long run aft to the comms room. Warm to the touch, and humming.') }), '2-repeater-1', .2, .82, -.1);
-    d2TellTale(place('n', 'arrayFeed', 6.7, .5, 'e', { it: IT('Array feed', 'Where the dish\'s cables come through the bulkhead and split for the racks. Each one labelled, in Dr. Sato\'s handwriting, naturally.') }), '2-feed-1', .2, 1.27, 0);
+    place('n', 'crawlCableTray', 3.5, .73, 's', { w: 5.0 });
+    place('n', 'signalRepeater', .35, .5, 'w', { it: IT('Signal repeater', 'Lifts the array\'s signal for the long run aft to the comms room. Warm to the touch, and humming.') });
+    place('n', 'arrayFeed', 6.7, .5, 'e', { it: IT('Array feed', 'Where the dish\'s cables come through the bulkhead and split for the racks. Each one labelled, in Dr. Sato\'s handwriting, naturally.') });
     // lived-in touches (0.32.3): a sign in the gas plant, the calendar nook in the closet, a sign and a forgotten mug in the crawl
     placeWall('g', 'd2Sign', 'w', 6.5, { m: D2.flames });
     placeWall('u', 'd2Nook', 'w', 2.5);
@@ -6395,7 +6375,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.32.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.32.5';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
