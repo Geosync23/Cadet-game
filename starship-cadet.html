@@ -42,9 +42,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device,.devtip{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip,.devdlg,#chat.devchat{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
@@ -122,7 +122,18 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 .devtip{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:4;width:min(440px,calc(100% - 24px));display:flex;gap:12px;align-items:flex-start;padding:12px 14px;min-height:44px;
   border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
   box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);cursor:pointer}
-.devtip[hidden]{display:none}
+.devtip[hidden],.devdlg[hidden]{display:none}
+.devdlg,#chat.devchat{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;width:min(520px,calc(100% - 20px));padding:12px 16px 12px;border-radius:16px;border:3px solid var(--bezel);
+  font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);box-shadow:0 8px 28px rgba(0,0,0,.55),inset 0 0 22px rgba(0,0,0,.85);-webkit-backdrop-filter:none;backdrop-filter:none}
+.devdlg small,#chat.devchat small{display:block;margin:0 34px 6px 0;font-size:15px;color:var(--crt-dim);letter-spacing:.06em}
+#chat.devchat b{display:block;font-size:var(--crt-size);color:var(--crt-hot);font-weight:700;letter-spacing:.06em}
+.devdlg p,#chat.devchat p{margin:0 0 10px;font-size:var(--crt-size);color:var(--crt-ink);line-height:1.4}
+#chat.devchat p.feel{font-style:normal;color:var(--crt-dim)}
+.devdlg button,#chat.devchat button{font-family:var(--crt-font);font-size:15px;color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;text-transform:uppercase;letter-spacing:.06em;text-shadow:inherit;-webkit-backdrop-filter:none;backdrop-filter:none;flex:1 1 auto}
+.devdlg .btns,#chat.devchat .btns{display:flex;flex-wrap:wrap;gap:8px}
+.devdlg .next{display:block;margin-left:auto}
+.devdlg .x,#chat.devchat .x{position:absolute;top:6px;right:8px;border:0;min-width:44px;font-size:22px;padding:0;flex:none}
+body.devsheet .devdlg,body.devsheet #chat.devchat{bottom:calc(66vh + 12px)}
 .devtip b{flex:none;padding:0 6px;border-radius:3px;background:var(--crt-ink);color:var(--crt-bg);text-shadow:none;letter-spacing:.1em}
 body.devsheet .devtip{bottom:calc(66vh + 70px)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
@@ -166,7 +177,7 @@ body.devsheet .devtip{bottom:calc(66vh + 70px)}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.4
+   STARSHIP CADET: CSV Wren                            build 0.35.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6628,7 +6639,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.5';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7581,7 +7592,7 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // other sections when drawn. Nothing here calls R() or makes 3D objects.
 // =====================================================================
 const DEVICE_APPS = new Map();                 // id -> { id, title, icon, order, badge, view, act }
-const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [] }, errors: [] };
+const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [], phosphor: [] }, errors: [] };
 // what the device keeps (saved, SAVE_EXTRA): settings now; memos, appointments, pins and tips as their apps arrive
 const PHOSPHORS = { amber: 'Amber', green: 'Green', cyan: 'Wren cyan' };
 function deviceLoad(s) {
@@ -7596,10 +7607,15 @@ function deviceLoad(s) {
 }
 SHIP.device = deviceLoad(SAVED);
 SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
-setTimeout(() => { DEV.live = true; }, 0);
+setTimeout(() => {
+  DEV.live = true;
+  try { if (typeof CHAT_SKIN !== 'undefined' && CHAT_SKIN && !CHAT_SKIN.draw) CHAT_SKIN.draw = DEVICE_SKIN.chat; } catch (e) { /* no section 20 */ }
+}, 0);
 // ---- your day (0.35.2): the shift, the meals, the week's shape and the ship traditions, for Schedule, Calendar
 // and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
+// whether you work on day d: every day for now; a rota of your own drops in here
+function playerShiftOn(d) { return true; }
 const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
   [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
   [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
@@ -7629,6 +7645,7 @@ function devDay(d) {
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
+  if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
   return out.sort((x, y) => x.from - y.from);
@@ -7659,7 +7676,7 @@ function deviceTick() {
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
     DEV_REMINDED.add(x.id);
-    const m = SHIP.time.min, onShift = m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    const m = SHIP.time.min, onShift = playerShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
     deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
   }
 }
@@ -7731,6 +7748,28 @@ function deviceFrameStep(now) {
   DEV.frApplied = off !== 0;
 }
 requestAnimationFrame(deviceFrameStep);
+// ---- the meeting dialogue panel (Part 2, "meetings with dialogue"): section 18 owns the scripts and their flow; this
+// only draws. deviceDialogue(view) shows one line: view = { title, who, role, text, choices: [text] } (null hides it).
+// A tap on the line calls section 18's dialogueNext(), a choice dialogueChoose(k), the X dialogueClose(); without them
+// the panel just closes. deviceDialogue(script, i) (a raw MEETING_SCRIPTS entry and a line number) also works.
+function devWho(id) {
+  const p = typeof ROSTER !== 'undefined' ? ROSTER.find(x => x.id === id) : null;
+  return p ? { who: p.name, role: p.role || '' } : { who: String(id || ''), role: '' };
+}
+function deviceDialogue(v, i) {
+  if (v && Array.isArray(v.lines) && Number.isInteger(i)) {   // a raw script: resolve the line here
+    const l = v.lines[i]; if (!l) { DEVICE_SKIN.dialogue(null); return false; }
+    const ctx = { band: 'smooth', mine: {}, you: 'Cadet' }, txt = x => typeof x === 'function' ? x(ctx) : x;
+    v = l.choice ? { title: v.title, who: 'You', role: '', text: '', choices: l.choice.map(c => txt(c.text)) } : { title: v.title, ...devWho(l.who), text: txt(l.text) };
+  }
+  DEVICE_SKIN.dialogue(v || null);
+  return true;
+}
+function devDialogueDo(what, k) {
+  const f = what === 'next' ? (typeof dialogueNext === 'function' ? dialogueNext : null) : what === 'choose' ? (typeof dialogueChoose === 'function' ? dialogueChoose : null) : (typeof dialogueClose === 'function' ? dialogueClose : null);
+  try { if (f) f(k); else DEVICE_SKIN.dialogue(null); } catch (e) { DEV.errors.push('dialogue: ' + (e && e.message || e)); DEVICE_SKIN.dialogue(null); }
+  if (what === 'close') DEVICE_SKIN.dialogue(null);
+}
 function deviceRefresh() {
   deviceTick();
   DEVICE_SKIN.button();
@@ -7816,7 +7855,9 @@ const DEVICE_SKIN = (() => {
     },
     dom(b) { const box = mk('div'); try { b.render(box); } catch (e) { box.textContent = '(this section failed to draw)'; } return box; },   // the addSection shim
   };
+  const INK = { amber: '#ffb347', green: '#5dff8a', cyan: '#6ff0dc' };   // --crt-ink per phosphor, for the 3D prop (section 8b)
   const skin = {
+    get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
     close() { el.hidden = true; drawn = null; layout(); if (back && back.focus) back.focus(); },
@@ -7852,6 +7893,31 @@ const DEVICE_SKIN = (() => {
       clearTimeout(c._t); c.hidden = !t; if (!t) return;
       c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
       c._t = setTimeout(() => tipDone(), 9000);
+    },
+    dialogue(v) {                              // the meeting panel: a strip across the bottom, in the screen's style
+      let c = $('devDlg');
+      if (!c) {
+        c = mk('div', 'devdlg'); c.id = 'devDlg'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
+        c.addEventListener('pointerdown', e => e.stopPropagation());   // taps on the panel never reach the deck
+      }
+      c.hidden = !v; if (!v) return;
+      c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
+      const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Walk away'); x.onclick = e => { e.stopPropagation(); devDialogueDo('close'); };
+      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + ' · ' : '') + (v.who || '') + (v.role ? ', ' + v.role : '')));
+      if (v.text) { const t = mk('p', '', v.text); c.appendChild(t); }
+      if (v.choices && v.choices.length) {
+        const box = mk('div', 'btns');
+        v.choices.forEach((ch, k) => { const b = mk('button', 'act', ch); b.type = 'button'; b.onclick = e => { e.stopPropagation(); devDialogueDo('choose', k); }; box.appendChild(b); });
+        c.appendChild(box);
+      } else { const n = mk('button', 'act next', 'Go on ▸'); n.type = 'button'; n.onclick = e => { e.stopPropagation(); devDialogueDo('next'); }; c.appendChild(n); }
+    },
+    chat(el, v) {                              // section 20's chat card (CHAT_SKIN.draw), in the screen's style
+      el.className = 'devchat'; el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = '';
+      const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.onclick = () => chatClose();
+      el.append(x, mk('b', '', v.who), mk('small', '', [v.role, v.tier].filter(Boolean).join(' · ')), mk('p', v.say ? '' : 'feel', v.say ? '"' + v.line + '"' : v.line));
+      const row = mk('div', 'btns');
+      for (const b of v.buttons || []) { const e = mk('button', 'act', b.label); e.type = 'button'; e.disabled = !!b.off; e.onclick = () => chatDo(b.id); row.appendChild(e); }
+      el.appendChild(row);
     },
     notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
   };
@@ -8127,7 +8193,7 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
 // Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
 // phone asks for reduced motion), tips on or off
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) st.phosphor = arg; else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
   view: () => {
     const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
