@@ -4196,6 +4196,29 @@ DECKS[5] = {
 };
 for (const [key, r] of Object.entries(DECKS[5].sealed)) DECKS[5].closedDoors[key] = { t: DECKS[5].rooms[r].name, x: DECKS[5].rooms[r].tap };
 
+// ---- Gym kit (Pillar 3, C9, 0.38.2, the deck architect; made at load, no R()): a punch bag on its stand and a single stretching mat ----
+Object.assign(KIT, {
+  punchBag(g, o = {}) {                                  // a stand with an arm, and a bag that swings while someone's punching (MOVERS)
+    box(.6, .04, .9, GYM.plate, 0, .02, 0, g);           // the base plate
+    box(.08, 2.3, .08, GYM.frame, 0, 1.15, -.38, g); box(.06, .06, .52, GYM.frame, 0, 2.27, -.12, g);   // the post, and the arm out over the bag
+    const pv = new THREE.Group(); pv.position.set(0, 2.24, .1); g.add(pv);
+    cyl(.012, .012, .3, GYM.mat[2], 0, -.15, 0, pv, 6); cyl(.17, .17, .85, GYM.mat[2], 0, -.725, 0, pv, 14);   // the strap and the bag, one material
+    mergeMeshes(pv); for (const m of pv.children) m.userData.noMerge = true;   // one mesh, kept out of the deck's merge so it can swing
+    if (o.place) {
+      let v = 0, ph = 0;
+      MOVERS.push({ place: o.place, tick(dt, on) {
+        if (!on && v === 0) return;
+        v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) { v = 0; pv.rotation.x = 0; return; }
+        ph += dt * 4.4; pv.rotation.x = Math.max(0, Math.sin(ph)) * .14 * v;   // knocked back, swings home
+      } });
+    }
+    return { w: .6, d: .9 };
+  },
+  gymMat(g) {                                            // one stretching mat, rolled out
+    const m = box(.6, .015, 1.7, GYM.mat[1], 0, .008, 0, g); m.castShadow = false;
+    return { w: .6, d: 1.7, noBlock: true };
+  },
+});
 // ---- Deck 3 kit (A5b, the bridge architect; made at load, no R()): the crew store's till and baskets ----
 Object.assign(KIT, {
   till(g) {                                              // a badge scanner and a little screen, standing on the store counter
@@ -4652,6 +4675,11 @@ DECKS[3] = {
     { id: '3-shop-7', type: 'shop', at: [34, 14], xy: [34.15, 14.85], walk: [34, 14], face: 'e', pose: 'stand', anim: 'pay', room: 'S' },   // paying at the till (A5b)
     { id: '3-shop-8', type: 'shop', at: [32, 14], xy: [32.4, 14.25], walk: [32, 14], face: 'n', pose: 'stand', anim: 'browse', room: 'S' },   // taking a basket by the door
     { id: '3-gym-10', type: 'gym', at: [31, 14], xy: [31.5, 14.05], walk: [31, 14], face: 'n', pose: 'stand', anim: 'drink', room: 'F' },   // the water dispenser
+    // Pillar 3 (C9, 0.38.2): the rowing pair, the punch bag and the extra mat. 'punch' and 'stretch' are the performance engineer's standing poses (8b, 0.27.15; plain stand until merged)
+    { id: '3-gym-11', type: 'gym', at: [24, 17], xy: [24, 17.4], walk: [25, 17], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F' },
+    { id: '3-gym-12', type: 'gym', at: [24, 17], xy: [24.8, 17.4], walk: [25, 17], face: 's', pose: 'sit', anim: 'row', y: .43, room: 'F' },
+    { id: '3-gym-13', type: 'gym', at: [29, 17], xy: [29.8, 17.5], face: 'e', pose: 'stand', anim: 'punch', room: 'F' },
+    { id: '3-gym-14', type: 'gym', at: [27, 17], xy: [27.9, 17.15], face: 's', pose: 'stand', anim: 'stretch', room: 'F' },   // at the mat's head, 1.3 m of mat in front
     // the machines' panels: where a Works tech stands to service each one (A5b)
     { id: '3-oven-1-panel', type: 'work:works', at: [37, 4], xy: [37.5, 4.3], walk: [37, 4], face: 'n', pose: 'work', machine: '3-oven-1', room: 'K' },
     { id: '3-oven-2-panel', type: 'work:works', at: [38, 4], xy: [38.5, 4.3], walk: [38, 4], face: 'n', pose: 'work', machine: '3-oven-2', room: 'K' },
@@ -4885,6 +4913,10 @@ DECKS[3] = {
     placeWall('B', 'clocks', 'e', 3.0, { hitW: 1.5, it: IT('Three clocks', 'Ship time, home time, and how long a message takes to get there. The third one is the hardest to look at.') });
     placeWall('B', 'msgBoard', 'w', 3.0, { hitW: 1.0, it: IT('Messages waiting', 'Who has something from home. Vance has two. Your line says none yet.') });
     for (const x of [.45, 4.55]) place('B', 'plant', x, .45, 'n', { band: '#d9a441' });
+    // ---- Pillar 3 (C9, 0.38.2): more gym kit, last so nothing above moves; none of it calls R() ----
+    [1.0, 1.8].forEach((x, k) => place('F', 'rower', x, 4.6, 's', { place: '3-gym-' + (11 + k), it: k ? IT('Rowing machines', 'A matched pair, side by side, so two people can race. Somebody always says it isn\'t a race.') : undefined }));
+    place('F', 'punchBag', 7.5, 4.5, 'e', { place: '3-gym-13', it: IT('Punch bag', 'Patched with tape in three places. The Watch crew say it helps them think. The Works crew say it helps them not think.') });
+    place('F', 'gymMat', 4.9, 4.6, 's', { it: IT('Stretching mat', 'One more mat, rolled out in the middle of the room, for people who want to stretch where everyone can see them do it.') });
   },
 
 };
@@ -6631,6 +6663,166 @@ function gatherSpots(v) {
   GATHER_SPOTS.set(v, out);
   return out;
 }
+
+// ---- Visitable rooms (Pillar 3, C9, 0.38.2; plans/pillar3-plan.md Part 4, "progression hooks") ----
+// Rooms the player enters only when invited or summoned: section 14's doorOpenFor (the sim engineer) opens `door` for
+// the appointment's window; every other time the door stays as it is. One table per deck:
+//   visits: { <id>: { name, room, door, host (the host's place), places: [place ids: the first is yours, then the other guests] } }
+// The ready room's guest places are new here (type 'event', visit: id, so nobody uses them day to day); the Captain's
+// table uses its own seats: the Captain at the north end, you at the south end. visitSpots(id) -> { deck, name, room,
+// door, host: place, places: [place, ...] }, each place with its deck.
+DECKS[1].places.push(
+  { id: '1-ready-visit-1', type: 'event', visit: 'ready-room', at: [11, 3], xy: [11.5, 3.05], face: 'n', pose: 'stand', room: 'R' },   // in front of the desk: summoned
+  { id: '1-ready-visit-2', type: 'event', visit: 'ready-room', at: [10, 3], xy: [10.6, 3.2], face: 'n', pose: 'sit', y: .5, room: 'R' },   // the two chairs by the door
+  { id: '1-ready-visit-3', type: 'event', visit: 'ready-room', at: [12, 3], xy: [12.4, 3.2], face: 'n', pose: 'sit', y: .5, room: 'R' },
+  { id: '1-ready-visit-4', type: 'event', visit: 'ready-room', at: [10, 2], xy: [10.5, 1.9], face: 'n', pose: 'stand', room: 'R' },      // looking into the Admiral's tank
+);
+DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R', door: 'h,11,4', host: '1-ready-1', places: ['1-ready-visit-1', '1-ready-visit-2', '1-ready-visit-3', '1-ready-visit-4'] } };
+DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
+function visitSpots(id) {
+  for (const n of Object.keys(DECKS)) {
+    const v = (DECKS[n].visits || {})[id]; if (!v) continue;
+    const pl = pid => { const p = DECKS[n].places.find(q => q.id === pid); return p ? { ...p, deck: +n } : null; };
+    return { deck: +n, name: v.name, room: v.room, door: v.door, host: pl(v.host), places: v.places.map(pl).filter(Boolean) };
+  }
+  return null;
+}
+
+// ---- Event dressing and traces (Pillar 3, C9, 0.38.1; plans/pillar3-plan.md "How outcomes are scored", "How you learn") ----
+// Props that appear only while an event asks for them: sign-up sheets on the mess and Works boards, the storm crew's
+// signed roster in the Works tea corner, a scorch mark and a taped panel in Deck 1's relay room, the bow lounge party.
+//   DECK_DRESS[id] = { deck, what, make(g, o) -> the tap item { t, x, at: [x, y, z], w, h, d, front } }
+//   dressShow(list)  section 18 calls it (once a ship minute is plenty, like eventsDecor): list = ids, or { id, title,
+//                    lines } to write on a sheet or banner. Only the current deck's are drawn; it does nothing when the
+//                    list hasn't changed, and puts them back after a deck change. Never called: nothing shows (inert).
+//   dressingOn()     -> the ids drawn now
+// No R(); every colour through col(); no shadows; each one merged to a few draw calls (the party: 5); not in the
+// collision grid; wall pieces lower with their wall, like placeWall's. Ids follow section 18's trace names.
+const DRESS = { root: null, key: '', on: new Map() }, DRESS_MATS = {};
+const dressMat = c => DRESS_MATS[c] || (DRESS_MATS[c] = new THREE.MeshStandardMaterial({ color: col(c), roughness: .8 }));
+// a group on a room's wall (room-local `along`, as placeWall) or floor (room-local x, z); y up, local +z into the room
+function dressAt(g, room, wall, a, b = 0) {
+  const r = ROOM_BOX[room], s = new THREE.Group(); let key = null;
+  if (wall === 'floor') s.position.set(X0(r.i0) + a, 0, Z0(r.j0) + b);
+  else {
+    if (wall === 'n') { s.position.set(X0(r.i0) + a, 0, Z0(r.j0) + T / 2); key = `h,${r.i0 + Math.floor(a)},${r.j0}`; }
+    if (wall === 's') { s.position.set(X0(r.i0) + a, 0, Z0(r.j1 + 1) - T / 2); key = `h,${r.i0 + Math.floor(a)},${r.j1 + 1}`; }
+    if (wall === 'w') { s.position.set(X0(r.i0) + T / 2, 0, Z0(r.j0) + a); key = `v,${r.i0},${r.j0 + Math.floor(a)}`; }
+    if (wall === 'e') { s.position.set(X0(r.i1 + 1) - T / 2, 0, Z0(r.j0) + a); key = `v,${r.i1 + 1},${r.j0 + Math.floor(a)}`; }
+    s.rotation.y = FACING[wall];
+  }
+  s.userData.edge = key && EDGES.get(key); g.add(s); return s;
+}
+const dressBox = (s, w, h, d, c, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), dressMat(c)); m.position.set(x, y, z); s.add(m); return m; };
+// a sheet of paper pinned to a wall: a heading, a title and numbered lines (names written in), on a canvas
+function dressSheet(s, o, z, y) {
+  const lines = o.lines || [], t = tex(256, 330, (c, w, h) => {
+    c.fillStyle = '#f4efe2'; c.fillRect(0, 0, w, h);
+    c.fillStyle = '#c45a3f'; c.font = '700 22px system-ui,sans-serif'; c.fillText(o.head || 'SIGN UP', 16, 34);
+    c.fillStyle = '#2b2b2b'; c.font = '600 15px system-ui,sans-serif';
+    String(o.title || 'Volunteers wanted').split('\n').slice(0, 2).forEach((l, k) => c.fillText(l, 16, 60 + k * 19));
+    for (let k = 0; k < 8; k++) {
+      const y0 = 112 + k * 26; c.fillStyle = '#9aa7b0'; c.fillRect(34, y0 + 4, w - 52, 1);
+      c.fillStyle = '#6b7780'; c.font = '500 13px system-ui,sans-serif'; c.fillText((k + 1) + '.', 14, y0);
+      if (lines[k]) { c.fillStyle = '#1f3c6e'; c.font = 'italic 500 16px Georgia,serif'; c.fillText(lines[k], 38, y0); }
+    }
+  });
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(.32, .42), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, y, z + .014); s.add(p);
+  dressBox(s, .34, .44, .012, '#d8d0bd', 0, y, z);                  // the backing, .008 behind the paper
+  dressBox(s, .03, .03, .02, '#c45a3f', 0, y + .18, z + .016);       // the pin, through the paper
+}
+const dressNames = (dept, n) => typeof ROSTER === 'undefined' ? [] : ROSTER.filter(p => !p.player && (!dept || p.dept === dept)).slice(0, n).map(p => p.name.split(' ').slice(-1)[0]);
+const DECK_DRESS = {
+  signupMess: { deck: 3, what: 'a sign-up sheet beside the mess menu board', make(g, o) {
+    dressSheet(dressAt(g, 'M', 'e', 2.55), o, .016, 1.75);
+    return { t: 'Sign-up sheet', x: (o.title || 'Volunteers wanted').replace(/\n/g, ', ') + '. ' + ((o.lines || []).length ? (o.lines || []).length + ' names so far.' : 'Nobody has signed yet.'), wall: ['M', 'e', 2.55], y: 1.75 };
+  } },
+  signupWorks: { deck: 5, what: 'a sign-up sheet pinned to the corner of the Works job board', make(g, o) {
+    dressSheet(dressAt(g, 'w', 'n', 6.65), o, .088, 1.12);           // in front of the board's screen (.075)
+    return { t: 'Sign-up sheet', x: (o.title || 'Volunteers wanted').replace(/\n/g, ', ') + '. ' + ((o.lines || []).length ? (o.lines || []).length + ' names so far.' : 'Nobody has signed yet.'), wall: ['w', 'n', 6.65], y: 1.12 };
+  } },
+  stormRosterTeaCorner: { deck: 5, what: 'the storm crew\'s signed duty roster, framed by the tea', make(g, o) {
+    const s = dressAt(g, 't', 'e', 1.6), names = o.lines || dressNames('works', 8);
+    dressBox(s, .52, .64, .03, '#5a3b26', 0, 1.5, .015);             // the frame
+    const t = tex(256, 320, (c, w, h) => {
+      c.fillStyle = '#f2ecdc'; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#2b2b2b'; c.font = '700 17px system-ui,sans-serif'; c.fillText(o.head || 'STORM DUTY ROSTER', 16, 30);
+      c.fillStyle = '#6b7780'; c.font = '500 12px system-ui,sans-serif'; c.fillText(o.title || 'Works, through the ion storm', 16, 50);
+      names.slice(0, 9).forEach((n, k) => { c.fillStyle = '#1f3c6e'; c.font = 'italic 500 16px Georgia,serif'; c.fillText(n, 22 + (k % 2) * 112, 84 + Math.floor(k / 2) * 34);
+        c.strokeStyle = '#3f8f5a'; c.lineWidth = 2; c.beginPath(); const x = 14 + (k % 2) * 112, y = 80 + Math.floor(k / 2) * 34; c.moveTo(x - 6, y - 4); c.lineTo(x - 2, y); c.lineTo(x + 4, y - 9); c.stroke(); });
+      c.fillStyle = '#c45a3f'; c.font = 'italic 600 15px Georgia,serif'; c.fillText('Thank you all. M. Calder', 16, h - 22);
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.44, .56), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.5, .036); s.add(p);
+    return { t: 'Storm duty roster', x: 'Everyone who worked the ion storm signed it, and the Chief framed it by the tea. Someone has drawn a little lightning bolt next to her name.', wall: ['t', 'e', 1.6], y: 1.5 };
+  } },
+  relayScorch: { deck: 1, what: 'a scorch mark on the relay room floor, where a relay arced in the storm', make(g) {
+    const s = dressAt(g, 'u', 'floor', 1.9, 1.45);                  // the walkway between the banks
+    [[.72, .5, '#5a3c26', .012], [.5, .36, '#2a211b', .018], [.28, .2, '#100d0b', .024]].forEach(([rx, rz, c, y], k) => {
+      const m = new THREE.Mesh(new THREE.CircleGeometry(1, 14), dressMat(c)); m.rotation.x = -Math.PI / 2; m.scale.set(rx, rz, 1); m.position.set(k * .05, y, -k * .03); s.add(m); });
+    return { t: 'Scorch mark', x: 'A black scorch across the deck plates, where a relay arced in the ion storm. Nobody has managed to scrub it out, and the Works crew have stopped trying.', floor: ['u', 1.9, 1.45] };
+  } },
+  tapedPanel: { deck: 1, what: 'an access panel in the relay room, taped shut after the storm', make(g) {
+    const s = dressAt(g, 'u', 'w', 1.5);                            // under the calendar, between the two relay banks
+    dressBox(s, .62, .52, .03, '#6f7a80', 0, .55, .015);             // the panel (face at .03)
+    dressBox(s, .78, .07, .006, '#e8c06a', 0, .55, .039).rotation.z = .62;   // hazard tape, crossed: the strips .005 apart
+    dressBox(s, .78, .07, .006, '#e8c06a', 0, .55, .05).rotation.z = -.62;
+    dressBox(s, .16, .11, .004, '#f4efe2', .18, .38, .062);         // a note
+    return { t: 'Taped panel', x: 'An access panel taped shut with hazard tape. The note says DO NOT OPEN: WAITING ON PARTS. The ion storm cooked whatever is behind it.', wall: ['u', 'w', 1.5], y: .55 };
+  } },
+  partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
+    const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
+    const pts = [[41.4, 9.0], [46.44, 8.27], [46.44, 13.73], [41.4, 13.0]].map(([x, z]) => [x - ROOM_BOX.L.i0, z - ROOM_BOX.L.j0]);
+    for (let k = 0; k < 3; k++) {                                     // three strings of bunting, sagging a little
+      const [a, b] = [pts[k], pts[k + 1]], len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.round(len / .32), ang = Math.atan2(b[0] - a[0], b[1] - a[1]);
+      for (let i = 0; i <= n; i++) {
+        const f = i / n, x = a[0] + (b[0] - a[0]) * f, z = a[1] + (b[1] - a[1]) * f, sag = .22 * 4 * f * (1 - f);
+        if (i < n) { const m = dressBox(s, .012, .012, len / n + .01, '#e9e1d0', x + (b[0] - a[0]) / n / 2, y - .22 * 4 * (f + .5 / n) * (1 - f - .5 / n), z + (b[1] - a[1]) / n / 2); m.rotation.y = ang; }
+        if (i > 0 && i < n) { const p = new THREE.Mesh(new THREE.ConeGeometry(.085, .17, 3), dressMat(C[(i + k) % 3])); p.rotation.set(Math.PI, Math.PI / 2 - ang, 0); p.scale.z = .25; p.position.set(x, y - sag - .095, z); s.add(p); }
+      }
+    }
+    for (const [x, z] of [[41.7, 8.9], [46.44, 8.27], [46.44, 13.73]].map(([x, z]) => [x - ROOM_BOX.L.i0, z - ROOM_BOX.L.j0]))   // balloons, three to a bunch
+      [[0, 2.32, 0], [.17, 2.22, .06], [-.1, 2.18, .14]].forEach(([dx, by, dz], k) => {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(.13, 12, 9), dressMat(C[k])); b.scale.y = 1.18; b.position.set(x + dx, by, z + dz); s.add(b);
+        dressBox(s, .008, by - 1.0, .008, '#e9e1d0', x + dx * .4, (by + 1.0) / 2 - .1, z + dz * .4); });
+    const t = tex(512, 112, (c, w, h) => { c.fillStyle = '#1f3c6e'; c.fillRect(0, 0, w, h); c.fillStyle = '#e8c06a'; c.fillRect(0, 8, w, 4); c.fillRect(0, h - 12, w, 4);
+      const l = String(o.title || 'WELL DONE, WREN!').toUpperCase().replace(/\n/g, ' ');
+      c.fillStyle = '#f4efe2'; c.font = '800 46px system-ui,sans-serif'; const fs = Math.min(46, Math.floor(46 * (w - 36) / c.measureText(l).width));
+      c.font = '800 ' + fs + 'px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText(l, w / 2, 56 + fs / 3); });
+    const bm = new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), [bx, bz] = [46.44 - ROOM_BOX.L.i0, 11 - ROOM_BOX.L.j0];
+    for (const side of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(1.8, .39), bm); p.position.set(bx + side * .006, 1.86, bz); p.rotation.y = side * Math.PI / 2; s.add(p); }   // both sides, 12 mm apart
+    return { t: 'Party decorations', x: 'Bunting from the bar to the windows, balloons that are already starting to droop, and a banner: ' + String(o.title || 'Well done, Wren!') + '.', floor: ['L', bx, bz], y: 1.86, w: .3, h: .5, d: 1.8 };
+  } },
+};
+function dressHide(id) {
+  const e = DRESS.on.get(id); if (!e) return;
+  e.g.parent && e.g.parent.remove(e.g); e.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.map) { o.material.map.dispose(); o.material.dispose(); } });
+  ITEMS = ITEMS.filter(it => it !== e.item); WALL_DECOR = WALL_DECOR.filter(d => !e.decor.includes(d));
+  DRESS.on.delete(id);
+}
+function dressShow(list) {
+  if (!deckRoot) return;
+  const want = new Map((list || []).map(x => typeof x === 'string' ? [x, {}] : [x.id, x]).filter(([id]) => DECK_DRESS[id] && DECK_DRESS[id].deck === deckDef.num));
+  if (DRESS.root !== deckRoot) { DRESS.root = deckRoot; DRESS.on.clear(); DRESS.key = ''; }   // a new deck: the old groups went with it
+  const key = JSON.stringify([...want]); if (key === DRESS.key) return;
+  DRESS.key = key;
+  for (const id of [...DRESS.on.keys()]) if (!want.has(id) || DRESS.on.get(id).o !== JSON.stringify(want.get(id))) dressHide(id);
+  for (const [id, o] of want) {
+    if (DRESS.on.has(id)) continue;
+    const g = new THREE.Group(), it = DECK_DRESS[id].make(g, o), decor = [];
+    deckRoot.add(g);
+    for (const s of g.children) { mergeMeshes(s); s.traverse(m => { if (m.isMesh) { m.castShadow = false; m.receiveShadow = true; } }); if (s.userData.edge) { const d = { g: s, e: s.userData.edge }; WALL_DECOR.push(d); decor.push(d); } }
+    // the tap: a hit box on the wall piece or over the floor spot, like place()'s and placeWall()'s
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(it.w || .6, it.h || (it.floor ? .1 : .6), it.d || .3), HIT_MAT); hit.userData.noMerge = true;
+    const host = it.wall ? g.children[0] : g; let front = 0;
+    if (it.wall) { hit.position.set(0, it.y, .15); front = FACING[it.wall[1]]; }
+    else { const r = ROOM_BOX[it.floor[0]]; hit.position.set(X0(r.i0) + it.floor[1], it.y || .05, Z0(r.j0) + it.floor[2]); }
+    host.add(hit);
+    const item = { t: it.t, x: it.x, hit, g: host, front, depth: it.wall ? .1 : .6, wall: !!it.wall }; hit.userData.item = item; ITEMS.push(item);
+    DRESS.on.set(id, { g, item, decor, o: JSON.stringify(o) });
+  }
+  if (typeof refreshPickables === 'function') refreshPickables();
+}
+const dressingOn = () => [...DRESS.on.keys()];
 
 // =====================================================================
 // 5. LIGHTING
