@@ -204,6 +204,26 @@ with sync_playwright() as pw:
     if ck['cakes'] != 1 or [ck[k]['shown'] for k in ('before', 'dinner', 'out', 'gone')] != [False, False, True, False] or ck['out']['candles'] != 10: fail(f"cake: {ck}")
     if 'birthday' not in ck['board'] or 'cake' not in ck['out']['text'].lower() or not any('Cake tonight' in m for m in ck['mail']): fail(f"cake: board, text or mail: {ck}")
 
+    # 4f2. section 18's events (0.29.15): a cake for an event with cake: true (Founding Day) and the birthday gathering's
+    # time in the Mail; fresh salad on a harvest day's menu. A stand-in eventsOn when section 18 isn't in the build
+    ev = g.ev(f"""(() => {{ const real = typeof eventsOn === 'function', keep = real ? eventsOn : undefined, fd = {DAY} + 3, hv = {DAY} + 5;
+      if (!real) window.__sc(`eventsOn = d => d === ${{fd}} ? [{{ id: 'founding', name: 'Founding Day', from: 1170, to: 1290, ev: {{ cake: true }}, honorees: [] }}] : d === ${{hv}} ? [{{ id: 'harvest', name: 'Harvest morning', from: 570, to: 690, ev: {{}}, honorees: [] }}] : []`);
+      const days = real ? [...Array(364)].map((_, k) => {DAY} + k) : [fd, hv];
+      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => e.cake || (e.ev && e.ev.cake))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
+      GALLEY_MENU.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
+      const out = {{ real, f, h }};
+      if (f) {{ out.cakes = galleyReport(f, 1)[0].cakes; out.board = galleyBoard(f); const mail = []; window.__keepMail = window.mailSend; window.__mailBox = mail; window.__sc("mailSend = x => window.__mailBox.push(x)");
+        setShipNow((f - 1) * 1440 + 19 * 60 + 45); SHIP.galley = null; galleyAdvance(shipNow()); out.text = galleyText('servery'); out.mail = mail.map(x => x.body); window.__sc("mailSend = window.__keepMail"); }}
+      const b = [...Array(364)].map((_, k) => {DAY} + k).find(d => galleyBirthdays(d).length && eventsOn(d).some(e => e.id === 'birthday'));
+      out.gather = b ? galleyCake(b).gather : null;
+      if (h) out.salad = galleyMenu(h).note;
+      if (!real) window.__sc("eventsOn = undefined"); GALLEY_MENU.clear(); GALLEY_EV.clear(); SHIP.galley = null; return out; }})()""")
+    print('Events' + (' (section 18)' if ev['real'] else ' (stand-in eventsOn)') + ':', ev)
+    if ev['real'] and not ev['f']: print("  no event with cake: true in section 18 yet: the event cake isn't checked")
+    elif not ev['f'] or ev['cakes'] != 1 or 'cake' not in ev['text'].lower() or 'happy' not in ev['board'] or not ev['mail']: fail(f"event cake: {ev}")
+    if not ev['h'] or 'salad' not in (ev['salad'] or ''): fail(f"harvest salad: {ev}")
+    if ev['real'] and ev['gather'] is None: fail('birthday gathering time not read from eventsOn')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
