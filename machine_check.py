@@ -120,6 +120,7 @@ def fail(msg):
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("player.steer = null; player.stop()")
+    g.ev("if (typeof TURN_IN !== 'undefined') TURN_IN = false")   # TURN_IN on in the build from 0.37.3; these checks assume it off, 5g turns it on itself
     # 0. nothing runs unless asked: a while of play with ?nosave leaves the machines untouched
     g.step(60)
     # since 0.40.2 the player's needs read shipEffects every ship minute, so play runs the machines; they must
