@@ -3411,7 +3411,7 @@ DECKS[4] = {
     { id: '4-junction-1', kind: 'lights', at: [18, 19], room: 'k', face: 'n', panel: [18, 18] },
     { id: '4-junction-2', kind: 'lights', at: [42, 19], room: 'y', face: 'n', panel: [42, 18] },
   ],
-  hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6 },   // stern line, stern corner radius, where the bow curve starts, how far it reaches
+  hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6, byFace: true },   // stern line, stern corner radius, where the bow curve starts, how far it reaches; one hull piece per facing (0.30.11)
   // 0.17.1: the bunk rooms grew, so the floor painter draws a different count of random numbers west of column 21. At column 21
   // of each row it picks up the value 0.17.0 had there, so the officers' wing floor, and everything built after the floor
   // (windows, furniture), come out exactly as before.
@@ -3804,7 +3804,7 @@ DECKS[5] = {
   },
   windows: ['t', 'o', 'b'].map(room => ({ room })),
   closedDoors: {},
-  hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6 },
+  hull: { sternX: 1, stern: 1.5, bowFrom: 34, bowLen: 9.6, byFace: true },   // one hull piece per facing (0.30.11)
   // service hatches into the utility rooms (0.30.3): the player and Works crew pass (see hatchPassable)
   // (the air plant and manifold room open off the pipe galleries; their hatches into the locked Fan hall stay sealed)
   service: ['v,34,0', 'v,34,15', 'h,30,9', 'h,19,10', 'v,19,13', 'h,32,1', 'h,25,15'],
