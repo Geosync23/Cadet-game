@@ -69,3 +69,4 @@ Ship traditions = official name (Calendar reminds ~30 ship min ahead); jobs take
 - Still open with the user: days off for the player.
 - The account showed a seven-day usage warning (resets Sat 08:00 UTC). If work stops, the hourly check-in resumes it.
 - **16:55 UTC: 0.41.6 = 9bb9409 on claude/ship-integration** (all checks pass; player_check's treadmill test from 0.28.18 skips treadmills crew are using). Republish of the link to 0.41.6 in progress (lead's background worker). 0.41.7 waits on galley 0.29.22 and sim 0.26.16; heads then: events 4344612, social 907b16a, systems e894246, player-needs bf5b5af, interactions a12d159, decks 7d228c2 (0.38.4 patient beds), device 16a4291, crowd-render 2d0e1ed (note only).
+- **17:02 UTC: playable link = version 14 = 0.41.6** (published by a fresh publisher session; a subagent can't do it, the two full reads don't fit — use a full session).
