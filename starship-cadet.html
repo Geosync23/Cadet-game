@@ -9474,10 +9474,11 @@ function actUpdate(dt, t) {
 // ---- you can see it working (0.28.20, the user's): when a need rises, a small "+25 Food" note floats up from your
 // character and the device button gives a soft pulse. Read off the needs themselves once a frame (needsSeen), so
 // every gain shows, whichever section made it (meals, showers, the toilet, sleep, chats, company, the store, 15b's
-// and 20's): rises add up per need and show every FLOAT_STEP, or once they stop for FLOAT_WAIT real seconds.
+// and 20's): rises add up per need and show once they stop for FLOAT_WAIT real seconds, or every FLOAT_EVERY
+// seconds while they go on (a toilet visit or the grab shelf shows one note; a long meal a few).
 // Drains never show. needPulse(k) is true for PULSE_SECS after need k showed a rise (for the device's Needs bars).
 // DOM and CSS made here, so the HTML stays as it was; nothing calls R(). ----
-const FLOAT_STEP = 10, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
+const FLOAT_EVERY = 5, FLOAT_WAIT = .6, FLOAT_MIN = 1, FLOAT_SECS = 1.8, PULSE_SECS = 1.5;
 let NEED_SEEN = null, FLOAT_LIVE = 0;
 const FLOAT_LOG = [];                                    // the last notes shown (player_check reads it: notes come and go on real-time timers)
 const NEED_RISE = {}, NEED_PULSE = {}, floatV = new THREE.Vector3();
@@ -9511,8 +9512,9 @@ function needsSeen() {                                   // once a frame: what r
   for (const k of NEED_KEYS) {
     const d = n[k] - NEED_SEEN[k]; NEED_SEEN[k] = n[k];
     const r = NEED_RISE[k] || (NEED_RISE[k] = { v: 0, t: 0 });
-    if (d > 0) { r.v += d; r.t = now; }
-    if (r.v > 0 && (r.v >= FLOAT_STEP || now - r.t > FLOAT_WAIT * 1000)) {
+    if (d > 0) { if (!(r.v > 0)) r.t0 = now; r.v += d; r.t = now; }
+    const stopped = now - r.t > FLOAT_WAIT * 1000;      // a slow trickle under FLOAT_MIN keeps adding up until it stops
+    if (r.v > 0 && (stopped || r.v >= FLOAT_MIN && now - r.t0 > FLOAT_EVERY * 1000)) {
       if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k]); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
       r.v = 0;
     }

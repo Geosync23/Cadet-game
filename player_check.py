@@ -23,6 +23,7 @@
 #   places held by crew are left alone ("In use"); the servery is closed between meals; walking away stops an
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
+#   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 # Setup and environment as for cadet_test.py.
 # Run:  python3 player_check.py BUILD.html
@@ -296,7 +297,7 @@ with sync_playwright() as pw:
       const near = seats.slice(1).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - s0.x, s.z - s0.z) < COMPANY_NEAR).slice(0, 4);
       const fake = near.map(([q, s]) => ({ settled: true, goalId: q.id, x: s.x, z: s.z, p: { name: 'Test' } })); const out = [];
       for (const k of [0, 2, 4]) {
-        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50 });
+        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
         FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
         ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
         needsT = shipNow() - 10; playerUpdate(0, 0); out.push([company(ACT), Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10]);
@@ -461,7 +462,7 @@ with sync_playwright() as pw:
     check(st['note'], 'the ship notes should show on the device')
     check(st['shower'] == 50, f"a weak shower (restore x0.5) should give half: 10 -> {st['shower']}")
     if real[2]:
-        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => isFinite(f.restore[k]) && isFinite(f.drain[k])); })()")
+        live = g.ev("(() => { FX_MIN = -1; const f = playerFx(), r = shipEffects(deckDef.num); return f === r && NEED_KEYS.every(k => k === 'bathroom' ? !(k in f.restore) || isFinite(f.restore[k]) && isFinite(f.drain[k]) : isFinite(f.restore[k]) && isFinite(f.drain[k])); })()   // section 17 knows the first five needs (bathroom, 0.28.19: 1 when left out)")
         print('  playerFx is the real shipEffects for this deck:', live)
         check(live, 'playerFx should read the real shipEffects')
     if not real[0]:                                   # the galley's food on its own, with stand-ins (a combined build tests the real one above)
