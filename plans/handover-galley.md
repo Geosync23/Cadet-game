@@ -58,6 +58,19 @@ Section 16 itself calls `cartClaim(t, cold, { replay })` (section 17) on the hou
   - **The player's queue spot is a fixed tile, [33, 2].** If Deck 3's furniture moves, check that it's still free (food_check checks it).
   - **The DEV_NOTES build table** has my rows in two places after the merges, so it could use a tidy.
 
+## The answers pass (2026-10-16 night, builds 0.29.11–0.29.17)
+
+All four of the galley's rows are built and shipped in combined 0.41.4 (claude/ship-integration c7598df). Details are in DEV_NOTES, section 16.
+
+- **Spoilage (row 7):** reads section 17's `chillerAt(t).spoil` (the share lost per hour), else `shipEffectsAt(3, t).spoil`. The 09:00 and 21:00 checks bin the spoiled food (bags by the dish pit) and send Mail.
+- **Menus (row 10):** `galleyMenu(day)`: a weekly cycle, a crew favourite on Wednesdays, a Friday treat with a pudding, and a Sunday dinner voted for by the crew. Shown on the menu board's canvas and in its tap text. A harvest morning (section 18) adds a garden salad.
+- **Queues (row 11):** `galleyBusy(day)`: a rush after the 17:00 shift change, and the odd slow oven. Waits stay within 25 minutes, only inside those windows.
+- **Cakes (row 17):** `galleyCake(day)`: ROSTER birthdays (the player's too), or section 18 events with `cake: true` (Founding Day). Baked at 15:00, on the servery from 19:30 to 21:30, with a noon Mail that gives the gathering time. There's one cake a day, the galley's; section 18 hides its own when ours is out.
+- **Your cart run:** carts are `[arriveAt, meals, hour]`. While section 17's `cartWaiting(hour)` is true (the run is claimed by 'you'), the meals wait. `galleyCartLand(hour)` lands them when you unload; a second call for the same hour returns 0.
+- **Who counts meals on their way:** only the galley (the lead's decision). When it asks `cartClaim`, it passes the cold store plus everything in `S.carts`. Without that, a held run set off a new run every hour (0.29.17). Section 17 takes that figure as given (0.33.22).
+- **food_check's live-vs-report test** runs with `cartWaiting` off, because the test doesn't run the job list.
+- **Still open on other sections:** crew don't claim meals runs (the systems engineer's). player_check had pre-existing failures on 0.41.4 (grab, sitting, the stores cart run; the player and systems engineers').
+
 ## Gotchas
 
 - **`InstancedMesh.setColorAt` in r128** sizes the colour buffer from the mesh's *current* `count`. Set the colours before setting `count = 0`, or every instance is black (the fix in 0.29.0).

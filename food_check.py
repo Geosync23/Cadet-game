@@ -174,7 +174,7 @@ with sync_playwright() as pw:
     bd = g.ev(f"""(() => {{ setShipNow({B} + 18 * 60); goToDeck(3); galleyTick(); const mb = ITEMS.find(x => x.t === 'Menu board');
       return {{ text: galleyText('servery'), dinner: galleyMenu({DAY}).dinner, board: GV && GV.boardDay, tap: mb ? mb.x : '' }}; }})()""")
     print('Menu at 18:00:', bd['text'], '| board:', bd['tap'][:90])
-    if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or bd['board'] != DAY or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
+    if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or not str(bd['board']).startswith(f"{DAY}|") or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
 
     # 4e. busy windows over four weeks: queues only in them, nobody gives up, and rushes make queues
     bz = g.ev(f"""(() => {{ for (const E of GALLEY_EV.values()) E.k = 0;
@@ -230,6 +230,28 @@ with sync_playwright() as pw:
     elif not ev['f'] or ev['cakes'] != 1 or 'cake' not in ev['text'].lower() or 'happy' not in ev['board'] or not ev['mail']: fail(f"event cake: {ev}")
     if not ev['h'] or 'salad' not in (ev['salad'] or ''): fail(f"harvest salad: {ev}")
     if ev['real'] and ev['gather'] is None: fail('birthday gathering time not read from eventsOn')
+
+    # 4h. ship-wide events (C7, 0.29.18): section 18's eventMod('galley', key), read on the hour. A stand-in
+    # eventModAt for the ion storm's peak on day DAY + 9 (storm stew, quicker pots, 1.5 x the grab shelf, 6 trays for
+    # the bridge) and a formal dinner on day DAY + 10 (a batch of 12, 8 extra portions). Inert with no event: the
+    # days above already ran with eventNow null (or no section 18)
+    evg = g.ev(f"""(() => {{ const keepAt = typeof eventModAt === 'function' ? eventModAt : undefined, keepTr = typeof cartTrays === 'function' ? cartTrays : undefined;
+      const storm = {DAY} + 9, dinner = {DAY} + 10, sent = []; window.__sent = sent;
+      window.__evs = {{ [storm]: {{ menu: 'stormStew', cook: .75, grab: 1.5, trays: 6 }}, [dinner]: {{ batch: {{ meals: 12, label: 'the Envoy’s dinner' }}, extra: 8 }} }};
+      window.__sc("eventModAt = (t, kind, key) => {{ const e = window.__evs[Math.floor(t / 1440) + 1]; return kind === 'galley' && e && e[key] !== undefined ? e[key] : null; }}; cartTrays = o => window.__sent.push(o)");
+      for (const E of GALLEY_EV.values()) E.k = 0;
+      const plain = galleyReport(storm - 1, 1)[0], rep = galleyReport(storm, 2);
+      SHIP.galley = null; setShipNow((storm - 1) * 1440 + 18 * 60 + 30); galleyAdvance(shipNow());
+      const out = {{ plainCooked: plain.cooked, plainBaked: plain.baked, storm: {{ cooked: rep[0].cooked, baked: rep[0].baked, trays: rep[0].trays, maxWait: rep[0].maxWait, missed: rep[0].missed.length }},
+        dinner: {{ batch: rep[1].batch, cooked: rep[1].cooked, maxWait: rep[1].maxWait }}, dish: SHIP.galley.servery.dish, text: galleyText('servery'), sent: sent.length ? sent[0] : null }};
+      setShipNow((dinner - 1) * 1440 + 16 * 60); galleyAdvance(shipNow()); out.batchText = galleyText('servery'); out.cold = SHIP.galley.cold.meals;
+      window.__sc("eventModAt = window.__keepAt; cartTrays = window.__keepTr"); window.__keepAt = keepAt; window.__keepTr = keepTr;
+      SHIP.galley = null; GALLEY_EV.clear(); return out; }})()""")
+    print('Events (stand-in eventModAt): storm', evg['storm'], 'dish', repr(evg['dish']), 'trays sent', evg['sent'])
+    print('  ', evg['text'][:150], '| formal dinner', evg['dinner'], '|', evg['batchText'][-80:])
+    if evg['dish'] != 'storm stew' or evg['storm']['trays'] != 6 or not evg['sent'] or evg['sent'].get('trays') != 6 or 'bridge' not in evg['text']: fail(f"storm: {evg}")
+    if evg['storm']['missed'] or evg['storm']['maxWait'] > BUSY_WAIT_MAX: fail(f"storm: waits {evg['storm']}")
+    if evg['dinner']['batch'] != 12 or 'Envoy' not in evg['batchText']: fail(f"formal dinner: {evg['dinner']} {evg['batchText']}")
 
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
