@@ -4545,6 +4545,9 @@ DECKS[3] = {
     { id: '3-lights-1', kind: 'lights', at: [16, 15], room: 'R', face: 'w', panel: [16, 15] },
     { id: '3-nutrient-1', kind: 'nutrient', at: [5, 18], room: 'i', face: 'w', panel: [4, 18], look: { lamp: [0, 1.2, .7], drip: [0, .9, .74], light: [0, 2.1, .7] } },
     { id: '3-irrigation-1', kind: 'irrigation', at: [5, 20], room: 'i', face: 'w', panel: [4, 20], look: { lamp: [0, .96, .6], drip: [0, .9, .64], light: [0, 2.1, .6] } },
+    // the garden's grow racks (C9, 0.38.6, for the systems engineer): kind 'growlight', the north four racks and the south two
+    { id: '3-growlight-1', kind: 'growlight', at: [5, 0], room: 'G', face: 's', panel: [5, 1], look: { lamp: [-.4, 1.55, .17], drip: [-.4, .4, .2], light: [-.4, 2.05, .17] } },
+    { id: '3-growlight-2', kind: 'growlight', at: [8, 21], room: 'G', face: 'n', panel: [8, 20], look: { lamp: [.4, 1.55, .18], drip: [.4, .4, .21], light: [.4, 2.05, .18] } },
   ],
   places: [
     { id: '3-bench-1', type: 'bench', at: [22, 14], xy: [22.7, 14.15], walk: [22, 13], face: 'w', pose: 'sit', room: '+' },
@@ -4667,6 +4670,13 @@ DECKS[3] = {
     { id: '3-tend-15', type: 'garden', at: [10, 16], xy: [10.6, 16.25], walk: [10, 16], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-16', type: 'garden', at: [8, 19], xy: [8, 19.65], walk: [8, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
     { id: '3-tend-17', type: 'garden', at: [10, 19], xy: [10.6, 19.65], walk: [10, 19], face: 'n', pose: 'work', anim: 'water', room: 'G' },
+    // gardeners at work (C9, 0.38.6): standing at the racks and beds, watering; free tiles that aren't tend spots
+    { id: '3-gardenwork-1', type: 'work:garden', at: [7, 1], xy: [7.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // the north racks
+    { id: '3-gardenwork-2', type: 'work:garden', at: [9, 1], xy: [9.1, 1.15], face: 'n', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-3', type: 'work:garden', at: [4, 4], xy: [4.5, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },   // the beds
+    { id: '3-gardenwork-4', type: 'work:garden', at: [8, 4], xy: [8, 4.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-gardenwork-5', type: 'work:garden', at: [5, 14], xy: [5, 14.4], face: 's', pose: 'stand', anim: 'water', room: 'G' },
+    { id: '3-crates-1', type: 'storage', at: [10, 12], face: 'e', pose: 'stand', room: 'G' },   // where garden crates are picked up, by the glass doors
     { id: '3-garden-1', type: 'garden', at: [6, 8], xy: [6.15, 8.45], walk: [5, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-2', type: 'garden', at: [6, 8], xy: [6.85, 8.45], walk: [7, 8], face: 's', pose: 'sit', room: 'G' },
     { id: '3-garden-3', type: 'garden', at: [6, 13], xy: [6.85, 13.55], walk: [7, 13], face: 'n', pose: 'sit', room: 'G' },
@@ -4732,6 +4742,8 @@ DECKS[3] = {
     { id: '3-lights-1-panel', type: 'work:works', at: [16, 15], xy: [16.7, 15.5], walk: [16, 15], face: 'e', pose: 'work', machine: '3-lights-1', room: 'R' },
     { id: '3-nutrient-1-panel', type: 'work:works', at: [4, 18], xy: [4.7, 18.5], walk: [4, 18], face: 'e', pose: 'work', machine: '3-nutrient-1', room: 'i' },
     { id: '3-irrigation-1-panel', type: 'work:works', at: [4, 20], xy: [4.7, 20.5], walk: [4, 20], face: 'e', pose: 'work', machine: '3-irrigation-1', room: 'i' },
+    { id: '3-growlight-1-panel', type: 'work:works', at: [5, 1], xy: [5.4, 1.15], walk: [5, 1], face: 'n', pose: 'work', machine: '3-growlight-1', room: 'G' },
+    { id: '3-growlight-2-panel', type: 'work:works', at: [8, 20], xy: [8.4, 20.8], walk: [8, 20], face: 's', pose: 'work', machine: '3-growlight-2', room: 'G' },
     { id: '3-callhome-1', type: 'callhome', at: [36, 21], xy: [36.62, 21.15], walk: [36, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-2', type: 'callhome', at: [37, 21], xy: [37.84, 21.15], walk: [37, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
     { id: '3-callhome-3', type: 'callhome', at: [39, 21], xy: [39.06, 21.15], walk: [39, 20], face: 's', pose: 'sit', anim: 'call', y: .53, room: 'B' },
