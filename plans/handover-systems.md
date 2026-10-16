@@ -88,7 +88,24 @@ The user's answers 1–8 and 22 (`plans/answers-pass-plan.md`), all in section 1
 
   Leads: session_01WHXNp9A1WHAD2EHJw384Qp, since 2026-10-16 04:20.
 
-**Known outside section 17:** player_check's job loop fails since 0.33.16. The galley plant's panel on Deck 3 (tile 39,1) can only be reached through Brennan's station tile 39,4 (`3-galley-2`). It's a layout or player-walking fix, reported to the lead.
+- **0.33.20–0.33.22:** the food-cart fixes.
+    - `cartWaiting` is true only for your own run;
+    - a run that has already arrived when it reaches the list is history;
+    - the galley alone counts the meals on their way (the lead's decision);
+    - machine_check 5f proves the crew take every food run in live play.
+- **0.33.23:** handing jobs in at the board: `jobStepDone`, `turnInJob`, `j.workDone`, `jobStops` done marks, and `TURN_IN` (switched on by the interactions engineer's 0.37.3).
+- **Pillar 3, C7 (0.33.24–0.33.27):**
+    - event wear by system and machine kind (`eventWear`);
+    - event jobs from section 18's `eventMod('jobs')` (`eventStopOf`, `postEventJob`); finishing one yourself calls `eventMine('jobs')`;
+    - favours for the social engineer (`favourPost`, `favourAccept`, `favourDecline`, `favourTurnIn`, `favoursOf`, `myFavours`);
+    - `cartTrays` for the galley's event trays;
+    - storm blackouts (`blackoutHour`, `blackoutAt`, `deckLook().dark`, scored as `eventScore('blackout', minutes)`).
+
+  The storm's own `stormTrays` is to be dropped by the events engineer (the lead's decision): the galley's `cartTrays` is the one tray run.
+
+  Leads: session_015QoyPWBdMPM4ywf5W2jMMs since 2026-10-16 15:15.
+
+**Known outside section 17:** the galley-plant reach problem (from 0.33.16) was fixed by the player engineer's squeeze-past (0.28.12). player_check is all OK from 0.41.4 on.
 
 ## State at 0.40.8: loose ends and weak spots
 
