@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.21
+   STARSHIP CADET: CSV Wren                            build 0.33.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.21';                            // keep in step with the header's build line
+const GAME_BUILD = '0.33.22';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9948,7 +9948,6 @@ function cartClaim(t, cold, o = {}) {
   if (!(cold >= 0)) return null;
   const h = Math.floor(t / 60), hr = h % 24;
   if (!o.replay && CART_RUNS.has(h)) return CART_RUNS.get(h);
-  if (!o.replay) cold += yourCartMeals();                 // your run's meals are on their way (0.33.20)
   let run = null;
   if (cold < CART_URGENT || (hr >= 9 && hr < 17 && cold < CART_DAILY)) {
     let meals = Math.min(CART_MEALS, coldCap() - cold);
@@ -9996,8 +9995,8 @@ function cartPost() {
 // hour ordered another run and the hold ran dry). Live play only: never in replays
 const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you') || null;
 function cartWaiting(h) { return !!yourCartRun(h); }
-// the meals on your cart, not yet unloaded: cartClaim counts them as on their way, so the galley doesn't order more
-const yourCartMeals = () => SHIP.jobs.reduce((n, j) => n + (j.cargo === 'meals' && j.status === 'claimed' && j.claimedBy === 'you' ? j.meals || 0 : 0), 0);
+// (meals on their way, yours included, are counted by the galley when it asks cartClaim: section 16's 0.29.17; the
+// galley owns the cold store's accounting, so section 17 doesn't add them too: 0.33.22)
 // where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
 // first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
 // test copies that want the plain plans.
