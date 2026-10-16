@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.30.13
+   STARSHIP CADET: CSV Wren                            build 0.30.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3616,10 +3616,10 @@ DECKS[4] = {
     { id: '4-24-wash', type: 'shower', at: [41, 9], face: 'w', pose: 'stand', room: 'V' },
     { id: '4-shower-p1', type: 'shower', at: [2, 0], face: 'n', pose: 'stand', room: 'p' },
     { id: '4-shower-p2', type: 'shower', at: [4, 0], face: 'n', pose: 'stand', room: 'p' },
-    { id: '4-toilet-p1', type: 'toilet', at: [5, 0], face: 's', pose: 'sit', room: 'p' },
+    { id: '4-toilet-p1', type: 'toilet', at: [5, 0], face: 's', pose: 'sit', room: 'p', xy: [5.35, 0.5], y: 0.4 },
     { id: '4-shower-q1', type: 'shower', at: [4, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-shower-q2', type: 'shower', at: [5, 19], face: 's', pose: 'stand', room: 'q' },
-    { id: '4-toilet-q1', type: 'toilet', at: [2, 19], face: 'n', pose: 'sit', room: 'q' },
+    { id: '4-toilet-q1', type: 'toilet', at: [2, 19], face: 'n', pose: 'sit', room: 'q', xy: [2.65, 19.5], y: 0.4 },
     { id: '4-basin-p1', type: 'basin', at: [3, 2], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-p2', type: 'basin', at: [3, 3], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-q1', type: 'basin', at: [4, 16], face: 'e', pose: 'stand', room: 'q' },
@@ -3630,28 +3630,28 @@ DECKS[4] = {
     { id: '4-laundry-4', type: 'laundry', at: [11, 18], face: 's', pose: 'stand', room: 'l' },
     { id: '4-laundry-5', type: 'laundry', at: [13, 17], face: 'e', pose: 'stand', room: 'l' },
     { id: '4-laundry-6', type: 'laundry', at: [12, 17], face: 'w', pose: 'stand', room: 'l' },
-    { id: '4-common-1', type: 'common-room', at: [2, 9], face: 'e', pose: 'sit', room: 'j', window: true },
-    { id: '4-common-2', type: 'common-room', at: [2, 10], face: 'e', pose: 'sit', room: 'j', window: true },
-    { id: '4-common-3', type: 'common-room', at: [2, 11], face: 'e', pose: 'sit', room: 'j', window: true },
-    { id: '4-common-4', type: 'common-room', at: [7, 9], face: 'w', pose: 'sit', room: 'j' },
-    { id: '4-common-5', type: 'common-room', at: [7, 10], face: 'w', pose: 'sit', room: 'j' },
-    { id: '4-common-6', type: 'common-room', at: [5, 8], face: 's', pose: 'sit', room: 'j' },
-    { id: '4-common-7', type: 'common-room', at: [5, 12], face: 'n', pose: 'sit', room: 'j' },
-    { id: '4-common-8', type: 'common-room', at: [3, 6], face: 's', pose: 'sit', room: 'j' },
+    { id: '4-common-1', type: 'common-room', at: [2, 9], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
+    { id: '4-common-2', type: 'common-room', at: [2, 10], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
+    { id: '4-common-3', type: 'common-room', at: [2, 11], face: 'e', pose: 'sit', room: 'j', window: true, y: 0.52 },
+    { id: '4-common-4', type: 'common-room', at: [7, 9], face: 'w', pose: 'sit', room: 'j', xy: [7.36, 9.64], y: 0.44 },
+    { id: '4-common-5', type: 'common-room', at: [7, 10], face: 'w', pose: 'sit', room: 'j', xy: [7.45, 10.5], y: 0.44 },
+    { id: '4-common-6', type: 'common-room', at: [5, 8], face: 's', pose: 'sit', room: 'j', xy: [5.5, 8.3], y: 0.44 },
+    { id: '4-common-7', type: 'common-room', at: [5, 12], face: 'n', pose: 'sit', room: 'j', xy: [5.42, 12.16], y: 0.44 },
+    { id: '4-common-8', type: 'common-room', at: [3, 6], face: 's', pose: 'sit', room: 'j', xy: [3.25, 6.5], y: 0.49 },
     { id: '4-common-9', type: 'common-room', at: [3, 8], face: 'n', pose: 'sit', room: 'j' },
-    { id: '4-common-10', type: 'common-room', at: [2, 7], face: 'e', pose: 'sit', room: 'j', window: true },
+    { id: '4-common-10', type: 'common-room', at: [2, 7], face: 'e', pose: 'sit', room: 'j', xy: [2.5, 7.2], y: 0.49 },
     { id: '4-common-11', type: 'common-room', at: [4, 7], face: 'w', pose: 'sit', room: 'j' },
     { id: '4-common-kettle', type: 'common-room', at: [7, 7], face: 'n', pose: 'stand', room: 'j' },
-    { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n' },   // the piano bench
-    { id: '4-music-2', type: 'music', at: [45, 7], face: 'e', pose: 'sit', room: 'n' },
-    { id: '4-music-3', type: 'music', at: [45, 8], face: 'e', pose: 'sit', room: 'n' },
-    { id: '4-music-4', type: 'music', at: [45, 11], face: 'e', pose: 'sit', room: 'n' },
-    { id: '4-music-5', type: 'music', at: [46, 11], face: 'e', pose: 'sit', room: 'n' },
+    { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n', xy: [44.87, 5.35], y: 0.55 },   // the piano bench
+    { id: '4-music-2', type: 'music', at: [45, 7], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
+    { id: '4-music-3', type: 'music', at: [45, 8], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
+    { id: '4-music-4', type: 'music', at: [45, 11], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
+    { id: '4-music-5', type: 'music', at: [46, 11], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
     { id: '4-music-records', type: 'music', at: [45, 14], face: 's', pose: 'stand', room: 'n' },
-    { id: '4-bench-1', type: 'bench', at: [18, 6], face: 'e', pose: 'sit', room: '+' },
-    { id: '4-bench-2', type: 'bench', at: [18, 7], face: 'e', pose: 'sit', room: '+' },
-    { id: '4-bench-3', type: 'bench', at: [23, 6], face: 'w', pose: 'sit', room: '+' },
-    { id: '4-bench-4', type: 'bench', at: [23, 7], face: 'w', pose: 'sit', room: '+' },
+    { id: '4-bench-1', type: 'bench', at: [18, 6], face: 'e', pose: 'sit', room: '+', xy: [18.4, 6.5], y: 0.48 },
+    { id: '4-bench-2', type: 'bench', at: [18, 7], face: 'e', pose: 'sit', room: '+', xy: [18.4, 7.5], y: 0.48 },
+    { id: '4-bench-3', type: 'bench', at: [23, 6], face: 'w', pose: 'sit', room: '+', xy: [23.6, 6.5], y: 0.48 },
+    { id: '4-bench-4', type: 'bench', at: [23, 7], face: 'w', pose: 'sit', room: '+', xy: [23.6, 7.5], y: 0.48 },
     { id: '4-lift-1', type: 'lift-wait', at: [18, 8], face: 'e', pose: 'stand', room: '+' },
     { id: '4-lift-2', type: 'lift-wait', at: [18, 10], face: 'e', pose: 'stand', room: '+' },
     { id: '4-lift-3', type: 'lift-wait', at: [23, 8], face: 'w', pose: 'stand', room: '+' },
@@ -3947,13 +3947,13 @@ DECKS[5] = {
     { id: '5-bench-4', type: 'work:works', at: [19, 3], face: 'n', pose: 'work', room: 'w' },
     { id: '5-jobboard-1', type: 'work:works', at: [15, 1], face: 'n', pose: 'stand', room: 'w' },
     { id: '5-toolwall-1', type: 'work:works', at: [19, 1], face: 'n', pose: 'stand', room: 'w' },
-    { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w' },
-    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o' },
-    { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true },
-    { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true },
+    { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w', xy: [11.57, 3.63], y: 0.49 },
+    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5 },
+    { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.5, 0.6], y: 0.44 },
+    { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true, xy: [21.64, 0.64], y: 0.49 },
     { id: '5-tea-3', type: 'lounge-seat', at: [21, 1], face: 's', pose: 'stand', room: 't' },
     { id: '5-shower-1', type: 'shower', at: [21, 3], face: 'n', pose: 'stand', room: 'q' },
-    { id: '5-toilet-1', type: 'toilet', at: [23, 3], face: 's', pose: 'sit', room: 'q' },
+    { id: '5-toilet-1', type: 'toilet', at: [23, 3], face: 's', pose: 'sit', room: 'q', xy: [23.3, 3.5], y: 0.4 },
     { id: '5-basin-1', type: 'basin', at: [22, 5], face: 'w', pose: 'stand', room: 'q' },
     { id: '5-basin-2', type: 'basin', at: [22, 6], face: 'w', pose: 'stand', room: 'q' },
     { id: '5-store-1', type: 'work:works', at: [25, 4], face: 'w', pose: 'work', room: 'r' },
@@ -3979,7 +3979,7 @@ DECKS[5] = {
     { id: '5-bay-1', type: 'work:works', at: [4, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-2', type: 'work:works', at: [7, 9], face: 'n', pose: 'work', room: 'S' },
     { id: '5-bay-3', type: 'work:works', at: [2, 4], face: 'w', pose: 'work', room: 'S' },
-    { id: '5-booth-1', type: 'work:watch', at: [8, 14], face: 'e', pose: 'sit', room: 'b' },
+    { id: '5-booth-1', type: 'work:watch', at: [8, 14], face: 'e', pose: 'sit', room: 'b', xy: [8.75, 14.5], y: 0.5 },
     { id: '5-lift-1', type: 'lift-wait', at: [15, 6], face: 'e', pose: 'stand', room: '+' },
     { id: '5-lift-2', type: 'lift-wait', at: [15, 9], face: 'e', pose: 'stand', room: '+' },
     { id: '5-lift-3', type: 'lift-wait', at: [20, 6], face: 'w', pose: 'stand', room: '+' },
@@ -5865,17 +5865,17 @@ DECKS[6] = {
   // { id, type, at: [col, row], face, pose, room }. Seats and beds sit on furniture tiles and are reached from the tile beside them;
   // face is the way the person faces there. deck_check.py checks every place can be reached.
   places: [
-    { id: '6-control-1', type: 'work:engine', at: [25, 5], face: 'e', pose: 'sit', room: 'K' },
-    { id: '6-control-2', type: 'work:engine', at: [25, 6], face: 'e', pose: 'sit', room: 'K' },
-    { id: '6-watch-1', type: 'work:engine', at: [12, 8], face: 'w', pose: 'sit', room: 'S' },
-    { id: '6-watch-2', type: 'work:engine', at: [12, 9], face: 'w', pose: 'sit', room: 'S' },
+    { id: '6-control-1', type: 'work:engine', at: [25, 5], face: 'e', pose: 'sit', room: 'K', xy: [25.42, 5.37], y: 0.5 },
+    { id: '6-control-2', type: 'work:engine', at: [25, 6], face: 'e', pose: 'sit', room: 'K', xy: [25.58, 6.63], y: 0.5 },
+    { id: '6-watch-1', type: 'work:engine', at: [12, 8], face: 'w', pose: 'sit', room: 'S', xy: [12.84, 8.1], y: 0.44 },
+    { id: '6-watch-2', type: 'work:engine', at: [12, 9], face: 'w', pose: 'sit', room: 'S', xy: [12.84, 9.9], y: 0.44 },
     { id: '6-engine-1', type: 'work:engine', at: [4, 4], face: 's', pose: 'work', room: 'E' },
     { id: '6-engine-2', type: 'work:engine', at: [7, 7], face: 'n', pose: 'work', room: 'E' },
     { id: '6-engine-3', type: 'work:engine', at: [3, 8], face: 'w', pose: 'work', room: 'E' },
-    { id: '6-bench-1', type: 'bench', at: [14, 3], face: 'w', pose: 'sit', room: 'O' },
+    { id: '6-bench-1', type: 'bench', at: [14, 3], face: 'w', pose: 'sit', room: 'O', xy: [14.4, 3.5], y: 0.48 },
     { id: '6-bench-2', type: 'bench', at: [18, 10], face: 'n', pose: 'sit', room: '+' },
-    { id: '6-bench-3', type: 'bench', at: [22, 8], face: 's', pose: 'sit', room: '+' },
-    { id: '6-bench-4', type: 'bench', at: [23, 8], face: 's', pose: 'sit', room: '+' },
+    { id: '6-bench-3', type: 'bench', at: [22, 8], face: 's', pose: 'sit', room: '+', xy: [22.5, 8.4], y: 0.48 },
+    { id: '6-bench-4', type: 'bench', at: [23, 8], face: 's', pose: 'sit', room: '+', xy: [23.5, 8.4], y: 0.48 },
     { id: '6-lift-1', type: 'lift-wait', at: [16, 3], face: 'e', pose: 'stand', room: '+' },
     { id: '6-lift-2', type: 'lift-wait', at: [16, 7], face: 'e', pose: 'stand', room: '+' },
     { id: '6-lift-3', type: 'lift-wait', at: [21, 3], face: 'w', pose: 'stand', room: '+' },
@@ -6421,7 +6421,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.30.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.30.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
