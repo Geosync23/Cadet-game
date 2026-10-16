@@ -139,8 +139,13 @@ with sync_playwright() as pw:
             if x['noPath']: fail(f"no path: {x['noPath']}")
             if x['calls'] >= BUDGET: fail(f"draw calls {x['calls']} >= {BUDGET}")
     for d, i, k in [(7, 'market', 'stalls'), (bd, 'birthday', 'cake')]:
-        g.ev(f"goToDeck(3); setShipNow(({d} - 1) * 1440 + eventsOn({d}).find(e => e.id === '{i}').from + 10); EV_MIN = -1; eventsTick()")
+        g.ev(f"SHIP.galley = null; goToDeck(3); setShipNow(({d} - 1) * 1440 + eventsOn({d}).find(e => e.id === '{i}').from + 10); if (typeof galleyTick === 'function') galleyTick(); EV_MIN = -1; eventsTick()")
         on = g.ev("EV_DECOR.g ? EV_DECOR.g.children.length : 0")
+        if k == 'cake':                                   # one cake: the galley's on the servery (section 16) when it's out, else ours
+            gc = g.ev("typeof evGalleyCake === 'function' && evGalleyCake()")
+            print(f"  the galley's cake out: {gc}; ours: {on} meshes")
+            if gc and on: fail('two cakes: the galley\'s and ours')
+            if gc: on = 1
         g.ev(f"setShipNow(({d} - 1) * 1440 + eventsOn({d}).find(e => e.id === '{i}').to + 30); EV_MIN = -1; eventsTick()")
         off = g.ev("EV_DECOR.g ? EV_DECOR.g.children.length : 0")
         print(f"Decor ({k}): {on} meshes during {i}, {off} after")
