@@ -9740,6 +9740,7 @@ const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year:
 // who(p, d, ctx): the chance (0-1) a person who's free goes. anim(p): what they do there (an activity in 8b's ACTS),
 // or null for the place's own pose. k: the event's own hash key (never reuse one). prio: the higher wins a clash.
 // jitter: each person leaves up to that many minutes before `to`; early: the honorees come that much early.
+// cake: true asks the galley (section 16) to bake that day; its cake replaces our decor 'cake' prop.
 // decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
 // line before it; here: the tap line during it; thanks: the toast when the player joins.
 const SHIP_EVENTS = [
@@ -9787,7 +9788,7 @@ const SHIP_EVENTS = [
   { id: 'birthday', name: 'Birthday', k: 328, when: { birthday: true }, at: [1215, 1270], jitter: 15, early: 5, min: 20, prio: 2,
     where: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'], ids: /^3-mess-([1-9]|1[0-6])$/ }, { deck: 3, pool: 'mess-seat' }, { deck: 3, pool: 'lounge-seat' }, { deck: 3, pool: 'bench' }],
     who: (p, d, c) => c.honorees.includes(p) ? 1 : c.honorees.some(h => h.dept === p.dept) ? .8 : c.honorees.some(h => bedRoom(h) === bedRoom(p)) ? .7 : .45,
-    anim: () => 'talk', decor: 'cake',
+    anim: () => 'talk', decor: 'cake', cake: true,
     from: 'Matthias Oduya', mail: c => 'Tomorrow is ' + c.names + '\'s birthday. Chef Brennan is baking; cake in the mess hall at 20:15.',
     ask: c => 'Cake in the mess at quarter past eight, for ' + c.names + '.', here: c => 'Happy birthday, ' + c.first + '!', thanks: c => 'You join the birthday table and sing for ' + c.names + '. The cake is lemon.' },
   { id: 'hull-lights', name: 'Hull-lights evening', k: 329, when: { every: 28, on: 24 }, at: [1260, 1320], min: 25,
@@ -9798,7 +9799,7 @@ const SHIP_EVENTS = [
     ask: 'Hull lights tonight. The bow windows are the best seats.', here: 'There goes the green. My favourite.', thanks: 'You watch the hull lights run through their colours from the window.' },
   { id: 'founding', name: 'Founding Day', k: 330, when: { yearDay: 100 }, at: [1170, 1290], min: 30, prio: 3,
     where: [{ deck: 3, pool: 'mess-seat' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
-    who: () => .85, anim: () => 'talk', decor: 'cake',
+    who: () => .85, anim: () => 'talk', decor: 'cake', cake: true,
     from: 'Captain Odile Marrow', mail: 'Tomorrow is the Wren\'s Founding Day. Everyone off duty to the mess hall at 19:30 for cake and a few words. I promise to keep them few.',
     ask: 'Founding Day! Cake in the mess at half seven.', here: 'To the Wren.', thanks: 'You raise a cup in the mess hall. To the Wren.' },
   { id: 'quiet-watch', name: 'The quiet watch', k: 331, when: { yearDay: 300 }, at: [1290, 1335], min: 25,
@@ -9999,7 +10000,8 @@ const evGalleyCake = () => !!(typeof SHIP !== 'undefined' && SHIP.galley && SHIP
 function eventsDecor(now) {
   if (EV_DECOR.root !== deckRoot) { EV_DECOR.root = deckRoot; EV_DECOR.g = null; EV_DECOR.key = ''; }
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const on = eventsOn(d).filter(e => e.ev.decor && m >= e.from - 30 && m < e.to + 15).map(e => e.ev.decor), key = deckDef.num + ':' + [...new Set(on)].sort().join(',') + (evGalleyCake() ? ':galley-cake' : '');
+  const galley = typeof galleyAdvance === 'function';   // section 16 bakes for `cake: true` events (0.29.15): their cake, not a prop
+  const on = eventsOn(d).filter(e => e.ev.decor && !(galley && e.ev.cake && e.ev.decor === 'cake') && m >= e.from - 30 && m < e.to + 15).map(e => e.ev.decor), key = deckDef.num + ':' + [...new Set(on)].sort().join(',') + (evGalleyCake() ? ':galley-cake' : '');
   if (key === EV_DECOR.key) return;
   EV_DECOR.key = key;
   if (EV_DECOR.g) { deckRoot.remove(EV_DECOR.g); EV_DECOR.g.traverse(o => o.geometry && o.geometry.dispose()); EV_DECOR.g = null; }

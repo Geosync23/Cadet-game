@@ -145,7 +145,7 @@ with sync_playwright() as pw:
             gc = g.ev("typeof evGalleyCake === 'function' && evGalleyCake()")
             print(f"  the galley's cake out: {gc}; ours: {on} meshes")
             if gc and on: fail('two cakes: the galley\'s and ours')
-            if gc: on = 1
+            if gc or g.ev("typeof galleyAdvance === 'function'"): on = 1   # the galley bakes it (0.29.15)
         g.ev(f"setShipNow(({d} - 1) * 1440 + eventsOn({d}).find(e => e.id === '{i}').to + 30); EV_MIN = -1; eventsTick()")
         off = g.ev("EV_DECOR.g ? EV_DECOR.g.children.length : 0")
         print(f"Decor ({k}): {on} meshes during {i}, {off} after")
