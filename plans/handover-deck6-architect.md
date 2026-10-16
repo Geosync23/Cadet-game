@@ -161,7 +161,7 @@ Containment proofs, which I wrote as scratch scripts. They're easy to rebuild wi
 - **The cargo hold's shuttle-bay hatch:** open it when the shuttle starts flying cargo runs?
 - **More life in the utility rooms:** a radio left on in the heating plant, a mug on the breaker cabinet, a sign about the oxygen cells. Cheap touches that make Works rooms feel lived in.
 
-## 8. The answers pass (0.30.11–0.30.12, 2026-10-16)
+## 8. The answers pass (0.30.11–0.30.17, 2026-10-16)
 
 - **0.30.11:** `byFace` on Decks 4 and 5 (smooth hull stripes, fewer draw calls).
 - **0.30.12:** everything else on my rows. See its DEV_NOTES row. Formats others rely on:
@@ -174,3 +174,15 @@ Containment proofs, which I wrote as scratch scripts. They're easy to rebuild wi
   - an all-deck pixel comparer (day, night, wide and rotated shots, crew hidden);
   - a close-up shooter (camera target at a room-local spot; `WALLS=auto` keeps wall decor visible, since lowered walls hide it);
   - a stand-in `window.machineLook` to see the marks.
+  - a seat check: merge crowd-render 0.27.11+ into a scratch copy and open `?seats` (or `#seats` from 0.27.12): a labelled stand-in on every seat place.
+- **0.30.13:** `machineMarks` removed (section 8b's `machineFx` draws wear on every deck); `look` overrides on 23 of my 29 machines; plates read ROSTER's `plate: { rank, name }`.
+- **0.30.14 / 0.30.17:** seat places carry `xy` and `y` (seat top) from the performance engineer's measurements; all 36 seats on Decks 4–6 measured correct at 0.30.17. The watch-room armchairs I set by hand (12.84, 8.1 / 9.9).
+- **0.30.15:** the health board reads `shipHealthRows()` as built (systems 0.33.17: `[{ key, name, value, state, worst }]`; the `ship` row is the header, `worst` is shown per row).
+- **0.30.16:** numeric `face` in degrees (sim 0.26.11: 0 south, 90 east); the card-table stools use it. deck_check accepts letters or degrees.
+- **Last branch state:** claude/deck-architect 10a71a8 (0.30.17), all accepted by the lead for the next combined build. Nothing open on my side.
+- **Gotchas learned tonight:**
+  - Dress code runs before `cellAt` exists (it's defined further down the file); use `Math.floor(x + OX)` instead.
+  - After a deck is built, `mergeMeshes` empties the pieces' groups. So measure a piece's shape during dress, or in a scratch copy with merging switched off.
+  - Lowered walls hide wall decor, so shoot wall pieces with walls on Auto.
+  - The only merge conflicts with ship-integration have been the two build lines.
+- **Open:** the Deck 2 cableTray name clash is resolved (Deck 2's is `crawlCableTray`); Deck 6's crawls draw mine again, checked on 0.41.2.
