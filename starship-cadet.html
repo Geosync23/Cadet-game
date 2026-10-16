@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.14
+   STARSHIP CADET: CSV Wren                            build 0.27.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.14';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.15';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11114,6 +11114,18 @@ const ACTS = {
     for (const a of r.arms) armTo(a, s, -.55, -1.7 + (a.side > 0 ? .3 * turn : 0), -.14, .35);
     r.head.rotation.x = L(r.head.rotation.x, .45, s);
   } },
+  punch: { f(r, s, t, b, ph) {                          // 0.27.15: at the punch bag, guard up, jabs one hand then the other, a little bounce
+    const u = (t * 1.6 + ph) % 2, side = u < 1 ? -1 : 1, jab = pulse(u % 1, 1, .35);
+    for (const a of r.arms) { const j = a.side === side ? jab : 0; armTo(a, s, L(-1.05, -1.5, j), L(-2.1, -.15, j), .18, .2); }
+    r.chest.rotation.y = L(r.chest.rotation.y, side * -.25 * jab, s); r.torso.rotation.x = L(r.torso.rotation.x, .12, s);
+    r.hips.position.y += Math.abs(Math.sin(t * 6 + ph)) * .012 * s; r.head.rotation.x = L(r.head.rotation.x, .1, s);
+  } },
+  stretch: { f(r, s, t, b, ph) {                         // 0.27.15: on the mat, a slow reach overhead with a lean to each side, then a fold to the toes
+    const u = ((t + ph) % 12) / 12, fold = u > .62 ? Math.sin(Math.PI * (u - .62) / .38) : 0, lean = u < .62 ? Math.sin(u / .62 * Math.PI * 2) : 0;
+    for (const a of r.arms) armTo(a, s, L(L(-2.9, -2.6, Math.abs(lean)), -.25, fold), L(-.15, -.05, fold), L(.08, 0, fold), 0);
+    r.torso.rotation.z = L(r.torso.rotation.z, .28 * lean, s); r.torso.rotation.x = L(r.torso.rotation.x, 1.15 * fold, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.15 + .3 * fold, s);
+  } },
   talk: { f(r, s, t, b, ph) {
     for (const a of r.arms) {
       const g = pulse(t, 5 + a.side, 1.6, ph + a.side * 1.7);
@@ -11601,7 +11613,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
