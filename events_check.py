@@ -1,7 +1,7 @@
 # Starship Cadet: events check (keep in the repo, next to day_check.py)
 # Steps a few weeks of ship days with ?nosave and checks the ship's small traditions (section 18, SHIP_EVENTS):
 #   each event happens when it's due (its weekday, every N days, its day of the year, a birthday) and on no other day;
-#   people go to it (at least one), only at its time (honorees a little early; staying on up to 25 minutes after) and only to its places;
+#   people go to it (an occasional day with nobody, the room full of others, is noted; never anyone fails), only at its time (honorees a little early; staying on up to 25 minutes after) and only to its places;
 #   the schedules stay sound on event days (dayReport: sleep, meals, shifts, no double-booking, no gaps);
 #   the same day planned twice gives the same events;
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
@@ -19,7 +19,7 @@ BUDGET = 450
 STEP = 0.05                    # real seconds a step, as day_check
 
 PLANS = r"""(days => {
-  const out = { days: [], bad: [], ids: SHIP_EVENTS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
+  const out = { days: [], bad: [], empty: [], ids: SHIP_EVENTS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const tagId = tag => { const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read))?$/.exec(tag); return m && m[1]; };
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
@@ -41,7 +41,7 @@ PLANS = r"""(days => {
     for (const e of on) {
       const want = schedPeople().filter(p => eventPlan(p, d).some(x => x.id === e.id)).length, n = went[e.id] ? went[e.id].size : 0;
       const cap = new Set(e.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':' + i : w.pool)) || []).map(pl => pl.id)).size;
-      if (!n) out.bad.push(d + ' ' + e.id + ': nobody went (' + want + ' meant to)');
+      if (!n) out.empty.push(d + ' ' + e.id + ': nobody went (' + want + ' meant to; the room was full)');
       row.ev.push({ id: e.id, names: e.names, at: hhmm(e.from) + '-' + hhmm(e.to), want, went: n, places: places[e.id] ? places[e.id].size : 0, cap });
     }
     const r = dayReport(d);
@@ -115,9 +115,10 @@ with sync_playwright() as pw:
     for row in r['days']:
         if row['ev']:
             print(f"Day {row['d']} {row['wd']}: " + '; '.join(f"{e['id']}{' (' + e['names'] + ')' if e['names'] else ''} {e['at']} went {e['went']}/{e['want']} (places {e['cap']})" for e in row['ev']))
-    seen = {e['id'] for row in r['days'] for e in row['ev']}
+    seen = {e['id'] for row in r['days'] for e in row['ev'] if e['went']}
+    for x in r['empty']: print('  note:', x)
     for i in r['ids']:
-        if i not in seen: fail(f"{i} never happened in the days checked")
+        if i not in seen: fail(f"{i} never happened (or nobody ever went) in the days checked")
     for b in r['bad'][:20]: fail(b)
     if len(r['bad']) > 20: print(f"  ... and {len(r['bad']) - 20} more")
     same = g.ev(f"({SAME})(4)")
