@@ -1,7 +1,7 @@
 # Starship Cadet: events check (keep in the repo, next to day_check.py)
 # Steps a few weeks of ship days with ?nosave and checks the ship's small traditions (section 18, SHIP_EVENTS):
 #   each event happens when it's due (its weekday, every N days, its day of the year, a birthday) and on no other day;
-#   people go to it (at least one), only at its time (staying on up to 25 minutes after) and only to its places;
+#   people go to it (at least one), only at its time (honorees a little early; staying on up to 25 minutes after) and only to its places;
 #   the schedules stay sound on event days (dayReport: sleep, meals, shifts, no double-booking, no gaps);
 #   the same day planned twice gives the same events;
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
@@ -33,7 +33,7 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag)) continue;
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from || s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
+      if (s.from < B + e.from - (e.ev.early || 0) || s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
       (went[id] = went[id] || new Set()).add(p.id); (places[id] = places[id] || new Set()).add(s.placeId);
@@ -86,7 +86,7 @@ SIM = r"""(async ({ d, id, step }) => {
       if (Math.abs(now - (B + e.from + Math.min(30, (e.to - e.from) / 2))) < step * SHIP_RATE / 2 + 1e-9) {   // a frame over the crowd, at the event
         const c = DECK_CREW.length ? new THREE.Vector3(...[...att.keys()].map(i => DECK_CREW.find(a => a.p.id === i)).filter(Boolean).reduce((s, a, _, l) => [s[0] + a.x / l.length, 0, s[2] + a.z / l.length], [0, 0, 0])) : cellPos(...LIFT_AT);
         player.obj.position.copy(c); target.copy(c).setY(.7);
-        eventsTick(); window.__skip = false; window.__step(1, 1); setShipNow(now);
+        eventsTick(); window.__skip = false; window.__step(1, 1); window.__step(2, 16); setShipNow(now);   // settled: the cutaway's fades done
         r.calls = renderer.info.render.calls; r.crew = DECK_CREW.length; r.decor = EV_DECOR.g ? EV_DECOR.g.children.length : 0;
       }
     }
@@ -126,7 +126,7 @@ with sync_playwright() as pw:
 
     # 2. on the deck: one of each kind, walked through minute by minute
     bd = g.ev(f"[...Array({DAYS}).keys()].map(i => i + 1).find(d => eventsOn(d).some(e => e.id === 'birthday'))")
-    sims = [(1, 'running'), (2, 'observatory'), (4, 'quiz'), (5, 'works-tea'), (5, 'jam'), (bd, 'birthday'), (6, 'film'), (6, 'harvest'), (7, 'market'), (24, 'hull-lights'), (100, 'founding'), (300, 'quiet-watch')]
+    sims = [(1, 'running'), (6, 'observatory-night'), (4, 'quiz'), (5, 'works-tea'), (5, 'jam'), (bd, 'birthday'), (6, 'film'), (6, 'harvest'), (7, 'market'), (24, 'hull-lights'), (100, 'founding'), (300, 'quiet-watch')]
     for d, i in sims:
         if not g.ev(f"eventsOn({d}).some(e => e.id === '{i}')"): fail(f"{i} not on day {d}"); continue
         s = g.ev(f"({SIM})({{ d: {d}, id: '{i}', step: {STEP} }})")
