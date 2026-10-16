@@ -9,7 +9,8 @@
 #   with an ideal crew (the day shift services anything worn, a few machines an hour): nothing ever gets past
 #   worn, and ship health stays at 90 or more
 #   with the real Works crew claiming jobs on paper (B2, B3): nothing breaks, ship health stays at 85 or more,
-#   shelves never go below zero, deliveries get carried to storage, easy jobs wait for you first, nobody does two
+#   shelves never go below zero, deliveries get carried to storage, easy jobs wait for you first (CREW_LEAVE minutes
+#   of the day shift; it reports how many a day are left for the player, aiming at 3 to 6), nobody does two
 #   jobs at once or a job outside their work block, jobWhere agrees with the jobs, and it's the same every way
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
@@ -84,7 +85,11 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   out.atPure = MACH_REV === rev && MACH_HOUR === hour;
   // the jobs, for the real crew's checks
   const J = [...seen.values()], ppl = new Map(schedPeople().map(p => [p.id, p]));
-  out.jobList = J.map(j => ({ id: j.id, kind: j.kind, status: j.status, by: j.claimedBy, urgency: j.urgency, posted: j.posted, found: j.found, start: j.start, end: j.end, done: j.done, made: j.made || 0, tier: jobTier(j), cargo: j.cargo || null }));
+  out.jobList = J.map(j => ({ id: j.id, kind: j.kind, status: j.status, by: j.claimedBy, urgency: j.urgency, posted: j.posted, found: j.found, start: j.start, end: j.end, done: j.done, made: j.made || 0, tier: jobTier(j), cargo: j.cargo || null, leave: leaveEnd(j) }));
+  // jobs left for the player: at your tier, on the board unclaimed for an hour or more of the day shift
+  const dayMin = (a, b) => { let n = 0; for (let m = Math.ceil(a); m < b; m++) { const md = m % 1440; if (md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) n++; } return n; };
+  out.leftForYou = J.filter(j => j.found <= end && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))
+    && dayMin(j.found, Math.min(end, j.start ?? j.doneAt ?? end)) >= 60).length;
   // nobody on two jobs at once; every job inside its person's work block (whereIs says work all through)
   const byWho = {}; out.overlap = []; out.offShift = [];
   for (const j of J) if (j.segs && j.claimedBy !== 'you') {
@@ -198,7 +203,8 @@ with sync_playwright() as pw:
     print(f"  worst state {['healthy', 'worn', 'faulty', 'failing', 'broken'][worst]}, lowest ship health {r['minHealth']:.1f}, at most {r['maxOpen']} jobs on the board, lowest shelf {r['minStock']}, job-hours waiting for parts {r['waiting']}")
     if waits: print(f"  repairs claimed after {waits[len(waits) // 2]:.1f} h (median), {waits[-1]:.1f} h at worst")
     print('  ship health by day:', ' '.join(f"{d['health']:.0f}" for d in r['daily']))
-    early = [j['id'] for j in done if j['tier'] <= 1 and j['urgency'] < 2 and j['start'] < j['found'] + 180]
+    early = [j['id'] for j in done if j['start'] < j['leave']]
+    print(f"  jobs left for the player (your tier, on the board an hour or more of the day shift): {r['leftForYou']}, {r['leftForYou'] / DAYS:.1f} a day")
     restocks = [j for j in done if j['kind'] == 'restock']
     print(f"  restock runs {len(restocks)}, nobody on two jobs at once: {not r['overlap']}, every job inside its work block: {not r['offShift']}, overlay matches: {r.get('overlay')}")
     if worst > 3: fail('a machine broke with the Works crew on the job')
@@ -228,21 +234,23 @@ with sync_playwright() as pw:
       const fin = finishJob(id), after = SHIP.machines[j.machine].cond;
       const took = takePart('relay'), stock = SHIP.stores.relay;
       // one job at a time; one you leave goes back on the board after 12 ship hours
-      const k = jobsBoard().find(x => !x.claimedBy && jobTier(x) <= PLAYER_TIER && x.machine && !ENGINE_KINDS.has(machineById(x.machine).kind));
+      // the next job you can take, waiting up to a day for one to be found
+      const takeable = () => { for (let n = 0; n < 24; n++) { const x = jobsBoard().find(x => !x.claimedBy && jobTier(x) <= PLAYER_TIER && x.machine && !ENGINE_KINDS.has(machineById(x.machine).kind)); if (x) return x; setShipNow(shipNow() + 60); } return null; };
+      const k = takeable();
       let lapse = null, oneAtATime = null;
       if (k) { claimJob(k.id); const k2 = jobsBoard().find(x => !x.claimedBy && x.id !== k.id && jobTier(x) <= PLAYER_TIER); oneAtATime = !k2 || !claimJob(k2.id);
                setShipNow(shipNow() + 13 * 60); machinesNow(); const back = SHIP.jobs.find(x => x.id === k.id); lapse = !back || back.claimedBy !== 'you'; }
       // progress keeps it yours: touched 10 hours in, it's still yours 13 hours after the claim
       let kept = null;
-      const k3 = jobsBoard().find(x => !x.claimedBy && jobTier(x) <= PLAYER_TIER && x.machine && !ENGINE_KINDS.has(machineById(x.machine).kind));
+      const k3 = takeable();
       if (k3 && claimJob(k3.id)) { setShipNow(shipNow() + 600); touchJob(k3.id); setShipNow(shipNow() + 180); machinesNow(); const b = SHIP.jobs.find(x => x.id === k3.id); kept = !!b && b.claimedBy === 'you'; dropJob(k3.id); }
       const s0 = SHIP.stores.relay || 0, ret = returnPart('relay') && SHIP.stores.relay === s0 + 1;
       return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse, kept, ret };
     })()""")
     print(f"Your job: {y}")
     if y.get('none') or not (y['claimed'] and y['mine'] and y['fin'] and y['after'] >= 90): fail('claiming and finishing a job yourself')
-    if y.get('oneAtATime') is False or y.get('lapse') is False: fail('one job at a time, and a job left 12 hours goes back')
-    if y.get('kept') is False or not y.get('ret'): fail('touchJob keeps a job in progress yours; returnPart puts a part back')
+    if y.get('oneAtATime') is not True or y.get('lapse') is not True: fail('one job at a time, and a job left 12 hours goes back')
+    if y.get('kept') is not True or not y.get('ret'): fail('touchJob keeps a job in progress yours; returnPart puts a part back')
 
     # 5b. food by cart: cartClaim is one rule, pure in replays, the same twice live, and never past the store's cap
     ck = g.ev("""(() => {
@@ -261,6 +269,22 @@ with sync_playwright() as pw:
     })()""")
     print(f"Food by cart: replays pure {ck['pure']}, over the cap {ck['overCap']}, urgent runs missed {ck['urgentMissed']}, daily runs off the day shift {ck['nightDaily']}")
     if not ck['pure'] or ck['overCap'] or ck['urgentMissed'] or ck['nightDaily']: fail('cartClaim')
+
+    # 5c. the cart run as your job (0.33.16): a food run on the day shift that isn't urgent waits an hour for you;
+    # you can take it and finish it; one you leave goes to the crew after the hour; an urgent one goes to them at once
+    cr = g.ev("""(() => {
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(2 * 1440 + 10 * 60); machinesNow();
+      const live = (t, cold) => { setShipNow(t); const r = cartClaim(t, cold); machinesNow(); return r && SHIP.jobs.find(j => j.id === 'restock-meals@' + Math.floor(t / 60)); };
+      const a = live(2 * 1440 + 10 * 60, 200), waits = !!a && !a.claimedBy && a.urgency < 2;
+      setShipNow(shipNow() + 20); const took = !!a && claimJob(a.id), stops = jobStops(a).map(x => x.step).join(' ');
+      const fin = took && finishJob(a.id) && SHIP.jobs.find(j => j.id === a.id).doneBy === 'you';
+      const b = live(2 * 1440 + 13 * 60, 200), leftThen = !!b && !b.claimedBy;
+      setShipNow(2 * 1440 + 14 * 60); machinesNow(); const crewTook = !!b && !!b.claimedBy && b.claimedBy !== 'you' && b.start >= b.found + 60;
+      const c = live(2 * 1440 + 15 * 60, 50), urgentNow = !!c && !!c.claimedBy && c.claimedBy !== 'you';
+      return { waits, took, fin, stops, leftThen, crewTook, urgentNow };
+    })()""")
+    print(f"Cart run as your job: {cr}")
+    if not all(cr[k] for k in ('waits', 'took', 'fin', 'leftThen', 'crewTook', 'urgentNow')) or cr['stops'] != 'cart load unload return': fail('the cart run as your job')
 
     # 6. the save
     rt = g.ev("""(() => {
