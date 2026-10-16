@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.4
+   STARSHIP CADET: CSV Wren                            build 0.33.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.20';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9827,6 +9827,8 @@ function jobsHour(h) {
   if (Object.keys(SHIP.hold).some(k => k !== 'meals' && SHIP.hold[k] > 0)) restock('stores', 5);
   // (food runs come from cartClaim, the one rule the galley and the job list share: see cartPost)
   choresHour(h, jobs);
+  // a food run nobody took goes unseen (its meals landed long ago, in the galley's books): before the claims
+  for (const j of jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
@@ -9850,8 +9852,6 @@ function jobsHour(h) {
     }
   }
   suppliesHour(t, d);
-  // a food run nobody took goes unseen (its meals landed long ago, in the galley's books)
-  for (const j of SHIP.jobs) if (j.cargo === 'meals' && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -9943,6 +9943,7 @@ function cartClaim(t, cold, o = {}) {
   if (!(cold >= 0)) return null;
   const h = Math.floor(t / 60), hr = h % 24;
   if (!o.replay && CART_RUNS.has(h)) return CART_RUNS.get(h);
+  if (!o.replay) cold += yourCartMeals();                 // your run's meals are on their way (0.33.20)
   let run = null;
   if (cold < CART_URGENT || (hr >= 9 && hr < 17 && cold < CART_DAILY)) {
     let meals = Math.min(CART_MEALS, coldCap() - cold);
@@ -9967,6 +9968,9 @@ function cartPost() {
     if (SHIP.jobs.some(j => j.id === id)) continue;
     const j = { id, machine: null, deck: 3, kind: 'restock', cargo: 'meals', meals: r.meals, urgency: r.urgent ? 2 : 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', lands: r.arriveAt };
     SHIP.jobs.push(j);
+    // a run set while time jumped (sleep, a skip) and only reaching the list now has already arrived in the galley's
+    // books: it's history, never a job for anyone now (0.33.20: three stale runs once took both carts at once)
+    if (r.arriveAt <= shipNow()) { j.status = 'done'; j.doneAt = r.arriveAt; j.doneBy = null; MACH_REV++; continue; }
     const md = t % 1440;
     if (!r.urgent && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { MACH_REV++; continue; }   // left for you first
     const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
@@ -9982,13 +9986,13 @@ function cartPost() {
   }
 }
 // the galley's question (0.33.19, with the galley engineer's 0.29.13): is hour h's food run still on its way? True
-// while it's on the board waiting for you, or yours and not yet unloaded; then the galley holds its meals past
-// arriveAt. False once the crew take it, it's done or it goes unseen (the meals land). Live play only: never in replays
-function cartWaiting(h) {
-  if (CART_PENDING.length && MACH_HOUR !== null) cartPost();
-  const j = SHIP.jobs.find(x => x.id === 'restock-meals@' + h);
-  return !!j && (j.status === 'open' || (j.status === 'claimed' && j.claimedBy === 'you'));
-}
+// only while it's yours and not yet unloaded; then the galley holds its meals past arriveAt. A run just sitting on the
+// board lands at arriveAt as in the galley's replays (0.33.20: holding those too kept the cold store low, so every
+// hour ordered another run and the hold ran dry). Live play only: never in replays
+const yourCartRun = h => SHIP.jobs.find(x => x.id === 'restock-meals@' + h && x.status === 'claimed' && x.claimedBy === 'you') || null;
+function cartWaiting(h) { return !!yourCartRun(h); }
+// the meals on your cart, not yet unloaded: cartClaim counts them as on their way, so the galley doesn't order more
+const yourCartMeals = () => SHIP.jobs.reduce((n, j) => n + (j.cargo === 'meals' && j.status === 'claimed' && j.claimedBy === 'you' ? j.meals || 0 : 0), 0);
 // where a job puts someone at minute t, shaped like whereIs (plus `job`), or null. whereIs (section 14) asks this
 // first, so the crew on the deck walk to their jobs (0.33.7). Off (jobWhere.on) until section 17 has run, and in
 // test copies that want the plain plans.

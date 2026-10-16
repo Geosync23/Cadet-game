@@ -316,7 +316,7 @@ with sync_playwright() as pw:
       const b = live(2 * 1440 + 13 * 60, 200), leftThen = !!b && !b.claimedBy;
       setShipNow(2 * 1440 + 14 * 60); machinesNow(); const crewTook = !!b && !!b.claimedBy && b.claimedBy !== 'you' && b.start >= b.found + 60;
       const c = live(2 * 1440 + 15 * 60, 50), urgentNow = !!c && !!c.claimedBy && c.claimedBy !== 'you';
-      const waitingOk = w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: held for you, released once done or the crew take it
+      const waitingOk = !w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: only while it's yours (0.33.20), released once done
       return { waits, took, fin, stops, leftThen, crewTook, urgentNow, waitingOk };
     })()""")
     print(f"Cart run as your job: {cr}")
