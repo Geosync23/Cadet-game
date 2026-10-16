@@ -4149,7 +4149,7 @@ Object.assign(KIT, {
     [WM.paintGold, WM.paintDark].forEach((m, k) => pipeX(.04, 1.8, m, 0, .64, -.12 + k * .17, g));   // cables out to the trays
     return { w: 1.8, d: .6 };
   },
-  cableTray(g) {                                         // a cable tray on legs, bundles of cable along it
+  floorCableTray(g) {                                    // a cable tray on legs, bundles of cable along it (was cableTray, which clashed with Deck 6's wall tray)
     box(1.8, .05, .45, M.metal, 0, .3, 0, g);
     for (const x of [-.8, .8]) box(.05, .28, .4, M.slateDark, x, .14, 0, g);
     [WM.paintGold, WM.red, WM.paintDark].forEach((m, k) => pipeX(.035, 1.8, m, 0, .36, -.12 + k * .12, g));
@@ -6163,7 +6163,7 @@ DECKS[1] = {
   sealed: { 'h,11,4': 'R', 'h,6,2': 'k', 'h,9,9': 'u', 'h,14,10': 'c', 'v,10,10': 'c' },
   // Pillar 2 A5b: the utility spaces are built (plans/deck1-plan.html, "Utility rooms"); their hatches are service hatches
   service: ['h,6,2', 'h,9,9', 'h,14,10', 'v,10,10'],
-  crawl: ['10,10', '11,10', '12,10', '13,10', '14,10', '10,11', '11,11', '14,11', '15,11'],   // the sub-floor crawl: crouch tiles (answers pass, row 29)
+  crawl: ['10,10', '11,10', '12,10', '13,10', '14,10'],   // the sub-floor crawl's walkable tiles: crouch tiles (answers pass, row 29)
   plates: [['v,10,3', 'w', 'Bridge'], ['v,6,3', 'e', 'Observation'], ['h,12,4', 's', 'Ready room']],
   rooms: {
     '+': { name: 'Bridge lobby', floor: 'lobby', hall: true },
@@ -6320,7 +6320,7 @@ DECKS[1] = {
     place('k', 'cabinet', 1.0, .3, 'n', { it: IT('Light relays', 'Every lamp and light strip on Deck 1, the bridge\'s mood light included.') });
     place('k', 'cabinet', 3.0, .3, 'n', { breakers: true, it: IT('Power junction', 'Deck 1\'s breakers, fed from the trunk head next door.') });
     place('c', 'dataBus', 3.0, 1.65, 's', { it: IT('Data bus', 'Where every bridge station\'s cables meet. Mind your head.') });
-    place('c', 'cableTray', 1.0, 1.7, 's'); place('c', 'cableTray', 5.0, 1.7, 's');
+    place('c', 'floorCableTray', 1.0, 1.7, 's'); place('c', 'floorCableTray', 5.0, 1.7, 's');
   },
 };
 for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
