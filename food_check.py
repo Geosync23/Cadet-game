@@ -274,6 +274,23 @@ with sync_playwright() as pw:
         if not th['threads'].get('spoiled') or th['threads'].get('bridgeHungry') != 6 or not th['again'] or th['late'] != 7 or th['never'] != 11: fail(f"storm threads: {th}")
     else: print('Storm threads: no section 18 with the ion storm in this build; skipped')
 
+    # 4j. the garden (0.29.23): four weeks with stand-ins through GALLEY_TEST: a good garden, a dry one (water .3), and
+    # one nobody tends (gardenDay gives no one hours). Produce is picked daily and on harvest mornings, used before stored
+    # meals, and a poor garden gives less while nobody goes hungry
+    gd = g.ev(f"""(() => {{ const run = (at, day) => {{ GALLEY_TEST.gardenAt = at; GALLEY_TEST.gardenDay = day; GARDEN_COND.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
+        const r = galleyReport({DAY}, 28), sum = k => r.reduce((a, st) => a + st[k], 0);
+        return {{ picked: sum('picked'), fresh: sum('fresh'), binned: sum('produceBinned'), delivered: sum('delivered'), missed: r.reduce((a, st) => a + st.missed.length, 0), coldOut: sum('coldOut'),
+          harvest: r.filter(st => gardenHarvestDay(st.day)).map(st => st.picked), daily: r.filter(st => !gardenHarvestDay(st.day)).map(st => st.picked) }}; }};
+      const good = run(null, null), dry = run(t => ({{ water: .3, feed: 1, light: 1 }}), null), alone = run(null, () => null);
+      GALLEY_TEST.gardenAt = GALLEY_TEST.gardenDay = null; GARDEN_COND.clear(); return {{ good, dry, alone }}; }})()""")
+    for k in ('good', 'dry', 'alone'):
+        x = gd[k]; print(f"Garden, 28 days, {k}: picked {x['picked']} ({x['picked'] / 28:.1f} a day; harvest mornings {x['harvest']}), cooked fresh {x['fresh']}, binned {x['binned']}, cart meals in {x['delivered']}, missed {x['missed']}")
+    G0, Gd, Ga = gd['good'], gd['dry'], gd['alone']
+    if not (20 <= G0['picked'] / 28 <= 40) or G0['fresh'] < .9 * G0['picked'] or min(G0['harvest'] or [0]) < 100 or sum(1 for x in G0['daily'] if x) < .75 * len(G0['daily']): fail(f"garden, good: {G0}")
+    if Gd['picked'] > .5 * G0['picked'] or Ga['picked'] > .6 * G0['picked']: fail(f"garden: a poor garden should give much less: dry {Gd['picked']}, untended {Ga['picked']}, good {G0['picked']}")
+    if Gd['delivered'] <= G0['delivered']: fail(f"garden: a dry garden should need more meals by cart ({Gd['delivered']} vs {G0['delivered']})")
+    if any(x['missed'] or x['coldOut'] for x in (G0, Gd, Ga)): fail('garden: someone went without food')
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
