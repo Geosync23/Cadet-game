@@ -15,6 +15,7 @@
 #   the looks (0.33.17): machineLook, deckLook and the Ship health board's rows in range; shipMoodAt and chillerAt
 #   pure and in step with shipEffectsAt
 #   tapping a machine, Stores' Mail and tier locks (0.33.18): see 5d below
+#   chores and openJobs (0.33.19): see 5e below
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -55,7 +56,7 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
     for (const j of SHIP.jobs) seen.set(j.id, j);
     const cur = SHIP.jobs.find(j => j.segs && j.status === 'claimed' && j.claimedBy !== 'you');
     if (cur) {
-      const sg = cur.segs.find(x => x.tag === 'job' || x.tag === 'restock'), w = jobWhere(schedPeople().find(p => p.id === cur.claimedBy), sg.from);
+      const sg = cur.segs.find(x => x.act === 'work' && x.tag !== 'fetch' && x.tag !== 'make') || cur.segs[0], w = jobWhere(schedPeople().find(p => p.id === cur.claimedBy), sg.from);
       out.overlay = (out.overlay !== false) && !!w && w.deck === sg.deck && w.job === cur.id;
     }
     out.maxOpen = Math.max(out.maxOpen, SHIP.jobs.filter(j => j.status !== 'done' && j.found <= t).length);
@@ -309,15 +310,17 @@ with sync_playwright() as pw:
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(2 * 1440 + 10 * 60); machinesNow();
       const live = (t, cold) => { setShipNow(t); const r = cartClaim(t, cold); machinesNow(); return r && SHIP.jobs.find(j => j.id === 'restock-meals@' + Math.floor(t / 60)); };
       const a = live(2 * 1440 + 10 * 60, 200), waits = !!a && !a.claimedBy && a.urgency < 2;
-      setShipNow(shipNow() + 20); const took = !!a && claimJob(a.id), stops = jobStops(a).map(x => x.step).join(' ');
-      const fin = took && finishJob(a.id) && SHIP.jobs.find(j => j.id === a.id).doneBy === 'you';
+      const ha = a && Math.floor(a.posted / 60), w0 = !!a && cartWaiting(ha);
+      setShipNow(shipNow() + 20); const took = !!a && claimJob(a.id), stops = jobStops(a).map(x => x.step).join(' '), w1 = !!a && cartWaiting(ha);
+      const fin = took && finishJob(a.id) && SHIP.jobs.find(j => j.id === a.id).doneBy === 'you', w2 = !!a && cartWaiting(ha);
       const b = live(2 * 1440 + 13 * 60, 200), leftThen = !!b && !b.claimedBy;
       setShipNow(2 * 1440 + 14 * 60); machinesNow(); const crewTook = !!b && !!b.claimedBy && b.claimedBy !== 'you' && b.start >= b.found + 60;
       const c = live(2 * 1440 + 15 * 60, 50), urgentNow = !!c && !!c.claimedBy && c.claimedBy !== 'you';
-      return { waits, took, fin, stops, leftThen, crewTook, urgentNow };
+      const waitingOk = w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: held for you, released once done or the crew take it
+      return { waits, took, fin, stops, leftThen, crewTook, urgentNow, waitingOk };
     })()""")
     print(f"Cart run as your job: {cr}")
-    if not all(cr[k] for k in ('waits', 'took', 'fin', 'leftThen', 'crewTook', 'urgentNow')) or cr['stops'] != 'cart load unload return': fail('the cart run as your job')
+    if not all(cr[k] for k in ('waits', 'took', 'fin', 'leftThen', 'crewTook', 'urgentNow', 'waitingOk')) or cr['stops'] != 'cart load unload return': fail('the cart run as your job')
 
     # 5d. tapping a machine (0.33.18): one with a use starts, shows as running, and your use wears it a little at the
     # next hour (a crew member's adds nothing); a broken one doesn't start; one without a use only says how it is.
@@ -333,7 +336,7 @@ with sync_playwright() as pw:
       const b = SHIP.machines['3-oven-1']; b.cond = 5; b.state = machineState(5); MACH_REV++;
       const broken = machineUse('3-oven-1'), plainUse = machineUse('4-scrubber-1'), none = machineUse('no-such-machine');
       // Mail over 28 days with the real crew
-      const sent = []; window.mailSend = m => sent.push(m);
+      SHIP.mail = [];                                      // Stores' Mail, through section 15's mailSend (none without it)
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
       let lateLanded = null;
       for (let t = t0; t <= t0 + 28 * 1440; t += 60) {
@@ -341,8 +344,8 @@ with sync_playwright() as pw:
         const d = SHIP.time.day, md = t % 1440;
         if (deliveryLate(d) && weekday(d) === DELIVERY.day + deliveryLate(d) && md === DELIVERY.hour * 60 + 60) lateLanded = SHIP.jobs.some(j => j.kind === 'restock' && j.cargo === 'stores' && Math.abs(j.posted - (t - 60)) < 1) || Object.keys(SHIP.hold).some(k => k !== 'meals');
       }
-      delete window.mailSend;
-      const shapeOk = sent.every(m => Number.isFinite(m.at) && m.from === 'Stores' && typeof m.subject === 'string' && typeof m.body === 'string' && m.body.length > 20);
+      const sent = (SHIP.mail || []).filter(m => m.from === 'Stores').sort((a, b) => a.at - b.at || a.id - b.id);
+      const shapeOk = sent.every(m => Number.isFinite(m.at) && typeof m.subject === 'string' && typeof m.body === 'string' && m.body.length > 20);
       const subj = sent.map(m => m.subject), late = sent.filter(m => /late/.test(m.subject)).length;
       let twice = 0; for (let i = 1; i < sent.length; i++) if (sent.slice(0, i).some(o => o.subject === sent[i].subject && sent[i].at - o.at < 60)) twice++;
       // tier locks, on a scratch copy of one service hatch
@@ -362,6 +365,38 @@ with sync_playwright() as pw:
     if not mu['shapeOk'] or mu['twice'] or (mu['late'] and mu['lateLanded'] is False) or mu['mails'] > 28: fail("Stores' Mail")
     tt = mu['tiers']
     if tt and (tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')
+
+    # 5e. chores (0.33.19): many kinds of job, every stop a real place, tier-1 ones only in rooms you can enter;
+    # openJobs gives what you may take, in the shared shape; you can take a chore and finish it, and it does its work
+    ch = g.ev("""(() => {
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, kinds = {}, badStop = [], badTier = [];
+      for (let d = 1; d <= 14; d++) for (const c of choresOfDay(d)) {
+        kinds[c.kind] = (kinds[c.kind] || 0) + 1;
+        for (const st of c.cand.stops) if (!placeById(st.placeId)) badStop.push(c.kind + ' ' + c.cand.key);
+        const tier = Math.max(CHORES[c.kind].tier, c.cand.tier || 0, ...c.cand.stops.map(st => placeTier(st.placeId)));
+        if (tier < Math.max(...c.cand.stops.map(st => placeTier(st.placeId)))) badTier.push(c.kind + ' ' + c.cand.key);
+      }
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; let o = [], seen = new Set();
+      for (let t = t0 + 1440 + 180; t < t0 + 4 * 1440; t += 60) { setShipNow(t); machinesNow(); for (const x of openJobs()) { if (!seen.has(x.id)) { seen.add(x.id); o.push(x); } } }
+      const keys = ['id', 'title', 'kind', 'deck', 'at', 'room', 'place', 'tier', 'mins', 'parts', 'bring', 'urgency', 'state'];
+      const shapeBad = o.filter(x => !keys.every(k => k in x) || !(x.tier <= PLAYER_TIER) || !(x.mins > 0) || !Array.isArray(x.at) || !(x.deck >= 1)).map(x => x.id);
+      const openKinds = [...new Set(o.map(x => x.kind))];
+      // take a chore and finish it
+      const chore = () => openJobs().find(x => ['calibrate', 'delivery', 'lamp', 'vent', 'round', 'fault'].includes(x.kind));
+      let c = null; for (let n = 0; n < 48 && !(c = chore()); n++) { setShipNow(shipNow() + 60); machinesNow(); }   // wait up to two days for one
+      let took = null, fin = null, stops = null, helped = null;
+      if (c) { const j = SHIP.jobs.find(x => x.id === c.id), before = j.machine ? SHIP.machines[j.machine].cond : null;
+               took = claimJob(c.id); stops = jobStops(j).map(x => x.step + '@' + (x.places[0] || '-')).join(' ');
+               fin = finishJob(c.id) && SHIP.jobs.find(x => x.id === c.id).doneBy === 'you'; helped = before === null || SHIP.machines[j.machine].cond >= before; }
+      setShipNow(t0);
+      return { kinds, badStop: badStop.slice(0, 4), badTier: badTier.slice(0, 4), seen: o.length, shapeBad: shapeBad.slice(0, 4), openKinds, c: c && c.title, took, fin, stops, helped,
+               sample: o.slice(0, 4).map(x => x.title + ' (Deck ' + x.deck + ', ' + x.mins + ' min' + (x.parts.length ? ', bring ' + x.parts.join(' ') : x.bring ? ', ' + x.bring : '') + ')') };
+    })()""")
+    print(f"Chores over 14 days: {ch['kinds']}; stops not real places {ch['badStop']}, tiers below their rooms {ch['badTier']}")
+    print(f"openJobs (days 2-4): {ch['seen']} jobs you could take, kinds {ch['openKinds']}, bad shape {ch['shapeBad']}; e.g. {ch['sample']}")
+    print(f"  took '{ch['c']}': {ch['took']}, stops {ch['stops']}, finished {ch['fin']}, did its work {ch['helped']}")
+    if len(ch['kinds']) < 7 or ch['badStop'] or ch['badTier'] or ch['shapeBad'] or len(ch['openKinds']) < 5: fail('chores and openJobs')
+    if not (ch['took'] and ch['fin'] and ch['helped']): fail('taking and finishing a chore')
 
     # 6. the save
     rt = g.ev("""(() => {

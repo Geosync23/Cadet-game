@@ -16,6 +16,9 @@
 #   A deck's `machines` ({ id, kind, at, room, face, panel }): ids unique ship-wide, `at` in its room, the panel tile
 #   walkable and in the same room, and exactly one place that names it (`machine: id`): a `work:works` place on the
 #   panel tile. Every place that names a machine must name one on its deck.
+#   The answers pass (0.30.12): a deck's `service` entries are a hatch key or { key, tier } (tier 1, 2 or 3), each one a hatch;
+#   a place's `window: true` (a seat by a window) must be a seat or a standing place on a tile beside a hull wall with windows;
+#   a deck's `crawl: ['c,r', ...]` tiles must be walkable and reachable for Works crew. Counts are printed.
 # Then rides 4 -> n -> 4 three times and checks Deck 4's memory comes back to the same counts.
 # Setup and environment as for cadet_test.py.
 # The game loads with ?nosave&debug (cadet_test.py's Game class), so a save never changes what it checks.
@@ -52,8 +55,8 @@ CHECK = """(() => {
 PLACES = r"""(() => {
   const ps = deckDef.places; if (!ps) return null;
   const TYPES = ['bed', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
-    'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
-  const WORKS = { dept: 'works' };
+    'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage', 'event'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
+  const WORKS = { dept: 'works', tier: 3 };
   const passFor = who => (i, j, i2, j2) => { const e = EDGES.get(i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`); return !e || !edgeBlocks(e, who) || e.type === 'closed'; };
   const start = nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
   const flood = pass => { const seen = new Set([K(start)]), q = [start];
@@ -104,6 +107,38 @@ PLACES = r"""(() => {
   return { ids: ps.map(p => p.id), bad, counts, n: ps.length, mids: ms.map(m => m.id), mbad };
 })()"""
 
+# the answers pass's tags: service tiers, window seats, crawl tiles
+TAGS = r"""(() => {
+  const bad = [], tiers = {}, WORKS = { dept: 'works', tier: 3 };
+  for (const sv of deckDef.service || []) {
+    const key = typeof sv === 'string' ? sv : sv && sv.key, e = EDGES.get(key);
+    if (!e || e.type !== 'hatch' || !e.service) bad.push('service ' + key + ' is not a service hatch');
+    if (typeof sv !== 'string') { if (![1, 2, 3].includes(sv.tier)) bad.push('service ' + key + ' tier ' + sv.tier); else tiers[sv.tier] = (tiers[sv.tier] || 0) + 1; }
+  }
+  const hullBy = (i, j) => [`h,${i},${j}`, `h,${i},${j + 1}`, `v,${i},${j}`, `v,${i + 1},${j}`].some(k => EDGES.get(k) && EDGES.get(k).type === 'hull');
+  const winRooms = new Set((deckDef.windows || []).filter(w => w.room).map(w => w.room)), sideWin = (deckDef.windows || []).some(w => w.side);
+  let win = 0;
+  for (const p of deckDef.places || []) {
+    if (p.window === undefined) continue;
+    if (p.window !== true) { bad.push(p.id + ': window ' + p.window); continue; }
+    const [i, j] = p.at, near = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => hullBy(i + di, j + dj));
+    if (!['sit', 'stand'].includes(p.pose)) bad.push(p.id + ': a window place, but pose ' + p.pose);
+    if (!near || !(winRooms.has(p.room) || sideWin)) bad.push(p.id + ': window, but no hull window beside it');
+    win++;
+  }
+  const crawl = deckDef.crawl || [];
+  if (crawl.length) {
+    const start = nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
+    for (const k of crawl) {
+      const [i, j] = String(k).split(',').map(Number);
+      if (!/^\d+,\d+$/.test(String(k))) { bad.push('crawl ' + k + ' is not "c,r"'); continue; }
+      if (!free(i, j)) bad.push('crawl ' + k + ' not walkable');
+      else if (K([i, j]) !== K(start) && !findPath(start, [i, j], new Set(), WORKS)) bad.push('crawl ' + k + ' unreachable for Works crew');
+    }
+  }
+  return { bad, tiers, win, crawl: crawl.length };
+})()"""
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     decks = g.ev("Object.keys(DECKS).map(Number)")
@@ -137,6 +172,11 @@ with sync_playwright() as pw:
                 allMachines[mid] = n
             if pl['mbad']:
                 print(f"  bad machines ({len(pl['mbad'])}): {pl['mbad'][:12]}"); ok = False
+        tg = g.ev(TAGS)
+        if tg['tiers'] or tg['win'] or tg['crawl']:
+            print(f"  tags: service tiers {tg['tiers']}, window places {tg['win']}, crawl tiles {tg['crawl']}")
+        if tg['bad']:
+            print(f"  bad tags ({len(tg['bad'])}): {tg['bad'][:12]}"); ok = False
     mem = []
     for n in [d for d in decks if d != 4] * 3:
         g.ev(f"goToDeck({n})"); g.step(3); g.ev("goToDeck(4)"); g.step(3)
