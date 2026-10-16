@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.7
+   STARSHIP CADET: CSV Wren                            build 0.27.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6302,7 +6302,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9056,8 +9056,10 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 // drawn with even fewer polygons. Nothing here calls R(): each person has their own random stream.
 // =====================================================================
 const CROWD_JOINTS = 17, CROWD_BONES = 21;               // per person: 17 joints (hips, legs 6, torso, chest, head, arms 6, ponytail), then 4 prop bones
-const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] }];
+const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] },
+  { sph: [5, 4], cap: [5, 3], cyl: 4, tor: [3, 5], min: .03 }];   // 2 (0.27.8): coarse, for big crowds; parts smaller than min (eyes, badges) left out
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
+const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -9074,7 +9076,12 @@ function crowdGeo(geo, lod) {                            // the same shape, fewe
 // one person's parts at one level of detail, in their joints' own space: positions, normals, colours, joint numbers, triangles
 function crowdPack(joints, lod) {
   const list = []; let nv = 0, ni = 0;
-  joints.forEach((j, b) => { for (const p of j.userData.parts) { const g = crowdGeo(p.geo, lod); list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count; } });
+  const min = CROWD_DETAIL[lod].min || 0;
+  joints.forEach((j, b) => { for (const p of j.userData.parts) {
+    const g = crowdGeo(p.geo, lod);
+    if (min) { if (!g.boundingSphere) g.computeBoundingSphere(); if (g.boundingSphere.radius * p.m.getMaxScaleOnAxis() < min) continue; }
+    list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count;
+  } });
   const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3), B = new Uint8Array(nv), I = new Uint32Array(ni);
   const nm = new THREE.Matrix3(), v = new THREE.Vector3(); let o = 0, oi = 0;
   for (const [g, p, b] of list) {
@@ -9395,6 +9402,7 @@ class CrowdPerson {
     this.rig.root.rotation.order = 'YXZ';                // turn to face, after lying down
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
     this.geo = [0, 1].map(l => crowdPack(this.joints, l));
+    this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
     for (const j of this.joints) delete j.userData.parts;
     const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
     this.propBones = [hand(-1), hand(1), this.rig.chest, this.rig.root].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
@@ -9406,6 +9414,7 @@ class CrowdPerson {
     this.pos = new THREE.Vector3(); this.face = 0; this.rot = 0; this.pose = 'stand'; this.phase = undefined;
     this.moved = 0; this.fresh = true; this.lod = 0; this.chunk = null; this.slot = -1;
   }
+  packOf(l) { return this.geo[l] || (this.geo[l] = crowdPack(this.jparts.map(parts => ({ userData: { parts } })), l)); }
   set(pos, face, pose = 'stand', walkPhase) {
     if (!this.fresh) this.moved += Math.hypot(pos.x - this.pos.x, pos.z - this.pos.z);
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
@@ -9451,7 +9460,7 @@ class CrowdChunk {
   rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
     this.dirty = false;
     const old = this.mesh.geometry; let nv = 0, ni = 0;
-    const packs = p => [p.geo[p.lod], ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
+    const packs = p => [p.packOf(p.lod), ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
     for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
     if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
     const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
@@ -9503,10 +9512,11 @@ const crowd = {
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
-    const allFar = camera.zoom < CROWD_FAR_ZOOM;
+    const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
     for (const p of this.people) {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
-      const lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      if (many && lod && (allFar || d > CROWD_FAR2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
       p.update(dt, t);
     }
@@ -9522,7 +9532,7 @@ const crowd = {
   stats() {
     let verts = 0, tris = 0;
     for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.mesh.geometry.attributes.position.count; tris += c.mesh.geometry.index.count / 3; }
-    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length };
+    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length, coarse: this.people.filter(p => p.lod === 2).length };
   },
 };
 
@@ -9583,14 +9593,16 @@ const POSE_DEMO = (() => {
   };
 })();
 
-// ---- crowd demo: ?crowd=40 in the address (any number up to 76) puts that many of the real crew in Deck 3 at dinner,
+// ---- crowd demo: ?crowd=40 in the address (any number up to 76, or up to 151 for a ship-wide event) puts that many of the real crew in Deck 3 at dinner,
 // and starts you there by the lift at 18:30. The demo never touches your save: ?crowd works as ?nosave does (section 13).
 // Who: ROSTER (section 9) through rosterSpec, leaving out Rina and Brennan, who are already on Deck 3 as full rigs.
 // Where: Deck 3's own places, in this order: the servery queue, the grab shelf, two galley stations, three people
-// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches. Without the flag none of this exists. ----
+// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches; past 76 (0.27.8), the lounge seats, the
+// garden, the gym and the store, doing what's done there, and some crew twice. Over 70, the far ones go coarse
+// (CROWD_MANY). Without the flag none of this exists. ----
 const CROWD_DEMO = (() => {
   const m = /[?&]crowd=(\d+)/.exec(location.search); if (!m) return null;
-  const want = Math.min(+m[1], 76);
+  const want = Math.min(+m[1], 151);
   let sd = 4242; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const shuffle = a => { for (let i = 0; i < a.length; i++) { const j = i + Math.floor(rnd() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   // real crew, day shift first; read when the demo starts, since the roster is defined after this section
@@ -9610,7 +9622,8 @@ const CROWD_DEMO = (() => {
     };
     return [...of('servery-queue'), ...of('grab-shelf'), ...of('work:galley', 2)].map(at)
       .concat([0, 1, 2].map(i => ({ loop: i / 3, pose: 'walk' })))
-      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at));
+      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at))
+      .concat(['lounge-seat', 'garden', 'gym', 'shop'].flatMap(t => of(t, 99)).map(p => ({ ...at(p), pose: poseOf(p) })));
   }
   // the walkers' loop round the mess hall's aisles, in room tiles
   const LOOP = [[.5, 2.5], [9.6, 2.5], [9.6, 5.3], [.5, 5.3]];
@@ -9642,7 +9655,7 @@ const CROWD_DEMO = (() => {
         else e.h.set({ x: e.s.x, y: e.s.y || 0, z: e.s.z }, e.s.face, e.s.pose);
       }
       const now = performance.now(); ft += (now - last - ft) * .05; last = now;
-      if (hud) hud.textContent = `Crowd ${crowd.people.length} · ${renderer.info.render.calls} draw calls · ${ft.toFixed(1)} ms a frame`;
+      if (hud) { const st = crowd.stats(); hud.textContent = `Crowd ${st.people} (${st.coarse} coarse) · ${renderer.info.render.calls} draw calls · ${(st.tris / 1000).toFixed(0)}k triangles · ${ft.toFixed(1)} ms a frame`; }
     },
   };
 })();
