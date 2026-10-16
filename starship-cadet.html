@@ -8293,7 +8293,7 @@ function mailSend({ at, from, subject, body, quiet } = {}) {   // quiet: no toas
 const mailUnread = () => SHIP.mail.filter(m => !m.read).length;
 function mailWelcome() {
   mailSend({ from: 'Works Office', subject: 'Welcome aboard the Wren', body: 'Welcome to the CSV Wren, Cadet. You\'re a Works technician on the day shift: '
-    + 'take jobs from the board (here on your device, or in the Works bay on Deck 5), fetch parts from main storage, and keep the ship running. '
+    + 'take jobs from the job board in the Works bay on Deck 5 (your device keeps track of them), fetch parts from main storage, and keep the ship running. '
     + 'Look after yourself too: eat in the mess on Deck 3, shower in the junior wing\'s washrooms, keep fit at the gym, and get some sleep: your bunk is in Bunk 1. '
     + 'Your pay is credited for each job you finish; the store on Deck 3 sells snacks and small comforts. Welcome aboard.', quiet: true });
 }
@@ -8713,7 +8713,7 @@ function jobNotice() {
   const fresh = open.filter(j => !JOB_SEEN.has(j.id)); for (const j of open) JOB_SEEN.add(j.id);
   if (!fresh.length || myJob() || ACT) return;           // not while you hold a job or are busy
   const c = typeof jobCard === 'function' ? jobCard(fresh[0]) : [fresh[0].kind, 'Deck ' + fresh[0].deck];
-  toast('Your device', 'New job: ' + c[0] + ', ' + c[1] + (fresh.length > 1 ? ', and ' + (fresh.length - 1) + ' more' : '') + '. Take it on your device.');
+  toast('Your device', 'New job: ' + c[0] + ', ' + c[1] + (fresh.length > 1 ? ', and ' + (fresh.length - 1) + ' more' : '') + '. Take it at the job board in the Works bay, Deck 5.');
 }
 function carryLoad(s) { const c = s && s.player && s.player.carry; return Array.isArray(c) ? c.filter(x => typeof x === 'string').slice(0, CARRY_MAX) : []; }
 function workLoad(s) {
