@@ -361,12 +361,16 @@ with sync_playwright() as pw:
     BELT = "(id => { const s = placeSpot(id), v = []; scene.traverse(m => { if (m.isMesh && m.material && m.material.map && m.userData.noMerge) { m.getWorldPosition(_wp); if (Math.hypot(_wp.x - s.x, _wp.z - s.z) < 1.2) v.push(m.material.map.offset.y); } }); return JSON.stringify(v); })"
     W, H = g.page.viewport_size['width'], g.page.viewport_size['height']
     ran = 0
+    TREADS = ['3-gym-1', '3-gym-2', '3-gym-3']
+    if all(g.ev(f"!!heldBy('{p}')") for p in TREADS):    # all three taken: a weekday mid-morning, when the crew are at work
+        g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 10 * 60 + 30); needsT = null"); g.step(10)
     for pid, ht in [('3-gym-1', .3), ('3-gym-2', 1.1), ('3-gym-3', .6)]:
         g.ev("actEnd(true); player.stop(); Object.assign(player.obj.position, cellPos(26, 17)); Object.assign(SHIP.player.needs, { fitness: 40, energy: 70, hunger: 50, social: 50 })"); g.step(30)
         xy = g.ev(f"(() => {{ const s = placeSpot('{pid}'); const v = new THREE.Vector3(s.x, {ht}, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }})()")
         if not check(0 < xy[0] < W and 0 < xy[1] < H, f'treadmill {pid} should be on screen ({xy})'): continue
+        who = g.ev(f"(a => a ? a.p.name : null)(heldBy('{pid}'))")
+        if who: print(' ', pid, 'in use by', who, '(a click there taps them, which is right)'); continue   # a crew member on it: the click is a tap on them (0.41.6)
         g.page.mouse.click(xy[0], xy[1]); g.step(2)
-        if re.match(r'In use', g.ev("document.getElementById('tx').textContent")): print(' ', pid, 'in use by crew'); continue
         for k in range(60):
             g.step(30)
             if g.ev("!!ACT && ACT.phase === 'do'"): break
