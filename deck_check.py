@@ -56,7 +56,7 @@ PLACES = r"""(() => {
   const ps = deckDef.places; if (!ps) return null;
   const TYPES = ['bed', 'shower', 'basin', 'toilet', 'mess-seat', 'servery-queue', 'grab-shelf', 'gym', 'lounge-seat', 'garden', 'callhome',
     'music', 'bench', 'common-room', 'laundry', 'lift-wait', 'shop', 'storage', 'event'], POSES = ['sit', 'stand', 'lie', 'work'], FACES = ['n', 'e', 's', 'w'];
-  const WORKS = { dept: 'works', tier: 3 };
+  const WORKS = { dept: 'works', tier: 3, rank: 'senior' };
   const passFor = who => (i, j, i2, j2) => { const e = EDGES.get(i2 !== i ? `v,${Math.max(i, i2)},${j}` : `h,${i},${Math.max(j, j2)}`); return !e || !edgeBlocks(e, who) || e.type === 'closed'; };
   const start = nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
   const flood = pass => { const seen = new Set([K(start)]), q = [start];
@@ -109,7 +109,7 @@ PLACES = r"""(() => {
 
 # the answers pass's tags: service tiers, window seats, crawl tiles
 TAGS = r"""(() => {
-  const bad = [], tiers = {}, WORKS = { dept: 'works', tier: 3 };
+  const bad = [], tiers = {}, WORKS = { dept: 'works', tier: 3, rank: 'senior' };
   for (const sv of deckDef.service || []) {
     const key = typeof sv === 'string' ? sv : sv && sv.key, e = EDGES.get(key);
     if (!e || e.type !== 'hatch' || !e.service) bad.push('service ' + key + ' is not a service hatch');
