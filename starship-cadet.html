@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.19
+   STARSHIP CADET: CSV Wren                            build 0.27.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2638,6 +2638,14 @@ const TEMPLATES = {
 };
 
 // ---- merge everything static into a few meshes ----
+// 0.27.20: neighbouring faces of one geometry that share a material become one group, so a door leaf's box (four
+// edge faces, then two faces) draws in 2 calls, not 6, in the picture and in the shadows. Same triangles in the same
+// order, so nothing on screen changes.
+function packGroups(geo, mats) {
+  const out = [];
+  for (const gr of geo.groups) { const p = out[out.length - 1]; if (p && mats[p.materialIndex] === mats[gr.materialIndex] && p.start + p.count === gr.start) p.count += gr.count; else out.push({ ...gr }); }
+  geo.groups = out; return geo;
+}
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
@@ -2898,13 +2906,14 @@ function buildDeck(def) {
   frameEdges = edgeList.filter(e => e.type !== 'wall' && e.type !== 'window');   // doors, lifts, hatches and glass all carry a header
   glassEdges = edgeList.filter(e => e.type === 'glass' || e.type === 'pass'); sillIM = paneIM = null;   // a pass is glass with no pane
   if (glassEdges.length) {
-    sillIM = new THREE.InstancedMesh(sillGeo, [capMat, capMat, M.trim, capMat, wallMat, wallMat], glassEdges.length);
+    const sm = [capMat, capMat, M.trim, capMat, wallMat, wallMat]; sillIM = new THREE.InstancedMesh(packGroups(sillGeo, sm), sm, glassEdges.length);
     paneIM = new THREE.InstancedMesh(paneGeo, paneMat, glassEdges.length);
     glassEdges.forEach((e, k) => e.ginst = k);
     sillIM.castShadow = sillIM.receiveShadow = true; deckRoot.add(sillIM, paneIM);
   }
-  wallIM = new THREE.InstancedMesh(wallGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], wallEdges.length);
-  hdrIM = new THREE.InstancedMesh(hdrGeo, [capMat, capMat, capMat, capMat, wallMat, wallMat], frameEdges.length);
+  const wm = [capMat, capMat, capMat, capMat, wallMat, wallMat];   // 0.27.20: packGroups, 6 calls to 2
+  wallIM = new THREE.InstancedMesh(packGroups(wallGeo, wm), wm, wallEdges.length);
+  hdrIM = new THREE.InstancedMesh(packGroups(hdrGeo, wm), wm, frameEdges.length);
   wallEdges.forEach((e, k) => e.inst = k); frameEdges.forEach((e, k) => e.hinst = k);
   // posts at every corner where walls meet
   POSTS = [];
@@ -2948,7 +2957,7 @@ function buildDeck(def) {
     const mats = e.type === 'lift' ? liftLeafMats : e.type === 'hatch' ? hatchLeafMats : leafMats, leaves = [];
     for (const sd of [-1, 1]) {
       const m = mats[sd < 0 ? 0 : 1];
-      const leaf = new THREE.Mesh(new THREE.BoxGeometry(span / 2, 2.2, .07), [capMat, capMat, capMat, capMat, m, m]);
+      const lm = [capMat, capMat, capMat, capMat, m, m], leaf = new THREE.Mesh(packGroups(new THREE.BoxGeometry(span / 2, 2.2, .07), lm), lm);
       leaf.position.set(sd * span / 4, 1.1, sd * .012); leaf.castShadow = true; g.add(leaf); leaves.push(leaf);
     }
     if (e.type === 'door' || e.type === 'lift') {
@@ -3038,6 +3047,7 @@ function buildDeck(def) {
         n = e;
       }
       for (const p of parts) {
+        mergeMeshes(p.g);                                 // 0.27.20: one mesh per material for each piece (was one per strip); the decor is merged below
         p.g.traverse(o => { if (o.isMesh) HULL_MESHES.push(o); });
         // the hull doesn't follow you: pieces facing the camera stay low, the rest stay up
         let ox = 0, oz = 0; const edges = [];
@@ -3061,7 +3071,7 @@ function buildDeck(def) {
   for (const [i, j, w, d] of Object.entries(ROOM_BOX).filter(([k]) => ROOMS[k].void).map(([, b]) => [b.i0, b.j0, b.i1 - b.i0 + 1, b.j1 - b.j0 + 1])) {
     const t = hatchTex.clone(); t.needsUpdate = true; t.repeat.set(w / 2, d / 2);
     const top = new THREE.MeshStandardMaterial({ map: t, roughness: .9 });
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w - .21, H - .03, d - .21), [capMat, capMat, top, capMat, capMat, capMat]);
+    const vm = [capMat, capMat, top, capMat, capMat, capMat], m = new THREE.Mesh(packGroups(new THREE.BoxGeometry(w - .21, H - .03, d - .21), vm), vm);
     m.geometry.translate(0, (H - .03) / 2, 0); m.position.set(X0(i) + w / 2, 0, Z0(j) + d / 2); m.receiveShadow = true; deckRoot.add(m);
     VOID_BLOCKS.push({ m, cx: m.position.x, cz: m.position.z, s: 1 });
   }
@@ -6932,7 +6942,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.19';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.20';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
