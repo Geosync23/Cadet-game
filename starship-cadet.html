@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.13
+   STARSHIP CADET: CSV Wren                            build 0.27.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.13';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.14';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10708,8 +10708,9 @@ function bake(root) {
 function makeCharacter(spec, finish = bake) {          // finish: what to do with the queued parts (the crowd keeps them)
   const s = Object.assign({ dept: 'survey', rank: 0, skin: 2, hair: 'short', hairColor: 'dark', height: 1, build: 'average', acc: [] }, spec);
   const bw = BUILD[s.build] || 1, skin = SKIN[s.skin] || s.skin, hc = HAIR[s.hairColor] || s.hairColor;
-  const uni = DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66), has = a => s.acc.includes(a);
-  const suit = '#27313a', pants = '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
+  const civ = s.dept === 'civilian';                     // 0.27.14: guests in plain clothes, a top in their outfit colour, no badge or pips
+  const uni = civ ? s.outfit || '#7a6a5a' : DEPT[s.dept] || DEPT.survey, uniDk = shade(uni, .66), has = a => s.acc.includes(a);
+  const suit = civ ? shade(uni, .82) : '#27313a', pants = civ ? '#454a52' : '#3a4653', boot = '#16191d', sole = '#3a3f44', gold = '#e8c06a';
   const root = new THREE.Group(); root.scale.setScalar(s.height);
   const rig = { root, legs: [], arms: [], spec: s };
   const pv = (p, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); p.add(g); return g; };
@@ -10743,7 +10744,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
   part(rig.chest, cylG(.175 * bw, .175 * bw, .015, 20), uniDk, 0, .16, 0);
   part(rig.chest, GEO.sph, uni, 0, .28, 0, .2 * bw, .07, .15 * bw);
   if (has('apron')) part(rig.chest, GEO.box, '#e8e0cf', 0, .06, .162 * bw, .2 * bw, .2, .02);
-  else {                                               // department badge, left breast
+  else if (!civ) {                                     // department badge, left breast
     const bd = BADGE[s.dept] || BADGE.survey, bx = .085 * bw, bz = .168 * bw, silver = '#dfe4e6';
     if (bd.shape === 'diamond') {
       part(rig.chest, GEO.box, silver, bx, .2, bz, .045, .045, .015, 0, 0, Math.PI / 4);
@@ -10762,7 +10763,7 @@ function makeCharacter(spec, finish = bake) {          // finish: what to do wit
     }
   }
   part(rig.chest, cylG(.075, .085, .05, 16), uniDk, 0, .33, 0);
-  for (let i = 0; i < Math.min(4, s.rank + 1); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
+  for (let i = 0; i < (civ ? 0 : Math.min(4, s.rank + 1)); i++) { const a = .55 + i * .32; part(rig.chest, GEO.sph, gold, Math.sin(a) * .083, .33, Math.cos(a) * .083, .011, .011, .011); }
   part(rig.chest, cylG(.05, .055, .08, 12), skin, 0, .37, 0);
   // head and face
   const h = rig.head = pv(rig.chest, 0, .4, 0);
