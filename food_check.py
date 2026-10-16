@@ -13,7 +13,7 @@
 #   hover carts (B3): with FOOD.restock 'carts', a week fed by cartClaim never runs short; two days with none does
 #   with an empty cold store, people wait at the servery, each in their own spot (galleyHold)
 #   once the schedules use the rota (section 14's hook): galley staff are where the rota puts them
-#   spoilage (0.29.11): nothing spoils with the chiller fine; with it broken (a stand-in shipEffectsAt), food is binned
+#   spoilage (0.29.11): nothing spoils with the chiller fine; with it broken (a stand-in chillerAt), food is binned
 #   at the 09:00 and 21:00 checks, the bin shows by the dish pit, Mail gets a note, and a week still never runs short
 #   the menu (0.29.11): Friday's treat has a pudding, Sunday's dinner is the crew's top vote, Wednesday's favourite isn't
 #   on the week's menu already, the servery and the menu board say what's on
@@ -140,13 +140,14 @@ with sync_playwright() as pw:
     if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
-    # 4c. spoilage: a broken chiller (shipEffectsAt's spoil at 2, its worst) for a week
-    sp = g.ev(f"""(() => {{ window.__keepFx = shipEffectsAt; window.__sc("shipEffectsAt = (deck, t) => ({{ ...window.__keepFx(deck, t), spoil: 2 }})");
+    # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
+    # at its worst), which the galley reads before shipEffectsAt
+    sp = g.ev(f"""(() => {{ window.__keepCh = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
       const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy }}));
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
       const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
-      window.__sc("shipEffectsAt = window.__keepFx; mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
+      window.__sc("chillerAt = window.__keepCh; mailSend = window.__keepMail"); SHIP.galley = null; return out; }})()""")
     print('Chiller broken for a week, spoiled a day:', [w['spoiled'] for w in sp['week']], 'cold store low:', [w['coldMin'] for w in sp['week']])
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
