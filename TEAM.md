@@ -8,6 +8,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
+**Ship integration 0.41.7** (d89a3f5, 2026-10-16 ~20:52): **the ion storm switched on** (day 10 of a new game), occasions, one party via eventPlan, storm routines, patient beds, trays timing, chore props, social arcs and dramas, device apps to 0.35.13. All checks pass. Publishing to the link (publisher session_01LibC3b2PPyHrg7asNMsEb1).
+
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
 **The user's focus (2026-10-16 ~20:25):** the events engineer finishes the diplomatic visit (kept draft) and then stops; the comet viewing and the remaining events wait for later. Everyone else finishes the user's tweaks (job board, ship health panel, days off, Roster, device pop-up bug) and the personal device. Then the Pillar 3 check-in.
