@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.1
+   STARSHIP CADET: CSV Wren                            build 0.36.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.1';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.2';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10588,12 +10588,12 @@ function socReset(hour) {
   SHIP.social = { hour, fault: {}, pairs: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay] } }. A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
@@ -10610,7 +10610,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -10757,7 +10757,26 @@ function socialTo(t) {
 function socialTick() {                                  // the main loop: the chat card every frame, the hours once a ship minute
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
-  SOC_MIN = m; socialTo(m);
+  const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
+  SOC_MIN = m; socialTo(m); socialTogether(step);
+}
+// time together (0.36.2), as you play: eating with crew at your table (settled at mess seats within COMPANY_NEAR,
+// section 15) or working near crew who are at work (within SOC_WORK_NEAR tiles of you while you do a job). After
+// SOC_TOGETHER ship minutes with someone they get REL_PTS.meal or .work, once each a ship day (rel.mealDay, .workDay)
+const SOC_TOGETHER = 10, SOC_WORK_NEAR = 3, SOC_WITH = new Map();   // crew id -> minutes together, this meal or job
+function socialTogether(step) {
+  const A = typeof ACT !== 'undefined' ? ACT : null, kind = A && A.phase === 'do' ? (A.kind === 'eat' ? 'meal' : ['job', 'fetch', 'make', 'stow'].includes(A.kind) ? 'work' : null) : null;
+  if (!kind || typeof DECK_CREW === 'undefined') { SOC_WITH.clear(); return; }
+  const day = SHIP.time.day, at = A.spot || player.obj.position, now = shipNow(), here = new Set();
+  for (const a of DECK_CREW) {
+    if (!SOC.idx.has(a.p.id) || !a.settled || Math.hypot(a.x - at.x, a.z - at.z) >= (kind === 'meal' ? COMPANY_NEAR : SOC_WORK_NEAR)) continue;
+    if (kind === 'meal' ? (PLACE_OF.get(a.goalId) || {}).type !== 'mess-seat' : whereIs(a.p, now).act !== 'work') continue;
+    here.add(a.p.id);
+    const k = kind + ':' + a.p.id, n = (SOC_WITH.get(k) || 0) + step; SOC_WITH.set(k, n);
+    const r = relGet(a.p.id), dk = kind + 'Day';
+    if (n >= SOC_TOGETHER && r[dk] !== day) { r[dk] = day; relAdd(a.p.id, kind, REL_PTS[kind]); }
+  }
+  for (const k of [...SOC_WITH.keys()]) if (!here.has(k.slice(k.indexOf(':') + 1))) SOC_WITH.delete(k);
 }
 function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // section 13's New game
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
