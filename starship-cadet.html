@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.10
+   STARSHIP CADET: CSV Wren                            build 0.28.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6312,7 +6312,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.10';                            // keep in step with the header's build line
+const GAME_BUILD = '0.28.11';                            // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7085,9 +7085,12 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // message in SHIP.mail, read on the device's Mail tab. Social also comes from
 // chatting with crew (tap them) and eating with company; the store sells
 // snacks and small comforts for credits (SHIP.player.credits).
+// A tap on a machine asks section 17's machineUse (0.28.11); a restock job is
+// a hover-cart run you push yourself; crawlway tiles (a deck's crawl list)
+// slow you to a crouch.
 // Hooks elsewhere: the save (13: v 2, needs, New game), the item tap (11), the
-// crew tap (10: playerChat), playerUpdate in the main loop (12), the device's
-// HTML and CSS.
+// crew tap (10: playerChat), Walker.update's pose (10: holding, crouch),
+// playerUpdate in the main loop (12), the device's HTML and CSS.
 // =====================================================================
 const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
 const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
@@ -7233,6 +7236,10 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   job:    { mins: 3, pose: 'work', title: 'Your job' },
   stow:   { mins: 2, pose: 'browse', title: 'Main storage' },
   make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
+  cartTake: { mins: 2, pose: 'stand', title: 'Cart bay' },     // the cart run (0.28.11): the crew's own times (section 17's jobRun)
+  cartLoad: { mins: 10, pose: 'work+cart', title: 'Cargo hold' },
+  cartUnload: { mins: 15, pose: 'work+cartfull', title: 'Unloading' },
+  cartBack: { mins: 2, pose: 'stand+cart', title: 'Cart bay' },
 };
 // the store (0.28.10): browsing picks something from the shelf you tapped (a different one each visit), the counter
 // sells it. Snacks are eaten on the way out (+hunger); comforts go in your locker (+social). Credits: CREDITS_FRESH
@@ -7292,8 +7299,9 @@ function foodFrom(where, peek) {
 }
 // an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 function playerTap(it, at, point) {
+  if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
-  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return false;
+  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return machineTap(it, at);
   const [, types, kind] = rule;
   const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(pl.type === 'shower' && privatePlace(pl)))
     .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
@@ -7325,6 +7333,21 @@ function playerTap(it, at, point) {
   const pose = kind === 'eat' ? spot.pose : kind === 'gym' && !pl.anim && /treadmill/i.test(it.t) ? 'run'
     : crowdPose || (kind === 'gym' ? pl.anim || (pl.pose === 'stand' ? 'lift' : pl.pose) : kind === 'call' ? pl.anim || 'call' : pl.anim || PLAYER_ACTS[kind].pose);
   actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, shelf: kind === 'browse' ? STORE_SHELF(it) : null });
+  return true;
+}
+// a machine (0.28.11): the nearest of this deck's machines within MACHINE_NEAR m of the thing tapped. Section 17's
+// machineUse(id, 'player') says what the tap does ({ text, ran }: a line about it, and whether it started it). You
+// walk up to it first. Without machineUse, or no machine there, the tap does what it always did.
+const MACHINE_NEAR = 1.2;
+function machineTap(it, at) {
+  if (typeof machineUse !== 'function' || typeof machineList !== 'function' || typeof deckDef === 'undefined') return false;
+  const m = machineList().filter(m => m.deck === deckDef.num && !m.stub && m.at).map(m => [m, cellPos(...m.at)])
+    .filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < MACHINE_NEAR).sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z))[0];
+  if (!m) return false;
+  approach(at.clone(), it.front, it.depth, () => {
+    let r = null; try { r = machineUse(m[0].id, 'player'); } catch (e) { r = null; }
+    toast(it.t, r && r.text ? r.text : it.x);
+  });
   return true;
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
@@ -7381,6 +7404,7 @@ function actEnd(abort) {
       + ' ' + P.credits + ' credits left.');
   }
   if (A.kind === 'fetch' || A.kind === 'job' || A.kind === 'stow' || A.kind === 'make') jobEnd(A);
+  if (A.kind.startsWith('cart')) cartEnd(A);
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
   if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
@@ -7461,8 +7485,13 @@ function playerUpdate(dt, t) {
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
-  if (SHIP.player.carry.length || player.holding) player.holding = SHIP.player.carry.length > 0;   // carrying parts: the crate prop (Walker.update)
+  const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0;
+  if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
+  const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
+  if (crouch) player.maxV *= CRAWL_SPEED;
+  if (crouch && !player.crouch) toast('Crawlway', 'You duck down and crouch-walk through.');
+  if (crouch || player.crouch) player.crouch = crouch;
   for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
     const slow = n[k] < SLOW_BELOW;
     if (slow && slowWas[k] === false) toast('Your device', NEED_SAY[k][0]);
@@ -7470,7 +7499,14 @@ function playerUpdate(dt, t) {
   }
   if (ACT) actUpdate(dt, t);
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
+}
+// crawlway tiles: the deck's crawl list (['i,j', ...], from the architects); CRAWL_SPEED of your walking speed there
+const CRAWL_SPEED = .5; let CRAWL = { def: null, set: new Set() };
+function crawlTiles() {
+  if (typeof deckDef === 'undefined' || !deckDef) return CRAWL.set;
+  if (CRAWL.def !== deckDef) CRAWL = { def: deckDef, set: new Set((Array.isArray(deckDef.crawl) ? deckDef.crawl : []).map(String)) };
+  return CRAWL.set;
 }
 // a time skip: asleep if you chose Sleep (section 13), or for the debug Day button (a skip from the night);
 // otherwise awake. Any activity stops.
@@ -7484,7 +7520,7 @@ SIM_ADVANCE.push((from, to) => {
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
   actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
-  Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.mail = []; mailWelcome(); device.refresh();
+  Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
 // ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
@@ -7629,6 +7665,83 @@ function jobEnd(A) {
   device.refresh();
 }
 
+// ---- the cart run (0.28.11, answer 8): a restock job (section 17's kind 'restock', taken on the device) is a hover
+// cart you push yourself, the same steps as the crew's jobRun: take a cart from its dock in the Cart bay (Deck 5),
+// load it in the cargo hold, unload it in main storage ('stores') or Deck 3's cold store ('meals'), and dock it
+// again; then finishJob. Tap anything in each room to do that step. SHIP.player.cart = { job, stage, dock } with
+// stage 'empty' (going to the hold), 'full' (loaded), 'done' (unloaded, going back); saved. The cargo hold has nothing
+// to tap, so loading and unloading also start on their own when you stop in that room with the cart (cartAuto). ----
+const CART_STEP = { empty: 'Load it in the cargo hold on Deck 5.', full: null, done: 'Take it back to its dock in the Cart bay.' };
+const placeRoom = id => { const pl = (DECKS[deckOf(id)].places || []).find(q => q.id === id); return pl ? pl.room : null; };
+function cartDest(j) { return j.cargo === 'meals' ? { deck: 3, room: placeRoom('3-cold-1'), ids: ['3-cold-1', '3-cold-2'], name: 'the cold store on Deck 3' } : { deck: 5, room: 'r', ids: ['5-parts-1', '5-parts-2', '5-parts-3', '5-parts-4'], name: 'main storage on Deck 5' }; }
+function cartFree(ids) { const q = ids.filter(id => PLACE_OF.has(id) && !heldBy(id)); return q[0] || null; }
+function cartTap(it, at) {
+  if (!jobsOn() || typeof deckDef === 'undefined') return false;
+  const P = SHIP.player, j = myJob(), d = deckDef.num, rm = roomAt(...cellAt(at.x, at.z)), c = P.cart;
+  const dockTap = d === 5 && /^cart dock/i.test(it.t), dockId = dockTap ? '5-cart-' + (it.t.match(/\d+/) || [1])[0] : null;
+  if (c && (!j || j.id !== c.job)) {                     // the job's gone (dropped, or back on the board): the cart goes back
+    if (!dockTap) return false;
+    actStart('cartBack', PLACE_OF.has(dockId) ? dockId : null, { title: it.t, after: 'You dock the cart and plug it in to charge.' });
+    return true;
+  }
+  if (!j || j.kind !== 'restock') return false;
+  if (!c) {
+    if (!dockTap) return false;
+    if (P.carry.length) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Put them back in main storage first.'); return true; }
+    const out = typeof cartsOut === 'function' ? cartsOut(shipNow()) : new Set();
+    if (out.has(+dockId.split('-').pop())) { toast(it.t, 'That cart\'s out on a run. Try the other dock.'); return true; }
+    actStart('cartTake', PLACE_OF.has(dockId) ? dockId : null, { title: it.t, dock: dockId, after: 'You unplug the cart and float it out of the dock.' });
+    return true;
+  }
+  if (cartStep(j, c, d, rm, it.t)) return true;
+  const dest = cartDest(j);
+  if (dockTap && c.stage === 'done') { actStart('cartBack', PLACE_OF.has(dockId) ? dockId : null, { title: it.t, after: 'You dock the cart and plug it in to charge.' }); return true; }
+  if (dockTap) { toast(it.t, 'You\'ve got a cart already. ' + (CART_STEP[c.stage] || 'Take the load to ' + dest.name + '.')); return true; }
+  return false;
+}
+// load in the hold, unload where it's going: from a tap there, or on its own when you stop in that room with the cart
+function cartStep(j, c, d, rm, title) {
+  if (c.stage === 'empty' && d === 5 && rm === placeRoom('5-hold-1')) {
+    actStart('cartLoad', cartFree(['5-hold-1', '5-hold-2']), { title: title || 'Cargo hold', after: 'You load the cart: ' + (j.cargo === 'meals' ? 'crates of meals for the cold store.' : 'the delivery for the shelves.') });
+    return true;
+  }
+  const dest = cartDest(j);
+  if (c.stage === 'full' && d === dest.deck && rm === dest.room) {
+    actStart('cartUnload', cartFree(dest.ids), { title: title || 'Unloading', after: 'You unload the cart and shelve it all.' });
+    if (ACT && ACT.kind === 'cartUnload' && j.cargo !== 'meals') ACT.def.mins = 20;
+    return true;
+  }
+  return false;
+}
+function cartAuto() {                                    // each ship minute (playerUpdate): standing still in the right room
+  const P = SHIP.player, c = P.cart; if (!c || ACT || player.path.length || player.steer || !jobsOn() || typeof deckDef === 'undefined') return;
+  const j = myJob(); if (!j || j.id !== c.job) return;
+  cartStep(j, c, deckDef.num, roomAt(...player.here()), null);
+}
+function cartEnd(A) {
+  const P = SHIP.player, j = jobsOn() ? myJob() : null;
+  if (A.kind === 'cartTake' && j) { P.cart = { job: j.id, stage: 'empty', dock: A.o.dock || '5-cart-1' }; touchJob(j.id); toast('Cart bay', 'The cart hums along at hip height. ' + CART_STEP.empty); }
+  else if (A.kind === 'cartLoad' && P.cart && j) { P.cart.stage = 'full'; touchJob(j.id); toast('Cargo hold', 'Loaded. Now to ' + cartDest(j).name + '.'); }
+  else if (A.kind === 'cartUnload' && P.cart && j) {
+    P.cart.stage = 'done'; touchJob(j.id);
+    const h = +String(j.id).split('@')[1];               // a meals run's food lands in the cold store now (section 16; safe to call twice)
+    const n = j.cargo === 'meals' && typeof galleyCartLand === 'function' && isFinite(h) ? galleyCartLand(h) : 0;
+    toast('Unloaded', (n ? n + ' meals into the cold store. ' : 'All shelved. ') + CART_STEP.done);
+  }
+  else if (A.kind === 'cartBack') {
+    const done = P.cart && j && P.cart.job === j.id && P.cart.stage === 'done'; P.cart = null;
+    if (done && finishJob(j.id)) { P.credits += JOB_PAY; toast('Job done', 'Cart docked, run done. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
+    else toast('Cart bay', 'Cart docked.');
+  }
+  device.refresh();
+}
+function cartLoad(s) {
+  const c = s && s.player && s.player.cart;
+  return c && (typeof c.job === 'string') && ['empty', 'full', 'done'].includes(c.stage) ? { job: c.job, stage: c.stage, dock: typeof c.dock === 'string' ? c.dock : '5-cart-1' } : null;
+}
+SHIP.player.cart = cartLoad(SAVED);
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.player.cart && { ...SHIP.player.cart }; });
+
 // ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
 // device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
 // jobs live in their own data; this only shows them. ----
@@ -7679,6 +7792,7 @@ device.addSection('now', 'Now', el => {
   el.append(p, q);
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
   if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
+  if (P.cart) { const r = document.createElement('p'); r.textContent = 'Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')); el.appendChild(r); }
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) { const r = document.createElement('p'); r.textContent = 'Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.'; el.appendChild(r); }
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
@@ -10065,7 +10179,7 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined) animateActivity(this, this.holding ? 'stand+carry' : 'stand', dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: parts in hand (8b's '+carry')
+    if (this.holding !== undefined || this.crouch !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
