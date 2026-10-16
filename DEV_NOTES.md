@@ -158,6 +158,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.40.6 | 0.40.5 plus the player's job loop (0.28.6: take a job, inspect, fetch parts from Deck 5 storage, make one in the machine shop, repair at the panel), parts by shelf (0.30.9, 0.33.10–0.33.11), merged by the lead. |
 | 0.40.7 | Pillar 2 complete (the lead): 0.40.6 plus food by hover cart (0.33.13–0.33.14 cart runs and cartClaim, 0.29.9 FOOD.restock 'carts', 0.30.10 hold and dock places, 0.31.5 cold-store places), carts and held things drawn (0.27.5–0.27.6, 0.26.7 heldPose), and the player's touchJob / returnPart (0.28.7). |
 | 0.40.8 | Pillar 2 complete, final (the lead): 0.40.7 plus docked carts that hide while they're out on a run (0.33.15, cartDockLive) and the crate in the player's hands while carrying parts (0.28.8). |
+| 0.34.0 | Ship events (the events engineer, section 18): 12 small traditions in `SHIP_EVENTS` (running club, observatory night, quiz night, Works Friday tea, the music jam, film night, the Sunday swap meet, harvest morning, birthdays, hull-lights evening, Founding Day, the quiet watch), slotted into the crew's leisure time through three typeof-guarded hooks in section 14 (`eventPools`, `eventPlan`, the leisure loop), one in section 10's tap toast (`eventLine`) and `eventsTick()` in the main loop. Mail the evening before, decor (a cake, swap-meet stalls), the player joins by being in the room. New `events_check.py`. See "Ship events (section 18)". |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -321,6 +322,42 @@ Pillar 2, workstream A1 (plans/pillar2-plan.md).
     3. A meal window covered by work: a staff meal at the station (tag `staff`) from 30 to 10 minutes before the window ends.
     4. After the last block, the usual evening.
     `schedFrame` pulls the previous bedtime earlier for an early start. Tested with a stand-in rota (Brennan 04:30–08:10 and 15:30–20:30, hands 05:30–08:30 and 16:00–20:30): 28 days of dayReport clean.
+## Ship events (section 18, the events engineer, 0.34.x)
+
+The small, recurring ship traditions (the user: "lots of little holiday-like things, almost like Stardew Valley"). Not the big ship-wide story events (Pillar 3). Section 18 sits after section 17, before section 6.
+
+- **The table, `SHIP_EVENTS`.** Each entry: `id`, `name`, `k` (its own hash key, 500 up: never reuse one; 300-312 are the galley's), `when`, `at: [from, to]` (minutes from midnight), `min` (the shortest stay worth going for), `where`, `who`, `anim`, optional `prio` (the higher wins a clash), optional `decor`, and the texts: `from` and `mail` (the evening before), `ask` (the tap line before), `here` (the tap line during), `thanks` (the toast when the player joins). Texts can be functions of the day's event (a birthday names the person).
+    - **when:** `{ weekday }` (0 = Monday), `{ every, on }` (days with `d % every === on`), `{ yearDay }` (1-364, `shipYearDay(d) = (d - 1) % 364 + 1`, Day 1 a Monday), or `{ birthday: true }`.
+    - **where,** best first: `{ deck, pool }` (any of schedData's shared keys: `gym`, `music`, `garden-tend`, `mess-seat`...), or `{ deck, room, types, ids?, free?, who? }`: the shared places of those types in the room whose name matches `room` (not in a locked room), optionally narrowed by an id regexp, `free` (nobody's work station), `who: 'officer'` (officers and up only: Deck 1). Places tagged `event: '<id>'` by an architect are taken first, ahead of the rest.
+    - **who(p, d, event):** the chance a free person goes. Free means awake, off duty for the whole window with 15 minutes either side (the shift, galley stints, a night worker's day sleep) and 20 minutes before bed (`eventFree`, from `schedFrame` and `shiftBlocks` only).
+    - **anim(p):** what they do there, one of 8b's ACTS (talk, drink, play, water, wash, read), or null for the place's own pose. It goes on the plan as the tag `ev-<id>-<anim>` (`ev-<id>` when null), and section 18 registers those tags in section 10's `TAG_ACT` (`eventTags`, on the first tick).
+- **The events now (12):**
+
+  | Event | When | Where | Who |
+  | --- | --- | --- | --- |
+  | Running club | Mondays 19:15-20:00 | Deck 3 gym | runners, gym regulars |
+  | Observatory night | Tuesdays 20:30-22:00 | Deck 2 observatory, chart room, science corridor benches | stargazers, Survey, a few others |
+  | Quiz night | Thursdays 20:00-21:30 | Deck 3 bow lounge | anyone; bar and lounge regulars most |
+  | Works Friday tea | Fridays 18:45-19:30 | Deck 5 tea corner, spare Works places | Works crew (tea, wiping tools) |
+  | Music jam | Fridays 19:45-21:15 | Deck 4 music room | musicians play, music lovers listen |
+  | Film night | Saturdays 20:00-22:00 | Deck 4 junior common room | juniors |
+  | Sunday swap meet | Sundays 10:30-12:30 | Deck 3 promenade and plaza benches, two stalls | shoppers, anyone |
+  | Harvest morning | every other Saturday (days 6, 20, 34...) 09:30-11:30 | Deck 3 garden | gardeners, garden lovers |
+  | Birthday | the person's birthday, 20:00-20:45 | Deck 3 mess, the first two long tables, a cake | them, their department, bunkmates |
+  | Hull-lights evening | every 28 days (days 24, 52...) 21:00-22:00 | Deck 3 bow lounge, Deck 1 observation room (officers), promenade | anyone |
+  | Founding Day | day 100 of the year, 19:30-21:30 | Deck 3 mess and bow lounge, a cake | nearly everyone |
+  | The quiet watch | day 300 of the year, 21:30-22:15 | Deck 1 observation room, Deck 2 observatory, bow lounge | anyone |
+
+- **Birthdays.** `birthdayOf(p)` reads `ROSTER[i].birthday` (1-364) when it's there; until the crew designer adds them, a stand-in spread about one a week in id order. Several on one day share one gathering.
+- **How it reaches the plans (section 14, the sim engineer's, three inert hooks):** `schedData` calls `eventPools(shared, desks)`, which adds pools named `deck|ev:<id>:<n>`; `schedBuild` reads `eventPlan(p, d)` once (`EV`); `leisureUntil` treats an event like the Wednesday drill: a leisure block stops at the event's start, then `take('leisure', ev.opts, ...)` until its end, else they carry on. So events only ever use leisure time: shifts, meals and sleep never move, and anyone who finds the room full just does something else. People may stay on up to about 20 minutes after the end (the leisure loop's `linger`). Both hooks also wait for `EV_READY` (a `var` set at the end of section 18), and section 18 clears the plan caches once when it loads, in case anything planned a day before it ran.
+- **On the deck (`eventsTick`, main loop, once a ship minute):**
+    - **Mail:** an announcement at 18:00 the evening before (`eventsMail`, also on skips through `SIM_ADVANCE`, at most three days' worth), kept in `EV_MAILBOX` (the last 20, for the device's calendar later) and sent through section 15's `mailSend` when it's there. `SHIP.events.sent` keeps each one to once (saved as `ship.events`).
+    - **Decor:** `EV_KIT.cake` (on the mess hall's first long table) and `EV_KIT.stalls` (two trestle stalls at the promenade's east end, against the walls either side of cols 39-40) from 30 minutes before to 15 after. 5 and 8 meshes, no shadows, colours through `col()`, added to `deckRoot` so a deck change takes them away. Not in the collision grid.
+    - **Joining:** five ship minutes in one of the event's rooms while it's on: social +12, a toast (`thanks`), and a thank-you in the Mail. Once per event (`SHIP.events.joined`, saved).
+    - **Tap line:** `eventLine(p, t)`, read by `tapCrew`: the `ask` line if their plan has them going later today, `here` while they're there, in place of the bio.
+- **Numbers (days 1-28):** quiz 13-20 people, observatory 5-11 (of 12 places), birthdays 6-16, film 6-10 (of 12), jam 3-5 (of 6), Works tea 7 (full), market 5-7, harvest 6, running club 3-9, hull lights 18, Founding Day 51, the quiet watch 26. Everyone reaches their place on the deck; draw calls at the events peak 443 (hull lights, Deck 3) and 435 (quiz).
+- **Testing:** `events_check.py BUILD.html [DAYS]` (default 28, plus days 100 and 300; about 5 minutes). Good looks like: every event happens when due and never otherwise; at least one person at each; only in its window (plus 25 minutes' lingering) and only at its places; dayReport clean on every day; the same plans twice; on the deck everyone reaches their place, nobody stuck, nobody sharing, draw calls under 450; decor on during, gone after; one Mail per event at 18:00 the evening before; the player joins the quiz; a tap line before it. Ends "EVENTS CHECK OK". It resets `SHIP.galley` before each deck run, because jumping weeks ahead empties the cold store (no carts on paper).
+
 ## Machines and wear (section 17, the systems engineer, 0.33.x)
 Pillar 2, Half B (`plans/pillar2-plan.md`, "Machines and jobs"). Section 17 sits right after section 14 (and after 15 and 16 once they're in). B1 is data and logic only: nothing in it draws anything or calls `R()`, and nothing in it runs unless something asks (a game with `?nosave` never touches it), so cadet_test is ALL IDENTICAL.
 
@@ -899,6 +936,8 @@ They checked:
 
 **day_check.py** (0.22.2): `CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py BUILD.html [DAY]` fast-forwards one ship day with `?nosave&debug` (about 4 minutes) and checks the plan's rules: everyone sleeps 6+ hours in their own bed, eats twice and works their shift; no double-booked places, no gaps; the same plans twice; on every deck a whole day of crew logic with nobody stuck over 10 ship minutes, nobody in someone else's bed or place, nobody missing; draw calls peak under 450; Deck 4 run twice comes out identical. Run it with cadet_test and deck_check whenever crew, schedules, places or the roster change.
 
+**events_check.py** (0.34.0): `CADET_CHROME=/opt/pw-browsers/chromium python3 events_check.py BUILD.html [DAYS]` steps four weeks of ship events and walks each kind through on its deck. See "Ship events (section 18)". Run it whenever events, schedules, places or the roster change.
+
 **machine_check.py** (0.33.0): `CADET_CHROME=/opt/pw-browsers/chromium python3 machine_check.py BUILD.html [DAYS]` runs the machines on paper for 14 ship days, with no repairs and with an ideal crew, and checks the wear is sensible and the same every way (about 15 seconds). See "Machines and wear". Run it with the others whenever machines, schedules or places change.
 
 **deck_check.py** (0.6.8) does that: `CADET_CHROME=/opt/pw-browsers/chromium python3 deck_check.py BUILD.html` visits every deck in `DECKS` and checks every room tile and every tappable item can be reached from the lift, lists the rooms nobody can get into yet (locked cabins, sealed rooms; not failures), flags any room you can only partly get into, lists the active crew and draw calls, and checks Deck 4's memory over round trips. Run it on every turn alongside cadet_test.py.
@@ -1111,6 +1150,7 @@ The script is split into numbered sections:
 11. Interaction and UI: taps, `goToDeck`, the lift (`enterLift`, panel, `startRide`, `updateRide`)
 12. Main loop: rides, doors, `SPINS`, steam, cutaway and fades
 17. Machines and jobs (after 14): the machine registry, wear, systems, ship health, `shipEffects`; later the job list and supplies
+18. Ship events (after 17): `SHIP_EVENTS`, `eventsOn`, `eventPlan`, the Mail, decor and joining in
 13. Ship time and saving, 14. Schedules, 15. Player needs and the device (all three sit after section 5)
 
 The character spec, uniforms and badges are unchanged; see section 8 and design-doc.md ("Setting & names").
