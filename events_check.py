@@ -165,7 +165,7 @@ LIVE = r"""(() => {
   D.lines = seen; D.mine = { ...SHIP.event.mine }; D.closed = !DIALOGUE;
   // the front: day 11, 14:00, on Deck 3
   skipTo(10 * 1440 + 13 * 60 + 50); put(3, '3-grab-1'); tick(10 * 1440 + 13 * 60 + 51, 10 * 1440 + 14 * 60 + 1);
-  D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(ADDRESS_EL && !ADDRESS_EL.hidden); D.flicker = FEEL.flicker; D.calls2 = frames();
+  D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(ADDRESS_EL && !ADDRESS_EL.hidden) || !!(document.getElementById('devAddr') && !document.getElementById('devAddr').hidden); D.flicker = FEEL.flicker; D.calls2 = frames();   // the banner: the plain one, or section 19's
   // the all-clear: day 13, 10:00, the observation room; then walk out to the bridge
   skipTo(12 * 1440 + 9 * 60 + 50); put(1, '1-tea-1'); tick(12 * 1440 + 9 * 60 + 51, 12 * 1440 + 10 * 60 + 1);
   D.allClear = DIALOGUE ? dialogueView() : null; D.calls3 = frames();
@@ -174,7 +174,7 @@ LIVE = r"""(() => {
   D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
   D.dress = dress; if (hadDress) dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
-  MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
+  MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true; if (typeof deviceAddress === 'function') deviceAddress(null);
   return D;
 })()"""
 
