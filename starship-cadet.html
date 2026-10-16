@@ -9811,7 +9811,7 @@ jobWhere.on = true;                                      // crew go to their job
 //   eventPlan(p, day)  -> [{ id, from, to, opts: [[deck, pool], ...], tag, anim, min }] what section 14 slots into
 //                         that person's leisure time (minutes from midnight; [] most days). Read once per schedBuild
 //   eventPools(shared) adds each event's pools ('deck|ev:<id>:<n>') to schedData's shared places (section 14 hook)
-//   eventPlaces(e)     -> every place id the event can use (section 14 may hold them for the window)
+//   eventPlaces(e)     -> the place ids section 14 holds for the event's window (tagged, and `hold`: default the first pool)
 //   eventLine(p, t)    -> a line for the tap toast ("Coming to the quiz tonight?"), or null
 //   eventsTick()       the main loop: the Mail the evening before, decor on the deck during an event, the player joining
 // Every choice is a hash (schedU, k 320-333: section 14 uses 500-515 and 9100/9200, section 16 301 and 310 up); nothing here calls R(), and nothing reads planDay or whereIs
@@ -9826,6 +9826,7 @@ const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year:
 // who(p, d, ctx): the chance (0-1) a person who's free goes. anim(p): what they do there (an activity in 8b's ACTS),
 // or null for the place's own pose. k: the event's own hash key (never reuse one). prio: the higher wins a clash.
 // jitter: each person leaves up to that many minutes before `to`; early: the honorees come that much early.
+// hold: the `where` entries whose places section 14 keeps for those going (default [0]; [] for none).
 // cake: true asks the galley (section 16) to bake that day; its cake replaces our decor 'cake' prop.
 // decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
 // line before it; here: the tap line during it; thanks: the toast when the player joins.
@@ -9877,18 +9878,18 @@ const SHIP_EVENTS = [
     anim: () => 'talk', decor: 'cake', cake: true,
     from: 'Matthias Oduya', mail: c => 'Tomorrow is ' + c.names + '\'s birthday. Chef Brennan is baking; cake in the mess hall at 20:15.',
     ask: c => 'Cake in the mess at quarter past eight, for ' + c.names + '.', here: c => 'Happy birthday, ' + c.first + '!', thanks: c => 'You join the birthday table and sing for ' + c.names + '. The cake is lemon.' },
-  { id: 'hull-lights', name: 'Hull-lights evening', k: 329, when: { every: 28, on: 24 }, at: [1260, 1320], min: 25,
+  { id: 'hull-lights', name: 'Hull-lights evening', k: 329, when: { every: 28, on: 24 }, at: [1260, 1320], min: 25, hold: [],
     where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 1, room: /^Observation room$/, types: ['common-room', 'lounge-seat'], who: 'officer' },
       { deck: 3, room: /^Promenade$/, types: ['bench'] }],
     who: () => .4, anim: () => null,
     from: 'Commander Teo Vance', mail: 'Hull-lights evening tomorrow at 21:00: the running lights cycle through every colour they have. Best seen from the bow lounge windows.',
     ask: 'Hull lights tonight. The bow windows are the best seats.', here: 'There goes the green. My favourite.', thanks: 'You watch the hull lights run through their colours from the window.' },
-  { id: 'founding', name: 'Founding Day', k: 330, when: { yearDay: 100 }, at: [1170, 1290], min: 30, prio: 3,
+  { id: 'founding', name: 'Founding Day', k: 330, when: { yearDay: 100 }, at: [1170, 1290], min: 30, prio: 3, hold: [],
     where: [{ deck: 3, pool: 'mess-seat' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
     who: () => .85, anim: () => 'talk', decor: 'cake', cake: true,
     from: 'Captain Odile Marrow', mail: 'Tomorrow is the Wren\'s Founding Day. Everyone off duty to the mess hall at 19:30 for cake and a few words. I promise to keep them few.',
     ask: 'Founding Day! Cake in the mess at half seven.', here: 'To the Wren.', thanks: 'You raise a cup in the mess hall. To the Wren.' },
-  { id: 'quiet-watch', name: 'The quiet watch', k: 331, when: { yearDay: 300 }, at: [1290, 1335], min: 25,
+  { id: 'quiet-watch', name: 'The quiet watch', k: 331, when: { yearDay: 300 }, at: [1290, 1335], min: 25, hold: [],
     where: [{ deck: 1, room: /^Observation room$/, types: ['common-room', 'lounge-seat'], who: 'officer' }, { deck: 2, room: /^Observatory$/, types: ['common-room'] },
       { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
     who: () => .55, anim: () => null,
@@ -9955,11 +9956,13 @@ function eventOpts(ev, p) {
   });
   return out;
 }
-// every place an event can use (all its pools, officer-only ones too), for section 14 to hold for the window
+// the places section 14 holds for the event's window (only those going may take them): its tagged places and the
+// `where` entries listed in `hold` (default: the first). A big or casual event holds none (hold: []), so dinner and
+// the rest of the evening go on around it
 function eventPlaces(e) {
-  const S = schedData(), ev = e.ev || e, ids = new Set();
+  const S = schedData(), ev = e.ev || e, ids = new Set(), hold = ev.hold || [0];
   for (const n of Object.keys(DECKS).map(Number)) for (const k of ['@' + ev.id, 'ev:' + ev.id]) for (const pl of S.shared.get(n + '|' + k) || []) ids.add(pl.id);
-  ev.where.forEach((w, i) => { for (const pl of S.shared.get(w.deck + '|' + (w.room ? 'ev:' + ev.id + ':' + i : w.pool)) || []) ids.add(pl.id); });
+  ev.where.forEach((w, i) => { if (hold.includes(i)) for (const pl of S.shared.get(w.deck + '|' + (w.room ? 'ev:' + ev.id + ':' + i : w.pool)) || []) ids.add(pl.id); });
   return [...ids];
 }
 // free for the whole window: awake, off duty (the shift, the galley rota's stints, a night worker's day's sleep)
