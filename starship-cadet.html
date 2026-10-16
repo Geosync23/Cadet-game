@@ -113,6 +113,10 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
 .device .need i{height:14px;border:2px solid var(--crt-dim);border-radius:2px;overflow:hidden;background:transparent}
 .device .need b{display:block;height:100%;background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
 .device .need.low b{background:repeating-linear-gradient(90deg,var(--crt-hot) 0 6px,transparent 6px 9px)}
+.device .need.pulse b{background:var(--crt-hot);box-shadow:0 0 10px var(--crt-glow)}
+.device.fx .need.pulse b{animation:devpulse .5s steps(2) 3}
+@keyframes devpulse{50%{opacity:.4}}
+@media (prefers-reduced-motion:reduce){.device.fx .need.pulse b{animation:none}}
 .device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
 .device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
@@ -191,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.18
+   STARSHIP CADET: CSV Wren                            build 0.35.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6912,7 +6916,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.18';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.19';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8114,6 +8118,7 @@ function deviceFrame(on) { DEV.frOn = !!on; }
 let devFrameT = 0;
 function deviceFrameStep(now) {
   requestAnimationFrame(deviceFrameStep);
+  devPulseStep();
   const dt = Math.min(.1, Math.max(0, (now - (devFrameT || now)) / 1000)); devFrameT = now;
   const want = DEV.frOn ? 1 : 0; if (DEV.fr === want && !DEV.frApplied) return;
   DEV.fr += (want - DEV.fr) * Math.min(1, dt * 6); if (Math.abs(want - DEV.fr) < .002) DEV.fr = want;
@@ -8182,7 +8187,7 @@ const DEVICE_SKIN = (() => {
     bars(b) {
       const box = mk('div', 'bars');
       for (const it of b.items || []) {
-        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
+        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '') + (it.pulse ? ' pulse' : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
         fill.style.width = v.toFixed(1) + '%';
         if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
         row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
@@ -8834,10 +8839,18 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     return { title: 'Appointments', blocks: B };
   } });
 
+// a need's bar lights up for a moment when it rises (0.35.19): section 15's needPulse(k), true for about 1.5 s after
+// a "+N" note; while Needs is open the frame loop redraws it when that changes (it blinks with Screen effects on)
+const devPulse = k => { if (typeof needPulse !== 'function') return false; try { return !!needPulse(k); } catch (e) { return false; } };
+let devPulseKey = '';
+function devPulseStep() {
+  if (!DEV.open || DEV.app !== 'needs' || typeof needPulse !== 'function' || typeof NEED_KEYS === 'undefined') { devPulseKey = ''; return; }
+  const k = NEED_KEYS.map(devPulse).join(); if (k !== devPulseKey) { devPulseKey = k; deviceRefresh(); }
+}
 // Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
 deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   const n = SHIP.player.needs, fx = needEffects(n), B = [];
-  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '',
+  B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '', pulse: devPulse(k),
     mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null })) });
   for (const k of NEED_KEYS) if (fx.marks[k]) B.push({ kind: 'text', text: (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1], mark: fx.marks[k][0] });
   const sp = playerSpeed();
