@@ -39,6 +39,13 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .deckbtn.here i{background:#2a9d8f;color:#08201d;border-color:#2a9d8f}
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 .devbtn{position:fixed;left:14px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
+.devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
+.device .tabs{display:flex;gap:6px;margin:4px 2px 2px}
+.device .tabs button{padding:4px 10px;font-size:12.5px}
+.device .tabs button.on{border-color:var(--teal);color:#cfe9e4}
+.device .mail{display:block;width:100%;text-align:left;margin:4px 0;padding:6px 8px;font-size:13px}
+.device .mail.new{border-color:var(--teal)}
+.device .mail small{display:block;color:var(--muted);font-size:11.5px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 .device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
@@ -81,7 +88,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   <div class="decks"><button class="deckbtn" id="sleepYes">Sleep until 06:00</button></div>
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
-<button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span></button>
+<button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
 <div class="lift device" id="device" role="dialog" aria-labelledby="devT" hidden>
   <h2 id="devT">Your device</h2><p>A placeholder: the real device is still being designed.</p>
   <div id="devBody"></div>
@@ -93,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.9
+   STARSHIP CADET: CSV Wren                            build 0.28.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6305,7 +6312,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.28.10';                            // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7074,8 +7081,13 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // panel of sections, added with device.addSection(id, title, render).
 // Sits after 14 like 13 and 14 do; it only touches the player, the deck and
 // the HUD at run time (section 10 and on). Nothing here calls R().
-// Hooks elsewhere: the save (13: v 2, needs, New game), the item tap (11),
-// playerUpdate in the main loop (12), the device's HTML and CSS.
+// Mail (0.28.10): mailSend({ at, from, subject, body }) from any section puts a
+// message in SHIP.mail, read on the device's Mail tab. Social also comes from
+// chatting with crew (tap them) and eating with company; the store sells
+// snacks and small comforts for credits (SHIP.player.credits).
+// Hooks elsewhere: the save (13: v 2, needs, New game), the item tap (11), the
+// crew tap (10: playerChat), playerUpdate in the main loop (12), the device's
+// HTML and CSS.
 // =====================================================================
 const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
 const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
@@ -7117,6 +7129,16 @@ function needsLoad(s) {                                  // from the save (secti
   return out;
 }
 SHIP.player = { needs: needsLoad(SAVED), carry: [], work: null };   // carry and work come from the save below (the job loop)
+// credits, your locker and who you've chatted with today (0.28.10): from the save, read defensively
+const CREDITS_FRESH = 40, LOCKER_MAX = 40;
+function walletLoad(s) {
+  const p = s && s.player, c = p && p.credits, lk = p && p.locker, ch = p && p.chats, chats = {};
+  if (ch && typeof ch === 'object') for (const k in ch) if (Number.isInteger(ch[k])) chats[k] = ch[k];
+  return { credits: typeof c === 'number' && isFinite(c) && c >= 0 ? Math.floor(c) : CREDITS_FRESH,
+    locker: Array.isArray(lk) ? lk.filter(x => typeof x === 'string').slice(0, LOCKER_MAX) : [], chats };
+}
+Object.assign(SHIP.player, walletLoad(SAVED));
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.credits = SHIP.player.credits; p.locker = SHIP.player.locker.slice(); p.chats = { ...SHIP.player.chats }; });
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.needs = { ...SHIP.player.needs }; p.carry = SHIP.player.carry.slice(); p.work = SHIP.player.work && { ...SHIP.player.work, fitted: SHIP.player.work.fitted.slice(), make: SHIP.player.work.make && { ...SHIP.player.work.make } }; });   // into the save (section 13)
 // the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
 // restore and drain multiply ours (a failing recycler, weaker showers). walk is left out: the user's rule is that
@@ -7157,13 +7179,48 @@ function needsLine() {
   return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
 }
 
+// ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
+// left out). SHIP.mail holds the newest MAIL_MAX, newest first: { id, at, from, subject, body, read }. Saved in
+// save.mail (SAVE_EXTRA), read back defensively. New mail shows a count on the device button and a toast (one for a
+// batch: several sections can send in the same moment, a sleep's catch-up most of all). ----
+const MAIL_MAX = 60;
+function mailLoad(s) {
+  const m = s && Array.isArray(s.mail) ? s.mail : [];
+  return m.filter(x => x && typeof x === 'object' && typeof x.subject === 'string').slice(0, MAIL_MAX).map((x, i) => ({
+    id: Number.isInteger(x.id) ? x.id : -i, at: isFinite(x.at) ? +x.at : 0, from: typeof x.from === 'string' ? x.from : 'Ship',
+    subject: x.subject, body: typeof x.body === 'string' ? x.body : '', read: !!x.read }));
+}
+SHIP.mail = mailLoad(SAVED).concat(SHIP.mail || []);
+SAVE_EXTRA.push(s => { s.mail = SHIP.mail.map(m => ({ ...m })); });
+let mailNew = [], mailTimer = 0;
+function mailSend({ at, from, subject, body, quiet } = {}) {   // quiet: no toast (the welcome, under the first toast)
+  if (!SHIP.mail) SHIP.mail = [];
+  const id = SHIP.mail.reduce((a, m) => Math.max(a, m.id), 0) + 1;
+  const m = { id, at: isFinite(at) ? +at : shipNow(), from: String(from || 'Ship'), subject: String(subject || '(no subject)'), body: String(body || ''), read: false };
+  SHIP.mail.unshift(m); SHIP.mail.sort((a, b) => b.at - a.at || b.id - a.id); SHIP.mail.length = Math.min(SHIP.mail.length, MAIL_MAX);
+  if (!quiet) mailNew.push(m);
+  if (!mailTimer && mailNew.length) mailTimer = setTimeout(() => {         // one toast for a batch
+    const n = mailNew.filter(x => !x.read); mailNew = []; mailTimer = 0;
+    if (n.length && !(typeof sleeping !== 'undefined' && sleeping)) toast('Your device', n.length === 1 ? 'New mail from ' + n[0].from + ': ' + n[0].subject + '.' : n.length + ' new messages. Open your device to read them.');
+  }, 0);
+  try { device.refresh(); } catch (e) { /* sent before the device exists: it shows on the first refresh */ }
+  return id;
+}
+const mailUnread = () => SHIP.mail.filter(m => !m.read).length;
+function mailWelcome() {
+  mailSend({ from: 'Works Office', subject: 'Welcome aboard the Wren', body: 'Welcome to the CSV Wren, Cadet. You\'re a Works technician on the day shift: '
+    + 'take jobs from the board (here on your device, or in the Works bay on Deck 5), fetch parts from main storage, and keep the ship running. '
+    + 'Look after yourself too: eat in the mess on Deck 3, shower in the junior wing\'s washrooms, keep fit at the gym, and get some sleep: your bunk is in Bunk 1. '
+    + 'Your pay is credited for each job you finish; the store on Deck 3 sells snacks and small comforts. Welcome aboard.', quiet: true });
+}
+
 // ---- activities: tap the thing. ACT_TAP picks the activity by what you tapped, then the nearest free place of
 // its types (on this deck, within ACT_NEAR m of the thing). Without a place nearby the tap does what it always did. ----
 const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd's (anim names fall back to stand until 8b has them)
   gym:    { need: 'fitness', gain: 30, mins: 30, title: 'Working out', done: 'Workout done. You feel loose and warm.' },
   call:   { need: 'social', gain: 40, mins: 15, pose: 'call', title: 'Calling home', done: 'You say goodbye and send it off. It\'ll be days getting there.' },
-  browse: { mins: 8, pose: 'browse', title: 'Browsing', done: 'You\'ve picked out a few things. Pay at the counter.' },
-  pay:    { mins: 2, pose: 'pay', title: 'Paying', done: 'Paid. Nothing to carry yet: the shop\'s goods come later.' },
+  browse: { mins: 8, pose: 'browse', title: 'Browsing' },
+  pay:    { mins: 2, pose: 'pay', title: 'Paying' },
   shower: { need: 'hygiene', gain: 80, mins: 10, pose: 'stand', title: 'Showering', done: 'Clean, and smelling of the ship\'s one soap.' },
   tray:   { mins: 1, pose: 'stand', title: 'At the servery' },
   queue:  { mins: 1, pose: 'stand', title: 'In the queue', until: A => {   // the servery's queue (section 16): wait for your turn, then take a tray
@@ -7177,6 +7234,21 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   stow:   { mins: 2, pose: 'browse', title: 'Main storage' },
   make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
 };
+// the store (0.28.10): browsing picks something from the shelf you tapped (a different one each visit), the counter
+// sells it. Snacks are eaten on the way out (+hunger); comforts go in your locker (+social). Credits: CREDITS_FRESH
+// to start, JOB_PAY for each job you finish.
+const STORE = {
+  snack: [['a bag of dried apple', 2, 6], ['a bar of ship-made chocolate', 3, 8], ['a pot of spiced nuts', 3, 8], ['a honey flapjack', 2, 7]],
+  drink: [['a cold fizzy lime', 2, 4], ['a bottle of cold tea', 2, 4], ['a carton of oat milk', 2, 5]],
+  comfort: [['a paperback novel', 8, 5], ['a pair of soft socks', 6, 4], ['a postcard of Earth', 3, 3], ['a little potted succulent', 10, 6], ['a deck of cards', 5, 4], ['a scented candle (unlit, ship rules)', 7, 4]],
+};
+const STORE_SHELF = it => /fridge/i.test(it.t) ? 'drink' : /display/i.test(it.t) ? 'comfort' : 'snack';
+const JOB_PAY = 15;
+function storePick(kind) {                               // the next thing on that shelf: deterministic, never R()
+  const list = STORE[kind], n = SHIP.player.locker.length + (SHIP.player.bought || 0) + SHIP.time.day;
+  const [name, price, gain] = list[n % list.length];
+  return { kind, name, price, gain };
+}
 const ACT_TAP = [   // what you tapped (its title), the place types it leads to, the activity
   [/treadmill|rowing|weights|mats/i, ['gym'], 'gym'],
   [/^booth/i, ['callhome'], 'call'],
@@ -7188,7 +7260,7 @@ const ACT_TAP = [   // what you tapped (its title), the place types it leads to,
   [/^shower$/i, ['shower'], 'shower'],
 ];
 const ACT_NEAR = 2.4;
-let ACT = null, basket = false, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
+let ACT = null, basket = null, needsT = null, PLAYER_V0, slowWas = {}, devMin = -1;
 const heldBy = id => DECK_CREW.find(a => a.goalId === id);       // crew at a place, or on their way to it
 const playerHolds = () => ACT && ACT.placeId || null;             // the place you're using (for the schedules, later)
 function privatePlace(pl) {                              // someone's own: named after a bed, or in a room with a bed
@@ -7229,6 +7301,7 @@ function playerTap(it, at, point) {
   if (!near.length) return false;
   if (kind === 'pay') {                                  // the counter: pay for what you've picked out, standing at it
     if (!basket) return false;
+    if (SHIP.player.credits < basket.price) { toast(it.t, basket.name[0].toUpperCase() + basket.name.slice(1) + ' is ' + basket.price + ' credits, and you have ' + SHIP.player.credits + '. Finish a job or two first.'); basket = null; return true; }
     const clerk = heldBy(near[0][0].id);
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
@@ -7251,7 +7324,7 @@ function playerTap(it, at, point) {
   const crowdPose = typeof poseOf === 'function' ? poseOf(pl) : null;   // section 8b's pose for a place (with A2), as the crew use
   const pose = kind === 'eat' ? spot.pose : kind === 'gym' && !pl.anim && /treadmill/i.test(it.t) ? 'run'
     : crowdPose || (kind === 'gym' ? pl.anim || (pl.pose === 'stand' ? 'lift' : pl.pose) : kind === 'call' ? pl.anim || 'call' : pl.anim || PLAYER_ACTS[kind].pose);
-  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x });
+  actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, shelf: kind === 'browse' ? STORE_SHELF(it) : null });
   return true;
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
@@ -7295,10 +7368,20 @@ function actEnd(abort) {
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if (abort) return;
   player.face = player.obj.rotation.y = A.face;
-  if (A.def.done) toast(A.def.title, A.def.done + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
-  if (A.kind === 'browse') basket = true;
+  if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
+  if (A.kind === 'browse') {
+    basket = storePick(A.o.shelf || 'snack');
+    toast(A.def.title, 'You pick out ' + basket.name + ' (' + basket.price + ' credits; you have ' + SHIP.player.credits + '). Pay at the counter.');
+  }
+  if (A.kind === 'pay' && basket) {
+    const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1;
+    if (b.kind === 'comfort') { P.locker.push(b.name); P.locker.length = Math.min(P.locker.length, LOCKER_MAX); P.needs.social = needClamp(P.needs.social + b.gain); }
+    else P.needs.hunger = needClamp(P.needs.hunger + b.gain);
+    toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + (b.kind === 'comfort' ? '. It goes in your locker; it\'s nice to have something of your own.' : ' and have it on the way out.')
+      + ' ' + P.credits + ' credits left.');
+  }
   if (A.kind === 'fetch' || A.kind === 'job' || A.kind === 'stow' || A.kind === 'make') jobEnd(A);
-  if (A.kind === 'pay') basket = false;
+  if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
   if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
   if (A.kind === 'tray' || A.kind === 'queue') {         // tray in hand: the nearest free mess seat
@@ -7308,6 +7391,29 @@ function actEnd(abort) {
     if (seat) actStart('eat', seat[0].id, { ...o, pose: seat[1].pose });
     else { actStart('eat', null, o); toast('Mess hall', 'Every seat\'s taken, so you eat standing up.'); }
   }
+}
+// company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
+// at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.
+const COMPANY_NEAR = 3, COMPANY_MAX = 3, COMPANY_GAIN = .2;
+function company(A) {
+  if (!A || !A.spot || typeof DECK_CREW === 'undefined') return 0;
+  return DECK_CREW.filter(a => a.settled && a.goalId && (PLACE_OF.get(a.goalId) || {}).type === 'mess-seat' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).length;
+}
+// chatting (0.28.10): a tap on a crew member (section 10) calls playerChat(person). The first chat with someone each
+// ship day gives CHAT_GAIN social, later ones CHAT_AGAIN; times needEffects' socialGain (clean: more, unwashed: half).
+// It adds a line to the tap's toast.
+const CHAT_GAIN = 6, CHAT_AGAIN = 1;
+function playerChat(p) {
+  if (!p) return 0;
+  const P = SHIP.player, key = String(p.id || p.name), fx = needEffects(), first = P.chats[key] !== SHIP.time.day;
+  const gain = (first ? CHAT_GAIN : CHAT_AGAIN) * fx.socialGain;
+  P.chats[key] = SHIP.time.day;
+  for (const k in P.chats) if (P.chats[k] < SHIP.time.day - 1) delete P.chats[k];   // only today's (and yesterday's) are kept
+  P.needs.social = needClamp(P.needs.social + gain);
+  const tx = document.getElementById('tx'), first1 = (p.name || '').split(' ')[0];
+  if (tx) tx.textContent += first ? ' You chat for a minute.' + (P.needs.hygiene < NEED_LOW ? ' ' + first1 + ' wrinkles their nose a little.' : '') : ' You say hello again.';
+  device.refresh();
+  return gain;
 }
 // once a frame: the walk there, sliding into the place, the time it takes, and stepping back out
 function actUpdate(dt, t) {
@@ -7348,6 +7454,10 @@ function playerUpdate(dt, t) {
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
+      if (A.kind === 'eat' && m > 0) {                   // company at the table (0.28.10): social for each one near you, up to COMPANY_MAX
+        const c = company(A); A.o.company = Math.max(A.o.company || 0, c);
+        n.social = needClamp(n.social + COMPANY_GAIN * Math.min(c, COMPANY_MAX) * needEffects(n).socialGain * m);
+      }
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
@@ -7372,7 +7482,10 @@ SIM_ADVANCE.push((from, to) => {
   needsT = to;
 });
 // New game (section 13): fresh needs, nothing in hand
-function playerNew() { actEnd(true); basket = false; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {}; device.refresh(); }
+function playerNew() {
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
+  Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.mail = []; mailWelcome(); device.refresh();
+}
 
 // ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
 // section), fetch its parts from main storage on Deck 5 (tap a shelf or the counter there; you carry CARRY_MAX at a
@@ -7412,6 +7525,7 @@ function workLoad(s) {
   return { job: w.job, fitted: Array.isArray(w.fitted) ? w.fitted.filter(x => typeof x === 'string') : [], done: isFinite(w.done) && w.done > 0 ? +w.done : 0, seen: !!w.seen, make: mk };
 }
 SHIP.player.carry = carryLoad(SAVED); SHIP.player.work = workLoad(SAVED);
+if (!SAVED) setTimeout(() => { if (!SHIP.mail.length) mailWelcome(); }, 0);   // a fresh start (after the device exists, below)
 const jobsOn = () => typeof myJob === 'function' && typeof finishJob === 'function' && typeof takePart === 'function' && typeof machineById === 'function';
 const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1));
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
@@ -7508,7 +7622,7 @@ function jobEnd(A) {
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
-      if (finishJob(mw.j.id)) { P.work = null; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board.'); }
+      if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
       else toast('Your job', 'The job isn\'t yours any more.');
     } else toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length ? '' : 'Main storage is on Deck 5.'));
   }
@@ -7518,20 +7632,34 @@ function jobEnd(A) {
 // ---- the device: a PLACEHOLDER (the user is designing the real one). A button opens a plain panel of sections;
 // device.addSection(id, title, render) adds one (render(el) fills el each time the panel is drawn). Needs and
 // jobs live in their own data; this only shows them. ----
+// Tabs (0.28.10): a section belongs to a tab (addSection's fourth argument, 'status' if left out); the Mail tab is
+// one section of its own, with the unread count on its tab and the device button.
 const device = (() => {
   const el = document.getElementById('device'), body = document.getElementById('devBody'), btn = document.getElementById('devBtn'), sections = [];
-  let back = null;
+  const badge = document.getElementById('devMail'), TABS = [['status', 'Status'], ['mail', 'Mail']];
+  let back = null, tab = 'status';
   const api = {
-    addSection(id, title, render) { const i = sections.findIndex(s => s.id === id); const s = { id, title, render }; if (i < 0) sections.push(s); else sections[i] = s; api.refresh(); },
+    addSection(id, title, render, inTab = 'status') { const i = sections.findIndex(s => s.id === id); const s = { id, title, render, tab: inTab }; if (i < 0) sections.push(s); else sections[i] = s; api.refresh(); },
+    show(t) { tab = t; api.refresh(); },
+    get tab() { return tab; },
     open() { back = document.activeElement; el.hidden = false; api.refresh(); document.getElementById('devClose').focus(); },
     close() { el.hidden = true; if (back && back.focus) back.focus(); },
     get isOpen() { return !el.hidden; },
     refresh() {
       const n = SHIP.player.needs;
       btn.classList.toggle('low', NEED_KEYS.some(k => n[k] < SLOW_BELOW));
+      const un = mailUnread();
+      if (badge) { badge.hidden = !un; badge.textContent = un; }
       if (el.hidden) return;
       body.textContent = '';
+      const bar = document.createElement('div'); bar.className = 'tabs'; bar.setAttribute('role', 'tablist');
+      for (const [id, name] of TABS) {
+        const b = document.createElement('button'); b.className = id === tab ? 'on' : ''; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', id === tab);
+        b.textContent = name + (id === 'mail' && un ? ' (' + un + ')' : ''); b.onclick = () => api.show(id); bar.appendChild(b);
+      }
+      body.appendChild(bar);
       for (const s of sections) {
+        if (s.tab !== tab) continue;
         const box = document.createElement('section'), h = document.createElement('h3'), inner = document.createElement('div');
         h.textContent = s.title; box.append(h, inner); body.appendChild(box);
         try { s.render(inner); } catch (e) { inner.textContent = '(this section failed to draw)'; }
@@ -7554,6 +7682,23 @@ device.addSection('now', 'Now', el => {
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) { const r = document.createElement('p'); r.textContent = 'Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.'; el.appendChild(r); }
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
+device.addSection('wallet', 'Wallet', el => {      // credits and your locker (0.28.10)
+  const P = SHIP.player, p = document.createElement('p');
+  p.textContent = P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.');
+  el.appendChild(p);
+});
+let mailOpen = null;                                     // the message shown in full
+device.addSection('mail', 'Inbox', el => {
+  if (!SHIP.mail.length) { const p = document.createElement('p'); p.textContent = 'No mail.'; el.appendChild(p); return; }
+  for (const m of SHIP.mail) {
+    const b = document.createElement('button'), sm = document.createElement('small');
+    b.className = 'mail' + (m.read ? '' : ' new'); b.textContent = (m.read ? '' : '● ') + m.subject;
+    sm.textContent = m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440); b.appendChild(sm);
+    b.onclick = () => { mailOpen = mailOpen === m.id ? null : m.id; m.read = true; device.refresh(); };
+    el.appendChild(b);
+    if (mailOpen === m.id) { const p = document.createElement('p'); p.textContent = m.body; el.appendChild(p); }
+  }
+}, 'mail');
 device.addSection('needs', 'Needs', el => {
   const n = SHIP.player.needs, fx = needEffects(n);
   for (const k of NEED_KEYS) {
@@ -10181,6 +10326,7 @@ function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   toast(a.p.name, a.p.role + '. ' + a.p.bio);
+  if (typeof playerChat === 'function') playerChat(a.p);  // section 15: chatting raises social
   return true;
 }
 SIM_ADVANCE.push(() => { if (typeof deckDef !== 'undefined' && deckDef) deckCrewFill(); });   // after a sleep, everyone where they now are
@@ -10241,6 +10387,7 @@ function tap(cx, cy) {
     const who = ud.walker, s = who.spec;
     who.stop(); who.talking = 6; who.faceToward(player); player.faceToward(who);
     toast(s.name, `${DEPT_NAME[s.dept]}, ${RANK_NAME[s.rank]}. ${s.bio}`);
+    if (typeof playerChat === 'function') playerChat(s);  // section 15
     return;
   }
   if (ud.item && ud.item.lift) { enterLift(); return; }

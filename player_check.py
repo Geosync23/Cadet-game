@@ -7,6 +7,9 @@
 #   long days (0.28.9): a rested player stays up 16 to 18 ship hours before energy hits the tired line (17 at average
 #   fitness); your bunk from 20:00 fades out and wakes you at 06:00 with no dialog, and earlier says it's too early
 #   bonuses and penalties (needEffects, 0.28.9): the table, stacking, the device's marks, and tasks really going faster
+#   mail (0.28.10): mailSend, the unread count on the button and the Mail tab, reading marks it read, the welcome on a
+#   fresh start, saved and loaded; social from chatting (first chat a day, then a little, times socialGain) and from
+#   company at the mess table; the store sells what you picked out for credits (snacks: food; comforts: the locker)
 #   in the game, one player day on the real decks, by tapping the real things: shower (Deck 4), servery tray then a
 #   mess seat, grab shelf, treadmill (run), weights (lift), call-home booth (call), shelves then the counter
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
@@ -191,9 +194,14 @@ with sync_playwright() as pw:
     t = g.ev(f"({TAP})({json.dumps({'title': 'Counter'})})"); g.step(60)
     check(t is False and not state(g)['act'], 'the counter with nothing picked out should just show its text')
     tp, b, seen, e, pk = run_activity(g, 'Shelves'); peak = max(peak, pk); body_check('browse', None, 0, b, e, seen, 'browse')
-    check(e['basket'] is True, 'browsing should leave something to pay for')
+    check(isinstance(e['basket'], dict) and e['basket'].get('price', 0) > 0, f"browsing should leave something to pay for ({e['basket']})")
+    cr0, hu0 = g.ev("SHIP.player.credits"), e['needs']['hunger']
     tp, b, seen, e, pk = run_activity(g, 'Counter'); peak = max(peak, pk); body_check('pay', None, 0, b, e, seen, 'pay')
-    check(e['basket'] is False, 'paying should empty the basket')
+    check(e['basket'] is None, 'paying should empty the basket')
+    cr1 = g.ev("SHIP.player.credits"); print('  credits', cr0, '->', cr1, '|', e['toast'][:100])
+    check(cr1 == cr0 - b['basket']['price'] and e['toast'].startswith('Paid'), f"paying should cost {b['basket']['price']} credits: {cr0} -> {cr1}")
+    if b['basket']['kind'] == 'comfort': check(g.ev("SHIP.player.locker.includes(%s)" % json.dumps(b['basket']['name'])), 'a comfort goes in your locker')
+    else: check(e['needs']['hunger'] > hu0, 'a snack should feed you a little')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 17 * 60 + 40); needsT = null"); g.step(5)   # dinner
     tp, b, seen, e, pk = run_activity(g, 'Servery', label='Servery, then a seat'); peak = max(peak, pk)
     kinds = [a[0] for a in seen]
@@ -230,6 +238,52 @@ with sync_playwright() as pw:
         left = g.ev("[window.portions, !!window.joined]"); print('  portions left, still joined:', left)
         check(left == [29, False], 'queue: one portion taken, and the join cleared')
         g.ev("delete window.takePortion; delete window.galleyText; delete window.galleyJoin; delete window.galleyTurn; delete window.joined; delete window.portions")
+
+    print('The store (credits, snacks, comforts):')
+    sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50;
+      basket = storePick('comfort'); ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];
+      basket = storePick('snack'); ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
+      P.credits = 1; basket = storePick('comfort'); const it = ITEMS.find(i => i.t === 'Counter'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
+      const c = [r, !!ACT, basket, document.getElementById('tx').textContent]; P.credits = 40; return [a, b, c]; })()""")
+    print(' ', sh)
+    check(sh[0][1] and sh[0][0] < 20 and sh[0][2] > 50 and sh[0][3] is None, f'a comfort: credits down, in the locker, social up: {sh[0]}')
+    check(sh[1][0] < sh[0][0] and sh[1][1] == len(sh[0][1]) and sh[1][2] > 50, f'a snack: credits down, eaten (food up), not in the locker: {sh[1]}')
+    check(sh[2][0] is True and not sh[2][1] and sh[2][2] is None and 'credits' in sh[2][3], f'not enough credits: a toast, no sale: {sh[2]}')
+
+    print('Social from chatting and company:')
+    ch = g.ev(r"""(() => { const n = SHIP.player.needs, out = []; SHIP.player.chats = {};
+      const chat = (who, hy) => { n.social = 50; n.hygiene = hy; playerChat({ id: who, name: 'Test ' + who }); return Math.round((n.social - 50) * 10) / 10; };
+      out.push(chat('a', 50), chat('a', 50), chat('b', 80), chat('c', 10), document.getElementById('tx').textContent.includes('nose'));
+      setShipNow(shipNow() + 1440); out.push(chat('a', 50)); setShipNow(shipNow() - 1440); n.hygiene = 50; return out; })()""")
+    print('  first chat, again, clean, unwashed (and the remark), next day:', ch)
+    check(ch[:4] == [6, 1, 9, 3] and ch[4] is True and ch[5] == 6, f'chatting: {ch}')
+    cp = g.ev(r"""(() => { const n = SHIP.player.needs, seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat'), s0 = placeSpot(seats[0].id);
+      const near = seats.slice(1).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - s0.x, s.z - s0.z) < COMPANY_NEAR).slice(0, 4);
+      const fake = near.map(([q, s]) => ({ settled: true, goalId: q.id, x: s.x, z: s.z, p: { name: 'Test' } })); const out = [];
+      for (const k of [0, 2, 4]) {
+        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50 });
+        FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
+        ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+        needsT = shipNow() - 10; playerUpdate(0, 0); out.push([company(ACT), Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10]);
+        DECK_CREW.splice(DECK_CREW.length - k, k); ACT = null; }
+      FX_MIN = -1; return [near.length, out]; })()""")
+    print('  ten minutes eating with 0, 2, 4 (counts as 3) at the table: [company, social gained]', cp)
+    if check(cp[0] >= 3, f'company: need three mess seats near each other ({cp[0]})'):
+        check(all(abs(gn - 2 * min(c, 3)) < .15 for c, gn in cp[1]) and cp[1][1][0] - cp[1][0][0] == 2 and cp[1][2][0] - cp[1][0][0] == 4,
+              f'company at the table: +0.2 a minute for each of up to three ({cp[1]}; the first is whoever was already eating)')
+
+    print('Mail:')
+    ml = g.ev(r"""(() => { SHIP.mail = []; device.refresh(); const b = document.getElementById('devMail'), out = [b.hidden];
+      mailSend({ from: 'Stores', subject: 'Filters low', body: 'Two left.' }); mailSend({ at: shipNow() - 5, from: 'Galley', subject: 'Cake tonight', body: 'Tomas turns 24.' });
+      out.push(b.hidden, b.textContent, mailUnread(), SHIP.mail.map(m => m.subject));
+      device.open(); device.show('mail'); const body = document.getElementById('devBody');
+      out.push([...body.querySelectorAll('.tabs button')].map(x => x.textContent), body.querySelectorAll('button.mail').length);
+      body.querySelector('button.mail').click(); out.push(mailUnread(), document.getElementById('devBody').textContent.includes('Two left.'));
+      device.show('status'); device.close(); return out; })()""")
+    print(' ', ml)
+    check(ml[0] is True and ml[1] is False and ml[2] == '2' and ml[3] == 2, f'mail: the unread count on the button: {ml[:4]}')
+    check(ml[4] == ['Filters low', 'Cake tonight'] and ml[5] == ['Status', 'Mail (2)'] and ml[6] == 2, f'mail: the Mail tab, newest first: {ml[4:7]}')
+    check(ml[7] == 1 and ml[8] is True, f'mail: opening one shows it and marks it read: {ml[7:]}')
 
     print('Places held by crew, closed servery, walking away:')
     held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
@@ -392,6 +446,10 @@ with sync_playwright() as pw:
     check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55}, 'v 2 save should hold the needs')
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
+    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; saveGame()")
+    ev = load()
+    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats)])")); print('  mail, credits, locker, chats kept:', kept)
+    check(kept == [['Kept'], 77, ['a deck of cards'], ['x']], f'the save should keep mail, credits, locker and chats: {kept}')
     check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55}, 'a v 2 save should load its needs')
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
@@ -402,6 +460,8 @@ with sync_playwright() as pw:
     ns = json.loads(ev("const n0 = NEED_KEYS.map(k => SHIP.player.needs[k]); SHIP.player.needs.hunger = 1; saveGame(); JSON.stringify([n0, localStorage.getItem(SAVE_KEY)])"))
     print('  ?nosave:', ns[0])
     check(ns[0] == [60, 100, 60, 70, 70], f'?nosave should start fresh: {ns[0]}')
+    wl = json.loads(ev("JSON.stringify([SHIP.mail.map(m => [m.from, m.subject, m.read]), SHIP.player.credits])")); print('  a fresh start: mail', wl[0], 'credits', wl[1])
+    check(len(wl[0]) == 1 and wl[0][0][1].startswith('Welcome') and wl[0][0][2] is False and wl[1] == 40, f'a fresh start should have the welcome mail and 40 credits: {wl}')
     check(ns[1] == raw0, '?nosave should not write the save')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()
