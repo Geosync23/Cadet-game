@@ -26,7 +26,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd);
+      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d);   // a ship-wide event's quiet days
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -104,7 +104,8 @@ SIM = r"""(async ({ d, id, step }) => {
 STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0;
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
+    const due = eventDueDay();                           // as in a new game
     eventStart('ionStorm', 10); EV_DAYS.clear();
     const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
     if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
@@ -127,14 +128,14 @@ STORM = r"""(() => {
     if (real) { for (const x of NEWS.splice(n0)) { news.push(fmt(x)); delete SHIP.knows[x.id]; } } else delete window.newsAdd;
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
-    ADDRESSES.length = a0; MEETINGS.length = ms; EV_DAYS.clear();
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath,
+    ADDRESSES.length = a0; MEETINGS.length = 0; MEETINGS.push(...m0); EV_DAYS.clear();
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
       scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     return res;
   };
   const a = run(), b = run();
-  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log) && a.addr.join() === b.addr.join() && a.mails.join() === b.mails.join(), due: eventDueDay(), cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
+  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log) && a.addr.join() === b.addr.join() && a.mails.join() === b.mails.join(), due: a.due, cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
 })()"""
 
 # a live ion storm (0.34.9): started on day 10 and played through on the deck at the moments that matter: Calder's
@@ -296,7 +297,7 @@ with sync_playwright() as pw:
     print('  traditions by day (storm from day 10):', a['paused'], '| menu', a['mods'].get('menu'))
     print('  news:'); [print('    ' + x) for x in a['news']]
     print('  eventOn:', a['on'], '| gatherings:', a['gath'])
-    print('  the same twice:', st['same'], '| due in play:', st['due'], '(None while the storm is a draft)')
+    print('  the same twice:', st['same'], '| due in play:', st['due'], '(day 10 in a new game)')
     print('  upcoming traditions:', [(c['title'], c['at'], c['where']) for c in st['cal']])
     want = ['start', 'warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
     got = [w for x in a['steps'] for w in want if (' ' + w) in (' ' + x.split(' ', 3)[3]).replace('phase ', ' ').replace('end ', ' end ')]
@@ -304,6 +305,7 @@ with sync_playwright() as pw:
     m = a['mods']
     if m.get('-') != [None, None, None] or m.get('onset') != [1.5, 2, True] or m.get('escalation') != [2, 3, True] or m.get('resolution') != [None, None, None]: fail(f"eventMod by phase: {m}")
     if not st['same']: fail('the storm ran differently the second time')
+    if not st['due'] or st['due'].get('day') != 10: fail(f"the storm isn't due on day 10 in play: {st['due']}")
     if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")

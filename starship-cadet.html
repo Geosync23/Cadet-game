@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.11
+   STARSHIP CADET: CSV Wren                            build 0.34.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.11';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.12';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11026,10 +11026,9 @@ const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
-// the afterglow runs on to the end of day 5. `draft: true` keeps it from starting on its own until events_check has
-// passed a full live storm.
+// the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'], draft: true,   // need: on shift on the warning day (Calder's briefing)
+  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'],    // switched on (0.34.12): it starts in play, day 10 in a new game   // need: on shift on the warning day (Calder's briefing)
   phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
     { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
   scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
@@ -11067,10 +11066,7 @@ SHIP_EVENTS.ionStorm = {
       { id: 'stormJunctions', title: 'Storm prep: service the power junctions', tier: 3, at: 540,
         stops: [{ deck: 5, machine: 'junction', mins: 30, tag: 'service' }] },
     ],
-    escalation: [
-      { id: 'stormTrays', title: 'Take storm stew up to the bridge', tier: 1, at: 1080, bring: 'a tray of storm stew',
-        stops: [{ placeId: '3-grab-1', mins: 5, tag: 'pickup' }, { placeId: '1-works-1', mins: 10, tag: 'drop' }] },
-    ],
+    // (the bridge trays are the galley's own cart run at 18:00, from galley.trays: one run, the lead's call)
     afterglow: [
       { id: 'stormTidy', title: 'Put the bow lounge back together', tier: 1, at: 480,
         stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 25, tag: 'tidy' }] },
@@ -11215,8 +11211,12 @@ function eventPauses(ev, d) {
   }
   return false;
 }
-// the context an event's texts are written against: c.band (as things stand), c.mine, c.you
-const evCtx = e => ({ band: e ? eventBand(e.id, e.threads || {}) : 'smooth', mine: (e && e.mine) || {}, threads: (e && e.threads) || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet',
+// a news seed's tokens as crew ids: 'dept:<d>' (that department), 'all' (everyone aboard), ids as they are
+const newsSeed = l => [...new Set(l.flatMap(x => x === 'all' ? schedPeople().map(p => p.id) : /^dept:/.test(x) ? schedPeople().filter(p => p.dept === x.slice(5)).map(p => p.id) : [x]))];
+// the deck that last went to emergency lighting in the 12 hours before t (section 17's blackoutAt), or null
+function lastDark(t) { if (typeof blackoutAt !== 'function') return null; for (let k = t; k > t - 720; k -= 15) { const b = blackoutAt(k); if (b) return b.deck; } return null; }
+// the context an event's texts are written against: c.band (as things stand), c.mine, c.you, c.dark
+const evCtx = (e, t) => ({ dark: t === undefined ? null : lastDark(t), band: e ? eventBand(e.id, e.threads || {}) : 'smooth', mine: (e && e.mine) || {}, threads: (e && e.threads) || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet',
   jobsDone: typeof yourJobsDone === 'function' ? yourJobsDone() : 0, commended: !!(SHIP.commendations && SHIP.commendations.length) });
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
@@ -11257,7 +11257,7 @@ function eventAdvance(t = shipNow(), quiet) {
     const at = (e.startDay - 1 + n.at[0]) * 1440 + n.at[1];
     if (at > t || e.mine['news:' + n.id] || typeof newsAdd !== 'function') continue;
     e.mine['news:' + n.id] = 1;
-    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e)), weight: n.weight || 1, seed: (n.from ? [n.from] : []).concat(n.seed || []), born: at, kind: 'event', event: e.id, life: 2 });
+    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e, at)), weight: n.weight || 1, seed: newsSeed((n.from ? [n.from] : []).concat(n.seed || [])), born: at, kind: 'event', event: e.id, life: 2 });
   }
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
@@ -11295,6 +11295,7 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
   ADDRESSES.push({ at, from, text });
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
+  if (typeof deviceAddress === 'function') return deviceAddress({ from, text });   // section 19's CRT banner (0.35.7)
   if (!ADDRESS_EL) {
     ADDRESS_EL = document.createElement('div');
     ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
