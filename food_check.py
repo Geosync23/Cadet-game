@@ -89,7 +89,11 @@ with sync_playwright() as pw:
     b = json.dumps(g.ev(f"(() => {{ GALLEY_EV.clear(); GALLEY_ROTA.clear(); SHIP_DAYS.clear(); shipDay({DAY} + 4); galleyRota({DAY} + 2); return galleyReport({DAY}, {DAYS}); }})()"), sort_keys=True)
     print('The same days twice:', a == b)
     if a != b: fail('the galley came out differently the second time')
-    live = g.ev(f"(() => {{ SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); return {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }}; }})()")
+    # (with section 17's cartWaiting off: here the machines and jobs don't run, so a run left on the board for you
+    # would wait all day; holding it for you is checked in 4g)
+    live = g.ev(f"""(() => {{ const cw = typeof cartWaiting === 'function' ? cartWaiting : undefined; window.__cw = cw; window.__sc('cartWaiting = undefined');
+      SHIP.galley = null; galleyAdvance(({DAY} - 1) * 1440); const S = galleyAdvance({DAY} * 1440 - 1); const out = {{ cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length }};
+      window.__sc('cartWaiting = window.__cw'); SHIP.galley = null; return out; }})()""")
     print('Live galley matches the report:', live == rep[0]['end'])
     if live != rep[0]['end']: fail(f"live {live} vs report {rep[0]['end']}")
 
@@ -231,16 +235,17 @@ with sync_playwright() as pw:
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
       window.__mine = mine; window.__sc("cartWaiting = h => window.__mine.has(h)");
-      setShipNow({B} + 1440); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
-      let h = null; for (let t = {B} + 1440 + 9 * 60; t < {B} + 1440 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
+      const D0 = {B} + 40 * 1440; if (typeof CART_RUNS !== 'undefined') CART_RUNS.clear();   // a day no other test has asked about
+      setShipNow(D0); SHIP.galley = null; galleyAdvance(shipNow()); SHIP.galley.cold.meals = 200;
+      let h = null; for (let t = D0 + 9 * 60; t < D0 + 17 * 60 && h === null; t += 60) {{ setShipNow(t - 1); galleyAdvance(t - 1); mine.clear(); mine.add(t / 60); setShipNow(t); galleyAdvance(t); if (SHIP.galley.carts.some(c => c[2] === t / 60)) h = t / 60; }}
       if (h === null) return {{ real, h }};
       const c = SHIP.galley.carts.find(c => c[2] === h), meals = c[1];
-      setShipNow(c[0] + 30); const before = galleyAdvance(shipNow()).cold.meals, waiting = SHIP.galley.carts.some(c => c[2] === h);
+      setShipNow(c[0] + 150); const before = galleyAdvance(shipNow()).cold.meals, waiting = SHIP.galley.carts.some(c => c[2] === h), runs = SHIP.galley.carts.length;
       const landed = galleyCartLand(h), after = SHIP.galley.cold.meals, again = galleyCartLand(h);
       window.__sc("cartWaiting = " + (real ? 'window.__keepWait' : 'undefined')); window.__keepWait = keep; if (real) cartWaiting = keep;
-      SHIP.galley = null; return {{ real, h, meals, waiting, landed, gained: after - before, again }}; }})()""")
+      SHIP.galley = null; return {{ real, h, meals, waiting, runs, landed, gained: after - before, again }}; }})()""")
     print('Your cart run (stand-in cartWaiting' + (', section 17 has its own' if yc['real'] else '') + '):', yc)
-    if yc['h'] is None or not yc['waiting'] or yc['landed'] != yc['meals'] or yc['gained'] != yc['meals'] or yc['again'] != 0: fail(f"your cart run: {yc}")
+    if yc['h'] is None or not yc['waiting'] or yc['runs'] != 1 or yc['landed'] != yc['meals'] or yc['gained'] != yc['meals'] or yc['again'] != 0: fail(f"your cart run: {yc}")
     pb = g.ev("(() => { if (typeof ROSTER_PLAYER === 'undefined' || !ROSTER_PLAYER.birthday) return null; const d = ROSTER_PLAYER.birthday; return [d, galleyBoard(d).match(/happy birthday[^!]*!/)[0], galleyWhose(galleyBirthdays(d))]; })()")
     print('Your birthday:', pb if pb else 'not in ROSTER_PLAYER yet')
     if pb and pb[2] != 'your': fail(f"your birthday: {pb}")
