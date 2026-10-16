@@ -91,6 +91,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.26.6 | 0.40.4 merged into `claude/sim-engineer` (Pillar 2 Half A complete), with the merge resolved as agreed with the lead: one `planWhere` (section 14's, with every field section 10 needs; section 17's copy, which lacked `from`, `type`, `fromDeck` and `anim` and, being later in the file, would have replaced it, is removed) and section 14's `whereIs` (jobs laid over the plan, with the re-entry guard). Jobs are live: Works crew walk their claimed jobs on the deck. `jobsSafe` is gone, as section 17's `jobRun` reads `planWhere`. New `jobVisits()`, and day_check lists the places the day's jobs took the crew to. With crew on, cadet_test ALL IDENTICAL to 0.40.4; deck_check, food_check, machine_check and player_check OK; day_check days 1 and 7 OK (Deck 6 now peaks at 305), with jobs at panels on every deck. |
 | 0.26.7 | 0.40.6 and the performance engineer's 0.27.5 (held things) merged into `claude/sim-engineer`, plus (the sim engineer): a crew member's pose carries what they hold: `whereIs`'s `hold` ('cart', 'cartfull', 'carry'; section 17 sets it on cart runs) is appended as '+cart' and so on (`heldPose`), whenever the pose goes to the crowd or a full rig: walking, settled, talking to you, swapping detail. Inert until `whereIs` gives `hold`; a scratch copy with everyone holding a full cart drew 'walk+cartfull', 'sit:talk+cartfull' and so on without errors. cadet_test ALL IDENTICAL to 0.40.6 with crew on; deck_check, food_check, machine_check, player_check OK; day_check days 1 and 7 OK. |
 | 0.26.8 | The answers pass, time (the sim engineer): on 0.40.8 + cce1274. **`SHIP_RATE = 1080 / 1800`**: 18 ship hours take 30 real minutes (0.6 ship minutes a real second; a whole day is 40 real minutes). Nothing else in section 13 assumed 0.8: the light eases toward `nightAt()` per real second, and the sleep fades and the debug skips are real-time or absolute. Section 10 already reads `SHIP_RATE` (stuck minutes, arriving mid-walk). day_check works out its every-ship-minute and every-ship-hour steps from `SHIP_RATE` (they were fixed at 25 and 1500 steps). |
+| 0.26.9 | The answers pass, the rest of the sim engineer's rows (section 14, two lines in 10). Crew feelings on tap: `crewMood(p, t)` and `crewFeeling(p, t)` ("Tomas looks tired", "Chief Holt grumbles that the showers run weak", a birthday) in the tap toast (16, 22). Birthdays: a gathering in the mess at 20:15 (17). Observatory night, Saturdays 21:15 on Deck 2 (25). Deck 1: the night watch hands over at the ring 05:45–06:00, the Captain and the Commander at 17:55, and the Captain's evening walk (24). Habits that change slowly: `habitsOn(p, d)`, `SHIP.habitLog`, saved (18). Window seats: the habit reads `window: true` places (21). Held things: trays at mess-hall meals, toolboxes on Works jobs, datapads for officers (`withHold` in `whereIs`, 23). Some days a rush at the servery straight after the day shift (11). See "The answers pass". |
 | 0.27.0 | Pillar 2, workstream A2: activity animations (the performance engineer, from 0.25.2). Thirteen activities as poses for the crowd, full rigs and Walkers: run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk, with seated variants and props (dumbbells, receiver, basket, card, guitar, watering can, spoon and pan, sponge and plate, cloth, glass, book). `poseOf(place)` and `animateActivity()` in 8b; crowd props ride three prop bones inside the crowd's meshes. Section 10: `placeSpot` takes its pose from `poseOf(pl)` (one line). See "Activities (0.27.x)". |
 | 0.27.1 | A2: `row` for the gym's rower (legs drive on the footrests, the seat slides, the body swings back, the arms pull in last; always seated; a seated `gym` place with no `anim` rows). `CROWD_ANIMS`, the set of activities drawn, for the schedules to check before sending one. |
 | 0.27.2 | A2 (from 0.40.1): the `?poses` lineup. Deck 3's promenade at 10:30, one crew member per pose and activity (24), labelled, on stools and benches where they sit or lie; never touches the save (`NOSAVE` also checks `poses`). Without the flag none of it exists. |
@@ -322,6 +323,56 @@ Pillar 2, workstream A1 (plans/pillar2-plan.md).
     3. A meal window covered by work: a staff meal at the station (tag `staff`) from 30 to 10 minutes before the window ends.
     4. After the last block, the usual evening.
     `schedFrame` pulls the previous bedtime earlier for an early start. Tested with a stand-in rota (Brennan 04:30–08:10 and 15:30–20:30, hands 05:30–08:30 and 16:00–20:30): 28 days of dayReport clean.
+## The answers pass (sections 14 and 10, the sim engineer, 0.26.8–0.26.9)
+
+plans/answers-pass-plan.md, the sim engineer's rows.
+
+- **Time (0.26.8).** `SHIP_RATE = 1080 / 1800`.
+- **Feelings (16, 22).**
+    - `crewMood(p, t)`, 0–100:
+        - the needs averaged, with any under 40 counted twice;
+        - plus `shipEffectsAt(deck, t).mood` (0 to −30) where they are;
+        - plus 15 on their birthday;
+        - plus up to ±6 of the day's own temper (`schedU`, k 500).
+    - `crewFeeling(p, t)` gives a line or null, in this order:
+        1. a birthday;
+        2. the ship's worst trouble where they are, when its mood is −3 or lower ("Chief Holt grumbles that the showers run weak", from `MACHINE_FX` text);
+        3. their lowest need under 30 (`FEEL_LOW`);
+        4. a mood of 85 or more ("is in good spirits"), or under 40 ("seems a bit low").
+    - `shortName(p)` gives the first name, or the title and surname for officers with a title ("Chief Holt").
+    - `tapCrew` puts the line between the role and the bio.
+    - Day 3 at 21:00: moods lowest 44, middle 78, highest 90.
+- **Gatherings (17, 25).** `gatherings(p, d, F)` lists what a person goes to that day: `{ at, dur, where, tag, act?, walk? }`. `leisureUntil` stops a free-time block at `at` and takes the place, as the Wednesday drill does. People miss it if they're on the night shift that evening, at the gym, or gone to bed.
+    - **Birthday** (`birthdaysOn(d)`, from `ROSTER[i].birthday`, day of the year `(d − 1) % 364 + 1`).
+        - Who: the birthday person, 80% of their department, and 45% of everyone else.
+        - When and where: the mess at 20:15, for 40–55 minutes (tag `party`, pose sit:talk).
+        - With stand-in dates, about 24 people came.
+        - Mess seats in the evening skip the Deck 3 cap (`take`'s `event` option).
+    - **Observatory night** (`STARS_NIGHT`): Saturday 21:15, for 50–80 minutes.
+        - Who: the stargazers and 30% of everyone else.
+        - Where, in this order: places with `event: 'observatory-night'`, then the observatory's seats (the `observatory` sub-list now includes common-room), then any lounge seat or bench on Deck 2.
+        - About 15 people.
+    - These two will move into the events engineer's table (section 18) once that's agreed.
+- **Deck 1 (24).** Places with an `event` field are listed as `n|@event` in id order. Places of type `event` are used for nothing else.
+    - **The night watch:** Deck 1 night-shift crew spend the last 15 minutes of the shift at `@handover` (tag `handover`, act work).
+    - **The 18:00 handover:** the Captain, the Commander, and bridge crew with the workaholic habit, on their work days, stand at the ring 17:55–18:10, and dinner waits until after.
+    - **The Captain's walk:** 75% of evenings at 19:30–20:00, 4 minutes at each `@walk` place in order (tag `stroll`).
+- **Habits change (18).**
+    - From week 2 on, each week has 0, 1 or 2 changes (`schedU(9100, week, …)`), about 3.5 a month.
+    - Four times in five, the change is one of the person's own `habitShifts` items (from the crew designer: `{ add?, drop?, why }`, where `why` is the whole sentence), if still valid. Otherwise it's from `HABIT_TAKE` (with who may take each) or `HABIT_DROP`.
+    - `habitsOn(p, d)` gives the habits on day d. Section 14 always reads habits through it: the frame, the leisure picks, GYM/CALL/SHOP_BASE and the gatherings.
+    - `SHIP.habitLog` (a getter) is the changes up to today. It's saved in `save.habitLog`; a loaded log is kept for the weeks it covers, and New game clears it.
+    - Days 1–7 never change, so day_check and cadet_test aren't touched by this.
+- **Window seats (21).** The `window-seat` habit's leisure options are each deck's `window` sub-list: shared non-work places with `window: true`. It's inert until the architects mark some.
+- **Held things (23).** `whereIs` passes its result through `withHold`, unless the job or plan already says what's held:
+    - `tray` at a breakfast or dinner on a `mess-seat`;
+    - `toolbox` for Works crew on a job (jobWhere);
+    - `datapad` for officers at the handover, on the walk or on a tea break.
+    `heldPose` sends it to the crowd, which draws it from 0.27.7; earlier crowds ignore unknown holds.
+- **The rush (11).** On about 2 days in 5 (`schedU(9200, d, 0)`), half the day shift goes straight to dinner 3–13 minutes after the shift ends.
+- **Going to bed (plan item 3).** `sleepUntil` runs `SIM_ADVANCE`, and section 10's hook calls `deckCrewFill`, so the crew are wherever their plans put them when you wake.
+- **Testing.** A scratch script with stand-in birthdays and Deck 1 event places ran `dayReport` over 28 days: clean. It counted the gatherings, the habit log over 60 days (6 changes), feelings, moods and holds. day_check shows nothing new on days 1 and 7, apart from the plans moving.
+
 ## Machines and wear (section 17, the systems engineer, 0.33.x)
 Pillar 2, Half B (`plans/pillar2-plan.md`, "Machines and jobs"). Section 17 sits right after section 14 (and after 15 and 16 once they're in). B1 is data and logic only: nothing in it draws anything or calls `R()`, and nothing in it runs unless something asks (a game with `?nosave` never touches it), so cadet_test is ALL IDENTICAL.
 
