@@ -100,7 +100,7 @@ Shared tokens: `--crt-scan: rgba(0,0,0,.2)` every `3px`; `--crt-radius: 18px`; `
 - **Agreed (2026-10-16): the TriFold unfolded (wide).** It docks as a side panel on the left and can stay open while you walk. This suits the Maps and Jobs apps.
 - **Touch first:** every tappable thing at least 44 pixels high, no hover, no tiny text.
 - **Notifications:** a soft chirp (when we add sound) and a toast for urgent things (your job's machine broke, an appointment in 10 minutes, the Captain's address). Everything else is a quiet badge. **Agreed (2026-10-16):** a "Quiet off shift" setting that turns work notifications into badges after 17:00.
-- **While it's open,** the game keeps running and you keep walking if you were. Tapping a map pin, a job, a gathering note or a favour points tonight's goal arrow at it (`setGoal`, section 15b). There is **one arrow in the game, never a second system.**
+- **While it's open,** the game keeps running and you keep walking if you were. Tracking a job or favour, or tapping a map pin or a gathering note, points tonight's goal arrow at it (`setGoal`, section 15b). There is **one arrow in the game, never a second system.**
 
 ### The apps
 
@@ -115,7 +115,7 @@ Your eight first, then the extras. **Changed (2026-10-16):** all the proposed ex
 | **Mail** | Tonight's inbox, grown: from the ship (shortages, spoilage), crew (invitations, thanks), departments (event notices), the Captain (addresses, in writing), and home (replies to your calls). Read and unread, delete, "remember this". | `mailSend`, `SHIP.mail` |
 | **Calendar** | A month of ship life ahead: the weekday shapes (Monday briefing, Wednesday drill, Thursday inspection, Friday treat, Sunday vote dinner), the Captain's piano on Thursdays, observatory night, birthdays, traditions, holidays, and announced events once they're known. Tap a day to add it to Schedule or make an appointment that day. | Section 18, `ROSTER.birthday`, events |
 | **Needs** | Your five needs as bars, each with its bonus or penalty mark and a one-line reason ("Fed: energy drains 10% slower"), from tonight's `needEffects`. A line suggests what would help and where. | Section 15 |
-| **Jobs** | The job list for your tier: take, drop, see parts needed, where it is (with "show on map"). Event jobs carry the event's tag. Favours crew asked of you sit in their own list. | Section 17, social favours |
+| **Jobs** | **Changed (2026-10-16): tracks only.** Your jobs and favours: list, details, parts needed, which step you're on, and a **Track** toggle. The tracked one drives the goal arrow and the pins in Maps. No taking or dropping from the device: see "Jobs: take and turn in at the board". Event jobs carry the event's tag. | Section 17, social favours, 15b |
 | **Crew** | Your contacts: everyone you've met, with face, name, rank, department, relationship tier, birthday, and what you know about them (filled in as they tell you). Friends show where they usually are at this hour. Message a friend; make an appointment from here. | Section 20 social, `ROSTER` |
 | **Ship** | Ship health and each system's condition (as on the Works bay board), what's happening ("Ion storm: day 3 of 4"), and **Ship news**: everything you've heard, newest first, each with who told you and when. | Section 17, events, the news model |
 | **Record** | Your Works record: tier, jobs done, early catches, commendations, what the Chief thinks ("Calder: steady, a bit slow on filters"), and how close certification is. Where progression shows. | Section 17; certification comes later |
@@ -123,6 +123,44 @@ Your eight first, then the extras. **Changed (2026-10-16):** all the proposed ex
 | **Music** (later) | The music room's record cabinet on your device: a few procedurally made tunes. The game has no sound yet, so this waits for a sound pass. | A future sound pass |
 
 **Agreed (2026-10-16): knowing where people are.** Maps finds rooms always, and people only once they're at least an acquaintance (or are on duty somewhere public: the chef in the galley, Rina in the infirmary). This makes relationships useful and keeps the map from feeling like surveillance.
+
+### Seeing yourself use the device
+
+**Changed (2026-10-16):** the user's addition.
+
+- **Opening it:** your character visibly raises a small handheld and looks at it: a `device` pose holding a small glowing prop, its screen tinted in the chosen phosphor colour. **Closing it:** they put it away.
+- **Walking while it's open:** a walk-and-read pose (head down, the device held in front).
+- **Framing on a phone:** the sheet covers about two thirds of the screen, so the camera **eases** (no cut) to keep you framed in the visible top part while it's open, and eases back on close. On the unfolded TriFold the side panel needs no change of framing.
+- **Cheap:** the prop is part of the player's rig or the crowd's existing props, costing 0 or 1 extra draw call.
+- **Owners:** the performance engineer (the pose and prop), the player engineer (when you're holding it), the device engineer (the framing hook). They meet at two events, `deviceOpen` and `deviceClose` (see "Shared formats").
+
+### Jobs: take and turn in at the board
+
+**Changed (2026-10-16): a new rule.** You always **take** a job and **turn it in** at the job board: the Works bay board now, with more boards later if needed.
+
+1. **Take it at the board.** Walk up to the board and pick a job (tonight's pick-and-take). It goes into your Jobs app.
+2. **Track it.** In the Jobs app, switch **Track** on (a newly taken job is tracked automatically). The goal arrow and the Maps pins show the way, **step by step**: the board → storage (parts) → the machine shop (if a part must be made) → the machine → back to the board.
+3. **Do the work** at the machine and places, as now (inspect, fetch, repair).
+4. **Turn it in at the board.** The machine is fixed as soon as you finish, but the job only **completes** (your credit, your Record, the commendation count) when you turn it in at a board. Until then it waits as "done, waiting to be turned in".
+
+- **The device's Jobs app tracks only:** list, details, parts, the current step, the Track toggle. No taking or dropping from the device.
+- **Crew jobs are unaffected:** the Works crew still finish jobs where they do them.
+- **Favours** (the lead's interpretation, **Changed (2026-10-16)**): in the same spirit, face to face. You **accept** a favour in person, in the chat, and **turn it in to that person** (find them and tap them; the chat card offers "Done: here you go"). It's tracked in Jobs the same way, and the arrow leads to them at the end.
+- **Owners:** the interactions engineer (accepting and turning in at the board, tracking → `setGoal`; section 15b owns the board and the pointer), the systems engineer (the "done, awaiting turn-in" job state), the device engineer (the Jobs view and Track).
+
+### Light onboarding: first tips
+
+**Changed (2026-10-16):** a first step. Pillar 4 does the full onboarding and tutorials.
+
+- **Short tips, shown once each,** remembered in the save, in the device's CRT style (a small card near the bottom of the screen). **They never pause time** and close with a tap or on their own after a while.
+- **The first set is the job loop:**
+  1. first time near the job board: "Take jobs here, and turn them in here when they're done."
+  2. first job taken: "Track it on your device; the marker shows the way."
+  3. first arrival at the job's machine: "Tap the machine to inspect. You may need parts from storage or the machine shop."
+  4. the job's work finished: "Head back to the board to turn it in."
+  5. first time the device opens: what the apps are, in one line each.
+- **A settings switch** turns tips off.
+- **Owners:** the interactions engineer (when tips fire), the device engineer (how they look).
 
 ### Appointments in detail (the user's request)
 
@@ -218,7 +256,7 @@ Every other section asks `eventNow()` or `eventMod()` and changes its own behavi
 - **You're never told to do anything,** except by your job. If you're on shift, your work is Works work, and an event adds event jobs to the board like any other. Taking them is your choice, as now.
 - **Rank decides which parts reach you** (design doc). At Tier 1 you carry filters, secure fittings, swap lamps and run carts. You're in a briefing only when it's held where you work (Calder's storm briefing is in the Works bay) or someone takes you along (see Part 4). Later tiers get the relay work and a seat at the table.
 - **Ways in for a Tier 1 junior:**
-  - **Event jobs** on the board, tagged with the event, taken and done exactly like any other job (pick-and-take, the job loop, `machineUse`).
+  - **Event jobs** on the board, tagged with the event, taken, done and turned in at the board exactly like any other job.
   - **Volunteering:** some events put a sign-up sheet on a board (in the mess or the Works bay): "Garden watch tonight, 21:00–23:00", "Help set up the plaza for the festival". Signing up is an appointment.
   - **Asks from crew** you know: Brennan needs a hand carrying stew to the bridge; Rina asks you to check on Tomas.
   - **Just being there:** turning up at a moment, keeping people company, checking on friends.
@@ -401,7 +439,7 @@ Built on what exists: crew needs, feelings on tap, habits that change, birthdays
 - **Three or four buttons:**
   - **Chat** (counts once a day: social up for both of you, relationship points);
   - **Ask about…** (news, their work, home: each fills in a line in Crew's "what you know");
-  - **Help?** (if they have a favour to ask, it's offered; accepting adds it to Jobs);
+  - **Help?** (if they have a favour to ask, it's offered; accepting adds it to Jobs, and you turn it in to them, in a chat, when it's done);
   - **Meet up** (opens Appointments with them already picked).
 - **Lines are templates filled in from the simulation** ("The {machine} on {deck} has been {symptom} all week"), with about ten variations per kind and per tier, so it doesn't repeat quickly. No AI writing, as the design doc says.
 - **Hygiene matters** (tonight's table): chatting while grubby gives half the social, and some crew remark on it.
@@ -416,8 +454,8 @@ Built on what exists: crew needs, feelings on tap, habits that change, birthdays
 ### Crew seeking you out, and favours
 
 - **Friends come and find you** in their free time if you're on the same deck: they walk over, greet you, and a chat card is offered as a small prompt at the screen's edge (never a pop-up you must answer).
-- **Favours** grow from their lives and the ship: "My cabin lamp flickers", "Could you bring a tray up to Tomas, he's ill", "I left my datapad in the gym". Each is a personal job in Jobs, and "Go there" points the goal arrow (`setGoal`) at it.
-- **The parity rule:** favours and event jobs are done through the same paths as every other job and machine (`machineUse`, the job board's pick-and-take, the job loop). Nothing gets a special finish of its own.
+- **Favours** grow from their lives and the ship: "My cabin lamp flickers", "Could you bring a tray up to Tomas, he's ill", "I left my datapad in the gym". Each is accepted in person, tracked in Jobs like any job (the arrow points the way, then back to them), and turned in to that person face to face.
+- **The parity rule:** favours and event jobs are done through the same paths as every other job and machine (`machineUse`, the job loop, tracking). Board jobs are taken and turned in at the board; favours are taken and turned in in person. Nothing gets a special finish of its own.
 
 ### Mood
 
@@ -483,7 +521,7 @@ The lead turns the user's answers into fixes for the performance engineer and th
 
 | # | Workstream | Owner | Section of the game file | Builds |
 | --- | --- | --- | --- | --- |
-| C1 | The device: two layers, **the CRT skin** (with the three phosphor options for the lead), home screen, the shim for `addSection`, notifications, phone and wide layouts, the save part; moving Needs, Jobs and Mail onto it; the dialogue panel's look | **Device engineer (new)** | new `// 19. DEVICE`, small hooks in 15 and 11 | 0.35.x |
+| C1 | The device: two layers, **the CRT skin** (with the three phosphor options for the lead), home screen, the shim for `addSection`, notifications, phone and wide layouts, the save part; moving Needs, Jobs and Mail onto it; the dialogue panel's and tips' look; `deviceOpen` / `deviceClose` and the camera framing hook; the Jobs app as a tracker (Track) | **Device engineer (new)** | new `// 19. DEVICE`, small hooks in 15 and 11 | 0.35.x |
 | C2 | Device apps: Schedule, Calendar, Memos, Maps (drawn from deck data), Crew (with the social engineer), Ship, Record, Wallet | Device engineer | 19 | 0.35.x |
 | C3 | Appointments and invitations: the app (C1) and crew keeping them in `planDay`; `doorOpenFor` | Device engineer (the app), **sim engineer** (crew side, doors) | 19, 14 | 0.35.x, 0.26.x |
 | C4 | Social: relationships, chat cards and line templates, crew affinity, seating by friendship, crew seeking you out, favours, the first three arcs | **Social engineer (new)** | new `// 20. SOCIAL` | 0.36.x |
@@ -492,6 +530,9 @@ The lead turns the user's answers into fixes for the performance engineer and th
 | C7 | Event hooks in each system: wear and jobs (systems), routines and gatherings (sim), menus and batches (galley), shake, flicker and sky moods, the coarse crowd at gatherings (performance) | Systems, sim, galley, performance engineers | 17, 14, 16, 8/8b, 5 | their ranges |
 | C8 | Guests: templates, event guests, everyday visitors, guest schedules | **Crew designer** (data), sim engineer (schedules) | 9, 14 | 0.16.x, 0.26.x |
 | C9 | Places for gatherings (`gather` groups), event dressing and traces, the ready room and Captain's dining room as visitable places, the extra gym kit | **Architects** (bridge: 1, 3; command: 2; Deck 6 architect: 4, 5, 6) | `DECKS[n]`, kit | 0.31.x, 0.32.x, 0.30.x |
+| C11 | Seeing yourself use the device: the `device` and walk-and-read poses and the glowing prop (0–1 draw calls) | Performance engineer (pose, prop), player engineer (holding state) | 8/8b, 15 | 0.27.x, 0.28.x |
+| C12 | Jobs at the board: accept and turn in at the board, step-by-step tracking into `setGoal`, favours turned in in person, the "done, awaiting turn-in" state | Interactions engineer (board, tracking), systems engineer (job state), social engineer (favour hand-in in the chat) | 15b, 17, 20 | 0.37.x, 0.33.x, 0.36.x |
+| C13 | Light onboarding: the five job-loop tips, once each, saved, a switch to turn them off | Interactions engineer (triggers), device engineer (look) | 15b, 19 | 0.37.x, 0.35.x |
 | C10 | Progression hooks: the summons, the briefing, invitations, the Captain's table | Events engineer (the occasions), social engineer (who's invited), sim engineer (doors) | 18, 20, 14 | as above |
 
 **Who owns what at the seam with section 15:**
@@ -512,6 +553,17 @@ The owner of each may refine its details, but must tell the lead and keep the ot
 // 19. DEVICE (device engineer)
 deviceApp({ id, title, icon, order, badge, view })   // view(ctx) -> VIEW (plain content)
 deviceDo(action)  deviceNotify({ app, text, urgent })  DEVICE_SKIN
+deviceOn('open' | 'close', fn)                      // events: deviceOpen / deviceClose; the player pose and the camera listen
+deviceFrame(on)                                      // the camera eases the player into the visible top part (phone sheet)
+tipShow(id, text)  SHIP.device.tipsSeen = { id: true }  SHIP.device.settings.tips   // shown once each; saved
+
+// 15b. INTERACTIONS (interactions engineer)
+SHIP.player.track = jobId | favourId | null          // the tracked one drives setGoal and the Maps pins
+jobSteps(jobId) -> [ { at: 'board'|'storage'|'shop'|'machine'|'person', target } ], current step index
+jobTurnIn(jobId)                                     // at a board: completes the job (credit, Record, commendations)
+
+// 17. MACHINES & JOBS (systems engineer)
+// job status gains 'awaitingTurnIn' (the player's jobs only; crew jobs complete where they're done)
 device.addSection(id, title, render)                // kept as a shim
 SHIP.device = { memos: [], appts: [], readMail: {}, pins: [], settings: {} }   // saved; SAVE_V 2 -> 3 (no photos)
 // appointment: { id, with: [crewId|'guest:id'|'place:id'], at: shipMin, len: 30, where: placeId,
@@ -557,7 +609,7 @@ GUESTS: [{ id, name, spec, role, cabin, arrive, leave, template }]
    - C6's format (events engineer: the event format and phases on paper, an `events_check.py` that runs a storm for 4 days with nothing drawn);
    - C8 (crew designer: guest templates).
    - Work starts from the results of this morning's real-phone test.
-2. **Then:** C2 and C3 (apps, appointments), C4's chat cards and seeking out, C5's chatter, C9 gathering places.
+2. **Then:** C2 and C3 (apps, appointments), C11–C13 (seeing yourself use the device, jobs at the board, the first tips), C4's chat cards and seeking out, C5's chatter, C9 gathering places.
 3. **Check-in 1 with the user:** the new device with all the apps in the CRT skin (and the phosphor colour chosen), relationships and chats, crew who come and find you, appointments that crew keep, chatter you overhear.
 4. **Then:** C7 (event hooks in every system), meetings and the dialogue panel, and the ion storm end to end; C10's first hook (the ready room after a commendation).
 5. **Check-in 2 with the user:** a full ion storm played through: warning, Calder's briefing, onset, the address, flickers and blackouts, storm jobs, the Captain's all-clear, the rush on the booths, the party, the debrief, the trace.
@@ -575,6 +627,7 @@ GUESTS: [{ id, name, spec, role, cabin, arrive, leave, template }]
 - **Section owners collide.** The event layer touches every system. *Answer:* the events engineer only publishes `eventNow` and `eventMod`; each owner adds its own small, inert check (null means "no change"), as with `shipEffects`.
 - **Determinism.** News spread, affinity drift and event timing must replay exactly. *Answer:* everything seeded per person per day, like time jitter; checkers run twice and compare.
 - **Memory of the helpers.** Several sessions are near full. *Answer:* hand over before starting (the user's rule), fresh sessions for the big new jobs.
+- **Too many sessions at once.** Running about 13 sessions in parallel hit the account's usage limit overnight and stopped everyone for hours. *Answer:* Pillar 3 runs **at most about 5–6 active helpers at a time**, staggered (the next starts as one finishes or goes idle), and the lead's repeating hourly check-in resumes any work that stalls.
 
 ## The user's decisions (2026-10-16)
 
@@ -584,8 +637,11 @@ The user answered the pitch; the lead interpreted the answers.
 2. **The device:** **changed.** Keep the two layers, but build the real skin now: an old-school CRT screen (see "The device look"). All the extra apps **except Camera**: Schedule, Appointments, Maps, Memos, Mail, Calendar, Needs, Jobs, Crew, Ship, Record, Wallet (small; may live in Needs), and Music later with sound. Camera and photos are removed everywhere; traces that relied on photos are now in-world objects or Mail.
 3. **Ambient events:** **agreed, with one change.** An event can trigger a **meeting with dialogue**, never a full cutscene: a fourth kind of moment, used in the ion storm (Calder's storm briefing, the Captain's all-clear) and the diplomatic visit (the greeting, the formal dinner).
 4. **The event order:** **changed.** The user asked to keep the whole list, so the full order is explicit (Part 2, "The full order"): seven main events with six short ones between them. Pillar 3 builds the framework and the ion storm first, then works down the list; nothing is dropped.
+5. **Seeing yourself use the device:** **changed** (added). Your character raises and looks at the glowing handheld when it opens, reads while walking, and puts it away on close; on a phone the camera eases to keep you in view above the sheet.
+6. **Jobs at the board:** **changed** (a new rule). Take and turn in jobs at the job board; the device's Jobs app only tracks (with a Track toggle that drives the arrow and the map, step by step). Favours are accepted and turned in in person (the lead's interpretation).
+7. **Light onboarding:** **changed** (added). Five short job-loop tips, once each, in the CRT style, never pausing time, with a switch to turn them off. Pillar 4 does the full onboarding and tutorials.
 
-**Design-doc updates** (the lead, on the lead branch, from this agreed plan): "The player" (the device, its CRT look and its apps), "Social life" (numbers, chats, affinity, news), "Ship-wide events" (ambient rule, shape, threads and bands, the four kinds of moment including meetings with dialogue, guests, the full event list and order), "Works progression" (the hooks), "Milestones" (Pillar 3 as planned here), and move these answered questions out of "Open questions": the device; which event comes after the ion storm; the second visitors' cabin (already answered: kept for event visitors); how often Deck 4's guests change.
+**Design-doc updates** (the lead, on the lead branch, from this agreed plan): "The player" (the device, its CRT look and its apps), "Social life" (numbers, chats, affinity, news), "Ship-wide events" (ambient rule, shape, threads and bands, the four kinds of moment including meetings with dialogue, guests, the full event list and order), "Works progression" (the hooks), "Milestones" (Pillar 3 as planned here, and a note that Pillar 4 expands onboarding and tutorials), "The player" job loop (take and turn in at the board), and move these answered questions out of "Open questions": the device; which event comes after the ion storm; the second visitors' cabin (already answered: kept for event visitors); how often Deck 4's guests change.
 
 ## Appendix: the full list of decisions
 
@@ -602,3 +658,6 @@ The user answered the pitch; the lead interpreted the answers.
 11. **Agreed (2026-10-16):** **progression hooks** as appointments that unlock a door for their time: ready room, conference table, officers' quarters, the Captain's table, progress talks.
 12. **Agreed (2026-10-16):** **extra gym kit** now, and a **small sound pass** in or right after Pillar 3.
 13. **Agreed (2026-10-16):** **hiring** a device engineer and a social engineer; the events engineer grows into ship-wide events; builds 0.50.x.
+14. **Changed (2026-10-16):** **you see your character use the device** (pose, prop, walk-and-read, gentle camera framing on a phone).
+15. **Changed (2026-10-16):** **jobs are taken and turned in at the board**; the Jobs app only tracks; favours are taken and turned in in person.
+16. **Changed (2026-10-16):** **light onboarding**: five job-loop tips, once each, with a switch; full onboarding in Pillar 4.

@@ -11,13 +11,14 @@ The Wren already works: the galley cooks, machines wear out, the Works crew fix 
 - Walking through the mess, you overhear someone say "Sato hasn't left the chart room since last night", and later find it in your news feed.
 - You tap Pell and get a short chat, with buttons to chat, ask about something, offer help, or meet up.
 - You make an appointment to go to the gym with Tomas at 18:00, and he's there.
-- A friend asks you to fix the lamp in their cabin. It shows up in your jobs, and the same on-screen arrow you use for any job points the way.
+- You take a job at the Works bay board and track it on your device. The on-screen arrow leads you step by step: storage for the part, then the machine, then back to the board to turn it in.
+- A friend asks you to fix the lamp in their cabin. You say yes in the chat, the arrow points the way, and you hand it back to them in person when it's done.
 - The Captain's face appears across the top of the screen with a ship-wide announcement. The crew around you stop and look up for a moment, then carry on.
 - At the start of shift, Chief Calder gathers the Works crew at the job board. Her lines play one by one in a panel at the bottom of the screen, and you can offer to take a job, while the ship carries on around you.
 
 ## Your device
 
-It opens from a corner button or a swipe up. On a phone it slides up from the bottom and leaves the ship visible; on the unfolded TriFold it sits at the side. **Time keeps running while it's open.**
+It opens from a corner button or a swipe up. **You see your character take it out**: they raise a small glowing handheld and look at it, read it as they walk, and put it away when you close it. On a phone it slides up from the bottom, and the camera eases gently to keep you in view above it; on the unfolded TriFold it sits at the side. **Time keeps running while it's open.**
 
 **The look (your choice):** an old-school screen, like looking at an actual device's display. It has fine interlaced scan lines, a soft phosphor glow, slightly curved, darkened edges and chunky, readable letters, all set in a sturdy frame. Any flicker is optional, and it switches off on phones set to reduce motion. It's built to stay crisp at phone size and cost nothing extra to draw. The helper building it will show you three screen colours to choose from: amber, green, or a cyan that matches the Wren's teal.
 
@@ -30,12 +31,14 @@ It opens from a corner button or a swipe up. On a phone it slides up from the bo
 | Mail | Messages from the ship, the crew, the Captain and home |
 | Calendar | Ship traditions, birthdays, and events once they're announced |
 | Needs | Your five needs, with their bonuses and penalties |
-| Jobs | Your work, plus favours friends ask of you |
+| Jobs | Tracks your work and favours: details, parts, the next step, and a Track switch that drives the arrow and the map. You take and turn in jobs at the job board, not here |
 | Crew | Everyone you've met, how well you know them, what they've told you |
 | Ship | The ship's health and the latest news |
 | Record | Your Works progress and what the Chief thinks of you |
 | Wallet | Your credits and locker (small; may sit inside Needs) |
 | Music | Later, once the game has sound |
+
+**First tips.** The first few times through the job loop, a short tip appears in the same old-school style ("Take jobs here, and turn them in here when they're done"). Each one shows once, never pauses the game, and you can switch them off. Fuller tutorials come in Pillar 4.
 
 ## How ambient events work: the ion storm, through your eyes
 
@@ -105,3 +108,6 @@ The main events are in bold; the shorter ones between them are in italics.
 - **Ambient events:** agreed, and an event can also call a meeting with dialogue, never a full cutscene.
 - **The event order:** keep the whole list, in the order above.
 - **Everything else:** yes to all ten.
+- **Seeing yourself use the device:** your character takes out the glowing handheld and reads it.
+- **Jobs at the board:** take and turn in jobs at the board; the device only tracks them. Favours are taken and handed back in person.
+- **First tips:** a few short tips for the job loop; full onboarding in Pillar 4.
