@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.7
+   STARSHIP CADET: CSV Wren                            build 0.34.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10338,6 +10338,7 @@ function eventsOn(d) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
+    if (typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
@@ -10552,17 +10553,120 @@ function eventsTick() {
 const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
-// the ion storm's skeleton, for the format and events_check; its content (jobs, news, meetings, the address and
-// its words) is the next step's. `draft: true` keeps it from starting on its own in play.
+// ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
+// the afterglow runs on to the end of day 5. `draft: true` keeps it from starting on its own until events_check has
+// passed a full live storm.
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 4, earliest: 8, draft: true,
-  phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
-    { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1080], clears: true }],
-  systems: { onset: { wear: { power: 2, comms: 3 }, effects: ['flicker'] }, escalation: { wear: { power: 4, comms: 6 } } },
-  routines: {}, galley: {}, jobs: {}, news: [], moments: [], meetings: [],
-  threads: [{ id: 'blackout', label: 'Keep the lights on', good: 30, bad: 180 }, { id: 'spoiled', label: 'Food spoiled', good: 0, bad: 20 }],
+  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'], draft: true,   // need: on shift on the warning day (Calder's briefing)
+  phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
+    { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
+  scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
+  // ship traditions don't happen in these phases (no observatory night or quiz in a storm), except those in `keep`
+  pause: ['onset', 'escalation'], keep: ['birthday'],
+  // section 17: wear by system or machine kind; effects: 'flicker' (lights flicker), 'blackouts' (a deck at a time goes to
+  // emergency lighting for 15-60 minutes, scored as the 'blackout' thread), 'commsDown' (no calls home, no outside Mail)
+  systems: {
+    onset: { wear: { power: 1.5, comms: 2 }, effects: ['flicker', 'commsDown'] },
+    escalation: { wear: { power: 2, comms: 3, chiller: 1.5 }, effects: ['flicker', 'blackouts', 'commsDown'] },
+  },
+  // section 14: who: 'dept:<d>' | 'all'; where: '<deck>|<room name>' | 'type:<place type>'. rules: doubleShift (on
+  // shift twice as long), patrol (Watch walks the decks), closed (nobody goes there), stayIn (that share of leisure in
+  // their own quarters), rush (everyone with a call owed goes, in `at` minutes)
+  routines: {
+    onset: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
+      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .4 }],
+    escalation: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
+      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .5 }],
+    resolution: [{ where: 'type:callhome', rule: 'rush', at: [600, 1080] }],
+  },
+  needs: { escalation: { sleep: .8, social: 1.2 } },    // sections 14 and 15: energy refills slower, social drains faster
+  // section 16 (the galley's keys, 0.29.18): menu, cook (time multiplier), grab (shelf multiplier), trays (to the bridge)
+  galley: { escalation: { menu: 'stormStew', cook: .75, grab: 1.5, trays: 6 } },
+  // section 17 posts them, tagged event: 'ionStorm'. at: the minute that phase's day they go up. stops: a place id,
+  // or a room and place types, or a machine kind on a deck (the nearest of that kind)
+  jobs: {
+    warning: [
+      { id: 'stormLounge', title: 'Storm prep: secure the lounge glassware and bar', tier: 1, at: 510,
+        stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 30, tag: 'secure' }] },
+      { id: 'stormBallasts', title: 'Storm prep: fit shielded lamp ballasts', tier: 1, at: 510, parts: ['lamp', 'lamp'],
+        stops: [{ deck: 3, machine: 'lights', mins: 20, tag: 'lamp' }, { deck: 4, machine: 'lights', mins: 20, tag: 'lamp' }] },
+      { id: 'stormBatteries', title: 'Storm prep: carry battery packs to the bridge', tier: 1, at: 510, bring: 'two battery packs',
+        stops: [{ placeId: '5-parts-1', mins: 5, tag: 'pickup' }, { placeId: '1-works-1', mins: 10, tag: 'drop' }] },
+      { id: 'stormJunctions', title: 'Storm prep: service the power junctions', tier: 3, at: 540,
+        stops: [{ deck: 5, machine: 'junction', mins: 30, tag: 'service' }] },
+    ],
+    escalation: [
+      { id: 'stormTrays', title: 'Take storm stew up to the bridge', tier: 1, at: 1080, bring: 'a tray of storm stew',
+        stops: [{ placeId: '3-grab-1', mins: 5, tag: 'pickup' }, { placeId: '1-works-1', mins: 10, tag: 'drop' }] },
+    ],
+    afterglow: [
+      { id: 'stormTidy', title: 'Put the bow lounge back together', tier: 1, at: 480,
+        stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 25, tag: 'tidy' }] },
+    ],
+  },
+  // section 20 spreads them: at [day, minute] the seed people know it (who would know first); lines may be a function of
+  // the event's context (c.band, c.dark: a deck that went dark)
+  news: [
+    { id: 'storm-readings', from: 'sato', phase: 'warning', at: [0, 360], seed: ['dept:survey'], weight: 3,
+      lines: ['Sato hasn\'t left the chart room since last night.', 'Survey says something big is coming our way.', 'They say the storm\'s the size of a moon.'] },
+    { id: 'storm-prep', from: 'calder', phase: 'warning', at: [0, 540], seed: ['dept:works'], weight: 2,
+      lines: ['Works is tying down everything that isn\'t bolted.', 'Calder says the lights will flicker for two days.', 'Top up your water bottle. Just in case.'] },
+    { id: 'storm-bridge', from: 'vance', phase: 'onset', at: [1, 900], seed: ['dept:command', 'dept:helm'], weight: 2,
+      lines: ['The bridge is on double shifts.', 'Vance hasn\'t slept. You can tell.'] },
+    { id: 'storm-dark', phase: 'escalation', at: [2, 420], seed: ['dept:watch'], weight: 2,
+      lines: c => [c.dark ? 'Deck ' + c.dark + ' went to emergency lights for a while.' : 'The lights held all morning. Fingers crossed.', 'I keep waiting for the next jolt.'] },
+    { id: 'storm-stew', from: 'brennan', phase: 'escalation', at: [2, 660], seed: ['dept:galley'], weight: 1,
+      lines: ['Storm stew again. One pot, no complaints.', 'Brennan\'s sending trays up to the bridge.'] },
+    { id: 'storm-clear', from: 'marrow', phase: 'resolution', at: [3, 600], seed: ['all'], weight: 3,
+      lines: ['It\'s over. Comms are back.', 'The queue at the booths goes round the plaza.', 'Party in the bow lounge tonight!'] },
+    { id: 'storm-told', phase: 'afterglow', at: [3, 1320], seed: ['all'], weight: 2, lines: c => STORM_RETELL[c.band] },
+  ],
+  // felt everywhere (sections 5 and 8b: the performance engineer) and the gathering after; the addresses are below
+  moments: [
+    { id: 'front', phase: 'onset', at: [1, 840], where: 'shipwide', feel: ['jolt', 'lightsDip', 'flicker'], len: 6 },
+    { id: 'surge', phase: 'escalation', at: [2, 680], where: 'shipwide', feel: ['jolt', 'lightsDip'], len: 4 },
+    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, where: { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, gathering: true, who: .7, anim: 'talk' },
+  ],
+  // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
+  meetings: [
+    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { deck: 5, placeId: '5-jobboard-1', room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'] },
+    { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
+  ],
+  address: {
+    onset: ['This is the Captain. We\'re in it.', 'Expect flickers, and no calls home for a while.', 'Look after each other. Marrow out.'],
+    resolution: c => ['This is the Captain. The storm has passed.',
+      { smooth: 'You kept this ship bright and fed through two hard days. Thank you, all of you.', bumpy: 'It wasn\'t smooth, but we came through it together. Thank you.',
+        rough: 'It was a hard storm, and you got us through it. Rest when you can; we\'ll put the ship right together.' }[c.band],
+      'Comms are back and the booths are open. And there\'s a party in the bow lounge at 19:00. Marrow out.'],
+  },
+  mail: {
+    warning: { from: 'Chief Ines Calder', subject: 'Storm prep', body: 'Ion storm due tomorrow afternoon. Before then: secure loose fittings, top up the filters, check the battery packs. Storm jobs are on the board.' },
+    onset: { from: 'Commander Teo Vance', subject: 'Storm stations', body: 'The bridge is on double shifts and the bow lounge is closed. The call-home booths are off line until it\'s over.' },
+  },
+  // lower is better. Who scores what (the lead, 2026-10-16): blackout minutes, section 17; meals spoiled and the bridge
+  // crew's hours on double shift without a hot meal, section 16; the call-home backlog (hours of queue), section 18
+  threads: [{ id: 'blackout', label: 'Keep the lights on', good: 60, bad: 200 }, { id: 'spoiled', label: 'Nothing spoiled', good: 10, bad: 60 },
+    { id: 'bridgeHungry', label: 'A fed bridge', good: 6, bad: 14 }, { id: 'calls', label: 'Calls home', good: 3, bad: 6 }],
   traces: { smooth: ['stormRoster'], bumpy: ['relayScorch'], rough: ['relayScorch', 'tapedPanel'] },
+  debrief: { from: 'Chief Ines Calder',
+    smooth: 'We came through the storm in good order: short blackouts, nothing lost from the cold store, and a bridge crew that ate on time.',
+    bumpy: 'We came through. A relay burnt out on the bridge and a few decks spent time on emergency lights. I\'ll have it patched by the end of the week.',
+    rough: 'That was a hard one. Long blackouts, a scorched relay room, food binned. We\'ll be putting the ship right for a while. Rest first.',
+    mine: c => c.mine.jobs ? ' Thanks for the ' + (c.mine.jobs > 1 ? c.mine.jobs + ' storm jobs' : 'storm job') + ' you took on; it showed.' : '' },
 };
+const STORM_RETELL = {
+  smooth: ['The lights only went once on our deck, thanks to Works.', 'Best storm I\'ve been through. Is that a thing you can say?', 'Somebody pinned the storm roster up in the tea corner.'],
+  bumpy: ['We lost a relay on the bridge. Calder was not pleased.', 'An hour on emergency lights. I read by torch.', 'Could\'ve been worse. Could\'ve been a lot better.'],
+  rough: ['The relay room got scorched. You can still smell it.', 'I didn\'t sleep for two nights.', 'Half the cold store went in the bin.'],
+};
+// the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
+// minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
+function stormCallBacklog(e) {
+  const d = e.startDay + 3, ppl = schedPeople().filter(p => p.rank !== 'guest');
+  const owed = ppl.filter(p => (habitsOn(p, d) || []).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33).length;
+  const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
+  return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
+}
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 (() => {
@@ -10573,11 +10677,20 @@ SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 })();
 SAVE_EXTRA.push(s => { s.ship.event = SHIP.event; s.ship.eventLog = SHIP.eventLog; s.ship.traces = SHIP.traces; });
 // where a running event is at minute t: its day (0 = the warning's) and the last phase begun
+// Pure for any t: it reads the running event, the log of past ones and the next one due, so a replay of a past or
+// future day (the galley's, the schedules') sees the same event as play did or will
 function eventNow(t = shipNow()) {
-  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return null;
-  const rel = t - (e.startDay - 1) * 1440; if (rel < 0) return null;
-  let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
-  return ph ? { id: e.id, phase: ph, day: Math.floor(rel / 1440) } : null;
+  const e = typeof SHIP !== 'undefined' && SHIP.event, spans = [];
+  if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay, open: true });
+  if (typeof SHIP !== 'undefined' && SHIP.eventLog) for (const l of SHIP.eventLog) spans.push(l);
+  if (!e) { const due = eventDueDay(); if (due) spans.push({ id: due.id, startDay: due.day }); }
+  for (const sp of spans) {
+    const def = SHIP_EVENTS[sp.id]; if (!def) continue;
+    const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || (!sp.open && rel >= def.days * 1440)) continue;
+    let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
+    if (ph) return { id: sp.id, phase: ph, day: Math.floor(rel / 1440) };
+  }
+  return null;
 }
 // what the event changes now: a phase's value, else an earlier phase's (an onset's wear carries into the escalation),
 // stopping at a phase that `clears`. kinds: 'wear' and 'effect' (systems), 'routine', 'galley', 'jobs', or any other
@@ -10597,6 +10710,18 @@ function eventMod(kind, key, t) {
   }
   return null;
 }
+const eventModAt = (t, kind, key) => eventMod(kind, key, t);   // the galley's replays (0.29.18): the same, at ship minute t
+// a ship tradition paused by a ship-wide event (no observatory night or quiz in a storm): its start or end falls in one
+// of the event's `pause` phases, and it isn't in `keep`. From eventNow, so plans made on any day agree
+function eventPauses(ev, d) {
+  for (const m of [ev.at[0], ev.at[1] - 1]) {
+    const n = eventNow((d - 1) * 1440 + m), def = n && SHIP_EVENTS[n.id];
+    if (def && (def.pause || []).includes(n.phase) && !(def.keep || []).includes(ev.id)) return true;
+  }
+  return false;
+}
+// the context an event's texts are written against: c.band (as things stand), c.mine, c.you
+const evCtx = e => ({ band: eventBand(e.id, e.threads || {}), mine: e.mine || {}, threads: e.threads || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet' });
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
 function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
@@ -10612,13 +10737,17 @@ function eventStart(id, day) {
   SHIP.event = { id, startDay: day, phase: null, threads: {}, mine: {} }; return true;
 }
 // when the next event starts, if none is running: the first in EVENT_ORDER not yet in the log, not a draft, from its
-// `earliest` day plus 0-2 days by hash, at least `gap` days (default 7) after the last one ended
+// `earliest` day plus 0-2 days by hash, at least `gap` days (default 7) after the last one ended, then on to the first
+// day its `need` people are all on shift
 function eventDueDay() {
   const id = EVENT_ORDER.find(x => SHIP_EVENTS[x] && !SHIP_EVENTS[x].draft && !SHIP.eventLog.some(l => l.id === x));
   if (!id) return null;
   const def = SHIP_EVENTS[id], last = SHIP.eventLog[SHIP.eventLog.length - 1];
   const from = Math.max(def.earliest || 1, last ? last.endDay + (def.gap || 7) : 1);
-  return { id, day: from + Math.floor(3 * schedU(4242, from, EVENT_ORDER.indexOf(id))) };
+  let day = from + Math.floor(3 * schedU(4242, from, EVENT_ORDER.indexOf(id)));
+  const need = (def.need || []).map(n => ROSTER.find(p => p.id === n)).filter(Boolean);   // on shift on the warning day
+  for (let k = 0; k < 7 && !need.every(p => isWorkDay(p, day)); k++) day++;
+  return { id, day };
 }
 // move the event on to minute t: start one when due, run each phase's actions as it begins (the address, a notice),
 // and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
@@ -10626,13 +10755,15 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script });
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
     for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
       const ph = def.phases[k].id; out.push('phase ' + ph);
-      if (def.address && def.address[ph]) captainAddress({ lines: def.address[ph], at: (e.startDay - 1) * 1440 + def.phases[k].at[0] * 1440 + def.phases[k].at[1], quiet: quiet || k < to });
-      const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet });
+      for (const [th, f] of Object.entries((def.scores && def.scores[ph]) || {})) eventScore(th, f(e));
+      if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: (e.startDay - 1) * 1440 + def.phases[k].at[0] * 1440 + def.phases[k].at[1], quiet: quiet || k < to });
+      const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
     }
     e.phase = now.phase;
   }
@@ -10640,7 +10771,7 @@ function eventAdvance(t = shipNow(), quiet) {
     const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
     for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
     SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
-    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band], quiet: !!quiet });
+    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
     SHIP.event = null; out.push('end ' + band);
   }
   return out;
@@ -10684,8 +10815,52 @@ function dialogueShow(scriptId) {
 function dialogueClose() {                               // walking away: the gist arrives in Mail
   if (!DIALOGUE) return;
   const sc = MEETING_SCRIPTS[DIALOGUE.id]; DIALOGUE = null;
-  if (sc && sc.gist && typeof mailSend === 'function') mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: sc.gist, quiet: true });
+  if (sc && sc.gist && typeof mailSend === 'function') mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: evText(sc.gist, SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }), quiet: true });
 }
+
+// the ion storm's two meetings. who: a ROSTER id, or a cast slot the meeting fills from who's there ('tech1', 'tech2':
+// its 'works:2'). text and to may be functions of the context: c.band, c.mine (the player's part), c.you (your name).
+// A choice's reply is said back; rel nudges relationships (section 20's relAdd), job puts that event job on your list
+MEETING_SCRIPTS.calderStorm = {
+  title: 'Storm briefing', from: 'Chief Ines Calder',
+  gist: 'Briefing notes: the ion storm is due tomorrow about 14:00, and Survey says it\'s a big one. In order: the lounge glassware and bar, shielded ballasts on the main lamps, battery packs up to the bridge. Storm jobs are on the board.',
+  lines: [
+    { who: 'calder', text: 'Gather round. Coffee can wait two minutes.', pose: 'gesture' },
+    { who: 'calder', text: 'Survey\'s tracking an ion storm. Dr. Sato says it reaches us tomorrow afternoon, and it\'s a big one.' },
+    { who: 'tech1', text: 'How big is big?', pose: 'nod' },
+    { who: 'calder', text: 'Big enough that the lights flicker for two days and comms go dark. So we get ahead of it.' },
+    { who: 'calder', text: 'Loose fittings secured. Shielded ballasts on the lamps that matter. Battery packs where they\'re needed.', pose: 'gesture' },
+    { who: 'tech2', text: 'The lounge bar\'s the worst for loose glass. Last storm we were sweeping it up for a week.' },
+    { who: 'calder', text: 'Then the lounge goes first. And somebody takes battery packs up to the bridge before the front hits.' },
+    { who: 'calder', text: c => c.you + ', you\'re new to this. Anything you want to take on?', to: 'you' },
+    { choice: [
+      { text: 'I\'ll take the battery run to the bridge.', rel: { calder: 2 }, job: 'stormBatteries', reply: { who: 'calder', text: 'Good. The packs are in main storage. Mind the lift.', pose: 'nod' } },
+      { text: 'I can do the lounge.', rel: { calder: 1, tech2: 1 }, job: 'stormLounge', reply: { who: 'tech2', text: 'I\'ll show you where the bar keeps the good glasses.', pose: 'nod' } },
+      { text: '(Say nothing)', reply: { who: 'calder', text: 'Fine. The board\'s there when you want it.' } },
+    ] },
+    { who: 'calder', text: 'Right. Storm jobs are on the board. Off you go.', pose: 'gesture' },
+  ],
+};
+MEETING_SCRIPTS.captainAllClear = {
+  title: 'The all-clear', from: 'Commander Teo Vance',
+  gist: c => 'Notes from the observation room: the storm passed at 09:40. ' + SHIP_EVENTS.ionStorm.debrief[c.band] + ' Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.',
+  lines: [
+    { who: 'marrow', text: 'Dr. Sato?' },
+    { who: 'sato', text: 'The front passed us at 09:40. Readings are back to background. It\'s over.' },
+    { who: 'marrow', text: c => ({ smooth: 'Then let\'s say so. That went about as well as a storm can.', bumpy: 'Then let\'s say so. Not our smoothest two days, but nobody got hurt.',
+      rough: 'Then let\'s say so. That was a hard one, and the ship shows it.' })[c.band], pose: 'nod' },
+    { who: 'calder', text: c => ({ smooth: 'The lights only went a few times. The prep paid off.', bumpy: 'We lost a relay on the bridge. I\'ll have it patched by the end of the week.',
+      rough: 'The relay room\'s a mess. We\'ll be patching for a week.' })[c.band] },
+    { who: 'holt', text: 'Watch reports no injuries. Some short tempers. Mine included.' },
+    { who: 'marrow', text: c => c.mine.jobs ? 'And I\'m told our newest Works hand did their share. Thank you, ' + c.you + '.' : 'Comms are back. Expect a queue at the booths.', to: c => c.mine.jobs ? 'you' : null },
+    { choice: [
+      { text: 'It was good to be useful.', rel: { marrow: 1, calder: 1 }, reply: { who: 'marrow', text: 'It always is. Remember that on the dull days.', pose: 'nod' } },
+      { text: 'Is there a party?', rel: { vance: 1 }, reply: { who: 'vance', text: 'Bow lounge, 19:00. The Captain insists.', pose: 'gesture' } },
+      { text: '(Just nod)' },
+    ] },
+    { who: 'marrow', text: 'Right. I\'ll tell the ship.', pose: 'gesture' },
+  ],
+};
 
 // ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
 function upcomingTraditions(fromMin, toMin) {
