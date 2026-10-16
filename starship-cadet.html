@@ -9433,6 +9433,7 @@ jobWhere.on = true;                                      // crew go to their job
 //   eventPlan(p, day)  -> [{ id, from, to, opts: [[deck, pool], ...], tag, anim, min }] what section 14 slots into
 //                         that person's leisure time (minutes from midnight; [] most days). Read once per schedBuild
 //   eventPools(shared) adds each event's pools ('deck|ev:<id>:<n>') to schedData's shared places (section 14 hook)
+//   eventPlaces(e)     -> every place id the event can use (section 14 may hold them for the window)
 //   eventLine(p, t)    -> a line for the tap toast ("Coming to the quiz tonight?"), or null
 //   eventsTick()       the main loop: the Mail the evening before, decor on the deck during an event, the player joining
 // Every choice is a hash (schedU, k 320-333: section 14 uses 500-515 and 9100/9200, section 16 301 and 310 up); nothing here calls R(), and nothing reads planDay or whereIs
@@ -9575,6 +9576,13 @@ function eventOpts(ev, p) {
   });
   return out;
 }
+// every place an event can use (all its pools, officer-only ones too), for section 14 to hold for the window
+function eventPlaces(e) {
+  const S = schedData(), ev = e.ev || e, ids = new Set();
+  for (const n of Object.keys(DECKS).map(Number)) for (const k of ['@' + ev.id, 'ev:' + ev.id]) for (const pl of S.shared.get(n + '|' + k) || []) ids.add(pl.id);
+  ev.where.forEach((w, i) => { for (const pl of S.shared.get(w.deck + '|' + (w.room ? 'ev:' + ev.id + ':' + i : w.pool)) || []) ids.add(pl.id); });
+  return [...ids];
+}
 // free for the whole window: awake, off duty (the shift, the galley rota's stints, a night worker's day's sleep)
 function eventFree(p, d, a, b) {
   const F = schedFrame(p, d), P = schedFrame(p, d - 1), over = (x, y) => a < y && x < b;
@@ -9675,8 +9683,8 @@ const EV_DECOR = { key: '', g: null, root: null };
 const EV_MATS = {};
 const evMat = c => EV_MATS[c] || (EV_MATS[c] = new THREE.MeshStandardMaterial({ color: col(c), roughness: .6 }));
 const EV_KIT = {
-  cake(g) {                                              // on the first long table in the mess hall
-    if (deckDef.num !== 3 || !ROOM_BOX.M) return;
+  cake(g) {                                              // on the first long table in the mess hall, unless the galley's own is out
+    if (deckDef.num !== 3 || !ROOM_BOX.M || evGalleyCake()) return;   // (section 16 bakes birthday cakes: one cake, theirs)
     const b = ROOM_BOX.M, x = X0(b.i0) + 2.6, z = Z0(b.j0) + 1.0, add = (geo, c, y) => { const m = new THREE.Mesh(geo, evMat(c)); m.position.set(x, y, z); g.add(m); return m; };
     add(new THREE.CylinderGeometry(.22, .22, .02, 20), '#e6e0d3', .783);                       // the plate
     add(new THREE.CylinderGeometry(.16, .16, .13, 20), '#f2d7a0', .858);                       // the cake
@@ -9694,10 +9702,12 @@ const EV_KIT = {
     }
   },
 };
+// the galley's cake (section 16: SHIP.galley.cake, out on the servery from 19:30): when it's out, there's no second one
+const evGalleyCake = () => !!(typeof SHIP !== 'undefined' && SHIP.galley && SHIP.galley.cake && SHIP.galley.cake.out);
 function eventsDecor(now) {
   if (EV_DECOR.root !== deckRoot) { EV_DECOR.root = deckRoot; EV_DECOR.g = null; EV_DECOR.key = ''; }
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const on = eventsOn(d).filter(e => e.ev.decor && m >= e.from - 30 && m < e.to + 15).map(e => e.ev.decor), key = deckDef.num + ':' + [...new Set(on)].sort().join(',');
+  const on = eventsOn(d).filter(e => e.ev.decor && m >= e.from - 30 && m < e.to + 15).map(e => e.ev.decor), key = deckDef.num + ':' + [...new Set(on)].sort().join(',') + (evGalleyCake() ? ':galley-cake' : '');
   if (key === EV_DECOR.key) return;
   EV_DECOR.key = key;
   if (EV_DECOR.g) { deckRoot.remove(EV_DECOR.g); EV_DECOR.g.traverse(o => o.geometry && o.geometry.dispose()); EV_DECOR.g = null; }
