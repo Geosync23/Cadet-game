@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.14
+   STARSHIP CADET: CSV Wren                            build 0.34.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.14';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.15';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12484,13 +12484,15 @@ function dialogueStep(k) {
   D.i++; dialogueDraw();
 }
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
-// a job offered in a meeting: claimed for you if section 17 has posted it (tagged event and eventJob), else remembered
-// in SHIP.event.mine ('wants:<job>') for section 17 to give you when it posts
+// a job offered in a meeting: always remembered in SHIP.event.mine ('wants:<job>': the sign-up sheet reads it, and
+// section 17 claims it for you when it posts it later), and claimed at once if section 17 has already posted it
+// (tagged event and eventJob). The lead's 0.41.7 merge fix: the battery job is already up at the 08:15 briefing
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
+  e.mine['wants:' + job] = 1;
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
   if (j && typeof claimJob === 'function') return claimJob(j.id);
-  e.mine['wants:' + job] = 1; return false;
+  return false;
 }
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
