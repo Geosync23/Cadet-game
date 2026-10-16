@@ -10530,6 +10530,53 @@ function galleyBusy(d) {
 // cakes). On the day the galley bakes a cake at 15:00 (4 meals from the cold store), puts it out on the servery's tray
 // slide after dinner (19:30) and it's gone by 21:30; Mail says so at 12:00
 const CAKE = { mail: 720, bake: 900, out: 1170, gone: 1290, meals: 4 };
+// ---- the garden (the user's ask, 0.29.23+): food grows in Deck 3's hydroponic garden, is picked, carried to the cold
+// store and cooked. All on paper, a ship day at a time, the same in replays and live (no R()). Each crop has `beds`
+// beds; a bed grows by the day's condition (0-1) and is ripe when it has grown `days`; its yield (meal units) is scaled
+// by how well it grew (grown / days taken), so a poor garden gives less, later. Salad and herbs are picked every
+// morning (GARDEN.pick); beans, tomatoes and roots on harvest mornings (section 18's 'harvest', else every 14th day).
+// Picked produce goes to the cold store as its own stock (S.cold.produce: [[crop, meals, day picked], ...]), keeps
+// `keep` days, and the cooks use it first (up to GARDEN.potShare of a pot).
+const GARDEN_CROPS = [
+  { id: 'greens', name: 'salad greens', beds: 4, days: 6, yield: 12, keep: 3, daily: true },
+  { id: 'herbs', name: 'herbs', beds: 2, days: 4, yield: 5, keep: 3, daily: true },
+  { id: 'beans', name: 'beans', beds: 3, days: 14, yield: 36, keep: 5 },
+  { id: 'tomatoes', name: 'tomatoes', beds: 3, days: 21, yield: 54, keep: 7 },
+  { id: 'roots', name: 'root vegetables', beds: 3, days: 28, yield: 72, keep: 14 },
+];
+const GARDEN = {
+  pick: 600, harvest: 690, carry: 30,     // the daily pick at 10:00; the harvest morning's pick ends at 11:30; the crates reach the cold store 30 minutes later
+  tendHours: 8, untended: .4,             // gardener hours a day for a fully tended garden; growth with nobody tending
+  potShare: .5,                           // at most half of a pot is fresh produce
+};
+// the garden's condition on day d (0-1): water, feed and light from section 17's gardenAt(t) (pure; 1s without it), and
+// tending: gardener hours that day from gardenDay(p, d) (section 14's hook), or a fully tended garden while there's none
+const GARDEN_COND = new Map();
+function gardenCond(d) {
+  if (GARDEN_COND.has(d)) return GARDEN_COND.get(d);
+  const t = (d - 1) * 1440 + 720, g = (GALLEY_TEST.gardenAt || (typeof gardenAt === 'function' ? gardenAt : null));
+  const e = g ? g(t) || {} : {}, f = v => typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(1, v)) : 1;
+  let tend = 1;
+  const gd = GALLEY_TEST.gardenDay || (typeof gardenDay === 'function' ? gardenDay : null);
+  if (gd) {
+    let h = 0; for (const p of ROSTER) { const x = gd(p, d); if (x && x.blocks) for (const b of x.blocks) h += Math.max(0, b.to - b.from) / 60; }
+    tend = GARDEN.untended + (1 - GARDEN.untended) * Math.min(1, h / GARDEN.tendHours);
+  }
+  const out = { water: f(e.water), feed: f(e.feed), light: f(e.light), tend };
+  out.grow = out.water * out.feed * out.light * out.tend;
+  GARDEN_COND.set(d, out); for (const k of GARDEN_COND.keys()) if (k < d - 30 || k > d + 30) GARDEN_COND.delete(k);
+  return out;
+}
+const gardenHarvestDay = d => typeof eventsOn === 'function' ? eventsOn(d).some(e => e.id === 'harvest') : d % 14 === 6;
+// a fresh garden on day d: every bed part-grown, staggered so something is always coming ripe. Beds: [crop, grown, days]
+const GARDEN_START = d => ({ beds: GARDEN_CROPS.flatMap((c, ci) => [...Array(c.beds)].map((_, b) => { const g = Math.floor(c.days * ((b + .5) / c.beds + (d % c.days) / c.days) % c.days); return [ci, g, g]; })), crates: [] });
+const produceMeals = S => (S.cold.produce || []).reduce((n, b) => n + b[1], 0);
+// take up to n meal units of produce, oldest first; returns how many
+function produceTake(S, n) {
+  let got = 0; const P = S.cold.produce || [];
+  while (got < n && P.length) { const b = P[0], k = Math.min(b[1], n - got); b[1] -= k; got += k; if (!b[1]) P.shift(); }
+  return got;
+}
 // (yours too: ROSTER_PLAYER's birthday, when it's there)
 const galleyBirthdays = d => ROSTER.concat(typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER ? [ROSTER_PLAYER] : []).filter(p => p.birthday && p.birthday === ((d - 1) % 364 + 364) % 364 + 1);
 const galleyNames = ps => ps.map(p => p.player ? 'you' : galleyFirst(p)).join(' and ');
@@ -10546,7 +10593,7 @@ function galleyCake(d) {
 const galleyCakeFor = c => c.who.length ? galleyWhose(c.who) + ' birthday' : c.name;
 const galleyWhose = ps => ps.length === 1 && ps[0].player ? 'your' : galleyNames(ps) + '\'s';
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
-const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
+const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap, produce: [] }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // ship-wide events (Pillar 3, C7): section 18's eventMod('galley', key) changes the galley while an event runs;
 // null (no event, or no section 18) means no change. Read on the hour into S.ev (galleyStep):
 //   menu:  a dish (an id in GALLEY_EV_DISH, or the dish's own name) instead of the menu's, at both meals
@@ -10564,7 +10611,7 @@ const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains wi
 const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
 // can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
-const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null };
+const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null, gardenAt: null, gardenDay: null };
 function galleyEvRead(m, replay) {
   let get = null;
   if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
@@ -10628,7 +10675,7 @@ function galleyStep(S, m, st) {
     // meals already on their way (a run held for you, or not landed yet) count as in the cold store, so a run waiting
     // on the board doesn't set off another every hour. In replays the carts land within the hour, so it's 0 there
     if (md % 60 === 0) {
-      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming), { replay: !!st });
+      const coming = S.carts.reduce((n, c) => n + c[1], 0), c = cartClaim(m, Math.min(FOOD.coldCap, S.cold.meals + coming + produceMeals(S)), { replay: !!st });
       if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals, Math.floor(m / 60)]);
     }
     // a run that's yours (section 17's cartWaiting(hour): on the board for you, or yours and not unloaded yet) waits
@@ -10653,6 +10700,27 @@ function galleyStep(S, m, st) {
     if (!st && n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
   }
   if (md === FOOD.binOut) S.bin = 0;
+  // the garden: a day's growth at midnight; the morning pick (salad, herbs) and the harvest morning (the rest); the
+  // crates reach the cold store GARDEN.carry minutes later; produce past its keeping days is binned at the bin checks
+  if (!S.garden) S.garden = GARDEN_START(d);
+  if (!S.cold.produce) S.cold.produce = [];
+  const G = S.garden;
+  if (md === 0) { const c = gardenCond(d).grow; for (const b of G.beds) if (b[1] < GARDEN_CROPS[b[0]].days) { b[2]++; b[1] = Math.min(GARDEN_CROPS[b[0]].days, b[1] + c); } }   // a ripe bed waits for its pick
+  const pickNow = md === GARDEN.pick ? 'daily' : md === GARDEN.harvest && gardenHarvestDay(d) ? 'harvest' : null;
+  if (pickNow) {
+    for (const b of G.beds) {
+      const c = GARDEN_CROPS[b[0]]; if (b[1] < c.days || (pickNow === 'daily') !== !!c.daily) continue;
+      const n = Math.round(c.yield * Math.min(1, c.days / Math.max(c.days, b[2])));
+      if (n > 0) { G.crates.push([m + GARDEN.carry, b[0], n]); if (st) st.picked += n; }
+      b[1] = 0; b[2] = 0;
+    }
+  }
+  if (G.crates.length) { const keep = []; for (const c of G.crates) if (c[0] <= m) S.cold.produce.push([c[1], c[2], d]); else keep.push(c); G.crates = keep; }
+  if (FOOD.binAt.includes(md) && S.cold.produce.length) {
+    const keep = []; let n = 0;
+    for (const b of S.cold.produce) if (d - b[2] > GARDEN_CROPS[b[0]].keep) n += b[1]; else keep.push(b);
+    if (n) { S.cold.produce = keep; S.bin = (S.bin || 0) + n; if (st) st.produceBinned += n; }
+  }
   // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
   if (md === 900 && S.ev && S.ev.batch) {
@@ -10685,8 +10753,8 @@ function galleyStep(S, m, st) {
     const more = Math.round(galleyEvNum(ev.extra, 0)) + (meal === 'dinner' && md < FOOD.trayAt ? Math.round(galleyEvNum(ev.trays, 0)) : 0);
     let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack + more) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
-      const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
-      S.cold.meals -= n; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1) * galleyEvNum(ev.cook, 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
+      const fresh = produceTake(S, Math.floor(FOOD.batch * GARDEN.potShare)), n = fresh + Math.min(FOOD.batch - fresh, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
+      S.cold.meals -= n - fresh; if (st) st.fresh += fresh; S.pots.push([galleyCookT(FOOD.cookT * (busy('slow') ? FOOD.slowOven : 1) * galleyEvNum(ev.cook, 1), m), n, 'hot']); need -= n; if (st) st.cooked += n;
     }
   }
   {
@@ -10845,7 +10913,7 @@ function galleyText(what = 'servery') {
   const S = galleyAdvance(shipNow()), md = SHIP.time.min, meal = md >= FOOD.close.breakfast && md < FOOD.close.dinner ? 'dinner' : 'breakfast';
   if (what === 'grab') return S.grab.items ? `${S.grab.items} on the shelf.` : 'The shelf is empty.';
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
-  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
+  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store` + (produceMeals(S) ? `, and ${produceMeals(S)} of fresh produce from the garden.` : '.') + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
   if (what === 'menu') return galleyBoard();
   if (what === 'event') return S.batch && S.batch.d === SHIP.time.day ? `Brennan is cooking for ${S.batch.label} (${S.batch.meals} meals).` : '';
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
@@ -10871,12 +10939,13 @@ function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, picked: 0, fresh: 0, produceBinned: 0, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
     st.staff = staff;
     st.waited = st.waits.filter(w => w > 0).length;
+    st.produceEnd = produceMeals(S); st.grow = gardenCond(d).grow;
     st.end = { cold: S.cold.meals, servery: S.servery.portions, grab: S.grab.items, dirty: S.dirty, inUse: S.inUse, pots: S.pots.length, wait: S.wait.length };
     delete st.waits; out.push(st);
   }
