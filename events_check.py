@@ -108,6 +108,9 @@ STORM = r"""(() => {
     eventStart('ionStorm', 10); EV_DAYS.clear();
     const a0 = ADDRESSES.length, mails = [], ms = MEETINGS.length, send = typeof mailSend === 'function' ? mailSend : null;
     if (send) mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+    const news = [], hadNews = typeof newsAdd === 'function', na = hadNews ? newsAdd : null; window.newsAdd = x => { news.push(Math.floor(x.born / 1440) + 1 + ' ' + hhmm(x.born % 1440) + ' ' + x.id + ' (' + x.seed.join(',') + '): ' + x.lines[0]); return x; };
+    const on = [10, 11, 13, 16].map(d => { const o = eventOn(d); return d + ':' + (o ? o.day + ' ' + o.phases.map(p => p.id + '@' + p.from).join(' ') : '-'); });
+    const gath = [10, 13].map(d => eventGatherings(d).map(g => d + ' ' + g.id + ' ' + g.where + ' ' + hhmm(g.at) + ' ' + g.len).join('; '));
     const steps = [], sig = [], mods = {};
     const paused = [9, 10, 11, 12, 13, 14].map(d => d + ':' + eventsOn(d).map(e => e.id).join('+'));
     for (let t = 9 * 1440; t <= 17 * 1440; t += 10) {
@@ -116,14 +119,15 @@ STORM = r"""(() => {
       const k = n ? n.phase : '-', m = [eventMod('wear', 'power', t), eventMod('wear', 'comms', t), eventMod('effect', 'flicker', t)];
       sig.push(k + ':' + m.join(',')); mods[k] = m;
       if (n && n.phase === 'escalation') eventScore('blackout', 1);   // a stand-in: a minute of blackout per step of the escalation
-      const g = eventModAt(t, 'galley', 'menu'); if (g) mods.menu = g;
+      const g = eventMod('galley', 'menu', t); if (g) mods.menu = g;
     }
     if (send) mailSend = send;
+    if (hadNews) window.newsAdd = na; else delete window.newsAdd;
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
     ADDRESSES.length = a0; MEETINGS.length = ms; EV_DAYS.clear();
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused,
-      scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventModAt(12 * 1440, 'wear', 'power') };
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath,
+      scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     return res;
   };
@@ -135,6 +139,8 @@ STORM = r"""(() => {
 # briefing in the Works bay (the panel, the cast, a choice), the front at 14:00 on day 11 (the jolt, the address), the
 # all-clear in the observation room (walking out mails the gist), then on to the end (the log, the traces, the debrief)
 LIVE = r"""(() => {
+  const dress = [], hadDress = typeof dressShow === 'function', ds = hadDress ? dressShow : null;
+  window.dressShow = l => { const k = l.map(x => typeof x === 'string' ? x : x.id + (x.lines ? '[' + x.lines.length + ']' : '')).join('+'); if (dress[dress.length - 1] !== k) dress.push(k); };
   const D = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
   const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
   SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
@@ -160,6 +166,7 @@ LIVE = r"""(() => {
   put(1, '1-works-1'); tick(12 * 1440 + 10 * 60 + 2, 12 * 1440 + 10 * 60 + 2); D.walked = !DIALOGUE;
   skipTo(15 * 1440 + 10);
   D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
+  D.dress = dress; if (hadDress) window.dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
   MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
   return D;
@@ -256,6 +263,8 @@ with sync_playwright() as pw:
     print('  Mail:', a['mails'])
     print('  meetings:', a['meets'], '| scripts', a['scripts'], a['lines'])
     print('  traditions by day (storm from day 10):', a['paused'], '| menu', a['mods'].get('menu'))
+    print('  news:'); [print('    ' + x) for x in a['news']]
+    print('  eventOn:', a['on'], '| gatherings:', a['gath'])
     print('  the same twice:', st['same'], '| due in play:', st['due'], '(None while the storm is a draft)')
     print('  upcoming traditions:', [(c['title'], c['at'], c['where']) for c in st['cal']])
     want = ['start', 'warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
@@ -266,8 +275,10 @@ with sync_playwright() as pw:
     if not st['same']: fail('the storm ran differently the second time')
     if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
+    if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
+    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or 'stormBriefing works-bay 08:15' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
     if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
-    if m.get('menu') != 'stormStew': fail('eventModAt: no storm stew in the escalation')
+    if m.get('menu') != 'stormStew': fail('eventMod at t: no storm stew in the escalation')
     if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')
     pd = dict(x.split(':') for x in a['paused'])
     if 'quiz' in pd['11'] or 'works-tea' in pd['12']: fail(f"traditions in the storm: {a['paused']}")
@@ -284,6 +295,8 @@ with sync_playwright() as pw:
     print('  all-clear:', L['allClear'], '| draw calls', L['calls3'], '| walked out, closed:', L['walked'])
     print('  Mail:', L['mails'])
     print('  log:', L['log'], '| traces', L['traces'])
+    print('  dressing shown:', L['dress'])
+    if not any('signupWorks[3]' in x for x in L['dress']) or not any('partyLounge' in x for x in L['dress']): fail(f"the storm's dressing: {L['dress']}")
     b = L['briefing']
     if not b['open'] or set(b.get('cast', {})) != {'calder', 'tech1', 'tech2'} or not L['panel']: fail(f"the briefing didn't open with its cast: {b}")
     if not any(x.startswith('[choice]') for x in L['lines']) or not any('Mind the lift' in x for x in L['lines']) or not L['closed']: fail('the briefing script did not play through with the reply')

@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.9
+   STARSHIP CADET: CSV Wren                            build 0.34.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.9';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.10';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10530,6 +10530,15 @@ function eventsTick() {
   eventsDecor(now); eventsPlayer(now);
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
+  eventsDress(now);                                      // its dressing and the traces left by past events
+}
+// the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does
+// nothing when nothing changed and puts them back after a deck change
+function eventsDress(now) {
+  if (typeof dressShow !== 'function') return;
+  const n = eventNow(now), e = SHIP.event, def = n && SHIP_EVENTS[n.id], c = e ? evCtx(e) : { band: 'smooth', mine: {}, you: 'Cadet' };
+  const list = (def && def.dressing && def.dressing[n.phase] || []).map(x => ({ ...x, lines: x.lines ? evText(x.lines, c) : undefined }));
+  dressShow(list.concat(SHIP.traces));
 }
 // ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
 // The format (plans/pillar3-plan.md, "How an event is put together" and "Shared formats"):
@@ -10575,12 +10584,12 @@ SHIP_EVENTS.ionStorm = {
   },
   // section 14: who: 'dept:<d>' | 'all'; where: '<deck>|<room name>' | 'type:<place type>'. rules: doubleShift (on
   // shift twice as long), patrol (Watch walks the decks), closed (nobody goes there), stayIn (that share of leisure in
-  // their own quarters), rush (everyone with a call owed goes, in `at` minutes)
+  // their own quarters; where '<deck>|<room key>'), rush (everyone with a call owed goes, in `at` minutes)
   routines: {
     onset: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
-      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .4 }],
+      { where: '3|L', name: 'the bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .4 }],
     escalation: [{ who: 'dept:command', rule: 'doubleShift' }, { who: 'dept:helm', rule: 'doubleShift' }, { who: 'dept:watch', rule: 'patrol' },
-      { where: '3|Bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .5 }],
+      { where: '3|L', name: 'the bow lounge', rule: 'closed' }, { where: 'type:callhome', rule: 'closed' }, { who: 'all', rule: 'stayIn', share: .5 }],
     resolution: [{ where: 'type:callhome', rule: 'rush', at: [600, 1080] }],
   },
   needs: { escalation: { sleep: .8, social: 1.2 } },    // sections 14 and 15: energy refills slower, social drains faster
@@ -10629,13 +10638,13 @@ SHIP_EVENTS.ionStorm = {
   moments: [
     { id: 'front', phase: 'onset', at: [1, 840], where: 'shipwide', feel: ['jolt', 'lightsDip', 'flicker'], len: 6 },
     { id: 'surge', phase: 'escalation', at: [2, 680], where: 'shipwide', feel: ['jolt', 'lightsDip'], len: 4 },
-    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, where: { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, gathering: true, who: .7, anim: 'talk' },
+    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, gathering: true, who: .7, anim: 'talk' },
   ],
   // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
   meetings: [
-    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { deck: 5, placeId: '5-jobboard-1', room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'],
+    { id: 'stormBriefing', phase: 'warning', at: [0, 495], len: 12, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, script: 'calderStorm', who: ['calder', 'works:2'],
       notify: 'Chief Calder\'s storm briefing, at the job board in the Works bay at 08:15.' },
-    { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
+    { id: 'allClear', phase: 'resolution', at: [3, 600], len: 12, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'captainAllClear', who: ['marrow', 'vance', 'sato', 'holt', 'calder'] },
   ],
   address: {
     onset: ['This is the Captain. We\'re in it.', 'Expect flickers, and no calls home for a while.', 'Look after each other. Marrow out.'],
@@ -10652,7 +10661,12 @@ SHIP_EVENTS.ionStorm = {
   // crew's hours on double shift without a hot meal, section 16; the call-home backlog (hours of queue), section 18
   threads: [{ id: 'blackout', label: 'Keep the lights on', good: 60, bad: 200 }, { id: 'spoiled', label: 'Nothing spoiled', good: 10, bad: 60 },
     { id: 'bridgeHungry', label: 'A fed bridge', good: 6, bad: 14 }, { id: 'calls', label: 'Calls home', good: 3, bad: 6 }],
-  traces: { smooth: ['stormRoster'], bumpy: ['relayScorch'], rough: ['relayScorch', 'tapedPanel'] },
+  // dressing while a phase is on (dressShow, the deck architect's DECK_DRESS ids): a sign-up sheet, the party's bunting
+  dressing: {
+    warning: [{ id: 'signupWorks', title: 'Storm prep: who\'s doing what', lines: c => ['I. Calder: the board', 'Bay crew: lounge, ballasts'].concat(c.mine['wants:stormBatteries'] ? [c.you + ': batteries to the bridge'] : c.mine['wants:stormLounge'] ? [c.you + ': the lounge'] : []) }],
+    resolution: [{ id: 'partyLounge', title: 'All clear!' }], afterglow: [{ id: 'partyLounge', title: 'All clear!' }],
+  },
+  traces: { smooth: ['stormRosterTeaCorner'], bumpy: ['relayScorch'], rough: ['relayScorch', 'tapedPanel'] },
   debrief: { from: 'Chief Ines Calder',
     smooth: 'We came through the storm in good order: short blackouts, nothing lost from the cold store, and a bridge crew that ate on time.',
     bumpy: 'We came through. A relay burnt out on the bridge and a few decks spent time on emergency lights. I\'ll have it patched by the end of the week.',
@@ -10686,12 +10700,12 @@ SAVE_EXTRA.push(s => { s.ship.event = SHIP.event; s.ship.eventLog = SHIP.eventLo
 // future day (the galley's, the schedules') sees the same event as play did or will
 function eventNow(t = shipNow()) {
   const e = typeof SHIP !== 'undefined' && SHIP.event, spans = [];
-  if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay, open: true });
+  if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay });
   if (typeof SHIP !== 'undefined' && SHIP.eventLog) for (const l of SHIP.eventLog) spans.push(l);
   if (!e) { const due = eventDueDay(); if (due) spans.push({ id: due.id, startDay: due.day }); }
   for (const sp of spans) {
     const def = SHIP_EVENTS[sp.id]; if (!def) continue;
-    const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || (!sp.open && rel >= def.days * 1440)) continue;
+    const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || rel >= def.days * 1440) continue;
     let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
     if (ph) return { id: sp.id, phase: ph, day: Math.floor(rel / 1440) };
   }
@@ -10715,7 +10729,24 @@ function eventMod(kind, key, t) {
   }
   return null;
 }
-const eventModAt = (t, kind, key) => eventMod(kind, key, t);   // the galley's replays (0.29.18): the same, at ship minute t
+// for section 14's plans, made a day at a time and cached: the event on day d, and the minute of that day each of its
+// phases begins (0 for one already running at midnight). Pure, from eventNow
+function eventOn(d) {
+  const t0 = (d - 1) * 1440, n0 = eventNow(t0), n1 = eventNow(t0 + 1439), n = n0 || n1; if (!n) return null;
+  const def = SHIP_EVENTS[n.id], sd = n0 ? d - n0.day : d - n1.day, phases = [];
+  if (n0) phases.push({ id: n0.phase, from: 0 });
+  for (const p of def.phases) { const at = (sd - 1 + p.at[0]) * 1440 + p.at[1] - t0; if (at > 0 && at < 1440) phases.push({ id: p.id, from: at }); }
+  return { id: n.id, day: d - sd, phases };
+}
+// the gatherings on day d (the meetings and gathering moments), for section 14's gathering(): { id, where: venue,
+// at and len in minutes of that day, who: ROSTER ids and '<dept>:N' slots, or a chance (0-1) for everyone free }
+function eventGatherings(d) {
+  const o = eventOn(d); if (!o) return [];
+  const def = SHIP_EVENTS[o.id], out = [];
+  for (const m of (def.meetings || []).concat((def.moments || []).filter(x => x.gathering))) if (m.at[0] === o.day && m.where && m.where.venue)
+    out.push({ id: m.id, event: o.id, where: m.where.venue, at: m.at[1], len: m.len || 15, who: m.who, anim: m.anim || null });
+  return out;
+}
 // a ship tradition paused by a ship-wide event (no observatory night or quiz in a storm): its start or end falls in one
 // of the event's `pause` phases, and it isn't in `keep`. From eventNow, so plans made on any day agree
 function eventPauses(ev, d) {
@@ -10762,6 +10793,12 @@ function eventAdvance(t = shipNow(), quiet) {
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
   for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script, notify: m.notify });
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
+  for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
+    const at = (e.startDay - 1 + n.at[0]) * 1440 + n.at[1];
+    if (at > t || e.mine['news:' + n.id] || typeof newsAdd !== 'function') continue;
+    e.mine['news:' + n.id] = 1;
+    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e)), weight: n.weight || 1, seed: (n.from ? [n.from] : []).concat(n.seed || []), born: at, kind: 'event', event: e.id, life: 2 });
+  }
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
     for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
@@ -10812,8 +10849,9 @@ function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at
 // At run time (0.34.9): you're there when you're in the meeting's room on its deck while it's on; then its script plays,
 // line by line, tap to go on (or it moves on by itself after a few seconds; a choice waits for you). Walking out of the
 // room closes it and the gist comes by Mail; if you weren't there at all, the gist comes when it ends. The panel is
-// section 19's: deviceDialogue(view, onTap) when it exists (view = { title, name, text, to, pose, choices, i, n };
-// onTap(choiceIndex | undefined)), else the plain strip below.
+// section 19's: deviceDialogue(view) when it exists (view = { title, who: the speaker's name, role, text, choices,
+// and id, to, pose, i, n }; null hides it), and its taps call dialogueNext(), dialogueChoose(k) and dialogueClose();
+// else the plain strip below.
 let DIALOGUE = null;                                     // { id, m, cast, ctx, queue, i, at }: the script being shown
 let DIALOGUE_EL = null;
 const DIALOGUE_AUTO = 7000;                              // real ms before a line moves on by itself
@@ -10839,14 +10877,15 @@ function dialogueShow(scriptId, m) {
 }
 function dialogueView() {
   const D = DIALOGUE, sc = MEETING_SCRIPTS[D.id], l = D.queue[D.i]; if (!l) return null;
-  if (l.choice) return { title: sc.title, name: D.ctx.you, text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
-  return { title: sc.title, name: castName(D, l.who), who: l.who, text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
+  if (l.choice) return { title: sc.title, name: D.ctx.you, who: D.ctx.you, id: 'you', role: '', text: '', choices: l.choice.map(c => c.text), i: D.i, n: D.queue.length };
+  const p = D.cast[l.who] || schedPeople().find(q => q.id === l.who);
+  return { title: sc.title, name: castName(D, l.who), who: castName(D, l.who), id: p ? p.id : l.who, role: p ? p.role || '' : '', text: evText(l.text, D.ctx), to: evText(l.to, D.ctx) || null, pose: l.pose || null, choices: null, i: D.i, n: D.queue.length };
 }
 function dialogueDraw() {
   const v = DIALOGUE && dialogueView();
   if (!v) return dialogueEnd(true);
   DIALOGUE.at = performance.now();
-  if (typeof deviceDialogue === 'function') return deviceDialogue(v, dialogueStep);
+  if (typeof deviceDialogue === 'function') return deviceDialogue(v);
   if (typeof document === 'undefined') return;
   if (!DIALOGUE_EL) {
     DIALOGUE_EL = document.createElement('div');
@@ -10878,6 +10917,7 @@ function dialogueStep(k) {
   }
   D.i++; dialogueDraw();
 }
+const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
 // a job offered in a meeting: claimed for you if section 17 has posted it (tagged event and eventJob), else remembered
 // in SHIP.event.mine ('wants:<job>') for section 17 to give you when it posts
 function eventTakeJob(job) {
