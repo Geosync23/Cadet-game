@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
 #   and a drag up from the bottom edge leave it shut; only the Device button opens it
 #   0.35.14: the Maps plan kept between ship minutes, unknown appointment fields kept
@@ -208,6 +209,16 @@ def run(path):
               D.appts = []; deviceShow('home'); return out; })()""")
             print('  group meeting:', gm)
             check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
+            # days off (0.35.17): section 14's playerShiftOn(d) (a stand-in here: Saturday and Sunday off) shows "Day off" in
+            # Schedule, the strip and the Calendar, with no shift that day
+            do = g.ev("""(() => { const own = typeof playerShiftOn === 'function'; if (!own) window.playerShiftOn = d => weekday(d) < 5;
+              let d = SHIP.time.day; while (weekday(d) !== 5) d++; const out = [own, devDay(d).some(x => x.kind === 'shift'), devDay(d).some(x => x.title === 'Day off')];
+              let w = SHIP.time.day; while (weekday(w) >= 5) w++; out.push(devDay(w).some(x => x.kind === 'shift'));
+              const save = { day: SHIP.time.day, min: SHIP.time.min }; SHIP.time.day = d; SHIP.time.min = 600;
+              deviceShow('schedule'); out.push(document.getElementById('devBody').textContent.includes('Day off'), devNow().now.startsWith('Day off'));
+              SHIP.time.day = save.day; SHIP.time.min = save.min; deviceShow('calendar'); out.push(document.getElementById('devBody').textContent.includes('Day off'));
+              if (!own) delete window.playerShiftOn; deviceShow('home'); return out; })()""")
+            check(do[1:] == [False, True, True, True, True, True], f'days off: no shift, "Day off" in Schedule, the strip and the Calendar: {do}')
             # the Calendar's days (0.35.10): tap a day, See the day (Schedule shows it), Make an appointment (that day);
             # Pick on the map, then Meet here sets the place
             cd = g.ev("""(() => { const d = SHIP.time.day + 4, out = []; deviceShow('calendar'); deviceDo({ app: 'calendar', do: 'day', arg: d });

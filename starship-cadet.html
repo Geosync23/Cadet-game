@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.16
+   STARSHIP CADET: CSV Wren                            build 0.35.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6912,7 +6912,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.16';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.17';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7972,7 +7972,9 @@ setTimeout(() => {
 // and Home. The player keeps the day shift every day for now (no rota of their own yet). ----
 const DEV_SHIFT = { from: 480, to: 1020, where: 'the Works bay, Deck 5' };
 // whether you work on day d: every day for now; a rota of your own drops in here
-function playerShiftOn(d) { return true; }
+// 0.35.17: the player's days off come from section 14's playerShiftOn(d) (the sim engineer; the user chose Saturday and
+// Sunday off). Section 19 no longer defines it, as a later declaration here would override section 14's
+const devShiftOn = d => { if (typeof playerShiftOn !== 'function') return true; try { return playerShiftOn(d) !== false; } catch (e) { return true; } };
 const DEV_WEEK = [                                       // the weekday shapes (section 14's WEEK_SHAPE), for people
   [{ at: 470, title: 'All-hands briefing', where: 'the Works bay, Deck 5', len: 10 }], [],
   [{ at: 900, title: 'Drill: muster by the lift', where: 'your deck', len: 15 }],
@@ -8002,7 +8004,7 @@ function devDay(d) {
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
-  if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
+  if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
     out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
@@ -8040,7 +8042,7 @@ function deviceTick() {
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
     DEV_REMINDED.add(x.id);
-    const m = SHIP.time.min, onShift = playerShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
+    const m = SHIP.time.min, onShift = devShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
     deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
   }
 }
@@ -8063,7 +8065,7 @@ function deviceDo(action) {
 }
 // Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
 const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
-const devOnShift = () => playerShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
+const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
 function deviceNotify({ app, text, urgent } = {}) {
   if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
@@ -8391,7 +8393,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   if (n.next) B.push({ kind: 'text', text: n.next });
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
-    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
   }
@@ -8414,7 +8416,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
       if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
-      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: calDay === d ? null : 'Tap to plan this day', mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: (devShiftOn(d) ? '' : 'Day off') + (calDay === d ? '' : (devShiftOn(d) ? '' : ' · ') + 'Tap to plan this day') || null, mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
       if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
