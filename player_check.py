@@ -467,6 +467,7 @@ with sync_playwright() as pw:
             sv = json.loads(g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return JSON.stringify(s.player); })()"))
             check(sv.get('work', {}).get('done', 0) >= 4 and sv.get('carry') == [], f"job loop: the save should hold the work ({sv.get('work')})")
             g.step(60); check(g.ev(TAPI) is True, 'job loop: resume'); s3 = jrun(160)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             done = json.loads(g.ev(f"JSON.stringify([myJob(), SHIP.jobs.find(j => j.id === {json.dumps(jid)}).status, SHIP.machines[{json.dumps(mj[2])}].cond])"))
             print('  repaired:', s3[3][:80], '| job', done[1], '| condition', round(done[2]))
             check(done[0] is None and done[1] == 'done' and done[2] >= 99 and s3[2] is None, f'job loop: the job should be done and the machine as new ({done})')
@@ -525,6 +526,7 @@ with sync_playwright() as pw:
             g.ev(f"({IN_ROOM})('r')"); jrun(); c3 = json.loads(g.ev(CST)); steps.append(c3)
             pre = g.ev("[SHIP.stores.filter || 0, SHIP.hold.filter || 0]")   # the hourly job list may have moved stock meanwhile: compare across the docking
             g.ev(TAPS % json.dumps('Cart dock %d' % dock)); jrun(); c4 = json.loads(g.ev(CST)); steps.append(c4)
+            g.ev("(() => { const j = typeof turnInJob === 'function' && myJob(); if (j && j.workDone) turnInJob(j.id); })()")   # TURN_IN (0.37.3): finished jobs are turned in at the board
             fin = g.ev(f"[SHIP.jobs.find(j => j.id === {json.dumps(cj[0])}).status, SHIP.stores.filter, myJob()]")
             for st in steps: print('   ', st[0], st[1], '|', st[2][:90])
             print('    job', fin[0], '| filters on the shelf, in the hold before docking:', pre, '| on the shelf after:', fin[1])
