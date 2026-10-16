@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.26.14
+   STARSHIP CADET: CSV Wren                            build 0.26.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.14';                             // keep in step with the header's build line
+const GAME_BUILD = '0.26.15';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7014,33 +7014,48 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
   return false;
 }
 // ---- guests (Pillar 3, C8): visitors aboard for a few days, from the crew designer's GUESTS (section 9) ----
-// GUESTS: [{ id, name, spec | looks, role, cabin (their bed place id), arrive, leave (ship days), template, habits? }].
-// A guest lives like an off-duty crew member (no work), with their template's favourite places: a scientist the
-// observatory, a delegate the observation room and lounges, a passenger the Commons, a survivor mostly resting in
-// their cabin. They come aboard at 10:00 on `arrive` (by the shuttle bay, Deck 5) and leave at 10:00 on `leave`;
-// before and after, they're 'away' (deck 0: on no deck, so no one draws them). Nothing changes without GUESTS.
-const GUEST_LEISURE = {
-  scientist: [[2, 'observatory', 8], [2, 'lounge-seat', 3], [2, 'common-room', 3]],
-  delegate: [[1, 'common-room', 5], [2, 'lounge-seat', 5], [3, 'lounge-seat', 3]],
-  passenger: [[3, 'lounge-seat', 6], [3, 'garden', 6], [3, 'bench', 3], [4, 'common-room', 2]],
-  survivor: [],
-};
-const GUEST_REST = { survivor: 4 };                      // a survivor rests in their cabin far more than anyone else
+// GUESTS: [{ id, name, spec | looks, role, cabin (their bed place id), arrive, leave (days of the year, 1-364; a
+// stay may cross the year's end), template, work?, habits? }]. Event guests have arrive and leave null, and `event`
+// and `stay` (days) instead: section 18 says when they're aboard through eventGuestDays(g) -> [arrive, leave] in
+// ship days, or null; until it does, they're away. A guest lives off duty, from their GUEST_TEMPLATES entry
+// (section 9): `day` places until 17:00 and `evening` ones after, as [deck, type, weight] (types with no places
+// skipped), ['cabin', w] (resting in their own cabin) or ['work', w] (their own `work` place); a survivor has
+// `firstDay` for their first `first` days; `wake` and `bed` are the times they get up and turn in. They come aboard
+// at 10:00 on `arrive` (by the shuttle bay, Deck 5) and leave at 10:00 on `leave`; before and after, they're 'away'
+// (deck 0: on no deck, so no one draws them). Nothing changes without GUESTS.
 const GUEST_AT = 600;                                    // arrivals and departures, 10:00
+const guestTpl = p => p.guest && typeof GUEST_TEMPLATES !== 'undefined' && GUEST_TEMPLATES[p.template] || null;
 const strSeed = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
 function guestPeople() {
   if (typeof GUESTS === 'undefined' || !Array.isArray(GUESTS)) return [];
   return GUESTS.filter(g => g && g.id && (g.cabin || g.bed)).map(g => ({ ...g, looks: g.looks || g.spec, rank: 'guest', dept: g.dept || 'guest', shift: 'day',
-    rota: { offDays: [] }, work: null, bed: g.bed || g.cabin, habits: g.habits || [], seed: g.seed || strSeed(g.id), guest: true }));
+    rota: { offDays: [] }, work: null, guestWork: g.work || null, bed: g.bed || g.cabin, habits: g.habits || [], seed: g.seed || strSeed(g.id), guest: true }));
 }
-const aboard = (p, d) => !p.guest || (d >= (p.arrive || 1) && (!p.leave || d <= p.leave));
-const aboardAllDay = (p, d) => !p.guest || (d > (p.arrive || 0) && (!p.leave || d < p.leave));
+// where a guest's stay stands on ship day d: 'away', 'arrive', 'leave' or 'in' (aboard all day); crew are always 'in'.
+// Stays from the data are days of the year; an event guest's are ship days from section 18
+function guestStay(p, d) {
+  if (!p.guest) return 'in';
+  let a = p.arrive, l = p.leave, y = d;
+  if (a == null) { const ev = typeof eventGuestDays === 'function' ? eventGuestDays(p) : null; if (!ev) return 'away'; [a, l] = ev; }
+  else y = (d - 1) % 364 + 1;                            // the day of the year
+  if (y === a) return 'arrive';
+  if (y === l) return 'leave';
+  return (a <= l ? y > a && y < l : y > a || y < l) ? 'in' : 'away';   // a <= l, or across the year's end
+}
+const aboard = (p, d) => guestStay(p, d) !== 'away';
+const aboardAllDay = (p, d) => guestStay(p, d) === 'in';
+// a guest template's list as leisure options: 'cabin' is rest, 'work' their own work place. Weights count double,
+// so the template outweighs a habit or two (a window-seat habit alone weighs 20)
+const guestOpts = (p, list, bedDeck) => (list || []).map(o => o[0] === 'cabin' ? [bedDeck, 'rest', 2 * o[1]]
+  : o[0] === 'work' ? (p.guestWork ? [p.guestWork.deck, p.guestWork.place, 2 * o[1]] : null) : [o[0], o[1], 2 * o[2]]).filter(Boolean);
+// which day of their stay day d is for a guest: 1 on the day they arrive (counted up to `max`; past it, max + 1)
+const guestDayNo = (p, d, max = 7) => { for (let i = 0; i < max; i++) if (guestStay(p, d - i) === 'arrive') return i + 1; return max + 1; };
 // a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
 function guestTrim(p, d, segs) {
   if (aboardAllDay(p, d)) return segs;
   const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
   if (!aboard(p, d)) return [away(B, B + 1440)];
-  const cut = B + GUEST_AT, arriving = d === p.arrive, out = [];
+  const cut = B + GUEST_AT, arriving = guestStay(p, d) === 'arrive', out = [];
   if (arriving) {
     out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
     for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
@@ -7144,7 +7159,8 @@ function schedFrame(p, d) {
   const gp = shiftBlocks(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
-  let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
+  const gt = guestTpl(p);                                                   // a guest keeps their template's hours
+  let bed = (gt ? gt.bed : 1365) + jit(3) + (shape.late || 0);              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
   const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
@@ -7154,7 +7170,7 @@ function schedFrame(p, d) {
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
   else { f.workStart = 480 - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 1020 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
-  let wake = 375 + jit(10);                                                 // about 06:15
+  let wake = (gt ? gt.wake - 45 - 45 * U(13) : 375) + jit(10);            // about 06:15 (a guest's lie-in is in their template)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
@@ -7294,11 +7310,13 @@ function schedBuild(p, d, occ, S) {
   // left counts for little; [bedDeck, 'rest'] is time in your own bunk or cabin
   let lastLeisure = null;
   const leisureOpts = k => {
-    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest';
-    const opts = LEISURE.concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
-      .filter(([dk, type, w, who]) => (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
-      .concat(GUEST_LEISURE[p.template] || [])          // a guest's favourite places (Pillar 3)
-      .concat([[bedDeck, 'rest', 3 * (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1) * (GUEST_REST[p.template] || 1)]])   // tired: rest more; lonely: less
+    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest', gt = guestTpl(p);
+    const tired = (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1);   // tired: rest more; lonely: less
+    const opts = (gt ? guestOpts(p, t >= 1020 ? gt.evening : gt.first && guestDayNo(p, d) <= gt.first && gt.firstDay || gt.day, bedDeck) : LEISURE)   // a guest: their template's places (Pillar 3)
+      .concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
+      .filter(([dk, type, w, who]) => type === 'rest' || (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
+      .map(o => o[1] === 'rest' ? [o[0], o[1], o[2] * tired] : o)
+      .concat(gt ? [] : [[bedDeck, 'rest', 3 * tired]])
       .map(([dk, type, w]) => [dk, type, w * (dk === deck ? 4 : 1) * (dk + '|' + type === lastLeisure ? .2 : 1)]);
     const tot = opts.reduce((a, o) => a + o[2], 0); let r = U(k) * tot, i = 0;
     while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
