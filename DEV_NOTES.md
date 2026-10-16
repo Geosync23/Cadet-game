@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.40.8 (about 7,300 lines)
+## Current build: 0.41.0 (about 7,300 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -164,6 +164,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.40.6 | 0.40.5 plus the player's job loop (0.28.6: take a job, inspect, fetch parts from Deck 5 storage, make one in the machine shop, repair at the panel), parts by shelf (0.30.9, 0.33.10–0.33.11), merged by the lead. |
 | 0.40.7 | Pillar 2 complete (the lead): 0.40.6 plus food by hover cart (0.33.13–0.33.14 cart runs and cartClaim, 0.29.9 FOOD.restock 'carts', 0.30.10 hold and dock places, 0.31.5 cold-store places), carts and held things drawn (0.27.5–0.27.6, 0.26.7 heldPose), and the player's touchJob / returnPart (0.28.7). |
 | 0.40.8 | Pillar 2 complete, final (the lead): 0.40.7 plus docked carts that hide while they're out on a run (0.33.15, cartDockLive) and the crate in the player's hands while carrying parts (0.28.8). |
+| 0.41.0 | First answers-pass combined build (the lead): smooth hull stripes on Decks 3, 4, 5 (0.31.6, 0.30.11), window seats and Deck 1 crawl tiles (0.31.7), names approved, birthdays and door plates in the roster (0.16.6), trays, toolboxes, datapads and the crouch pose (0.27.7), a coarse third crowd detail for 70+ crew (0.27.8). |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
