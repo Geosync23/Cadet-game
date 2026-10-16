@@ -13,6 +13,8 @@
 #   machines, carts, crawlways (0.28.11): a tap on a machine walks you up and shows machineUse's text; a restock job is a
 #   hover-cart run you push (dock, hold, storage, dock: the hold lands on the shelves, you're paid, the cart in your
 #   hands on the way); a crawl tile slows you to half speed in a crouch
+#   sit anywhere (0.28.12): a tap on a public seat sits you there (the sit pose, at its height), rests you, and you get
+#   up by walking; squeeze past (0.28.12): crew settled at their station no longer wall off the way to the galley plant
 #   in the game, one player day on the real decks, by tapping the real things: shower (Deck 4), servery tray then a
 #   mess seat, grab shelf, treadmill (run), weights (lift), call-home booth (call), shelves then the counter
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
@@ -319,6 +321,46 @@ with sync_playwright() as pw:
     print('  on a crawl tile [speed, crouching, toast], then off it [speed, crouching]:', cw)
     check(cw[0] == .5 and cw[1] is True and 'crouch' in cw[2] and cw[3] == 1 and cw[4] is False, f'crawlway: {cw}')
     g.ev("goToDeck(3)"); g.step(5)                      # back where the next checks expect you
+
+    print('Sit anywhere:')
+    st = g.ev(r"""(() => { const seat = [...PLACE_OF.values()].filter(pl => SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !heldBy(pl.id) && pl.type !== 'mess-seat')
+        .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && s.pose === 'sit' && findPath(player.here(), s.walk, null, player))[0];
+      if (!seat) return null; const p = new THREE.Vector3(seat[1].x, .4, seat[1].z);
+      const it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; }).sort((a, b) => a[1].distanceTo(p) - b[1].distanceTo(p))[0];
+      return [seat[0].id, seat[0].type, it[0].t, playerTap(it[0], it[1].clone(), p)]; })()""")
+    print('  tapped:', st)
+    if check(st and st[3] is True, f'sit anywhere: a tap on a free seat should sit you ({st})'):
+        for k in range(80):
+            g.step(30)
+            if g.ev("!!ACT && ACT.phase === 'do'"): break
+        sat = json.loads(g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, ACT && ACT.pose, ACT && ACT.y, player.obj.visible, document.getElementById('tx').textContent])"))
+        print('  sitting:', sat[:5], '|', sat[5][:80])
+        check(sat[0] == 'sit' and sat[1] == st[0] and sat[2] == 'sit' and not sat[4] and 'sit down' in sat[5], f'sit anywhere: sitting at the seat ({sat})')
+        rest = g.ev(r"""(() => { const n = SHIP.player.needs; Object.assign(n, { energy: 60, fitness: 50, hunger: 50, social: 50 }); FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
+          needsT = shipNow() - 60; playerUpdate(0, 0); FX_MIN = -1; return [Math.round((60 - n.energy) * 100) / 100, !!ACT]; })()""")
+        print('  an hour sitting: energy drained', rest[0], '(awake, standing: 4.4)')
+        check(abs(rest[0] - 4.4 * .6) < .01 and rest[1], f'sitting should rest you: energy -{rest[0]} in an hour, want {4.4 * .6:.2f}')
+        g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(5)
+        up = g.ev("[!!ACT, player.obj.visible]"); print('  walked off:', up)
+        check(up == [False, True], f'walking away should get you up ({up})')
+
+    print('Squeezing past settled crew (the galley plant, Deck 3):')
+    sq = g.ev(r"""(() => { const blocker = { settled: true, spot: { onTile: true, walk: [39, 4], pose: 'work', x: cellPos(39, 4).x, z: cellPos(39, 4).z }, x: cellPos(39, 4).x, z: cellPos(39, 4).z,
+        goalId: 'test', p: { name: 'Test Brennan', role: 'Chef', id: 'test' }, update() { return true; }, remove() {}, h: { set() {} } };
+      window.__blocker = blocker; DECK_CREW.push(blocker);
+      const goal = [39, 1], here = player.here(), avoid = occupiedBy(player);
+      const walled = !findPath(here, goal, avoid, player), went = playerGo(goal);
+      return [walled, went, player.path.some(c => c[0] === 39 && c[1] === 4)]; })()""")
+    print('  walled off without squeezing, path found, through the chef\'s tile:', sq)
+    slow = 1
+    for k in range(400):
+        g.step(3); slow = min(slow, g.ev("player.maxV / PLAYER_V0 / needEffects().walk"))
+        if not g.ev("player.path.length > 0"): break
+    sqe = g.ev("[K(player.here()), document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent]")
+    g.ev("DECK_CREW.splice(DECK_CREW.indexOf(window.__blocker), 1); delete window.__blocker")
+    print('  arrived at', sqe[0], '| slowest', round(slow, 2), '|', sqe[1][:80])
+    check(sq[1] is True and sq[2] is True and sqe[0] == '39,1', f'squeeze past: should reach the galley plant panel through the chef ({sq}, {sqe})')
+    check(abs(slow - .5) < .01 and 'Excuse me, Chef' in sqe[1], f'squeeze past: slowed to half, with a polite word ({slow}, {sqe[1]})')
 
     print('Places held by crew, closed servery, walking away:')
     held = g.ev(r"""(() => { const ids = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];
