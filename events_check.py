@@ -1,5 +1,5 @@
 # Starship Cadet: events check (keep in the repo, next to day_check.py)
-# Steps a few weeks of ship days with ?nosave and checks the ship's small traditions (section 18, SHIP_EVENTS):
+# Steps a few weeks of ship days with ?nosave and checks the ship's small traditions (section 18, SHIP_TRADITIONS):
 #   each event happens when it's due (its weekday, every N days, its day of the year, a birthday) and on no other day;
 #   people go to it (an occasional day with nobody, the room full of others, is noted; never anyone fails), only at its time (honorees a little early; staying on up to 25 minutes after) and only to its places;
 #   the schedules stay sound on event days (dayReport: sleep, meals, shifts, no double-booking, no gaps);
@@ -7,7 +7,8 @@
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
 #   nobody is stuck for more than 10 ship minutes, nobody shares a place; draw calls at the event under BUDGET;
 #   the Mail the evening before (18:00), once each; decor on the deck while it's on, and gone after;
-#   the player joining by being in the room (a little social, once); the tap line before it.
+#   the player joining by being in the room (a little social, once); the tap line before it;
+#   a ship-wide event on paper: the ion storm's skeleton from day 10, its phases in order, eventMod in each, the same twice.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 events_check.py BUILD.html [DAYS]     (DAYS defaults to 28, from Day 1, plus days 100 and 300)
 import sys
@@ -19,12 +20,12 @@ BUDGET = 450
 STEP = 0.05                    # real seconds a step, as day_check
 
 PLANS = r"""(days => {
-  const out = { days: [], bad: [], empty: [], ids: SHIP_EVENTS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
+  const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const tagId = tag => { const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read))?$/.exec(tag); return m && m[1]; };
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
-    for (const ev of SHIP_EVENTS) {
+    for (const ev of SHIP_TRADITIONS) {
       const w = ev.when, due = w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd);
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
@@ -97,6 +98,30 @@ SIM = r"""(async ({ d, id, step }) => {
   return out;
 })"""
 
+
+# a ship-wide event on paper (Pillar 3): the ion storm's skeleton from day 10, stepped every 10 ship minutes to day 15,
+# twice from a clean slate. Phases in order, eventMod right in each phase, the end logged with a band and traces.
+STORM = r"""(() => {
+  const run = () => {
+    const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0;
+    eventStart('ionStorm', 10);
+    const steps = [], sig = [], mods = {};
+    for (let t = 9 * 1440; t <= 15 * 1440; t += 10) {
+      const n = eventNow(t);
+      const o = eventAdvance(t, true); if (o.length) steps.push('day ' + (Math.floor(t / 1440) + 1) + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
+      const k = n ? n.phase : '-', m = [eventMod('wear', 'power', t), eventMod('wear', 'comms', t), eventMod('effect', 'flicker', t)];
+      sig.push(k + ':' + m.join(',')); mods[k] = m;
+      if (n && n.phase === 'escalation') eventScore('blackout', 1);   // a stand-in: a minute of blackout per step of the escalation
+    }
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event };
+    SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
+    return res;
+  };
+  const a = run(), b = run();
+  return { a, same: a.sig === b.sig && JSON.stringify(a.log) === JSON.stringify(b.log), due: eventDueDay(), cal: upcomingTraditions(0, 7 * 1440).slice(0, 3) };
+})()"""
+
 ok = True
 def fail(msg):
     global ok
@@ -107,7 +132,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
-    print(f"{g.ev('SHIP_EVENTS.length')} events: " + ', '.join(g.ev("SHIP_EVENTS.map(e => e.id)")))
+    print(f"{g.ev('SHIP_TRADITIONS.length')} events: " + ', '.join(g.ev("SHIP_TRADITIONS.map(e => e.id)")))
     days = list(range(1, DAYS + 1)) + [100, 300]
 
     # 1. on paper: due days, who goes, where, and the schedules
@@ -178,6 +203,22 @@ with sync_playwright() as pw:
     })()""")
     print(f"Player in room {j['room']} during the quiz: joined {j['joined']}, social {j['n0']} -> {j['social']}")
     if j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player did not join the quiz')
+
+
+    # 5. a ship-wide event on paper: the ion storm's skeleton, twice
+    st = g.ev(STORM); a = st['a']
+    print('Ion storm on paper (days 10-14):'); [print('  ' + x) for x in a['steps']]
+    print(f"  wear and flicker by phase: {a['mods']}; result {a['log'][0]['band'] if a['log'] else '-'}, threads {a['log'][0]['threads'] if a['log'] else '-'}, traces {a['traces']}")
+    print('  the same twice:', st['same'], '| due in play:', st['due'], '(None while the storm is a draft)')
+    print('  upcoming traditions:', [(c['title'], c['at'], c['where']) for c in st['cal']])
+    want = ['start', 'warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
+    got = [w for x in a['steps'] for w in want if (' ' + w) in (' ' + x.split(' ', 3)[3]).replace('phase ', ' ').replace('end ', ' end ')]
+    if [w for w in want if w != 'start'] != [w for w in got if w != 'start']: fail(f"storm phases out of order: {a['steps']}")
+    m = a['mods']
+    if m.get('-') != [None, None, None] or m.get('onset') != [2, 3, True] or m.get('escalation') != [4, 6, True] or m.get('resolution') != [None, None, None]: fail(f"eventMod by phase: {m}")
+    if not st['same']: fail('the storm ran differently the second time')
+    if len(a['log']) != 1 or a['log'][0]['band'] not in ('smooth', 'bumpy', 'rough') or a['left'] is not None: fail(f"the storm didn't end cleanly: {a['log']} {a['left']}")
+    if not st['cal']: fail('upcomingTraditions found nothing in the first week')
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()

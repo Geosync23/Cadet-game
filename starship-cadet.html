@@ -10427,13 +10427,14 @@ jobWhere.on = true;                                      // crew go to their job
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
 // To the player they're "ship traditions" (the user's name, 2026-10-16); the big story ones are "ship-wide events".
 // Small, recurring and ambient. The crew who are free simply go; the player joins by being in the room.
-//   SHIP_EVENTS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
+//   SHIP_TRADITIONS        the table: when, the time, where (pools of places), who, what they do, the Mail and the tap lines
 //   eventsOn(day)      -> [{ id, name, ev, day, from, to, honorees }] the events that day (minutes from midnight)
 //   eventPlan(p, day)  -> [{ id, from, to, opts: [[deck, pool], ...], tag, anim, min }] what section 14 slots into
 //                         that person's leisure time (minutes from midnight; [] most days). Read once per schedBuild
 //   eventPools(shared) adds each event's pools ('deck|ev:<id>:<n>') to schedData's shared places (section 14 hook)
 //   eventPlaces(e)     -> the place ids section 14 holds for the event's window (tagged, and `hold`: default the first pool)
 //   eventLine(p, t)    -> a line for the tap toast ("Coming to the quiz tonight?"), or null
+//   SHIP_EVENTS        the ship-wide events (Pillar 3), an object by id; see "ship-wide events" below
 //   eventsTick()       the main loop: the Mail the evening before, decor on the deck during an event, the player joining
 // Every choice is a hash (schedU, k 320-333: section 14 uses 500-515 and 9100/9200, section 16 301 and 310 up); nothing here calls R(), and nothing reads planDay or whereIs
 // while plans are being made. Events only ever take leisure time: shifts, meals and sleep are untouched, and anyone
@@ -10451,7 +10452,7 @@ const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year:
 // cake: true asks the galley (section 16) to bake that day; its cake replaces our decor 'cake' prop.
 // decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
 // line before it; here: the tap line during it; thanks: the toast when the player joins.
-const SHIP_EVENTS = [
+const SHIP_TRADITIONS = [
   { id: 'running', name: 'Running club', k: 320, when: { weekday: 0 }, at: [1155, 1200], min: 20,
     where: [{ deck: 3, pool: 'gym' }],
     who: (p, d) => evHas(p, d, 'runner') ? .9 : evHas(p, d, 'gym-regular') ? .55 : .06, anim: () => null,
@@ -10536,7 +10537,7 @@ const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], wd = weekday(d), yd = shipYearDay(d);
-  for (const ev of SHIP_EVENTS) {
+  for (const ev of SHIP_TRADITIONS) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
@@ -10553,7 +10554,7 @@ function eventPools(shared, desks) {
   if (!EV_READY) return;                                 // called before section 18 has run: the caches are cleared at its end
   if (!desks) desks = schedDesks(ROSTER.concat(ROSTER_GUESTS).filter(p => !p.player), shared);
   const taken = new Set(desks.values());
-  for (const ev of SHIP_EVENTS) {
+  for (const ev of SHIP_TRADITIONS) {
     const tagged = new Map();
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
@@ -10621,7 +10622,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of SHIP_EVENTS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of SHIP_TRADITIONS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -10726,7 +10727,181 @@ function eventsTick() {
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now);
+  eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
 }
+// ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
+// The format (plans/pillar3-plan.md, "How an event is put together" and "Shared formats"):
+//   SHIP_EVENTS.<id> = { title, days, earliest, gap?, draft?,
+//     phases: [{ id, at: [day, minute], clears? }],       // day 0 is the warning's day; phases in order. A phase marked
+//                                                          // `clears` drops what earlier phases changed (resolution, afterglow)
+//     systems:  { <phase>: { wear: { power: 2 }, effects: ['flicker'] } },   // read by section 17 through eventMod
+//     routines: { <phase>: [{ who, where, rule }] },        // section 14
+//     galley:   { <phase>: { menu, grab } },                // section 16
+//     jobs:     { <phase>: [{ kind, where, tier }] },       // section 17
+//     news:     [{ id, from, phase, seed, lines }],         // section 20 (social)
+//     moments:  [{ id, phase, where, feel }],               // felt everywhere (5, 8b)
+//     meetings: [{ id, phase, at: [day, min], where, script }],
+//     address:  { <phase>: ['line', ...] },                 // the Captain's ship-wide address as that phase starts
+//     mail:     { <phase>: { from, subject, body } },       // a notice as that phase starts
+//     threads:  [{ id, label, good, bad }],                 // lower is better: <= good smoothly, >= bad roughly, else bumpily
+//     traces:   { smooth: [...], bumpy: [...], rough: [...] } }
+//   eventNow(t?)        -> { id, phase, day } | null          anyone may ask; null means no event
+//   eventMod(kind, key) -> number | rule | true | null        null means "no change" (every reader treats it so)
+//   eventScore(thread, n) / eventMine(what, n)                the simulation's and the player's part, added up
+//   eventStart(id, day) / eventAdvance(t)                     start one; move it on (phases, the end, the log)
+//   SHIP.event = { id, startDay, phase, threads: {}, mine: {} } | null; SHIP.eventLog; SHIP.traces   (saved)
+//   captainAddress({ lines, at }), MEETING_SCRIPTS, meeting(), dialogueShow(), dialogueClose(), upcomingTraditions()
+// Nothing here calls R(); when an event starts comes from schedU and the day, so a replay is identical.
+const SHIP_EVENTS = {};
+const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
+const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
+// the ion storm's skeleton, for the format and events_check; its content (jobs, news, meetings, the address and
+// its words) is the next step's. `draft: true` keeps it from starting on its own in play.
+SHIP_EVENTS.ionStorm = {
+  title: 'Ion storm', days: 4, earliest: 8, draft: true,
+  phases: [{ id: 'warning', at: [0, 540] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
+    { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1080], clears: true }],
+  systems: { onset: { wear: { power: 2, comms: 3 }, effects: ['flicker'] }, escalation: { wear: { power: 4, comms: 6 } } },
+  routines: {}, galley: {}, jobs: {}, news: [], moments: [], meetings: [],
+  threads: [{ id: 'blackout', label: 'Keep the lights on', good: 30, bad: 180 }, { id: 'spoiled', label: 'Food spoiled', good: 0, bad: 20 }],
+  traces: { smooth: ['stormRoster'], bumpy: ['relayScorch'], rough: ['relayScorch', 'tapedPanel'] },
+};
+// the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
+SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
+(() => {
+  const s = SAVED && SAVED.ship, e = s && s.event;
+  if (e && typeof e === 'object' && SHIP_EVENTS[e.id] && Number.isInteger(e.startDay)) SHIP.event = { id: e.id, startDay: e.startDay, phase: e.phase || null, threads: { ...(e.threads || {}) }, mine: { ...(e.mine || {}) } };
+  if (s && Array.isArray(s.eventLog)) SHIP.eventLog = s.eventLog.filter(x => x && typeof x.id === 'string');
+  if (s && Array.isArray(s.traces)) SHIP.traces = s.traces.filter(x => typeof x === 'string');
+})();
+SAVE_EXTRA.push(s => { s.ship.event = SHIP.event; s.ship.eventLog = SHIP.eventLog; s.ship.traces = SHIP.traces; });
+// where a running event is at minute t: its day (0 = the warning's) and the last phase begun
+function eventNow(t = shipNow()) {
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return null;
+  const rel = t - (e.startDay - 1) * 1440; if (rel < 0) return null;
+  let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
+  return ph ? { id: e.id, phase: ph, day: Math.floor(rel / 1440) } : null;
+}
+// what the event changes now: a phase's value, else an earlier phase's (an onset's wear carries into the escalation),
+// stopping at a phase that `clears`. kinds: 'wear' and 'effect' (systems), 'routine', 'galley', 'jobs', or any other
+// table on the event (def[kind][phase][key]). null: no change.
+function eventMod(kind, key, t) {
+  const now = eventNow(t); if (!now) return null;
+  const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
+  for (let k = i; k >= 0; k--) {
+    const ph = def.phases[k].id;
+    let v = null;
+    if (kind === 'wear') v = def.systems && def.systems[ph] && def.systems[ph].wear ? def.systems[ph].wear[key] : undefined;
+    else if (kind === 'effect') v = def.systems && def.systems[ph] && def.systems[ph].effects ? (def.systems[ph].effects.includes(key) ? true : undefined) : undefined;
+    else if (kind === 'routine') v = def.routines && def.routines[ph] ? def.routines[ph].find(r => r.rule === key || r.where === key || r.who === key) : undefined;
+    else { const tb = def[kind === 'jobs' ? 'jobs' : kind]; v = tb && tb[ph] ? (key === undefined ? tb[ph] : tb[ph][key]) : undefined; }
+    if (v !== undefined && v !== null) return v;
+    if (def.phases[k].clears) return null;
+  }
+  return null;
+}
+// the threads and the player's part: other sections add to them (inert while no event runs)
+function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
+function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
+const threadBand = (th, v) => v <= th.good ? 'smooth' : v >= th.bad ? 'rough' : 'bumpy';
+// the overall result: the threads' bands blended (their average, rounded)
+function eventBand(id, threads) {
+  const def = SHIP_EVENTS[id]; if (!def || !def.threads.length) return 'smooth';
+  const v = def.threads.reduce((a, th) => a + EVENT_BANDS.indexOf(threadBand(th, threads[th.id] || 0)), 0) / def.threads.length;
+  return EVENT_BANDS[Math.round(v)];
+}
+function eventStart(id, day) {
+  if (!SHIP_EVENTS[id]) return false;
+  SHIP.event = { id, startDay: day, phase: null, threads: {}, mine: {} }; return true;
+}
+// when the next event starts, if none is running: the first in EVENT_ORDER not yet in the log, not a draft, from its
+// `earliest` day plus 0-2 days by hash, at least `gap` days (default 7) after the last one ended
+function eventDueDay() {
+  const id = EVENT_ORDER.find(x => SHIP_EVENTS[x] && !SHIP_EVENTS[x].draft && !SHIP.eventLog.some(l => l.id === x));
+  if (!id) return null;
+  const def = SHIP_EVENTS[id], last = SHIP.eventLog[SHIP.eventLog.length - 1];
+  const from = Math.max(def.earliest || 1, last ? last.endDay + (def.gap || 7) : 1);
+  return { id, day: from + Math.floor(3 * schedU(4242, from, EVENT_ORDER.indexOf(id))) };
+}
+// move the event on to minute t: start one when due, run each phase's actions as it begins (the address, a notice),
+// and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
+function eventAdvance(t = shipNow(), quiet) {
+  const out = [];
+  if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
+  const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
+  if (now && now.phase !== e.phase) {
+    const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
+    for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
+      const ph = def.phases[k].id; out.push('phase ' + ph);
+      if (def.address && def.address[ph]) captainAddress({ lines: def.address[ph], at: (e.startDay - 1) * 1440 + def.phases[k].at[0] * 1440 + def.phases[k].at[1], quiet: quiet || k < to });
+      const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet });
+    }
+    e.phase = now.phase;
+  }
+  if (t >= end) {
+    const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
+    for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
+    SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
+    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band], quiet: !!quiet });
+    SHIP.event = null; out.push('end ' + band);
+  }
+  return out;
+}
+const traceOn = id => SHIP.traces.includes(id);         // for the architects' trace props: a scorch mark, a plaque, a pet
+SIM_ADVANCE.push((from, to) => { eventAdvance(to, true); });
+
+// ---- the Captain's ship-wide address: a banner across the top on every deck for about 20 seconds, copied to Mail.
+// The device engineer owns the look; this is the plain stand-in. Time never stops.
+let ADDRESS_EL = null, ADDRESS_T = 0;
+const ADDRESSES = [];                                    // every address so far (for the checks and the Ship app)
+function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', quiet = false }) {
+  const text = (lines || []).join(' ');
+  ADDRESSES.push({ at, from, text });
+  if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
+  if (quiet || typeof document === 'undefined') return;
+  if (!ADDRESS_EL) {
+    ADDRESS_EL = document.createElement('div');
+    ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+    document.body.appendChild(ADDRESS_EL);
+  }
+  ADDRESS_EL.innerHTML = '<div style="font-weight:600;color:#9fe0cf;margin-bottom:2px">' + from + ', to all hands</div>';
+  ADDRESS_EL.appendChild(document.createTextNode(text));
+  ADDRESS_EL.hidden = false; clearTimeout(ADDRESS_T); ADDRESS_T = setTimeout(() => { if (ADDRESS_EL) ADDRESS_EL.hidden = true; }, 20000);
+}
+
+// ---- meetings with dialogue (the fourth kind of moment): scripts are data; section 19 (the device engineer) draws
+// the panel. These are stand-ins: until section 19 provides deviceDialogue(script, i), a line shows as a toast.
+// MEETING_SCRIPTS.<id> = { title, gist, lines: [{ who, text, pose? } | { choice: [{ text, rel?, job? }, ...] }] }
+const MEETING_SCRIPTS = {};
+const MEETINGS = [];                                     // meetings registered by events: { id, where, at, who, script }
+function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at === m.at)) MEETINGS.push(m); return m; }
+let DIALOGUE = null;                                     // { id, i }: the script being shown, and the line
+function dialogueShow(scriptId) {
+  const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
+  DIALOGUE = { id: scriptId, i: 0 };
+  if (typeof deviceDialogue === 'function') return deviceDialogue(sc, 0);
+  const l = sc.lines.find(x => x.text); if (l) toast(sc.title + ': ' + l.who, l.text);
+  return true;
+}
+function dialogueClose() {                               // walking away: the gist arrives in Mail
+  if (!DIALOGUE) return;
+  const sc = MEETING_SCRIPTS[DIALOGUE.id]; DIALOGUE = null;
+  if (sc && sc.gist && typeof mailSend === 'function') mailSend({ at: shipNow(), from: sc.from || 'Works', subject: sc.title + ' (notes)', body: sc.gist, quiet: true });
+}
+
+// ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
+function upcomingTraditions(fromMin, toMin) {
+  const out = [], S = schedData();
+  for (let d = Math.floor(fromMin / 1440) + 1; d <= Math.floor(toMin / 1440) + 1; d++) for (const e of eventsOn(d)) {
+    const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
+    const w = e.ev.where[0], pl = (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [])[0];
+    const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
+    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck });
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+
 var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
