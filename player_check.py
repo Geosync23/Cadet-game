@@ -310,6 +310,10 @@ with sync_playwright() as pw:
     if not real_use: mt.append(g.ev("window.__used")); g.ev("delete window.machineUse; delete window.__used")
     print(' ', mt)
     check(mt[1] is True and mt[2] and len(mt[3]) > len(mt[0]) + 2 and ('Stand-in' in mt[3] if not real_use else True) and (real_use or mt[4] == [mt[2], 'player']), f'a machine tap should ask machineUse: {mt}')
+    wt = g.ev(r"""(() => { const it = ITEMS.find(i => /^washer \d/i.test(i.t)); if (!it) return null; it.hit.getWorldPosition(_wp);   // a stub machine (0.28.14): by room and name
+      const m = stubTap(it, _wp.clone()); return [it.t, m && m[0].id]; })()""")
+    print('  a washer (a stub machine, matched by name and number):', wt)
+    check(wt is None or (wt[1] and wt[1].endswith('-' + wt[0].split()[-1]) and 'washer' in wt[1]), f'a washer tap should find its stub machine: {wt}')
     no = g.ev("(() => { const it = ITEMS.find(i => /^bunk/i.test(i.t)); it.hit.getWorldPosition(_wp); return machineTap(it, _wp.clone()); })()")
     check(no is False, 'a bunk is no machine: the tap does what it always did')
 

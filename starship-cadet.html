@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.28.13
+   STARSHIP CADET: CSV Wren                            build 0.28.14
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.13';                            // keep in step with the header's build line
+const GAME_BUILD = '0.28.14';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7796,13 +7796,23 @@ const MACHINE_NEAR = 1.2;
 function machineTap(it, at) {
   if (typeof machineUse !== 'function' || typeof machineList !== 'function' || typeof deckDef === 'undefined') return false;
   const m = machineList().filter(m => m.deck === deckDef.num && !m.stub && m.at).map(m => [m, cellPos(...m.at)])
-    .filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < MACHINE_NEAR).sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z))[0];
+    .filter(([, c]) => Math.hypot(c.x - at.x, c.z - at.z) < MACHINE_NEAR).sort((a, b) => Math.hypot(a[1].x - at.x, a[1].z - at.z) - Math.hypot(b[1].x - at.x, b[1].z - at.z))[0]
+    || stubTap(it, at);
   if (!m) return false;
   approach(at.clone(), it.front, it.depth, () => {
     let r = null; try { r = machineUse(m[0].id, 'player'); } catch (e) { r = null; }
     toast(it.t, r && r.text ? r.text : it.x);
   });
   return true;
+}
+// a stub machine (0.28.14): one section 17 knows only by its room (the washers), so no tile to be near. Matched by
+// the thing you tapped instead: in the stub's room, titled with its kind's name, and with its number if the title
+// has one ('Washer 3' -> 4-washer-3)
+function stubTap(it, at) {
+  const rm = roomAt(...cellAt(at.x, at.z)), num = (it.t.match(/\d+/) || [])[0];
+  const m = machineList().find(m => m.stub && m.deck === deckDef.num && m.room && m.room === rm && MACHINE_KINDS[m.kind]
+    && it.t.toLowerCase().startsWith(MACHINE_KINDS[m.kind].name.toLowerCase()) && (!num || m.id.endsWith('-' + num)));
+  return m ? [m, null] : null;
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
