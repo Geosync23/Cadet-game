@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.32.6
+   STARSHIP CADET: CSV Wren                            build 0.32.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5505,7 +5505,7 @@ DECKS[2] = {
     { id: '2-armchair-8', type: 'lounge-seat', at: [13, 12], face: 'e', pose: 'sit', room: 'U', y: 0.44, anim: 'read' },
     // the Watch office
     { id: '2-watch-1', type: 'work:watch', at: [24, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-2', type: 'work:watch', at: [25, 1], face: 's', pose: 'work', room: 'W' },
-    { id: '2-watch-3', type: 'work:watch', at: [26, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-4', type: 'work:watch', at: [25, 6], face: 'w', pose: 'sit', room: 'W', xy: [25.62, 6.5], y: 0.5 },
+    { id: '2-watch-3', type: 'work:watch', at: [26, 1], face: 's', pose: 'work', room: 'W' }, { id: '2-watch-4', type: 'work:watch', at: [25, 6], face: 'w', pose: 'sit', room: 'W', xy: [25, 6], y: 0.5 },
     { id: '2-watch-5', type: 'work:watch', at: [25, 3], face: 'e', pose: 'stand', room: 'W' },
     // the washroom
     { id: '2-wctoilet-1', type: 'toilet', at: [24, 13], face: 'w', pose: 'sit', room: 'w', xy: [24.5, 13.6], y: 0.4 }, { id: '2-wctoilet-2', type: 'toilet', at: [24, 16], face: 'w', pose: 'sit', room: 'w', xy: [24.5, 16.4], y: 0.4 },
@@ -5539,7 +5539,7 @@ DECKS[2] = {
     // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
     // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
     // type 'event' so the everyday habits leave them alone. window: by the bow glass.
-    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.5, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.6, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night' },
     { id: '2-obsnight-2', type: 'event', at: [44, 1], face: 'n', pose: 'stand', room: 'J', window: true, event: 'observatory-night' },
     { id: '2-obsnight-3', type: 'event', at: [41, 2], face: 'n', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
     { id: '2-obsnight-4', type: 'event', at: [41, 3], face: 'e', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
@@ -5557,15 +5557,15 @@ DECKS[2] = {
     { id: '2-comms-9', type: 'work:comms', at: [28, 18], face: 's', pose: 'sit', room: 'Q', xy: [28.64, 18.36], y: 0.5, anim: 'talk' },
     { id: '2-comms-10', type: 'work:comms', at: [29, 18], face: 's', pose: 'sit', room: 'Q', xy: [29.64, 18.36], y: 0.5, anim: 'talk' },
     // the lobby
-    { id: '2-bench-1', type: 'bench', at: [21, 16], face: 'n', pose: 'sit', room: '+' }, { id: '2-watch-6', type: 'work:watch', at: [22, 6], face: 'w', pose: 'stand', room: '+' },
+    { id: '2-bench-1', type: 'bench', at: [21, 16], face: 'n', pose: 'sit', room: '+', xy: [21.5, 16.6], y: 0.48 }, { id: '2-watch-6', type: 'work:watch', at: [22, 6], face: 'w', pose: 'stand', room: '+' },
     { id: '2-liftwait-1', type: 'lift-wait', at: [17, 9], face: 'e', pose: 'stand', room: '+' }, { id: '2-liftwait-2', type: 'lift-wait', at: [22, 9], face: 'w', pose: 'stand', room: '+' },
     { id: '2-liftwait-3', type: 'lift-wait', at: [17, 10], face: 'e', pose: 'stand', room: '+' }, { id: '2-liftwait-4', type: 'lift-wait', at: [22, 10], face: 'w', pose: 'stand', room: '+' },
     { id: '2-liftwait-5', type: 'lift-wait', at: [17, 11], face: 'e', pose: 'stand', room: '+' }, { id: '2-liftwait-6', type: 'lift-wait', at: [22, 11], face: 'w', pose: 'stand', room: '+' },
     // the senior corridor
     { id: '2-watch-7', type: 'work:watch', at: [8, 10], face: 'w', pose: 'stand', room: '-' },
     // the science corridor
-    { id: '2-bench-2', type: 'bench', at: [24, 9], face: 's', pose: 'sit', room: '=' }, { id: '2-bench-3', type: 'bench', at: [25, 9], face: 's', pose: 'sit', room: '=' },
-    { id: '2-bench-4', type: 'bench', at: [40, 12], face: 'n', pose: 'sit', room: '=' }, { id: '2-bench-5', type: 'bench', at: [39, 12], face: 'n', pose: 'sit', room: '=' },
+    { id: '2-bench-2', type: 'bench', at: [24, 9], face: 's', pose: 'sit', room: '=', xy: [24.5, 9.4], y: 0.48 }, { id: '2-bench-3', type: 'bench', at: [25, 9], face: 's', pose: 'sit', room: '=', xy: [25.5, 9.4], y: 0.48 },
+    { id: '2-bench-4', type: 'bench', at: [40, 12], face: 'n', pose: 'sit', room: '=', xy: [40.5, 12.6], y: 0.48 }, { id: '2-bench-5', type: 'bench', at: [39, 12], face: 'n', pose: 'sit', room: '=', xy: [39.5, 12.6], y: 0.48 },
     { id: '2-watch-8', type: 'work:watch', at: [44, 11], face: 'e', pose: 'stand', room: '=' },
     // the lab gas plant
     { id: '2-works-1', type: 'work:works', at: [39, 3], face: 'e', pose: 'work', room: 'g', machine: '2-gasplant-1' },
@@ -6377,7 +6377,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.32.6';                             // keep in step with the header's build line
+const GAME_BUILD = '0.32.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
