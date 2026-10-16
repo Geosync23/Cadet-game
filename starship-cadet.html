@@ -43,12 +43,15 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device h3{margin:10px 2px 4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .device #devBody p{margin:2px 2px 6px;font-size:13px;color:#cfd9dc;line-height:1.4}
 .device .devtime{font-size:14px;color:#cfe9e4;font-variant-numeric:tabular-nums}
-.device .need{display:grid;grid-template-columns:64px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
+.device .need{display:grid;grid-template-columns:78px 1fr 28px;align-items:center;gap:8px;margin:5px 2px;font-size:13px}
 .device .need i{height:8px;border-radius:4px;background:#26343a;overflow:hidden}
 .device .need b{display:block;height:100%;background:var(--teal)}
 .device .need.mid b{background:#d9b25a}
 .device .need.low b{background:#e07a5f}
 .device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.device .need em{font-style:normal;font-size:10px;margin-left:5px}
+.device .need em.up,.device #devBody p.fx.up{color:var(--teal)}
+.device .need em.down,.device #devBody p.fx.down{color:#e07a5f}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -4894,6 +4897,16 @@ const D2 = {
 Object.assign(WALL_KIT, {
   // a brass nameplate on the header above a bedroom door: gold letters on navy, in a brass frame
   brassPlate(g, o) {
+    if (o.sub) {                                         // 0.32.3: an officer's plate, name over rank (answer 27)
+      const t = tex(256, 80, (c, w, h) => {
+        c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
+        c.fillStyle = '#ecd08a'; c.textAlign = 'center';
+        let f = 26; do c.font = '600 ' + f + 'px Georgia,serif'; while (c.measureText(o.text).width > w - 26 && --f > 14);
+        c.fillText(o.text, w / 2, 38); c.font = 'italic 17px Georgia,serif'; c.fillStyle = '#d9b45a'; c.fillText(o.sub, w / 2, 63);
+      });
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(.56, .175), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+      p.position.set(0, 2.5, .04); g.add(p); box(.62, .235, .035, D2.brass, 0, 2.5, .0175, g); return;
+    }
     const t = tex(256, 64, (c, w, h) => {
       c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
       c.fillStyle = '#ecd08a'; c.font = '600 27px Georgia,serif'; c.textAlign = 'center'; c.fillText(o.text, w / 2, 42);
@@ -4902,6 +4915,13 @@ Object.assign(WALL_KIT, {
     p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
   },
 });
+// a bedroom's plate (0.32.3, answer 27): an officer's name and rank from the roster (read at dress time, so section 9 is in);
+// rooms without an officer (the Envoy, the visitors) keep the plate's own text
+const D2_RANK = { captain: 'Captain', xo: 'Executive Officer', chief: 'Department Chief', senior: 'Senior Officer' };
+function d2Plate(room, text) {
+  const p = typeof ROSTER !== 'undefined' && ROSTER.find(q => q.bed === '2-' + room);
+  return p && D2_RANK[p.rank] ? { text: p.name.replace(/^(Captain|Commander|Chief) /, ''), sub: D2_RANK[p.rank] } : { text };
+}
 // bedrooms (0.9.2): shared materials only, so fifteen furnished rooms merge into a handful of draw calls
 Object.assign(D2, {
   woodDark: std('#3e2a1f', .6), linen: std('#efe9dc', .9), duvet: std('#e4e7ea', .9), leather: std('#5a3324', .55),
@@ -5433,6 +5453,43 @@ Object.assign(KIT, {
     box(.3, .1, .02, D2.amber, 0, .85, .21, g);
     return { w: .7, d: .4 };
   },
+  // lived-in touches in the utility rooms (0.32.3, answer 31): a mug someone left, signs, the closet calendar
+  d2Mug(g, o = {}) {
+    const x = o.x || 0, y = o.y || 0, z = o.z || 0, m = o.m || D2.china;
+    cyl(.04, .035, .09, m, x, y + .045, z, g, 10); box(.015, .05, .03, m, x + .048, y + .05, z, g); cyl(.034, .034, .005, D2.coffee, x, y + .088, z, g, 10);
+    return { w: .12, d: .12, noBlock: true };
+  },
+});
+// made at load from fixed text, no R(): each is one shared material
+const d2Paper = (w, h, draw) => new THREE.MeshBasicMaterial({ map: tex(w, h, draw), toneMapped: false });
+const d2SignMat = (text, bg, fg) => d2Paper(256, 96, (c, w, h) => {
+  c.fillStyle = bg; c.fillRect(0, 0, w, h); c.strokeStyle = fg; c.lineWidth = 6; c.strokeRect(8, 8, w - 16, h - 16);
+  c.fillStyle = fg; c.textAlign = 'center'; let f = 30; do c.font = '700 ' + f + 'px Arial,sans-serif'; while (c.measureText(text).width > w - 36 && --f > 12); c.fillText(text, w / 2, 48 + f * .36);
+});
+Object.assign(D2, {
+  coffee: std('#3b2416', .3), mugRed: std('#b8433a', .5),
+  flames: d2SignMat('NO NAKED FLAMES', '#f4f1ea', '#c0392b'), head: d2SignMat('MIND YOUR HEAD', '#f2c94c', '#1b1b1f'),
+  calendar: d2Paper(128, 160, (c, w, h) => {
+    c.fillStyle = '#f6f3ec'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f6f73'; c.fillRect(0, 0, w, 52);
+    c.fillStyle = '#f6f3ec'; c.font = '700 18px Arial,sans-serif'; c.textAlign = 'center'; c.fillText('THE WREN', w / 2, 22);
+    c.font = '13px Arial,sans-serif'; c.fillText('Concord Survey', w / 2, 42);
+    c.strokeStyle = '#9aa3a8'; c.lineWidth = 1;
+    for (let r = 0; r < 5; r++) for (let q = 0; q < 7; q++) {
+      const x = 8 + q * 16, y = 60 + r * 19; c.strokeRect(x, y, 16, 19);
+      if (r * 7 + q < 16) { c.strokeStyle = '#c0392b'; c.beginPath(); c.moveTo(x + 3, y + 3); c.lineTo(x + 13, y + 16); c.stroke(); c.strokeStyle = '#9aa3a8'; }
+    }
+    c.fillStyle = '#c0392b'; c.beginPath(); c.arc(8 + 4 * 16 + 8, 60 + 3 * 19 + 9.5, 7, 0, 7); c.fill();
+  }),
+});
+Object.assign(WALL_KIT, {
+  d2Sign(g, o) { const p = new THREE.Mesh(new THREE.PlaneGeometry(.5, .19), o.m); p.position.set(0, o.y || 1.6, .02); g.add(p); },
+  // the closet's corner: a calendar with the days crossed off, a steel shelf with someone's mug and a roll of tape
+  d2Nook(g) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.32, .4), D2.calendar); p.position.set(0, 1.62, .02); g.add(p);
+    box(.5, .025, .18, D2.steel, 0, 1.12, .09, g); for (const x of [-.2, .2]) box(.02, .1, .14, D2.steel, x, 1.06, .08, g);
+    KIT.d2Mug(g, { x: -.1, y: 1.1325, z: .09, m: D2.mugRed });
+    cyl(.05, .05, .05, D2.cord, .14, 1.16, .09, g, 12).rotation.x = Math.PI / 2;
+  },
 });
 DECKS[2] = {
   num: 2, name: 'Command & Science', seed: 20219,
@@ -5584,8 +5641,8 @@ DECKS[2] = {
     { id: '2-captable-4', type: 'lounge-seat', at: [5, 12], face: 'w', pose: 'sit', room: 'C', anim: 'talk' },
     { id: '2-captable-5', type: 'lounge-seat', at: [4, 9], face: 's', pose: 'sit', room: 'C', anim: 'talk' },
     { id: '2-captable-6', type: 'lounge-seat', at: [4, 13], face: 'n', pose: 'sit', room: 'C', anim: 'talk' },
-    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
-    { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
+    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', anim: 'read', window: true },
+    { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', anim: 'read', window: true },
     { id: '2-command-1', type: 'work:command', at: [4, 15], face: 'n', pose: 'sit', room: 'C', anim: 'read' },
     { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
     // Vance
@@ -5665,9 +5722,9 @@ DECKS[2] = {
     { id: '2-survey-2', type: 'work:survey', at: [30, 2], face: 's', pose: 'sit', room: 'K', anim: 'read' },
     { id: '2-survey-3', type: 'work:survey', at: [29, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' },
     { id: '2-survey-4', type: 'work:survey', at: [30, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' }, { id: '2-survey-5', type: 'work:survey', at: [31, 4], face: 'w', pose: 'work', room: 'K' },
-    { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
-    { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
-    { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
+    { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
+    { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
     { id: '2-armchair-12', type: 'common-room', at: [27, 7], face: 'e', pose: 'sit', room: 'K', anim: 'read' },
     // the Survey lab
     { id: '2-survey-6', type: 'work:survey', at: [33, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-7', type: 'work:survey', at: [35, 1], face: 's', pose: 'work', room: 'L' },
@@ -5681,11 +5738,21 @@ DECKS[2] = {
     { id: '2-survey-21', type: 'work:survey', at: [35, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-22', type: 'work:survey', at: [36, 19], face: 'n', pose: 'work', room: 'M' },
     { id: '2-survey-23', type: 'work:survey', at: [39, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-24', type: 'work:survey', at: [35, 18], face: 'e', pose: 'work', room: 'M' },
     // the observatory
-    { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
-    { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
+    { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', anim: 'read', window: true, event: 'observatory-night' },
+    { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', anim: 'read', window: true, event: 'observatory-night' },
     { id: '2-survey-16', type: 'work:survey', at: [42, 5], face: 's', pose: 'work', room: 'J' },
-    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
-    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
+    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
+    // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
+    // type 'event' so the everyday habits leave them alone. window: by the bow glass.
+    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', anim: 'talk', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-2', type: 'event', at: [44, 1], face: 'n', pose: 'stand', room: 'J', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-3', type: 'event', at: [41, 2], face: 'n', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-4', type: 'event', at: [41, 3], face: 'e', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-5', type: 'event', at: [43, 3], face: 'w', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
     // the comms room
     { id: '2-comms-1', type: 'work:comms', at: [29, 20], face: 'n', pose: 'work', room: 'Q' }, { id: '2-comms-2', type: 'work:comms', at: [26, 20], face: 'n', pose: 'work', room: 'Q' },
     { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
@@ -5723,7 +5790,7 @@ DECKS[2] = {
   ],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
-    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, { text });
+    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, d2Plate(d.sealed[key], text));
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
     placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Command & Science, one below the bridge.') });
     // the spine behind glass: the trunks above the car, the ladder below it
@@ -5824,6 +5891,7 @@ DECKS[2] = {
     place('J', 'brassTelescope', 2.0, 4.4, 'n', { turn: -.5, it: IT('Telescope', 'A brass telescope on a pier, aimed out of the bow. Survey uses it by day. A note on the eyepiece: PUT IT BACK ON THE NEBULA WHEN YOU\'RE DONE.') });
     for (const a of [3.5, 6.5]) placeWall('J', 'starChart', 'w', a);
     place('J', 'beanbag', 1.0, 6.8, 'n', { turn: .5, fab: MUS.fab[1] }); place('J', 'beanbag', 2.2, 7.4, 'n', { turn: -.3, fab: MUS.fab[3] });
+    for (const [z, f] of [[5.5, 'sage'], [6.5, 'wine']]) place('J', 'cushion', 3.5, z, 'e', { fab: D2.fabs[f] });   // floor cushions for observatory night (0.32.3)
     // ---- the comms room: the signal board along the windows, two rows of headset desks ----
     place('Q', 'signalBoard', 3.0, 8.55, 's', { w: 4.8, it: IT('Signal board', 'Every message in and out, as a line of light. The slow gold wave is a call home on its way out, weeks from arriving.') });
     for (const z of [3.6, 5.9]) for (const x of [1.5, 4.3]) {
@@ -5875,6 +5943,11 @@ DECKS[2] = {
     place('n', 'cableTray', 3.5, .73, 's', { w: 5.0 });
     place('n', 'signalRepeater', .35, .5, 'w', { it: IT('Signal repeater', 'Lifts the array\'s signal for the long run aft to the comms room. Warm to the touch, and humming.') });
     place('n', 'arrayFeed', 6.7, .5, 'e', { it: IT('Array feed', 'Where the dish\'s cables come through the bulkhead and split for the racks. Each one labelled, in Dr. Sato\'s handwriting, naturally.') });
+    // lived-in touches (0.32.3): a sign in the gas plant, the calendar nook in the closet, a sign and a forgotten mug in the crawl
+    placeWall('g', 'd2Sign', 'w', 6.5, { m: D2.flames });
+    placeWall('u', 'd2Nook', 'w', 2.5);
+    placeWall('n', 'd2Sign', 'n', 2.5, { m: D2.head, y: 1.15 });
+    place('n', 'd2Mug', .45, .5, 'w', { y: .8 });
   },
 };
 for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key] = { t: DECKS[2].rooms[r].name, x: DECKS[2].rooms[r].tap };
@@ -6524,7 +6597,7 @@ function applyLight(k) {
 // 13. SHIP TIME & SAVE
 // Sits here, after lighting and before the first deck is built (section 10):
 // the clock drives the light, and the save decides where you wake.
-// The ship day lasts 30 real minutes. SHIP.time is the ship's clock: day 1 is
+// 18 ship hours take 30 real minutes (a whole day 40). SHIP.time is the ship's clock: day 1 is
 // a Monday, min counts ship minutes since midnight. It only runs while the
 // game is on screen; the ship doesn't run while the game is closed.
 // The game saves itself in the browser (localStorage, one save per device):
@@ -6535,7 +6608,7 @@ function applyLight(k) {
 // Nothing here calls R().
 // =====================================================================
 const GAME_BUILD = '0.31.11';                             // keep in step with the header's build line
-const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
+const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -6640,7 +6713,7 @@ newBtn.onclick = () => {
   updateClock(); saveGame();
   toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
 };
-// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 and choose Sleep.
+// Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
 const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
@@ -6649,8 +6722,7 @@ function offerSleep(at) {                                // at: where the tapped
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
-  document.getElementById('sleepX').textContent = clockText() + '. Sleep until ' + hhmm(WAKE_AT) + '?';
-  sleepEl.hidden = false; toastEl.classList.remove('show'); document.getElementById('sleepYes').focus();
+  toastEl.classList.remove('show'); document.getElementById('sleepYes').onclick();   // 0.28.9, the user's rule: no dialog, you just sleep
   return true;
 }
 document.getElementById('sleepNo').onclick = () => { sleepEl.hidden = true; };
@@ -7297,8 +7369,9 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // bunk, section 13), shower, work out (treadmill, weights), call home (a
 // booth). Tap the thing to do it: you walk there, take the pose, time runs,
 // the need rises; walk away to stop. Places crew hold are left alone.
-// Fitness gains you nothing, but below SLOW_BELOW of fitness, or of energy,
-// you walk slower. Nothing else is punished; there is no fail state.
+// Needs give bonuses and penalties (needEffects, 0.28.9): over NEED_HIGH a
+// bonus, under NEED_LOW a penalty (low fitness or energy: you walk slower).
+// There is no fail state.
 // The device is a PLACEHOLDER for the user's design: a button opens a plain
 // panel of sections, added with device.addSection(id, title, render).
 // Sits after 14 like 13 and 14 do; it only touches the player, the deck and
@@ -7308,14 +7381,38 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // =====================================================================
 const NEED_KEYS = ['hunger', 'energy', 'hygiene', 'fitness', 'social'];   // the plan's NEEDS (section 14 has it too, as NEEDS)
 const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitness: 'Fitness', social: 'Social' };
-// drain per ship hour: [awake, asleep]. A normal day (breakfast, dinner, a shower, 8 hours' sleep) keeps every
-// need above 40; the gym every two or three days keeps fitness up; a call home every two days keeps social up.
-const NEED_DRAIN = { hunger: [4, 2], energy: [3.75, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
+// drain per ship hour (so they hold whatever SHIP_RATE is): [awake, asleep]. A normal day (breakfast, dinner, a
+// shower, a night's sleep) keeps food, hygiene and fitness above 40; the gym every two or three days keeps fitness
+// up; a call home every two days keeps social up. Energy (0.28.9, the user's long days): 4.4 an hour takes a rested
+// player from 100 to the tired line (25) in 17 ship hours at average fitness, about 18 when fit and 16 when not
+// (needEffects' drain, below).
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.4, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25] };
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
 const needClamp = v => Math.max(0, Math.min(100, v));
+// what your needs do (the user's rule, 0.28.9): at NEED_HIGH or over a need gives a bonus, under NEED_LOW a penalty,
+// in between nothing; the effects multiply. walk: walking speed; task: how fast tasks go (repairs, making parts,
+// activities: 1.15 = 15% faster); drain: how fast energy drains while awake; socialGain: social from chatting with
+// crew and eating in company. Each comes with the device's one-line reason. The machines' walk is never in it.
+const NEED_HIGH = 75, NEED_LOW = SLOW_BELOW;
+const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
+  energy:  { hi: [{ task: 1.15 }, 'Well rested: tasks go 15% faster.'], lo: [{ walk: SLOW_SPEED }, 'Tired: you walk slower.'] },
+  fitness: { hi: [{ drain: .94, walk: 1.05 }, 'Fit: a spring in your step, and you tire more slowly.'], lo: [{ walk: SLOW_SPEED, drain: 1.06 }, 'Out of shape: you walk slower and tire sooner.'] },
+  hunger:  { hi: [{ drain: .96 }, 'Well fed: you tire a little more slowly.'], lo: [{ task: .85 }, 'Hungry: tasks go 15% slower.'] },
+  hygiene: { hi: [{ socialGain: 1.5 }, 'Fresh and clean: chatting does you more good.'], lo: [{ socialGain: .5 }, 'You could do with a wash: chatting does half the good.'] },
+  social:  { hi: [{ task: 1.1 }, 'In good spirits: tasks go 10% faster.'], lo: [{ drain: 1.05 }, 'Lonely: you tire a little sooner.'] },
+};
+function needEffects(n = SHIP.player.needs) {             // -> { walk, task, drain, socialGain, notes: [reason], marks: { need: ['up' | 'down', reason] } }
+  const e = { walk: 1, task: 1, drain: 1, socialGain: 1, notes: [], marks: {} };
+  for (const k of NEED_KEYS) {
+    const side = n[k] >= NEED_HIGH ? 'hi' : n[k] < NEED_LOW ? 'lo' : null, fx = side && NEED_FX[k][side]; if (!fx) continue;
+    for (const f in fx[0]) e[f] *= fx[0][f];
+    e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
+  }
+  return e;
+}
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
   const src = s && s.v >= 2 && s.player && s.player.needs, out = {};
   for (const k of NEED_KEYS) { const v = src && src[k]; out[k] = !s ? NEEDS_FRESH[k] : typeof v === 'number' && isFinite(v) ? needClamp(v) : NEEDS_OLD; }
@@ -7339,12 +7436,16 @@ function playerFx() {
 const fxR = (fx, k) => fx && fx.restore && isFinite(fx.restore[k]) ? fx.restore[k] : 1;
 const fxD = (fx, k) => fx && fx.drain && isFinite(fx.drain[k]) ? fx.drain[k] : 1;
 function needsDrain(mins, asleep, fx, except) {          // except: the need an activity is restoring (it doesn't drain meanwhile)
-  const n = SHIP.player.needs, h = mins / 60;
-  for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * h);
-  if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+  const n = SHIP.player.needs;
+  for (let left = mins; left > 0;) {                     // in steps of up to half an hour, so a long skip feels the bonuses change
+    const step = Math.min(left, 30), h = step / 60, ed = asleep ? 1 : needEffects(n).drain; left -= step;
+    for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * (k === 'energy' ? ed : 1) * h);
+    if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+  }
 }
-// walking speed: 1, or SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy
-const playerSpeed = (n = SHIP.player.needs) => (n.fitness < SLOW_BELOW ? SLOW_SPEED : 1) * (n.energy < SLOW_BELOW ? SLOW_SPEED : 1);
+// walking speed (needEffects): SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy; 105% when fit
+const playerSpeed = (n = SHIP.player.needs) => needEffects(n).walk;
+const taskMins = mins => Math.max(1, Math.round(mins / needEffects().task));   // how long a task of so many minutes takes you now
 // the line on the device: the lowest need under 50 says something, else all's well
 const NEED_SAY = {
   energy: ['You feel sluggish: get some sleep. Your bunk is in Bunk 1 on Deck 4.', 'You\'re getting tired.'],
@@ -7488,7 +7589,7 @@ function actBegin() {
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
   const what = A.kind === 'queue' ? 'You join the queue' + (A.o.ahead ? ': ' + A.o.ahead + ' ahead of you.' : '.') : A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
-  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + A.def.mins + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
@@ -7544,7 +7645,8 @@ function playerUpdate(dt, t) {
     const A = ACT, fx = playerFx(), doing = A && A.phase === 'do' && A.done < A.def.mins && A.def.need;
     needsT = now; needsDrain(dm, false, fx, doing || null);
     if (A && A.phase === 'do') {
-      const m = Math.max(0, Math.min(dm, A.def.mins - A.done)); A.done += dm;
+      const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
+      const m = Math.max(0, Math.min(dw, A.def.mins - A.done)); A.done += dw;
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
@@ -7652,7 +7754,7 @@ function jobTap(it, at) {
       if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first.'); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
       const left = Math.max(1, PLAYER_ACTS.make.mins - P.work.make.done);
-      actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + Math.ceil(left) + ' minutes. Walk away to pause.' });
+      actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + taskMins(left) + ' minutes. Walk away to pause.' });
       if (ACT && ACT.kind === 'make') ACT.def.mins = left;
       return true;
     }
@@ -7674,7 +7776,7 @@ function jobBegin(A) {
   if (!need.length) {
     const left = Math.max(1, jobMins(j) - w.done);
     A.def = { mins: left, pose: 'work', title: 'Repairing' }; A.o.repair = true; w.seen = true;
-    A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + Math.ceil(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + Math.ceil(left) + ' minutes.') + ' Walk away to pause.';
+    A.o.after = fitted + (w.done ? 'Back to the ' + name + ': about ' + taskMins(left) + ' minutes to go.' : 'You set to work on the ' + name + ': about ' + taskMins(left) + ' minutes.') + ' Walk away to pause.';
     return true;
   }
   if (!w.seen) {
@@ -7747,7 +7849,7 @@ device.addSection('now', 'Now', el => {
   const p = document.createElement('p'), q = document.createElement('p');
   p.className = 'devtime'; p.textContent = clockText();
   q.textContent = ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
-    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil(ACT.def.mins - ACT.done)) + ' min to go.' : '.') : needsLine();
+    : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine();
   el.append(p, q);
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
   if (P.carry.length) { const r = document.createElement('p'); r.textContent = 'Carrying: ' + P.carry.join(', ') + '.'; el.appendChild(r); }
@@ -7755,17 +7857,20 @@ device.addSection('now', 'Now', el => {
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) { const r = document.createElement('p'); r.textContent = nt.text + '.'; el.appendChild(r); }
 });
 device.addSection('needs', 'Needs', el => {
-  const n = SHIP.player.needs;
+  const n = SHIP.player.needs, fx = needEffects(n);
   for (const k of NEED_KEYS) {
     const row = document.createElement('div'), lab = document.createElement('span'), bar = document.createElement('i'), fill = document.createElement('b'), num = document.createElement('span');
     row.className = 'need' + (n[k] < SLOW_BELOW ? ' low' : n[k] < 50 ? ' mid' : '');
     lab.textContent = NEED_LABEL[k]; num.textContent = Math.round(n[k]); fill.style.width = n[k].toFixed(1) + '%';
+    const mk = fx.marks[k];                              // a bonus (up) or a penalty (down), with its reason below the bars
+    if (mk) { const em = document.createElement('em'); em.className = mk[0]; em.textContent = mk[0] === 'up' ? '▲' : '▼'; em.title = mk[1]; em.setAttribute('aria-label', mk[0] === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
     row.setAttribute('role', 'meter'); row.setAttribute('aria-label', NEED_LABEL[k]); row.setAttribute('aria-valuenow', Math.round(n[k]));
     row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
     bar.appendChild(fill); row.append(lab, bar, num); el.appendChild(row);
   }
+  for (const k of NEED_KEYS) if (fx.marks[k]) { const p = document.createElement('p'); p.className = 'fx ' + fx.marks[k][0]; p.textContent = (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1]; el.appendChild(p); }
   const sp = playerSpeed();
-  if (sp < 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
+  if (sp !== 1) { const p = document.createElement('p'); p.textContent = 'Walking at ' + Math.round(sp * 100) + '% speed.'; el.appendChild(p); }
 });
 
 // =====================================================================
@@ -7886,11 +7991,52 @@ const FOOD = {
   close: { breakfast: 510, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted)
   slack: 3, grabSlack: 4,                 // a few more than the plans need (you, for one)
   giveUp: 30,                             // minutes after the close that anyone still waiting gives up
+  spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken
+  binAt: [540, 1260], binOut: 630,        // spoiled food is binned at the 09:00 and 21:00 checks; the bin goes at 10:30
 };
+// the menu (answer 10): a week's cycle. Breakfasts by weekday. Dinners on Monday, Tuesday, Thursday and Saturday from
+// `cycle`, moving on four dishes a week; Wednesday is a crew member's favourite (someone different each week);
+// Friday is the treat, with a pudding; Sunday is the dish the crew voted for (galleyMenu). No dish name has a full stop
+// in it (the player's section reads "Serving: <dish>.").
 const MENU = {
   breakfast: ['porridge and eggs', 'pancakes and fruit', 'eggs and garden greens', 'oat bake and yoghurt', 'eggs on toast', 'Brennan\'s spiced beans', 'the big Sunday fry'],
-  dinner: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'pizza night', 'Sunday roast'],
+  cycle: ['Brennan\'s spiced lentils', 'fish pie', 'noodle soup', 'roast roots and grains', 'curry and rice', 'dumplings and greens', 'chilli and cornbread', 'mushroom risotto', 'shepherd\'s pie'],
+  treat: ['pizza night', 'fish and chips', 'burger night', 'tacos'],
+  pudding: ['sticky toffee pudding', 'apple crumble', 'chocolate cake', 'ice cream sundaes'],
+  // what the crew like best (a ROSTER `favourite` wins; otherwise one of these, from the person's seed)
+  fav: ['curry and rice', 'fish pie', 'Sunday roast', 'noodle soup', 'pizza night', 'dumplings and greens', 'chilli and cornbread', 'mushroom risotto', 'Brennan\'s spiced lentils', 'shepherd\'s pie', 'fish and chips', 'tacos'],
 };
+const galleyFirst = p => { const w = p.name.split(' '); return /^(Dr\.|Chef)$/.test(w[0]) ? w[0] + ' ' + w[w.length - 1] : w[0]; };
+const galleyFav = (p, k = 0) => k === 0 && p.favourite ? p.favourite : MENU.fav[Math.floor(schedU(p.seed, 0, 920 + k) * MENU.fav.length)];
+// a day's menu: { breakfast, dinner, note, pudding, fav: person, votes: [[dish, n], ...] }. Sunday's vote: everyone
+// aboard votes for their favourite, or their second choice if the favourite was on this week's menu; about one in
+// four doesn't bother. The most votes wins (ties: the earlier in MENU.fav).
+const GALLEY_MENU = new Map();
+function galleyMenu(d) {
+  if (GALLEY_MENU.has(d)) return GALLEY_MENU.get(d);
+  const wd = weekday(d), w = Math.floor((d - 1) / 7), C = MENU.cycle, out = { breakfast: MENU.breakfast[wd], dinner: '', note: '' };
+  const ppl = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1), regular = k => C[(w * 4 + k) % C.length];
+  if (wd === 2 && ppl.length) {                          // a favourite that isn't on the menu already this week
+    const p = ppl[(w * 5) % ppl.length], on = [0, 1, 2, 3].map(regular).concat(MENU.treat[w % MENU.treat.length]);
+    const pick = [galleyFav(p), galleyFav(p, 1), ...MENU.fav].find(x => !on.includes(x)) || galleyFav(p);
+    out.fav = p.id; out.dinner = pick; out.note = `${galleyFirst(p)}'s ${pick === galleyFav(p) ? 'favourite' : 'pick'}`;
+  } else if (wd === 4) {
+    out.dinner = MENU.treat[w % MENU.treat.length]; out.pudding = MENU.pudding[w % MENU.pudding.length]; out.note = `Friday treat, with ${out.pudding}`;
+  } else if (wd === 6) {
+    const week = [0, 1, 2, 3].map(regular).concat(MENU.treat[w % MENU.treat.length]), n = new Map();
+    for (const p of ppl) {
+      if (schedU(p.seed, w, 930) < .25) continue;
+      const a = galleyFav(p), b = galleyFav(p, 1), v = week.includes(a) && !week.includes(b) ? b : a;
+      n.set(v, (n.get(v) || 0) + 1);
+    }
+    out.votes = [...n].sort((x, y) => y[1] - x[1] || MENU.fav.indexOf(x[0]) - MENU.fav.indexOf(y[0]));
+    out.dinner = out.votes.length ? out.votes[0][0] : 'Sunday roast';
+    out.note = out.votes.length ? `voted for by the crew, ${out.votes[0][1]} votes` : '';
+  } else out.dinner = regular([0, 1, , 2, , 3][wd]);
+  GALLEY_MENU.set(d, out);
+  for (const k of GALLEY_MENU.keys()) if (k < d - 8 || k > d + 8) GALLEY_MENU.delete(k);
+  return out;
+}
 const galleyMeal = md => md >= FOOD.open.breakfast - FOOD.lead && md < FOOD.close.breakfast ? 'breakfast' : md >= FOOD.open.dinner - FOOD.lead && md < FOOD.close.dinner ? 'dinner' : null;
 const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions: 0, dish: '' }, grab: { items: 8 }, dirty: 0, inUse: 0, pots: [], wait: [], back: [], carts: [] });
 // a day's events, from the plans and the rota: who takes food when, and how many cook, bake and wash each minute
@@ -7943,6 +8089,18 @@ function galleyStep(S, m, st) {
     if (md % 60 === 0) { const c = cartClaim(m, S.cold.meals, { replay: !!st }); if (c && c.meals > 0) S.carts.push([Math.max(m, Math.floor(c.arriveAt)), c.meals]); }
     if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
   }
+  // spoilage (answer 7): section 17's shipEffectsAt(3, m).spoil is 1 while the cold store's chiller is fine, up to 2
+  // when it's broken (read on the hour; pure, so replays agree). A warm store's food goes off bit by bit (S.rot);
+  // the 09:00 and 21:00 checks bin what's gone off (S.bin, by the dish pit) and tell you by Mail; the bin goes at 10:30
+  if (md % 60 === 0) { const e = typeof shipEffectsAt === 'function' && shipEffectsAt(3, m); S.spoil = e && e.spoil > 1 ? e.spoil - 1 : 0; }
+  if (S.spoil) S.rot = (S.rot || 0) + S.cold.meals * S.spoil * FOOD.spoilDay / 1440;
+  if (S.rot >= 1 && FOOD.binAt.includes(md)) {
+    const n = Math.min(S.cold.meals, Math.floor(S.rot));
+    S.rot -= Math.floor(S.rot); S.cold.meals -= n; S.bin = (S.bin || 0) + n;
+    if (st) st.spoiled += n;
+    else if (n) galleyMail(m, 'Spoiled food binned', `The cold store's chiller is running warm, and ${n} meal${n > 1 ? 's' : ''} had to go in the bin at the ${hhmm(md)} check. Works has been told.`);
+  }
+  if (md === FOOD.binOut) S.bin = 0;
   // plates come back, and the dish pit washes what it can
   if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
   const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;
@@ -7952,7 +8110,7 @@ function galleyStep(S, m, st) {
   let cooks = E.cook[md], bakers = E.bake[md];
   const potsOf = kind => S.pots.filter(p => p[2] === kind).length;
   if (meal && md >= FOOD.open[meal] - FOOD.lead) {
-    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = MENU[meal][weekday(d)]; S.servery.meal = meal; }
+    if (!S.servery.dish || S.servery.meal !== meal) { S.servery.dish = galleyMenu(d)[meal]; S.servery.meal = meal; }
     let need = Math.min(FOOD.serveryCap, countFrom(E.left[meal], m) + S.wait.length + FOOD.slack) - S.servery.portions - inPots('hot');
     for (let idle = cooks - potsOf('hot'); idle > 0 && need > 0; idle--) {
       const n = Math.min(FOOD.batch, S.cold.meals); if (n <= 0) { if (st) st.coldOut++; break; }
@@ -8018,6 +8176,15 @@ function galleyStep(S, m, st) {
   }
 }
 // step SHIP.galley up to ship minute `to` (absolute); a fresh start when there's no state or time went backwards
+// a note to the device's Mail tab (section 15's mailSend, when it's there), once: never twice for the same minute and subject
+const GALLEY_MAILED = new Set();
+function galleyMail(at, subject, body) {
+  if (typeof mailSend !== 'function') return;
+  const key = at + '|' + subject, box = SHIP.mail && (Array.isArray(SHIP.mail) ? SHIP.mail : SHIP.mail.inbox);
+  if (GALLEY_MAILED.has(key) || (Array.isArray(box) && box.some(x => x && x.at === at && x.subject === subject))) return;
+  GALLEY_MAILED.add(key); mailSend({ at, from: galleyChef() || 'The galley', subject, body });
+}
+const galleyChef = () => { const c = galleyStaff().find(p => galleyTeam(p) === 'chef'); return c ? galleyFirst(c) : ''; };
 function galleyAdvance(to) {
   to = Math.floor(to);
   let S = SHIP.galley;
@@ -8070,17 +8237,25 @@ function galleyText(what = 'servery') {
   const S = galleyAdvance(shipNow()), md = SHIP.time.min, meal = md >= FOOD.close.breakfast && md < FOOD.close.dinner ? 'dinner' : 'breakfast';
   if (what === 'grab') return S.grab.items ? `${S.grab.items} on the shelf.` : 'The shelf is empty.';
   if (what === 'dish') return S.dirty ? `${S.dirty} plates waiting to be washed.` : 'All washed up.';
-  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.`;
+  if (what === 'cold') return `About ${S.cold.meals} meals in the cold store.` + (S.spoil ? ' It\'s running warm.' : '') + (S.bin ? ` ${S.bin} spoiled meals binned by the dish pit.` : '');
+  if (what === 'menu') return galleyBoard();
   const open = md >= FOOD.open[meal] && md < (meal === 'breakfast' ? 480 : 1230);
-  if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.`;
-  return open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`;
+  const M = galleyMenu(SHIP.time.day), extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
+  if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
+  return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
+}
+// the menu board: today's meals and the week's dinners
+function galleyBoard(d = SHIP.time.day) {
+  const M = galleyMenu(d);
+  const week = [...Array(7)].map((_, k) => d - weekday(d) + k).map(x => WEEKDAYS[weekday(x)].slice(0, 3) + ' ' + galleyMenu(x).dinner);
+  return `Today: ${M.breakfast} for breakfast, ${M.dinner} for dinner${M.note ? ' (' + M.note + ')' : ''}. This week's dinners: ${week.join(', ')}.`;
 }
 // food_check.py: `days` ship days from a fresh galley at the start of `day`, with the figures for each day
 function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, spoiled: 0, ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
@@ -8125,6 +8300,12 @@ function galleyVisuals() {
     if (t) { V.grab.material.userData.base = { op: 1, tr: false }; t.mats.push(V.grab.material); }
   }
   if (dp) V.plates = im(new THREE.CylinderGeometry(.1, .1, .012, 16), std('#d9d3c4', .45, .05), 24, dp.g);
+  if (dp) V.bin = im(new THREE.SphereGeometry(1, 10, 7), std('#2c3a30', .8), 3, dp.g);   // spoiled food, bagged, beside the dish pit
+  const mb = it('Menu board');                           // the board's canvas, redrawn with the day's menu; its tap text, live
+  if (mb) {
+    mb.g.traverse(o => { if (o.material && o.material.map && o.material.map.image && o.material.map.image.getContext) V.board = o.material.map; });
+    Object.defineProperty(mb, 'x', { get: () => galleyBoard(), configurable: true });
+  }
   return V;
 }
 const _gm = new THREE.Matrix4(), _gq = new THREE.Quaternion(), _gsc = new THREE.Vector3(), _gpo = new THREE.Vector3();
@@ -8132,7 +8313,9 @@ function galleyShow() {
   if (!deckDef || deckDef.num !== 3) { GV = null; return; }
   if (!GV || GV.root !== deckRoot) GV = galleyVisuals();
   const S = SHIP.galley, p = S.servery.portions, g = Math.ceil(S.grab.items / 2), dirty = Math.min(24, Math.ceil(S.dirty / 3));
-  const key = p + '|' + g + '|' + dirty; if (key === GV.key) return; GV.key = key;
+  if (GV.board && GV.boardDay !== SHIP.time.day) { GV.boardDay = SHIP.time.day; galleyBoardDraw(GV.board, SHIP.time.day); }
+  const bags = Math.min(3, Math.ceil((S.bin || 0) / 10));
+  const key = p + '|' + g + '|' + dirty + '|' + bags; if (key === GV.key) return; GV.key = key;
   const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
   if (GV.food) {
     const h = .008 + .05 * Math.min(1, p / FOOD.serveryCap);   // from just over the pans' own food (top at .98) up
@@ -8151,6 +8334,27 @@ function galleyShow() {
     for (let k = 0; k < 24; k++) put(GV.plates, k, k < 12 ? -.62 : -.28, .914 + (k % 12) * .014, .1, 1, 1, 1);
     GV.plates.instanceMatrix.needsUpdate = true;
   }
+  if (GV.bin) {                                         // up to three bags, one for every 10 meals binned, against the wall by the pit's end
+    GV.bin.count = bags;
+    [[-1.06, .15, -.19, .14, .15, .13], [-1.06, .15, .09, .14, .15, .13], [-1.06, .39, -.05, .12, .11, .11]].forEach((b, k) => put(GV.bin, k, ...b));
+    GV.bin.instanceMatrix.needsUpdate = true;
+  }
+}
+// the menu board (section 4b's menuBoard canvas, 320 x 200), in its own style: the day's breakfast and dinner, and the
+// dinner's note (a favourite, the Friday treat, the Sunday vote)
+function galleyBoardDraw(t, d) {
+  const c = t.image.getContext('2d'), w = t.image.width, h = t.image.height, M = galleyMenu(d), cap = x => x[0].toUpperCase() + x.slice(1);
+  const line = (txt, y, font, colour) => { let px = parseInt(font.split(' ')[1]); c.fillStyle = colour; do c.font = font.replace(/\d+px/, px + 'px'); while (c.measureText(txt).width > w - 30 && --px > 9); c.fillText(txt, 18, y); };
+  c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
+  line('MESS', 34, '700 24px system-ui,sans-serif', '#e8c06a');
+  c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText(WEEKDAYS[weekday(d)], w - 18 - c.measureText(WEEKDAYS[weekday(d)]).width, 34);
+  line('Breakfast 06:00  ' + cap(M.breakfast), 66, '600 15px system-ui,sans-serif', '#9fd9cf');
+  line('Dinner 17:00  ' + cap(M.dinner), 92, '600 15px system-ui,sans-serif', '#9fd9cf');
+  if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
+  line('Fresh rolls, garden greens', 148, '500 15px system-ui,sans-serif', '#e8eef0');
+  line('Grab & go by the line', 172, '500 15px system-ui,sans-serif', '#e8eef0');
+  c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
+  t.needsUpdate = true;
 }
 // once a frame from the main loop: the galley up to the minute, and on Deck 3, what it looks like
 function galleyTick() { galleyAdvance(shipNow()); galleyShow(); }
@@ -9214,7 +9418,8 @@ const L = (a, b, k) => a + (b - a) * k;
 const STRIDE = .46, STANCE = .6, CYCLE = STRIDE / STANCE, LIFT = .12;
 function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes each person's own stream, so it never draws on R()
   const w = g.w, p = g.p % 1, TAU = Math.PI * 2;
-  const hipY = L(HIP_Y + Math.sin(t * 1.7) * .004, HIP_W + .024 * Math.cos(2 * TAU * (p - .3)), w);
+  const cr = g.crouch || 0;                             // 0.27.7: crouching (animateActivity sets it), the hips lower and the body leans
+  const hipY = L(HIP_Y + Math.sin(t * 1.7) * .004, HIP_W + .024 * Math.cos(2 * TAU * (p - .3)), w) - .2 * cr;
   const hipX = L(Math.sin(t * .45) * .012, .026 * Math.cos(TAU * (p - .3)), w);
   rig.hips.position.set(hipX, hipY, 0);
   rig.hips.rotation.z = L(Math.sin(t * .45) * .02, .05 * Math.cos(TAU * (p - .3)), w);
@@ -9240,7 +9445,7 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
   const fl = zL / (STRIDE / 2) * w;
   rig.hips.rotation.y = -.16 * fl;
   rig.chest.rotation.y = .3 * fl;
-  g.lean += ((.09 * sk * w) - g.lean) * Math.min(1, dt * 4);
+  g.lean += ((.09 * sk * w + .34 * cr) - g.lean) * Math.min(1, dt * 4);
   rig.torso.rotation.x = g.lean;
   rig.chest.rotation.z = -rig.hips.rotation.z * .7;
   rig.chest.scale.y = 1 + Math.sin(t * 1.7) * .012 * (1 - w);
@@ -9287,8 +9492,10 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
 // drawn with even fewer polygons. Nothing here calls R(): each person has their own random stream.
 // =====================================================================
 const CROWD_JOINTS = 17, CROWD_BONES = 21;               // per person: 17 joints (hips, legs 6, torso, chest, head, arms 6, ponytail), then 4 prop bones
-const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] }];
+const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sph: [7, 5], cap: [7, 4], cyl: 6, tor: [3, 8] },
+  { sph: [5, 4], cap: [5, 3], cyl: 4, tor: [3, 5], min: .03 }];   // 2 (0.27.8): coarse, for big crowds; parts smaller than min (eyes, badges) left out
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
+const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -9305,7 +9512,12 @@ function crowdGeo(geo, lod) {                            // the same shape, fewe
 // one person's parts at one level of detail, in their joints' own space: positions, normals, colours, joint numbers, triangles
 function crowdPack(joints, lod) {
   const list = []; let nv = 0, ni = 0;
-  joints.forEach((j, b) => { for (const p of j.userData.parts) { const g = crowdGeo(p.geo, lod); list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count; } });
+  const min = CROWD_DETAIL[lod].min || 0;
+  joints.forEach((j, b) => { for (const p of j.userData.parts) {
+    const g = crowdGeo(p.geo, lod);
+    if (min) { if (!g.boundingSphere) g.computeBoundingSphere(); if (g.boundingSphere.radius * p.m.getMaxScaleOnAxis() < min) continue; }
+    list.push([g, p, b]); nv += g.attributes.position.count; ni += g.index.count;
+  } });
   const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3), B = new Uint8Array(nv), I = new Uint32Array(ni);
   const nm = new THREE.Matrix3(), v = new THREE.Vector3(); let o = 0, oi = 0;
   for (const [g, p, b] of list) {
@@ -9330,10 +9542,15 @@ function crowdPack(joints, lod) {
 // "Activities on places"). animateActivity(o, pose, dt, t, sk, y) poses any rig: the crowd, a FullPerson, or a Walker.
 // what a '+modifier' holds: its prop (on the body bone) and how the arms hold it
 const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 }, cartfull: { prop: 'cartfull', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
-  carry: { prop: 'parts', sx: -.42, ex: -1.25, sz: .16, lean: -.04 } };
+  carry: { prop: 'parts', sx: -.42, ex: -1.25, sz: .16, lean: -.04 },
+  // 0.27.7: one: only that arm holds it (1 left, -1 right; the other keeps swinging); bone: the prop rides that hand; hx: the
+  // wrist; look: the head bends to it. A tray in the mess, a toolbox for the Works crew on a job, a datapad for officers.
+  tray: { prop: 'tray', sx: -.36, ex: -1.2, sz: .14, lean: -.02 },
+  toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
+  datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
-const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work']);
+const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
 function poseOf(pl) {
   const act = pl.anim || ACT_OF_TYPE[pl.type], base = pl.type === 'bed' ? 'lie' : pl.pose || 'stand';
   if (!act || !ACTS[act]) return base;
@@ -9348,7 +9565,7 @@ const _parsed = new Map();
 function parsePose(pose = 'stand', y = 0) {
   const k = pose + (y >= .3 ? '^' : ''); let r = _parsed.get(k); if (r) return r;
   const plus = pose.indexOf('+'), mod = plus < 0 ? '' : pose.slice(plus + 1), bare = plus < 0 ? pose : pose.slice(0, plus);
-  const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts)
+  const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts), '+tray', '+toolbox', '+datapad'
   const i = bare.indexOf(':'); let base = i < 0 ? bare : bare.slice(0, i), act = i < 0 ? null : bare.slice(i + 1);
   if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
   if (!BASES.has(base)) base = 'stand';
@@ -9490,6 +9707,17 @@ const PROP_KIT = {
     part(p, GEO.box, '#7a6a52', 0, .98, .36, .34, .22, .24); part(p, GEO.box, '#e9c46a', 0, .98, .484, .14, .07, .008); part(p, GEO.box, '#a4aeb4', .06, 1.1, .34, .06, .04, .14);
   },
   cartfull(p) { PROP_KIT.cart(p); part(p, GEO.box, '#7a6a52', -.1, .7, .7, .3, .24, .3); part(p, GEO.box, '#e3eff4', .12, .67, .92, .26, .18, .26); part(p, GEO.box, '#e9c46a', .02, .67, .7, .1, .06, .01); },
+  tray(p) {                                              // a mess tray carried at the waist: a plate of dinner and a mug
+    part(p, GEO.box, '#c9ccc4', 0, .97, .38, .46, .025, .32); part(p, cylG(.09, .09, .012, 14), '#e8ebe8', -.08, .99, .38);
+    part(p, GEO.sph, '#c88a3a', -.08, 1.0, .38, .06, .018, .05); part(p, cylG(.03, .028, .07, 10), '#d06a3a', .13, 1.017, .35);
+  },
+  toolbox(p) {                                           // a red toolbox hanging from the hand by its handle
+    part(p, GEO.box, '#c0392b', 0, -.23, .01, .1, .15, .34); part(p, GEO.box, '#8e2a20', 0, -.165, .01, .104, .03, .344);
+    part(p, GEO.box, '#2b2f33', 0, -.105, .01, .03, .025, .17); for (const z of [-.06, .08]) part(p, GEO.box, '#2b2f33', 0, -.13, z, .02, .05, .02);
+  },
+  datapad(p) {                                           // a datapad on the palm, its screen lit
+    part(p, GEO.box, '#2b2f33', 0, -.1, .03, .14, .2, .015); part(p, GEO.box, '#7fd4e6', 0, -.1, .039, .12, .17, .006);
+  },
   book(p) { part(p, GEO.box, '#8c3f22', .09, -.08, .05, .17, .22, .035, .2); part(p, GEO.box, '#efe9dc', .09, -.08, .07, .15, .2, .008, .2); },
 };
 const _propParts = {}, _propPacks = {}, _propGeos = {};
@@ -9540,6 +9768,7 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
   if (act === 'run') {                                   // running in place: the gait at a run, with nowhere to go
     g.w = o.fresh ? 1 : g.w + (1 - g.w) * Math.min(1, dt * 6); g.p += dt * 1.9; sk = 1;
   }
+  g.crouch = k.crouch ? ss(k.crouch) : 0;
   animateRig(rig, g, dt, t, sk, o.rnd || R);
   const cartKey = cart ? '+' + cart : null;
   for (const key of [base, act, cartKey]) if (key && k[key] === undefined) k[key] = 0;
@@ -9582,13 +9811,19 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     for (const a of rig.arms) { a.sh.rotation.x = L(a.sh.rotation.x, .04, s); a.el.rotation.x = L(a.el.rotation.x, -.12, s); a.sh.rotation.z = L(a.sh.rotation.z, a.side * .1, s); }
     rig.torso.rotation.x *= 1 - s; rig.head.rotation.x = L(rig.head.rotation.x, -.12, s);
   }
+  if (k.crouch > .001) {                                 // crouched: arms a little forward and out, the head up to see ahead
+    const s = ss(k.crouch);
+    for (const a of rig.arms) { a.sh.rotation.x -= .3 * s; a.el.rotation.x -= .45 * s; a.sh.rotation.z += a.side * .1 * s; }
+    rig.head.rotation.x -= .32 * s;
+  }
   for (const key in k) if (ACTS[key] && k[key] > .001) ACTS[key].f(rig, ss(k[key]), t, base, ph, h, seat || CROWD_SEAT.sit);
   for (const hk in HOLDS) if (k['+' + hk] > .001 && base !== 'sit' && base !== 'lie') {   // hands on the cart's handle, or round the box
     const H = HOLDS[hk], s = ss(k['+' + hk]), busy = act ? ss(k[act] || 0) : base === 'work' ? ss(k.work || 0) : 0, w = s * (1 - busy);   // loading or unloading ('work+cart') keeps its own arms
-    for (const a of rig.arms) armTo(a, w, H.sx, H.ex, H.sz, .35);
-    rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
+    for (const a of rig.arms) if (!H.one || a.side === H.one) armTo(a, w, H.sx, H.ex, H.sz, H.hx !== undefined ? H.hx : .35);
+    if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
+    if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
   }
-  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? 'B:' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
+  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
     o.propKey = key;
     if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
@@ -9603,6 +9838,7 @@ class CrowdPerson {
     this.rig.root.rotation.order = 'YXZ';                // turn to face, after lying down
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
     this.geo = [0, 1].map(l => crowdPack(this.joints, l));
+    this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
     for (const j of this.joints) delete j.userData.parts;
     const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
     this.propBones = [hand(-1), hand(1), this.rig.chest, this.rig.root].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
@@ -9614,12 +9850,13 @@ class CrowdPerson {
     this.pos = new THREE.Vector3(); this.face = 0; this.rot = 0; this.pose = 'stand'; this.phase = undefined;
     this.moved = 0; this.fresh = true; this.lod = 0; this.chunk = null; this.slot = -1;
   }
+  packOf(l) { return this.geo[l] || (this.geo[l] = crowdPack(this.jparts.map(parts => ({ userData: { parts } })), l)); }
   set(pos, face, pose = 'stand', walkPhase) {
     if (!this.fresh) this.moved += Math.hypot(pos.x - this.pos.x, pos.z - this.pos.z);
     this.pos.set(pos.x, pos.y || 0, pos.z); this.face = face; this.pose = pose; this.phase = walkPhase;
   }
   update(dt, t) {
-    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk';
+    const g = this.g, rig = this.rig, h = this.h, { base, act } = parsePose(this.pose, this.pos.y), walking = base === 'walk' || base === 'crouch';
     const prev = this.rot; let df = this.face - this.rot; df = Math.atan2(Math.sin(df), Math.cos(df));
     this.rot = this.fresh ? this.face : this.rot + df * Math.min(1, dt * 8);
     g.turn += ((this.rot - prev) / Math.max(dt, 1e-3) - g.turn) * Math.min(1, dt * 10);
@@ -9659,7 +9896,7 @@ class CrowdChunk {
   rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
     this.dirty = false;
     const old = this.mesh.geometry; let nv = 0, ni = 0;
-    const packs = p => [p.geo[p.lod], ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
+    const packs = p => [p.packOf(p.lod), ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
     for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
     if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
     const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
@@ -9708,13 +9945,15 @@ const crowd = {
     return best;
   },
   update(dt, t) {
+    machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
     if (!this.chunks.length) return;
-    const allFar = camera.zoom < CROWD_FAR_ZOOM;
+    const allFar = camera.zoom < CROWD_FAR_ZOOM, many = this.people.length > CROWD_MANY;
     for (const p of this.people) {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
-      const lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
+      if (many && lod && (allFar || d > CROWD_FAR2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
       p.update(dt, t);
     }
@@ -9730,7 +9969,85 @@ const crowd = {
   stats() {
     let verts = 0, tris = 0;
     for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.mesh.geometry.attributes.position.count; tris += c.mesh.geometry.index.count / 3; }
-    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length };
+    return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length, coarse: this.people.filter(p => p.lod === 2).length };
+  },
+};
+
+// ---- machine looks (0.27.9, answers pass rows 2 and 3): wear and faults, drawn on the machines. Section 17's
+// machineLook(id) says what a machine shows: { state, blink, dim, drip, flicker }, each 0..1 or true. Without it nothing is
+// drawn. All the machines on the deck share four instanced meshes: red lamps that blink, drips, dark plates over
+// screens, and light glows that flicker. That's at most 4 draw calls, none while all is well, no shadows, no R().
+// Where: from the machine's `at` and `face`, or its optional look: { lamp, drip, light: [dx, y, dz], screen: [dx, y, dz, w, h] }.
+// dx and dz are tiles from the centre of `at` (dx to the right as you face its front, dz out of its front), y and w, h in
+// metres. On Deck 3 the garden's leaves also yellow while its irrigation pumps or nutrient dosing are poor or failing.
+// ?looks in the address turns every effect on, on every machine, to check where they go. ----
+const MACHINE_FX_ALL = /[?&]looks\b/.test(location.search), MACHINE_FX_MAX = 64, MACHINE_WILT = col('#a08a3c');
+const machineFx = {
+  deck: undefined, list: [], next: 0, mesh: null, o: new THREE.Object3D(),
+  make() {                                               // made the first time a machine shows something
+    const mk = (geo, c, opacity) => {
+      const m = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ color: col(c), transparent: opacity < 1, opacity, depthWrite: opacity >= 1 }), MACHINE_FX_MAX);
+      m.frustumCulled = false; m.visible = false; m.count = 0; m.raycast = () => {}; scene.add(m); return m;
+    };
+    this.mesh = { lamp: mk(new THREE.SphereGeometry(.06, 10, 8), '#ff3b30', 1), drip: mk(new THREE.SphereGeometry(.022, 6, 5), '#9fd8ff', .85),
+      screen: mk(new THREE.BoxGeometry(1, 1, .006), '#05080c', .62), light: mk(new THREE.SphereGeometry(.13, 10, 8), '#fff1c4', .6) };
+  },
+  spots(n) {                                             // the deck's machines, and where each effect goes
+    this.deck = n; this.list = []; this.next = 0;
+    if (typeof machineLook !== 'function' && !MACHINE_FX_ALL || typeof machineList !== 'function') return;
+    for (const m of machineList()) {
+      if (m.deck !== n || m.stub || !m.at) continue;
+      const a = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[m.face] || 0, c = cellPos(m.at[0], m.at[1]), lk = m.look || {};
+      const front = m.panel && (m.panel[0] !== m.at[0] || m.panel[1] !== m.at[1]) ? .45 : -.25;   // its front: on the tile's edge, or against the wall
+      const at = ([dx, y, dz]) => new THREE.Vector3(c.x + dx * Math.cos(a) + dz * Math.sin(a), y, c.z - dx * Math.sin(a) + dz * Math.cos(a));
+      this.list.push({ id: m.id, a, ph: this.list.length * .37, look: null,
+        lamp: at(lk.lamp || [0, 1.2, front]), drip: at(lk.drip || [0, .9, front + .06]), light: at(lk.light || [0, 2.1, front]),
+        screen: lk.screen ? { p: at(lk.screen), w: lk.screen[3], h: lk.screen[4] } : null });
+    }
+  },
+  wilt(n) {                                              // the garden's plants yellow while its irrigation or dosing is poor or failing
+    let w = 0;
+    for (const s of n === 3 ? this.list : []) if (/irrigation|nutrient/.test(s.id)) w = Math.max(w, { poor: .45, failing: 1 }[MACHINE_FX_ALL ? 'failing' : (s.look || {}).state] || 0);
+    if (w === (this.wilted || 0)) return;
+    this.wilted = w;                                     // GD.leaves are the garden kit's (and the promenade planters'): only on Deck 3
+    if (!this.leafBase) this.leafBase = GD.leaves.map(m => m.color.clone());
+    GD.leaves.forEach((m, i) => m.color.copy(this.leafBase[i]).lerp(MACHINE_WILT, w * .65));
+  },
+  tick(dt, t) {
+    const n = deckDef ? deckDef.num : null;
+    if (n !== this.deck) this.spots(n);
+    if (t >= this.next && (this.list.length || this.wilted)) {   // the machines' state, twice a second
+      this.next = t + .5;
+      for (const s of this.list) s.look = MACHINE_FX_ALL ? { blink: 1, dim: 1, drip: 1, flicker: 1 } : machineLook(s.id) || null;
+      this.wilt(n);
+    }
+    if (!this.list.length) { if (this.mesh) for (const k in this.mesh) this.mesh[k].visible = false; return; }
+    const v = x => x === true ? 1 : Math.max(0, Math.min(1, +x || 0)), cnt = { lamp: 0, drip: 0, screen: 0, light: 0 }, o = this.o;
+    let any = false;
+    const put = (k, p, sx, sy, sz, ry, dy = 0) => {
+      if (cnt[k] >= MACHINE_FX_MAX) return;
+      o.position.set(p.x, p.y + dy, p.z); o.rotation.set(0, ry, 0); o.scale.set(sx, sy, sz); o.updateMatrix();
+      this.mesh[k].setMatrixAt(cnt[k]++, o.matrix);
+    };
+    for (const s of this.list) {
+      const lk = s.look; if (!lk) continue;
+      const blink = v(lk.blink), dim = v(lk.dim), drip = v(lk.drip), fl = v(lk.flicker);
+      if (!(blink || dim && s.screen || drip || fl)) continue;
+      if (!this.mesh) this.make();
+      any = true;
+      if (blink && (t * (.6 + blink) + s.ph) % 1 < .5) put('lamp', s.lamp, 1, 1, 1, s.a);   // faster the worse it is
+      if (dim && s.screen) put('screen', s.screen.p, s.screen.w, s.screen.h, 1, s.a);
+      if (drip) {                                        // a drop falls every so often; more often the worse the leak
+        const per = 2.4 - 1.6 * drip, fall = Math.sqrt(2 * s.drip.y / 9.8);
+        for (const k of [0, .5]) { const u = ((t + s.ph * 3 + k * per) % per) / fall; if (u < 1) put('drip', s.drip, 1, 1.5, 1, 0, -s.drip.y * u * u); }
+      }
+      if (fl) {                                          // on, with stutters: a hash of the moment, never R()
+        const hh = Math.sin(Math.floor(t * 11) * 12.9898 + s.ph * 78.233) * 43758.5453;
+        if (hh - Math.floor(hh) > .45 * fl) put('light', s.light, 1, 1, 1, 0);
+      }
+    }
+    if (!this.mesh) return;
+    for (const k in this.mesh) { const m = this.mesh[k]; m.count = cnt[k]; m.visible = any && cnt[k] > 0; m.instanceMatrix.needsUpdate = true; }
   },
 };
 
@@ -9740,7 +10057,8 @@ const crowd = {
 const POSE_DEMO = (() => {
   if (!/[?&]poses\b/.test(location.search)) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
-    'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk'];
+    'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -9752,7 +10070,7 @@ const POSE_DEMO = (() => {
     let n = 0, m = 0;                                    // upright poses in two rows east of the lift; the two lying ones on benches to the west
     here = POSES.map(pose => {
       const { base, act } = parsePose(pose, 0), lie = base === 'lie', k = lie ? m++ : n++;
-      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 11) * 1.5, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 11 ? 9 : 12) + .5;
+      const x = lie ? X0(14) + .5 : X0(23) + .75 + (k % 13) * 1.35, z = lie ? Z0(10) + .4 + k * 1.2 : Z0(k < 13 ? 9 : 12) + .5;
       const seated = base === 'sit' || act === 'row', lying = base === 'lie';
       const g = new THREE.Group(); g.position.set(x, 0, z); furn.add(g);
       if (lying) KIT.bench(g, { w: 1.6 }); else if (seated) { const st = new THREE.Group(); st.position.z = act === 'row' ? -.05 : 0; g.add(st); KIT.stool(st); }
@@ -9780,7 +10098,7 @@ const POSE_DEMO = (() => {
       const on = deckDef.num === 3;
       if (on && !here.length) fill(); else if (!on && here.length) clear();
       for (const e of here) {
-        e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, e.pose === 'walk' ? t * 1.1 : undefined);   // walking in place
+        e.h.set({ x: e.x, y: e.y, z: e.z }, e.face, e.pose, /^(walk|crouch)/.test(e.pose) ? t * 1.1 : undefined);   // walking in place
         v.set(e.x, 1.85, e.z).project(camera);
         const vis = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
         e.el.style.display = vis ? '' : 'none';
@@ -9790,14 +10108,16 @@ const POSE_DEMO = (() => {
   };
 })();
 
-// ---- crowd demo: ?crowd=40 in the address (any number up to 76) puts that many of the real crew in Deck 3 at dinner,
+// ---- crowd demo: ?crowd=40 in the address (any number up to 76, or up to 151 for a ship-wide event) puts that many of the real crew in Deck 3 at dinner,
 // and starts you there by the lift at 18:30. The demo never touches your save: ?crowd works as ?nosave does (section 13).
 // Who: ROSTER (section 9) through rosterSpec, leaving out Rina and Brennan, who are already on Deck 3 as full rigs.
 // Where: Deck 3's own places, in this order: the servery queue, the grab shelf, two galley stations, three people
-// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches. Without the flag none of this exists. ----
+// walking the mess hall aisles, the 44 mess seats (shuffled), then the 22 benches; past 76 (0.27.8), the lounge seats, the
+// garden, the gym and the store, doing what's done there, and some crew twice. Over 70, the far ones go coarse
+// (CROWD_MANY). Without the flag none of this exists. ----
 const CROWD_DEMO = (() => {
   const m = /[?&]crowd=(\d+)/.exec(location.search); if (!m) return null;
-  const want = Math.min(+m[1], 76);
+  const want = Math.min(+m[1], 151);
   let sd = 4242; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const shuffle = a => { for (let i = 0; i < a.length; i++) { const j = i + Math.floor(rnd() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   // real crew, day shift first; read when the demo starts, since the roster is defined after this section
@@ -9817,7 +10137,8 @@ const CROWD_DEMO = (() => {
     };
     return [...of('servery-queue'), ...of('grab-shelf'), ...of('work:galley', 2)].map(at)
       .concat([0, 1, 2].map(i => ({ loop: i / 3, pose: 'walk' })))
-      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at));
+      .concat(shuffle(of('mess-seat').map(at)), of('bench').map(at))
+      .concat(['lounge-seat', 'garden', 'gym', 'shop'].flatMap(t => of(t, 99)).map(p => ({ ...at(p), pose: poseOf(p) })));
   }
   // the walkers' loop round the mess hall's aisles, in room tiles
   const LOOP = [[.5, 2.5], [9.6, 2.5], [9.6, 5.3], [.5, 5.3]];
@@ -9849,7 +10170,7 @@ const CROWD_DEMO = (() => {
         else e.h.set({ x: e.s.x, y: e.s.y || 0, z: e.s.z }, e.s.face, e.s.pose);
       }
       const now = performance.now(); ft += (now - last - ft) * .05; last = now;
-      if (hud) hud.textContent = `Crowd ${crowd.people.length} · ${renderer.info.render.calls} draw calls · ${ft.toFixed(1)} ms a frame`;
+      if (hud) { const st = crowd.stats(); hud.textContent = `Crowd ${st.people} (${st.coarse} coarse) · ${renderer.info.render.calls} draw calls · ${(st.tris / 1000).toFixed(0)}k triangles · ${ft.toFixed(1)} ms a frame`; }
     },
   };
 })();
@@ -9911,85 +10232,85 @@ const HABITS = {
   "stargazer": "Evenings in the Deck 2 observatory at the bow windows, on the observatory-night list."
 };
 const ROSTER = [
-  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "music", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542},
-  {"id": "vance", "name": "Commander Teo Vance", "story": true, "rank": "xo", "dept": "command", "uniform": "command", "role": "Executive Officer", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-X", "work": {"deck": 1, "place": "work:command"}, "habits": ["workaholic", "gym-regular"], "traits": ["precise", "competitive", "loyal"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 1.08, "build": "average", "acc": []}, "bio": "By the book. Every page of it.", "life": ["Top of the rowing leaderboard in the gym, and taped the leaderboard there himself.", "Keeps the waiting list for the good records.", "Has two messages from home waiting."], "seed": 826440},
-  {"id": "sato", "name": "Dr. Imra Sato", "story": true, "rank": "chief", "dept": "survey", "uniform": "survey", "role": "Head of Survey", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-V", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "tea-break"], "traits": ["brilliant", "absent-minded", "stubborn"], "looks": {"skin": 0, "hair": "long", "hairColor": "grey", "height": 0.94, "build": "slim", "acc": ["glasses"]}, "bio": "Head of Survey. Her lab, her rules, her terrible tea.", "life": ["Brews a tea nobody else will drink.", "Labels every sample in the specimen store in her own handwriting."], "seed": 8968},
-  {"id": "holt", "name": "Chief Bram Holt", "story": true, "rank": "chief", "dept": "watch", "uniform": "watch", "role": "Head of Watch", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "2-T", "work": {"deck": 2, "place": "work:watch"}, "habits": ["early-riser", "late-diner"], "traits": ["suspicious", "dependable", "gruff"], "looks": {"skin": 2, "hair": "bald", "hairColor": "grey", "height": 1.05, "build": "broad", "acc": ["moustache"]}, "bio": "Head of Watch. Does not trust the Veyli, and says so.", "life": ["Asked for the cabin next door to the Envoy's.", "Only his deputy can make him laugh."], "seed": 682911},
-  {"id": "calder", "name": "Chief Ines Calder", "story": true, "provisional": true, "rank": "chief", "dept": "works", "uniform": "works", "role": "Head of Works", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-O", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "workaholic", "tea-break"], "traits": ["exacting", "fair", "dry"], "looks": {"skin": 3, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["glasses"]}, "bio": "Head of Works. Remembers every repair you got wrong, and every one you got right.", "life": ["Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard.", "Keeps a battered toolbox that belonged to her first chief."], "seed": 211686},
-  {"id": "pell", "name": "Pell Okafor", "story": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-2", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "tea-break", "gym-regular"], "traits": ["easygoing", "handy", "chatty"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": ["beard"]}, "bio": "Works, like you, and two years ahead. Can fix anything except his sleep schedule.", "life": ["Talks in his sleep, mostly about engines.", "Has three messages from his mum waiting."], "seed": 841867},
-  {"id": "rina", "name": "Rina Deshi", "story": true, "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-3", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["common-room", "calls-home"], "traits": ["dry humour", "steady", "competitive"], "looks": {"skin": 3, "hair": "curls", "hairColor": "black", "height": 0.95, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Dry humour, steady hands, undefeated at Tiles.", "life": ["Uses a stack of medical journals as a pillow.", "Has a message from her sister waiting.", "Undefeated at Tiles in the junior common room."], "seed": 104849},
-  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5], "team": "chef"}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728},
-  {"id": "tomas", "name": "Tomas Lind", "story": true, "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B1-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["common-room", "window-seat", "stargazer"], "traits": ["earnest", "curious", "a little lost"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": []}, "bio": "New to Watch, and your bunkmate. Still learning where everything is.", "life": ["Taped a star map to the underside of the top bunk.", "Joined the Wren a week before you did."], "seed": 754367},
-  {"id": "nandakumar", "name": "Dr. Priya Nandakumar", "provisional": true, "rank": "chief", "dept": "infirmary", "uniform": "infirmary", "role": "Head of Infirmary", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-I", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["early-riser", "garden-lover", "gardener"], "traits": ["calm", "brisk", "kind"], "looks": {"skin": 4, "hair": "long", "hairColor": "black", "height": 0.97, "build": "slim", "acc": ["glasses", "earrings"]}, "bio": "Head of Infirmary. Says \"drink some water\" in a way that ends the argument.", "life": ["Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3.", "Grows chillies in a corner of the garden."], "seed": 779824},
-  {"id": "kowalczyk", "name": "Anja Kowalczyk", "provisional": true, "rank": "senior", "dept": "command", "uniform": "command", "role": "Second Officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "2-S", "work": {"deck": 1, "place": "work:command"}, "habits": ["night-owl", "quiet-corner"], "traits": ["steady", "private", "wry"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "brown", "height": 1.04, "build": "average", "acc": []}, "bio": "Second Officer. Runs the bridge at night, when the ship is hers.", "life": ["Third in command, and first to be woken.", "Reads old paper novels on the bridge during quiet nights."], "seed": 876932},
-  {"id": "raman", "name": "Dev Raman", "provisional": true, "rank": "senior", "dept": "helm", "uniform": "command", "role": "Senior Helm Officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "2-H", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "window-seat"], "traits": ["careful", "proud", "gentle"], "looks": {"skin": 3, "hair": "short", "hairColor": "black", "height": 1.06, "build": "slim", "acc": ["moustache"]}, "bio": "Senior Helm Officer. Flies the Wren like it might spill.", "life": ["Keeps a model of the Wren on the shelf by his door.", "Has flown survey ships for twenty years."], "seed": 958213},
-  {"id": "ferreira", "name": "Lucia Ferreira", "provisional": true, "rank": "senior", "dept": "comms", "uniform": "command", "role": "Comms Chief", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "2-R", "work": {"deck": 2, "place": "work:comms"}, "habits": ["lounge-regular", "calls-home", "bar-regular"], "traits": ["sociable", "discreet", "quick"], "looks": {"skin": 2, "hair": "curls", "hairColor": "dark", "height": 0.98, "build": "average", "acc": ["earrings"]}, "bio": "Comms Chief. Every message home passes through her hands, and she never reads them.", "life": ["Hangs a headset on her door handle, just in case.", "Speaks four languages and some Veyli."], "seed": 905884},
-  {"id": "oduya", "name": "Matthias Oduya", "provisional": true, "rank": "senior", "dept": "infirmary", "uniform": "infirmary", "role": "Ship's Counsellor", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-N", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["garden-lover", "lingers-at-meals"], "traits": ["warm", "perceptive", "unhurried"], "looks": {"skin": 5, "hair": "short", "hairColor": "grey", "height": 1.07, "build": "broad", "acc": ["glasses", "beard"]}, "bio": "Ship's Counsellor. Seventy-five people a long way from home keep him busy.", "life": ["Keeps office hours on Deck 3 and a bowl of sweets on his desk.", "Knows everyone's birthday."], "seed": 988875},
-  {"id": "mensah", "name": "Kofi Mensah", "provisional": true, "rank": "senior", "dept": "watch", "uniform": "watch", "role": "Senior Watch Officer", "shift": "night", "rota": {"offDays": [5, 6]}, "bed": "2-G", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "gym-regular"], "traits": ["easy laugh", "watchful", "patient"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": []}, "bio": "Senior Watch Officer. Holt's deputy, in charge of the Watch at night.", "life": ["The only one who can make Holt laugh.", "Walks the whole ship once a night, deck by deck."], "seed": 365513},
-  {"id": "mori", "name": "Hana Mori", "provisional": true, "rank": "senior", "dept": "survey", "uniform": "survey", "role": "Deputy Survey Chief", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "2-D", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "stargazer"], "traits": ["organised", "shy", "meticulous"], "looks": {"skin": 0, "hair": "bun", "hairColor": "black", "height": 0.93, "build": "slim", "acc": ["glasses"]}, "bio": "Deputy Survey Chief. Runs the labs while Sato runs everyone.", "life": ["Tapes a star chart over her nameplate.", "Maps the frontier one survey at a time, in the chart room."], "seed": 98519},
-  {"id": "janssen-hugo", "name": "Hugo Janssen", "rank": "officer", "dept": "helm", "uniform": "command", "role": "Helm officer", "shift": "night", "rota": {"offDays": [5, 6]}, "bed": "4-11", "work": {"deck": 1, "place": "work:helm"}, "habits": ["window-seat", "calls-home", "gym-regular", "shopper"], "traits": ["curious", "kind"], "looks": {"skin": 3, "hair": "short", "hairColor": "black", "height": 0.91, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Flies the night watch with one hand on the helm and one on a cup of tea.", "life": ["Keeps a cactus called Gerald on the windowsill.", "Grows herbs for the galley."], "seed": 731485},
-  {"id": "lindqvist-isak", "name": "Isak Lindqvist", "rank": "officer", "dept": "helm", "uniform": "command", "role": "Helm officer", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-06", "work": {"deck": 1, "place": "work:helm"}, "habits": ["music", "shopper"], "traits": ["restless", "stubborn"], "looks": {"skin": 4, "hair": "buzz", "hairColor": "black", "height": 0.91, "build": "slim", "acc": ["earrings", "headband"]}, "bio": "Can feel a drift in the Wren's course before the console shows it.", "life": ["Is learning the guitar, badly.", "Is training for the gym's rowing leaderboard."], "seed": 774020},
-  {"id": "zielinski-oona", "name": "Oona Zielinski", "rank": "officer", "dept": "command", "uniform": "command", "role": "Operations officer", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-09", "work": {"deck": 1, "place": "work:ops"}, "habits": ["skips-breakfast", "evening-shower", "late-sleeper", "shopper"], "traits": ["meticulous", "sarcastic"], "looks": {"skin": 1, "hair": "short", "hairColor": "dark", "height": 0.94, "build": "average", "acc": []}, "bio": "Keeps the bridge's boards honest, one status light at a time.", "life": ["Ran a market stall on Marra Station before joining up.", "Has a parent who served on the Wren years ago."], "seed": 386688},
-  {"id": "takahashi-wen", "name": "Wen Takahashi", "rank": "officer", "dept": "comms", "uniform": "command", "role": "Comms officer", "shift": "night", "rota": {"offDays": [3, 4]}, "bed": "4-12", "work": {"deck": 1, "place": "work:comms"}, "habits": ["calls-home", "music"], "traits": ["blunt", "practical"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "black", "height": 1.09, "build": "average", "acc": []}, "bio": "Can tune a signal out of static like picking a lock.", "life": ["Knows the lyrics to every song in the record cabinet.", "Keeps a journal of every star they have seen."], "seed": 294934},
-  {"id": "farouk-olu", "name": "Olu Farouk", "rank": "officer", "dept": "comms", "uniform": "command", "role": "Comms officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-10", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed"], "traits": ["quiet", "kind"], "looks": {"skin": 3, "hair": "short", "hairColor": "dark", "height": 0.92, "build": "average", "acc": ["glasses"]}, "bio": "Hears every voice on the ship's channels, and remembers most of them.", "life": ["Knows the lyrics to every song in the record cabinet.", "Ran a market stall on Lisk before joining up."], "seed": 561499},
-  {"id": "navarro-mateo", "name": "Mateo Navarro", "rank": "officer", "dept": "works", "uniform": "works", "role": "Works systems officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-15", "work": {"deck": 5, "place": "work:works"}, "habits": ["gym-regular", "calls-home", "early-riser", "runner"], "traits": ["reliable", "sharp-eyed"], "looks": {"skin": 0, "hair": "short", "hairColor": "auburn", "height": 1.03, "build": "slim", "acc": ["headband", "moustache"]}, "bio": "Keeps the Works bay's day running, and the job board tidy.", "life": ["Is quietly in charge of the lost-property box.", "Has a twin on another survey ship."], "seed": 685527},
-  {"id": "halloran-emeka", "name": "Emeka Halloran", "rank": "officer", "dept": "works", "uniform": "works", "role": "Works systems officer", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-13", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "garden-lover", "late-sleeper"], "traits": ["kind", "loyal"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "brown", "height": 1.01, "build": "slim", "acc": []}, "bio": "Keeps the Works bay's day running, and the job board tidy.", "life": ["Tells terrible jokes at breakfast.", "Bakes on rest days, if Brennan allows it."], "seed": 457668},
-  {"id": "reyes-alejandro", "name": "Alejandro Reyes", "rank": "officer", "dept": "works", "uniform": "works", "role": "Engine officer", "shift": "night", "rota": {"offDays": [4, 5]}, "bed": "4-16", "work": {"deck": 6, "place": "work:engine"}, "habits": ["lingers-at-meals", "night-owl", "musician"], "traits": ["restless", "nervous"], "looks": {"skin": 5, "hair": "long", "hairColor": "dark", "height": 0.91, "build": "slim", "acc": ["glasses"]}, "bio": "Knows the drive coils' moods better than anyone's.", "life": ["Has a cat back home on Port Halloran, and talks about it a lot.", "Writes letters home to Lisk every rest day, on paper."], "seed": 711141},
-  {"id": "torres-zeke", "name": "Zeke Torres", "rank": "officer", "dept": "works", "uniform": "works", "role": "Engine officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-14", "work": {"deck": 6, "place": "work:engine"}, "habits": ["skips-breakfast"], "traits": ["curious", "ambitious"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["beard"]}, "bio": "Knows the drive coils' moods better than anyone's.", "life": ["Knows the lyrics to every song in the record cabinet.", "Knits scarves for anyone who stands still long enough."], "seed": 351933},
-  {"id": "achterberg-lars", "name": "Lars Achterberg", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "night", "rota": {"offDays": [6, 0]}, "bed": "4-19", "work": {"deck": 2, "place": "work:watch"}, "habits": ["lingers-at-meals", "calls-home", "bar-regular"], "traits": ["reliable", "dry humour"], "looks": {"skin": 0, "hair": "bald", "hairColor": "auburn", "height": 1.07, "build": "average", "acc": ["glasses"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knows the lyrics to every song in the record cabinet.", "Reads mystery novels and guesses the ending too early."], "seed": 464758},
-  {"id": "dahl-mira", "name": "Mira Dahl", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-17", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["practical", "thoughtful"], "looks": {"skin": 2, "hair": "bald", "hairColor": "blonde", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knits scarves for anyone who stands still long enough.", "Has a parent who served on the Wren years ago."], "seed": 598747},
-  {"id": "ibarra-rafael", "name": "Rafael Ibarra", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "night", "rota": {"offDays": [3, 4]}, "bed": "4-20", "work": {"deck": 2, "place": "work:survey"}, "habits": ["lounge-regular", "early-to-bed"], "traits": ["forgetful", "sarcastic"], "looks": {"skin": 2, "hair": "bun", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Lives for the next sensor sweep.", "life": ["Keeps a tin of good biscuits and tells no one.", "Plays Tiles, and loses gracefully."], "seed": 109188},
-  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-18", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991},
-  {"id": "zamora-quinn", "name": "Quinn Zamora", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-21", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-diner", "night-owl", "runner"], "traits": ["meticulous", "quiet"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 1.09, "build": "slim", "acc": []}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Brought a telescope from home.", "Sings in the shower; the whole washroom knows."], "seed": 379086},
-  {"id": "yoon-elif", "name": "Elif Yoon", "rank": "officer", "dept": "infirmary", "uniform": "infirmary", "role": "Doctor", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-22", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["calls-home", "tea-break", "lounge-regular", "bar-regular"], "traits": ["nervous", "patient"], "looks": {"skin": 4, "hair": "short", "hairColor": "dark", "height": 0.93, "build": "average", "acc": []}, "bio": "Night doctor. Steady hands and a soft voice at three in the morning.", "life": ["Tells terrible jokes at breakfast.", "Is the best at fixing the coffee machine."], "seed": 951856},
-  {"id": "bakshi-sol", "name": "Sol Bakshi", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-1", "work": {"deck": 1, "place": "work:helm"}, "habits": ["lounge-regular", "common-room", "early-riser", "shopper"], "traits": ["easygoing", "gentle"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "dark", "height": 1.01, "build": "average", "acc": []}, "bio": "Plots courses for fun on rest days.", "life": ["Paints tiny portraits of the crew.", "Grew up on Lisk, and misses the rain."], "seed": 224075},
-  {"id": "strand-erik", "name": "Erik Strand", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-6", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "garden-lover", "quiet-corner", "runner"], "traits": ["optimistic", "restless"], "looks": {"skin": 3, "hair": "buzz", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["beard", "glasses"]}, "bio": "Learning the helm one watch at a time.", "life": ["Paints tiny portraits of the crew.", "Writes poetry and shows nobody."], "seed": 513721},
-  {"id": "santos-zofia", "name": "Zofia Santos", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-3", "work": {"deck": 2, "place": "work:comms"}, "habits": ["skips-breakfast", "runner"], "traits": ["easygoing", "ambitious"], "looks": {"skin": 0, "hair": "short", "hairColor": "auburn", "height": 0.97, "build": "slim", "acc": []}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Ran a market stall on Hesper Dock before joining up.", "Is training for the gym's rowing leaderboard."], "seed": 768544},
-  {"id": "tran-chloe", "name": "Chloe Tran", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B1-2", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed", "lingers-at-meals"], "traits": ["reliable", "dry humour"], "looks": {"skin": 2, "hair": "short", "hairColor": "brown", "height": 0.99, "build": "average", "acc": ["beard", "headband"]}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Bakes on rest days, if Brennan allows it.", "Is quietly in charge of the lost-property box."], "seed": 955723},
-  {"id": "silva-bea", "name": "Bea Silva", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser"], "traits": ["dreamy", "reliable"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Grew up on Coriel, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 740803},
-  {"id": "teague-theo", "name": "Theo Teague", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "bar-regular"], "traits": ["restless", "blunt"], "looks": {"skin": 5, "hair": "long", "hairColor": "brown", "height": 1.09, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Draws comics about life aboard and pins them in the common room.", "Makes a playlist for every week of the tour."], "seed": 660843},
-  {"id": "rossi-femi", "name": "Femi Rossi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B7-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "calls-home", "early-to-bed"], "traits": ["optimistic", "competitive"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "auburn", "height": 0.91, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Brought a telescope from home.", "Is learning Veyli from a phrasebook."], "seed": 211718},
-  {"id": "rahman-farah", "name": "Farah Rahman", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B6-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "calls-home", "night-owl", "bar-regular"], "traits": ["stubborn", "restless"], "looks": {"skin": 4, "hair": "bun", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["beard", "moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is saving up for a boat on Hesper Dock.", "Keeps a journal of every star they have seen."], "seed": 828477},
-  {"id": "eklund-leila", "name": "Leila Eklund", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B5-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["calls-home", "lounge-regular"], "traits": ["dry humour", "meticulous"], "looks": {"skin": 4, "hair": "curls", "hairColor": "brown", "height": 1.04, "build": "average", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Collects old maps of Hesper Dock.", "Sends voice messages to a grandmother on Kesh."], "seed": 489006},
-  {"id": "oneill-imani", "name": "Imani O'Neill", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B6-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["night-owl", "quiet-corner", "gardener"], "traits": ["dry humour", "cheerful"], "looks": {"skin": 0, "hair": "long", "hairColor": "dark", "height": 0.99, "build": "average", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Paints tiny portraits of the crew.", "Makes a playlist for every week of the tour."], "seed": 513421},
-  {"id": "moreau-signe", "name": "Signe Moreau", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B6-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["music"], "traits": ["stubborn", "sharp-eyed"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 0.98, "build": "slim", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is training for the gym's rowing leaderboard.", "Reads mystery novels and guesses the ending too early."], "seed": 222356},
-  {"id": "soto-marta", "name": "Marta Soto", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["quiet-corner", "evening-shower"], "traits": ["loyal", "blunt"], "looks": {"skin": 1, "hair": "buzz", "hairColor": "auburn", "height": 0.99, "build": "slim", "acc": ["headband"]}, "bio": "Fixes lamps, ovens and washers, and grumbles about all three.", "life": ["Keeps a tin of good biscuits and tells no one.", "Got married just before the tour and counts the days."], "seed": 101468},
-  {"id": "volkov-maeve", "name": "Maeve Volkov", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-diner", "runner"], "traits": ["kind", "playful"], "looks": {"skin": 2, "hair": "long", "hairColor": "dark", "height": 1.06, "build": "slim", "acc": ["headband"]}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Collects pressed flowers from the garden.", "Is the best at fixing the coffee machine."], "seed": 299177},
-  {"id": "kovac-zainab", "name": "Zainab Kovac", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B6-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["skips-breakfast", "garden-lover", "shopper"], "traits": ["meticulous", "shy"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "auburn", "height": 1.04, "build": "average", "acc": []}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Knits scarves for anyone who stands still long enough.", "Is secretly afraid of the lift."], "seed": 741137},
-  {"id": "hart-ravi", "name": "Ravi Hart", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B5-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "garden-lover", "gardener"], "traits": ["stubborn", "gentle"], "looks": {"skin": 2, "hair": "short", "hairColor": "auburn", "height": 0.95, "build": "average", "acc": []}, "bio": "Good with filters, bad with mornings.", "life": ["Draws comics about life aboard and pins them in the common room.", "Keeps fish back home on Valo."], "seed": 929678},
-  {"id": "quist-ilse", "name": "Ilse Quist", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B6-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["garden-lover", "runner"], "traits": ["dreamy", "dry humour"], "looks": {"skin": 2, "hair": "long", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Grows herbs for the galley.", "Reads mystery novels and guesses the ending too early."], "seed": 349564},
-  {"id": "esposito-yara", "name": "Yara Esposito", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [0, 1], "hours": [[480, 870]]}, "bed": "4-B5-4", "work": {"deck": 3, "place": "work:store"}, "habits": ["tea-break", "common-room", "gym-regular", "shopper"], "traits": ["dry humour", "kind"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "brown", "height": 0.98, "build": "average", "acc": ["moustache"]}, "bio": "Opens the crew store in the morning and knows who has run out of what.", "life": ["Keeps a cactus called Gerald on the windowsill.", "Keeps a journal of every star they have seen."], "seed": 468786},
-  {"id": "ishikawa-orla", "name": "Orla Ishikawa", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [3, 4], "hours": [[870, 1260]]}, "bed": "4-B5-6", "work": {"deck": 3, "place": "work:store"}, "habits": ["window-seat", "tea-break", "stargazer"], "traits": ["loyal", "kind"], "looks": {"skin": 2, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["earrings", "headband"]}, "bio": "Keeps the crew store open into the evening, and the ledger in perfect order.", "life": ["Sings in the shower; the whole washroom knows.", "Grows herbs for the galley."], "seed": 960153},
-  {"id": "keane-davi", "name": "Davi Keane", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["gym-regular", "music", "runner"], "traits": ["cheerful", "reliable"], "looks": {"skin": 2, "hair": "buzz", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["moustache"]}, "bio": "Keeps the engine room clean enough to eat in.", "life": ["Sends voice messages to a grandmother on Kesh.", "Is secretly afraid of the lift."], "seed": 54212},
-  {"id": "jovanovic-petra", "name": "Petra Jovanovic", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "night", "rota": {"offDays": [1, 2]}, "bed": "4-B8-3", "work": {"deck": 6, "place": "work:engine"}, "habits": ["common-room", "calls-home", "lounge-regular", "bar-regular"], "traits": ["nervous", "reliable"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Tends the coils on the long engine watch.", "life": ["Got married just before the tour and counts the days.", "Grew up on Valo, and misses the rain."], "seed": 695809},
-  {"id": "amadi-asha", "name": "Asha Amadi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B5-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["window-seat", "late-diner"], "traits": ["dry humour", "optimistic"], "looks": {"skin": 2, "hair": "short", "hairColor": "black", "height": 0.92, "build": "broad", "acc": ["beard", "earrings"]}, "bio": "Tends the coils on the long engine watch.", "life": ["Sings in the shower; the whole washroom knows.", "Climbs the garden's big tree when nobody is looking."], "seed": 306843},
-  {"id": "salo-saad", "name": "Saad Salo", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B7-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["skips-breakfast", "early-to-bed"], "traits": ["cheerful", "patient"], "looks": {"skin": 0, "hair": "short", "hairColor": "teal", "height": 1.09, "build": "slim", "acc": ["earrings"]}, "bio": "Keeps the engine room clean enough to eat in.", "life": ["Has a twin on another survey ship.", "Grew up on the Tevan belt, and misses the rain."], "seed": 224637},
-  {"id": "garcia-greta", "name": "Greta Garcia", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "night", "rota": {"offDays": [1, 2]}, "bed": "4-B8-4", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["sarcastic", "gentle"], "looks": {"skin": 1, "hair": "bun", "hairColor": "teal", "height": 1.0, "build": "slim", "acc": []}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Fixes everyone's broken headphones.", "Grew up on Hesper Dock, and misses the rain."], "seed": 314206},
-  {"id": "park-noor", "name": "Noor Park", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-B8-5", "work": {"deck": 2, "place": "work:watch"}, "habits": ["workaholic", "stargazer"], "traits": ["tidy", "patient"], "looks": {"skin": 0, "hair": "long", "hairColor": "brown", "height": 1.04, "build": "slim", "acc": ["headband"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Is saving up for a boat on Coriel.", "Is learning the guitar, badly."], "seed": 439601},
-  {"id": "vasquez-uma", "name": "Uma Vasquez", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B5-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["quiet-corner", "window-seat", "bar-regular"], "traits": ["homesick", "cheerful"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "blonde", "height": 0.99, "build": "broad", "acc": ["glasses", "moustache"]}, "bio": "Learning the Watch from Holt, one lecture at a time.", "life": ["Writes poetry and shows nobody.", "Keeps fish back home on the Ostrander colonies."], "seed": 619954},
-  {"id": "shah-dara", "name": "Dara Shah", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B4-5", "work": {"deck": 2, "place": "work:watch"}, "habits": ["skips-breakfast", "early-to-bed", "shopper"], "traits": ["shy", "dry humour"], "looks": {"skin": 1, "hair": "bun", "hairColor": "blonde", "height": 0.97, "build": "average", "acc": ["earrings", "moustache"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Has a parent who served on the Wren years ago.", "Is the best at fixing the coffee machine."], "seed": 338182},
-  {"id": "chen-carmen", "name": "Carmen Chen", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B4-3", "work": {"deck": 2, "place": "work:watch"}, "habits": ["calls-home", "lounge-regular", "shopper"], "traits": ["dreamy", "restless"], "looks": {"skin": 5, "hair": "ponytail", "hairColor": "auburn", "height": 0.94, "build": "slim", "acc": []}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Sings in the shower; the whole washroom knows.", "Sends voice messages to a grandmother on Lisk."], "seed": 132744},
-  {"id": "nakamura-bilal", "name": "Bilal Nakamura", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B4-4", "work": {"deck": 2, "place": "work:watch"}, "habits": ["calls-home", "skips-breakfast", "runner"], "traits": ["patient", "proud"], "looks": {"skin": 5, "hair": "short", "hairColor": "dark", "height": 0.96, "build": "average", "acc": ["earrings"]}, "bio": "Learning the Watch from Holt, one lecture at a time.", "life": ["Grows herbs for the galley.", "Has a twin on another survey ship."], "seed": 611065},
-  {"id": "ueda-vera", "name": "Vera Ueda", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B4-6", "work": {"deck": 2, "place": "work:watch"}, "habits": ["evening-shower", "early-to-bed", "late-diner", "musician"], "traits": ["kind", "thoughtful"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "teal", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Brought a telescope from home.", "Writes letters home to Valo every rest day, on paper."], "seed": 345781},
-  {"id": "lemaire-nils", "name": "Nils Lemaire", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "night", "rota": {"offDays": [6, 0]}, "bed": "4-B8-6", "work": {"deck": 2, "place": "work:survey"}, "habits": ["music", "lounge-regular", "gardener"], "traits": ["quiet", "ambitious"], "looks": {"skin": 4, "hair": "short", "hairColor": "auburn", "height": 1.03, "build": "broad", "acc": ["glasses"]}, "bio": "Carries samples and dreams of naming a star.", "life": ["Ran a market stall on the Ostrander colonies before joining up.", "Tells terrible jokes at breakfast."], "seed": 758061},
-  {"id": "fonseca-arjun", "name": "Arjun Fonseca", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B3-5", "work": {"deck": 2, "place": "work:survey"}, "habits": ["common-room", "evening-shower", "shopper"], "traits": ["sarcastic", "competitive"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["beard", "moustache"]}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Is quietly in charge of the lost-property box.", "Collects pressed flowers from the garden."], "seed": 870145},
-  {"id": "kim-yusuf", "name": "Yusuf Kim", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B3-6", "work": {"deck": 2, "place": "work:survey"}, "habits": ["quiet-corner", "bar-regular"], "traits": ["curious", "quiet"], "looks": {"skin": 0, "hair": "short", "hairColor": "brown", "height": 0.91, "build": "slim", "acc": ["beard", "earrings"]}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Collects old maps of Marra Station.", "Fixes everyone's broken headphones."], "seed": 336908},
-  {"id": "yilmaz-karin", "name": "Karin Yilmaz", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B4-2", "work": {"deck": 2, "place": "work:survey"}, "habits": ["early-to-bed"], "traits": ["quiet", "playful"], "looks": {"skin": 4, "hair": "buzz", "hairColor": "dark", "height": 1.06, "build": "broad", "acc": ["moustache"]}, "bio": "Carries samples and dreams of naming a star.", "life": ["Tells terrible jokes at breakfast.", "Bakes on rest days, if Brennan allows it."], "seed": 180154},
-  {"id": "abara-rosa", "name": "Rosa Abara", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-3", "work": {"deck": 2, "place": "work:survey"}, "habits": ["common-room", "lingers-at-meals"], "traits": ["quiet", "loyal"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "black", "height": 0.94, "build": "slim", "acc": []}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Ran a market stall on Valo before joining up.", "Draws comics about life aboard and pins them in the common room."], "seed": 125860},
-  {"id": "alvarez-luca", "name": "Luca Alvarez", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B3-4", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-sleeper", "garden-lover", "stargazer"], "traits": ["playful", "cheerful"], "looks": {"skin": 5, "hair": "short", "hairColor": "brown", "height": 1.08, "build": "slim", "acc": []}, "bio": "Carries samples and dreams of naming a star.", "life": ["A sister on Coriel who sends recipes.", "Keeps a cactus called Gerald on the windowsill."], "seed": 740188},
-  {"id": "mbeki-bo", "name": "Bo Mbeki", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B4-1", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["cheerful", "meticulous"], "looks": {"skin": 2, "hair": "curls", "hairColor": "dark", "height": 1.08, "build": "slim", "acc": []}, "bio": "Carries samples and dreams of naming a star.", "life": ["Brought a telescope from home.", "A sister on Kesh who sends recipes."], "seed": 802246},
-  {"id": "grieve-thea", "name": "Thea Grieve", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-1", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["lingers-at-meals", "tea-break", "stargazer"], "traits": ["serious", "nervous"], "looks": {"skin": 1, "hair": "long", "hairColor": "dark", "height": 0.94, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Keeps fish back home on New Aberdeen.", "Is quietly in charge of the lost-property box."], "seed": 780864},
-  {"id": "larsen-hamid", "name": "Hamid Larsen", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B3-2", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["skips-breakfast", "night-owl", "tea-break", "musician"], "traits": ["serious", "chatty"], "looks": {"skin": 1, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Is learning the guitar, badly.", "Is saving up for a boat on the Ostrander colonies."], "seed": 690121},
-  {"id": "walsh-esme", "name": "Esme Walsh", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6], "team": "late"}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530},
-  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "late"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898},
-  {"id": "varga-tariq", "name": "Tariq Varga", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "early"}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511},
-  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3], "team": "early"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759},
-  {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2], "team": "early", "cover": {"for": "brennan", "days": [4, 5]}}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406},
+  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "music", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542, "birthday": 335, "plate": {"rank": "Captain", "name": "Odile Marrow"}, "habitShifts": [{"add": "stargazer", "why": "Captain Marrow has started coming to observatory night, to see what the juniors see."}]},
+  {"id": "vance", "name": "Commander Teo Vance", "story": true, "rank": "xo", "dept": "command", "uniform": "command", "role": "Executive Officer", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-X", "work": {"deck": 1, "place": "work:command"}, "habits": ["workaholic", "gym-regular"], "traits": ["precise", "competitive", "loyal"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 1.08, "build": "average", "acc": []}, "bio": "By the book. Every page of it.", "life": ["Top of the rowing leaderboard in the gym, and taped the leaderboard there himself.", "Keeps the waiting list for the good records.", "Has two messages from home waiting."], "seed": 826440, "birthday": 179, "plate": {"rank": "Executive Officer", "name": "Teo Vance"}, "habitShifts": [{"add": "runner", "drop": "gym-regular", "why": "Commander Vance has moved from the rowing machine to the treadmills, to start a new leaderboard."}, {"drop": "workaholic", "why": "Commander Vance has started leaving the bridge on time, on the Counsellor's advice."}]},
+  {"id": "sato", "name": "Dr. Imra Sato", "story": true, "rank": "chief", "dept": "survey", "uniform": "survey", "role": "Head of Survey", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-V", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "tea-break"], "traits": ["brilliant", "absent-minded", "stubborn"], "looks": {"skin": 0, "hair": "long", "hairColor": "grey", "height": 0.94, "build": "slim", "acc": ["glasses"]}, "bio": "Head of Survey. Her lab, her rules, her terrible tea.", "life": ["Brews a tea nobody else will drink.", "Labels every sample in the specimen store in her own handwriting."], "seed": 8968, "birthday": 47, "plate": {"rank": "Department Chief", "name": "Dr. Imra Sato"}, "habitShifts": [{"add": "gardener", "why": "Dr. Sato has started growing sample plants in the garden, and tends them every evening."}]},
+  {"id": "holt", "name": "Chief Bram Holt", "story": true, "rank": "chief", "dept": "watch", "uniform": "watch", "role": "Head of Watch", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "2-T", "work": {"deck": 2, "place": "work:watch"}, "habits": ["early-riser", "late-diner"], "traits": ["suspicious", "dependable", "gruff"], "looks": {"skin": 2, "hair": "bald", "hairColor": "grey", "height": 1.05, "build": "broad", "acc": ["moustache"]}, "bio": "Head of Watch. Does not trust the Veyli, and says so.", "life": ["Asked for the cabin next door to the Envoy's.", "Only his deputy can make him laugh."], "seed": 682911, "birthday": 267, "plate": {"rank": "Department Chief", "name": "Bram Holt"}, "habitShifts": [{"add": "gym-regular", "why": "Chief Holt has started training in the gym after shift."}]},
+  {"id": "calder", "name": "Chief Ines Calder", "story": true, "rank": "chief", "dept": "works", "uniform": "works", "role": "Head of Works", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-O", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "workaholic", "tea-break"], "traits": ["exacting", "fair", "dry"], "looks": {"skin": 3, "hair": "short", "hairColor": "grey", "height": 1.02, "build": "average", "acc": ["glasses"]}, "bio": "Head of Works. Remembers every repair you got wrong, and every one you got right.", "life": ["Runs the job board from the glass office on Deck 5, and certifies every Works tech aboard.", "Keeps a battered toolbox that belonged to her first chief."], "seed": 211686, "birthday": 211, "plate": {"rank": "Department Chief", "name": "Ines Calder"}, "habitShifts": [{"drop": "tea-break", "why": "Chief Calder has given up her tea break: there's always one more job on the board."}]},
+  {"id": "pell", "name": "Pell Okafor", "story": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-2", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "tea-break", "gym-regular"], "traits": ["easygoing", "handy", "chatty"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": ["beard"]}, "bio": "Works, like you, and two years ahead. Can fix anything except his sleep schedule.", "life": ["Talks in his sleep, mostly about engines.", "Has three messages from his mum waiting."], "seed": 841867, "birthday": 331, "habitShifts": [{"add": "calls-home", "why": "Pell has started calling his mum back on rest days."}, {"drop": "late-sleeper", "why": "Pell is trying to get up on time, after one too many late starts in the Works bay."}]},
+  {"id": "rina", "name": "Rina Deshi", "story": true, "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B2-3", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["common-room", "calls-home"], "traits": ["dry humour", "steady", "competitive"], "looks": {"skin": 3, "hair": "curls", "hairColor": "black", "height": 0.95, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Dry humour, steady hands, undefeated at Tiles.", "life": ["Uses a stack of medical journals as a pillow.", "Has a message from her sister waiting.", "Undefeated at Tiles in the junior common room."], "seed": 104849, "birthday": 315, "habitShifts": [{"add": "stargazer", "why": "Rina has started going up to observatory night with Tomas."}]},
+  {"id": "brennan", "name": "Chef Auda Brennan", "story": true, "rank": "officer", "dept": "galley", "uniform": "works", "role": "Chef, galley and mess hall", "shift": "day", "rota": {"offDays": [4, 5], "team": "chef"}, "bed": "4-05", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "early-to-bed"], "traits": ["warm", "fierce in her kitchen", "generous"], "looks": {"skin": 1, "hair": "bun", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["apron", "glasses"]}, "bio": "Runs the galley and mess hall. Cooks by ear, and sends biscuits down for the juniors.", "life": ["Furious whenever the cold store runs warm.", "Sends biscuits down to the junior wing."], "seed": 471728, "birthday": 252, "plate": {"rank": "Officer", "name": "Chef Auda Brennan"}, "habitShifts": [{"add": "gardener", "why": "Chef Brennan has started picking her own herbs in the garden."}]},
+  {"id": "tomas", "name": "Tomas Lind", "story": true, "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B1-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["common-room", "window-seat", "stargazer"], "traits": ["earnest", "curious", "a little lost"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": []}, "bio": "New to Watch, and your bunkmate. Still learning where everything is.", "life": ["Taped a star map to the underside of the top bunk.", "Joined the Wren a week before you did."], "seed": 754367, "birthday": 105, "habitShifts": [{"add": "runner", "why": "Tomas has taken up running: Vance talked him into the treadmill."}]},
+  {"id": "nandakumar", "name": "Dr. Priya Nandakumar", "rank": "chief", "dept": "infirmary", "uniform": "infirmary", "role": "Head of Infirmary", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "2-I", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["early-riser", "garden-lover", "gardener"], "traits": ["calm", "brisk", "kind"], "looks": {"skin": 4, "hair": "long", "hairColor": "black", "height": 0.97, "build": "slim", "acc": ["glasses", "earrings"]}, "bio": "Head of Infirmary. Says \"drink some water\" in a way that ends the argument.", "life": ["Puts a sign on her door: IF YOU ARE BLEEDING, DECK 3.", "Grows chillies in a corner of the garden."], "seed": 779824, "birthday": 54, "plate": {"rank": "Department Chief", "name": "Dr. Priya Nandakumar"}, "habitShifts": [{"add": "runner", "why": "Dr. Nandakumar has started running before breakfast, and recommends it to everyone."}]},
+  {"id": "kowalczyk", "name": "Anja Kowalczyk", "rank": "senior", "dept": "command", "uniform": "command", "role": "Second Officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "2-S", "work": {"deck": 1, "place": "work:command"}, "habits": ["night-owl", "quiet-corner"], "traits": ["steady", "private", "wry"], "looks": {"skin": 0, "hair": "ponytail", "hairColor": "brown", "height": 1.04, "build": "average", "acc": []}, "bio": "Second Officer. Runs the bridge at night, when the ship is hers.", "life": ["Third in command, and first to be woken.", "Reads old paper novels on the bridge during quiet nights."], "seed": 876932, "birthday": 241, "plate": {"rank": "Senior Officer", "name": "Anja Kowalczyk"}, "habitShifts": [{"add": "stargazer", "why": "Anja Kowalczyk has started spending evenings off in the observatory."}]},
+  {"id": "raman", "name": "Dev Raman", "rank": "senior", "dept": "helm", "uniform": "command", "role": "Senior Helm Officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "2-H", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "window-seat"], "traits": ["careful", "proud", "gentle"], "looks": {"skin": 3, "hair": "short", "hairColor": "black", "height": 1.06, "build": "slim", "acc": ["moustache"]}, "bio": "Senior Helm Officer. Flies the Wren like it might spill.", "life": ["Keeps a model of the Wren on the shelf by his door.", "Has flown survey ships for twenty years."], "seed": 958213, "birthday": 126, "plate": {"rank": "Senior Officer", "name": "Dev Raman"}, "habitShifts": [{"add": "musician", "why": "Dev Raman has started playing an old guitar in the music room."}]},
+  {"id": "ferreira", "name": "Lucia Ferreira", "rank": "senior", "dept": "comms", "uniform": "command", "role": "Comms Chief", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "2-R", "work": {"deck": 2, "place": "work:comms"}, "habits": ["lounge-regular", "calls-home", "bar-regular"], "traits": ["sociable", "discreet", "quick"], "looks": {"skin": 2, "hair": "curls", "hairColor": "dark", "height": 0.98, "build": "average", "acc": ["earrings"]}, "bio": "Comms Chief. Every message home passes through her hands, and she never reads them.", "life": ["Hangs a headset on her door handle, just in case.", "Speaks four languages and some Veyli."], "seed": 905884, "birthday": 201, "plate": {"rank": "Senior Officer", "name": "Lucia Ferreira"}, "habitShifts": [{"drop": "bar-regular", "why": "Lucia Ferreira is cutting back on the bar, and spending evenings on her Veyli."}]},
+  {"id": "oduya", "name": "Matthias Oduya", "rank": "senior", "dept": "infirmary", "uniform": "infirmary", "role": "Ship's Counsellor", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "2-N", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["garden-lover", "lingers-at-meals"], "traits": ["warm", "perceptive", "unhurried"], "looks": {"skin": 5, "hair": "short", "hairColor": "grey", "height": 1.07, "build": "broad", "acc": ["glasses", "beard"]}, "bio": "Ship's Counsellor. Seventy-five people a long way from home keep him busy.", "life": ["Keeps office hours on Deck 3 and a bowl of sweets on his desk.", "Knows everyone's birthday."], "seed": 988875, "birthday": 117, "plate": {"rank": "Senior Officer", "name": "Matthias Oduya"}, "habitShifts": [{"add": "bar-regular", "why": "Matthias Oduya has started dropping by the lounge bar, where people talk more freely."}]},
+  {"id": "mensah", "name": "Kofi Mensah", "rank": "senior", "dept": "watch", "uniform": "watch", "role": "Senior Watch Officer", "shift": "night", "rota": {"offDays": [5, 6]}, "bed": "2-G", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "gym-regular"], "traits": ["easy laugh", "watchful", "patient"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 1.1, "build": "broad", "acc": []}, "bio": "Senior Watch Officer. Holt's deputy, in charge of the Watch at night.", "life": ["The only one who can make Holt laugh.", "Walks the whole ship once a night, deck by deck."], "seed": 365513, "birthday": 232, "plate": {"rank": "Senior Officer", "name": "Kofi Mensah"}, "habitShifts": [{"add": "runner", "drop": "gym-regular", "why": "Kofi Mensah has swapped the weights for the treadmill."}]},
+  {"id": "mori", "name": "Hana Mori", "rank": "senior", "dept": "survey", "uniform": "survey", "role": "Deputy Survey Chief", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "2-D", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "stargazer"], "traits": ["organised", "shy", "meticulous"], "looks": {"skin": 0, "hair": "bun", "hairColor": "black", "height": 0.93, "build": "slim", "acc": ["glasses"]}, "bio": "Deputy Survey Chief. Runs the labs while Sato runs everyone.", "life": ["Tapes a star chart over her nameplate.", "Maps the frontier one survey at a time, in the chart room."], "seed": 98519, "birthday": 197, "plate": {"rank": "Senior Officer", "name": "Hana Mori"}, "habitShifts": [{"drop": "workaholic", "why": "Hana Mori has stopped working late, now the charts are up to date."}]},
+  {"id": "janssen-hugo", "name": "Hugo Janssen", "rank": "officer", "dept": "helm", "uniform": "command", "role": "Helm officer", "shift": "night", "rota": {"offDays": [5, 6]}, "bed": "4-11", "work": {"deck": 1, "place": "work:helm"}, "habits": ["window-seat", "calls-home", "gym-regular", "shopper"], "traits": ["curious", "kind"], "looks": {"skin": 3, "hair": "short", "hairColor": "black", "height": 0.91, "build": "average", "acc": ["earrings", "headband"]}, "bio": "Flies the night watch with one hand on the helm and one on a cup of tea.", "life": ["Keeps a cactus called Gerald on the windowsill.", "Grows herbs for the galley."], "seed": 731485, "birthday": 153, "plate": {"rank": "Officer", "name": "Hugo Janssen"}, "habitShifts": [{"add": "lounge-regular", "why": "Hugo spends evenings in the bow lounge now."}]},
+  {"id": "lindqvist-isak", "name": "Isak Lindqvist", "rank": "officer", "dept": "helm", "uniform": "command", "role": "Helm officer", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-06", "work": {"deck": 1, "place": "work:helm"}, "habits": ["music", "shopper"], "traits": ["restless", "stubborn"], "looks": {"skin": 4, "hair": "buzz", "hairColor": "black", "height": 0.91, "build": "slim", "acc": ["earrings", "headband"]}, "bio": "Can feel a drift in the Wren's course before the console shows it.", "life": ["Is learning the guitar, badly.", "Is training for the gym's rowing leaderboard."], "seed": 774020, "birthday": 309, "plate": {"rank": "Officer", "name": "Isak Lindqvist"}, "habitShifts": [{"add": "window-seat", "why": "Isak always heads for a window seat now."}]},
+  {"id": "zielinski-oona", "name": "Oona Zielinski", "rank": "officer", "dept": "command", "uniform": "command", "role": "Operations officer", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-09", "work": {"deck": 1, "place": "work:ops"}, "habits": ["skips-breakfast", "evening-shower", "late-sleeper", "shopper"], "traits": ["meticulous", "sarcastic"], "looks": {"skin": 1, "hair": "short", "hairColor": "dark", "height": 0.94, "build": "average", "acc": []}, "bio": "Keeps the bridge's boards honest, one status light at a time.", "life": ["Ran a market stall on Marra Station before joining up.", "Has a parent who served on the Wren years ago."], "seed": 386688, "birthday": 226, "plate": {"rank": "Officer", "name": "Oona Zielinski"}, "habitShifts": [{"drop": "late-sleeper", "why": "Oona is trying to get up on time."}, {"add": "lingers-at-meals", "drop": "skips-breakfast", "why": "Oona has started taking time over meals."}]},
+  {"id": "takahashi-wen", "name": "Wen Takahashi", "rank": "officer", "dept": "comms", "uniform": "command", "role": "Comms officer", "shift": "night", "rota": {"offDays": [3, 4]}, "bed": "4-12", "work": {"deck": 1, "place": "work:comms"}, "habits": ["calls-home", "music"], "traits": ["blunt", "practical"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "black", "height": 1.09, "build": "average", "acc": []}, "bio": "Can tune a signal out of static like picking a lock.", "life": ["Knows the lyrics to every song in the record cabinet.", "Keeps a journal of every star they have seen."], "seed": 294934, "birthday": 85, "plate": {"rank": "Officer", "name": "Wen Takahashi"}, "habitShifts": [{"add": "musician", "drop": "music", "why": "Wen has gone from listening in the music room to playing."}]},
+  {"id": "farouk-olu", "name": "Olu Farouk", "rank": "officer", "dept": "comms", "uniform": "command", "role": "Comms officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-10", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed"], "traits": ["quiet", "kind"], "looks": {"skin": 3, "hair": "short", "hairColor": "dark", "height": 0.92, "build": "average", "acc": ["glasses"]}, "bio": "Hears every voice on the ship's channels, and remembers most of them.", "life": ["Knows the lyrics to every song in the record cabinet.", "Ran a market stall on Lisk before joining up."], "seed": 561499, "birthday": 22, "plate": {"rank": "Officer", "name": "Olu Farouk"}, "habitShifts": [{"add": "tea-break", "why": "Olu has started taking a mid-shift tea break."}]},
+  {"id": "navarro-mateo", "name": "Mateo Navarro", "rank": "officer", "dept": "works", "uniform": "works", "role": "Works systems officer", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-15", "work": {"deck": 5, "place": "work:works"}, "habits": ["gym-regular", "calls-home", "early-riser", "runner"], "traits": ["reliable", "sharp-eyed"], "looks": {"skin": 0, "hair": "short", "hairColor": "auburn", "height": 1.03, "build": "slim", "acc": ["headband", "moustache"]}, "bio": "Keeps the Works bay's day running, and the job board tidy.", "life": ["Is quietly in charge of the lost-property box.", "Has a twin on another survey ship."], "seed": 685527, "birthday": 285, "plate": {"rank": "Officer", "name": "Mateo Navarro"}, "habitShifts": [{"drop": "gym-regular", "why": "Mateo has stopped going to the gym after shift."}, {"add": "gardener", "why": "Mateo has started helping out in the garden."}]},
+  {"id": "halloran-emeka", "name": "Emeka Halloran", "rank": "officer", "dept": "works", "uniform": "works", "role": "Works systems officer", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-13", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "garden-lover", "late-sleeper"], "traits": ["kind", "loyal"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "brown", "height": 1.01, "build": "slim", "acc": []}, "bio": "Keeps the Works bay's day running, and the job board tidy.", "life": ["Tells terrible jokes at breakfast.", "Bakes on rest days, if Brennan allows it."], "seed": 457668, "birthday": 260, "plate": {"rank": "Officer", "name": "Emeka Halloran"}, "habitShifts": [{"drop": "late-sleeper", "why": "Emeka is trying to get up on time."}, {"add": "music", "why": "Emeka has started listening in the music room in the evenings."}]},
+  {"id": "reyes-alejandro", "name": "Alejandro Reyes", "rank": "officer", "dept": "works", "uniform": "works", "role": "Engine officer", "shift": "night", "rota": {"offDays": [4, 5]}, "bed": "4-16", "work": {"deck": 6, "place": "work:engine"}, "habits": ["lingers-at-meals", "night-owl", "musician"], "traits": ["restless", "nervous"], "looks": {"skin": 5, "hair": "long", "hairColor": "dark", "height": 0.91, "build": "slim", "acc": ["glasses"]}, "bio": "Knows the drive coils' moods better than anyone's.", "life": ["Has a cat back home on Port Halloran, and talks about it a lot.", "Writes letters home to Lisk every rest day, on paper."], "seed": 711141, "birthday": 320, "plate": {"rank": "Officer", "name": "Alejandro Reyes"}, "habitShifts": [{"add": "stargazer", "why": "Alejandro's name is on the observatory-night list now."}]},
+  {"id": "torres-zeke", "name": "Zeke Torres", "rank": "officer", "dept": "works", "uniform": "works", "role": "Engine officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-14", "work": {"deck": 6, "place": "work:engine"}, "habits": ["skips-breakfast"], "traits": ["curious", "ambitious"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["beard"]}, "bio": "Knows the drive coils' moods better than anyone's.", "life": ["Knows the lyrics to every song in the record cabinet.", "Knits scarves for anyone who stands still long enough."], "seed": 351933, "birthday": 298, "plate": {"rank": "Officer", "name": "Zeke Torres"}, "habitShifts": [{"add": "gym-regular", "why": "Zeke has joined the after-shift gym crowd."}]},
+  {"id": "achterberg-lars", "name": "Lars Achterberg", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "night", "rota": {"offDays": [6, 0]}, "bed": "4-19", "work": {"deck": 2, "place": "work:watch"}, "habits": ["lingers-at-meals", "calls-home", "bar-regular"], "traits": ["reliable", "dry humour"], "looks": {"skin": 0, "hair": "bald", "hairColor": "auburn", "height": 1.07, "build": "average", "acc": ["glasses"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knows the lyrics to every song in the record cabinet.", "Reads mystery novels and guesses the ending too early."], "seed": 464758, "birthday": 340, "plate": {"rank": "Officer", "name": "Lars Achterberg"}, "habitShifts": [{"add": "stargazer", "why": "Lars's name is on the observatory-night list now."}]},
+  {"id": "dahl-mira", "name": "Mira Dahl", "rank": "officer", "dept": "watch", "uniform": "watch", "role": "Watch officer", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-17", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["practical", "thoughtful"], "looks": {"skin": 2, "hair": "bald", "hairColor": "blonde", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Calm in a crisis, fussy about paperwork.", "life": ["Knits scarves for anyone who stands still long enough.", "Has a parent who served on the Wren years ago."], "seed": 598747, "birthday": 220, "plate": {"rank": "Officer", "name": "Mira Dahl"}, "habitShifts": [{"add": "bar-regular", "why": "Mira has become a regular at the lounge bar."}, {"drop": "night-owl", "why": "Mira has started going to bed on time."}]},
+  {"id": "ibarra-rafael", "name": "Rafael Ibarra", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "night", "rota": {"offDays": [3, 4]}, "bed": "4-20", "work": {"deck": 2, "place": "work:survey"}, "habits": ["lounge-regular", "early-to-bed"], "traits": ["forgetful", "sarcastic"], "looks": {"skin": 2, "hair": "bun", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Lives for the next sensor sweep.", "life": ["Keeps a tin of good biscuits and tells no one.", "Plays Tiles, and loses gracefully."], "seed": 109188, "birthday": 219, "plate": {"rank": "Officer", "name": "Rafael Ibarra"}, "habitShifts": [{"add": "runner", "why": "Rafael has taken up running on the treadmills."}]},
+  {"id": "cruz-tove", "name": "Tove Cruz", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-18", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["messy", "shy"], "looks": {"skin": 5, "hair": "short", "hairColor": "auburn", "height": 0.92, "build": "broad", "acc": ["beard", "headband"]}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Is secretly afraid of the lift.", "Keeps a cactus called Gerald on the windowsill."], "seed": 168991, "birthday": 61, "plate": {"rank": "Officer", "name": "Tove Cruz"}, "habitShifts": [{"add": "evening-shower", "why": "Tove has switched to showering at night."}, {"add": "early-to-bed", "drop": "night-owl", "why": "Tove has started going to bed early."}]},
+  {"id": "zamora-quinn", "name": "Quinn Zamora", "rank": "officer", "dept": "survey", "uniform": "survey", "role": "Survey officer", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-21", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-diner", "night-owl", "runner"], "traits": ["meticulous", "quiet"], "looks": {"skin": 1, "hair": "short", "hairColor": "blonde", "height": 1.09, "build": "slim", "acc": []}, "bio": "Can name every star in the chart room, and argues about the rest.", "life": ["Brought a telescope from home.", "Sings in the shower; the whole washroom knows."], "seed": 379086, "birthday": 94, "plate": {"rank": "Officer", "name": "Quinn Zamora"}, "habitShifts": [{"drop": "runner", "why": "Quinn has given up running for now."}]},
+  {"id": "yoon-elif", "name": "Elif Yoon", "rank": "officer", "dept": "infirmary", "uniform": "infirmary", "role": "Doctor", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-22", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["calls-home", "tea-break", "lounge-regular", "bar-regular"], "traits": ["nervous", "patient"], "looks": {"skin": 4, "hair": "short", "hairColor": "dark", "height": 0.93, "build": "average", "acc": []}, "bio": "Night doctor. Steady hands and a soft voice at three in the morning.", "life": ["Tells terrible jokes at breakfast.", "Is the best at fixing the coffee machine."], "seed": 951856, "birthday": 151, "plate": {"rank": "Officer", "name": "Elif Yoon"}, "habitShifts": [{"add": "musician", "why": "Elif has dusted off an old instrument and plays in the music room now."}]},
+  {"id": "bakshi-sol", "name": "Sol Bakshi", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-1", "work": {"deck": 1, "place": "work:helm"}, "habits": ["lounge-regular", "common-room", "early-riser", "shopper"], "traits": ["easygoing", "gentle"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "dark", "height": 1.01, "build": "average", "acc": []}, "bio": "Plots courses for fun on rest days.", "life": ["Paints tiny portraits of the crew.", "Grew up on Lisk, and misses the rain."], "seed": 224075, "birthday": 66, "habitShifts": [{"drop": "shopper", "why": "Sol is saving up, and has stopped browsing the store."}]},
+  {"id": "strand-erik", "name": "Erik Strand", "rank": "junior", "dept": "helm", "uniform": "command", "role": "Helm rating", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B2-6", "work": {"deck": 1, "place": "work:helm"}, "habits": ["early-riser", "garden-lover", "quiet-corner", "runner"], "traits": ["optimistic", "restless"], "looks": {"skin": 3, "hair": "buzz", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["beard", "glasses"]}, "bio": "Learning the helm one watch at a time.", "life": ["Paints tiny portraits of the crew.", "Writes poetry and shows nobody."], "seed": 513721, "birthday": 42, "habitShifts": [{"add": "gardener", "drop": "garden-lover", "why": "Erik has gone from sitting in the garden to tending it."}]},
+  {"id": "santos-zofia", "name": "Zofia Santos", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-3", "work": {"deck": 2, "place": "work:comms"}, "habits": ["skips-breakfast", "runner"], "traits": ["easygoing", "ambitious"], "looks": {"skin": 0, "hair": "short", "hairColor": "auburn", "height": 0.97, "build": "slim", "acc": []}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Ran a market stall on Hesper Dock before joining up.", "Is training for the gym's rowing leaderboard."], "seed": 768544, "birthday": 207, "habitShifts": [{"add": "common-room", "why": "Zofia has joined the Tiles nights in the common room."}]},
+  {"id": "tran-chloe", "name": "Chloe Tran", "rank": "junior", "dept": "comms", "uniform": "command", "role": "Comms rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B1-2", "work": {"deck": 2, "place": "work:comms"}, "habits": ["early-to-bed", "lingers-at-meals"], "traits": ["reliable", "dry humour"], "looks": {"skin": 2, "hair": "short", "hairColor": "brown", "height": 0.99, "build": "average", "acc": ["beard", "headband"]}, "bio": "Sorts the ship's messages, and sneaks a look at the gossip.", "life": ["Bakes on rest days, if Brennan allows it.", "Is quietly in charge of the lost-property box."], "seed": 955723, "birthday": 8, "habitShifts": [{"add": "musician", "why": "Chloe has dusted off an old instrument and plays in the music room now."}]},
+  {"id": "silva-bea", "name": "Bea Silva", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser"], "traits": ["dreamy", "reliable"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Grew up on Coriel, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 740803, "birthday": 263, "habitShifts": [{"add": "music", "why": "Bea has started listening in the music room in the evenings."}]},
+  {"id": "teague-theo", "name": "Theo Teague", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "bar-regular"], "traits": ["restless", "blunt"], "looks": {"skin": 5, "hair": "long", "hairColor": "brown", "height": 1.09, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Draws comics about life aboard and pins them in the common room.", "Makes a playlist for every week of the tour."], "seed": 660843, "birthday": 237, "habitShifts": [{"add": "stargazer", "why": "Theo's name is on the observatory-night list now."}]},
+  {"id": "rossi-femi", "name": "Femi Rossi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B7-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["tea-break", "calls-home", "early-to-bed"], "traits": ["optimistic", "competitive"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "auburn", "height": 0.91, "build": "broad", "acc": []}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Brought a telescope from home.", "Is learning Veyli from a phrasebook."], "seed": 211718, "birthday": 354, "habitShifts": [{"add": "music", "why": "Femi has started listening in the music room in the evenings."}]},
+  {"id": "rahman-farah", "name": "Farah Rahman", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B6-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["early-riser", "calls-home", "night-owl", "bar-regular"], "traits": ["stubborn", "restless"], "looks": {"skin": 4, "hair": "bun", "hairColor": "blonde", "height": 0.92, "build": "average", "acc": ["beard", "moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is saving up for a boat on Hesper Dock.", "Keeps a journal of every star they have seen."], "seed": 828477, "birthday": 276, "habitShifts": [{"add": "evening-shower", "why": "Farah has switched to showering at night."}]},
+  {"id": "eklund-leila", "name": "Leila Eklund", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B5-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["calls-home", "lounge-regular"], "traits": ["dry humour", "meticulous"], "looks": {"skin": 4, "hair": "curls", "hairColor": "brown", "height": 1.04, "build": "average", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Collects old maps of Hesper Dock.", "Sends voice messages to a grandmother on Kesh."], "seed": 489006, "birthday": 130, "habitShifts": [{"add": "gardener", "why": "Leila has started helping out in the garden."}]},
+  {"id": "oneill-imani", "name": "Imani O'Neill", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B6-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["night-owl", "quiet-corner", "gardener"], "traits": ["dry humour", "cheerful"], "looks": {"skin": 0, "hair": "long", "hairColor": "dark", "height": 0.99, "build": "average", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Paints tiny portraits of the crew.", "Makes a playlist for every week of the tour."], "seed": 513421, "birthday": 19, "habitShifts": [{"add": "early-to-bed", "drop": "night-owl", "why": "Imani has started going to bed early."}, {"add": "shopper", "why": "Imani has started browsing the crew store after shift."}]},
+  {"id": "moreau-signe", "name": "Signe Moreau", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B6-3", "work": {"deck": 5, "place": "work:works"}, "habits": ["music"], "traits": ["stubborn", "sharp-eyed"], "looks": {"skin": 5, "hair": "buzz", "hairColor": "black", "height": 0.98, "build": "slim", "acc": ["moustache"]}, "bio": "Good with filters, bad with mornings.", "life": ["Is training for the gym's rowing leaderboard.", "Reads mystery novels and guesses the ending too early."], "seed": 222356, "birthday": 304, "habitShifts": [{"add": "gym-regular", "why": "Signe has joined the after-shift gym crowd."}]},
+  {"id": "soto-marta", "name": "Marta Soto", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B7-4", "work": {"deck": 5, "place": "work:works"}, "habits": ["quiet-corner", "evening-shower"], "traits": ["loyal", "blunt"], "looks": {"skin": 1, "hair": "buzz", "hairColor": "auburn", "height": 0.99, "build": "slim", "acc": ["headband"]}, "bio": "Fixes lamps, ovens and washers, and grumbles about all three.", "life": ["Keeps a tin of good biscuits and tells no one.", "Got married just before the tour and counts the days."], "seed": 101468, "birthday": 188, "habitShifts": [{"add": "common-room", "why": "Marta has joined the Tiles nights in the common room."}]},
+  {"id": "volkov-maeve", "name": "Maeve Volkov", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B7-6", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-diner", "runner"], "traits": ["kind", "playful"], "looks": {"skin": 2, "hair": "long", "hairColor": "dark", "height": 1.06, "build": "slim", "acc": ["headband"]}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Collects pressed flowers from the garden.", "Is the best at fixing the coffee machine."], "seed": 299177, "birthday": 78, "habitShifts": [{"add": "gym-regular", "why": "Maeve has joined the after-shift gym crowd."}]},
+  {"id": "kovac-zainab", "name": "Zainab Kovac", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B6-1", "work": {"deck": 5, "place": "work:works"}, "habits": ["skips-breakfast", "garden-lover", "shopper"], "traits": ["meticulous", "shy"], "looks": {"skin": 3, "hair": "ponytail", "hairColor": "auburn", "height": 1.04, "build": "average", "acc": []}, "bio": "Can strip a scrubber in ten minutes flat.", "life": ["Knits scarves for anyone who stands still long enough.", "Is secretly afraid of the lift."], "seed": 741137, "birthday": 212, "habitShifts": [{"add": "tea-break", "why": "Zainab has started taking a mid-shift tea break."}]},
+  {"id": "hart-ravi", "name": "Ravi Hart", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B5-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["late-sleeper", "garden-lover", "gardener"], "traits": ["stubborn", "gentle"], "looks": {"skin": 2, "hair": "short", "hairColor": "auburn", "height": 0.95, "build": "average", "acc": []}, "bio": "Good with filters, bad with mornings.", "life": ["Draws comics about life aboard and pins them in the common room.", "Keeps fish back home on Valo."], "seed": 929678, "birthday": 82, "habitShifts": [{"add": "gym-regular", "why": "Ravi has joined the after-shift gym crowd."}]},
+  {"id": "quist-ilse", "name": "Ilse Quist", "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B6-5", "work": {"deck": 5, "place": "work:works"}, "habits": ["garden-lover", "runner"], "traits": ["dreamy", "dry humour"], "looks": {"skin": 2, "hair": "long", "hairColor": "blonde", "height": 1.0, "build": "slim", "acc": ["headband"]}, "bio": "New to Works, eager, and already covered in grease.", "life": ["Grows herbs for the galley.", "Reads mystery novels and guesses the ending too early."], "seed": 349564, "birthday": 256, "habitShifts": [{"add": "gym-regular", "why": "Ilse has joined the after-shift gym crowd."}]},
+  {"id": "esposito-yara", "name": "Yara Esposito", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [0, 1], "hours": [[480, 870]]}, "bed": "4-B5-4", "work": {"deck": 3, "place": "work:store"}, "habits": ["tea-break", "common-room", "gym-regular", "shopper"], "traits": ["dry humour", "kind"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "brown", "height": 0.98, "build": "average", "acc": ["moustache"]}, "bio": "Opens the crew store in the morning and knows who has run out of what.", "life": ["Keeps a cactus called Gerald on the windowsill.", "Keeps a journal of every star they have seen."], "seed": 468786, "birthday": 62, "habitShifts": [{"add": "gardener", "why": "Yara has started helping out in the garden."}]},
+  {"id": "ishikawa-orla", "name": "Orla Ishikawa", "rank": "junior", "dept": "store", "uniform": "works", "role": "Storekeeper", "shift": "day", "rota": {"offDays": [3, 4], "hours": [[870, 1260]]}, "bed": "4-B5-6", "work": {"deck": 3, "place": "work:store"}, "habits": ["window-seat", "tea-break", "stargazer"], "traits": ["loyal", "kind"], "looks": {"skin": 2, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["earrings", "headband"]}, "bio": "Keeps the crew store open into the evening, and the ledger in perfect order.", "life": ["Sings in the shower; the whole washroom knows.", "Grows herbs for the galley."], "seed": 960153, "birthday": 30, "habitShifts": [{"add": "lounge-regular", "why": "Orla spends evenings in the bow lounge now."}]},
+  {"id": "keane-davi", "name": "Davi Keane", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "night", "rota": {"offDays": [0, 1]}, "bed": "4-B8-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["gym-regular", "music", "runner"], "traits": ["cheerful", "reliable"], "looks": {"skin": 2, "hair": "buzz", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["moustache"]}, "bio": "Keeps the engine room clean enough to eat in.", "life": ["Sends voice messages to a grandmother on Kesh.", "Is secretly afraid of the lift."], "seed": 54212, "birthday": 163, "habitShifts": [{"add": "lounge-regular", "why": "Davi spends evenings in the bow lounge now."}]},
+  {"id": "jovanovic-petra", "name": "Petra Jovanovic", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "night", "rota": {"offDays": [1, 2]}, "bed": "4-B8-3", "work": {"deck": 6, "place": "work:engine"}, "habits": ["common-room", "calls-home", "lounge-regular", "bar-regular"], "traits": ["nervous", "reliable"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.02, "build": "average", "acc": []}, "bio": "Tends the coils on the long engine watch.", "life": ["Got married just before the tour and counts the days.", "Grew up on Valo, and misses the rain."], "seed": 695809, "birthday": 247, "habitShifts": [{"add": "music", "why": "Petra has started listening in the music room in the evenings."}]},
+  {"id": "amadi-asha", "name": "Asha Amadi", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B5-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["window-seat", "late-diner"], "traits": ["dry humour", "optimistic"], "looks": {"skin": 2, "hair": "short", "hairColor": "black", "height": 0.92, "build": "broad", "acc": ["beard", "earrings"]}, "bio": "Tends the coils on the long engine watch.", "life": ["Sings in the shower; the whole washroom knows.", "Climbs the garden's big tree when nobody is looking."], "seed": 306843, "birthday": 194, "habitShifts": [{"add": "music", "why": "Asha has started listening in the music room in the evenings."}]},
+  {"id": "salo-saad", "name": "Saad Salo", "rank": "junior", "dept": "works", "uniform": "works", "role": "Engine technician", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B7-2", "work": {"deck": 6, "place": "work:engine"}, "habits": ["skips-breakfast", "early-to-bed"], "traits": ["cheerful", "patient"], "looks": {"skin": 0, "hair": "short", "hairColor": "teal", "height": 1.09, "build": "slim", "acc": ["earrings"]}, "bio": "Keeps the engine room clean enough to eat in.", "life": ["Has a twin on another survey ship.", "Grew up on the Tevan belt, and misses the rain."], "seed": 224637, "birthday": 299, "habitShifts": [{"add": "gardener", "why": "Saad has started helping out in the garden."}]},
+  {"id": "garcia-greta", "name": "Greta Garcia", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "night", "rota": {"offDays": [1, 2]}, "bed": "4-B8-4", "work": {"deck": 2, "place": "work:watch"}, "habits": ["night-owl", "lingers-at-meals", "gardener"], "traits": ["sarcastic", "gentle"], "looks": {"skin": 1, "hair": "bun", "hairColor": "teal", "height": 1.0, "build": "slim", "acc": []}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Fixes everyone's broken headphones.", "Grew up on Hesper Dock, and misses the rain."], "seed": 314206, "birthday": 359, "habitShifts": [{"add": "lounge-regular", "why": "Greta spends evenings in the bow lounge now."}]},
+  {"id": "park-noor", "name": "Noor Park", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "night", "rota": {"offDays": [2, 3]}, "bed": "4-B8-5", "work": {"deck": 2, "place": "work:watch"}, "habits": ["workaholic", "stargazer"], "traits": ["tidy", "patient"], "looks": {"skin": 0, "hair": "long", "hairColor": "brown", "height": 1.04, "build": "slim", "acc": ["headband"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Is saving up for a boat on Coriel.", "Is learning the guitar, badly."], "seed": 439601, "birthday": 180, "habitShifts": [{"add": "shopper", "why": "Noor has started browsing the crew store after shift."}]},
+  {"id": "vasquez-uma", "name": "Uma Vasquez", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B5-1", "work": {"deck": 2, "place": "work:watch"}, "habits": ["quiet-corner", "window-seat", "bar-regular"], "traits": ["homesick", "cheerful"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "blonde", "height": 0.99, "build": "broad", "acc": ["glasses", "moustache"]}, "bio": "Learning the Watch from Holt, one lecture at a time.", "life": ["Writes poetry and shows nobody.", "Keeps fish back home on the Ostrander colonies."], "seed": 619954, "birthday": 41, "habitShifts": [{"add": "stargazer", "why": "Uma's name is on the observatory-night list now."}]},
+  {"id": "shah-dara", "name": "Dara Shah", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B4-5", "work": {"deck": 2, "place": "work:watch"}, "habits": ["skips-breakfast", "early-to-bed", "shopper"], "traits": ["shy", "dry humour"], "looks": {"skin": 1, "hair": "bun", "hairColor": "blonde", "height": 0.97, "build": "average", "acc": ["earrings", "moustache"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Has a parent who served on the Wren years ago.", "Is the best at fixing the coffee machine."], "seed": 338182, "birthday": 147, "habitShifts": [{"add": "music", "why": "Dara has started listening in the music room in the evenings."}]},
+  {"id": "chen-carmen", "name": "Carmen Chen", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B4-3", "work": {"deck": 2, "place": "work:watch"}, "habits": ["calls-home", "lounge-regular", "shopper"], "traits": ["dreamy", "restless"], "looks": {"skin": 5, "hair": "ponytail", "hairColor": "auburn", "height": 0.94, "build": "slim", "acc": []}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Sings in the shower; the whole washroom knows.", "Sends voice messages to a grandmother on Lisk."], "seed": 132744, "birthday": 136, "habitShifts": [{"drop": "lounge-regular", "why": "Carmen rarely goes to the lounge now."}, {"add": "garden-lover", "why": "Carmen has found a favourite bench in the garden."}]},
+  {"id": "nakamura-bilal", "name": "Bilal Nakamura", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [6, 0]}, "bed": "4-B4-4", "work": {"deck": 2, "place": "work:watch"}, "habits": ["calls-home", "skips-breakfast", "runner"], "traits": ["patient", "proud"], "looks": {"skin": 5, "hair": "short", "hairColor": "dark", "height": 0.96, "build": "average", "acc": ["earrings"]}, "bio": "Learning the Watch from Holt, one lecture at a time.", "life": ["Grows herbs for the galley.", "Has a twin on another survey ship."], "seed": 611065, "birthday": 106, "habitShifts": [{"add": "musician", "why": "Bilal has dusted off an old instrument and plays in the music room now."}]},
+  {"id": "ueda-vera", "name": "Vera Ueda", "rank": "junior", "dept": "watch", "uniform": "watch", "role": "Watch rating", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B4-6", "work": {"deck": 2, "place": "work:watch"}, "habits": ["evening-shower", "early-to-bed", "late-diner", "musician"], "traits": ["kind", "thoughtful"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "teal", "height": 1.01, "build": "average", "acc": ["headband"]}, "bio": "Friendly on patrol, firm at the airlock.", "life": ["Brought a telescope from home.", "Writes letters home to Valo every rest day, on paper."], "seed": 345781, "birthday": 229, "habitShifts": [{"add": "runner", "why": "Vera has taken up running on the treadmills."}]},
+  {"id": "lemaire-nils", "name": "Nils Lemaire", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "night", "rota": {"offDays": [6, 0]}, "bed": "4-B8-6", "work": {"deck": 2, "place": "work:survey"}, "habits": ["music", "lounge-regular", "gardener"], "traits": ["quiet", "ambitious"], "looks": {"skin": 4, "hair": "short", "hairColor": "auburn", "height": 1.03, "build": "broad", "acc": ["glasses"]}, "bio": "Carries samples and dreams of naming a star.", "life": ["Ran a market stall on the Ostrander colonies before joining up.", "Tells terrible jokes at breakfast."], "seed": 758061, "birthday": 344, "habitShifts": [{"add": "calls-home", "why": "Nils has started calling home more often."}]},
+  {"id": "fonseca-arjun", "name": "Arjun Fonseca", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [0, 1]}, "bed": "4-B3-5", "work": {"deck": 2, "place": "work:survey"}, "habits": ["common-room", "evening-shower", "shopper"], "traits": ["sarcastic", "competitive"], "looks": {"skin": 4, "hair": "ponytail", "hairColor": "black", "height": 0.95, "build": "broad", "acc": ["beard", "moustache"]}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Is quietly in charge of the lost-property box.", "Collects pressed flowers from the garden."], "seed": 870145, "birthday": 169, "habitShifts": [{"add": "lounge-regular", "why": "Arjun spends evenings in the bow lounge now."}, {"drop": "common-room", "why": "Arjun has drifted away from the common-room crowd."}]},
+  {"id": "kim-yusuf", "name": "Yusuf Kim", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [1, 2]}, "bed": "4-B3-6", "work": {"deck": 2, "place": "work:survey"}, "habits": ["quiet-corner", "bar-regular"], "traits": ["curious", "quiet"], "looks": {"skin": 0, "hair": "short", "hairColor": "brown", "height": 0.91, "build": "slim", "acc": ["beard", "earrings"]}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Collects old maps of Marra Station.", "Fixes everyone's broken headphones."], "seed": 336908, "birthday": 77, "habitShifts": [{"add": "garden-lover", "why": "Yusuf has found a favourite bench in the garden."}]},
+  {"id": "yilmaz-karin", "name": "Karin Yilmaz", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "4-B4-2", "work": {"deck": 2, "place": "work:survey"}, "habits": ["early-to-bed"], "traits": ["quiet", "playful"], "looks": {"skin": 4, "hair": "buzz", "hairColor": "dark", "height": 1.06, "build": "broad", "acc": ["moustache"]}, "bio": "Carries samples and dreams of naming a star.", "life": ["Tells terrible jokes at breakfast.", "Bakes on rest days, if Brennan allows it."], "seed": 180154, "birthday": 294, "habitShifts": [{"add": "evening-shower", "why": "Karin has switched to showering at night."}]},
+  {"id": "abara-rosa", "name": "Rosa Abara", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-3", "work": {"deck": 2, "place": "work:survey"}, "habits": ["common-room", "lingers-at-meals"], "traits": ["quiet", "loyal"], "looks": {"skin": 1, "hair": "ponytail", "hairColor": "black", "height": 0.94, "build": "slim", "acc": []}, "bio": "Runs the lab scanners and labels everything twice.", "life": ["Ran a market stall on Valo before joining up.", "Draws comics about life aboard and pins them in the common room."], "seed": 125860, "birthday": 307, "habitShifts": [{"add": "shopper", "why": "Rosa has started browsing the crew store after shift."}]},
+  {"id": "alvarez-luca", "name": "Luca Alvarez", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B3-4", "work": {"deck": 2, "place": "work:survey"}, "habits": ["late-sleeper", "garden-lover", "stargazer"], "traits": ["playful", "cheerful"], "looks": {"skin": 5, "hair": "short", "hairColor": "brown", "height": 1.08, "build": "slim", "acc": []}, "bio": "Carries samples and dreams of naming a star.", "life": ["A sister on Coriel who sends recipes.", "Keeps a cactus called Gerald on the windowsill."], "seed": 740188, "birthday": 341, "habitShifts": [{"add": "early-riser", "drop": "late-sleeper", "why": "Luca has turned into an early riser."}]},
+  {"id": "mbeki-bo", "name": "Bo Mbeki", "rank": "junior", "dept": "survey", "uniform": "survey", "role": "Survey assistant", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B4-1", "work": {"deck": 2, "place": "work:survey"}, "habits": ["night-owl", "late-diner", "musician"], "traits": ["cheerful", "meticulous"], "looks": {"skin": 2, "hair": "curls", "hairColor": "dark", "height": 1.08, "build": "slim", "acc": []}, "bio": "Carries samples and dreams of naming a star.", "life": ["Brought a telescope from home.", "A sister on Kesh who sends recipes."], "seed": 802246, "birthday": 271, "habitShifts": [{"add": "bar-regular", "why": "Bo has become a regular at the lounge bar."}]},
+  {"id": "grieve-thea", "name": "Thea Grieve", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [3, 4]}, "bed": "4-B3-1", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["lingers-at-meals", "tea-break", "stargazer"], "traits": ["serious", "nervous"], "looks": {"skin": 1, "hair": "long", "hairColor": "dark", "height": 0.94, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Keeps fish back home on New Aberdeen.", "Is quietly in charge of the lost-property box."], "seed": 780864, "birthday": 328, "habitShifts": [{"add": "gym-regular", "why": "Thea has joined the after-shift gym crowd."}]},
+  {"id": "larsen-hamid", "name": "Hamid Larsen", "rank": "junior", "dept": "infirmary", "uniform": "infirmary", "role": "Infirmary aide", "shift": "day", "rota": {"offDays": [4, 5]}, "bed": "4-B3-2", "work": {"deck": 3, "place": "work:infirmary"}, "habits": ["skips-breakfast", "night-owl", "tea-break", "musician"], "traits": ["serious", "chatty"], "looks": {"skin": 1, "hair": "short", "hairColor": "brown", "height": 1.05, "build": "average", "acc": ["beard", "headband"]}, "bio": "Changes the infirmary beds and knows everyone's blood type.", "life": ["Is learning the guitar, badly.", "Is saving up for a boat on the Ostrander colonies."], "seed": 690121, "birthday": 74, "habitShifts": [{"add": "lingers-at-meals", "drop": "skips-breakfast", "why": "Hamid has started taking time over meals."}, {"drop": "night-owl", "why": "Hamid has started going to bed on time."}]},
+  {"id": "walsh-esme", "name": "Esme Walsh", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [5, 6], "team": "late"}, "bed": "4-B2-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["quiet-corner", "workaholic", "runner"], "traits": ["sharp-eyed", "meticulous"], "looks": {"skin": 5, "hair": "short", "hairColor": "black", "height": 0.92, "build": "slim", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Keeps fish back home on Port Halloran.", "Keeps a cactus called Gerald on the windowsill."], "seed": 383530, "birthday": 9, "habitShifts": [{"add": "evening-shower", "why": "Esme has switched to showering at night."}]},
+  {"id": "madsen-ivo", "name": "Ivo Madsen", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "late"}, "bed": "4-B2-1", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "shopper"], "traits": ["stubborn", "chatty"], "looks": {"skin": 4, "hair": "bald", "hairColor": "auburn", "height": 0.93, "build": "slim", "acc": ["glasses", "headband"]}, "bio": "Can carry six trays at once.", "life": ["Sings in the shower; the whole washroom knows.", "Collects pressed flowers from the garden."], "seed": 443898, "birthday": 157, "habitShifts": [{"add": "early-riser", "why": "Ivo has started getting up early."}]},
+  {"id": "varga-tariq", "name": "Tariq Varga", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [0, 1], "team": "early"}, "bed": "4-B2-4", "work": {"deck": 3, "place": "work:galley"}, "habits": ["early-riser", "late-diner", "lounge-regular", "runner"], "traits": ["competitive", "thoughtful"], "looks": {"skin": 1, "hair": "bun", "hairColor": "dark", "height": 0.93, "build": "slim", "acc": []}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Sends voice messages to a grandmother on the Tevan belt.", "Writes letters home to Valo every rest day, on paper."], "seed": 599511, "birthday": 293, "habitShifts": [{"add": "window-seat", "why": "Tariq always heads for a window seat now."}]},
+  {"id": "haddad-tamsin", "name": "Tamsin Haddad", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [2, 3], "team": "early"}, "bed": "4-B6-2", "work": {"deck": 3, "place": "work:galley"}, "habits": ["evening-shower", "lingers-at-meals"], "traits": ["optimistic", "nervous"], "looks": {"skin": 1, "hair": "short", "hairColor": "auburn", "height": 0.94, "build": "average", "acc": ["glasses"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Knows the lyrics to every song in the record cabinet.", "Is learning the guitar, badly."], "seed": 416759, "birthday": 4, "habitShifts": [{"add": "quiet-corner", "why": "Tamsin has been looking for quiet corners lately."}]},
+  {"id": "dlamini-lukas", "name": "Lukas Dlamini", "rank": "junior", "dept": "galley", "uniform": "works", "role": "Galley hand", "shift": "day", "rota": {"offDays": [1, 2], "team": "early", "cover": {"for": "brennan", "days": [4, 5]}}, "bed": "4-B1-5", "work": {"deck": 3, "place": "work:galley"}, "habits": ["garden-lover", "skips-breakfast", "night-owl", "bar-regular"], "traits": ["dry humour", "blunt"], "looks": {"skin": 4, "hair": "short", "hairColor": "black", "height": 1.1, "build": "average", "acc": ["moustache"]}, "bio": "Chops, stirs and washes up under Brennan's eye.", "life": ["Grew up on Port Halloran, and misses the rain.", "Got married just before the tour and counts the days."], "seed": 542406, "birthday": 123, "habitShifts": [{"add": "quiet-corner", "why": "Lukas has been looking for quiet corners lately."}]},
 ];
 const ROSTER_GUESTS = [
-  {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695},
+  {"id": "saruth", "name": "Envoy Saruth", "story": true, "rank": "guest", "dept": "guest", "uniform": null, "role": "Veyli Envoy (guest)", "shift": "day", "rota": {"offDays": []}, "bed": "2-E", "work": null, "habits": ["quiet-corner", "garden-lover"], "traits": ["formal", "observant", "patient"], "looks": {"skin": 2, "hair": "long", "hairColor": "white", "height": 1.09, "build": "slim", "acc": ["headband"]}, "bio": "The Veyli Envoy, guest of the Concord. Courteous, ritual-minded, and hard to read.", "life": ["Keeps a knot of Veyli cord on the door handle: visitors by invitation only.", "Takes tea at a low table, kneeling, at the same hour every day."], "seed": 623695, "birthday": 287, "plate": {"rank": "Veyli Envoy", "name": "Saruth"}, "habitShifts": [{"add": "gardener", "why": "Envoy Saruth has asked for a corner of the garden, and tends Veyli seedlings there."}]},
 ];
-const ROSTER_PLAYER = {"id": "you", "name": "You", "player": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician (you)", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-4", "work": {"deck": 5, "place": "work:works"}, "habits": [], "traits": [], "looks": {"skin": 2, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}, "bio": "New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.", "life": [], "seed": 554340};
+const ROSTER_PLAYER = {"id": "you", "name": "You", "player": true, "rank": "junior", "dept": "works", "uniform": "works", "role": "Works technician (you)", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "4-B1-4", "work": {"deck": 5, "place": "work:works"}, "habits": [], "traits": [], "looks": {"skin": 2, "hair": "short", "hairColor": "dark", "height": 1.05, "build": "average", "acc": []}, "bio": "New aboard, a junior technician in Works. Your bunk is in Bunk 1, with Tomas.", "life": [], "seed": 554340, "birthday": 50};
 // ---- END ROSTER ----
 // a roster entry as makeCharacter takes it
 const ROSTER_RANK = { junior: 0, officer: 1, senior: 1, chief: 2, xo: 3, captain: 4, guest: 0 };

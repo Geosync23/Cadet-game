@@ -16,11 +16,11 @@ from playwright.sync_api import sync_playwright
 
 DAY = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 BUDGET = 450
-STEP = 0.05                    # real seconds a step (the main loop's longest frame): 0.04 ship minutes
+STEP = 0.05                    # real seconds a step (the main loop's longest frame): 0.03 ship minutes at SHIP_RATE 0.6
 
 # run one deck through the day: the crew logic only, a step at a time; every ship hour, draw a frame or two
 SIM = r"""(async ({ n, day, step, draw }) => {
-  const B = (day - 1) * 1440, out = { deck: n, stuck: 0, stuckWho: '', shared: 0, sharedWho: [], notOwnBed: [], noPath: [], missing: 0, peakCrew: 0, calls: [], unexpected: [] };
+  const B = (day - 1) * 1440, perMin = Math.round(1 / (step * SHIP_RATE)), perHour = perMin * 60, out = { deck: n, stuck: 0, stuckWho: '', shared: 0, sharedWho: [], notOwnBed: [], noPath: [], missing: 0, peakCrew: 0, calls: [], unexpected: [] };
   setShipNow(B); goToDeck(n);
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
@@ -37,11 +37,11 @@ SIM = r"""(async ({ n, day, step, draw }) => {
       }
     }
     out.peakCrew = Math.max(out.peakCrew, DECK_CREW.length);
-    if (k % 25 === 0) {                                   // every ship minute: is everyone due here here?
+    if (k % perMin === 0) {                                   // every ship minute: is everyone due here here?
       const here = new Set(DECK_CREW.map(a => a.p.id));
       for (const p of schedPeople()) { const w = whereIs(p, now); if (w.deck === n && w.act !== 'commute' && now - w.from > 1 && !here.has(p.id)) out.missing++; }
     }
-    if (draw && k % 1500 === 0) {                         // every ship hour: a frame by the lift and one over the crowd
+    if (draw && k % perHour === 0) {                         // every ship hour: a frame by the lift and one over the crowd
       for (const view of ['lift', 'crowd']) {
         let c = view === 'lift' ? cellPos(...nearestOpen(LIFT_AT[0], LIFT_AT[1], player)) : null;
         if (!c) { if (!DECK_CREW.length) continue; c = new THREE.Vector3(DECK_CREW.reduce((s, a) => s + a.x, 0) / DECK_CREW.length, 0, DECK_CREW.reduce((s, a) => s + a.z, 0) / DECK_CREW.length); }
