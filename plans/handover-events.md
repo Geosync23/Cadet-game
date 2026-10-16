@@ -44,30 +44,46 @@ Written at build 0.34.6 and updated at **0.34.7** (Pillar 3, C6 step 1, on top o
 - Should joining a tradition do more than a little social (friendship with those there, once relationships exist)?
 - Pillar 3: the device's Calendar reads `eventsOn` / `EV_MAILBOX`; ship-wide events may reuse the gathering machinery.
 
-## Pillar 3 (C6, C10's occasions, meetings): where it stands at 0.34.7
+## Pillar 3: where it stands at 0.34.13 (the second events engineer, session_01GW9QtevJxaMQzzCGPBHaxb)
 
-Read plans/pillar3-plan.md (on `claude/lead-pillar1`): Part 2 in full, "Shared formats" section 18, the workstream rows C6 and C10. DEV_NOTES "Ship-wide events (0.34.7)" has the format.
+Read plans/pillar3-plan.md (on `claude/lead-pillar1`): Part 2, Part 4, "Shared formats" section 18, rows C6 and C10. DEV_NOTES "Ship-wide events" has every detail; this is the short version.
 
-- **Done (0.34.7):**
-  - The traditions array is now `SHIP_TRADITIONS`.
-  - `SHIP_EVENTS` is the object of ship-wide events.
-  - The machinery: `eventNow`, `eventMod`, `eventScore`/`eventMine`, `eventStart`/`eventAdvance`/`eventDueDay`, bands, traces (`traceOn`), the save.
-  - Stand-ins: `captainAddress`, `MEETING_SCRIPTS`/`meeting`/`dialogueShow`/`dialogueClose`, and `upcomingTraditions`.
-  - events_check runs the storm's skeleton from day 10, twice.
-- **Next (the lead's order, step 2): the ion storm's data**, all in `SHIP_EVENTS.ionStorm`:
-  - the warning, onset, escalation, resolution and afterglow (the afterglow should last a day or two; `days` is 4 now, so it gets only 6 hours: raise `days` or move the end);
-  - the address lines for onset and the all-clear;
-  - the Works notice Mail;
-  - jobs (secure the lounge, shielded ballasts, battery packs to the bridge);
-  - news seeds for the social engineer (session_01DzZ669spGpdSdVMYzUog2N, section 20);
-  - routines (double shifts on the bridge, the lounge closed, call-home booths closed) for the sim engineer;
-  - galley (storm stew, trays to the bridge) for the galley engineer;
-  - threads (blackout minutes, food spoiled, bridge tiredness, call-home backlog);
-  - traces; the debrief by band.
-  Then remove `draft: true`, so it starts in play about day 8-10.
-- **Meetings:** Calder's storm briefing (Works bay, day 0, 08:15, with one choice: the bridge battery run, the lounge, or nothing) and the Captain's all-clear (observation room, day 3, 10:00, at the same moment as the all-clear address), as `MEETING_SCRIPTS` entries. The device engineer (session_014TpEMbWarRFJM8BHC9WM8c, section 19) draws the panel: agree with them on `deviceDialogue(script, i)` and on how a choice reports back (relationship and job).
-- **Other owners add their own inert checks (C7):** systems read `eventMod('wear', system)` and `eventMod('effect', 'flicker')`; sim reads `eventMod('routine', ...)`; galley reads `eventMod('galley', ...)`. Tell them the keys once the storm's data is fixed.
-- **Open for you:**
-  - Traditions should pause or change during a ship-wide event (no observatory night in a storm). Do it so plans stay deterministic: decide from `SHIP.event`'s start day and the event's phases, never from live state that changes during a day.
-  - Who scores the threads (systems for blackout, galley for spoilage).
-  - The C10 occasions: the summons, briefings, invitations, the Captain's table.
+- **Branch and builds:** `claude/ship-events`, 0.34.8 to 0.34.13. Merged ship-integration 0.41.5 at 5ad87e8. Report to the lead, session_015QoyPWBdMPM4ywf5W2jMMs.
+- **The ion storm is ON (0.34.12):** `SHIP_EVENTS.ionStorm`, due on the first day from 8 on when Calder is on shift (day 10 in a new game). It has the full data: phases to the end of day 5, systems, routines, needs, galley, jobs, news, moments, meetings, address, mail, threads, traces, dressing and the debrief.
+  - Thread scorers: blackout (systems 0.33.26), spoiled and bridgeHungry (galley 0.29.21), calls (here, `stormCallBacklog`).
+- **Meetings (0.34.9-10):** `MEETING_SCRIPTS.calderStorm` and `captainAllClear`.
+  - `meetingsTick` plays a script when you're in its room. `meetingCast` fills 'works:2'.
+  - The panel is section 19's `deviceDialogue(view)`, and its taps call `dialogueNext`, `dialogueChoose(k)` and `dialogueClose`. The plain strip `DIALOGUE_EL` stands in until it lands.
+  - Walking out or missing a meeting mails its gist (after skips too).
+- **Felt everywhere:** `eventFeel` -> the performance engineer's `shipFeel(kinds, len)`, else my stand-in `eventFeelFrame` (shake, light dip, flicker).
+- **The address:** `captainAddress` -> section 19's `deviceAddress({ from, text })` when it exists, else a plain banner.
+- **Joined up:**
+  - `newsAdd` (section 20). I expand 'dept:'/'all' seeds to ids myself.
+  - `dressShow` (the deck architect's DECK_DRESS ids: signupWorks, partyLounge, stormRosterTeaCorner, relayScorch, tapedPanel).
+  - For section 14: `eventOn(d)`, `eventGatherings(d)`, `eventRoutines(t)`, `callOwed`, `eventGuestDays(g)`.
+  - The party goes through `eventPlan` (`EV_SHIPWIDE`).
+  - `eventOneOff` for section 20's story beats, with `host: true` on the host's plan entry.
+  - `eventMod(kind, key, t)` takes a minute; `eventModAt` was dropped.
+- **Occasions (C10, 0.34.11):** `OCCASIONS`: readyRoom (summons), captainsTable (every 28 days), progressTalk (`occasionAsk`). `SHIP.occasions` and `SHIP.commendations` are saved. `occasionDoorOpen` is for section 14's `doorOpenFor`; `occasionMod` is the table's galley batch through `eventMod`. design-doc has the rules.
+- **Tests:** events_check now also runs:
+  - the paper storm twice (identical);
+  - a live storm (briefing, front, all-clear, end);
+  - the occasions;
+  - the hooks (party, routines, guests, one-off).
+  Before each push, run deck_check, day_check 1 (and 11 or 13 for storm days), player_check, food_check and cadet_test against the previous build.
+
+### Loose ends
+
+- The sim engineer (session_01R6RBwwBM9aorpsqDCrztDU) builds the storm routines from `eventRoutines`. They should seat a one-off's host first (`host: true`). Doors for occasions: `doorOpenFor` should read `occasionDoorOpen`.
+- The systems engineer should set `j.eventJob` on posted storm jobs, and claim for 'you' when `SHIP.event.mine['wants:<job>']` is set (the briefing choice).
+- The device engineer: `apptAdd` for occasions, Record reading `SHIP.occasions` (kept) and `SHIP.commendations`. A lasting count of your jobs is needed (`yourJobsDone` reads `SHIP.jobs`, which may be pruned).
+- The conference table (Part 4) waits for an event with a senior briefing (the diplomatic visit). Officers' quarters invitations are section 20's.
+- Known: the warning Mail goes at 06:00, before Calder's 08:15 briefing. The debrief arrives at the end of the afterglow.
+- Next events: the diplomatic visit (guests through `eventGuestDays`, `guestsArrive`, the greeting meeting at the shuttle-bay venue, formal dinners as occasions or meetings), then down the plan's list.
+
+### Gotchas
+
+- `eventNow(t)` is pure: running event, then the log, then the next due. Never let it read live-only state. It never runs past `days`.
+- `MEETINGS` dedups by id and minute. events_check saves and restores it, because the in-play storm registers the same meetings.
+- `newsAdd` is section 20's real function in merged builds. Tests can't stub it (it's not on window), so events_check reads `NEWS` and removes what it added.
+- Something added to `evTable()` adds pools to `schedData`. `eventOneOff` clears `SCHED_DATA` and later plans.

@@ -1,11 +1,11 @@
 # Handover: performance engineer (crowd rendering and activity poses)
 
-Written at 0.40.8 (merged up to claude/ship-integration 980e6a9). Plain notes for whoever picks this area up.
+Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.17 (claude/crowd-render 5add99d, on 0.41.4). Plain notes for whoever picks this area up.
 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities, last was 0.27.6). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.17). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
 - **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`. Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
 - **Test scripts:** I don't own any. I use `cadet_test.py`, `deck_check.py`, `day_check.py` and `player_check.py`.
@@ -36,6 +36,30 @@ The functions:
 **Demos** (these never save; the NOSAVE line is in section 13):
 - `?crowd=40` (or any number) puts that many crew in the plaza.
 - `?poses` lines up every pose with its prop, east of the lift. Lying poses go on the benches to the west.
+
+## Added since 0.40.8 (builds 0.27.7 to 0.27.17)
+All in sections 8 and 8b unless named. The DEV_NOTES rows have the detail.
+- **More held things** (`HOLDS`): `+tray`, `+toolbox`, `+datapad`, `+device`. A HOLDS entry can take `one` (only one arm holds: 1 left, -1 right), `bone` (the prop rides a hand, R or L), `hx` (wrist) and `look` (head bend).
+- **Crouch:** `crouch` is a base pose that walks like `walk`, with the hips 0.2 lower. animateRig reads `g.crouch` (0 unless crouching).
+- **Coarse third detail** for crowds over `CROWD_MANY` (70): people beyond `CROWD_FAR2` (16) use `CROWD_DETAIL[2]`, about 1,100 triangles each. It's packed on first use (`packOf`), and `?crowd=` / `#crowd-` goes up to 151. A normal day reaches 67 people on Deck 3, so an event pushing a deck past 70 turns it on.
+- **Machine looks** (`machineFx`): reads systems' `machineLook(id)` twice a second, and draws blink lamps, drips, dim plates and flicker glows in at most 4 instanced meshes. Optional `look` placement sits on machine entries. On Deck 3 the garden wilts (`GD.leaves`). Also lamp stutter (`machineFx.lamps(t)`, one line in section 12 after applyLight) and shower spray (one instanced mesh; `placeBusy` showers; thin and patchy when `shipSystems()` water or heat is low). `#looks` forces everything on.
+- **Seats:** on a seat higher than 0.62, the feet rest on the ring. `?seats` / `#seats` puts a labelled stand-in on every seat place. All 267 seat places were fixed by the architects from my measurements (place `y`, `xy`, and numeric `face` in degrees, which sim 0.26.11 added to placeSpot).
+- **Debug switches from the hash** (section 13): `URL_FLAGS` also reads `#tok.tok-value`, and `urlFlag(name)` returns a switch's value. `#crowd-120`, `#poses`, `#seats`, `#looks`, `#nosave` work on the playable link, which never gets a ?query.
+- **The device pose (C11):** `deviceHook()` listens to section 19's `deviceOn('open'|'close'|'phosphor')` and sets `player.deviceOut`. One shared line in section 10's Walker adds '+device' when your hands are otherwise empty. The prop is drawn unlit on a full rig (+1 draw call while open), tinted by `devicePhosphor()` (`DEVICE_SKIN.ink`, else `--crt-ink`), and rebuilt on a phosphor change (`devicePropRecolour`).
+- **Chatter bubbles (C5):** `bubbleSay(who, text, secs)`, `bubbleClear()` and `bubbles.hidden`. DOM only, at most 2 on screen, 120 to 220 px wide, kept on screen. The social engineer drives them from section 20.
+- **Plain clothes for guests:** `dept: 'civilian'` with `outfit` draws a top in that colour, no badge, no pips.
+- **Gym:** `punch` and `stretch` activities.
+
+## Waiting for me (at 0.27.17)
+- **shipFeel(kinds, len)** for the events engineer (section 18). The kinds are 'jolt', 'lightsDip' and 'flicker' on the current deck; their stand-in, `eventFeelFrame`, shows the baseline and steps aside once shipFeel exists. Also the occasional flicker while `eventMod('effect', 'flicker')`, then emergency lighting, 'look up' at a jolt, and the address pose. The lead calls this when the storm switches on.
+- **Review the device engineer's CRT skin for phone cost** when they send their branch (claude/device).
+- **The 450 budget at gatherings:** the festival waits for a real-phone sign-off from this role (plan, "Gatherings").
+
+## Gotchas found since 0.40.8
+- cadet_test sometimes shows `i_tap1` with 78 pixels one level off along a hull edge, even for DOM-only changes. It's run-to-run renderer noise, and the test labels it so.
+- A 4-sided shower streak once moved that same edge; 3-sided didn't. If i_tap1 differs by more than one level, look again.
+- Seat heights come from the place's `y`, never from SEAT_Y by type: the same type ranges from 0.18 (cushions) to 0.80 (bar stools). My probe scripts measure seat tops by raycasting (scratchpad b11/fit.py, which isn't committed); re-create the probe if needed.
+- The player's Walker pose line in section 10 is shared with the player engineer (holding, crouch, deviceOut). Keep each addition inert while its field is undefined.
 
 ## State at 0.40.8: loose ends and weak spots
 - The `HOLDS` arm poses (`sx/ex/sz/lean`) and the props were tuned by eye from screenshots only. Nobody has checked them on a real phone.

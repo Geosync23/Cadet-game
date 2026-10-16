@@ -287,7 +287,7 @@ One list for the whole ship, shown on the big job board in the Works bay and on 
 3. They fetch parts, using hover carts from the Deck 5 hold for supplies, walk to the fault and fix it.
 4. The player gets the skilled or interesting jobs for their rank. Routine jobs get done by the crew if the player leaves them, but more slowly. Jobs nobody claims pile up and get worse.
 
-**Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs wait 3 day-shift hours for the player before the crew step in. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
+**Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs wait for the player at least 3 day-shift hours and then to the end of that shift, at most 6 held at once, before the crew step in (from 0.33.32: at the real clock 3 ship hours are only 5 real minutes, and the board looked empty). On the player's days off nothing is held: the crew take those jobs, though the board stays open. The first morning has two small jobs ready by 08:00. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
 
 ### Consequences
 
@@ -542,6 +542,14 @@ Story arrives without stopping daily life, like a TNG episode where a phenomenon
 4. **Meetings with dialogue:** a gathering where people talk to each other and to you: a briefing, a summons, a greeting, a formal dinner. When you're there, a panel in the device's screen style plays their lines one by one, with each speaker's name and face, and the speakers turn to each other with small gestures. Sometimes you get two or three replies to choose from; they nudge a relationship or a thread a little, and there's never a right answer, a pass or a fail. The ship keeps running, the camera stays with you, and you can walk away at any time; the gist then arrives in Mail. It is never a full cutscene.
 
 Whatever you saw or missed, the crew retell it in chatter for a day or two, with the details that really happened.
+
+**Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
+
+- **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
+- **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
+- **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
+- Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
 **Pacing:** roughly one main event every 1–2 ship weeks (about 4½–9½ real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday cake in the mess.
 

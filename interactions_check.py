@@ -238,7 +238,7 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
-# a fresh game (0.37.6, the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
+# a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:
     with sync_playwright() as pw:
@@ -250,9 +250,7 @@ if '--quick' not in sys.argv:
             hours.append((h, g.ev("typeof openJobs === 'function' ? openJobs('you').length : jobsBoard().filter(j => !j.claimedBy).length")))
         print('   open to you by hour:', ' '.join(f'{h:02d}:00 {n}' for h, n in hours))
         empty = [h for h, n in hours if n < 1]
-        if empty and '--strict-jobs' not in sys.argv:   # until section 17's first-day fix lands (0.37.6): reported, not failed
-            print(f'   PENDING (section 17): a fresh game has no job for you at {empty}:00')
-        else: check(not empty, f'a fresh game has a job for you on the board every hour of the day shift (empty at {empty})')
+        check(not empty, f'a fresh game has a job for you on the board every hour of the day shift (empty at {empty})')   # strict from 0.37.7 (section 17's 0.33.32)
         check(not g.errors, f'no console errors ({g.errors[:3]})')
         g.close()
 

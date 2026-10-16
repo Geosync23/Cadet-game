@@ -67,7 +67,7 @@ with sync_playwright() as pw:
     # stop the game's own loop from moving anything between our steps: we drive the crew ourselves
     g.ev("window.__realTick = tickShip; tickShip = () => {}")
     g.ev("player.steer = null; player.stop()")
-    print(f"Day {DAY} ({g.ev(f'WEEKDAYS[weekday({DAY})]')}), {g.ev('schedPeople().length')} people")
+    print(f"Day {DAY} ({g.ev(f'WEEKDAYS[weekday({DAY})]')}), {g.ev(f'schedPeople().filter(p => aboard(p, {DAY})).length')} people aboard ({g.ev(f'schedPeople().filter(p => p.guest && aboard(p, {DAY})).length')} of them guests)")
 
     # 1. the schedules
     r = g.ev(f"dayReport({DAY})")
@@ -85,7 +85,7 @@ with sync_playwright() as pw:
     print('  never used:', ', '.join(unused) or 'none')
     print('  used by fewer than 3 people:', ', '.join(few) or 'none')
     # crew needs on paper through the day (lowest and middle value of each)
-    nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
+    nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
       out.push(hhmm(hm) + '  ' + NEEDS.map(k => {{ const v = all.map(n => n[k]).sort((a, b) => a - b); return k + ' ' + v[0] + '/' + v[v.length >> 1]; }}).join('  ')); }} return out; }})()""")
     print('Crew needs (lowest/middle):'); [print('  ' + l) for l in nd]
 

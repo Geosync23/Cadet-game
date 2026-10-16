@@ -42,14 +42,15 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device,.devtip,.devdlg,.devaddr,#chat.devchat{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+html[data-ph="amber"] body #seek,.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
 .device.wide{left:12px;top:12px;bottom:12px;right:auto;width:min(420px,40vw);height:auto;border-radius:24px;padding:8px 12px 10px}
-.device .bez{display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device .bez{position:relative;display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:15px;letter-spacing:.14em;color:#8d969e;text-shadow:none;touch-action:none}
+.device:not(.wide) .bez::before{content:"";position:absolute;left:0;right:0;top:-14px;bottom:-8px}
 .device .bez .grip{flex:1;display:flex;justify-content:center}
 .device .bez .grip::before{content:"";width:44px;height:4px;border-radius:2px;background:#3a4148}
 .device.wide .bez .grip::before{display:none}
@@ -77,6 +78,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device #devBody p.hot{color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow)}
 .device #devBody p.head{margin:16px 0 2px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .row.hot{border-color:var(--crt-ink)}
+.device .row.head{margin-top:14px}
+.device .row.head .rt{color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
 .device .devform label{display:block;margin:8px 0;color:var(--crt-ink)}
 .device .devform input,.device .devform textarea{display:block;width:100%;margin-top:4px;padding:8px 10px;min-height:44px;font:inherit;color:var(--crt-hot);background:rgba(0,0,0,.35);border:2px solid var(--crt-dim);border-radius:4px;-webkit-user-select:text;user-select:text;touch-action:auto;caret-color:var(--crt-hot);resize:vertical}
 .device .devform input:focus,.device .devform textarea:focus{outline:none;border-color:var(--crt-ink)}
@@ -92,6 +95,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device .devmap .pick{fill:var(--crt-hot);opacity:.8}
 .device .devmap .m-wall{fill:none;stroke:var(--crt-ink);stroke-width:.14;stroke-linecap:square}
 .device .devmap .m-you{fill:var(--crt-hot);stroke:var(--crt-bg);stroke-width:.3}
+.device .devmap .m-per{fill:var(--crt-bg);stroke:var(--crt-ink);stroke-width:.28;cursor:pointer}
+.device .devmap .m-per.pick{fill:var(--crt-hot);stroke:var(--crt-hot);opacity:1}
 .device .row.past .rt{color:var(--crt-dim)}
 .device #devBody p.fx.up,.device #devBody p.fx.down{color:var(--crt-ink)}
 .device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:inherit}
@@ -123,6 +128,10 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
   border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
   box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);cursor:pointer}
 .devtip[hidden],.devdlg[hidden]{display:none}
+body #seek{border-radius:12px;border:3px solid var(--bezel);padding:10px 14px;min-height:44px;font-family:var(--crt-font);font-size:15px;line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);
+  text-shadow:0 0 4px var(--crt-glow);box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);-webkit-backdrop-filter:none;backdrop-filter:none}
+body #seek b{color:var(--crt-hot);font-weight:700}
+body #seek[hidden]{display:none}
 .devdlg,#chat.devchat{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;width:min(520px,calc(100% - 20px));padding:12px 16px 12px;border-radius:16px;border:3px solid var(--bezel);
   font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);box-shadow:0 8px 28px rgba(0,0,0,.55),inset 0 0 22px rgba(0,0,0,.85);-webkit-backdrop-filter:none;backdrop-filter:none}
 .devdlg small,#chat.devchat small{display:block;margin:0 34px 6px 0;font-size:15px;color:var(--crt-dim);letter-spacing:.06em}
@@ -181,7 +190,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.37.6
+   STARSHIP CADET: CSV Wren                            build 0.37.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4672,6 +4681,12 @@ DECKS[3] = {
     { id: '3-infirmary-4', type: 'work:infirmary', at: [16, 7], xy: [16.3, 7.15], walk: [16, 7], face: 'n', pose: 'sit', room: 'X' },
     { id: '3-infirmary-5', type: 'work:infirmary', at: [16, 2], xy: [16.5, 2.4], walk: [16, 2], face: 'n', pose: 'stand', room: 'I' },   // ward round, between the middle beds
     { id: '3-infirmary-6', type: 'work:infirmary', at: [13, 4], xy: [13.05, 4.4], walk: [13, 4], face: 'w', pose: 'work', room: 'I' },   // the supplies shelf
+    // patients (C9, 0.38.4): the four ward beds, for anyone the sim sends to the infirmary (storm survivors, the sick). Type
+    // 'patient-bed', so nobody sleeps here at night and no plan uses them day to day; you get in from the south
+    { id: '3-ward-1', type: 'patient-bed', at: [13, 1], xy: [13.5, 1.12], walk: [13, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-2', type: 'patient-bed', at: [15, 1], xy: [15.5, 1.12], walk: [15, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-3', type: 'patient-bed', at: [17, 1], xy: [17.5, 1.12], walk: [17, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
+    { id: '3-ward-4', type: 'patient-bed', at: [19, 1], xy: [19.5, 1.12], walk: [19, 2], face: 's', pose: 'lie', y: .69, room: 'I' },
     { id: '3-toilet-1', type: 'toilet', at: [22, 21], xy: [22.18, 21.5], walk: [22, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-toilet-2', type: 'toilet', at: [20, 21], xy: [20.73, 21.5], walk: [20, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-toilet-3', type: 'toilet', at: [19, 21], xy: [19.27, 21.5], walk: [19, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
@@ -6902,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.37.6';                             // keep in step with the header's build line
+const GAME_BUILD = '0.37.7';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7101,7 +7116,7 @@ const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'gu
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = ROSTER.concat(ROSTER_GUESTS)
+  const people = ROSTER.concat(ROSTER_GUESTS, guestPeople())   // and the visitors aboard for a few days (Pillar 3)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
   // a machine's panel place isn't handed out as a desk (A5b). Event places (an `event` field) are listed by event
@@ -7282,6 +7297,7 @@ function apptTick() {
 // accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
 // with no appointments it changes nothing. Section 4's edgeBlocks asks it for 'closed' doors; section 10 opens the door.
 function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefined' ? deckDef.num : null) {
+  if ((who === 'player' || who === 'you' || (who && who.isPlayer)) && typeof occasionDoorOpen === 'function' && occasionDoorOpen(deck, room, t)) return true;   // section 18's occasions: a summons, the Captain's table
   for (const a of apptList()) {
     if (!apptOn(a) || !/^(invite|summons|meeting|checkup|work|social)$/.test(a.kind || 'social')) continue;
     const pl = apptPlace(a); if (!pl || pl.deck !== deck || pl.room !== room) continue;
@@ -7289,6 +7305,60 @@ function doorOpenFor(room, who, t = shipNow(), deck = typeof deckDef !== 'undefi
     if (who === 'player' || (who && who.isPlayer) || a.with.includes((who && (who.p || who).id) || who)) return true;
   }
   return false;
+}
+// ---- guests (Pillar 3, C8): visitors aboard for a few days, from the crew designer's GUESTS (section 9) ----
+// GUESTS: [{ id, name, spec | looks, role, cabin (their bed place id), arrive, leave (days of the year, 1-364; a
+// stay may cross the year's end), template, work?, habits? }]. Event guests have arrive and leave null, and `event`
+// and `stay` (days) instead: section 18 says when they're aboard through eventGuestDays(g) -> [arrive, leave] in
+// ship days, or null; until it does, they're away. A guest lives off duty, from their GUEST_TEMPLATES entry
+// (section 9): `day` places until 17:00 and `evening` ones after, as [deck, type, weight] (types with no places
+// skipped), ['cabin', w] (resting in their own cabin) or ['work', w] (their own `work` place); a survivor has
+// `firstDay` for their first `first` days; `wake` and `bed` are the times they get up and turn in. They come aboard
+// at 10:00 on `arrive` (by the shuttle bay, Deck 5) and leave at 10:00 on `leave`; before and after, they're 'away'
+// (deck 0: on no deck, so no one draws them). Nothing changes without GUESTS.
+const GUEST_AT = 600;                                    // arrivals and departures, 10:00
+const guestTpl = p => p.guest && typeof GUEST_TEMPLATES !== 'undefined' && GUEST_TEMPLATES[p.template] || null;
+const strSeed = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+function guestPeople() {
+  if (typeof GUESTS === 'undefined' || !Array.isArray(GUESTS)) return [];
+  return GUESTS.filter(g => g && g.id && (g.cabin || g.bed)).map(g => ({ ...g, looks: g.looks || g.spec, rank: 'guest', dept: g.dept || 'guest', shift: 'day',
+    rota: { offDays: [] }, work: null, guestWork: g.work || null, bed: g.bed || g.cabin, habits: g.habits || [], seed: g.seed || strSeed(g.id), guest: true }));
+}
+// where a guest's stay stands on ship day d: 'away', 'arrive', 'leave' or 'in' (aboard all day); crew are always 'in'.
+// Stays from the data are days of the year; an event guest's are ship days from section 18
+function guestStay(p, d) {
+  if (!p.guest) return 'in';
+  let a = p.arrive, l = p.leave, y = d;
+  if (a == null) { const ev = typeof eventGuestDays === 'function' ? eventGuestDays(p) : null; if (!ev) return 'away'; [a, l] = ev; }
+  else y = (d - 1) % 364 + 1;                            // the day of the year
+  if (y === a) return 'arrive';
+  if (y === l) return 'leave';
+  return (a <= l ? y > a && y < l : y > a || y < l) ? 'in' : 'away';   // a <= l, or across the year's end
+}
+const aboard = (p, d) => guestStay(p, d) !== 'away';
+const aboardAllDay = (p, d) => guestStay(p, d) === 'in';
+// a guest template's list as leisure options: 'cabin' is rest, 'work' their own work place. Weights count double,
+// so the template outweighs a habit or two (a window-seat habit alone weighs 20)
+const guestOpts = (p, list, bedDeck) => (list || []).map(o => o[0] === 'cabin' ? [bedDeck, 'rest', 2 * o[1]]
+  : o[1] === 'work:infirmary' && p.template === 'survivor' && guestWard(o[0]) ? [o[0], 'patient-bed', 2 * o[2]]   // a patient: the ward's beds when the deck has them
+  : o[0] === 'work' ? (p.guestWork ? [p.guestWork.deck, p.guestWork.place, 2 * o[1]] : null) : [o[0], o[1], 2 * o[2]]).filter(Boolean);
+const guestWard = n => (schedData().shared.get(n + '|patient-bed') || []).length > 0;
+// which day of their stay day d is for a guest: 1 on the day they arrive (counted up to `max`; past it, max + 1)
+const guestDayNo = (p, d, max = 7) => { for (let i = 0; i < max; i++) if (guestStay(p, d - i) === 'arrive') return i + 1; return max + 1; };
+// a guest's day on an arrival or departure day: away until 10:00 then the shuttle bay, or the shuttle bay then away
+function guestTrim(p, d, segs) {
+  if (aboardAllDay(p, d)) return segs;
+  const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
+  if (!aboard(p, d)) return [away(B, B + 1440)];
+  const cut = B + GUEST_AT, arriving = guestStay(p, d) === 'arrive', out = [];
+  if (arriving) {
+    out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
+    for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
+  } else {
+    for (const s of segs) if (s.from < cut - 10) out.push({ ...s, to: Math.min(s.to, cut - 10) });
+    out.push({ from: cut - 10, to: cut, act: 'off', deck: 5, type: null, placeId: null, tag: 'leave' }, away(cut, B + 1440));
+  }
+  return out;
 }
 // ---- habits that change slowly (answer 18): a few changes a month, the same in every game ----
 // From the second week on, each week has 0, 1 or 2 changes (about 3.5 a month): someone takes up a habit
@@ -7319,7 +7389,7 @@ const HABIT_WEEKS = [[]];                                // week w (days 7w+1 ..
 let HABIT_SAVED = null;                                  // the saved log, kept for the weeks it covers
 function habitWeek(w) {
   while (HABIT_WEEKS.length <= w) {
-    const k = HABIT_WEEKS.length, ppl = schedPeople(), out = [], d0 = 7 * k + 1;
+    const k = HABIT_WEEKS.length, ppl = schedPeople().filter(q => !q.guest), out = [], d0 = 7 * k + 1;
     if (HABIT_SAVED && HABIT_SAVED.some(c => c.day > 7 * k + 7)) { HABIT_WEEKS.push(HABIT_SAVED.filter(c => c.day >= d0 && c.day < d0 + 7)); continue; }
     const U = j => schedU(9100, k, j), n = U(0) < .35 ? 0 : U(0) < .8 ? 1 : 2;
     // the crew designer's own changes first (ROSTER[i].habitShifts: [{ add?, drop?, why }], why a whole sentence),
@@ -7379,12 +7449,46 @@ function gatherings(p, d, F) {
   if (p.rank === 'captain' && !(F.night && F.works) && U(514) < .75) out.push({ at: 1170 + Math.round(30 * U(515)), dur: 4, where: [[1, '@walk']], tag: 'stroll', walk: true });
   return out;
 }
+// ---- ship-wide events' routines (Pillar 3, C7): section 18's SHIP_EVENTS[id].routines and needs ----
+// evDay(d): the day in 10-minute slots (an event's phases start on the 10 minutes), each null or { rules, sleep, social,
+// startDay }: rules is section 18's eventRoutines(t), the whole list in force (eventMod('routine', key) finds only
+// the first match), sleep and social the needs' multipliers (eventMod('needs', ...)). Read through eventNow, which is pure for any minute, so a day planned ahead or again agrees with play.
+// Cached per day; shipDay clears the cache and the plans when the running event or the log of past ones changes.
+// The rules: doubleShift (schedFrame: the day shift works on to 20:30 with dinner at the station, the night shift to
+// 07:15, so the bridge is never empty and the two never meet at a shared desk), patrol (the Watch walks the decks in turn), closed (take() passes those places by), stayIn (that
+// share of free time in their own quarters), rush (a call owed: a booth at the first chance in `at`). Inert with no event.
+const EV_DAY = new Map(); let EV_SIG = '';
+const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0);
+function evDay(d) {
+  if (EV_DAY.has(d)) return EV_DAY.get(d);
+  let out = null;
+  try {                                                  // before section 18 has run: nothing, and nothing kept
+    if (typeof eventNow !== 'function' || typeof EV_READY === 'undefined') return null;
+    for (let i = 0; i < 144; i++) {
+      const t = (d - 1) * 1440 + i * 10, now = eventNow(t); if (!now) continue;
+      const rules = typeof eventRoutines === 'function' && eventRoutines(t).length ? eventRoutines(t) : null;
+      const sleep = eventMod('needs', 'sleep', t), social = eventMod('needs', 'social', t);
+      if (rules || sleep || social) (out || (out = new Array(144).fill(null)))[i] = { rules: rules || [], sleep: sleep || 1, social: social || 1, startDay: d - now.day };
+    }
+  } catch (e) { return null; }
+  EV_DAY.set(d, out);
+  if (EV_DAY.size > 40) EV_DAY.delete(EV_DAY.keys().next().value);
+  return out;
+}
+const evAt = abs => { const d = Math.floor(abs / 1440) + 1, sl = evDay(d); return sl ? sl[Math.max(0, Math.min(143, Math.floor((abs - (d - 1) * 1440) / 10)))] : null; };
+const evWho = (who, p) => !who || who === 'all' || who === 'dept:' + p.dept;
+const evRule = (abs, rule, p) => { const e = evAt(abs); return e && e.rules.find(r => r.rule === rule && (!p || evWho(r.who, p))) || null; };
+// a place closed at ship minute abs: where 'type:<type>' or '<deck>|<room key>'
+const evClosed = (pl, abs) => { const e = evAt(abs); return !!e && e.rules.some(r => r.rule === 'closed' && (r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room)); };
+// owed a call when comms come back: section 18's callOwed (the calls-home crew and about a third of the rest)
+const evOwed = (p, e, d) => p.rank !== 'guest' && (typeof callOwed === 'function' ? callOwed(p, e.startDay) : habitsOn(p, d).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33);
 function schedFrame(p, d) {
   const U = k => schedU(p.seed, d, k), H = new Set(habitsOn(p, d)), shape = WEEK_SHAPE[weekday(d)];
   const gp = shiftBlocks(p, d), works = galleyRotaOn() && p.dept === 'galley' && p.shift !== 'night' ? !!(gp && gp.blocks) : isWorkDay(p, d);   // the rota decides galley days off
   const jit = k => (U(k) < .5 ? -1 : 1) * (5 + 20 * U(k + 1));              // 5-25 minutes either way
   const wa = H.has('workaholic');
-  let bed = 1365 + jit(3) + (shape.late || 0);                              // about 22:45
+  const gt = guestTpl(p);                                                   // a guest keeps their template's hours
+  let bed = (gt ? gt.bed : 1365) + jit(3) + (shape.late || 0);              // about 22:45
   if (H.has('early-to-bed')) bed -= 30 + 30 * U(5);
   if (H.has('night-owl')) bed += 30 + 30 * U(5);
   const next = shiftBlocks(p, d + 1);                      // an early galley start tomorrow means an early night
@@ -7394,7 +7498,10 @@ function schedFrame(p, d) {
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
   else { f.workStart = 480 - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 1020 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
-  let wake = 375 + jit(10);                                                 // about 06:15
+  if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
+    f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
+  }
+  let wake = (gt ? gt.wake - 45 - 45 * U(13) : 375) + jit(10);            // about 06:15 (a guest's lie-in is in their template)
   if (H.has('early-riser')) wake -= 30 + 15 * U(12);
   if (H.has('late-sleeper')) wake += 15 + 15 * U(12);
   if (!works) wake += 45 + 45 * U(13) + (shape.lieIn || 0);
@@ -7429,6 +7536,7 @@ function schedBuild(p, d, occ, S) {
   const bedDeck = deckOf(p.bed), desk = rot ? rot.id : S.desks.get(p.id) || null, wd = rot ? rot.deck : p.work && p.work.deck;
   const wtype = rot ? rot.type : p.work && p.work.place, deskAnim = placeAnim(desk && S.byId.get(desk));
   const N = needsEst(p, d);                               // the needs that steer today's choices
+  const EVD = evDay(d), shut = EVD && EVD.some(e => e && e.rules.some(r => r.rule === 'closed'));   // a ship-wide event today (C7)
   const segs = []; let t = 0, deck = bedDeck;
   const deck3Full = (a, b) => { const h = occ.heads; for (let m = Math.max(a, 1020); m < Math.min(b, 1440); m++) if (h[m] >= DECK3_EVENING_MAX) return true; return false; };
   // free from a to b (minutes from midnight). An event's own places are held for it from 5 minutes before it starts
@@ -7458,6 +7566,7 @@ function schedBuild(p, d, occ, S) {
     } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
   };
   // take a free place of one of `opts` ([deck, type] pairs, best first) for `dur` minutes, waiting up to `wait`
+  // (a gathering's crowd spots, `gather` places from the deck architect, fill in their order: nearest the focus first)
   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
   const take = (act, opts, dur, o = {}) => {
     for (const [dk, type] of opts) {
@@ -7465,7 +7574,7 @@ function schedBuild(p, d, occ, S) {
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       const pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
-      const fav = Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
+      const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       for (let s = arrive; s <= arrive + wait; s++) {
         let end = s + dur; if (o.by !== undefined) end = Math.min(end, o.by);
@@ -7473,6 +7582,7 @@ function schedBuild(p, d, occ, S) {
         for (let i = 0; i < pool.length; i++) {
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
+          if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
@@ -7483,7 +7593,22 @@ function schedBuild(p, d, occ, S) {
     }
     return null;
   };
-  const work = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
+  const desk1 = to => seg('work', to, wtype, desk, deskAnim ? { anim: deskAnim } : undefined);
+  // a ship-wide event's patrol (C7): spells at their own station, between them a quarter of an hour at another deck's
+  // lift lobby or a bench, the decks in turn. The rides count as the shift (tag 'patrol')
+  const patrolTag = () => { const l = segs[segs.length - 1]; if (l && l.act === 'commute') l.tag = 'patrol'; };
+  const patrol = to => {
+    const ring = [3, 4, 5, 1, 6, 2], k0 = Math.floor(6 * U(119));
+    for (let n = 0; t < to; n++) {
+      desk1(Math.min(to, t + 30 + Math.round(20 * U(120 + n % 20))));
+      if (to - t < 2 * C + 25) { desk1(to); break; }
+      const dk = ring[(k0 + n) % 6]; if (dk === wd) continue;
+      go(dk); patrolTag();
+      if (!take('work', [[dk, 'lift-wait'], [dk, 'bench']], 15, { tag: 'patrol', min: 5, by: to - C })) seg('work', t + 10, null, null, { tag: 'patrol' });
+      go(wd); patrolTag();
+    }
+  };
+  const work = to => (EVD && to > t && evRule(B + t, 'patrol', p) ? patrol(to) : desk1(to));
   const workAt = (pid, task, to) => {                    // a galley stint: its own station and task
     const pl = pid && S.byId.get(pid);                   // tea on the stool takes the stool's own pose; the dish pit is 'wash'
     const an = pl && pl.anim || (task === 'tea' ? null : task === 'wash' ? 'wash' : placeAnim(pl) || (p.dept === 'galley' ? 'cook' : null)), ex = {};
@@ -7501,10 +7626,19 @@ function schedBuild(p, d, occ, S) {
     const br = [];
     if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
+    if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
+    const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
+    if (ru && !called && evOwed(p, evAt(B + 600), d)) br.push([Math.max(ra[0], t + 15) + Math.round((Math.min(ra[1], to) - 60 - Math.max(ra[0], t + 15)) * U(37)), 'call']);
     for (const [bt, kind] of br.sort((a, b) => a[0] - b[0])) {
       if (bt <= t + 10 || bt >= to - 25) continue;
       work(bt);
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
+      else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
+      else if (kind === 'call') {                       // to the booths and back on the shift's time (tag 'rush')
+        called = true; const n0 = segs.length;
+        if (take('callhome', [[3, 'callhome']], 20, { wait: 20, min: 10, tag: 'rush' })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = 'rush'; }
+        else work(t + 5);
+      }
       else toilet(34);
     }
     work(to);
@@ -7532,12 +7666,15 @@ function schedBuild(p, d, occ, S) {
   };
   // leisure options for this person, weighted: places on the deck you're on count four times, the one you just
   // left counts for little; [bedDeck, 'rest'] is time in your own bunk or cabin
-  let lastLeisure = null;
+  let lastLeisure = null, called = false;
   const leisureOpts = k => {
-    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest';
-    const opts = LEISURE.concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
-      .filter(([dk, type, w, who]) => (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
-      .concat([[bedDeck, 'rest', 3 * (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1)]])   // tired: rest more; lonely: less
+    const junior = p.rank === 'junior', senior = !junior && p.rank !== 'guest', gt = guestTpl(p);
+    const tired = (N.energy < 70 ? 2 : 1) * (N.social < 50 ? .5 : 1);   // tired: rest more; lonely: less
+    const opts = (gt ? guestOpts(p, t >= 1020 ? gt.evening : gt.first && guestDayNo(p, d) <= gt.first && gt.firstDay || gt.day, bedDeck) : LEISURE)   // a guest: their template's places (Pillar 3)
+      .concat(...habitsOn(p, d).map(h => HABIT_LEISURE[h] || []))
+      .filter(([dk, type, w, who]) => type === 'rest' || (!who || (who === 'junior' ? junior : who === 'deck2' ? senior || wd === 2 : senior)) && (S.shared.get(dk + '|' + type) || []).length)
+      .map(o => o[1] === 'rest' ? [o[0], o[1], o[2] * tired] : o)
+      .concat(gt ? [] : [[bedDeck, 'rest', 3 * tired]])
       .map(([dk, type, w]) => [dk, type, w * (dk === deck ? 4 : 1) * (dk + '|' + type === lastLeisure ? .2 : 1)]);
     const tot = opts.reduce((a, o) => a + o[2], 0); let r = U(k) * tot, i = 0;
     while (i < opts.length - 1 && (r -= opts[i][2]) > 0) i++;
@@ -7555,7 +7692,13 @@ function schedBuild(p, d, occ, S) {
       if (U(k + n * 3 + 2) < .12) toilet(k + n * 3 + 2);
       const opts = leisureOpts(k + n * 3 + 1), pick = opts[0];
       lastLeisure = pick[0] + '|' + pick[1];
-      if (pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 })) {
+      let rang = false;                                  // a ship-wide event (C7): a call owed when comms come back, or staying in
+      if (EVD) {
+        const ru = evRule(B + t, 'rush'), ra = ru && (ru.at || [600, 1080]);
+        if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush' }); }
+      }
+      const si = !rang && EVD && evRule(B + t, 'stayIn', p);
+      if (!rang && ((si && schedU(p.seed, d, 700 + k + n) < si.share) || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
         if (deck !== bedDeck && to - t < C + 15) linger(to); else { go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }
       }
       if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
@@ -7569,6 +7712,7 @@ function schedBuild(p, d, occ, S) {
   };
   const specials = (k, offDay) => {                      // needs: the gym, a call home, the weekly wash
     const out = [];
+    if (p.template === 'survivor') return out;            // a rescued guest rests: no gym, no shopping
     // the gym is likelier the lower fitness is, a call home the lonelier someone is
     const gym = () => take('gym', [[3, 'gym']], 40 + Math.round(20 * U(61)), { wait: 15, min: 25 });
     if (schedU(p.seed, d, 60) < GYM_BASE(p, d) + (100 - N.fitness) / 100 * .9) out.push(gym);
@@ -7655,7 +7799,7 @@ function schedBuild(p, d, occ, S) {
       morning(20, ws - (wd !== 3 ? C : 0) - 1);          // a minute in hand for the wait by the lift
       go(wd);
       shiftWithBreaks(we);
-      evening(specials(50, false), F.bed, false);
+      evening(specials(50, false), F.bed, false, F.double);
     } else {
       morning(20, MEALS.breakfast[1]);
       const sp = specials(50, true);
@@ -7716,13 +7860,14 @@ function crewNeeds(p, t) {
     const dr = k => fx && fx.drain && fx.drain[k] || 1, rs = k => fx && fx.restore && fx.restore[k] !== undefined ? fx.restore[k] : 1;
     const up = (k, to) => { n[k] = cl(n[k] + Math.max(0, to - n[k]) * rs(k)); };   // restore toward `to`, scaled
     n.hunger = cl(n.hunger - 5.5 * h * dr('hunger')); n.fitness = cl(n.fitness - .35 * h * dr('fitness'));
-    if (s.act === 'sleep') up('energy', n.energy + 14 * h); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
+    const ev = evAt(s.from);                              // a ship-wide event: sleep refills slower, company is missed sooner (C7)
+    if (s.act === 'sleep') up('energy', n.energy + 14 * h * (ev ? ev.sleep : 1)); else n.energy = cl(n.energy - 3.8 * h * dr('energy'));
     n.hygiene = cl(n.hygiene - 2.1 * h * dr('hygiene'));
     if ((s.act === 'breakfast' || s.act === 'dinner') && tag !== 'queue') up('hunger', tag === 'grab' ? 50 : 100);
     if (s.act === 'wash' && tag !== 'toilet') up('hygiene', type === 'shower' ? 100 : n.hygiene + 15);
     if (s.act === 'gym') { up('fitness', n.fitness + (h >= .4 ? 35 : 15)); n.hygiene = cl(n.hygiene - 10); }
     if (s.act === 'callhome') up('social', n.social + 35);
-    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social'));
+    else if (SOCIAL_TYPES.has(type) || /^work:/.test(type)) up('social', n.social + 15 * h); else n.social = cl(n.social - 2.5 * h * dr('social') * (ev ? ev.social : 1));
   }
   for (const k of NEEDS) n[k] = Math.round(n[k]);
   return n;
@@ -7793,6 +7938,7 @@ function jobVisits() {
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
+  if (EV_SIG !== evSig()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
   if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
@@ -7802,7 +7948,9 @@ function shipDay(d) {
     if (c.length) occ.rot.set(c[Math.floor(schedU(9001 + i, d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });
   });
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
-  const order = S.people.slice().sort((a, b) => wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
+  // an event's host (section 18's eventPlan, host: true: Pell at his own show) is planned first, so their seat is theirs
+  const host = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.host) ? new Set(S.people.filter(p => eventPlan(p, d).some(e => e.host)).map(p => p.id)) : null;
+  const order = S.people.slice().sort((a, b) => (host ? host.has(b.id) - host.has(a.id) : 0) || wakeAt(a) - wakeAt(b) || (a.id < b.id ? -1 : 1));
   occ.heads = new Int16Array(1440);                      // how many the plans so far put on Deck 3, minute by minute
   // section 18's events: each event's own places are held for it (occ.res: placeId -> [[from, to, eventId]], not a
   // booking, so dayReport never counts them) from 5 minutes before it starts until it ends (releasing them 15 minutes
@@ -7816,7 +7964,7 @@ function shipDay(d) {
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
   for (const p of order) {
-    const plan = schedBuild(p, d, occ, S); plans.set(p.id, plan);
+    const plan = guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : []); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
   const day = { d, plans, occ };
@@ -7869,6 +8017,7 @@ function runDay(day, step = 1, fn) {
 function dayReport(day) {
   const S = schedData(), B = (day - 1) * 1440, rep = { day, people: S.people.length, short: [], meals: [], work: [], double: [], gaps: [], unplaced: {}, peak: {} };
   for (const p of S.people) {
+    if (!aboardAllDay(p, day) || !aboardAllDay(p, day - 1)) continue;   // a guest arriving, leaving or away: not a full day to judge
     const segs = planDay(p, day - 1).concat(planDay(p, day));
     let sleep = 0;
     for (const s of segs) if (s.act === 'sleep' && s.placeId === p.bed) sleep += Math.max(0, Math.min(s.to, B + 1080) - Math.max(s.from, B - 360));
@@ -7879,7 +8028,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff'].includes(s.tag));
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag));
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -7944,11 +8093,15 @@ function deviceLoad(s) {
   const tipsSeen = {}; if (d.tipsSeen && typeof d.tipsSeen === 'object') for (const k in d.tipsSeen) if (d.tipsSeen[k] === true && k.length < 40) tipsSeen[k] = true;
   const appts = (Array.isArray(d.appts) ? d.appts : []).filter(a => a && typeof a === 'object' && Number.isInteger(a.id) && isFinite(a.at) && Array.isArray(a.with) && typeof a.where === 'string')
     .slice(-60).map(a => ({ id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
-      kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null }));
-  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false },
+      kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
+      ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
+  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
+// the page knows the phosphor (html data-ph) for screens drawn by other sections, like section 20's #seek chip
+function devPhosphorPage() { document.documentElement.dataset.ph = SHIP.device.settings.phosphor; }
+devPhosphorPage();
 SAVE_EXTRA.push(s => { s.device = JSON.parse(JSON.stringify(SHIP.device)); });
 setTimeout(() => {
   DEV.live = true;
@@ -7989,8 +8142,8 @@ function devDay(d) {
     { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!playerShiftOn(d)) out.splice(1, 1);               // a day off: no shift
-  for (const a of SHIP.device.appts) if ((a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)
-    out.push({ from: a.at - B, to: a.at - B + (a.len || 30), title: 'With ' + a.with.map(apptName).join(', '), where: apptWhereName(a.where), kind: 'appt' });
+  for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
   return out.sort((x, y) => x.from - y.from);
@@ -8017,9 +8170,11 @@ function deviceTick() {
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
   }
-  for (const a of SHIP.device.appts) if (a.status === 'yes' && a.at > t && a.at <= t + 10 && !DEV_REMINDED.has('appt' + a.id)) {
-    DEV_REMINDED.add('appt' + a.id); deviceNotify({ app: 'appointments', text: 'With ' + a.with.map(apptName).join(', ') + ' at ' + devWhen(a.at) + ', ' + apptWhereName(a.where) + '.', urgent: true });
+  for (const g of apptGroups(SHIP.device.appts.filter(a => a.status === 'yes' && a.at > t && a.at <= t + 10))) if (!DEV_REMINDED.has('appt' + (g.a.grp || g.a.id))) {
+    DEV_REMINDED.add('appt' + (g.a.grp || g.a.id)); deviceNotify({ app: 'appointments', text: 'With ' + g.names + ' at ' + devWhen(g.a.at) + ', ' + apptWhereName(g.a.where) + '.', urgent: true });
   }
+  for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
+    for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
   if (!R.on) return;
   for (const x of devTraditions(t + 1, t + R.ahead)) {
     if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
@@ -8044,7 +8199,11 @@ function deviceDo(action) {
   try { if (a && a.act) a.act(action.do, action.arg); } catch (e) { DEV.errors.push(String(e && e.message || e)); }
   deviceRefresh();
 }
+// Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
+const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
+const devOnShift = () => playerShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
 function deviceNotify({ app, text, urgent } = {}) {
+  if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
   DEVICE_SKIN.notify({ app, text, urgent });
   deviceRefresh();
@@ -8132,7 +8291,7 @@ const DEVICE_SKIN = (() => {
   const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
-  let back = null, drawn = null;
+  let back = null, drawn = null, drawnKey = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
     el.classList.toggle('wide', w); el.dataset.ph = st.phosphor; el.classList.toggle('fx', !!st.fx);
@@ -8185,8 +8344,10 @@ const DEVICE_SKIN = (() => {
         if (k !== at(i, j + 1) && (k !== '.' || at(i, j + 1) !== '.')) d += 'M' + i + ' ' + (j + 1) + 'h1';
       }
       svg.appendChild(sv('path', { d, class: 'm-wall' }));
+      for (const q of b.people || []) { const c = sv('circle', { cx: q.x + .5, cy: q.y + .5, r: .62, class: 'm-per' + (q.pick ? ' pick' : '') }); c.dataset.who = q.id; svg.appendChild(c); }
       if (b.you) svg.appendChild(sv('circle', { cx: b.you[0] + .5, cy: b.you[1] + .5, r: .9, class: 'm-you' }));
-      svg.onclick = e => { const k = e.target && e.target.dataset && e.target.dataset.room; if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
+      svg.onclick = e => { const ds = e.target && e.target.dataset || {}, k = ds.room;
+        if (ds.who && b.whoAction) { e.stopPropagation(); deviceDo({ ...b.whoAction, arg: ds.who }); } else if (k && b.action) { e.stopPropagation(); deviceDo({ ...b.action, arg: k }); } };
       return svg;
     },
     form(b) {                                  // text fields; the submit action gets { field id: value }
@@ -8209,7 +8370,7 @@ const DEVICE_SKIN = (() => {
     get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
-    close() { el.hidden = true; drawn = null; layout(); if (back && back.focus) back.focus(); },
+    close() { el.hidden = true; drawn = null; drawnKey = null; layout(); if (back && back.focus) back.focus(); },
     button() {
       let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
       btn.classList.toggle('low', low);
@@ -8219,6 +8380,12 @@ const DEVICE_SKIN = (() => {
     },
     draw(id, v) {
       if (drawn === id && body.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;   // typing: leave it be
+      // nothing changed since the last draw (most ship minutes): leave the screen be, as rebuilding the glowing text costs
+      // phones the most (0.35.12). Views holding a dom block (the shim) always redraw; home adds its badges
+      let key = null;
+      try { key = v.blocks.some(b => b && b.kind === 'dom') ? null : id + JSON.stringify(v) + (id === 'home' ? deviceApps().map(a => a.id + ':' + deviceBadge(a)).join() : ''); } catch (e) { key = null; }
+      if (key && key === drawnKey && drawn === id) { layout(); return; }
+      drawnKey = key;
       const keep = drawn === id ? body.scrollTop : 0;
       layout(); head.textContent = id === 'home' ? 'Your device' : v.title; backB.disabled = id === 'home';
       body.textContent = ''; body.dataset.app = id;
@@ -8285,19 +8452,24 @@ const DEVICE_SKIN = (() => {
   backB.onclick = () => deviceShow('home'); $('devHome').onclick = () => deviceShow('home');
   addEventListener('keydown', e => { if (e.key === 'Escape' && DEV.open) deviceClose(); });
   addEventListener('resize', () => { if (DEV.open) layout(); });
-  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it
+  // swipe up from the bottom edge opens it; on a phone, a swipe down on the bezel or a tap on the ship closes it.
+  // 0.35.12 (the phone review): the ship closes it on a tap (lifted within 12px and 0.4 s), not at the first touch, so a
+  // drag or a pinch over the ship doesn't close it (it doesn't steer or zoom either while the sheet is up); a cancelled
+  // touch (the phone took the gesture) forgets the swipe
   let swipe = null;
   addEventListener('pointerdown', e => {
     const cv = e.target && e.target.tagName === 'CANVAS';
     if (!DEV.open && cv && e.clientY > innerHeight - 28) swipe = { y: e.clientY, open: true };
     else if (DEV.open && !skin.wide() && e.target.closest && e.target.closest('#devBez')) swipe = { y: e.clientY, open: false };
-    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); deviceClose(); }
+    else if (DEV.open && !skin.wide() && cv) { e.stopPropagation(); swipe = { x: e.clientX, y: e.clientY, tap: performance.now() }; }
   }, true);
   addEventListener('pointerup', e => {
     if (!swipe) return; const dy = e.clientY - swipe.y;
-    if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
+    if (swipe.tap) { if (Math.hypot(e.clientX - swipe.x, dy) < 12 && performance.now() - swipe.tap < 400) { e.stopPropagation(); deviceClose(); } }
+    else if (swipe.open && dy < -40) deviceShow('home'); else if (!swipe.open && dy > 40) deviceClose();
     swipe = null;
   }, true);
+  addEventListener('pointercancel', () => { swipe = null; }, true);
   return skin;
 })();
 
@@ -8334,11 +8506,17 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   return { title: 'Home', blocks: B };
 } });
 
-// Schedule: today as a timeline, with where you're expected right now; tomorrow below
-deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view: () => {
+// Schedule: today as a timeline, with where you're expected right now; tomorrow below. A day picked in the Calendar
+// (0.35.10: { app: 'schedule', day }) shows instead of tomorrow until the device closes.
+let schedDay = null;
+deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; });
+deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
+  act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null; },
+  view: () => {
   const d = SHIP.time.day, m = SHIP.time.min, n = devNow(), B = [{ kind: 'text', text: n.now, mark: 'hot' }];
   if (n.next) B.push({ kind: 'text', text: n.next });
-  for (const day of [d, d + 1]) {
+  if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
+  for (const day of schedDay ? [schedDay] : [d, d + 1]) {
     B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)], mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
@@ -8346,27 +8524,31 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10, view
   return { title: 'Schedule', blocks: B };
 } });
 
-// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't
+// Calendar: two weeks of ship life ahead (the week's shape and the ship traditions), each tradition with Remind me / Don't.
+// Tap a day (0.35.10) for See the day (Schedule shows it) or Make an appointment (Appointments, on that day).
+let calDay = null;
 deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
   act(verb, arg) {
     const R = SHIP.device.calendarRemind;
     if (verb === 'remind') R.per[arg] = R.per[arg] === false ? true : R.per[arg] === true ? false : false;   // default (on) -> Don't -> Remind me -> Don't
     else if (verb === 'on') R.on = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) R.ahead = arg;
+    else if (verb === 'day') calDay = calDay === arg ? null : arg;
   },
   view: () => {
     const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [];
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
-      if (!trad.length && !ship.length) continue;
-      B.push({ kind: 'text', text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), mark: 'head' });
+      if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: calDay === d ? null : 'Tap to plan this day', mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
         const p = R.per[x.kind];
         rows.push({ text: devWhen(x.at) + '  ' + x.title, sub: x.where + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
           button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
-      B.push({ kind: 'list', rows });
+      if (rows.length) B.push({ kind: 'list', rows });
     }
     B.push({ kind: 'text', text: 'Reminders', mark: 'head' }, { kind: 'buttons', items: [
       { label: 'On', on: R.on, action: { app: 'calendar', do: 'on', arg: true } }, { label: 'Off', on: !R.on, action: { app: 'calendar', do: 'on', arg: false } }] });
@@ -8417,16 +8599,65 @@ deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
 // "Go there" points the goal arrow at it (setGoal, section 15b); on another deck the arrow leads to the lift first.
 let mapDeck = null, mapPick = null;
 const mapLocked = (n, k) => typeof schedRoomLocked === 'function' ? schedRoomLocked(n, k) : false;
+// people on Maps (0.35.9): only those whose whereabouts you may know (section 20's crewContacts and its rule:
+// acquaintances and up, or anyone on duty somewhere public; strangers show by their job). On your own deck a dot is
+// where they really are (the walkers); elsewhere it sits in the middle of their room. Tap a dot or a name to pick them;
+// "Go there" points the goal arrow at their room. { app: 'maps', who: crewId } opens Maps on them (the Crew app).
+let mapWho = null, mapFor = null;                         // mapFor: 'appointments' while picking a place to meet (0.35.10)
+const MAP_MID = new Map();                               // 'deck|room' -> [i, j], the room's middle tile
+function mapRoomTile(n, key) {
+  const k = n + '|' + key; if (MAP_MID.has(k)) return MAP_MID.get(k);
+  const g = DECKS[n].map || [], t = []; let sx = 0, sz = 0;
+  for (let j = 0; j < g.length; j++) for (let i = 0; i < g[j].length; i++) if (g[j][i] === key) { t.push([i, j]); sx += i; sz += j; }
+  const c = t.length ? t.sort((a, b) => Math.hypot(a[0] - sx / t.length, a[1] - sz / t.length) - Math.hypot(b[0] - sx / t.length, b[1] - sz / t.length))[0] : null;
+  MAP_MID.set(k, c); return c;
+}
+function mapPeople() {                                   // [{ id, name, label, tierName, role, deck, room, roomName, act }]
+  if (typeof crewContacts !== 'function') return [];
+  let cs; try { cs = crewContacts({ all: true }); } catch (e) { DEV.errors.push('crewContacts: ' + (e && e.message || e)); return []; }
+  const out = [];
+  for (const c of cs || []) {
+    const w = c && c.where; if (!w || !DECKS[w.deck] || w.act === 'sleep' || w.act === 'wash') continue;   // never in their bunk or the shower
+    const rooms = DECKS[w.deck].rooms || {}, room = Object.keys(rooms).find(k => rooms[k].name === w.room) || null;
+    out.push({ id: c.id, name: c.name, label: c.tier >= 1 ? c.name : c.role + ' (on duty)', named: c.tier >= 1, tierName: c.tierName, role: c.role, deck: w.deck, room, roomName: w.room, act: w.act });
+  }
+  return out;
+}
+const MAP_ACT = { work: 'at work', breakfast: 'at breakfast', dinner: 'at dinner', lunch: 'at lunch', leisure: 'off duty', off: 'off duty', gym: 'at the gym', sleep: 'asleep', wash: 'washing' };
+const MAP_NEAR = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1], [2, 0], [-2, 0], [0, 2]];   // people sharing a room's middle spread out
+function mapDots(n, people) {                            // the dots on deck n: [{ id, x, y, pick }]
+  const live = new Map(), used = new Map(), out = [];
+  if (n === deckDef.num && typeof DECK_CREW !== 'undefined') for (const a of DECK_CREW) if (a && a.p) live.set(a.p.id, a);
+  for (const q of people) {
+    if (q.deck !== n) continue;
+    const a = live.get(q.id); let c = a ? cellAt(a.x, a.z) : null;
+    if (!c && q.room) { const m = mapRoomTile(n, q.room); if (m) { const k = used.get(q.room) || 0; used.set(q.room, k + 1); const o = MAP_NEAR[k % MAP_NEAR.length]; c = [m[0] + o[0], m[1] + o[1]]; } }
+    if (c) out.push({ id: q.id, x: c[0], y: c[1], pick: q.id === mapWho });
+  }
+  return out;
+}
 deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
   act(verb, arg) {
-    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; }
-    else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
+    if (verb === 'open' && arg && arg.who) verb = 'who', arg = arg.who;   // { app: 'maps', who } from another app
+    if (verb === 'deck' && DECKS[arg]) { mapDeck = arg; mapPick = null; mapWho = null; }
+    else if (verb === 'pick') { mapPick = mapPick === arg ? null : arg; mapWho = null; }
+    else if (verb === 'who') {
+      const q = mapPeople().find(x => x.id === arg);
+      if (!q || mapWho === arg) mapWho = null;
+      else { mapWho = q.id; mapDeck = q.deck; mapPick = q.room; }
+    }
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
-      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', Deck ' + n : '') });
-      deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
+      const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick], q = mapWho && mapPeople().find(x => x.id === mapWho && x.room === mapPick);
+      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: (q ? q.label + ', ' + r.name.toLowerCase() : r.name) + (n !== deckDef.num ? ', Deck ' + n : '') });
+      deviceNotify({ app: 'maps', text: 'Follow the marker to ' + (q ? q.label : 'the ' + r.name.toLowerCase()) + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
+    else if (verb === 'meet' && mapFor === 'appointments') {
+      const id = mapPick && apptRoomPlace(mapDeck || deckDef.num, mapPick); mapFor = null;
+      if (id && apptDraft) apptDraft.where = id;
+      deviceShow('appointments');
+    }
+    else if (verb === 'unmeet') { mapFor = null; deviceShow('appointments'); }
   },
   view: () => {
     const n = mapDeck && DECKS[mapDeck] ? mapDeck : deckDef.num, def = DECKS[n], rooms = {};
@@ -8436,14 +8667,35 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     }
     const you = n === deckDef.num && typeof player !== 'undefined' ? player.here() : null;
     const g = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.deck === n ? IX_GOAL : null;
+    const people = mapPeople(), who = mapWho && people.find(x => x.id === mapWho);
     const B = [{ kind: 'text', text: 'Deck' }, { kind: 'buttons', items: Object.keys(DECKS).map(Number).sort((a, b) => a - b).map(d => ({ label: String(d), on: d === n, action: { app: 'maps', do: 'deck', arg: d } })) },
       { kind: 'text', text: 'Deck ' + n + ': ' + def.name + (n === deckDef.num ? ' (you are here)' : ''), mark: 'head' },
-      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' } }];
+      { kind: 'map', grid: def.map, rooms, you, pick: mapPick, goal: g ? (g.room && typeof g.room === 'string' ? g.room : null) : null, action: { app: 'maps', do: 'pick' },
+        people: mapDots(n, people), whoAction: { app: 'maps', do: 'who' } }];
+    if (mapFor === 'appointments') {
+      if (!apptDraft) mapFor = null;
+      else {
+        const id = mapPick && apptRoomPlace(n, mapPick);
+        B.splice(0, 0, { kind: 'text', text: mapPick ? id ? 'Meet in the ' + rooms[mapPick].name.toLowerCase() + '?' : 'Nowhere to sit and meet in there. Try a lounge, the mess or a garden.' : 'Tap a room to meet in.', mark: 'hot' },
+          { kind: 'buttons', items: (id ? [{ label: 'Meet here', action: { app: 'maps', do: 'meet' } }] : []).concat([{ label: 'Cancel', action: { app: 'maps', do: 'unmeet' } }]) });
+      }
+    }
+    if (who) B.push({ kind: 'text', text: who.label + ': ' + (who.roomName ? 'the ' + who.roomName.toLowerCase() + ', ' : '') + 'Deck ' + who.deck + (MAP_ACT[who.act] ? ', ' + MAP_ACT[who.act] : '') + '.', mark: 'hot' });
     if (mapPick && rooms[mapPick]) {
       const r = rooms[mapPick];
-      B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
-      if (r.kind !== 'locked' && r.kind !== 'void') B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
+      if (!who) B.push({ kind: 'text', text: r.name + (r.kind === 'locked' ? ': locked' : r.kind === 'service' ? ': a service room' : ''), mark: 'hot' });
+      if (r.kind !== 'locked' && r.kind !== 'void' && !mapFor) B.push({ kind: 'buttons', items: [{ label: 'Go there', action: { app: 'maps', do: 'go' } }] });
     }
+    if (typeof crewContacts === 'function') {               // people you can find, those on this deck first
+      B.push({ kind: 'text', text: 'People', mark: 'head' });
+      const ps = people.filter(q => q.named).sort((a, b) => (a.deck === n ? 0 : 1) - (b.deck === n ? 0 : 1) || a.deck - b.deck), duty = {};
+      for (const q of people) if (!q.named && q.deck === n) duty[q.role] = (duty[q.role] || 0) + 1;
+      const dl = Object.entries(duty).map(([r, k]) => k + ' ' + r.toLowerCase() + (k > 1 ? 's' : ''));
+      if (dl.length) B.push({ kind: 'text', text: 'On duty on this deck: ' + dl.join(', ') + '.' });
+      if (ps.length) B.push({ kind: 'list', rows: ps.map(q => ({ text: q.label, sub: 'Deck ' + q.deck + (q.roomName ? ', ' + q.roomName : '') + (MAP_ACT[q.act] ? ' · ' + MAP_ACT[q.act] : ''), mark: q.id === mapWho ? 'hot' : null, action: { app: 'maps', do: 'who', arg: q.id } })) });
+      else B.push({ kind: 'text', text: 'Nobody you know well enough to find yet. Get to know people and they show here.' });   // strangers on duty: dots only
+    }
+    B.push({ kind: 'text', text: 'Rooms', mark: 'head' });
     const list = Object.entries(rooms).filter(([, r]) => r.kind === 'room' || r.kind === 'hall' && /lobby|lounge|promenade|bridge/i.test(r.name))
       .sort((a, b) => a[1].name < b[1].name ? -1 : 1);
     B.push({ kind: 'list', rows: list.map(([k, r]) => ({ text: r.name, mark: k === mapPick ? 'hot' : null, action: { app: 'maps', do: 'pick', arg: k } })) });
@@ -8489,9 +8741,18 @@ deviceApp({ id: 'memos', title: 'Memos', icon: 'memo', order: 45,
   } });
 
 // Ship (0.35.4): ship health and each system, as on the Works bay board (shipHealthRows, section 17), and what's on
-// today. Ship news (the social engineer's news model) joins it later.
+// today. Ship news (0.35.8): what you've heard aboard, newest first (section 20's shipNews: { text, from, at }).
+const SHIP_NEWS_N = 8;
+function devNews() {
+  if (typeof shipNews !== 'function') return [];
+  try { return (shipNews(SHIP_NEWS_N) || []).filter(x => x && typeof x.text === 'string'); } catch (e) { DEV.errors.push('shipNews: ' + (e && e.message || e)); return []; }
+}
 deviceApp({ id: 'ship', title: 'Ship', icon: 'ship', order: 60, view: () => {
-  const B = [];
+  const B = [], news = devNews();
+  B.push({ kind: 'text', text: 'Ship news', mark: 'head' });
+  if (news.length) B.push({ kind: 'list', rows: news.map(x => ({ text: x.text, sub: (x.from ? x.from + ' · ' : '') + (isFinite(x.at) ? devDayName(Math.floor(x.at / 1440) + 1) + ' ' + devWhen(x.at) : '') })) });
+  else B.push({ kind: 'text', text: 'Nothing heard yet. Talk to people aboard and you\'ll hear what\'s going on.' });
+  B.push({ kind: 'text', text: 'Systems', mark: 'head' });
   if (typeof shipHealthRows === 'function') {
     const rows = shipHealthRows();
     B.push({ kind: 'bars', items: rows.map(r => ({ label: r.name, value: r.value, level: r.state === 'failing' ? 'low' : r.state === 'poor' ? 'mid' : '' })) });
@@ -8533,21 +8794,33 @@ function apptPlaces() {                                  // [{ id, name, deck }]
     for (const pl of def.places || []) {
       const r = rooms[pl.room]; if (!r || seen.has(pl.room) || !APPT_PLACE_ROOMS.test(r.name || '') || mapLocked(n, pl.room)) continue;
       if (!APPT_SEATS.includes(pl.type) && !/office|infirmary/i.test(r.name)) continue;
-      seen.add(pl.room); out.push({ id: pl.id, name: r.name, deck: n });
+      seen.add(pl.room); out.push({ id: pl.id, name: r.name, deck: n, room: pl.room });
     }
   }
   return (apptPlacesCache = out);
 }
 // a free spot in that room at that time (the sim engineer's advice): a seat nobody's plan holds then (shipDay's occ),
 // and no other appointment; a room behind a locked door takes any place in it
-function apptSpot(where, at, len) {
-  const ref = apptPlaces().find(x => x.id === where); if (!ref) return where;
-  const def = DECKS[ref.deck], room = (def.places.find(q => q.id === where) || {}).room, office = /office|infirmary/i.test(ref.name);
+const apptSpot = (where, at, len) => apptSpots(where, at, len, 1)[0];
+function apptSpots(where, at, len, k = 1) {               // k free spots (0.35.10: a group gets a seat each), repeating the last if short
+  const n = apptDeckOf(where); if (n === null) return Array(k).fill(where);
+  const def = DECKS[n], room = def.places.find(q => q.id === where).room, office = /office|infirmary/i.test((def.rooms[room] || {}).name || '');
   const d = Math.floor(at / 1440) + 1, occ = typeof shipDay === 'function' ? shipDay(d).occ : null, over = (a, b) => a < at + len && at - 10 < b;
   const used = new Set(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && over(a.at, a.at + (a.len || 30))).map(a => a.where));
   const free = def.places.filter(q => q.room === room && (office || APPT_SEATS.includes(q.type)) && !used.has(q.id)
     && !(occ && (occ.get(q.id) || []).some(([a, b]) => over(a, b))));
-  return free.length ? free[0].id : where;
+  const ids = free.slice(0, k).map(q => q.id); if (!ids.length) ids.push(where);
+  while (ids.length < k) ids.push(ids[ids.length - 1]);
+  return ids;
+}
+const apptDeckOf = id => { for (const n of Object.keys(DECKS)) if ((DECKS[n].places || []).some(q => q.id === id)) return +n; return null; };
+// a place to meet in room key of deck n, for a room picked on Maps (0.35.10): its listed meeting spot, else any seat
+// in it; null for a locked room or one with nowhere to sit
+function apptRoomPlace(n, key) {
+  const ref = apptPlaces().find(x => x.deck === n && x.room === key); if (ref) return ref.id;
+  const r = (DECKS[n].rooms || {})[key]; if (!r || r.void || r.floor === 'lift' || mapLocked(n, key)) return null;
+  const q = (DECKS[n].places || []).find(x => x.room === key && APPT_SEATS.includes(x.type) && !x.machine);
+  return q ? q.id : null;
 }
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
@@ -8560,50 +8833,97 @@ function apptPeople() {                                  // who you can ask: peo
   const met = typeof relTier === 'function' ? all.filter(p => { try { return relTier(p.id) >= 1; } catch (e) { return false; } }) : [];
   return (met.length ? met : all.filter(p => p.story || p.dept === 'works')).slice().sort((a, b) => a.name < b.name ? -1 : 1);
 }
+// appointments as the player sees them: a group meeting (0.35.10) is one appointment per person (each with their own
+// seat, so section 14 walks each to a spot of their own) sharing a grp id; apptGroups gathers them: [{ a, all, names }]
+const APPT_MAX = 6;
+function apptGroups(list) {
+  const out = [], by = new Map();
+  for (const a of list) {
+    const g = a.grp ? by.get(a.grp) : null;
+    if (g) g.all.push(a); else { const n = { a, all: [a] }; out.push(n); if (a.grp) by.set(a.grp, n); }
+  }
+  for (const g of out) g.names = g.all.flatMap(x => x.with).map(apptName).join(', ');
+  return out;
+}
+const apptNames = ids => ids.length < 3 ? ids.map(id => apptName(id).split(' ')[0]).join(' and ') : ids.slice(0, -1).map(id => apptName(id).split(' ')[0]).join(', ') + ' and ' + apptName(ids[ids.length - 1]).split(' ')[0];
 function apptKind(where, withId) {
   const r = apptPlaces().find(x => x.id === where), p = apptPerson(withId);
   return r && /infirmary/i.test(r.name) ? 'checkup' : r && /office/i.test(r.name) || p && /chief/i.test(p.role || '') && r && /office/i.test(r.name) ? 'work' : 'social';
+}
+function apptBook(ids, at, len, kind) {                  // accepted: one appointment each, a seat each, one grp for a group
+  const D = SHIP.device, spots = apptSpots(apptDraft.where, at, len, ids.length), id0 = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+  ids.forEach((pid, i) => D.appts.push({ id: id0 + i, with: [pid], at, len, where: spots[i], kind, status: 'yes', by: null, ...(ids.length > 1 ? { grp: id0 } : {}) }));
 }
 deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'calendar', order: 12,
   badge: () => SHIP.device.appts.filter(a => a.by && a.status === 'asked').length || null,
   act(verb, arg) {
     const D = SHIP.device, now = shipNow();
-    if (verb === 'open' && arg && arg.with) { apptDraft = { with: arg.with, day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
-    else if (verb === 'new') { apptDraft = { with: null, day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
+    if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
+    else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
+      apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
+    else if (verb === 'map' && apptDraft) { mapFor = 'appointments'; mapWho = null; const w = apptDraft.where && apptDeckOf(apptDraft.where); mapDeck = w || null; mapPick = null; deviceShow('maps'); }
+    else if (verb === 'new') { apptDraft = { with: [], day: SHIP.time.day, min: Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440, where: null }; apptSay = null; }
     else if (verb === 'cancel') { apptDraft = null; apptSay = null; }
-    else if (verb === 'who' && apptDraft) apptDraft.with = arg;
+    else if (verb === 'who' && apptDraft && arg) {               // add or remove someone (a group meeting: up to APPT_MAX)
+      const W = apptDraft.with, i = W.indexOf(arg);
+      if (i >= 0) W.splice(i, 1); else if (W.length < APPT_MAX) W.push(arg);
+      apptDraft.adding = false; delete apptDraft.later; delete apptDraft.some;
+    }
+    else if (verb === 'adding' && apptDraft) apptDraft.adding = !apptDraft.adding;
     else if (verb === 'day' && apptDraft) apptDraft.day = arg;
     else if (verb === 'time' && apptDraft) apptDraft.min = Math.max(360, Math.min(22 * 60, apptDraft.min + arg));
     else if (verb === 'where' && apptDraft) apptDraft.where = arg;
-    else if (verb === 'ask' && apptDraft && apptDraft.with && apptDraft.where) {
-      const p = apptPerson(apptDraft.with), at = (apptDraft.day - 1) * 1440 + apptDraft.min;
+    else if (verb === 'ask' && apptDraft && apptDraft.with.length && apptDraft.where) {
+      const d = apptDraft, ids = d.with.slice(), at = (d.day - 1) * 1440 + d.min, len = 30, kind = apptKind(d.where, ids[0]);
       if (at <= now + 10) { apptSay = 'That\'s too soon. Pick a later time.'; return; }
-      const a = { id: D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1, with: [apptDraft.with], at, len: 30, where: apptSpot(apptDraft.where, at, 30), kind: apptKind(apptDraft.where, apptDraft.with), status: 'asked', by: null };
-      const r = typeof apptReply === 'function' ? apptReply(p, a) : { answer: 'yes', at, text: apptName(apptDraft.with) + ': "See you then."' };
-      apptSay = r.text;
-      if (r.answer === 'yes') { a.status = 'yes'; D.appts.push(a); apptDraft = null; }
-      else if (r.answer === 'later') apptDraft.later = r.at;
+      delete d.later; delete d.some;
+      const nextId = () => D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+      const ask = (pid, t, where) => { const a = { id: nextId(), with: [pid], at: t, len, where: where || apptSpot(d.where, t, len), kind, status: 'asked', by: null };
+        return { a, r: typeof apptReply === 'function' ? apptReply(apptPerson(pid), a) : { answer: 'yes', at: t, text: apptName(pid) + ': "See you then."' } }; };
+      if (ids.length === 1) {
+        const { a, r } = ask(ids[0], at);
+        apptSay = r.text;
+        if (r.answer === 'yes') { a.status = 'yes'; D.appts.push(a); apptDraft = null; }
+        else if (r.answer === 'later') d.later = r.at;
+        return;
+      }
+      const rs = ids.map(pid => ask(pid, at).r), yes = ids.filter((x, i) => rs[i].answer === 'yes');
+      if (yes.length === ids.length) { apptBook(ids, at, len, kind); apptSay = 'Everyone can come: ' + apptNames(ids) + ', ' + devWhen(at) + '.'; apptDraft = null; return; }
+      apptSay = rs.filter(x => x.answer !== 'yes').map(x => x.text).join(' ') + (yes.length ? ' (' + apptNames(yes) + (yes.length > 1 ? ' can.)' : ' can.)') : '');
+      const dayEnd = Math.floor(at / 1440) * 1440 + 22 * 60;   // a time later that day everyone can do
+      for (let t = Math.ceil((at + 30) / 30) * 30; t + len <= dayEnd; t += 30) if (ids.every(pid => ask(pid, t).r.answer === 'yes')) { d.later = t; break; }
+      if (yes.length) d.some = yes;
+      if (!d.later && !d.some) apptSay += ' Try another time or day.';
+    }
+    else if (verb === 'some' && apptDraft && apptDraft.some) {   // go ahead with those who can
+      const d = apptDraft, at = (d.day - 1) * 1440 + d.min, ids = d.some;
+      apptBook(ids, at, 30, apptKind(d.where, ids[0])); apptSay = 'Booked with ' + apptNames(ids) + ', ' + devWhen(at) + '.'; apptDraft = null;
     }
     else if (verb === 'later' && apptDraft && apptDraft.later) { apptDraft.min = apptDraft.later % 1440; apptDraft.day = Math.floor(apptDraft.later / 1440) + 1; delete apptDraft.later; DEVICE_APPS.get('appointments').act('ask'); }
     else if (verb === 'accept' || verb === 'decline') { const a = D.appts.find(x => x.id === arg); if (a) a.status = verb === 'accept' ? 'yes' : 'no'; }
-    else if (verb === 'drop') { const a = D.appts.find(x => x.id === arg); if (a && a.status === 'yes') a.status = 'no'; }
+    else if (verb === 'drop') { const a = D.appts.find(x => x.id === arg); if (a) for (const o of D.appts) if ((o === a || a.grp && o.grp === a.grp) && o.status === 'yes') o.status = 'no'; }
   },
   view: () => {
     const D = SHIP.device, now = shipNow(), B = [], d = apptDraft;
     if (d) {
       if (apptSay) B.push({ kind: 'text', text: apptSay, mark: 'hot' });
-      if (d.later) B.push({ kind: 'buttons', items: [{ label: 'OK, ' + devWhen(d.later), action: { app: 'appointments', do: 'later' } }, { label: 'Never mind', action: { app: 'appointments', do: 'cancel' } }] });
+      if (d.later || d.some) B.push({ kind: 'buttons', items: (d.later ? [{ label: 'OK, ' + devWhen(d.later) + (d.with.length > 1 ? ' for all' : ''), action: { app: 'appointments', do: 'later' } }] : [])
+        .concat(d.some ? [{ label: 'Just ' + apptNames(d.some), action: { app: 'appointments', do: 'some' } }] : [], [{ label: 'Never mind', action: { app: 'appointments', do: 'cancel' } }]) });
       B.push({ kind: 'text', text: 'Who', mark: 'head' });
-      if (d.with) B.push({ kind: 'list', rows: [{ text: apptName(d.with), sub: (apptPerson(d.with) || {}).role || '', mark: 'hot', button: 'Change', action: { app: 'appointments', do: 'who', arg: null } }] });
-      else B.push({ kind: 'list', rows: apptPeople().map(p => ({ text: p.name, sub: p.role || '', action: { app: 'appointments', do: 'who', arg: p.id } })) });
-      if (d.with) {
+      if (d.with.length) B.push({ kind: 'list', rows: d.with.map(id => ({ text: apptName(id), sub: (apptPerson(id) || {}).role || '', mark: 'hot', button: 'Remove', action: { app: 'appointments', do: 'who', arg: id } })) });
+      if (!d.with.length || d.adding) B.push({ kind: 'list', rows: apptPeople().filter(p => !d.with.includes(p.id)).map(p => ({ text: p.name, sub: p.role || '', action: { app: 'appointments', do: 'who', arg: p.id } })) });
+      else if (d.with.length < APPT_MAX) B.push({ kind: 'buttons', items: [{ label: 'Add someone', action: { app: 'appointments', do: 'adding' } }] });
+      if (d.with.length) {
         B.push({ kind: 'text', text: 'When', mark: 'head' },
-          { kind: 'buttons', items: [0, 1, 2].map(k => ({ label: k ? k === 1 ? 'Tomorrow' : WEEKDAYS[weekday(SHIP.time.day + 2)].slice(0, 3) : 'Today', on: d.day === SHIP.time.day + k, action: { app: 'appointments', do: 'day', arg: SHIP.time.day + k } })) },
+          { kind: 'buttons', items: [0, 1, 2].map(k => ({ label: k ? k === 1 ? 'Tomorrow' : WEEKDAYS[weekday(SHIP.time.day + 2)].slice(0, 3) : 'Today', on: d.day === SHIP.time.day + k, action: { app: 'appointments', do: 'day', arg: SHIP.time.day + k } }))
+            .concat(d.day > SHIP.time.day + 2 ? [{ label: WEEKDAYS[weekday(d.day)].slice(0, 3) + ' ' + d.day, on: true, action: { app: 'appointments', do: 'day', arg: d.day } }] : []) },
           { kind: 'text', text: hhmm(d.min), mark: 'big' },
           { kind: 'buttons', items: [[-60, '−1h'], [-15, '−15'], [15, '+15'], [60, '+1h']].map(([v, l]) => ({ label: l, action: { app: 'appointments', do: 'time', arg: v } })) },
           { kind: 'text', text: 'Where', mark: 'head' },
-          { kind: 'list', rows: apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } })) });
-        if (d.where) B.push({ kind: 'buttons', items: [{ label: 'Ask ' + apptName(d.with).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
+          { kind: 'buttons', items: [{ label: 'Pick on the map', action: { app: 'appointments', do: 'map' } }] },
+          { kind: 'list', rows: (d.where && !apptPlaces().some(x => x.id === d.where) ? [{ text: apptWhereName(d.where), mark: 'hot', action: { app: 'appointments', do: 'where', arg: d.where } }] : [])
+            .concat(apptPlaces().map(x => ({ text: x.name + ', Deck ' + x.deck, mark: x.id === d.where ? 'hot' : null, action: { app: 'appointments', do: 'where', arg: x.id } }))) });
+        if (d.where) B.push({ kind: 'buttons', items: [{ label: d.with.length > 1 ? 'Ask all ' + d.with.length : 'Ask ' + apptName(d.with[0]).split(' ').slice(-1)[0], action: { app: 'appointments', do: 'ask' } }] });
       }
       B.push({ kind: 'buttons', items: [{ label: 'Cancel', action: { app: 'appointments', do: 'cancel' } }] });
       return { title: 'New appointment', blocks: B };
@@ -8619,9 +8939,9 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
     B.push({ kind: 'text', text: 'Coming up', mark: 'head' });
     if (!up.length) B.push({ kind: 'text', text: 'Nothing booked.' });
-    for (const a of up) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + a.with.map(apptName).join(', '), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
-    const past = D.appts.filter(a => a.status === 'kept' || a.status === 'missed').slice(-4).reverse();
-    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(a => ({ text: a.with.map(apptName).join(', ') + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
+    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
+    const past = apptGroups(D.appts.filter(a => a.status === 'kept' || a.status === 'missed')).slice(-4).reverse();
+    if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: names + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
     return { title: 'Appointments', blocks: B };
   } });
 
@@ -8658,14 +8978,15 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
 // Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
 // phone asks for reduced motion), tips on or off
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; },
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg; },
   view: () => {
     const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
       { kind: 'text', text: 'Screen colour' },
       { kind: 'buttons', items: Object.entries(PHOSPHORS).map(([k, label]) => ({ label, action: { app: 'settings', do: 'phosphor', arg: k }, on: st.phosphor === k })) },
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
-      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') }] };
+      { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
+      { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') }] };
   } });
 
 // Wallet: credits and your locker (0.28.10)
@@ -10097,8 +10418,8 @@ const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions
 const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
 const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
-// can't replace: eventMod(kind, key, t) and cartTrays(o). null in the game
-const GALLEY_TEST = { eventMod: null, cartTrays: null };
+// can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
+const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null };
 function galleyEvRead(m, replay) {
   let get = null;
   if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
@@ -10189,10 +10510,6 @@ function galleyStep(S, m, st) {
   if (md === FOOD.binOut) S.bin = 0;
   // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
-  // an event's "A fed bridge" thread: on a day it wants trays for the bridge, each hour from noon until they go up at
-  // 18:00: 6 hours a day, the thread's "good" (a day's trays that never go, from an empty servery, still count 6)
-  // (live only: replays never score)
-  if (!st && md % 60 === 0 && md >= 720 && md < FOOD.trayAt && S.ev && S.ev.trays && !(S.trays && S.trays.d === d)) galleyScore(m, 'bridgeHungry', 1);
   if (md === 900 && S.ev && S.ev.batch) {
     const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
     if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
@@ -10250,7 +10567,17 @@ function galleyStep(S, m, st) {
   // trays for the bridge (an event): plated from the servery at 18:00 and sent up by hover cart
   if (md === FOOD.trayAt && S.ev && S.ev.trays) {
     const n = Math.min(Math.round(galleyEvNum(S.ev.trays, 0)), S.servery.portions);
-    if (n > 0) { S.servery.portions -= n; S.trays = { d, n }; if (st) st.trays += n; else (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }); }
+    if (n > 0) { S.trays = { d, n, job: null }; S.servery.portions -= n; if (st) st.trays += n; else S.trays.job = (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }) || null; }
+  }
+  // an event's "A fed bridge" thread: on a day it wants trays for the bridge, each hour from noon until they reach the
+  // bridge: section 17's traysArrivedAt(day) is when the cart's drop-off ends (null: not yet, or nobody on it), so a
+  // late or missed cart run shows. Without it (or when cartTrays made no run) the count stops when the trays go up at
+  // 18:00, 6 hours a day, the thread's "good". Live only: replays never score
+  if (!st && md % 60 === 0 && md >= 720 && S.ev && S.ev.trays) {
+    const sent = S.trays && S.trays.d === d, ta = GALLEY_TEST.traysArrivedAt || (typeof traysArrivedAt === 'function' ? traysArrivedAt : null);
+    const arr = sent && S.trays.job && ta ? ta(d, 'bridge') : undefined;
+    const hungry = arr === undefined ? md < FOOD.trayAt && !sent : arr === null || m < arr;
+    if (hungry) galleyScore(m, 'bridgeHungry', 1);
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
@@ -11116,16 +11443,23 @@ function hatchTier(who) {
 // jobs left for you (0.33.16): the crew take urgent and big jobs, and everything above your tier, at once; a small
 // job at your tier waits CREW_LEAVE minutes of the day shift after it's found (one found in the evening waits for
 // your morning), a food run an hour. leaveEnd(j): the minute the crew may take it
+// 0.33.32 (the user's "the job board never has any jobs"): 3 ship hours are only 5 real minutes, so a small job is
+// now held to the end of the shift its wait runs out in, and at most HOLD_MAX at once (jobsHour lets the oldest go,
+// j.released). On your days off (playerShiftOn, Saturday and Sunday) nothing is held: the crew take it then.
 const DAY_SHIFT = [480, 1020];                           // 08:00-17:00, when you're on shift
+const HOLD_MAX = 6;                                      // small jobs held for you at once, at most
 const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
 function leaveEnd(j) {
-  if (!forYou(j)) return j.found;
+  if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
   let t = j.found, left = j.leave || CREW_LEAVE;
-  while (left > 0) {
-    const d0 = Math.floor(t / 1440) * 1440, a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
+  for (let k = 0; k < 14 && left > 0; k++) {
+    const d0 = Math.floor(t / 1440) * 1440;
+    if (!playerShiftOn(d0 / 1440 + 1)) return t;         // your day off: the crew take it
+    const a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
     if (n > 0) { left -= n; t = a + n; }
     if (left > 0) t = d0 + 1440;
+    else if (!j.leave) t = Math.max(t, d0 + DAY_SHIFT[1]);   // held to the end of that shift
   }
   return t;
 }
@@ -11245,6 +11579,10 @@ function jobsHour(h) {
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
+  // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
+  const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && j.cargo !== 'meals' && j.found <= t && t < leaveEnd(j))
+    .sort((a, b) => b.found - a.found || (a.id < b.id ? -1 : 1));
+  for (const j of held.slice(HOLD_MAX)) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
   for (const j of todo) {
@@ -11265,6 +11603,7 @@ function jobsHour(h) {
   }
   suppliesHour(t, d);
   const bo = blackoutHour(h); if (bo && typeof eventScore === 'function') eventScore('blackout', bo.to - bo.from);
+  if (typeof eventScore === 'function' && coldCabinsHour(h)) eventScore('coldCabins', 1);
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -11323,6 +11662,7 @@ function choresOfDay(d) {
     const n = Math.floor(C.per) + (schedU(seed, d, 1) < C.per % 1 ? 1 : 0);
     for (let k = 0; k < n; k++) out.push({ hour: 7 + Math.floor(12 * schedU(seed, d, 10 + k)), kind, cand: cs[Math.floor(cs.length * schedU(seed, d, 30 + k))] });
   }
+  if (d === SHIP_START.day) for (const c of out.slice().sort((a, b) => a.hour - b.hour).slice(0, 2)) c.hour = 7;   // your first morning: two ready by 08:00 (0.33.32)
   CHORE_DAYS.set(d, out); for (const k of CHORE_DAYS.keys()) if (k < d - 2) CHORE_DAYS.delete(k);
   return out;
 }
@@ -11458,6 +11798,7 @@ function jobStepDone(id, k) {
   const n = j ? jobStops(j).length : 0;
   if (!j || !(k >= 0 && k < n) || (j.kind === 'favour' && k === n - 1)) return { ok: false, left: n, done: !!(j && j.workDone) };   // a favour goes back by favourTurnIn
   j.stepsDone = [...new Set([...(j.stepsDone || []), k])].sort((a, b) => a - b); j.touched = shipNow();
+  if (jobStops(j)[k].step === 'drop' && j.dropAt === undefined) j.dropAt = shipNow();   // a delivery's arrival (traysArrivedAt)
   const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; return { ok: true, left, done: !!j.workDone };
@@ -11522,7 +11863,7 @@ function eventJob(spec, ev, t, key) {
     stops = [{ deck: st.deck, placeId: st.placeId, mins: spec.mins || 20, tag: spec.kind || 'event', at: st.at || null }];
     title = title || (EVENT_JOB_TEXT[spec.kind] || 'Event job') + (st.room ? ': ' + roomName(st.deck, st.room) : '');
   }
-  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, title,
+  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
            bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
            claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
 }
@@ -11538,7 +11879,12 @@ function eventJobsHour(h, jobs) {
     if (Number.isFinite(spec.at) && Math.floor((t % 1440) / 60) !== Math.floor(spec.at / 60)) return;   // only in the hour of its minute (afterglow's 08:00 is the next morning)
     const key = 'event:' + ev.id + ':' + (spec.id || ev.phase + k) + '@' + start;
     if (jobs.some(j => j.id === key)) return;
-    const j = eventJob(spec, ev.id, Number.isFinite(spec.at) ? Math.max(t, Math.floor(t / 1440) * 1440 + spec.at) : t, key); if (j) jobs.push(j);
+    const j = eventJob(spec, ev.id, Number.isFinite(spec.at) ? Math.max(t, Math.floor(t / 1440) * 1440 + spec.at) : t, key); if (!j) return;
+    jobs.push(j);
+    // you volunteered for it at the meeting before it went up (section 18 sets SHIP.event.mine['wants:<job id>']): it's
+    // yours as it's posted, if you aren't on another board job (claimed directly: claimJob would re-enter the hour)
+    const E = typeof SHIP !== 'undefined' && SHIP.event, mine = jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour');
+    if (spec.id && E && E.id === ev.id && E.mine && E.mine['wants:' + spec.id] && !mine) Object.assign(j, { claimedBy: 'you', status: 'claimed', start: j.posted });
   });
 }
 function postEventJob(spec, o = {}) {
@@ -11564,6 +11910,14 @@ function blackoutHour(h) {
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
 }
+// cold guest cabins (0.33.31, the diplomatic visit's 'coldCabins' thread): an hour while guests are aboard (section
+// 18's eventMod('effect', 'guests')) with Deck 4's heating poor (its heating plant or heating pumps faulty or worse
+// at the hour's start). Pure; jobsHour scores each such hour as eventScore('coldCabins', 1)
+function coldCabinsHour(h) {
+  if (typeof eventMod !== 'function' || eventMod('effect', 'guests', h * 60) !== true) return false;
+  const c = MACH_HIST.get(histHour((h - 1) * 60));
+  return machineList().some(m => m.deck === 4 && (m.kind === 'heater' || m.kind === 'heatpump') && (c ? c[m.id] ?? 100 : 100) < 50);
+}
 function blackoutAt(t) { const b = blackoutHour(Math.floor(t / 60)); return b && t >= b.from && t < b.to ? b : null; }
 
 // trays by cart (Pillar 3, C7, with the galley engineer's 0.29.18): an event asks for trays, the galley plates them
@@ -11582,6 +11936,17 @@ function cartTrays(o = {}) {
                    tier: 1, stops: [{ deck: 3, placeId: from.id, mins: 5, tag: 'pickup' }, { deck: to.deck, placeId: to.placeId, mins: 10, tag: 'drop', at: to.at || null }],
                    urgency: 1, leave: 30, posted: at, found: at, claimedBy: null, parts: [], status: 'open' });
   MACH_REV++; return key;
+}
+
+// when the day's trays reached `to` (0.33.28, for the galley's bridgeHungry score): the ship minute they arrived, or
+// null while they haven't. A crew run: the end of its drop-off (planned when it's claimed, so compare with the minute
+// you ask about); yours: when you ticked off the drop-off (jobStepDone) or finished the job. It reads the job list only
+function traysArrivedAt(day, to = 'bridge') {
+  const j = SHIP.jobs.find(x => x.id === 'trays:' + to + '@' + (day - 1));   // day: the ship day (1 = Day 1); cartTrays keys by day - 1
+  if (!j) return null;
+  if (j.claimedBy && j.claimedBy !== 'you') { const d = (j.segs || []).filter(sg => sg.tag === 'drop').pop(); return d ? d.to : j.doneAt ?? null; }
+  if (j.claimedBy === 'you') return j.dropAt ?? j.workDone ?? (j.status === 'done' ? j.doneAt : null);
+  return null;
 }
 
 // ---- favours (Pillar 3, C7, for the social engineer): personal jobs, accepted and handed back in person ----
@@ -11894,16 +12259,34 @@ function birthdayOf(p) {
   }
   return EV_BDAYS.get(p.id) || null;
 }
+// gatherings shaped like traditions, so they reach the plans through the same door (eventPlan): a ship-wide event's
+// gathering moments (when: { ship: <event id>, day: <its day 0..> }) and one-offs (when: { date: <ship day> }).
+// They carry no Mail of their own (the event's address and Mail announce them, or the one-off's caller).
+// venue: the deck architect's gather venue (gatherSpots, non-lead spots) as the first pool when it's in the build
+const EV_SHIPWIDE = [];
+// (filled after SHIP_EVENTS, below: evShipwide)
+// one-offs (section 20's story beats: Pell's show), saved in SHIP.events.oneOffs; see eventOneOff
+function evOneOffDefs() {
+  return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
+    id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
+    where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
+    who: p => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinity === 'function' ? Math.max(0, affinity(r.host, p.id)) / 100 * .6 : 0)),
+    anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
+    from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
+}
+const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 // the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
 const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], wd = weekday(d), yd = shipYearDay(d);
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
+    else if (w.date) { if (d !== w.date) continue; }
     else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
-    if (typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
+    if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
@@ -11917,8 +12300,9 @@ function eventPools(shared, desks) {
   if (!EV_READY) return;                                 // called before section 18 has run: the caches are cleared at its end
   if (!desks) desks = schedDesks(ROSTER.concat(ROSTER_GUESTS).filter(p => !p.player), shared);
   const taken = new Set(desks.values());
-  for (const ev of SHIP_TRADITIONS) {
+  for (const ev of evTable()) {
     const tagged = new Map();
+    if (ev.venue && typeof gatherVenue === 'function') { const g = gatherVenue(ev.venue), l = g ? (shared.get(g.deck + '|event') || []).filter(pl => pl.gather === ev.venue && !pl.lead) : []; if (l.length) tagged.set(g.deck, l); }   // the architect's crowd spots
     for (const l of shared.values()) for (const pl of l) if (pl.event === ev.id) (tagged.get(pl.deck) || tagged.set(pl.deck, []).get(pl.deck)).push(pl);
     for (const [n, l] of tagged) shared.set(n + '|ev:' + ev.id, [...new Set(l)]);
     ev.where.forEach((w, i) => {
@@ -11966,6 +12350,10 @@ function eventFree(p, d, a, b) {
 // a person's events on day d: who goes is a hash per person, day and event; a clash keeps the higher prio (then the earlier)
 function eventPlan(p, d) {
   if (!EV_READY) return [];
+  if (p.rank === 'guest') {                              // a guest goes only on the days they're aboard (section 14's aboard, else their event's days)
+    if (typeof aboard === 'function') { if (!aboard(p, d)) return []; }
+    else if (p.event && p.arrive == null) { const g = eventGuestDays(p); if (!g || d < g[0] || d > g[1]) return []; }
+  }
   const out = [];
   for (const e of eventsOn(d)) {
     const ev = e.ev, ctx = e;
@@ -11974,7 +12362,7 @@ function eventPlan(p, d) {
     const opts = eventOpts(ev, p); if (!opts.length) continue;
     const anim = ev.anim(p, d) || null;
     const from = e.from - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0 });
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id) });   // host: section 14 seats them first
   }
   out.sort((x, y) => y.prio - x.prio || x.from - y.from);
   const keep = [];
@@ -11985,7 +12373,7 @@ function eventPlan(p, d) {
 let EV_TAGS = false;
 function eventTags() {
   if (EV_TAGS) return;
-  try { for (const ev of SHIP_TRADITIONS) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
+  try { for (const ev of evTable()) for (const a of ['talk', 'drink', 'play', 'water', 'wash', 'read']) TAG_ACT['ev-' + ev.id + '-' + a] = a; EV_TAGS = true; } catch (e) { /* section 10 not in yet */ }
 }
 // the event someone is at, or going to later today, from their plan: { e, seg, now }
 function eventOf(p, t) {
@@ -12005,9 +12393,21 @@ function eventLine(p, t) {
 // SHIP.events = { sent: ['id@day', ...], joined: ['id@day', ...] } (saved as ship.events)
 SHIP.events = (() => {
   const s = SAVED && SAVED.ship && SAVED.ship.events, ok = a => Array.isArray(a) && a.every(x => typeof x === 'string');
-  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [] };
+  const oo = s && Array.isArray(s.oneOffs) ? s.oneOffs.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Array.isArray(r.at) && Array.isArray(r.where)) : [];
+  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [], oneOffs: oo };
 })();
-SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60) }; });
+SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60), oneOffs: SHIP.events.oneOffs.slice(-20).map(({ def, ...r }) => r) }; });
+// a one-off gathering (section 20's story beats, e.g. Pell's music boxes): eventOneOff({ id, name, day, at: [from, to],
+// where: [{ deck, pool } | { deck, room: 'regexp source' | RegExp, types, ids? }], host?, chance? (base, 0-1; friends of
+// the host more), anim?, hostAnim?, venue?, from?, mail? (text: the evening-before Mail), ask?, here?, thanks? }).
+// Only for a later day (today's plans are made); it's saved and planned like a tradition. Returns true when added
+function eventOneOff(o) {
+  if (!o || !o.id || !Number.isInteger(o.day) || o.day <= Math.floor(shipNow() / 1440) + 1 || SHIP.events.oneOffs.some(r => r.id === o.id && r.day === o.day)) return false;
+  const r = { ...o, where: (o.where || []).map(w => w.room instanceof RegExp ? { ...w, room: w.room.source } : { ...w }) };
+  delete r.who; SHIP.events.oneOffs.push(r);
+  SCHED_DATA = null; EV_DAYS.clear(); for (const d of [...SHIP_DAYS.keys()]) if (d >= o.day) SHIP_DAYS.delete(d);   // its places join the pools; later plans are made again
+  return true;
+}
 const EV_MAIL_AT = 1080;                                 // 18:00 the evening before
 let EV_LAST = null;                                      // the last minute the Mail was checked to
 // the announcements due in (from, to]: at most three days' worth after a long skip. EV_MAILBOX keeps the last 20
@@ -12017,7 +12417,7 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
   from = Math.max(from, to - 3 * 1440);
   for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
-    if (at <= from || at > to || SHIP.events.sent.includes(key)) continue;
+    if (at <= from || at > to || SHIP.events.sent.includes(key) || !e.ev.mail) continue;   // ship-wide gatherings and one-offs: no tradition Mail
     SHIP.events.sent.push(key);
     const m = { at, from: e.ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };   // the user's name for them: "ship traditions"
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
@@ -12096,6 +12496,7 @@ function eventsTick() {
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   eventsDress(now);                                      // its dressing and the traces left by past events
+  occasionsTick(now);                                    // C10: summons, invitations, progress talks
 }
 // the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does
 // nothing when nothing changed and puts them back after a deck change
@@ -12132,10 +12533,9 @@ const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm'];                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
-// the afterglow runs on to the end of day 5. `draft: true` keeps it from starting on its own until events_check has
-// passed a full live storm.
+// the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'], draft: true,   // need: on shift on the warning day (Calder's briefing)
+  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'],    // switched on (0.34.12): it starts in play, day 10 in a new game   // need: on shift on the warning day (Calder's briefing)
   phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
     { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
   scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
@@ -12173,7 +12573,7 @@ SHIP_EVENTS.ionStorm = {
       { id: 'stormJunctions', title: 'Storm prep: service the power junctions', tier: 3, at: 540,
         stops: [{ deck: 5, machine: 'junction', mins: 30, tag: 'service' }] },
     ],
-    // escalation: no job of its own; the storm stew goes up by the galley's cartTrays run (the one tray run)
+    // (the bridge trays are the galley's own cart run at 18:00, from galley.trays: one run, the lead's call)
     afterglow: [
       { id: 'stormTidy', title: 'Put the bow lounge back together', tier: 1, at: 480,
         stops: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 25, tag: 'tidy' }] },
@@ -12242,12 +12642,20 @@ const STORM_RETELL = {
 };
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
+// who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
 function stormCallBacklog(e) {
-  const d = e.startDay + 3, ppl = schedPeople().filter(p => p.rank !== 'guest');
-  const owed = ppl.filter(p => (habitsOn(p, d) || []).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33).length;
+  const ppl = schedPeople().filter(p => p.rank !== 'guest');
+  const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
   return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
 }
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
+  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
+  who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
+  thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 (() => {
@@ -12277,7 +12685,7 @@ function eventNow(t = shipNow()) {
 // stopping at a phase that `clears`. kinds: 'wear' and 'effect' (systems), 'routine', 'galley', 'jobs', or any other
 // table on the event (def[kind][phase][key]). null: no change.
 function eventMod(kind, key, t) {
-  const now = eventNow(t); if (!now) return null;
+  const now = eventNow(t); if (!now) return SHIP.occasions && typeof occasionMod === 'function' ? occasionMod(kind, key, t === undefined ? shipNow() : t) : null;
   const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
   for (let k = i; k >= 0; k--) {
     const ph = def.phases[k].id;
@@ -12318,8 +12726,32 @@ function eventPauses(ev, d) {
   }
   return false;
 }
-// the context an event's texts are written against: c.band (as things stand), c.mine, c.you
-const evCtx = e => ({ band: eventBand(e.id, e.threads || {}), mine: e.mine || {}, threads: e.threads || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet' });
+// a news seed's tokens as crew ids: 'dept:<d>' (that department), 'all' (everyone aboard), ids as they are
+const newsSeed = l => [...new Set(l.flatMap(x => x === 'all' ? schedPeople().map(p => p.id) : /^dept:/.test(x) ? schedPeople().filter(p => p.dept === x.slice(5)).map(p => p.id) : [x]))];
+// the deck that last went to emergency lighting in the 12 hours before t (section 17's blackoutAt), or null
+function lastDark(t) { if (typeof blackoutAt !== 'function') return null; for (let k = t; k > t - 720; k -= 15) { const b = blackoutAt(k); if (b) return b.deck; } return null; }
+// the context an event's texts are written against: c.band (as things stand), c.mine, c.you, c.dark
+const evCtx = (e, t) => ({ dark: t === undefined ? null : lastDark(t), band: e ? eventBand(e.id, e.threads || {}) : 'smooth', mine: (e && e.mine) || {}, threads: (e && e.threads) || {}, you: (SHIP.player && SHIP.player.name) || 'Cadet',
+  jobsDone: typeof yourJobsDone === 'function' ? yourJobsDone() : 0, commended: !!(SHIP.commendations && SHIP.commendations.length) });
+// section 14's schedule rules at ship minute t: the whole list in force (the phase's, else an earlier phase's back to
+// one that `clears`), [] when nothing's on. Rules: { who: 'dept:<d>' | 'all', where: '<deck>|<room key>' |
+// 'type:<place type>', rule, share?, at? }. Pure, like eventNow
+function eventRoutines(t) {
+  const now = eventNow(t); if (!now) return [];
+  const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
+  for (let k = i; k >= 0; k--) { const l = def.routines && def.routines[def.phases[k].id]; if (l) return l; if (def.phases[k].clears) return []; }
+  return [];
+}
+// an event guest's stay (section 14, C8): [arriveDay, leaveDay] in ship days, from the event's start day (running,
+// logged or next due): they arrive arriveOffset days after it starts (default the event's `guestsArrive`, else its
+// onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
+function eventGuestDays(g) {
+  const def = g && SHIP_EVENTS[g.event]; if (!def) return null;
+  const e = SHIP.event && SHIP.event.id === g.event ? SHIP.event : [...SHIP.eventLog].reverse().find(l => l.id === g.event) || (() => { const d = eventDueDay(); return d && d.id === g.event ? { startDay: d.day } : null; })();
+  if (!e) return null;
+  const on = def.phases.find(p => p.id === 'onset'), off = g.arriveOffset != null ? g.arriveOffset : def.guestsArrive != null ? def.guestsArrive : on ? on.at[0] : 0;
+  return [e.startDay + off, e.startDay + off + (g.stay || 1)];
+}
 // the threads and the player's part: other sections add to them (inert while no event runs)
 function eventScore(thread, n = 1) { const e = SHIP.event; if (e) e.threads[thread] = (e.threads[thread] || 0) + n; }
 function eventMine(what, n = 1) { const e = SHIP.event; if (e) e.mine[what] = (e.mine[what] || 0) + n; }
@@ -12359,7 +12791,7 @@ function eventAdvance(t = shipNow(), quiet) {
     const at = (e.startDay - 1 + n.at[0]) * 1440 + n.at[1];
     if (at > t || e.mine['news:' + n.id] || typeof newsAdd !== 'function') continue;
     e.mine['news:' + n.id] = 1;
-    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e)), weight: n.weight || 1, seed: (n.from ? [n.from] : []).concat(n.seed || []), born: at, kind: 'event', event: e.id, life: 2 });
+    newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e, at)), weight: n.weight || 1, seed: newsSeed((n.from ? [n.from] : []).concat(n.seed || [])), born: at, kind: 'event', event: e.id, life: 2 });
   }
   if (now && now.phase !== e.phase) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
@@ -12376,6 +12808,11 @@ function eventAdvance(t = shipNow(), quiet) {
     for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
     SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
     if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+    const mine = e.mine || {};
+    if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
+      SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
+      if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
+    }
     SHIP.event = null; out.push('end ' + band);
   }
   return out;
@@ -12392,6 +12829,7 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
   ADDRESSES.push({ at, from, text });
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
+  if (typeof deviceAddress === 'function') return deviceAddress({ from, text });   // section 19's CRT banner (0.35.7)
   if (!ADDRESS_EL) {
     ADDRESS_EL = document.createElement('div');
     ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
@@ -12433,7 +12871,7 @@ const castName = (D, who) => who === 'you' ? D.ctx.you : D.cast[who] ? D.cast[wh
 function dialogueShow(scriptId, m) {
   const sc = MEETING_SCRIPTS[scriptId]; if (!sc) return false;
   m = m || MEETINGS.find(x => x.script === scriptId) || { id: scriptId, who: [], at: shipNow() };
-  DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: SHIP.event ? evCtx(SHIP.event) : { band: 'smooth', mine: {}, you: 'Cadet' }, queue: sc.lines.slice(), i: 0, at: 0 };
+  DIALOGUE = { id: scriptId, m, cast: meetingCast(m), ctx: evCtx(SHIP.event), queue: sc.lines.slice(), i: 0, at: 0 };
   eventMine('meetings', 1);
   dialogueDraw(); return true;
 }
@@ -12480,19 +12918,20 @@ function dialogueStep(k) {
   D.i++; dialogueDraw();
 }
 const dialogueNext = () => dialogueStep(), dialogueChoose = k => dialogueStep(k);   // section 19's taps
-// a job offered in a meeting: claimed for you if section 17 has posted it (tagged event and eventJob), else remembered
-// in SHIP.event.mine ('wants:<job>') for section 17 to give you when it posts
+// a job offered in a meeting: remembered in SHIP.event.mine ('wants:<job>'), and claimed for you if section 17 has
+// posted it (tagged event and eventJob), else section 17 gives it to you when it posts
 function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
+  e.mine['wants:' + job] = 1;   // always remembered (the sign-up sheet reads it), even when it's claimed at once (0.41.7)
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
   if (j && typeof claimJob === 'function') return claimJob(j.id);
-  e.mine['wants:' + job] = 1; return false;
+  return false;
 }
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
-  if (!finished) meetingGist(D.id);
+  if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
 }
 const dialogueClose = () => dialogueEnd(false);          // walking away: the gist arrives in Mail
 function meetingGist(scriptId) {
@@ -12505,14 +12944,18 @@ function inMeeting(m) {
   return !!room && (!w.room || w.room.test(room.name || ''));
 }
 // once a ship minute: the notice 15 minutes before (notify: true), the script when you're there, walking away, the gist after
-function meetingsTick(now) {
-  const e = SHIP.event; if (!e) return;
+function meetingFlags(m) {
+  if (m.event === 'occasion') { const r = (SHIP.occasions || []).find(x => x.key === m.id); return r && r.status === 'asked' ? (r.f || (r.f = {})) : null; }
+  return SHIP.event && SHIP.event.id === m.event ? SHIP.event.mine : null;
+}
+function meetingsTick(now, quiet) {                     // quiet: a sleep or skip (no notice, no panel; the gists still come)
   for (const m of MEETINGS) {
-    if (m.event !== e.id) continue;
-    const k = m.id, f = e.mine;
+    const k = m.id, f = meetingFlags(m); if (!f) continue;
+    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); } continue; }
     if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
     if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
     if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
+    if (m.event === 'occasion' && f['met:' + k]) { const r = SHIP.occasions.find(x => x.key === k); if (r) r.met = true; }
   }
   if (DIALOGUE && !inMeeting(DIALOGUE.m)) dialogueClose();
 }
@@ -12594,6 +13037,127 @@ MEETING_SCRIPTS.captainAllClear = {
   ],
 };
 
+// ---- occasions (C10; plans/pillar3-plan.md Part 4, "Progression hooks"): moments of trust, each opened by something
+// you earned and each an appointment (a time window that opens a door). Section 18 decides when they're due and plays
+// them as meetings; section 20 knows who's friends (relTier), section 19 shows the appointment (apptAdd), section 14
+// opens the door for its window (doorOpenFor reads occasionDoorOpen), the galley cooks for the Captain's table.
+//   OCCASIONS.<id> = { title, kind: 'summons' | 'invite' | 'meeting', by, deck, room (key), at, len, script,
+//                      due(d) -> bool (pure from saved state), ask? (you ask for it), galley?, trace?, mail }
+//   SHIP.occasions: [{ id, key, at, len, deck, room, status: 'asked' | 'kept' | 'missed' }]   (saved; the device's Record
+//   reads the kept ones). SHIP.commendations: [{ event, day }]   (saved; an event ends with your part counted)
+// Commended: two or more of the event's jobs, or one and a meeting (`eventMine`). Nothing here calls R().
+SHIP.occasions = []; SHIP.commendations = [];
+(() => {
+  const s = SAVED && SAVED.ship;
+  if (s && Array.isArray(s.occasions)) SHIP.occasions = s.occasions.filter(o => o && OCC_OK(o)).slice(-40);
+  if (s && Array.isArray(s.commendations)) SHIP.commendations = s.commendations.filter(c => c && typeof c.event === 'string' && Number.isInteger(c.day));
+})();
+function OCC_OK(o) { return typeof o.id === 'string' && typeof o.key === 'string' && Number.isFinite(o.at); }
+SAVE_EXTRA.push(s => { s.ship.occasions = SHIP.occasions.slice(-40); s.ship.commendations = SHIP.commendations; });
+const occRel = id => typeof relTier === 'function' ? relTier(id) || 0 : 0;
+const occOnShift = (id, d) => { const p = schedPeople().find(q => q.id === id); return !!p && isWorkDay(p, d); };
+const yourJobsDone = () => (SHIP.jobs || []).filter(j => j.status === 'done' && j.doneBy === 'you').length;
+const OCCASIONS = {
+  // summoned after your first commendation (the next day the Captain is on shift), or by Vance once you're friends
+  readyRoom: { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', deck: 1, room: 'R', at: 660, len: 25, script: 'readyRoomFirst', once: true,
+    due: d => { const c = SHIP.commendations[0], from = c ? c.day + 1 : null;
+      if (from === null && occRel('vance') < 3) return false;
+      if (from !== null && d < from) return false;
+      for (let k = from || d; k < d; k++) if (occOnShift('marrow', k)) return false;   // only the first such day
+      return occOnShift('marrow', d); },
+    mail: { from: 'Commander Teo Vance', subject: 'The Captain would like a word', body: 'The Captain would like to see you in her ready room on Deck 1 at 11:00 today. The door will be open. No need to change.' } },
+  // the Captain's table: a dinner in her quarters every 28 days (days 20, 48...), one junior who stood out invited
+  captainsTable: { title: 'The Captain\'s table', kind: 'invite', by: 'marrow', deck: 2, room: 'C', at: 1170, len: 90, script: 'captainsTable', notice: 1,
+    due: d => d % 28 === 20 && (SHIP.commendations.some(c => c.day > d - 28 && c.day <= d)
+      || (typeof SHIP.rel === 'object' && SHIP.rel ? Object.keys(SHIP.rel).filter(id => occRel(id) >= 3).length >= 3 : false)),
+    galley: { batch: { meals: 8, label: 'the Captain\'s table' } }, trace: 'framedMenu',
+    mail: { from: 'Captain Odile Marrow', subject: 'Dinner at my table', body: 'You\'re invited to dinner in my quarters on Deck 2 tomorrow at 19:30. Chef Brennan is cooking. Come as you are, but do come.' } },
+  // a progress talk in the Chief's office: you ask for one (the device's Appointments app calls occasionAsk)
+  progressTalk: { title: 'A progress talk', kind: 'meeting', by: 'calder', deck: 5, room: 'o', len: 20, script: 'calderProgress', ask: true,
+    mail: { from: 'Chief Ines Calder', subject: 'Your progress talk', body: 'My office, at the time you asked for. Bring nothing; I have your record.' } },
+};
+// a new occasion on the books: the appointment, the Mail, and the meeting that plays when you're in the room
+function occasionAdd(id, at, quiet) {
+  const o = OCCASIONS[id], key = id + '@' + (Math.floor(at / 1440) + 1);
+  if (!o || SHIP.occasions.some(x => x.key === key)) return null;
+  const r = { id, key, at, len: o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
+  SHIP.occasions.push(r);
+  if (typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+  if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: o.mail.body, quiet: !!quiet });
+  return r;
+}
+// you ask for one (ask: true): at ship minute `at`, if its person is on shift that day; returns the record or null
+function occasionAsk(id, at) { const o = OCCASIONS[id]; return o && o.ask && occOnShift(o.by, Math.floor(at / 1440) + 1) ? occasionAdd(id, at) : null; }
+// the doors (section 14's doorOpenFor): the room is open to you from 10 minutes before an occasion to its end
+function occasionDoorOpen(deck, room, t = shipNow()) { return SHIP.occasions.some(r => r.status === 'asked' && r.deck === deck && r.room === room && t >= r.at - 10 && t < r.at + r.len); }
+// the galley's keys during an occasion's day (eventMod falls back to this when no event is on)
+function occasionMod(kind, key, t) {
+  const d = Math.floor(t / 1440);
+  for (const r of SHIP.occasions) { const o = OCCASIONS[r.id]; if (o && o[kind] && Math.floor(r.at / 1440) === d && r.status !== 'missed' && o[kind][key] != null) return o[kind][key]; }
+  return null;
+}
+// once a ship minute (and on skips): book what's due today and tomorrow, keep the meetings registered, close the past
+function occasionsTick(now, quiet) {
+  const d = Math.floor(now / 1440) + 1;
+  for (const [id, o] of Object.entries(OCCASIONS)) {
+    if (o.ask || (o.once && SHIP.occasions.some(r => r.id === id))) continue;
+    for (const k of [d, d + (o.notice || 0)]) if (o.due(k)) { const at = (k - 1) * 1440 + o.at; if (at > now) occasionAdd(id, at, quiet); }
+  }
+  for (const r of SHIP.occasions) {
+    const o = OCCASIONS[r.id]; if (!o) continue;
+    if (r.status === 'asked' && now < r.at + r.len) meeting({ notify: o.title + ': ' + DECKS[r.deck].rooms[r.room].name + ', Deck ' + r.deck + ', at ' + hhmm(r.at % 1440) + '.', id: r.key, event: 'occasion', where: { deck: r.deck, room: new RegExp('^' + DECKS[r.deck].rooms[r.room].name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') }, at: r.at, len: r.len, who: [r.by], script: o.script });
+    if (r.status === 'asked' && now >= r.at + r.len) { r.status = r.met ? 'kept' : 'missed'; if (r.met && o.trace && !SHIP.traces.includes(o.trace)) SHIP.traces.push(o.trace); }
+  }
+}
+SIM_ADVANCE.push((from, to) => { meetingsTick(to, true); occasionsTick(to, true); });   // after a skip: book what's due, and the gists of what you missed
+MEETING_SCRIPTS.readyRoomFirst = {
+  title: 'The ready room', from: 'Commander Teo Vance',
+  gist: 'The Captain sent for you and you weren\'t there. She says it will keep, and she has a long memory.',
+  lines: [
+    { who: 'marrow', text: 'Come in. Mind the step; everyone trips on it.', pose: 'gesture' },
+    { who: 'marrow', text: c => c.commended ? 'I read the debrief. Calder says you were where you were needed.' : 'Commander Vance tells me you\'re worth knowing. He doesn\'t say that often.', to: 'you' },
+    { who: 'marrow', text: 'Tell me something. From where you stand, what does this ship need that the senior crew can\'t see?', to: 'you' },
+    { choice: [
+      { text: 'Better lights on the lower decks.', rel: { marrow: 1 }, reply: { who: 'marrow', text: 'Noted. Calder will love that.', pose: 'nod' } },
+      { text: 'More people who know where the spare filters are.', rel: { marrow: 1, calder: 1 }, reply: { who: 'marrow', text: 'Ha. That\'s a Works answer.', pose: 'nod' } },
+      { text: 'I\'m still learning. Ask me in a month.', rel: { marrow: 2 }, reply: { who: 'marrow', text: 'Honest. I will.' } },
+    ] },
+    { who: 'marrow', text: 'Before you go: meet the Admiral.', pose: 'gesture' },
+    { who: 'marrow', text: 'He\'s been aboard longer than anyone. He doesn\'t say much, which is why he outranks us all.' },
+    { who: 'marrow', text: c => 'Thank you, ' + c.you + '. Back to it.', to: 'you' },
+  ],
+};
+MEETING_SCRIPTS.captainsTable = {
+  title: 'The Captain\'s table', from: 'Captain Odile Marrow',
+  gist: 'Your seat at the Captain\'s table stayed empty. Chef Brennan saved you a slice of the tart.',
+  lines: [
+    { who: 'marrow', text: 'Sit, sit. Brennan has outdone herself.', pose: 'gesture' },
+    { who: 'vance', text: 'To the Wren.' },
+    { who: 'sato', text: 'And to whoever fixed the observatory heater.' },
+    { who: 'calder', text: 'That would be Works. As usual.', pose: 'nod' },
+    { who: 'marrow', text: 'So. What do the juniors say about us when we\'re not listening?', to: 'you' },
+    { choice: [
+      { text: 'That the Commander never sleeps.', rel: { vance: 1 }, reply: { who: 'vance', text: 'Accurate.' } },
+      { text: 'That the stew\'s improved.', rel: { marrow: 1 }, reply: { who: 'marrow', text: 'I\'ll tell Brennan. She\'ll pretend not to care.', pose: 'nod' } },
+      { text: 'Only good things, Captain.', rel: { holt: 1 }, reply: { who: 'holt', text: 'A diplomat. We\'ll make an officer of you yet.' } },
+    ] },
+    { who: 'marrow', text: 'Same time next month, then. Perhaps.' },
+  ],
+};
+MEETING_SCRIPTS.calderProgress = {
+  title: 'A progress talk', from: 'Chief Ines Calder',
+  gist: 'You missed your progress talk. Calder says ask again when you\'re ready.',
+  lines: [
+    { who: 'calder', text: 'Sit. Let\'s look at your record.', pose: 'gesture' },
+    { who: 'calder', text: c => c.jobsDone + (c.jobsDone === 1 ? ' job' : ' jobs') + ' signed off since you came aboard.' },
+    { who: 'calder', text: c => c.jobsDone >= 25 ? 'That\'s close to what Tier 2 asks. A seal check or two and I\'ll put your name forward.' : 'Tier 2 wants about twenty-five, and a seal check or two. Keep at it.', to: 'you' },
+    { choice: [
+      { text: 'What should I work on?', rel: { calder: 1 }, reply: { who: 'calder', text: 'Seals. Everyone avoids them.' } },
+      { text: 'Thanks, Chief.', reply: { who: 'calder', text: 'Don\'t thank me. Thank the filters.', pose: 'nod' } },
+    ] },
+  ],
+};
+
 // ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
 function upcomingTraditions(fromMin, toMin) {
   const out = [], S = schedData();
@@ -12641,7 +13205,7 @@ const SOC_SYMPTOM = { scrubber: 'rattling', fan: 'rattling', airplant: 'wheezing
   heatpump: 'clanking', recycler: 'gurgling', filter: 'gurgling', pump: 'humming', extractor: 'roaring', irrigation: 'sputtering', uv: 'flickering' };
 const NEWS = [];
 let SOC = null, SOC_MIN = -1;
-SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {} };
+SHIP.rel = {}; SHIP.aff = null; SHIP.knows = {}; SHIP.heard = []; SHIP.social = { hour: 0, fault: {}, pairs: {}, mail: [], feuds: {} };
 const socRoom = p => { const b = String(p.bed).split('-'); return b.length > 2 ? b.slice(0, 2).join('-') : b.join('-'); };   // '4-B1-2' -> '4-B1'; a cabin is its own
 const socHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h | 0; };
 const pairIdx = (i, j) => { if (i > j) [i, j] = [j, i]; return i * (2 * SOC.n - i - 1) / 2 + j - i - 1; };
@@ -12666,32 +13230,32 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0;
-  SHIP.social = { hour, fault: {}, pairs: {} };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay] } }, mail (story Mail to come). A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), rel };
 }
 function socLoad(s) {
   try {
     if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
     const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
     for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) } };
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {} };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -12717,12 +13281,25 @@ function relAdd(id, why, pts) {
   r.pts = Math.max(REL_TIERS[r.tier], Math.round((r.pts + pts) * 100) / 100);   // never below the tier you've reached
   if (r.met === null) r.met = now;
   if (why !== 'news') r.lastTalk = now;
-  r.tier = relTierOf(r.pts);
+  const was = r.tier; r.tier = relTierOf(r.pts);
+  if (r.tier > was && typeof deviceNotify === 'function') {   // a badge on the device's Crew app (section 19)
+    const p = SOC.crew[SOC.idx.get(id)];
+    deviceNotify({ app: 'crew', text: r.tier === 1 ? 'You and ' + shortName(p) + ' know each other now.' : 'You and ' + shortName(p) + ' are ' + REL_NAMES[r.tier] + 's now.', urgent: false });   // a badge only: the chat card says it in person
+  }
   return r.tier;
 }
 function affinity(a, b) {
   socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
   return i === undefined || j === undefined || i === j ? 0 : SHIP.aff[pairIdx(i, j)];
+}
+// what section 14 plans with (seating by friendship): pure, so a day planned early or again after a reload comes out
+// the same. For now the pair's starting affinity (affStart: roster data and a seed only); d is kept for later
+const AFF_PLAN = new Map();
+function affinityPlan(a, b, d) {
+  socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
+  if (i === undefined || j === undefined || i === j) return 0;
+  const k = pairIdx(i, j); if (!AFF_PLAN.has(k)) AFF_PLAN.set(k, affStart(SOC.crew[Math.min(i, j)], SOC.crew[Math.max(i, j)]));
+  return AFF_PLAN.get(k);
 }
 
 // ---- news ----
@@ -12823,6 +13400,7 @@ function socialHour(h) {
   socBorn(h, rooms);
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
+  for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
@@ -12830,6 +13408,26 @@ function socPairNews(i, j, friends, t) {
     weight: .6, life: 4, born: t, seed: [SOC.crew[i].id, SOC.crew[j].id],
     lines: friends ? [a + ' and ' + b + ' are always together these days.', 'Have you noticed ' + a + ' and ' + b + '? Best of friends now.', a + ' and ' + b + ' have become thick as thieves.']
                    : [a + ' and ' + b + ' aren\'t speaking.', 'There\'s a chill between ' + a + ' and ' + b + ' lately.', 'Did you hear ' + a + ' and ' + b + ' had words?'] });
+  if (!friends) SHIP.social.feuds[SOC.crew[i].id + ':' + SOC.crew[j].id] = { until: t + 3 * 1440, talked: [] };   // a falling-out you can smooth over
+}
+// small dramas (0.36.11): a pair who fall out (rivals, above) is a feud for three days. Each of them grumbles about
+// the other on their card (feudOf); chat with both while it lasts and they make it up: their affinity goes back to
+// -10, it's news ("X and Y have made up"), and each gives you REL_PTS.chat extra. SHIP.social.feuds, saved
+function feudOf(id, t = shipNow()) {
+  for (const k in SHIP.social.feuds) { const f = SHIP.social.feuds[k], [a, b] = k.split(':'); if (f.until > t && (a === id || b === id)) return { k, f, other: a === id ? b : a }; }
+  return null;
+}
+function feudTalk(p) {                                   // you chatted with someone in a feud
+  const o = feudOf(p.id); if (!o) return null;
+  if (!o.f.talked.includes(p.id)) o.f.talked.push(p.id);
+  if (o.f.talked.length < 2) return null;
+  const [a, b] = o.k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(b), t = Math.floor(shipNow());
+  delete SHIP.social.feuds[o.k]; SHIP.aff[pairIdx(i, j)] = -10; SHIP.social.pairs[Math.min(i, j) + '-' + Math.max(i, j)] = 'm';
+  const na = shortName(SOC.crew[i]), nb = shortName(SOC.crew[j]);
+  newsAdd({ id: 'madeup:' + o.k + ':' + t, about: a + ',' + b, kind: 'madeup', weight: .5, life: 3, born: t, seed: [a, b],
+    lines: [na + ' and ' + nb + ' have made up.', 'Saw ' + na + ' and ' + nb + ' having dinner together. About time.', 'Looks like ' + na + ' and ' + nb + ' are talking again.'] });
+  relAdd(a, 'chat', REL_PTS.chat); relAdd(b, 'chat', REL_PTS.chat);
+  return 'You talk it over, and you can tell something\'s shifted. ' + shortName(SOC.crew[SOC.idx.get(o.other)]) + ' must have said something too.';
 }
 function socialTo(t) {
   socInit(); const h1 = Math.floor(t / 60);
@@ -12841,7 +13439,7 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts();
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -12931,14 +13529,14 @@ function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // s
 // ---- for the device's apps (0.36.6; section 19 draws them): plain data, nothing drawn here ----
 // crewContacts() -> everyone you've met (or all with { all: true }), closest first: [{ id, name, role, dept, tier,
 //   tierName, pts, toNext (points to the next tier, or null), met, lastTalk, known: [what you know], where }].
-//   where: { deck, room, act } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
+//   where: { deck, room, act, placeId } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
 //   shows people once you're acquaintances, or on public duty); else null
 // newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
 const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
 function crewWhere(p, t = shipNow()) {
   const w = whereIs(p, t); if (!w || w.moving) return null;
   const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
-  return { deck: w.deck, room: rm ? rm.name : null, act: w.act };
+  return { deck: w.deck, room: rm ? rm.name : null, act: w.act, placeId: w.placeId || null };
 }
 function crewContacts({ all = false } = {}) {
   socInit(); const t = shipNow(), out = [];
@@ -12956,6 +13554,23 @@ function newsFeed() {
   return SHIP.heard.slice().reverse().map(h => { const it = NEWS.find(x => x.id === h.id), p = h.from && SOC.idx.has(h.from) ? SOC.crew[SOC.idx.get(h.from)] : null;
     return { id: h.id, line: h.line, from: p ? p.name : null, at: h.at, kind: it ? it.kind : (h.id.split(':')[0] || 'news') }; });
 }
+// the Crew app (0.36.8), on the device engineer's deviceApp (section 19; nothing without it): the people you've met,
+// closest first, with where they are when you may know it; tap one for what you know about them
+let CREW_PICK = null;
+const shipNews = (limit = 20) => newsFeed().slice(0, limit).map(x => ({ text: x.line, from: x.from, at: x.at }));   // the Ship app's news feed (section 19)
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50,
+  view: () => {
+    const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
+    if (c) return { title: c.name, blocks: [
+      { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: c.where ? 'Now: Deck ' + c.where.deck + (c.where.room ? ', ' + c.where.room : '') + '.' : 'Where they are: you don\'t know them well enough yet.' },
+      { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
+      { kind: 'buttons', items: (c.where ? [{ label: 'On the map', action: { app: 'maps', do: 'person', arg: c.id } }] : []).concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
+    const cs = crewContacts();
+    return { title: 'Crew', blocks: cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+      : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }] };
+  },
+  act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
@@ -12998,10 +13613,90 @@ const CHAT_DEPT = { command: 'The bridge is calmer than people think.', helm: 'S
   works: 'Something always needs fixing, doesn\'t it?', watch: 'Quiet watch so far. I like it that way.', survey: 'Sato has us chasing another reading.',
   infirmary: 'Drink some water. Doctor\'s orders. Well, aide\'s orders.', galley: 'Two hundred meals a day, and they still ask what\'s for dinner.' };
 const chatName = () => (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet';
+// the first story arcs (0.36.10; plans/pillar3-plan.md "Story crew arcs"): Tomas (homesick, and a call home that goes
+// wrong), Pell (a hobby that becomes a little show in the music room) and Rina (a worry about her gran). Four beats
+// each, opening at acquaintance, colleague, friend and close friend: beat i is told the first time their card opens
+// once you're at tier i + 1, at most one a ship day (rel.arc beats told, rel.arcDay). mail: a message from them
+// `after` ship minutes later (SHIP.social.mail, sent by socialTick). They never contradict the roster's details.
+const STORY_ARCS = {
+  tomas: [
+    { say: 'Do you ever miss home? I keep staring at that star map above my bunk. Every place on it is somewhere I\'ve never been.' },
+    { say: 'My brother\'s birthday is on Thursday. I\'m going to call him from the booths on Deck 3. First proper call since I left.' },
+    { say: 'The call dropped halfway through. Relay lag. He thought I hung up on him. Now he won\'t answer.',
+      mail: { after: 180, subject: 'Sorry about earlier', body: 'Sorry I was so quiet. The call home really got to me. Thanks for listening, though. It helped more than you know. Tomas' } },
+    { say: 'He wrote back! He\'s taped a star map to his ceiling, same as mine. Says we can look at the same sky now. Sort of.',
+      mail: { after: 60, subject: 'Observatory?', body: 'If you\'re free on observatory night, come up to Deck 2. I want to show you where home is on the big window. Tomas' } },
+  ],
+  pell: [
+    { say: 'Want to see something? I made this out of my tin of spare screws. It plays a tune. Badly.' },
+    { say: 'I found an old music box at the swap meet. Rusted solid. I\'ve nearly got the chime working again.' },
+    { say: 'Brennan says I can show my music boxes in the music room after dinner one night. Is that mad? You\'d come, right?',
+      mail: { after: 120, subject: 'Music boxes!', body: 'It\'s happening: my music boxes, in the Deck 4 music room after dinner some night this week. Bring people. Or just you. Pell' },
+      show: { id: 'pell-show', name: 'Pell\'s music boxes', at: [1230, 1290], where: [{ deck: 4, pool: 'music' }], hostAnim: 'play', chance: .12,
+              mail: 'Tomorrow at 20:30 in the Deck 4 music room: my music boxes, all of them, wound up at once. Bring people. Or just you. Pell',
+              ask: 'Coming to see my music boxes tonight?', here: 'This one plays a waltz. Mostly.', thanks: 'You watch Pell wind up his music boxes one by one. The little room laughs and claps.' } },
+    { afterShow: true, say: p => { const n = showCrowd(p, 'pell-show'), w = n > 12 ? n : ['Nobody', 'One person', 'Two people', 'Three people', 'Four people', 'Five people', 'Six people', 'Seven people', 'Eight people', 'Nine people', 'Ten people', 'Eleven people', 'Twelve people'][n];
+      return n ? w + (n > 12 ? ' people' : '') + ' came to see the music boxes. ' + (n > 3 ? n + '! ' : '') + 'I think they actually liked them.' + (showJoined(p, 'pell-show') ? ' And you came. That meant a lot.' : '') : 'Hardly anyone came to the music boxes. That\'s fine. I\'ll try again some time.'; } },
+  ],
+  rina: [
+    { say: 'My gran taught me Tiles. Cheated the whole time. She hasn\'t been well lately.' },
+    { say: 'My sister says Gran\'s gone into hospital. She\'s the doctor in the family. I\'m just the one who worries.' },
+    { say: 'No news from the station for two days. I haven\'t slept. Talk to me about anything else, would you?',
+      mail: { after: 240, subject: 'Thank you', body: 'Thanks for keeping me company today. Still no news, but I feel steadier. You\'re a good one. Rina' } },
+    { say: 'Gran\'s home! First night back she beat my sister at Tiles. Cheated, obviously. I\'ve never been so happy to hear it.',
+      mail: { after: 30, subject: 'Tiles?', body: 'Gran sends her love, apparently, to "the friend who listened". Come and lose to me at Tiles in the common room some evening. Rina' } },
+  ],
+};
+// how many crew went to a beat's show (their plans that day), and whether you joined in (section 18's SHIP.events.joined)
+function showCrowd(p, id) {
+  const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; if (!d) return 0;
+  return SOC.crew.filter(q => q !== p && planDay(q, d).some(s => s.tag && (s.tag === 'ev-' + id || s.tag.startsWith('ev-' + id + '-')))).length;
+}
+const showJoined = (p, id) => { const d = SHIP.rel[p.id] && SHIP.rel[p.id].showDay; return !!(d && SHIP.events && SHIP.events.joined.includes(id + '@' + d)); };
+function arcBeat(p, t = shipNow()) {
+  const arc = STORY_ARCS[p.id], r = SHIP.rel[p.id]; if (!arc || !r) return null;
+  const n = r.arc || 0, day = Math.floor(t / 1440) + 1;
+  if (arc[n] && arc[n].afterShow && r.showDay && day <= r.showDay) return null;   // Pell's last beat waits for his show
+  return n < arc.length && r.tier >= n + 1 && (r.arcDay || 0) < day ? arc[n] : null;
+}
+function arcTold(p) {                                    // the card showed their next beat
+  const beat = arcBeat(p); if (!beat) return;
+  const r = SHIP.rel[p.id]; r.arc = (r.arc || 0) + 1; r.arcDay = SHIP.time.day;
+  // a beat with a show: a real one-off gathering the next evening (section 18's eventOneOff), which sends its own Mail
+  if (beat.show && typeof eventOneOff === 'function' && eventOneOff({ ...beat.show, day: SHIP.time.day + 1, host: p.id, from: p.name })) { r.showDay = SHIP.time.day + 1; return; }
+  if (beat.mail) SHIP.social.mail.push({ at: Math.floor(shipNow()) + beat.mail.after, from: p.name, subject: beat.mail.subject, body: beat.mail.body });
+}
+// appointments (0.36.13; the device's Appointments, section 19, and the crew side, section 14's apptList): one you
+// kept gives REL_PTS.appt to each person in it, once (a.socKept); one you missed costs nothing, but the next time you
+// tap them they mention it (apptMissedBy, a.socSaid), within three days. The two flags ride on the appointment, saved
+// with the device's part of the save
+function socialAppts() {
+  if (typeof apptList !== 'function') return;
+  for (const a of apptList()) if (a.status === 'kept' && !a.socKept && Array.isArray(a.with)) { a.socKept = true; for (const id of a.with) if (SOC.idx.has(id)) relAdd(id, 'appt', REL_PTS.appt); }
+}
+function apptMissedBy(p, t = shipNow()) {
+  if (typeof apptList !== 'function') return null;
+  return apptList().find(a => a.status === 'missed' && !a.socSaid && Array.isArray(a.with) && a.with.includes(p.id) && t - a.at < 3 * 1440 && t >= a.at) || null;
+}
+function apptRemark(p, a, t = shipNow()) {
+  const pl = typeof apptPlace === 'function' ? apptPlace(a) : null, rm = pl && ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name;
+  const when = Math.floor(a.at / 1440) === Math.floor(t / 1440) ? 'earlier' : Math.floor(a.at / 1440) === Math.floor(t / 1440) - 1 ? 'yesterday' : 'the other day';
+  const at = rm ? ' at the ' + rm.toLowerCase() : '';
+  return ['Waited for you' + at + ' ' + when + '. No harm done.', 'I was' + at + ' ' + when + '. Thought you\'d forgotten me!', 'Missed you' + at + ' ' + when + '. Another time?'][Math.floor(schedU(p.seed, Math.floor(t / 60), 642) * 3)];
+}
+function socialMail(now) {                               // story Mail that's due (socialTick)
+  const due = SHIP.social.mail.filter(x => x.at <= now); if (!due.length || typeof mailSend !== 'function') return;
+  SHIP.social.mail = SHIP.social.mail.filter(x => x.at > now);
+  for (const x of due) mailSend(x);
+}
 function chatLine(p, t = shipNow()) {
   socInit();
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const fill = s => s.replace('{me}', chatName());
+  const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
+  const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
+  const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
+    return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
   if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
   const heard = new Set(SHIP.heard.map(x => x.id));
   const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
@@ -13093,6 +13788,8 @@ function chatOpen(p, greet) {                             // greet: they came to
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
   CHAT = { p, line: greet ? chatGreet(p) : chatLine(p), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
+  if (CHAT.line.kind === 'story') arcTold(p);
+  if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
   return true;
@@ -13108,9 +13805,14 @@ function chatDo(id) {
     if (typeof playerChat === 'function') playerChat(p);  // section 15: social for you (half when you're grubby)
     const before = r.tier, after = relAdd(p.id, 'chat', REL_PTS.chat);
     const grubby = SHIP.player && SHIP.player.needs && typeof NEED_LOW !== 'undefined' && SHIP.player.needs.hygiene < NEED_LOW;
+    const fd = feudOf(p.id), made = fd ? feudTalk(p) : null;   // a falling-out: talking it over (small dramas)
     let l = null;                                       // the next thing on their mind: something they say, not the same again
-    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text); k++) l = chatLine(p, shipNow() + 60 * k);
+    if (made) l = { text: made, say: false };
+    else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
+    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) l = chatLine(p, shipNow() + 60 * k);
     if (l.news) playerHeard(l.news, p.id);
+    if (l.kind === 'story') arcTold(p);
+    if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
   } else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'back') { C.ask = false; chatShow(); }

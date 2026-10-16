@@ -2,6 +2,37 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
+## Update: builds 0.28.9 to 0.28.17 (the answers pass and after; written 2026-10-16 at b6e8d7e)
+
+Read this first; the older sections below still hold except where this says otherwise. DEV_NOTES "Player needs and the device" has the full detail and the build rows.
+
+**Branch state.** `claude/player-needs` at b6e8d7e sits on merges of ship-integration 0.41.5 (8027d4b), the device engineer's 0.35.0 and systems 0.33.20. The lead merges from it into `claude/ship-integration` (0.41.x). Next build number: **0.28.18**.
+
+**What these builds added (all in section 15 unless noted):**
+- **0.28.9, needs give bonuses:** `needEffects(needs)` -> `{ walk, task, drain, socialGain, notes, marks }`. At 75 or over a bonus, under 25 a penalty, effects multiply; the table is `NEED_FX` (in DEV_NOTES). `task` speeds activities, repairs and making parts (`A.done += dm * task`; `taskMins`). Energy drains 4.4 an hour awake: 16 hours (unfit), 17 (average) or 18 (fit) to the tired line. Your bunk from 20:00 sleeps you straight to 06:00 (section 13's offerSleep calls the Sleep button's handler: one line).
+- **0.28.10, mail, chatting, store:** `mailSend({ at, from, subject, body, quiet })` and `SHIP.mail` (saved as `save.mail`), `mailUnread()`; the welcome on a fresh start. `playerChat(p)`: +6 social for the first chat a day per person, times socialGain. Since the social engineer's 0.36.1 it's called from their chat card's Chat button, not the crew tap. Company at the mess table: +0.2 a minute each, up to three. `SHIP.player.credits` (40, +15 a job), `locker`, `chats`; `STORE`, `storePick`.
+- **0.28.11:** `machineTap` (a real machine within 1.2 m -> section 17's `machineUse(id, 'player')`); the cart run (`cartTap`, `cartStep`, `cartAuto`, `cartEnd`, `SHIP.player.cart`, places from `jobStops` when present; meals runs call the galley's `galleyCartLand`); crawl tiles (`crawlTiles()`, `CRAWL_SPEED` 0.5, `player.crouch`).
+- **0.28.12:** sit anywhere (`sitTap`, `SIT_TYPES`, activity `sit` until you walk away; rest `SIT_REST` 0.6, `SIT_GAIN`); squeeze past settled crew (`squeezePath` from one line in section 10's `Walker.goTo`, `squeezeStep` slows you and says "Excuse me, Chef"); 15b's `PLAYER_TAPS` hook in `playerTap`.
+- **0.28.13:** player_check only (the cart test takes a free dock and checks the delivery across the docking).
+- **0.28.14:** `stubTap`: stub machines (the washers) matched by room, kind name and number.
+- **0.28.15:** the tray: `player.holding = 'tray'` walking from the servery or queue to your seat, `'walk+tray'` on the stand-in; `TRAY_ON` (one mesh made at load) on the table while you eat.
+- **0.28.16:** on the device engineer's 0.35.0. **The placeholder device is gone:** the device is section 19's (theirs). `device` is a shim there and `deviceOn` is theirs; never fire it from 15. Their apps read only section 15's data (needs, needEffects, needsLine, playerSpeed, credits, locker, carry, work, cart, SHIP.mail, mailSend, mailUnread, ACT). The welcome mail and the job notice now say jobs are taken at the job board.
+- **0.28.17, the user's treadmill report:** things with no description of their own aren't tappable (only the middle treadmill had one), so `playerFloorTap(point)` (one line in section 11's `tap`, before a floor tap walks) follows the tap's line of sight up to 1.2 m and uses a gym place, booth, store shelf or public seat it passes within 0.5 m of. A workout costs 6 energy (`PLAYER_ACTS.gym.cost`; any activity may carry a `cost`). Screenshots are in `plans/shot-0.28.17-*.png`.
+- **Other people's lines in section 15 and its hooks, keep them at merges:** the galley's numeric face for `galleyJoin`; the performance engineer's Walker pose line (held things win over `'+device'`); 15b's `ixHold()` at the end of the hold expression; and the interactions engineer's player_check lines (`turnInJob` before reading a finished job; `holding is not True`). All are inert without their sections.
+
+**Gotchas learned:**
+- **player_check now takes about 25 minutes.** Give it `timeout 2400` or more: a 1500-second limit killed it once mid cart-run, which looked like a hang.
+- **The repo ignores `*.png`.** Use `git add -f` for screenshots.
+- **Clicks in tests:** a `page.mouse.click` outside the viewport silently does nothing. Put the player near the target first (the camera follows the player) and check the projected point is on screen.
+- **Merges:** expect conflicts only in the header build line, `GAME_BUILD` and the DEV_NOTES table or sections. Keep both sides of DEV_NOTES.
+- **Food in player_check depends on sections 16 and 17:** a starved galley (cart runs never claimed) once made every eating test fail. Diagnose supply (`galleyText`, `SHIP.galley.cold`) before blaming taps.
+
+**Loose ends:**
+- `cartsOut()` reads the player's cart since systems 0.33.20; check the parked cart hides while you push one.
+- C11: verify on a combined build that a crate, cart or tray in hand wins over the raised device.
+- The stand-in body during activities never shows the device or chores' toolboxes. Decide with the performance and interactions engineers whether it should.
+- `playerChat`'s toast remark goes to a hidden toast now that the chat card is used. Harmless; drop it or add a `quiet` option if the social engineer asks.
+
 ## Role
 
 - **Who:** the player engineer, Pillar 2. Workstream A3 (the player's needs and activities, the walking-speed rule, the placeholder device), then the player's side of B2 (the job loop).
@@ -141,6 +172,9 @@ Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9),
 - **The other five checks must stay green:** cadet_test ALL IDENTICAL against the build you started from, deck_check, day_check day 1, food_check and machine_check.
 
 ## Ideas and open questions for the user
+
+(Answered since: social from chatting and company yes, shopping buys things yes, machine trouble slows only the crew. Still open: what the real device should show first is now the device engineer's.)
+
 - **Should talking to crew, or eating with company, raise social?** Today only calling home does.
 - **Should shopping buy things** (snacks that restore a little hunger, small comforts), or stay a nice moment?
 - **The device:** what do you want on it first, now that needs, jobs and notices all show there?

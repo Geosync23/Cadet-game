@@ -1,5 +1,7 @@
 # Handover: the device engineer (section 19, your personal device)
 
+**Update (device engineer 2, session_01LGbDXmiNuSmR6dPGjRj8mX, builds 0.35.8-0.35.13):** see "Device engineer 2" at the end; the lead is now session_015QoyPWBdMPM4ywf5W2jMMs.
+
 Written 2026-10-16 at device build 0.35.7 (`claude/device`), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Your device (section 19 ...)"), `plans/pillar3-plan.md` on the lead branch (Part 1, "The device look", "Shared formats", workstreams C1, C2, C3, C11, C13) and `design-doc.md` ("The player").
 
 ## Role
@@ -68,3 +70,18 @@ Check the branch for which of 0.35.4–0.35.7 were pushed (they were pushed toge
 ## How to test
 
 `CADET_CHROME=/opt/pw-browsers/chromium python3 device_check.py BUILD.html` (about 2 minutes), then one at a time: player_check, interactions_check, deck_check, day_check 1, cadet_test against the previous push (the device is closed there, so expect ALL IDENTICAL).
+
+## Device engineer 2 (0.35.8 onwards)
+
+| Build | Commit | What |
+| --- | --- | --- |
+| 0.35.8 | ae506b9 | Ship news in the Ship app (`devNews()` over section 20's `shipNews`) |
+| 0.35.9 | a86d7a7 | People on Maps (`mapPeople`, `mapDots`; `{ app: 'maps', who }`) |
+| 0.35.10 | 16a4291 | Calendar day → See the day / Make an appointment; Pick on the map (`mapFor`, `apptRoomPlace`); group meetings (`grp`, `apptSpots`, `apptGroups`, `apptBook`) |
+| 0.35.11 | cdfcdb1 | Quiet off shift (`settings.quiet`, `DEV_WORK_APPS`); #seek chip in the CRT style (`html[data-ph]`); Maps hides sleepers and lists only people you know |
+| 0.35.12 | 4a1d044 | Phone review: tap-to-close on a tap, `pointercancel`, a 44px bezel grip, no rebuild when the VIEW is unchanged |
+| 0.35.13 | 61ebe6a | Ship integration 0.41.6 merged in |
+
+Loose ends now: 1 (the phosphor is chosen: Wren cyan), 3, 4, 5, 6, 7 are done. Still open: 2 (days off), 8 (a real phone; the performance engineer was asked to check the CRT skin's paint cost on a real GPU). Bottom-edge swipe-up fights the iPhone home bar; the Device button is the main way in.
+
+Gotchas added: a group meeting is one appointment per person (each a seat of their own) sharing `grp`, so section 14 needed no change; `deviceTick` keeps the group together (one kept → all kept). The full suite takes 25-40 minutes a build; run browser checks one at a time. For testing against the social branch's newer section 20 without merging, splice its section 20 into a scratch copy (between the `// 20. SOCIAL` and `// 6. CAMERA` headers).
