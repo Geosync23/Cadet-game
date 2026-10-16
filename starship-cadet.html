@@ -119,7 +119,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .device .keys button:active{transform:translateY(2px);box-shadow:0 1px 0 #0d1013}
 .device .keys button:disabled{opacity:.45}
 body.devsheet .toast{bottom:calc(66vh + 12px)}
-.devtip{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:4;width:min(440px,calc(100% - 24px));display:flex;gap:12px;align-items:flex-start;padding:12px 14px;min-height:44px;
+.devtip{position:fixed;left:50%;top:128px;transform:translateX(-50%);z-index:4;width:min(440px,calc(100% - 24px));display:flex;gap:12px;align-items:flex-start;padding:12px 14px;min-height:44px;
   border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
   box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8);cursor:pointer}
 .devtip[hidden],.devdlg[hidden]{display:none}
@@ -133,9 +133,8 @@ body.devsheet .toast{bottom:calc(66vh + 12px)}
 .devdlg .btns,#chat.devchat .btns{display:flex;flex-wrap:wrap;gap:8px}
 .devdlg .next{display:block;margin-left:auto}
 .devdlg .x,#chat.devchat .x{position:absolute;top:6px;right:8px;border:0;min-width:44px;font-size:22px;padding:0;flex:none}
-body.devsheet .devdlg,body.devsheet #chat.devchat{bottom:calc(66vh + 12px)}
+body.dlgon .devtip{display:none}
 .devtip b{flex:none;padding:0 6px;border-radius:3px;background:var(--crt-ink);color:var(--crt-bg);text-shadow:none;letter-spacing:.1em}
-body.devsheet .devtip{bottom:calc(66vh + 70px)}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
 </head>
@@ -7756,27 +7755,21 @@ function deviceFrameStep(now) {
   DEV.frApplied = off !== 0;
 }
 requestAnimationFrame(deviceFrameStep);
-// ---- the meeting dialogue panel (Part 2, "meetings with dialogue"): section 18 owns the scripts and their flow; this
-// only draws. deviceDialogue(view) shows one line: view = { title, who, role, text, choices: [text] } (null hides it).
-// A tap on the line calls section 18's dialogueNext(), a choice dialogueChoose(k), the X dialogueClose(); without them
-// the panel just closes. deviceDialogue(script, i) (a raw MEETING_SCRIPTS entry and a line number) also works.
-function devWho(id) {
-  const p = typeof ROSTER !== 'undefined' ? ROSTER.find(x => x.id === id) : null;
-  return p ? { who: p.name, role: p.role || '' } : { who: String(id || ''), role: '' };
-}
-function deviceDialogue(v, i) {
-  if (v && Array.isArray(v.lines) && Number.isInteger(i)) {   // a raw script: resolve the line here
-    const l = v.lines[i]; if (!l) { DEVICE_SKIN.dialogue(null); return false; }
-    const ctx = { band: 'smooth', mine: {}, you: 'Cadet' }, txt = x => typeof x === 'function' ? x(ctx) : x;
-    v = l.choice ? { title: v.title, who: 'You', role: '', text: '', choices: l.choice.map(c => txt(c.text)) } : { title: v.title, ...devWho(l.who), text: txt(l.text) };
-  }
+// ---- the meeting dialogue panel (Part 2, "meetings with dialogue"): section 18 owns the scripts and their flow
+// (advancing, replies, walking away); this only draws and reports taps. deviceDialogue(view, onTap): view = { title,
+// name, who, text, to, pose, choices: null | [text], i, n }; onTap() goes on, onTap(k) picks reply k. null closes it.
+let devDlgTap = null;
+function deviceDialogue(v, onTap) {
+  devDlgTap = v && typeof onTap === 'function' ? onTap : null;
+  if (v && !v.name && v.who) { const p = typeof ROSTER !== 'undefined' ? ROSTER.find(x => x.id === v.who) : null; v = { ...v, name: p ? p.name : String(v.who) }; }
   DEVICE_SKIN.dialogue(v || null);
   return true;
 }
 function devDialogueDo(what, k) {
-  const f = what === 'next' ? (typeof dialogueNext === 'function' ? dialogueNext : null) : what === 'choose' ? (typeof dialogueChoose === 'function' ? dialogueChoose : null) : (typeof dialogueClose === 'function' ? dialogueClose : null);
-  try { if (f) f(k); else DEVICE_SKIN.dialogue(null); } catch (e) { DEV.errors.push('dialogue: ' + (e && e.message || e)); DEVICE_SKIN.dialogue(null); }
-  if (what === 'close') DEVICE_SKIN.dialogue(null);
+  try {
+    if (what === 'close') { DEVICE_SKIN.dialogue(null); devDlgTap = null; if (typeof dialogueClose === 'function') dialogueClose(); return; }
+    if (devDlgTap) devDlgTap(what === 'choose' ? k : undefined); else DEVICE_SKIN.dialogue(null);
+  } catch (e) { DEV.errors.push('dialogue: ' + (e && e.message || e)); DEVICE_SKIN.dialogue(null); }
 }
 function deviceRefresh() {
   deviceTick();
@@ -7886,7 +7879,7 @@ const DEVICE_SKIN = (() => {
         const grid = mk('div', 'apps');
         for (const a of deviceApps()) {
           const t = act(mk('button', 'app'), { app: a.id, do: 'open' }), n = deviceBadge(a);
-          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '︎'), mk('span', '', a.title));
+          t.dataset.app = a.id; t.append(mk('i', '', (GLYPH[a.icon] || GLYPH.dot) + '︎'), mk('span', '', a.short || a.title));
           if (n) t.appendChild(mk('b', '', n));
           t.setAttribute('aria-label', a.title + (n ? ', ' + n + ' new' : ''));
           grid.appendChild(t);
@@ -7898,7 +7891,7 @@ const DEVICE_SKIN = (() => {
     tip(t) {                                   // the tip card, in the screen's style; null hides it
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
-      clearTimeout(c._t); c.hidden = !t; if (!t) return;
+      clearTimeout(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
       c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
       c._t = setTimeout(() => tipDone(), 9000);
     },
@@ -7908,10 +7901,11 @@ const DEVICE_SKIN = (() => {
         c = mk('div', 'devdlg'); c.id = 'devDlg'; c.setAttribute('role', 'dialog'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
         c.addEventListener('pointerdown', e => e.stopPropagation());   // taps on the panel never reach the deck
       }
-      c.hidden = !v; if (!v) return;
+      c.hidden = !v; document.body.classList.toggle('dlgon', !!v);
+      if (!v) { if (TIP_Q.length) skin.tip(TIP_Q[0]); return; }   // a tip waiting behind the meeting comes back
       c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Walk away'); x.onclick = e => { e.stopPropagation(); devDialogueDo('close'); };
-      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + ' · ' : '') + (v.who || '') + (v.role ? ', ' + v.role : '')));
+      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + ' · ' : '') + (v.name || '') + (v.n ? ' · ' + ((v.i || 0) + 1) + '/' + v.n : '')));
       if (v.text) { const t = mk('p', '', v.text); c.appendChild(t); }
       if (v.choices && v.choices.length) {
         const box = mk('div', 'btns');
@@ -8187,9 +8181,23 @@ function apptPlaces() {                                  // [{ id, name, deck }]
   }
   return (apptPlacesCache = out);
 }
+// a free spot in that room at that time (the sim engineer's advice): a seat nobody's plan holds then (shipDay's occ),
+// and no other appointment; a room behind a locked door takes any place in it
+function apptSpot(where, at, len) {
+  const ref = apptPlaces().find(x => x.id === where); if (!ref) return where;
+  const def = DECKS[ref.deck], room = (def.places.find(q => q.id === where) || {}).room, office = /office|infirmary/i.test(ref.name);
+  const d = Math.floor(at / 1440) + 1, occ = typeof shipDay === 'function' ? shipDay(d).occ : null, over = (a, b) => a < at + len && at - 10 < b;
+  const used = new Set(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && over(a.at, a.at + (a.len || 30))).map(a => a.where));
+  const free = def.places.filter(q => q.room === room && (office || APPT_SEATS.includes(q.type)) && !used.has(q.id)
+    && !(occ && (occ.get(q.id) || []).some(([a, b]) => over(a, b))));
+  return free.length ? free[0].id : where;
+}
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
-const apptWhereName = id => { const p = apptPlaces().find(x => x.id === id); return p ? p.name + ', Deck ' + p.deck : 'there'; };
+const apptWhereName = id => {                          // the room's name, for any place in it
+  for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', Deck ' + n; } }
+  return 'there';
+};
 function apptPeople() {                                  // who you can ask: people you've met when section 20 says, else story and Works crew
   const all = typeof schedPeople === 'function' ? schedPeople().filter(p => !p.player && p.rank !== 'guest') : [];
   const met = typeof relTier === 'function' ? all.filter(p => { try { return relTier(p.id) >= 1; } catch (e) { return false; } }) : [];
@@ -8199,7 +8207,7 @@ function apptKind(where, withId) {
   const r = apptPlaces().find(x => x.id === where), p = apptPerson(withId);
   return r && /infirmary/i.test(r.name) ? 'checkup' : r && /office/i.test(r.name) || p && /chief/i.test(p.role || '') && r && /office/i.test(r.name) ? 'work' : 'social';
 }
-deviceApp({ id: 'appointments', title: 'Appointments', icon: 'calendar', order: 12,
+deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'calendar', order: 12,
   badge: () => SHIP.device.appts.filter(a => a.by && a.status === 'asked').length || null,
   act(verb, arg) {
     const D = SHIP.device, now = shipNow();
@@ -8213,7 +8221,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', icon: 'calendar', order: 
     else if (verb === 'ask' && apptDraft && apptDraft.with && apptDraft.where) {
       const p = apptPerson(apptDraft.with), at = (apptDraft.day - 1) * 1440 + apptDraft.min;
       if (at <= now + 10) { apptSay = 'That\'s too soon. Pick a later time.'; return; }
-      const a = { id: D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1, with: [apptDraft.with], at, len: 30, where: apptDraft.where, kind: apptKind(apptDraft.where, apptDraft.with), status: 'asked', by: null };
+      const a = { id: D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1, with: [apptDraft.with], at, len: 30, where: apptSpot(apptDraft.where, at, 30), kind: apptKind(apptDraft.where, apptDraft.with), status: 'asked', by: null };
       const r = typeof apptReply === 'function' ? apptReply(p, a) : { answer: 'yes', at, text: apptName(apptDraft.with) + ': "See you then."' };
       apptSay = r.text;
       if (r.answer === 'yes') { a.status = 'yes'; D.appts.push(a); apptDraft = null; }
