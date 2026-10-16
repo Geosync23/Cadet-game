@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   Ship news (0.35.8): section 20's shipNews feed in the Ship app
 #   Appointments (0.35.6): ask someone for tomorrow at a meeting place; an answer, booked or offered; saved
 #   the meeting panel (deviceDialogue(view, onTap)) and the Captain's address (deviceAddress) draw and report taps
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
@@ -134,6 +135,12 @@ def run(path):
               const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);
               D.settings.tips = false; out.push(tipShow('t2', 'Off')); D.settings.tips = true; out.push(!!D.tipsSeen.t1); D.tipsSeen = {}; return out; })()""")
             check(tp == [True, False, True, True, False, True], f'tips: once each, a tap closes, the switch: {tp}')
+            # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none)
+            sn = g.ev("""(() => { const own = typeof shipNews === 'function'; if (!own) window.shipNews = n => [{ text: 'The scrubber on Deck 4 is rattling.', from: 'Pell Varga', at: shipNow() - 30 }].slice(0, n);
+              const out = [own, devNews().length]; deviceShow('ship'); const t = document.getElementById('devBody').textContent;
+              out.push(t.includes('Ship news'), !devNews().length || t.includes(devNews()[0].text)); if (!own) delete window.shipNews; deviceShow('home'); return out; })()""")
+            print('  ship news:', sn)
+            check(sn[1] >= (0 if sn[0] else 1) and sn[2] and sn[3], f'Ship news: the feed shows in the Ship app: {sn}')
             # an action with no verb opens its app (the social engineer's Meet up: { app: 'appointments', with })
             ap = g.ev("(() => { deviceDo({ app: 'appointments', with: 'calder' }); const a = DEV.app; deviceShow('home'); return a; })()")
             check(ap == 'appointments', f'deviceDo with no verb opens the app: {ap}')

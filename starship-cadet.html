@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.35.7
+   STARSHIP CADET: CSV Wren                            build 0.35.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6707,7 +6707,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.35.8';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8294,9 +8294,18 @@ deviceApp({ id: 'memos', title: 'Memos', icon: 'memo', order: 45,
   } });
 
 // Ship (0.35.4): ship health and each system, as on the Works bay board (shipHealthRows, section 17), and what's on
-// today. Ship news (the social engineer's news model) joins it later.
+// today. Ship news (0.35.8): what you've heard aboard, newest first (section 20's shipNews: { text, from, at }).
+const SHIP_NEWS_N = 8;
+function devNews() {
+  if (typeof shipNews !== 'function') return [];
+  try { return (shipNews(SHIP_NEWS_N) || []).filter(x => x && typeof x.text === 'string'); } catch (e) { DEV.errors.push('shipNews: ' + (e && e.message || e)); return []; }
+}
 deviceApp({ id: 'ship', title: 'Ship', icon: 'ship', order: 60, view: () => {
-  const B = [];
+  const B = [], news = devNews();
+  B.push({ kind: 'text', text: 'Ship news', mark: 'head' });
+  if (news.length) B.push({ kind: 'list', rows: news.map(x => ({ text: x.text, sub: (x.from ? x.from + ' · ' : '') + (isFinite(x.at) ? devDayName(Math.floor(x.at / 1440) + 1) + ' ' + devWhen(x.at) : '') })) });
+  else B.push({ kind: 'text', text: 'Nothing heard yet. Talk to people aboard and you\'ll hear what\'s going on.' });
+  B.push({ kind: 'text', text: 'Systems', mark: 'head' });
   if (typeof shipHealthRows === 'function') {
     const rows = shipHealthRows();
     B.push({ kind: 'bars', items: rows.map(r => ({ label: r.name, value: r.value, level: r.state === 'failing' ? 'low' : r.state === 'poor' ? 'mid' : '' })) });
