@@ -181,7 +181,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.34.17
+   STARSHIP CADET: CSV Wren                            build 0.34.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6902,7 +6902,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.17';                             // keep in step with the header's build line
+const GAME_BUILD = '0.34.18';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12096,7 +12096,7 @@ function eventsDress(now) {
 //   captainAddress({ lines, at }), MEETING_SCRIPTS, meeting(), dialogueShow(), dialogueClose(), upcomingTraditions()
 // Nothing here calls R(); when an event starts comes from schedU and the day, so a replay is identical.
 const SHIP_EVENTS = {};
-const EVENT_ORDER = ['ionStorm', 'diplomatic'];                        // the main and short events, in the plan's order (Part 2, "The full order")
+const EVENT_ORDER = ['ionStorm', 'diplomatic'];   // the main events with the short ones between (Part 2, "The full order")                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
@@ -12209,7 +12209,7 @@ const STORM_RETELL = {
 // the call-home backlog (section 18's thread): when comms return, everyone owed a call queues for the booths, about 40
 // minutes each. Owed: the calls-home crew, and about a third of the rest by hash; slower with the comms system worn
 // who's owed a call home when comms come back (section 14's 'rush' rule uses it too)
-const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 601) < .33;
+const callOwed = (p, startDay) => (habitsOn(p, startDay + 3) || []).includes('calls-home') || schedU(p.seed, startDay, 336) < .33;
 function stormCallBacklog(e) {
   const ppl = schedPeople().filter(p => p.rank !== 'guest');
   const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
@@ -12301,9 +12301,10 @@ const VEYLI_RETELL = {
   bumpy: ['The Veyli dinner was late. Brennan blamed the herbs.', 'Holt\'s still telling the door story. It gets longer every time.'],
   rough: ['Their cabin was freezing the first night. Nobody\'s owning up.', 'Holt and their pilot still won\'t look at each other.'],
 };
-// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn)
+// the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
+// hash key k (the storm's party 340, then 351 up)
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
-  id: m.id, name: m.name || 'All-clear party', k: 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  id: m.id, name: m.name || 'All-clear party', k: EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
   who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
@@ -12514,7 +12515,7 @@ function meetingCast(m) {
     const mm = /^(\w+):(\d+)$/.exec(w);
     if (!mm) { const p = evPerson(w); if (p) cast[w] = p; continue; }
     const pool = ppl.filter(p => p.dept === mm[1] && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !(m.who || []).includes(p.id))
-      .sort((a, b) => schedU(a.seed, d, 602) - schedU(b.seed, d, 602));
+      .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337));
     pool.slice(0, +mm[2]).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
   }
   return cast;
