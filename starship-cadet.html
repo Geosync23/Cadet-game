@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.3
+   STARSHIP CADET: CSV Wren                            build 0.41.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6748,8 +6748,12 @@ function schedData() {
   const people = ROSTER.concat(ROSTER_GUESTS)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
-  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine && !p.event) places.push({ ...p, deck: n });   // a machine's panel place isn't handed out as a desk (A5b), nor an event's place (answers pass)
-  const byId = new Map(places.map(p => [p.id, p]));
+  // a machine's panel place isn't handed out as a desk (A5b). Event places (an `event` field) are listed by event
+  // below; those only for an event (type 'event', or Deck 1's handover and walk) are kept out of everyday use, while
+  // everyday seats an event also uses (the observatory's window seats) stay in it
+  const EVENT_ONLY = new Set(['handover', 'walk']), evPlaces = [];
+  for (const n of Object.keys(DECKS).map(Number)) for (const p of (DECKS[n].places || [])) if (!p.machine) (p.event && (p.type === 'event' || EVENT_ONLY.has(p.event)) ? evPlaces : places).push({ ...p, deck: n });
+  const byId = new Map(places.concat(evPlaces).map(p => [p.id, p]));
   // private places: one named after a bed ('4-05-wash') belongs to whoever sleeps there, and so does any place
   // in a room with a bed place in it (an en-suite, a desk, an armchair). In a room of several beds (a bunk room)
   // it's shared by the people who sleep there. owner: placeId -> [bed ids]
@@ -6785,7 +6789,7 @@ function schedData() {
     sub('observatory', ['lounge-seat', 'bench', 'common-room'].flatMap(t => shared.get(n + '|' + t) || []).filter(pl => obs.includes(pl.room)));
     // gatherings' places (answers 24 and 25): anything with `event: 'handover' | 'walk' | 'observatory-night'`, as
     // n|@handover and so on, in id order (the Captain walks them in that order). Type 'event' places serve nothing else
-    const evs = new Map(); for (const pl of places) if (pl.deck === n && pl.event) { if (!evs.has(pl.event)) evs.set(pl.event, []); evs.get(pl.event).push(pl); }
+    const evs = new Map(); for (const pl of places.concat(evPlaces)) if (pl.deck === n && pl.event) { if (!evs.has(pl.event)) evs.set(pl.event, []); evs.get(pl.event).push(pl); }
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
@@ -6921,13 +6925,12 @@ function habitsOn(p, d) {
 Object.defineProperty(SHIP, 'habitLog', { get: () => { const d = SHIP.time.day, out = []; for (let w = 1; w <= Math.floor((d - 1) / 7); w++) out.push(...habitWeek(w).filter(c => c.day <= d)); return out; }, enumerable: false });
 SAVE_EXTRA.push(save => { save.habitLog = SHIP.habitLog; });
 if (SAVED && Array.isArray(SAVED.habitLog) && SAVED.habitLog.every(c => c && c.day >= 8 && typeof c.id === 'string')) HABIT_SAVED = SAVED.habitLog;
-// ---- gatherings (answers 17 and 25): a birthday in the mess after dinner, and observatory night on Deck 2 ----
-// A birthday (ROSTER[i].birthday, a ship day of the year 1-364, section 9): the birthday person, most of their
-// department and about half the rest who are free gather in the mess at 20:15 for 40-55 minutes (tag 'party').
-// Observatory night is Saturday at 21:15: the stargazers and about a third of everyone free go up to Deck 2's
-// observatory for 50-80 minutes (tag 'stars'). Anyone on the night shift that evening, at the gym, or already off
-// to bed misses it. Nothing happens with no birthdays in the roster or no observatory places.
-const BIRTHDAY_AT = 20 * 60 + 15, STARS_NIGHT = { day: 5, at: 21 * 60 + 15 };
+// ---- gatherings: what a person goes to on day d, besides their own plans ----
+// The ship's events (birthdays, observatory night, quiz night and the rest) are section 18's (the events engineer):
+// its eventPlan(p, d) gives [{ id, from, to, opts, tag, anim, min }] in minutes from midnight, already filtered to
+// who goes. Section 14 keeps the Deck 1 routines (answer 24). leisureUntil stops a free-time block at a gathering's
+// `at` and takes its place, as it does for the Wednesday drill; anyone at the gym or gone to bed misses it.
+// birthdaysOn(d) is a helper for section 18: ROSTER[i].birthday is a ship day of the year, 1-364.
 const BDAY_CACHE = new Map();
 function birthdaysOn(d) {                                // everyone (not the player) whose birthday is ship day d
   if (!BDAY_CACHE.has(d)) BDAY_CACHE.set(d, schedPeople().filter(p => isBirthday(p, (d - 1) * 1440)));
@@ -6935,17 +6938,8 @@ function birthdaysOn(d) {                                // everyone (not the pl
 }
 function gatherings(p, d, F) {
   if (F.night && F.works) return [];                     // on the night shift tonight
-  const U = k => schedU(p.seed, d, k), out = [], bd = birthdaysOn(d), EV = typeof eventPlan === 'function';
-  // section 18 (the events engineer) owns the ship's events when it's there: its eventPlan(p, d) gives
-  // [{ id, from, to, opts, tag, anim, min }] in minutes from midnight, already filtered to who goes; it replaces
-  // the birthday and observatory night below. The Deck 1 routines further down stay here.
-  if (EV) for (const e of eventPlan(p, d) || []) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20 });
-  if (!EV && bd.length) {
-    const mine = bd.includes(p), mate = bd.some(b => b.dept === p.dept);
-    if (mine || U(510) < (mate ? .8 : .45)) out.push({ at: BIRTHDAY_AT - (mine ? 5 : 0), dur: 40 + Math.round(15 * U(511)), where: [[3, 'mess-seat'], [3, 'lounge-seat'], [3, 'bench']], tag: 'party' });
-  }
-  if (!EV && weekday(d) === STARS_NIGHT.day && (habitsOn(p, d).includes('stargazer') || U(512) < .3))
-    out.push({ at: STARS_NIGHT.at, dur: 50 + Math.round(30 * U(513)), where: [[2, '@observatory-night'], [2, 'observatory'], [2, 'lounge-seat'], [2, 'bench']], tag: 'stars' });
+  const U = k => schedU(p.seed, d, k), out = [];
+  if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20 });
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
   // Captain and the Commander on their work days and any bridge crew who work late; and the Captain's evening walk
   // through the observation room (places with `event: 'walk'`, visited in id order), most evenings
@@ -7341,7 +7335,8 @@ function roomsInUse(d0, days = 7) {
   for (const pl of S.places) { const k = pl.deck + ' ' + pl.type; (T[k] = T[k] || { places: 0, used: new Set(), uses: 0, min: 0, people: new Set() }).places++; }
   for (let d = d0; d < d0 + days; d++) for (const p of S.people) for (const s of planDay(p, d)) {
     const pl = s.placeId && S.byId.get(s.placeId); if (!pl) continue;
-    const t = T[pl.deck + ' ' + pl.type]; t.uses++; t.min += s.to - s.from; t.used.add(pl.id); t.people.add(p.id);
+    const t = T[pl.deck + ' ' + pl.type]; if (!t) continue;   // an event's own place (type 'event', the Deck 1 routines): not an everyday type
+    t.uses++; t.min += s.to - s.from; t.used.add(pl.id); t.people.add(p.id);
   }
   return Object.entries(T).sort().map(([k, t]) => ({ k, places: t.places, used: t.used.size, uses: t.uses, hours: Math.round(t.min / 60), people: t.people.size }));
 }
@@ -9643,7 +9638,7 @@ let EV_LAST = null;                                      // the last minute the 
 // the announcements due in (from, to]: at most three days' worth after a long skip. EV_MAILBOX keeps the last 20
 // (for the device's calendar later, and events_check); they go to the Mail tab when it's there (section 15)
 const EV_MAILBOX = [];
-function eventsMail(from, to) {
+function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or skip; never before 06:30 on Day 1, under the welcome)
   from = Math.max(from, to - 3 * 1440);
   for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 2; d++) for (const e of eventsOn(d)) {
     const at = (d - 2) * 1440 + EV_MAIL_AT, key = e.id + '@' + d;
@@ -9651,10 +9646,10 @@ function eventsMail(from, to) {
     SHIP.events.sent.push(key);
     const m = { at, from: e.ev.from, subject: e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(e.ev.mail, e), event: key };
     EV_MAILBOX.push(m); if (EV_MAILBOX.length > 20) EV_MAILBOX.shift();
-    if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body });
+    if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet || to < 390 });
   }
 }
-SIM_ADVANCE.push((from, to) => { eventsMail(from, to); EV_LAST = to; });
+SIM_ADVANCE.push((from, to) => { eventsMail(from, to, true); EV_LAST = to; });
 // the player joins by being in one of the event's rooms for 5 ship minutes while it's on: a little social, a toast,
 // and a thank-you in the Mail
 let EV_IN = { key: null, since: 0 };
@@ -9672,7 +9667,7 @@ function eventsPlayer(now) {
   SHIP.events.joined.push(key);
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12);
   toast(e.name, evText(e.ev.thanks, e));
-  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?' });
+  if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
 }
 // decor: a few cheap props on the deck while an event is on (from 30 minutes before to 15 after), built on demand,
 // added to the deck's root (so a deck change takes them away), colours through col(), no R(), no shadows
@@ -11204,7 +11199,9 @@ function placeSpot(id) {
     }
     const berth = pl.type === 'bed' && /^4-B\d+-(\d+)$/.exec(id);
     const y = pl.y !== undefined ? pl.y : pl.type === 'bed' ? (berth && +berth[1] % 2 === 0 ? 1.6 : .5) : SEAT_Y[pl.type] || 0;
-    s = { id, walk, x, z, y, face: FACE_ANGLE[pl.face] || 0,
+    // facing: a compass letter, or a number in degrees (round tables, the curved bar, card tables; 0 = south, 90 = east,
+    // as the letters); a place's own `y` (seat height) always wins over SEAT_Y, for the crew and the player alike
+    s = { id, walk, x, z, y, face: typeof pl.face === 'number' ? pl.face * Math.PI / 180 : FACE_ANGLE[pl.face] || 0,
       pose: pl.type === 'bed' ? 'lie' : pl.pose, anim: placeAnim(pl), room: pl.room, onTile: free(...pl.at) };
   }
   SPOT_OF.set(id, s); return s;
@@ -11217,7 +11214,7 @@ function placeSpot(id) {
 // (TAG_ACT: a musician plays, a bar regular drinks, the dish pit washes, tea on the galley stool just sits); then
 // someone sitting about in a lounge, common room or on a bench reads, talks or has a drink (seeded per person, place
 // and day); then the place itself (poseOf, 8b). Collisions and taps use the place's plain pose (spot.pose).
-const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null, party: 'talk', stars: null, handover: 'talk', stroll: null };
+const TAG_ACT = { play: 'play', bar: 'drink', wash: 'wash', tea: null, handover: 'talk', stroll: null };
 const SIT_ABOUT = new Set(['lounge-seat', 'common-room', 'bench']);
 // the pose with what's held: '+cart', '+cartfull' or '+carry' after it (the crowd's held things, 8b)
 const heldPose = a => a.hold ? a.pose + '+' + a.hold : a.pose;
