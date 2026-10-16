@@ -6917,7 +6917,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.7';                             // keep in step with the header's build line
+const GAME_BUILD = '0.33.33';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -11426,16 +11426,23 @@ function hatchTier(who) {
 // jobs left for you (0.33.16): the crew take urgent and big jobs, and everything above your tier, at once; a small
 // job at your tier waits CREW_LEAVE minutes of the day shift after it's found (one found in the evening waits for
 // your morning), a food run an hour. leaveEnd(j): the minute the crew may take it
+// 0.33.32 (the user's "the job board never has any jobs"): 3 ship hours are only 5 real minutes, so a small job is
+// now held to the end of the shift its wait runs out in, and at most HOLD_MAX at once (jobsHour lets the oldest go,
+// j.released). On your days off (playerShiftOn, Saturday and Sunday) nothing is held: the crew take it then.
 const DAY_SHIFT = [480, 1020];                           // 08:00-17:00, when you're on shift
+const HOLD_MAX = 6;                                      // small jobs held for you at once, at most
 const forYou = j => j.urgency < 2 && jobTier(j) <= PLAYER_TIER && !(j.machine && ENGINE_KINDS.has(machineById(j.machine).kind));
 function leaveEnd(j) {
-  if (!forYou(j)) return j.found;
+  if (!forYou(j) || j.released) return j.found;
   if (j.cargo === 'meals') return j.found + 60;
   let t = j.found, left = j.leave || CREW_LEAVE;
-  while (left > 0) {
-    const d0 = Math.floor(t / 1440) * 1440, a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
+  for (let k = 0; k < 14 && left > 0; k++) {
+    const d0 = Math.floor(t / 1440) * 1440;
+    if (!playerShiftOn(d0 / 1440 + 1)) return t;         // your day off: the crew take it
+    const a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
     if (n > 0) { left -= n; t = a + n; }
     if (left > 0) t = d0 + 1440;
+    else if (!j.leave) t = Math.max(t, d0 + DAY_SHIFT[1]);   // held to the end of that shift
   }
   return t;
 }
@@ -11555,6 +11562,10 @@ function jobsHour(h) {
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
   const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
+  // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
+  const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && j.cargo !== 'meals' && j.found <= t && t < leaveEnd(j))
+    .sort((a, b) => b.found - a.found || (a.id < b.id ? -1 : 1));
+  for (const j of held.slice(HOLD_MAX)) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
   for (const j of todo) {
@@ -11575,6 +11586,7 @@ function jobsHour(h) {
   }
   suppliesHour(t, d);
   const bo = blackoutHour(h); if (bo && typeof eventScore === 'function') eventScore('blackout', bo.to - bo.from);
+  if (typeof eventScore === 'function' && coldCabinsHour(h)) eventScore('coldCabins', 1);
   // done jobs are kept two days, for the board's history
   SHIP.jobs = jobs.filter(j => j.status !== 'done' || j.doneAt > t - 2880);
 }
@@ -11633,6 +11645,7 @@ function choresOfDay(d) {
     const n = Math.floor(C.per) + (schedU(seed, d, 1) < C.per % 1 ? 1 : 0);
     for (let k = 0; k < n; k++) out.push({ hour: 7 + Math.floor(12 * schedU(seed, d, 10 + k)), kind, cand: cs[Math.floor(cs.length * schedU(seed, d, 30 + k))] });
   }
+  if (d === SHIP_START.day) for (const c of out.slice().sort((a, b) => a.hour - b.hour).slice(0, 2)) c.hour = 6;   // your first morning: two on the board from the start (0.33.32; 06:00 from 0.33.33)
   CHORE_DAYS.set(d, out); for (const k of CHORE_DAYS.keys()) if (k < d - 2) CHORE_DAYS.delete(k);
   return out;
 }
@@ -11879,6 +11892,14 @@ function blackoutHour(h) {
   const decks = Object.keys(DECKS).map(Number).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
+}
+// cold guest cabins (0.33.31, the diplomatic visit's 'coldCabins' thread): an hour while guests are aboard (section
+// 18's eventMod('effect', 'guests')) with Deck 4's heating poor (its heating plant or heating pumps faulty or worse
+// at the hour's start). Pure; jobsHour scores each such hour as eventScore('coldCabins', 1)
+function coldCabinsHour(h) {
+  if (typeof eventMod !== 'function' || eventMod('effect', 'guests', h * 60) !== true) return false;
+  const c = MACH_HIST.get(histHour((h - 1) * 60));
+  return machineList().some(m => m.deck === 4 && (m.kind === 'heater' || m.kind === 'heatpump') && (c ? c[m.id] ?? 100 : 100) < 50);
 }
 function blackoutAt(t) { const b = blackoutHour(Math.floor(t / 60)); return b && t >= b.from && t < b.to ? b : null; }
 
