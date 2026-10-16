@@ -8360,7 +8360,7 @@ const FOOD = {
   close: { breakfast: 510, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted)
   slack: 3, grabSlack: 4,                 // a few more than the plans need (you, for one)
   giveUp: 30,                             // minutes after the close that anyone still waiting gives up
-  spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken
+  spoilDay: .25,                          // the share of the cold store that goes off in a day with its chiller broken (without chillerAt)
   binAt: [540, 1260], binOut: 630,        // spoiled food is binned at the 09:00 and 21:00 checks; the bin goes at 10:30
   rushRate: 1, slowOven: 1.75,             // in a rush the line serves this many a minute; a slow oven's pots take this much longer
 };
@@ -8482,11 +8482,15 @@ function galleyStep(S, m, st) {
     const held = c => !st && c[2] !== undefined && typeof cartWaiting === 'function' && cartWaiting(c[2]);
     if (S.carts.length) { const keep = []; for (const c of S.carts) if (c[0] <= m && !held(c)) { const n = Math.min(c[1], FOOD.coldCap - S.cold.meals); S.cold.meals += n; if (st) { st.delivered += n; st.waste += c[1] - n; } } else keep.push(c); S.carts = keep; }
   }
-  // spoilage (answer 7): section 17's shipEffectsAt(3, m).spoil is 1 while the cold store's chiller is fine, up to 2
-  // when it's broken (read on the hour; pure, so replays agree). A warm store's food goes off bit by bit (S.rot);
+  // spoilage (answer 7): S.spoil, the share of the cold store lost an hour, read on the hour from section 17's
+  // chillerAt(m).spoil (0 while the chiller works well, up to CHILL_SPOIL broken), else from shipEffectsAt(3, m).spoil
+  // (1 fine, 2 broken: FOOD.spoilDay a day). Both pure, so replays agree. A warm store's food goes off bit by bit (S.rot);
   // the 09:00 and 21:00 checks bin what's gone off (S.bin, by the dish pit) and tell you by Mail; the bin goes at 10:30
-  if (md % 60 === 0) { const e = typeof shipEffectsAt === 'function' && shipEffectsAt(3, m); S.spoil = e && e.spoil > 1 ? e.spoil - 1 : 0; }
-  if (S.spoil) S.rot = (S.rot || 0) + S.cold.meals * S.spoil * FOOD.spoilDay / 1440;
+  if (md % 60 === 0) {
+    const c = typeof chillerAt === 'function' && chillerAt(m), e = !c && typeof shipEffectsAt === 'function' && shipEffectsAt(3, m);
+    S.spoil = c ? Math.max(0, c.spoil || 0) : e && e.spoil > 1 ? (e.spoil - 1) * FOOD.spoilDay / 24 : 0;
+  }
+  if (S.spoil) S.rot = (S.rot || 0) + S.cold.meals * S.spoil / 60;
   if (S.rot >= 1 && FOOD.binAt.includes(md)) {
     const n = Math.min(S.cold.meals, Math.floor(S.rot));
     S.rot -= Math.floor(S.rot); S.cold.meals -= n; S.bin = (S.bin || 0) + n;
