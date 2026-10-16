@@ -241,13 +241,14 @@ DIPLO = r"""(() => {
     const due = eventDueDay(), sd = due.day, a0 = ADDRESSES.length, mails = [], send = mailSend;
     mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - sd + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
     eventStart('diplomatic', sd); EV_DAYS.clear();
-    const steps = [], batch = [];
+    const steps = [], batch = [], guestsOn = [];
     for (let t = (sd - 1) * 1440; t <= (sd + 9) * 1440; t += 15) {
       const o = eventAdvance(t, true); if (o.length) steps.push((Math.floor(t / 1440) + 1 - sd) + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
       if (t % 1440 === 900) { const b = eventMod('galley', 'batch', t); batch.push((Math.floor(t / 1440) + 1 - sd) + ':' + (b ? b.meals : '-')); }
+      if (t % 1440 === 900 && eventMod('effect', 'guests', t)) guestsOn.push(Math.floor(t / 1440) + 1 - sd);
     }
     mailSend = send;
-    const R = { due, steps, batch, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
+    const R = { due, steps, batch, guestsOn, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
       farewell: eventsOn(sd + 7).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + 7).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
       guests: ['teshavi', 'kesrin'].map(id => { const g = typeof GUESTS !== 'undefined' && GUESTS.find(x => x.id === id); return g ? id + ':' + (eventGuestDays(g) || []).map(d => d - sd).join('-') : id + ':-'; }),
       log: SHIP.eventLog.slice(1).map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
@@ -427,7 +428,8 @@ with sync_playwright() as pw:
     print('  galley batch at 15:00 by day:', a['batch'], '| guests (days from the start):', a['guests'])
     print('  addresses:', a['addr']); print('  Mail:', a['mails']); print('  meetings:', a['meets'])
     print('  farewell:', a['farewell'], 'going', a['going'], '| result', a['log'], a['traces'])
-    print('  greeting speakers:', V['names'])
+    print('  greeting speakers:', V['names'], '| guests flag on days', a['guestsOn'])
+    if a['guestsOn'] != [2, 3, 4, 5, 6]: fail(f"the 'guests' effect: {a['guestsOn']}")
     if not a['due'] or a['due']['id'] != 'diplomatic' or a['due']['day'] < 23 or not V['same']: fail(f"the diplomatic visit's start or repeatability: {a['due']} {V['same']}")
     want = ['warning', 'onset', 'escalation', 'resolution', 'afterglow', 'end']
     if [w for x in a['steps'] for w in want if (' ' + w) in x.replace('phase ', ' ')] != want: fail(f"diplomatic phases: {a['steps']}")
