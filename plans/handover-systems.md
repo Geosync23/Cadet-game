@@ -1,6 +1,6 @@
 # Handover: the systems engineer (Pillar 2, Half B)
 
-Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
+Updated 2026-10-16 at 0.33.29 (claude/ship-systems; the predecessor's note below, then this session's additions). First written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9) by the systems engineer session (session_0134zewqwGV9hdGK6PqsaZ36). Read it with `DEV_NOTES.md`, which has the full detail under "Machines and wear (section 17)" and "The job list and supplies, on paper", and `plans/pillar2-plan.md` ("Machines and jobs").
 
 ## Role, branch, builds
 
@@ -88,7 +88,37 @@ The user's answers 1–8 and 22 (`plans/answers-pass-plan.md`), all in section 1
 
   Leads: session_01WHXNp9A1WHAD2EHJw384Qp, since 2026-10-16 04:20.
 
-**Known outside section 17:** player_check's job loop fails since 0.33.16. The galley plant's panel on Deck 3 (tile 39,1) can only be reached through Brennan's station tile 39,4 (`3-galley-2`). It's a layout or player-walking fix, reported to the lead.
+- **0.33.20–0.33.22:** the food-cart fixes.
+    - `cartWaiting` is true only for your own run;
+    - a run that has already arrived when it reaches the list is history;
+    - the galley alone counts the meals on their way (the lead's decision);
+    - machine_check 5f proves the crew take every food run in live play.
+- **0.33.23:** handing jobs in at the board: `jobStepDone`, `turnInJob`, `j.workDone`, `jobStops` done marks, and `TURN_IN` (switched on by the interactions engineer's 0.37.3).
+- **Pillar 3, C7 (0.33.24–0.33.27):**
+    - event wear by system and machine kind (`eventWear`);
+    - event jobs from section 18's `eventMod('jobs')` (`eventStopOf`, `postEventJob`); finishing one yourself calls `eventMine('jobs')`;
+    - favours for the social engineer (`favourPost`, `favourAccept`, `favourDecline`, `favourTurnIn`, `favoursOf`, `myFavours`);
+    - `cartTrays` for the galley's event trays;
+    - storm blackouts (`blackoutHour`, `blackoutAt`, `deckLook().dark`, scored as `eventScore('blackout', minutes)`).
+
+  The storm's own `stormTrays` is dropped in the events engineer's 0.34.12 (the lead's decision): the galley's `cartTrays` is the one tray run.
+- **0.33.28:** `traysArrivedAt(day, to)` for the galley's bridgeHungry score:
+    - a crew run gives its drop-off end;
+    - yours gives `j.dropAt`, recorded by `jobStepDone` on a `drop` step.
+- **0.33.29:** event jobs carry `eventJob: <spec id>` for section 18's `eventTakeJob`. One the player volunteered for at a meeting (`SHIP.event.mine['wants:<id>']`) is claimed for 'you' as it's posted. It's claimed directly, since `claimJob` would re-enter `jobsHour`.
+
+**Gotchas from this session:**
+- `jobsHour` must never call anything that runs `machinesNow` (`claimJob`, `jobsBoard`, `openJobs`): that re-enters the hour loop.
+- `deckLook` is cached on `MACH_REV`, so anything that changes within an hour (blackouts) must be in its cache key.
+- machine_check's stand-in events: `eventNow` must count the day on, as section 18's does, or event job keys (which hold the event's start day) repost daily. `SHIP_EVENTS` is keyed by id from 0.41.5; the test handles a list or an object.
+- A job the player holds lapses after 12 ship hours with no progress. Tests that jump a day must check before that.
+- With `TURN_IN` on (from the interactions engineer's 0.37.3), `finishJob` only does the work. machine_check turns it off at the start; 5g turns it on itself.
+
+**Test files I own:** machine_check.py. Sections 5c–5h cover cart runs, looks, tapping machines and Mail, chores and `openJobs`, live food runs, turning jobs in, and events and favours. Run every check one at a time. day_check takes about 4 minutes; the rest take 1–2 minutes each.
+
+  Leads: session_015QoyPWBdMPM4ywf5W2jMMs since 2026-10-16 15:15.
+
+**Known outside section 17:** the galley-plant reach problem (from 0.33.16) was fixed by the player engineer's squeeze-past (0.28.12). player_check is all OK from 0.41.4 on.
 
 ## State at 0.40.8: loose ends and weak spots
 

@@ -443,9 +443,13 @@ with sync_playwright() as pw:
       const sys = id => MACHINE_KINDS[machineById(id).kind].sys;
       const fasterPower = Object.keys(plain).filter(id => sys(id) === 'power').every(id => storm[id] < plain[id] - 1e-9 || plain[id] === 0);
       const othersSame = Object.keys(plain).filter(id => sys(id) !== 'power').every(id => Math.abs(storm[id] - plain[id]) < 1e-9);
-      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 1440); machinesNow(); setShipNow(t0 + 1440 + 600); machinesNow();
+      const keepEvent = SHIP.event; SHIP.event = { id: 'mcStorm', startDay: 1, phase: 'onset', threads: {}, mine: { 'wants:lounge': true } };   // you volunteered for 'lounge'
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 60); machinesNow();
+      const volunteered = (SHIP.jobs.find(j => j.event === 'mcStorm' && j.eventJob === 'lounge') || {}).claimedBy === 'you'; SHIP.event = keepEvent;   // yours as it went up (left 12 hours, it would go back on the board)
+      setShipNow(t0 + 1440); machinesNow(); setShipNow(t0 + 1440 + 600); machinesNow();
+      for (const j of SHIP.jobs) if (j.event === 'mcStorm' && j.claimedBy === 'you') dropJob(j.id);
       const ej = SHIP.jobs.filter(j => j.event === 'mcStorm'), once = ej.length === 4 && new Set(ej.map(j => j.id)).size === 4;
-      const packs = ej.find(j => j.target === 'packs'), packsOk = !!packs && packs.stops.length === 2 && packs.stops[1].deck === 5;
+      const packs = ej.find(j => j.target === 'packs'), packsOk = !!packs && packs.stops.length === 2 && packs.stops[1].deck === 5 && packs.eventJob === 'packs';
       // blackouts while the effect is on: at most one an hour, 15-60 minutes, scored as the 'blackout' thread
       const bos = []; for (let h = Math.floor((t0 + 1440) / 60); h <= Math.floor((t0 + 1440 + 600) / 60); h++) { const b = blackoutHour(h); if (b) bos.push(b); }
       const boOk = bos.every(b => b.to - b.from >= 15 && b.to - b.from <= 60 && Math.floor(b.from / 60) === Math.floor((b.to - 1) / 60)) && (window.__scored.blackout || 0) >= bos.reduce((a, b) => a + b.to - b.from, 0);
@@ -467,15 +471,21 @@ with sync_playwright() as pw:
       const trayOk = !!tj && tid === tid2 && tj.stops[1].deck === 1 && openJobs().some(x => x.id === tid);
       let trayCrew = null; for (let n = 0; n < 30 && !(tj.claimedBy); n++) { setShipNow(shipNow() + 60); machinesNow(); }
       trayCrew = !!tj.claimedBy && tj.claimedBy !== 'you' && (tj.segs || []).some(sg => sg.hold === 'cartfull');
+      // traysArrivedAt (0.33.28): the crew's drop-off end; yours, the minute you tick off the drop-off
+      const tday = Math.floor(tj.posted / 1440) + 1, tAt = traysArrivedAt(tday), tdrop = tj.segs.filter(sg => sg.tag === 'drop').pop();
+      let tMine = null;
+      { const yid = cartTrays({ trays: 2, at: shipNow() + 1440, to: 'bridge' }); setShipNow(shipNow() + 1440); machinesNow(); const yj = SHIP.jobs.find(j => j.id === yid);
+        if (yj && claimJob(yid)) { const before = traysArrivedAt(tday + 1); jobStepDone(yid, 0); setShipNow(shipNow() + 30); jobStepDone(yid, 1); tMine = before === null && traysArrivedAt(tday + 1) === shipNow(); dropJob(yid); } }
+      const trayArrive = tAt === tdrop.to && tMine !== false;
       // put it all back
       window.__sc("eventNow = window.__keepEv[0]; eventMod = window.__keepEv[1]; eventScore = window.__keepEv[2]; eventMine = window.__keepEv[3]");
       if (Array.isArray(SHIP_EVENTS)) SHIP_EVENTS.splice(SHIP_EVENTS.indexOf(def), 1); else delete SHIP_EVENTS.mcStorm;
       SHIP.jobs = SHIP.jobs.filter(j => j.event !== 'mcStorm' && j.kind !== 'favour' && j.chore !== 'trays'); setShipNow(t0); JOBS_ON = true;
-      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed, trayOk, trayCrew, packsOk, blackouts: bos.length, blackoutMin: window.__scored.blackout || 0, boOk, mineOk };
+      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed, trayOk, trayCrew, trayArrive, tMine, volunteered, packsOk, blackouts: bos.length, blackoutMin: window.__scored.blackout || 0, boOk, mineOk };
     })()""")
     print(f"Event hooks and favours: {evr}")
-    if not (evr['fasterPower'] and evr['othersSame'] and evr['once'] and evr['tagged'] and evr['after'] == 4 and evr['packsOk'] and evr['boOk'] and evr['mineOk'] and evr['offBoard'] and evr['crewLeft'] and evr['acc']
-            and evr['steps'].endswith('return') and not evr['backEarly'] and evr['s0'] and evr['tin'] and evr['done'] and evr['lapsed'] and evr['trayOk'] and evr['trayCrew']): fail('event hooks and favours')
+    if not (evr['fasterPower'] and evr['othersSame'] and evr['once'] and evr['tagged'] and evr['after'] == 4 and evr['packsOk'] and evr['volunteered'] and evr['boOk'] and evr['mineOk'] and evr['offBoard'] and evr['crewLeft'] and evr['acc']
+            and evr['steps'].endswith('return') and not evr['backEarly'] and evr['s0'] and evr['tin'] and evr['done'] and evr['lapsed'] and evr['trayOk'] and evr['trayCrew'] and evr['trayArrive']): fail('event hooks and favours')
 
     # 5f. food runs in live play (0.33.21): the galley stepping live and the job list together for six days, nobody
     # pushing carts for you: every food run is taken by the crew (or goes unseen) within 2 hours of its hour's wait,
