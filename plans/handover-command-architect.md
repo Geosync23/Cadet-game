@@ -33,7 +33,7 @@ Written 2026-10-16 at build 0.40.8 (`claude/ship-integration` 980e6a9), by sessi
 - **Mood light:** `light: { sky #e9e6ff, sun #fff0dc, hemi .94, sunI .96 }`.
 - **All kit uses shared `D2` materials.** Nothing calls `R()` at load.
 
-## Update: the answers pass (0.32.3–0.32.6, session_01EhJv6dqovqhQyruMveFuRR)
+## Update: the answers pass (0.32.3–0.32.7, session_01EhJv6dqovqhQyruMveFuRR, now retired)
 
 - **Door plates (27):** officers' plates read name over rank from `ROSTER` (`d2Plate`, by bed id, at dress time; `brassPlate` takes `sub`). The Envoy and Visitors plates keep their text. Room names and tap texts still say roles.
 - **Observatory night (25):** 11 places in the observatory carry `event: 'observatory-night'`; the seven new ones (`2-obsnight-1..7`) are type `event`, which deck_check.py now accepts. The sim engineer schedules the evening.
@@ -41,9 +41,12 @@ Written 2026-10-16 at build 0.40.8 (`claude/ship-integration` 980e6a9), by sessi
 - **Lived-in touches (31):** signs in the gas plant and crawl, a calendar nook in the closet, two mugs (`d2Mug`, `d2Sign`, `d2Nook`).
 - **Machine wear (2/3):** drawn centrally by the performance engineer (section 8b, 0.27.9). Deck 2's only part is optional `look` overrides on its `machines` entries where the default spot is hidden. My 0.32.4 lamps were withdrawn in 0.32.5.
 - **Kit names (0.32.5):** Deck 2's `cableTray` and `relayRack` clashed with other decks' (the last definition wins), so they're `crawlCableTray` and `lightRelayRack` now. Check a new kit name isn't already used.
-- **Seats (0.32.6):** sit places have `xy` and `y` from the performance engineer's measurements, checked in `?seats`; the en-suites got a toilet (they had none). Far-side stools face their tables.
+- **Seats (0.32.6–0.32.7):** every sit place has `xy` and `y` from the performance engineer's measurements, checked in `?seats`. Their re-measure of 0.32.7 found all 89 Deck 2 seats right. The en-suites got a toilet (they had none; seat top 0.42 at the cubicle's local (.24, .2), facing -x). Far-side stools face their tables. If furniture moves, re-measure its seats in `?seats`.
+- **Gotcha:** rooms named by a symbol (`+` lobby, `-` senior corridor, `=` science corridor) trip up scripts that match `room: '[A-Za-z]'`. That's how the benches missed 0.32.6.
 - **Plates:** `d2Plate` prefers the crew designer's `plate: { rank, name }` (0.16.6) when present.
 - Places: 175. Draw calls by the lift: 282; day peak 374.
+- **Merge note:** 0.32.5's rename means that on `claude/deck2-command` alone, deck_check fails on Deck 6 (the bridge architect's tray-on-legs wins there). With the bridge architect's `floorCableTray` rename (`claude/deck1-scale` 5dfed37) merged too, every check passes.
+- **Branch head when I retired:** `claude/deck2-command` at 0.32.7 (9baf976). Pillar 3 deck work moves to the merged deck architect (`claude/decks-p3`).
 - Testing extras kept in my scratchpad (not in the repo): a pixel compare of every deck day and night with crew hidden, and a plate-texture dump. Rebuild them from cadet_test's `Game` class if needed.
 
 ## Shared formats other sections rely on
