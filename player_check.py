@@ -15,6 +15,8 @@
 #   hands on the way); a crawl tile slows you to half speed in a crouch
 #   sit anywhere (0.28.12): a tap on a public seat sits you there (the sit pose, at its height), rests you, and you get
 #   up by walking; squeeze past (0.28.12): crew settled at their station no longer wall off the way to the galley plant
+#   the treadmills (0.28.17, the user's report): a real click on each of the three (belt or console) walks you there,
+#   you run on it (pose 'run'), its belt scrolls, and over a few ship minutes fitness rises and energy falls
 #   in the game, one player day on the real decks, by tapping the real things: shower (Deck 4), servery tray then a
 #   mess seat, grab shelf, treadmill (run), weights (lift), call-home booth (call), shelves then the counter
 #   (browse, pay); each need rises by its gain, the pose is right, you're back on your feet and visible after
@@ -44,7 +46,8 @@ PAPER = r"""(({ normal }) => {
   const look = () => { for (const k of NEED_KEYS) { lo[k] = Math.min(lo[k], n[k]); hi[k] = Math.max(hi[k], n[k]); } };
   const awake = mins => { for (let m = 0; m < mins; m++) { needsDrain(1, false); if (playerSpeed() < 1) slowMins++; look(); } };
   const act = kind => { const d = PLAYER_ACTS[kind]; for (let m = 0; m < d.mins; m++) { needsDrain(1, false);
-    if (d.need) n[d.need] = needClamp(n[d.need] + d.gain / d.mins + NEED_DRAIN[d.need][0] / 60); look(); } };
+    if (d.need) n[d.need] = needClamp(n[d.need] + d.gain / d.mins + NEED_DRAIN[d.need][0] / 60);
+    if (d.cost) for (const k in d.cost) n[k] = needClamp(n[k] - d.cost[k] / d.mins); look(); } };
   const sleep = mins => { needsDrain(mins, true); look(); };
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
     if (normal) {
@@ -353,6 +356,29 @@ with sync_playwright() as pw:
         g.ev("playerGo(nearestOpen(LIFT_AT[0], LIFT_AT[1], player))"); g.step(5)
         up = g.ev("[!!ACT, player.obj.visible]"); print('  walked off:', up)
         check(up == [False, True], f'walking away should get you up ({up})')
+
+    print('The treadmills, by real clicks (Deck 3 gym):')
+    BELT = "(id => { const s = placeSpot(id), v = []; scene.traverse(m => { if (m.isMesh && m.material && m.material.map && m.userData.noMerge) { m.getWorldPosition(_wp); if (Math.hypot(_wp.x - s.x, _wp.z - s.z) < 1.2) v.push(m.material.map.offset.y); } }); return JSON.stringify(v); })"
+    W, H = g.page.viewport_size['width'], g.page.viewport_size['height']
+    ran = 0
+    for pid, ht in [('3-gym-1', .3), ('3-gym-2', 1.1), ('3-gym-3', .6)]:
+        g.ev("actEnd(true); player.stop(); Object.assign(player.obj.position, cellPos(26, 17)); Object.assign(SHIP.player.needs, { fitness: 40, energy: 70, hunger: 50, social: 50 })"); g.step(30)
+        xy = g.ev(f"(() => {{ const s = placeSpot('{pid}'); const v = new THREE.Vector3(s.x, {ht}, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }})()")
+        if not check(0 < xy[0] < W and 0 < xy[1] < H, f'treadmill {pid} should be on screen ({xy})'): continue
+        g.page.mouse.click(xy[0], xy[1]); g.step(2)
+        if re.match(r'In use', g.ev("document.getElementById('tx').textContent")): print(' ', pid, 'in use by crew'); continue
+        for k in range(60):
+            g.step(30)
+            if g.ev("!!ACT && ACT.phase === 'do'"): break
+        a = json.loads(g.ev("JSON.stringify([ACT && ACT.placeId, ACT && ACT.phase, ACT && ACT.pose, SHIP.player.needs.fitness, SHIP.player.needs.energy, shipNow()])")); b0 = g.ev(f"({BELT})('{pid}')")
+        g.step(250)
+        b = json.loads(g.ev("JSON.stringify([ACT && ACT.placeId, ACT && ACT.phase, ACT && ACT.pose, SHIP.player.needs.fitness, SHIP.player.needs.energy, shipNow()])")); b1 = g.ev(f"({BELT})('{pid}')")
+        print(f'  {pid} (clicked at {ht} m): {a[:3]} | {b[5] - a[5]:.1f} ship min: fitness {a[3]:.1f} -> {b[3]:.1f}, energy {a[4]:.1f} -> {b[4]:.1f} | belt moving {b0 != b1}')
+        if check(a[0] == pid and a[1] == 'do' and a[2] == 'run', f'treadmill {pid}: should be running on it ({a[:3]})'):
+            ran += 1
+            check(b[0] == pid and b0 != b1 and b[3] > a[3] + 2 and b[4] < a[4] - .5, f'treadmill {pid}: belt moving, fitness up, energy down ({a} -> {b}, belt {b0 != b1})')
+    check(ran >= 1, 'treadmills: at least one free to run on')
+    g.ev("actEnd(true); player.stop()")
 
     print('Squeezing past settled crew (the galley plant, Deck 3):')
     sq = g.ev(r"""(() => { const blocker = { settled: true, spot: { onTile: true, walk: [39, 4], pose: 'work', x: cellPos(39, 4).x, z: cellPos(39, 4).z }, x: cellPos(39, 4).x, z: cellPos(39, 4).z,
