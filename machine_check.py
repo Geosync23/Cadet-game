@@ -498,14 +498,24 @@ with sync_playwright() as pw:
       { const yid = cartTrays({ trays: 2, at: shipNow() + 1440, to: 'bridge' }); setShipNow(shipNow() + 1440); machinesNow(); const yj = SHIP.jobs.find(j => j.id === yid);
         if (yj && claimJob(yid)) { const before = traysArrivedAt(tday + 1); jobStepDone(yid, 0); setShipNow(shipNow() + 30); jobStepDone(yid, 1); tMine = before === null && traysArrivedAt(tday + 1) === shipNow(); dropJob(yid); } }
       const trayArrive = tAt === tdrop.to && tMine !== false;
+      // cold cabins (0.33.31): with guests aboard, each hour Deck 4's heating is faulty or worse scores 'coldCabins'
+      window.__sc("eventMod = (k, key) => !window.__ev ? null : k === 'effect' && key === 'guests' ? true : null");
+      const htr = machineList().find(m => m.deck === 4 && (m.kind === 'heater' || m.kind === 'heatpump'));
+      let coldOk = null;
+      if (htr) { window.__ev = { id: 'mcStorm', phase: 'onset', day: 0 }; window.__scored = {}; JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+        const warm = (setShipNow(t0 + 180), machinesNow(), window.__scored.coldCabins || 0);
+        SHIP.machines[htr.id].cond = 30; SHIP.machines[htr.id].state = machineState(30); machRecord(MACH_HOUR - 1); MACH_REV++;
+        setShipNow(t0 + 360); machinesNow(); const cold = window.__scored.coldCabins || 0;
+        window.__ev = null; setShipNow(t0 + 540); machinesNow(); const gone = window.__scored.coldCabins || 0;
+        coldOk = warm === 0 && cold >= 2 && gone === cold; }
       // put it all back
       window.__sc("eventNow = window.__keepEv[0]; eventMod = window.__keepEv[1]; eventScore = window.__keepEv[2]; eventMine = window.__keepEv[3]");
       if (Array.isArray(SHIP_EVENTS)) SHIP_EVENTS.splice(SHIP_EVENTS.indexOf(def), 1); else delete SHIP_EVENTS.mcStorm;
       SHIP.jobs = SHIP.jobs.filter(j => j.event !== 'mcStorm' && j.kind !== 'favour' && j.chore !== 'trays'); setShipNow(t0); JOBS_ON = true;
-      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed, trayOk, trayCrew, trayArrive, tMine, volunteered, packsOk, blackouts: bos.length, blackoutMin: window.__scored.blackout || 0, boOk, mineOk };
+      return { fasterPower, othersSame, once, tagged, crewTook, after, titles: ej.map(j => j.title + ' (tier ' + j.tier + ')'), offBoard, crewLeft, acc, steps, backEarly, s0: s0.done, tin, done, lapsed, trayOk, trayCrew, trayArrive, tMine, volunteered, coldOk, packsOk, blackouts: bos.length, blackoutMin: window.__scored.blackout || 0, boOk, mineOk };
     })()""")
     print(f"Event hooks and favours: {evr}")
-    if not (evr['fasterPower'] and evr['othersSame'] and evr['once'] and evr['tagged'] and evr['after'] == 4 and evr['packsOk'] and evr['volunteered'] and evr['boOk'] and evr['mineOk'] and evr['offBoard'] and evr['crewLeft'] and evr['acc']
+    if not (evr['fasterPower'] and evr['othersSame'] and evr['once'] and evr['tagged'] and evr['after'] == 4 and evr['packsOk'] and evr['volunteered'] and evr['coldOk'] is not False and evr['boOk'] and evr['mineOk'] and evr['offBoard'] and evr['crewLeft'] and evr['acc']
             and evr['steps'].endswith('return') and not evr['backEarly'] and evr['s0'] and evr['tin'] and evr['done'] and evr['lapsed'] and evr['trayOk'] and evr['trayCrew'] and evr['trayArrive']): fail('event hooks and favours')
 
     # 5f. food runs in live play (0.33.21): the galley stepping live and the job list together for six days, nobody
