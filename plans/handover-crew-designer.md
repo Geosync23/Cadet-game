@@ -132,4 +132,4 @@ CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py starship-cadet.html 
 
 - The user said no to a store open every day (answers pass, row 19).
 - Birthdays: built in 0.16.6 (`birthday`, ship day of the year 1–364, about one a week). The galley bakes the cake and the sim engineer gathers the mess.
-- Habits that change over time: the user said yes (row 18). The format is being agreed with the sim engineer, who owns `SHIP.habitLog`.
+- Habits that change over time: built in 0.16.7 as `habitShifts` (see DEV_NOTES); the sim engineer's `habitWeek` applies them and owns `SHIP.habitLog`. To add or reword one, edit `SHIFTS_HAND` or the swap/add/drop lists in the generator; keep `why` a whole sentence that names the person.

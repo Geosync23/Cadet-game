@@ -254,6 +254,66 @@ P2_LIKES = {'runner': ['gym-regular', 'early-riser'], 'shopper': ['calls-home', 
 P2_DISLIKES = {'bar-regular': ['early-to-bed'], 'stargazer': ['early-to-bed'], 'runner': ['late-sleeper']}
 NEW_R = random.Random(20261016)
 BDAY_R = random.Random(20261017)   # birthdays (0.16.6)
+# ---------------------------------------------------------------- habits that change (0.16.7, answers pass row 18)
+# A short list per person of plausible habit changes. The sim engineer (section 14, habitWeek) picks who changes
+# and when (a few a month), applies one item and logs it in SHIP.habitLog; `why` is shown as it is (the log, Mail,
+# the tap line), so it's a whole sentence that names the person. Every item is valid against the person's habits
+# here: it adds only what they don't have and drops only what they do, and never makes a clashing pair.
+SHIFT_R = random.Random(20261018)
+CLASH = [('early-riser', 'late-sleeper'), ('early-to-bed', 'night-owl')]
+# the hand-written crew: what their life lines suggest
+SHIFTS_HAND = {
+    'marrow': [{'add': 'stargazer', 'why': 'Captain Marrow has started coming to observatory night, to see what the juniors see.'}],
+    'vance': [{'add': 'runner', 'drop': 'gym-regular', 'why': 'Commander Vance has moved from the rowing machine to the treadmills, to start a new leaderboard.'},
+              {'drop': 'workaholic', 'why': 'Commander Vance has started leaving the bridge on time, on the Counsellor\'s advice.'}],
+    'sato': [{'add': 'gardener', 'why': 'Dr. Sato has started growing sample plants in the garden, and tends them every evening.'}],
+    'holt': [{'add': 'gym-regular', 'why': 'Chief Holt has started training in the gym after shift.'}],
+    'calder': [{'drop': 'tea-break', 'why': 'Chief Calder has given up her tea break: there\'s always one more job on the board.'}],
+    'pell': [{'add': 'calls-home', 'why': 'Pell has started calling his mum back on rest days.'},
+             {'drop': 'late-sleeper', 'why': 'Pell is trying to get up on time, after one too many late starts in the Works bay.'}],
+    'rina': [{'add': 'stargazer', 'why': 'Rina has started going up to observatory night with Tomas.'}],
+    'brennan': [{'add': 'gardener', 'why': 'Chef Brennan has started picking her own herbs in the garden.'}],
+    'tomas': [{'add': 'runner', 'why': 'Tomas has taken up running: Vance talked him into the treadmill.'}],
+    'nandakumar': [{'add': 'runner', 'why': 'Dr. Nandakumar has started running before breakfast, and recommends it to everyone.'}],
+    'kowalczyk': [{'add': 'stargazer', 'why': 'Anja Kowalczyk has started spending evenings off in the observatory.'}],
+    'raman': [{'add': 'musician', 'why': 'Dev Raman has started playing an old guitar in the music room.'}],
+    'ferreira': [{'drop': 'bar-regular', 'why': 'Lucia Ferreira is cutting back on the bar, and spending evenings on her Veyli.'}],
+    'oduya': [{'add': 'bar-regular', 'why': 'Matthias Oduya has started dropping by the lounge bar, where people talk more freely.'}],
+    'mensah': [{'add': 'runner', 'drop': 'gym-regular', 'why': 'Kofi Mensah has swapped the weights for the treadmill.'}],
+    'mori': [{'drop': 'workaholic', 'why': 'Hana Mori has stopped working late, now the charts are up to date.'}],
+    'saruth': [{'add': 'gardener', 'why': 'Envoy Saruth has asked for a corner of the garden, and tends Veyli seedlings there.'}],
+}
+# everyone else: swaps (one habit for another), new habits and dropped ones, each a sentence with {f} for the first name
+SHIFT_SWAPS = [
+    ('gym-regular', 'runner', '{f} has swapped the weights for the treadmill.'),
+    ('music', 'musician', '{f} has gone from listening in the music room to playing.'),
+    ('garden-lover', 'gardener', '{f} has gone from sitting in the garden to tending it.'),
+    ('common-room', 'stargazer', '{f} has swapped Tiles nights for the observatory.'),
+    ('bar-regular', 'runner', '{f} has swapped the bar for the treadmill.'),
+    ('late-sleeper', 'early-riser', '{f} has turned into an early riser.'),
+    ('lounge-regular', 'bar-regular', '{f} has moved from the lounge sofas to the bar.'),
+    ('night-owl', 'early-to-bed', '{f} has started going to bed early.'),
+    ('skips-breakfast', 'lingers-at-meals', '{f} has started taking time over meals.'),
+]
+SHIFT_ADDS = {
+    'runner': '{f} has taken up running on the treadmills.', 'gym-regular': '{f} has joined the after-shift gym crowd.',
+    'shopper': '{f} has started browsing the crew store after shift.', 'musician': '{f} has dusted off an old instrument and plays in the music room now.',
+    'gardener': '{f} has started helping out in the garden.', 'bar-regular': '{f} has become a regular at the lounge bar.',
+    'stargazer': '{f}\'s name is on the observatory-night list now.', 'early-riser': '{f} has started getting up early.',
+    'tea-break': '{f} has started taking a mid-shift tea break.', 'calls-home': '{f} has started calling home more often.',
+    'garden-lover': '{f} has found a favourite bench in the garden.', 'lounge-regular': '{f} spends evenings in the bow lounge now.',
+    'quiet-corner': '{f} has been looking for quiet corners lately.', 'window-seat': '{f} always heads for a window seat now.',
+    'evening-shower': '{f} has switched to showering at night.', 'music': '{f} has started listening in the music room in the evenings.',
+    'common-room': '{f} has joined the Tiles nights in the common room.',
+}
+SHIFT_DROPS = {
+    'bar-regular': '{f} is cutting back on the bar.', 'runner': '{f} has given up running for now.',
+    'gym-regular': '{f} has stopped going to the gym after shift.', 'late-sleeper': '{f} is trying to get up on time.',
+    'night-owl': '{f} has started going to bed on time.', 'skips-breakfast': '{f} has started eating breakfast again.',
+    'workaholic': '{f} has stopped staying late at work.', 'common-room': '{f} has drifted away from the common-room crowd.',
+    'shopper': '{f} is saving up, and has stopped browsing the store.', 'lounge-regular': '{f} rarely goes to the lounge now.',
+    'tea-break': '{f} has stopped taking a tea break.', 'lingers-at-meals': '{f} eats and goes these days.',
+}
 # the rank line on a door plate (the ranks of design-doc "The crew", as the game's RANK_NAME says them)
 PLATE_RANK = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer',
               'officer': 'Officer', 'guest': 'Veyli Envoy'}
@@ -383,6 +443,33 @@ def main():
             for t in ('Captain ', 'Commander ', 'Chief ', 'Envoy '):
                 if name.startswith(t): name = name[len(t):]
             e['plate'] = {'rank': PLATE_RANK[e['rank']], 'name': name}
+    # ---- habits that change (0.16.7): hand-written for the hand-written crew and the Envoy; for everyone else one or
+    # two items drawn (SHIFT_R, after everything else) from the swaps, adds and drops that are valid for them
+    def ok(e, it):
+        hab = set(e['habits'])
+        if it.get('drop') and it['drop'] not in hab: return False
+        if it.get('add'):
+            if it['add'] in hab: return False
+            after = (hab - {it.get('drop')}) | {it['add']}
+            if any(a in after and b in after for a, b in CLASH): return False
+            if it['add'] == 'common-room' and e['rank'] != 'junior': return False
+        return True
+    for e in out:
+        if e.get('player'): continue
+        if e['id'] in SHIFTS_HAND:
+            e['habitShifts'] = SHIFTS_HAND[e['id']]
+        else:
+            f = e['name'].split()[0]
+            opts = [dict(drop=a, add=b, why=w.format(f=f)) for a, b, w in SHIFT_SWAPS] * 2 + \
+                   [dict(add=h, why=w.format(f=f)) for h, w in SHIFT_ADDS.items()] + [dict(drop=h, why=w.format(f=f)) for h, w in SHIFT_DROPS.items()]
+            opts = [o for o in opts if ok(e, o)]
+            pick = []
+            for _ in range(SHIFT_R.choice([1, 2, 2])):
+                o = SHIFT_R.choice(opts)
+                if all(o.get('add') != q.get('add') and o.get('drop') != q.get('drop') for q in pick): pick.append(o)
+            e['habitShifts'] = [{k: o[k] for k in ('add', 'drop', 'why') if o.get(k)} for o in pick]
+        assert e['habitShifts'] and all(ok(e, it) for it in e['habitShifts']), e['id']
+        for it in e['habitShifts']: assert e['name'].split()[0] in it['why'] or e['name'] in it['why'] or e['id'] in it['why'].lower(), (e['id'], it['why'])
     ids = [p['id'] for p in out]
     assert len(ids) == len(set(ids)), 'duplicate ids'
     beds = [p['bed'] for p in out]
@@ -523,10 +610,10 @@ def page(entries):
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
-                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
+                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div><div class="wide"><dt>Might change</dt><dd>%s</dd></div></dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
-                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'),
+                          e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'), e(' '.join(i['why'] for i in x.get('habitShifts', [])) or 'you decide'),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
