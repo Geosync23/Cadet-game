@@ -16,6 +16,7 @@
 #   pure and in step with shipEffectsAt
 #   tapping a machine, Stores' Mail and tier locks (0.33.18): see 5d below
 #   chores and openJobs (0.33.19): see 5e below
+#   food runs in live play (0.33.21): the crew take every food run soon after its wait (5f)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -316,7 +317,7 @@ with sync_playwright() as pw:
       const b = live(2 * 1440 + 13 * 60, 200), leftThen = !!b && !b.claimedBy;
       setShipNow(2 * 1440 + 14 * 60); machinesNow(); const crewTook = !!b && !!b.claimedBy && b.claimedBy !== 'you' && b.start >= b.found + 60;
       const c = live(2 * 1440 + 15 * 60, 50), urgentNow = !!c && !!c.claimedBy && c.claimedBy !== 'you';
-      const waitingOk = w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: held for you, released once done or the crew take it
+      const waitingOk = !w0 && w1 && !w2 && !!b && !cartWaiting(Math.floor(b.posted / 60));   // cartWaiting: only while it's yours (0.33.20), released once done
       return { waits, took, fin, stops, leftThen, crewTook, urgentNow, waitingOk };
     })()""")
     print(f"Cart run as your job: {cr}")
@@ -397,6 +398,25 @@ with sync_playwright() as pw:
     print(f"  took '{ch['c']}': {ch['took']}, stops {ch['stops']}, finished {ch['fin']}, did its work {ch['helped']}")
     if len(ch['kinds']) < 7 or ch['badStop'] or ch['badTier'] or ch['shapeBad'] or len(ch['openKinds']) < 5: fail('chores and openJobs')
     if not (ch['took'] and ch['fin'] and ch['helped']): fail('taking and finishing a chore')
+
+    # 5f. food runs in live play (0.33.21): the galley stepping live and the job list together for six days, nobody
+    # pushing carts for you: every food run is taken by the crew (or goes unseen) within 2 hours of its hour's wait,
+    # never sits open for days; the cold store never runs empty and the hold isn't drained by repeat orders
+    fr = g.ev("""(() => {
+      if (typeof galleyAdvance !== 'function' || !cartsCarryFood || typeof FOOD === 'undefined' || FOOD.restock !== 'carts') return { skipped: true };
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.galley = null; setShipNow(t0); machinesNow(); galleyAdvance(t0);
+      let late = [], coldMin = 1e9, holdMin = 1e9, runs = new Set(), claimed = new Set();
+      for (let t = t0 + 1440; t <= t0 + 7 * 1440; t += 10) {
+        setShipNow(t); galleyAdvance(t); machinesNow();
+        coldMin = Math.min(coldMin, SHIP.galley.cold.meals); if (SHIP.hold.meals !== undefined) holdMin = Math.min(holdMin, SHIP.hold.meals);
+        for (const j of SHIP.jobs) if (j.cargo === 'meals') { runs.add(j.id); if (j.claimedBy && j.claimedBy !== 'you') claimed.add(j.id); if (j.status === 'open' && t > leaveEnd(j) + 120) late.push(j.id + ' open at ' + hhmm(t % 1440) + ' day ' + SHIP.time.day); }
+      }
+      setShipNow(t0); SHIP.galley = null;
+      return { runs: runs.size, crew: claimed.size, late: [...new Set(late)].slice(0, 4), coldMin, holdMin };
+    })()""")
+    print(f"Food runs in live play, 6 days: {fr}")
+    if not fr.get('skipped') and (fr['late'] or fr['coldMin'] <= 0 or fr['holdMin'] < 100 or fr['runs'] < 5 or fr['runs'] > 30 or fr['crew'] < fr['runs'] / 2): fail('food runs in live play')
 
     # 6. the save
     rt = g.ev("""(() => {
