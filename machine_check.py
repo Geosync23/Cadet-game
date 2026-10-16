@@ -37,7 +37,9 @@ CREW_PER_HOUR = 3                                       # jobs the ideal day shi
 
 # run the machines from a fresh ship at Day 1 06:00 for `days` days. mode: 'hour' (ask every ship hour),
 # 'jump' (ask once at the end), 'odd' (ask at odd minutes); crew: service worn machines on the day shift
-RUN = r"""(({ days, mode, crew, perHour }) => {
+RUN = r"""(({ days, mode, crew, perHour, events }) => {
+  // ordinary wear: ship-wide events (the ion storm, due day 10 of a new game) off unless asked for; put back at the end
+  if (!events) window.__sc("window.__evRun = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evRun[0]) eventNow = () => null; if (window.__evRun[1]) eventMod = () => null");
   const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + days * 1440;
   JOBS_ON = crew === 'real'; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
   const out = { daily: [], first: {}, rising: [], worst: {}, minHealth: 100, fx: [], jobs: 0, maxOpen: 0, minStock: 99, waiting: 0 };
@@ -108,6 +110,7 @@ RUN = r"""(({ days, mode, crew, perHour }) => {
   // the overlay: someone mid-job is where the job says
   out.endJobs = JSON.stringify([SHIP.jobs, SHIP.stores, SHIP.hold]);
   JOBS_ON = true;
+  if (!events) window.__sc("if (window.__evRun[0]) eventNow = window.__evRun[0]; if (window.__evRun[1]) eventMod = window.__evRun[1]");
   return out;
 })"""
 
@@ -145,7 +148,7 @@ with sync_playwright() as pw:
     stubs = g.ev("machineList().filter(m => m.stub).length")
     print(f"{n} machines ({n - stubs} from the decks, {stubs} stand-ins), {DAYS} days")
 
-    run = lambda **o: g.page.evaluate("([s, o]) => window.__sc(s)(o)", [RUN, {'days': DAYS, 'mode': 'hour', 'crew': False, 'perHour': CREW_PER_HOUR, **o}])
+    run = lambda **o: g.page.evaluate("([s, o]) => window.__sc(s)(o)", [RUN, {'days': DAYS, 'mode': 'hour', 'crew': False, 'perHour': CREW_PER_HOUR, 'events': False, **o}])
 
     # 1. no repairs
     t = time.time(); a = run()
@@ -258,6 +261,24 @@ with sync_playwright() as pw:
     print(f"Looks: {lk['nBad']} out of range, board rows ok {lk['rowsOk']}: {lk['rows']}; crew grumble about {lk['about']}; chiller at day 10 {lk['chillEnd']}; pure {lk['pure']}")
     if lk['nBad'] or not lk['rowsOk']: fail(f"machineLook / deckLook / shipHealthRows: {lk['bad']}")
     if lk['moodBad'] or not lk['chillOk'] or not lk['pure']: fail('shipMoodAt / chillerAt')
+
+    # 4c. the ion storm (section 18, when the build has one due in DAYS days): the runs above are ordinary wear, with
+    # events off. With the storm on, comms (and power) wear harder than without it; with the real Works crew the sensor
+    # array never gets past faulty, and the storm's comms wear shows on the job list
+    storm = g.ev("typeof eventNow === 'function' && typeof SHIP_EVENTS === 'object' && !!SHIP_EVENTS.ionStorm && !SHIP_EVENTS.ionStorm.draft")
+    if storm:
+        sa = run(events=True)
+        comms = [i for i in sa['kinds'] if g.ev(f"MACHINE_KINDS[{json.dumps(sa['kinds'][i])}].sys") == 'comms']
+        harder = [i for i in comms if sa['final'][i] < a['final'][i] - 1e-9 or a['final'][i] == 0]
+        sr = run(crew='real', events=True)
+        arr = [i for i in sr['kinds'] if sr['kinds'][i] == 'array']
+        arrWorst = max((sr['worst'][i] for i in arr), default=0)
+        arrJobs = [j for j in sr['jobList'] if j['id'].split('@')[0] in arr]
+        print(f"Ion storm on: comms machines worn harder than without it {len(harder)}/{len(comms)}; no repairs, the array ends {[sa['states'][i] for i in arr]}; with the Works crew the array's worst {['healthy', 'worn', 'faulty', 'failing', 'broken'][arrWorst]}, its jobs {[(j['kind'], j['status']) for j in arrJobs]}, lowest ship health {sr['minHealth']:.1f}")
+        if len(harder) < len(comms) or not comms: fail('the storm should wear comms harder')
+        if arrWorst > 2: fail('the sensor array got past faulty in the storm with the Works crew on the job')
+    else:
+        print('Ion storm: not in this build (or still a draft); skipped')
 
     # 5. your side: a job you claim is left to you
     y = g.ev("""(() => {
