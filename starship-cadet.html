@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.27.23
+   STARSHIP CADET: CSV Wren                            build 0.27.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7012,7 +7012,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.23';                             // keep in step with the header's build line
+const GAME_BUILD = '0.27.24';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15389,15 +15389,22 @@ function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() /
 // building it; here they're drawn as instances, one InstancedMesh per shape and material, culled with the garden.
 // Looked at about once a second; the matrices are only rewritten when a bed's growth has moved on. The nth bed of a
 // crop on the deck is the galley's nth bed of it; beds with no place in the garden (the third bean bed, the root
-// vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were.
+// vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were. Plants in a tall piece
+// (the bean trellises) get their own copies of the materials, in that room's fade list, so they fade with it (0.27.24).
 const gardenView = {
   root: null, list: [], key: '', next: 0, m: new THREE.Matrix4(), p: new THREE.Matrix4(), v: new THREE.Vector3(), s: new THREE.Vector3(), q: new THREE.Quaternion(),
   make() {                                               // the deck's instanced meshes, once per deck build
     this.root = deckRoot; this.list = []; this.key = ''; this.next = 0; if (!deckRoot || !GARDEN_PLOTS.length) return;
     deckRoot.updateMatrixWorld(true);
     const geo = { leaf: LEAF_GEO, ball: new THREE.SphereGeometry(1, 10, 7), pod: new THREE.CylinderGeometry(.012, .01, .14, 5) }, by = new Map(), box = new THREE.Box3();
+    const tallOf = P => { for (let o = P.g.parent; o; o = o.parent) { const t = TALL.find(t => t.g === o); if (t) return t; } return null; };
     for (const P of GARDEN_PLOTS) for (const sl of P.slots) {
-      const k = sl.geo + '|' + sl.mat.uuid; let b = by.get(k); if (!b) by.set(k, b = { geo: sl.geo, mat: sl.mat, items: [] });
+      const t = tallOf(P), k = sl.geo + '|' + sl.mat.uuid + '|' + (t ? TALL.indexOf(t) : '');
+      let b = by.get(k);
+      if (!b) {                                          // in a tall piece (the trellises): its own copy of the material, faded with the room (0.27.24)
+        const mat = t ? sl.mat.clone() : sl.mat; if (t) { mat.userData.base = { op: sl.mat.opacity, tr: sl.mat.transparent }; t.mats.push(mat); }
+        by.set(k, b = { geo: sl.geo, mat, items: [] });
+      }
       b.items.push({ P, sl }); box.expandByPoint(this.v.set(sl.x, sl.y, sl.z).applyMatrix4(P.g.matrixWorld));
     }
     const sphere = box.getBoundingSphere(new THREE.Sphere()); sphere.radius += 1;

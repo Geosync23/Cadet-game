@@ -5,7 +5,7 @@ Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.23; next is 0.27.24). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.24; next is 0.27.25). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
 - **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`. Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
 - **Test scripts:** I don't own any. I use `cadet_test.py`, `deck_check.py`, `day_check.py` and `player_check.py`.
