@@ -11713,11 +11713,12 @@ function chillerAt(t) {
 // the garden's growing conditions (0.33.34, for the galley engineer's working garden): gardenAt(t) -> { water, feed,
 // light }, each 0-1 (1: all good). water: the irrigation pumps, held back by the rest of the water system once it's
 // below 75 ("water feeds the garden"); feed: the nutrient dosing; light: the grow racks' lights, held back by power
-// the same way. Each by how well its worst machine works (machWorks: 1 healthy, .85 at the worst of worn, .5 faulty, .2 failing, 0 broken).
+// the same way. Each by how well its worst machine works: 1 while it's worn or better, then machWorks scaled (about .59 at
+// the top of faulty, .24 failing, 0 broken; 0.33.35: before, a worn machine gave .85-1 and the galley's beds grew slower)
 // Pure: it reads the hour-by-hour record (all good with none yet), so it's safe in the galley's replays
 function gardenAt(t) {
   const c = MACH_HIST.get(histHour(t)) || {}, ms = machineList();
-  const works = kind => { const xs = ms.filter(m => m.kind === kind); return xs.length ? Math.min(...xs.map(m => machWorks(c[m.id] ?? 100))) / 100 : 1; };
+  const works = kind => { const xs = ms.filter(m => m.kind === kind); return xs.length ? Math.min(1, Math.min(...xs.map(m => machWorks(c[m.id] ?? 100))) / 85) : 1; };
   const feeds = (sys, own) => { const c2 = { ...c }; for (const m of ms) if (m.kind === own) c2[m.id] = 100; return Math.min(1, systemOwn(sys, c2) / 75); };
   const r = x => Math.round(x * 1000) / 1000;
   return { water: r(works('irrigation') * feeds('water', 'irrigation')), feed: r(works('nutrient')), light: r(works('growlight') * feeds('power', 'growlight')) };
