@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.41.5
+   STARSHIP CADET: CSV Wren                            build 0.29.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.5';                             // keep in step with the header's build line
+const GAME_BUILD = '0.29.20';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9042,13 +9042,19 @@ const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions
 //          { meals, label }; cooked from the cold store from 15:00
 //   trays: trays for the bridge at dinner: cooked with the dinner, plated at 18:00 and sent up by hover cart (section
 //          17's cartTrays({ trays, at, to: 'bridge' }) posts the run, when it's there)
-// eventModAt(t, kind, key), when section 18 has it, is eventMod at ship minute t (pure), so replays agree; without it
-// only the live galley reads events (eventNow / eventMod: now) and replays run as if there were none.
+// Section 18's eventModAt(t, kind, key) (0.34.8), or its eventMod(kind, key, t) (0.34.7), answers for ship minute t, so
+// replays agree with the live galley; an eventMod without the third argument is read live only (eventNow / eventMod:
+// now), and replays run as if there were none.
 const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
 const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
+// GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
+// can't replace: eventMod(kind, key, t) and cartTrays(o). null in the game
+const GALLEY_TEST = { eventMod: null, cartTrays: null };
 function galleyEvRead(m, replay) {
   let get = null;
-  if (typeof eventModAt === 'function') get = k => eventModAt(m, 'galley', k);
+  if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
+  else if (typeof eventModAt === 'function') get = k => eventModAt(m, 'galley', k);
+  else if (typeof eventMod === 'function' && eventMod.length >= 3) get = k => eventMod('galley', k, m);
   else if (!replay && typeof eventMod === 'function' && typeof eventNow === 'function' && eventNow()) get = k => eventMod('galley', k);
   if (!get) return null;
   const o = {}; let any = false;
@@ -9190,7 +9196,7 @@ function galleyStep(S, m, st) {
   // trays for the bridge (an event): plated from the servery at 18:00 and sent up by hover cart
   if (md === FOOD.trayAt && S.ev && S.ev.trays) {
     const n = Math.min(Math.round(galleyEvNum(S.ev.trays, 0)), S.servery.portions);
-    if (n > 0) { S.servery.portions -= n; S.trays = { d, n }; if (st) st.trays += n; else if (typeof cartTrays === 'function') cartTrays({ trays: n, at: m, to: 'bridge' }); }
+    if (n > 0) { S.servery.portions -= n; S.trays = { d, n }; if (st) st.trays += n; else (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }); }
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
