@@ -4685,6 +4685,16 @@ const D2 = {
 Object.assign(WALL_KIT, {
   // a brass nameplate on the header above a bedroom door: gold letters on navy, in a brass frame
   brassPlate(g, o) {
+    if (o.sub) {                                         // 0.32.3: an officer's plate, name over rank (answer 27)
+      const t = tex(256, 80, (c, w, h) => {
+        c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
+        c.fillStyle = '#ecd08a'; c.textAlign = 'center';
+        let f = 26; do c.font = '600 ' + f + 'px Georgia,serif'; while (c.measureText(o.text).width > w - 26 && --f > 14);
+        c.fillText(o.text, w / 2, 38); c.font = 'italic 17px Georgia,serif'; c.fillStyle = '#d9b45a'; c.fillText(o.sub, w / 2, 63);
+      });
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(.56, .175), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+      p.position.set(0, 2.5, .04); g.add(p); box(.62, .235, .035, D2.brass, 0, 2.5, .0175, g); return;
+    }
     const t = tex(256, 64, (c, w, h) => {
       c.fillStyle = '#1d2740'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b45a'; c.lineWidth = 3; c.strokeRect(5, 5, w - 10, h - 10);
       c.fillStyle = '#ecd08a'; c.font = '600 27px Georgia,serif'; c.textAlign = 'center'; c.fillText(o.text, w / 2, 42);
@@ -4693,6 +4703,13 @@ Object.assign(WALL_KIT, {
     p.position.set(0, 2.5, .04); g.add(p); box(.62, .2, .035, D2.brass, 0, 2.5, .0175, g);
   },
 });
+// a bedroom's plate (0.32.3, answer 27): an officer's name and rank from the roster (read at dress time, so section 9 is in);
+// rooms without an officer (the Envoy, the visitors) keep the plate's own text
+const D2_RANK = { captain: 'Captain', xo: 'Executive Officer', chief: 'Department Chief', senior: 'Senior Officer' };
+function d2Plate(room, text) {
+  const p = typeof ROSTER !== 'undefined' && ROSTER.find(q => q.bed === '2-' + room);
+  return p && D2_RANK[p.rank] ? { text: p.name.replace(/^(Captain|Commander|Chief) /, ''), sub: D2_RANK[p.rank] } : { text };
+}
 // bedrooms (0.9.2): shared materials only, so fifteen furnished rooms merge into a handful of draw calls
 Object.assign(D2, {
   woodDark: std('#3e2a1f', .6), linen: std('#efe9dc', .9), duvet: std('#e4e7ea', .9), leather: std('#5a3324', .55),
@@ -5224,6 +5241,43 @@ Object.assign(KIT, {
     box(.3, .1, .02, D2.amber, 0, .85, .21, g);
     return { w: .7, d: .4 };
   },
+  // lived-in touches in the utility rooms (0.32.3, answer 31): a mug someone left, signs, the closet calendar
+  d2Mug(g, o = {}) {
+    const x = o.x || 0, y = o.y || 0, z = o.z || 0, m = o.m || D2.china;
+    cyl(.04, .035, .09, m, x, y + .045, z, g, 10); box(.015, .05, .03, m, x + .048, y + .05, z, g); cyl(.034, .034, .005, D2.coffee, x, y + .088, z, g, 10);
+    return { w: .12, d: .12, noBlock: true };
+  },
+});
+// made at load from fixed text, no R(): each is one shared material
+const d2Paper = (w, h, draw) => new THREE.MeshBasicMaterial({ map: tex(w, h, draw), toneMapped: false });
+const d2SignMat = (text, bg, fg) => d2Paper(256, 96, (c, w, h) => {
+  c.fillStyle = bg; c.fillRect(0, 0, w, h); c.strokeStyle = fg; c.lineWidth = 6; c.strokeRect(8, 8, w - 16, h - 16);
+  c.fillStyle = fg; c.textAlign = 'center'; let f = 30; do c.font = '700 ' + f + 'px Arial,sans-serif'; while (c.measureText(text).width > w - 36 && --f > 12); c.fillText(text, w / 2, 48 + f * .36);
+});
+Object.assign(D2, {
+  coffee: std('#3b2416', .3), mugRed: std('#b8433a', .5),
+  flames: d2SignMat('NO NAKED FLAMES', '#f4f1ea', '#c0392b'), head: d2SignMat('MIND YOUR HEAD', '#f2c94c', '#1b1b1f'),
+  calendar: d2Paper(128, 160, (c, w, h) => {
+    c.fillStyle = '#f6f3ec'; c.fillRect(0, 0, w, h); c.fillStyle = '#2f6f73'; c.fillRect(0, 0, w, 52);
+    c.fillStyle = '#f6f3ec'; c.font = '700 18px Arial,sans-serif'; c.textAlign = 'center'; c.fillText('THE WREN', w / 2, 22);
+    c.font = '13px Arial,sans-serif'; c.fillText('Concord Survey', w / 2, 42);
+    c.strokeStyle = '#9aa3a8'; c.lineWidth = 1;
+    for (let r = 0; r < 5; r++) for (let q = 0; q < 7; q++) {
+      const x = 8 + q * 16, y = 60 + r * 19; c.strokeRect(x, y, 16, 19);
+      if (r * 7 + q < 16) { c.strokeStyle = '#c0392b'; c.beginPath(); c.moveTo(x + 3, y + 3); c.lineTo(x + 13, y + 16); c.stroke(); c.strokeStyle = '#9aa3a8'; }
+    }
+    c.fillStyle = '#c0392b'; c.beginPath(); c.arc(8 + 4 * 16 + 8, 60 + 3 * 19 + 9.5, 7, 0, 7); c.fill();
+  }),
+});
+Object.assign(WALL_KIT, {
+  d2Sign(g, o) { const p = new THREE.Mesh(new THREE.PlaneGeometry(.5, .19), o.m); p.position.set(0, o.y || 1.6, .02); g.add(p); },
+  // the closet's corner: a calendar with the days crossed off, a steel shelf with someone's mug and a roll of tape
+  d2Nook(g) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.32, .4), D2.calendar); p.position.set(0, 1.62, .02); g.add(p);
+    box(.5, .025, .18, D2.steel, 0, 1.12, .09, g); for (const x of [-.2, .2]) box(.02, .1, .14, D2.steel, x, 1.06, .08, g);
+    KIT.d2Mug(g, { x: -.1, y: 1.1325, z: .09, m: D2.mugRed });
+    cyl(.05, .05, .05, D2.cord, .14, 1.16, .09, g, 12).rotation.x = Math.PI / 2;
+  },
 });
 DECKS[2] = {
   num: 2, name: 'Command & Science', seed: 20219,
@@ -5375,8 +5429,8 @@ DECKS[2] = {
     { id: '2-captable-4', type: 'lounge-seat', at: [5, 12], face: 'w', pose: 'sit', room: 'C', anim: 'talk' },
     { id: '2-captable-5', type: 'lounge-seat', at: [4, 9], face: 's', pose: 'sit', room: 'C', anim: 'talk' },
     { id: '2-captable-6', type: 'lounge-seat', at: [4, 13], face: 'n', pose: 'sit', room: 'C', anim: 'talk' },
-    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
-    { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
+    { id: '2-windowseat-1', type: 'lounge-seat', at: [2, 12], face: 'e', pose: 'sit', room: 'C', anim: 'read', window: true },
+    { id: '2-windowseat-2', type: 'lounge-seat', at: [2, 10], face: 'e', pose: 'sit', room: 'C', anim: 'read', window: true },
     { id: '2-command-1', type: 'work:command', at: [4, 15], face: 'n', pose: 'sit', room: 'C', anim: 'read' },
     { id: '2-armchair-11', type: 'lounge-seat', at: [2, 15], face: 'e', pose: 'sit', room: 'C', anim: 'read' },
     // Vance
@@ -5456,9 +5510,9 @@ DECKS[2] = {
     { id: '2-survey-2', type: 'work:survey', at: [30, 2], face: 's', pose: 'sit', room: 'K', anim: 'read' },
     { id: '2-survey-3', type: 'work:survey', at: [29, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' },
     { id: '2-survey-4', type: 'work:survey', at: [30, 5], face: 's', pose: 'sit', room: 'K', anim: 'read' }, { id: '2-survey-5', type: 'work:survey', at: [31, 4], face: 'w', pose: 'work', room: 'K' },
-    { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
-    { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
-    { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', anim: 'read' },
+    { id: '2-windowseat-3', type: 'lounge-seat', at: [28, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
+    { id: '2-windowseat-4', type: 'lounge-seat', at: [30, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
+    { id: '2-windowseat-5', type: 'common-room', at: [31, 0], face: 's', pose: 'sit', room: 'K', anim: 'read', window: true },
     { id: '2-armchair-12', type: 'common-room', at: [27, 7], face: 'e', pose: 'sit', room: 'K', anim: 'read' },
     // the Survey lab
     { id: '2-survey-6', type: 'work:survey', at: [33, 1], face: 's', pose: 'work', room: 'L' }, { id: '2-survey-7', type: 'work:survey', at: [35, 1], face: 's', pose: 'work', room: 'L' },
@@ -5472,11 +5526,21 @@ DECKS[2] = {
     { id: '2-survey-21', type: 'work:survey', at: [35, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-22', type: 'work:survey', at: [36, 19], face: 'n', pose: 'work', room: 'M' },
     { id: '2-survey-23', type: 'work:survey', at: [39, 19], face: 'n', pose: 'work', room: 'M' }, { id: '2-survey-24', type: 'work:survey', at: [35, 18], face: 'e', pose: 'work', room: 'M' },
     // the observatory
-    { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
-    { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', anim: 'read' },
+    { id: '2-windowseat-6', type: 'common-room', at: [41, 1], face: 's', pose: 'sit', room: 'J', anim: 'read', window: true, event: 'observatory-night' },
+    { id: '2-windowseat-7', type: 'common-room', at: [43, 1], face: 's', pose: 'sit', room: 'J', anim: 'read', window: true, event: 'observatory-night' },
     { id: '2-survey-16', type: 'work:survey', at: [42, 5], face: 's', pose: 'work', room: 'J' },
-    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
-    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', anim: 'talk' },
+    { id: '2-beanbag-1', type: 'common-room', at: [42, 6], face: 's', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-beanbag-2', type: 'common-room', at: [43, 7], face: 's', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
+    // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
+    // type 'event' so the everyday habits leave them alone. window: by the bow glass.
+    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', anim: 'talk', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-2', type: 'event', at: [44, 1], face: 'n', pose: 'stand', room: 'J', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-3', type: 'event', at: [41, 2], face: 'n', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-4', type: 'event', at: [41, 3], face: 'e', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-5', type: 'event', at: [43, 3], face: 'w', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', anim: 'talk', event: 'observatory-night' },
     // the comms room
     { id: '2-comms-1', type: 'work:comms', at: [29, 20], face: 'n', pose: 'work', room: 'Q' }, { id: '2-comms-2', type: 'work:comms', at: [26, 20], face: 'n', pose: 'work', room: 'Q' },
     { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q', anim: 'talk' },
@@ -5514,7 +5578,7 @@ DECKS[2] = {
   ],
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
-    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, { text });
+    for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, d2Plate(d.sealed[key], text));
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
     placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Six decks, top to bottom. Bridge, Command & Science, Commons, Quarters, Operations, Engineering. You are here: Command & Science, one below the bridge.') });
     // the spine behind glass: the trunks above the car, the ladder below it
@@ -5615,6 +5679,7 @@ DECKS[2] = {
     place('J', 'brassTelescope', 2.0, 4.4, 'n', { turn: -.5, it: IT('Telescope', 'A brass telescope on a pier, aimed out of the bow. Survey uses it by day. A note on the eyepiece: PUT IT BACK ON THE NEBULA WHEN YOU\'RE DONE.') });
     for (const a of [3.5, 6.5]) placeWall('J', 'starChart', 'w', a);
     place('J', 'beanbag', 1.0, 6.8, 'n', { turn: .5, fab: MUS.fab[1] }); place('J', 'beanbag', 2.2, 7.4, 'n', { turn: -.3, fab: MUS.fab[3] });
+    for (const [z, f] of [[5.5, 'sage'], [6.5, 'wine']]) place('J', 'cushion', 3.5, z, 'e', { fab: D2.fabs[f] });   // floor cushions for observatory night (0.32.3)
     // ---- the comms room: the signal board along the windows, two rows of headset desks ----
     place('Q', 'signalBoard', 3.0, 8.55, 's', { w: 4.8, it: IT('Signal board', 'Every message in and out, as a line of light. The slow gold wave is a call home on its way out, weeks from arriving.') });
     for (const z of [3.6, 5.9]) for (const x of [1.5, 4.3]) {
@@ -5666,6 +5731,11 @@ DECKS[2] = {
     place('n', 'cableTray', 3.5, .73, 's', { w: 5.0 });
     place('n', 'signalRepeater', .35, .5, 'w', { it: IT('Signal repeater', 'Lifts the array\'s signal for the long run aft to the comms room. Warm to the touch, and humming.') });
     place('n', 'arrayFeed', 6.7, .5, 'e', { it: IT('Array feed', 'Where the dish\'s cables come through the bulkhead and split for the racks. Each one labelled, in Dr. Sato\'s handwriting, naturally.') });
+    // lived-in touches (0.32.3): a sign in the gas plant, the calendar nook in the closet, a sign and a forgotten mug in the crawl
+    placeWall('g', 'd2Sign', 'w', 6.5, { m: D2.flames });
+    placeWall('u', 'd2Nook', 'w', 2.5);
+    placeWall('n', 'd2Sign', 'n', 2.5, { m: D2.head, y: 1.15 });
+    place('n', 'd2Mug', .45, .5, 'w', { y: .8 });
   },
 };
 for (const [key, r] of Object.entries(DECKS[2].sealed)) DECKS[2].closedDoors[key] = { t: DECKS[2].rooms[r].name, x: DECKS[2].rooms[r].tap };
