@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.36.2
+   STARSHIP CADET: CSV Wren                            build 0.36.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6561,7 +6561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.2';                             // keep in step with the header's build line
+const GAME_BUILD = '0.36.3';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -10588,12 +10588,12 @@ function socReset(hour) {
   SHIP.social = { hour, fault: {}, pairs: {} };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
-// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay] } }. A save made with a different crew list starts the crew's side afresh
+// rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay] } }. A save made with a different crew list starts the crew's side afresh
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, rel };
@@ -10610,7 +10610,7 @@ function socLoad(s) {
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     return true;
   } catch (e) { return false; }
@@ -10647,6 +10647,8 @@ function affinity(a, b) {
 // ---- news ----
 function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
+  // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
+  seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
   const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s)), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
   return it;
@@ -10844,7 +10846,30 @@ function chatLine(p, t = shipNow()) {
   return { text: fill(pick(CHAT_GREET[tier], 619)), kind: 'greet', say: true };
 }
 // favours (0.36.2 fills this in): the favour that person has for you, or null
-function favourOf(p) { return null; }
+// favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
+// favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or
+// yours), else today's idea for one (not yet posted: { idea: true, title, ask, post }), else null. Ideas come from
+// their life: something left behind where they spent yesterday's free time (fetch it back to them), or a lamp over
+// their work station that needs swapping (the 'lamp' chore). Acquaintances and up ask; the better they know you,
+// the more often (FAVOUR_ODDS per ship day, schedU k 624-628), and only one a day each.
+const FAVOUR_ODDS = [0, .2, .3, .4, .45];
+const FAVOUR_THINGS = ['datapad', 'mug', 'jacket', 'notebook', 'glasses case', 'stylus', 'scarf', 'water bottle'];
+function favourOf(p) {
+  if (typeof favourPost !== 'function' || typeof favoursOf !== 'function') return null;
+  const open = favoursOf(p.id)[0]; if (open) return open;
+  const r = relGet(p.id), d = SHIP.time.day, U = k => schedU(p.seed, d, k), tier = relTier(p.id);
+  if (r.favDay === d || U(624) >= FAVOUR_ODDS[tier]) return null;
+  const S = schedData(), left = planDay(p, d - 1).filter(s => s.placeId && SOCIAL_TYPES.has(s.type) && s.type !== 'servery-queue').map(s => S.byId.get(s.placeId)).filter(pl => pl && DECKS[pl.deck]);
+  if (left.length && U(625) < .6) {
+    const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
+    return { idea: true, title: 'Fetch ' + shortName(p) + '\'s ' + thing, ask: 'I think I left my ' + thing + ' in the ' + room.toLowerCase() + ' yesterday. Could you bring it to me?',
+             post: { from: p.id, title: 'Fetch ' + shortName(p) + '\'s ' + thing + ' (' + room + ', Deck ' + pl.deck + ')', bring: thing, stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'pickup' }] } };
+  }
+  if (p.work && p.work.place && U(628) < .7)
+    return { idea: true, title: 'A lamp for ' + shortName(p), ask: 'The lamp over my station keeps flickering. Could you swap it when you get a chance?',
+             post: { from: p.id, title: 'Swap the lamp at ' + shortName(p) + '\'s station', kind: 'lamp', where: p.work.place, deck: p.work.deck, parts: ['lamp'] } };
+  return null;
+}
 // the card. CHAT_SKIN.draw(el, view) is the device engineer's hook: view = { who, role, tier, line, say, buttons:
 // [{ id, label }] }; until there is one, chatDraw below draws a plain panel like the toast
 let CHAT = null;
@@ -10874,9 +10899,11 @@ function chatDraw(el, v) {
 }
 function chatShow() {
   const C = CHAT, p = C.p, r = relGet(p.id), today = SHIP.time.day;
+  const f = C.fav, ready = f && !f.idea && f.status === 'claimed' && f.claimedBy === 'you' && (f.workDone || !f.stops.length);
   const buttons = C.ask ? [{ id: 'ask-news', label: 'News' }, { id: 'ask-work', label: 'Their work' }, { id: 'ask-home', label: 'Home' }, { id: 'back', label: 'Back' }]
+    : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
     : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
-       { id: 'help', label: C.fav && C.fav.status === 'done' ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
+       { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -10914,18 +10941,30 @@ function chatDo(id) {
     const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
     if (n) { playerHeard(n.id, p.id); chatSay(pick(n.lines, 620)); } else chatSay(pick(['Nothing new, really.', 'Quiet week. I\'ll let you know.', 'Not that I\'ve heard.'], 621));
     if (!r.known.includes('news')) r.known.push('news');
-  } else if (id === 'ask-work') {
-    chatSay((CHAT_DEPT[p.dept] || 'Work\'s work.') + ' ' + (p.role ? 'I\'m ' + (/^[aeiou]/i.test(p.role) ? 'an ' : 'a ') + p.role.toLowerCase().replace(/^the /, '') + '.' : ''));
-    if (!r.known.includes('work')) r.known.push('work');
-  } else if (id === 'ask-home') {
-    // the crew designer's life details (ROSTER[i].about: [{ tier, text }], third person) up to how well they know
-    // you, else their `life` lines once you're acquaintances
-    const tier = relTier(p.id), all = (p.about || []).filter(x => x && x.text && (x.tier || 0) <= tier).map(x => x.text).concat(tier >= 1 ? p.life || [] : []);
-    const life = all.filter(x => !r.known.includes(x)), more = (p.about || []).some(x => x && (x.tier || 0) > tier) || (tier < 1 && (p.life || []).length);
-    if (!life.length) chatSay(more ? pick(['Maybe when we know each other better.', 'Oh, there\'s not much to tell.', 'Ha. Another time.'], 622) : 'You\'ve heard all my stories by now.');
-    else { const x = life[0]; r.known.push(x); chatSay(/^([A-Z][a-z]*s|Grew|Ran|Got|Brought|Joined|Was|Left|Spent|Came|Lost|Won|Once|Used)\b/.test(x) ? shortName(p) + ' ' + x[0].toLowerCase() + x.slice(1) : 'About ' + shortName(p) + ': ' + x, false); }
+  } else if (id === 'ask-work' || id === 'ask-home') {
+    // the crew designer's life details (ROSTER[i].about: [{ tier, topic, text }], third person; topic work for
+    // Their work, anything else for Home) up to how well they know you; Home falls back to their `life` lines once
+    // you're acquaintances, Their work to a line about their department. Each one told goes into rel.known
+    const work = id === 'ask-work', tier = relTier(p.id), mine = x => x && x.text && (x.topic === 'work') === work;
+    const all = (p.about || []).filter(x => mine(x) && (x.tier || 0) <= tier).map(x => x.text).concat(!work && tier >= 1 ? p.life || [] : []);
+    const life = all.filter(x => !r.known.includes(x)), more = (p.about || []).some(x => mine(x) && (x.tier || 0) > tier) || (!work && tier < 1 && (p.life || []).length);
+    if (life.length) { const x = life[0]; r.known.push(x); chatSay(/^([A-Z][a-z]*s|Grew|Ran|Got|Brought|Joined|Was|Left|Spent|Came|Lost|Won|Once|Used)\b/.test(x) ? shortName(p) + ' ' + x[0].toLowerCase() + x.slice(1) : 'About ' + shortName(p) + ': ' + x, false); }
+    else if (work) { chatSay((CHAT_DEPT[p.dept] || 'Work\'s work.') + ' ' + (p.role ? 'I\'m ' + (/^[aeiou]/i.test(p.role) ? 'an ' : 'a ') + p.role.toLowerCase().replace(/^the /, '') + '.' : '')); if (!r.known.includes('work')) r.known.push('work'); }
+    else chatSay(more ? pick(['Maybe when we know each other better.', 'Oh, there\'s not much to tell.', 'Ha. Another time.'], 622) : 'You\'ve heard all my stories by now.');
   } else if (id === 'help') {
-    chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
+    const f = C.fav = favourOf(p);
+    if (!f) chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
+    else if (f.idea || f.status === 'offered') { C.offer = true; chatSay(f.idea ? f.ask : 'Still could use a hand: ' + f.title.toLowerCase() + '.'); }
+    else if (f.workDone || !f.stops.length) {          // handing it back, face to face
+      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
+      else chatSay('Hmm, not quite done yet, is it?');
+    } else chatSay(pick(['No rush. Whenever you can.', 'Thanks for doing that, by the way.', 'Any luck yet?'], 630));
+  } else if (id === 'fav-yes' || id === 'fav-no') {
+    const f = C.fav; C.offer = false;
+    if (f && f.idea) { const fid = favourPost(f.post); C.fav = fid ? favourById(fid) : null; r.favDay = SHIP.time.day; }
+    if (!C.fav) { chatSay('Never mind, it\'s sorted.'); return; }
+    if (id === 'fav-yes' && favourAccept(C.fav.id)) chatSay(pick(['Thank you! Find me when it\'s done.', 'You\'re a lifesaver. I\'ll be around.', 'Brilliant, thanks.'], 631) + ' (It\'s in your Jobs.)');
+    else { if (typeof favourDecline === 'function') favourDecline(C.fav.id); C.fav = null; chatSay(pick(['No worries, I\'ll manage.', 'That\'s fine. Another time.', 'Sure, no problem.'], 632)); }
   } else if (id === 'meet') {
     if (typeof deviceDo === 'function') { chatClose(); deviceDo({ app: 'appointments', with: p.id }); }
     else chatSay('Appointments come with the new device. Soon.', false);
