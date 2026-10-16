@@ -90,7 +90,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.31.8
+   STARSHIP CADET: CSV Wren                            build 0.31.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4159,6 +4159,31 @@ Object.assign(WALL_KIT, {
     box(.3, .06, .02, WM.paintGold, 0, 1.38, .17, g);
     cyl(.035, .035, 1.05, M.metal, 0, 2.27, .08, g, 8);
   },
+  // lived-in touches for the utility rooms (answers pass, row 31): made from shared materials, nothing coplanar
+  calendar(g) {                                          // a paper wall calendar, this month's days crossed off
+    box(.42, .56, .01, KM.paper, 0, 1.55, .02, g); box(.42, .12, .01, KM.red, 0, 1.77, .03, g);
+    for (let k = 0; k < 9; k++) box(.04, .04, .006, M.slateDark, -.15 + (k % 5) * .075, 1.62 - Math.floor(k / 5) * .075, .029, g);
+    cyl(.012, .012, .03, M.metal, 0, 1.86, .02, g, 6).rotation.x = Math.PI / 2;
+  },
+  handSign(g) {                                          // a hand-lettered card, taped up at the corners
+    box(.38, .25, .01, KM.note, 0, 1.45, .02, g);
+    [[-.03, .28, 1.51], [-.06, .22, 1.455], [0, .26, 1.4]].forEach(([x, w, y]) => box(w, .018, .006, M.slateDark, x, y, .028, g));   // the lettering
+    for (const x of [-.17, .17]) box(.07, .025, .012, M.ceramic, x, 1.57, .03, g);
+  },
+  radioShelf(g) {                                        // a little wall shelf: someone's radio, a mug and a flask
+    box(.62, .03, .2, M.wood, 0, 1.15, .1, g);
+    box(.26, .15, .1, WM.paintDark, -.12, 1.24, .1, g); box(.1, .1, .01, M.slateDark, -.18, 1.24, .155, g);
+    box(.05, .02, .01, WM.screenAmber, -.06, 1.27, .155, g);
+    cyl(.006, .006, .32, M.metal, -.03, 1.43, .08, g, 4).rotation.z = -.35;
+    cyl(.04, .035, .09, M.ceramic, .1, 1.21, .1, g, 10); box(.015, .05, .03, M.ceramic, .148, 1.21, .1, g);
+    cyl(.035, .035, .2, M.metal, .23, 1.265, .1, g, 10);
+  },
+  mugRail(g) {                                           // a hook rail by the door, mugs hanging from it
+    box(.5, .03, .03, M.metal, 0, 1.62, .03, g);
+    [[-.15, M.ceramic], [.0, KM.teal], [.15, KM.red]].forEach(([x, m]) => {
+      cyl(.04, .035, .09, m, x, 1.53, .07, g, 10); box(.012, .05, .02, M.metal, x, 1.6, .045, g);
+    });
+  },
 });
 
 // =====================================================================
@@ -4647,11 +4672,16 @@ DECKS[3] = {
     place('R', 'risers', 4.0, .3, 'n', { it: IT('Risers', 'Clean water up, used water down, through the spine to every deck.') });
     place('R', 'sump', 1.0, 8.55, 's');
     placeWall('R', 'relayBox', 'e', 2.5, { it: IT('Light relays', 'Deck 3\'s light relays: every lamp from the garden to the lounge runs through this box.') });
+    placeWall('R', 'calendar', 'n', 2.5, { it: IT('Calendar', 'A paper calendar, days crossed off in three different pens. Filter day is circled every week, with a frowning face.') });
+    placeWall('R', 'radioShelf', 'w', 5.4, { it: IT('Radio', 'Somebody\'s radio, tuned low to a music channel from home, and a mug of tea gone cold beside it.') });
+    placeWall('R', 'handSign', 's', 2.5, { it: IT('Sign', 'Hand-lettered: MIND THE SUMP. Underneath, smaller: seriously.') });
     place('g', 'extractorUnit', 1.0, .45, 'n', { it: IT('Extractor fans', 'The galley hoods\' fan, its motor and the grease filters. It hums all day and roars at mealtimes.') });
     place('g', 'chillerUnit', 1.55, 2.0, 'e', { it: IT('Chiller', 'The cold store\'s chiller, with the dishwasher pumps tucked in beside it.') });
+    placeWall('g', 'handSign', 'w', 2.2, { it: IT('Sign', 'IF THE FAN STICKS: KNOCK TWICE, THEN CALL WORKS. In the chef\'s handwriting.') });
     place('i', 'nutrientTanks', 3.3, 2.0, 'e', { it: IT('Nutrient tanks', 'Two tanks of garden feed and the dosing unit that mixes them. It smells faintly of tomato leaves.') });
     place('i', 'irrigationPump', 3.4, 3.9, 'e', { it: IT('Irrigation pump', 'The pump and a row of valves, one for each part of the garden.') });
     place('i', 'headerPipes', .25, 1.5, 'w');
+    placeWall('i', 'calendar', 'n', 3.4, { it: IT('Planting calendar', 'Sowing and feeding days for every bed in the garden, in the gardeners\' neat print.') });
     place('S', 'drinksFridge', 2.0, 8.55, 's', { it: IT('Drinks fridge', 'Fizzy drinks in colours not found in nature. The orange one sells out first.') });
     place('S', 'shopDisplay', 2.5, .5, 'n', { it: IT('Window display', 'This week: new socks in department colours, and a single, expensive jar of real honey.') });
 
@@ -6248,6 +6278,9 @@ DECKS[1] = {
     place('k', 'cabinet', 3.0, .3, 'n', { breakers: true, it: IT('Power junction', 'Deck 1\'s breakers, fed from the trunk head next door.') });
     place('c', 'dataBus', 3.0, 1.65, 's', { it: IT('Data bus', 'Where every bridge station\'s cables meet. Mind your head.') });
     place('c', 'floorCableTray', 1.0, 1.7, 's'); place('c', 'floorCableTray', 5.0, 1.7, 's');
+    placeWall('k', 'mugRail', 's', 2.8, { it: IT('Mug rail', 'Three mugs on hooks. The red one says BRIDGE CREW, and nobody admits it\'s theirs.') });
+    placeWall('u', 'calendar', 'w', 1.5, { it: IT('Calendar', 'Relay checks ticked off week by week. Someone has drawn a small rocket on payday.') });
+    placeWall('c', 'handSign', 'n', 1.5, { it: IT('Sign', 'MIND YOUR HEAD. Three dents in the plate above it suggest people don\'t.') });
   },
 };
 for (const [key, r] of Object.entries(DECKS[1].sealed)) DECKS[1].closedDoors[key] = { t: DECKS[1].rooms[r].name, x: DECKS[1].rooms[r].tap };
@@ -6303,7 +6336,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.31.8';                             // keep in step with the header's build line
+const GAME_BUILD = '0.31.9';                             // keep in step with the header's build line
 const SHIP_RATE = 1440 / 1800;                           // ship minutes per real second (a 30-minute day)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
