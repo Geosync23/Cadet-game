@@ -12254,12 +12254,12 @@ function newsKnownBy(p, t = shipNow()) {
   return NEWS.filter(x => x.born <= t && SHIP.knows[x.id] && SHIP.knows[x.id].has(id))
     .sort((a, b) => (b.weight - (t - b.born) / 1440 * .2) - (a.weight - (t - a.born) / 1440 * .2) || (a.id < b.id ? -1 : 1));
 }
-function playerHeard(newsId, from) {
+function playerHeard(newsId, from, overheard) {        // overheard: in passing (chatter), so no nudge for the teller
   socInit(); const it = NEWS.find(x => x.id === newsId);
   if (!it || SHIP.heard.some(x => x.id === newsId)) return false;
   SHIP.heard.push({ id: newsId, from: from || null, at: Math.floor(shipNow()), line: it.lines[0] });
   if (SHIP.heard.length > 60) SHIP.heard.splice(0, SHIP.heard.length - 60);
-  if (from && SOC.idx.has(from)) relAdd(from, 'news', REL_PTS.news);
+  if (from && !overheard && SOC.idx.has(from)) relAdd(from, 'news', REL_PTS.news);
   return true;
 }
 // the day's gossip, born at its hour: birthdays and ship traditions at 07:00, habit changes at 09:00
@@ -12278,7 +12278,7 @@ function socBorn(h, rooms) {
   }
   if (hr === 7 && typeof eventsOn === 'function') for (const e of eventsOn(d)) if (!e.honorees.length) {
     const going = crew.filter(p => planDay(p, d).some(s => s.tag && (s.tag === 'ev-' + e.id || s.tag.startsWith('ev-' + e.id + '-')))), when = e.from >= 1020 ? 'tonight' : 'today';
-    newsAdd({ id: 'trad:' + e.id + ':' + d, about: e.id, kind: 'tradition', weight: .4, life: 1, born: t, seed: socPick(going, 4, socHash(e.id), d, 603).map(q => q.id),
+    newsAdd({ id: 'trad:' + e.id + ':' + d, about: e.id, kind: 'tradition', weight: .4, life: Math.max(.1, (e.to - 450) / 1440), born: t,   // gone once it's over seed: socPick(going, 4, socHash(e.id), d, 603).map(q => q.id),
       lines: [e.name + ' ' + when + ' at ' + hhmm(e.from) + '.', 'Are you coming? ' + e.name + ' starts at ' + hhmm(e.from) + '.', e.id === 'quiz' ? 'Quiz night tonight. I\'ve been revising.' : e.name + ' ' + when + '. Should be good.'] });
   }
   // machines going faulty or worse (section 17's record of the hour); whoever is on that deck notices first
@@ -12356,7 +12356,38 @@ function socialTick() {                                  // the main loop: the c
   chatTick();
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m);
+}
+// chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
+// at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
+// real seconds) someone awake within CHATTER_NEAR tiles says a line: news they know that you haven't heard (you hear
+// it: playerHeard, no relationship nudge for eavesdropping), else, more rarely, small talk by what they're doing.
+// No bubbles while a chat card is open (the voice budget: bubbles.hidden)
+const CHATTER_NEAR = 7, CHATTER_ODDS = .35, CHATTER_GAP = 12;
+const CHATTER_IDLE = {                                   // small talk between crew, by what they're doing
+  meal: ['Pass the salt?', 'Is this the new recipe?', 'I\'m stuffed.', 'Brennan\'s outdone herself.', 'Seconds? Go on then.', 'Who made the bread?'],
+  work: ['Hand me that, would you?', 'Nearly done here.', 'Who logged this one?', 'Check that again for me.', 'Right, next.'],
+  free: ['Did you see the stars last night?', 'I could sit here all evening.', 'Long day.', 'Fancy a game later?', 'Heard from home lately?', 'Ha! No way.'],
+};
+let CHATTER_AT = -1e9;
+const CHATTER_LAST = [];                                 // the last few lines said, so nobody repeats one
+function socialChatter(m) {
+  if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
+  if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
+  if (CHAT || sleeping || performance.now() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
+  const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
+  const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
+  const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a))
+    .sort((a, b) => schedU(a.p.seed, m, 636) - schedU(b.p.seed, m, 636));
+  for (const a of near) {
+    const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
+    const n = newsKnownBy(a.p, t).find(x => !heard.has(x.id) && !(x.about === a.p.id && x.kind !== 'fault'));
+    let text = n ? n.lines[Math.floor(schedU(a.p.seed, m, 637) * n.lines.length)] : null;
+    if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null; if (k) text = CHATTER_IDLE[k][Math.floor(schedU(a.p.seed, m, 639) * CHATTER_IDLE[k].length)]; }
+    if (!text || CHATTER_LAST.includes(text)) continue;
+    if (bubbleSay(a.h, text)) { CHATTER_AT = performance.now(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); if (n) playerHeard(n.id, a.p.id, true); }
+    return;
+  }
 }
 // friends come and find you (0.36.4): a friend (tier 3+) in their free time on your deck, within SEEK_NEAR tiles,
 // now and then (SEEK_ODDS a ship minute, schedU k 633) waves you over: a small prompt at the screen's edge, never one
@@ -12411,6 +12442,35 @@ function socialTogether(step) {
   for (const k of [...SOC_WITH.keys()]) if (!here.has(k.slice(k.indexOf(':') + 1))) SOC_WITH.delete(k);
 }
 function socialNew() { socInit(); socReset(Math.floor(shipNow() / 60)); }   // section 13's New game
+
+// ---- for the device's apps (0.36.6; section 19 draws them): plain data, nothing drawn here ----
+// crewContacts() -> everyone you've met (or all with { all: true }), closest first: [{ id, name, role, dept, tier,
+//   tierName, pts, toNext (points to the next tier, or null), met, lastTalk, known: [what you know], where }].
+//   where: { deck, room, act } only for acquaintances and up, or anyone on duty in a public place (the plan: Maps
+//   shows people once you're acquaintances, or on public duty); else null
+// newsFeed() -> what you've heard, newest first: [{ id, line, from (name or null), at, kind }]
+const PUBLIC_WORK = new Set(['galley', 'infirmary', 'works']);   // on duty where anyone may find them
+function crewWhere(p, t = shipNow()) {
+  const w = whereIs(p, t); if (!w || w.moving) return null;
+  const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
+  return { deck: w.deck, room: rm ? rm.name : null, act: w.act };
+}
+function crewContacts({ all = false } = {}) {
+  socInit(); const t = shipNow(), out = [];
+  for (const p of SOC.crew) {
+    const r = SHIP.rel[p.id]; if (!all && !(r && r.met !== null)) continue;
+    const tier = relTier(p.id), pts = r ? r.pts : 0, w = whereIs(p, t);
+    const show = tier >= 1 || (w && w.act === 'work' && PUBLIC_WORK.has(p.dept));
+    out.push({ id: p.id, name: p.name, role: p.role, dept: p.dept, tier, tierName: REL_NAMES[tier], pts, toNext: tier < 4 ? Math.ceil(REL_TIERS[tier + 1] - pts) : null,
+               met: r ? r.met : null, lastTalk: r ? r.lastTalk : null, known: r ? r.known.filter(k => k !== 'news' && k !== 'work') : [], where: show ? crewWhere(p, t) : null });
+  }
+  return out.sort((a, b) => b.pts - a.pts || (a.name < b.name ? -1 : 1));
+}
+function newsFeed() {
+  socInit();
+  return SHIP.heard.slice().reverse().map(h => { const it = NEWS.find(x => x.id === h.id), p = h.from && SOC.idx.has(h.from) ? SOC.crew[SOC.idx.get(h.from)] : null;
+    return { id: h.id, line: h.line, from: p ? p.name : null, at: h.at, kind: it ? it.kind : (h.id.split(':')[0] || 'news') }; });
+}
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // ---- chat cards (0.36.1): tap a crew member ----
 // chatLine(p, t) -> { text, kind, news?, say }: one line, picked in order of what matters: news they know that you
