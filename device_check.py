@@ -8,6 +8,7 @@
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
+#   Appointments (0.35.6): ask someone for tomorrow at a meeting place; an answer, booked or offered; saved
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
@@ -134,6 +135,16 @@ def run(path):
             # an action with no verb opens its app (the social engineer's Meet up: { app: 'appointments', with })
             ap = g.ev("(() => { deviceDo({ app: 'appointments', with: 'calder' }); const a = DEV.app; deviceShow('home'); return a; })()")
             check(ap == 'appointments', f'deviceDo with no verb opens the app: {ap}')
+            # Appointments: who, when, where, ask; the answer comes from section 14's apptReply when it's there
+            at = g.ev("""(() => { SHIP.device.appts = []; deviceShow('appointments'); deviceDo({ app: 'appointments', do: 'new' });
+              const who = apptPeople()[0], pl = apptPlaces(); if (!who || !pl.length) return ['no people or places', !!who, pl.length];
+              deviceDo({ app: 'appointments', do: 'who', arg: who.id }); deviceDo({ app: 'appointments', do: 'day', arg: SHIP.time.day + 1 });
+              deviceDo({ app: 'appointments', do: 'where', arg: pl[0].id }); deviceDo({ app: 'appointments', do: 'ask' });
+              const out = [pl.length, typeof apptSay, SHIP.device.appts.length + (apptDraft && apptDraft.later ? 1 : 0) + (/Sorry/.test(apptSay || '') ? 1 : 0)];
+              const sv = {}; for (const f of SAVE_EXTRA) f(sv); out.push(deviceLoad(sv).appts.length === SHIP.device.appts.length);
+              apptDraft = null; apptSay = null; SHIP.device.appts = []; deviceShow('home'); return out; })()""")
+            print('  appointments:', at)
+            check(at[0] >= 5 and at[1] == 'string' and at[2] == 1 and at[3] is True, f'appointments: places, an answer, booked or offered, saved: {at}')
             # the shim
             sh = g.ev("""(() => { device.addSection('test', 'Test', el => { el.textContent = 'shim works'; }); device.addSection('mail', 'Old inbox', el => { el.textContent = 'old'; });
               device.show('test'); const a = document.getElementById('devBody').textContent; device.show('mail'); const b = document.getElementById('devT').textContent;
