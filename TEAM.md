@@ -37,7 +37,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 
 | Session | Job | Branch it pushes to | Builds | Status | Handover note |
 | --- | --- | --- | --- | --- | --- |
-| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (from 2026-10-16 ~15:20). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 14 = 0.41.6; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
+| session_015QoyPWBdMPM4ywf5W2jMMs | Lead (from 2026-10-16 ~15:20). Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 15 = 0.41.7; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.41.x (combined) | Active | — |
 | session_01WHXNp9A1WHAD2EHJw384Qp | Lead (2026-10-16 ~04:20 to ~15:20) | `claude/lead-pillar1` | 0.41.x (combined) | Retired 2026-10-16 (memory full) | `plans/handover-lead.md` |
 | session_0158BCCswtdujm3t5d2LXsFz | Lead (2026-10-15 to 2026-10-16 ~04:20) | `claude/lead-pillar1` | 0.40.x–0.41.2 (combined) | Retired 2026-10-16 (~460k) | `plans/handover-lead.md` |
 | session_01TqLepvhqDZRwFj7ZuLb6Xa | Systems engineer 3 (hired 2026-10-16 ~20:22): empty job board (with interactions), days-off jobs to crew (section 17) | `claude/ship-systems` | 0.33.32+ | Active | — |
