@@ -100,7 +100,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.37.4
+   STARSHIP CADET: CSV Wren                            build 0.37.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6625,7 +6625,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.37.4';                             // keep in step with the header's build line
+const GAME_BUILD = '0.37.5';                             // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8110,7 +8110,7 @@ function playerUpdate(dt, t) {
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : false;   // a tray from the servery to your seat (0.28.15)
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -8608,6 +8608,18 @@ function ixChoreTap(it, at) {
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
   if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
+}
+// what you carry for your job between stops (section 15 asks, for the held prop: 8b's '+toolbox', '+carry'), after its own
+// cases (a cart, parts in hand, a tray): a delivery's crate from the pickup to the drop; a toolbox for any other job you're
+// on until its work is done (repairs, lamps, vents, rounds). Nothing for cart runs (the cart) or with no job.
+function ixHold() {
+  const j = typeof myJob === 'function' ? myJob() : null;
+  if (!j || j.workDone || j.kind === 'restock') return null;
+  if (j.kind === 'chore' && j.chore === 'delivery' && typeof jobStops === 'function') {
+    const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
+    return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) ? 'carry' : null;
+  }
+  return 'toolbox';
 }
 // a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
 function ixStopDone(A) {

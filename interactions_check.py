@@ -112,6 +112,7 @@ with sync_playwright() as pw:
     check(rows >= 1, f'the board lists jobs ({rows})')
     took = g.ev("ixBoard.take('ixtest@1')"); g.step(3); s = st()
     check(took and g.ev("(myJob() || {}).id") == 'ixtest@1' and not s['board'], 'Take it: the job is yours and the board closes')
+    g.step(2); check(g.ev("player.holding") == 'toolbox', f'a repair job: a toolbox in hand ({g.ev("player.holding")!r})')
     print('   goal:', s['goal'])
     check(s['goal'] and 'storage' in s['goal'], f'the pointer: fetch from main storage ({s["goal"]})')
     check(g.ev("SHIP.player.track") == 'ixtest@1', f'taking a job tracks it ({g.ev("SHIP.player.track")})')
@@ -188,6 +189,9 @@ with sync_playwright() as pw:
                 s = walk_stop(step); g.step(3); s = st()
                 done = g.ev(f"jobStops(myJob() || {{}}).map(x => !!x.done)") if g.ev("!!myJob()") else []
                 check(len(done) > i and done[i], f'{kind} {step}: marked done ({done}, {s["toast"][:80]})')
+                hold = g.ev("player.holding")
+                want = ('carry' if kind == 'delivery' and step == 'pickup' else None if kind == 'delivery' else True if g.ev("SHIP.player.carry.length") else 'toolbox') if i < len(stops) - 1 else False
+                if want is not None: check(hold == want, f'{kind} after {step}: in hand {hold!r}, want {want!r}')
             s = st()
             check(g.ev("!!(myJob() && myJob().workDone)") and s['goal'] and 'turn it in' in s['goal'].lower(), f'{kind}: work done, the pointer says turn it in ({s["goal"]})')
             check(not g.ev("SHIP.player.carry.length"), f'{kind}: the parts were used')
