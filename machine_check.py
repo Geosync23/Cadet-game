@@ -577,7 +577,7 @@ with sync_playwright() as pw:
         fail('the board through a week')
 
     # 5j. the garden (0.33.34, for the galley engineer's working garden): grow lights are machines like any other;
-    # gardenAt(t) is pure, .85 or more while the garden's machines are fine, and falls when the irrigation, dosing or grow
+    # gardenAt(t) is pure, all 1 while the garden's machines are worn or better (a fresh ship), and falls when the irrigation, dosing or grow
     # lights are broken (only that one); gardenCarry posts one crate run (asking twice gives the same id), it waits
     # for you, then a crew member takes it, carryWaiting is true until the drop-off ends and false after; yours lands
     # through the galley's galleyCarryLand (a stand-in here if section 16 hasn't one) when you tick off the drop
@@ -617,7 +617,7 @@ with sync_playwright() as pw:
     print(f"  crate run {gd['id']}: once {gd['same']}, for you first {gd['forYou']}, taken by {gd['claimedBy']}, arrived {gd['arrived']}, carryWaiting till then {gd['after']}; "
           f"yours: took {gd['took']}, stops '{gd['stops']}', waiting before/after the drop {gd['mineWaiting']}, landed {gd['landed']}")
     b = gd['broke']
-    if (len(gd['lights']) < 1 or min(gd['fine'].values()) < .85 or not gd['pure']
+    if (len(gd['lights']) < 1 or gd['fine'] != {'water': 1, 'feed': 1, 'light': 1} or not gd['pure']
         or not (b['irrigation']['water'] == 0 and b['irrigation']['feed'] == gd['fine']['feed'] and b['irrigation']['light'] == gd['fine']['light'])
         or not (b['nutrient']['feed'] == 0 and b['nutrient']['water'] == gd['fine']['water']) or not (b['growlight']['light'] == 0 and b['growlight']['water'] == gd['fine']['water'])
         or not gd['same'] or not gd['forYou'] or not gd['claimedBy'] or gd['claimedBy'] == 'you' or not gd['arrived'] or not gd['after']
