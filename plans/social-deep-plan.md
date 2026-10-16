@@ -284,7 +284,7 @@ The planner's **ship notes bus** (`simNote(kind, data)` / `onSim(kind, fn)`, pla
 
 ### Overheard conversations
 
-Two- to four-line exchanges between two crew as you pass (the planner's dialogue workstream: `content/overheard/*.lines`, played as alternating bubbles under the existing voice budget). Social's part: pair conditions read through `affBand` and `bondOf`, and news riding on a conversation is passed on (the second speaker learns it, on screen as on paper) through `newsAdd`'s spread. *TODO: confirm with the planner that the dialogue engine owns playing them.*
+Two- to four-line exchanges between two crew as you pass (the planner's dialogue workstream: `content/overheard/*.lines`, played as alternating bubbles under the existing voice budget). Social's part: pair conditions read through `affBand` and `bondOf`, and news riding on a conversation is passed on (the second speaker learns it, on screen as on paper) through `newsAdd`'s spread. The dialogue engine plays them (agreed with the planner), with a small saved ring so none repeats within 7 ship days.
 
 ### Moment scripts
 
@@ -319,9 +319,9 @@ Generated crew's moments come from **theme templates** (`MOMENT_THEMES.homesick 
 The planner owns the arrival and the first week: `SHIP.intro = { step, day, done, skipped }`, the scripts, tutorials and the "Settling in" list. The seam with social is small:
 
 - **Relationships:** onboarding calls `relAdd(id, 'intro:<step>', pts)`. After the arrival evening: the escort 10 (acquaintance), Tomas 10, Pell 5, Calder 3, Brennan 3 (the planner's numbers). Skip-intro sets the same end state.
-- **Flags:** onboarding sets flags in the shared store (`flagSet('met.calder')`, `escort.halloran`, `week1.d2` ... `week1.done`); line conditions read them (`flag:met.calder`).
+- **Flags:** onboarding sets flags in the shared store (`flagSet('met.calder')`, `escort.halloran`, `mug`, `seedling`, `week1.d2` at Tuesday 06:00 ... `week1.done`; the store is section 13's, beside the bus, owned by the sim engineer and saved in the main save); line conditions read them (`flag:met.calder`).
 - **Memories:** social listens for `simNote('introStep', { step, who })` and adds core memories (`intro.arrival` with the escort, `intro.dinner` with Calder and the escort, `intro.shadowShift` with the escort), so they can be called back for the rest of the game ("Remember your first day? You held the spanner upside down."). It also makes a **mentor bond** from the escort to you: extra week-1 lines (`week1:true`), a check-in each evening of week 1.
-- **Gating:** social features stay quiet until onboarding's flags open them: chat cards always; favours from `week1.d2`; friends waving you over from `week1.d3`; invitations from `week1.d5`; moments and bunk visits after `week1.done`. The first-weekend tradition invitation is the escort's, sent by the planner's script through `socialInvite({ trad, day, from: 'halloran' })` so it becomes a real appointment. A scripted escort visit on night 1 is the planner's call.
+- **Gating:** social features stay quiet until onboarding's flags open them: chat cards always; favours from `week1.d2`; friends waving you over from `week1.d3`; invitations from `week1.d5`; moments and bunk visits after `week1.done`. The first-weekend tradition invitation comes from **Tomas** (your bunkmate, free that Saturday), sent on Friday by the planner's script through `socialInvite({ trad: 'sowing', day: 6, from: 'tomas' })` so it becomes a real appointment (Sowing morning in the garden, then film night). Halloran's part that week is the Friday mug at Works tea. A scripted escort visit on night 1 is the planner's call.
 
 **The escort: Emeka Halloran** (the planner's proposal, to confirm with the user): Works systems officer, Officer rank (one notch above you), day shift, off Thursday and Friday, cabin 4-13; kind, loyal, terrible breakfast jokes, bakes. He becomes story crew with a full voice card and an arc (suggested thread: "not good enough", whether he's ready to be anyone's mentor).
 
@@ -475,13 +475,13 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 | **Deck architect** | one keepsake shelf place by Bunk 1 berth 4; "calm" tags on places (which seats count as somewhere to sit and talk) | the list of calm place types |
 | **Performance engineer** (8/8b) | the `sigh`, `laugh`, `listen` talk poses for moments and visits; the keepsake instanced mesh | nothing new |
 
-`schedU` keys: section 20 uses 600 to 643; the deep system takes **644 to 699**.
+`schedU` keys: section 20 uses 600 to 643; the deep system takes **644 to 699** (the planner's map: arrival 700-749, lines 750-799, new traditions 434-499). `lineFor` is the dialogue engineer's (section 22, builds 0.43.x).
 
 ---
 
 ## Part 12: Build steps
 
-**Two social engineers** (the planner's staffing, agreed): **Social A** owns section 20 and carries on the social range **0.36.20+**; **Social B** works in a marked sub-block `// 20c. SOCIAL STORIES` (so their merges never clash) with a new range the planner sets (**0.39.x** suggested: unused so far). Each step is small exact-string edits, a build number bump, a DEV_NOTES row, the full test set, a push and a report, as CLAUDE.md asks. Steps marked *(inert)* change nothing you can see.
+**Two social engineers** (the planner's staffing, agreed): **Social A** owns section 20 on `claude/social` and carries on the social range **0.36.20+**; **Social B** works in a marked sub-block `// 20c. SOCIAL STORIES` (so their merges never clash) on branch `claude/social-stories`, range **0.39.x** (set by the planner). Each step is small exact-string edits, a build number bump, a DEV_NOTES row, the full test set, a push and a report, as CLAUDE.md asks. Steps marked *(inert)* change nothing you can see.
 
 **Wave 1 (foundations, before the writers' vocabulary freezes; alongside the planner's dialogue engine and arrival):**
 
@@ -529,7 +529,7 @@ The writers' work runs alongside from wave 1 (the shapes and vocabulary freeze a
 
 1. **The escort:** Emeka Halloran, a new Works systems officer (the planner's proposal, which I support), written as story crew? (The other option was Pell, a junior two years ahead and already your neighbour.)
 2. **Crew-to-crew romance:** none anywhere (simplest and safest), or a few established couples who are simply together in the background (no storylines, never involving you)?
-3. **How serious can it get?** Struggles like an ill grandparent and homesickness are in. Is grief (someone they lost) in, handled gently?
+3. **How serious can it get?** Struggles like an ill grandparent and homesickness are in. Is grief (someone they lost) in, handled gently? (Merges with the planner's question on how serious.)
 4. **Visits to your bunk:** OK as designed (friends only, evenings, easy to ignore)?
 5. **Gifts from the machine shop** (making small trinkets) once Works lets you, or only bought and picked gifts?
 6. **Reputation dipping** when you leave a department's job unfinished: OK, or only ever up?
