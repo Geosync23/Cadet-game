@@ -24,25 +24,29 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstreams, formats and build numbers). A helper session can only push to the branch it was created with. Pillar 1 (done, 0.25.2) roles are in git history.
 
-| Session | Job | Branch it pushes to | Builds | Status |
-| --- | --- | --- | --- | --- |
-| session_0158BCCswtdujm3t5d2LXsFz | Lead | `claude/lead-pillar1` | 0.40.0+ (combined) | Active |
-| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: A1, every room in use (crew free time across the ship, crew needs, activity choice, galley-rota hook) | `claude/sim-engineer` | 0.26.x | Done (0.26.7) |
-| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: A2, activity poses and props (run, lift, call, browse, pay, play, water, cook, wash, fold, drink, read, talk) | `claude/crowd-render` | 0.27.x | Done (0.27.6) |
-| session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer (new): A3, player needs (fitness and energy slow you), activities, placeholder device, save v2 | `claude/player-needs` | 0.28.x | Done (0.28.8) |
-| session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer (new): A4, food and cooking (chef from 04:30, batches, servery, shelf, dish pit) | `claude/galley-food` | 0.29.x | Done (0.29.10) |
-| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: A5a. First 0.30.1, the shared turn: `service: true` hatches (player and Works crew pass, only into built rooms), `still` floors, deck_check machine and place rules. Then the utility rooms on Decks 4, 5 and 6 (plan c20fa6b approved: 29 machines, no room changes size). Also the treadmill belt animation. Owns the playable link | `claude/deck-architect` | 0.30.x | Done (0.30.10) |
-| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: A5b done (0.31.4: Deck 3 activity furniture, staffed till, rower, live grab shelf, treadmill y; utility rooms on Decks 1 and 3, 17 machines). Waiting | `claude/deck1-scale` | 0.31.x | Done |
-| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: A5c done (0.32.2: Deck 2 anims and utility rooms, 9 machines). Waiting | `claude/deck2-command` | 0.32.x | Done |
-| session_01JScnVG158eYAHYvKDz3jZG | Crew designer: A6 done (0.16.5 c02e656: six new habits, two storekeepers, galley teams). Waiting | `claude/deck-plans-1-2-6` | 0.16.x | Done |
-| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: B1 done (0.33.0, 8e34c3b: machine registry with stubs, wear on paper, 10 systems, shipEffects, SAVE_EXTRA, machine_check). Now B2 and B3 on paper (jobs, Works crew claiming, stores, restock); the board and device section wait for Half A | `claude/ship-systems` | 0.33.x | Done (0.33.15) |
-| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived |
+| Session | Job | Branch it pushes to | Builds | Status | Handover note |
+| --- | --- | --- | --- | --- | --- |
+| session_0158BCCswtdujm3t5d2LXsFz | Lead. Also republishes the playable link (https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, version 11 = 0.40.8; steps in the Deck 6 architect's note, section 3) | `claude/lead-pillar1` | 0.40.x (combined) | Active | — |
+| session_01S5xTHRBpJ9kqytfrwKipUG | Sim engineer: crew time, schedules, needs, day_check (sections 10, 13, 14) | `claude/sim-engineer` | 0.15, 0.21–0.22, 0.26.x | Standby (~120k since a summary) | `plans/handover-sim.md` |
+| session_01TiBtENVFJV7RqEQ7YkxH1Z | Performance engineer: crowd, poses, props, draw calls (sections 8, 8b) | `claude/crowd-render` | 0.20, 0.27.x | Standby (<100k since a summary) | `plans/handover-performance.md` |
+| session_015BoZMMp5b4A4F51dMcZ3ax | Bridge architect: Decks 1 and 3 | `claude/deck1-scale` | 0.18, 0.31.x | Standby (~150k since a summary) | `plans/handover-bridge-architect.md` |
+| session_01JScnVG158eYAHYvKDz3jZG | Crew designer: roster, habits, generator (section 9) | `claude/deck-plans-1-2-6` | 0.16.x | Standby (~200k since a summary) | `plans/handover-crew-designer.md` |
+| session_0134zewqwGV9hdGK6PqsaZ36 | Systems engineer: machines, wear, jobs, supplies, carts (section 17) | `claude/ship-systems` | 0.33.x | Retired 2026-10-16 (~600k) | `plans/handover-systems.md` |
+| session_01UFZoEaoHa3Tz1RrypCRzNx | Deck 6 architect: Decks 4, 5, 6, utility kit, deck_check | `claude/deck-architect` | 0.17, 0.30.x | Retired 2026-10-16 (~690k) | `plans/handover-deck6-architect.md` |
+| session_01Q9xiH4P2jjftpwBSrMyr42 | Player engineer: player needs, device, job loop, save (section 15) | `claude/player-needs` | 0.28.x | Retired 2026-10-16 (~560k) | `plans/handover-player.md` |
+| session_0182LPGeQR8Cix6rhf6op5Qv | Galley engineer: cooking, servery, food by cart (section 16) | `claude/galley-food` | 0.29.x | Retired 2026-10-16 (~490k) | `plans/handover-galley.md` |
+| session_014DMHpLuFyNknrAcZZGGNhU | Command architect: Deck 2 | `claude/deck2-command` | 0.19, 0.32.x | Retired 2026-10-16 (~670k) | `plans/handover-command-architect.md` |
+| session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
+
+**Hiring for a retired role:** start a fresh session on `claude/ship-integration`, have it read its predecessor's handover note first, and give it a new branch and build range (the old branch can be reused if the new session is created with it).
 
 ## Context check (2026-10-15, 17:10)
 
 How full each helper's memory is (out of 1,000,000): crew designer 84k and Deck 6 architect 199k (both already compacted), bridge architect 570k, command architect 525k, performance engineer 510k; sim engineer not reported while working. Sessions compact themselves automatically, but lose detail when they do. Plan: no new hires for the end of Pillar 1. For Pillar 2, give big new jobs to fresh sessions, and retire the bridge and command architects (idle, work merged) once the user agrees, after the usual idle check.
 
 ## Done
+
+- **Helper handovers (2026-10-16):** all nine helpers wrote handover notes (`plans/handover-*.md`, on this branch and on ship-integration 9efcea0, no game changes). The five fullest (systems, Deck 6 architect, player, galley, command architect) are retired; the lead now owns the playable link. Four stay on standby.
 
 - **Plan (the user, 2026-10-15):** finish Pillar 2 and its end-of-pillar review first; hand over to a fresh lead session after that. Pillar 2 is now complete (0.40.8); next: the review to the user, then the handover.
 
