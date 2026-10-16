@@ -6841,7 +6841,7 @@ function schedData() {
     for (const [ev, l] of evs) sub('@' + ev, l.sort(nat));
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
-  if (typeof eventPools === 'function') eventPools(shared);   // section 18: each ship event's places
+  if (typeof eventPools === 'function') eventPools(shared);   // section 18: the events' own place lists
   SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
   return SCHED_DATA;
 }
@@ -6987,10 +6987,12 @@ function birthdaysOn(d) {                                // everyone (not the pl
 }
 function gatherings(p, d, F) {
   if (F.night && F.works) return [];                     // on the night shift tonight
-  const U = k => schedU(p.seed, d, k), out = [], bd = birthdaysOn(d);
-  const EV = typeof eventPlan === 'function' ? eventPlan(p, d) : null;   // section 18: the ship's events (birthdays and observatory night among them)
-  if (EV) for (const e of EV) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min });
-  else if (bd.length) {
+  const U = k => schedU(p.seed, d, k), out = [], bd = birthdaysOn(d), EV = typeof eventPlan === 'function';
+  // section 18 (the events engineer) owns the ship's events when it's there: its eventPlan(p, d) gives
+  // [{ id, from, to, opts, tag, anim, min }] in minutes from midnight, already filtered to who goes; it replaces
+  // the birthday and observatory night below. The Deck 1 routines further down stay here.
+  if (EV) for (const e of eventPlan(p, d) || []) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20 });
+  if (!EV && bd.length) {
     const mine = bd.includes(p), mate = bd.some(b => b.dept === p.dept);
     if (mine || U(510) < (mate ? .8 : .45)) out.push({ at: BIRTHDAY_AT - (mine ? 5 : 0), dur: 40 + Math.round(15 * U(511)), where: [[3, 'mess-seat'], [3, 'lounge-seat'], [3, 'bench']], tag: 'party' });
   }
