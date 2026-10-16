@@ -11,7 +11,7 @@ The Wren already works: the galley cooks, machines wear out, the Works crew fix 
 - Walking through the mess, you overhear someone say "Sato hasn't left the chart room since last night", and later find it in your news feed.
 - You tap Pell and get a short chat, with buttons to chat, ask about something, offer help, or meet up.
 - You make an appointment to go to the gym with Tomas at 18:00, and he's there.
-- A friend asks you to fix the lamp in their cabin, and it shows up in your jobs.
+- A friend asks you to fix the lamp in their cabin. It shows up in your jobs, and the same on-screen arrow you use for any job points the way.
 - The Captain's face appears across the top of the screen with a ship-wide announcement. The crew around you stop and look up for a moment, then carry on.
 
 ## Your device
@@ -22,7 +22,7 @@ It opens from a corner button or a swipe up. On a phone it slides up from the bo
 | --- | --- |
 | Schedule | Your day: shift, meals, appointments, gatherings |
 | Appointments | Meet a crew member, see the infirmary, talk to the Chief. Crew answer from their real schedule and turn up |
-| Maps | Every deck, where you are, find a room or a friend, tap to walk there |
+| Maps | Every deck, where you are, find a room or a friend; the on-screen arrow points the way |
 | Memos | Your own notes |
 | Mail | Messages from the ship, the crew, the Captain and home |
 | Calendar | Ship traditions, birthdays, and events once they're announced |
@@ -68,24 +68,29 @@ It opens from a corner button or a swipe up. On a phone it slides up from the bo
 
 ## The order of work
 
-1. The device, relationships and chats, and appointments, all built side by side. We also run the real-phone test with you.
+1. The device, relationships and chats, and appointments, all built side by side, starting from what your phone test this morning shows.
 2. **Check-in 1 with you:** try the new device and the social life.
 3. The ion storm from start to finish, and the first visit to the ready room.
 4. **Check-in 2 with you:** play through a whole storm.
 5. Then the visit, the garden creature, and the festival.
 
-## Thirteen questions for you
+## Three big choices for you
 
-1. Should the device's look be a separate, swappable piece, so it works now and your design drops in later?
-2. Add the extra apps: Crew, Ship, Camera, Record (and a Wallet, and Music once the game has sound)?
-3. Should Maps show where someone is only once you know them, or once they're on duty somewhere public?
-4. If you miss an appointment, should it cost nothing beyond a remark next time?
-5. Should events reach you only through chatter, Mail, the boards and the Captain, with no markers or cutscenes and the camera never taken away?
-6. Should results come as smoothly, bumpily or roughly, told as story and small traces on the ship, with no scores and no failing?
-7. Are the three kinds of big moment right: felt everywhere, the Captain's announcement, and announced gatherings?
-8. Event order: ion storm, then the diplomatic visit, then the garden creature, with the festival held back until the phone test says big crowds are OK?
-9. Should ordinary visitors stay in the guest cabins about once a week, as well as the event visitors?
-10. Are the friendship tiers, the short chats and crew friendships with each other right, with Tomas, Pell and Rina first?
-11. Should the ready room, briefings, officers' cabins and the Captain's table open by invitation, for the time of the visit only?
-12. Add more gym equipment now, and give the game some simple sounds soon?
-13. OK to bring in two new helpers (one for the device, one for social life), with the traditions helper growing into ship-wide events?
+1. **The device's look:** should it be a separate piece we can swap, so everything works now in a plain style and your design drops in later? And should we add the extra apps (Crew, Ship, Camera, Record)?
+2. **Ambient events:** should events reach you only through chatter, Mail, the boards and the Captain, never with markers, cutscenes or the camera taken away, and end smoothly, bumpily or roughly, told as story, with no failing?
+3. **Event order:** ion storm, then the diplomatic visit, then the garden creature, with the festival held back until the phone test says big crowds are fine?
+
+## Everything else we'll go with unless you say otherwise
+
+One "yes" covers all of these:
+
+- The device opens from a corner button or a swipe up, and time keeps running.
+- Maps shows where someone is once you know them (or when they're on duty somewhere public).
+- A missed appointment costs nothing but a remark next time.
+- Big moments come three ways: felt everywhere, the Captain's announcements, gatherings announced ahead.
+- Your own part in an event counts toward commendations.
+- Ordinary visitors stay in the guest cabins about once a week, as well as event visitors.
+- Friendship tiers, short chats, crew friendships with each other; Tomas, Pell and Rina first.
+- The ready room, briefings, officers' cabins and the Captain's table open by invitation, for the visit only.
+- More gym equipment now, and some simple sounds soon.
+- Two new helpers (one for the device, one for social life), with the traditions helper growing into ship-wide events.

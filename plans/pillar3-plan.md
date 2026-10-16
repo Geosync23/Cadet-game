@@ -18,7 +18,7 @@ After Pillar 2 the Wren works: the galley cooks, machines wear, the Works crew f
 
 **How it's built:** three new helpers (device, social, and the events engineer you already have, who grows from traditions into ship-wide events), with the existing helpers doing small parts. Two check-ins with you: one after the device and social basics, one after the ion storm. Combined builds are **0.50.x**.
 
-**What we need from you:** a yes, no or change on each **Proposal** below; above all the device's two-layer approach, the "no fail screens, outcomes in three bands" rule for events, and the event order. The device's look stays yours to design whenever you're ready.
+**What we need from you:** three big choices, and one "yes" for everything else (see "Decisions for the user" at the end). The device's look stays yours to design whenever you're ready.
 
 ---
 
@@ -29,6 +29,7 @@ After Pillar 2 the Wren works: the galley cooks, machines wear, the Works crew f
 - **The build** (0.41.x tonight, on `claude/ship-integration`): 75 crew on schedules (section 14), needs for crew and player (14, 15), the galley (16), machines, jobs and supplies (17), and section 18 `SHIP EVENTS`, small recurring traditions from the events engineer.
 - **The device today** is a placeholder panel (section 15) with registered sections: `device.addSection(id, title, render)`. It has Now, Needs (with tonight's bonus and penalty marks) and Jobs, plus Mail (`mailSend`, `SHIP.mail`).
 - **Crew feelings:** `crewMood(p, t)` and `crewFeeling(p, t)` give the tap line. Birthdays (`ROSTER[i].birthday`), habits that change (`SHIP.habitLog`), observatory night, the Deck 1 shift handover and the Captain's evening walk all exist or arrive tonight.
+- **Tonight's interactions work** (the interactions engineer, section 15b, builds 0.37.x): the player can use everything the crew use (treadmill, rower, bar, music, garden, laundry, games and more); job-board pick-and-take; an on-screen goal arrow, `setGoal(target)` and `clearGoal()`; sit anywhere (tap a free seat); and squeezing past crew who are settled in a spot.
 - **Not there yet:** no relationships, no conversation, no way to talk to crew beyond a toast, no guests, no events beyond traditions, no map, no appointments. The ready room and private bedrooms are locked. No sound at all (the game has no audio code).
 - **Crowds:** the crowd draws all 75 cheaply; tonight adds a third, coarse level of detail and a `?crowd=120` demo (performance engineer).
 
@@ -72,7 +73,7 @@ deviceNotify({ app, text, urgent })            // the chirp: a badge, and a toas
 - **Proposal: the TriFold unfolded (wide).** It docks as a side panel on the left and can stay open while you walk. This suits the Maps and Jobs apps.
 - **Touch first:** every tappable thing at least 44 pixels high, no hover, no tiny text.
 - **Notifications:** a soft chirp (when we add sound) and a toast for urgent things (your job's machine broke, an appointment in 10 minutes, the Captain's address). Everything else is a quiet badge. **Proposal:** a "Quiet off shift" setting that turns work notifications into badges after 17:00.
-- **While it's open,** the game keeps running and you keep walking if you were. Tapping a map pin or a job can set your walk target (see Maps).
+- **While it's open,** the game keeps running and you keep walking if you were. Tapping a map pin, a job, a gathering note or a favour points tonight's goal arrow at it (`setGoal`, section 15b). There is **one arrow in the game, never a second system.**
 
 ### The apps
 
@@ -82,7 +83,7 @@ Your eight first, then the proposed extras.
 | --- | --- | --- |
 | **Schedule** | Today as a timeline: shift, meals, your appointments, gatherings, birthdays, event moments. A week view with the rota and your days off. A strip says where you're expected right now ("On shift: Works bay"). | Your rota (section 13/14), section 18 traditions, Appointments, events |
 | **Appointments** | Make one: pick a person or a place (a crew member, the infirmary, the Works Chief's office, a meeting), a time and a spot. Crew answer from their real schedule: yes, "not then, how about 19:00?", or no. Accepted appointments go into their day and they turn up. Invitations from crew arrive here too. | New: section 19 (the form), section 14 (crew keep them) |
-| **Maps** | Each deck as a clean plan drawn from its deck data: rooms named, you as a dot, locked rooms hatched. Search a room or a person; a person shows where they are now, if you know them well enough (see below). Tap a spot to walk there; on another deck, it walks you to the lift. | The deck text maps in `DECKS`, `whereIs` |
+| **Maps** | Each deck as a clean plan drawn from its deck data: rooms named, you as a dot, locked rooms hatched. Search a room or a person; a person shows where they are now, if you know them well enough (see below). "Show on map" and "Go there" point the goal arrow (`setGoal`) at the room or person; on another deck the arrow leads to the lift first. | The deck text maps in `DECKS`, `whereIs` |
 | **Memos** | Notes you write. Plain text, a title, the date. Pin one to the home screen. **Proposal:** a "remember this" button on chats, Mail and job lines copies the line into a new memo. | New, saved |
 | **Mail** | Tonight's inbox, grown: from the ship (shortages, spoilage), crew (invitations, thanks), departments (event notices), the Captain (addresses, in writing), and home (replies to your calls). Read and unread, delete, "remember this". | `mailSend`, `SHIP.mail` |
 | **Calendar** | A month of ship life ahead: the weekday shapes (Monday briefing, Wednesday drill, Thursday inspection, Friday treat, Sunday vote dinner), the Captain's piano on Thursdays, observatory night, birthdays, traditions, holidays, and announced events once they're known. Tap a day to add it to Schedule or make an appointment that day. | Section 18, `ROSTER.birthday`, events |
@@ -111,8 +112,8 @@ Your eight first, then the proposed extras.
 
 ### Saving
 
-- **Proposal:** everything the device owns goes into the save through `SAVE_EXTRA` as `SHIP.device = { memos, appts, readMail, pins, settings, photos }`. The save goes to `v: 3` and still reads `v: 2` saves (empty device).
-- **Photos** are small (320 pixels wide, compressed, about 20 KB each) and kept in the browser's larger storage (IndexedDB), not the main save, with a cap of 30. When full, the oldest unpinned one goes. If the browser refuses storage, the camera says so and nothing else breaks.
+- **Proposal:** everything the device owns goes into the save through `SAVE_EXTRA` as `SHIP.device = { memos, appts, readMail, pins, settings, photos }`. The save goes up one version: `SAVE_V` is 2 at 0.41.2 (e806e7b), so the device makes it **3** (or the next free number, if another pass bumps it first), and still reads older saves with an empty device.
+- **Photos** are small (320 pixels wide, compressed, about 20 KB each) and kept in the browser's larger storage (IndexedDB), not the main save, with a cap of 30. When full, the oldest unpinned one goes. The game runs as a claude.ai artifact, where browser storage can be empty or refused: then **photos are kept in memory for the session** (the camera still works, and says they won't survive closing the game), and nothing else breaks.
 - **Appointments** are also saved in the crew side (section 14 reads `SHIP.device.appts`), so a crew member still turns up after a reload.
 
 ---
@@ -141,7 +142,8 @@ What that means in practice:
 ```js
 // section 18. SHIP EVENTS (the events engineer; ship-wide events join tonight's traditions)
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 3, earliest: 8,           // ship days; the soonest day it can happen
+  title: 'Ion storm', days: 4, earliest: 8,           // ship days; the soonest day it can happen
+  // at: [day, minute] with day counted from 0 (the warning's day); the prose calls these Days 1-4
   phases: [ { id: 'warning', at: [0, 9*60] }, { id: 'onset', at: [1, 14*60] },
             { id: 'peak', at: [2, 6*60] }, { id: 'clear', at: [3, 10*60] } ],
   // what each phase changes, read by the sections that own those things:
@@ -189,7 +191,7 @@ Every other section asks `eventNow()` or `eventMod()` and changes its own behavi
 - **You're never told to do anything,** except by your job. If you're on shift, your work is Works work, and an event adds event jobs to the board like any other. Taking them is your choice, as now.
 - **Rank decides which parts reach you** (design doc). At Tier 1 you carry filters, secure fittings, swap lamps and run carts. You see the briefing only if someone takes you along (see Part 4). Later tiers get the relay work and a seat at the table.
 - **Ways in for a Tier 1 junior:**
-  - **Event jobs** on the board, tagged with the event.
+  - **Event jobs** on the board, tagged with the event, taken and done exactly like any other job (pick-and-take, the job loop, `machineUse`).
   - **Volunteering:** some events put a sign-up sheet on a board (in the mess or the Works bay): "Garden watch tonight, 21:00–23:00", "Help set up the plaza for the festival". Signing up is an appointment.
   - **Asks from crew** you know: Brennan needs a hand carrying stew to the bridge; Rina asks you to check on Tomas.
   - **Just being there:** turning up at a moment, keeping people company, checking on friends.
@@ -221,7 +223,7 @@ The hard question: how do you stage a few unmissable beats without cutscenes? **
 2. **The Captain's ship-wide address.** A banner across the top of the screen with the Captain's portrait and a few lines of text, shown on every deck at once, readable for about 20 seconds and kept in Mail afterwards. Crew on your deck stop and turn toward the nearest speaker grille for those seconds (a pose, no pathing change), then go on. **Time never stops.** Used at most two or three times per event, so it feels like an occasion.
 3. **Gatherings at a real place and time.** Announced ahead (Calendar, Mail, the address, chatter): the delegation arrives at the shuttle bay at 10:00, the all-clear party in the bow lounge at 19:00, the hunt for the garden creature at 21:00. Crew who'd come put it into their day (section 14) and go. If you're there, you see it: the shuttle doors open, the guests walk down the ramp, the Captain greets them, everyone claps (a short scripted sequence that moves crew already there, never the camera). If you're not, you hear about it, get a Mail with a photo, and the Camera app has a "missed" note.
 
-- **Proposal: no forced camera, ever.** At most, a gentle "Something's happening in the shuttle bay (Deck 5)" note on the device 15 minutes before a gathering, with "show on map".
+- **Proposal: no forced camera, ever.** At most, a gentle "Something's happening in the shuttle bay (Deck 5)" note on the device 15 minutes before a gathering, with "show on map" (which points the goal arrow, `setGoal`, at it).
 - **Proposal: moments repeat in conversation.** Whatever you saw or missed, the crew retell it in chatter for a day or two, with the details that happened (who was there, whether the lights went), because it's built from the simulation.
 
 ### Gatherings of more than 70 crew
@@ -246,10 +248,10 @@ The hard question: how do you stage a few unmissable beats without cutscenes? **
 Each lasts 2–4 ship days. Tier 1 is what reaches you now; later tiers in brackets.
 
 **1. Ion storm (the first, about day 8–10 of a new game).** Touches every system.
-- *Warning (the day before):* Survey picks up readings. Dr. Sato lives in the chart room; chatter starts in Survey and spreads by dinner. Mail from Works: "Storm prep: secure fittings, top up filters, check battery packs." Event jobs: secure the lounge glassware and bar, swap two lamp ballasts for shielded ones, carry battery packs from Deck 5 to the bridge. [Tier 3: service the power junctions.]
-- *Onset (day 1, 14:00):* **Felt everywhere:** a jolt, every light dips, then flickering. **The Captain's address:** "We're in it. Expect flickers and no calls home for a while. Look after each other." Comms go down: the call-home booths close, outside Mail stops. The bridge runs double shifts; the lounge closes; the mess goes quiet as people stay in their quarters; Watch patrols the decks.
-- *Escalation (day 2):* power wear doubled and comms tripled: relay faults pop up, one deck at a time goes to emergency lighting for up to an hour (a dim red-amber light mood on that deck), the chiller strains. Brennan cooks storm stew (one pot, quicker) and sends trays to the bridge (a cart job). Sleep is worse; crew are short-tempered in the tap lines.
-- *Resolution (day 3, about 10:00):* **the all-clear address.** Comms return, and everyone rushes the booths: a real queue at the call-home booths for an afternoon. That evening, a gathering in the bow lounge.
+- *Day 1, warning:* Survey picks up readings. Dr. Sato lives in the chart room; chatter starts in Survey and spreads by dinner. Mail from Works: "Storm prep: secure fittings, top up filters, check battery packs." Event jobs: secure the lounge glassware and bar, swap two lamp ballasts for shielded ones, carry battery packs from Deck 5 to the bridge. [Tier 3: service the power junctions.]
+- *Day 2, onset (14:00):* **Felt everywhere:** a jolt, every light dips, then flickering. **The Captain's address:** "We're in it. Expect flickers and no calls home for a while. Look after each other." Comms go down: the call-home booths close, outside Mail stops. The bridge runs double shifts; the lounge closes; the mess goes quiet as people stay in their quarters; Watch patrols the decks.
+- *Day 3, escalation:* power wear doubled and comms tripled: relay faults pop up, one deck at a time goes to emergency lighting for up to an hour (a dim red-amber light mood on that deck), the chiller strains. Brennan cooks storm stew (one pot, quicker) and sends trays to the bridge (a cart job). Sleep is worse; crew are short-tempered in the tap lines.
+- *Day 4, resolution (about 10:00):* **the all-clear address.** Comms return, and everyone rushes the booths: a real queue at the call-home booths for an afternoon. That evening, a gathering in the bow lounge.
 - *Threads:* minutes of blackout; food spoiled; how tired the bridge crew got; the call-home backlog.
 - *Goes well:* short blackouts, no spoilage, a cheerful party, a photo of the storm crew in the tea corner. *Goes badly:* long blackouts, binned food, a tired, grumpy ship for two days, a scorch mark and a taped panel in the relay room.
 
@@ -353,7 +355,8 @@ Built on what exists: crew needs, feelings on tap, habits that change, birthdays
 ### Crew seeking you out, and favours
 
 - **Friends come and find you** in their free time if you're on the same deck: they walk over, greet you, and a chat card is offered as a small prompt at the screen's edge (never a pop-up you must answer).
-- **Favours** grow from their lives and the ship: "My cabin lamp flickers", "Could you bring a tray up to Tomas, he's ill", "I left my datapad in the gym". Each is a personal job in Jobs, completed physically like any other job.
+- **Favours** grow from their lives and the ship: "My cabin lamp flickers", "Could you bring a tray up to Tomas, he's ill", "I left my datapad in the gym". Each is a personal job in Jobs, and "Go there" points the goal arrow (`setGoal`) at it.
+- **The parity rule:** favours and event jobs are done through the same paths as every other job and machine (`machineUse`, the job board's pick-and-take, the job loop). Nothing gets a special finish of its own.
 
 ### Mood
 
@@ -400,7 +403,7 @@ From the lead and the helpers' handovers, not yet scheduled anywhere:
 
 ### The real-phone test
 
-The user agreed to test on a real phone (answers pass, item 34). **Proposal: the checklist**, run on the TriFold folded and unfolded, at the start of Pillar 3 and again after the festival:
+The user agreed to test on a real phone (answers pass, item 34), and the lead is giving them a checklist this morning on tonight's build. **Pillar 3 starts from those results** (they set the device's layout and the crowd budget). **Proposal:** the same checklist runs again after the festival, on the TriFold folded and unfolded. Its points, for reference:
 
 1. Load time from tapping the link to the first frame.
 2. Smoothness on each deck by the lift and zoomed out (does it judder?).
@@ -430,9 +433,15 @@ The lead turns the user's answers into fixes for the performance engineer and th
 | C9 | Places for gatherings (`gather` groups), event dressing and traces, the ready room and Captain's dining room as visitable places, the extra gym kit | **Architects** (bridge: 1, 3; command: 2; Deck 6 architect: 4, 5, 6) | `DECKS[n]`, kit | 0.31.x, 0.32.x, 0.30.x |
 | C10 | Progression hooks: the summons, the briefing, invitations, the Captain's table | Events engineer (the occasions), social engineer (who's invited), sim engineer (doors) | 18, 20, 14 | as above |
 
+**Who owns what at the seam with section 15:**
+
+- `mailSend` / `SHIP.mail` and `needEffects` stay in section 15 as APIs (the player engineer).
+- The device engineer (section 19) takes over the device's screens, including the Mail, Needs and Jobs views.
+- Section 15b keeps `setGoal` / `clearGoal` (the interactions engineer); the device and social code only call it.
+
 **Proposal: hiring.** Two fresh sessions (device engineer, social engineer); the events engineer from tonight carries on into ship-wide events; the existing helpers (sim, systems, galley, performance, crew designer, the three architects) each take their rows. Any helper over about 500k of memory hands over to a fresh session before starting (the user's handover rule).
 
-**Build numbers.** Combined builds on `claude/ship-integration` are **0.50.0, 0.50.1, ...** (the lead). Helper ranges continue from wherever tonight's answers pass ends for existing roles (for example sim 0.26.x, performance 0.27.x, player 0.28.x, galley 0.29.x, Deck 6 architect 0.30.x, bridge 0.31.x, command 0.32.x, systems 0.33.x, crew designer 0.16.x), the events engineer keeps 0.34.x, and the two new roles get **0.35.x (device)** and **0.36.x (social)**.
+**Build numbers.** Combined builds on `claude/ship-integration` are **0.50.0, 0.50.1, ...** (the lead). Helper ranges continue from wherever tonight's answers pass ends for existing roles (for example sim 0.26.x, performance 0.27.x, player 0.28.x, galley 0.29.x, Deck 6 architect 0.30.x, bridge 0.31.x, command 0.32.x, systems 0.33.x, crew designer 0.16.x), the events engineer keeps 0.34.x, the interactions engineer has 0.37.x (taken tonight), and the two new roles get **0.35.x (device)** and **0.36.x (social)**.
 
 ## Shared formats
 
@@ -443,7 +452,7 @@ The owner of each may refine its details, but must tell the lead and keep the ot
 deviceApp({ id, title, icon, order, badge, view })   // view(ctx) -> VIEW (plain content)
 deviceDo(action)  deviceNotify({ app, text, urgent })  DEVICE_SKIN
 device.addSection(id, title, render)                // kept as a shim
-SHIP.device = { memos: [], appts: [], readMail: {}, pins: [], settings: {}, photos: [] }   // saved, v 3
+SHIP.device = { memos: [], appts: [], readMail: {}, pins: [], settings: {}, photos: [] }   // saved; SAVE_V 2 -> 3
 // appointment: { id, with: [crewId|'guest:id'|'place:id'], at: shipMin, len: 30, where: placeId,
 //                kind: 'social'|'work'|'checkup'|'meeting'|'summons'|'invite', status: 'asked'|'yes'|'no'|'kept'|'missed', by }
 
@@ -479,7 +488,7 @@ GUESTS: [{ id, name, spec, role, cabin, arrive, leave, template }]
    - C4's data (social engineer: relationships, affinity and the news model on paper, with a `social_check.py` in the style of `day_check`);
    - C6's format (events engineer: the event format and phases on paper, an `events_check.py` that runs a storm for 4 days with nothing drawn);
    - C8 (crew designer: guest templates).
-   - The real-phone test with the user, so the device and crowd work start from real numbers.
+   - Work starts from the results of this morning's real-phone test.
 2. **Then:** C2 and C3 (apps, appointments), C4's chat cards and seeking out, C5's chatter, C9 gathering places.
 3. **Check-in 1 with the user:** the new device with all the apps (in the plain skin), relationships and chats, crew who come and find you, appointments that crew keep, chatter you overhear. If the user's device design is ready by then, the device engineer builds the new skin next.
 4. **Then:** C7 (event hooks in every system) and the ion storm end to end; C10's first hook (the ready room after a commendation).
@@ -501,6 +510,31 @@ GUESTS: [{ id, name, spec, role, cabin, arrive, leave, template }]
 
 ## Decisions for the user
 
+### Three big choices
+
+1. **The device:** its look is a separate, swappable layer (apps describe, a skin draws), so it works now in a plain style and your design drops in later; plus the extra apps Crew, Ship, Camera and Record (and Wallet; Music once there's sound).
+2. **Ambient events:** news only through chatter, Mail, the boards and the Captain's address; no markers or cutscenes; the camera never taken away; outcomes in three bands (smoothly, bumpily, roughly) told as story and traces, never as a fail.
+3. **The event order:** ion storm, then the diplomatic visit, then something in the garden; the festival (the big-crowd event) only after the phone test says crowds are fine.
+
+### Everything else we'll go with unless you say otherwise
+
+One "yes" covers all of these:
+
+- The device opens from a corner button or a swipe up, and never pauses time.
+- Maps shows where people are once you know them (or when they're on duty somewhere public).
+- A missed appointment costs nothing but a remark.
+- Three kinds of big moment: felt everywhere, the Captain's address, announced gatherings.
+- Your own part in an event counts separately, for commendations.
+- Ordinary visitors about once a ship week, plus event visitors; the second visitors' cabin kept for event visitors.
+- Friendship tiers, short chats with three or four buttons, crew friendships with each other; Tomas, Pell and Rina first.
+- The ready room, briefings, officers' cabins and the Captain's table open by invitation, for the visit only.
+- More gym equipment now, and simple sounds soon.
+- Two new helpers (device, social life); the traditions helper grows into ship-wide events; combined builds 0.50.x.
+
+**Design-doc updates when agreed** (the lead, on the lead branch): "The player" (the device and its apps), "Social life" (numbers, chats, affinity, news), "Ship-wide events" (ambient rule, shape, threads and bands, moments, guests, the six events and order), "Works progression" (the hooks), "Milestones" (Pillar 3 as planned here), and move these answered questions out of "Open questions": the device; which event comes after the ion storm; the second visitors' cabin (already answered: kept for event visitors); how often Deck 4's guests change.
+
+## Appendix: the full list of decisions
+
 1. The device's **two layers** (apps describe, a skin draws), opening from a corner button or a swipe up, never pausing time.
 2. The **extra apps:** Crew, Ship, Camera, Record (and Wallet; Music once there's sound).
 3. **Maps shows people** only once you're acquaintances (or they're on public duty).
@@ -514,5 +548,3 @@ GUESTS: [{ id, name, spec, role, cabin, arrive, leave, template }]
 11. **Progression hooks** as appointments that unlock a door for their time: ready room, conference table, officers' quarters, the Captain's table, progress talks.
 12. **Extra gym kit** now, and a **small sound pass** in or right after Pillar 3.
 13. **Hiring** a device engineer and a social engineer; the events engineer grows into ship-wide events; builds 0.50.x.
-
-**Design-doc updates when agreed** (the lead, on the lead branch): "The player" (the device and its apps), "Social life" (numbers, chats, affinity, news), "Ship-wide events" (ambient rule, shape, threads and bands, moments, guests, the six events and order), "Works progression" (the hooks), "Milestones" (Pillar 3 as planned here), and move these answered questions out of "Open questions": the device; which event comes after the ion storm; the second visitors' cabin (already answered: kept for event visitors); how often Deck 4's guests change.

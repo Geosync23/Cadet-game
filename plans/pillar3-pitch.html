@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pillar 3 Pitch</title>
+<style>
+:root{
+  --bg:#eef2f3;--bg2:#e2e9ec;--ink:#17232b;--muted:#566a73;--teal:#16897c;--teal-ink:#0d5f56;
+  --gold:#a8741a;--rose:#b2493d;--card:rgba(255,255,255,.82);--line:rgba(22,70,80,.16);--chip:rgba(22,137,124,.1);
+  --storm:#3d4f7a;--glow:rgba(22,137,124,.14);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141c2b;--bg2:#0c111b;--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--teal-ink:#bdeee6;
+    --gold:#e9c46a;--rose:#e8857a;--card:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.12);
+    --storm:#9fb4e8;--glow:rgba(76,195,181,.10);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141c2b;--bg2:#0c111b;--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--teal-ink:#bdeee6;
+  --gold:#e9c46a;--rose:#e8857a;--card:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.12);
+  --storm:#9fb4e8;--glow:rgba(76,195,181,.10);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);background:var(--bg);
+  background-image:radial-gradient(ellipse at 50% 0%,var(--glow) 0%,transparent 60%),linear-gradient(var(--bg),var(--bg2));
+  background-attachment:fixed;font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.55;overflow-x:hidden}
+main{max-width:760px;margin:0 auto;padding:0 16px 48px}
+header{padding:28px 0 8px}
+.eyebrow{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);font-weight:600}
+h1{font-size:28px;line-height:1.2;font-weight:600;margin:6px 0 10px}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px}
+h3{font-size:16px;font-weight:600;margin:0 0 4px;color:var(--teal-ink)}
+p{margin:0 0 12px}
+.lede{font-size:17px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.grid{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:620px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0}
+.see li{margin:8px 0}
+
+/* the storm */
+.storm{border:1px solid var(--line);border-radius:18px;background:var(--card);padding:18px 16px 8px;margin-top:8px}
+.storm h2{margin-top:0}
+.tl{list-style:none;padding:0;margin:0;position:relative}
+.tl:before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl>li{position:relative;padding:0 0 18px 36px;margin:0}
+.tl>li:before{content:"";position:absolute;left:4px;top:5px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--teal)}
+.tl>li.hit:before{background:var(--storm);border-color:var(--storm)}
+.day{font-weight:600;color:var(--teal-ink)}
+.tag{display:inline-block;font-size:12px;line-height:1.4;padding:2px 9px;border-radius:999px;background:var(--chip);color:var(--teal-ink);margin:0 4px 4px 0;white-space:nowrap}
+.tag.felt{background:none;border:1px solid var(--storm);color:var(--storm)}
+.quote{border-left:3px solid var(--teal);padding:2px 0 2px 12px;margin:8px 0;font-style:italic}
+.bands{display:grid;gap:10px;grid-template-columns:1fr;margin:4px 0 12px}
+@media (min-width:620px){.bands{grid-template-columns:1fr 1fr}}
+.band{border-radius:12px;padding:12px 14px;border:1px solid var(--line)}
+.band b{display:block;margin-bottom:2px}
+.band.good b{color:var(--teal-ink)}
+.band.rough b{color:var(--rose)}
+
+/* apps */
+.apps{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+@media (min-width:620px){.apps{grid-template-columns:1fr 1fr 1fr}}
+.app{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.app b{display:block;font-size:15px}
+.app.extra{border-style:dashed}
+.app.extra b:after{content:" · proposed";font-weight:400;font-size:12px;color:var(--muted)}
+
+/* order */
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:2px 0 10px 40px;margin:0}
+.steps li:before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--chip);color:var(--teal-ink);font-weight:600;text-align:center;line-height:28px;font-size:14px}
+.steps li.check:before{content:"✓";background:var(--teal);color:var(--bg)}
+
+/* choices */
+.choice{background:var(--card);border:1px solid var(--teal);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.choice .n{display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.choice p{margin:4px 0 0}
+footer{margin-top:36px;font-size:13px;color:var(--muted)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="eyebrow">Starship Cadet · Pillar 3 proposal</div>
+  <h1>The ship gets a voice</h1>
+  <p class="lede">The Wren already works: the galley cooks, machines wear out, the Works crew fix them and so can you. Pillar 3 gives that ship a voice. Your <b>personal device</b> becomes the one screen you use for everything. The <b>crew become people you know</b>, who remember you, chat, invite you places and ask for favours. The first <b>ship-wide events</b> begin: a few days when the whole ship changes and everyone talks about it. There are no cutscenes and no mission markers, and the game never stops for a story.</p>
+  <p class="muted">A proposal for you to approve; nothing here is built yet. The full plan is in <code>plans/pillar3-plan.md</code>.</p>
+</header>
+
+<h2>What you'd see and do</h2>
+<div class="card">
+  <ul class="see">
+    <li>Walking through the mess, you overhear someone say <i>"Sato hasn't left the chart room since last night"</i>, and later find it in your news feed.</li>
+    <li>You tap Pell and get a short chat, with buttons to chat, ask about something, offer help, or meet up.</li>
+    <li>You make an appointment to go to the gym with Tomas at 18:00, and he's there.</li>
+    <li>A friend asks you to fix the lamp in their cabin. It shows up in your jobs, and the same on-screen arrow you use for any job points the way.</li>
+    <li>The Captain's face appears across the top of the screen with a ship-wide announcement. The crew around you stop and look up for a moment, then carry on.</li>
+  </ul>
+</div>
+
+<section class="storm" aria-labelledby="storm-h">
+  <div class="eyebrow">How ambient events work</div>
+  <h2 id="storm-h">The ion storm, through your eyes</h2>
+  <p class="muted">You're never given a mission. You hear about it the way everyone does, and help as much as you choose to.</p>
+  <ol class="tl">
+    <li>
+      <div class="day">Day 1, morning: a rumour</div>
+      <p>Nothing official yet. At breakfast a Survey officer says the sensors are "doing something odd". By dinner, half the mess is talking about it. A Works notice lands in your Mail: <i>storm prep, secure loose fittings, top up filters.</i> New jobs appear on the board, such as securing the bow lounge's glassware and carrying battery packs to the bridge. You take two of them, or you don't. That's up to you.</p>
+      <span class="tag">crew chatter</span><span class="tag">Mail</span><span class="tag">job board</span>
+    </li>
+    <li class="hit">
+      <div class="day">Day 2, 14:00: the storm hits</div>
+      <p>You're fixing a lamp on Deck 4 when the screen jolts, every light dips, and then they start to flicker. The Captain's announcement appears across the top of the screen:</p>
+      <p class="quote">"We're in it. Expect flickers and no calls home for a while. Look after each other."</p>
+      <p>The call-home booths close, the lounge is shut, the mess is quiet, and bridge crew are on double shifts.</p>
+      <span class="tag felt">felt on every deck</span><span class="tag">the Captain's address</span>
+    </li>
+    <li>
+      <div class="day">Day 3: it gets harder</div>
+      <p>Relays fail, and one deck at a time drops to dim emergency lighting. The chef makes storm stew and sends trays up to the bridge; you can push the cart. People are tired and snappy when you tap them. Each job you do keeps the lights on for someone.</p>
+      <span class="tag">more faults</span><span class="tag">tired crew</span>
+    </li>
+    <li class="hit">
+      <div class="day">Day 4, mid-morning: all clear</div>
+      <p>The all-clear is announced. Calls home come back on, and there's a queue at the booths all afternoon. In the evening there's a party in the bow lounge.</p>
+      <span class="tag">gathering, announced ahead</span>
+    </li>
+    <li>
+      <div class="day">Afterwards: no score, just the ship</div>
+      <div class="bands">
+        <div class="band good"><b>If it went smoothly</b>A photo of the storm crew goes up in the Works tea corner, and people thank you.</div>
+        <div class="band rough"><b>If it went roughly</b>There's a scorch mark in the relay room and the ship is grumpy for a couple of days, then it recovers.</div>
+      </div>
+      <p><b>You can't fail.</b> If you did your part you may get a commendation, which counts toward promotion. If you slept through it, the crew coped, and you hear all about it the next day.</p>
+    </li>
+  </ol>
+</section>
+
+<h2>Big moments, never missed or forced</h2>
+<div class="grid three">
+  <div class="card"><h3>Felt everywhere</h3>The jolt, the lights dipping, a nebula filling every window. It happens wherever you are.</div>
+  <div class="card"><h3>The Captain's address</h3>A banner on every deck. The crew stop and look up, and time keeps running.</div>
+  <div class="card"><h3>Gatherings</h3>Announced ahead, at a real place and time. If you're there, you see it; if not, people tell you about it.</div>
+</div>
+<p class="muted" style="margin-top:10px">The camera is never taken away from you.</p>
+
+<h2>After the storm</h2>
+<div class="grid two">
+  <div class="card"><h3>A diplomatic visit</h3>Veyli guests in the visitors' cabins, formal dinners at the Captain's table, a galley at full stretch.</div>
+  <div class="card"><h3>Something in the garden</h3>A creature eats the crops, half the ship hunts it, and it ends up as the ship's pet.</div>
+</div>
+<p class="muted" style="margin-top:10px">Later: an illness aboard, a nebula, salvage, and a festival with the whole crew on the plaza.</p>
+
+<h2>Your device</h2>
+<p>It opens from a corner button or a swipe up. On a phone it slides up from the bottom and leaves the ship visible; on the unfolded TriFold it sits at the side. <b>Time keeps running while it's open.</b></p>
+<div class="apps">
+  <div class="app"><b>Schedule</b>Your shift, meals, plans</div>
+  <div class="app"><b>Appointments</b>Crew turn up</div>
+  <div class="app"><b>Maps</b>Find rooms and friends</div>
+  <div class="app"><b>Memos</b>Your own notes</div>
+  <div class="app"><b>Mail</b>Ship, crew, Captain, home</div>
+  <div class="app"><b>Calendar</b>Traditions, birthdays, events</div>
+  <div class="app"><b>Needs</b>Bonuses and penalties</div>
+  <div class="app"><b>Jobs</b>Work and favours</div>
+  <div class="app extra"><b>Crew</b>Everyone you've met</div>
+  <div class="app extra"><b>Ship</b>Health and news</div>
+  <div class="app extra"><b>Camera</b>Your photo log</div>
+  <div class="app extra"><b>Record</b>Your Works progress</div>
+</div>
+<p class="muted" style="margin-top:10px">Your design for the device can come whenever it's ready. The look is a separate piece we can swap; until then everything works in a plain style.</p>
+
+<div class="grid two" style="margin-top:28px">
+  <div class="card">
+    <h3>Getting to know the crew</h3>
+    <ul>
+      <li>Stranger, acquaintance, colleague, friend, close friend.</li>
+      <li>You get closer by working, eating and chatting together, and by doing favours. Friendships don't fade.</li>
+      <li>Friends come and find you, invite you places and put in a good word with the Chief.</li>
+      <li>The crew have friendships and rivalries with each other.</li>
+      <li>Tomas, Pell and Rina get the first personal storylines.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Moving up</h3>
+    <ul>
+      <li>Summoned to the Captain's ready room after an event.</li>
+      <li>Taken by the Chief to a briefing at the conference table.</li>
+      <li>Invited to tea in an officer's cabin.</li>
+      <li>Dinner at the Captain's table.</li>
+      <li>Progress talks in the Chief's office.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>The order of work</h2>
+<ol class="steps">
+  <li>The device, relationships and chats, and appointments, built side by side, starting from what your phone test this morning shows.</li>
+  <li class="check"><b>Check-in 1 with you:</b> try the new device and the social life.</li>
+  <li>The ion storm from start to finish, and the first visit to the ready room.</li>
+  <li class="check"><b>Check-in 2 with you:</b> play through a whole storm.</li>
+  <li>Then the visit, the garden creature, and the festival.</li>
+</ol>
+
+<h2>Three big choices for you</h2>
+<div class="choice">
+  <span class="n">Choice 1 · the device</span>
+  <p>Should its look be a separate piece we can swap, so everything works now in a plain style and your design drops in later? And should we add the extra apps (Crew, Ship, Camera, Record)?</p>
+</div>
+<div class="choice">
+  <span class="n">Choice 2 · ambient events</span>
+  <p>Should events reach you only through chatter, Mail, the boards and the Captain, never with markers, cutscenes or the camera taken away, and end smoothly, bumpily or roughly, told as story, with no failing?</p>
+</div>
+<div class="choice">
+  <span class="n">Choice 3 · the event order</span>
+  <p>Ion storm, then the diplomatic visit, then the garden creature, with the festival held back until the phone test says big crowds are fine?</p>
+</div>
+
+<h2 style="font-size:17px;margin-top:28px">Everything else we'll go with unless you say otherwise</h2>
+<div class="card">
+  <p class="muted" style="margin-bottom:6px">One "yes" covers all of these:</p>
+  <ul>
+    <li>The device opens from a corner button or a swipe up, and time keeps running.</li>
+    <li>Maps shows where someone is once you know them (or when they're on duty somewhere public).</li>
+    <li>A missed appointment costs nothing but a remark next time.</li>
+    <li>Big moments come three ways: felt everywhere, the Captain's announcements, gatherings announced ahead.</li>
+    <li>Your own part in an event counts toward commendations.</li>
+    <li>Ordinary visitors stay in the guest cabins about once a week, as well as event visitors.</li>
+    <li>Friendship tiers, short chats, crew friendships with each other; Tomas, Pell and Rina first.</li>
+    <li>The ready room, briefings, officers' cabins and the Captain's table open by invitation, for the visit only.</li>
+    <li>More gym equipment now, and some simple sounds soon.</li>
+    <li>Two new helpers (one for the device, one for social life), with the traditions helper growing into ship-wide events.</li>
+  </ul>
+</div>
+
+<footer>Starship Cadet · CSV Wren · Pillar 3 pitch, draft of 16 October 2026.</footer>
+</main>
+</body>
+</html>
