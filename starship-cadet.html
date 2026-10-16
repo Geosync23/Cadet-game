@@ -10034,8 +10034,8 @@ const GALLEY_START = () => ({ cold: { meals: FOOD.coldCap }, servery: { portions
 const GALLEY_EV_DISH = { stormStew: 'storm stew', veyli: 'Veyli spiced grains with garden herbs', feast: 'the Founding Day feast', bland: 'plain rice and beans' };
 const GALLEY_EV_KEYS = ['menu', 'cook', 'grab', 'extra', 'batch', 'trays'];
 // GALLEY_TEST: stand-ins a test copy can set (food_check), since section 17's and 18's functions may be consts it
-// can't replace: eventMod(kind, key, t) and cartTrays(o). null in the game
-const GALLEY_TEST = { eventMod: null, cartTrays: null };
+// can't replace: eventMod(kind, key, t), cartTrays(o) and traysArrivedAt(day, to). null in the game
+const GALLEY_TEST = { eventMod: null, cartTrays: null, traysArrivedAt: null };
 function galleyEvRead(m, replay) {
   let get = null;
   if (GALLEY_TEST.eventMod) get = k => GALLEY_TEST.eventMod('galley', k, m);
@@ -10126,10 +10126,6 @@ function galleyStep(S, m, st) {
   if (md === FOOD.binOut) S.bin = 0;
   // an event (C7): its galley settings, on the hour; a batch for a dinner away from the mess at 15:00
   if (md % 60 === 0) S.ev = galleyEvRead(m, !!st);
-  // an event's "A fed bridge" thread: on a day it wants trays for the bridge, each hour from noon until they go up at
-  // 18:00: 6 hours a day, the thread's "good" (a day's trays that never go, from an empty servery, still count 6)
-  // (live only: replays never score)
-  if (!st && md % 60 === 0 && md >= 720 && md < FOOD.trayAt && S.ev && S.ev.trays && !(S.trays && S.trays.d === d)) galleyScore(m, 'bridgeHungry', 1);
   if (md === 900 && S.ev && S.ev.batch) {
     const b = S.ev.batch, want = Math.round(galleyEvNum(typeof b === 'object' ? b.meals : b, 0)), n = Math.min(want, S.cold.meals);
     if (n > 0) { S.cold.meals -= n; S.batch = { d, meals: n, label: (typeof b === 'object' && b.label) || 'a formal dinner' }; if (st) st.batch += n; }
@@ -10187,7 +10183,17 @@ function galleyStep(S, m, st) {
   // trays for the bridge (an event): plated from the servery at 18:00 and sent up by hover cart
   if (md === FOOD.trayAt && S.ev && S.ev.trays) {
     const n = Math.min(Math.round(galleyEvNum(S.ev.trays, 0)), S.servery.portions);
-    if (n > 0) { S.servery.portions -= n; S.trays = { d, n }; if (st) st.trays += n; else (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }); }
+    if (n > 0) { S.trays = { d, n, job: null }; S.servery.portions -= n; if (st) st.trays += n; else S.trays.job = (GALLEY_TEST.cartTrays || (typeof cartTrays === 'function' ? cartTrays : () => null))({ trays: n, at: m, to: 'bridge' }) || null; }
+  }
+  // an event's "A fed bridge" thread: on a day it wants trays for the bridge, each hour from noon until they reach the
+  // bridge: section 17's traysArrivedAt(day) is when the cart's drop-off ends (null: not yet, or nobody on it), so a
+  // late or missed cart run shows. Without it (or when cartTrays made no run) the count stops when the trays go up at
+  // 18:00, 6 hours a day, the thread's "good". Live only: replays never score
+  if (!st && md % 60 === 0 && md >= 720 && S.ev && S.ev.trays) {
+    const sent = S.trays && S.trays.d === d, ta = GALLEY_TEST.traysArrivedAt || (typeof traysArrivedAt === 'function' ? traysArrivedAt : null);
+    const arr = sent && S.trays.job && ta ? ta(d, 'bridge') : undefined;
+    const hungry = arr === undefined ? md < FOOD.trayAt && !sent : arr === null || m < arr;
+    if (hungry) galleyScore(m, 'bridgeHungry', 1);
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
