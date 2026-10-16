@@ -8,6 +8,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
+**Ship integration 0.41.10** (6d91ee1, 2026-10-16 ~23:45): draw calls packed with the same picture (crowd-render 0.27.20-0.27.24; end-of-test calls 358 -> 217), the garden you can see growing (all 15 beds), root beds and a second bean trellis (decks 0.38.7). All checks pass. Publishing. Next: Pillar 3 check-in 1.
+
 **Ship integration 0.41.9** (098e922, 2026-10-16 ~23:00): bathroom need, "+N Need" notes and progress bars, the zoom-out limit (kept by the user), the storm's look and feel, the working garden (grow lights, gardeners, daily pick, carry run, fresh produce), Schedule fix, goal arrow hides under the progress bar. All checks pass. Published: link version 17 = 0.41.9. Next: 0.41.10 with crowd-render 0.27.20-0.27.22 (draw calls halved zoomed out), then Pillar 3 check-in 1.
 
 **Ship integration 0.41.8** (7dd0aa4, 2026-10-16 ~21:33): the user's tweaks — job board on screen with jobs held for you, ship health panel, two days off, Roster, Maps without people, no swipe-to-open, the Schedule only lists what happens, friendship seating; visit still draft. All checks pass. Publishing (publisher session_01TUkgk8CFyttKRa371emQBd).
