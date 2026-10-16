@@ -37,7 +37,7 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - Notes on these:
     - `uniform` is the makeCharacter department key: command | works | watch | survey | infirmary.
     - `bed` ids look like `4-B<room>-<berth>`, `4-01`..`4-24` (cabins) and `2-<letter>` (Deck 2 rooms).
-- **`ROSTER_GUESTS`:** Envoy Saruth (rank `guest`). She's outside the 75.
+- **`ROSTER_GUESTS`:** Envoy Saruth (rank `guest`), who is outside the 75.
 - **`ROSTER_PLAYER`:** you. You're a Works junior, bed `4-B1-4` (the top berth of the second bunk in Bunk 1, which matches the bunk's text), off Sat and Sun. You aren't scheduled.
 - **After the END marker:** `ROSTER_RANK` and `rosterSpec(p)`, which turns an entry into a makeCharacter spec. The crowd (8b) and full rigs (10) use it.
 

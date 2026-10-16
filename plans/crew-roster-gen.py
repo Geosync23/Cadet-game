@@ -330,6 +330,203 @@ def looks():
                 height=round(R.uniform(.9, 1.1), 2), build=R.choice(['slim', 'average', 'average', 'broad']),
                 acc=sorted(R.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], R.choice([0, 0, 1, 1, 2]))))
 
+# ---------------------------------------------------------------- what the story crew tell you (0.16.8, Pillar 3)
+# about: [{ tier, text }]: things a story crew member tells you as you get to know them, for the social engineer's
+# chat lines and the Crew app's "what you know". tier 0 is small talk with a stranger, then 1, 2, 3 as you get closer.
+# Third person, one sentence each; they add to the bio and life lines and never contradict them
+ABOUT = {
+    'tomas': [(0, 'Joined the Wren a week before you did, and still takes the long way round Deck 2.'),
+              (0, 'Thinks the Watch office has the best view of the lift, and therefore of everyone.'),
+              (1, 'Grew up on a farm moon where the sky was always the same grey.'),
+              (1, 'Taped the star map up so the first thing he sees each morning is somewhere he has never been.'),
+              (2, 'Failed the Watch exam once before passing, and hasn\'t told Chief Holt.'),
+              (2, 'Writes to his little brother every week and pretends the job is more exciting than it is.'),
+              (3, 'Signed up because he was afraid of staying home for the rest of his life.')],
+    'pell': [(0, 'Has been in Works two years, and knows which panel on Deck 5 sticks.'),
+             (0, 'Can sleep anywhere, any time, except at night.'),
+             (1, 'Keeps a tin of spare screws from every ship he has fixed something on.'),
+             (1, 'His mum sends the same three messages every week: eat, sleep, call.'),
+             (2, 'Wants Chief Calder\'s certification more than anything, and is scared of the practical.'),
+             (2, 'Taught himself engines from an old manual he found in a scrapyard.'),
+             (3, 'Nearly left the Wren in his first month, and is glad every day that he didn\'t.')],
+    'rina': [(0, 'Works in the infirmary, and will tell you to drink some water.'),
+             (0, 'Has never lost a game of Tiles in the junior common room, and keeps count.'),
+             (1, 'Studies for her medical exams at night, with the journals she uses as a pillow.'),
+             (1, 'Her sister is a doctor on a station, and they argue about everything by message.'),
+             (2, 'Wants to be a ship\'s doctor one day, and quietly thinks she\'d be good at it.'),
+             (2, 'Learnt to play Tiles from her grandmother, who cheated.'),
+             (3, 'Joined the Wren after a hard year at home, and the routine helped more than she expected.')],
+    'marrow': [(0, 'Asks every new junior one question about the ship, and remembers the answer.'),
+               (1, 'Learnt the piano as a girl and took it up again on her first command.'),
+               (2, 'Has a daughter at the Concord academy who doesn\'t write often enough.'),
+               (3, 'Thinks about retiring, and can\'t imagine anyone else in the ready room.')],
+    'vance': [(0, 'Has read the ship\'s regulations cover to cover, twice.'),
+              (1, 'Rowed for his academy, and still checks the gym leaderboard every morning.'),
+              (2, 'Keeps a list of every junior he has recommended for promotion.'),
+              (3, 'Was a junior who broke every rule once, which is why he knows them all.')],
+    'sato': [(0, 'Will explain the tea to anyone, at length.'),
+             (1, 'Named three comets, and pretends not to care about the third.'),
+             (2, 'Turned down a university post to stay on the frontier.'),
+             (3, 'Worries the survey she is proudest of was mostly luck.')],
+    'holt': [(0, 'Walks every deck before breakfast, the long way.'),
+             (1, 'Served on a border patrol before the Wren, and doesn\'t talk about it much.'),
+             (2, 'Distrusts the Veyli because of one bad day years ago, and knows it isn\'t fair.'),
+             (3, 'Asked for the cabin next to the Envoy\'s so he could keep an eye out, and has started to like the Envoy.')],
+    'calder': [(0, 'Can tell you what\'s wrong with a fan by the sound.'),
+               (1, 'Started as a junior in a shipyard, sweeping up swarf.'),
+               (2, 'Keeps a list of every Works tech she has certified, with a note on each.'),
+               (3, 'The toolbox was her first chief\'s, who taught her everything and never said well done.')],
+    'brennan': [(0, 'Cooks by ear: she listens to the pans.'),
+                (1, 'Ran a restaurant on Port Halloran before the Wren.'),
+                (2, 'Keeps a book of every crew member\'s favourite dish.'),
+                (3, 'Left the restaurant after a fire, and finds the galley\'s order comforting.')],
+    'saruth': [(0, 'Takes tea at the same hour every day, and will sometimes invite you.'),
+               (1, 'Ties a new knot in the cord on the cabin door for every month aboard.'),
+               (2, 'Finds humans exhausting and very kind, often at once.'),
+               (3, 'Was sent to the Wren because no one at home expected the posting to work.')],
+}
+
+def looks_with(rng):                               # looks() from another random stream (visitors)
+    return dict(skin=rng.randrange(6), hair=rng.choice(['ponytail', 'short', 'bun', 'curls', 'buzz', 'long', 'short']),
+                hairColor=rng.choice(['black', 'dark', 'brown', 'brown', 'auburn', 'blonde', 'grey', 'teal']),
+                height=round(rng.uniform(.9, 1.1), 2), build=rng.choice(['slim', 'average', 'average', 'broad']),
+                acc=sorted(rng.sample(['glasses', 'beard', 'moustache', 'earrings', 'headband'], rng.choice([0, 0, 1, 1, 2]))))
+
+# ---------------------------------------------------------------- visitors (0.16.8, Pillar 3 C8)
+# GUESTS: people who stay a while and leave. Inert data: the sim engineer schedules them from GUEST_TEMPLATES
+# (section 14), the events engineer sets the day an event guest arrives. Same shape as roster entries (rank 'guest',
+# habits, bio, life, seed) plus template, cabin, arrive and leave (ship days of the year, 1-364, like birthdays),
+# and spec, ready for crowd.add / makeCharacter. Their own random stream (VIS_R), after everything else.
+VIS_R = random.Random(20261019)
+# what each kind of visitor does with a day: [deck, place type, weight] as in LEISURE (types with no places are
+# skipped); 'cabin' is their own cabin; 'work' is their entry's work place. The sim engineer turns these into days
+GUEST_TEMPLATES = {
+    'scientist': {'label': 'A visiting scientist or specialist: works by day, the observatory or the lounge in the evening',
+                  'day': [['work', 6], [2, 'work:survey', 2]], 'evening': [[2, 'observatory', 3], [3, 'lounge-seat', 2], [3, 'bar', 1], ['cabin', 2]],
+                  'meals': 'mess', 'wake': 390, 'bed': 1350},
+    'delegate': {'label': 'A member of a delegation: tours, formal dinners (the event decides), the observation room, their cabin',
+                 'day': [['cabin', 3], [1, 'common-room', 2], [3, 'garden', 2], [2, 'observatory', 1]], 'evening': [['cabin', 3], [3, 'lounge-seat', 1]],
+                 'meals': 'mess', 'formal': True, 'wake': 360, 'bed': 1320},
+    'passenger': {'label': 'A passenger or a transfer waiting for their ship: the lounge, the mess, the garden, the store',
+                  'day': [[3, 'lounge-seat', 3], [3, 'garden', 2], [3, 'shop', 1], [3, 'bench', 1], ['cabin', 1]],
+                  'evening': [[3, 'lounge-seat', 3], [3, 'bar', 2], [2, 'observatory', 1], ['cabin', 1]], 'meals': 'mess', 'wake': 450, 'bed': 1380},
+    'survivor': {'label': 'Rescued: the infirmary for the first days, then rest, the garden and the mess',
+                 'first': 2, 'firstDay': [[3, 'work:infirmary', 1]], 'day': [['cabin', 3], [3, 'garden', 2], [3, 'lounge-seat', 1]],
+                 'evening': [['cabin', 3], [3, 'lounge-seat', 1]], 'meals': 'mess', 'wake': 480, 'bed': 1260},
+}
+# the guest cabins: Deck 2's visitors' suite (2-B) and second visitors' cabin (2-U, for event visitors); Deck 4's
+# six guest cabins. Event guests use 2-U and 4-01..4-04 (one event at a time), everyday visitors 4-07 and 4-08 by turns,
+# so the two never meet
+EVERYDAY_CABINS = ['4-07', '4-08']
+# clothes: specialists wear their service's uniform (spec.dept a DEPT key); everyone else is spec.dept 'civilian' with
+# spec.outfit, the colour a civilian outfit should be. makeCharacter has no civilian outfit yet (unknown depts fall back to
+# the survey colour), so that's for whoever draws them
+VEYLI_LOOKS = lambda: dict(skin=VIS_R.choice([1, 2, 3]), hair=VIS_R.choice(['long', 'bun', 'ponytail']), hairColor=VIS_R.choice(['white', 'teal', 'grey']),
+                           height=round(VIS_R.uniform(1.04, 1.12), 2), build='slim', acc=['headband'])
+EVENT_GUESTS = [
+    # the diplomatic visit: a Veyli delegation of four; the leader on Deck 2, the others on Deck 4
+    dict(id='teshavi', name='Speaker Teshavi', role='Leader of the Veyli delegation', template='delegate', cabin='2-U', event='diplomatic', stay=5,
+         outfit='#6b4a8a', bio='Speaks for the Veyli council. Patient, precise, and fond of long silences.',
+         life=['Has known Envoy Saruth since they were both students of the cord.', 'Brought a gift for the Captain wrapped in seven knots.'],
+         habits=['quiet-corner', 'early-riser']),
+    dict(id='kesrin', name='Kesrin', role='Aide to the Speaker', template='delegate', cabin='4-01', event='diplomatic', stay=5,
+         outfit='#6b4a8a', bio='Carries the Speaker\'s schedule in their head and their tea set in a satchel.',
+         life=['Is secretly delighted by the vending machine on Deck 3.', 'Writes everything down, including the jokes.'],
+         habits=['window-seat']),
+    dict(id='moleth', name='Moleth', role='Veyli scholar', template='delegate', cabin='4-02', event='diplomatic', stay=5,
+         outfit='#7a5a3a', bio='Studies human ships, and asks the crew questions nobody has asked before.',
+         life=['Wants to see the engine room more than anything.', 'Has a list of forty questions for Chief Calder.'],
+         habits=['garden-lover', 'stargazer']),
+    dict(id='ithra', name='Ithra', role='Veyli pilot and guard', template='delegate', cabin='4-03', event='diplomatic', stay=5,
+         outfit='#3a4a5a', bio='Flies the delegation\'s shuttle and watches every door. Says very little.',
+         life=['Has asked Chief Holt about the Watch rota, twice.', 'Runs laps of the plaza at dawn.'],
+         habits=['early-riser', 'runner']),
+    # nebula drift: the visiting scientist who books the observatory
+    dict(id='lindgren', name='Dr. Soraya Lindgren', role='Visiting astrophysicist', template='scientist', cabin='4-04', event='nebula', stay=6,
+         outfit=None, dept='survey', work=dict(deck=2, place='work:survey'),
+         bio='Chases nebulae across the frontier, and has finally caught one.', life=['Gives a talk in the observation room before she leaves.', 'Lives on tea and star charts.'],
+         habits=['stargazer', 'night-owl']),
+    # a Veyli vessel needs help: one of their engineers comes aboard
+    dict(id='taavek', name='Taavek', role='Veyli engineer', template='scientist', cabin='4-04', event='veyliVessel', stay=3,
+         outfit='#3a4a5a', work=dict(deck=5, place='work:works'),
+         bio='Came aboard with a crate of parts and no common words for most of them.', life=['Sketches every machine in the Works bay.', 'Trades Veyli sweets for coffee.'],
+         habits=['workaholic']),
+    # salvage: two survivors from the derelict
+    dict(id='quill', name='Mara Quill', role='Survivor from the derelict', template='survivor', cabin='4-01', event='salvage', stay=7,
+         outfit='#8a8f9a', bio='Was the derelict\'s cook. Has not stopped thanking people.', life=['Wants to help in the galley as soon as Dr. Nandakumar lets her.', 'Lost everything but a photo of a dog.'],
+         habits=['early-riser']),
+    dict(id='petrie', name='Jonah Petrie', role='Survivor from the derelict', template='survivor', cabin='4-02', event='salvage', stay=7,
+         outfit='#8a8f9a', bio='Was the derelict\'s navigator. Quiet, and watches the stars from any window.', life=['Keeps asking what day it is.', 'Is good at cards, and better at losing on purpose.'],
+         habits=['window-seat', 'night-owl']),
+]
+# everyday visitors: [role, template, uniform or None (civilian), work (deck, place) or None, stay range, bios, life lines]
+EVERYDAY = [
+    ('Visiting astronomer', 'scientist', 'survey', (2, 'work:survey'), (5, 9), ['Here to borrow the observatory for a week of measurements.', 'Brought a telescope lens the size of a dinner plate.'], ['Asks everyone what they have seen out of the windows.', 'Has a habit of naming stars after cafes.']),
+    ('Concord hull inspector', 'scientist', 'works', (5, 'work:works'), (4, 7), ['Inspects survey ships for the Concord, clipboard first.', 'Knocks on bulkheads and listens.'], ['Says the Wren is the tidiest ship this quarter, and means it.', 'Collects mission patches.']),
+    ('Relief doctor', 'scientist', 'infirmary', (3, 'work:infirmary'), (6, 9), ['Covers the infirmary on rotation between ships.', 'A doctor on rotation, here to give Dr. Nandakumar a few days off.'], ['Has worked on eleven ships and remembers every galley.', 'Knits during quiet shifts.']),
+    ('Visiting botanist', 'scientist', 'survey', (2, 'work:survey'), (5, 8), ['Studies plants grown in space, and has opinions about the garden.', 'Here to test new seeds in the garden.'], ['Talks to the tomatoes.', 'Brought cuttings from a Kesh orchard.']),
+    ('Survey cartographer', 'scientist', 'survey', (2, 'work:survey'), (5, 8), ['Draws the charts other ships fly by.', 'On loan from the Concord charts office.'], ['Carries a pencil behind each ear.', 'Is trying to map the Wren\'s corridors by memory.']),
+    ('Transfer to Marra Station', 'passenger', 'works', None, (2, 5), ['A Works technician waiting for a ship to Marra Station.', 'Between postings, and itching for something to fix.'], ['Offers to help in the Works bay every morning.', 'Has never seen a nebula.']),
+    ('Retired captain', 'passenger', None, None, (3, 6), ['Commanded a freighter for thirty years, and is on the way home.', 'A retired captain hitching a ride to see family.'], ['Gives Captain Marrow advice she never asked for.', 'Tells stories in the lounge until late.']),
+    ('Trader\'s apprentice', 'passenger', None, None, (2, 4), ['Learning the trade, and trying to sell everyone a better kettle.', 'Travels with a case of samples and a big smile.'], ['Has already sold two kettles.', 'Misses home and calls every night.']),
+    ('Concord courier', 'passenger', None, None, (2, 3), ['Carries sealed pouches between ships, and says nothing about them.', 'A courier with a locked case and a tired face.'], ['Sleeps with the case.', 'Plays chess with anyone who asks.']),
+    ('Musician on tour', 'passenger', None, None, (3, 5), ['Plays the stations of the frontier, one lounge at a time.', 'A travelling musician on the way to the next station.'], ['Plays in the music room every evening.', 'Can play anything you hum.']),
+    ('Student on placement', 'passenger', 'survey', None, (4, 7), ['A student on a short placement, following the Survey team around.', 'Here to learn how a survey ship works.'], ['Asks the juniors for advice.', 'Keeps a notebook of everyone\'s names.']),
+    ('Chef on exchange', 'passenger', 'works', None, (3, 6), ['A chef from Port Halloran, here to trade recipes with Brennan.', 'Swapping recipes with the galley for a few days.'], ['Brennan let them near the ovens once.', 'Brought spices nobody can pronounce.']),
+]
+# visitors' names: their own pools, so they never run short and never share a surname with the crew
+VIS_FIRST = ['Adaeze', 'Alba', 'Aleksi', 'Amir', 'Anouk', 'Ari', 'Ayla', 'Bastian', 'Bryn', 'Cato', 'Celeste', 'Dario', 'Dilan', 'Edda', 'Elio', 'Esra',
+             'Fen', 'Florin', 'Gael', 'Hale', 'Idris', 'Ilka', 'Ines', 'Iver', 'Jora', 'Juno', 'Kaito', 'Keira', 'Lark', 'Lio', 'Mads', 'Maren',
+             'Milo', 'Nell', 'Nico', 'Nyla', 'Odo', 'Petra', 'Pim', 'Rhea', 'Ronan', 'Saoirse', 'Silas', 'Talia', 'Teo', 'Ulla', 'Vesna', 'Wilf', 'Yuki', 'Zora']
+VIS_LAST = ['Aalto', 'Abbas', 'Arden', 'Baptiste', 'Bjork', 'Calloway', 'Castro', 'Danek', 'Delacroix', 'Ekwueme', 'Fairweather', 'Ferro', 'Galloway',
+            'Grimaldi', 'Hadley', 'Hovland', 'Iwasaki', 'Jaramillo', 'Kalnins', 'Kessler', 'Laurent', 'Lindahl', 'Marsh', 'Mbatha', 'Novak', 'Oyelaran',
+            'Pacheco', 'Quinlan', 'Rasmussen', 'Rocha', 'Saarinen', 'Sandoval', 'Szabo', 'Tamura', 'Thorne', 'Upton', 'Valdez', 'Varela', 'Wexley', 'Whitlock',
+            'Adeyemi', 'Xu', 'Yarrow', 'Zaid', 'Zeller', 'Ashby', 'Brandt', 'Corwin', 'Dunmore', 'Ellery', 'Faraday', 'Gunn', 'Holm', 'Ingram', 'Royce',
+            'Kirby', 'Lowe', 'Mercer', 'Nash', 'Orme']
+CIVVIES = ['#7a6a5a', '#5a6a7a', '#6a7a5a', '#7a5a6a', '#5a5a5a', '#8a7a5a']
+
+def visitors(out):
+    used = {p['name'].split()[-1] for p in out} | {p['name'].split()[-1] for p in EVENT_GUESTS}
+    used_first = {p['name'].split()[0] for p in out}
+    res = []
+    for g in EVENT_GUESTS:
+        e = dict(id=g['id'], name=g['name'], rank='guest', dept='guest', uniform=g.get('dept'), role=g['role'], template=g['template'],
+                 cabin=g['cabin'], event=g['event'], stay=g['stay'], arrive=None, leave=None,
+                 work=g.get('work'), habits=g['habits'], bio=g['bio'], life=g['life'], seed=seed_of(g['id']))
+        lk = VEYLI_LOOKS() if g['outfit'] in ('#6b4a8a', '#7a5a3a', '#3a4a5a') else looks_with(VIS_R)
+        e['spec'] = dict(name=g['name'], dept=g.get('dept') or 'civilian', rank=0, bio=g['bio'], outfit=g['outfit'], **lk)
+        res.append(e)
+    free = {c: 0 for c in EVERYDAY_CABINS}             # the day each everyday cabin is free from
+    for w in range(52):
+        role, tpl, uni, work, (lo, hi), bios, lifes = VIS_R.choice(EVERYDAY)
+        f = VIS_R.choice([x for x in VIS_FIRST if x not in used_first])
+        l = VIS_R.choice([x for x in VIS_LAST if x not in used])
+        used.add(l)
+        arrive = w * 7 + VIS_R.randrange(7) + 1
+        cabin = min(EVERYDAY_CABINS, key=lambda c: (free[c], c))
+        arrive = max(arrive, free[cabin])
+        leave = min(364, arrive + VIS_R.randint(lo, hi))
+        free[cabin] = leave + 1
+        pid = 'v-' + l.lower().replace("'", '') + '-' + f.lower()
+        lk = looks_with(VIS_R)
+        bio = VIS_R.choice(bios)
+        e = dict(id=pid, name=f + ' ' + l, rank='guest', dept='guest', uniform=uni, role=role, template=tpl, cabin=cabin,
+                 arrive=arrive, leave=leave, work=dict(deck=work[0], place=work[1]) if work else None,
+                 habits=VIS_R.sample(['window-seat', 'lounge-regular', 'garden-lover', 'stargazer', 'bar-regular', 'shopper', 'early-riser', 'night-owl', 'calls-home'], 2),
+                 bio=bio, life=[VIS_R.choice(lifes)], seed=seed_of(pid))
+        e['spec'] = dict(name=e['name'], dept=uni or 'civilian', rank=0, bio=bio, outfit=None if uni else VIS_R.choice(CIVVIES), **lk)
+        res.append(e)
+    # checks: one guest per cabin at a time, every week has an everyday arrival, ids unique
+    every = [e for e in res if e['arrive']]
+    for c in EVERYDAY_CABINS:
+        st = sorted((e['arrive'], e['leave']) for e in every if e['cabin'] == c)
+        assert all(a[1] < b[0] for a, b in zip(st, st[1:])), c
+    assert len({(e['arrive'] - 1) // 7 for e in every}) >= 50
+    assert len({e['id'] for e in res}) == len(res) and not {e['id'] for e in res} & {p['id'] for p in out}
+    for e in res:
+        if any(a in e['habits'] and b in e['habits'] for a, b in CLASH): e['habits'] = e['habits'][:1]
+    return res
+
 DROPPED = []
 
 def main():
@@ -470,6 +667,8 @@ def main():
             e['habitShifts'] = [{k: o[k] for k in ('add', 'drop', 'why') if o.get(k)} for o in pick]
         assert e['habitShifts'] and all(ok(e, it) for it in e['habitShifts']), e['id']
         for it in e['habitShifts']: assert e['name'].split()[0] in it['why'] or e['name'] in it['why'] or e['id'] in it['why'].lower(), (e['id'], it['why'])
+    for e in out:
+        if e['id'] in ABOUT: e['about'] = [dict(tier=t, text=x) for t, x in ABOUT[e['id']]]
     ids = [p['id'] for p in out]
     assert len(ids) == len(set(ids)), 'duplicate ids'
     beds = [p['bed'] for p in out]
@@ -493,12 +692,13 @@ GROUPS = [('command', 'Command', 'The bridge: the Captain, the Executive Officer
 RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'guest']
 RANK_WORDS = {'captain': 'Captain', 'xo': 'Executive Officer', 'chief': 'Department Chief', 'senior': 'Senior Officer', 'officer': 'Officer', 'junior': 'Junior Officer', 'guest': 'Guest'}
 UNI_COL = {'command': '#b4453f', 'works': '#d6a53a', 'watch': '#d6a53a', 'survey': '#3f9a92', 'infirmary': '#3f9a92', None: '#8a8f9a'}
-DECK2_ROOM = {'C': "the Captain's quarters", 'E': "the Envoy's guest cabin"}
+DECK2_ROOM = {'C': "the Captain's quarters", 'E': "the Envoy's guest cabin", 'B': "the visitors' suite", 'U': "the second visitors' cabin"}
 
 def bed_words(b):
     if b.startswith('4-B'):
         room, berth = b[3:].split('-')
         return f'Deck 4, Bunk {room}, berth {berth}' + (' (the night-shift room)' if room == '8' else '')
+    if b in ('4-01', '4-02', '4-03', '4-04', '4-07', '4-08'): return f'Deck 4, guest cabin {b}'
     if b.startswith('4-'): return f'Deck 4, officer cabin {b}'
     if b.startswith('2-'): return 'Deck 2, ' + DECK2_ROOM.get(b[2:], 'senior quarters, room ' + b[2:])
     return b
@@ -542,6 +742,7 @@ dd{margin:0;color:#cfd9dc}
 .more{margin:7px 0 0;color:var(--muted);font-size:12.5px}
 .tr{font-style:italic}
 dl .wide{grid-column:1/-1}
+.vis{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}.vis td,.vis th{border-top:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}.vis th{color:var(--muted);font-weight:500}
 .hide{display:none}
 footer{max-width:1100px;margin:24px auto;padding:0 16px;font-size:12px;color:var(--muted)}
 </style>
@@ -582,7 +783,7 @@ assert set(HABIT_WORDS) == set(HABITS)
 def bday_words(d):
     return 'Day %d: the %s of week %d' % (d, ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][(d - 1) % 7], (d - 1) // 7 + 1)
 
-def page(entries):
+def page(entries, visits=None):
     e = lambda s: html.escape(str(s))
     from collections import Counter
     crew = [x for x in entries if x['rank'] != 'guest']
@@ -610,12 +811,29 @@ def page(entries):
             out.append('<article class="p" data-text="%s" data-shift="%s"><i class="dot" style="background:%s"></i>\n'
                        '  <div class="who"><b>%s</b>%s<span class="role">%s%s</span></div>\n'
                        '  <p class="bio">%s</p>\n'
-                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div><div class="wide"><dt>Might change</dt><dd>%s</dd></div></dl>\n'
+                       '  <dl><div><dt>Shift</dt><dd>%s</dd></div><div><dt>Days off</dt><dd>%s</dd></div><div><dt>Sleeps</dt><dd>%s</dd></div><div><dt>Works</dt><dd>%s</dd></div><div><dt>Birthday</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div><div class="wide"><dt>Might change</dt><dd>%s</dd></div>%s</dl>\n'
                        '  <p class="more">%s <span class="tr">%s</span></p></article>\n'
                        % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio'] + ' ' + ' '.join(x['habits'])).lower()), x['shift'], UNI_COL[x['uniform']], e(x['name']), badges,
                           e(x['role'] + (', and cook on the chef\'s days off' if x['rota'].get('cover') else '')), (', ' + e(RANK_WORDS[x['rank']])) if RANK_WORDS[x['rank']].lower() not in x['role'].lower() else '', e(x['bio']), shift, off, e(bed_words(x['bed'])), e(work), e(bday_words(x['birthday'])), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize() or 'none yet'), e(' '.join(i['why'] for i in x.get('habitShifts', [])) or 'you decide'),
+                          ''.join('<div class="wide"><dt>Tells you%s</dt><dd>%s</dd></div>' % (' (tier %d)' % t if t else '', e(' '.join(a['text'] for a in x['about'] if a['tier'] == t))) for t in sorted({a['tier'] for a in x.get('about', [])})),
                           e(' '.join(x['life'])), e((', '.join(x['traits']).capitalize() + '.') if x['traits'] else '')))
         out.append('</div></section>\n')
+    if visits:
+        ev = [v for v in visits if v.get('event')]; every = [v for v in visits if not v.get('event')]
+        out.append('<section class="dept" id="visitors"><h2>Visitors <span class="n">%d event guests, %d everyday visitors a year</span></h2>'
+                   '<p class="blurb">Guests who stay a while and leave. Event guests come with a ship-wide event (the day is the event\'s); everyday visitors arrive about once a week. '
+                   'Deck 2\'s second visitors\' cabin is kept for event visitors; on Deck 4, event guests use cabins 4-01 to 4-04 and everyday visitors 4-07 and 4-08.</p><div class="grid">\n' % (len(ev), len(every)))
+        EVW = {'diplomatic': 'The diplomatic visit', 'nebula': 'Nebula drift', 'veyliVessel': 'A Veyli vessel needs help', 'salvage': 'Salvage'}
+        for x in ev:
+            out.append('<article class="p" data-text="%s" data-shift="day"><i class="dot" style="background:%s"></i>\n'
+                       '  <div class="who"><b>%s</b> <span class="b story">%s</span><span class="role">%s</span></div>\n  <p class="bio">%s</p>\n'
+                       '  <dl><div><dt>Stays</dt><dd>%d days, in %s</dd></div><div><dt>Kind</dt><dd>%s</dd></div><div class="wide"><dt>Habits</dt><dd>%s</dd></div></dl>\n'
+                       '  <p class="more">%s</p></article>\n'
+                       % (e((x['name'] + ' ' + x['role'] + ' ' + x['bio']).lower()), x['spec'].get('outfit') or UNI_COL[x['uniform']], e(x['name']), e(EVW[x['event']]), e(x['role']),
+                          e(x['bio']), x['stay'], e(bed_words(x['cabin'])), e(x['template']), e(', '.join(HABIT_WORDS[h] for h in x['habits']).capitalize()), e(' '.join(x['life']))))
+        out.append('</div><table class="vis"><tr><th>Arrives</th><th>Leaves</th><th>Who</th><th>Cabin</th></tr>\n' + ''.join(
+            '<tr><td>Day %d</td><td>Day %d</td><td><b>%s</b>, %s. %s</td><td>%s</td></tr>\n' % (x['arrive'], x['leave'], e(x['name']), e(x['role'].lower()), e(x['bio']), x['cabin'])
+            for x in every) + '</table></section>\n')
     out.append('</main>\n' + PAGE_TAIL)
     return ''.join(out)
 
@@ -628,14 +846,18 @@ if __name__ == '__main__':
     rc = Counter(x['rank'] for x in crew + [you]); sc = Counter(x['shift'] for x in crew + [you])
     assert len(crew) == 74 and rc == {'captain': 1, 'xo': 1, 'chief': 4, 'senior': 6, 'officer': 16, 'junior': 47}, rc
     assert sc == {'day': 60, 'night': 15}, sc
+    visits = visitors(entries)
     block = ('// ---- BEGIN ROSTER (generated by plans/crew-roster-gen.py: fixed data; to change the crew, edit the generator and re-run it) ----\n'
              'const HABITS = ' + json.dumps(HABITS, ensure_ascii=False, indent=2) + ';\n'
              'const ROSTER = [\n' + js(crew) + '\n];\n'
              'const ROSTER_GUESTS = [\n' + js(guests) + '\n];\n'
              'const ROSTER_PLAYER = ' + json.dumps(you, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
+             '// visitors (Pillar 3, C8): inert data; the sim engineer schedules them, the events engineer sets event guests\' days\n'
+             'const GUEST_TEMPLATES = ' + json.dumps(GUEST_TEMPLATES, ensure_ascii=False, separators=(', ', ': ')) + ';\n'
+             'const GUESTS = [\n' + js(visits) + '\n];\n'
              '// ---- END ROSTER ----\n')
     game = os.path.join(here, '..', 'starship-cadet.html'); g = open(game).read()
     a = g.index('// ---- BEGIN ROSTER'); b = g.index('// ---- END ROSTER ----\n') + len('// ---- END ROSTER ----\n')
     open(game, 'w').write(g[:a] + block + g[b:])
-    open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries))
+    open(os.path.join(here, 'crew-roster.html'), 'w').write(page(entries, visits))
     print('74 crew + you = 75, + %d guest; ranks %s; shifts %s; made way for you: %s. Wrote section 9 of starship-cadet.html and plans/crew-roster.html' % (len(guests), dict(rc), dict(sc), DROPPED))
