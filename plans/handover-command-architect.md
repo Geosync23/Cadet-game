@@ -33,6 +33,16 @@ Written 2026-10-16 at build 0.40.8 (`claude/ship-integration` 980e6a9), by sessi
 - **Mood light:** `light: { sky #e9e6ff, sun #fff0dc, hemi .94, sunI .96 }`.
 - **All kit uses shared `D2` materials.** Nothing calls `R()` at load.
 
+## Update: the answers pass (0.32.3–0.32.4, session_01EhJv6dqovqhQyruMveFuRR)
+
+- **Door plates (27):** officers' plates read name over rank from `ROSTER` (`d2Plate`, by bed id, at dress time; `brassPlate` takes `sub`). The Envoy and Visitors plates keep their text. Room names and tap texts still say roles.
+- **Observatory night (25):** 11 places in the observatory carry `event: 'observatory-night'`; the seven new ones (`2-obsnight-1..7`) are type `event`, which deck_check.py now accepts. The sim engineer schedules the evening.
+- **Window seats (21):** `window: true` on the seven window-bench seats and two spots by the observatory glass.
+- **Lived-in touches (31):** signs in the gas plant and crawl, a calendar nook in the closet, two mugs (`d2Mug`, `d2Sign`, `d2Nook`).
+- **Machine wear (2/3):** `d2TellTale` puts a lamp on top of each machine showing `machineLook(id)`. Inert (green) without it.
+- Places: 175. Draw calls by the lift: 282; day peak 374.
+- Testing extras kept in my scratchpad (not in the repo): a pixel compare of every deck day and night with crew hidden, and a plate-texture dump. Rebuild them from cadet_test's `Game` class if needed.
+
 ## Shared formats other sections rely on
 
 - **`DECKS[2].places`, 168 entries:** `{ id, type, at: [c, r], face, pose, room }`, plus optional `anim` and `machine`.
