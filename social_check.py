@@ -62,16 +62,17 @@ def fail(msg):
     ok = False
     print('  FAIL', msg)
 
-# long play: a steady stand-in player who hears all the news going round each evening and asks everyone they chat to about themselves (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
+# long play, from the Day 0 arrival (newGameStart(true)): a steady stand-in player who hears all the news going round each evening and asks everyone they chat to about themselves (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
 # lunch with Tomas, quiz and Tiles night each week) for LONG_DAYS days on paper, story Mail delivered as the game would
 LONG_RUN = r"""((days) => {
-  const h0 = 6; setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();
-  socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;
+  newGameStart(true); socInit();                       // the real first launch: the shuttle arrival on Day 0 (section 13; sections 15, 20, 21 start again)
+  const h0 = Math.floor(shipNow() / 60);
   const crew = SOC.crew.filter(p => !p.reserve), pal = ['tomas', 'pell', 'rina'], weeks = []; let w140 = { size: 0 }, w280 = { size: 0 };
   const parts = () => { const s = socSave(); return { size: JSON.stringify(s).length, parts: Object.entries(s).map(([k, v]) => [k, JSON.stringify(v).length]).sort((a, b) => b[1] - a[1]).slice(0, 8) }; };
-  for (let h = h0 + 1; h <= h0 + days * 24; h++) {
+  for (let h = h0 + 1; h <= (days - 1) * 24 + 23; h++) {   // to 23:00 on the last day
     setShipNow(h * 60); socialTo(h * 60); SHIP.social.mail = SHIP.social.mail.filter(x => x.at > h * 60);   // delivered (socialMail, which the test stops)
-    const hr = h % 24, d = Math.floor(h / 24) + 1, u = schedU(d, h, 9001);
+    const hr = socHr(h), d = Math.floor(h / 24) + 1, u = schedU(d, h, 9001);
+    if (d === 8 && hr === 6 && typeof flagSet === 'function' && !flag('week1.done')) flagSet('week1.done', true);   // the stand-in's first week is over
     if (hr === 8) repNote('shiftStart', { late: u < .1 ? 25 : 0 });
     if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
       const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat');
@@ -90,6 +91,19 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if LONG:
         g.ev("window.__realTick = tickShip; tickShip = () => {}; socialTick = () => {}")
+        jumpA = r"""((jump) => { newGameStart(true); socInit(); const t0 = Math.floor(shipNow() / 60) * 60;   // from the arrival: two days in one jump against hour by hour
+          if (!window.__busLog && typeof onSim === 'function') { window.__busLog = []; for (const k of SOC_HEARS) onSim(k, d => window.__busLog.push(k + ' ' + (d.id || d.machine || '') + ' ' + d.t)); }
+          if (window.__busLog) window.__busLog.length = 0;
+          if (jump) { setShipNow(t0 + 2 * 1440); socialTo(t0 + 2 * 1440); } else for (let t = t0 + 60; t <= t0 + 2 * 1440; t += 60) { setShipNow(t); socialTo(t); }
+          return [JSON.stringify(socSave()), (window.__busLog || []).slice().sort()]; })"""
+        (ha, hb), (ja, jb) = g.ev(jumpA + "(false)"), g.ev(jumpA + "(true)")
+        print('From the arrival, two days in one jump the same as hour by hour:', ha == ja)
+        if hb != jb: print('  the bus itself sends different notes in the jump (section 17): only hour by hour', sorted(set(hb) - set(jb))[:8], 'only in the jump', sorted(set(jb) - set(hb))[:8])
+        if ha != ja:
+            A, B = json.loads(ha), json.loads(ja)
+            for k in sorted(set(A) | set(B)):
+                if A.get(k) != B.get(k): print(f'  differs: {k}: hour by hour {json.dumps(A.get(k))[:300]}  jump {json.dumps(B.get(k))[:300]}')
+            fail('from the arrival, a time jump gives a different social life')
         res = g.ev(LONG_RUN + f"({LONG_DAYS})"); lw = res['weeks']
         for x in lw: print(f"Day {x['day']}: social save {x['size']} bytes, rivals {x['rivals']}, biggest parts {x['parts']}")
         a, b = res['w140'], res['w280']
@@ -181,7 +195,11 @@ with sync_playwright() as pw:
     c = run(days=2, player=False, jump=False, notes=True)
     d = run(days=2, player=False, jump=True, notes=True)
     print('Two days in one jump the same as hour by hour (with bus notes):', c['key'] == d['key'])
-    if c['key'] != d['key']: fail('a time jump gives a different social life')
+    if c['key'] != d['key']:
+        A, B = json.loads(c['key']), json.loads(d['key'])
+        for k in sorted(set(A) | set(B)):
+            if A.get(k) != B.get(k): print(f'  differs: {k}: hour by hour {json.dumps(A.get(k))[:300]}  jump {json.dumps(B.get(k))[:300]}')
+        fail('a time jump gives a different social life')
     if 'fixed.oven' not in c['key'] or 'came.quiz' not in c['key']: fail('the stand-in bus notes left no memories')
     # the same through section 13's real bus, when it's there: the note's shape (its kind and t) as the bus sends it
     bus = g.ev(r"""(() => { if (typeof simNote !== 'function') return null;
