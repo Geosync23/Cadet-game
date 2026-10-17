@@ -160,3 +160,69 @@
 - {best}'s the best. They always know where they're going. I just follow.   #warm
 ? aff:vance:friend
 - Vance runs next to me on the treadmill now. Doesn't talk. Very encouraging. I think.   #funny
+
+// Writer 3, batch 1: callbacks (told: is said once; mem: is a fond memory that can come back), visits at your bunk
+// (friend tier and up; he lives there, so he knocks anyway), and notes left on your bunk (the game adds his name).
+// Moment memories are moment.tomas.<word> from beats 5-7; heard.<key> is what a friend told him.
+
+== callback
+? told:moment.tomas.promised
+- You never told anyone. About the exam. I knew you wouldn't. I still checked. Sorry.   #warm
+? told:moment.tomas.passed
+- "That's the one that counts." I wrote it inside my locker. Small. Holt won't see.   #warm
+? told:moment.tomas.blanket
+- The blanket held! Holt stared at it for ages, then walked on. That's a pass. I think.   #funny
+? told:moment.tomas.listened
+- Thanks for listening. About the list. I only read it twice a day now. Progress.   #warm
+? told:moment.tomas.showed
+- I did show you round, didn't I? I keep thinking about that. I got one thing right.   #warm
+? told:moment.tomas.observatory !beat:tomas.7
+- Observatory night's coming. The star map's rolled up and ready. Is that keen? It's keen.   #funny
+? told:moment.tomas.shown
+- Just left of the bright one. My left. You remembered! You did, didn't you?   #funny
+? mem:moment.tomas.staying
+- Still here. Still staying. I check every morning. Still true.   #warm
+? told:moment.tomas.home
+- Holt's put me down to meet the next shuttle. Me! I've been practising "This way."   #funny
+? told:came.observatory-night
+- You came up! Did you see the one I named? The wobbly one. That's mine.   #funny
+? told:came.film
+- Thanks for coming to film night. I cried at the bit with the boat. Don't tell anyone.   #funny
+? told:came.running
+- You came running! Vance said "adequate" about you. He said "noted" about me.   #funny
+? told:fav.fetch
+- Thanks for fetching that. I'd have gone the long way. You know I would.   #warm
+? told:fav.lamp
+- My lamp works! I can read my brother's letters at night now. Thanks, really.   #warm
+? told:fav.job
+- You did my job for me. I owe you. I've written it down. I'll lose the paper.   #funny
+? told:gift.star
+- I put your present by the star map. Two skies under one bunk now. Thank you.   #warm
+? told:gift.card
+- I kept your card. It's in with my brother's letters. That's the good pile.   #warm
+? told:gift.sweet
+- Those sweets lasted two days. I rationed. Well, I tried. One and a half days.   #funny
+? told:fixed.lift
+- Was it you who fixed the lift? It sounds happier. I can hear it from the Watch office.
+? told:bday
+- You came to find me on my birthday. My brother always does that. Now two people do.   #warm
+? told:heard.moment.rina
+- Rina says you're all right. From Rina that's practically a medal.   #funny
+? told:heard.moment.pell
+- Pell says you're the best. He says that about anyone with biscuits. But he meant it.   #funny
+
+== visit
+- Knock, knock. I know I live here. It felt polite.   #funny
+- Are you busy? I'm not. I've been not busy all evening. It's lonely, not being busy.   #funny
+- Can I sit? I wrote my brother a whole page about you. Nice things. Mostly.   #warm
+- I found biscuits. Brennan's. Don't ask where. Want one? Want two?
+? time:night
+- Can't sleep. The star map's too interesting. Want to look at it with me for a bit?
+
+== note
+- Came to find you. You were out. You're always out! Saving the ship, probably. See you at the bunk.
+- Left you a biscuit under your pillow. Don't sit on it. If you've sat on it, sorry.   #funny
+- Went the long way round Deck 2 again. Found a new window. I'll show you tomorrow.
+- Your blanket was falling off, so I folded it. Badly. Holt would weep.   #funny
+? trad:observatory-night
+- Observatory's open tonight. Come up if you see this in time. If not, I'll tell you all about it.
