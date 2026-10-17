@@ -206,7 +206,7 @@ Each card: what happens · what it touches (and whose section) · its Tier 2 par
 
 - New code in **new sections** (24, and `18e` sub-blocks), lazy at load, owned by one seat.
 - **`PLAYER_TIER` → `playerTier()`**, done once, early and inert: section 17 declares `function playerTier() { return typeof careerTier === 'function' ? careerTier() : 1 }` and keeps `const PLAYER_TIER = 1` as a fallback name for one release; sections 15b, 17 and 19's readers switch to `playerTier()` in one combined build with `cadet_test` ALL IDENTICAL.
-- **Hash keys:** the career 850-879; small incidents 880-899; new ship-wide events 352-399 (the events engineer's "351 up"), and 900-929 if needed. The lead checks them against DEV_NOTES' list before the first push.
+- **Hash keys** (checked free by the build master, 2026-10-17): the career 850-899 (section 24; no `k + 100` jitter there). New ship-wide events 950-979 and small incidents 980-999, because every section 18 entry also uses `k + 100` for its end jitter (so 1050-1099 is theirs too). Not 352-399: their jitter would land in the traditions' 434-499. 930 is already used in the game.
 - **The save:** `save.career` (tier, experience, skills by kind, tools, on-call, the work log ring, certification state), small and read defensively; `SAVE_V` stays 2.
 - **Merge order:** Pillar 5 branches go **after** Pillar 4's in each round: … content → systems (17) → career (24) → player (15) → deck architect 2 → events A/B (18e).
 - **Simple notes on the bus:** `simNote('promoted')`, `simNote('certify', { step })`, `simNote('diagnose', { right })`, `simNote('incident', { id })`, so Pillar 4's lines and reputation can react without new hooks.
@@ -329,7 +329,7 @@ careerTier(), careerSpeed(kind) -> 0.65..1, careerHas(tool), careerWords() -> Re
 simNote('promoted', { tier }), simNote('certify', { step }), simNote('diagnose', { right, kind })
 
 // section 18e (events): an incident
-SHIP_EVENTS.burstPipe = { kind: 'incident', k: 880, when: { every: [5, 9] }, deck: 4, mins: 90,
+SHIP_EVENTS.burstPipe = { kind: 'incident', k: 980, when: { every: [5, 9] }, deck: 4, mins: 90,
   moment: { feel: ['hiss'] }, jobs: [{ kind: 'repair', machine: 'pipe-4c', urgent: true }],
   routines: [{ where: '4-corridor-s', rule: 'closed' }], news: [ ... ], draft: true }
 ```
