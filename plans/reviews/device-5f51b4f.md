@@ -27,3 +27,4 @@ Low (no fix needed for the combine):
 - The host now actually walks to the room through section 14, which wasn't true before. Section 18's `meeting()` only waits for you to be in the room and moves nobody, so nothing pulls the host two ways.
 - One notice: with traditions 0.34.45 (the toast is off when deviceApp exists), occasions get only the heads-up strip.
 - For 1b's side: a missed summons now counts as a missed appointment with the host in section 20 (that's how appointments already work). Make sure that's wanted for the Captain's ready room.
+- Social 0.36.74 (0154e8d), lead-assigned: PASS. socialAppts and the "you missed it" mention both skip `a.occ`, so occasions give no appointment points, no kindness dip and no officer reputation hit. momentAppt still counts them, so no moments fire while you're at the Captain's table, which is right.
