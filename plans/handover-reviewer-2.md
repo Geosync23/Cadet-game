@@ -10,9 +10,9 @@ Chain of command: only the lead talks to the user.
 | Seat | Branch | Engineer (session) | Last passed | Open from me |
 | --- | --- | --- | --- | --- |
 | Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 46e948b (0.43.25) | none |
-| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | f78dd03 (0.34.41) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
+| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | 2951e5b (0.34.44, PASS WITH FIXES) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
 | Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | 5f51b4f (0.35.29) | none |
-| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | 9377551 (0.38.17) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
+| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | eb0e776 (0.38.18, PASS WITH FIXES) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
 | Tiles (section 23) | claude/tiles | Tiles eng (idle; handover plans/handover-tiles.md) | 99609d3 (0.46.6) | none |
 | Content (head writer's bakes) | claude/content | not reviewed yet | - | next: the writers' batches |
 Combined builds: 0.60.2 released (142b503); build master 2 is combining 0.60.3 on claude/cand-0603.
