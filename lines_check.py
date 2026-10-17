@@ -60,7 +60,7 @@ BANNED = [
 BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry me\b', r'\bwill you marry\b', r'\bmy heart\b',
                  r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
                  r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b', r'\bdating\b', r'\bgoing out\b',
-                 r'\bseeing each other\b']   # "married", "wedding": family lines need them
+                 r'\bseeing (?:each other|anyone|someone|somebody)\b']   # "married", "wedding": family lines need them
 # aimed at you: banned even in lines about crew couples
 BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
                  r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
