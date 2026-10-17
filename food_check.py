@@ -141,7 +141,7 @@ with sync_playwright() as pw:
       if (real) cartClaim = keep; else window.__sc("cartClaim = undefined"); FOOD.restock = was; return {{ real, week, missed }}; }})()""")
     print('Carts' + (' (section 17)' if carts['real'] else ' (stand-in rule)') + ':', ', '.join(f"day {DAY + k}: low {w['coldMin']}, in {w['delivered']}, wait {w['maxWait']}" for k, w in enumerate(carts['week'])))
     print('  no carts on days 2 and 3:', carts['missed'])
-    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
+    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran out, or a wait over the limit, in the week with carts')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
     # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
@@ -156,7 +156,7 @@ with sync_playwright() as pw:
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
     if not all(w['spoiled'] > 0 for w in sp['week']): fail('spoilage: a broken chiller spoiled nothing on some day')
-    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
+    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran out, or a wait over the limit, in the week with a broken chiller')
     if not sp['bin'] or sp['bags'] < 1: fail(f"spoilage: nothing in the bin by the dish pit at 09:30: {sp}")
     if not sp['mail'] or 'binned' not in sp['mail'][0]: fail('spoilage: no Mail about the binned food')
 
