@@ -515,6 +515,14 @@ with sync_playwright() as pw:
     if not b['open'] or set(b.get('cast', {})) != {'calder', 'tech1', 'tech2'} or not L['panel']: fail(f"the briefing didn't open with its cast: {b}")
     if not any(x.startswith('[choice]') for x in L['lines']) or not any('Mind the lift' in x for x in L['lines']) or not L['closed']: fail('the briefing script did not play through with the reply')
     print('  ship notes for your replies:', L.get('choiceNotes'))
+    mo = g.ev("""(() => {   // social B's moments play on this panel: onPick and onEnd on the script (20c)
+      const got = []; MEETING_SCRIPTS['moment:test'] = { title: 'Test', lines: [{ who: 'tomas', text: 'Hi.' }, { choice: [{ text: 'A' }, { text: 'B' }] }, { who: 'tomas', text: 'Bye.' }],
+        onPick: (k, c) => got.push('pick:' + k + ':' + c.text), onEnd: f => got.push('end:' + f) };
+      dialogueShow('moment:test'); dialogueStep(); dialogueStep(1); dialogueStep(); dialogueEnd(true);
+      delete MEETING_SCRIPTS['moment:test']; return got;
+    })()""")
+    print('  a moment on the panel:', mo)
+    if mo != ['pick:1:B', 'end:true']: fail(f"a moment's onPick / onEnd: {mo}")
     if not any(x.startswith('stormBriefing:0:') or x.startswith('calderStorm:0:') for x in L.get('choiceNotes') or []): fail(f"no simNote('choice') for the briefing reply: {L.get('choiceNotes')}")
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')
