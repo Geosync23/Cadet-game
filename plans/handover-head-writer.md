@@ -22,6 +22,13 @@ for the combine: 5e2605e (0.48.48: days off follow roster 0.16.17; facts column 
 session_01TDCn9auvCBML52hyjWGY6x (roster 0.16.19, claude/deck-plans-1-2-6). Social B2: session_014A3w2gK8FBNWs66YC3LfME.
 Reviewer 2b (content): session_01F93LiFWtciyCLNV34qPsjP. Reviewer 1c (roster): session_01YcSJkhhJ2MnCjsJs7QV8ud. Onboarding
 engineer 2: session_0163dcLt17oTCdR8po9HRo2p (tour pacing A: core = walk.<place>.1..N). Latest content: 92866aa (0.48.51).
+**State at 0.48.60 (5417aeb, 16:40):** 0.48.54-58 Zeke's tour cut for the user (greeting walk.shuttle.1-3 in the user's words;
+works/lift/wing/servery walk-and-talk; the bunk stop is introBunk, opening "Bunk 1. This is you. This is where you sleep.";
+extras walk.extra.<point>.<n> on tap; goodnight walk.goodnight.1-2, walk.free removed). Sim engineer 5 (session_01Do3HU5Rh96tgUsPTUbsF8a,
+claude/arrival) owns the tour code. 0.48.59 times follow design-doc (shift 08:00-17:00, dinner 17:00-20:30). 0.48.60 News
+feed bank content/banks/news.lines (335 posts, kinds news.<source>, subject crew = speaker); player engineer 5
+(session_01SyRmwPxQEVKab6re9UgyrD, claude/player-needs) builds the feed and had my tips/warnings text by message. Writer 5
+archived; reviewers 2b gone, 1c (session_01YcSJkhhJ2MnCjsJs7QV8ud) checks key/token changes. Send hashes to the lead and build master 2.
 **Rule: the writing follows the game** (no crew takes the ladder; nobody skips breakfast; days off from the roster).
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
