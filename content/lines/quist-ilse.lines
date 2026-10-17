@@ -87,3 +87,18 @@
 == about
 ? aff:moreau-signe:friend
 - Moreau talked me into the gym. She runs ahead, then waits. She always waits.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The basil's showing off again.   #funny
+- The parsley's wilting. I take it personally.
+- Chapter three. I know. Still reading.
+? act:off
+- Rest day. Windowsill. Herbs. Good.
+? act:work
+- Pump's fine. Smells of the garden.
+?
+
+== rumour
+- Hm? Oh. The thyme told me.   #funny
+- Slowly, then. Here's the thing.

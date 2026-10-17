@@ -88,3 +88,18 @@
 == about
 ? aff:pell:friend
 - Pell found my tin. Of course he did. I let him have one. One. He's a good lad.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Biscuits? What biscuits?   #funny
+- Tiles tonight. I'll lose. Fine.
+- Day count's up. Don't ask.
+? act:work
+- Hm. That washer.   #funny
+? act:off
+- Rest day. Doing nothing. Hard work.   #funny
+?
+
+== rumour
+- Hm. Don't spread this.
+- Not gossip. Facts. Grumbled facts.   #funny
