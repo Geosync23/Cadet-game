@@ -22,3 +22,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - faa2562 (+ clock-fix 83beaf6): events_check OK (no shift short, no film overrun)
 - faa2562 day_check (R2) days 0/6/7/35 all OK: shift short 0, tray gone, stuck 0.0, peak D3 279
 - d571db4 (R3): interactions OK · path OK (3093/3093) · player FAIL cart-run c2 = one-frame lag (holding follows stage next frame); test-only fix in player_check (step 1 before c2/c3) being verified on faa2562
+- faa2562 + player_check cart fix (890a1f3): PLAYER CHECK OK (cart run cart → cartfull → cart)
