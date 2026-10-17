@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.30
+   STARSHIP CADET: CSV Wren                           build 0.48.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.31';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13127,6 +13127,11 @@ const VOICE = {
       "feel": [
         {"text": "Quiet night, tidy forms, and I guessed the ending by page ten.", "id": "1g5m0s2", "mood": "high"},
         {"text": "Long night. A form went missing. I found it. In the wrong drawer. Mine.", "id": "7yibh8", "mood": "low"},
+        {"text": "Packing. Calmly. Nothing's on fire. That's a good sign.", "id": "1hpavnf", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Leaving. Calmly. Here's an ending: it was a good posting.", "id": "u98ty9", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never spoiled a book for me. Not once. Rare. Thank you.", "id": "ozrfac", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Evening, cadet. Achterberg, night Watch. If something's on fire, there's a form.", "id": "1rif8jr", "tone": "funny", "tier": [0, 0]},
@@ -13146,6 +13151,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "A good mystery. I guess the ending early. Then I enjoy being right for two hundred pages.", "id": "tb3r61", "tone": "funny", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Their record cabinet's wrong about every second verse. I'm fixing it. Dad read me an ending. Again.", "id": "1354gwj"},
+        {"text": "Left Signe a book. With the last page in. She'll be suspicious. Good. Hello from out here.", "id": "1ujn55q", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I know every song in the record cabinet. Ask four others. They disagree.", "id": "4meym3", "tone": "funny", "tier": [1, 4]},
@@ -13300,6 +13309,11 @@ const VOICE = {
       "feel": [
         {"text": "Bit grey today. I'll find a window. That usually does it.", "id": "lfzpkj", "mood": "low"},
         {"text": "Sunny side up today. Coils behaving, window seat free. What more is there?", "id": "lqxrlb", "mood": "high"},
+        {"text": "Packing. Window seat on the shuttle's booked. Obviously.", "id": "1v6pzy5", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off. Look on the bright side: someone else gets my window.", "id": "1r7wus7", "leaving": "you", "tier": [1, 4]},
+        {"text": "You found the good windows too. Best company for looking out of them. Thanks.", "id": "1upj8q8", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hey. New hand? Best window on Deck 5 is in the shuttle bay. Don't tell anyone.", "id": "r65bfo", "tier": [0, 0]},
@@ -13320,6 +13334,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "The best window aboard changes every week. This week it's the observatory.", "id": "o2qpyg", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Found the best window on day one. It's in the cargo bay. Of course it is.", "id": "1gxx60w"},
+        {"text": "There's a tree in the new garden. Small one. I haven't climbed it. Yet. Hello from near a window.", "id": "12ljsrz", "tier": [3, 4]},
       ],
       "life": [
         {"text": "The whole washroom knows my songs. In order. I've stopped pretending they don't.", "id": "19dx2df", "tone": "funny", "tier": [1, 4]},
@@ -13898,6 +13916,11 @@ const VOICE = {
       "feel": [
         {"text": "Lovely day. Sang all the way through patrol. In my head. Mostly.", "id": "edepts", "mood": "high"},
         {"text": "Restless. I've walked Deck 4 three times. It hasn't changed.", "id": "174vai2", "mood": "low"},
+        {"text": "Packing. Or planning to. I keep starting. Then I think of something better.", "id": "13389h6", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon. Somewhere else. I always wanted somewhere else. Now I'm sad. Funny.", "id": "wguz4t", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never minded when I drifted off mid-sentence. You waited. Thank you.", "id": "1koips", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh, hi. Chen, Watch. Sorry, I was miles away. Literally. About forty light years.", "id": "13plv7z", "tone": "funny", "tier": [0, 0]},
@@ -13916,6 +13939,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "My bench in the garden. Leaves above, pumps humming. I can think there.", "id": "ritinm", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. The washroom has an echo. I've been singing. Sent Grandma a message. She liked the echo.", "id": "13qq8r5"},
+        {"text": "Was going to write a long letter. Then I thought of a better one. This is it: hello. The Wren was good.", "id": "oy76n8", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I send voice messages to my grandmother on Lisk. They're long. She says too short.", "id": "1j3xia", "tier": [1, 4]},
@@ -14109,6 +14136,11 @@ const VOICE = {
       "feel": [
         {"text": "Good day. Patrol was easy, and I finished a mitten. The left one.", "id": "1k74bjx", "mood": "high"},
         {"text": "Long shift. I knitted faster than I should. That's how you can tell.", "id": "1kdytfm", "mood": "low"},
+        {"text": "Packing. What's the most useful thing to take? Tea. Then wool.", "id": "1v4ahcb", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon. What will you do with my seat at the knitting circle? Fill it.", "id": "108uusx", "leaving": "you", "tier": [1, 4]},
+        {"text": "You asked good questions. I liked answering them with better ones. Thank you for that.", "id": "nta3pj", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. Dahl, Watch. Stand still too long and I'll measure you for a scarf.", "id": "rwz8k0", "tone": "funny", "tier": [0, 0]},
@@ -14128,6 +14160,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "A practical scarf. Warm, plain, done by Friday. There's no better feeling.", "id": "igwtv0", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Started a knitting circle. Two people so far. Practical scarves only. Kovac would approve.", "id": "1vfgoaz"},
+        {"text": "Looked at a portrait gallery today. Not ours. Still looked for a familiar face. Habit. Hello.", "id": "1dfjc5h", "tier": [3, 4]},
       ],
       "life": [
         {"text": "My parent served on the Wren, years back. I check the gallery sometimes. Just to look.", "id": "1k6znpz", "tier": [1, 4]},
@@ -14355,6 +14391,11 @@ const VOICE = {
       "feel": [
         {"text": "No answer from home today. It's the relay. It's always the relay.", "id": "4fe6jv", "mood": "low"},
         {"text": "New old map. Hesper Dock, forty years out of date. Perfect condition.", "id": "1td4vjr", "mood": "high"},
+        {"text": "Packing. Fine. I'm fine. Mostly maps.", "id": "51jrec", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Leaving. Don't make a fuss. ...Small fuss is fine.", "id": "1tpkoay", "leaving": "you", "tier": [1, 4]},
+        {"text": "I don't say this often. You were good to work with. That's it. That's the speech.", "id": "1ifi5ix", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh. Hello. The call-home booths are on Deck 3. The queue's shortest just after lunch.", "id": "o3jtbc", "tier": [0, 0]},
@@ -14375,6 +14416,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "An old map is a picture of a place that isn't there any more. I find that very calming.", "id": "yng6iu", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Nobody here knows Hesper Dock. I've put up a map. Gran says hello. She doesn't know you. Still.", "id": "17x7jx2"},
+        {"text": "Sent Gran a message today. Told her about the Wren. She said it sounded nice. It was. Hello.", "id": "1tzafyd", "tier": [3, 4]},
       ],
       "life": [
         {"text": "My gran's on Kesh. So is Keane's. It might be the same gran. We don't ask.", "id": "1gqyane", "tone": "funny", "tier": [1, 4]},
@@ -14839,6 +14884,11 @@ const VOICE = {
       "feel": [
         {"text": "Fixed four pairs of headphones and the garden pump. Proper useful night.", "id": "1j6ep35", "mood": "high"},
         {"text": "Missing the rain. Don't laugh. It used to sing on the roof at home.", "id": "1ypasjr", "mood": "low"},
+        {"text": "Packing. Try not to break your headphones while I'm gone.", "id": "scn6ml", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Off soon. Who'll fix your headphones? Not my problem. Kidding. Mostly.", "id": "12wfzph", "leaving": "you", "tier": [1, 4]},
+        {"text": "Look who it is. You. Every night shift worth having. Don't make it a thing. Thanks.", "id": "1gwv26m", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh, hey. Garcia, night Watch. Friendly on patrol, firm at the airlock. That's the job.", "id": "xcflyp", "tier": [0, 0]},
@@ -14857,6 +14907,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Taking something broken and handing it back working. Best feeling there is.", "id": "2nm7c1", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Seven broken pairs of headphones by day three. I'm very popular. Tell Yusuf I'm winning.", "id": "ujfxgx"},
+        {"text": "Played the musical card Yusuf made me. Still works. Annoyingly. Hello from the night side.", "id": "1ydj6u2", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I fix everyone's headphones. Mine haven't worked in a month.", "id": "jmcy1p", "tone": "funny", "tier": [1, 4]},
@@ -15188,6 +15242,11 @@ const VOICE = {
       "feel": [
         {"text": "No joke today. Don't look at me like that. I'll have two tomorrow.", "id": "z6khxn", "mood": "low"},
         {"text": "Brennan let me have an oven on Saturday. A whole oven. I'm still glowing.", "id": "f855qz", "tone": "funny", "mood": "high"},
+        {"text": "Packing. Lovely. Have you eaten? I've eaten. Mostly biscuits.", "id": "1nxtffs", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon! Have you eaten? Go and eat. That's my goodbye.", "id": "1o2p3ic", "leaving": "you", "tier": [1, 4]},
+        {"text": "Your first mug, Friday tea. I still think about that. Lovely day. Keep the hook.", "id": "11m622a", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. You'll be new. Have you eaten? Breakfast's in the mess till eight.", "id": "b77ox4", "tier": [0, 0]},
@@ -15208,6 +15267,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "The face people make at a warm scone. That's why I bake. Well, that and the scone.", "id": "11z97z7", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "Why did the engineer leave the ship? To see if it would miss him. It's a work in progress. Have you eaten?", "id": "1i084ks"},
+        {"text": "Baked for the new crew. They didn't have an inspection. I inspected it myself, in Brennan's voice. It passed. Just.", "id": "1fq6rjl", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I trade breakfast jokes with Yoon. Mine are worse. It's not a contest. It is a bit.", "id": "1yaiv69", "tone": "funny", "tier": [1, 4]},
@@ -15941,6 +16004,11 @@ const VOICE = {
       "feel": [
         {"text": "Bit of a worry night. Nothing wrong. I just worried. It's what I do.", "id": "dmtjy8", "mood": "low"},
         {"text": "Coils ran just right all watch. I sat in the armchair and listened. Lovely.", "id": "g8dc2r", "mood": "high"},
+        {"text": "Packing. I think. Maybe. Yes, packing.", "id": "1icuq96", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Um, I'm leaving soon. I think. Yes. Bye. I'll miss the coils.", "id": "za71k8", "leaving": "you", "tier": [1, 4]},
+        {"text": "You always listened when I said 'I think'. Most people don't wait for the rest. Thank you.", "id": "1pwytqs", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh, hi. I'm on the coils at night. If the board says \"coil watch\", that's me. I think.", "id": "fj6j5", "tier": [0, 0]},
@@ -15961,6 +16029,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "When the coils run just right, there's a purr under the hum. Reyes hears it too.", "id": "1507slt", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. The coils are fine. I think. They're fine. The count's higher. It rained on Valo, they say.", "id": "128p2x"},
+        {"text": "I was right about a coil today. First week. I said 'I think' and then I said 'I know'. Hello from here.", "id": "1nhse8p", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I married just before the tour. Silva, Soto and I compare day counts at breakfast.", "id": "13hejou", "tier": [1, 4]},
@@ -16029,6 +16101,11 @@ const VOICE = {
       "feel": [
         {"text": "Bit flat. I've cleaned this panel twice. It was clean the first time.", "id": "136mj7", "mood": "low"},
         {"text": "Good night on the coils, good song on the radio. Can't ask for more.", "id": "9x9bfj", "mood": "high"},
+        {"text": "Packing, mate! Cleanest bag in the whole Service.", "id": "1rceyk9", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Off soon! Keep the engine room clean for me. Cleanest in the Service.", "id": "5l2tas", "leaving": "you", "tier": [1, 4]},
+        {"text": "You were brilliant company on the late jobs. Honestly. Cheers, mate.", "id": "1icng1p", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hey, hey! New? Engine room's Deck 6. Wipe your boots. I've just done the floor.", "id": "1kihr3j", "tier": [0, 0]},
@@ -16048,6 +16125,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.", "id": "1kjtf6m", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New engine room. Not as clean. Yet. Give me a week. Sent Gran a message. She says I sound happy.", "id": "jr5ffs"},
+        {"text": "Took the stairs today. For the exercise. Thought of the ladder. Don't tell anyone. Cheers, mate.", "id": "9qqr73", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I send voice messages to my gran on Kesh. Eklund does too. Maybe the same gran. Imagine.", "id": "p2e8se", "tone": "funny", "tier": [1, 4]},
@@ -17327,6 +17408,11 @@ const VOICE = {
       "feel": [
         {"text": "Dropped a place on the leaderboard. Santos. Fair's fair. I'll be back.", "id": "yge63n", "mood": "low"},
         {"text": "Guessed the ending. Wrong. Completely wrong. Best book in months.", "id": "lfbf5f", "tone": "funny", "mood": "high"},
+        {"text": "Packing. Quickly. I spotted the shuttle's late. It's late.", "id": "1elrgni", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Off soon. Keep my rowing time warm. I'll beat it from here.", "id": "qk0za5", "leaving": "you", "tier": [1, 4]},
+        {"text": "You were a good rival on the board. And a better shipmate. Don't tell anyone I said that.", "id": "1631s8i", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hey. New hand. Check the seal before you close a panel. Every time. You'll thank me.", "id": "1jsoy47", "tier": [0, 0]},
@@ -17347,6 +17433,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "The moment in a mystery when you know. Right or wrong. That's the best page.", "id": "11fc5xf", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship has a rowing board. I'm top. Took a week. Finished a mystery. Guessed it on page four.", "id": "1shjpfk"},
+        {"text": "Lars sent me a book with the last page in. A first. Tell him I noticed. Music's not the same here.", "id": "rn7ltt", "tier": [3, 4]},
       ],
       "life": [
         {"text": "Vance moved to the treadmill. We think he's scared of the rowing board. We're right.", "id": "d1xy2j", "tone": "funny", "tier": [1, 4]},
@@ -17501,6 +17591,11 @@ const VOICE = {
       "feel": [
         {"text": "Good day. Clean patrol, and Brennan took my thyme. She called it \"decent\".", "id": "1yv1my1", "mood": "high"},
         {"text": "My twin got a commendation. I'm pleased for them. I'm going for a run.", "id": "17lx0ym", "mood": "low"},
+        {"text": "Packing. Patiently. The herbs go in a box with holes.", "id": "rzq4a1", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving soon. As Holt says: do it properly. Goodbye, properly.", "id": "7v1bs6", "leaving": "you", "tier": [1, 4]},
+        {"text": "You learnt the Wren the patient way. I noticed. I'm proud of that. Of you, a bit.", "id": "tr386l", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hello. Nakamura, Watch. Learning the Watch from Holt, one lecture at a time.", "id": "1dwpjn3", "tier": [0, 0]},
@@ -17520,6 +17615,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "My herbs. You plant a seed and a week later it smells of home. It still amazes me.", "id": "xc0248", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "The Halcyon. My twin's here. The crew call us the set. My herbs are on a new windowsill.", "id": "1s7g6r9"},
+        {"text": "Grew the first parsley on the Halcyon. Sent some to the galley. Brennan would've inspected it. Hello.", "id": "13hlrom", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I grow herbs for the galley. Window pots, mostly. Brennan collects on Fridays.", "id": "1sbehkp", "tier": [1, 4]},
@@ -17674,6 +17773,11 @@ const VOICE = {
       "feel": [
         {"text": "Quiet night. Too quiet. I've sorted the lost-property box twice.", "id": "v5uj9a", "mood": "low"},
         {"text": "Good shift. Every job closed, every note written. I might hum.", "id": "170r35f", "tone": "funny", "mood": "high"},
+        {"text": "Packing. I've found three things that weren't mine. They'll turn up with their owners.", "id": "3d3g3q", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon. Keep an eye on the lost-property box for me.", "id": "19ox5ah", "leaving": "you", "tier": [1, 4]},
+        {"text": "You noticed the small things here. I did too. Good to have company in that.", "id": "1to4yla", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. Night board's mine. If a job comes in after half four, it comes to me.", "id": "s762bo", "tier": [0, 0]},
@@ -17694,6 +17798,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "A spanner came back to its owner today. Three weeks in the box. They nearly cried.", "id": "mt9q1o", "tone": "warm", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "The Halcyon, at last. My twin met me at the hatch. We're very confusing. The set is complete.", "id": "5s4pa8"},
+        {"text": "Found a lost-property box on the Halcyon. Nobody's in charge of it. I am now. Hello from here.", "id": "1ozfg6f", "tier": [3, 4]},
       ],
       "life": [
         {"text": "Third glove this week in the box. Same hand every time. Someone's very unlucky.", "id": "1usb4dt", "tone": "funny", "tier": [1, 4]},
@@ -17974,6 +18082,11 @@ const VOICE = {
       "feel": [
         {"text": "Good patrol. Quiet decks. I worked out the boat's sail, in my head.", "id": "1k5a5uc", "mood": "high"},
         {"text": "Tired. Two shifts back to back. The boat had better be worth it.", "id": "1k32piv", "mood": "low"},
+        {"text": "Packing. Tidily. Everything folded in three.", "id": "1n05stt", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving soon. Keep your locker tidy. It's a good habit.", "id": "1s9t5md", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never asked my boat's name. Thank you. That's very rare. Very kind.", "id": "7290lw", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hi. Park, night Watch. I'll show you the patrol route if you're ever up late.", "id": "1h84fal", "tier": [0, 0]},
@@ -17993,6 +18106,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "The boat. Water slapping the side, nothing to fix, nowhere to be. One day.", "id": "1hcurp6", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Tidy lockers. Good. The boat fund's growing. The guitar's not improving.", "id": "o7b3yv"},
+        {"text": "Played the guitar today. Still badly. Thought of the music room and the book. The boat's got a name. Still secret.", "id": "1yj2g1", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I'm saving for a boat on Coriel. A small one. Blue, I think.", "id": "i2e10c", "tier": [1, 4]},
@@ -18364,6 +18481,11 @@ const VOICE = {
       "feel": [
         {"text": "The parsley's wilting. I'm taking it personally.", "id": "1nzy7iy", "mood": "low"},
         {"text": "Brennan used my herbs tonight. She said so. Out loud. In front of people.", "id": "1ndgl19", "mood": "high"},
+        {"text": "Packing the herbs. Hm. They're sulking.", "id": "1pogddu", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Oh. I'm off soon. Water the windowsills. Somebody has to.", "id": "1bw8ffj", "leaving": "you", "tier": [1, 4]},
+        {"text": "Hm. You were nice to my herbs. And to me. In that order, probably. Thanks.", "id": "1dviazm", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh, hello. You're new. The garden's on Deck 3, if you need to stand somewhere green.", "id": "1eylgun", "tier": [0, 0]},
@@ -18384,6 +18506,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Rub a basil leaf. Go on. Smell your fingers. That's the whole summer, right there.", "id": "d4144s", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. The basil came with me. It's thriving. Read a mystery. Guessed it. Of course I did.", "id": "nfitqp"},
+        {"text": "The thyme flowered. I thought, the Wren would like that. So, hello from the thyme.", "id": "123mmn2", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I grow herbs on the bunk windowsill for the galley. The basil's a bit of a show-off.", "id": "ppudtp", "tone": "funny", "tier": [1, 4]},
@@ -18452,6 +18578,11 @@ const VOICE = {
       "feel": [
         {"text": "Did the boat sums again. Still short. It'll come.", "id": "1curd5g", "mood": "low"},
         {"text": "New thing for the boat. A little stove. Don't laugh. It's a very good stove.", "id": "14qzy15", "mood": "high"},
+        {"text": "Packing. The boat fund comes with me. Obviously.", "id": "104rzjs", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Leaving. Short version: it was good. The boat's nearer.", "id": "zybw2i", "leaving": "you", "tier": [1, 4]},
+        {"text": "You let me talk about the boat. Every time. You can sail in it. Once. Maybe.", "id": "2wb0va", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hey. New? Main storage is on Deck 5, past the board. You'll live in there.", "id": "1i2fck5", "tier": [0, 0]},
@@ -18472,6 +18603,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Picture it: the boat, Hesper Dock, morning, rain on the deck. Just me and a kettle.", "id": "14exn6e", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Four hundred and ten stars now. The boat fund's at three quarters. Not long.", "id": "qp379q"},
+        {"text": "Saw the Hesper Dock lights from the window. Nearly cried. Didn't. Boat's nearly paid for. Hello.", "id": "1vwq6qe", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I'm saving for a boat on Hesper Dock. Small. Blue. No name yet. Every name's wrong.", "id": "yo6kk6", "tier": [1, 4]},
@@ -18628,6 +18763,11 @@ const VOICE = {
       "feel": [
         {"text": "Long watch. Coil three was shy all night. I sat with her. That's allowed.", "id": "74qkza", "mood": "low"},
         {"text": "Coils sang all night. All three. I played along on the table. Sorry, Petra.", "id": "1wctuq8", "tone": "funny", "mood": "high"},
+        {"text": "Packing! Sorry, packing. The notes for the coils go in first. Anyway.", "id": "9ele6d", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Oh! I'm leaving. Soon. Sorry. Look after coil three. Anyway.", "id": "1x2d5vq", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never minded me talking. About the cat. Or the coils. Thank you. Anyway. Thank you.", "id": "h9xfcd", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh! Hi. Reyes, nights, engines. If the coils hum funny after ten, that's me. Anyway.", "id": "1ob3mis", "tier": [0, 0]},
@@ -18648,6 +18788,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "I play in the music room after shift. Nobody's awake to mind. Ideal.", "id": "1ls1glc", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. New coils. One of them's shy. Obviously. My neighbour says the cat's well. Anyway, hello.", "id": "19pbuxd"},
+        {"text": "I still leave notes at shift change. Nobody here writes back yet. Tell Zeke coil three was always shy. Anyway.", "id": "1hfh97x", "tier": [3, 4]},
       ],
       "life": [
         {"text": "My cat back home is furious about the tour. My neighbour writes to tell me. Often.", "id": "1pmcqeb", "tone": "funny", "tier": [1, 4]},
@@ -18940,6 +19084,11 @@ const VOICE = {
       "feel": [
         {"text": "No Veyli word today. I couldn't make one stick. Tomorrow.", "id": "7ygmnr", "mood": "low"},
         {"text": "Two Veyli words today, in a sentence. The Envoy nodded. I think it was a good nod.", "id": "13ruats", "mood": "high"},
+        {"text": "Packing! Race you to the shuttle. Kidding. Mostly.", "id": "1t9yzj9", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving soon. Here's a Veyli word for goodbye. I've forgotten it. Sorry.", "id": "tuhtv4", "leaving": "you", "tier": [1, 4]},
+        {"text": "Thanks for racing me. And losing. Sometimes. Mostly I lost. Thanks anyway.", "id": "1ekn0yf", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hello! You're new. The board's numbers update every hour. First to a job gets it. Go!", "id": "1b0selu", "tier": [0, 0]},
@@ -18960,6 +19109,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "The first star of the evening. I look for it every night. I've never missed it once.", "id": "1evm6w8", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship's observatory has no tiny telescopes. Mine's the only one. I've made friends with it. Still calling home Tuesdays.", "id": "3gpqe1"},
+        {"text": "I learnt the Veyli word for goodbye. It's long. I practised it on the window. It means something like 'see you'. So: that.", "id": "130kj7s", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I brought a telescope from home. It's the smallest at observatory night. And the best.", "id": "gynjpy", "tone": "funny", "tier": [1, 4]},
@@ -19028,6 +19181,11 @@ const VOICE = {
       "feel": [
         {"text": "No letter from the Halcyon this week. It'll come. Relays are slow.", "id": "kofb9c", "mood": "low"},
         {"text": "Letter from my twin. Good news. I'll read it out at tea. All four pages.", "id": "sz7fkc", "mood": "high"},
+        {"text": "Packing. Slowly. No rush. There's never a rush.", "id": "r2370q", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon. No rush, though. Take your time saying goodbye.", "id": "1fnd4fk", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never rushed me. I noticed. Thank you. That's rarer than you'd think.", "id": "1f5ayoo", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hello, hello. New? Take your time. Nobody's hurried down here. The coils don't like it.", "id": "h9d5yj", "tier": [0, 0]},
@@ -19048,6 +19206,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "My twin's letters come in episodes. I read one a week. Saves the good bits.", "id": "10h7ycp", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "The Halcyon! My twin and I are on the same shift. The crew think it's very funny. The set, they call us. Still.", "id": "1k0onjj"},
+        {"text": "Episode forty of my twin's news: we're both here now. It's less of a serial. More of a sitcom. Hello.", "id": "ctq1d9", "tier": [3, 4]},
       ],
       "life": [
         {"text": "My twin's on the Halcyon. So are Navarro's and Nakamura's. They find it hilarious.", "id": "w7ojk9", "tone": "funny", "tier": [1, 4]},
@@ -19430,6 +19592,11 @@ const VOICE = {
       "feel": [
         {"text": "Machine purred all morning. Nobody queued. Good day.", "id": "t4ospo", "mood": "high"},
         {"text": "Long day. The machine and I aren't speaking.", "id": "1mf72jc", "tone": "funny", "mood": "low"},
+        {"text": "Packing. The coffee machine will miss me. Not you. The machine.", "id": "mpavqa", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Oh. Hi. I'm leaving. ...It was good. That's all.", "id": "1v9p7kw", "leaving": "you", "tier": [1, 4]},
+        {"text": "You never minded the quiet. Good company, quiet. Thanks.", "id": "108rzc", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh. Hi. Shah, Watch. Coffee machine's on Deck 3. If it's broken, I'm near.", "id": "1d0k6n1", "tier": [0, 0]},
@@ -19448,6 +19615,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "A coffee machine that works. Sounds small. At six in the morning, it's everything.", "id": "1u7t7i0", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Coffee machine works. Because of me. Took a day. Hello.", "id": "b9rasf"},
+        {"text": "Looked for my parent's name on the new ship's crew lists. Not there. Fine. Coffee's good. Hello.", "id": "o1gffd", "tier": [3, 4]},
       ],
       "life": [
         {"text": "My parent served on the Wren, a long time back. Watch, too. Big boots.", "id": "123l3yf", "tier": [1, 4]},
@@ -19518,6 +19689,11 @@ const VOICE = {
       "feel": [
         {"text": "Grey day. In my head, I mean. The ship's the same as always.", "id": "1ot5oo9", "mood": "low"},
         {"text": "The sprinklers ran in the garden this morning. I stood under the edge. Nearly rain.", "id": "1w2ce7h", "mood": "high"},
+        {"text": "Packing. Slowly. Second tea first. Then packing.", "id": "1tmbejp", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Oh, hello. I'm off soon. Mind the weather in the corridors.", "id": "16ngdid", "leaving": "you", "tier": [1, 4]},
+        {"text": "Mm. You were good company in the mornings. Even before the second tea.", "id": "18ogmtk", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Oh, hello. Filters are my thing. If one's clogged, the board will say. Then it's mine.", "id": "z43yhq", "tier": [0, 0]},
@@ -19538,6 +19714,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Rain on a window, on Coriel. If you ever go, sit by a window. That's all. Just sit.", "id": "ibn1kf", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "The new ship sounds like drizzle. I like it. The count's higher. Still counting. Mm. Hello.", "id": "nrgw1x"},
+        {"text": "Rained on the window today. Properly. Thought of the Wren, and the misting hour. Mm. Write.", "id": "nzqve0", "tier": [3, 4]},
       ],
       "life": [
         {"text": "Coriel rains nearly every day. People complain. I'd give a week's credits for one shower.", "id": "1y1vxac", "tier": [1, 4]},
@@ -19606,6 +19786,11 @@ const VOICE = {
       "feel": [
         {"text": "Lamp, oven, washer. All three today. All three. I've nothing left to grumble with.", "id": "cqxx7u", "mood": "low"},
         {"text": "Oven on Deck 3 runs like new. I won't say I'm proud. I'm a bit proud.", "id": "157ywmu", "mood": "high"},
+        {"text": "Packing. Huh. More biscuits than socks.", "id": "iymse8", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Huh. Off soon. Don't touch my tin. It's coming with me.", "id": "1xqnz65", "leaving": "you", "tier": [1, 4]},
+        {"text": "Hm. You were all right. More than all right. Have a biscuit. The good ones.", "id": "7ofddu", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Huh. New. Lamps, ovens, washers: if it's one of those, it's probably mine. Ask.", "id": "1bkodui", "tier": [0, 0]},
@@ -19626,6 +19811,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "A washer that spins first time. Not a wobble. Just spins. Best noise on the ship.", "id": "1gorw4d", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. Count's higher. Tin's full. Nobody's found it. Yet. Huh.", "id": "94skfs"},
+        {"text": "Thought about Pell finding my tin. Left a biscuit out for nobody. Old habit. Hm. Hello.", "id": "1a8ixap", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I married just before the tour. I count the days. So do Silva and Jovanovic. We compare.", "id": "1jnsegz", "tier": [1, 4]},
@@ -19975,6 +20164,11 @@ const VOICE = {
       "feel": [
         {"text": "No comic this week. Nothing funny happened. That's never true. I just couldn't see it.", "id": "3k2q2c", "mood": "low"},
         {"text": "This week's playlist is perfect. Twelve songs. Thirteen. Fine, fourteen.", "id": "101un21", "tone": "funny", "mood": "high"},
+        {"text": "Packing. Comics first. They're the valuable bit.", "id": "ilnptb", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Off soon. Keep the comics wall going. Somebody has to.", "id": "1qazic4", "leaving": "you", "tier": [1, 4]},
+        {"text": "You were in eleven of my comics. That's a record. It means you were good to draw. Cheers.", "id": "1s7pqhk", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "{hi}. New hand? Take the short jobs first. You'll look good. I didn't.", "id": "1k987ol", "tier": [0, 0]},
@@ -19995,6 +20189,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Someone laughed at the comics wall this morning. Out loud. I heard it from the corridor.", "id": "19cge53", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. No comics wall. I've started one. It's me and a cloud, so far. Tell Imani mine are better.", "id": "1tound6"},
+        {"text": "Drew the Wren from memory today. The mess, the tea corner, Calder as a very tidy cloud. You're in it.", "id": "qjuhf2", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I drew Calder as a very tidy cloud. She saw it. She said, \"Fair.\" Best day of my life.", "id": "1ui00ky", "tone": "funny", "tier": [1, 4]},
@@ -20773,6 +20971,11 @@ const VOICE = {
       "feel": [
         {"text": "A letter came from Valo. On paper. It took six weeks. Worth it.", "id": "w4sgyk", "mood": "high"},
         {"text": "Long shift. I'll write a long letter. It helps, somehow.", "id": "p2hygj", "mood": "low"},
+        {"text": "Packing. Letters first. Then the telescope. Then the rest.", "id": "1qji6w2", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm leaving soon. I'll write. On paper, slowly. As I always do.", "id": "1rjc2ry", "leaving": "you", "tier": [1, 4]},
+        {"text": "You always waited for me to finish a sentence. That's a kind thing. Thank you for it.", "id": "1f7u4dv", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hello. Ueda, Watch. You'll find me early to dinner and early to bed.", "id": "4n8x8", "tier": [0, 0]},
@@ -20792,6 +20995,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Writing letters. Proper paper, slow words. When it arrives, the news is old and lovely.", "id": "1bmy8zb", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship. The post bag is slower here. I'm learning to like it. The telescope came safe.", "id": "16wni2r"},
+        {"text": "A paper letter, for once, by Mail. The Wren's out there somewhere, in my little telescope. Hello.", "id": "1rxr1nc", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I write home to Valo every rest day, on paper. Tariq and I share the post bag.", "id": "1q4qfu9", "tier": [1, 4]},
@@ -22052,6 +22259,11 @@ const VOICE = {
       "feel": [
         {"text": "Good day! Message from home. The orange fish is fine. Bigger, even.", "id": "iu618i", "mood": "high"},
         {"text": "Bit of a flat day. But the lift worked first time! Little wins.", "id": "lh7u9d", "mood": "low"},
+        {"text": "Packing! Holt says pack the heavy things first. Holt's right.", "id": "6ka6qv", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "I'm off soon! Holt says say goodbye properly. So: goodbye. Properly.", "id": "o249f6", "leaving": "you", "tier": [1, 4]},
+        {"text": "You made the Wren feel less far from home. That's a lot. Thank you.", "id": "1cd34za", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hi hi! Vasquez, Watch. You're new! I was new once. Last Sowing. It gets better.", "id": "1h9is99", "tier": [0, 0]},
@@ -22070,6 +22282,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "News of my fish. Every message home, first question. They're doing great, by the way.", "id": "1s08djj", "tier": [2, 4]},
+      ],
+      "letter": [
+        {"text": "New ship! Mum says the fish are cheerful. Even the orange one. I'm cheerful too. Mostly.", "id": "7k0mi0"},
+        {"text": "Wrote a poem about the Wren. Nobody's seeing it. Holt's in it. Don't tell him. Hello.", "id": "1lb8311", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I keep fish back home on the Ostrander colonies. Mum feeds them. She tells me their moods.", "id": "1au6rbl", "tier": [1, 4]},
@@ -22138,6 +22354,11 @@ const VOICE = {
       "feel": [
         {"text": "Bit tired. I'll get dinner late, I think. When it's quiet.", "id": "1sc4xix", "mood": "low"},
         {"text": "Nine minutes fifty on a scrubber. Don't tell Kovac. Tell Kovac.", "id": "ejya59", "tone": "funny", "mood": "high"},
+        {"text": "Packing! Timing it. Eleven minutes so far. Personal best.", "id": "s8yooq", "leaving": "soon"},
+      ],
+      "goodbye": [
+        {"text": "Ooh, I'm leaving soon. Race you to the coffee machine one last time?", "id": "1y813zo", "leaving": "you", "tier": [1, 4]},
+        {"text": "You always played along. With the timing. And the games. Thanks for that. Really.", "id": "1bfwn8t", "tone": "warm", "leaving": "you", "tier": [3, 4]},
       ],
       "greet": [
         {"text": "Hiya. You're new. Coffee machine's in the tea corner. If it beeps twice, come and get me.", "id": "ass4mn", "tier": [0, 0]},
@@ -22158,6 +22379,10 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Press a flower right and it keeps its colour for years. Look. This one's from Sowing.", "id": "19hzkb8", "tier": [1, 4]},
+      ],
+      "letter": [
+        {"text": "New ship's coffee machine is a mystery. I've cracked it. Four minutes. Pressed a flower from their garden. Small one.", "id": "10acalz"},
+        {"text": "Timed the walk from my bunk to the mess here. Two minutes longer than the Wren. I miss the shortcut. Hello.", "id": "19p4n9f", "tier": [3, 4]},
       ],
       "life": [
         {"text": "I press flowers from the garden. Cruz hasn't noticed. Cruz has definitely noticed.", "id": "13p9gti", "tone": "funny", "tier": [1, 4]},
