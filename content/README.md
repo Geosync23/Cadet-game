@@ -138,7 +138,8 @@ the hours it could.
 skipped, so it's safe to use them.
 
 `{me}` your name, `{name}` the speaker's name, `{first}` their first name, `{nick}` what they call you,
-`{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{boss}` their chief,
+`{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{missed}` the close friend,
+partner or mentor who has left the ship ("I miss {missed}."; a line is skipped for someone who misses nobody), `{boss}` their chief,
 `{other}` the other crew member in the scene, `{thing}` what the line's memory is about (`mem:fav.lamp` gives "the lamp"), `{trad}` the tradition,
 `{machine}`, `{room}`, `{deck}`, `{dish}`, `{weekday}`, and from their roster entry `{home}`, `{family}`, `{hobby}`,
 `{since}`. In story arcs and themes use the short, line-ready forms instead (0.43.24): `{kin}` and `{lost}` (they
@@ -211,7 +212,11 @@ A: No promises.
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
-  (A outranks B), `couple` (one of the established crew couples).
+  (A outranks B), `couple` (one of the established crew couples), `best` (best friends), `mentor` (one mentors the
+  other, either way). lines_check knows these words.
+- **Goodbyes** (0.43.27): a conversation with `leaving:soon` is someone's goodbye before they leave the ship. When the
+  person leaving is near you with someone close by, their goodbye plays first, whatever the usual odds, once per pair.
+  Give it a pair (`? leaving:soon pair:best|mentor|friend|couple`) so it's said to the right person.
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
 - In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
   or so, A and B taking turns. `act:`, `place:` and `deck:` are where speaker A is and what they're doing. Once you've
