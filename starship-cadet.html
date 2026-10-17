@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.69
+   STARSHIP CADET: CSV Wren                           build 0.36.70
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.69';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.70';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -26491,6 +26491,8 @@ function socBorn(h, rooms) {
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
+const RIVAL_COOL = .4, RIVAL_FLOOR = -45, RIVAL_HEAL = -25, RIVAL_HEAL_DAYS = 2;   // A12: clashing pairs cool a point in 40% of their hours together, no lower than -45; below -25, a point back every other night
+function socHeal(h) { if ((Math.floor(h / 24) + 1) % RIVAL_HEAL_DAYS) return; const a = SHIP.aff; for (let x = 0; x < a.length; x++) if (a[x] < RIVAL_HEAL) a[x]++; }   // time heals: a falling-out eases unless they keep meeting
 const socHr = h => ((h % 24) + 24) % 24;               // the hour of the day, also on Day 0 (negative ship hours)
 let SOC_IN = null;                                      // the hour socialHour is running (SHIP.social.hour is already the next one)
 function socialHour(h) {
@@ -26515,7 +26517,7 @@ function socialHour(h) {
       pairs.push([i, j]);
       const x = pairIdx(i, j), v0 = aff[x], u = schedU(ps, h, 606), clash = socClash(crew[i], crew[j]);
       let v = v0;
-      if (!clash && v < 90 && u < .7 && (v >= 60 || (FR[i] < CAP[i] && FR[j] < CAP[j]))) v++; else if (clash && v > -60 && u < .4) v--;
+      if (!clash && v < 90 && u < .7 && (v >= 60 || (FR[i] < CAP[i] && FR[j] < CAP[j]))) v++; else if (clash && v > RIVAL_FLOOR && u < RIVAL_COOL) v--;
       aff[x] = v;
       const key = i + '-' + j, P = SHIP.social.pairs;
       if (v0 < 60 && v >= 60 && P[key] !== 'f') { P[key] = 'f'; socPairNews(i, j, true, t); }
@@ -26538,7 +26540,7 @@ function socialHour(h) {
   socBorn(h, rooms);
   socCourtesy(h, rooms);
   if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
-  if (socHr(h) === 4) memFade();
+  if (socHr(h) === 4) { memFade(); socHeal(h); }
   if (socHr(h) === 19) socCrewGift(h);
   if (socHr(h) === 7) { socTransfers(h); socInvites(h); socGuideDay(h); }
   if (socHr(h) === 15) socGuideMail(h);
