@@ -32,3 +32,118 @@
 == joy
 ? tier>=acquaintance
 - A rest-day bake that passes Brennan's inspection. Best feeling on the ship.
+
+== about
+? aff:santos-zofia:friend
+- Zofia's a menace. Best bunkmate I've had. Don't repeat that.   #warm
+
+// Writer-commons, batch 5: towards 60 (a bunkmate). Off Sun, Mon; early to bed, lingers at meals; bakes on rest
+// days (Brennan inspects); keeps a lost-property box (thinks it's the only one).
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- Morning. You slept. Good. Lights out works. I keep telling people.
+? tier>=acquaintance time:morning
+- {hi}. Messages go out on the hour. I'm on the hour. You're on the half. Close enough.   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}. Long dinner. Best part of the day. Sit, if you're staying.
+? tier>=acquaintance time:night
+- Why are you up? Lights out was ages ago. Twenty minutes. Ages.   #funny
+? tier>=colleague warmth:cold
+- Oh, you're back. I'd started a lost-property tag for you.   #funny
+? tier>=colleague weekday:sun|mon
+- {hi}. Day off. I'm baking. Don't come in. Do come in later. With a plate.
+? tier>=close
+- {hi}, {nick}. I saved you the corner piece. Corners are the best bit. Fact.   #warm
+
+== bye
+? tier>=acquaintance
+- {bye}. Lights out at ten.
+- See you. Don't leave your socks on the floor. They end up in my box.
+? tier>=colleague time:evening
+- I'm off to bed. Yes, already. Some of us have standards.   #funny
+? tier>=friend
+- Night, {me}. Good talk. Don't tell Zofia I said so. She'll gloat.   #warm
+
+== feel
+? mood:ok
+- Fine. Steady. Messages went out. Nothing exploded. A good day, by my measure.
+? mood:high tier>=colleague
+- Brennan ate a whole slice of my bake. A whole one. That's never happened.
+? mood:low tier>=friend
+- Early night for me. Earlier than early. Don't worry. I'm just tired.
+
+== near
+? act:work
+- Sorting the post. No reading over my shoulder. Zofia does. I tell her off. Then I look.   #funny
+? act:meal
+- I take my time over dinner. It's the only part of the day nobody can hurry.
+? deck:4 time:evening
+- Bunk 1 tidy check. Yours is fine. Tomas has folded his socks again. Bless him.
+? act:leisure
+- Lost-property box. One left glove, a scarf, and a very sad sock. I'll find their people.
+
+== life
+? tier>=acquaintance
+- I bake on rest days. Brennan lends me one oven, then inspects. An exam with crumbs.   #funny
+? tier>=colleague
+- Zofia gossips, I disapprove. Then I ask how it ended. It's a system.   #funny
+? tier>=colleague
+- I like routines. Bed at ten. Up at six. Bake on Sundays. You know where you are.
+? tier>=friend
+- Home's a long way off. Baking helps. My kitchen smells like my gran's for an hour.   #warm
+
+== joy
+? tier>=colleague
+- The moment Brennan picks up a slice and nods. Best moment of my week.
+
+== invite
+? trad:film tier>=acquaintance
+- Film night? I'll come for the first half. Then bed. Wake me if anything explodes.   #funny
+? tier>=colleague weekday:sun
+- I'm baking. Come and lick the spoon. Don't tell Brennan. Hygiene.   #funny
+? tier>=friend time:evening
+- Long dinner tonight? Bring a story. I'll bring pudding.
+
+== accept
+- Fine. I'll be there. Until ten.   #funny
+- Sure. I'll bring a bake. If it passes inspection.
+
+== decline
+- Can't. It's half nine. You know the rule.   #funny
+- Not tonight. Early start. Another time? A sensible time?
+
+== missed
+- You didn't come. I kept a slice. It's slightly stale now. Like my patience. Kidding.   #funny
+- Missed you earlier. No harm done. You know where to find me. In bed by ten.
+
+== birthday
+? birthday:me
+- It's my birthday. I baked my own cake. It passed. Brennan nodded twice.   #funny
+? birthday:you
+- Happy birthday! I baked. Don't argue. Eat it. It passed inspection.   #warm
+
+== hint
+- Got a minute? Before ten, ideally.   #funny
+
+== week1
+? week1:true tier<=acquaintance deck:4
+- You're new. Welcome to Bunk 1. Lights out at ten. Everything else, ask Tomas. Or me.
+
+== greet
+? tier>=acquaintance act:work
+- {hi}. On the hour, every hour. Don't distract me. Distract me at five past.   #funny
+? tier>=friend time:evening
+- There you are. Dinner's better with company. Even the stew.
+
+== near
+? act:breakfast
+- Breakfast at six sharp. The porridge is best before half past. Trust me on this.
+? deck:3 act:leisure
+- I'm reading. Not a mystery. Mysteries keep me up. I don't do up.   #funny
+
+== life
+? tier>=acquaintance
+- Tomas thinks I'm strict. I'm not strict. I'm right at ten o'clock every night.   #funny
+? tier>=colleague
+- There's a lost-property box. Mine. The only one. Thea Grieve gave me a very odd look.   #funny
