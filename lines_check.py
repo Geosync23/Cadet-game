@@ -57,9 +57,9 @@ BANNED = [
 ]
 # romance said to you (the user: none with the player). Crew couples may speak of each other in overheard conversations,
 # so these are errors in every player-facing line (chat, moments, replies, meetings, Mail) but not in overheard banks
-BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmarried\b', r'\bmy heart\b',
+BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry me\b', r'\bwill you marry\b', r'\bmy heart\b',
                  r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
-                 r'\bwedding\b', r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al)\b']
+                 r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b']   # "married", "wedding": family lines need them
 # aimed at you: banned even in lines about crew couples
 BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
                  r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
@@ -239,7 +239,12 @@ def main(argv):
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
         bonds = ' '.join(str(x) for x in (e.get('bond') if isinstance(e.get('bond'), list) else [e.get('bond', '')]))
-        about_crew = src == 'convo' or kind in CREW_ABOUT_CREW or 'couple' in bonds or 'partner' in bonds
+        # couple words are allowed only about crew: in an overheard conversation between a couple (pair:couple or bond:couple),
+        # or a crew-about-crew line, and never with a reference to you in it ({me}, the new hand, cadet; "you" too, except
+        # between the two speakers of an overheard conversation)
+        couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
+        at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadet\b", low) or (src != 'convo' and re.search(r"\byou(?:r|rs)?\b", low))
+        about_crew = not at_you and ((src == 'convo' and couple) or (src != 'convo' and (kind in CREW_ABOUT_CREW or couple)))
         romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
         for b in BANNED + romance:
             m = re.search(b, low)
