@@ -25,3 +25,55 @@
 == joy
 ? tier>=colleague
 - Bread on a rest day. The galley smells of it and everyone walks a bit slower past.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Why was the sample so calm? It was well preserved.   #funny
+? tier>=acquaintance warmth:cold
+- Oh, hi, {me}. It's been a while. I've got six jokes saved. Sit down.   #funny
+
+== bye
+- Bye! Mind your step. That's not a joke. The deck's wet.
+
+== near
+? habit:evening-shower
+- Shower, then bed. Early bake tomorrow. Bread waits for no one.
+? place:mess
+- Is that my bread? It is. Brennan put it out. Don't tell me if it's good. Tell me.   #funny
+
+== invite
+- Tasting night? Brennan's letting me bring a loaf. Come and be honest. Kindly.
+
+== accept
+- Yes! Oh. Yes. I'll bring bread.
+- Yes, please. I'll save you a crust. The good end.
+
+== decline
+- Not tonight. Early bed. Big bake tomorrow. Another time?
+? weekday:wed|thu
+- Rest day. Brennan's given me an oven. One oven. I'm not leaving it. Friday?   #funny
+
+== missed
+- You missed it. And the bread. The bread was very good. I'm sorry for you.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I baked a small loaf. Your initial's on the crust.   #warm
+? birthday:me
+- My birthday. Nils told no joke at breakfast, as a present. Best breakfast ever.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I've taken my loaf out early. It'll be fine. It'll be fine.
+
+== hint
+- {me}. Have you a minute later? I'd like to say something. Not a joke.
+
+== about
+? aff:lemaire-nils:friend
+- Nils thinks we're rivals. We are. He's also my favourite person at breakfast.   #warm
+
+== life
+? tier>=friend
+- I was so quiet my first month. Then I told a joke at breakfast. Never looked back.   #funny

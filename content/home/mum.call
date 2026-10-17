@@ -121,21 +121,22 @@ them: It holds tea. Mostly. Every time you drink from it, that's me saying "Are 
   + them: Thank you for ringing, every time. The house isn't quiet any more. It's got clay in it. And you, on the line.   [listen]
 them: Off you go. Ship to run. I love you. Gran says she does too. Louder than that.
 
-// ---- what you can tell her on a call (social B offers 2-3 whose condition holds, newest first). Condition names
-// marked (?) are for social B / the dialogue engineer to confirm or map.
+// ---- what you can tell her on a call (social B offers 2-3 whose condition holds, newest first). A condition lasts
+// until the next `?` line; a bare `?` means anyone, any time. came:any fills {trad}, friend:any fills {friend}.
 == send
-? flag:intro.soloJob (?)
+? flag:intro.soloJob
 - I did my first job on my own. Start to finish.   flavour:share
   them: On your own! Oh, pet. I'm telling the whole bus.
 ? cue:event.ionStorm.afterglow
 - We had an ion storm. Everyone was fine. It was loud.   flavour:share
   them: A storm? In space? Is that allowed? You're fine? Good. Wear a jumper.
-? came:any (?)
+? came:any
 - We had a {trad} on the ship. I went.   flavour:share
   them: You went! Good. Did you talk to anyone? Course you did.
-? friend:any (?)
+? friend:any
 - I've made a friend. {friend}. You'd like them.   flavour:share
   them: {friend}. Say hello from me. Feed them a biscuit. Is that allowed?
+?
 - I'm eating. I promise.   flavour:cheer
   them: Promise properly. Vegetables count. Biscuits don't.
 - Tell me about home.   flavour:listen

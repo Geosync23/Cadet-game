@@ -25,3 +25,57 @@
 == joy
 ? tier>=colleague
 - Pressed flowers. Cruz pretends not to see me pick them. I press them in the chart books.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Box check done. Seven things in, two out. Busy night for losing.
+? tier>=acquaintance warmth:cold
+- {me}. Haven't seen you. I nearly filed you under "missing". Nearly.   #funny
+
+== bye
+- {bye}. If you lose anything: Deck 2. The good box.
+
+== near
+? place:chartroom
+- Chart room. I press flowers in the old chart books. They're heavy. It works.
+? place:lounge
+- The lounge. I'm not here to talk. I'm here to look busy near people.   #funny
+
+== invite
+- Tiles tonight? I'll win. Twice. Come anyway.   #funny
+? tier>=acquaintance
+- Garden after shift? I'll show you which flowers press best. Don't tell Cruz.
+
+== accept
+- Fine. Yes. I'll be there. I'll label the time.   #funny
+- Yes. Good. Thanks.
+
+== decline
+- Not tonight. Box audit. Someone put a sock in the wrong box. Another night.   #funny
+? weekday:mon|tue
+- Rest day. I'm pressing flowers. Very slowly. Wednesday?
+
+== missed
+- You didn't come. I filed it. Under "next time".
+
+== birthday
+? birthday:you
+- Happy birthday. Here. A pressed flower. Labelled. Twice.   #warm
+? birthday:me
+- My birthday. Someone left a present in my box. Lost property. I found it, obviously.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Things will fall off shelves. They'll end up in boxes. Mine, ideally.   #funny
+
+== hint
+- {me}. Got a minute later? There's something I'd like to say. No filing involved.
+
+== about
+? aff:kim-yusuf:friend
+- Kim labels things twice now. My doing. I've never been prouder of anyone.   #funny
+
+== life
+? tier>=friend
+- The box is silly, I know. But everything in it belongs to someone. I like that.
