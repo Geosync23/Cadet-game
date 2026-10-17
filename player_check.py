@@ -580,13 +580,13 @@ with sync_playwright() as pw:
     check(ran >= 1, 'treadmills: at least one free to run on')
     g.ev("actEnd(true); player.stop()")
 
-    print('Squeezing past settled crew (the galley plant, Deck 3):')
-    sq = g.ev(r"""(() => { const blocker = { settled: true, spot: { onTile: true, walk: [39, 4], pose: 'work', x: cellPos(39, 4).x, z: cellPos(39, 4).z }, x: cellPos(39, 4).x, z: cellPos(39, 4).z,
+    print('Squeezing past settled crew (the galley plant, Deck 3):')   # the chef on [39,3]: [39,4] is shared by two places, where sim 0.26.36's crew step aside instead (0.28.40)
+    sq = g.ev(r"""(() => { const blocker = { settled: true, spot: { onTile: true, walk: [39, 3], pose: 'work', x: cellPos(39, 3).x, z: cellPos(39, 3).z }, x: cellPos(39, 3).x, z: cellPos(39, 3).z,
         goalId: 'test', p: { name: 'Test Brennan', role: 'Chef', id: 'test' }, update() { return true; }, remove() {}, h: { set() {} } };
       window.__blocker = blocker; DECK_CREW.push(blocker);
       const goal = [39, 1], here = player.here(), avoid = occupiedBy(player);
       const walled = !findPath(here, goal, avoid, player), went = playerGo(goal);
-      return [walled, went, player.path.some(c => c[0] === 39 && c[1] === 4)]; })()""")
+      return [walled, went, player.path.some(c => c[0] === 39 && c[1] === 3)]; })()""")
     print('  walled off without squeezing, path found, through the chef\'s tile:', sq)
     slow = 1
     for k in range(400):
