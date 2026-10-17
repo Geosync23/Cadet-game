@@ -4,8 +4,10 @@
 #   the home screen shows the time and a tile for every app, with badges (unread mail on the Mail tile and the button)
 #   tapping a tile opens the app; Back goes home; Close and the button close it; deviceOn('open' / 'close') fire once each
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
-#   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
+#   heads-ups (0.35.29, were the calendar reminders): traditions, appointments, meals; a queue, busy, Go there, tap, off;
+#   Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
+#   Play on a message from home (0.35.27); the Needs page's icons, colours and short effect lines (0.35.28)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
@@ -101,26 +103,55 @@ def run(path):
               const toast = document.getElementById('tx').textContent; deviceShow('wallet'); deviceShow('home');
               return [t, toast, !!document.querySelector('#devBody .app[data-app="wallet"] b')]; })()""")
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
-            # calendar reminders: about 30 ship minutes before a tradition; a toast off shift, a quiet badge on shift,
-            # none for one marked Don't; Remind me chirps even on shift
-            rm = g.ev("""(() => { const t0 = shipNow(), d = SHIP.time.day, R = SHIP.device.calendarRemind, out = {};
+            # heads-ups (0.35.29, built on the calendar reminders): R.ahead (15) ship minutes before a tradition, the strip off
+            # shift and a quiet Calendar badge on shift; nothing earlier; none for Don't; Remind me shows even on shift
+            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15;
               const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
-              const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min };
-              const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; DEV_REMINDED.clear(); delete DEV.notes.calendar;
-                document.getElementById('tx').textContent = ''; devTickMin = -1; f && f(); deviceTick(); return [DEV.notes.calendar || 0, document.getElementById('tx').textContent]; };
-              out.kind = x.kind; out.when = devWhen(x.at);
-              out.before = at(x.at - 25); out.early = at(x.at - 45);
-              R.per[x.kind] = false; out.dont = at(x.at - 25);
-              const onShift = (x.at % 1440) - 25 >= DEV_SHIFT.from && (x.at % 1440) - 25 < DEV_SHIFT.to;
-              R.per[x.kind] = true; out.remind = at(x.at - 25); delete R.per[x.kind];
+              const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min }, hu = () => document.getElementById('devHu');
+              const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; devHeadsReset(); delete DEV.notes.calendar;
+                devTickMin = -1; f && f(); deviceTick(); const h = hu(), shown = !!h && !h.hidden && HU_Q.some(q => q.title === x.title); return [DEV.notes.calendar || 0, shown ? h.textContent : '']; };
+              out.kind = x.kind; out.title = x.title;
+              out.before = at(x.at - 10); out.early = at(x.at - 25);
+              R.per[x.kind] = false; out.dont = at(x.at - 10);
+              const onShift = (x.at % 1440) - 10 >= DEV_SHIFT.from && (x.at % 1440) - 10 < DEV_SHIFT.to && devShiftOn(Math.floor(x.at / 1440) + 1);
+              R.per[x.kind] = true; out.remind = at(x.at - 10); delete R.per[x.kind];
               out.onShift = onShift;
-              SHIP.time.day = save.day; SHIP.time.min = save.min; DEV_REMINDED.clear(); delete DEV.notes.calendar; devTickMin = -1; return out; })()""")
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); delete DEV.notes.calendar; devTickMin = -1; return out; })()""")
             print('  reminders:', rm)
             if check(isinstance(rm, dict), f'reminders: {rm}'):
-                check(rm['before'][0] == 1 and (rm['onShift'] or rm['when'] in rm['before'][1]), f'a reminder 25 minutes before (a toast unless on shift): {rm["before"]}')
-                check(rm['early'][0] == 0, f'nothing 45 minutes before: {rm["early"]}')
-                check(rm['dont'][0] == 0, f"nothing for one marked Don't: {rm['dont']}")
-                check(rm['remind'][0] == 1 and rm['when'] in rm['remind'][1], f'Remind me always chirps: {rm["remind"]}')
+                check((rm['before'][0] == 1 and not rm['before'][1]) if rm['onShift'] else ('starts in 10 min' in rm['before'][1] and rm['title'] in rm['before'][1]), f'a heads-up 10 minutes before (the strip, or a badge on shift): {rm["before"]}')
+                check(rm['early'] == [0, ''], f'nothing 25 minutes before (15 ahead): {rm["early"]}')
+                check(rm['dont'] == [0, ''], f"nothing for one marked Don't: {rm['dont']}")
+                check('starts in 10 min' in rm['remind'][1], f'Remind me always shows: {rm["remind"]}')
+            # heads-ups for everything in the Schedule (0.35.29): an appointment 15 and 0 minutes before, with Go there; a meal;
+            # Meals and your shift off; one at a time (a queue); waits behind a meeting; no repeat (saved); a tap opens the
+            # Schedule; off with the switch; inside the screen on a phone
+            hu = g.ev("""(() => { const ev0 = __ev.slice(), wasOpen = DEV.open, D = SHIP.device, R = D.calendarRemind, save = { day: SHIP.time.day, min: SHIP.time.min }, keepAppts = D.appts; R.ahead = 15;
+              const el = () => document.getElementById('devHu'), txt = () => { const h = el(); return h && !h.hidden ? h.textContent : ''; };
+              const go = (m, keep) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; if (!keep) devHeadsReset(); devTickMin = -1; deviceTick(); return txt(); };
+              const d = SHIP.time.day + 2, T = (d - 1) * 1440 + 1290, pl = apptPlaces().find(x => /mess|lounge/i.test(x.name)) || apptPlaces()[0], who = apptPeople().slice(0, 2).map(p => p.id);
+              D.appts = [{ id: 901, with: [who[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }]; const nm = apptName(who[0]);
+              const out = { soon: go(T - 15) };
+              out.go = [...el().querySelectorAll('button')].map(b => b.textContent).join();
+              el().querySelector('button').click(); out.goal = typeof IX_GOAL !== 'undefined' && !!IX_GOAL && IX_GOAL.place === pl.id; out.hidden = el().hidden;
+              if (typeof clearGoal === 'function') clearGoal();
+              out.start = go(T); out.again = go(T + 1, true) === out.start && HU_Q.length === 1;
+              out.saved = deviceLoad(JSON.parse(JSON.stringify({ device: D }))).calendarRemind.heard.some(k => k.endsWith('|start'));
+              const bf = (d - 1) * 1440 + MEALS.breakfast[0]; D.appts = []; out.meal = go(bf - 15); R.everyday = false; out.mealOff = go(bf - 15); R.everyday = true;
+              D.appts = [{ id: 902, with: [who[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }, { id: 903, with: [who[1] || who[0]], at: T + 5, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
+              go(T - 10); out.queue = [HU_Q.length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
+              devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.length];
+              document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
+              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height <= 120;
+              el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
+              R.on = false; out.off = go(T - 15); R.on = true;
+              D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
+            print('  heads-ups:', hu)
+            check(hu['soon'].startswith('With ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
+            check(hu['start'].startswith('With ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
+            check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
+            check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
+            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'] == '', f'heads-up: on screen, a tap opens the Schedule, off with the switch: {hu}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
             jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
@@ -170,11 +201,41 @@ def run(path):
               const sv = JSON.parse(JSON.stringify({ device: SHIP.device })); out.push(sv.device.memos.length, deviceLoad(sv).memos.length, deviceLoad({ device: { memos: [7, null, { title: 3 }] } }).memos.length);
               SHIP.device.memos = []; return out; })()""")
             check(mm == [['Ask Pell'], True, 'Cake tonight', 2, 2, 0], f'memos: the form, pin to Home, Remember this, saved and read back, junk refused: {mm}')
+            # calls home (0.35.27, social B2): Mail from homeFolks() first under "From home"; Play while mailPlayable(m), a tap
+            # calls mailPlay(m) and closes the device on true (stays open on false); no button without them. Stand-ins
+            # when this build has no section 20c, else only the grouping and the button are checked
+            pl = g.ev("""(() => { const own = typeof mailPlay === 'function' && typeof homeFolks === 'function', got = [], ev0 = __ev.slice(), wasOpen = DEV.open;
+              const done = new Set(); if (!own) { window.homeFolks = () => ['Gran', 'Mum']; window.mailPlayable = m => m.from === 'Gran' && m.subject === 'A recorded message' && !done.has(m.id);
+                window.mailPlay = m => { got.push(m.id); if (got.length > 1) return false; done.add(m.id); return true; }; }
+              const data = own && homeFolks().includes('Gran'), H0 = own && SHIP.social.stories && SHIP.social.stories.home ? JSON.stringify(SHIP.social.stories.home) : null;
+              if (data) homeC('gran').msg = { day: SHIP.time.day, i: 0, done: false };   // with 20c's real mailPlayable: a real recorded message from Gran waiting (social B2)
+              const btns = () => [...document.querySelectorAll('#devBody button')].map(b => b.textContent);
+              mailSend({ from: 'Gran', subject: 'A recorded message', body: 'Hello, love.', quiet: true }); const m = SHIP.mail[0];
+              mailSend({ from: 'Galley', subject: 'Plain', body: 'No play.', quiet: true }); const p = SHIP.mail[0];
+              deviceShow('mail'); const t = document.getElementById('devBody').textContent; const out = { order: t.indexOf('From home') >= 0 && t.indexOf('From home') < t.indexOf('A recorded message') && t.indexOf('A recorded message') < t.indexOf('Ship mail') && t.indexOf('Ship mail') < t.indexOf('Plain') };
+              deviceDo({ app: 'mail', do: 'read', arg: p.id }); out.plain = !btns().includes('Play');
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); out.play = btns().includes('Play') && btns().indexOf('Play') < btns().indexOf('Remember this');
+              if (!own) { deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.closed = !DEV.open;
+                deviceShow('mail'); out.gone = !btns().includes('Play');
+                done.clear(); deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.stays = DEV.open; out.got = got.slice();
+                for (const n of ['homeFolks', 'mailPlayable', 'mailPlay']) delete window[n]; deviceRefresh(); const t2 = document.getElementById('devBody').textContent; out.none = !btns().includes('Play') && !t2.includes('From home'); }
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); SHIP.mail = SHIP.mail.filter(x => x !== m && x !== p); if (!wasOpen) deviceClose();
+              if (own) { if (H0) SHIP.social.stories.home = JSON.parse(H0); else if (SHIP.social.stories) delete SHIP.social.stories.home; }   // the home state as it was
+              __ev.length = 0; __ev.push(...ev0); out.own = own; out.data = data; return out; })()   // the open / close count is checked later""")
+            check((pl['plain'] if pl['own'] and not pl['data'] else all(pl.get(k) for k in ['order', 'plain', 'play'])) and (pl['own'] or (all(pl.get(k) for k in ['closed', 'gone', 'stays', 'none']) and len(pl.get('got', [])) == 2)), f'Mail: From home, Play on a recorded message: {pl}')
+            # the servery queue line says no made-up wait (0.35.27, the user: no invented numbers)
+            check('In the queue for the servery: about' not in open(sys.argv[1]).read(), 'the servery queue line has no guessed wait')
             # tips: once each, saved, off in Settings; the card closes on a tap
             tp = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const out = [tipShow('t1', 'First tip'), tipShow('t1', 'Again')];
               const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);
               D.settings.tips = false; out.push(tipShow('t2', 'Off')); D.settings.tips = true; out.push(!!D.tipsSeen.t1); D.tipsSeen = {}; return out; })()""")
             check(tp == [True, False, True, True, False, True], f'tips: once each, a tap closes, the switch: {tp}')
+            # tipSeen (0.35.26, for section 21): seen without showing; a waiting tip is dropped, the one on screen stays
+            ts = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const c = document.getElementById('devTip');
+              const out = [tipSeen('s1'), tipSeen('s1'), c.hidden, tipShow('s1', 'Never')];
+              tipShow('s2', 'On screen'); tipShow('s3', 'Waiting'); out.push(tipSeen('s3'), TIP_Q.length, tipSeen('s2'), TIP_Q.length, c.textContent.includes('On screen'), tipSeen(''), tipSeen(7));
+              c.click(); out.push(c.hidden, TIP_Q.length); D.tipsSeen = {}; return out; })()""")
+            check(ts == [True, False, True, False, False, 1, False, 1, True, False, False, True, 0], f'tipSeen: marks without showing, drops a waiting tip, leaves the one on screen: {ts}')
             # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none)
             sn = g.ev("""(() => { const own = typeof shipNews === 'function'; if (!own) window.shipNews = n => [{ text: 'The scrubber on Deck 4 is rattling.', from: 'Pell Varga', at: shipNow() - 30 }].slice(0, n);
               const out = [own, devNews().length]; deviceShow('ship'); const t = document.getElementById('devBody').textContent;
@@ -210,7 +271,7 @@ def run(path):
               const t = document.getElementById('devBody').textContent; out.push(t.includes(apptName(ps[0].id) + ', ' + apptName(ps[1].id)));
               const save = { day: SHIP.time.day, min: SHIP.time.min }; SHIP.time.day = Math.floor(at / 1440) + 1; SHIP.time.min = at % 1440 + 3;
               A[0].status = 'kept'; devTickMin = -1; deviceTick(); out.push(A[1].status);
-              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear();
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; devHeadsReset();
               A[0].status = A[1].status = 'yes'; deviceDo({ app: 'appointments', do: 'drop', arg: A[0].id }); out.push(A.map(a => a.status).join());
               D.appts = []; deviceShow('home'); return out; })()""")
             print('  group meeting:', gm)
@@ -226,6 +287,19 @@ def run(path):
             p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
             g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")   # (0.35.20: works with the real needPulse too)
             check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
+            # the needs-display redesign (0.35.28): section 15's icons and colours (amber under NEED_LOW) when it has them,
+            # short effect lines from NEED_FX's numbers, what holds you back first; nothing wider than the screen
+            nd = g.ev("""(() => { const N = SHIP.player.needs, keep = { ...N }; Object.assign(N, { hunger: 10, energy: 90, fitness: 90, hygiene: 60, social: 60, bathroom: 60 });
+              deviceShow('needs'); const body = document.getElementById('devBody'), T = [...body.querySelectorAll('p, div')].map(e => e.textContent);
+              const has = t => T.some(x => x === t), rows = [...body.querySelectorAll('.need')], own = typeof NEED_COL !== 'undefined' && typeof NEED_ICON !== 'undefined';
+              const out = { hungry: has('▼ Hungry: tasks −15%'), rested: has('▲ Well rested: tasks +15%'), fit: has('▲ Fit: walking +5%, tiring −6%'),
+                order: T.findIndex(x => x.startsWith('▼ Hungry')) < T.findIndex(x => x.startsWith('▲ ')), wide: body.scrollWidth <= body.clientWidth + 1, own };
+              if (own) { const nc = k => rows[NEED_KEYS.indexOf(k)].style.getPropertyValue('--nc');
+                out.icons = body.querySelectorAll('.need svg path').length === NEED_KEYS.length; out.amber = nc('hunger') === NEED_AMBER && nc('energy') === NEED_COL.energy; }
+              else out.plain = !body.querySelector('.need svg') && !rows.some(r => r.style.getPropertyValue('--nc'));
+              Object.assign(N, keep); deviceShow('home'); return out; })()""")
+            print('  needs page:', nd)
+            check(all(nd.get(k) for k in ['hungry', 'rested', 'fit', 'order', 'wide']) and (nd['icons'] and nd['amber'] if nd['own'] else nd['plain']), f'Needs: icons and colours, short effect lines: {nd}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
             # event's tag, the drill, the bunk tidy) within its first half hour, on its deck
@@ -380,10 +454,10 @@ def run(path):
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               // 0.35.24 (reviewer 2): rows with missing fields don't break the pages
-              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas' }); else window.keepsakes = () => [{ from: 'tomas' }, null];
-              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell' }); else window.movedOn = () => [{ id: 'pell' }, null];
-              deviceShow('wallet'); out.keepBad = !document.getElementById('devBody').textContent.includes('failed to draw');
-              deviceShow('roster'); out.movedBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas', day: null }); else window.keepsakes = () => [{ from: 'tomas', day: null }, null];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell', day: null }); else window.movedOn = () => [{ id: 'pell', day: null }, null];
+              deviceShow('wallet'); out.keepBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);   // 0.35.26: a null day isn't 'Day null'
+              deviceShow('roster'); out.movedBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['keepsakes', 'movedOn']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               deviceShow('home'); out.own = own; return out; })()""")
@@ -402,7 +476,7 @@ def run(path):
               deviceAddress({ from: 'Captain', text: 'All hands.' }); deviceAddress(null);
               deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Gather round.', choices: null, i: 0, n: 1 }, () => {}); deviceDialogue(null);
               while (TIP_Q.length) tipDone(); D.appts = D.appts.filter(a => a.id < 900); D.tipsSeen = {};
-              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear(); for (const k in DEV.notes) delete DEV.notes[k]; })()""")
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; devHeadsReset(); for (const k in DEV.notes) delete DEV.notes[k]; })()""")
             g.page.mouse.move(w / 2, h - 10); g.page.mouse.down(); g.page.mouse.move(w / 2, h - 200, steps=8); g.page.mouse.up(); g.step(2)
             self_open = g.ev("[window.__opens, DEV.open, document.getElementById('device').hidden]")
             check(self_open == [0, False, True], f'the device never opens by itself (a day of reminders, tips, notices, an address, a dialogue, an invitation; a drag up from the bottom): {self_open}')
