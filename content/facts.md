@@ -335,7 +335,7 @@ stories. These are the facts to keep straight.
 
 - **Zeke Torres** (Works engine officer, cabin 4-14 "the one with the music"; short, blonde, bearded; curious,
   ambitious). Meets you off the Tern on Day 0 and trains you in your first week. Talks to the drive coils; coil three
-  sulks. Knits (the knitting circle; your scarf). Knows every song in the record cabinet (he says). Skips breakfast for
+  sulks. Knits (the knitting circle; your scarf). Knows every song in the record cabinet (he says). Last in to breakfast:
   ten more minutes with the coils. Passed over twice for Engine Specialist. His father, also an engine man, lives back
   home and is losing his memory (arc only: never before it opens).
 - **Chief Ines Calder** (Head of Works, cabin 2-O, the glass office on Deck 5). Exacting, fair, dry. Started as a
