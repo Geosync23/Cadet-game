@@ -30,8 +30,11 @@
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
+#   --long (0.28.41, the lead's save budget): only this: the whole save from the real arrival (newGameStart(true)) to
+#   day 280 (or --long N), skipTo ten hours at a time, measured after each day's 06:00; prints the size and the biggest
+#   parts every 10 days and fails if it ever passes SAVE_BUDGET (250 KB). About two minutes on a combined build.
 # Setup and environment as for cadet_test.py.
-# Run:  python3 player_check.py BUILD.html
+# Run:  python3 player_check.py BUILD.html  [--long [DAYS]]
 import sys, json, pathlib
 exec(open(__file__.replace('player_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
@@ -142,6 +145,47 @@ def body_check(name, need, gain, before, end, seen, pose):
     if pose: check(any(a[2] == 'do' and a[3] in ((pose,) if isinstance(pose, str) else pose) for a in seen), f'{name}: pose {pose} not taken ({sorted(set(str(a[3]) for a in seen))})')
     if need: check(end['needs'][need] >= min(99.5, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
     check(end['visible'] and not end['act'], f'{name}: not back on your feet ({end})')
+
+SAVE_BUDGET = 250 * 1024                                  # the whole save at any point to day 280 (the lead, 0.28.41)
+SAVE_SIZE = r"""(() => { saveGame(); const raw = localStorage.getItem(SAVE_KEY) || '', s = JSON.parse(raw || '{}'), out = { total: raw.length };
+  for (const k in s) { if ((k === 'ship' || k === 'player') && s[k] && typeof s[k] === 'object') { for (const j in s[k]) out[k + '.' + j] = JSON.stringify(s[k][j]).length; } else out[k] = JSON.stringify(s[k]).length; }
+  return JSON.stringify(out); })()"""
+def save_budget(pw, path, days):
+    """the whole save from the real arrival to day `days`: the largest size seen, and its parts"""
+    tmp = WORK / 'test' / '_save_budget.html'; tmp.write_text(instrument(pathlib.Path(path).read_text()))
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    page = b.new_page(viewport={'width': 600, 'height': 500}); errs = []
+    page.on('pageerror', lambda e: errs.append(f'pageerror: {e}'))
+    page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    page.add_init_script(INIT)
+    def load():
+        page.goto('file://' + str(tmp)); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    ev = lambda s: page.evaluate('s => window.__sc(s)', s)
+    load(); ev("localStorage.clear()"); load()                # saving on (no ?nosave), from an empty store
+    if not ev("typeof newGameStart === 'function' && typeof skipTo === 'function'"):   # this branch alone: no arrival (section 13) to start from
+        print('  this build has no newGameStart / skipTo (section 13): skipped'); b.close(); return (0, 0, {}), errs
+    print('  arrival:', ev("(() => { newGameStart(true); return JSON.stringify([SHIP.time.day, hhmm(SHIP.time.min), typeof introOn === 'function' && introOn()]); })()"))
+    worst = (0, 0, {})
+    for d in range(1, days + 1):
+        ev(f"(() => {{ const end = {d} * 1440 + 360; while (shipNow() < end) skipTo(Math.min(end, shipNow() + 600)); }})()")
+        sz = json.loads(ev(SAVE_SIZE))
+        if sz['total'] > worst[0]: worst = (sz['total'], d, sz)
+        if d % 10 == 0 or d == days:
+            top = sorted(((v, k) for k, v in sz.items() if k != 'total'), reverse=True)[:6]
+            print(f"  day {d:3d} {sz['total'] / 1024:6.1f} KB  biggest: " + ', '.join(f'{k} {v / 1024:.1f}' for v, k in top), flush=True)
+    ev("localStorage.clear()"); b.close()
+    return worst, errs
+
+if '--long' in sys.argv:
+    k = sys.argv.index('--long'); days = int(sys.argv[k + 1]) if len(sys.argv) > k + 1 and sys.argv[k + 1].isdigit() else 280
+    print(f'The whole save, from the real arrival to day {days} (budget {SAVE_BUDGET // 1024} KB):')
+    with sync_playwright() as pw:
+        (big, day, parts), errs = save_budget(pw, sys.argv[1], days)
+    print(f'  largest: {big / 1024:.1f} KB on day {day}:', ', '.join(f'{k} {v / 1024:.1f}' for k, v in sorted(parts.items(), key=lambda x: -x[1]) if k != 'total' and v >= 512))
+    check(big <= SAVE_BUDGET, f'the whole save passed {SAVE_BUDGET // 1024} KB: {big / 1024:.1f} KB on day {day}')
+    if errs: fail('page errors: ' + '; '.join(errs[:3]))
+    print('SAVE BUDGET OK' if ok else 'SAVE BUDGET FAILED')
+    sys.exit(0 if ok else 1)
 
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
