@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.22
+   STARSHIP CADET: CSV Wren                           build 0.38.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7015,12 +7015,12 @@ function ternHinge(P) {                                  // the kit hands over t
 }
 // 0.38.20: extra seats for the Sunday table and the harvest supper (the mess seats 44; they want up to 50 and 57): a chair at
 // each end of the four long tables, and a trestle table with two benches on the promenade just outside the mess's west
-// doors. 13 places `3-longtable-1..13`, type 'event' with event: 'long-table': they're there every day but nobody uses
+// doors (five a side; 0.38.23). 14 places `3-longtable-1..14`, type 'event' with event: 'long-table': they're there every day but nobody uses
 // them unless a tradition's where: names them; DECK_DRESS.longTables and .harvestTables draw the chairs and the trestle
 // while the tradition is on (MESS_EXTRA lists the furniture, room-local to the mess hall).
-const MESS_EXTRA = { heads: [[.42, 1.0, 1], [.42, 4.0, 1], [9.58, 1.0, -1], [9.58, 4.0, -1]], trestle: [3.5, 10.5, 3.0] };   // heads: [x, z, the way they face (+1 east)]; trestle: [x, z, length]
+const MESS_EXTRA = { heads: [[.42, 1.0, 1], [.42, 4.0, 1], [9.58, 1.0, -1], [9.58, 4.0, -1]], trestle: [3.5, 10.5, 3.0], block: [[25, 10], [26, 10], [27, 10]] };   // heads: [x, z, the way they face (+1 east)]; trestle: [x, z, length]; block: the trestle's tiles (deck tiles), blocked while it's out
 DECKS[3].places.push(...[[23.42, 1.0, 90], [23.42, 4.0, 90], [32.58, 1.0, -90], [32.58, 4.0, -90]].concat(
-  [25.4, 26.13, 26.87, 27.6].flatMap(x => [[x, 9.95, 0], [x, 11.05, 180]]), [[28.4, 10.5, -90]]).map(([x, z, f], k) =>
+  [25.3, 25.9, 26.5, 27.1, 27.7].flatMap(x => [[x, 9.95, 0], [x, 11.05, 180]])).map(([x, z, f], k) =>
   ({ id: '3-longtable-' + (k + 1), type: 'event', event: 'long-table', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'sit', y: .47, room: z < 9 ? 'M' : '=' })));
 DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
 DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
@@ -7043,7 +7043,8 @@ function visitSpots(id) {
 // ---- Event dressing and traces (Pillar 3, C9, 0.38.1; plans/pillar3-plan.md "How outcomes are scored", "How you learn") ----
 // Props that appear only while an event asks for them: sign-up sheets on the mess and Works boards, the storm crew's
 // signed roster in the Works tea corner, a scorch mark and a taped panel in Deck 1's relay room, the bow lounge party.
-//   DECK_DRESS[id] = { deck, what, make(g, o) -> the tap item { t, x, at: [x, y, z], w, h, d, front } }
+//   DECK_DRESS[id] = { deck, what, make(g, o) -> the tap item { t, x, at: [x, y, z], w, h, d, front, more?, block? } }
+//                    (more: extra floor taps with the same text; block: [[i, j], ...] deck tiles blocked while it's out)
 //   dressShow(list)  section 18 calls it (once a ship minute is plenty, like eventsDecor): list = ids, or { id, title,
 //                    lines } to write on a sheet or banner. Only the current deck's are drawn; it does nothing when the
 //                    list hasn't changed, and puts them back after a deck change. Never called: nothing shows (inert).
@@ -7191,7 +7192,7 @@ const DECK_DRESS = {
       dressBox(s, 3.3, .004, .32, '#c45a3f', x, .772, z);
       for (const dx of [-.4, .4]) { const j = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, .17, 12), dressMat('#e9e1d0')); j.position.set(x + dx, .855, z + .06); s.add(j); dressBox(s, .015, .1, .05, '#e9e1d0', x + dx + .065, .87, z + .06); }
     }
-    return { t: 'The long table', x: 'Runners down every long table, jugs of water at each one and extra seats at the ends and out on the promenade. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+    return { block: MESS_EXTRA.block, t: 'The long table', x: 'Runners down every long table, jugs of water at each one and extra seats at the ends and out on the promenade. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
   } },
   harvestTables: { deck: 3, what: 'the harvest supper: burlap runners and baskets from the garden on the long tables', make(g) {
     const s = dressAt(g, 'M', 'floor', 0, 0), C = ['#d8412f', '#f0952e']; messExtra(s);
@@ -7202,7 +7203,7 @@ const DECK_DRESS = {
         for (let i = 0; i < 5; i++) { const a = i * 1.26 + t, r = i ? .065 : 0, f = new THREE.Mesh(new THREE.SphereGeometry(i ? .038 : .045, 8, 6), dressMat(C[(i + b + t) % 2])); f.position.set(x + dx + Math.cos(a) * r, .885 + (i ? 0 : .02), z + .05 + Math.sin(a) * r); s.add(f); }
       });
     });
-    return { t: 'Harvest supper', x: 'Burlap down the long tables and baskets from the garden on every one: tomatoes, squash, whatever the beds gave. Everything on the plates tonight was grown on this deck.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+    return { block: MESS_EXTRA.block, t: 'Harvest supper', x: 'Burlap down the long tables and baskets from the garden on every one: tomatoes, squash, whatever the beds gave. Everything on the plates tonight was grown on this deck.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
   } },
   cupBoard: { deck: 3, what: 'the department cup: a chalk scoreboard on an easel and the cup on its plinth, in the gym', make(g, o) {
     const s = dressAt(g, 'F', 'floor', 0, 0), x = .5, z = 6.0;   // by the west wall, past the rowers, facing into the room
@@ -7328,6 +7329,7 @@ function dressHide(id) {
   const e = DRESS.on.get(id); if (!e) return;
   const shared = new Set(Object.values(DRESS_MATS).concat(HIT_MAT));   // the cached colours and the tap boxes' stay; a piece's own materials go (0.38.13)
   e.g.parent && e.g.parent.remove(e.g); e.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !shared.has(o.material)) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+  for (const k of e.blocked || []) BLOCKED.delete(k);
   ITEMS = ITEMS.filter(it => !e.items.includes(it)); WALL_DECOR = WALL_DECOR.filter(d => !e.decor.includes(d));
   DRESS.on.delete(id);
 }
@@ -7356,7 +7358,8 @@ function dressShow(list) {
       h2.position.set(X0(r.i0) + m.floor[1], m.y || .05, Z0(r.j0) + m.floor[2]); g.add(h2);
       const i2 = { t: it.t, x: it.x, hit: h2, g, front: 0, depth: .6, wall: false }; h2.userData.item = i2; ITEMS.push(i2); items.push(i2);
     }
-    DRESS.on.set(id, { g, item, items, decor, o: JSON.stringify(o) });
+    const blocked = (it.block || []).map(([i, j]) => i + ',' + j).filter(k => !BLOCKED.has(k)); for (const k of blocked) BLOCKED.add(k);   // 0.38.23: tiles it stands on, blocked while it's out
+    DRESS.on.set(id, { g, item, items, decor, blocked, o: JSON.stringify(o) });
   }
   if (typeof refreshPickables === 'function') refreshPickables();
 }
@@ -7421,7 +7424,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.22';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.23';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
