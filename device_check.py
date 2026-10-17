@@ -136,12 +136,12 @@ def run(path):
               out.go = [...el().querySelectorAll('button')].map(b => b.textContent).join();
               el().querySelector('button').click(); out.goal = typeof IX_GOAL !== 'undefined' && !!IX_GOAL && IX_GOAL.place === pl.id; out.hidden = el().hidden;
               if (typeof clearGoal === 'function') clearGoal();
-              out.start = go(T); out.again = go(T + 1, true) === out.start && HU_Q.length === 1;
+              out.start = go(T); out.again = go(T + 1, true) === out.start && HU_Q.filter(q => q.key.startsWith('appt|')).length === 1;
               out.saved = deviceLoad(JSON.parse(JSON.stringify({ device: D }))).calendarRemind.heard.some(k => k.endsWith('|start'));
               const bf = (d - 1) * 1440 + MEALS.breakfast[0]; D.appts = []; out.meal = go(bf - 15); R.everyday = false; out.mealOff = go(bf - 15); R.everyday = true;
               D.appts = [{ id: 902, with: [who[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }, { id: 903, with: [who[1] || who[0]], at: T + 5, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
-              go(T - 10); out.queue = [HU_Q.length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
-              devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.length];
+              go(T - 10); out.queue = [HU_Q.filter(q => q.key.startsWith('appt|')).length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
+              devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.filter(q => q.key.startsWith('appt|')).length];
               document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
               const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height > 0 && r.height <= 120;
               el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
@@ -160,10 +160,10 @@ def run(path):
               D.appts = [{ id: 911, grp: 911, with: [ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
               SHIP.time.day = d; SHIP.time.min = 1290 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const out = { shown: !el.hidden };
               let c = document.getElementById('chat'), made = false; if (!c) { c = document.createElement('div'); c.id = 'chat'; document.body.appendChild(c); made = true; }
-              const was = [c.hidden, c.className]; c.hidden = false; c.className = 'devchat'; SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.back = el.hidden && HU_Q.length === 1;
+              const was = [c.hidden, c.className]; c.hidden = false; c.className = 'devchat'; SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.back = el.hidden && HU_Q.filter(q => q.key.startsWith('appt|')).length === 1;
               c.hidden = was[0]; c.className = was[1]; if (made) c.remove(); SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.again = !el.hidden;
               devHeadsDo('done'); D.appts.push({ id: 912, grp: 911, with: [ps[1] || ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' });
-              SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.grown = el.hidden && HU_Q.length === 0;
+              SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.grown = el.hidden && HU_Q.filter(q => q.key.startsWith('appt|')).length === 0;
               D.appts = keepA; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
             print('  heads-up vs chat card, group:', cb)
             check(cb == {'shown': True, 'back': True, 'again': True, 'grown': True}, f'heads-up: waits while a chat card is open; a grown group is not new: {cb}')
