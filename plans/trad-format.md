@@ -66,6 +66,7 @@ One tradition per file, the file named after its id.
 | `decor:` | no | props on the deck while it's on (an id the traditions engineer or deck architect builds) | `decor: stalls` |
 | `ties:` | no, one per kind | what it asks of other parts of the ship (below) | `ties: garden harvest` |
 | `invite:` | no | crew may invite you (social reads it) | `invite: host=rina odds=40% line="Tiles tonight. I need a victim."` |
+| `trace:` | no | a lasting mark the first time you join it (the deck architect's DECK_DRESS id), saved with the day: Sowing morning's `seedlingYours` plants your seedling | `trace: seedlingYours` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).
 
@@ -114,7 +115,7 @@ Each is read by its owner with `tradTies(kind, day)`; ask the traditions enginee
 | --- | --- | --- |
 | `ties: galley dish=<dishId> meal=dinner batch=10` | the galley engineer | a dish or a special meal that day |
 | `ties: garden sow` / `tend` / `harvest` | the galley engineer (the garden) | the garden's part |
-| `ties: decor <id>` | the deck architect | props on its deck for the window (at most 6 draw calls) |
+| `ties: decor <id>` | the deck architect | props on its deck (a DECK_DRESS id, e.g. `tilesNight`), shown from 30 minutes before to 15 after; at most 6 draw calls |
 | `ties: tally <kind> choices=a\|b\|c` | the traditions engineer | a simple vote or score kept for a week |
 
 ## Texts
@@ -135,4 +136,4 @@ Texts go in sections, one variant per line starting with `- ` (a line may have `
 
 ## The baked shape (for content_gen.py)
 
-`const TRADITIONS = [ ... ];`, an **array**, one tradition per line, in file-name order (section 18's loader also accepts an object by id). Fields as `parse_field()` builds them and `finish()` orders them: `id, k, name, when, at, min, prio, jitter, early, where, hold, who, anim, host, from, cake, decor, ties, invite, text`. `at` in minutes from midnight; `when` as section 18's objects (`{ every: 'quarter', week, weekday }`, weekdays 0 = Monday); room names as anchored regexp source (`"^Bow lounge$"`); `hold` 0-based; `who` as `[[cond, chance], ...]`; `anim` a string or `[[cond, act or null], ...]`; texts as `text: { <section>: [{ t, tone }] }`. **The API** (frozen; the traditions engineer tells the dialogue engineer before changing it): `bake_traditions(folder)` -> the block with its markers; `read_all(folder)` -> the list; `parse_trad(text, name)` -> `[tradition]`; `parse_field(tr, key, value, where)`, `finish(tr, id, where)`, `check_all(list)`; `TradError` (messages carry file:line). Never-due rhythms (a 14th week of a season, day 400, the 0th Friday...) and bad `hold:` lines are errors. Until the block is in the build, section 18 has a stand-in, `TRAD_STANDIN`, made by `python3 plans/trad_parse.py --standin`.
+`const TRADITIONS = [ ... ];`, an **array**, one tradition per line, in file-name order (section 18's loader also accepts an object by id). Fields as `parse_field()` builds them and `finish()` orders them: `id, k, name, when, at, min, prio, jitter, early, where, hold, who, anim, host, from, cake, decor, ties, invite, text`. `at` in minutes from midnight; `when` as section 18's objects (`{ every: 'quarter', week, weekday }`, weekdays 0 = Monday); room names as anchored regexp source (`"^Bow lounge$"`); `hold` 0-based; `who` as `[[cond, chance], ...]`; `anim` a string or `[[cond, act or null], ...]`; texts as `text: { <section>: [{ t, tone }] }`. **The API** (frozen; the traditions engineer tells the dialogue engineer before changing it; content_gen.py calls only `read_all(folder)` and writes its list, one tradition a line, in section 22's markers): `bake_traditions(folder)` -> the block with its markers; `read_all(folder)` -> the list; `parse_trad(text, name)` -> `[tradition]`; `parse_field(tr, key, value, where)`, `finish(tr, id, where)`, `check_all(list)`; `TradError` (messages carry file:line). Never-due rhythms (a 14th week of a season, day 400, the 0th Friday...) and bad `hold:` lines are errors. Until the block is in the build, section 18 has a stand-in, `TRAD_STANDIN`, made by `python3 plans/trad_parse.py --standin`.
