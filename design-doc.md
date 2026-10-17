@@ -16,7 +16,7 @@ The CSV Wren is a little clockwork world: a properly simulated starship whose cr
 
 - **The ship runs itself.** Machines wear, supplies get used, crew follow shifts and do real work. The ship is never paused waiting for the player.
 - **You are one of the crew.** The simulation treats you like everyone else: same job list, same needs, same schedule, a bunk in the junior wing like every other new hand.
-- **Work is physical, not abstract.** You walk the ship, look, fetch, carry and repair. No mini-games standing in for the job.
+- **Work is physical, not abstract.** You walk the ship, look, fetch, carry and repair. No mini-games standing in for the job. Deduction puzzles are allowed as the diagnosing step of some repairs (the user, 2026-10-17, Pillar 5 Q8): the clues are found in the world (panels, logs, crew), the fix is still done by hand, and there are no timers or scores.
 - **Your work matters.** Fix the oven and breakfast is on time. Let the scrubber fail and the whole deck gets stuffy and short-tempered.
 - **You grow by going deeper.** Progression means trust and access to the ship's more important systems, from galley ovens to the reactor.
 - **Small, cozy, alive.** No combat, no fail screens. One ship you come to know like a home.
