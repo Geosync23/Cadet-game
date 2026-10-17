@@ -9,10 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.60.2 (about 30,200 lines; the writers' content is about 10,000 of them)
-## Current build: 0.43.16 (about 17,440 lines)
-## Current build: 0.43.18 (on 0.60.1, about 19,960 lines)
-## Current build: 0.43.23 (on 0.60.1, about 19,960 lines)
+## Current build: 0.60.3 (about 30,900 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
