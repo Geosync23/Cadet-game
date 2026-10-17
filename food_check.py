@@ -353,32 +353,48 @@ with sync_playwright() as pw:
     for x in tr['days']:
         if x['missed'] or x['ate'] != x['got'] or x['end']['dirty'] or x['end']['inUse'] or x['end']['wait'] or not wait_ok(x, x['mealMax']): fail(f"traditions, day {x['day']}: {x}")
 
-    # 4n. Brennan's tasting table (0.29.27): a stand-in Wednesday (tradTies 'galley' extra: 'tasting', and its 'tally')
-    # and Sunday (side: 'tasting'). 20 tastes cooked an hour before, one for each taster, the rest wasted; the week's two
-    # choices; your token (galleyVote) once, and it wins a tie; Wednesday's winner is Sunday's side; the plates on Deck 3
-    ts = g.ev(f"""(() => {{ let wed = {DAY} + 60; while (weekday(wed) !== 2) wed++; const sun = wed + 4, CH = ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'];
-      const realTag = schedPeople().filter(p => planDay(p, wed).some(s => s.tag && s.tag.startsWith('ev-tasting-table'))).length;
-      GALLEY_TEST.tradTies = (kind, d) => d === wed ? (kind === 'galley' ? [{{ id: 'tasting-table', from: 1095, to: 1155, tie: {{ meal: 'dinner', extra: 'tasting', batch: 20 }} }}] : kind === 'tally' ? [{{ id: 'tasting-table', tie: {{ kind: 'tasting', choices: CH }} }}] : [])
-        : d === sun && kind === 'galley' ? [{{ id: 'sunday-table', from: 1080, to: 1140, tie: {{ meal: 'dinner', side: 'tasting' }} }}] : [];
+    # 4n. Brennan's tasting table (0.29.27, the vote section 18's tally since 0.29.29): a stand-in Wednesday (tradTies
+    # 'galley' extra: 'tasting', and its 'tally') for the cooking: 20 tastes an hour before, two for each taster, the
+    # rest wasted, the week's two choices, the plates on Deck 3. With section 18's tallies (tallyOf) and a real tasting
+    # table: the galley shows the tally's dishes and votes, your token goes through tallyVote once, and Sunday's side
+    # is the tally's winner
+    ts = g.ev(f"""(() => {{ let wed = {DAY} + 60; while (weekday(wed) !== 2) wed++; const CH = ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'];
+      GALLEY_TEST.tradTies = (kind, d) => d === wed ? (kind === 'galley' ? [{{ id: 'tasting-stand-in', from: 1095, to: 1155, tie: {{ meal: 'dinner', extra: 'tasting', batch: 20 }} }}] : kind === 'tally' ? [{{ id: 'tasting-stand-in', tie: {{ kind: 'tasting', choices: CH }} }}] : []) : [];
       {clr} GALLEY_TASTE.clear();
-      const z0 = galleyTasting(wed), rep = galleyReport(wed, 1)[0], B = (wed - 1) * 1440, out = {{ wed, realTag, choices: z0.choices, voters: z0.voters.length, votes0: z0.votes, winner0: z0.winner, note: galleyMenu(wed).note,
+      const z0 = galleyTasting(wed), rep = galleyReport(wed, 1)[0], B = (wed - 1) * 1440, out = {{ wed, choices: z0.choices, voters: z0.voters.length, winner0: z0.winner, note: galleyMenu(wed).note,
         rep: {{ tastes: rep.tastes, tasted: rep.tasted, missed: rep.missed.length, ate: rep.ate, got: rep.eaten + rep.grabbed }} }};
-      SHIP.galley = null; setShipNow(B + 17 * 60); galleyTick(); out.before = galleyText('tasting'); out.early = galleyVote(0);
+      SHIP.galley = null; setShipNow(B + 17 * 60); galleyTick(); out.before = galleyText('tasting');
       setShipNow(B + 18 * 60 + 20); galleyTick(); out.text = galleyText('servery'); out.plates = GV && GV.taste ? GV.taste.count : -1; out.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
-      out.vote = galleyVote(z0.choices[1]); out.again = galleyVote(0); const z1 = galleyTasting(wed); out.you = z1.you; out.votes1 = z1.votes; out.after = SHIP.galley.tasting.left;
-      setShipNow(B + 19 * 60 + 20); galleyTick(); out.result = galleyText('tasting'); out.plates2 = GV && GV.taste ? GV.taste.count : -1;
       setShipNow(B + 19 * 60 + 40); galleyTick(); out.gone = SHIP.galley.tasting; out.plates3 = GV && GV.taste ? GV.taste.count : -1;
-      const S = galleyMenu(sun); out.sun = {{ side: S.side, note: S.note }}; out.winner1 = z1.winner;
-      GALLEY_TEST.tradTies = null; {clr} GALLEY_TASTE.clear(); SHIP.galley = null; return out; }})()""".replace('{clr}', clr))
-    print(f"Tasting table (stand-in, day {ts['wed']}; {ts['realTag']} at the real tradition there): {ts['choices']}, {ts['voters']} tasters, votes {ts['votes0']} -> {ts['winner0']}; report {ts['rep']}")
-    print(f"   menu note: {ts['note']} | 17:00 {ts['before']} (vote then: {ts['early']})")
-    print(f"   18:20: {ts['text'][-150:]} | plates {ts['plates']}, left {ts['left']} | your vote {ts['vote']}, again {ts['again']}, you {ts['you']}, votes {ts['votes1']}, left {ts['after']}")
-    print(f"   19:20: {ts['result']} (plates {ts['plates2']}) | 19:40 gone {ts['gone']}, plates {ts['plates3']} | Sunday: {ts['sun']}")
+      GALLEY_TEST.tradTies = null; {clr} GALLEY_TASTE.clear(); SHIP.galley = null;
+      if (typeof tallyOf === 'function') {{                  // the real one
+        const rw = [...Array(28)].map((_, k) => {DAY} + 7 + k).find(d => galleyTasting(d)), keepVotes = JSON.stringify(SHIP.events.votes || {{}});
+        if (rw) {{
+          const z = galleyTasting(rw), r = tallyOf(z.id, rw), RB = (rw - 1) * 1440;
+          out.real = {{ day: rw, choices: z.choices, votes: z.votes, tally: r && r.choices.map(c => r.counts[c]), tallyChoices: r && r.choices, winner: z.winner, voters: z.voters.length, n: r && r.n }};
+          setShipNow(RB + 18 * 60 + 20); galleyTick(); out.real.left = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          out.real.vote = galleyVote(z.choices[1]); out.real.again = galleyVote(0); const z1 = galleyTasting(rw); out.real.you = z1.you; out.real.votes1 = z1.votes; out.real.after = SHIP.galley.tasting && SHIP.galley.tasting.left;
+          setShipNow(RB + 19 * 60 + 20); galleyTick(); out.real.result = galleyText('tasting');
+          const sun = rw + 4, tl = typeof tallyLast === 'function' ? tallyLast(z.id, sun) : null; out.real.sun = {{ side: galleyMenu(sun).side, note: galleyMenu(sun).note, tallyLast: tl && tl.winner, sideTie: !!(galleyTies(sun).dinner && galleyTies(sun).dinner.side) }};
+        }}
+        SHIP.events.votes = JSON.parse(keepVotes); GALLEY_MENU.clear(); SHIP.galley = null;
+      }}
+      return out; }})()""".replace('{clr}', clr))
+    print(f"Tasting table (stand-in, day {ts['wed']}): {ts['choices']}, {ts['voters']} tasters, winner {ts['winner0']}; report {ts['rep']}")
+    print(f"   menu note: {ts['note']} | 17:00 {ts['before']}")
+    print(f"   18:20: {ts['text'][-110:]} | plates {ts['plates']}, left {ts['left']} | 19:40 gone {ts['gone']}, plates {ts['plates3']}")
     r = ts['rep']
     if ts['choices'] != [c.replace('-', ' ') for c in ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'][(2 * ((ts['wed'] - 1) // 7)) % 8:][:2]]: fail(f"tasting choices: {ts['choices']}")
     if r['tastes'] != 20 or r['tasted'] != min(20, 2 * ts['voters']) or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
-    if 'tasting table' not in ts['note'] or ts['early'] or not ts['vote'] or ts['again'] or ts['you'] != 1 or ts['votes1'][1] != ts['votes0'][1] + 1 or ts['after'] != max(0, ts['left'] - 2): fail(f"tasting vote: {ts}")
-    if ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or 'won' not in ts['result'] or "Wednesday's winner: " + ts['winner1'] not in ts['sun']['note'] or ts['sun']['side'] != ts['winner1']: fail(f"tasting table: {ts}")
+    if 'tasting table' not in ts['note'] or ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or ts['winner0'] is not None: fail(f"tasting table: {ts}")
+    R = ts.get('real')
+    if R:
+        print(f"   real (section 18's tally), day {R['day']}: {R['choices']}, votes {R['votes']} (tally {R['tallyChoices']} {R['tally']}, {R['n']} went; {R['voters']} came to taste) -> {R['winner']}")
+        print(f"   your vote {R['vote']}, again {R['again']}, you {R['you']}, votes {R['votes1']}, tastes {R['left']} -> {R['after']} | {R['result']} | Sunday {R['sun']}")
+        if [c.replace('-', ' ') for c in R['tallyChoices'][:2]] != R['choices'] or R['votes'] != R['tally'][:2] or not R['vote'] or R['again'] or R['you'] != 1 or R['votes1'][1] != R['votes'][1] + 1: fail(f"tasting with the tally: {R}")
+        if R['left'] is not None and R['after'] != max(0, R['left'] - 2): fail(f"your tastes: {R}")
+        if R['sun']['sideTie'] and (R['sun']['side'] != (R['sun']['tallyLast'] or '').replace('-', ' ') or "Wednesday's winner" not in R['sun']['note']): fail(f"Sunday's side: {R['sun']}")
+    else: print('   no section 18 tally with a tasting table in this build: the vote is not checked')
 
     # 4o. late meals (0.29.28): simNote('lateMeal', { who, meal, late, how, deck }) live, once per person and meal; heard
     # here with onSim. You: from the grab shelf after dinner's serving ended, and after a 15-minute queue. Crew: an
@@ -397,8 +413,8 @@ with sync_playwright() as pw:
         print(f"Late meals: you at 20:45 from the shelf {lm['grabNotes']} (a second time: {len(lm['grabNotes']) == 1 and lm['again']}) | after a 15-minute queue {lm['queueNotes']} | on time {lm['onTimeNotes']}")
         print(f"   crew with an empty galley: {len(lm['crew'])} notes, {lm['kinds']}, e.g. {lm['crew'][:2]}")
         gn, qn = lm['grabNotes'], lm['queueNotes']
-        if len(gn) != 1 or {k: gn[0].get(k) for k in ('who', 'meal', 'late', 'how', 'deck')} != {'who': 'you', 'meal': 'dinner', 'late': 15, 'how': 'grab', 'deck': 3}: fail(f"late meal from the shelf: {gn}")
-        if len(qn) != 1 or qn[0]['who'] != 'you' or qn[0]['late'] != 15 or qn[0]['how'] != 'servery' or lm['onTimeNotes']: fail(f"late meal after a queue: {qn} / on time {lm['onTimeNotes']}")
+        if len(gn) != 1 or {k: gn[0].get(k) for k in ('who', 'meal', 'late', 'how', 'deck')} != {'who': 'you', 'meal': 'dinner', 'late': 15, 'how': 'grab', 'deck': 3} or gn[0].get('dish', 0) is not None: fail(f"late meal from the shelf: {gn}")
+        if len(qn) != 1 or qn[0]['who'] != 'you' or qn[0]['late'] != 15 or qn[0]['how'] != 'servery' or not qn[0].get('dish') or lm['onTimeNotes']: fail(f"late meal after a queue: {qn} / on time {lm['onTimeNotes']}")
         if not lm['crew'] or any(x['how'] != 'missed' or x['meal'] != 'breakfast' or x['who'] == 'you' for x in lm['crew']) or len({x['who'] for x in lm['crew']}) != len(lm['crew']): fail(f"crew late meals: {lm['crew'][:5]}")
     else: print('Late meals: no simNote/onSim (section 13) in this build; skipped')
     print('Late meals the report would post, by day:', [st['late'] for st in rep])
