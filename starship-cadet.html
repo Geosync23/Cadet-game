@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.5a
+   STARSHIP CADET: CSV Wren                           build 0.62.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7561,7 +7561,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.5a';                           // keep in step with the header's build line
+const GAME_BUILD = '0.62.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -28589,7 +28589,7 @@ function momentShow(id) {
   MEETING_SCRIPTS['moment:' + id] = { title: shortName(p), lines,
     onPick: (k, c) => { picked = c; if (c.fit && c.c.warm) c.reply = say(c.c.warm); },   // the reply that fits them best can have a warmer answer
     onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); } };
-  return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t });
+  return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t, where: hereWhere() });
 }
 // favours that matter (0.39.6, B4): a moment's practical reply with `favour: <id>` starts one of these on section 20's
 // favour types (the lead's ruling: no new jobs), accepted at once (you offered), in your Jobs, handed back on their
@@ -28844,8 +28844,15 @@ function homeCall(k, t = shipNow()) {
   if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
   const s = homeScript(k, t); if (!s) return false;
   MEETING_SCRIPTS['home:' + k] = s;
-  return dialogueShow('home:' + k, { id: 'home:' + k, who: [], at: t });
+  return dialogueShow('home:' + k, { id: 'home:' + k, who: [], at: t, where: HOME_WHERE });
 }
+// where a call is (0.62.5, the user's "the menu to call someone disappears"): section 18's meetingsTick closes a dialogue
+// once a ship minute (under 2 real seconds) when you're not in its meeting's place (inMeeting(m), by m.where); without a
+// where that's never true, so every call, recorded message and moment closed by itself. Calls happen at the booths
+// (walk out and the call ends); a recorded message or a moment is wherever you are (any room on this deck, as section
+// 21's introAsk does).
+const HOME_WHERE = { deck: 3, room: /^Call-home booths$/ };
+const hereWhere = () => ({ deck: typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 3, room: /./ });
 const HOME_FIRST = 'Your first call home. Four names on the screen, and a little lag on the line. Who first?';
 function homeBooth(t = shipNow()) {                      // the booth: whom to call (the only choice), then the call, in one dialogue
   if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
@@ -28862,7 +28869,7 @@ function homeBooth(t = shipNow()) {                      // the booth: whom to c
     onPick: (i, c) => { if (call) return; const s = c.k && homeScript(c.k, t); if (!s || !DIALOGUE) return;
       call = s; MEETING_SCRIPTS['home:booth'].title = s.title; DIALOGUE.queue.splice(DIALOGUE.i + 1, 0, ...s.lines); },   // the call goes on in the same panel
     onEnd: f => { delete MEETING_SCRIPTS['home:booth']; if (call) call.onEnd(f); } };
-  return dialogueShow('home:booth', { id: 'home:booth', who: [], at: t });
+  return dialogueShow('home:booth', { id: 'home:booth', who: [], at: t, where: HOME_WHERE });
 }
 function homeDone(k, L, f, t) {                          // the call ended: a beat counts once heard to the end (hung up early, it plays next time)
   const hc = homeBaked()[0][k], c = homeC(k), H = homeState(), d = L.d, now = Math.floor(t);
@@ -28922,7 +28929,7 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
     onEnd: f => { delete MEETING_SCRIPTS['home:msg:' + k]; if (!f) return; const C = homeC(k), m = C.msg; if (m) m.done = true;
       const g = homeTag(e); C.h = (C.h || []).filter(x => x !== g).concat(g).slice(-HOME_HEARD);
       if (typeof simNote === 'function') simNote('homeCall', { contact: k, who: hc.id, beat: null, tone: 'message', via: 'message', live: false, flavour: null }); } };
-  return dialogueShow('home:msg:' + k, { id: 'home:msg:' + k, who: [], at: t });
+  return dialogueShow('home:msg:' + k, { id: 'home:msg:' + k, who: [], at: t, where: hereWhere() });
 }
 // ---- end of 20c ----
 
