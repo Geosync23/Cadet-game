@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.61.10 (about 32,300 lines)
+## Current build: 0.61.11 (about 32,300 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -606,6 +606,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.61.8 | The career engineer, reviewer 1d's sickness notes (plans/reviews/sick-b0c0f37.md): a sick note undoes a counted miss by exactly the work it took (`mx`; it overshot, since the refund wasn't softened like the hit); the sick roll is seeded by your name too, so each game has its own sick days; walking never drops below 35% when sick (`SICK.floor`; doubled over with low energy and fitness was 26%). leave_check checks the refund and that two names give different days. |
 | 0.61.9 | The career engineer, the lead's settings for 0.61.8's fixes: the sick roll is seeded by the game's own seed (`gs` in the career save, made once when the career starts from `Date.now` and `Math.random`, never `R()`), not your name; the sick walking floor is 40% (`SICK.floor`). leave_check pins the seed for the sickness case and switches sickness off in the ladder runs, so it gives the same results every run. |
 | 0.61.10 | The career engineer, reviewer 1d's MEDIUM on 0.61.8: a line in `careerMissed` had been swallowed into the comment before it, so the first missed-shift warning never showed. Fixed; leave_check now checks the warning's bit (`k & 2`) after the first miss. |
+| 0.61.11 | The career engineer, reviewer 1d's LOW: the game seed `gs` is 0 with `?nosave` (every check's URL), so checks that step past day 7 get the same sick days every run; real games still vary. |
 | 0.42.7 | Reviewer 1's re-review: a step's wait also counts from the last minute you got nearer to it on its deck (`SHIP.intro.near`, saved), so one slow moment no longer costs the steps after it; intro_check's new "one slow step, then a steady pace" cases miss nothing. The days-off line FAILs from combined builds 0.60 on. Sowing morning's beat moved to 11:45-12:40 (the traditions engineer's 0.34.23: it follows harvest morning). intro_check OK; cadet_test vs 0.42.6 identical apart from the known `g_nocrew` flake. |
 | 0.42.8 | Signing the manifest hands you your kit bag (player engineer 3's `bagGive`, typeof-guarded; not on skip). Section 15 stows it at the bunk and locks the device until `intro.device` (`deviceLocked`). intro_check OK. |
 | 0.42.9 | The kit bag is section 15's alone now (`bagTick` gives it on the ramp), so 0.42.8's `bagGive` call is gone; Torres's missed-bunk Mail asks you to drop your bag in your locker (it's still in your hands). intro_check OK. |

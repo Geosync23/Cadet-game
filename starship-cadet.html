@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.10
+   STARSHIP CADET: CSV Wren                           build 0.61.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.11';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27098,7 +27098,7 @@ function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
   const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, gs: (Date.now() ^ Math.floor(Math.random() * 2147483647)) | 0, md: 0, mx: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, gs: NOSAVE ? 0 : (Date.now() ^ Math.floor(Math.random() * 2147483647)) | 0, md: 0, mx: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -27232,7 +27232,8 @@ SIM_ADVANCE.push((from, to) => careerTick(to));
 // and find you to nudge you. Two cures: the infirmary (in the Infirmary or the Exam room on Deck 3, an exam plays:
 // Rina's when she's on shift, else a medic on duty's; it ends with the medicine) or your bunk (lying down sleeps it off
 // by day, SICK.nap minutes). Crew who see you say a get-well line, and the next day or two they're glad you're better.
-//   SHIP.career (saved) adds gs: the game's own seed (made once with the career, Date.now and Math.random; never R()), sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
+//   SHIP.career (saved) adds gs: the game's own seed (made once with the career, Date.now and Math.random; never R();
+//   0 with ?nosave, so the checks are the same every run), sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
 //   off), ss: the last stage told, sc: the day the card was shown
 // The words are head writer 4's (career.sick.*, career.tip.sick, sick.getwell / sick.nudge / sick.better, the meetings
 // sickExam1-3 and sickExamCover). Nothing here calls R().
