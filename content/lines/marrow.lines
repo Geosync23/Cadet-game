@@ -379,3 +379,27 @@
 - Calder mentioned your work on {thing}. She said "fine". Twice. That's a lot.   #funny
 ? told:intro.arrival tier>=acquaintance !week1:true
 - You arrived on the last evening of Lanterns. A good evening to arrive. The lights were up.   #warm
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: no retiring, no academy post, no daughter; the Admiral never explained.
+
+== feel
+? leaving:soon
+- Ten days. I've said goodbye to every portrait in the gallery. Even mine. Especially mine.   #funny
+- The ready room's packed. Mind the step, whoever comes next. Everyone trips on it.
+? leaving:soon tier>=friend
+- I keep playing the piano late. Not only on Thursdays now. You'll forgive me.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving the Wren, cadet. I remember your answer. I always will.
+? leaving:you tier>=colleague
+- You're on page forty of my little book. It comes with me. Look after her, {me}.   #warm
+? leaving:you tier>=friend
+- The Wren's in good hands. Some of them are yours. Thank you. Mind the step.   #warm
+
+== letter
+- My new ready room has no step. I keep tripping on nothing. Say hello to the gallery for me.   #funny
+- I read page forty again tonight. The word I underlined still fits. I hope the Wren's well. Mind the step.
+? tier>=friend
+- Someone here asked me what the Admiral is. I told them he outranks us all. Some things travel. Hello to everyone.   #funny

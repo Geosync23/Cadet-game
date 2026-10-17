@@ -380,3 +380,27 @@
 - I logged your arrival, the Sunday you came. On time. The Tern wasn't. You were.   #funny
 ? told:came.observatory tier>=acquaintance
 - Observatory night. You were early. So was I. We waited correctly.   #funny
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no messages from home, no father, no rule, no Gull.
+
+== feel
+? leaving:soon
+- Ten days. Three lists to hand on: the treadmill board, the record list, the rota.
+- Regulation eleven, section two, does not cover this. I have checked. Twice.   #funny
+? leaving:soon tier>=friend
+- I have left the bridge on time every day this week. Partly advice. Partly goodbyes.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm transferring, Cadet. Carry on as you are. That is an order. A kind one.
+? leaving:you tier>=colleague
+- You are on my list of juniors I would recommend. In ink. Carry on, {nick}.   #warm
+? leaving:you tier>=friend
+- Three things, {nick}. Eat. Rest. Read regulation nine. It is the one about rest.   #funny
+
+== letter
+- New ship. Their treadmill board was empty. I have corrected this. I am also on it. Carry on.   #funny
+- Please tell whoever is next on the record list that it moves up one. Fairly. In order. Thank you.
+? tier>=friend
+- There was no rowing board here. I have taped one up. Tell Lindqvist the Wren's is his to chase. Tell him I said so. Carry on.

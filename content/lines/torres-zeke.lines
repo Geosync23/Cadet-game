@@ -521,3 +521,27 @@
 - First night you said you weren't sure why you came. Any closer? No rush.
 ? told:intro.dinner.unsure tier>=friend
 - You said you weren't sure, that first dinner. You look sure now. A bit. I'm glad.   #warm
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no Specialist list, no father.
+
+== feel
+? leaving:soon
+- Packing! Ten days. I said goodbye to coil three. It sulked. Course it did.   #funny
+- New ship, new coils. I'll have to learn all their moods. Right, onward. Sort of.
+? leaving:soon tier>=friend
+- Bit strange, going. I've knitted three rows and unpicked them. That's how you can tell.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off to a new ship. Talk to coil three for me. It likes being asked how it is.
+? leaving:you tier>=colleague
+- Your scarf's not finished. It's never finished. Take it anyway. Keep it growing.   #warm
+? leaving:you tier>=friend
+- You'll be brilliant, {nick}. You already are. I just got to see it first.   #warm
+
+== letter
+- New engine room. Their coils don't sulk, they grumble. Different thing altogether. Tell Reyes. Tell coil three I said hello.   #funny
+- Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.   #funny
+? tier>=friend
+- Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said "Fine" to you yet? She will.   #warm

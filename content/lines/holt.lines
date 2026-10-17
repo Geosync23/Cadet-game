@@ -380,3 +380,29 @@
 - Your birthday. Mensah reminded me. I'd remembered. Hm. Mostly.   #funny
 ? told:came.observatory tier>=acquaintance
 - Observatory night. You stood by the door. Good habit. Look up, too, though.   #funny
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no bad day, no Rook, no six hours; nothing against the Captain.
+
+== feel
+? leaving:soon
+- Ten days. Walked every deck this morning. The long way. Twice.
+- Packing. Boots, books, a tin of mints. Mensah keeps the rest. The rest is jokes.   #funny
+? leaving:soon tier>=friend
+- Hm. I'll miss the rounds here. The doors. The people behind them. Don't repeat that.   #warm
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off, cadet. Mind the hatches. Mind each other.
+? leaving:you tier>=colleague
+- You did the job properly. Every time I checked. I checked a lot. Hm.   #funny
+? leaving:you tier>=friend
+- {nick}. Adequate. More than. That's all I'm saying. It's a lot, from me.   #warm
+? leaving:you tier>=close
+- Kid. Look after Mensah. He'll say he's fine. He needs someone to tell jokes to.   #warm
+
+== letter
+- New ship. Walked every deck. Took four hours. The long way. Tell Mensah one of his jokes landed here. Once.   #funny
+- They keep the doors wrong here. I've said. Politely. Hm. Hello to the Wren. Eat something.
+? tier>=friend
+- Still check under my bunk. Old habit. Then I think of the Wren and sleep fine. Hm. Write, if you like.

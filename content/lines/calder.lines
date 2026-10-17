@@ -377,3 +377,27 @@
 - Someone told me your birthday. I wrote it down. It's on the list. With the pumps.   #funny
 ? told:came.observatory tier>=acquaintance
 - Observatory night. You found the array from the window. Most can't. Good eyes.
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: no Fenn, no toolbox's story, no junior on the Halcyon.
+
+== feel
+? leaving:soon
+- Ten days. The board's handed over. Every job. Every note.
+- Packing. One bag. The mug comes. It's a mug.   #funny
+? leaving:soon tier>=friend
+- Walked the bay twice tonight. Listening. The fans are all right. Good.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving the Wren. The board's in good hands. Do the jobs on it.
+? leaving:you tier>=colleague
+- You do clean work, {me}. Keep doing it. That's all.
+? leaving:you tier>=friend
+- I keep a list of every tech I've certified. You'll be on it one day. Note's written.   #warm
+
+== letter
+- New ship. Their fans are loud and nobody's noticed. I've noticed. Keep the Wren's board short.
+- The board here is longer than ours. I've started on it. Tell Torres to be patient. He won't be.   #funny
+? tier>=friend
+- Nobody thanks the air. I've been thinking about the Wren's, though. Still working, I expect. That's you lot. Carry on.   #warm
