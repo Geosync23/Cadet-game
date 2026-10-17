@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.37
+   STARSHIP CADET: CSV Wren                           build 0.35.38
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7252,7 +7252,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.37';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.38';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8839,9 +8839,9 @@ function deviceTick() {
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
   }
-  if (Array.isArray(SHIP.occasions)) for (const a of SHIP.device.appts) if (a.occ && (a.status === 'yes' || a.status === 'missed')) {   // 0.35.32: an occasion you met is kept,
-    const r = SHIP.occasions.find(x => x.key === a.occ); if (r && (r.met || r.status === 'kept')) { a.status = 'kept'; a.keptAt = t; }  // wherever in the room you stood
-  }
+  if (Array.isArray(SHIP.occasions)) for (const a of SHIP.device.appts) if (a.occ && a.status === 'yes') {   // 0.35.32: an occasion you met is kept, wherever in the
+    const r = SHIP.occasions.find(x => x.key === a.occ); if (r && (r.met || r.status === 'kept')) { a.status = 'kept'; a.keptAt = t; }   // room you stood; 0.35.38 (the lead):
+  }                                                       // once section 14 has marked it missed (15 minutes in), missed is final
   for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
     for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
   devHeadsTick(t);
