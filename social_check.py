@@ -25,7 +25,8 @@ RUN = r"""(({ days, player, jump }) => {
   else for (let h = h0 + 1; h <= h1; h++) {
     setShipNow(h * 60); socialTo(h * 60); watch();
     for (const x of NEWS) if (h * 60 - x.born >= 720 && h * 60 - x.born < 780) stats.spread.push([x.kind, x.seed.length, SHIP.knows[x.id].size]);
-    if (player && h % 24 === 12) { relAdd('tomas', 'chat', REL_PTS.chat); if ((h / 24 | 0) % 2) relAdd('pell', 'chat', REL_PTS.chat); for (const x of newsKnownBy('rina')) playerHeard(x.id, 'rina'); }
+    if (player && h === h0 + 3 * 24 + 6) { memAdd('rina', 'moment.test.1'); memAdd('pell', 'missed.test'); memAdd('pell', 'intro.arrival'); }
+    if (player && h % 24 === 12) { relAdd('tomas', 'chat', REL_PTS.chat); memAdd('tomas', 'chat'); if ((h / 24 | 0) % 2) relAdd('pell', 'chat', REL_PTS.chat); for (const x of newsKnownBy('rina')) playerHeard(x.id, 'rina'); }
     if (player && h % 24 === 18) relAdd('tomas', 'meal', REL_PTS.meal);
   }
   const s = socSave(), a = Array.from(SHIP.aff), n = SOC.n, start = [];
@@ -37,7 +38,7 @@ RUN = r"""(({ days, player, jump }) => {
            up: moved.filter(v => v > 0).length, down: moved.filter(v => v < 0).length },
     born: stats.born, spread: stats.spread, news: NEWS.length, heard: SHIP.heard.length,
     rel: Object.fromEntries(Object.entries(SHIP.rel).map(([k, r]) => [k, [r.pts, REL_NAMES[r.tier]]])),
-    sample: NEWS.slice(-6).map(x => x.lines[0]) };
+    sample: NEWS.slice(-6).map(x => x.lines[0]), mem: Object.fromEntries(Object.entries(SHIP.mem).map(([k, l]) => [k, l.map(m => m[0] + ' ' + Math.round(m[2]))])) };
 })"""
 
 ok = True
@@ -79,6 +80,14 @@ with sync_playwright() as pw:
     if a['rel'].get('tomas', [0, ''])[1] != 'friend': fail(f"Tomas should be a friend after {DAYS} days of chats and dinners: {a['rel'].get('tomas')}")
     if a['rel'].get('pell', [0, ''])[1] not in ('acquaintance', 'colleague'): fail(f"Pell should be an acquaintance: {a['rel'].get('pell')}")
 
+    print('Memories after the run:', json.dumps(a['mem']))
+    m = a['mem']
+    if not any(x.startswith('chat ') for x in m.get('tomas', [])): fail('Tomas should remember chatting')
+    if not any(x.startswith('moment.test.1 ') for x in m.get('rina', [])): fail("Rina's big memory should last two weeks")
+    if any(x.startswith('missed.test') for x in m.get('pell', [])): fail("Pell's sour memory should have faded")
+    if 'intro.arrival 100' not in m.get('pell', []): fail('a core memory should stay at 100')
+    if not any(k != 'rina' and any(x.startswith('heard.moment.test.1') for x in l) for k, l in m.items()): print('  (nobody heard of the big memory: Rina has no friends at 40+)')
+
     # 3. the save: size, and back again
     print(f"Save: social part {a['size']} bytes (limit {SAVE_MAX})")
     if a['size'] > SAVE_MAX: fail('the save is too big')
@@ -119,6 +128,30 @@ with sync_playwright() as pw:
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if q['fill']['boss'] is None or q['fill']['none'] is not None or q['fill']['thing'] is None: fail(f"socialFill wrong: {q['fill']}")
     if q['cue'] != [True, True, True, False, True, True] or not q['cueSaved'] or not q['cueGone']: fail(f"cues wrong: {q['cue']} saved {q['cueSaved']} gone {q['cueGone']}")
+
+    # 6. memories (0.36.21): adding, refreshing, the ninth pushing out the lightest, fading by half-life, callbacks told once
+    r = g.ev(r"""(() => {
+      const o = {}; SHIP.mem = {}; const t0 = shipNow();
+      memAdd('tomas', 'chat'); memAdd('tomas', 'fav.lamp'); memAdd('tomas', 'chat'); o.refresh = SHIP.mem.tomas.length === 2;
+      for (let i = 0; i < 8; i++) memAdd('tomas', 'came.t' + i, { w: 20 + i }); o.max = SHIP.mem.tomas.length; o.kept = !!mem('tomas', 'fav.lamp') && !mem('tomas', 'came.t0');
+      o.prefix = mem('tomas', 'fav').key; o.none = mem('tomas', 'fa');
+      o.told = [memTold('tomas', 'fav'), mem('tomas', 'fav').told, memTold('tomas', 'fav')];
+      o.warm = warmth('tomas');
+      SHIP.mem = {}; memAdd('pell', 'chat'); memAdd('pell', 'fixed.oven'); memAdd('pell', 'moment.x'); memAdd('pell', 'intro.arrival'); memAdd('pell', 'grubby');
+      const w = () => Object.fromEntries((SHIP.mem.pell || []).map(m => [m[0], Math.round(m[2])]));
+      for (let i = 0; i < 7; i++) memFade(); o.week = w();
+      for (let i = 0; i < 14; i++) memFade(); o.three = w();
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      SHIP.mem = {}; return o;
+    })()""")
+    print('Memories:', json.dumps(r))
+    if not r['refresh'] or r['max'] != 8 or not r['kept']: fail('adding memories wrong (refresh, at most 8, the lightest goes)')
+    if r['prefix'] != 'fav.lamp' or r['none'] is not None or r['told'] != [True, True, False]: fail('mem prefix or memTold wrong')
+    wk, th = r['week'], r['three']
+    near = lambda x, v: x is not None and abs(x - v) <= 1
+    if not (near(wk.get('chat'), 15) and near(wk.get('fixed.oven'), 48) and near(wk.get('grubby'), 12) and wk.get('intro.arrival') == 100): fail(f"fading after a week wrong: {wk}")
+    if 'chat' in th or 'grubby' in th or not near(th.get('moment.x'), 71) or not near(th.get('fixed.oven'), 30) or th.get('intro.arrival') != 100: fail(f"fading after three weeks wrong: {th}")
+    if not r['saved']: fail('memories save and load differ')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
