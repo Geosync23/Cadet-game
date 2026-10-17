@@ -36,7 +36,7 @@ Check on arrival + decks-p3 Tern + the sim head + content (text 29e52c9, 89a496b
 - the goodnight, then the bed arrow;
 - dinner seats 3-mess-10/12/9;
 - the ramp and pilot.
-Also coming for 0.60.5: the career system (claude/leave), which I suggested go to a fresh reviewer (memory ~62% at 17:30); 0.62.3 (content only, skim). Otherwise the lead says stay idle; a fresh reviewer is started only for real new work.
+The career system (claude/leave) goes to **reviewer 1d, session_01AxGXvu4gwTfNVGRKeYbBPw**. Social-fixes is passed to 3960b06 (0.62.3 skimmed). After the arrival re-check I hand over (the lead's plan, memory ~62% at 17:15). Otherwise the lead says stay idle; a fresh reviewer is started only for real new work.
 
 **Open loose ends:**
 - Arrival is mine now (the lead's split); onboarding engineer 2 is session_0163dcLt17oTCdR8po9HRo2p. Reviewer 1's remaining arrival lows (health kind, missed health check, seek-ask Mail fallback, standing at Dinner with Torres, double health booking) will come later on claude/arrival (0.42.23+).
