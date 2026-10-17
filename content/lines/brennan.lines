@@ -491,3 +491,37 @@
 - They don't listen to the pans here. I'm teaching them. Slowly. Tell Lukas the bread rose better on the Wren. Tell him it's the ovens, not him.
 ? tier>=friend
 - Made the Wren's Sunday bread here. Didn't taste the same. It's the company, love. Write and tell me what you're eating. Properly, mind.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? trad:today tier>=acquaintance !week1:true
+- {hi}. Something on tonight. There'll be food. There's always food.
+
+== near
+? trad:quiz
+- Quiz night. I've done sandwiches. Brain food, love. Eat one before the music round.
+? trad:film
+- Film night. There's popcorn. Well, there's a big pan of it. Help yourself, love.
+? trad:market
+- Swap meet. I bring a tin of biscuits to trade. Nobody trades. They just eat them.   #funny
+? trad:observatory-night
+- Observatory night. I've sent up a flask of cocoa. It's cold up there, love.
+? trad:running
+- Running club. There's soup when you're done. Run, then soup. That's the rule.   #funny
+? trad:harvest
+- Harvest morning! Bring me the greens, love. They'll be on plates by dinner.
+? trad:founding
+- Founding Day cake. Three layers. The Captain gets the first slice. Then everyone.   #warm
+? trad:hull-lights
+- Hull lights tonight. I'll stop the pans for that. Five minutes. Then back to it.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I'll be at the galley porthole. Thinking of my mother, and her pans.   #warm
+
+== smalltalk
+? trad:today
+- Something's on. I've baked.
+? trad:founding
+- Cake's out! Three layers!

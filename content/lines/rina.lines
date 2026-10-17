@@ -534,3 +534,31 @@
 - My sister says my letters sound happy. I've told her she's wrong. She isn't. Don't tell her. How's Bunk 2? Is Pell still asleep on the chairs?
 ? tier>=friend beat:rina.4
 - Gran says hello. To "the friend who listened", her words. She's still cheating, by message. I've no idea how. Drink some water.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:sowing tier>=acquaintance
+- Sowing. Seedlings everywhere. Wear gloves. I mean it.
+? season:greening tier>=acquaintance
+- Greening. Half the ship's sneezing. Pollen. Drink some water.   #funny
+? trad:today tier>=acquaintance !week1:true
+- Something's on tonight. I'm going. Someone has to bring the water.   #funny
+
+== near
+? trad:harvest
+- Harvest morning. I'm on blisters. Bring your hands to me after.
+? trad:hull-lights
+- Hull lights. Fine. It's pretty. I said it. Don't tell anyone.   #funny
+? trad:founding
+- Founding Day. Cake. One slice. Fine, two. It's a birthday.   #funny
+? trad:quiet-watch tier>=friend beat:rina.1
+- Quiet watch. I'll be at the window. Gran would say stop moping. I'm not moping.   #warm
+
+== smalltalk
+? trad:today
+- Something on tonight. Bring water.
+? trad:hull-lights
+- Fine. It's pretty.
