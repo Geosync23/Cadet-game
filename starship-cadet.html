@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.3
+   STARSHIP CADET: CSV Wren                           build 0.42.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.4';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14578,7 +14578,7 @@ function chatTick() {
 //   INTRO_STEPS  the arrival evening, A0-A13: { id, day, at, until, who, where, mode, meeting, checkpoint, fallback, rel }
 //   INTRO_WEEK   Days 1-7: one beat per person who teaches you something, in their real day (section 14 plans them)
 //   SETTLE       the Settling-in list (the device's app reads it); each item ticks itself from the ship notes
-//   introOn() introStep() introDone(id) introEnd() introSkip() introArrival()   escortPlan(p, t)   introBeats(id, d)   settleNote(kind, data)
+//   introOn() introStep() introDone(id) introEnd() introSkip() introArrival() introWanted() introNewGame(arriving) introSig()   escortPlan(p, t)   introBeats(id, d)   settleNote(kind, data)
 //   introAdvance(t, here)   moves the steps on at minute t; here = { deck, tile } of the player, or null (walked off)
 // SHIP.intro.since: the minute the current step became yours (its fallback's wait counts from then).
 // Times: day 0 is the arrival Sunday, so a step's minute is (day - 1) * 1440 + at, below 0 on Day 0.
@@ -14746,6 +14746,14 @@ function introBegin(name) {
   if (name !== undefined) { if (typeof playerNameSet === 'function') playerNameSet(name); else SHIP.player.name = String(name).trim().slice(0, 24) || null; }
   introFlagSet('escort.' + INTRO_ESCORT); introFlagSet('week1');
 }
+
+// for section 13's New game (newGameStart): whether a new game should arrive by shuttle (never on a test URL; once
+// you've arrived before, wave 2's choice will ask; until then a returning player starts on Monday as before), and the
+// intro's side of the fresh start, called after section 13 has cleared the flags and set the clock
+const introWanted = () => !NOSAVE && !introArrived();
+function introNewGame(arriving) { if (arriving) introBegin(); else SHIP.intro = introBlank(); }
+// section 14 plans the crew again when this changes (introBeats depends on nothing else)
+const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
 
 // one step done: its points, its flags, its note; then the next step (the evening) or none (the week runs by the clock)
 function introDone(id, at = Math.floor(shipNow())) {

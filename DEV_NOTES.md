@@ -353,6 +353,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.42.1 | The manifest name is section 15's `SHIP.player.name` (set through `playerNameSet`), not a second copy in `SHIP.intro`; "Your first solo job" ticks on Tuesday's reserved job (slot 3, agreed with the systems engineer) or any ordinary one. intro_check OK; cadet_test vs 0.42.0 ALL IDENTICAL on one run in three; the other runs differ only in `g_nocrew` (1,921 px), and 0.42.0 against itself differs the same way in 2 of 3 runs, so that shot is flaky in this container (not this build). |
 | 0.42.2 | `introArrival()` for the traditions engineer's "after arrival" rhythms (the day you came aboard: Day 0). intro_check resets section 13's flags and notes between runs, ready for sim 0.26.22's bus. intro_check OK; cadet_test vs 0.42.1 ALL IDENTICAL. |
 | 0.42.3 | Reviewer 1's fixes (claude/reviews, arrival-3cba8ac): `INTRO_FLAGS`, cleared by `introBegin` and set by `introEnd` (ending early no longer leaves the device locked and the week's gates shut); a step needs you in its checkpoint's room within 2 tiles (the lift checkpoint moved to [15, 9], apart from the Works door); waits count from when a step became yours (`SHIP.intro.since`), 5 minutes while you're missing steps; `introBeats` keeps Calder until her fallback's 20:00. intro_check gains a slow follower, ending early, a second arrival (section 13's flags not reset between runs), checkpoints out of each other's reach and the three days-off a WAITING line until the crew designer's change. intro_check OK on this branch and on a merge with sim 0.26.22; cadet_test vs 0.42.2 ALL IDENTICAL (one rerun hit the known `g_nocrew` flake). |
+| 0.42.4 | For the sim engineer's 0.26.23 (Day 0 start, `introPlan`, the escort walker): `introWanted()` (a new game arrives by shuttle unless it's a test URL or you've arrived before; wave 2 adds the choice), `introNewGame(arriving)` (the intro's side of New game) and `introSig()` (crew plans redone when the intro starts, ends or is skipped). intro_check OK; cadet_test vs 0.42.3 ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -1045,6 +1046,8 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 21 `introRel` | `relAdd(id, 'intro:<step>', pts)` (20) | onboarding | in 0.42.0 |
 | section 21 `introMail` | `mailSend` (15) | onboarding | in 0.42.0 |
 | section 21 `introBegin` | `playerNameSet(name)` (15) | onboarding | in 0.42.1 |
+| section 13 `newGameStart(arrival)` | `introWanted()`, `introNewGame(arriving)` (21) | sim engineer | 0.26.23 / 0.42.4 |
+| section 14 plan cache | `introSig()` (21): plans again when the intro starts, ends or is skipped | sim engineer | 0.26.23 / 0.42.4 |
 | section 18 "after arrival" rhythms | `introArrival()` (21): the day you came aboard, Day 0 | traditions engineer | in 0.42.2 |
 | section 21 `introAdvance` | `socialInvite(...)` (20) | onboarding | in 0.42.0, waits for social A |
 | section 21 at load: `onSim(kind, d => settleNote(kind, d))` for each of `SETTLE_KINDS` | `onSim` (13) | onboarding | in 0.42.0, live when 13 has it |
