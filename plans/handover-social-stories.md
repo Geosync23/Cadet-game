@@ -14,6 +14,14 @@ you can call each person once a day, any day: a live call scene (everyday talk f
 clear line, no lag or drops; crew gather at the booths for their overheard calls). Recorded messages with Mail replies
 are an optional extra (the device engineer retired; the Mail `play:` field is optional). Pacing as agreed: 7+ days,
 a call since the last beat, one home beat a day. Head writer 2 writes content/home/mum.arc as the model.
+**Baked shapes (the dialogue engineer, 0.43.11, from content/home/mum.call on claude/content 5a07b86):**
+HOME_CONTACTS[contact] = { id: 'home:mum', arc: 'home.mum', name, pron? }; HOME_MOMENTS['mum:<n>'] (MOMENTS shape +
+`via: 'reply'|'live'`; who 'home:mum', thread 'arc:home.mum'); HOME_SEND[contact] = [{ text, id, flavour, flag?,
+...conditions, reply: { who, text, pose? } }]; HOME_CHAT[contact] = [{ when?, lines: [{ who, text, pose? } |
+{ send: true }] }] (`send: true` = where the player's message choices go). Check send lines with
+`linesOk(entry, homePerson, ctx)` and fill with `linesFill(text, homePerson, ctx)`, homePerson = HOME_CONTACTS'
+{ id, name }; pass ctx.trad (the latest tradition you joined, last ~3 days) and ctx.friend (your closest crew
+friend's short name) for `came:` / `friend:` conditions and {trad} / {friend}.
 Build it in 20c on the moments engine; ask the player engineer (booth -> `homeCall()`), the device engineer (Mail
 `play: '<momentId>'`) and the traditions engineer (Letters evening) for their one-line hooks through the lead.
 
