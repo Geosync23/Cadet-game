@@ -344,3 +344,20 @@
 - A marrow called the Captain, first prize! Tell your gran I want the recipe. And the seeds.   #funny
 ? flag:home.mum.mug tier>=colleague
 - Your mum made you a mug, love? Bring it to breakfast. I'll fill it first. Every time.   #warm
+
+// Writer 4, batch 10: Brennan on a repair you did (cue:repair.you), in her own words.
+== cue
+? cue:repair.you tier>=acquaintance
+- I hear you fixed something. Good. Sit. Eat. You've earned it, love.   #warm
+- Fixing things on an empty stomach? Not in my mess. Plate.   #funny
+- They told me it was you. I'll put a little extra in your bowl tonight.   #warm
+- Good hands, you've got. My mother would have said so. I'm saying so.   #warm
+? cue:repair.you@dept
+- My galley sings again. Thank you, love. Properly.   #warm
+- My kitchen's not purred like that in a month. Come here. Biscuit.   #warm
+- I listened. It sounds right now. You've got an ear for it.
+? cue:repair.you tier>=friend
+- You fix my galley, I feed you. That's the deal. It's a good deal.   #funny
+- Every time something's fixed, I check who. It's been you a lot. I've noticed.   #warm
+? cue:repair.you warmth:cold
+- I hear you've been fixing things. Not eating, though. Sit down.   #funny

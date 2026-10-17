@@ -1,0 +1,129 @@
+@reactions repair
+// Writer 4, batch 9. More reactions to repairs around the Commons (the thinnest cues). .you: thanks to you, warm
+// not gushing, by tier; without: someone fixed it. Short and light; Commons voices by dept:.
+
+? cue:repair.oven !cue:repair.oven.you
+- Oven's back. Bread by four, then.
+- Someone fixed the oven. The whole mess can smell it.
+? cue:repair.oven.you tier>=acquaintance
+- The oven! That was you? {thanks}. Pudding's on time again.
+? cue:repair.oven.you tier>=friend
+- Fixed the oven, I hear. Typical. Come by for the first slice.   #warm
+? cue:repair.oven.you dept:galley
+- You fixed the oven. You'll never queue for seconds again.   #warm
+? cue:repair.oven.you dept:galley !who:brennan
+- Oven's purring. Brennan smiled. Well, she nodded. Same thing.   #funny
+
+? cue:repair.range !cue:repair.range.you !who:dlamini-lukas
+- The range is back. Lukas stopped muttering.   #funny
+? cue:repair.range !cue:repair.range.you
+- All six rings going again. Lovely sound.
+? cue:repair.range.you dept:galley
+- Six rings, all lit. {thanks}. Stew's back on.
+- You fixed the range. Come and taste what it made.   #warm
+? cue:repair.range.you tier>=acquaintance
+- Heard you got the galley range going. Good work. Lovely soup tonight.
+
+? cue:repair.chiller !cue:repair.chiller.you !who:brennan
+- Cold store's cold again. Brennan can breathe.
+? cue:repair.chiller !cue:repair.chiller.you
+- Somebody fixed the chiller. The ice cream lives.   #funny
+? cue:repair.chiller.you tier>=acquaintance
+- The cold store was you? {thanks}. The pudding thanks you too.   #funny
+? cue:repair.chiller.you tier>=friend !who:brennan
+- You saved the cold store. And Brennan's mood. Big day.   #funny
+? cue:repair.chiller.you dept:galley
+- Chiller's humming right. You've no idea. {thanks}.   #warm
+? cue:repair.chiller.you dept:galley !who:brennan
+- Brennan's stopped checking the thermometer every minute. Now it's every hour.   #funny
+
+? cue:repair.washer !cue:repair.washer.you
+- Washer's fixed! Clean socks for all!   #funny
+- Somebody fixed the dryer. Hero.   #funny
+- Laundry's running again. Deck 4 rejoices.
+? cue:repair.washer.you tier>=acquaintance
+- You fixed the washer? {thanks}. My jumpers thank you.
+? cue:repair.washer.you tier>=friend
+- My laundry's clean because of you. Honestly. Tea's on me.   #warm
+? cue:repair.washer.you deck:4
+- The laundry hums again. Someone said it was you. Good.
+
+? cue:repair.lights !cue:repair.lights.you
+- The light's fixed. No more blinking. Lovely.
+- Somebody fixed the flicker. I can read again.
+? cue:repair.lights.you tier>=acquaintance
+- That light's steady now. You? {thanks}. My eyes say thanks.
+? cue:repair.lights.you tier>=friend
+- You fixed the lights. Of course it was you.   #warm
+? cue:repair.lights.you dept:store
+- The store's bright again. Customers can see the biscuits. {thanks}.   #funny
+? cue:repair.lights.you dept:infirmary
+- Proper light in the infirmary again. Thank you. It matters.
+
+? cue:repair.heater !cue:repair.heater.you
+- Somebody fixed the hot water. Proper showers again!
+- Warm again. Who did it? Bless them.
+? cue:repair.heater.you tier>=acquaintance
+- That heater was you? {thanks}. Warm showers. Bliss.
+? cue:repair.heater.you tier>=friend
+- Hot water before ten and after. You're a legend.   #funny
+? cue:repair.heater.you deck:4
+- Washroom's steaming. That was you? Lovely. {thanks}.
+- No more character-building showers. Thanks to you.   #funny
+
+? cue:repair.growlight !cue:repair.growlight.you
+- Grow lights are back. The basil's looking up.
+- The garden's pink again. Someone fixed the lights.
+? cue:repair.growlight.you dept:garden
+- Lights back on the beds. The seedlings say thank you. Mm.
+- You fixed the grow lights. Week nine's saved.   #warm
+? cue:repair.growlight.you tier>=acquaintance
+- The garden lights were you? Lovely. The tomatoes approve.   #funny
+
+? cue:repair.irrigation !cue:repair.irrigation.you
+- The pumps are back. The garden's drinking again.
+- Somebody fixed the misters. Misting hour's on.
+? cue:repair.irrigation.you dept:garden
+- Water's flowing. You fixed it. The beans are very grateful.   #funny
+- Pumps sound right again. {thanks}. Really.
+? cue:repair.irrigation.you tier>=acquaintance
+- Was that you on the garden pumps? The pond's happy again.
+
+? cue:repair.nutrient !cue:repair.nutrient.you
+- Nutrient feed's back. The lettuce perked up.
+? cue:repair.nutrient.you dept:garden
+- Feed's flowing. You did that. {thanks}. The roots know.
+- Mm. The beds are fed. Good work. Proper work.
+
+? cue:repair.extractor !cue:repair.extractor.you
+- The galley fan's back. No more smoky toast.   #funny
+? cue:repair.extractor.you dept:galley
+- Extractor's pulling again. I can see the stove. {thanks}.   #funny
+- No more smoke in my eyes. You did that. Biscuit?   #warm
+
+? cue:repair.galleyplant !cue:repair.galleyplant.you
+- The galley's back to full steam.
+? cue:repair.galleyplant.you dept:galley
+- Everything's running in the galley. Because of you. {thanks}.
+- You sorted the galley's insides. Dinner's on time. Hero.   #funny
+
+? cue:repair.cartdock !cue:repair.cartdock.you
+- The cart dock's working. Trays everywhere, on time.
+? cue:repair.cartdock.you dept:galley !who:madsen-ivo
+- Cart dock's fixed. Ivo can stop carrying everything.   #funny
+? cue:repair.cartdock.you dept:galley
+- Trays are rolling again. {thanks}. Saved our backs.
+
+? cue:repair.uv !cue:repair.uv.you
+- The infirmary's lamp is back. Very clean in there now.
+? cue:repair.uv.you dept:infirmary
+- The UV unit was you? Thank you. Everything's properly clean.
+? cue:repair.uv.you dept:infirmary !who:rina
+- You fixed the steriliser. Rina said "fine". That's high praise.   #funny
+
+? cue:repair.filter !cue:repair.filter.you
+- Air feels fresher. Someone changed a filter.
+? cue:repair.filter.you dept:infirmary
+- The filter was you? Lovely. Clean air's good medicine.
+? cue:repair.filter.you tier>=acquaintance
+- Fresh air, thanks to you. Breathe in. Lovely.

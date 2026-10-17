@@ -373,3 +373,20 @@
 - Fair. You got me. Biscuits are on me.   #funny
 - Beaten. Lovely. I'm going for a nap.   #funny
 - Well played. Don't tell Rina. She'll be thrilled.   #funny
+
+// Writer 4, batch 10: Pell on a repair you did (cue:repair.you), in his own words.
+== cue
+? cue:repair.you tier>=acquaintance
+- Oi oi! Heard you fixed a thing. Was it the panel? It's never the panel.   #funny
+- Nice one! Did it fight you? They always fight me. Then I win. Usually.   #funny
+- You fixed it? Brilliant. I'd have napped first, then fixed it. Same result.   #funny
+- Heard about your job. Proper. Calder'll pretend she didn't notice. She noticed.
+? cue:repair.you@dept
+- That was on the board for ages. I was saving it. For you. Obviously.   #funny
+- Look at you, clearing the board. I'll have nothing to do. Lovely. Nap.   #funny
+- Good job. Want a screw from my tin? To remember it by. From the Wren pile.   #warm
+? cue:repair.you tier>=friend
+- Mate. That was good work. I'm not even joking. Bit proud, me.   #warm
+- You're getting better than me. Don't tell anyone. Don't tell Rina.   #funny
+? cue:repair.you mood:low
+- Nice fix. Honestly. Glad someone's on form today. It's not me.
