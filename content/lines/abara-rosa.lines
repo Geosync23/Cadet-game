@@ -25,3 +25,55 @@
 == joy
 ? tier>=colleague
 - My comics. Little squares of life aboard. People find themselves in them, and smile.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. I'm sketching the breakfast queue. You're in it. Small, at the back.   #funny
+? tier>=acquaintance warmth:cold
+- Oh. Hi, {me}. It's been a while. The comics wall's been short of good material.   #funny
+
+== bye
+- Bye. Mind how you go. If you trip, I might draw it.   #funny
+
+== near
+? habit:common-room
+- The comics wall. Hart's got a new one up. Teague's sulking. Good week.   #funny
+? habit:lingers-at-meals
+- I stay after meals. People are funnier when they're full.
+
+== invite
+- Swap table tonight? I'm swapping comics for pencils. Bring something small.
+
+== accept
+- Yes. Okay. I'll bring my sketchbook.
+- Yes. I'll come. I won't draw you. Probably.   #funny
+
+== decline
+- Not tonight. I've a comic to finish. Another time?
+? weekday:thu|fri
+- Rest day. Pencils, common room, quiet. Saturday?
+
+== missed
+- You didn't come. That's fine. I drew the empty chair. It's very moving.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. There's a little comic on the wall. Third row. It's about you.   #warm
+? birthday:me
+- My birthday. Teague and Hart drew me a comic. Two styles. One very confused me.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I'll draw it after. Everyone holding on to their mugs.
+
+== hint
+- {me}. Have you a minute later? I've something to say. Out loud, not drawn.
+
+== about
+? aff:teague-theo:friend
+- Teague and I share the comics wall. He's louder. I'm neater. It works.   #funny
+
+== life
+? tier>=friend
+- On Valo I shouted prices all day. Drawing's quieter. I say more with it.

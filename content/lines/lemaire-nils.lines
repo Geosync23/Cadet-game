@@ -25,3 +25,57 @@
 == joy
 ? tier>=colleague
 - My list of star names. For stars nobody's found yet. Somebody has to be ready.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! What do you call a lazy star? A... no. Wait. I'll fix it.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. You've missed four jokes. I can tell them all now. No? Later, then.   #funny
+
+== bye
+- {bye}. If you spot a new star, tell me first. I've got names ready.
+
+== near
+? habit:gardener
+- I help in the garden before shift. Plants don't groan at my jokes. They just grow.   #funny
+? place:lounge
+- Bow lounge. Big windows. I look for the gaps where a star should be.
+
+== invite
+- Observatory night? Bring a name. If we find a star, you can have first go.
+? tier>=acquaintance
+- Friday jam? I'll tell a joke between songs. That's my instrument.   #funny
+
+== accept
+- Yes! Good. I'll prepare a joke for the walk there.   #funny
+- Yes, please. I'll be there. Early, for once.
+
+== decline
+- Not tonight. Night sweep. Boxes to carry. Another time?
+? weekday:sun|mon
+- Rest day. I'm calling home. Mum still laughs at my jokes. Tuesday?
+
+== missed
+- You missed it. And a joke. The joke was bad. You were lucky.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! Why did the cake go to space? It wanted a launch. Sorry.   #funny
+? birthday:me
+- My birthday. Karin told me a good joke as a present. It hurt. It was good.   #funny
+
+== cue
+? cue:tradition.observatory
+- Last night I found a gap on the chart. Probably nothing. I wrote a name down anyway.
+
+== hint
+- {me}. Have you a minute later? No joke. Promise. Well. Maybe one.
+
+== about
+? aff:yilmaz-karin:friend
+- Karin's jokes are worse than mine. That's the nicest thing I can say. I mean it nicely.   #funny
+
+== life
+? tier>=friend
+- I carry the boxes now. One day it'll be my name on the chart. I'm patient. Mostly.

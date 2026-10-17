@@ -25,3 +25,55 @@
 == joy
 ? tier>=colleague
 - My old maps. Every corridor that isn't there any more. It's like a secret station.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Marra Station once had two mess halls. I've got the map.
+? tier>=acquaintance warmth:cold
+- Oh, hi, {me}. It's been a while. Headphones all right?
+
+== bye
+- Bye, {me}. Mind the corridor. At least ours are all still there.   #funny
+
+== near
+? habit:garden-lover
+- The garden. Quieter than the lab. The pumps sound like a corridor at night.
+? habit:bar-regular
+- One drink in the corner. I like watching the room. Is that strange?
+
+== invite
+- Garden after shift? Cruz is trying a new bed. I'd like to see. Come along?
+
+== accept
+- Oh. Yes. Thank you. I'd like that.
+- Yes. I'll bring a map. Just in case.   #funny
+
+== decline
+- Not tonight. Three pairs of headphones waiting. Another time?
+? weekday:tue|wed
+- Rest day. I'm unfolding maps. All of them. Thursday?
+
+== missed
+- You didn't come. That's all right. I fixed some headphones. They're happy.
+
+== birthday
+? birthday:you
+- Happy birthday. An old map of Marra Station. The corridor's gone. The map isn't.   #warm
+? birthday:me
+- My birthday. Garcia sent a card that plays a tune. I taught her that.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Everyone wants headphones so they can't hear it. I'll be busy.
+
+== hint
+- {me}. Can I ask you something later? Well. Tell you something.
+
+== about
+? aff:garcia-greta:friend
+- Garcia does the night shift's headphones. I do the day's. We trade spare parts.   #warm
+
+== life
+? tier>=friend
+- Marra Station's been rebuilt twice. My maps are of the first one. That's the one I miss.

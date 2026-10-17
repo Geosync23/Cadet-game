@@ -25,3 +25,57 @@
 == joy
 ? tier>=colleague
 - Playing in the music room. The notes go just where they should. Nothing in between.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:evening
+- Evening, {me}. Late dinner, then the telescope, then the music room. All planned.
+? tier>=acquaintance warmth:cold
+- Hello, {me}. It's been a while. Good to see you. I checked. It's definitely you.   #funny
+
+== bye
+- Bye, {me}. See you at nine. Well. Nine and a bit.
+
+== near
+? habit:bar-regular
+- One drink at the bar. Just the one. I counted.   #funny
+? habit:musician
+- Music room. Scales first. Exactly. Then the fun bit.
+
+== invite
+- Friday jam? I'll play exactly. You can play however you like.
+? tier>=acquaintance
+- Observatory night? My telescope's very clean. You'll see. Literally.   #funny
+
+== accept
+- Yes. Good. I'll put it on my list.
+- Yes, please. I'll be there at nine. Exactly nine.
+
+== decline
+- Not tonight. My sister's sent a recipe. I need to convert all of it.   #funny
+? weekday:sat|sun
+- Rest day. Telescope cleaning. Then music. Then the telescope again. Monday?
+
+== missed
+- You didn't come. That's fine. I checked the time three times. That's how I know.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I baked my sister's biscuits. To the gram. Two are yours.   #warm
+? birthday:me
+- My birthday. My sister's message said "a handful of happy returns". Whose hand?   #funny
+
+== cue
+? cue:tradition.observatory
+- Last night my telescope found the ring before the big one did. Not gloating. Much.   #funny
+
+== hint
+- {me}. Have you a minute later? I've something to say. I've checked it twice.
+
+== about
+? aff:zamora-quinn:friend
+- Zamora names the stars. I check the sums. Between us, nothing's ever wrong.   #warm
+
+== life
+? tier>=friend
+- My sister says I measure everything. I do. It's how I know I've got it right.
