@@ -10,7 +10,7 @@ Chain of command: only the lead talks to the user.
 | Seat | Branch | Engineer (session) | Last passed | Open from me |
 | --- | --- | --- | --- | --- |
 | Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 46e948b (0.43.25) | none |
-| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | 3377935 (0.34.47, PASS; 774eeb7 comments) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
+| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng 2, 01WEEoe5DyRegEqVMZgKRHWB | 3377935 (0.34.47, PASS; 774eeb7 comments) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
 | Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | 2ef3cce (0.35.30) | none |
 | Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | a570274 (0.38.19): ternClear still ignores DECK_CREW (one-line fix asked) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
 | Performance (sections 4c/5, lead-assigned) | claude/crowd-render | lead | cfbfd76 (0.27.25) | none; context-restore note in reviews/crowd-render-cfbfd76.md |
