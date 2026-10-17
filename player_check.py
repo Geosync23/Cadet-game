@@ -24,6 +24,7 @@
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
+#   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
@@ -188,6 +189,19 @@ with sync_playwright() as pw:
     g.ev("goToDeck(4); setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 + 14 * 60); needsT = null"); g.step(3)
     early = [g.ev(BED), g.ev("document.getElementById('tx').textContent"), g.ev("clockText()")]; print('  at 14:00:', early)
     check(early[0] is True and 'Too early' in early[1] and early[2].endswith('14:00'), f'the bunk before 20:00 should say it is too early: {early}')
+    # a friend's note on your bunk (0.28.25, section 20's bunkNote; a stand-in when it's missing): the first tap reads it, the next is the bunk as before
+    BTAP = "(() => { const id = playerBed(), b = cellPos(...DECKS[4].places.find(p => p.id === id).at); const it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; }).sort((m, n) => m[1].distanceTo(b) - n[1].distanceTo(b))[0]; return playerTap(it[0], it[1].clone(), it[1].clone()); })()"
+    stubn = g.ev("(() => { if (typeof bunkNote === 'function') return false; let left = 1; window.bunkNote = () => left-- > 0 ? { from: 'Tomas Reyes', text: 'Left you the good pillow.' } : null; return true; })()")
+    notes = []
+    for k in range(2):
+        tp = g.ev(BTAP)
+        for j in range(60):
+            g.step(10)
+            if not g.ev("player.path.length > 0"): break
+        g.step(5); notes.append([tp, g.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent")])
+    if stubn: g.ev("delete window.bunkNote")
+    print('  your bunk with a note, then again:', notes)
+    if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'Too early' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
     day0 = g.ev("SHIP.time.day"); g.ev(BED); asked = g.ev("!sleepEl.hidden")
     g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
@@ -280,14 +294,27 @@ with sync_playwright() as pw:
 
     print('The store (credits, snacks, comforts):')
     sh = g.ev(r"""(() => { const P = SHIP.player, n = P.needs; P.credits = 20; P.locker = []; n.social = 50; n.hunger = 50;
-      basket = storePick('comfort'); ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];
-      basket = storePick('snack'); ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
+      basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];   // not a gift (0.28.25)
+      basket = { ...storePick('snack'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
       P.credits = 1; basket = storePick('comfort'); const it = ITEMS.find(i => i.t === 'Counter'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
       const c = [r, !!ACT, basket, document.getElementById('tx').textContent]; P.credits = 40; return [a, b, c]; })()""")
     print(' ', sh)
     check(sh[0][1] and sh[0][0] < 20 and sh[0][2] > 50 and sh[0][3] is None, f'a comfort: credits down, in the locker, social up: {sh[0]}')
     check(sh[1][0] < sh[0][0] and sh[1][1] == len(sh[0][1]) and sh[1][2] > 50, f'a snack: credits down, eaten (food up), not in the locker: {sh[1]}')
     check(sh[2][0] is True and not sh[2][1] and sh[2][2] is None and 'credits' in sh[2][3], f'not enough credits: a toast, no sale: {sh[2]}')
+    print('Gifts and your bunk (0.28.25: section 20\'s giftAdd, GIFT_MAKES, bunkNote; stand-ins when they\'re missing):')
+    gf = g.ev(r'''(() => { const P = SHIP.player, stub = typeof giftAdd !== 'function', out = {};
+      if (stub) { window.giftAdd = x => P.carry.length < CARRY_MAX ? (P.carry.push(x), true) : false; window.GIFT_MAKES = [{ item: 'keyring', mins: 10, needs: 'scrap' }]; }
+      P.carry = []; P.credits = 40; P.locker = []; basket = { kind: 'comfort', name: 'a postcard of Earth', price: 3, gain: 3, gift: 'postcard' };
+      ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); out.bought = [P.carry.slice(), P.locker.length, P.credits];
+      out.gifts = Object.values(STORE).flat().filter(x => x[3]).map(x => x[3]);
+      P.carry = []; ACT = { kind: 'craft', def: { ...PLAYER_ACTS.craft }, o: { gift: 'keyring', needs: 'scrap' }, face: 0 }; actEnd(false); out.made = P.carry.slice(); P.carry = [];
+      if (stub) { delete window.giftAdd; delete window.GIFT_MAKES; }
+      out.stub = stub; return out; })()''')
+    print(' ', gf)
+    check(gf['bought'] == [['postcard'], 0, 37], f"a gift from the store goes into your hands, not the locker ({gf['bought']})")
+    check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book'} and len(gf['gifts']) == 5, f"the store's gifts are section 20's names ({gf['gifts']})")
+    check(gf['made'] == ['keyring'], f"a gift made in the machine shop goes into your hands ({gf['made']})")
 
     print('Social from chatting and company:')
     ch = g.ev(r"""(() => { const n = SHIP.player.needs, out = []; SHIP.player.chats = {};

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.24
+   STARSHIP CADET: CSV Wren                           build 0.28.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.24';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.25';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9437,6 +9437,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   job:    { mins: 3, pose: 'work', title: 'Your job' },
   stow:   { mins: 2, pose: 'browse', title: 'Main storage' },
   make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
+  craft:  { mins: 15, pose: 'work', title: 'Machine shop' },   // a small gift, no job (0.28.25: section 20's GIFT_MAKES sets the minutes)
   sit:    { mins: 1, pose: 'sit', title: 'Sitting', until: () => false },   // sit anywhere (0.28.12): until you get up
   cartTake: { mins: 2, pose: 'stand', title: 'Cart bay' },     // the cart run (0.28.11): the crew's own times (section 17's jobRun)
   cartLoad: { mins: 10, pose: 'work+cart', title: 'Cargo hold' },
@@ -9447,16 +9448,18 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
 // sells it. Snacks are eaten on the way out (+hunger); comforts go in your locker (+social). Credits: CREDITS_FRESH
 // to start, JOB_PAY for each job you finish.
 const STORE = {
-  snack: [['a bag of dried apple', 2, 6], ['a bar of ship-made chocolate', 3, 8], ['a pot of spiced nuts', 3, 8], ['a honey flapjack', 2, 7]],
-  drink: [['a cold fizzy lime', 2, 4], ['a bottle of cold tea', 2, 4], ['a carton of oat milk', 2, 5]],
-  comfort: [['a paperback novel', 8, 5], ['a pair of soft socks', 6, 4], ['a postcard of Earth', 3, 3], ['a little potted succulent', 10, 6], ['a deck of cards', 5, 4], ['a scented candle (unlit, ship rules)', 7, 4]],
+  snack: [['a bag of dried apple', 2, 6], ['a bar of ship-made chocolate', 3, 8], ['a pot of spiced nuts', 3, 8], ['a honey flapjack', 2, 7], ['a packet of biscuits', 3, 6, 'biscuits']],
+  drink: [['a cold fizzy lime', 2, 4], ['a bottle of cold tea', 2, 4], ['a carton of oat milk', 2, 5], ['a tin of tea', 4, 3, 'tin of tea']],
+  comfort: [['a paperback novel', 8, 5], ['a pair of soft socks', 6, 4], ['a postcard of Earth', 3, 3, 'postcard'], ['a little potted succulent', 10, 6, 'little plant'], ['a deck of cards', 5, 4], ['a scented candle (unlit, ship rules)', 7, 4], ['a puzzle book', 6, 4, 'puzzle book']],
 };
+// gifts (0.28.25, Pillar 4: section 20's giftAdd): a store line with a 4th name is a gift (SOC_GIFTS' name). Bought, it
+// goes into your hands to give to someone (giftAdd) instead of your locker or your mouth; hands full, as before.
 const STORE_SHELF = it => /fridge/i.test(it.t) ? 'drink' : /display/i.test(it.t) ? 'comfort' : 'snack';
 const JOB_PAY = 15;
 function storePick(kind) {                               // the next thing on that shelf: deterministic, never R()
   const list = STORE[kind], n = SHIP.player.locker.length + (SHIP.player.bought || 0) + SHIP.time.day;
-  const [name, price, gain] = list[n % list.length];
-  return { kind, name, price, gain };
+  const [name, price, gain, gift] = list[n % list.length];
+  return { kind, name, price, gain, gift: gift || null };
 }
 const ACT_TAP = [   // what you tapped (its title), the place types it leads to, the activity
   [/treadmill|rowing|weights|mats/i, ['gym'], 'gym'],
@@ -9501,9 +9504,20 @@ function foodFrom(where, peek) {
   if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
   return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 08:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
 }
+// your bunk (0.28.25, Pillar 4): with section 20's bunkNote, a tap on your own bunk walks you there and shows a friend's
+// note if one was left (the oldest unread; marked read), else does what a bunk tap always did (offerSleep, section 13)
+function bunkTap(it, at) {
+  if (typeof bunkNote !== 'function' || typeof offerSleep !== 'function' || typeof playerBed !== 'function') return false;
+  const id = playerBed(), bed = PLACE_OF.get(id); if (!bed || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  const p = at.clone();
+  approach(p, it.front, it.depth, () => { let n = null; try { n = bunkNote(); } catch (e) { n = null; }
+    if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else if (!offerSleep(p)) toast(it.t, it.x); });
+  return true;
+}
 const PLAYER_TAPS = [];                                  // other sections' taps (15b): f(item, itemPos, tapPoint) -> true if handled
 // an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 function playerTap(it, at, point) {
+  if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
@@ -9662,6 +9676,9 @@ function actEnd(abort) {
   }
   if (A.kind === 'pay' && basket) {
     const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1; simAct('buy', { item: b.name });
+    if (b.gift && typeof giftAdd === 'function' && giftAdd(b.gift)) {   // a gift: into your hands (0.28.25)
+      toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + '. You keep it in your hands to give to someone. ' + P.credits + ' credits left.'); basket = null; return;
+    }
     if (b.kind === 'comfort') { P.locker.push(b.name); P.locker.length = Math.min(P.locker.length, LOCKER_MAX); P.needs.social = needClamp(P.needs.social + b.gain); }
     else P.needs.hunger = needClamp(P.needs.hunger + b.gain);
     toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + (b.kind === 'comfort' ? '. It goes in your locker; it\'s nice to have something of your own.' : ' and have it on the way out.')
@@ -9669,6 +9686,9 @@ function actEnd(abort) {
   }
   if (A.kind === 'fetch' || A.kind === 'job' || A.kind === 'stow' || A.kind === 'make') jobEnd(A);
   if (A.kind.startsWith('cart')) cartEnd(A);
+  if (A.kind === 'craft') {                              // the gift you made (0.28.25)
+    const P = SHIP.player; if (P.carry.length < CARRY_MAX && (!A.o.needs || typeof SHIP.stores[A.o.needs] !== 'number' || takePart(A.o.needs)) && giftAdd(A.o.gift)) { P.crafted = (P.crafted || 0) + 1; toast('Machine shop', 'You make ' + partList([A.o.gift]) + '. It\'s in your hands: give it to someone.'); }
+  }
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
   if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
@@ -10016,6 +10036,15 @@ function jobTap(it, at) {
     if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Fit those first, then come back for ' + partList(need) + '.'); return true; }
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
     if (pl) actStart('fetch', pl.id, { ...o, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('fetch', null, o));
+    return true;
+  }
+  if (!mw && deckDef.num === 5 && roomAt(...c) === 'f' && typeof GIFT_MAKES !== 'undefined' && typeof giftAdd === 'function') {   // no job: make a small gift (0.28.25)
+    const g = GIFT_MAKES[(P.crafted || 0) % GIFT_MAKES.length], pl = jobPlaceNear('storage', 'f', at);
+    if (!g || !pl) return false;
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + ').'); return true; }
+    if (g.needs && typeof SHIP.stores[g.needs] === 'number' && !(SHIP.stores[g.needs] > 0)) { toast(it.t, 'No ' + g.needs + ' left to make ' + partList([g.item]) + ' from.'); return true; }
+    actStart('craft', pl.id, { title: it.t, flavour: it.x, gift: g.item, needs: g.needs || null, after: 'You make ' + partList([g.item]) + ' from offcuts, to give to someone: about ' + taskMins(g.mins) + ' minutes.' });
+    if (ACT && ACT.kind === 'craft') ACT.def.mins = g.mins;
     return true;
   }
   if (!mw) return false;
