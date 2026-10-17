@@ -49,7 +49,7 @@ All of seat 8's places are built (0.38.9-0.38.12). Still to do: decor for each n
 - **Wall pieces hide when their wall is lowered.** Shoot them with walls on auto, from a camera angle that faces the wall.
 - **Tall things** (bunks, racks) fade, so a shelf on the wall behind them can still be seen.
 - **Floating need notes** ("+69 Energy") fade on real-time timers and can make one cadet_test shot differ; re-run (the combined build's cadet_test hides them).
-- **`DECK_DRESS` disposes** every geometry and every material with a map when hidden: give instanced meshes their own geometry, material and texture clone, and set `noMerge` and `frustumCulled = false` on them.
+- **`DECK_DRESS` disposes** every geometry and (since 0.38.13) every material except the cached `DRESS_MATS` colours and `HIT_MAT` when hidden. So a dressing must never borrow a shared kit material (`M.*`, `LNG.*`, `GD.*`, `TILES_KIT.mat`): use `dressMat(colour)` or its own. Give instanced meshes their own geometry, material and texture clone, and set `noMerge` and `frustumCulled = false` on them.
 - **cadet_test only covers Deck 4.** Anything you add to Deck 4 shows in `a_start`/`b_wander10s`. Crop the differing box and check it's only your piece.
 
 ## How to test
