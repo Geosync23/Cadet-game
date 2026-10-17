@@ -15,6 +15,9 @@
 #   sitting down (0.46.2): tapping the Tiles table with nobody about gives a tip and sits you as before (15b); with a crew member at it, you walk to a
 #   free seat and sit (the 'tiles' activity, sit:play) and the game opens against them; Done stands you up; walking
 #   away leaves a game uncounted; a win adds friendship and a memory; beating Rina is news, once; save.tiles round-trips
+#   Tiles night (0.46.3): tilesNight(day, came) pairs everyone (one watches when odd), the same every time; Rina always
+#   has a game and wins it until you beat her; 2000 nights of rolls match the levels' odds; the end of the tradition
+#   (simNote('tradition', { id: 'tilesNight' })) posts the news once and counts Rina's Tuesdays; the Tiles app shows it
 # Setup and environment as for cadet_test.py.
 # Run:  python3 tiles_check.py BUILD.html [GAMES]   (GAMES per level and mode, default 4000; Hard plays half as many)
 import sys, json, re
@@ -211,8 +214,52 @@ def seat(pw, path):
     check(b == [0, True, 1, True], f'beating Rina: news once, her memory, the day kept: {b}')
     sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x' } }))]; })()")
     check(sv[0], f'save.tiles round-trips: {sv}')
-    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"firstWin":null,"beatRina":null}', f'a bad save.tiles reads safely: {sv[1]}')
+    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
     check(not gg.errors and not gg.ev("DEV.errors.length"), f'seating: no errors: {gg.errors[:3]}')
+    gg.close()
+
+NIGHT = r"""(() => {
+  const out = {}, crew = ROSTER.filter(p => p.id !== 'rina').slice(0, 9).map(p => p.id), came = ['rina', ...crew];
+  const a = tilesNight(8, came), b = tilesNight(8, came.slice().reverse());
+  out.same = JSON.stringify(a) === JSON.stringify(b);
+  out.games = a.games.length; out.out = a.out;
+  out.everyone = new Set(a.games.flatMap(g => [g.a, g.b]).concat(a.out ? [a.out] : [])).size === came.length;
+  out.rinaPlays = a.games.some(g => g.a === 'rina' || g.b === 'rina');
+  let rinaWins = 0, rinaGames = 0;
+  for (let d = 1; d < 400; d += 7) { const r = tilesNight(d, came); for (const g of r.games) if (g.a === 'rina' || g.b === 'rina') { rinaGames++; if (g.win === 'rina') rinaWins++; } }
+  out.rina = [rinaWins, rinaGames];
+  // the rolls follow the odds: count, per level pair, how often the first beat the second
+  const tally = {}, P = id => ROSTER.find(x => x.id === id);
+  for (let d = 1; d <= 2000; d++) for (const g of tilesNight(d, crew).games) {
+    const la = tilesStyle(P(g.a)).level, lb = tilesStyle(P(g.b)).level, k = la + '>' + lb, t = tally[k] || (tally[k] = [0, 0]); t[1]++; if (g.win === g.a) t[0]++;
+  }
+  out.odds = Object.fromEntries(Object.entries(tally).filter(([, v]) => v[1] >= 200).map(([k, v]) => [k, [Math.round(v[0] / v[1] * 100) / 100, TL_ODDS[k.split('>')[0]][k.split('>')[1]], v[1]]]));
+  // the end of the night: news once, Rina's Tuesdays
+  const n0 = SHIP.tiles.night.rina;
+  simNote('tradition', { id: 'tilesNight', day: 15, at: 1290, came, you: true, host: 'rina' });
+  simNote('tradition', { id: 'tilesNight', day: 15, at: 1290, came, you: true, host: 'rina' });
+  out.news = NEWS.filter(x => x.id === 'tiles-night:15').map(x => x.lines);
+  out.streak = [n0, SHIP.tiles.night.rina, SHIP.tiles.night.last];
+  simNote('tradition', { id: 'quiz', day: 16, at: 1290, came, you: false });
+  out.quiz = SHIP.tiles.night.last;
+  deviceShow('tiles'); out.app = document.getElementById('devBody').textContent; deviceClose();
+  return out;
+})()"""
+
+def night(pw, path):
+    gg = Game(pw, path, 900, 760); gg.step(3)
+    r = gg.ev(NIGHT)
+    check(r['same'] and r['games'] == 5 and r['out'] is None and r['everyone'] and r['rinaPlays'], f'Tiles night: 10 people, 5 games, everyone placed, the same whatever the order, Rina plays: {r["same"]}, {r["games"]}, {r["everyone"]}, {r["rinaPlays"]}')
+    check(r['rina'][0] == r['rina'][1] > 50, f'Rina wins every crew game until you beat her: {r["rina"]}')
+    for k, (got, want, n) in r['odds'].items():
+        e = 2.2 * (want * (1 - want) / n) ** .5 + .01
+        check(abs(got - want) <= e, f'night rolls {k}: {got} against the odds {want} ({n} games)')
+    print('  night odds:', {k: v[:2] for k, v in r['odds'].items()})
+    check(len(r['news']) == 1 and r['news'][0] and 'Rina' in r['news'][0][0], f'the end of the night posts the news once: {r["news"]}')
+    check(r['streak'][1] == r['streak'][0] + 1 and r['streak'][2] == 15 and r['quiz'] == 15, f'Rina Tuesdays counted; other traditions ignored: {r["streak"]}, {r["quiz"]}')
+    check('Last Tiles night' in r['app'] or 'LAST TILES NIGHT' in r['app'].upper(), f'the Tiles app shows the last night: {r["app"][:120]}')
+    print('  night news:', r['news'][0] if r['news'] else None)
+    check(not gg.errors and not gg.ev("DEV.errors.length"), f'night: no errors: {gg.errors[:3]}')
     gg.close()
 
 def run(path, games):
@@ -258,6 +305,7 @@ def run(path, games):
         g.close()
         board(pw, path)
         seat(pw, path)
+        night(pw, path)
 
 if __name__ == '__main__':
     run(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 4000)

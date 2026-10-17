@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.46.2
+   STARSHIP CADET: CSV Wren                           build 0.46.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.46.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.46.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16690,7 +16690,7 @@ function tilesStyle(p) {
 // ---- the board on your device (0.46.1): the Tiles app. A game in play draws as a 6 x 6 board in the device's
 // phosphor screen; tap a tile, then where it goes (legal squares glow, a square that docks shows a spark); tap your
 // hold to launch. The crew member answers a moment later. No timers on you, no drag, words for every move.
-SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, firstWin: null, beatRina: null };   // read from save.tiles below
+SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
 let TL_GAME = null;   // { s, opp, name, style, rng, where, teach, hint, sel, log: [lines], fx, timer }
 const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<kind>')) arrive
   start: { rina: ['Best of one. Try to keep up.'], chatty: ['Oh good, a game. Did I tell you about the hydroponics leak?', 'Go easy on me. Or don\'t, I\'ll learn more.'], any: ['Your move.', 'Let\'s see what you\'ve got.'] },
@@ -16897,6 +16897,12 @@ deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
     if (vs.length) blocks.push({ kind: 'text', text: 'Against: ' + vs.join(', ') + '.' });
     if (T.firstWin !== null) blocks.push({ kind: 'text', text: 'Your first win: day ' + T.firstWin + '.' });
     if (T.beatRina !== null) blocks.push({ kind: 'text', mark: 'hot', text: 'You beat Rina on day ' + T.beatRina + '.' });
+    if (T.night && T.night.last !== null && T.night.games.length) {   // the last Tiles night (0.46.3)
+      const nm = id => { try { const p = ROSTER.find(x => x.id === id); return p ? p.name.split(' ')[0] : id; } catch (e) { return id; } };
+      blocks.push({ kind: 'text', mark: 'head', text: 'Last Tiles night, day ' + T.night.last });
+      for (const [a, b, w] of T.night.games) blocks.push({ kind: 'text', text: nm(w) + ' beat ' + nm(w === a ? b : a) + '.' });
+      if (T.beatRina === null && T.night.rina > 1) blocks.push({ kind: 'text', text: 'Rina hasn’t lost in ' + T.night.rina + ' Tuesdays.' });
+    }
     return { title: 'Tiles', blocks };
   } });
 // ---- sitting down to play (0.46.2): tap a Tiles table, station or board; you take a free seat at it and play whoever
@@ -16947,11 +16953,55 @@ function tilesLoad(s) {   // save.tiles, read defensively
   const d = s && s.tiles && typeof s.tiles === 'object' ? s.tiles : {}, n = k => Number.isFinite(d[k]) && d[k] >= 0 ? Math.floor(d[k]) : 0, vs = {};
   if (d.vs && typeof d.vs === 'object') for (const k in d.vs) { const v = d.vs[k]; if (Array.isArray(v) && v.length === 2 && k.length < 40) vs[k] = [Math.max(0, v[0] | 0), Math.max(0, v[1] | 0)]; }
   const day = k => Number.isFinite(d[k]) ? Math.floor(d[k]) : null;
-  return { played: n('played'), won: n('won'), lost: n('lost'), vs, firstWin: day('firstWin'), beatRina: day('beatRina') };
+  const nt = d.night && typeof d.night === 'object' ? d.night : {}, games = Array.isArray(nt.games) ? nt.games.filter(g => Array.isArray(g) && g.length === 3 && g.every(x => typeof x === 'string' && x.length < 40)).slice(0, 20) : [];
+  const night = { last: Number.isFinite(nt.last) ? Math.floor(nt.last) : null, rina: Number.isFinite(nt.rina) && nt.rina >= 0 ? Math.floor(nt.rina) : 0, games };
+  return { played: n('played'), won: n('won'), lost: n('lost'), vs, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
 }
 SHIP.tiles = tilesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.tiles = JSON.parse(JSON.stringify(SHIP.tiles)); });
 onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); TL_GAME = null; });
+// ---- Tiles night on paper (0.46.3): when the tradition ends (section 18's simNote('tradition'), id tilesNight), the
+// crew who came are paired (seeded by the day, key 801) and each pairing is settled by a seeded roll (key 802) from
+// their levels: the same level is even, Hard beats Medium 68%, Medium beats Easy 70%, Hard beats Easy 83% (tiles_check's
+// numbers). Rina's story rule (the user, 2026-10-17): she wins every crew game until you beat her. One odd one out
+// watches. The results are news the next morning, and the Tiles app keeps the last night.
+const TL_ODDS = { easy: { easy: .5, medium: .3, hard: .17 }, medium: { easy: .7, medium: .5, hard: .32 }, hard: { easy: .83, medium: .68, hard: .5 } };
+function tilesNight(d, came) {   // came: crew ids at the night; returns { day, games: [{ a, b, win }], out, rina }
+  const ids = [...new Set((came || []).filter(id => typeof id === 'string' && id !== 'you'))];
+  const P = id => { try { return ROSTER.find(x => x.id === id) || { id, seed: socHash(id) }; } catch (e) { return { id, seed: 0 }; } };
+  const order = ids.map(id => [id, schedU(P(id).seed | 0, d, 801)]).sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : 1)).map(x => x[0]);
+  if (order.includes('rina') && order.length > 1) { order.splice(order.indexOf('rina'), 1); order.unshift('rina'); }   // the champion always gets a game
+  const games = [];
+  for (let i = 0; i + 1 < order.length; i += 2) {
+    const a = order[i], b = order[i + 1], pa = P(a), pb = P(b), la = tilesStyle(pa).level, lb = tilesStyle(pb).level;
+    let win;
+    if ((a === 'rina' || b === 'rina') && SHIP.tiles.beatRina === null) win = 'rina';
+    else win = schedU((pa.seed | 0) ^ (pb.seed | 0), d, 802) < TL_ODDS[la][lb] ? a : b;
+    games.push({ a, b, win });
+  }
+  return { day: d, games, out: order.length % 2 ? order[order.length - 1] : null };
+}
+function tilesNightNews(r, you) {   // the night's results into the save and the news
+  const T = SHIP.tiles, N = T.night || (T.night = { last: null, rina: 0, games: [] });
+  if (N.last === r.day) return;   // once a night
+  const rg = r.games.find(g => g.a === 'rina' || g.b === 'rina');
+  if (rg) N.rina = rg.win === 'rina' ? N.rina + 1 : 0;
+  N.last = r.day; N.games = r.games.map(g => [g.a, g.b, g.win]);
+  if (typeof newsAdd !== 'function' || !r.games.length) return;
+  const name = id => { try { const p = ROSTER.find(x => x.id === id); return p ? shortName(p) : id; } catch (e) { return id; } };
+  const lines = [];
+  if (rg && rg.win === 'rina') lines.push(N.rina > 1 ? 'Rina won again at Tiles. That’s ' + N.rina + ' Tuesdays running.' : 'Rina won at Tiles night, of course.');
+  else if (rg) lines.push(name(rg.win) + ' beat Rina at Tiles night!');
+  const lvl = id => { let p = null; try { p = ROSTER.find(x => x.id === id); } catch (e) { /* before section 9 */ } return tilesStyle(p || { id, seed: 0 }).level; };
+  const up = r.games.find(g => g !== rg && TL_ODDS[lvl(g.win)][lvl(g.win === g.a ? g.b : g.a)] < .5);   // an upset: the weaker player won
+  if (up) lines.push(name(up.win) + ' beat ' + name(up.win === up.a ? up.b : up.a) + ' at Tiles. Nobody saw that coming.');
+  const other = r.games.find(g => g !== rg && g !== up);
+  if (other && lines.length < 2) lines.push(name(other.win) + ' beat ' + name(other.win === other.a ? other.b : other.a) + ' at Tiles night.');
+  if (you) lines.push('The new hand turned up to Tiles night.');
+  newsAdd({ id: 'tiles-night:' + r.day, kind: 'gossip', weight: .6, life: 3, seed: r.games.flatMap(g => [g.a, g.b]).slice(0, 6), lines });
+}
+onSim('tradition', d => { if (!d || !/^tiles/i.test(d.id || '')) return; tilesNightNews(tilesNight(d.day, d.came || []), !!d.you); });
+const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck architect: the trophy on your bunk shelf once you've beaten Rina
 
 // =====================================================================
 // 6. CAMERA
