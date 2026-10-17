@@ -197,11 +197,11 @@
 
 // ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
 // Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
-// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in.
+// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in. From onboarding 0.42.30 EVERY line
+// under a walk.job*/job2/job3 step plays, in file order, ~4.8 s apart: write each step as a sequence, not alternatives.
 == week1
 ? flag:walk.job2.take
-- Your pick. Your lead. I'm just your shadow.
-- Your lead. I'm just the shadow. A chatty shadow.   #funny
+- Your pick. Your lead. I'm just the shadow. A chatty one.   #funny
 ? flag:walk.job2.fetch
 - Stuck? Part number's on the card. The shelf's yours to find.
 ? flag:walk.job2.make

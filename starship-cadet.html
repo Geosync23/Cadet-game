@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.78
+   STARSHIP CADET: CSV Wren                           build 0.48.79
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.78';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.79';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -22272,8 +22272,7 @@ const VOICE = {
         {"text": "Have a look. Device, then Record. It's under Reputation.", "id": "ljgkeo", "flag": "walk.job.turnin"},
         {"text": "That's how you rank up. Better jobs. Trickier ones.", "id": "18co6pl", "tone": "warm", "flag": "walk.job.turnin"},
         {"text": "Lunch, then you lead the next one. I'll just follow.", "id": "14z283", "tone": "warm", "flag": "walk.job.turnin"},
-        {"text": "Your pick. Your lead. I'm just your shadow.", "id": "17gqldt", "flag": "walk.job2.take"},
-        {"text": "Your lead. I'm just the shadow. A chatty shadow.", "id": "17wr5vn", "tone": "funny", "flag": "walk.job2.take"},
+        {"text": "Your pick. Your lead. I'm just the shadow. A chatty one.", "id": "7vdf87", "tone": "funny", "flag": "walk.job2.take"},
         {"text": "Stuck? Part number's on the card. The shelf's yours to find.", "id": "pxdmm6", "flag": "walk.job2.fetch"},
         {"text": "Not saying a word. Well. Mind your fingers.", "id": "tpz2uu", "tone": "funny", "flag": "walk.job2.make"},
         {"text": "Look before you touch. You know this bit.", "id": "1ujz6r5", "flag": "walk.job2.panel"},
