@@ -200,6 +200,10 @@ A: No promises.
 ```
 
 - `A:`, `B:` (and `C:`) are the speakers; a blank line or `---` ends a conversation. Two to four lines.
+- **One speaker** (0.43.13): a conversation with only `A:` lines is one person talking with nobody else in it, such as
+  someone on a call home (`@overheard booths` with `? place:booths`), one to four lines. It plays when that person has
+  no conversation with someone close by; people on a call home only ever say these. No `pair:`, `with:` or `{other}`
+  in it (lines_check says so).
 - `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;

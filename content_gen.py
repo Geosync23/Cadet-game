@@ -234,7 +234,8 @@ def parse_overheard(lines, path, rel, topic, out):
     def close():
         nonlocal cur
         if cur:
-            if len(cur['lines']) < 2:
+            solo = all(x['who'] == 'A' for x in cur['lines'])   # one speaker (on a call, to themselves): one line is enough
+            if len(cur['lines']) < 2 and not solo:
                 raise GenError(f'{path}: a conversation needs at least two lines (near line {cur["at"]})')
             text = '\n'.join(x['who'] + ':' + x['text'] for x in cur['lines'])
             c = merge_conds({'topic': topic}, cur['conds'])
