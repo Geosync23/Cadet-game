@@ -7653,7 +7653,7 @@ function tickShip(dt) {
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
   SHIP.time.min += dt * SHIP_RATE;
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
-  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); }   // section 14: appointments kept or missed; your shift's start
+  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); if (typeof careerTick === 'function') careerTick(); }   // section 14: appointments kept or missed; your shift's start
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
@@ -7945,6 +7945,7 @@ function shiftTick() {
 // section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
 // when used (ROSTER_PLAYER comes later in the file); before it exists, Saturday and Sunday are the days off
 function playerShiftOn(d) {
+  if (typeof careerOff === 'function' && careerOff(d)) return false;   // a leave or sick day, or let go (the career engineer, 0.61.0)
   try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; }
 }
 // The galley rota (section 16, the galley engineer). galleyDay(person, day) -> null | { role, wake, bedBy,
@@ -8269,7 +8270,7 @@ function gatherings(p, d, F) {
   // of their friends who is free stands with them in the shuttle bay while they wait to board, 14:30-15:00 (0.26.38)
   if (!p.guest && typeof farewellCrew === 'function') {
     const S = schedData(), bye = S.people.filter(q => q !== p && !q.guest && crewLeaving(q) === d && aboard(q, d));
-    if (bye.some(q => { try { return (farewellCrew(q, d) || []).includes(p.id); } catch (e) { return false; } }))
+    if (bye.some(q => { try { return (farewellCrew(q, d) || []).includes(p.id); } catch (e) { return false; } }) || (typeof careerSendOff === 'function' && careerSendOff(d).includes(p.id)))   // or your own send-off, let go (0.61.0)
       out.push({ at: ROTA_OFF - ROTA_WAIT, dur: ROTA_WAIT, where: [[5, '@gather-shuttle-bay']], tag: 'farewell', anim: 'talk', min: 20 });
   }
   if (F.night && F.works) return out;                    // on the night shift tonight: the ship's events still (eventFree keeps them clear of the shift), not Deck 1's routines (0.26.31)
@@ -9764,15 +9765,18 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
 let schedDay = null;
 deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; if (typeof settleSure !== 'undefined') settleSure = false; });
 deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
-  act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null; },
+  act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null;
+    else if (verb === 'leave' && Number.isInteger(arg) && typeof careerBook === 'function') careerBook(arg); },   // book or cancel a leave day (the career engineer, 0.61.0)
   view: () => {
   const d = SHIP.time.day, m = SHIP.time.min, n = devNow(), B = [{ kind: 'text', text: n.now, mark: 'hot' }];
   if (n.next) B.push({ kind: 'text', text: n.next });
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
-    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (typeof careerOn === 'function' && careerOn(day) ? ' · Leave' : devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
+    const lv = typeof careerCanBook === 'function' ? careerCanBook(day) : null;   // leave (0.61.0): a workday you can still book, or cancel, until 07:30 that day
+    if (lv) { B.push({ kind: 'buttons', items: [{ label: lv === 'book' ? 'Take this day as leave (' + SHIP.career.l + ' left)' : 'Cancel this leave', action: { app: 'schedule', do: 'leave', arg: day } }] }); tipShow('career.leave', careerText('career.tip.leave')); }
   }
   return { title: 'Schedule', blocks: B };
 } });
@@ -19521,7 +19525,7 @@ const VOICE = JSON.parse([
   '{"text":"Not tonight. I\'m studying. Ask me again. I\'ll say yes. Probably.","id":"1h5e3nc"}]',
   ',"farewell.day":[',
   '{"text":"Look after yourself. Sleep. Eat. That\'s not advice, that\'s an order.","id":"tk75ue","tone":"warm","tier":[1,4]},',
-  '{"text":"I\'m only here to check you\'re fit to fly. You are. Go on.","id":"30f1k3","tone":"warm","tier":[1,4]}]',
+  '{"text":"Came to check you\'re fit to fly. You are. I\'ll see you at the bay.","id":"lh1cy3","tone":"warm","tier":[1,4]}]',
   ',"farewell.eve":[',
   '{"text":"Tomorrow. Right. I\'ll lose at Tiles once, as a send-off. Don\'t tell anyone.","id":"2k50po","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
@@ -20898,7 +20902,7 @@ const VOICE = JSON.parse([
   '{"text":"It\'s my day off and I\'m going to sit still for once. Tomorrow? Ask me tomorrow.","id":"1cz7p54","tone":"funny","weekday":"thu|fri"}]',
   ',"farewell.day":[',
   '{"text":"Today, then. I\'ll walk you down. Least I can do.","id":"6o9tgd","tone":"warm","tier":[1,4]},',
-  '{"text":"Window seat. Every time. You remember.","id":"o37o4z","tone":"warm","tier":[1,4]}]',
+  '{"text":"Half two, the bay. I\'ll be there. Where else would I be?","id":"1qxw1e1","tone":"warm","tier":[1,4]}]',
   ',"farewell.eve":[',
   '{"text":"Tomorrow, then. I\'ll be at the Tern. Same spot as when you came.","id":"1vm6jq5","tone":"warm","tier":[1,4]},',
   '{"text":"I keep going over it. What I\'d have said. Doesn\'t matter now. I\'m sorry, shipmate.","id":"spgkso","tone":"serious","tier":[3,4]}]',
@@ -23069,7 +23073,7 @@ const LINES = JSON.parse([
   '{"text":"{bye}, {nick}. Safe trip on the Tern.","id":"1rz0hru","tier":[1,4]},',
   '{"text":"Off today, then. Good luck out there. I mean it.","id":"1etbqx6","tier":[1,4]},',
   '{"text":"Go well. Turn up wherever you land. The rest comes.","id":"nt2rd8","tone":"warm","tier":[2,4]},',
-  '{"text":"Came to see you off. Couldn\'t not.","id":"1wca0dh","tone":"warm","tier":[3,4]},',
+  '{"text":"Came to find you. Couldn\'t let today go without it.","id":"1nglpyy","tone":"warm","tier":[3,4]},',
   '{"text":"Window seat. Promise me.","id":"13kmyqa","tone":"warm","tier":[3,4]},',
   '{"text":"Write when you land. Proper Mail.","id":"1phxnb2","tone":"warm","tier":[3,4]}]',
   ',"farewell.eve":[',
@@ -25922,7 +25926,7 @@ function occasionAdd(id, at, quiet, len) {
   if (!o || SHIP.occasions.some(x => x.key === key)) return null;
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
-  if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+  if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
   if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: o.mail.body, quiet: !!quiet });
   return r;
 }
@@ -26988,6 +26992,191 @@ function byeLine(p, mail) {                              // a goodbye that talks
   return (tier >= 3 ? 'I\'m going to miss you, ' + you + '. ' : 'I\'m off soon. ') + (things.length ? things.map(x => x[0].toUpperCase() + x.slice(1)).join('. ') + '. I won\'t forget that. ' : '') + (tier >= 3 ? 'Write to me?' : 'Look after the old Wren.');
 }
 const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === socId(id)));   // moved:<id>: they've left the Wren
+// ---- leave, missed shifts and being let go (0.61.0, the career engineer; design-doc "Leave, missed shifts and being
+// let go", and "One fail state": this is the game's only way to end) ----
+// Leave: CAREER.leave days to start, one more every CAREER.every ship days (days 29, 57...), at most CAREER.max held.
+// Book a workday from the Schedule until 07:30 that day (careerBook); cancel by then to get it back. A leave day, or a
+// sick day (careerSick(d), the hook for an illness system: days in the infirmary never count), is a day off to section
+// 14's playerShiftOn, so the shift, its start note and the jobs held for you all treat it as one.
+// Missing a shift: a workday without leave where you haven't started by CAREER.missBy (12:30, over half of 08:00-17:00)
+// is a big hit to Works and ship-wide work (repAdd: softened near the bottom, pulled to the middle each Sunday); being
+// late stays section 20's small dip. Started: in a Works room on Deck 5 (shiftTick's test), or a repair of yours. Your
+// first week aboard is a grace (days up to CAREER.grace never count as missed).
+// The ladder: CAREER.chiefRun workday shifts missed in a row (days off, leave and sick days neither count nor break
+// the run; the user's rule, 0.61.4) bring the Chief's talk, again after each worked shift; then, once it's been held,
+// SHIP.rep.ship.work under CAREER.captain brings the Captain's reprimand. Each is an occasion (appointment, Mail, meeting), booked at 07:00 on a day its person is on shift (or
+// after CAREER.wait days anyway), the Captain's only once the Chief's has been held, so the Mail can say "today". The
+// Captain's comes again only once you recover (CAREER.rearm; back to rearm.chief clears both steps). When it's booked, a tip (a warning: shown even with tips off) and up to
+// CAREER.worried friends (tier 2+) come and find you, worried. Under CAREER.bottom at the end of a workday, once the
+// Captain's reprimand has been held (kept or missed), is a day at the bottom (days off and leave neither count nor
+// reset); CAREER.days in a row and you're let go, so it always comes after both talks: the notice day (Mail and tip,
+// Calder's last words in her office, friends come to say goodbye), then your last day (no shift; friends find you
+// again; they, Torres, Pell and Calder stand with you in the shuttle bay 14:30-15:00, section 14's farewell, where
+// the send-off plays), and at 15:00 (or when the send-off ends) the closing card. The save is marked ended (a reload
+// shows the card), with New game the only way on.
+//   SHIP.career (saved) = { l: leave held, w: grants so far, b: [booked days], s: [sick days], st: 0 | 1 Chief | 2
+//   Captain, n: bottom days in a row, on: the last day you started your shift, e: the last day checked for a miss,
+//   z: the last day whose end is counted, k: once-only warnings (1 late, 2 missed), ms: missed shifts in a row, ca: 1
+//   once the Chief's step has been taken for this run (cleared by a worked shift), q: a step waiting to be booked (1,
+//   2), qd: the day it fell due, fl: the goodbye's steps done (1 the notice, 2 the last morning), go: the notice day,
+//   f: [who stands with you at the send-off], end }
+// The words are head writer 4's (content/meetings/careerChief|careerCaptain|careerLetGo|careerSendoff.meet, the bank
+// content/banks/career.lines and each voice's content/career/*.lines).
+// Nothing here calls R().
+const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
+  chiefRun: 3, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
+SHIP.career = null;
+(() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
+function careerClean(s) {
+  const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
+  return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
+    k: int(s.k, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+}
+SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
+onSim('newGame', () => { SHIP.career = null; careerCard(false); });
+function careerInit(now = shipNow()) {
+  if (SHIP.career) return SHIP.career;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
+  const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+}
+const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
+const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
+const careerOn = d => !!SHIP.career && SHIP.career.b.includes(d);   // a booked leave day
+function careerSick(d, on = true) { const c = careerInit(); c.s = c.s.filter(x => x !== d); if (on) c.s.push(d); c.s = c.s.slice(-8); }
+function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
+  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go));
+}
+const careerDeadline = d => (d - 1) * 1440 + CAREER.bookBy;
+function careerCanBook(d, now = shipNow()) {             // 'book', 'cancel' or null
+  const c = careerInit(); if (c.go != null || now >= careerDeadline(d) || !careerRota(d) || c.s.includes(d)) return null;
+  return c.b.includes(d) ? 'cancel' : c.l > 0 ? 'book' : null;
+}
+function careerBook(d, now = shipNow()) {                // the Schedule's button: book a leave day, or cancel one
+  const c = careerInit(), can = careerCanBook(d, now); if (!can) return false;
+  if (can === 'book') { c.l--; c.b.push(d); c.b = c.b.filter(x => x >= SHIP.time.day - 1); } else { c.b = c.b.filter(x => x !== d); c.l++; }   // back, even at the cap: it was earned
+  simNote('leave', { day: d, booked: can === 'book' });
+  return true;
+}
+function careerText(kind, k = 0) {                       // a text from content (tips, Mail, the card; variant k), {me} filled, or null
+  const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null;
+  return e && typeof e.text === 'string' ? e.text.replace(/\{me\}/g, () => chatName()) : null;
+}
+const careerSplit = (kind, from) => { const t = careerText(kind) || '', i = t.indexOf(' | '); return i < 0 ? null : { from, subject: t.slice(0, i), body: t.slice(i + 3) }; };
+function careerTip(key) {                                // a warning: shown even with tips off (like the low-need ones), each time it's due
+  const text = careerText('career.tip.' + key), id = 'career.' + key;
+  if (!text || typeof TIP_Q === 'undefined' || typeof DEVICE_SKIN === 'undefined' || TIP_Q.some(x => x.id === id)) return false;
+  TIP_Q.push({ id, text }); if (TIP_Q.length === 1) DEVICE_SKIN.tip(TIP_Q[0]); return true;
+}
+function careerFriends(n) {                              // your friends aboard (tier 2+), closest first
+  socInit(); return SOC.crew.filter(p => relTier(p.id) >= 2 && socAboard(p) && p.rank !== 'guest').sort((a, b) => (SHIP.rel[b.id].pts || 0) - (SHIP.rel[a.id].pts || 0) || (a.id < b.id ? -1 : 1)).slice(0, n);
+}
+function careerSeek(why, from, until, n) { for (const p of careerFriends(n)) socialSeekAsk(p.id, { from, until, why: 'career:' + why }); }
+function careerSeekLine(p, why) {                        // the chip's line when a career ask finds you (section 20's seekShow)
+  const k = /^career:(\w+)$/.exec(why || ''); if (!k) return null;
+  const kind = k[1] === 'eve' || k[1] === 'day' ? 'farewell.' + k[1] : 'worried.' + k[1], l = socLine(p, kind, { t: shipNow(), tier: relTier(p.id) });
+  return l ? { text: l.text, kind, say: true } : null;
+}
+const careerHeld = (id, now) => { const r = SHIP.occasions.filter(x => x.id === id).pop(); return !!r && now >= r.at + r.len; };   // its latest one is over (kept or missed)
+function careerDue(now) {                                // a step waiting: booked at 07:00 on a day its person is on shift, the Captain's after the Chief's
+  const c = SHIP.career, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (!c.q || c.go != null) return;
+  const step = c.q === 1 ? 'chief' : 'captain', id = c.q === 1 ? 'careerChief' : 'careerCaptain', o = OCCASIONS[id];
+  if (m < 420 || m > o.at - 30 || !playerShiftOn(d) || (!occOnShift(o.by, d) && d < c.qd + CAREER.wait) || (c.q === 2 && !careerHeld('careerChief', now))) return;   // only on your workdays (reviewer 1d)
+  o.mail = careerSplit('career.mail.' + step, c.q === 1 ? 'Chief Ines Calder' : 'Commander Teo Vance');
+  occasionAdd(id, (d - 1) * 1440 + o.at); c.q = 0;
+  careerTip(step); careerSeek(step, now + 60, now + 1440, CAREER.worried);
+  simNote('careerStep', { step });
+}
+OCCASIONS.careerChief = { title: 'A word with the Chief', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.chiefAt, len: 20, script: 'careerChief', due: () => false, mail: null };
+OCCASIONS.careerCaptain = { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', deck: 1, room: 'R', at: CAREER.captainAt, len: 20, script: 'careerCaptain', due: () => false, mail: null };
+OCCASIONS.careerLetGo = { title: 'The Chief\'s office', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.letGoAt, len: 20, script: 'careerLetGo', due: () => false, mail: null };
+OCCASIONS.careerSendoff = { title: 'Your send-off', kind: 'meeting', by: 'torres-zeke', with: ['pell', 'calder'], deck: 5, room: 'S', at: CAREER.sendOffAt, len: 30, script: 'careerSendoff', due: () => false, mail: null };
+function careerStarted(t) {                              // you started your shift (from 07:00 until it counts as missed)
+  const c = careerInit(), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; if (m >= 420 && m < CAREER.missBy) c.on = d;
+}
+onSim('shiftStart', n => { if (!n.missed) careerStarted(n.t); else return;
+  const c = careerInit(); if (n.late >= 20 && !(c.k & 1)) { c.k |= 1; careerTip('late'); } });
+onSim('repair', n => { if (n.who === 'you') careerStarted(n.t); });
+function careerAtWork() {
+  try { return deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { return false; }
+}
+function careerMissed(d) {
+  repAdd('works', -CAREER.hitDept, { work: -CAREER.hitWork }, 'missed');
+  const c = careerInit(); if (!(c.k & 2)) { c.k |= 2; careerTip('missed'); }
+  simNote('shiftMissed', { day: d });
+}
+function careerDayEnd(d, now) {                          // a workday ends: at the bottom (after the Captain) or not
+  const c = careerInit(); if (c.go != null || !careerRota(d) || careerOff(d)) return;
+  c.n = c.st >= 2 && !c.q && careerHeld('careerCaptain', now) && careerWork() < CAREER.bottom ? c.n + 1 : 0;   // only once the reprimand has been held
+  if (c.n === 1) { careerTip('bottom'); careerSeek('last', now, now + 1440, CAREER.worried); }
+  if (c.n >= CAREER.days) careerLetGo(d + 1, now);
+}
+function careerLadder(now) {
+  const c = careerInit(), w = careerWork();
+  const st = c.st; if (c.st >= 1 && w >= CAREER.rearm.chief) c.st = 0; else if (c.st >= 2 && w >= CAREER.rearm.captain) c.st = 1;   // recovered: the steps come again
+  if (c.st < st) { if (c.q > c.st) c.q = 0; careerTip('up'); }
+  if (c.go != null || c.q) return;                       // a step waiting is booked by careerDue
+  const d = Math.floor(now / 1440) + 1;
+  if (c.st <= 1 && !c.ca && c.ms >= CAREER.chiefRun) { c.ca = 1; c.st = 1; c.q = 1; c.qd = d; }   // the Chief: missed shifts in a row (the user's rule, 0.61.4)
+  else if (c.st === 1 && w < CAREER.captain && careerHeld('careerChief', now)) { c.st = 2; c.q = 2; c.qd = d; }   // the Captain: very low standing, after the Chief's talk
+}
+function careerLetGo(d, now) {                           // notice on day d, the last day d + 1
+  const c = careerInit(), see = CAREER.seeOff.filter(id => { const p = socP(id); return p && socAboard(p, d + 1); });
+  c.go = d; c.f = [...new Set(careerFriends(CAREER.sendOff).map(p => p.id).concat(see))];
+  c.b = []; c.n = 0; c.q = 0;                             // booked leave is moot now
+  occasionAdd('careerLetGo', (d - 1) * 1440 + CAREER.letGoAt); occasionAdd('careerSendoff', d * 1440 + CAREER.sendOffAt);   // Calder's last words; the shuttle bay
+  if (typeof SHIP_DAYS !== 'undefined') { SCHED_DATA = null; SHIP_DAYS.clear(); }   // the last day's plans pick up the send-off (as section 18's eventOneOff does)
+  simNote('letGo', { day: d + 1 });
+}
+const careerSendOff = d => SHIP.career && SHIP.career.go != null && d === SHIP.career.go + 1 && !SHIP.career.end ? SHIP.career.f : [];   // section 14's farewell friends for you
+function careerGoTick(now) {                             // the notice, the last day and the shuttle
+  const c = SHIP.career; if (!c || c.go == null || c.end) return;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, L = c.go + 1;
+  if (d >= c.go && m >= 420 && !(c.fl & 1)) { c.fl |= 1;  // 07:00 on notice day: Mail, the warning, friends come to say goodbye
+    const ml = careerSplit('career.mail.notice', 'Chief Ines Calder'); if (ml && typeof mailSend === 'function') mailSend({ at: Math.min(now, (c.go - 1) * 1440 + 420), ...ml });
+    careerTip('notice'); careerSeek('eve', now, (c.go - 1) * 1440 + 1320, CAREER.sendOff);
+  }
+  if (d >= L && m >= 420 && !(c.fl & 2)) { c.fl |= 2; careerSeek('day', now, (L - 1) * 1440 + 870, CAREER.sendOff); }
+  const off = (L - 1) * 1440 + ROTA_OFF, saying = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === 'careerSendoff';
+  if (now >= off && (!saying || now >= off + 30)) {     // the shuttle leaves at 15:00, once the send-off is said
+    c.end = true; simNote('careerEnd', { day: L }); saveGame(); careerCard(true);
+  }
+}
+// once a ship minute (section 13's tickShip) and after a skip: leave earned, today's start, the misses and day ends
+// passed, the ladder and the goodbye
+function careerTick(now = shipNow()) {
+  const c = careerInit(now); if (c.end) return;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
+  if (c.on !== d && m >= 420 && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
+  for (let k = Math.min(c.e, c.z) + 1; k <= d; k++) {
+    if (c.e < k && (k < d || m >= CAREER.missBy)) { c.e = k; if (k > CAREER.grace && careerRota(k) && !careerOff(k)) { if (c.on !== k) { c.ms++; careerMissed(k); } else { c.ms = 0; c.ca = 0; } } }   // a worked shift ends the run and re-arms the Chief; days off, leave and sick days do neither
+    careerLadder(now);
+    if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
+  }
+  careerDue(now); careerGoTick(now);
+}
+SIM_ADVANCE.push((from, to) => careerTick(to));
+// the closing card: your time on the Wren is over. New game is the only way on (as the HUD's button: arrive or skip)
+function careerCard(on) {
+  let el = document.getElementById('careerEnd');
+  if (!on) { if (el) el.hidden = true; return; }
+  if (!el) {
+    el = document.createElement('div'); el.id = 'careerEnd';
+    el.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,10,14,.94);color:#e6f0f1;text-align:center';
+    document.body.appendChild(el);
+  }
+  const t = careerText('career.card', SHIP.career ? SHIP.career.go || 0 : 0) || 'Your time on the Wren is over | ', i = t.indexOf(' | ');
+  el.innerHTML = '<div style="max-width:420px"><h2 style="margin:0 0 12px;font-weight:600"></h2><p style="margin:0 0 20px;line-height:1.5"></p><button type="button" style="display:block;margin:0 auto;font:inherit;padding:10px 22px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1">New game</button></div>';
+  el.querySelector('h2').textContent = i < 0 ? t : t.slice(0, i); el.querySelector('p').textContent = i < 0 ? '' : t.slice(i + 3);
+  el.querySelector('button').onclick = () => { el.hidden = true;
+    if (NOSAVE || typeof introArrived !== 'function' || !introArrived() || typeof deviceChoose !== 'function') return newGameStart(!NOSAVE && typeof introArrived === 'function');
+    deviceChoose({ title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] },
+      k => { if (k === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } }); };
+  el.hidden = false;
+}
+if (SHIP.career && SHIP.career.end) careerCard(true);    // a save that ended: the card again
 const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
 // ---- guiding a newcomer (0.36.65, A10; plans/social-deep-plan.md Part 8b) ----
 // Only after you've been promoted (the user's rule: the flag 'promoted', onboarding's and mine; off in normal play until
@@ -27308,14 +27497,14 @@ function seekEl() {
   st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:3;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
-  el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
+  el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined); } };
   return el;
 }
-function seekShow(p, m) {                               // the chip: '<name> waves you over.'
+function seekShow(p, m, why) {                          // the chip: '<name> waves you over.' (why: an ask's, for its line: the career engineer's worried friends and goodbyes, 0.61.0)
   const el = seekEl(), U = k => schedU(p.seed, m, k);
   el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
   el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
-  el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000 };
+  el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000, line: why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null };
 }
 function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
 // socialSeekAsk(id, { from, until, why }) (0.36.58, for section 21's first week): between from and until (absolute ship
@@ -27344,7 +27533,7 @@ function socialSeekAsks(m) {
     const p = SOC.crew[SOC.idx.get(ask.id)], w = whereIs(p, t);
     if (!w || w.moving || ['work', 'sleep', 'wash'].includes(w.act)) { ask.next = t + 5; continue; }
     const a = DECK_CREW.find(x => x.p === p);
-    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, m); return true; }
+    if (a && Math.hypot(a.x - P.x, a.z - P.z) <= SEEK_NEAR) { if (CHAT || SEEK || sleeping) continue; ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, m, ask.why); return true; }
     if (typeof crewComeTo !== 'function') continue;
     const pl = seekSpot(); if (!pl) continue;
     ask.walking = true; ask.walkUntil = t + SEEK_WALK;
@@ -27352,7 +27541,7 @@ function socialSeekAsks(m) {
       ask.stop = crewComeTo(p, pl.id, () => {
         ask.walking = false;
         if (CHAT || SEEK || sleeping) { ask.next = shipNow() + 5; return; }
-        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, Math.floor(shipNow()));
+        ask.done = true; relGet(p.id).seekDay = SHIP.time.day; seekShow(p, Math.floor(shipNow()), ask.why);
       }, { until: t + SEEK_WALK });
     } catch (e) { ask.walking = false; ask.next = t + SEEK_RETRY; }
     if (ask.done) return true;                            // they were already there: the chip is up
