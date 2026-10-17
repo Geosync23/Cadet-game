@@ -8680,6 +8680,7 @@ function deviceShow(id) {
   if (!DEV.open && devLocked()) { try { if (typeof deviceLockedTap === 'function') deviceLockedTap(); } catch (e) { /* section 15's */ } return; }
   if (!DEV.open && !SHIP.device.booted && devTry(() => SHIP.intro && SHIP.intro.on && !SHIP.intro.skipped)) { SHIP.device.booted = true; id = 'boot'; }
   if (!DEVICE_APPS.has(id)) id = 'home';
+  if (id !== 'settle') settleSure = false;               // 0.35.24 (reviewer 2): the end-the-welcome confirm never outlives the screen
   DEV.app = id; delete DEV.notes[id];
   if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
     tipShow('device', 'Your device: Schedule and Calendar for your day, Maps to find your way, Jobs to track your work, Mail and Memos, Needs for how you feel.'); }
@@ -8722,6 +8723,7 @@ requestAnimationFrame(deviceFrameStep);
 function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); return true; }
 let devDlgTap = null;
 function deviceDialogue(v, onTap) {
+  if (DEV.choose) { const f = DEV.choose; DEV.choose = null; try { f(-1); } catch (e) { /* the asker's */ } }   // 0.35.25: a meeting takes the panel; a pending question is Not now
   devDlgTap = v && typeof onTap === 'function' ? onTap : null;
   if (v && !v.name && v.who) { const p = typeof ROSTER !== 'undefined' ? ROSTER.find(x => x.id === v.who) : null; v = { ...v, name: p ? p.name : String(v.who) }; }
   DEVICE_SKIN.dialogue(v || null);
@@ -8730,11 +8732,15 @@ function deviceDialogue(v, onTap) {
 // deviceChoose(view, onPick) (0.35.23, Pillar 4): a question with buttons in the meeting panel's style, e.g. section 13's
 // New game: { title, text, choices: [label, ...], cancel } (cancel: the last button's label, 'Not now' by default, false
 // for none). onPick(k) gets the index of the choice, or -1 for Not now or the ×. One question at a time.
+// 0.35.25 (reviewer 2): it shares the panel with section 18's meetings, so it refuses (returns false) while the panel or
+// a meeting is up, and a meeting drawn over a question cancels the question first (deviceDialogue)
 function deviceChoose(v, onPick) {
-  if (!v || !Array.isArray(v.choices) || !v.choices.length) return false;
+  if (!v || !Array.isArray(v.choices) || !v.choices.length || DEV.choose) return false;
+  const panel = document.getElementById('devDlg'); if (panel && !panel.hidden) return false;
+  try { if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false; } catch (e) { /* section 18 not loaded */ }
   const n = v.choices.length, choices = v.choices.map(String).concat(v.cancel === false ? [] : [v.cancel || 'Not now']);
-  DEV.choose = typeof onPick === 'function' ? onPick : () => {};
   deviceDialogue({ title: v.title || 'Choose', name: '', text: v.text || '', choices }, k => devChosen(k < n ? k : -1));
+  DEV.choose = typeof onPick === 'function' ? onPick : () => {};
   return true;
 }
 function devChosen(k) {
@@ -9039,7 +9045,7 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
 // Schedule: today as a timeline, with where you're expected right now; tomorrow below. A day picked in the Calendar
 // (0.35.10: { app: 'schedule', day }) shows instead of tomorrow until the device closes.
 let schedDay = null;
-deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; });
+deviceOn('close', () => { schedDay = null; if (typeof mapFor !== 'undefined') mapFor = null; if (typeof settleSure !== 'undefined') settleSure = false; });
 deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   act(verb, arg) { if (verb === 'open' && arg && Number.isInteger(arg.day)) schedDay = arg.day > SHIP.time.day ? arg.day : null; else if (verb === 'today') schedDay = null; },
   view: () => {
@@ -9241,7 +9247,9 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
     group('Others aboard', rest.filter(x => !known.has(x.p.dept)).sort(byName));
     let gone = []; try { gone = typeof movedOn === 'function' ? movedOn() || [] : []; } catch (e) { gone = []; }   // 0.35.22: section 20's movedOn
-    if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: x.name, sub: (x.role || '') + ' · left on Day ' + x.day + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
+    gone = gone.filter(x => x && typeof x === 'object');
+    if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: String(x.name || x.id || 'Someone'),
+      sub: [x.role, isFinite(x.day) ? 'left on Day ' + x.day : 'left the ship'].filter(Boolean).join(' · ') + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
     if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
     return { title: 'Roster', blocks: B };
   } });
@@ -9556,7 +9564,9 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
   const P = SHIP.player;
   const B = [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }];
   let ks = []; try { ks = typeof keepsakes === 'function' ? keepsakes() || [] : []; } catch (e) { ks = []; }   // gifts from friends (0.35.22, section 20)
-  if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => ({ text: k.what.charAt(0).toUpperCase() + k.what.slice(1), sub: 'From ' + (k.name || k.from) + (k.day ? ', Day ' + k.day : '') })) });
+  ks = ks.filter(k => k && typeof k === 'object');      // 0.35.24 (reviewer 2): a row with a missing field never breaks the page
+  if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => { const w = String(k.what || 'a keepsake');
+    return { text: w.charAt(0).toUpperCase() + w.slice(1), sub: 'From ' + (k.name || k.from || 'a friend') + (isFinite(k.day) ? ', Day ' + k.day : '') }; }) });
   return { title: 'Wallet', blocks: B };
 } });
 
