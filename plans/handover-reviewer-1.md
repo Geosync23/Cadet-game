@@ -7,12 +7,12 @@
 ## My seats (session ids)
 | Seat | Branch | Session | Last reviewed | Verdict |
 | --- | --- | --- | --- | --- |
-| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | f9a4843 (0.26.25) | PASS (the farewell clash was fixed on social's side, 0.36.48; a cosmetic leftover: the leaver vanishes at 15:00 wherever they are) |
+| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 2f6d8dd (0.26.27) | PASS (also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (repair cues are `repair.repair`); agreed fix: section 17's `mkind` |
 | Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 7abf466 (0.42.15) | PASS (first launch from section 21's first frame) |
-| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 108cd6f (0.36.48) | PASS |
+| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 45b0595 (0.36.49) | PASS WITH FIXES: social_check's purity test wipes the real bonds (line 152); the cue key should use machineById first |
 | Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
-| Systems (on call, the lead added it) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa | f211129 (0.33.39) | PASS |
+| Systems (retired; section 17 is the sim engineer's now) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa (inactive) | f211129 (0.33.39) | PASS |
 
 Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`; read the latest per branch before re-reviewing.
 
@@ -23,6 +23,8 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 2. **Social save size:** 27.8 kB with the reserve, mostly social B's `affWeek` snapshots. **Decided (the lead):** option (a), snapshots keep only pairs with |aff| ≥ 30 (section 14 seats on ±30; the lead changed it from 40), budget 30 kB. Check social B 0.39.3 keeps ≥ 30 pairs, that seating on paper is unchanged by it, and that social_check.s limit is 30000.
 3. Done (day_check day 35 OK, bunk handed over by time). Was: **Sim 0.26.25 review:** on rotation days (35, 77, ...) the leaver and the newcomer are both "aboard" by day and share one bed. Run day_check on day 35, and check that `ROSTER_ROTATIONS.out` (now a list of ids) is read right.
 4. Done: social B 0.39.3 passed (31f8aea). Its section 18 hooks (onPick / onEnd) were pointed out to the lead for reviewer 2.
+
+5. **The notes bus contract** (notes-bus-contract-0601.md): the time part is fixed (sim 2f6d8dd); the `kind` part is open. Re-run the full-merge jump test and the cue key once it lands.
 
 ## Tools (on `claude/reviews`)
 - `name_check.py`: `python3 name_check.py COMBINED.html` (names declared twice, and `node --check`); `--branches BASE REF...` (names two branches both add; names a branch deleted but still uses). On a re-review, run `--branches <last reviewed> <new>`: it caught `socP` in social f05d7db. The build master runs it on every combine.
