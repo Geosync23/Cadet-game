@@ -1,0 +1,41 @@
+@crew rahman-farah
+// Farah Rahman (they/them), Works technician, days. The Works writer, batch 2. Short, stubborn; the boat.
+
+== greet
+? tier=stranger
+- Hey. New? Main storage is on Deck 5, past the board. You'll live in there.
+- You. New hand. Spare filters are on the bottom shelf. Everyone looks on the top one first.
+? tier>=acquaintance time:morning
+- Hey. Up since four. Don't ask. I'm fine.   #funny
+? tier>=acquaintance time:night
+- Still up? Me too. Always. Stars are better after midnight.
+? tier>=colleague
+- {me}. Settle something. Quick way or right way? Quick way. Thank you.   #funny
+? tier>=friend
+- Oh good, you. Sit. I need someone who won't argue. Then argue with me.   #warm
+
+== bye
+- Right. Off with you.
+- Later. Mind the top shelf. It's a trap.   #funny
+
+== feel
+? mood:low
+- Did the boat sums again. Still short. It'll come.
+? mood:high
+- New thing for the boat. A little stove. Don't laugh. It's a very good stove.
+
+== near
+? act:work
+- There's a quicker way. I'll show you. Then do it the right way. Calder's watching.   #funny
+? act:leisure
+- One drink, then the observatory. Then bed. Maybe bed.
+
+== life
+? tier>=acquaintance
+- I'm saving for a boat on Hesper Dock. Small. Blue. No name yet. Every name's wrong.
+? tier>=colleague
+- I log every star I've seen. Takahashi and Esposito think their journals are longer. Wrong.   #funny
+
+== joy
+? tier>=acquaintance
+- Picture it: the boat, Hesper Dock, morning, rain on the deck. Just me and a kettle.
