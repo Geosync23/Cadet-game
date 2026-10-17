@@ -451,6 +451,21 @@ with sync_playwright() as pw:
     if not any(r[1] for r in empty): fail(f"queue: nobody stood in the line with an empty galley: {empty}")
     if mine[1] > 0.5 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
 
+    # 4q. section 10's live line (sim engineer 3's lineJoin / lineSpot / lineFront / lineLeave), stood in for here: you
+    # take the spot it gives, your turn comes GALLEY_SERVE.you after you reach the counter (never before), takePortion
+    # leaves the line; galleyServeMins / galleyCanServe for section 10's serving
+    ln = g.ev(f"""(() => {{ const real = typeof lineJoin === 'function', line = ['cook-a', 'cook-b']; window.__line = line;
+      if (!real) window.__sc("lineJoin = id => {{ if (!window.__line.includes(id)) window.__line.push(id); }}; lineSpot = id => ({{ at: [33, 6 - window.__line.indexOf(id)], xy: [33.5, 6.5 - window.__line.indexOf(id)], face: 's' }}); lineFront = id => window.__line[0] === id; lineLeave = id => {{ const k = window.__line.indexOf(id); if (k >= 0) window.__line.splice(k, 1); }}");
+      SHIP.galley = null; const B = {B} + 1440 * 2; setShipNow(B + 17 * 60 + 30); galleyAdvance(shipNow()); SHIP.galley.servery.portions = Math.max(5, SHIP.galley.servery.portions);
+      const j = galleyJoin('player'), out = {{ real, line: j.line, at: j.at, notYet: galleyTurn('player') }};
+      line.shift(); line.shift(); out.front = lineFront('player'); out.atFront = galleyTurn('player'); setShipNow(shipNow() + .3); out.soon = galleyTurn('player'); setShipNow(shipNow() + .25); out.served = galleyTurn('player');
+      out.ate = takePortion('player'); out.left = line.slice(); out.mins = galleyServeMins(); out.can = galleyCanServe();
+      SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; out.cannot = galleyCanServe();
+      if (!real) window.__sc("lineJoin = lineSpot = lineFront = lineLeave = undefined");
+      SHIP.galley = null; return out; }})()""")
+    print('Live line (stand-in for section 10' + ('; section 10 has its own' if ln['real'] else '') + '):', ln)
+    if not ln['real'] and (not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.5, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();

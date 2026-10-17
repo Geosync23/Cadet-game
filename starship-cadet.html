@@ -11904,7 +11904,7 @@ function galleyAdvance(to) {
 // the player (or anyone) eats: a hot portion and a plate if the servery has one, else something from the grab shelf
 function takePortion(who = 'player') {
   const S = galleyAdvance(shipNow()), m = Math.floor(shipNow()), j = GALLEY_JOINED.get(who);
-  GALLEY_JOINED.delete(who);
+  GALLEY_JOINED.delete(who); if (j && j.line && typeof lineLeave === 'function') lineLeave(who);   // out of section 10's line
   let how = null;
   if (S.servery.portions > 0 && FOOD.plates - S.dirty - S.inUse > 0) { S.servery.portions--; S.inUse++; S.back.push([m + 20, 1]); how = 'servery'; }
   else if (S.grab.items > 0) { S.grab.items--; how = 'grab'; }
@@ -11933,20 +11933,44 @@ function galleyAhead(now) {
   for (const w of (SHIP.galley && SHIP.galley.wait) || []) ids.add(w[0]);
   return ids.size;
 }
+// serving at the counter (for section 10's live line, below): how long the person at the front takes, in ship minutes
+// (GALLEY_SERVE.each; a minute in a rush), and whether there's anything to hand over now (a hot portion and a clean
+// plate, or something on the grab shelf)
+function galleyServeMins(t = shipNow()) {
+  const d = Math.floor(t / 1440) + 1, md = Math.floor(t) - (d - 1) * 1440;
+  return galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to) ? 1 / FOOD.rushRate : GALLEY_SERVE.each;
+}
+function galleyCanServe(t = shipNow()) {
+  const S = galleyAdvance(t); return (S.servery.portions > 0 && FOOD.plates - S.dirty - S.inUse > 0) || S.grab.items > 0;
+}
+// section 10's live line on Deck 3 (sim engineer 3: lineJoin, lineSpot, lineFront, lineLeave, servLine), when it's
+// there: you stand in it behind the real crew and step up; your turn is GALLEY_SERVE.you after you reach the counter.
+// Without it, a spot at the back and a turn from who's standing in the line (galleyAhead)
+const galleyLine = () => typeof lineJoin === 'function' && typeof lineSpot === 'function' && typeof lineFront === 'function';
 function galleyJoin(who = 'player') {
-  const now = shipNow(), S = galleyAdvance(now), d = Math.floor(now / 1440) + 1, md = Math.floor(now) - (d - 1) * 1440;
-  const ahead = galleyAhead(now), rush = galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to);
-  const j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + GALLEY_SERVE.you + ahead * (rush ? 1 / FOOD.rushRate : GALLEY_SERVE.each) };
+  const now = shipNow(); galleyAdvance(now);
+  const ahead = galleyAhead(now), j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + GALLEY_SERVE.you + ahead * galleyServeMins(now) };
+  if (galleyLine()) {
+    lineJoin(who); const sp = lineSpot(who);
+    if (sp && sp.at) { j.at = sp.at.slice(); j.xy = sp.xy ? sp.xy.slice() : j.xy; j.face = sp.face !== undefined ? sp.face : j.face; }
+    j.line = true; j.front = null;
+  }
   GALLEY_JOINED.set(who, j); return j;
 }
 function galleyTurn(who = 'player') {
   const j = GALLEY_JOINED.get(who); if (!j) return false;
-  const S = galleyAdvance(shipNow()); return shipNow() >= j.turnAt && (S.servery.portions > 0 || S.grab.items > 0);
+  const now = shipNow();
+  if (j.line && galleyLine()) {                          // the live line: at the counter, then served
+    if (!lineFront(who)) { j.front = null; return false; }
+    if (j.front === null) { j.front = now; j.turnAt = now + GALLEY_SERVE.you; }
+    return now >= j.turnAt && galleyCanServe(now);
+  }
+  return now >= j.turnAt && galleyCanServe(now);
 }
 // someone waiting for food at the servery: the queue place they wait at (null: stand where you are), else undefined
 // Each waiter gets their own spot: the queue places in line order (the first to wait at the front), then null.
 // The galley is brought up to t first, so a stepped test sees the same waits as the game.
-const GALLEY_QUEUE = ['3-queue-1', '3-queue-2', '3-queue-3', '3-queue-4'];
+const GALLEY_QUEUE = ['3-queue-4', '3-queue-3', '3-queue-2', '3-queue-1'];   // front first: 3-queue-4 is at the counter (the line runs from the trays south to the food)
 function galleyHold(person, t) {
   let S = SHIP.galley; if (!S) return undefined;
   if (t !== undefined && S.at <= Math.floor(t)) S = galleyAdvance(t);
