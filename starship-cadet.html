@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.36
+   STARSHIP CADET: CSV Wren                           build 0.35.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7252,7 +7252,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.36';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.37';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8904,7 +8904,10 @@ function devHeadsShow(t = shipNow()) {
     where: h.where, soft: h.stage === 'start', go: !!h.goal });
 }
 function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
-if (typeof onSim === 'function') onSim('newGame', () => devHeadsReset());   // the clock starts again: nothing is heard yet
+if (typeof onSim === 'function') onSim('newGame', () => {   // the clock starts again: nothing is heard yet; 0.35.37 (reviewer 1b): no appointments
+  devHeadsReset(); SHIP.device.appts = []; DEV.notes = {};  // carry over from the last game (they'd list, remind and walk people to old times)
+  try { apptDraft = null; apptSay = null; } catch (e) { /* not made yet */ }
+});
 function devHeadsBack() { if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } }   // a tip or the address takes the top: the strip waits (still HU_Q[0])
 function devHeadsDo(verb) {                              // the strip's taps: 'open' (the Schedule), 'go' (the goal arrow), 'done'
   const h = DEV.hu; if (!h) return; DEV.hu = null; HU_Q.shift(); DEVICE_SKIN.heads(null);

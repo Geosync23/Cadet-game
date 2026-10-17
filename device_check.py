@@ -201,6 +201,10 @@ def run(path):
               const dd = Math.floor(T / 1440) + 1, held = typeof shipDay === 'function' ? shipDay(dd).occ : null; out.free = !held || !(held.get(a.where) || []).some(([x, y]) => x < T + a.len && T - 10 < y);   // 0.35.35: a seat no plan holds
               if (r) { r.met = true; a.status = 'missed'; devTickMin = -1; deviceTick(); out.kept = a.status; }
               D.appts = keepA; SHIP.occasions.length = 0; SHIP.occasions.push(...keepO); deviceShow('home'); return out; })()""")
+            # a New game starts with no appointments (0.35.37, reviewer 1b): the old game's would list and walk people to old times
+            ng = g.ev("""(() => { const D = SHIP.device, keep = D.appts.slice(); D.appts = [{ id: 950, with: ['pell'], at: shipNow() + 600, len: 30, where: apptPlaces()[0].id, kind: 'social', status: 'yes' }];
+              simNote('newGame', { arrival: false }); const out = D.appts.length; D.appts = keep; return out; })()""")
+            check(ng == 0, f'a New game clears the appointments: {ng}')
             print('  apptAdd:', aa)
             check(not aa['own'] or (aa['n'] == 1 and aa['host'] == 'marrow' and aa['kind'] == 'invite' and aa['room'] == [2, 'C'] and aa['occ'] == 'captainsTable@' + str(aa['occ']).split('@')[-1]
                 and aa['sched'] == ['appt'] and not aa['cancel'] and aa['saved'] and aa['free'] and aa['kept'] == 'kept'), f'apptAdd: an occasion becomes one appointment, listed, kept when met: {aa}')
