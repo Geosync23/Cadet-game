@@ -210,7 +210,7 @@ with sync_playwright() as pw:
     w = g.ev(r"""(() => {
       const o = {}, F = new Set(), had = typeof flag === 'function' ? flag : null; SHIP.mem = {};
       o.open = ['d2', 'd3', 'd5', 'done'].every(socGate);
-      SHIP.intro = { step: 'arrival', escort: 'torres-zeke' }; window.flag = k => F.has(k);
+      const introWas = SHIP.intro; SHIP.intro = { on: true, step: 'arrival', escort: 'torres-zeke', done: {} }; window.flag = k => F.has(k);
       o.shut = ['d2', 'd3', 'd5', 'done'].map(socGate); F.add('week1.d2'); F.add('week1.d3'); o.tue = ['d2', 'd3', 'd5', 'done'].map(socGate);
       socIntroNote({ step: 'arrival', who: ['torres-zeke'] }); socIntroNote({ step: 'dinner', who: [] }); socIntroNote({ step: 'look', who: ['pell'] }); socIntroNote({ step: 'bunk', who: ['rina'], missed: true });
       o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro') || !!mem('rina', 'intro')];
@@ -218,7 +218,7 @@ with sync_playwright() as pw:
       window.lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
       o.week1 = chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind;
       F.add('week1.done'); o.done = [socIntroOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
-      delete window.lineFor; SHIP.intro = null; if (had) window.flag = had; else delete window.flag;
+      delete window.lineFor; SHIP.intro = introWas; if (had) window.flag = had; else delete window.flag;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.social.mentor === 'torres-zeke';
       SHIP.social.mentor = null; SHIP.mem = {};
       // an invitation to a tradition someone is going to
