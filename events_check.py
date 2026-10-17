@@ -499,6 +499,26 @@ with sync_playwright() as pw:
     if sw.get('err') or sw['joined'] != ['sowing@6'] or len(sw['tr']) != 1 or sw['tr'][0].get('day') != 6: fail(f"joining Sowing morning should plant your seedling once: {sw}")
     if sw.get('dec') != ['', 'testDecor', 'testDecor', '']: fail(f"a tradition's decor window: {sw.get('dec')}")
 
+    # 4c. tallies (Pillar 4): the tasting vote (two dishes a week, in turn), the department cup by teams, the same twice,
+    # your vote counts once and only on the day, the galley's tallyLast, a decor with a tally shows the votes
+    ty = g.ev("""(() => {
+      const d1 = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'tasting-table'));
+      const d2 = d1 + 7, cup = [...Array(56).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'department-cup'));
+      if (!d1) return { err: 'no tasting table' };
+      const a = tallyOf('tasting-table', d1); TALLY_MEMO.clear(); const a2 = tallyOf('tasting-table', d1), b = tallyOf('tasting-table', d2);
+      const votes0 = { ...SHIP.events.votes }, t0 = shipNow();
+      setShipNow((d1 - 1) * 1440 + 1100); const ok = tallyVote('tasting-table', a.choices[1]); const late = (setShipNow((d1 - 1) * 1440 + 1200), tallyVote('tasting-table', a.choices[0]));
+      const v = tallyOf('tasting-table', d1), last = tallyLast('tasting-table', d1 + 4);
+      const e = eventsOn(d1).find(x => x.id === 'tasting-table'), ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = tradDecor((d1 - 1) * 1440 + Math.round((e.from + e.to) / 2)).find(x => x.id === 'testDecor'); e.ev.ties = ties;
+      SHIP.events.votes = votes0; TALLY_MEMO.clear();
+      return { d1, a, same: JSON.stringify(a) === JSON.stringify(a2), b: b && b.choices, ok, late, you: v.you, plus: v.counts[a.choices[1]] - a.counts[a.choices[1]], last: last && last.day, dec, cup: cup && tallyOf('department-cup', cup) };
+    })()""")
+    print('Tallies:', ty)
+    if ty.get('err') or not ty['same'] or len(ty['a']['choices']) != 2 or ty['b'] == ty['a']['choices'] or not ty['ok'] or ty['late'] or ty['plus'] != 1 or ty['last'] != ty['d1']: fail(f"the tasting tally: {ty}")
+    if not ty.get('dec') or ' or ' not in ty['dec'].get('title', '') or len(ty['dec'].get('lines', [])) != 2: fail(f"a decor with a tally: {ty.get('dec')}")
+    if not ty.get('cup') or sum(ty['cup']['counts'].values()) == 0: fail(f"the department cup's teams: {ty.get('cup')}")
+
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
     st = g.ev(STORM); a = st['a']
