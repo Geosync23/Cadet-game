@@ -63,6 +63,7 @@ WALK_TICK = r"""((mode) => {
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
   let act = '';
   if (DIALOGUE) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); act = 'talk'; }
+  else if (mode === 'follow' && st && st.checkpoint && typeof INTRO_UI !== 'undefined' && INTRO_UI.pause && a) act = 'listen';   // he's stopped to tell you about a place: stay with him
   else if (mode === 'follow' && st && st.checkpoint) {
     const cp = st.checkpoint;
     if (cp.deck !== deckDef.num) {                      // ride the lift to the checkpoint's deck
@@ -272,6 +273,7 @@ with sync_playwright() as pw:
     if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
     else:
+        g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), SHIP.intro.step, text]); return old.apply(this, arguments); }; return true; })()")   # reviewer 1c's probe: what's actually said
         g.ev('newGameStart(true)'); g.step(5)
         tern = g.ev("typeof ternRamp === 'function' && !!DECKS[5].tern")
         if tern:   # the walk-in Tern (deck architect 0.38.18): you start in its aisle with the ramp shut
@@ -294,6 +296,8 @@ with sync_playwright() as pw:
         print('  tour lines with the week under way (place, played, written):', tl2)
         if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
+        dinner, bunkAt, seats = None, None, None
+        INTRO_ESC_ID = g.ev('INTRO_ESCORT')
         for k in range(420):
             g.step(20)
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
@@ -302,7 +306,20 @@ with sync_playwright() as pw:
             if tern and shut is None and g.ev('INTRO_UI.ternShut'): shut = (r['t'], r['step'], r['me']); print(f"  {r['t']}  the ramp closes behind you (you at {r['me']}, ramp {g.ev('ternRampOpen().toFixed(2)')})")
             if tern and shut and reopened is None and not g.ev('INTRO_UI.ternShut'): reopened = (r['t'], r['step'])
             if not order or order[-1] != r['step']: order.append(r['step']); print(f"  {r['t']}  {r['step']}  (you: Deck {r['deck']} {r['me']}; Torres {r['esc'][0] if r['esc'] else 'not here'}{'; his seat ' + r['seat'] if r['seat'] else ''})")
+            if r['step'] == 'table' and dinner is None:   # the lead's condition for the longer tour: dinner still hot, seats and crew there
+                dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
+                print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
+            if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
+                g.step(60)
+                seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you)], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
+                print(f"  the dinner seats at {seats['t']}: yours {seats['you']}, Torres {seats['torres']}, Calder {seats['calder']}")
+            if r['goal'] == 'Your bunk' and bunkAt is None: bunkAt = r['t']; print(f"  {r['t']}  the arrow points to your bunk")
             if r['step'] is None: break
+        simnow = g.ev("typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")   # the sim's dinner seating and evening cooking (0.26.26-0.26.31)
+        if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
+        elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
+        if not bunkAt: fail('the first-night arrow never pointed to your bunk before 20:00')
+        if simnow and (not seats or seats['you'][1] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
         if w['missed']: fail('the real walk missed ' + ', '.join(w['missed']))
@@ -311,6 +328,20 @@ with sync_playwright() as pw:
         if not (w['device'] and w['calder']): fail('no device or no Calder after the real walk')
         if max(peak.values()) >= 450: fail(f'draw calls {max(peak.values())} at the arrival (budget 450)')
         if led < 20: fail('Torres hardly led you')
+        # the tour as heard by a follower (pacing A): every place's core lines, in place order; extras only if you linger
+        said = [x[2] for x in g.ev('window.__said')]
+        sp = g.ev("INTRO_TOUR.map(t => [t.id, introTourSplit(t)])")
+        pos = {}
+        for i, x in enumerate(said): pos.setdefault(x, i)
+        heard_core = sum(1 for i, L in sp for l in L['core'] if l in pos); all_core = sum(len(L['core']) for i, L in sp)
+        heard_all = sum(1 for i, L in sp for l in L['core'] + L['extra'] if l in pos); all_lines = sum(len(L['core']) + len(L['extra']) for i, L in sp)
+        print(f'  the tour, following: core lines heard {heard_core}/{all_core}, all lines {heard_all}/{all_lines}; per place ' + ', '.join(f"{i} {sum(1 for l in L['core'] if l in pos)}/{len(L['core'])}+{sum(1 for l in L['extra'] if l in pos)}" for i, L in sp))
+        if heard_core < all_core: fail('following Torres, some core tour lines are never heard: ' + ', '.join(i for i, L in sp if any(l not in pos for l in L['core'])))
+        seq = [pos[l] for i, L in sp for l in L['core'] if l in pos]
+        if seq != sorted(seq): fail('the tour\'s core lines are heard out of place order')
+        # the last place's core lines may finish at the table (the dinner chat waits for them); extras there, or anything at the Chief's, may not
+        late = [x for x in g.ev('window.__said') if (x[1] == 'chief' and any(x[2] in L['core'] + L['extra'] for i, L in sp)) or (x[1] == 'table' and any(x[2] in L['extra'] for i, L in sp))]
+        if late: fail(f'tour lines play over dinner: {late[:3]}')
         if tern:
             print(f'  the ramp: closed behind you at {shut}, open again at {reopened} (target {g.ev("TERN.target")})')
             if not shut: fail('the Tern\'s ramp never closed behind you')
@@ -358,7 +389,11 @@ with sync_playwright() as pw:
     if not g.ev("typeof jobReserve === 'function' && typeof newGameStart === 'function'"):
         print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
     else:
+        stale = g.ev("({ calder: INTRO_UI.calder, tour: INTRO_UI.tour.length })")   # after part 8's evening
         g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        fresh = g.ev("({ calder: !!INTRO_UI.calder, tour: INTRO_UI.tour.length, step: INTRO_UI.step === undefined, meet: INTRO_UI.meet.length })")
+        print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
+        if fresh['calder'] or fresh['tour'] or not fresh['step'] or fresh['meet']: fail(f'New game kept the last evening\'s state: {fresh}')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
         g.ev('skipTo(introAbs(1, 7 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
         res = g.ev("[1, 2, 3].map(k => SHIP.jobs.find(x => x.reserved === k)).map(j => j && j.machine)")
