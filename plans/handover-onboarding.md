@@ -58,7 +58,8 @@ Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx (onboarding 1); **taken o
 
 ## Still to do (onboarding 2's queue)
 
-- Job 5, wave 4 guiding, behind flag('promoted') (social A's introGuide/introGuideEnd).
+- **Job 5, wave 4 guiding: PARKED until promotion exists** (the lead, 2026-10-17 ~15:00). Guiding a newcomer only switches on after a promotion (flag('promoted')), and nothing sets that yet. When promotion is built: social A's A10 contract (`simNote('guideAssigned', { id, day })`, `socialGuide(id)` -> your `introGuide(id)`, `socialGuideEnd('handed')` -> your `introGuideEnd(id)`), a separate state `SHIP.intro.guide` (never touch `SHIP.intro.on`), the evening's steps with you as the escort and the newcomer following; see "In flight" item 5 below for the details. Test with the flag set in intro_check only.
+- **Handed over** by onboarding 2 at ~15:00 UTC, at about 60% memory (the lead's call, to save cost). Nothing else is in flight; 0.42.26 (9de4291) was with reviewer 1c.
 
 ## For other seats
 
