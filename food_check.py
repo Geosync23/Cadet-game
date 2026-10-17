@@ -111,7 +111,8 @@ with sync_playwright() as pw:
         if vis[name]['p'] > 0 and vis[name]['food'] != 5 or vis[name]['p'] == 0 and vis[name]['covers'] != 5: fail(f"{name}: pans don't match the servery")
     eat = g.ev(f"(() => {{ setShipNow({B} + 6 * 60 + 40); const a = galleyAdvance(shipNow()).servery.portions, ok = takePortion('player'); return [a, ok, SHIP.galley.servery.portions]; }})()")
     print('The player eats at 06:40:', eat)
-    q = g.ev(f"(() => {{ setShipNow({B} + 18 * 60); const j = galleyJoin('player'), early = galleyTurn('player'); setShipNow(j.turnAt + .01); const on = galleyTurn('player'), ate = takePortion('player'); return [j.ahead, early, on, ate, galleyTurn('player'), free(...j.at)]; }})()")
+    # with section 10's live line, those ahead are served first (here: taken out), then yours takes a serve
+    q = g.ev(f"(() => {{ setShipNow({B} + 18 * 60); const j = galleyJoin('player'), early = galleyTurn('player'); if (j.line) {{ for (const id of servLine().filter(x => x !== 'player')) lineLeave(id); galleyTurn('player'); setShipNow(shipNow() + GALLEY_SERVE.you + .01); }} else setShipNow(j.turnAt + .01); const on = galleyTurn('player'), ate = takePortion('player'); return [j.ahead, early, on, ate, galleyTurn('player'), free(...j.at)]; }})()")
     print('The player queues at 18:00 (ahead, turn too soon, turn, ate, turn after, spot free):', q)
     if q[1:] != [False, True, True, False, True]: fail(f"galleyJoin / galleyTurn: {q}")
     if not (eat[1] and eat[2] == eat[0] - 1): fail(f"takePortion: {eat}")
@@ -141,7 +142,7 @@ with sync_playwright() as pw:
       if (real) cartClaim = keep; else window.__sc("cartClaim = undefined"); FOOD.restock = was; return {{ real, week, missed }}; }})()""")
     print('Carts' + (' (section 17)' if carts['real'] else ' (stand-in rule)') + ':', ', '.join(f"day {DAY + k}: low {w['coldMin']}, in {w['delivered']}, wait {w['maxWait']}" for k, w in enumerate(carts['week'])))
     print('  no carts on days 2 and 3:', carts['missed'])
-    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran short')
+    if any(w['coldOut'] or not wait_ok(w) or w['ready']['breakfast']['portions'] < READY_MIN or w['ready']['dinner']['portions'] < READY_MIN for w in carts['week']): fail('carts: the cold store ran out, or a wait over the limit, in the week with carts')
     if not any(m['coldOut'] for m in carts['missed']): fail('carts: two missed days should run the cold store dry')
 
     # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
@@ -156,7 +157,7 @@ with sync_playwright() as pw:
     print('  at 09:30 on day', DAY + 1, '- bin', sp['bin'], 'bags', sp['bags'], '|', sp['text'])
     print('  mail:', sp['mail'][:2])
     if not all(w['spoiled'] > 0 for w in sp['week']): fail('spoilage: a broken chiller spoiled nothing on some day')
-    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran short with carts running')
+    if any(w['coldOut'] or not wait_ok(w) for w in sp['week']): fail('spoilage: the cold store ran out, or a wait over the limit, in the week with a broken chiller')
     if not sp['bin'] or sp['bags'] < 1: fail(f"spoilage: nothing in the bin by the dish pit at 09:30: {sp}")
     if not sp['mail'] or 'binned' not in sp['mail'][0]: fail('spoilage: no Mail about the binned food')
 
@@ -482,6 +483,19 @@ with sync_playwright() as pw:
       return {{ d, name: c.name, out: hhmm(c.out), before, after, text: text.slice(-90) }}; }})()""")
     print('An early cake (a mess gathering before 19:30):', ec if ec else 'none in these days (the welcome tea comes with section 18\'s rotations)')
     if ec and (ec['before'] or not ec['after']): fail(f"early cake: {ec}")
+
+    # 4s. a day's events changing after the galley worked it out (0.29.35, reviewer 1's note: a one-off booked late, a
+    # tradition's flag set): the galley sees the new list (its day caches start again). A stand-in one-off through
+    # section 18's eventOneOff (one-offs carry no galley ties, so it's the cache that's checked), then removed
+    if g.ev("typeof eventOneOff === 'function'"):
+        oo = g.ev(f"""(() => {{ const d = Math.floor(shipNow() / 1440) + 4; galleyTies(d); const src0 = GALLEY_TIES.get(d).src;
+          const ok = eventOneOff({{ id: 'galley-test', name: 'Test gathering', day: d, at: [1080, 1140], where: [{{ deck: 3, room: '^Mess hall$', types: ['mess-seat'] }}] }});
+          galleyTies(d); const src1 = GALLEY_TIES.get(d).src;
+          SHIP.events.oneOffs = SHIP.events.oneOffs.filter(r => r.id !== 'galley-test'); EV_DAYS.clear(); SHIP_DAYS.clear(); SCHED_DATA = null; galleyTies(d);
+          return {{ d, ok, before: src0, after: src1, again: GALLEY_TIES.get(d).src }}; }})()""")
+        print('A one-off booked late:', oo)
+        if not oo['ok'] or 'galley-test' not in (oo['after'] or '') or 'galley-test' in (oo['again'] or '') or 'galley-test' in (oo['before'] or ''): fail(f"one-off: {oo}")
+    else: print('A one-off booked late: no eventOneOff in this build; not checked')
 
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
