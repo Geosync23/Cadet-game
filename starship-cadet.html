@@ -7503,6 +7503,7 @@ function newGameStart(arrival) {
   target.copy(player.obj.position).setY(.7); lastRoom = null;
   playerNew();                                           // section 15: fresh needs
   if (typeof socialNew === 'function') socialNew();      // section 20: strangers again
+  if (typeof linesNew === 'function') linesNew();        // section 22: nothing heard yet
   if (typeof introNewGame === 'function') introNewGame(arr);   // section 21: the arrival begins, or a blank intro (Monday)
   simNote('newGame', { arrival: arr });                  // anyone else with state of their own starts again
   updateClock(); saveGame();
@@ -23225,16 +23226,91 @@ function lineFor(who, kind, ctx = {}) {
 // a conversation between two crew: CONVOS whose pair and conditions hold (read for speaker A, with B as ctx.other),
 // picked by the pair and hour (schedU k 751). Wave 2 plays them as alternating bubbles and keeps the saved ring.
 function overheardFor(a, b, ctx = {}) {
-  a = linesWho(a); b = linesWho(b); if (!a || !b || typeof CONVOS === 'undefined') return null;
+  a = linesWho(a); if (b) { b = linesWho(b); if (!b) return null; } if (!a || typeof CONVOS === 'undefined') return null;   // no b: one speaker's lines (only A:, a call home)
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60), ca = { ...ctx, t, other: b }, cb = { ...ctx, t, other: a };
   const skip = new Set(ctx.skip || []);
-  const pool = CONVOS.filter(e => !skip.has(e.id) && linesOk(e, a, ca)).map(e => {
-    const lines = e.lines.map(l => ({ who: l.who === 'B' ? b.id : a.id, text: linesFill(l.text, l.who === 'B' ? b : a, l.who === 'B' ? cb : ca) }));
-    return lines.every(l => l.text != null) ? { e, lines, sc: lineSpec(e) } : null;
-  }).filter(Boolean);
-  if (!pool.length) return null;
-  const top = Math.max(...pool.map(x => x.sc)), best = pool.filter(x => x.sc === top);
-  return best[Math.floor(schedU((a.seed || 0) ^ (b.seed || 0), h, 751) * best.length)].lines;
+  const pool = CONVOS.filter(e => !skip.has(e.id) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && linesOk(e, a, ca))
+    .map(e => ({ e, sc: lineSpec(e) })).sort((x, y) => y.sc - x.sc);   // stable: file order within a score
+  let best = [];
+  for (let i = 0; i < pool.length && !best.length;) {     // fill only the most specific ones, the next score down if none of them fill
+    const top = pool[i].sc;
+    for (; i < pool.length && pool[i].sc === top; i++) {
+      const e = pool[i].e, lines = e.lines.map(l => ({ who: l.who === 'B' ? b.id : a.id, text: linesFill(l.text, l.who === 'B' ? b : a, l.who === 'B' ? cb : ca) }));
+      if (lines.every(l => l.text != null)) best.push({ e, lines });
+    }
+  }
+  if (!best.length) return null;
+  const x = best[Math.floor(schedU((a.seed || 0) ^ (b ? b.seed || 0 : 0), h, 751) * best.length)];
+  return Object.assign(x.lines, { id: x.e.id, tone: x.e.tone || 'light' });   // the lines, with the conversation's id and tone
+}
+// ---- overheard conversations, played (0.43.12). linesTick() runs every frame (section 20's socialTick calls it).
+// Once a ship minute, now and then (OVH_ODDS, schedU k 752), two crew awake and in place within OVH_PAIR tiles of each
+// other, both within section 20's CHATTER_NEAR of you and well on screen, talk: overheardFor's lines as alternating
+// speech bubbles (section 8b's bubbleSay), one every OVH_STEP real seconds. Pairs are tried in a seeded order (k 753).
+// The voice budget: one conversation at a time; none starts while a bubble shows or within section 20's chatter gap
+// (CHATTER_AT, which each line here sets too, so the chatter waits until the conversation is over); none while a chat
+// card (CHAT), a meeting (DIALOGUE) or sleep is on, and one playing stops (its bubbles go) when one opens or a speaker
+// walks off; at most one #serious conversation a ship day. Failing a pair, one of them can say a one-speaker
+// conversation (only A: lines, e.g. on a call home in the booths). Kept cheap: odds first, at most OVH_NEAR people
+// (in the seeded order) and OVH_TRIES pairs or singles a ship minute; overheardFor fills only its top-scoring group. The saved ring (SHIP.lines, in the save as save.lines): a
+// conversation you've heard isn't played again within LINES_RING_DAYS ship days.
+const OVH_ODDS = .3, OVH_GAP = 20, OVH_STEP = 3.2, OVH_PAIR = 2.5, OVH_NEAR = 6, OVH_TRIES = 8, LINES_RING_DAYS = 7, LINES_RING_MAX = 80;
+let OVH = null, OVH_MIN = -1, OVH_AT = -1e9;              // OVH: the conversation playing { a, b, lines, i, next, bub }
+function linesState() {                                   // SHIP.lines = { ring: [[id, day], ...], serious: the day of the last #serious }
+  if (typeof SHIP === 'undefined') return null;
+  if (!SHIP.lines) {
+    const s = typeof SAVED !== 'undefined' && SAVED && SAVED.lines;
+    const ok = s && Array.isArray(s.ring) && s.ring.every(r => Array.isArray(r) && typeof r[0] === 'string' && Number.isInteger(r[1]));
+    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0 };
+  }
+  return SHIP.lines;
+}
+if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => { if (SHIP.lines) s.lines = { ring: SHIP.lines.ring.slice(-LINES_RING_MAX), serious: SHIP.lines.serious }; });
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0 }; OVH = null; OVH_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13 calls it)
+// the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
+function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
+function linesHeard(id, day, tone) {
+  const L = linesState(); if (!L) return;
+  L.ring.push([id, day]); if (L.ring.length > LINES_RING_MAX) L.ring.shift();
+  if (tone === 'serious') L.serious = day;
+}
+const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
+function linesTick() {
+  if (OVH) { linesTalk(); return; }
+  const m = Math.floor(shipNow()); if (m === OVH_MIN) return; OVH_MIN = m;
+  if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined' || typeof CONVOS === 'undefined' || !CONVOS.length) return;
+  const now = performance.now(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
+  if (schedU(m, 0, 752) >= OVH_ODDS || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
+  const t = shipNow(), day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
+  const onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // as section 20's chatter
+  const near = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
+    .map(a => ({ a, w: whereIs(a.p, t) })).filter(x => x.w && !x.w.moving && x.w.act !== 'sleep' && x.w.act !== 'wash')
+    .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753)).slice(0, OVH_NEAR);
+  const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day;
+  let tries = OVH_TRIES;
+  for (const x of near) {
+    const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
+    const ctx = { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, skip, noSerious };
+    const call = w => w.act === 'callhome';               // someone on a call home talks to home, not to the next booth
+    for (const y of near.filter(y => y !== x && !call(x.w) && !call(y.w) && Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) <= OVH_PAIR).concat(null)) {   // with each one close by, then alone
+      if (tries-- <= 0) return;
+      const lines = overheardFor(x.a.p, y && y.a.p, ctx); if (!lines) continue;
+      linesHeard(lines.id, day, lines.tone);
+      OVH = { a: x.a, b: y && y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
+    }
+  }
+}
+// the conversation playing: the next line when it's due; it ends after the last, or stops when the budget says hush
+function linesTalk() {
+  const o = OVH, now = performance.now();
+  const gone = s => !DECK_CREW.includes(s) || !s.h, apart = !!o.b && Math.hypot(o.a.x - o.b.x, o.a.z - o.b.z) > OVH_PAIR + 1.5;
+  if (linesHush() || gone(o.a) || (o.b && gone(o.b)) || apart) { for (const b of o.bub) { b.el.remove(); const k = bubbles.list.indexOf(b); if (k >= 0) bubbles.list.splice(k, 1); } OVH = null; OVH_AT = now; return; }
+  if (now < o.next) return;
+  if (o.i >= o.lines.length) { OVH = null; OVH_AT = now; return; }
+  const l = o.lines[o.i++], s = o.b && l.who === o.b.p.id ? o.b : o.a;
+  const b = bubbleSay(s.h, l.text, OVH_STEP + .8); if (b) o.bub.push(b);
+  o.next = now + OVH_STEP * 1000;
+  if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = now;   // section 20's chatter waits while two are talking
 }
 // the baked meetings into MEETING_SCRIPTS (section 18 calls this once, right after declaring it): a text with {me} becomes
 // c => text with c.you, the shape section 18's dialogue already plays
@@ -25658,6 +25734,7 @@ function socialTo(t) {
 }
 function socialTick() {                                  // the main loop: the chat card every frame, the hours once a ship minute
   chatTick();
+  if (typeof linesTick === 'function') linesTick();       // section 22: overheard conversations (0.43.12)
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
   SOC_MIN = m; socialTo(m); socialTogether(step); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);

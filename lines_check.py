@@ -38,12 +38,13 @@ VALUES = {
 BUBBLE_KINDS = {'smalltalk', 'rumour', 'overheard'}        # spoken over heads: 60 characters (90 at most)
 LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad')    # chat lines, moments, Mail: 140
 CARD = 90
+HOME_IDS = {'mum', 'gran', 'jo', 'sam'}                  # your people back home (content/home/<id>.call)
 NAME_W = 9                                                 # a filled-in name counts as this many characters
 
 BANNED = [
     # romance and flirting with anyone (the user: no romance with the player; couples live quietly in the background)
     r'\bkiss\w*', r'\bflirt\w*', r'\bdarling\b', r'\bsweetheart\b', r'\bbabe\b', r'\bsexy\b', r'\bgorgeous\b', r'\bcrush\b',
-    r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
+    r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bmy love\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
     # swearing (the ship's "blast" is fine)
     r'\bdamn\w*', r'\bhell\b', r'\bbloody\b', r'\bcrap\w*', r'\bshit\w*', r'\bfuck\w*', r'\bbastard\w*', r'\bpiss\w*',
     r'\barse\w*', r'\bass\b', r'\bbollocks\b', r'\bgod\b', r'\bjesus\b', r'\bchrist\b',
@@ -146,6 +147,10 @@ def main(argv):
     for kind, es in out['LINES'].items():
         allx += [('bank', kind, e, None, 'bank') for e in es]
     for c in out['CONVOS']:
+        if all(l['who'] == 'A' for l in c['lines']):       # one speaker (a call home, a mutter): nobody else is in it
+            bad = [k for k in ('pair', 'with') if c.get(k)] + (['{other}'] if any('{other}' in l['text'] for l in c['lines']) else [])
+            if bad:
+                errors.append(f'overheard {c["topic"]} "{c["lines"][0]["text"]}": a one-speaker conversation has no other person ({", ".join(bad)})')
         for l in c['lines']:
             allx.append((f'overheard {c["topic"]}', 'overheard', dict(c, text=l['text']), None, 'convo'))
     for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
@@ -161,6 +166,9 @@ def main(argv):
         for mid, b in out['HOME_MOMENTS'].items():
             yield f'call {b["thread"][4:]} beat {b["beat"]}', b, b['who']
     home_ids = {c['id'] for c in out['HOME_CONTACTS'].values()}   # the player's people back home: home:mum, ...
+    for k, c in out['HOME_CONTACTS'].items():
+        if k not in HOME_IDS:                              # content_gen makes sure its who: is home:<k>
+            errors.append(f'call home.{k}: no such person back home (the contacts are {", ".join(sorted(HOME_IDS))})')
     known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
         src = 'home' if where.startswith('call ') else 'moment'
@@ -284,8 +292,11 @@ def main(argv):
         couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
         at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadets?\b|\bnewcomer\b|\byou(?:r|rs|rself)?\b", low)
         about_crew = couple and not at_you
-        romance = [] if e.get('id') in allowed or src == 'home' else BANNED_AT_YOU if about_crew else BANNED_PLAYER
-        for b in (BANNED if src != 'home' else [x for x in BANNED if x != r'\blove you\b']) + romance:   # family warmth from home
+        # calls home: only family warmth is exempt (a plain "love you", "I love you"); every other romance word stays an
+        # error ("I'm still in love with you" fails on "in love")
+        family = [x for x in BANNED_PLAYER + BANNED_AT_YOU if x != r'\blove you\b']
+        romance = [] if e.get('id') in allowed else family if src == 'home' else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in (BANNED if src != 'home' else [x for x in BANNED if x != r'\blove you\b']) + romance:
             m = re.search(b, low)
             if m:
                 errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))

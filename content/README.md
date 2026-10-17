@@ -200,12 +200,21 @@ A: No promises.
 ```
 
 - `A:`, `B:` (and `C:`) are the speakers; a blank line or `---` ends a conversation. Two to four lines.
+- **One speaker** (0.43.13): a conversation with only `A:` lines is one person talking with nobody else in it, such as
+  someone on a call home (`@overheard booths` with `? place:booths`), one to four lines. It plays when that person has
+  no conversation with someone close by; people on a call home only ever say these. No `pair:`, `with:` or `{other}`
+  in it (lines_check says so).
 - `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
   (A outranks B), `couple` (one of the established crew couples).
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
+- In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
+  or so, A and B taking turns. `act:`, `place:` and `deck:` are where speaker A is and what they're doing. Once you've
+  heard a conversation it isn't played again for 7 ship days, and only one `#serious` conversation plays a day, so
+  a place you visit often needs plenty of them. Give a conversation that only makes sense somewhere its `place:` (a
+  plants talk without `place:garden` can turn up in the mess).
 
 ## Reactions
 
@@ -307,8 +316,9 @@ three differences:
   - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
     the lines, and `? send` where your choice of news goes.
 
-Family warmth ("I love you", "love to you") is fine in call files; the head writer reads them for tone. Jo, Sam and the
-contacts' names count as known names.
+Family warmth ("I love you", "love to you") is fine in call files, and only that: any other romance word ("in love",
+"my love", "my heart"...) is an error there as everywhere; the head writer reads them for tone. The contacts are `mum`,
+`gran`, `jo` and `sam` (a file for anyone else is an error). Jo, Sam and the contacts' names count as known names.
 
 ## Meetings (.meet)
 
