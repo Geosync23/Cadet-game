@@ -159,3 +159,8 @@ Read this first; it supersedes the 01:40 summary where they differ.
 **Still open with the user:** Pillar 3 check-in 1 on the link (version 18 = 0.41.10; guide sent ~23:43 UTC 10-16), the full-storm check-in 2 later. The Pillar 4 draft doc is https://claude.ai/code/artifact/c320bb5a-c65b-4769-87c1-8f23c61acff1 (final plan differs: escort Zeke Torres, first solo job Tuesday; the user answered all 14 questions — plans/pillar4-notes.md).
 
 **Old lead's hourly check-in:** trig_01U315RUDEiSDA2ZsKUf8Xf4 (fires :39) — the new lead deletes it and creates its own.
+
+## Lead log (session_01PJtmxWgAPLebXSZKP6ZRpG, from 2026-10-17 02:40 UTC)
+- 02:40 took over; hourly check-in trig_018pRJUMKQr75nKGDHN7ovUp (:40). Archived (done, notes pushed): systems 3, galley, crew designer, interactions.
+- Decision: social B's weekly affinity snapshots keep pairs with |aff| >= 30 (not 40: section 14's seating lines are ±30). AFF_SNAP = 30, in 0.39.3.
+- 0.60.0 gate: waiting on social A's social_check harness fix, the 22-vs-18 breakfast count (sim 0.26.23), reviewer 1 on social B fa2f20d.
