@@ -107,6 +107,15 @@ with sync_playwright() as pw:
       const s2 = JSON.parse(JSON.stringify(s0)); s2.ids = 12345; delete s2.idl; socLoad(s2); const kept = JSON.stringify(SHIP.rel) === R && NEWS.length === 0;
       socLoad(s0); return [moved, kept]; })()""")
     print('A save from a different crew list: affinity moved across by id, rest kept:', xl)
+    rv = g.ev(r"""(() => { relAdd('tomas', 'chat', 12); memAdd('tomas', 'fav.lamp'); repAdd('galley', 5, { work: 3 });
+      const s0 = JSON.parse(JSON.stringify(socSave())), R = JSON.stringify(SHIP.rel), M = JSON.stringify(SHIP.mem), P = JSON.stringify(SHIP.rep), A = affinity('tomas', 'pell');
+      const t = SOC.crew[SOC.idx.get('tomas')];
+      window.ROSTER_RESERVE = [{ ...JSON.parse(JSON.stringify(t)), id: 'reserve-test', name: 'Testy Reserve', seed: 4242, aboard: [400, null] }];
+      SOC = null; socInit(); const n = SOC.n; socLoad(s0);
+      const o = [n === s0.idl.split(',').length + 1, JSON.stringify(SHIP.rel) === R, JSON.stringify(SHIP.mem) === M, JSON.stringify(SHIP.rep) === P, affinity('tomas', 'pell') === A, affinity('tomas', 'reserve-test') === affStart(t, SOC.crew[SOC.idx.get('reserve-test')])];
+      delete window.ROSTER_RESERVE; SOC = null; socInit(); socLoad(s0); return o; })()""")
+    print('A reserve person added between save and load (bigger crew, rel, mem, rep, affinity kept, new pair from its start):', rv)
+    if rv != [True] * 6: fail('adding a reserve person loses what the save had')
     if xl != [True, True]: fail('a save with a different crew list loses what it should keep')
     if not rt: fail('save and load differ')
 
