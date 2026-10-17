@@ -30,8 +30,11 @@
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
+#   --long (0.28.41, the lead's save budget): only this: the whole save from the real arrival (newGameStart(true)) to
+#   day 280 (or --long N), skipTo ten hours at a time, measured after each day's 06:00; prints the size and the biggest
+#   parts every 10 days and fails if it ever passes SAVE_BUDGET (250 KB). About two minutes on a combined build.
 # Setup and environment as for cadet_test.py.
-# Run:  python3 player_check.py BUILD.html
+# Run:  python3 player_check.py BUILD.html  [--long [DAYS]]
 import sys, json, pathlib
 exec(open(__file__.replace('player_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
@@ -143,6 +146,47 @@ def body_check(name, need, gain, before, end, seen, pose):
     if need: check(end['needs'][need] >= min(99.5, before['needs'][need] + gain - 3) - .1, f"{name}: {need} {before['needs'][need]} -> {end['needs'][need]} (gain {gain})")
     check(end['visible'] and not end['act'], f'{name}: not back on your feet ({end})')
 
+SAVE_BUDGET = 250 * 1024                                  # the whole save at any point to day 280 (the lead, 0.28.41)
+SAVE_SIZE = r"""(() => { saveGame(); const raw = localStorage.getItem(SAVE_KEY) || '', s = JSON.parse(raw || '{}'), out = { total: raw.length };
+  for (const k in s) { if ((k === 'ship' || k === 'player') && s[k] && typeof s[k] === 'object') { for (const j in s[k]) out[k + '.' + j] = JSON.stringify(s[k][j]).length; } else out[k] = JSON.stringify(s[k]).length; }
+  return JSON.stringify(out); })()"""
+def save_budget(pw, path, days):
+    """the whole save from the real arrival to day `days`: the largest size seen, and its parts"""
+    tmp = WORK / 'test' / '_save_budget.html'; tmp.write_text(instrument(pathlib.Path(path).read_text()))
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    page = b.new_page(viewport={'width': 600, 'height': 500}); errs = []
+    page.on('pageerror', lambda e: errs.append(f'pageerror: {e}'))
+    page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    page.add_init_script(INIT)
+    def load():
+        page.goto('file://' + str(tmp)); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+    ev = lambda s: page.evaluate('s => window.__sc(s)', s)
+    load(); ev("localStorage.clear()"); load()                # saving on (no ?nosave), from an empty store
+    if not ev("typeof newGameStart === 'function' && typeof skipTo === 'function'"):   # this branch alone: no arrival (section 13) to start from
+        print('  this build has no newGameStart / skipTo (section 13): skipped'); b.close(); return (0, 0, {}), errs
+    print('  arrival:', ev("(() => { newGameStart(true); return JSON.stringify([SHIP.time.day, hhmm(SHIP.time.min), typeof introOn === 'function' && introOn()]); })()"))
+    worst = (0, 0, {})
+    for d in range(1, days + 1):
+        ev(f"(() => {{ const end = {d} * 1440 + 360; while (shipNow() < end) skipTo(Math.min(end, shipNow() + 600)); }})()")
+        sz = json.loads(ev(SAVE_SIZE))
+        if sz['total'] > worst[0]: worst = (sz['total'], d, sz)
+        if d % 10 == 0 or d == days:
+            top = sorted(((v, k) for k, v in sz.items() if k != 'total'), reverse=True)[:6]
+            print(f"  day {d:3d} {sz['total'] / 1024:6.1f} KB  biggest: " + ', '.join(f'{k} {v / 1024:.1f}' for v, k in top), flush=True)
+    ev("localStorage.clear()"); b.close()
+    return worst, errs
+
+if '--long' in sys.argv:
+    k = sys.argv.index('--long'); days = int(sys.argv[k + 1]) if len(sys.argv) > k + 1 and sys.argv[k + 1].isdigit() else 280
+    print(f'The whole save, from the real arrival to day {days} (budget {SAVE_BUDGET // 1024} KB):')
+    with sync_playwright() as pw:
+        (big, day, parts), errs = save_budget(pw, sys.argv[1], days)
+    print(f'  largest: {big / 1024:.1f} KB on day {day}:', ', '.join(f'{k} {v / 1024:.1f}' for k, v in sorted(parts.items(), key=lambda x: -x[1]) if k != 'total' and v >= 512))
+    check(big <= SAVE_BUDGET, f'the whole save passed {SAVE_BUDGET // 1024} KB: {big / 1024:.1f} KB on day {day}')
+    if errs: fail('page errors: ' + '; '.join(errs[:3]))
+    print('SAVE BUDGET OK' if ok else 'SAVE BUDGET FAILED')
+    sys.exit(0 if ok else 1)
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     errors = g.errors
@@ -160,18 +204,159 @@ with sync_playwright() as pw:
     sp = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
       const walk = () => { Object.assign(player.obj.position, cellPos(...nearestOpen(LIFT_AT[0], LIFT_AT[1], player))); player.steer = { x: 0, z: 1, k: 1 }; player.vel = 0;
         for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
-      for (const [f, e] of [[80, 80], [20, 80], [80, 20], [20, 20], [25, 25]]) { Object.assign(n, { fitness: f, energy: e }); playerUpdate(0, 0);
+      for (const [f, e] of [[80, 80], [20, 80], [80, 20], [20, 20], [25, 25]]) { Object.assign(n, { fitness: f, energy: e, bathroom: 50 }); playerUpdate(0, 0);
         out[f + '/' + e] = [Math.round(playerSpeed() * 1000) / 1000, Math.round(player.maxV / PLAYER_V0 * 1000) / 1000, Math.round(walk() / PLAYER_V0 * 1000) / 1000]; }
       Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return out; })()""")
     print('  fitness/energy: [speed, top speed ratio, walking speed reached after 1 s, as a ratio]', sp)
     for key, want in [('80/80', 1.05), ('20/80', .8), ('80/20', .84), ('20/20', .64), ('25/25', 1)]:   # fit (75+): 105% (0.28.9)
         check(abs(sp[key][0] - want) < 1e-9 and abs(sp[key][1] - want) < 1e-3, f'speed {key}: {sp[key]} want {want}')
     for key in sp: check(abs(sp[key][2] - sp[key][0]) < .01, f'speed {key}: walking at {sp[key][2]}, want {sp[key][0]}')
+    # bursting for the toilet (0.28.41, the user's): at bathroom 0 the '+go' pose (no prop: no new meshes) and 70% walking; above 0, gone
+    bg = g.ev(r"""(() => { const n = SHIP.player.needs, out = [];
+      const walk = () => { Object.assign(player.obj.position, cellPos(...nearestOpen(LIFT_AT[0], LIFT_AT[1], player))); player.steer = { x: 0, z: 1, k: 1 }; player.vel = 0;
+        for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
+      for (const b of [0, .5]) { Object.assign(n, { fitness: 50, energy: 50, hunger: 50, bathroom: b }); const v = walk() / PLAYER_V0;
+        out.push([Math.round(playerSpeed() * 1000) / 1000, Math.round(v * 100) / 100, !!player.needGo, Math.round((player.k && player.k['+go'] || 0) * 100) / 100, (player.propMeshes || []).length, needEffects().marks.bathroom[1].slice(0, 8)]); }
+      Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return JSON.stringify(out); })()""")
+    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note]', bg)
+    check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
+    check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
+
+    print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
+    ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
+      const t0 = shipNow(), c = careerInit(), keep = { sd: c.sd, sh: c.sh }, n = SHIP.player.needs, n0 = { ...n }; Object.assign(n, NEEDS_FRESH);
+      setShipNow(-1440 + 17 * 60 + 30); c.sd = 0; c.sh = 0; const a = [SHIP.time.day, sickNow(), playerSpeed(), needEffects().notes.some(x => /unwell/.test(x))];
+      setShipNow(5 * 1440 + 12 * 60); c.sd = SHIP.time.day; c.sh = 0; const b = [sickNow(), playerSpeed() < 1];   // a real sick day still counts
+      Object.assign(c, keep); setShipNow(t0); Object.assign(n, n0); return JSON.stringify([a, b]); })()""")
+    if ar is None: print('  (no career section in this build)')
+    else:
+        ar = json.loads(ar); print('  day 0 at 17:30 [day, unwell, speed, an unwell note]; a real sick day [unwell, slower]:', ar)
+        check(ar[0] == [0, False, 1, False] and ar[1] == [True, True], f'a new arrival is not "unwell" (a sick day 0 meant never): full speed at 17:30 on day 0: {ar}')
+
+    print('No tray, no meal (0.28.45, the user\'s):')
+    def table_go(tray):
+        g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 3) goToDeck(3); setShipNow(Math.floor(shipNow() / 1440) * 1440 + 18 * 60 + 5); needsT = null;
+          SHIP.player.tray = {json.dumps(tray)}; Object.assign(SHIP.player.needs, {{ hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 }});
+          const it = ITEMS.find(i => /^Long table$/.test(i.t)), q = new THREE.Vector3(); it.hit.getWorldPosition(q); return playerTap(it, q, q); }})()""")
+        for k in range(200):
+            g.step(10)
+            if g.ev("!ACT || ACT.phase === 'do'"): break
+        h0 = g.ev("SHIP.player.needs.hunger"); r0 = g.ev("JSON.stringify([ACT && ACT.kind, ACT && !!ACT.o.fed, TRAY_ON.visible, SHIP.player.tray])")
+        g.step(150)
+        h1 = g.ev("SHIP.player.needs.hunger"); r = json.loads(r0) + [round(h1 - h0, 1), g.ev("TRAY_ON.visible")]
+        g.ev("actEnd(true); SHIP.player.tray = null"); return r
+    nt = table_go(None); wt = table_go('Test soup')
+    print('  a table, no tray: [activity, fed, tray on the table, tray in hand, food change, tray later]', nt)
+    print('  a table with a served tray:', wt)
+    check(nt[0] == 'sit' and nt[1] is False and nt[2] is False and nt[4] <= 0 and nt[5] is False, f'sitting at a mess table without a meal: just sitting, no tray, no food: {nt}')
+    check(wt[0] == 'eat' and wt[1] is True and wt[2] is True and wt[3] is None and wt[4] > 1, f'with a tray from the servery: it goes on the table and food rises as you eat: {wt}')
+
+    print('Need warnings (0.28.41):')
+    wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
+      let t = performance.now() + 1e6;
+      const quiet = () => { POP.toast = POP.card = POP.warn = -1e9; POP.busy = false; te.classList.remove('show'); };
+      const tick = (gap = true) => { if (gap) quiet(); t += 1000; const k = needWarnTick(t); return k ? [k, document.getElementById('tt').textContent] : null; };
+      deviceClose(); WARN_SAID = {}; Object.assign(n, { hunger: 60, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
+      out.push(tick());                                      // 0 nothing low
+      n.hunger = 24; out.push(tick(), tick(false), tick());  // 1 the gentle one, 2 not again at once, 3 nor later
+      n.hunger = 9; out.push(tick());                        // 4 the firm one
+      n.hunger = 30; tick(); n.hunger = 20; out.push(tick()); // 5 not re-armed at 30
+      n.hunger = 45; tick(); n.hunger = 20; out.push(tick()); // 6 re-armed at 40+
+      n.hunger = 20; n.bathroom = 5; n.social = 22; out.push(tick(), tick(false), tick(), tick());   // 7-10 lowest first, one at a time (food already said)
+      n.energy = 20; DEV.open = true; out.push(tick()); DEV.open = false;   // 11 not with the device open
+      quiet(); POP.busy = true; t += 1000; out.push(needWarnTick(t)); // 12 not while busy
+      sleeping = true; POP.at = -1e9; popupWatch(t); out.push(POP.busy); sleeping = false; POP.at = -1e9; popupWatch(t + 1); out.push(POP.busy);   // 13, 14
+      out.push(tick());                                      // 15 energy now
+      WARN_SAID = {}; Object.assign(n, NEEDS_FRESH); return JSON.stringify(out); })()"""))
+    for i, x in enumerate(wn): print('   ', i, x)
+    check(wn[0] is None and wn[1] == ['hunger', 'Hungry'] and wn[2] is None and wn[3] is None, f'a gentle warning once when food drops under 25: {wn[:4]}')
+    check(wn[4] == ['hunger', 'Very hungry'] and wn[5] is None and wn[6] == ['hunger', 'Hungry'], f'a firmer one under 10; re-armed only at 40+: {wn[4:7]}')
+    check(wn[7] == ['bathroom', 'Bursting'] and wn[8] is None and wn[9] == ['social', 'A bit lonely'] and wn[10] is None, f'the lowest need first, one at a time, after a gap: {wn[7:11]}')
+    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[15] == ['energy', 'Tired'], f'never with the device open, while busy or asleep: {wn[11:]}')
+    # and in the running game: food under 25 says so within a few seconds once the screen is quiet
+    g.ev("WARN_SAID = {}; POP.toast = POP.card = POP.warn = -1e9; document.getElementById('toast').classList.remove('show'); deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); Object.assign(SHIP.player.needs, { hunger: 20, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 })")
+    g.step(30)
+    wl = json.loads(g.ev("JSON.stringify([WARN_SAID.hunger || 0, document.getElementById('tt').textContent])")); print('  in the game:', wl)
+    check(wl == [1, 'Hungry'], f'the warning shows in the running game: {wl}')
+    g.ev("WARN_SAID = {}; Object.assign(SHIP.player.needs, NEEDS_FRESH)")
+
+    print('Teaching tips (0.28.42):')
+    tt = json.loads(g.ev(r"""(() => { const D = SHIP.device, keep = { ...D.tipsSeen }, tipsOn = D.settings.tips, intro = SHIP.intro && { ...SHIP.intro }, out = {};
+      const ids = TEACH.map(x => x[0]); out.list = [ids.length, new Set(ids).size, Math.max(...ids.map(x => x.length)), Math.max(...TEACH.map(x => x[2].length))];
+      let t = performance.now() + 5e6;
+      const clear = () => { TIP_Q.length = 0; DEVICE_SKIN.tip(null); };
+      const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); };
+      const tick = () => { t += 1000; POP.busy = false; return teachTick(t); };
+      if (SHIP.intro) SHIP.intro.ended = true; deviceClose(); D.settings.tips = true;
+      for (const id of ids) delete D.tipsSeen[id];
+      Object.assign(SHIP.player.needs, { hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
+      quiet(); const a = tick(); out.first = [a, !!D.tipsSeen[a], TIP_Q.length && TIP_Q[0].id, document.getElementById('devTip') && !document.getElementById('devTip').hidden];
+      quiet(); POP.tip = t; out.gap = [tick()];                              // 3 minutes between tips
+      clear(); POP.card = POP.tip = t - 181000; POP.card = t - 30000; out.gap.push(tick());   // a card 30 s ago: not yet
+      POP.card = t - 61000; const b = tick(); out.gap.push(b, b && b !== a);  // 61 s: the next one
+      quiet(); POP.toast = t - 3000; out.gap.push(tick());                   // a toast 3 s ago
+      const seen0 = ids.filter(k => D.tipsSeen[k]).length; quiet(); D.settings.tips = false; out.off = [tick(), ids.filter(k => D.tipsSeen[k]).length - seen0]; D.settings.tips = true;
+      if (SHIP.intro) { SHIP.intro.on = true; SHIP.intro.ended = false; SHIP.intro.step = 'chief'; quiet(); out.intro = tick(); SHIP.intro.step = null; SHIP.intro.ended = true; }
+      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = false; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
+      out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = true; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = false; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
+      for (const id of ids) delete D.tipsSeen[id];
+      quiet(); DEV.open = true; DEV.app = 'home'; out.dev = [tick()]; DEV.app = 'needs'; quiet(); out.dev.push(tick()); DEV.open = false; DEV.app = 'home';
+      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:queue']; delete D.tipsSeen['t:needs'];
+      const was = ACT; ACT = { kind: 'queue', o: {}, def: {} }; quiet(); out.prio = [tick()]; ACT = was; quiet(); out.prio.push(tick());
+      out.size = JSON.stringify(D.tipsSeen).length;
+      for (const id of ids) delete D.tipsSeen[id]; Object.assign(D.tipsSeen, keep); D.settings.tips = tipsOn; if (intro) Object.assign(SHIP.intro, intro);
+      clear(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return JSON.stringify(out); })()"""))
+    for k in tt: print('   ', k, tt[k])
+    check(tt['list'][0] >= 25 and tt['list'][0] == tt['list'][1] and tt['list'][2] < 12 and tt['list'][3] <= 200, f'25+ tips, unique short ids, short texts: {tt["list"]}')
+    check(str(tt['first'][0]).startswith('t:') and tt['first'][1] is True and tt['first'][2] == tt['first'][0] and tt['first'][3] is True, f'a due tip shows on the card and is marked seen: {tt["first"]}')
+    check(tt['gap'][0] is None and tt['gap'][1] is None and tt['gap'][3] is True and tt['gap'][4] is None, f'pacing: 3 minutes apart, 60 s after a card, not just after a toast: {tt["gap"]}')
+    check(tt['off'] == [None, 0], f'Tips off: none shown, none marked seen: {tt["off"]}')
+    check(tt.get('intro') is None, f'none during the arrival: {tt.get("intro")}')
+    check(tt['rep'] == [1, None, 't:rep', 't:rep'], f'the reputation tip on Monday: after your first job is turned in, or at 17:00, whatever the pacing: {tt["rep"]}')
+    check(tt['dev'] == [None, 't:a-needs'], f'over the device only the open app\'s tip: {tt["dev"]}')
+    check(tt['prio'] == ['t:queue', 't:needs'], f'the first due tip in priority order: {tt["prio"]}')
+    check(tt['size'] < 800, f'all the tips seen fit in a small save: {tt["size"]} bytes')
+
+    print('The News feed (0.28.44):')
+    nf = json.loads(g.ev(r"""(() => { const out = {}, added = [], keep = { news: SHIP.news, used: SHIP.newsUsed, at: SHIP.newsAt, rows: SHIP.newsRows };
+      for (const k of Object.keys(NEWS_SRC)) if (!LINES['news.' + k]) { added.push(k);   // stand-ins until head writer 3's bank is in the build
+        LINES['news.' + k] = Array.from({ length: 12 }, (_, i) => ({ text: NEWS_SRC[k] + ' post ' + i + ' about {first}.', id: 'tn' + k + i }));
+        if (k === 'trad') LINES['news.trad'].push({ text: 'On today: come along.', id: 'tntoday', trad: 'today' }); }
+      SHIP.news = []; SHIP.newsUsed = []; SHIP.newsAt = null; SHIP.newsRows = {};
+      const d0 = SHIP.time.day + 1, days = 14, per = {}; let t = (d0 - 1) * 1440;
+      newsTick(t); for (let h = 1; h <= days * 24; h++) { t += 60; newsTick(t);
+        for (const x of SHIP.news) { const d = Math.floor(x.at / 1440) + 1; ((per[d] = per[d] || {})[x.at + '|' + x.text] = x); } }
+      const counts = [], srcMax = [], ids = {};
+      for (let d = d0; d < d0 + days; d++) { const xs = Object.values(per[d] || {}); counts.push(xs.length);
+        const c = {}; for (const x of xs) if (x.src !== 'trad' && x.src !== 'works') c[x.src] = (c[x.src] || 0) + 1; srcMax.push(Math.max(0, ...Object.values(c)));
+        for (const x of xs) if (x.id) (ids[x.id] = ids[x.id] || []).push(d); }
+      out.counts = counts; out.srcMax = Math.max(...srcMax);
+      out.repeat = Object.values(ids).some(ds => ds.some((d, i) => i > 0 && d - ds[i - 1] < NEWS_COOL));
+      out.kept = SHIP.news.length; out.sources = [...new Set(SHIP.news.map(x => x.src))].length;
+      out.sorted = SHIP.news.every((x, i) => !i || SHIP.news[i - 1].at >= x.at);
+      const sv = {}; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) { /* not ours */ } out.bytes = JSON.stringify([sv.news, sv.newsUsed, sv.newsAt, sv.newsRows]).length;
+      deviceShow('ship'); const body = document.getElementById('devBody').textContent; out.app = [DEVICE_APPS.get('ship').title, !!SHIP.news[0] && body.includes(SHIP.news[0].text), body.includes('Systems')];
+      deviceShow('crew'); out.rel = DEVICE_APPS.get('crew').title; deviceClose();
+      out.trad = SHIP.news.some(x => x.id === 'tntoday') || SHIP.news.some(x => /^Today aboard/.test(x.text)) || null;
+      for (const k of added) delete LINES['news.' + k]; Object.assign(SHIP, { news: keep.news, newsUsed: keep.used, newsAt: keep.at, newsRows: keep.rows });
+      return JSON.stringify(out); })()"""))
+    print('  ', nf)
+    c = nf['counts']
+    check(min(c) >= 2 and max(c) <= 10 and 3 <= sum(c) / len(c) <= 8, f'about 3 to 8 posts a ship day: {c}')
+    check(nf['srcMax'] <= 2 and not nf['repeat'] and nf['sources'] >= 5, f'at most 2 a source a day, no post again within 7 days, a mix of sources: {nf}')
+    check(nf['kept'] == 40 and nf['sorted'] and nf['bytes'] < 9000, f'the last 40 kept, newest first, small in the save: {nf["kept"]}, {nf["bytes"]} bytes')
+    check(nf['app'] == ['News feed', True, True] and nf['rel'] == 'Relationships', f'the apps renamed; the feed and the system bars show: {nf["app"]}, {nf["rel"]}')
+    # in the running game: with the screen quiet (heads-ups paused), a due tip comes up on its own
+    g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; TEACH_CK = -1e9; Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
+    g.step(90)
+    tg = json.loads(g.ev("JSON.stringify([TIP_Q.map(x => x.id), !document.getElementById('devTip').hidden])")); print('  in the game:', tg)
+    check(len(tg[0]) == 1 and tg[0][0].startswith('t:') and tg[1], f'a due tip shows by itself in the running game: {tg}')
+    g.ev("TIP_Q.length = 0; DEVICE_SKIN.tip(null); SHIP.device.calendarRemind.on = true; for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]")
 
     print('Sleep and time skips:')
     sl = g.ev(r"""(() => { const n = SHIP.player.needs; Object.assign(n, NEEDS_FRESH); setShipNow(22 * 60); needsT = null; playerUpdate(0, 0);
       n.energy = 40; sleeping = true; sleepUntil(WAKE_AT); sleeping = false; const slept = n.energy;
-      skipTo(shipNow() + 21 * 60); const awake = n.energy; playerUpdate(0, 0);
+      skipTo(shipNow() + 21 * 60); const awake = n.energy; n.bathroom = 50; playerUpdate(0, 0);   // bursting would slow you too (0.28.41)
       return { slept: Math.round(slept), awake21h: Math.round(awake), speed: playerSpeed(), at: clockText() }; })()""")
     print(' ', sl)
     check(sl['slept'] == 100, 'sleep should refill energy')
@@ -453,21 +638,34 @@ with sync_playwright() as pw:
       setShipNow(shipNow() + 1440); out.push(chat('a', 50)); setShipNow(shipNow() - 1440); n.hygiene = 50; return out; })()""")
     print('  first chat, again, clean, unwashed (and the remark), next day:', ch)
     check(ch[:4] == [6, 1, 9, 3] and ch[4] is True and ch[5] == 6, f'chatting: {ch}')
-    cp = g.ev(r"""(() => { const n = SHIP.player.needs, seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat'), s0 = placeSpot(seats[0].id);
-      const near = seats.slice(1).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - s0.x, s.z - s0.z) < COMPANY_NEAR).slice(0, 4);
-      const fake = near.map(([q, s]) => ({ settled: true, goalId: q.id, x: s.x, z: s.z, p: { name: 'Test' } })); const out = [];
-      for (const k of [0, 2, 4]) {
-        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
+    cf = g.ev("(() => { if (!SHIP.rel) return null; const n = SHIP.player.needs, k = SHIP.rel['tst-f']; SHIP.rel['tst-f'] = { pts: 0, tier: 3, met: 1, known: true }; n.social = 50; delete SHIP.player.chats['tst-f']; playerChat({ id: 'tst-f', name: 'Test F' }); const g = Math.round((n.social - 50) * 10) / 10; if (k === undefined) delete SHIP.rel['tst-f']; else SHIP.rel['tst-f'] = k; delete SHIP.player.chats['tst-f']; return g; })()")
+    print('  first chat with a friend (0.28.43):', cf)
+    check(cf is None or cf == 12, f'a chat with a friend counts twice: {cf}')
+    # company at a meal (0.28.43, the user's): only your own table counts, each person by your bond (bondMult); capped
+    cp = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && /^3-/.test(q.id));
+      const me = seats[0], tb = seatTable(me.id), mates = seats.filter(q => q.id !== me.id && seatTable(q.id) === tb), others = seats.filter(q => seatTable(q.id) !== tb).slice(0, 2);
+      const sizes = {}; for (const q of seats) { const t = seatTable(q.id); sizes[t] = (sizes[t] || 0) + 1; }
+      const s0 = placeSpot(me.id), rel = SHIP.rel || {}, keep = {}, out = [];
+      const fake = (q, id) => { const s = placeSpot(q.id); return { settled: true, goalId: q.id, x: s.x, z: s.z, spot: { pose: 'sit', room: 'M' }, p: { id, name: 'Test' } }; };
+      const ids = ['tst-a', 'tst-b', 'tst-c', 'tst-d', 'tst-e', 'tst-f']; for (const id of ids) keep[id] = rel[id];
+      const was = DECK_CREW.filter(a => a.settled && a.goalId && seatTable(a.goalId) === tb); DECK_CREW.splice(0, DECK_CREW.length, ...DECK_CREW.filter(a => !was.includes(a)));   // the table to ourselves
+      const meal = (crew, tiers = {}) => {
+        for (const id in tiers) if (SHIP.rel) SHIP.rel[id] = { pts: 0, tier: tiers[id], met: 1, known: true };
+        DECK_CREW.push(...crew); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
         FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
-        ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
-        needsT = shipNow() - 10; playerUpdate(0, 0); out.push([company(ACT), Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10]);
-        DECK_CREW.splice(DECK_CREW.length - k, k); ACT = null; }
-      FX_MIN = -1; return [near.length, out]; })()""")
-    print('  ten minutes eating with 0, 2, 4 (counts as 3) at the table: [company, social gained]', cp)
-    if check(cp[0] >= 3, f'company: need three mess seats near each other ({cp[0]})'):
-        check(all(abs(gn - 2 * min(c, 3)) < .15 for c, gn in cp[1]) and cp[1][1][0] - cp[1][0][0] == 2 and cp[1][2][0] - cp[1][0][0] == 4,
-              f'company at the table: +0.2 a minute for each of up to three ({cp[1]}; the first is whoever was already eating)')
-
+        ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, placeId: me.id, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+        needsT = shipNow() - 10; playerUpdate(0, 0); const r = [Math.round(company(ACT) * 10) / 10, Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10];
+        DECK_CREW.splice(DECK_CREW.length - crew.length, crew.length); ACT = null; for (const id in tiers) if (SHIP.rel) delete SHIP.rel[id]; return r; };
+      out.push(meal([]), meal([fake(mates[0], 'tst-a'), fake(mates[1], 'tst-b')]), meal(mates.slice(0, 4).map((q, i) => fake(q, ids[i]))),
+        meal(others.map((q, i) => fake(q, ids[i]))), meal([fake(mates[0], 'tst-e'), fake(mates[1], 'tst-f')], { 'tst-e': 4, 'tst-f': 4 }),
+        meal(mates.slice(0, 4).map((q, i) => fake(q, ids[i])), { 'tst-a': 4, 'tst-b': 4, 'tst-c': 4, 'tst-d': 4 }));
+      for (const id of ids) { if (keep[id] === undefined) { if (SHIP.rel) delete SHIP.rel[id]; } else SHIP.rel[id] = keep[id]; }
+      DECK_CREW.push(...was); FX_MIN = -1; return JSON.stringify({ tables: Object.values(sizes).sort(), mates: mates.length, out, mult: BOND_MULT, rel: !!SHIP.rel }); })()"""))
+    print('  mess tables (seats each), your table-mates; ten minutes eating with [company, social]: nobody, 2 and 4 strangers at your table, 2 at another table, 2 and 4 close friends:', cp)
+    o = cp['out']
+    check(cp['tables'] == [4, 4, 4, 8, 8, 8, 8] and cp['mates'] == 7, f"the mess's tables: four long ones of eight, three round ones of four ({cp['tables']}, mates {cp['mates']})")
+    check(o[0] == [0, 0] and o[1] == [2, 4] and o[2] == [4, 8] and o[3] == [0, 0], f'only your own table counts, +0.2 a minute a stranger, an empty table nothing: {o[:4]}')
+    if cp['rel']: check(o[4] == [6, 12] and o[5] == [6, 12], f"close friends count three times, at most six strangers' worth: {o[4:]}")
     print('The note bus (0.28.22: simNote acts, inert until section 13 has simNote):')
     sn = g.ev(r'''(() => { const log = [], real = typeof simNote === 'function';
       if (!real) window.simNote = (k, o) => log.push([k, o]); else return 'real';

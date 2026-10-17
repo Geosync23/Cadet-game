@@ -294,10 +294,10 @@ def run(path):
               tipShow('s2', 'On screen'); tipShow('s3', 'Waiting'); out.push(tipSeen('s3'), TIP_Q.length, tipSeen('s2'), TIP_Q.length, c.textContent.includes('On screen'), tipSeen(''), tipSeen(7));
               c.click(); out.push(c.hidden, TIP_Q.length); D.tipsSeen = {}; return out; })()""")
             check(ts == [True, False, True, False, False, 1, False, 1, True, False, False, True, 0], f'tipSeen: marks without showing, drops a waiting tip, leaves the one on screen: {ts}')
-            # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none)
+            # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none); the News feed (0.28.44) shows them as Overheard
             sn = g.ev("""(() => { const own = typeof shipNews === 'function'; if (!own) window.shipNews = n => [{ text: 'The scrubber on Deck 4 is rattling.', from: 'Pell Varga', at: shipNow() - 30 }].slice(0, n);
               const out = [own, devNews().length]; deviceShow('ship'); const t = document.getElementById('devBody').textContent;
-              out.push(t.includes('Ship news'), !devNews().length || t.includes(devNews()[0].text)); if (!own) delete window.shipNews; deviceShow('home'); return out; })()""")
+              out.push(t.includes('Ship news') || t.includes('Overheard') || t.includes('No news yet') || (SHIP.news || []).some(x => t.includes(x.text)), !devNews().length || t.includes(devNews()[0].text)); if (!own) delete window.shipNews; deviceShow('home'); return out; })()""")
             print('  ship news:', sn)
             check(sn[1] >= (0 if sn[0] else 1) and sn[2] and sn[3], f'Ship news: the feed shows in the Ship app: {sn}')
             # an action with no verb opens its app (the social engineer's Meet up: { app: 'appointments', with })

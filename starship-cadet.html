@@ -9511,7 +9511,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', record: '★', crew: '☺', gear: '✲', dot: '•' };
+  const GLYPH = { home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
   let back = null, drawn = null, drawnKey = null, mapCache = null;
@@ -10064,22 +10064,20 @@ function devNews() {
   if (typeof shipNews !== 'function') return [];
   try { return (shipNews(SHIP_NEWS_N) || []).filter(x => x && typeof x.text === 'string'); } catch (e) { DEV.errors.push('shipNews: ' + (e && e.message || e)); return []; }
 }
-deviceApp({ id: 'ship', title: 'Ship', icon: 'ship', order: 60, view: () => {
-  const B = [], news = devNews();
-  B.push({ kind: 'text', text: 'Ship news', mark: 'head' });
-  if (news.length) B.push({ kind: 'list', rows: news.map(x => ({ text: x.text, sub: (x.from ? x.from + ' · ' : '') + (isFinite(x.at) ? devDayName(Math.floor(x.at / 1440) + 1) + ' ' + devWhen(x.at) : '') })) });
-  else B.push({ kind: 'text', text: 'Nothing heard yet. Talk to people aboard and you\'ll hear what\'s going on.' });
-  B.push({ kind: 'text', text: 'Systems', mark: 'head' });
+deviceApp({ id: 'ship', title: 'News feed', icon: 'news', order: 60, view: () => {   // 0.28.44: the Ship app became the News feed (section 15's SHIP.news)
+  const B = [], posts = (Array.isArray(SHIP.news) ? SHIP.news : []).map(x => ({ at: x.at, text: x.text, from: typeof NEWS_SRC !== 'undefined' && NEWS_SRC[x.src] || x.src }));
+  for (const x of devNews()) posts.push({ at: x.at, text: x.text, from: 'Overheard' + (x.from ? ', ' + x.from : '') });   // what you've heard aboard (section 20's shipNews)
+  posts.sort((a, b) => (isFinite(b.at) ? b.at : 0) - (isFinite(a.at) ? a.at : 0));
+  if (posts.length) B.push({ kind: 'list', rows: posts.slice(0, 40).map(x => ({ text: x.text, sub: x.from + (isFinite(x.at) ? ' · ' + devDayName(Math.floor(x.at / 1440) + 1) + ' ' + devWhen(x.at) : '') })) });
+  else B.push({ kind: 'text', text: 'No news yet. Posts from around the ship turn up here through the day.' });
+  const notes = (playerFx().notes || []).filter(n => n && n.text);
+  if (notes.length) { B.push({ kind: 'text', text: 'Around you', mark: 'head' }); for (const n of notes.slice(0, 4)) B.push({ kind: 'text', text: n.text + '.' }); }
+  B.push({ kind: 'text', text: 'Systems', mark: 'head' });   // the bars stay, small, at the bottom: the health board is only in the Works bay
   if (typeof shipHealthRows === 'function') {
     const rows = shipHealthRows();
     B.push({ kind: 'bars', items: rows.map(r => ({ label: r.name, value: r.value, level: r.state === 'failing' ? 'low' : r.state === 'poor' ? 'mid' : '' })) });
-    for (const r of rows.slice(1)) if (r.worst && r.state !== 'fine') B.push({ kind: 'text', text: r.name + ': ' + r.state + ', worst is the ' + r.worst + '.' });
   } else B.push({ kind: 'text', text: 'No ship systems report yet.' });
-  const notes = (playerFx().notes || []).filter(n => n && n.text);
-  if (notes.length) { B.push({ kind: 'text', text: 'Around you', mark: 'head' }); for (const n of notes.slice(0, 4)) B.push({ kind: 'text', text: n.text + '.' }); }
-  const today = devTraditions(shipNow(), SHIP.time.day * 1440 - 1);
-  B.push({ kind: 'text', text: 'Today aboard', mark: 'head' }, { kind: 'text', text: today.length ? today.map(x => x.title + ' at ' + devWhen(x.at) + ', ' + x.where).join('; ') + '.' : 'Nothing special. A quiet day.' });
-  return { title: 'Ship', blocks: B };
+  return { title: 'News feed', blocks: B };
 } });
 
 // Record (0.35.4): your Works record, where progression shows. Certification and the Chief's comments come later.
@@ -10104,7 +10102,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
 
 // Crew and Appointments (0.35.4): shells. The social engineer's section 20 registers its own 'crew' and 'appointments' apps
 // with deviceApp, which replace these.
-deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50, view: () => ({ title: 'Crew', blocks: [{ kind: 'text', text: 'Your contacts fill in as you get to know people aboard.' }] }) });
+deviceApp({ id: 'crew', title: 'Relationships', icon: 'people', order: 50, view: () => ({ title: 'Relationships', blocks: [{ kind: 'text', text: 'Your contacts fill in as you get to know people aboard.' }] }) });
 
 // Appointments (0.35.6, C3): make one (who, when, where), and crew answer from their real day (section 14's
 // apptReply: yes, "how about 18:30?", or no). Accepted ones go into SHIP.device.appts (saved) and section 14 walks
@@ -10441,6 +10439,7 @@ const needClamp = v => Math.max(0, Math.min(100, v));
 // activities: 1.15 = 15% faster); drain: how fast energy drains while awake; socialGain: social from chatting with
 // crew and eating in company. Each comes with the device's one-line reason. The machines' walk is never in it.
 const NEED_HIGH = 75, NEED_LOW = SLOW_BELOW;
+const GO_SPEED = .7, GO_SAY = 'Bursting for the toilet: you walk slower, and tasks go 10% slower.';   // bathroom at 0 (0.28.41)
 const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   energy:  { hi: [{ task: 1.15 }, 'Well rested: tasks go 15% faster.'], lo: [{ walk: SLOW_SPEED }, 'Tired: you walk slower.'] },
   fitness: { hi: [{ drain: .94, walk: 1.05 }, 'Fit: a spring in your step, and you tire more slowly.'], lo: [{ walk: SLOW_SPEED, drain: 1.06 }, 'Out of shape: you walk slower and tire sooner.'] },
@@ -10455,6 +10454,9 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
     const side = n[k] >= NEED_HIGH ? 'hi' : n[k] < NEED_LOW ? 'lo' : null, fx = side && NEED_FX[k][side]; if (!fx) continue;
     for (const f in fx[0]) e[f] *= fx[0][f];
     e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
+  }
+  if (n.bathroom <= 0) {                                 // bursting (0.28.41, the user's): you hold yourself and walk slower ('+go')
+    e.walk *= GO_SPEED; e.marks.bathroom = ['down', GO_SAY]; e.notes[e.notes.indexOf(NEED_FX.bathroom.lo[1])] = GO_SAY;
   }
   const sk = n === SHIP.player.needs && typeof sickFx === 'function' ? sickFx() : null;   // being sick (the career engineer, 0.61.5): slower, more tired
   if (sk) { e.walk = Math.max(SICK.floor, e.walk * sk.walk); e.drain *= sk.drain; e.notes.push(sk.note); }   // never slower than SICK.floor, 40% (reviewer 1d, the lead: phones)
@@ -10525,6 +10527,232 @@ const NEED_SAY = {
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
   return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
+}
+// quiet moments (0.28.41): what's on screen. popupBusy: a panel, a card, a dialogue, sleep, the lift or a fade is up,
+// so nothing new should pop up (the panels are looked at four times a second, the rest every frame). POP.toast / POP.card:
+// when an ordinary toast / a tip card or dialogue was last on screen, or a heads-up came up (performance.now(), so virtual in tests).
+// The need warnings and the teaching tips (below) wait for a quiet moment; nothing here changes what's shown.
+const POP = { at: -1e9, panels: false, busy: false, toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 };
+const POP_PANELS = ['lift', 'sleepAsk', 'qAsk', 'ixBoard', 'ixHealth', 'chat', 'devAddr', 'seek'];
+const popOn = id => { const e = document.getElementById(id); return !!(e && !e.hidden); };
+function popupWatch(now) {
+  if (now - POP.at >= 250) { POP.at = now; const fe = document.getElementById('fade'); POP.panels = POP_PANELS.some(popOn) || !!(fe && +fe.style.opacity > 0); }
+  const dlg = document.body.classList.contains('dlgon') || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE), te = document.getElementById('toast');
+  if (te && te.classList.contains('show')) POP.toast = now;
+  if (dlg || TIP_Q.length || DEV.hu && DEV.hu !== POP.hu || DEV.choose) POP.card = now;   // a heads-up counts as it comes (it can stay up a while, at the side)
+  POP.hu = DEV.hu;
+  POP.busy = POP.panels || dlg || !!DEV.choose || TIP_Q.length > 0 || sleeping || !!ride;
+}
+// need warnings (0.28.41, the user's "as any need approaches the lower end a warning and an explanation needs to
+// appear"): a gentle toast the first time a need drops under WARN_AT[0] (the low line, where its penalty starts), a firmer
+// one under WARN_AT[1]; each need re-arms once it's back to WARN_REARM. One at a time, never over a panel, a card, a
+// dialogue or sleep, nor with the device open, and WARN_GAP after anything else; the lowest need goes first. Not the
+// Tips setting's (they're about you, not teaching). At 0 nothing more happens (no fail state) except bathroom's '+go'.
+const WARN_AT = [NEED_LOW, 10], WARN_REARM = 40, WARN_GAP = 8000;
+const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] (text: head writer 3)
+  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 06:00-08:00, dinner 17:00-20:30. The grab shelf never closes.'],
+    ['Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.']],
+  energy: [['Tired', 'You\'re tired, so you\'re walking slower. Your bunk\'s in Bunk 1, Deck 4, from 20:00. By day, sit down a while.'],
+    ['Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.']],
+  hygiene: [['Could do with a wash', 'Time for a wash: people enjoy your company less. Showers are in the junior wing washrooms, Deck 4.'],
+    ['Really need a shower', 'You really need a shower. Chats do half the good till you\'ve had one. Junior wing, Deck 4.']],
+  fitness: [['Out of shape', 'Out of shape: you walk slower and tire sooner. A treadmill or weights session in the Deck 3 gym will help.'],
+    ['Badly out of shape', 'Badly out of shape. Get to the gym on Deck 3. Even one workout makes a difference.']],
+  social: [['A bit lonely', 'A bit lonely, and tiring sooner for it. Chat with someone, eat with company, or call home from the Deck 3 booths.'],
+    ['Missing people', 'Really missing people. Find a friendly face, or call home from the booths on Deck 3.']],
+  bathroom: [['Need the toilet', 'You need the toilet. Public washrooms are in the junior wing on Deck 4, and on Deck 3.'],
+    ['Bursting', 'You really need the toilet, now! Deck 4 or Deck 3. Hold on, or you\'ll be hopping.']],
+};
+let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
+function needWarnTick(now) {
+  const n = SHIP.player.needs; let pick = null, lvl = 0;
+  for (const k of NEED_KEYS) {
+    if (n[k] >= WARN_REARM) { WARN_SAID[k] = 0; continue; }
+    const l = n[k] < WARN_AT[1] ? 2 : n[k] < WARN_AT[0] ? 1 : 0;
+    if (l > (WARN_SAID[k] || 0) && (!pick || n[k] < n[pick])) { pick = k; lvl = l; }
+  }
+  if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
+  const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
+  toast(w[0], w[1]); return pick;
+}
+// teaching tips (0.28.42, the user's "a lot more tips and tutorial bubbles appearing, teaching you. But not too many and
+// not too often"): TEACH lists them in priority order, [id, test(c), text]. teachTick (from playerUpdate, once a second)
+// shows the first one not seen whose test passes, through the device's tipShow (its card, its saved tipsSeen, its Tips
+// setting). Pacing: one every TEACH_GAP at most; none within TEACH_QUIET of another tip card, need warning, heads-up or
+// dialogue, nor TEACH_TOAST of a toast; none during the arrival (teachHeld) or while anything's up (POP.busy). App tips ('t:a-...')
+// show only over that app on the device; the rest never over the device. A tip whose moment passes waits for the next.
+// TEACH_ST: what teachWatch has seen happen (not saved: a reload starts it again, the tips themselves are saved).
+const TEACH_GAP = 180000, TEACH_QUIET = 60000, TEACH_TOAST = 6000;
+let TEACH_CK = -1e9, TEACH_ST = null;
+const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
+const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
+const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
+  ['t:rep', c => c.d >= 1 && (c.S.turnin || c.min >= 1020 || c.d >= 2), 'People notice good work, kindness and joining in. Each department has its own view of you, and so does the ship. The Record app shows where you stand.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end
+  ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
+  ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
+  ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
+  ['t:a-jobs', c => c.app === 'jobs', 'Your job and its steps. The board in the Works bay has the rest.'],
+  ['t:a-crew', c => c.app === 'crew', 'Everyone you\'ve met, and how well you know them.'],
+  ['t:a-needs', c => c.app === 'needs', 'What each need is doing for you right now: ▲ helping, ▼ holding you back.'],
+  ['t:queue', c => ACT && ACT.kind === 'queue', 'The line moves on its own. You\'ll get a tray at the front. Tap anywhere to leave the queue.'],
+  ['t:tray', c => !!SHIP.player.tray && !(ACT && ACT.kind === 'eat'), 'Take your tray to any free seat and tap it to eat. Company at the table lifts your spirits too.'],
+  ['t:lift', c => teachRecent(c.S.arrived, c), 'Six decks, one lift. Maps on your device shows where you are and what\'s on every deck.'],
+  ['t:deck3', c => c.deck === 3, 'Deck 3 is the Commons: the mess, the gym, the crew store, the call-home booths, the bow lounge and the promenade.'],
+  ['t:deck5', c => c.deck === 5, 'Deck 5 is Operations: the Works bay and its job board, main storage and the machine shop. You work here.'],
+  ['t:shift', c => c.work && c.min >= 450 && c.min < 480, 'Your shift is 08:00 to 17:00 in the Works bay, Deck 5. Take a job from the board when you get in.'],
+  ['t:dayoff', c => c.work === false && c.min >= 420 && c.min < 1200, 'Day off! No shift today. The garden, a game of Tiles, a long call home, or nothing at all. Your choice.'],
+  ['t:fault', c => c.fault, 'A blinking light means a machine is struggling. Faults become jobs on the Works board. The News feed on your device shows how she\'s holding up.'],
+  ['t:pay', c => c.S.paid, 'Credits! Spend them at the crew store on Deck 3: snacks and small comforts. Some make good gifts.'],
+  ['t:gift', c => giftHeld(), 'You\'re carrying a gift. Tap a crewmate to give it. Everyone has their favourites.'],
+  ['t:carry', c => SHIP.player.carry.length > 0 && !giftHeld() && !bagHeld(), 'Parts in hand. Fit them at the job\'s machine. Spares go back to main storage.'],
+  ['t:chat', c => Object.keys(SHIP.player.chats).length > 0, 'Chatting lifts your Social. The first chat with someone each day counts most. It\'s how strangers become friends.'],
+  ['t:tier', c => c.S.tierUp > 0, 'You\'re getting to know someone. Chats, meals and favours move you along: stranger, acquaintance, colleague, friend, close friend.'],
+  ['t:friend', c => c.S.tierUp >= 3, 'A friend! Friends save you a seat, ask you along to things, and sometimes leave a note on your bunk.'],
+  ['t:mail', c => mailUnread() > 0, 'New mail. Read it in Mail on your device. Ship traditions are announced the evening before.'],
+  ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
+  ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
+  ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
+  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
+  ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
+  ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
+  ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
+  ['t:sit', c => c.n.energy < 50, 'Tired? Sit down anywhere for a bit; it slows the tiredness. Lying on your bunk rests you properly.'],
+  ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout every few days keeps you fit and quick on your feet.'],
+  ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to Mum, Gran, Jo or Sam.'],
+  ['t:bonus', c => c.now - c.S.start > 600000 && Object.values(needEffects(c.n).marks).some(m => m[0] === 'up'), 'Needs kept high give bonuses: well rested, you work faster. The Needs app shows what\'s helping and what isn\'t.'],
+  ['t:view', c => c.now - c.S.start > 300000, 'Rotate turns the view. Walls lowers them so you can see into rooms. Pinch or scroll to zoom.'],
+];
+const teachTry = f => { try { return !!f(); } catch (e) { return false; } };
+function teachWatch(now) {                               // what's happened, for the tests that need more than a look
+  const S = TEACH_ST || (TEACH_ST = { start: now, deck: deckDef.num, cr: SHIP.player.credits, tierUp: 0, slept: false });
+  if (deckDef.num !== S.deck && !ride) { S.deck = deckDef.num; S.arrived = now; }
+  if (SHIP.player.credits > S.cr) S.paid = true; S.cr = SHIP.player.credits;
+  if (sleeping) S.slept = true; else if (S.slept) S.woke = true;
+  if (DEV.hu) S.huOn = true; else if (S.huOn) S.hu = true;
+  return S;
+}
+if (typeof onSim === 'function') {
+  onSim('tierUp', x => { if (TEACH_ST && x && x.tier > TEACH_ST.tierUp) TEACH_ST.tierUp = x.tier; });
+  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin') TEACH_ST.turnin = true; });
+}
+// the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
+// day 8) with tips, which is when they're most use.
+const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1);
+function teachTick(now) {
+  if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
+  const S = teachWatch(now), D = SHIP.device;
+  if (!D || !D.settings.tips || teachHeld() || devLocked() || POP.busy || POP.toast > now - TEACH_TOAST) return null;
+  const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
+  const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
+  const c = { now, S, n: SHIP.player.needs, d, min, deck, app: DEV.open ? DEV.app : null,
+    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerShiftOn(d) : null,
+    fault: teachTry(() => typeof machineList === 'function' && machineList().some(m => m.deck === deck && machineLook(m.id).blink)),
+    trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
+  for (const [id, test, text, o] of TEACH) {
+    if (D.tipsSeen[id] || !paced && !(o && o.sure) || id.startsWith('t:a-') !== !!DEV.open || !teachTry(() => test(c))) continue;
+    if (tipShow(id, text)) { POP.tip = POP.card = now; return id; }
+  }
+  return null;
+}
+// the news feed (0.28.44, the user's, through the lead: the device's Ship app becomes "News feed"): short posts, newest
+// first, each with a time and a source. SHIP.news = [{ at, src, text, id }] (saved, the last FEED_MAX). Posts come from
+// head writer 3's bank (content/banks/news.lines: kinds 'news.<src>', a crew member as the subject, conditions as
+// triggers) through section 22's lineFor, so the feed fills in once that bank is in the build. Each ship day has 2-6
+// slot times (newsSlots: a hash of the day, no R()) between 06:30 and 21:30; a slot picks a source (NEWS_W, at most
+// NEWS_PER_SRC a day) and a subject, and posts what lineFor gives. On top: today's traditions at 06:00, tomorrow's at
+// 18:00 (ctx.flags 'trad.tomorrow.<id>'), one just held (the 'tradition' note: ctx.trad and 'trad.done.<id>'), your own
+// repair (the 'repair' note, who 'you'), and a ship system getting worse or better (section 17's shipHealthRows). A post
+// id never comes back within NEWS_COOL ship days (SHIP.newsUsed, saved). newsTick runs once a ship minute; after a time
+// skip it catches up on the slots of the last NEWS_CATCH minutes.
+const NEWS_SRC = { bridge: 'Bridge', galley: 'Galley', works: 'Works', garden: 'Garden', infirmary: 'Infirmary', trad: 'Traditions',
+  crew: 'Crew', gossip: 'Overheard', outside: 'Outside', notice: 'Noticeboard' };
+const NEWS_W = { bridge: 2, galley: 2, works: 2, garden: 1, infirmary: 1, crew: 2, gossip: 2, outside: 1, notice: 1 };
+const NEWS_DEPT = { bridge: ['command', 'helm', 'comms', 'watch'], galley: ['galley'], works: ['works'], garden: ['survey', 'galley'], infirmary: ['infirmary'] };
+const FEED_MAX = 40, NEWS_COOL = 7, NEWS_PER_SRC = 2, NEWS_CATCH = 720;
+const newsH = (d, k) => { let h = (d * 2654435761 + k * 40503) >>> 0; h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h ^= h >>> 13; return (h >>> 0) / 4294967296; };
+function newsLoad(s) {
+  const n = s && Array.isArray(s.news) ? s.news : [], u = s && Array.isArray(s.newsUsed) ? s.newsUsed : [];
+  return { news: n.filter(x => x && isFinite(x.at) && typeof x.text === 'string' && NEWS_SRC[x.src]).slice(0, FEED_MAX).map(x => ({ at: +x.at, src: x.src, text: x.text.slice(0, 200), id: typeof x.id === 'string' ? x.id : '' })),
+    used: u.filter(x => Array.isArray(x) && typeof x[0] === 'string' && Number.isInteger(x[1])).slice(-120),
+    at: s && isFinite(s.newsAt) ? +s.newsAt : null, rows: s && s.newsRows && typeof s.newsRows === 'object' ? { ...s.newsRows } : {} };
+}
+{ const L = newsLoad(SAVED); SHIP.news = L.news; SHIP.newsUsed = L.used; SHIP.newsAt = L.at; SHIP.newsRows = L.rows; }
+SAVE_EXTRA.push(s => { s.news = SHIP.news.slice(0, FEED_MAX); s.newsUsed = SHIP.newsUsed.slice(-120); s.newsAt = SHIP.newsAt; s.newsRows = { ...SHIP.newsRows }; });
+function newsSlots(d) {                                  // -> sorted ship minutes of the day's slots (2 to 6)
+  const n = 2 + Math.floor(newsH(d, 1) * 5), out = [];
+  for (let i = 0; i < n; i++) out.push(390 + Math.floor(newsH(d, 10 + i) * 900));
+  return out.sort((a, b) => a - b);
+}
+function feedAdd(at, src, text, id) {
+  if (!text || !NEWS_SRC[src]) return false;
+  const d = Math.floor(at / 1440) + 1;
+  SHIP.news.unshift({ at, src, text, id: id || '' }); SHIP.news.sort((a, b) => b.at - a.at); if (SHIP.news.length > FEED_MAX) SHIP.news.length = FEED_MAX;
+  if (id) { SHIP.newsUsed.push([id, d]); if (SHIP.newsUsed.length > 120) SHIP.newsUsed.splice(0, SHIP.newsUsed.length - 120); }
+  return true;
+}
+const newsCount = (d, src) => SHIP.news.filter(x => Math.floor(x.at / 1440) + 1 === d && (!src || x.src === src)).length;
+// a post from the bank: tries a few subjects (the source's department first) until a line fits; null without one
+function newsLine(src, at, ctx = {}) {
+  if (typeof lineFor !== 'function' || typeof LINES === 'undefined' || !LINES['news.' + src] || typeof ROSTER === 'undefined') return null;
+  const d = Math.floor(at / 1440) + 1, used = new Set(SHIP.newsUsed.filter(x => x[1] > d - NEWS_COOL).map(x => x[0]));
+  const crew = ROSTER.filter(p => p && p.id && p.rank !== 'guest'), depts = NEWS_DEPT[src];
+  const pool = depts ? crew.filter(p => depts.includes(p.dept)).concat(crew.filter(p => !depts.includes(p.dept))) : crew;
+  if (!pool.length) return null;
+  const k0 = Math.floor(newsH(d, at % 1440) * pool.length);
+  for (let i = 0; i < 4; i++) {
+    const p = pool[(depts && i < 2 ? Math.floor(newsH(d, at + i) * Math.max(1, crew.filter(q => depts.includes(q.dept)).length)) : k0 + i * 7) % pool.length];
+    let r = null; try { r = lineFor(p.id, 'news.' + src, { ...ctx, t: at, peek: true, keep: e => !used.has(e.id) }); } catch (e) { r = null; }
+    if (r && r.text) return { text: r.text, id: r.id || (r.e && r.e.id) || '' };
+  }
+  return null;
+}
+function newsPost(src, at, ctx, fallback) {
+  const L = newsLine(src, at, ctx);
+  if (L) return feedAdd(at, src, L.text, L.id);
+  return fallback ? feedAdd(at, src, fallback, '') : false;
+}
+function newsSlot(at) {                                  // a slot: the source by weight, at most NEWS_PER_SRC each a day
+  const d = Math.floor(at / 1440) + 1, srcs = Object.keys(NEWS_W).filter(k => newsCount(d, k) < NEWS_PER_SRC);
+  if (!srcs.length) return false;
+  let r = newsH(d, 100 + at % 1440) * srcs.reduce((a, k) => a + NEWS_W[k], 0);
+  const order = srcs.slice(); let first = order[order.length - 1];
+  for (const k of order) { r -= NEWS_W[k]; if (r < 0) { first = k; break; } }
+  for (const k of [first, ...order.filter(x => x !== first)]) if (newsPost(k, at, {})) return true;   // the first source with a line
+  return false;
+}
+function newsTrad(at, d, when) {                         // today's traditions (06:00) or tomorrow's (18:00)
+  if (typeof eventsOn !== 'function') return;
+  let es = []; try { es = eventsOn(d) || []; } catch (e) { es = []; }
+  for (const e of es.slice(0, 2)) {
+    const ctx = when === 'today' ? { trad: e.id } : { flags: { ['trad.tomorrow.' + e.id]: true } };
+    newsPost('trad', at, ctx, when === 'today' ? 'Today aboard: ' + e.name + ' at ' + hhmm(e.from) + '.' : null);
+  }
+}
+function newsRows(at) {                                  // a ship system getting worse or better (section 17), as a Works post
+  if (typeof shipHealthRows !== 'function') return;
+  let rows = []; try { rows = shipHealthRows(); } catch (e) { rows = []; }
+  const R_ = SHIP.newsRows, rank = { fine: 0, worn: 1, poor: 2, failing: 3 };
+  for (const r of rows) {
+    const was = R_[r.key], now = rank[r.state] !== undefined ? rank[r.state] : 0; R_[r.key] = now;
+    if (was === undefined || was === now) continue;
+    if (now > was && now >= 2) feedAdd(at, 'works', (r.worst ? r.worst.charAt(0).toUpperCase() + r.worst.slice(1) : r.name) + ' running rough: ' + r.name.toLowerCase() + ' at ' + r.value + '%. A job\'s on the board.', '');
+    else if (now < was && now <= 1 && was >= 2) feedAdd(at, 'works', r.name + ' back to normal. Thanks to whoever fixed it.', '');
+  }
+}
+if (typeof onSim === 'function') {
+  onSim('tradition', x => { if (x && x.id) newsPost('trad', isFinite(x.at) ? x.at : shipNow(), { trad: x.id, flags: { ['trad.done.' + x.id]: true } }); });
+  onSim('repair', x => { if (x && x.who === 'you') newsPost('works', isFinite(x.t) ? x.t : shipNow(), { machine: typeof machineLabel === 'function' && typeof machineById === 'function' && machineById(x.machine) ? machineLabel(machineById(x.machine)) : undefined }); });
+}
+function newsTick(now) {                                 // once a ship minute (playerUpdate)
+  now = Math.floor(now); const from = SHIP.newsAt === null ? now : Math.max(SHIP.newsAt + 1, now - NEWS_CATCH);
+  SHIP.newsAt = now; if (from > now) return;
+  for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(now / 1440) + 1; d++) {
+    const base = (d - 1) * 1440, inside = m => base + m >= from && base + m <= now;
+    if (inside(360)) newsTrad(base + 360, d, 'today');
+    for (const m of newsSlots(d)) if (inside(m)) newsSlot(base + m);
+    if (inside(1080)) newsTrad(base + 1080, d + 1, 'tomorrow');
+  }
+  newsRows(now);
 }
 
 // ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
@@ -10713,7 +10941,7 @@ function playerTap(it, at, point) {
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
   }
-  if ((kind === 'tray' || kind === 'eat' && !SHIP.player.tray) && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if (kind === 'tray' && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }   // a table with no tray just sits you (0.28.45)
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player'), ln = j.line && typeof lineSpot === 'function' ? lineAt(lineSpot('player')) : null;   // the back of section 10's line for now (the galley joins you to it), else the galley's spot
     if (j.line && typeof galleyLeave === 'function') galleyLeave('player');   // in the line only once you reach it (0.28.36; actBegin joins again): from across the room you'd hold it up
@@ -10778,8 +11006,8 @@ function playerFloorTap(point) {
   return playerTap({ t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at, at);
 }
 // crew near you (0.28.12, for sitting): settled at a place you'd sit at, within COMPANY_NEAR m
-const sitCompany = A => !A || !A.spot || typeof DECK_CREW === 'undefined' ? 0
-  : DECK_CREW.filter(a => a.settled && a.spot && a.spot.pose === 'sit' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).length;
+const sitCompany = A => !A || !A.spot || typeof DECK_CREW === 'undefined' ? 0   // 0.28.43: each by the bond (bondMult)
+  : bondSum(DECK_CREW.filter(a => a.settled && a.spot && a.spot.pose === 'sit' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).map(crewId), COMPANY_CAP);
 // a machine (0.28.11): the nearest of this deck's machines within MACHINE_NEAR m of the thing tapped. Section 17's
 // machineUse(id, 'player') says what the tap does ({ text, ran }: a line about it, and whether it started it). You
 // walk up to it first. Without machineUse, or no machine there, the tap does what it always did.
@@ -10811,6 +11039,9 @@ function actStart(kind, placeId, o = {}) {
   if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && (PLACE_OF.get(placeId) || {}).type === 'mess-seat') {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
   }
+  if (kind === 'eat' && !o.fed) {                        // no tray, no meal (0.28.45, the user's: "no auto tray: you must get it from the line"): you just sit
+    kind = 'sit'; o = { ...o, after: [o.flavour, 'You sit down. To eat, queue at the servery for a tray, then bring it to a seat.'].filter(Boolean).join(' ') };
+  }
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
@@ -10832,7 +11063,7 @@ function actBegin() {
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
     ACT = null; toast(A.o.title, 'In use: ' + who.p.name + ' got there first.'); return;
   }
-  if (A.kind === 'tray' || A.kind === 'eat' && !A.o.fed || A.kind === 'grab') {   // take the food now
+  if (A.kind === 'tray' || A.kind === 'grab') {          // take the food now (an 'eat' is always a served tray since 0.28.45)
     const f = foodFrom(A.kind === 'grab' ? 'grab' : 'servery');
     if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
     A.o.dish = f.dish;
@@ -10920,13 +11151,44 @@ function queueLeave() {
   if (!ACT || ACT.kind !== 'queue') return;
   actEnd(true); toast('Servery', 'You step out of the line.');   // actEnd calls galleyLeave
 }
-// company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
-// at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.
-const COMPANY_NEAR = 3, COMPANY_MAX = 3, COMPANY_GAIN = .2;
-function company(A) {
-  if (!A || !A.spot || typeof DECK_CREW === 'undefined') return 0;
-  return DECK_CREW.filter(a => a.settled && a.goalId && (PLACE_OF.get(a.goalId) || {}).type === 'mess-seat' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).length;
+// social comes from people, scaled by the bond (0.28.43, the user's "that last part is always true"): bondMult(id) is
+// how much one person's company or chat counts, by your tier with them (section 20's relTier: stranger, acquaintance,
+// colleague, friend, close friend). A close friend is worth three strangers. Without section 20 everyone counts 1.
+// bondSum(ids, cap): the people together, at most cap; bondBest(ids): the best of them (0 for nobody).
+const BOND_MULT = [1, 1.2, 1.5, 2, 3];
+function bondMult(id) {
+  let t = 0; try { t = typeof relTier === 'function' && id ? relTier(id) || 0 : 0; } catch (e) { t = 0; }
+  return BOND_MULT[Math.max(0, Math.min(BOND_MULT.length - 1, t | 0))];
 }
+const bondSum = (ids, cap = Infinity) => Math.min(cap, ids.reduce((a, id) => a + bondMult(id), 0));
+const bondBest = ids => ids.reduce((a, id) => Math.max(a, bondMult(id)), 0);
+const crewId = a => (a.p || a).id;
+// tables (0.28.43): mess seats close together (TABLE_LINK m, seat to seat) make one table: the long tables seat eight, the
+// round ones four. seatTable(placeId) -> the first seat id of its table, or null; made once a deck, from the places.
+const TABLE_LINK = 1.3, TABLES = new Map();
+function seatTable(id) {
+  const pl = PLACE_OF.get(id); if (!pl || pl.type !== 'mess-seat') return null;
+  const dk = id.split('-')[0]; if (!TABLES.has(dk)) {
+    const seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && q.id.split('-')[0] === dk && q.xy), m = new Map();
+    for (const q of seats) if (!m.has(q.id)) {             // single linkage: everything within TABLE_LINK of the table so far
+      const todo = [q]; m.set(q.id, q.id);
+      while (todo.length) { const a = todo.pop(); for (const b of seats) if (!m.has(b.id) && Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) < TABLE_LINK) { m.set(b.id, q.id); todo.push(b); } }
+    }
+    TABLES.set(dk, m);
+  }
+  return TABLES.get(dk).get(id) || null;
+}
+// company at a meal (0.28.10; your table only, 0.28.43, the user's "you should only get social at a meal if people are
+// sitting next to you", then "anyone at YOUR table"): crew settled at the other seats of your table, nobody at other
+// tables. COMPANY_GAIN social a minute for each, times their bondMult, the lot at most COMPANY_CAP (two close friends).
+// A 20-minute meal with three strangers at your table: about +12 (times needEffects' socialGain); an empty table, nothing.
+const COMPANY_CAP = 6, COMPANY_GAIN = .2, COMPANY_NEAR = 3;   // COMPANY_NEAR: sitting elsewhere (sitCompany), not meals
+function tableCrew(A) {
+  if (!A || !A.placeId || typeof DECK_CREW === 'undefined') return [];
+  const tb = seatTable(A.placeId); if (!tb) return [];
+  return DECK_CREW.filter(a => a.settled && a.goalId && a.goalId !== A.placeId && seatTable(a.goalId) === tb).map(crewId);
+}
+const company = A => bondSum(tableCrew(A), COMPANY_CAP);
 // chatting (0.28.10): a tap on a crew member (section 10) calls playerChat(person). The first chat with someone each
 // ship day gives CHAT_GAIN social, later ones CHAT_AGAIN; times needEffects' socialGain (clean: more, unwashed: half).
 // It adds a line to the tap's toast.
@@ -10934,7 +11196,7 @@ const CHAT_GAIN = 6, CHAT_AGAIN = 1;
 function playerChat(p) {
   if (!p) return 0;
   const P = SHIP.player, key = String(p.id || p.name), fx = needEffects(), first = P.chats[key] !== SHIP.time.day;
-  const gain = (first ? CHAT_GAIN : CHAT_AGAIN) * fx.socialGain;
+  const gain = (first ? CHAT_GAIN : CHAT_AGAIN) * fx.socialGain * bondMult(p.id);   // by the bond (0.28.43)
   P.chats[key] = SHIP.time.day;
   for (const k in P.chats) if (P.chats[k] < SHIP.time.day - 1) delete P.chats[k];   // only today's (and yesterday's) are kept
   P.needs.social = needClamp(P.needs.social + gain);
@@ -11204,17 +11466,18 @@ function playerUpdate(dt, t) {
     if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
     needsT = now; needsDrain(dm, false, fx, doing || null);
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
-    if (sat) n.social = needClamp(n.social + SIT_GAIN * Math.min(sitCompany(A), COMPANY_MAX) * needEffects(n).socialGain * dm);
+    if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
       const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
       const m = Math.max(0, Math.min(dw, A.def.mins - A.done)); A.done += dw;
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
-      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
+      const bm = A.def.need === 'social' && A.o.opp ? bondMult(A.o.opp) : 1;   // a game of Tiles: by your bond with them (0.28.43)
+      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * bm * m);
       if (A.def.cost) for (const k in A.def.cost) n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m);   // a workout tires you (0.28.17)
-      if (A.kind === 'eat' && m > 0) {                   // company at the table (0.28.10): social for each one near you, up to COMPANY_MAX
-        const c = company(A); A.o.company = Math.max(A.o.company || 0, c);
-        n.social = needClamp(n.social + COMPANY_GAIN * Math.min(c, COMPANY_MAX) * needEffects(n).socialGain * m);
+      if (A.kind === 'eat' && m > 0) {                   // company at your table (0.28.10, 0.28.43): by the bond, up to COMPANY_CAP
+        const c = company(A); A.o.company = Math.max(A.o.company || 0, c);   // bond-weighted, capped (0.28.43)
+        n.social = needClamp(n.social + COMPANY_GAIN * c * needEffects(n).socialGain * m);
       }
     }
   }
@@ -11231,16 +11494,14 @@ function playerUpdate(dt, t) {
   if (crouch && !player.crouch) toast('Crawlway', 'You duck down and crouch-walk through.');
   const bent = typeof sickBent === 'function' && sickBent();   // doubled over when you're very unwell (0.61.5)
   if (crouch || bent || player.crouch) player.crouch = crouch || bent;
-  for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
-    const slow = n[k] < SLOW_BELOW;
-    if (slow && slowWas[k] === false) toast('Your device', NEED_SAY[k][0]);
-    slowWas[k] = slow;
-  }
+  const go = n.bathroom <= 0;                            // bursting (0.28.41): the '+go' pose while it's at 0 (hands full keep their hold)
+  if (go || player.needGo) player.needGo = go;
+  const pn = performance.now(); popupWatch(pn); needWarnTick(pn); teachTick(pn);   // a need getting low says so (0.28.41; it replaced the two slow-walk toasts), and the teaching tips (0.28.42)
   if (ACT) actUpdate(dt, t);
   needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); gardenGift(); device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); gardenGift(); newsTick(now); device.refresh(); }
 }
 // squeezing past (0.28.12): crew settled at their places hold their tile (section 10's occupiedBy), which can close
 // the only way through (Chef Brennan at the galley's middle station, the plant panel behind her). When the player's
@@ -11285,7 +11546,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -11652,6 +11913,7 @@ function ixKind(pl, it) {
 Object.assign(PLAYER_ACTS, IX_ACTS);
 // company: crew settled near the spot (or anyone sitting in the same room)
 const ixCompany = s => DECK_CREW.filter(c => c.settled && c.spot && (Math.hypot(c.x - s.x, c.z - s.z) < IX_COMPANY || c.spot.room === s.room && s.room)).length;
+const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c => c.settled && c.spot && (Math.hypot(c.x - s.x, c.z - s.z) < IX_COMPANY || c.spot.room === s.room && s.room)).map(c => (c.p || c).id)) : ixCompany(s) > 0 ? 1 : 0;   // 0.28.43: the best bond there
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
@@ -11659,7 +11921,7 @@ function ixSide(A) {
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
     const side = { ...(d.also || {}) };
-    if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult;
+    if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult * (A.o.company === true ? 1 : A.o.company);   // by the best bond there (0.28.43)
     if (side[d.need]) { d.gain += side[d.need]; delete side[d.need]; }   // more of the main need: section 15 spreads d.gain over the minutes
     A.o.ixSide = side; A.o.ixGiven = {};
     if (A.o.company && d.with) d.done = (d.done || '') + ' The company helped.';
@@ -11767,7 +12029,7 @@ function ixTap(it, at, point) {
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
   const free = near.find(([pl]) => !busy(pl.id));
   if (!free) { const a = heldBy(near[0][0].id); toast(it.t, 'In use' + (a ? ': ' + a.p.name + ' is there.' : '.') + ' ' + it.x); return true; }
-  const [pl, spot, kind] = free, company = ixCompany(spot) > 0;
+  const [pl, spot, kind] = free, company = ixBond(spot);   // 0 or the best bond (0.28.43; truthy as before)
   const pose = kind === 'gym' ? (typeof poseOf === 'function' ? poseOf(pl) : pl.anim || 'lift') : ixPose(kind, pl, spot, company);
   actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, company });
   return true;
@@ -25737,7 +25999,8 @@ function eventsPlayer(now) {
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key)) return;
   SHIP.events.joined.push(key);
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
-  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12);
+  const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
+  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12 * bb);
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
 }
@@ -28383,7 +28646,7 @@ function newsFeed() {
 // closest first, with where they are when you may know it; tap one for what you know about them
 let CREW_PICK = null;
 const shipNews = (limit = 20) => newsFeed().slice(0, limit).map(x => ({ text: x.line, from: x.from, at: x.at }));   // the Ship app's news feed (section 19)
-if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon: 'crew', order: 50,
+if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationships', icon: 'people', order: 50,   // 'Crew' until 0.28.44 (the user's)
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
@@ -28391,7 +28654,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
-    return { title: 'Crew', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+    return { title: 'Relationships', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
       : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }]).concat(gone) };
   },
   act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
@@ -31355,7 +31618,10 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
   datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 },
   // 0.27.13 (Pillar 3, C11): your own device, held in both hands at the chest and read, head down, standing or walking
-  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 } };
+  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 },
+  // 0.28.41 (the user's): bursting for the toilet. No prop: both hands clasped low in front, knees in, short quick
+  // steps, a little lean and a jiggle on the spot (knees: how far the thighs turn in)
+  go: { sx: -.24, ex: -.6, sz: -.34, hx: .6, lean: .14, look: .16, knees: .16 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
 const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
@@ -31717,8 +31983,14 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     for (const a of rig.arms) if (!H.one || a.side === H.one) armTo(a, w, H.sx, H.ex, H.sz, H.hx !== undefined ? H.hx : .35);
     if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
     if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
+    if (H.knees) for (const leg of rig.legs) {           // '+go': knees together, the stride shortened, a jiggle when still
+      leg.thigh.rotation.x *= 1 - .45 * s; leg.knee.rotation.x *= 1 - .3 * s;
+      leg.thigh.rotation.z = L(leg.thigh.rotation.z, -leg.side * H.knees, s);
+      leg.knee.rotation.z = L(leg.knee.rotation.z, leg.side * H.knees * 1.6, s);
+      leg.knee.rotation.x -= Math.max(0, Math.sin(t * 11 + leg.side * 1.6)) * .14 * s * (1 - sk);
+    }
   }
-  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
+  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && HOLDS[cart].prop && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
   const ek = !pk && o.eating && base === 'sit' && k.sit > .5 ? 'R:fork' : '';   // 0.27.38: a fork while eating
   const key = pk && hk ? pk + ' ' + hk : pk || hk || ek;     // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
@@ -32298,7 +32570,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -32798,7 +33070,7 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
+    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined || this.needGo !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : this.needGo ? '+go' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
