@@ -10,7 +10,7 @@
 ? tier>=acquaintance time:night
 - You're up too? I keep looking at the star map instead of sleeping.
 ? tier>=colleague
-- {hi} I took the long way round Deck 2 again. On purpose. Mostly on purpose.   #funny
+- {hi}. I took the long way round Deck 2 again. On purpose. Mostly on purpose.   #funny
 ? tier>=friend
 - There you are! I saved you the window seat. Well, I sat in it. Same thing.   #warm
 

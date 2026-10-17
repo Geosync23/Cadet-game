@@ -46,39 +46,47 @@
 - How's the first week? Honestly, mind. I'll know if you're being polite.
 
 // ---- Day 0: his walking lines, replacing section 21's INTRO_LINES and INTRO_CALL ----
-// Conditions left blank on purpose: the head writer and the onboarding engineer are settling the hook. Each block is
-// one step, in order; the step's name is in the comment above it. Said as bubbles, so 60 characters or fewer.
-?
+// Each step's lines are gated by flag:walk.<step>, which nothing sets yet, so they're never said as ordinary week-1
+// chat (the head writer). The onboarding engineer's hook will ask for them by step. Bubbles: 60 characters or fewer.
 // step: hello
+? flag:walk.hello
 - You must be the new hand. Zeke Torres. Works, engines.
 - Welcome to the Wren. She's glad you're here. So am I.
 - Bag all right? Right, onward. Stay close.
 // step: haulway
+? flag:walk.haulway
 - Cargo hold on the left. Cart bay on the right.
 - Mind the carts. They don't mind you.   #funny
 - Hear that hum? That's the coils, one deck down.
 // step: works
+? flag:walk.works
 - That's us. Works. The board, the tea corner, the office.
 - Glass office is the Chief's. Calder. Exact, but fair.
 - Tomorrow, ten to eight. Right here. Not eight. Ten to.
 // step: lift
+? flag:walk.lift
 - Four, please. Go on, the panel's all yours.
 // step: wing
+? flag:walk.wing
 - Washrooms. Hot water till ten, then it's character-building.   #funny
 - Laundry there. Common room at the end, by the windows.
 - Nearly there. First walks are always the longest.
 // step: toMess
+? flag:walk.toMess
 - Dinner. Mess is on Deck 3. You know the lift now.
 - Brennan's cooking. Trust me, you want to be early.
 // step: servery
+? flag:walk.servery
 - Tray first, then the servery. Take what smells best.
 - Thank Chef on the way past. It matters to her.
 - I'll find us a table. Window side, if it's free.
 // step: free
+? flag:walk.free
 - That's it. You're free. The bunk's yours any time from eight.
 - I'm on Deck 4 if you need me. 14, the one with the music.
 - Good first night. Properly good. Sleep well.   #warm
 // step: call (the "this way" calls when you wander)
+? flag:walk.call
 - This way! Over here.
 - Over here, {me}. She's bigger than she looks.
 - I'll wait. No rush. Well, a bit of rush.   #funny
