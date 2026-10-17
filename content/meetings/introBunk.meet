@@ -1,7 +1,8 @@
 @meeting introBunk
 // The arrival evening, step A7 (plans/pillar4-plan.md Part 1): Torres shows you Bunk 1 and hands you your device.
 // Tomas may be there (Sunday evening). The head writer's lines, replacing section 21's stand-in. You're berth 4,
-// the upper bunk above Zofia Santos's; Tomas is berth 1, by the door, under his star map.
+// the upper bunk above Zofia Santos's; Tomas is berth 1, by the door, under his star map. Tomas's three lines are a
+// self-contained aside (section 21 leaves them out when he isn't in the room): nothing after them depends on them.
 title: Your bunk
 from: Zeke Torres
 gist: Torres showed you Bunk 1 and your locker, and handed you your device.
@@ -10,8 +11,7 @@ torres-zeke: Bunk 1. Home. Top bunk at the back is yours.   [gesture]
 torres-zeke > you: Your locker's under it. Bag in there. Go on, it's yours now.
 tomas: Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door.
 tomas > you: I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.
-torres-zeke: Tomas will show you the washroom in the morning. Won't you, Tomas.
-tomas: Yes! It's left at the end. It's left. It's probably left.
+tomas: I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left.
 torres-zeke > you: And this is yours too. Your device. Mail, your schedule, maps, the lot.   [gesture]
 torres-zeke: It'll want to say hello. They always do. Let it.
 ? choice

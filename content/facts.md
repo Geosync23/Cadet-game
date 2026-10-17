@@ -482,3 +482,8 @@ introduces them), unless noted.
 | A lad two doors down from Pell's mum's shop is good with his hands | Pell | writer-commons, arcs |
 | Torres's father calls him by his uncle's name; he used to hum to the engines, badly | Torres | writer-works, arcs |
 | Kovac counted 112 bolts; she knits two-colour only once, for you | Kovac | writer-works, arcs |
+| Esme Walsh's brother feeds her fish; Thea Grieve's sister sends news of hers; Ravi Hart's nan draws his | the fish keepers | writer-commons, batch 3 |
+| Hamid Larsen's boat is "the Morning Tide" this week (renamed often; never "Gull") | Larsen | writer-commons, batch 3 |
+| Zofia Santos has a five-year plan | Santos | writer-commons, batch 3 |
+| Tariq Varga leads Lukas Dlamini at onions, 41 to 38 | the galley | writer-commons, batch 3 |
+| The struggle themes use `{family}`, `{home}`, `{hobby}`, `{since}`, `{boss}`, `{rival}`; "an old loss" is always years ago | everyone | head writer |

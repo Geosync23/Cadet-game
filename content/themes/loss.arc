@@ -44,7 +44,7 @@ them: I think they'd have liked you. They liked people who stay for the quiet bi
 ? choice
 * I'll come every year, if you like.   flavour:practical mem:everyyear
   them: Would you? Yes. I'd like that very much.
-  + them: Every year. Yes. Then it's not a sad day any more. It's our day. With them in it.
+  + them: Every year. Yes. Then it's not a sad day any more. It's a day with company in it. And them.
 * Raise your cup to them?   flavour:share
   them: To {family}. Who laughed at everything.   [laugh]
 them: Thank you. It feels lighter this year. It's the company.
