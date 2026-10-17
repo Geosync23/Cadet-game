@@ -3,13 +3,13 @@
 Written by session_012pK2XVi5UhqEd28fakYk68 (took over from session_01DzZ669spGpdSdVMYzUog2N, whose Pillar 3 note this replaces; its content is in DEV_NOTES "Social life"). Read CLAUDE.md, DEV_NOTES.md ("Social life (section 20)", all of it), plans/pillar4-plan.md (Part 6, seat 3) and plans/social-deep-plan.md on claude/social-design (the A steps, Parts 2, 4, 5, 6, 7, 8, 8b) first.
 
 ## Role, branch and builds
-- Branch `claude/social`, builds 0.36.20+. Last: **0.36.67** (9c16a83). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
+- Branch `claude/social`, builds 0.36.20+. Last: **0.36.71** (c08142c). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
 - 0.36.41 passed the full set; later builds ran social_check (17 parts), plus intro_check and cadet_test where they touched anything visible (0.36.65/0.36.66 ALL IDENTICAL). Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews; 0.36.52-0.36.59 PASS WITH FIXES, fixed in 0.36.60-0.36.62.
 - I own section `// 20. SOCIAL` (except the sub-block `// 20c. SOCIAL STORIES` at its end, social B's) and `social_check.py`.
 - Report to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE) after each push. Onboarding engineer: session_01KaHzfqSqF8B4bkNFrH1tsx.
 
 ## What's built (DEV_NOTES has every detail and number)
-A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A4 0.36.23 week-1 gating, `socialInvite`; A5 0.36.24 gifts; A6 0.36.25 reputation; A7 0.36.26 invitations; A8 0.36.27 bunk visits and notes; A9 0.36.28 crew come and go; 0.36.29-0.36.63 lining up with the other seats and the reviewers' fixes (notes applied at the end of their hour, asked-for waves `socialSeekAsk`, `seekSpot`); **A10 0.36.65 guiding a newcomer** and **A11 0.36.66 your own room** (both behind `flag('promoted')`, the user's rule; off in normal play, tested with the flag set: social_check parts 16-17); **A12 0.36.67** the save packs 20c's bonds.
+A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A4 0.36.23 week-1 gating, `socialInvite`; A5 0.36.24 gifts; A6 0.36.25 reputation; A7 0.36.26 invitations; A8 0.36.27 bunk visits and notes; A9 0.36.28 crew come and go; 0.36.29-0.36.63 lining up with the other seats and the reviewers' fixes (notes applied at the end of their hour, asked-for waves `socialSeekAsk`, `seekSpot`); **A10 0.36.65 guiding a newcomer** and **A11 0.36.66 your own room** (both behind `flag('promoted')`, the user's rule; off in normal play, tested with the flag set: social_check parts 16-17); **A12 0.36.67-0.36.71**: the save packs 20c's bonds; ship standings gain less near the top; rivalries floor at -45 and ease every other night; unclaimed-job dips once a week per department (all approved by the lead; numbers in DEV_NOTES). 0.36.68: `socHr` (Day 0 hours), `momentWantsVisit` in the visit picker (social B2), `kin`/`lost`/`hobbyNoun` fill-ins (crew designer 3).
 
 ## Shared formats and seams (others rely on these names)
 - Query API (frozen vocabulary): `relTier mem memTold warmth affBand bondOf moodOf beatOf knowsNews repBand repShip knownFor cue inWeek1 leavingSoon newHere movedOff memThing socialFill`. `CALM_TYPES` / `placeCalm` are the deck architect's, `aboard` / `crewLeaving` / `crewArriving` / `crewComeTo` the sim engineer's, `introOn` / `introNote` onboarding's (mine are `socIntroOn` / `socIntroNote`). `SOC_BOND_KINDS` (20c has `STORY_BONDS`).
@@ -25,7 +25,7 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - The sim engineer builds `crewLeaving` / `crewArriving` after crew 0.16.13; nothing for me to change unless names differ.
 - When social B's bonds merge, turn social_check's bond NOTE into a FAIL (friends 15-40, rivals 2-6, a mentor at day 14).
 - A10's other half is onboarding's: `introGuide(id)` (you lead, the newcomer follows) and `introGuideEnd(id)`; I asked them to keep `introOn()` about your own intro while you guide (else week-1 gates close again). `simNote('guideAssigned', { id, day })` goes out at assignment.
-- A12 in progress: proposals sent to the lead (ship standings saturate in ~2 weeks: diminishing gains above 50; rivals grow to 23 by day 56: slower cooling, a floor, warming apart; unclaimed-job dips once a week per department). Waiting for an OK. The month runner is a scratch script (month.py: social_check's harness plus a stand-in player; easy to rebuild from social_check's RUN).
+- A12 done on paper; the rest waits for the user's play. The month runner is a scratch script (month.py: social_check's harness plus a stand-in player; easy to rebuild from social_check's RUN).
 - The save is 26.6 KB at day 56 (budget 30 KB): aff 4.9, affWeek (20c) 3.6, cues 3.5, bonds 3.2, rel 2.6. Cues could be capped lower if it creeps.
 
 ## Gotchas
@@ -39,7 +39,7 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - **Trial merges: never `git merge -X ours`.** It keeps your side of a whole conflict block, and a block can swallow another seat's new code next to it (the build-number line sits right beside section 13's bus, so `-X ours` silently dropped the bus). Merge normally, take theirs for every conflict outside section 20 (a small script on the markers), and check the other seat's key function is in the result (e.g. `grep -c 'function simNote'`).
 
 ## How to test
-- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (17 parts, ~4 min). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
+- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (18 parts, ~4 min). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
 
 ## Open questions for the user
 - Are the numbers right once played (visits, invitations, gift points, reputation dips)? More drama or gentler?
