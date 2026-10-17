@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.0
+   STARSHIP CADET: CSV Wren                           build 0.60.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7364,7 +7364,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.60.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10340,7 +10340,8 @@ function bunkLie(id) {
   actStart('lie', id, { title: 'Your bunk', sleep: night, after: night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
 }
 function bunkSleep(A) {                                  // once you're lying in it at night: sleep (section 13's fade and skip)
-  if (A.kind !== 'lie' || !A.o.sleep || A.o.slept || A.phase !== 'do') return;
+  if (A.kind !== 'lie' || A.o.slept || A.phase !== 'do') return;
+  if (!A.o.sleep && !bedtime()) return; A.o.sleep = true;   // lay down by day and stayed past 20:00: sleep now (reviewer 1, 0.28.37)
   A.o.slept = true; const bed = PLACE_OF.get(A.placeId);
   if (bed && typeof offerSleep === 'function') offerSleep(cellPos(...bed.at));
 }
@@ -10368,7 +10369,8 @@ function playerTap(it, at, point) {
   }
   if ((kind === 'tray' || kind === 'eat' && !SHIP.player.tray) && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
-    const j = galleyJoin('player'), ln = lineAt(typeof lineJoin === 'function' ? lineJoin('player') : null);   // section 10's real line (0.28.34), else the galley's spot
+    const j = galleyJoin('player'), ln = j.line && typeof lineSpot === 'function' ? lineAt(lineSpot('player')) : null;   // the back of section 10's line for now (the galley joins you to it), else the galley's spot
+    if (j.line && typeof galleyLeave === 'function') galleyLeave('player');   // in the line only once you reach it (0.28.36; actBegin joins again): from across the room you'd hold it up
     actStart('queue', null, { title: it.t, ahead: j.ahead, turnAt: j.turnAt,
       spot: ln || { id: null, walk: j.at, x: j.xy[0] - OX, z: j.xy[1] - OZ, y: 0, face: typeof j.face === 'number' ? j.face * Math.PI / 180 : FACE_ANGLE[j.face] || 0, pose: 'stand' } });   // a number: degrees, as placeSpot (0 south, 90 east)
     return true;
@@ -10486,7 +10488,8 @@ function actBegin() {
     if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
     A.o.dish = f.dish;
   }
-  if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt; }   // your place in line from when you reach it
+  if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt;   // your place in line from when you reach it
+    const ln = typeof lineSpot === 'function' && lineAt(lineSpot('player')); if (ln) A.spot = ln; }   // the back of the real line now (0.28.36; section 16 owns who's in it, 15 only reads the spot)
   if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
@@ -10502,7 +10505,7 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
-  if (A.kind === 'queue' && !A.o.dish) try { if (typeof galleyLeave === 'function') galleyLeave('player'); else if (typeof lineLeave === 'function') lineLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (0.28.34; galleyLeave, galley 0.29.32: 0.28.35)
+  if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
     const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
@@ -10564,7 +10567,7 @@ function queueAsk() {
 const lineAt = sp => sp && isFinite(sp.x) && isFinite(sp.z) ? { id: null, walk: sp.at, x: sp.x, z: sp.z, y: 0, face: isFinite(sp.face) ? sp.face : 0, pose: 'stand' } : null;   // lineSpot -> a spot
 function queueLeave() {
   if (!ACT || ACT.kind !== 'queue') return;
-  actEnd(true); toast('Servery', 'You step out of the line.');   // actEnd calls lineLeave (0.28.34)
+  actEnd(true); toast('Servery', 'You step out of the line.');   // actEnd calls galleyLeave
 }
 // company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
 // at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.
@@ -10617,6 +10620,7 @@ function actUpdate(dt, t) {
   };
   let pose = A.pose;
   if (A.phase === 'in') {
+    if (A.kind === 'queue' && typeof lineSpot === 'function') { const ln = lineAt(lineSpot('player')); if (ln) A.to = ln; player.obj.position.set(A.x, 0, A.z); }   // to the line's back as it is now, the camera with you (0.28.36)
     if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = A.kind === 'eat' && A.o.fed ? 'walk+tray' : 'walk';
   } else if (A.phase === 'do') {
     if (A.kind === 'queue' && typeof lineSpot === 'function') {   // the line moves: walk up with it, a tile at a time (0.28.34)
@@ -10919,6 +10923,7 @@ SIM_ADVANCE.push((from, to) => {
 function playerNew() {
   actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
+  DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
 
 // ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
@@ -11019,7 +11024,8 @@ function bagLockerTap(point) {                           // a tap in Bunk 1 with
 // its checkpoint: at section 21's introSeat('you') (3-mess-10, by Torres) when it names a free one, else the nearest.
 // Tap anywhere to get up, as with any seat.
 const DINNER_NEAR = 3, DINNER_MINS = 30;
-let DINNER_SAT = false;
+let DINNER_SAT = false, DINNER_TRY = -1;                 // seated once (also the saved flag 'intro.dinnerSat' when section 13's flags are here: a reload doesn't seat you again); the last ship minute it looked for a seat
+const dinnerSat = v => { if (v) { DINNER_SAT = true; if (typeof flagSet === 'function') flagSet('intro.dinnerSat'); } return DINNER_SAT || typeof flag === 'function' && !!flag('intro.dinnerSat'); };
 function playerSitNear(deck, tile, title = 'Mess table') {
   if (typeof PLACE_OF === 'undefined' || typeof deckDef === 'undefined' || deckDef.num !== deck) return false;
   const c = cellPos(...tile), seat = [...PLACE_OF.values()].filter(pl => SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id))
@@ -11030,15 +11036,16 @@ function playerSitNear(deck, tile, title = 'Mess table') {
   return true;
 }
 function dinnerTick() {
-  if (DINNER_SAT || ACT || player.path.length || typeof introOn !== 'function' || !introOn()) return;
+  if (ACT || player.path.length || typeof introOn !== 'function' || !introOn() || dinnerSat()) return;
+  const m = Math.floor(shipNow()); if (m === DINNER_TRY) return; DINNER_TRY = m;   // once a ship minute: no searching every frame while no seat is free (reviewer 1)
   const I = SHIP.intro, st = typeof introStepById === 'function' ? introStepById('chief') : null, cp = st && st.checkpoint;
   if (!cp || deckDef.num !== cp.deck) return;
   const done = (I.done || {}).chief, yours = I.step === 'chief' || done !== undefined && !(I.missed || []).includes('chief') && shipNow() - done < DINNER_MINS;
   if (!yours) return;
   const c = cellPos(...cp.tile), p = player.obj.position; if (Math.hypot(p.x - c.x, p.z - c.z) > DINNER_NEAR) return;
   const mine = typeof introSeat === 'function' ? introSeat('you') : null, sp = mine && PLACE_OF.has(mine) && !heldBy(mine) ? placeSpot(mine) : null;
-  if (sp) { actStart('sit', mine, { pose: sp.pose, title: 'Mess table', after: 'You sit down at the table. Tap anywhere to get up.' }); DINNER_SAT = true; return; }
-  DINNER_SAT = playerSitNear(cp.deck, cp.tile);
+  if (sp) { actStart('sit', mine, { pose: sp.pose, title: 'Mess table', after: 'You sit down at the table. Tap anywhere to get up.' }); dinnerSat(true); return; }
+  dinnerSat(playerSitNear(cp.deck, cp.tile));
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };

@@ -253,6 +253,19 @@ with sync_playwright() as pw:
     bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent, ACT && ACT.kind, ACT && ACT.phase]"); print('  at 21:00:', tp, bed, 'dialog shown:', asked)
     check(tp is True and not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
     g.ev("actEnd(true)")
+    # lay down by day (19:40, a few minutes' walk from the bunk) and still there at 20:00 (reviewer 1, 0.28.37): you fall asleep, as if you'd lain down at night
+    g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 19 * 60 + 40); needsT = null"); g.step(3); day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
+    for j in range(60):
+        g.step(10)
+        if g.ev("!!ACT && ACT.kind === 'lie' && ACT.phase === 'do'"): break
+    by = g.ev("[ACT && ACT.kind, !!(ACT && ACT.o.sleep), hhmm(SHIP.time.min)]"); g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 20 * 60 + 1)")
+    for j in range(60):
+        g.step(10)
+        if g.ev("sleeping || !!ACT && ACT.o.slept"): break
+    g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
+    lz = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), ACT && ACT.kind]"); print('  lay down at', by, '-> past 20:00:', lz)
+    check(by[:2] == ['lie', False] and lz == [day0 + 1, '06:00', 'lie'], f'lying down by day and still there at 20:00 should sleep you to 06:00: {by} {lz}')
+    g.ev("actEnd(true)")
 
     print('One player day, tapping the real things:')
     g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20, bathroom: 20 }); basket = false")
@@ -341,22 +354,22 @@ with sync_playwright() as pw:
     g.ev("document.getElementById('qLeave').click()"); g.step(5); left = g.ev("[!!ACT, document.getElementById('qAsk').hidden]")
     print('  the line holds you (in it, tap held, asked, still queueing):', lq, still, '| after Leave:', left)
     if lq[0]: check(lq[1:] == [True, True, 'queue'] and still == 'queue' and left == [False, True], f'a tap in the line asks first; Leave takes you out: {lq} {still} {left}')
-    # moving with the real line (0.28.34, section 10's lineJoin/lineSpot/lineLeave; stand-ins when it's missing): your
+    # moving with the real line (0.28.34, section 10's lineSpot, section 16's galleyLeave; stand-ins when they're missing): your
     # stand-in walks up a tile when the line moves, and you are where it is; leaving takes you out of the line
     stub = g.ev("""(() => { if (typeof lineSpot === 'function') return false; const j = galleyJoin('player');
       window.__ls = { x: j.xy[0] - OX, z: j.xy[1] - OZ, face: Math.PI, at: j.at.slice() }; window.__left = 0;
-      window.lineJoin = () => window.__ls; window.lineSpot = () => window.__ls; window.lineLeave = () => { window.__left++; };
+      window.lineJoin = () => window.__ls; window.lineSpot = () => window.__ls; window.lineLeave = () => {}; if (typeof galleyLeave !== 'function') window.galleyLeave = () => { window.__left++; };   // section 15 leaves only through the galley (the owner's ruling)
       window.__gt = galleyTurn; galleyTurn = () => false; return true; })()""")   # your turn held back while the line moves (the game's own binding: __sc evals inside its scope, where window.galleyTurn isn't seen)
     if stub:
         g.ev("SHIP.player.needs.hunger = 30"); g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})")
         for j in range(60):
             g.step(10)
             if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
-        z0 = g.ev("ACT && ACT.z"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
+        z0 = g.ev("ACT && ACT.z"); g.ev("window.__left = 0"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
         for j in range(20): g.step(5)
         mv = g.ev("ACT ? [ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)] : [null]")
         g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
-        lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
+        lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; delete window.galleyLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
         check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and (lv[1] == 1 or lv[2]), f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
@@ -843,6 +856,8 @@ with sync_playwright() as pw:
     print('  the arrival dinner (0.28.28):', dn0, dn)
     check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True and (dn[4] is None or dn[2] == dn[4] or dn0[2]), f'at your table for the dinner you sit down (in your own seat when section 21 names one and nobody is heading for it): {dn}')
     ev("actEnd(true); SHIP.intro.ended = true; goToDeck(4)")
+    nd = json.loads(ev("JSON.stringify([DINNER_SAT, (playerNew(), DINNER_SAT)])")); print('  seated at the dinner, then after a new game:', nd)
+    check(nd == [True, False], f'a new game lets the next arrival dinner seat you again (reviewer 1): {nd}')
     check(kb[0] == ['kitbag'], f'at the ramp you hold one kit bag: {kb[0]}')
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
