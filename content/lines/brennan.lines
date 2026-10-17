@@ -466,3 +466,28 @@
 - My oven still purrs. Every time I light it, I think: that was a good fix.
 ? told:came.observatory tier>=acquaintance
 - Observatory night. I sent a flask up with you. Did you share it? Good.   #warm
+
+// Writer 5, batch 4: if Brennan is ever transferred (goodbye leaving:you, packing as feel leaving:soon, letters
+// after; the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). A new galley on a new ship: no
+// restaurant, no Nell, no fire, nothing of her arc. Lukas covers the galley, so he keeps the book.
+
+== feel
+? leaving:soon
+- Packing, love. Twelve knives, three aprons, one good pan. The book stays with Lukas.
+- Ten days. Lukas has the galley. He's ready. I've told him. Twice. He's ready.   #funny
+? leaving:soon tier>=friend
+- I keep stopping to listen to the pans. Saying goodbye, I suppose. Don't fuss.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off you go, love. No, wait. I'm the one going. Eat your dinner anyway.   #funny
+? leaving:you tier>=colleague
+- Your favourite's in the book. Lukas has the book. He'll do it right. I've checked.   #warm
+? leaving:you tier>=friend
+- Look after yourself, love. Eat properly. I'll know if you don't. I always know.   #warm
+
+== letter
+- New galley. The ovens run hot and the stew's too shy. I'm fixing both. Eat something, love.   #funny
+- They don't listen to the pans here. I'm teaching them. Slowly. Tell Lukas the bread rose better on the Wren. Tell him it's the ovens, not him.
+? tier>=friend
+- Made the Wren's Sunday bread here. Didn't taste the same. It's the company, love. Write and tell me what you're eating. Properly, mind.   #warm
