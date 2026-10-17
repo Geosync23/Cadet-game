@@ -638,7 +638,7 @@ with sync_playwright() as pw:
       for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
       const a = jobReserve('lights', 1, 480, 1), b = jobReserve('washer', 1, 780, 2), c = jobReserve('lights', 2, 465, 3), a2 = jobReserve('lights', 1, 480, 1);
       const J = id => SHIP.jobs.find(j => j.id === id), out = { ids: [a, b, c], again: a === a2, looked: [1, 2, 3].map(jobReserved).join() === [a, b, c].join() };
-      out.machines = [a, b, c].map(id => J(id).machine); out.panels = out.machines.every(id => panelPlace(id)); out.tiers = [a, b, c].map(id => jobTier(J(id)));
+      out.machines = [a, b, c].map(id => J(id).machine); out.makeMins = [a, b, c].map(id => J(id).makeMins); out.panels = out.machines.every(id => panelPlace(id)); out.tiers = [a, b, c].map(id => jobTier(J(id)));
       setShipNow(t0 + 60); machinesNow(); out.early = openJobs('you').some(x => x.id === a);
       setShipNow(t0 + 125); machinesNow();
       const oa = openJobs('you').find(x => x.id === a); out.onBoard = !!oa; out.asked = !!(oa && oa.asked); out.faulty = SHIP.machines[J(a).machine].state;
@@ -663,13 +663,13 @@ with sync_playwright() as pw:
       setShipNow(t0);
       return out;
     })()""")
-    print(f"Reserved jobs: {rs['ids']} on {rs['machines']} (tiers {rs['tiers']}, panels {rs['panels']}); asking again {rs['again']}, looked up {rs['looked']}")
+    print(f"Reserved jobs: {rs['ids']} on {rs['machines']} (tiers {rs['tiers']}, panels {rs['panels']}, make minutes {rs['makeMins']}); asking again {rs['again']}, looked up {rs['looked']}")
     print(f"  slot 1: early {rs['early']}, on the board {rs['onBoard']} asked {rs['asked']}, machine {rs['faulty']}, crew see it {rs['crewSee']}, took {rs['took']}, stops '{rs['stops']}', "
           f"kept past 14 h {rs['kept']}, turned in {rs['turned']}; notes '{rs['notes']}'")
     print(f"  slot 2 untaken: crew before 17:00 {rs['crewBefore']}, crew took it {rs['crewAfter']}; slot 3 released {rs['released']}; an ordinary job's lapse noted {rs['lapse']}")
     if (len(set(rs['ids'])) != 3 or not rs['again'] or not rs['looked'] or not rs['panels'] or max(rs['tiers']) > 1 or rs['machines'][0] == rs['machines'][1]
         or rs['early'] or not rs['onBoard'] or not rs['asked'] or rs['faulty'] not in ('faulty', 'failing') or rs['crewSee'] or not rs['took']
-        or rs['stops'] != 'fetch make job' or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False
+        or rs['stops'] != 'fetch make job' or rs['makeMins'] != [30, 30, 30] or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False
         or not all(x in rs['notes'].split() for x in ['take/1', 'stop:fetch/1', 'stop:make/1', 'stop:job/1', 'done/1', 'turnin/1'])):
         fail('reserved jobs and job notes')
 

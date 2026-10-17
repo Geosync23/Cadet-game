@@ -191,7 +191,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                            build 0.33.36
+   STARSHIP CADET: CSV Wren                            build 0.33.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6918,7 +6918,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.33.36';                            // keep in step with the header's build line
+const GAME_BUILD = '0.33.37';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12104,6 +12104,7 @@ function traysArrivedAt(day, to = 'bridge') {
 // taken yet. jobReserved(slot) -> id | null; jobRelease(slot?) releases one (or all) not yet taken. No R(); nothing
 // happens unless it's called.
 const RESERVE_MAKE = 'bracket';                          // the part you make in the machine shop for a reserved job
+const RESERVE_MAKE_MINS = 30;                            // how long you take to make it (j.makeMins, read by section 15; a first lesson, 0.33.37)
 const heldForYou = j => !!j.reserved && !j.freed && j.status !== 'done';
 function jobReserve(kind, day, at, slot = 1, o = {}) {
   machinesNow();
@@ -12119,7 +12120,7 @@ function jobReserve(kind, day, at, slot = 1, o = {}) {
   if (!pick) return null;
   SHIP.jobs = SHIP.jobs.filter(j => !(j.machine === pick.id && j.status === 'open' && !j.claimedBy && !j.reserved));   // its own ordinary job, if any: this one stands for it
   const id = 'reserve' + slot + ':' + pick.id + '@' + due;
-  SHIP.jobs.push({ id, machine: pick.id, deck: pick.deck, kind: 'repair', urgency: 1, posted: due, found: due, until, reserved: slot, make: RESERVE_MAKE,
+  SHIP.jobs.push({ id, machine: pick.id, deck: pick.deck, kind: 'repair', urgency: 1, posted: due, found: due, until, reserved: slot, make: RESERVE_MAKE, makeMins: RESERVE_MAKE_MINS,
                    claimedBy: null, parts: [MACHINE_KINDS[pick.kind].part, RESERVE_MAKE], status: 'open' });
   MACH_REV++; return id;
 }
