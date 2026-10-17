@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.19
+   STARSHIP CADET: CSV Wren                           build 0.34.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.19';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.20';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12805,7 +12805,7 @@ const SHIP_TRADITIONS = [
 ];
 const evHas = (p, d, h) => (typeof habitsOn === 'function' ? habitsOn(p, d) || [] : p.habits || []).includes(h);   // habits change over time (section 14)
 const bedRoom = p => String(p.bed).replace(/-\d+$/, '');   // '4-B1-2' -> '4-B1': bunkmates
-const evText = (x, c) => typeof x === 'function' ? x(c) : x;
+const evText = (x, c, p) => typeof x === 'function' ? x(c, p) : x;   // p: the person speaking (tap lines), when there is one
 // the ship's year has four seasons of 13 weeks, named for the garden (Pillar 4): season(d) -> 'sowing' | 'greening' |
 // 'harvest' | 'lanterns'; seasonOf(d) -> { id, name, day (1-91), week (1-13) }. Day 0 (your arrival) is Lanterns' last
 const SEASONS = [{ id: 'sowing', name: 'Sowing' }, { id: 'greening', name: 'Greening' }, { id: 'harvest', name: 'Harvest' }, { id: 'lanterns', name: 'Lanterns' }];
@@ -12833,6 +12833,80 @@ function evDue(w, d) {
     return false;
   }
   return w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd;
+}
+// ---- BEGIN TRADITIONS (generated from content/traditions/*.trad: never edit by hand; plans/trad-format.md) ----
+const TRADITIONS = [
+  {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, 11:45, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
+];
+// ---- END TRADITIONS ----
+// The loader (Pillar 4): each baked tradition becomes a SHIP_TRADITIONS entry (one with the same id is replaced), so the
+// tradition designers' .trad files (content/traditions, baked by content_gen.py) need no code. Rules are data:
+// who: [[cond, chance], ...] and anim: 'act' | [[cond, act], ...], the first cond that holds wins (who: else 0). A cond
+// is words joined by '+' (all must hold): everyone, host, honoree, juniors, officers, friends-of-host, a crew id, a
+// department, a habit, or id:/dept:/habit:/rank:<x>. Texts: text.<kind> = [{ t, tone }] (mail, ask, here, thanks,
+// chatter), one picked per person and day; placeholders {trad} {host} {names} {first} {season} {weekday} {time}; a
+// line whose placeholder can't be filled is skipped. TRAD_ERRORS lists what didn't load or resolve (events_check reads it)
+const TRAD_ERRORS = [];
+const TRAD_WORDS = new Map();                            // a bare word's meaning, worked out once (the roster loads after us)
+function tradWord(w) {
+  if (TRAD_WORDS.has(w)) return TRAD_WORDS.get(w);
+  let r = null; const m = /^(id|dept|habit|rank):(.+)$/.exec(w);
+  if (m) r = [m[1], m[2]];
+  else if (schedPeople().some(p => p.id === w)) r = ['id', w];
+  else if (schedPeople().some(p => p.dept === w)) r = ['dept', w];
+  else if (typeof HABITS !== 'undefined' && HABITS[w]) r = ['habit', w];
+  if (!r) TRAD_ERRORS.push('unknown word "' + w + '"');
+  TRAD_WORDS.set(w, r); return r;
+}
+function tradIs(cond, p, d, c, host) {
+  return cond.split('+').every(w => {
+    if (w === 'everyone') return true;
+    if (w === 'host') return !!host && p.id === host;
+    if (w === 'honoree') return !!(c && c.honorees && c.honorees.includes(p));
+    if (w === 'juniors') return p.rank === 'junior';
+    if (w === 'officers') return p.rank !== 'junior' && p.rank !== 'guest';
+    if (w === 'friends-of-host') return !!host && host !== p.id && typeof affinity === 'function' && affinity(host, p.id) >= 40;
+    const r = tradWord(w); if (!r) return false;
+    return r[0] === 'id' ? p.id === r[1] : r[0] === 'dept' ? p.dept === r[1] : r[0] === 'rank' ? p.rank === r[1] : evHas(p, d, r[1]);
+  });
+}
+const tradRule = (rules, p, d, c, host, none) => { for (const [cond, v] of rules) if (tradIs(cond, p, d, c, host)) return v; return none; };
+const evFirst = name => name.split(' ').slice(-2)[0];   // 'Chef Auda Brennan' -> 'Auda'
+function tradFill(text, t, c) {
+  let ok = true;
+  const out = text.replace(/\{(\w+)\}/g, (all, k) => {
+    const h = t.host && schedPeople().find(p => p.id === t.host);
+    const v = k === 'trad' ? t.name : k === 'host' ? h && evFirst(h.name) : k === 'names' ? c && c.names : k === 'first' ? c && c.first
+      : k === 'season' ? c && seasonOf(c.day).name : k === 'weekday' ? c && WEEKDAYS[weekday(c.day)] : k === 'time' ? c && hhmm(c.from) : null;
+    if (!v) ok = false; return v || '';
+  });
+  return ok ? out : null;
+}
+function tradText(t, kind, c, p) {
+  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.t, t, c)).filter(Boolean);
+  return l.length ? l[Math.floor(schedU((p ? p.seed : 0) + 7919, c ? c.day : 0, t.k) * l.length)] : null;   // per person and day
+}
+function tradLoad(t) {
+  if (!t || typeof t.id !== 'string' || !Number.isInteger(t.k) || !t.when || !Array.isArray(t.at) || !Array.isArray(t.where) || !t.where.length || !Array.isArray(t.who)) {
+    TRAD_ERRORS.push('tradition ' + (t && t.id) + ' is missing id, k, when, at, where or who'); return null;
+  }
+  const has = kind => !!((t.text || {})[kind] || []).length;
+  return {
+    id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
+    hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, text: t.text || {}, baked: true,
+    where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
+    who: (p, d, c) => tradRule(t.who, p, d, c, t.host, 0),
+    anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
+    get from() { const p = t.from && schedPeople().find(q => q.id === t.from); return p ? p.name : t.from || 'The Wren'; },
+    mail: has('mail') ? c => tradText(t, 'mail', c) : null, ask: has('ask') ? (c, p) => tradText(t, 'ask', c, p) : null,
+    here: has('here') ? (c, p) => tradText(t, 'here', c, p) : null, thanks: c => tradText(t, 'thanks', c) || 'You join in for a while.',
+    chatter: (c, p) => tradText(t, 'chatter', c, p),
+  };
+}
+for (const t of TRADITIONS) {
+  const ev = tradLoad(t); if (!ev) continue;
+  const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
+  if (i >= 0) SHIP_TRADITIONS[i] = ev; else SHIP_TRADITIONS.push(ev);
 }
 // birthdays: ROSTER[i].birthday (a day of the year, 1-364, section 9) when it's there; until then a stand-in, spread
 // so about one falls each week, in id order
@@ -12976,7 +13050,7 @@ function eventOf(p, t) {
 }
 function eventLine(p, t) {
   const o = eventOf(p, t); if (!o) return null;
-  return evText(o.now ? o.e.ev.here : o.e.ev.ask, o.e);
+  return evText(o.now ? o.e.ev.here : o.e.ev.ask, o.e, p);
 }
 
 // ---- on the deck: Mail the evening before, decor while it's on, the player joining ----

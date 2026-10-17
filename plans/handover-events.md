@@ -123,3 +123,12 @@ Before each push, also run cadet_test against the previous build, deck_check, da
 - Anything added to `evTable()` adds pools to `schedData`. `eventOneOff` clears `SCHED_DATA` and later plans. Tests that lift a draft must clear `SHIP_DAYS`.
 - Never put a `// comment` in the middle of a one-line object literal: it swallows the rest of the line. I did this twice; it breaks the game's start-up silently.
 - Meeting scripts must be added after `const MEETING_SCRIPTS` (below the meetings section), or the game won't start.
+
+## Pillar 4: the traditions engineer (seat 5), from 0.34.19 (session_018WZccmSvEfz2LC7DCfxdii)
+
+Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and plans/social-deep-plan.md (Parts 5-6: invitations, `simNote('tradition')`). Report to the lead, session_01PxXKwc5mkC7tV5MPi3p7PP.
+
+- **0.34.19:** new rhythms in `when` (`evDue`), `season(d)` / `seasonOf(d)`, `tradTies(kind, d)`.
+- **0.34.20:** the TRADITIONS loader (`tradLoad`, `TRAD_ERRORS`), the `.trad` grammar (`plans/trad-format.md`), the reference parser (`plans/trad_parse.py`), the sample Sowing morning (`content/traditions/sowing.trad`, k 434). events_check: a whole year on paper.
+- **Next:** `simNote('tradition', { id, day, came, you })` after each; `invite` for social (A7); the voice budget (at most two an evening, never the same deck at once; birthdays never moved); the Sunday "This week aboard" Mail (with the monthly designer); then collecting the three designers' files.
+- **Hash keys I give out:** 434 sowing; next free 435.
