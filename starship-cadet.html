@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.41.10
+   STARSHIP CADET: CSV Wren                           build 0.26.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,50 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.22';                           // keep in step with the header's build line
+// ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
+// simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
+//   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
+//   ship days as a cue (simNotes(kind, since) -> those notes, newest last), saved with the game (save.notes).
+//   Kinds (pillar4-plan, appendix): repair {who, machine, kind, deck}, favour {who, from}, tradition {id, day, came, you},
+//   gift {to, item}, apptKept / apptMissed {id, with}, introStep {step, who}, eventPhase {id, phase}, choice {script, k,
+//   who}, jobAbandoned {machine, dept}, harvest, lateMeal, job {id, step}, need {key, low}; social: tierUp, moment, bond, invite.
+// flag(key) -> its value (undefined when unset); flagSet(key, value = true) sets it; flagSet(key, null) clears it.
+//   Flags are saved with the game (save.flags): 'met.calder', 'escort.torres', 'week1.d2' ... Values are plain JSON.
+// Function declarations and lazily made state, so a section anywhere in the file may call these while it loads.
+// Nothing here calls R(); a note never changes a plan (plans are pure), only what listeners do with it.
+var SIM_ON = null, SIM_DEPTH = 0;
+const SIM_CUE = 2880, SIM_RING = 200;                    // cues last two ship days; at most 200 kept
+function onSim(kind, fn) {
+  if (typeof fn !== 'function') return () => {};
+  const m = SIM_ON || (SIM_ON = new Map()); if (!m.has(kind)) m.set(kind, []); m.get(kind).push(fn);
+  return () => { const l = m.get(kind), i = l ? l.indexOf(fn) : -1; if (i >= 0) l.splice(i, 1); };   // to stop listening
+}
+function simNote(kind, data) {
+  const t = typeof SHIP !== 'undefined' && SHIP.time ? (SHIP.time.day - 1) * 1440 + SHIP.time.min : 0;
+  const note = Object.assign({}, data && typeof data === 'object' ? data : {}, { kind, t });
+  if (typeof SHIP !== 'undefined') {
+    const ring = SHIP.notes || (SHIP.notes = []);
+    ring.push(note);
+    while (ring.length > SIM_RING || (ring.length && ring[0].t < t - SIM_CUE)) ring.shift();
+  }
+  if (SIM_ON && SIM_DEPTH < 8) {                          // a listener may send notes of its own, a few deep at most
+    SIM_DEPTH++;
+    try { for (const fn of (SIM_ON.get(kind) || []).concat(SIM_ON.get('*') || [])) { try { fn(note); } catch (e) { /* that listener's problem */ } } }
+    finally { SIM_DEPTH--; }
+  }
+  return note;
+}
+function simNotes(kind, since = -Infinity) {
+  const ring = (typeof SHIP !== 'undefined' && SHIP.notes) || [];
+  return ring.filter(n => (!kind || kind === '*' || n.kind === kind) && n.t >= since);
+}
+function flag(key) { return typeof SHIP !== 'undefined' && SHIP.flags && Object.prototype.hasOwnProperty.call(SHIP.flags, key) ? SHIP.flags[key] : undefined; }
+function flagSet(key, value = true) {
+  if (typeof SHIP === 'undefined' || typeof key !== 'string') return;
+  const f = SHIP.flags || (SHIP.flags = {});
+  if (value === null || value === undefined) delete f[key]; else f[key] = value;
+}
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -7105,6 +7148,7 @@ function saveGame() {
     const save = {
       v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min },
       player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
+      flags: SHIP.flags || {}, notes: SHIP.notes || [],
     };
     for (const f of SAVE_EXTRA) f(save);
     localStorage.setItem(SAVE_KEY, JSON.stringify(save));
@@ -7128,6 +7172,9 @@ if (SAVED) {
   SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
   const decks = (SAVED.ship && SAVED.ship.decks) || {};
   for (const n in decks) if (DECKS[n] && Array.isArray(decks[n].open)) shipDeck(+n).open = new Set(decks[n].open);
+  // the flag store and the recent notes (Pillar 4), read defensively: plain objects only, a note needs a kind and a time
+  const fl = SAVED.flags; if (fl && typeof fl === 'object' && !Array.isArray(fl)) SHIP.flags = Object.assign(SHIP.flags || {}, fl);
+  if (Array.isArray(SAVED.notes)) SHIP.notes = SAVED.notes.filter(n => n && typeof n.kind === 'string' && isFinite(n.t)).slice(-SIM_RING);
 }
 nightT = nightAt();                                      // wake to the right light, not a fade into it
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
