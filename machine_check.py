@@ -294,6 +294,7 @@ with sync_playwright() as pw:
       setShipNow(4 * 1440 + 19 * 60); machinesNow();
       const still = SHIP.jobs.find(x => x.id === id), mine = still && still.claimedBy === 'you' && still.status === 'claimed';
       const fin = finishJob(id), after = SHIP.machines[j.machine].cond;
+      if (typeof turnInJob === 'function') turnInJob(id);   // with the board's Turn in on, a finished job is yours until you hand it in (one at a time)
       const took = takePart('relay'), stock = SHIP.stores.relay;
       // one job at a time; one you leave goes back on the board after 12 ship hours
       // the next job you can take, waiting up to a day for one to be found
@@ -304,6 +305,7 @@ with sync_playwright() as pw:
                setShipNow(shipNow() + 13 * 60); machinesNow(); const back = SHIP.jobs.find(x => x.id === k.id); lapse = !back || back.claimedBy !== 'you'; }
       // progress keeps it yours: touched 10 hours in, it's still yours 13 hours after the claim
       let kept = null;
+      if (typeof playerShiftOn === 'function') { let d = Math.floor(shipNow() / 1440) + 1; while (!playerShiftOn(d)) d++; if (d > Math.floor(shipNow() / 1440) + 1) { setShipNow((d - 1) * 1440 + 9 * 60); machinesNow(); } }   // on your days off the crew take every job: try on a shift day
       // none waiting (with the crew's rota, they may have claimed them all): make one, as the oven above
       const breakOne = () => { for (const m of machineList()) { const s = SHIP.machines[m.id];
           if (ENGINE_KINDS.has(m.kind) || m.id === '3-oven-1' || !s || s.cond < 60) continue;
