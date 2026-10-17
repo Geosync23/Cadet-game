@@ -306,3 +306,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - 16:31 0.60.4 RELEASED: ship-integration -> d449914 (cand-0604), published to SmL8Na1iTB2JQZDP4dYdou version 2. 0.60.5 = first week + tour + ghost-tap + utility rooms + career system (waits for sim 5 + career, both via 1c).
 - ~16:40 user played 0.60.4: likes its Zeke dialogue. DROP the tour cuts and greeting; KEEP bunk first -> Chief -> dinner, goodnight + bed arrow, 17:30 start. Sim 5 + HW3 restoring.
 - ~16:45 user notes on 0.60.4: no hallway trestle; Chief's speech missing (sim 5); seated hands-up pose + stiff busy-work anim (perf 3, before bubbles); scratch Letters night; one call home a day; call-home story not showing. Hired social & traditions engineer (session_01RvxnkWWPF4SF5ygWT4CvQE, claude/social-fixes, 0.62.x).
+- ~16:52 user idea: rare random sickness -> wake card -> infirmary exam -> medicine -> back to day (excused). Career engineer after leave system; target 0.60.6.
