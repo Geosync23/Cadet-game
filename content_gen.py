@@ -394,20 +394,14 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
-    # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.py (its
-    # functions are frozen and theirs). Same as trad_parse.read_all, except that lines starting with # are dropped
-    # first, as // comments are. Baked as one array: const TRADITIONS = [ one tradition a line ];
+    # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
+    # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
-    tfiles = sorted(f for f in os.listdir(tdir) if f.endswith('.trad')) if os.path.isdir(tdir) else []
-    if tfiles:
+    if os.path.isdir(tdir) and any(f.endswith('.trad') for f in os.listdir(tdir)):
         if not trad_parse:
             raise GenError('content/traditions has .trad files but plans/trad_parse.py (the traditions engineer\'s) is missing')
         try:
-            for f in tfiles:
-                src = open(os.path.join(tdir, f), encoding='utf-8').read()
-                src = '\n'.join('' if l.lstrip().startswith('#') else l for l in src.split('\n'))   # keep line numbers
-                out['TRADITIONS'].append(trad_parse.parse_trad(src, f))
-            trad_parse.check_all(out['TRADITIONS'])
+            out['TRADITIONS'] = trad_parse.read_all(tdir)
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
     ids = {}

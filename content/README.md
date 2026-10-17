@@ -209,7 +209,7 @@ A: No promises.
 
 ## Traditions (.trad)
 
-A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (comments start with `//`, or `#`). content_gen.py bakes it with their `plans/trad_parse.py`
+A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (comments start with `//`). content_gen.py bakes it with their `plans/trad_parse.py`
 into `const TRADITIONS = [ ... ]`. The words go in `== mail`, `== ask`, `== here`, `== thanks` and `== chatter`;
 besides the usual placeholders they can use `{host}`, `{names}`, `{season}` and `{time}`. lines_check checks the words
 (chatter, ask and here 90 characters, mail and thanks 200) but not the fields: content_gen.py does.
