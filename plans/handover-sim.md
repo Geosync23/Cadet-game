@@ -3,8 +3,6 @@
 Written at build 0.40.8, brought up to date at 0.26.18 and at 0.26.31 (sim engineer 3: see the first "Start here") (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
 
-<<<<<<< HEAD
-=======
 ## Start here: 0.26.32 to 0.26.37 (sim engineer 4, session_01EJUGywZv9BpcUezjXES9AC, 17 October)
 
 Read this first, then sim engineer 3's section below it. **Builds on `claude/sim-engineer`:** 0.26.32 f9a145c, 0.26.33 7a11c73 (+6e87e6b row), 0.26.34 236810f, 0.26.35 7c1feea, then 0.26.36 and 0.26.37 (see DEV_NOTES' rows for their hashes and tests). Same ownership: sections 10, 13, 14, 17, `day_check.py`, `machine_check.py`. Lead session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it, by send_message); reviewer 1 session_018XY1NbMBxo2SLDPxooe5yx; build master 2 session_01F8ph7FKqViF3heRn94YgBr.
@@ -34,7 +32,6 @@ Read this first, then sim engineer 3's section below it. **Builds on `claude/sim
 - cadet_test once showed 1-level pixel noise on every shot (even crew-off); a rerun was identical. Rerun before chasing it.
 - Merges: in this period the only conflicts with peers were the build lines; resolving every conflict to my side is only safe after checking that.
 
->>>>>>> e4d6ace (Calder's arrival seat respects every hold; the cook steps aside only when it's your goal, and seated diners stay put (0.26.37))
 ## Start here: 0.26.30 and 0.26.31 (sim engineer 3, session_01517opwS4UAxYZKNwJytaEK, 17 October)
 
 Read this first, then sim engineer 2's section below it. **Last build: 0.26.31 (bfcd864) on `claude/sim-engineer`.** You own sections 10, 13, 14 and 17, plus `day_check.py` and `machine_check.py`. The lead is session_01KPJMYjXAPkNUcrQ8VRkhLE (report to it only, by send_message; never the user). Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews each build. Push only to `claude/sim-engineer`; never merge `claude/ship-systems`.
