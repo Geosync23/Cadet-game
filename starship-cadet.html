@@ -9391,15 +9391,16 @@ function mailLoad(s) {
   const m = s && Array.isArray(s.mail) ? s.mail : [];
   return m.filter(x => x && typeof x === 'object' && typeof x.subject === 'string').slice(0, MAIL_MAX).map((x, i) => ({
     id: Number.isInteger(x.id) ? x.id : -i, at: isFinite(x.at) ? +x.at : 0, from: typeof x.from === 'string' ? x.from : 'Ship',
-    subject: x.subject, body: typeof x.body === 'string' ? x.body : '', read: !!x.read }));
+    subject: x.subject, body: typeof x.body === 'string' ? x.body : '', read: !!x.read, ...(typeof x.play === 'string' ? { play: x.play.slice(0, 60) } : {}) }));
 }
 SHIP.mail = mailLoad(SAVED).concat(SHIP.mail || []);
 SAVE_EXTRA.push(s => { s.mail = SHIP.mail.map(m => ({ ...m })); });
 let mailNew = [], mailTimer = 0;
-function mailSend({ at, from, subject, body, quiet } = {}) {   // quiet: no toast (the welcome, under the first toast)
+function mailSend({ at, from, subject, body, quiet, play } = {}) {   // quiet: no toast (the welcome, under the first toast); play: a recording (0.28.30, social B2's 'home:gran')
   if (!SHIP.mail) SHIP.mail = [];
   const id = SHIP.mail.reduce((a, m) => Math.max(a, m.id), 0) + 1;
   const m = { id, at: isFinite(at) ? +at : shipNow(), from: String(from || 'Ship'), subject: String(subject || '(no subject)'), body: String(body || ''), read: false };
+  if (play) m.play = String(play).slice(0, 60);
   SHIP.mail.unshift(m); SHIP.mail.sort((a, b) => b.at - a.at || b.id - a.id); SHIP.mail.length = Math.min(SHIP.mail.length, MAIL_MAX);
   if (!quiet) mailNew.push(m);
   if (!mailTimer && mailNew.length) mailTimer = setTimeout(() => {         // one toast for a batch
