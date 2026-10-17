@@ -24,3 +24,6 @@ Reviewer 1c, 2026-10-17. Diff: `git diff d449914 d651ad6` (section 3's deck data
 ## Low
 1. **A contact with nothing to say is still offered.** On day 10 of the probe, Jo had no beat due and no scene fitting the day, so `homeScript('jo')` returned null. The booth still lists "Call Jo", and picking it just ends the panel without a word. Today's call isn't used up, so nothing is lost, but it looks broken. Fix: list only contacts with `homeLines(k, t)` not null, or give a line ("Jo's not picking up. Try tomorrow.").
 2. **`c.news` has no hard cap.** It holds one tag per news scene ever heard, bounded today only by how much news content exists. The save rule asks for a hard bound and its worst case in DEV_NOTES' Save bounds: cap it (e.g. `slice(-32)`) and write the worst case next to `c.h`'s 16. Today's measured total is 1.8 KB at day 60, well inside the social budget.
+
+## 0.62.3 (3960b06), skimmed (content only)
+- Only `content/home/*.call` and their baked lines in the game changed, plus the build line. No code changes. The engineer reports arc_check (calls and arcs) OK and lines_check PASS. **PASS.** The longer scenes may also make low 1 (a contact with nothing to say) rarer, but the guard is still worth having.
