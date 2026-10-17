@@ -8,6 +8,12 @@ plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md fir
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
 writer 2 (session_01HNrh3xCtczeZM5NVFrE6pa) are under "Loose ends" below. **The lead's one change: calls any day, once
 per contact per day; Letters evening (Sunday, the booths) is the best relay window, where the big live beats land.**
+**Revised by head writer 2 after the lead's approval (2026-10-17 04:30):** home stays unnamed ("home"); at the booths
+you can call each person once a day, any day: a live call scene (everyday talk from HOME_REPLY, or a beat if due).
+`via: reply` / any-day beats play on an ordinary call (a little lag); `via: live` beats wait for Letters evening (a
+clear line, no lag or drops; crew gather at the booths for their overheard calls). Recorded messages with Mail replies
+are an optional extra (the device engineer retired; the Mail `play:` field is optional). Pacing as agreed: 7+ days,
+a call since the last beat, one home beat a day. Head writer 2 writes content/home/mum.arc as the model.
 Build it in 20c on the moments engine; ask the player engineer (booth -> `homeCall()`), the device engineer (Mail
 `play: '<momentId>'`) and the traditions engineer (Letters evening) for their one-line hooks through the lead.
 
