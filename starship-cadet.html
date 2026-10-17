@@ -12923,7 +12923,7 @@ function lineQ(name, ...a) {
       repBand: typeof repBand === 'function' && repBand, repShip: typeof repShip === 'function' && repShip, knownFor: typeof knownFor === 'function' && knownFor,
       cue: typeof cue === 'function' && cue, flag: typeof flag === 'function' && flag, season: typeof season === 'function' && season,
       inWeek1: typeof inWeek1 === 'function' && inWeek1, leavingSoon: typeof leavingSoon === 'function' && leavingSoon, newHere: typeof newHere === 'function' && newHere,
-      movedOff: typeof movedOff === 'function' && movedOff, memThing: typeof memThing === 'function' && memThing,
+      movedOff: typeof movedOff === 'function' && movedOff, memThing: typeof memThing === 'function' && memThing, socialFill: typeof socialFill === 'function' && socialFill,
       eventNow: typeof eventNow === 'function' && eventNow }[name];
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
@@ -13016,11 +13016,13 @@ function lineWord(p, tok, h, i) {
 // fill a line for speaker p: voice tokens, then placeholders. null when a placeholder can't be filled
 function linesFill(text, p, ctx = {}) {
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60);
-  let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => lineWord(p, k, h, i++));
+  let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => { const f = k === 'nick' && lineQ('socialFill', p, 'nick', ctx); return f || lineWord(p, k, h, i++); });
   const bond = k => { const id = lineQ('bondOf', p.id, k); return id ? linesName(linesWho(id)) : null; };
   const chief = () => typeof ROSTER !== 'undefined' && ROSTER.find(q => q.dept === p.dept && q.rank === 'chief' && q !== p);
+  const SOCIAL_FILL = ['me', 'partner', 'friend', 'best', 'rival', 'mentor', 'mentee', 'boss', 'thing', 'trad'];   // section 20's socialFill fills these when it's there
   const val = k => {
     if (ctx[k] != null && typeof ctx[k] !== 'object') return String(ctx[k]);
+    if (SOCIAL_FILL.includes(k) && typeof socialFill === 'function') { const x = lineQ('socialFill', p, k, ctx); return x == null ? null : String(x); }
     switch (k) {
       case 'me': return linesMe();
       case 'name': return linesName(p);
