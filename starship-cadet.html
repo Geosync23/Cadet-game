@@ -7535,7 +7535,6 @@ function newGameStart(arrival) {
   target.copy(player.obj.position).setY(.7); lastRoom = null;
   playerNew();                                           // section 15: fresh needs
   if (typeof socialNew === 'function') socialNew();      // section 20: strangers again
-  if (typeof linesNew === 'function') linesNew();        // section 22: nothing heard yet
   if (typeof introNewGame === 'function') introNewGame(arr);   // section 21: the arrival begins, or a blank intro (Monday)
   simNote('newGame', { arrival: arr });                  // anyone else with state of their own starts again
   updateClock(); saveGame();
