@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.30
+   STARSHIP CADET: CSV Wren                           build 0.26.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.31';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7234,6 +7234,7 @@ function newGameStart(arrival) {
   player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = arr ? SHIP_START_ARRIVAL.face : Math.PI;
   target.copy(player.obj.position).setY(.7); lastRoom = null;
   playerNew();                                           // section 15: fresh needs
+  if (typeof machinesNew === 'function') machinesNew();  // section 17: the machines and jobs afresh, before section 21 reserves its jobs
   if (typeof socialNew === 'function') socialNew();      // section 20: strangers again
   if (typeof introNewGame === 'function') introNewGame(arr);   // section 21: the arrival begins, or a blank intro (Monday)
   simNote('newGame', { arrival: arr });                  // anyone else with state of their own starts again
@@ -7747,12 +7748,12 @@ function birthdaysOn(d) {                                // everyone (not the pl
   return BDAY_CACHE.get(d);
 }
 function gatherings(p, d, F) {
-  if (F.night && F.works) return [];                     // on the night shift tonight
   const U = k => schedU(p.seed, d, k), out = [];
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
     out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
   }
+  if (F.night && F.works) return out;                    // on the night shift tonight: the ship's events still (eventFree keeps them clear of the shift), not Deck 1's routines (0.26.31)
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
   // Captain and the Commander on their work days and any bridge crew who work late; and the Captain's evening walk
   // through the observation room (places with `event: 'walk'`, visited in id order), most evenings
@@ -11759,7 +11760,7 @@ setTimeout(machNormWarm, 300);                           // after the whole scri
 function machUse(m, h) {
   const K = MACHINE_KINDS[m.kind];
   if (!K.use || K.time >= 1) return 1;
-  const u = machUseDay(Math.floor(h / 24) + 1), i = h % 24, N = machNorm();
+  const u = machUseDay(Math.floor(h / 24) + 1), i = (h % 24 + 24) % 24, N = machNorm();   // day 0's hours are negative (0.26.31)
   const v = K.use === 'heads' ? u.heads[m.deck][i] : u[K.use][i], nm = K.use === 'heads' ? N.heads[m.deck] : N[K.use];
   return nm > 0 ? v * 24 / nm : 1;
 }
@@ -11796,6 +11797,12 @@ function machinesReset(hour) {
   for (const m of machineList()) { const c = machFresh(m); SHIP.machines[m.id] = { cond: c, state: machineState(c), lastService: null }; }
   jobsReset(); MACH_HIST.clear(); MACH_HOUR = hour; MACH_REV++;
   SHIP.short = {}; for (const k in MACH_EXTRA) delete MACH_EXTRA[k]; for (const k in MACH_RUN) delete MACH_RUN[k];
+}
+// a new game (section 13's newGameStart, 0.26.31): the machines and jobs start afresh at once, whichever way the clock
+// moved, so the old game's jobs never carry over and jobs reserved right after (section 21) aren't wiped by a rewind
+function machinesNew() {
+  machinesReset(Math.floor(shipNow() / 60)); MACH_SEEN = shipNow();
+  CART_RUNS.clear(); CART_PENDING.length = 0; SIM_Q.length = 0;
 }
 // run the ship's hours up to and including this one: each hour, the jobs (jobsHour), then that hour's wear.
 // A clock earlier than the machines' (New game) starts afresh
@@ -12448,7 +12455,7 @@ function choresOfDay(d) {
 }
 function choresHour(h, jobs) {
   const d = Math.floor(h / 24) + 1, t = h * 60;
-  for (const c of choresOfDay(d)) if (c.hour === h % 24) {
+  for (const c of choresOfDay(d)) if (c.hour === (h % 24 + 24) % 24) {   // (day 0's hours are negative)
     const C = CHORES[c.kind], key = c.kind + ':' + c.cand.key;
     if (jobs.some(j => j.kind === 'chore' && j.status !== 'done' && j.chore + ':' + j.target === key)) continue;
     if (C.parts.some(k => (SHIP.stores[k] || 0) < STOCK[k] / 2)) continue;   // not while its parts run low: repairs come first
@@ -12474,7 +12481,7 @@ function choreDone(j, t) {
 // of the hold and queues the run for the job list (cartPost).
 function cartClaim(t, cold, o = {}) {
   if (!(cold >= 0)) return null;
-  const h = Math.floor(t / 60), hr = h % 24;
+  const h = Math.floor(t / 60), hr = (h % 24 + 24) % 24;
   if (!o.replay && CART_RUNS.has(h)) return CART_RUNS.get(h);
   let run = null;
   if (cold < CART_URGENT || (hr >= 9 && hr < 17 && cold < CART_DAILY)) {
@@ -18430,13 +18437,13 @@ function crewPose(a) {
 }
 // findPath, with the 'closed' doors into `rooms` open for the moment; `who` (a CrewAgent or roster person) is passed
 // on so service hatches open for Works crew (hatchPassable, section 4)
-function crewPath(s, g, rooms, who) {
+function crewPath(s, g, rooms, who, avoid) {
   const opened = [];
   for (const k in CLOSED_DOORS) {
     const e = EDGES.get(k);
     if (e && e.type === 'closed' && edgeTiles(k).some(c => rooms.has(roomAt(...c)))) { e.type = 'door'; opened.push(e); }
   }
-  try { return findPath(s, g, undefined, who); } finally { for (const e of opened) e.type = 'closed'; }
+  try { return findPath(s, g, avoid, who); } finally { for (const e of opened) e.type = 'closed'; }
 }
 // The servery line on Deck 3 (0.26.30): LINE is who's standing in it, front first (crew ids, and 'player' when
 // section 15 joins you): real bodies only, joined on reaching its back. Its spots run up column 33 from the counter
@@ -18452,6 +18459,8 @@ const LINE_SERVE = .6, LINE_LATE = 12, LINE_COUNTER = 1;                   // sh
 const LINE = [], LINE_LOG = { joined: 0, served: 0, trays: 0, left: 0, returned: 0, back: 0, long: 0, wait: 0, who: [] };
 const lineSpotId = k => k < LINE_Q.length ? LINE_Q[k] : k < LINE_AT.length ? '@line-' + k : null;
 const ALT_SEAT = new Set(['mess-seat', 'lounge-seat', 'bench']);   // places where someone sitting in yours sends you to the next one
+let MESS_ONLY = null;                                    // Deck 3's tiles outside the mess hall, for findPath's avoid (made once a deck)
+const messOnly = () => { if (!MESS_ONLY || MESS_ONLY.d !== deckDef) { MESS_ONLY = new Set(); MESS_ONLY.d = deckDef; for (const r in ROOM_TILES) if (r !== 'M') for (const t of ROOM_TILES[r]) MESS_ONLY.add(t[0] + ',' + t[1]); } return MESS_ONLY; };
 const lineSeg = w => w.type === 'servery-queue' || w.tag === 'queue';   // the plan's walk to the line, its queue stop, a grab at the servery
 const trayTo = id => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M'; };   // a tray only to a seat in the mess hall
 function lineSpotMake(id) {
@@ -18480,6 +18489,15 @@ function lineTick(dt, now) {
     if (a.lineT >= mins && (typeof galleyCanServe !== 'function' || galleyCanServe(now))) { LINE.splice(k--, 1); a.lineT = 0; a.served(whereIs(a.p, now), now); }
   }
 }
+// crewHold(p, placeId) keeps someone at a place on this deck (null: where they're headed now, or stood) whatever their
+// plan says, until the function it returns is called (or crewHold(p, undefined)); for a game of Tiles with you (section
+// 23, 0.26.31) and anything else that needs someone to stay put. Their plan runs on underneath: let go, they rejoin it.
+const CREW_HELD = new Map();
+function crewHold(p, placeId) {
+  const id = p && (p.id || p); if (!id) return () => {};
+  if (placeId === undefined) { CREW_HELD.delete(id); return () => {}; }
+  CREW_HELD.set(id, placeId); return () => { if (CREW_HELD.get(id) === placeId) CREW_HELD.delete(id); };
+}
 const liftTiles = () => (ROOM_TILES['@'] || []).slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 class CrewAgent {
   constructor(p, cell) {
@@ -18505,7 +18523,8 @@ class CrewAgent {
     if (goalId === '@lift') goal = this.liftCell;
     else if (goalId) { this.spot = placeSpot(goalId); goal = this.spot && this.spot.walk; if (this.spot) this.rooms = new Set(this.bedRooms.concat(this.spot.room)); }
     if (!goal) { goal = free(...from) ? from : nearestOpen(this.x, this.z, null); if (!goal) return; }
-    const path = crewPath(from, goal, new Set([...this.rooms, roomAt(...from)]), this);   // you can always leave the room you're in
+    const inMess = this.meal && this.meal.tray && roomAt(...from) === 'M' && roomAt(...goal) === 'M';   // a tray stays in the mess hall: no short cut along the promenade (0.26.31)
+    const path = (inMess && crewPath(from, goal, new Set([...this.rooms, 'M']), this, messOnly())) || crewPath(from, goal, new Set([...this.rooms, roomAt(...from)]), this);   // you can always leave the room you're in
     if (path) this.path = path;
     else { this.noPath++; this.lost = { from, goal, goalId, at: hhmm(SHIP.time.min) }; const c = cellPos(...goal); this.x = c.x; this.z = c.z; }   // no way there: they're simply there
   }
@@ -18513,7 +18532,7 @@ class CrewAgent {
     const w = whereIs(this.p, now);
     if (w && w.escort && !(w.escort.mode === 'wait' && w.placeId)) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you (waiting at a place: they sit or stand there, below)
     this.esc = null;
-    if (w && w.visit && !w.visit.arrived && this.spot && this.spot.id === w.visit.placeId && this.settled) {   // a visit: there
+    if (w && w.visit && !w.visit.arrived && this.spot && (this.spot.id === w.visit.placeId || this.alt && this.alt[0] === w.visit.placeId && this.spot.id === this.alt[1]) && this.settled) {   // a visit: there (or at the next seat, when theirs was taken)
       w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
     }
     this.hold = w && w.hold || (this.meal && this.meal.tray ? 'tray' : null);   // something in hand: a hover cart on a run (section 17's whereIs), your tray (mealStep)
@@ -18530,6 +18549,8 @@ class CrewAgent {
     const mg = this.mealStep(w, now, N);                 // the servery line and the tray, inside the mess hall (0.26.30)
     if (mg !== undefined) { goalId = mg; this.tag = null; }
     if (goalId && (goalId === PLAYER_PLACE || BUSY.has(goalId) && !(this.settled && this.spot && this.spot.id === goalId))) goalId = this.elsewhere(goalId);   // you're using it (section 15), or someone's sat there: another seat, else wait nearby
+    const held = CREW_HELD.get(this.p.id);
+    if (held !== undefined) { goalId = held || (this.goalId !== '@lift' ? this.goalId : null); this.tag = null; }   // crewHold: kept here, whatever the plan says
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -18695,7 +18716,7 @@ function crewDetail() {                                  // who gets a full rig:
 const BUSY = new Set(); let PLAYER_PLACE = null;
 const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
@@ -18769,6 +18790,7 @@ function crewAtScreen(cx, cy) {
 }
 function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
+  if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   if (typeof chatOpen === 'function' && chatOpen(a.p)) return true;   // section 20: the chat card
   const f = crewFeeling(a.p, shipNow());               // section 14: "Tomas looks tired"
