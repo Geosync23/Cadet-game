@@ -1,7 +1,7 @@
 @tradition midtour
 // Midtour: day 182, half the year (a Sunday, Greening's last day). In the bow lounge crew write a letter to
 // themselves; Oduya seals them, and Year's end (day 364) gives them back. The player's letter comes back by Mail then.
-// On a Sunday it takes the weekly letters evening's slot if that's built (it's letter-writing either way).
+// (Letters evening, the weekly Sunday slot it once shared, was scratched in 0.62.0.)
 // Design note: plans/trad-notes-seasons.md.
 k: 478
 title: Midtour

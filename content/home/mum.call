@@ -2,108 +2,84 @@
 who: home:mum
 name: Mum
 // The player's people back home (the user's ruling, 2026-10-17: a fixed cast, Mum, Gran, Jo and Sam; home stays
-// unnamed, just "home"). Calls play at the call-home booths, once per person per day, any day; Letters evening is the
-// relay's best window, and `via: live` beats wait for it. Social B's step B8 plays them; the dialogue engineer bakes
-// this file (HOME_CONTACTS, HOME_MOMENTS, HOME_SEND, HOME_CHAT). `.call`, not `.arc`, until the baker reads it
-// (content_gen reads every .arc as a crew arc). The head writer's model file for the other three.
+// unnamed, just "home"). ONE-SIDED CALLS (the user, 2026-10-17 evening; head writer 4): one call a day, you choose
+// who; only they speak, you listen. No Letters night, no replies. Each call is a little scene, 5-10 lines. The arc's
+// six beats come in order; between them, ordinary calls (`== chat`) that match where the arc is (`beat=home.mum.N`).
+// The social & traditions engineer plays them (claude/social-fixes).
 //
-// HOW SHE TALKS: fast, in questions, then catches herself ("Listen to me."). Calls you {me}, or "pet". Practical worry:
-//   food, sleep, socks. Drives the number nine bus; tells you about the route. Laughs at herself first.
+// HOW SHE TALKS: fast, in questions, then answers them herself, then catches herself ("Listen to me."). Calls you
+//   {me}, or "pet". Practical worry: food, sleep, socks. Drives the number nine bus; tells you about the route. Laughs
+//   at herself first. On the relay she just talks: the delay makes it easier, and she's good at talking.
 // NEVER: guilt-trips you for leaving, says "I'm lonely" straight out (she says "the house is quiet"), or genders you.
 // GRAN lives with her (Gran is her mum); she shouts things from the other room. JO is your older sibling (they).
-// RUNNING: the pottery (from beat 2), the number nine, Gran's commentary, the relay lag ("Is that the delay?").
+// Don't run ahead of Gran's arc (the fall and the hip are Gran's to tell) or Jo's (the boatyard is Jo's to tell).
+// RUNNING: the pottery (from beat 2), the number nine, Gran's commentary, the relay delay, your shelf, the kettle.
 
 // ---- the arc: worry to pride; the empty room becomes a pottery room; a lopsided mug in the post bag ----
 == beat 1
 tone: light
-via: reply
 mem: firstcall
 flag: home.mum.called
 them: Is that you? {me}? There's a delay. Is that the delay? Hello!   [laugh]
+them: The lady at the relay office says it's easier if I just talk and you listen. So I'll talk. I'm good at talking.
 them: Are you eating? Is there food? Proper food, I mean, not just biscuits.
+them: Don't answer that. I can't hear you anyway. I'll just assume vegetables.
 them: Gran says hello. She says it louder than that. She's in the kitchen.
-? choice
-* The food's good, Mum. The chef's brilliant.   flavour:cheer mem:food
-  them: Oh, thank goodness. Tell the chef thank you from me. No, I mean it. Tell them.
-* It's a lot. But I like it here.   flavour:share mem:likeit
-  them: A lot's all right. A lot's how it should be at the start. I'm glad you like it, pet.
-  + them: Then that's all I need to hear. Well. Nearly all. Are you sleeping?   [listen]
-* How are you, Mum?   flavour:listen mem:asked
-  them: Me? Oh, fine. Same route, same bus. The number nine misses you. It told me.
+them: The number nine misses you. It told me. Well, the driver did. Same thing.
 them: Right. I'll let you go. You've got a ship to run. Call again? Call again.
 
 == beat 2
 tone: light
-via: reply
-when: flag:home.mum.called
+when: beat:home.mum.1
 mem: pottery
 flag: home.mum.pottery
-them: Guess what I've done. No, don't guess. I've signed up for pottery. Tuesday nights, at the hall.
+them: Guess what I've done. No, don't guess, it'll take a week with this delay. I've signed up for pottery.
+them: Tuesday nights, at the hall. There's eight of us and a man called Rolf who's been doing it forty years.
 them: I made a bowl. It isn't a bowl. Gran says it's a hat. Gran's wearing it.   [laugh]
-? choice
-* Send me a picture! Wait. Describe it.   flavour:cheer mem:describe
-  them: It's sort of brown. And sort of leaning. Like the number nine on a windy day.
-* You've always wanted to try that.   flavour:listen mem:always
-  them: Have I? I suppose I have. Nobody ever asked. You've gone and asked.
-  + them: I have. For years. I just never went. Then the house went quiet, and I thought, well. Go.   [nod]
+them: I've always wanted to try. For years. I just never went. Then the house went quiet, and I thought, well. Go.
 them: Next week, a cup. A proper one. With a handle. Probably.
+them: Listen to me, going on about clay. You've got stars. Love to you, pet.
 
 == beat 3
 tone: heartfelt
-via: live
 when: beat:home.mum.2
 mem: room
 flag: home.mum.room
-hint: The relay's clear tonight. Mum's on the line.
-them: Clear line tonight! No delay at all. I can hear your kettle. Is that your kettle?   [laugh]
-them: Listen. I've been sitting in your room. Just sitting. The house is quiet without you.
-them: I'd like to put the wheel in there. For the pottery. Only if you say yes. It's still your room.
-? choice
-* Yes. Of course. Fill it with pots.   flavour:practical mem:yes
-  them: Oh, pet. All right. I'll keep the window clear. You liked the window.
-* Keep my shelf? The rest is yours.   flavour:practical mem:shelf
-  them: Your shelf stays. Every last thing on it. I'll dust round it. Carefully.
-* I miss it too. My room. Home.   flavour:share mem:misshome
-  them: Course you do. That's allowed. Missing it means it was a good room. Put the kettle on, wherever you are.
-  + them: Course you do. I'll tell you what. I'll leave your shelf exactly as it is, and the rest can get muddy. Deal?   [listen]
-them: Thank you. Gran says she's having the chair. Gran's always having the chair.
+them: Hello, pet. Line's clear today. I can almost hear your kettle.
+them: Listen. I've been sitting in your room. Just sitting. The house is quiet without you.   [sigh]
+them: I'd like to put a wheel in there. For the pottery. Rolf's selling his old one.
+them: Your shelf stays. Every last thing on it. I'll dust round it. Carefully.
+them: And I'll keep the window clear. You liked the window. Still your room. Just muddier.
+them: Gran says she's having the chair. Gran's always having the chair.
+them: There. I've said it. Now I'll go and feel silly about it. Bye, pet.
 
 == beat 4
 tone: light
-via: reply
 when: beat:home.mum.3
 mem: wheel
 them: The wheel's in! It spins. Mostly. I've had clay in my hair since Sunday.   [laugh]
+them: Rolf brought it round in a wheelbarrow. Down our street. Everyone came out to watch.
 them: Gran sits in your chair and tells me I'm doing it wrong. She's never touched clay in her life.
 them: And Jo came round and made a little pot. Better than mine. Don't tell them I said.
-? choice
-* Tell Jo I said so.   flavour:cheer mem:teasejo
-  them: I will not! I've got my pride. Well. What's left of it after the hat.
-* I'm proud of you, Mum.   flavour:share mem:proud
-  them: Oh. Now look. You've set me off. It's only clay, pet. Thank you.
+them: Your shelf's fine. I put a cloth over it. Like a birdcage at night.
 them: The bus is late tomorrow, they say. I'll be on the wheel instead. Living dangerously.
 
 == beat 5
 tone: serious
-via: live
 when: beat:home.mum.4
 mem: nearly
 flag: home.mum.told
-hint: Clear line tonight. Mum sounds like she's got something to say.
+hint: Mum sounds like she's got something to say.
 them: Can I tell you something? I've been carrying it about. Like a pot that's too hot.   [sigh]
 them: When you got the letter for the Wren, I nearly asked you not to go. I had the words ready.
+them: I'd practised them on the bus. The whole number nine route, there and back.
 them: I didn't, because you'd have stayed. For me. And then you'd have been here, wishing.
-? choice
-* I'm glad you didn't. And glad you told me.   flavour:listen mem:glad
-  them: So am I. Both of those. There. It's out. I feel lighter. Lighter than the hat, anyway.
-* I'd have stayed, you know.   flavour:share mem:stayed
-  them: I know. That's exactly why I kept quiet. Don't you dare come home early on my account.
-  + them: I know you would. That's why I didn't ask. You're out there because you're meant to be. I can hear it in your voice.   [listen]
-them: Right. Enough of that. Tell me something happy. Tell me what you had for dinner.
+them: You're out there because you're meant to be. I can hear it in your voice, even with the delay.
+them: Don't you dare come home early on my account. There. It's out. I feel lighter.
+them: Right. Enough of that. I'm going to make a cup of tea and look at a hat.   [laugh]
 
 == beat 6
 tone: resolution
-via: live
 when: beat:home.mum.5
 mem: mug
 flag: home.mum.mug
@@ -112,52 +88,245 @@ learn: Mum made you a mug on her wheel, in the room that used to be yours. It le
 mail: 2880 | From home | A parcel came up in the post bag: one mug, wrapped in a scarf, a little lopsided. A note inside: "It holds tea. Mostly. Love, Mum."
 them: Has it come yet? The parcel? No, it won't have. The post's slow. It's on its way.   [laugh]
 them: I made you a mug. On the wheel, in your room. Our room. It leans a bit. Like the bus.
+them: Rolf says it's the best thing I've made. Rolf says that about everything. I'm choosing to believe him.
 them: It holds tea. Mostly. Every time you drink from it, that's me saying "Are you eating?"
-? choice
-* I'll use it every day.   flavour:cheer mem:everyday
-  them: You'd better. I'll know. Mothers know. It's a whole thing.
-* Thank you, Mum. For all of it.   flavour:share mem:thanks
-  them: Oh, pet. Thank you for calling. Every week. You don't know what it does.
-  + them: Thank you for ringing, every time. The house isn't quiet any more. It's got clay in it. And you, on the line.   [listen]
+them: Thank you for ringing, every time. The house isn't quiet any more. It's got clay in it. And you, on the line.
 them: Off you go. Ship to run. I love you. Gran says she does too. Louder than that.
 
-// ---- what you can tell her on a call (social B offers 2-3 whose condition holds, newest first). A condition lasts
-// until the next `?` line; a bare `?` means anyone, any time. came:any fills {trad}, friend:any fills {friend}.
-== send
-? flag:intro.soloJob
-- I did my first job on my own. Start to finish.   flavour:share
-  them: On your own! Oh, pet. I'm telling the whole bus.
-? cue:event.ionStorm.afterglow
-- We had an ion storm. Everyone was fine. It was loud.   flavour:share
-  them: A storm? In space? Is that allowed? You're fine? Good. Wear a jumper.
-? came:any
-- We had a {trad} on the ship. I went.   flavour:share
-  them: You went! Good. Did you talk to anyone? Course you did.
-? friend:any
-- I've made a friend. {friend}. You'd like them.   flavour:share
-  them: {friend}. Say hello from me. Feed them a biscuit. Is that allowed?
-?
-- I'm eating. I promise.   flavour:cheer
-  them: Promise properly. Vegetables count. Biscuits don't.
-- Tell me about home.   flavour:listen
-  them: Nothing's changed. Everything's changed. The number nine's got a new driver on Sundays. Scandal.
-
-// ---- everyday calls when no beat is due: whole little calls; `? send` is where the choice above goes.
+// ---- ordinary calls, a whole little scene each, separated by --. `when:` keeps them in step with the arc. ----
 == chat
+// any time
 them: Hello! Is it you? It's you. The kettle's on. Not that you can have any.   [laugh]
-? send
+them: I had the early shift. The number nine at six in the morning. Just me and the milkman and a man with a goose.
+them: I don't know where the goose was going. I didn't ask. You don't ask, on the early shift.
+them: Are you sleeping? You sound like you're sleeping. That's a mother's guess.
 them: Love to you. Gran says love. Jo says nothing, Jo's asleep. Bye, pet.
 --
-them: {me}! I was just thinking about ringing you. Well, you can't ring me. But I was thinking it.
-? send
+them: {me}! I was just thinking about ringing you. Well, I can't ring you. But I was thinking it.
+them: I went to the market. They had those little pears you liked. I bought six and ate four on the bus.
+them: The other two are in the bowl. Waiting for you. They won't wait that long. I'll eat them.   [laugh]
+them: Socks. Have you got enough socks? It's cold in space, isn't it? It looks cold.
 them: Right. Off you go. Sleep. Eat. Don't touch anything that sparks.
 --
-when: flag:home.mum.pottery
-them: Quick one. I've clay on the receiver. Gran's watching. Say hello to Gran.
-? send
-them: Must go. My cup's collapsing. It does that. Bye!   [laugh]
+them: Hello, pet. Quick one, I'm on my break. Sitting in the depot in my coat.
+them: The new driver on Sundays takes the corner by the chapel too fast. Gran's written a letter about it.
+them: She hasn't sent it. She just reads it out. At dinner. Every night.
+them: Do you have buses up there? Little carts? I can't picture it. I keep picturing a bus with stars outside.
+them: Break's over. Number nine waits for no one. Except old Mr Pask. Bye, pet.
 --
-when: weekday:tue
-them: Can't stop, it's pottery night. Five minutes. Tell me one thing.
-? send
-them: Lovely. Right. Off to make another hat. I mean bowl.
+them: Are you there? You're there. I'm going to pretend you just said "Hello, Mum." Lovely. Hello.
+them: I've been cleaning the oven. You don't want to hear about the oven. Nobody does. It's very clean.
+them: Gran made a crumble. It's mostly crumble. There's a pear in there somewhere, she says.
+them: I put a bit aside for you. That's silly, isn't it. I'll have it for you.
+them: Love to you, pet. Mind how you go.
+--
+them: Can you hear rain? It's raining here. Proper rain. I held the receiver up to the window.   [laugh]
+them: I thought you might miss it. Do you have weather? You must have something.
+them: Gran's put the buckets out in the hall again. The roof's fine. She just likes the buckets.
+them: Listen to me, talking about buckets to someone on a starship.
+them: There. That's your rain. Go and be dry. Bye, pet.
+--
+when: time:evening
+them: Evening, pet. I've got my feet up. First time today. The bus was full of schoolchildren.
+them: One of them asked me if I'd ever been to space. I said no, but my {me} has.
+them: Well, I said your name. Whole bus went quiet. Then a boy said "Cool." So you're cool now. Official.
+them: Get to bed at a proper time. I know it's a different time up there. Get to bed at a proper one anyway.
+them: Night night, pet.
+--
+them: Hello! I've got two minutes and a lot of words. Here they come.
+them: Gran's got a cold, she's fine, she's furious about it. The cat from next door got in again. Jo came for tea.
+them: The bin men came on the wrong day. Mrs Ellery's hedge has a bird's nest in it. I've bought a new mop.
+them: That's everything. That's all of home. You're up to date.   [laugh]
+them: Love you, pet. Bye.
+--
+them: You know what I did today? I walked past your old school. Just because.
+them: They've painted the gate. Green. It used to be blue. I nearly wrote to the council.
+them: Then I thought, you don't even go there any more. You go to space. So I let it go.
+them: It's still the wrong green, mind.
+them: Bye, pet. Look after yourself.
+--
+when: weekday:sun
+them: Sunday! Sunday roast. Well, Sunday something. Gran's in charge, so it's anyone's guess.
+them: I've laid a place for you. Don't laugh. Gran puts the salt on it. It's where the salt lives now.
+them: We do say your name at the table, you know. Every Sunday. "Wonder what {me}'s eating."
+them: Then Gran says "Not this, lucky thing." And we laugh. Every week. Same joke. It's a good one.
+them: Off you go, pet. Have a nice Sunday, whatever day it is up there.
+--
+them: Can I tell you a small thing? It's very small. A robin sat on the back fence this morning.
+them: It sat there all through my breakfast. Looking at me. I said "What?" It didn't say.
+them: That's it. That's the whole story. I just wanted to tell somebody, and you're my somebody.
+them: Go on. Back to work. Bye, pet.
+--
+them: Hello, love. I've had a long day, so I'm going to talk slowly and you can't stop me.   [laugh]
+them: A man left his shopping on the bus. Three tins of peaches and a birthday cake. I drove it back to his stop.
+them: He was still standing there. Looking lost. When he saw the bus come back round, he cried. Over a cake.
+them: People are lovely, really. Mostly. Remember that, out there.
+them: Bye, pet. Eat something nice.
+--
+them: Is the line all right? You keep going crackly. Or that's me. I've a crackly cold.
+them: Gran's making me honey and lemon. Which means she's making it for herself and giving me the cup after.
+them: Don't worry about me. I'm only telling you so you know I'm a real person with a real nose.   [laugh]
+them: Wrap up. Whatever wrapping up is, up there.
+them: Bye, pet. Love you.
+
+// after beat 1: early days, worry and the quiet house
+--
+when: beat=home.mum.1
+them: Hello, pet! Second time's easier. I've got a list. I wrote a list.
+them: One: are you eating. I know, I know. Two: are you making friends. Three: is your bed comfy.
+them: Four: is anybody being unkind to you. Because I'll come up there. I'll get the bus.
+them: I can't hear the answers, so I'm going to imagine yes, yes, yes and no. Lovely. Good list.
+them: Bye, pet. Call again.
+--
+when: beat=home.mum.1
+them: I keep setting out two mugs. Then I put one back. Then I get it out again for Gran.
+them: She doesn't even want tea. She wants to watch me make it. It's a whole performance, our kitchen.
+them: The house is quiet. Not bad quiet. Just quiet. Like it's listening for you.
+them: There. I said I wouldn't say that. Ignore me. Tell your ship I said hello.
+them: Bye, pet.
+--
+when: beat=home.mum.1
+them: Your room's exactly as you left it. I've not touched it. Well, I've opened the window.
+them: And I've dusted. And I sat on the bed for a minute. But apart from that, exactly as you left it.
+them: There was a sock under the bed. Just the one. I've put it on your shelf. It's waiting for its friend.
+them: Are you wearing the other one? I bet you are. I bet it's lonely up there. Ha.
+them: Right. Off you go. Bye, pet.
+
+// after beat 2: pottery's started
+--
+when: beat=home.mum.2
+them: Pottery report! It's Tuesday, so there's a report.
+them: I made a cup. It has a handle. The handle fell off in the kiln. So I made a cup.   [laugh]
+them: Rolf says the first year is just making things that fall over. I'm doing very well, then.
+them: Gran's started calling it "Mum's mud". She says it like a disease. "How's the mud?"
+them: The mud's lovely, thank you. Bye, pet.
+--
+when: beat=home.mum.2
+them: There's a woman at pottery who makes only frogs. Little clay frogs. Dozens of them.
+them: Nobody knows why. I asked. She said "Why not?" And honestly, pet, I had no answer.
+them: I might make a frog. For you. For your bunk. Every bunk needs a frog.
+them: Don't tell Gran. She'll want one. Then she'll want two.
+them: Bye, pet. Ribbit. That's a frog joke.   [laugh]
+--
+when: beat=home.mum.2
+them: I've got clay under my nails and I can't get it out. I drove the whole route with grey fingers.
+them: A lady asked if I was a sculptor. I said yes. I've never felt so grand on the number nine.
+them: Gran's still wearing the hat. To the shop now. People ask. She says "My daughter's an artist."
+them: She's never said that about anything I've done. Took a lopsided bowl.
+them: Bye, artist's child. Bye, pet.
+
+// after beat 3: the room, waiting for the wheel
+--
+when: beat=home.mum.3
+them: Rolf's measuring the wheel for the doorway. He says it'll fit. He said that about his van.
+them: I've moved your bed to the other wall. Under the window. It looks bigger. The room, not the bed.
+them: Your shelf's untouched. I promised. I've told Gran it's a museum. She's not allowed to sit near it.
+them: She sat near it.
+them: Bye, pet.
+--
+when: beat=home.mum.3
+them: I keep standing in the doorway of your room. Planning. Where the clay goes. Where the shelf of pots goes.
+them: Then I remember it's your room and I feel funny. Then I remember you said... well. You'd say yes. You would.
+them: It'll still smell like you. Under the clay. I'll know.
+them: Listen to me. Go and do something useful. Bye, pet.
+--
+when: beat=home.mum.3
+them: Gran wants to know if your ship has a cat. She says every ship needs a cat. For the mice.
+them: I said there won't be mice in space. She said "That's what they want you to think."   [laugh]
+them: She's been reading a book about sailors. It's got her going. She calls the kitchen "the galley" now.
+them: Ask about the cat, will you. For Gran. She'll want to know.
+them: Bye, pet.
+
+// after beat 4: the wheel's in
+--
+when: beat=home.mum.4
+them: I'm on the wheel right now. I've got you on the shoulder. Don't mind the whirring.
+them: I'm making a jug. It's going well. It's going... oh. No. It's a plate now.   [laugh]
+them: Everything I make turns into a plate in the end. Rolf says that's the clay telling me something.
+them: I'll have a cupboard full of plates. We'll have a party when you're home. Plates for everyone.
+them: Bye, pet. Plate.
+--
+when: beat=home.mum.4
+them: Jo came round again. Made another pot. Annoyingly good. They've got the hands for it.
+them: They sat in your room with me for an hour. Not talking. Just the wheel going round.
+them: That's nice, isn't it. Having someone to be quiet with. I hope you've got someone like that.
+them: Gran says Jo's showing off. Gran says that about everyone who's good at things.
+them: Bye, pet.
+--
+when: beat=home.mum.4
+them: I've sold a bowl! Mrs Ellery bought one. For her keys. She gave me two coins and a cake.
+them: I'm a professional now. I've told the depot. They made me buy the biscuits.
+them: Gran says she's my agent and wants a cut. Of the cake.
+them: It's silly. But I'm so pleased. Is it silly to be pleased about a bowl?
+them: Bye, pet. Professional potter, signing off.   [laugh]
+
+// after beat 5: gentler, closer
+--
+when: beat=home.mum.5
+them: Hello, pet. I feel lighter since I told you. Like I put something down.
+them: I've been sleeping better. Gran says I've stopped muttering bus stops in my sleep.
+them: I didn't know I did that. Apparently I say "Chapel Road" twice a night.
+them: You get your talking in your sleep from me, then. Sorry about that.
+them: Bye, pet. Chapel Road.   [laugh]
+--
+when: beat=home.mum.5
+them: I made something today and I'm not telling you what it is. It's a secret. It's drying.
+them: Don't ask. You can't ask, anyway. Ha. That's handy for once.
+them: Gran knows. Gran's sworn to secrecy. Gran has never kept a secret in her life.
+them: If she rings you, hang up. Can you hang up? Just don't listen. Bye, pet.
+--
+when: beat=home.mum.5
+them: I was on the top deck of the bus at the end of the route. Nobody on. I looked up.
+them: You can't see you, of course. But I looked anyway. I do that now. Every night, end of the route.
+them: The other drivers think I'm checking the weather. Let them.
+them: Bye, pet. I'll look up tonight.
+
+// after beat 6: settled, proud
+--
+when: beat=home.mum.6
+them: Has the mug arrived? Is it in one piece? Rolf packed it. Rolf packs like he's posting a baby.
+them: If it's broken, don't tell me. Just glue it. Then tell me it's lovely.
+them: I'm making a teapot to go with it. Matching. That'll take another year at least.
+them: Bye, pet. Use the mug.
+--
+when: beat=home.mum.6
+them: I've got a little stall now. Saturdays, at the market. Bowls and plates. Mostly plates.
+them: I tell everyone my {me} is on a starship. Then they buy a bowl. I don't know why that works.
+them: Gran sits beside me in the hat and tells people it's my early work. It sells.
+them: Look at us. A business. Who'd have thought. Bye, pet.   [laugh]
+--
+when: beat=home.mum.6
+them: Do you know what I'm proud of? Not the pots. You. Out there. Doing it.
+them: I tell people. I tell people who didn't ask. The milkman knows everything about you.
+them: That's all. I just wanted you to hear it. Not over the clay, not over Gran. Just: proud.
+them: Right. Off you go, before I start. Bye, pet.
+
+// news: she's heard it in your messages
+--
+when: flag:intro.soloJob
+them: You did a job on your own! Start to finish! Your message came this morning.
+them: I read it on the bus at the lights. I read it to the passengers. Some of them clapped.
+them: I don't know what a scrubber is. I told them it's very important. Is it? It sounds important.
+them: On your own. Oh, pet. I'm telling the whole route.
+them: Bye. Bye, my clever thing.
+--
+when: cue:event.ionStorm.afterglow
+them: A storm? In space? Is that allowed? Your message said everyone's fine. Are you fine? You're fine.
+them: I've been out in the garden looking up. I couldn't see anything. Just Mrs Ellery's washing.
+them: Gran says storms are good luck. She says that about everything bad. Burnt toast. Her knee.
+them: Wear a jumper. I don't know if it helps with space storms. It can't hurt.
+them: Bye, pet.
+--
+when: came:any
+them: You went to the {trad}! You wrote and told me. I'm so glad you went.
+them: You always said you'd hide at a party. And there you are, going to things. On a starship.
+them: Did you talk to anyone? Course you did. Did you eat something? Course you did.
+them: Next time, tell me what everyone wore. I want details. Gran wants details.
+them: Bye, pet.
+--
+when: friend:any
+them: You've got a friend! {friend}. Say it again. {friend}. I'm writing it on the calendar.
+them: Gran wants to know if they're nice. I said of course they're nice, they picked {me}.
+them: Tell {friend} hello from me. Feed them a biscuit. Is that allowed up there?
+them: Oh, pet. A friend. That's all I wanted. Well. That and vegetables.   [laugh]
+them: Bye. Love to you both.
