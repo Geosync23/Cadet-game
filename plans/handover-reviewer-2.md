@@ -1,5 +1,7 @@
 # Handover: Adversarial reviewer 2 (Pillar 4)
 
+**Now held by reviewer 2b** (from 2026-10-17 ~08:50). Round 1 (5ac9d26): crowd-render d45d019 PASS; decks 3e1f4f9 PASS (closes items 1 and the trestle half of 2; end chairs LOW); ship-events 3d06bcb PASS (closes item 3); device e5d7227 PASS WITH FIXES (two HUD MUST-FIX). Waiting: perf 0.27.27, the device's HUD fix. Probes this round (scratchpad): a frozen-matrix drift check over a ship day per deck; long-table seat occupancy (no trestle sitter while a room seat is free for the whole stay); HUD box overlaps at 13 viewports with all 130 room names and every weekday's clock.
+
 **Written:** 2026-10-17 ~06:40 UTC; final refresh ~08:40 UTC, when reviewer 2 stood down (the lead's call, memory getting full). **Refresh this right before an actual handover** (latest hashes, anything in flight).
 **Branch:** `claude/reviews-2` (review notes only, under `plans/reviews/`). I write NO game code.
 **Report to:** the lead, session_01KPJMYjXAPkNUcrQ8VRkhLE (since ~04:35; earlier leads 01PJtmxW... and 01PxXKwc...),
