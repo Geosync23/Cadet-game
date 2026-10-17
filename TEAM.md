@@ -8,6 +8,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
+**Ship integration 0.60.0 "the writers' kit"** (e3ee66b, 2026-10-17 ~02:53): Pillar 4 wave 1a: sim bus + flags + Day 0, device 0.35.20, systems 0.33.37, social A to 0.36.43, social B 0.39.0, traditions to 0.34.24 (loader, seasons, Sowing morning), dialogue 0.43.0 (the writers' kit; Torres baked), arrival 0.42.6. All checks pass; cadet_test identical to 0.41.10. Publishing (publisher session_01DDuqdr8wnzaYpdaTsPJo1f). Next: 0.60.1; wave 1b hired.
+
 **Ship integration 0.41.10** (6d91ee1, 2026-10-16 ~23:45): draw calls packed with the same picture (crowd-render 0.27.20-0.27.24; end-of-test calls 358 -> 217), the garden you can see growing (all 15 beds), root beds and a second bean trellis (decks 0.38.7). All checks pass. Published: link version 18. Next: Pillar 3 check-in 1.
 
 **Ship integration 0.41.9** (098e922, 2026-10-16 ~23:00): bathroom need, "+N Need" notes and progress bars, the zoom-out limit (kept by the user), the storm's look and feel, the working garden (grow lights, gardeners, daily pick, carry run, fresh produce), Schedule fix, goal arrow hides under the progress bar. All checks pass. Published: link version 17 = 0.41.9. Next: 0.41.10 with crowd-render 0.27.20-0.27.22 (draw calls halved zoomed out), then Pillar 3 check-in 1.
@@ -139,6 +141,13 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_016EJg9DempByUCWwpszyWmV | Player engineer 3 (Pillar 4 on-call: kit bag, device lock, gift tags; section 15) | `claude/player-needs` | 0.28.26+ | Active | `plans/handover-player.md` |
 | session_01ToE6RJFCw9deB3HcJRLKxS | P4 seat 8, Deck architect 2: seedling pots, Tiles station + boards, postbox, tasting board, lanterns, calm tags, tradition decor | `claude/decks-p3` | 0.38.10+ | Active | `plans/handover-deck-architect.md` |
 | session_01DG3in6CvFFta6NrLpoVCJV | P4 seat 10, Tiles engineer (hired 2026-10-17 ~02:51, ahead of wave 3, at the user's ask: two-player checkers + block matching): design page plans/tiles-plan.html first (rules tested by simulation) for the user's approval; then section 23 + tiles_check.py | `claude/tiles` | 0.46.x | Active (design) | — |
+| session_016i7YYgZd6puKxfBSkLggRF | P4 seat 11, Head writer (wave 1b, hired 2026-10-17 ~02:54): facts, voice bible, story voice cards and arcs; merges the three writers; LINES/MEETINGS blocks; Voices sampler for check-in A | `claude/content` | 0.48.x | Active | — |
+| session_01DbudMKaYgwjL8yDQpe3DFo | P4 seat 12, Writer: Works and the arrival (reports to the head writer) | `claude/writer-works` | — | Active | — |
+| session_01HdsVyhcPUgWse8qpaYqKex | P4 seat 13, Writer: command, Survey, Watch, guests (reports to the head writer) | `claude/writer-command` | — | Active | — |
+| session_01DfadYjSP8skcVF72f6JxBw | P4 seat 14, Writer: Commons and juniors, overheard and reactions banks (reports to the head writer) | `claude/writer-commons` | — | Active | — |
+| session_01Wr9Jcc4nRUHHWdfJDUwb3X | P4 seat 15, Tradition designer: weekly (reports to the traditions engineer; keys 435-454) | `claude/trad-weekly` | — | Active | — |
+| session_015dAEQhLUgkxejuzQF5CsV9 | P4 seat 16, Tradition designer: every few weeks + Sunday Mail (reports to the traditions engineer; keys 455-474) | `claude/trad-monthly` | — | Active | — |
+| session_01GnWSW6a2D1XdABqpCpVjaY | P4 seat 17, Tradition designer: seasons, year, life moments (reports to the traditions engineer; keys 475-499) | `claude/trad-seasons` | — | Active | — |
 | session_01PGFJbAfDYddQRGYQJktgXj, session_012zFHAS6jkPUhCrpBn2zW9Q, session_01USkJjdw16L4K2tuK8otcc6, session_01V5ghkKLy1XQkZkKS9yKUkr, session_01PPVXqo8s4NvK8JkBWt3WoH, session_01L5Bg1nrCfowojNxeVZJHoi | Standing check runners R1-R6 (2026-10-17 ~02:36, the user's ask): R1 cadet_test, R2 day_check, R3 player+interactions, R4 events+intro, R5 food+machine+deck, R6 social+device+lines+content_gen; report to the build master; no pushes | — | — | Active (Full level) | — |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 

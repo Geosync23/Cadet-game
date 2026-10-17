@@ -164,3 +164,7 @@ Read this first; it supersedes the 01:40 summary where they differ.
 - 02:40 took over; hourly check-in trig_018pRJUMKQr75nKGDHN7ovUp (:40). Archived (done, notes pushed): systems 3, galley, crew designer, interactions.
 - Decision: social B's weekly affinity snapshots keep pairs with |aff| >= 30 (not 40: section 14's seating lines are ±30). AFF_SNAP = 30, in 0.39.3.
 - 0.60.0 gate: waiting on social A's social_check harness fix, the 22-vs-18 breakfast count (sim 0.26.23), reviewer 1 on social B fa2f20d.
+- 02:53 0.60.0 GREEN (build master): pushed e3ee66b to claude/ship-integration (fast-forward). Publisher session_01DDuqdr8wnzaYpdaTsPJo1f publishing link version 19. Build master told GO for 0.60.1.
+- 02:51 Tiles engineer hired early at the user's ask (session_01DG3in6CvFFta6NrLpoVCJV, claude/tiles): design page first (checkers + block matching, simulated balance), user approves before building.
+- 02:54 Wave 1b hired: head writer session_016i7YYgZd6puKxfBSkLggRF; writers 01DbudMKaYgwjL8yDQpe3DFo (works), 01HdsVyhcPUgWse8qpaYqKex (command), 01DfadYjSP8skcVF72f6JxBw (commons); tradition designers 01Wr9Jcc4nRUHHWdfJDUwb3X (weekly), 015dAEQhLUgkxejuzQF5CsV9 (monthly), 01GnWSW6a2D1XdABqpCpVjaY (seasons).
+- Arrival dinner polish decided: Calder comes to your table, you and Torres sit (sim + player 3).
