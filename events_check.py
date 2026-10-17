@@ -667,6 +667,13 @@ with sync_playwright() as pw:
     if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
+    # 9b. tradOn (0.34.37, social B's calls home): letters evening's window in absolute ship minutes, null outside it
+    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'letters')); if (!d) return null;
+      const e = eventsOn(d).find(x => x.id === 'letters'), B = (d - 1) * 1440;
+      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('letters', t)), other: tradOn('letters', B + 600), none: tradOn('nope', B + e.from) }; })()""")
+    print('tradOn letters:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
+    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('letters'): {T}")
+
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)
     print('Bridge invite: eves', I['eves'][:4], '| booked', I['booked'], '| Vance there', I['vanceThere'], '| open', I.get('open'), '| flag', I.get('flagBefore'), '->', I.get('flagAfter'), '| after', I['after'], '| bridge hour day 23', I['before'], '->', I['on23'], f"({I['going']} going)")

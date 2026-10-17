@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.36
+   STARSHIP CADET: CSV Wren                           build 0.34.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.36';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.37';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13697,6 +13697,10 @@ function tallyVote(id, choice, t = shipNow()) {
   SHIP.events.votes[id + '@' + d] = choice; return true;
 }
 const tradTies = (kind, d) => eventsOn(d).filter(e => e.ev.ties && e.ev.ties[kind] != null).map(e => ({ id: e.id, name: e.name, from: e.from, to: e.to, tie: e.ev.ties[kind] }));
+// tradOn(id, t) -> { id, name, day, from, to } (absolute ship minutes) while that tradition is on at minute t, else null
+// (pure). For social B's live calls home on letters evening (tradOn('letters')): the relay's best window
+const tradOn = (id, t = shipNow()) => { const d = Math.floor(t / 1440) + 1, B = (d - 1) * 1440, e = eventsOn(d).find(x => x.id === id);
+  return e && t >= B + e.from && t < B + e.to ? { id: e.id, name: e.name, day: d, from: B + e.from, to: B + e.to } : null; };
 // the pools: for each `where` with a room, the shared places of those types in that room (not in a locked room; with
 // `free`, not anyone's work station), as 'deck|ev:<id>:<n>'; places tagged event: '<id>' as 'deck|ev:<id>'
 function eventPools(shared, desks) {
