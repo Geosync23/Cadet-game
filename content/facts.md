@@ -492,3 +492,6 @@ introduces them), unless noted.
 | The person in the "loss" theme taught them to whistle, badly (generic for every theme user) | the loss theme | writer-commons, themes |
 | Halloran gives the new hand's mug at Works tea, Friday of week 1 ("It's the law. Well, it's me."); the hook on the end of the rack | Halloran | writer-works, batch 5 |
 | Torres's shadow-job bubbles are `week1` lines gated by `flag:walk.job.<step>` (take, fetch, make, panel, done, turnin) | Torres | writer-works, batch 5 (onboarding maps its keys) |
+| Zofia Santos's cousin runs her old Hesper Dock stall, "badly"; Chloe Tran bakes because it smells like her gran's kitchen; Lukas Dlamini has the same bar stool and the same drink every night | Bunk 1 | writer-commons, batch 5 |
+| Thea Grieve's fish are called One, Two and Three; the first Gerald is still going, very old now; Ivo Madsen has carried trays for three years; Tariq Varga once lost a race to Erik Strand | the commons crew | writer-commons, batch 6 |
+| Speaker conditions for overheard: `who:` (A is one of) and `with:` (B is one of), crew ids (dialogue 0.43.8) | everyone | head writer |
