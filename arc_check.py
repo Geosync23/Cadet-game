@@ -122,7 +122,8 @@ CALLS = r"""
 # 'booth' mode (0.62.5, the user's "clicking the phone works, then the menu to call someone disappears"): the real game
 # loop, Deck 3 at 10:30 on day 4, tap Booth 3, walk there and sit; then, a second of play between taps, tap the panel's
 # buttons as a player would (Go on, Call Mum, Go on to the end), by mouse click, and again by touch on a phone-sized
-# screen. The picker must stay open, the call must play to its end and Mum's first beat must be told.
+# screen. The picker must stay open, the call must play to its end and Mum's first beat must be told. Then a recorded
+# message from Gran must stay open through a lift ride (0.62.6).
 BOOTH_TAP = r"""(() => { const it = ITEMS.find(i => i.t === 'Booth 3'); it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
 BOOTH_ST = r"""(() => ({ dlg: DIALOGUE && DIALOGUE.id, b: homePeekC('mum').b }))()"""
 def booth_run(pw, touch):
@@ -152,6 +153,12 @@ with sync_playwright() as pw:
         for touch in (False, True):
             r = booth_run(pw, touch); print('touch' if touch else 'click', json.dumps(r))
             if not r['picked'] or r['b'] != 1 or r['open'] or r['errors']: bad.append('touch' if touch else 'click')
+        g = ct.Game(pw, sys.argv[1]); g.step(3)   # a recorded message plays on through the lift and off-room tiles (0.62.6, reviewer 1e)
+        g.ev("setShipNow(10 * 60 + 1440 * 5); needsT = null; goToDeck(3)"); g.step(5)
+        g.ev("(() => { homeC('gran').b = 1; homeC('gran').msg = { day: 6, i: 0, done: false }; return homeMessage('gran'); })()")
+        g.step(30); m1 = g.ev("DIALOGUE && DIALOGUE.id"); g.ev("goToDeck(4)"); g.step(60); m2 = g.ev("DIALOGUE && DIALOGUE.id"); g.close()
+        print('recorded message: open after 1 s', m1, '| after the lift', m2)
+        if m1 != 'home:msg:gran' or m2 != 'home:msg:gran': bad.append('message')
         print('BOOTH CHECK OK' if not bad else 'BOOTH CHECK: ' + ', '.join(bad) + ' (the picker closed, or the call never ended with Mum\'s beat 1)')
         sys.exit(0)
     g = ct.Game(pw, sys.argv[1]); g.step(3)
