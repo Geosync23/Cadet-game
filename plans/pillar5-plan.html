@@ -38,7 +38,7 @@ li{margin:3px 0}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
 .steps time{display:block;font-size:12px;color:var(--gold)}
 .steps b{color:#e4f3f0;font-weight:600}
-.steps span{font-size:13.5px;color:#cfd9dc}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
 .week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 .day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
 .day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
@@ -64,431 +64,264 @@ svg text{font-family:inherit}
 </head>
 <body>
 <header>
-  <h1>Pillar 5: new ways to work <span class="draft">Draft 2 · from your answers</span> <span class="draft">+ puzzles</span> <span class="draft">your answers in</span> <span class="draft">+ career</span> <span class="draft">+ Tiers 3-4</span></h1>
-  <div class="sub">Pillar 5 is now about the core mechanics only: new things your hands do on the job, opened one at a time, each taught by a crew member. Ship-wide events move to Pillar 6, and the bigger career story (including the night shift) to Pillar 7. Nothing is built until you approve this, and every mechanic gets its own short page for you to approve before it's built. The detailed version for the team is <code>plans/pillar5-plan.md</code>. <b>New:</b> <a href="#puzzles" style="color:#f1dca0">deductive repair puzzles</a>, added at your request beside everything else. <b>Your answers are all in</b> (see <a href="#q" style="color:#f1dca0">the end</a>): laundry every two weeks, all seven extra ideas on the ladder, and Pillar 5 built on its own after Pillar 4 by one small team. <b>Also new:</b> <a href="#career" style="color:#f1dca0">career progression</a> and <a href="#tiers" style="color:#f1dca0">Tiers 3 and 4</a> (everything that was Pillar 7) are now part of Pillar 5.</div>
+  <h1>Pillar 5: your Works career <span class="draft">final plan</span></h1>
+  <div class="sub">Pillar 5 is the core of the game: new ways to work, repair puzzles you solve by deduction, and your whole career from Junior Officer to Senior Officer and Engine Specialist, in about <b>12 to 13 hours of play</b>. All your answers are folded in. Nothing is built until you approve it, and each piece gets a short page for you to approve first. It's built on its own, after Pillar 4, by one small team. The detailed version for the team is <code>plans/pillar5-plan.md</code>.</div>
 </header>
 <nav><div>
-  <a href="#big">In short</a><a href="#rules">The rules</a><a href="#ladder">The ladder</a><a href="#m">Each mechanic</a><a href="#promo">Promotion</a><a href="#more">Seven more</a><a href="#puzzles">Added: puzzles</a><a href="#career">Added: career</a><a href="#tiers">Added: Tiers 3-4</a><a href="#p4">On its own</a><a href="#team">Team</a><a href="#waves">Order</a><a href="#risks">Risks</a><a href="#q">Questions</a>
+  <a href="#big">In short</a><a href="#changed">What changed</a><a href="#time">Timeline</a><a href="#rank">Ranking up</a><a href="#map">Jobs by rank</a><a href="#work">The work</a><a href="#promo">Promotions</a><a href="#puzzles">Puzzles</a><a href="#side">Side jobs</a><a href="#team">Team and steps</a><a href="#risks">Risks</a><a href="#q">Answers</a>
 </div></nav>
 <main>
 
 <section id="big">
   <h2>In short</h2>
-  <p>Today the Works job does one thing: <b>fetch a part and replace it</b>. Even the odd jobs on the board (a vent, a delivery, a round) all play the same way: walk there and hold to work. Pillar 5 gives the job <b>a ladder of new mechanics</b>, each a different way of working. They open slowly, one at a time, and each is <b>taught to you by a person on a real job</b>. You start simple, and the job keeps opening up as you work on more of the ship.</p>
+  <p>You arrive able only to <b>fetch a part and replace it</b> (Pillar 4's first week). Over about <b>five ship weeks</b> the job opens up a little at a time, <b>each new thing taught to you by a person on a real job</b>.</p>
   <div class="grid">
-    <div class="card"><b>One at a time</b><span>About one new mechanic every 2 or 3 ship days after your first week. Never two on one day. If you're slow, the ladder waits.</span></div>
-    <div class="card"><b>Taught, not told</b><span>Each new mechanic starts with a crew member doing one job with you, then watching you do one. You get anything new from them: a clipboard, a key, a tool.</span></div>
-    <div class="card"><b>Hands, not mini-games</b><span>Everything happens in the world: walking, looking, carrying, turning a valve, folding. Doing something badly costs time or a remark, never a fail.</span></div>
-    <div class="card"><b>It keeps growing</b><span>Each mechanic has 2 or 3 stages that open as you use it, so even old work keeps changing.</span></div>
-    <div class="card"><b>Around the ladder</b><span>More real faults reach you. Repairs get quicker with practice, said in words. Off shift: tinkering, touches for your cabin, logging stars. Your device gets pages for your training, your work log and your tools.</span></div>
-    <div class="card"><b>Your first promotion</b><span>After about 2 ship weeks of steady work beyond your first week: a test job, the Officer's badge, your own cabin. Only ever delayed, never passed over.</span></div>
+    <div class="card"><b>New ways to work</b><span>Rounds, your uniform and laundry, the drill and inspection, hauling, tuning, small incidents, the scanner. Then tracing faults and team jobs, then power, shutdowns and the sensor array, then engines and the reactor.</span></div>
+    <div class="card"><b>Head-scratchers</b><span>From your first days as an Officer, some repairs become puzzles. You gather clues around the ship, cross out suspects and call the cause, then fix it by hand. There are nine kinds, getting harder with each tier.</span></div>
+    <div class="card"><b>Your career</b><span>Good work raises your reputation, which brings harder jobs, then a test job, then promotion: <b>Officer</b> on day 16, <b>Senior Officer</b> on day 23, <b>Engine Specialist</b> on day 30.</span></div>
+    <div class="card"><b>Moments along the way</b><span>An officer ceremony with the Captain, your own cabin, then Deck 2's suite, two nights on the night shift, the Monday briefing, leading a team, a day mentoring a junior, and "Calder's question" at the end.</span></div>
+    <div class="card"><b>Side jobs</b><span>The workshop, tool upkeep, the logbook, leak hunting, irrigation, rewiring and the lift roof, plus crew favours and a board of old mysteries. They're there whenever you want them, and never needed to rank up.</span></div>
+    <div class="card"><b>Jobs mapped to rank</b><span>Every job needs a tier, and some are reserved for a rank. Junior jobs stop being given to you after promotion, but stay on the board if you want them.</span></div>
   </div>
 </section>
 
-<section id="rules">
-  <h2>The rules every mechanic follows</h2>
-  <ul>
-    <li><b>Start simple.</b> Your first week (built in Pillar 4) teaches fetch and replace. Everything new comes after that, one piece at a time.</li>
-    <li><b>Taught by a person.</b> Short lines, on a real job. At most one small control tip.</li>
-    <li><b>Physical.</b> When you have to choose (which part, which valve), you choose from what you've seen on the deck. <span class="tag new">added</span> The new <a href="#puzzles" style="color:#bdeee6">head-scratchers</a> keep to this: clues are found around the ship, and the fix is still done by hand.</li>
-    <li><b>Words, not numbers.</b> Your Record says "Trained: rounds, laundry, hauling" and "Ovens: you know these well". No points, no bars.</li>
-    <li><b>The ship never depends on you.</b> The crew can do every kind of work too, just more slowly, so there's always work for you but nothing falls apart without you.</li>
-  </ul>
+<section id="changed">
+  <h2>What changed because of "10 to 15 hours"</h2>
+  <p>You said the game should be about 10 to 15 hours, not 65. The journey is now about <b>33 ship days</b> instead of 98. Skipping the nights when you sleep, a ship day plays in about 25 real minutes, so that's about <b>12 to 13 hours</b>, your first week included. To fit, a few earlier agreements change. Nothing is cut: anything moved off the main path is listed here.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Before</th><th>Now</th></tr>
+    <tr><td>Never two new things on one day</td><td><b>At most one big new thing and one small one per workday</b>. Big means a promotion step, a new tier, a new tool or the night shift; small means a puzzle kind's first case or a side job. Nothing new on days off.</td></tr>
+    <tr><td>A new mechanic every 2 or 3 days</td><td><b>About one a workday</b> while you're learning</td></tr>
+    <tr><td>Use the last one about three times first</td><td><b>Once or twice</b></td></tr>
+    <tr><td>First promotion around day 20</td><td><b>Officer day 16, Senior Officer day 23, Engine Specialist day 30</b></td></tr>
+    <tr><td>Puzzles from day 13</td><td><b>Day 17, your first days as an Officer</b> (your answer)</td></tr>
+    <tr><td>Each puzzle kind taught as its own job</td><td>Your first puzzle is a full lesson from Torres; each later kind comes on a real case <b>with a short word from a crew member</b> and a new page in the Chief's notes</td></tr>
+    <tr><td>Officer for about three weeks</td><td><b>One week</b> (days 15 to 21)</td></tr>
+    <tr><td>Night shift for a week</td><td><b>Two nights</b>, once (Friday and Saturday, days 26 and 27)</td></tr>
+    <tr><td>Mentoring for two weeks</td><td><b>One day</b> (your answer)</td></tr>
+    <tr><td>The seven extra ideas on the ladder</td><td><b>Side jobs</b> from day 19, never needed to rank up; coolant rounds folds into the engine work</td></tr>
+    <tr><td>Workshop, fault-finder grades, favours and old mysteries on the way</td><td><b>Side paths</b>: optional, there when you want them</td></tr>
+    <tr><td>Each mechanic's later stages on the way</td><td><b>Off the main path</b>: they open with use and are optional</td></tr>
+    <tr><td>The officer ceremony at 16:30 the next afternoon</td><td><b>Day 17 at 17:15</b>, after the Wednesday drill and your shift</td></tr>
+  </table></div>
 </section>
 
-<section id="ladder">
-  <h2>The ladder</h2>
+<section id="time">
+  <h2>The timeline</h2>
+  <div style="margin:4px 0 10px">
+    <div style="display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line);font-size:11px">
+      <div style="width:24%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--muted);white-space:nowrap">First week</div>
+      <div style="width:21%;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;color:var(--muted);white-space:nowrap">Junior</div>
+      <div style="width:21%;background:rgba(76,195,181,.2);display:flex;align-items:center;justify-content:center;color:#bdeee6;white-space:nowrap">Officer</div>
+      <div style="width:20%;background:rgba(233,196,106,.22);display:flex;align-items:center;justify-content:center;color:#f1dca0;white-space:nowrap">Senior</div>
+      <div style="width:14%;background:rgba(229,143,122,.22);display:flex;align-items:center;justify-content:center;color:#f3c3b6;white-space:nowrap">Tier 4</div>
+    </div>
+    <div class="note" style="display:flex;justify-content:space-between"><span>day 0</span><span>8</span><span>15</span><span>22</span><span>29</span><span>33</span></div>
+  </div>
+  <p class="note">Days are for a steady player: if you're slower, the next thing waits for you. Weekends are days off, with side jobs and off-shift things if you want them. Day 1 is a Monday.</p>
   <ol class="steps">
-    <li><time>Day 1 (Pillar 4)</time><b>Fetch and replace</b><span>Zeke Torres shows you the basic job in your first week.</span></li>
-    <li><time>About day 8 · Torres</time><b>Rounds</b><span>Walk a route of machines, look at each, and mark what you see. Catch wear early.</span></li>
-    <li><time>About day 9 · a laundry hand</time><b>Laundry and uniforms</b><span>Your uniform gets grubby; change it, wash it, and take your turn on laundry duty.</span></li>
-    <li><time>Days 10-11 · Calder, Tomas</time><b>The drill and the inspection</b><span>A job of your own at the Wednesday drill; get your berth and uniform ready for Thursday.</span></li>
-    <li><time>About day 12 · a storekeeper</time><b>Hauling and stores</b><span>Cart runs from a list of stops, and counting the shelves.</span></li>
-    <li><time>About day 15 · Brennan and Calder</time><b>Tuning</b><span>Adjust a machine that's out of true while you watch it settle.</span></li>
-    <li><time>About day 16 · Calder</time><b>Making it safe</b><span>Small incidents: shut it off first, clean up, then fix.</span></li>
-    <li><time>About day 18 · Torres</time><b>The scanner</b><span>Read a machine's parts and work out which one is failing.</span></li>
-    <li><time>About day 20 · Calder</time><b>Your test job and promotion</b><span>Officer's badge, your own cabin.</span></li>
-    <li><time>About day 22 · a Works officer</time><b>Team jobs</b><span>Big jobs with three or four crew.</span></li>
-    <li><time>About day 23 · Torres</time><b>Tool upkeep</b><span>Look after your own tools at your bench. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 24 · Calder</time><b>Tracing faults</b><span>Faults that start somewhere else.</span></li>
-    <li><time>About day 25 · Calder</time><b>The logbook</b><span>Your line in the Works log at the end of a shift. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 27 · Torres</time><b>Leak hunting</b><span>Follow the wet to the drip. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 28 · the machine shop tech</time><b>The workshop</b><span>Crew order small things; you make them.</span></li>
-    <li><time>About day 29 · a gardener</time><b>Garden irrigation</b><span>Clear the racks' nozzles at harvest. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 31 · Calder</time><b>Rewiring</b><span>Follow a junction's colour chart. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 33 · Torres</time><b>Coolant rounds</b><span>Read the engine coils' gauges on Deck 6. <span class="tag new">your pick</span></span></li>
-    <li><time>About day 35 · a Works officer</time><b>On the lift roof</b><span>Ride the lift car's roof down the spine. <span class="tag new">your pick</span></span></li>
+    <li><time>Days 0 to 7 · Pillar 4</time><b>Arrival and your first week</b><span>Fetch and replace, the shadow shift, your first solo job.</span></li>
+    <li><time>Day 8 Mon · Torres; a laundry hand</time><b>Rounds</b><span>And your own uniform.</span></li>
+    <li><time>Day 9 Tue · a storekeeper</time><b>Hauling and stores</b><span>And your one laundry duty.</span></li>
+    <li><time>Day 10 Wed · Brennan and Calder</time><b>Tuning</b><span>And the drill at 15:00 (you hold the extinguisher).</span></li>
+    <li><time>Day 11 Thu · Torres; Tomas</time><b>The scanner</b><span>And the inspection at 06:30.</span></li>
+    <li><time>Day 12 Fri · Calder</time><b>Making it safe</b><span>Your first small incident. At Friday tea: "Monday, your test job."</span></li>
+    <li><time>Day 15 Mon · Calder</time><b>The test job</b><span>A Tier 2 machine, with Calder watching.</span></li>
+    <li><time>Day 16 Tue · Calder</time><b>Promotion: Officer</b><span>The urgent summons, the badge, the crew, Brennan's cake. At 17:00 Calder walks you to cabin 4-23.</span></li>
+    <li><time>Day 17 Wed · the Captain; Torres</time><b>The officer ceremony</b><span>And your first head-scratcher.</span></li>
+    <li><time>Day 18 Thu · Calder</time><b>Tracing faults</b><span>With the pipe kit, plus a new kind of puzzle.</span></li>
+    <li><time>Day 19 Fri · a Works officer</time><b>Team jobs</b><span>Plus a new kind of puzzle, and the side jobs open.</span></li>
+    <li><time>Day 22 Mon · Calder</time><b>The Tier 3 test job</b><span>Your first planned shutdown.</span></li>
+    <li><time>Day 23 Tue · the Captain; Vance</time><b>Promotion: Senior Officer</b><span>The ready room. At 17:00 Commander Vance walks you to Deck 2's suite.</span></li>
+    <li><time>Day 24 Wed · Calder</time><b>Power and relays</b><span>The conduit tester; the Captain's table toast that evening.</span></li>
+    <li><time>Day 25 Thu · Calder</time><b>Shutdowns</b><span>Your own, plus "the clash" puzzle. Calder gives you the night shift.</span></li>
+    <li><time>Day 26 Fri · the Deputy Survey Chief</time><b>The sensor array</b><span>The calibration rig, then home at 13:00 to sleep.</span></li>
+    <li><time>Nights of days 26 and 27</time><b>The night shift</b><span>You're the senior Works officer on the quiet ship.</span></li>
+    <li><time>Day 29 Mon · the Captain; Calder</time><b>The Monday briefing</b><span>And the Tier 4 test job on a drive coil.</span></li>
+    <li><time>Day 30 Tue · Torres</time><b>Engine Specialist and engine work</b><span>The engine crew's welcome.</span></li>
+    <li><time>Day 31 Wed · Torres</time><b>The reactor</b><span>With a permit and a dosimeter. You run the drill.</span></li>
+    <li><time>Day 32 Thu · Calder</time><b>Leading a team job</b><span></span></li>
+    <li><time>Day 33 Fri</time><b>Mentoring a junior</b><span>For one day. Then, at Friday tea, <b>"Calder's question"</b>: what do you want next?</span></li>
   </ol>
+  <p class="note">After that the ship carries on: your work, the puzzles, the side jobs, the old mysteries, and later Pillar 6's events.</p>
 </section>
 
-<section id="m">
-  <h2>Each mechanic</h2>
-  <div class="grid">
-    <div class="card"><b>1. Rounds</b><span>Walk 4 to 6 machines and look at each. Mark one as worn and it becomes a quick service job "found by you", instead of a bigger repair next week. Later you choose your own route, and later still the scanner reads machines from across the room.</span><span class="meta"><span class="tag">Torres</span><span class="tag">a clipboard</span></span></div>
-    <div class="card"><b>2. Laundry and uniforms</b><span>You get a uniform that gets grubby as you work (oily jobs faster). Change it at your locker and drop the worn one at the laundry. About every two weeks you take a laundry duty: load a washer, come back when it's done, move it to the dryer, fold, and push the clean linen to the bunk rooms. A grubby uniform makes you feel less fresh, gets remarks, and shows at inspection. If you skip your duty, someone else on the rota does it.</span><span class="meta"><span class="tag new">your ask</span><span class="tag">a laundry hand</span></span></div>
-    <div class="card"><b>3. The drill and the inspection</b><span>Wednesday 15:00: go to the Works bay and do your drill job (take the extinguisher on a fire drill, close the bulkhead door on a pressure drill), and Calder times the team. Thursday 06:30: clean uniform, berth made, locker tidy; the duty officer gives a nod or a gentle remark. Both build Calder's trust.</span><span class="meta"><span class="tag">Calder</span><span class="tag">Tomas</span></span></div>
-    <div class="card"><b>4. Hauling and stores</b><span>Collect a hover cart, load the crates on your list from the hold, ride the lift, and drop them at each stop (linen, medical supplies, store stock, bridge spares). You choose the order, so routes matter. Count the storage shelves to catch a shortage before it holds up a repair. Later, help unload the Wednesday supply shuttle.</span><span class="meta"><span class="tag">Yara the storekeeper</span></span></div>
-    <div class="card"><b>5. Tuning</b><span>Some faults aren't a broken part, just a machine out of true: an oven running hot, a fan humming off-key, lights flickering. Turn its setting a step at a time and watch the machine settle on the deck. There's no timer and no score. Later, two settings that pull against each other.</span><span class="meta"><span class="tag">Brennan's oven</span><span class="tag new">your yes</span></span></div>
-    <div class="card"><b>6. Making it safe</b><span>About once a week, a small incident: a burst pipe floods a corridor, the lift sticks with someone inside, or a scorched pan sets off the galley alarm. First shut it off at the right valve or breaker, then clean up (mop, clear the smoke, help them out), then fix the cause. Never at night, never on an event day.</span><span class="meta"><span class="tag new">your yes</span><span class="tag">Calder</span></span></div>
-    <div class="card"><b>7. The scanner</b><span>Point it at a faulty machine and it shows 3 to 5 parts, each with a reading. Usually one is clearly off; sometimes two, and what you saw (the drip, the flicker) tells them apart. A wrong pick costs a walk back to storage. Before the scanner, looking at a machine simply tells you, so the start stays simple.</span><span class="meta"><span class="tag">Torres</span><span class="tag">a tool</span></span></div>
-    <div class="card"><b>8. Team jobs</b><span>After promotion: a big job (the main fan's bearing, the recycler's membrane) takes three or four Works crew. You're one pair of hands: be there, brace, pass tools or crank when your turn comes, while the crew chat as they work.</span><span class="meta"><span class="tag">after promotion</span></span></div>
-    <div class="card"><b>9. Tracing faults</b><span>After promotion: weak showers on Deck 4 might start at a valve on Deck 5. With a pipe kit (and training), read the flow and follow it back. Deck 5's machine rooms and the spine's crawlways open with your key.</span><span class="meta"><span class="tag">after promotion</span><span class="tag">a pipe kit</span></span></div>
-    <div class="card"><b>10. The workshop</b><span>After promotion: crew order small things at the machine shop (a hook for Pell's guitar, a shelf for Rina). Make them on the lathe and deliver them in person.</span><span class="meta"><span class="tag">after promotion</span></span></div>
+<section id="rank">
+  <h2>How you rank up: one clear rule</h2>
+  <div class="flow">
+    <span class="box">Good work</span><span class="arrow">→</span><span class="box">Works reputation grows</span><span class="arrow">→</span><span class="box">Harder jobs</span><span class="arrow">→</span><span class="box">A test job</span><span class="arrow">→</span><span class="box">Promotion</span>
   </div>
-  <p class="note">Off shift, alongside the ladder: tinkering in the machine shop (things to give or keep), 3 or 4 spots in your cabin for things you bought or made, and logging stars for Survey at the observatory telescope.</p>
+  <ul>
+    <li><b>Your Works reputation</b> is shown in words, never a number. It goes up with jobs done well, faults caught early, the right part first time, clever puzzle fixes and turning up to the drill and inspection. It goes down with missed shifts and jobs left half-done.</li>
+    <li><b>It decides the work you're given:</b> New, Steady, Reliable, Trusted, then Relied on, when Calder sets your test job. It starts again with each new rank. You're <b>never demoted</b>.</li>
+    <li>Your Record always shows your rank, your reputation and one <b>"What's next"</b> line. Test jobs are only ever delayed, never failed.</li>
+  </ul>
+  <div class="tablewrap"><table>
+    <tr><th>Rank</th><th>Title</th><th>Where you live</th><th>Moment</th></tr>
+    <tr><td>Junior Officer</td><td>Junior Technician</td><td>Bunk 1, with Tomas</td><td>arrival</td></tr>
+    <tr><td><b>Officer</b></td><td>Technician</td><td><b>cabin 4-23</b></td><td>the officer ceremony with the Captain</td></tr>
+    <tr><td><b>Senior Officer</b></td><td>Senior Technician</td><td><b>Deck 2's visitors' suite</b>, with a window</td><td>a toast at the Captain's table</td></tr>
+    <tr><td>Senior Officer</td><td>Engine Specialist</td><td>your suite</td><td>the engine crew's welcome (a badge)</td></tr>
+  </table></div>
+</section>
+
+<section id="map">
+  <h2>Which jobs need which rank</h2>
+  <p>Every job has a tier (its machine's tier), and some are <b>reserved for a rank</b>. The crew follow the same rule, and senior crew take reserved jobs too, so the ship never waits on you. Junior jobs aren't given to you after promotion, but stay on the board if you want them.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Rank</th><th>Your jobs</th><th>Reserved for this rank</th></tr>
+    <tr><td>Junior Officer · Tier 1</td><td>fetch and replace, chores, rounds on a set route, tuning, incidents with Calder, the scanner</td><td>junior jobs: laundry duty, the food cart, hauling runs, the bunk inspection; at the drill you hold the extinguisher or the door</td></tr>
+    <tr><td>Officer · Tier 2</td><td>Tier 2 machines, tracing, team jobs (a pair of hands), Tier 2 puzzles; side jobs, favours, old mysteries</td><td>writing the Works logbook; signing off manifests; mustering the Works team at the drill; first on the scene at incidents</td></tr>
+    <tr><td>Senior Officer · Tier 3</td><td>power, relays, batteries, the sensor array, Tier 3 puzzles, the clash</td><td><b>planning shutdowns</b>, <b>the Monday briefing</b>, <b>the night shift's senior post</b>, running the drill, saying an incident is safe</td></tr>
+    <tr><td>Senior Officer · Tier 4</td><td>engine work (with coolant rounds), Tier 4 puzzles</td><td><b>the reactor</b> (specialists, with a permit), <b>leading team jobs</b>, <b>mentoring a junior</b></td></tr>
+  </table></div>
+  <p class="note">The full job-by-job map is in the detailed plan.</p>
+</section>
+
+<section id="work">
+  <h2>The work, tier by tier</h2>
+  <h3>Junior: your second week</h3>
+  <div class="grid">
+    <div class="card"><b>Rounds</b><span>Walk a route of machines and look at each. Mark one as worn and it becomes a quick job "found by you".</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 8</span></span></div>
+    <div class="card"><b>Your uniform and laundry</b><span>Your uniform gets grubby as you work and looks a little duller. Change it at your locker. Laundry duty comes every two weeks while you're a junior.</span><span class="meta"><span class="tag">a laundry hand</span><span class="tag">days 8 and 9</span></span></div>
+    <div class="card"><b>Hauling and stores</b><span>Cart runs from a list of stops, and counting the shelves.</span><span class="meta"><span class="tag">a storekeeper</span><span class="tag">day 9</span></span></div>
+    <div class="card"><b>Tuning</b><span>Turn a machine's setting a step at a time and watch it settle. No timer, no score.</span><span class="meta"><span class="tag">Brennan, Calder</span><span class="tag">day 10</span></span></div>
+    <div class="card"><b>The drill and the inspection</b><span>Your drill job on Wednesday; clean uniform, berth made and locker tidy on Thursday.</span><span class="meta"><span class="tag">Calder, Tomas</span><span class="tag">days 10 and 11</span></span></div>
+    <div class="card"><b>The scanner</b><span>Read a machine's parts and choose which one is failing.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 11</span></span></div>
+    <div class="card"><b>Making it safe</b><span>Small incidents (a burst pipe, a stuck lift, the galley alarm): shut it off, clean up, fix it.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 12</span></span></div>
+  </div>
+  <h3>Officer: Tier 2</h3>
+  <div class="grid">
+    <div class="card"><b>Tracing faults</b><span>A fault that shows in one place and starts in another: follow the pipes back with the pipe kit.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 18</span></span></div>
+    <div class="card"><b>Team jobs</b><span>One pair of hands on a big job with three or four crew.</span><span class="meta"><span class="tag">a Works officer</span><span class="tag">day 19</span></span></div>
+  </div>
+  <h3>Senior Officer: Tier 3, planning around people</h3>
+  <div class="grid">
+    <div class="card"><b>Power and relays</b><span>The relay room, the batteries and the power junctions, with the conduit tester.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 24</span></span></div>
+    <div class="card"><b>Shutdowns</b><span>See who a junction feeds, pick a quiet hour, warn the people affected and choose what keeps power. A bad hour just means grumbles.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 25</span><span class="tag new">senior only</span></span></div>
+    <div class="card"><b>The sensor array</b><span>Calibrate it with the calibration rig against a star the Survey crew name.</span><span class="meta"><span class="tag">the Deputy Survey Chief</span><span class="tag">day 26</span></span></div>
+    <div class="card"><b>The night shift</b><span>Two nights as the senior Works officer: sleep by day, walk the quiet ship, and handle the 3 a.m. burst pipe. Sunday off after.</span><span class="meta"><span class="tag">Calder</span><span class="tag">nights of days 26 and 27</span><span class="tag new">senior only</span></span></div>
+    <div class="card"><b>The Monday briefing</b><span>A seat at the senior table: hear the week's plans first and choose what Works raises.</span><span class="meta"><span class="tag">the Captain</span><span class="tag">day 29</span><span class="tag new">senior only</span></span></div>
+  </div>
+  <h3>Tier 4: leading a team</h3>
+  <div class="grid">
+    <div class="card"><b>Engine work</b><span>The drive coils and engine control, with the coolant rounds folded in. The engine crew sign your Engine Specialist badge.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 30</span></span></div>
+    <div class="card"><b>The reactor</b><span>A permit, a dosimeter badge and a short, careful visit. Nothing frightening.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 31</span><span class="tag new">specialists only</span></span></div>
+    <div class="card"><b>Leading a team job</b><span>Pick two or three crew, book the bridge, give each a spot, and call the steps.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 32</span><span class="tag new">Tier 4 only</span></span></div>
+    <div class="card"><b>Mentoring a junior</b><span>A new cadet spends one day with you. They watch you, then you watch them, and you help them on a puzzle.</span><span class="meta"><span class="tag">day 33</span><span class="tag new">senior only</span></span></div>
+    <div class="card"><b>Your career story</b><span>Four moments with Calder and Torres across the journey, ending with "Calder's question". Your Record keeps the milestones.</span><span class="meta"><span class="tag">throughout</span></span></div>
+  </div>
 </section>
 
 <section id="promo">
-  <h2>Your first promotion</h2>
-  <p><span class="tag new">changed</span> The moment itself is now a full sequence (a summons, the crew, being walked to your cabin, an officer ceremony): see <a href="#career" style="color:#bdeee6">career progression</a>.</p>
-  <div class="flow">
-    <span class="box">Steady work</span><span class="arrow">→</span><span class="box">Calder: "getting there"</span><span class="arrow">→</span><span class="box">The test job</span><span class="arrow">→</span><span class="box">Your badge</span><span class="arrow">→</span><span class="box">Your own cabin</span>
-  </div>
-  <ul>
-    <li>Counts: jobs done well, faults caught early, the right part first time, and the mechanics you've been trained in. Reliability is Pillar 4's "Work" reputation plus turning up to the drill and the inspection.</li>
-    <li>The test job uses what you've learned: a round finds it, the scanner reads it, you fit the part, maybe a tuning step. Calder follows you (Torres on her days off). If it goes wrong, she tells you what to practise and sets another in a week.</li>
-    <li>Next morning at the board she hands you the Officer's badge, the Captain sends Mail, and you move into the spare cabin 4-23. The bigger story around promotion comes in Pillar 7.</li>
-  </ul>
-</section>
-
-<section id="more">
-  <h2>Seven more, on the ladder <span class="draft">your pick: all seven</span></h2>
-  <p>You picked all seven extra ideas. They come <b>after your promotion</b>, between days 23 and 35: the days before promotion already have something new each day, and several need things you only have by then (your tools, the Tier 2 wiring, the engine deck, the lift's shaft). The easy ones come first, and the trickiest to build (the lift roof) comes last. With team jobs, tracing and the workshop that's ten new things in about three weeks: one every two or three days, the pace you agreed.</p>
-  <div class="grid">
-    <div class="card"><b>11. Tool upkeep</b><span>Your tools wear. At your bench (Friday afternoons, by custom) recharge the scanner, clean and re-seal the pipe kit, check the logger. A tool that's due just works slower; it never stops. Later you look after the team's shared tools too.</span><span class="meta"><span class="tag">Torres</span><span class="tag">about day 23</span></span></div>
-    <div class="card"><b>12. The logbook</b><span>At the end of a shift, pick one of three lines that sum up your real shift. Calder mentions them at your progress talks, the next shift finishes your open jobs sooner, and later your own notes turn up as clues in head-scratchers.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 25</span></span></div>
-    <div class="card"><b>13. Leak hunting</b><span>"A pipe drips somewhere." Follow the puddle and the damp patch along the pipes (and, once sound is in, the drip getting louder), then fix the joint. Later behind panels in the pipe galleries.</span><span class="meta"><span class="tag">Torres</span><span class="tag">about day 27</span></span></div>
-    <div class="card"><b>14. Garden irrigation</b><span>While the garden crew harvest, walk the grow racks and clear the nozzles. Even watering means a slightly bigger next harvest. Later, flush a rack's line and service the irrigation machine.</span><span class="meta"><span class="tag">a gardener</span><span class="tag">about day 29</span></span></div>
-    <div class="card"><b>15. Rewiring</b><span>Redo a junction box's wiring by following the colour chart on its panel, wire by wire. A wrong pair pops a fuse at the test: open it and redo it. Later the chart is faded, which leads into the "faded labels" puzzle.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 31</span></span></div>
-    <div class="card"><b>16. Coolant rounds</b><span>A weekly round with the engine crew on Deck 6: read the gauges on the drive coils, mark any that are off, and top up the coolant where it's low. Repairing the engines stays for later tiers.</span><span class="meta"><span class="tag">Torres, an engine officer</span><span class="tag">about day 33</span></span></div>
-    <div class="card"><b>17. On the lift roof</b><span>In a quiet mid-morning hour the main lift is held; you ride its roof slowly down the spine and grease each guide, with a view nobody else gets. Crew use the other lift for the hour.</span><span class="meta"><span class="tag">a Works officer</span><span class="tag">about day 35</span></span></div>
-  </div>
+  <h2>Your promotions</h2>
+  <h3>Officer (days 15 to 17)</h3>
+  <ol class="steps">
+    <li><time>Day 15</time><b>The test job</b><span>A Tier 2 machine with Calder watching. If it goes wrong, she tells you what to practise and sets another.</span></li>
+    <li><time>Day 16, 10:30 · urgent</time><b>The summons</b><span>"Chief Calder: My office, 11:00. — C." If you don't come, she comes and finds you.</span></li>
+    <li><time>Day 16, 11:00</time><b>The scene</b><span>The Technician's badge and your Officer's collar pip. You answer, and she remembers what you said.</span></li>
+    <li><time>Day 16</time><b>The crew react</b><span>The Works crew are gathered at the board, friends congratulate you all day, and Brennan bakes a cake.</span></li>
+    <li><time>Day 16, 17:00</time><b>Your cabin</b><span>Calder walks you to 4-23 (Vance on her days off). You pass Tomas and Pell carrying your box; your name is on the door and your things are inside.</span></li>
+    <li><time>Day 17, 17:15</time><b>The officer ceremony</b><span>Deck 1's observation room: the Captain, Vance, Calder, Torres and up to three close friends. Your insignia is pinned on, and your uniform shows it from then on.</span></li>
+  </ol>
+  <h3>Senior Officer (days 22 to 24)</h3>
+  <p>A Tier 3 test job (your first planned shutdown), then an urgent summons: Calder's office, then the Captain's ready room. <b>Deck 2's visitors' suite</b> is refitted as yours (you can take the refit job yourself), and <b>Commander Vance walks you up</b> at 17:00 with your things moved. The Captain toasts you at the Captain's table the next evening. From then on, visitors stay in the second visitors' cabin and on Deck 4.</p>
+  <h3>Engine Specialist (days 29 and 30)</h3>
+  <p>A Tier 4 test job on a drive coil, then the engine crew's welcome: a new badge, not a new rank.</p>
 </section>
 
 <section id="puzzles">
-  <h2>Added: deductive repair puzzles <span class="draft">new · your ask</span></h2>
-  <p>You asked to keep the whole plan and add deduction puzzles to some repairs, <b>starting about 30 to 50% of the way into your progression</b>, so the early job stays simple. <b>Nothing above changes</b>, and the progression isn't made any longer. This adds a second track beside the ladder.</p>
-  <h3>The idea</h3>
-  <p>Some faults don't tell you their cause. The crew call them <b>head-scratchers</b>. The job card names a symptom ("the oven runs cool, but only at dinner"), and a new device page, <b>Fault notes</b>, lists the <b>suspects</b> (the parts or causes it could be). You collect <b>clues</b> by walking the ship: reading the machine's log at its panel, asking the crew who were there, finding the last shift's note, reading a gauge on Deck 5, checking the week's calendar. Each clue lets you cross a suspect out. When you're sure, you <b>call it</b>, and the rest is the job you know: fetch the part, fit it, turn it in.</p>
-  <div class="flow">
-    <span class="box">A strange symptom</span><span class="arrow">→</span><span class="box">Suspects</span><span class="arrow">→</span><span class="box">Clues around the ship</span><span class="arrow">→</span><span class="box">Cross out</span><span class="arrow">→</span><span class="box">Call it</span><span class="arrow">→</span><span class="box">Fetch and fit</span>
-  </div>
-  <div class="grid">
-    <div class="card"><b>Still "work, not a mini-game"</b><span>Every clue is at a place you walk to or a person you find. The device only holds your notes. The fix stays in your hands. No timers, no scores.</span></div>
-    <div class="card"><b>Only some repairs</b><span>Only real faults with a puzzling shape: ones that come and go, ones somebody already tried, ones others saw, a lying gauge, and at Tier 2 faults that start somewhere else and several identical parts. (Clashes come later, at Tier 3.) Everything else stays plain fetch and fit.</span></div>
-    <div class="card"><b>Never stuck, never failed</b><span>A wrong call costs a walk and some time (at Tier 2, a used seal or cartridge). After two wrong calls, Torres or Calder comes to talk it through. And there's always "the long way": fit each suspect in turn.</span></div>
-    <div class="card"><b>The same every time</b><span>Each case is built from the real ship: the machine's real busy hours, the crew who really were there, the real job history and pipes. Before you ever see a case, the game checks it has exactly one answer; if not, it stays a plain fault.</span></div>
-  </div>
-
-  <h3>How often</h3>
+  <h2>Head-scratchers: repairs you solve by deduction</h2>
+  <p>Some faults don't show their cause. The job names a symptom, and the device's <b>Fault notes</b> page lists the suspects. You gather clues by walking the ship and asking people, cross suspects out, and <b>call it</b>; then you fetch the part and fix it by hand. There are no timers and no scores. A wrong call costs a walk and some time (and from Tier 2, a seal or cartridge). There's always "the long way": fit each suspect in turn.</p>
   <div class="tablewrap"><table>
-    <tr><th>When</th><th>Head-scratchers among your real faults</th></tr>
-    <tr><td>Days 1-12</td><td>none (your first week and the first ladder steps stay simple)</td></tr>
-    <tr><td>Days 13-19</td><td>about 1 in 8 (one every other workday), one at a time</td></tr>
-    <tr><td>Day 19 to promotion</td><td>about 1 in 6</td></tr>
-    <tr><td>Tier 2, weeks 4-5</td><td>about 1 in 5 (1 in 3 on Tier 2 machines), two open at most</td></tr>
-    <tr><td>Tier 2, week 6 on</td><td>about 1 in 4 (1 in 3 on Tier 2 machines)</td></tr>
+    <tr><th>When</th><th>How many of your real repairs</th></tr>
+    <tr><td>Days 1 to 16 (Junior)</td><td>none</td></tr>
+    <tr><td>Days 17 to 21 (Officer)</td><td>about 1 in 6</td></tr>
+    <tr><td>Day 22 onward (Senior)</td><td>about 1 in 4 (1 in 3 on your own tier's machines)</td></tr>
   </table></div>
-  <p class="note">They're taken out of your 3 to 6 jobs a day, not added on top. None on days off or event days. No setting to change how many (your choice): the hints and "the long way" keep it kind.</p>
-
-  <h3>The nine kinds of puzzle (eight in Pillar 5)</h3>
+  <h3>The nine kinds</h3>
   <div class="grid">
-    <div class="card"><b>1. When does it happen?</b><span>Brennan's oven runs cool, but only at dinner. Its log shows it sags when the big range and the extractor run too. A bad element would be cool all day: <i>it's the power junction, sagging under load.</i> Later, the logger tool records a whole day for you.</span><span class="meta"><span class="tag">Torres</span><span class="tag">Day 14</span></span></div>
-    <div class="card"><b>2. Who saw what?</b><span>The mess door sticks now and then. Ask around: it stuck when the food trolley went through, twice; fine for Pell at breakfast. Tomas swears it stuck at 13:00, but he was at the gym then (he means the gym door; nobody lies). <i>Only wide things: the safety sensor.</i></span><span class="meta"><span class="tag">Calder, Tomas</span><span class="tag">Day 17</span></span></div>
-    <div class="card"><b>3. What's been tried?</b><span>Bunk 2's lamp flickers. Torres's note: "Swapped the bulb, still flickers." Pell's: "Reset the breaker: fine for an hour, then back." <i>A relay warming up.</i> The gentlest one, and the first you meet.</span><span class="meta"><span class="tag">Torres</span><span class="tag">Day 13</span></span></div>
-    <div class="card"><b>4. Which gauge is lying?</b><span>The cold store's display says 3°, but the milk's going off. The scanner on the back shelf reads 9°. <i>The sensor is lying, so the chiller never works harder.</i> Later: a table of scrubbers, one out of step.</span><span class="meta"><span class="tag">Torres</span><span class="tag">Day 19, with the scanner</span></span></div>
-    <div class="card"><b>5. Follow the line</b><span>Deck 4's showers are weak all day. Read the gauges along the water line (each one a walk) and halve it each time until you find where it drops. <i>The manifold's Deck 4 valve is sticking.</i> This is how "tracing faults" (mechanic 9) gets harder.</span><span class="meta"><span class="tag">Calder</span><span class="tag">Tier 2</span></span></div>
-    <div class="card"><b>6. Does it add up?</b><span>The garden's far beds are dry. The recycler sends 15; the branches get 6, 5 and 2. <i>Two are going missing</i>; check the joints in the pipe gallery until the sums match.</span><span class="meta"><span class="tag">Calder</span><span class="tag">Tier 2</span></span></div>
-    <div class="card"><b>7. Faded labels</b><span>A junction's four relay labels have worn off, and one relay chatters. Pell's old sketch, what you saw at the Wednesday power drill, and flipping test switches tell you which feeds what. Then you relabel the panel for good.</span><span class="meta"><span class="tag">Calder</span><span class="tag">Tier 2 · a grid</span></span></div>
-    <div class="card"><b>8. Swap testing</b><span>One of five recycler cartridges leaks. The machine shop's test rig says how many in a group leak, not which, and you have three runs. Test 1 and 2: none. Test 3: one. Out of runs? Calder says "new ones all round", which costs parts.</span><span class="meta"><span class="tag">the machine shop tech</span><span class="tag">Tier 2 · the test rig</span></span></div>
-    <div class="card"><b>9. The clash (later, at Tier 3)</b><span>The recycler trips on Tuesdays and Fridays at 06:40. The calendar and the crew's week show what lands on both mornings. <i>The gym class plus a second big draw.</i> Service it, and ask the laundry hand to move Tuesday's wash to 08:00.</span><span class="meta"><span class="tag">Calder</span><span class="tag new">Tier 3, later: your answer</span></span></div>
+    <div class="card"><b>1. When does it happen?</b><span>Brennan's oven runs cool, but only at dinner. Its log shows it sags when the big range and the extractor run too. A bad element would be cool all day: <i>it's the power junction, sagging under load.</i> Later, the logger tool records a whole day for you.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 18</span></span></div>
+    <div class="card"><b>2. Who saw what?</b><span>The mess door sticks now and then. Ask around: it stuck when the food trolley went through, twice; fine for Pell at breakfast. Tomas swears it stuck at 13:00, but he was at the gym then (he means the gym door; nobody lies). <i>Only wide things: the safety sensor.</i></span><span class="meta"><span class="tag">Tomas</span><span class="tag">day 19</span></span></div>
+    <div class="card"><b>3. What's been tried?</b><span>Bunk 2's lamp flickers. Torres's note: "Swapped the bulb, still flickers." Pell's: "Reset the breaker: fine for an hour, then back." <i>A relay warming up.</i> The gentlest one, and the first you meet.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 17 · your first</span></span></div>
+    <div class="card"><b>4. Which gauge is lying?</b><span>The cold store's display says 3°, but the milk's going off. The scanner on the back shelf reads 9°. <i>The sensor is lying, so the chiller never works harder.</i> Later: a table of scrubbers, one out of step.</span><span class="meta"><span class="tag">Torres</span><span class="tag">day 22</span></span></div>
+    <div class="card"><b>5. Follow the line</b><span>Deck 4's showers are weak all day. Read the gauges along the water line (each one a walk) and halve it each time until you find where it drops. <i>The manifold's Deck 4 valve is sticking.</i> This is how tracing faults gets harder; later it's power lines too.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 24</span></span></div>
+    <div class="card"><b>6. Does it add up?</b><span>The garden's far beds are dry. The recycler sends 15; the branches get 6, 5 and 2. <i>Two are going missing</i>; check the joints in the pipe gallery until the sums match.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 26</span></span></div>
+    <div class="card"><b>7. Faded labels</b><span>A junction's four relay labels have worn off, and one relay chatters. Pell's old sketch, what you saw at the Wednesday power drill, and flipping test switches tell you which feeds what. Then you relabel the panel for good.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 29 · a grid</span></span></div>
+    <div class="card"><b>8. Swap testing</b><span>One of five recycler cartridges leaks. The machine shop's test rig says how many in a group leak, not which, and you have three runs. Test 1 and 2: none. Test 3: one. Out of runs? Calder says "new ones all round", which costs parts.</span><span class="meta"><span class="tag">the machine shop tech</span><span class="tag">day 30 · the test rig</span></span></div>
+    <div class="card"><b>9. The clash</b><span>The recycler trips on Tuesdays and Fridays at 06:40. The calendar and the crew's week show what lands on both mornings. <i>The gym class plus a second big draw.</i> Service it, and ask the laundry hand to move Tuesday's wash to 08:00.</span><span class="meta"><span class="tag">Calder</span><span class="tag">day 25 · Tier 3</span></span></div>
   </div>
-  <p class="note">Each kind is taught like a ladder step (the teacher does the first case with you, thinking out loud, then watches you do one). Each grows with your tier: more suspects, clues on more decks, a witness with an honest mix-up, and at the top, two causes at once.</p>
-
   <h3>Hints, gentlest first</h3>
   <ul>
-    <li><b>The Chief's notes:</b> Calder's binder of rules of thumb ("Weak only at the busy hour: the pump. Weak all day: the filter."), on her shelf and on your device. A page is added with each training, and more for machines you know well.</li>
-    <li><b>Ask a Works hand</b> on shift: they tell you what kind of clue you're missing.</li>
+    <li><b>The Chief's notes:</b> rules of thumb, with a page added for each kind.</li>
+    <li><b>Ask a Works hand</b> what kind of clue you're missing.</li>
     <li><b>Talk it through</b> with Torres or Calder: they cross one suspect out with you.</li>
     <li><b>The long way:</b> fit each suspect in turn. It always works.</li>
   </ul>
-
-  <h3>Where the puzzles start: about a third of the way in</h3>
-  <p>Your job's progression in Pillar 5 runs from <b>day 1</b> (your first week) to about <b>day 42</b> (the end of the after-promotion mechanics). The early part has <b>no puzzles at all</b>. The first head-scratcher comes at about <b>day 13: about 31% of the way in</b>. By time played, which is what you feel, that's inside the 30 to 50% you asked for, and you confirmed it. (Counted by ladder steps it's after 5 of 19 now that your seven extra mechanics are in, all of them after promotion.) The progression is no longer than before.</p>
-  <div style="margin:10px 0 4px">
-    <div style="display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line);font-size:11.5px">
-      <div style="width:17%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--muted);white-space:nowrap">wk 1</div>
-      <div style="width:12%;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;color:var(--muted);white-space:nowrap">8-12</div>
-      <div style="width:19%;background:rgba(233,196,106,.25);display:flex;align-items:center;justify-content:center;color:#f1dca0;white-space:nowrap">Tier 1</div>
-      <div style="width:52%;background:rgba(76,195,181,.22);display:flex;align-items:center;justify-content:center;color:#bdeee6;white-space:nowrap">Tier 2: puzzles grow</div>
-    </div>
-    <div style="position:relative;height:30px;font-size:11.5px;color:var(--gold)">
-      <span style="position:absolute;left:calc(31% - 6px);white-space:nowrap">▲ day 13 · 31%: first puzzle</span>
-    </div>
-    <div class="note" style="display:flex;justify-content:space-between"><span>day 1</span><span>promotion ~day 20</span><span>day 42</span></div>
-  </div>
-  <p><b>What starts it:</b> not a date. Like every ladder step, it opens once the step before it, <b>hauling</b>, has been used about three times, on a day with nothing else new. For a steady player that's about day 13; if you're slower it waits, but it always comes at the same point: after hauling, before tuning. Torres finds you at the board with a job the last shift couldn't crack.</p>
-  <p><b>Then it grows:</b> about 1 in 8 of your real faults at first, 1 in 6 after the scanner, 1 in 5 once you're promoted, and about 1 in 4 in the last week. Only ever some repairs.</p>
-  <ol class="steps">
-    <li><time>About day 13 · 31% · Torres</time><b>What's been tried?</b><span>Your first head-scratcher, with the Fault notes page and the Chief's notes.</span></li>
-    <li><time>About day 14 · 33% · Torres</time><b>When does it happen?</b><span>Between hauling and tuning on the ladder.</span></li>
-    <li><time>About day 17 · 40% · Calder, Tomas</time><b>Who saw what?</b><span>A new "Ask about the fault" button when you chat.</span></li>
-    <li><time>About day 19 · 45% · Torres</time><b>Which gauge is lying?</b><span>The day after the scanner.</span></li>
-    <li><time>About day 20 · 48% · Calder</time><b>Your test job</b><span>gains one easy head-scratcher step. Still only ever delayed.</span></li>
-    <li><time>About day 26 · 62%</time><b>Follow the line</b><span>Two days after tracing faults; the logger tool.</span></li>
-    <li><time>About day 30 · 71%</time><b>Swap testing</b><span>The test rig, two days after the workshop.</span></li>
-    <li><time>About day 32 · 76%</time><b>Does it add up?</b><span></span></li>
-    <li><time>About day 34 · 81%</time><b>Fault-finder</b><span>Your first grade and its pin.</span></li>
-    <li><time>About day 36 · 86%</time><b>Faded labels</b><span>After rewiring.</span></li>
-    <li><time>About day 38 · 90%</time><b>Trusted fault-finder</b><span>Your second grade.</span></li>
-    <li><time>About day 39 · 93%</time><b>Favours</b><span>Crew start bringing you their own little mysteries.</span></li>
-    <li><time>About day 42 · 100%</time><b>Old mysteries</b><span>The board of old mysteries opens as Pillar 5 ends; <b>the ship's fault-finder</b> comes when you're ready, after.</span></li>
-    <li><time>Later, at Tier 3</time><b>The clash</b><span>Kept for later tiers, as you asked.</span></li>
-  </ol>
-  <div class="grid">
-    <div class="card"><b>Fault-finder grades</b><span>Three, in words, each with a small pin on your uniform, each earned with a harder "ticket case" Calder sets. Only ever delayed. They sit inside Tier 2; they aren't a promotion.</span></div>
-    <div class="card"><b>Tools that open new clues</b><span>The scanner (already planned) reads parts and sensors; the <b>logger</b> (new) records a machine's whole day; the pipe kit (already planned) reads gauges along a line; the <b>test rig</b> (new) tests parts in groups.</span></div>
-    <div class="card"><b>A name for clever fixes</b><span>"Right first time" and "a clever fix" go in your work log, lift your Work reputation a little, and the crew talk about it: "Heard you sorted the mess door. The sensor! Who knew?"</span></div>
-    <div class="card"><b>Crew asking for help</b><span>Off shift, crew bring you their own little mysteries as favours ("my lamp flickers only when Pell plays guitar next door"). Juniors stuck on a case ask you at the board, and you tell them which clue they missed.</span></div>
-  </div>
-
-  <h3>Alongside everything else</h3>
-  <ul>
-    <li><b>Rounds:</b> a "something's off" mark can turn into a head-scratcher. <b>Laundry:</b> washer mysteries; the laundry hand is a witness. <b>The drill:</b> the power drill is a free clue for faded labels. <b>Hauling:</b> Tier 2 wrong calls use stock. <b>Tuning:</b> some answers are "it's a setting, not a part".</li>
-    <li><b>Incidents:</b> never a puzzle while making it safe; afterwards an optional "why did it burst?". <b>The scanner:</b> one of the clue types. <b>Team jobs:</b> an answer can be "this needs a team". <b>Tracing:</b> grows into "Follow the line" and "Does it add up?". <b>The workshop:</b> home of the test rig.</li>
-    <li><b>Your device</b> gains Fault notes and the Chief's notes beside Training, Work log and Tools.</li>
-  </ul>
-
   <h3>On your phone</h3>
-  <p>One case per screen in the device's cyan style: the symptom, the suspects as big chips you tap to cross out (you cross them out; the game never does it for you), the puzzle's own view (a day strip, a line map, a grid or the test rig), your clues, and two buttons: <b>Where next?</b> (points the arrow at a clue place you haven't visited) and <b>Call it</b>. Tap only, everything at least thumb-sized, grids no bigger than 5 by 5. Nothing new is drawn on the decks.</p>
   <div class="grid">
     <div class="card"><b>Mock-up 1 · When does it happen?</b><img src="shots/p5-puzzle-when.png" alt="Fault notes on a phone: the oven's day strip and suspects" style="width:100%;border-radius:10px;margin-top:6px"></div>
     <div class="card"><b>Mock-up 2 · Follow the line</b><img src="shots/p5-puzzle-line.png" alt="Fault notes on a phone: the water line map with gauges" style="width:100%;border-radius:10px;margin-top:6px"></div>
     <div class="card"><b>Mock-up 3 · Swap testing</b><img src="shots/p5-puzzle-rig.png" alt="Fault notes on a phone: the test rig with five cartridges" style="width:100%;border-radius:10px;margin-top:6px"></div>
   </div>
-  <p class="note">The mock-ups are also a page of their own: <code>plans/pillar5-puzzles-mockup.html</code>.</p>
-
-  <h3>What it adds to the team and the order</h3>
-  <ul>
-    <li><b>Seats:</b> inside the one small team below: the designer also writes the puzzle pages and plays the generated cases for fairness, and one head-scratcher engineer builds them across three steps.</li>
-    <li><b>The order:</b> the first four kinds in step 3 (days 13 to 19), the test-job step in step 4, two Tier 2 kinds in step 5, and the rest with the grades and extras in step 6. The clash waits for Tier 3.</li>
-    <li><b>A new check</b> (<code>puzzle_check.py</code>) runs the whole progression on paper and checks every case: exactly one answer, needs more than one clue, every clue reachable, the long way always works, the right share per tier, and the same result twice.</li>
-  </ul>
+  <p class="note">Every case is built from the real ship and checked to have exactly one answer before you see it; if not, it stays a plain repair. The mock-ups are also a page of their own: <code>plans/pillar5-puzzles-mockup.html</code>.</p>
 </section>
 
-<section id="career">
-  <h2>Added: career progression <span class="draft">new · your ask</span></h2>
-  <p>You asked to bring career progression into Pillar 5, "since it all coincides". It used to be Pillar 7's. Everything above stays; this replaces only the short "promotion moment" with a proper sequence.</p>
-
-  <h3>How ranking up works: one clear rule</h3>
-  <div class="flow">
-    <span class="box">Good work</span><span class="arrow">→</span><span class="box">Your Works reputation grows</span><span class="arrow">→</span><span class="box">Harder, more interesting jobs</span><span class="arrow">→</span><span class="box">Calder sets your test job</span><span class="arrow">→</span><span class="box">Promotion</span>
-  </div>
-  <ul>
-    <li><b>One thing to watch: your Works reputation</b>, in words, never a number (it's the same Work reputation the crew already have of you).</li>
-    <li><b>It goes up</b> with jobs done (bigger faults count more), faults you catch early, the right part first time, clever fixes, turning up to the drill and the inspection. <b>It goes down</b> with missed shifts and jobs left half-done.</li>
-    <li><b>It decides the work you're given:</b> the higher it is, the more interesting the jobs the crew leave for you on the board.</li>
-    <li><b>You always know where you stand:</b> your Record shows your rank, your reputation in words and one "What's next" line ("Calder wants to see you handle a scrubber before she puts you up"). You're never demoted: a dip just means fewer interesting jobs until you pick up again.</li>
-  </ul>
-  <div class="tablewrap"><table>
-    <tr><th>Reputation</th><th>Jobs left for you</th></tr>
-    <tr><td>New</td><td>fetch and replace, chores (your first week)</td></tr>
-    <tr><td>Steady</td><td>about half real faults; rounds, laundry, hauling</td></tr>
-    <tr><td>Reliable</td><td>urgent jobs too; the first head-scratchers; tuning and incidents</td></tr>
-    <tr><td>Trusted</td><td>a supervised Tier 2 job now and then</td></tr>
-    <tr><td>Relied on</td><td>Calder sets your test job for promotion</td></tr>
-  </table></div>
-  <p class="note">After a promotion it starts again for your new rank ("New officer" and up), each step bringing harder Tier 2 work.</p>
-
-  <h3>Your ranks</h3>
-  <div class="tablewrap"><table>
-    <tr><th>Rank</th><th>Works title</th><th>Where you live</th><th>When</th></tr>
-    <tr><td>Junior Officer</td><td>Junior Technician</td><td>Bunk 1, with Tomas</td><td>when you arrive</td></tr>
-    <tr><td><b>Officer</b></td><td><b>Technician</b></td><td><b>your own cabin, 4-23</b></td><td><b>about day 20, in Pillar 5, with the officer ceremony</b></td></tr>
-    <tr><td><b>Senior Officer</b></td><td><b>Senior Technician (Tier 3)</b></td><td><b>Deck 2's visitors' suite, made yours</b></td><td><b>about day 44, in Pillar 5</b></td></tr>
-    <tr><td>Senior Officer</td><td>Engine Specialist (Tier 4)</td><td>your Deck 2 suite</td><td>about day 70</td></tr>
-  </table></div>
-  <p class="note">You climb but never command, so Senior Officer is the top (your answer).</p>
-
-  <h3>Your first promotion, step by step</h3>
-  <ol class="steps">
-    <li><time>About day 20 · Calder</time><b>The test job</b><span>A real Tier 2 job with Calder watching. If it goes wrong, she tells you what to practise and sets another in a week.</span></li>
-    <li><time>Day 21, 10:30 · urgent</time><b>The summons</b><span>Your device sounds: "Chief Calder: My office, 11:00. — C." Torres: "Go on. She doesn't bite. Usually." If you don't come, she walks over and finds you. You can't miss it.</span></li>
-    <li><time>Day 21, 11:00 · Calder's office</time><b>The scene</b><span>She tells you you've passed and hands you the Technician's badge and your Officer's collar pip. You answer (proud, surprised, or "about time"), and she remembers which.</span></li>
-    <li><time>Day 21 · all day</time><b>The crew react</b><span>The Works crew are gathered at the board when you come out: applause, Torres grinning. Friends congratulate you all day, there's Mail from friends and the Captain, a ship news item, and Brennan's cake at the Works tea corner after the shift.</span></li>
-    <li><time>Day 21, about 17:00 · Calder</time><b>Your new quarters</b><span>Calder walks you up to the officers' corridor, talking about officers' ways. On the way you pass Tomas and Pell carrying your box. Your name and rank are already on the door of 4-23, and your things are inside. Tomas: "Don't be a stranger, Officer."</span></li>
-    <li><time>Day 22, about 16:30 · the Captain</time><b>The officer ceremony</b><span>In the observation room on Deck 1, with the Captain, Commander Vance, Calder, Torres and up to three of your closest friends. The Captain reads your commission and pins your insignia (your uniform shows it from now on), then a handshake and a toast. The framed commission goes on your shelf.</span></li>
-  </ol>
-
-  <h3>Your second promotion</h3>
-  <p>It happens in Pillar 5 too, as you chose: see <a href="#tiers" style="color:#bdeee6">Tiers 3 and 4</a>.</p>
-</section>
-
-<section id="tiers">
-  <h2>Added: Tiers 3 and 4, the night shift, mentoring and your story <span class="draft">new · your answers</span></h2>
-  <p>You chose to build everything that was Pillar 7 into Pillar 5: "I know it's big. But this is absolute bulk of the game." This section covers that work: the second promotion (switched on right away), Tier 3, a week on the night shift, Tier 4, mentoring a junior and your career story. It also maps every job to the rank it needs, with some jobs reserved for a rank, as you asked.</p>
-
-  <h3>The whole journey: about 14 ship weeks</h3>
-  <div style="margin:10px 0 4px">
-    <div style="display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line);font-size:11px">
-      <div style="width:21%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--muted);white-space:nowrap">Junior</div>
-      <div style="width:23%;background:rgba(76,195,181,.18);display:flex;align-items:center;justify-content:center;color:#bdeee6;white-space:nowrap">Officer</div>
-      <div style="width:28%;background:rgba(233,196,106,.22);display:flex;align-items:center;justify-content:center;color:#f1dca0;white-space:nowrap">Senior · Tier 3</div>
-      <div style="width:28%;background:rgba(229,143,122,.22);display:flex;align-items:center;justify-content:center;color:#f3c3b6;white-space:nowrap">Senior · Tier 4</div>
-    </div>
-    <div class="note" style="display:flex;justify-content:space-between"><span>day 1</span><span>21</span><span>44</span><span>71</span><span>day 98</span></div>
-  </div>
-  <p>About <b>98 ship days, roughly 65 real hours</b>, of new things opening (before, it was about 42 days). After that the ship keeps running with all your work, the puzzles and, later, the ship-wide events.</p>
-
-  <h3>Your second promotion: Senior Officer (about days 43 to 45)</h3>
-  <p>A Tier 3 test job (your first planned shutdown, with Calder) comes first. The next work day there's an urgent summons: Calder's office, then together to <b>the Captain's ready room</b>, where the Captain tells you. <b>Deck 2's visitors' suite</b>, on the hull with a window, is refitted as yours; you can take the refit job yourself and watch the door plate change to your name. <b>Commander Vance walks you up</b> that evening with your things moved, and the Captain toasts you at a special dinner at the Captain's table the next evening. From then on, visitors stay in the second visitors' cabin and Deck 4's guest cabins.</p>
-
-  <h3>Tier 3: planning around people (weeks 7 to 10)</h3>
+<section id="side">
+  <h2>Side jobs and side paths (optional)</h2>
+  <p>These are open from your Officer week. Each is taught once by a person when you first take it. You never need any of them to rank up; they're there between promotions and after the journey ends.</p>
   <div class="grid">
-    <div class="card"><b>Power and relays</b><span>The relay room under the bridge, the battery rows, the power junctions on Deck 6. A new tool, the conduit tester, reads power along a line, the way the pipe kit reads water.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 46</span></span></div>
-    <div class="card"><b>Shutdowns</b><span>Some repairs need the power off. You see who that junction feeds, pick a quiet hour, warn the people affected (tell Brennan in person before a galley shutdown) and choose what keeps power. A badly chosen hour just means grumbles and a late dinner.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 48</span><span class="tag new">senior only</span></span></div>
-    <div class="card"><b>The Monday briefing</b><span>A seat at the senior crew's weekly table with the Captain. You hear the week's plans first and choose what Works raises (a shutdown to book, a worry, a request for parts), and it happens.</span><span class="meta"><span class="tag">the Captain</span><span class="tag">about day 50</span><span class="tag new">senior only</span></span></div>
-    <div class="card"><b>The clash</b><span>The puzzle you kept for later tiers comes back here, where it fits: two things that only go wrong together, and a fix that moves someone's routine or a shutdown hour.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 52</span></span></div>
-    <div class="card"><b>The sensor array</b><span>Up in Deck 2's array room, calibrate the sensors with a new tool, the calibration rig, against a star the Survey crew name. Your star logging pays off.</span><span class="meta"><span class="tag">the Deputy Survey Chief</span><span class="tag">about day 53</span></span></div>
-    <div class="card"><b>The night-shift week</b><span>Calder assigns it at a Monday briefing, a week ahead. For one ship week (about days 57 to 63) you're the night shift's senior Works officer: you sleep by day, eat at the edges of the meal windows, walk the hushed ship, meet the night crew, and handle anything that goes wrong at 3 a.m.</span><span class="meta"><span class="tag">Calder</span><span class="tag new">senior only</span></span></div>
+    <div class="card"><b>The workshop</b><span>Crew order small things; you make and deliver them.</span></div>
+    <div class="card"><b>Tool upkeep</b><span>Recharge and clean your tools at your bench.</span></div>
+    <div class="card"><b>The logbook</b><span>A line in the Works log after your shift. Your notes come back later as puzzle clues.</span></div>
+    <div class="card"><b>Leak hunting</b><span>Follow the wet to the drip.</span></div>
+    <div class="card"><b>Garden irrigation</b><span>Clear the racks' nozzles at harvest.</span></div>
+    <div class="card"><b>Rewiring</b><span>Follow a junction's colour chart, wire by wire.</span></div>
+    <div class="card"><b>On the lift roof</b><span>Ride the car's roof down the spine, greasing the guides.</span></div>
+    <div class="card"><b>Favours and old mysteries</b><span>Crew bring you their own little puzzles, and there's a board of faults nobody solved.</span></div>
+    <div class="card"><b>Fault-finder grades</b><span>Three harder ticket cases, each with a pin for your uniform.</span></div>
+    <div class="card"><b>Off shift</b><span>Tinkering, touches for your cabin, logging stars.</span></div>
   </div>
-
-  <h3>Tier 4: leading a team (weeks 11 to 14)</h3>
-  <div class="grid">
-    <div class="card"><b>Engine Specialist</b><span>A Tier 4 test job on a drive coil. It isn't a new rank, but you get a new badge and the engine crew's welcome: they sign your badge, and Torres makes a speech that goes on too long.</span><span class="meta"><span class="tag">Calder, Torres</span><span class="tag">about day 70</span></span></div>
-    <div class="card"><b>Engine work and the reactor</b><span>Service the drive coils and engine control, and balance the coils. The reactor needs a permit from the bridge, a dosimeter badge and a short, careful visit. Nothing frightening and no fail; it's just the most careful job on the ship.</span><span class="meta"><span class="tag">Torres</span><span class="tag">days 72 and 75</span><span class="tag new">reactor: specialists only</span></span></div>
-    <div class="card"><b>Leading team jobs</b><span>For a big job, pick two or three crew on shift (friends say yes faster), book a time with the bridge if the drive needs slowing, give each person their spot, and call the steps.</span><span class="meta"><span class="tag">Calder</span><span class="tag">about day 78</span><span class="tag new">Tier 4 lead only</span></span></div>
-    <div class="card"><b>Mentoring a junior</b><span>A new cadet arrives with Sunday's crew rotation and is yours for two weeks. They watch you, then you watch them. They get stuck on a puzzle and you point them to the clue; they're late once and you choose what to say.</span><span class="meta"><span class="tag">about day 82</span><span class="tag new">senior only</span></span></div>
-    <div class="card"><b>Your career story</b><span>Four moments with Calder and Torres across your career: why Calder chose Works, Torres's own failed test years ago, and on the last day, "Calder's question" about what you want next. Your Record keeps milestones with dates.</span><span class="meta"><span class="tag">throughout</span></span></div>
-  </div>
-
-  <h3>Which jobs need which rank</h3>
-  <p>Every job has a tier (its machine's tier), and some are <b>reserved for a rank</b>. The crew follow the same rule, so a reserved job waits for the right person and the ship never waits on you. After each promotion, <b>junior jobs</b> stop being left for you (you can still lend a hand).</p>
-  <div class="tablewrap"><table>
-    <tr><th>Rank</th><th>Your jobs</th><th>Reserved for this rank</th></tr>
-    <tr><td>Junior Officer · Tier 1</td><td>fetch and replace, chores, rounds on a set route, tuning, incidents with Calder, the scanner, Tier 1 puzzles</td><td>junior jobs: laundry duty, the food cart, hauling runs, the bunk inspection; at the drill you hold the extinguisher or the door</td></tr>
-    <tr><td>Officer · Tier 2</td><td>Tier 2 machines, tracing, team jobs (a pair of hands), the workshop, tool upkeep, leak hunting, irrigation, rewiring, coolant readings, the lift roof, Tier 2 puzzles, favours, old mysteries</td><td>writing the Works logbook; signing off hauling manifests; mustering the Works team at the drill; first on the scene at incidents</td></tr>
-    <tr><td>Senior Officer · Tier 3</td><td>power, relays, batteries, the sensor array, Tier 3 puzzles, the clash</td><td><b>planning shutdowns</b>, <b>the Monday briefing</b>, <b>the night shift's senior post</b>, running the drill, saying an incident is safe</td></tr>
-    <tr><td>Senior Officer · Tier 4</td><td>engine work, the drive coils, Tier 4 puzzles</td><td><b>the reactor</b> (specialists, with a permit), <b>leading team jobs</b>, <b>mentoring a junior</b></td></tr>
-  </table></div>
-  <p class="note">The full map, job by job, is in the detailed plan (<code>plans/pillar5-plan.md</code>, Part 8.8).</p>
-
-  <h3>Still a small team: more steps, not more people</h3>
-  <p>At most about 6 helpers at once. The six steps already planned are followed by five more, each with a check-in where you play it:</p>
-  <div class="waves">
-    <div class="wave"><b>7 · Senior Officer</b>Tier 3 machines, the conduit tester, the second promotion and your Deck 2 suite.<span class="ci">Check-in 7.</span></div>
-    <div class="wave"><b>8 · Tier 3 work</b>Power and relays, shutdowns, the Monday briefing, the sensor array, the clash.<span class="ci">Check-in 8.</span></div>
-    <div class="wave"><b>9 · The night shift</b>Your upside-down week and the night ship.<span class="ci">Check-in 9.</span></div>
-    <div class="wave"><b>10 · Tier 4</b>Engine Specialist, engine work, the reactor, leading team jobs.<span class="ci">Check-in 10.</span></div>
-    <div class="wave"><b>11 · Mentoring and your story</b>Your junior, the four story moments, the milestones, the end of the journey.<span class="ci">Check-in 11: Pillar 5 final, then into the main version with your OK.</span></div>
-  </div>
-  <ul>
-    <li><b>Risks:</b> the size (each step ends playable, and you can pause after any of them); the night shift turning your day upside down (it gets its own step, and it lasts one week only); reserved jobs left undone (senior crew take them too); crowding on Decks 1 and 6 (at most about 8 at the table, 4 on a team, phone speed measured).</li>
-  </ul>
 </section>
-
-<section id="p4">
-  <h2>Built on its own <span class="draft">your answer</span></h2>
-  <p>You said: "we will develop Pillar 5 on its own." So Pillar 5 starts <b>after Pillar 4 is finished</b>, not beside it. That makes it simpler:</p>
-  <ul>
-    <li><b>No racing for the game file:</b> nobody else is changing the same parts at the same time.</li>
-    <li><b>No extra crew to keep two pillars apart:</b> the two "cross-pillar coordinators" and the second build master from the earlier plan aren't needed.</li>
-    <li><b>Still tidy:</b> the work lives in its own new part of the game file, one small block per mechanic with one owner, so taking a block out only removes that mechanic.</li>
-    <li><b>Your first week stays safe:</b> the ladder starts on day 8 and Pillar 4's first-week test runs on every change.</li>
-  </section>
 
 <section id="team">
-  <h2>The team: one small crew</h2>
-  <p>At most about <b>6 helpers at once</b>, because you're watching usage. Three stay for the whole pillar; up to three builders join for their step and leave when it's signed off.</p>
-  <div class="tablewrap"><table>
-    <tr><th>Seat</th><th>Does</th><th>When</th></tr>
-    <tr><td>Designer (no code)</td><td>a page for every mechanic and puzzle kind for you to approve; plays each build and the generated puzzles before you do</td><td>throughout</td></tr>
-    <tr><td>Build master</td><td>puts the builders' work together, runs every test, checks each change against the checklist; the lead releases</td><td>throughout</td></tr>
-    <tr><td>Career engineer</td><td>the ladder, training, tools, skill in words, the test job, promotion, your device's work pages</td><td>steps 1, 2 and 4</td></tr>
-    <tr><td>Systems engineer</td><td>more real faults; the machine side of every mechanic</td><td>step 1, then on call</td></tr>
-    <tr><td>Player engineer</td><td>the building blocks your hands use (look, choose, turn, wait); your uniform; off-shift things</td><td>step 1, then on call</td></tr>
-    <tr><td>Three mechanic engineers</td><td>about six mechanics each, in ladder order</td><td>steps 2, 3, 5 and 6</td></tr>
-    <tr><td>Head-scratcher engineer</td><td>the puzzles, Fault notes, the hints, the grades</td><td>steps 3, 5 and 6</td></tr>
-    <tr><td>Deck builder 2</td><td>the new places (laundry, your bench, the garden racks, the engine gauges, your cabin, Deck 5's machine rooms)</td><td>steps 2, 4 and 5</td></tr>
-    <tr><td>Works writer</td><td>training lines, incident lines, inspection remarks, witness lines, logbook summaries</td><td>steps 3, 4 and 6</td></tr>
-  </table></div>
-  <p class="note">If usage needs reining in further, it can run with 4 at once (the designer, the build master and two builders): slower, but nothing is cut. Helpers from Pillar 4 (crew schedules, phone speed, the device) are on call only when a step needs them.</p>
-</section>
-
-<section id="waves">
-  <h2>The order, with a check-in after every step</h2>
+  <h2>The team and the steps</h2>
+  <p>It's built on its own after Pillar 4, by at most about <b>6 helpers at once</b>: a designer, a build master and a career engineer for the whole pillar, plus up to three builders who join for their step. There are six steps, each ending in a build you play at a check-in.</p>
   <div class="waves">
-    <div class="wave"><b>0 · done</b>You answered every question. Pillar 5 waits for Pillar 4 to finish.</div>
-    <div class="wave"><b>1 · the foundation</b>More real faults, quicker repairs with practice, your Works reputation deciding the jobs you're given, the building blocks, the ladder itself; pages for the first mechanics.<span class="ci">Check-in 1: play a work day; approve the pages.</span></div>
-    <div class="wave"><b>2 · your second week</b>Rounds, laundry and uniforms, the drill and the inspection, hauling.<span class="ci">Check-in 2: play your second week.</span></div>
-    <div class="wave"><b>3 · puzzles start</b>The first four kinds of head-scratcher, tuning, incidents, the scanner.<span class="ci">Check-in 3.</span></div>
-    <div class="wave"><b>4 · promotion</b>The test job, the summons, the badge and the crew, being walked to your own cabin, the officer ceremony.<span class="ci">Check-in 4: from near the test job to the ceremony.</span></div>
-    <div class="wave"><b>5 · after promotion, part 1</b>Team jobs, tracing, the workshop, tool upkeep, the logbook, leak hunting, two Tier 2 puzzles.<span class="ci">Check-in 5.</span></div>
-    <div class="wave"><b>6 · after promotion, part 2</b>Irrigation, rewiring, coolant rounds, the lift roof, the last Tier 2 puzzles, grades, favours, old mysteries, cabin touches, star logging.<span class="ci">Check-in 6.</span></div>
-    <div class="wave"><b>7 to 11 · Tiers 3 and 4</b>See <a href="#tiers" style="color:#bdeee6">Tiers 3 and 4</a>.<span class="ci">Check-ins 7 to 11, then into the main version with your OK.</span></div>
+    <div class="wave"><b>1 · Foundation</b>More real faults, jobs by tier and rank, your reputation, the building blocks.<span class="ci">Check-in 1: a work day; approve the first pages.</span></div>
+    <div class="wave"><b>2 · Your Junior week</b>Rounds, laundry, the drill and inspection, hauling, tuning, incidents, the scanner.<span class="ci">Check-in 2: days 8 to 12.</span></div>
+    <div class="wave"><b>3 · Officer</b>The test job and the whole first promotion, tracing, team jobs, the first puzzles.<span class="ci">Check-in 3: day 15 onward.</span></div>
+    <div class="wave"><b>4 · Side jobs</b>The workshop, the seven extras, favours, grades, old mysteries, cabin touches.<span class="ci">Check-in 4.</span></div>
+    <div class="wave"><b>5 · Senior Officer</b>The second promotion and your suite, Tier 3, more puzzle kinds, the night shift.<span class="ci">Check-in 5: day 22 through the night shift.</span></div>
+    <div class="wave"><b>6 · Tier 4 and the end</b>The briefing, Engine Specialist, the reactor, leading a team, mentoring, your story, "Calder's question".<span class="ci">Check-in 6: the final build, then into the main version with your OK.</span></div>
   </div>
+  <p class="note">If usage needs reining in, it can run with 4 at once: slower, but nothing is cut.</p>
 </section>
 
 <section id="risks">
   <h2>Risks, and what we do about them</h2>
   <ul>
-    <li><b>Too much for a new player:</b> one mechanic at a time, taught by a person, never two on a day.</li>
-    <li><b>Mechanics becoming mini-games:</b> everything in the world with your hands, feedback from the machine itself, no timers or scores.</li>
-    <li><b>Phones slowing down:</b> each mechanic's props are tiny (2 or 3 draw calls), only on their deck while in use, and measured against the 450 limit.</li>
-    <li><b>The game must play the same every time:</b> faults, drift and incidents are worked out from the day and the machine, never by chance, and checked twice.</li>
-    <li><b>Usage:</b> one small team, at most about 6 at once (4 if needed), after Pillar 4 is done.</li>
-    <li><b>The lift roof:</b> the trickiest of your seven picks (the lift and the camera in its shaft), so it comes last and its phone speed is measured.</li>
-    <li><b>Puzzles that are unfair, too wordy or too hard:</b> every case is checked for exactly one answer before you see it, clue lines are one sentence, hints go gentlest first, and there's always "the long way".</li>
-    <li><b>Breaking your first week:</b> the ladder starts on day 8, and Pillar 4's first-week test runs on every change.</li>
+    <li><b>Too much, too fast:</b> at most one big and one small new thing a workday; later stages and side jobs are off the main path; weekends are free.</li>
+    <li><b>Unfair puzzles:</b> every case is checked for exactly one answer before you see it, and there's always "the long way".</li>
+    <li><b>Phones slowing down:</b> each new prop is tiny and only drawn while in use, and phone speed is measured on every deck.</li>
+    <li><b>The same every time:</b> faults, puzzles and incidents are worked out from the day and the machine, never by chance, and checked twice.</li>
+    <li><b>The night shift:</b> only two nights, with a half day to sleep before and Sunday off after.</li>
+    <li><b>Your first week:</b> Pillar 5 starts on day 8, and Pillar 4's first-week test runs on every change.</li>
   </ul>
 </section>
 
 <section id="q">
-  <h2>Your answers</h2>
+  <h2>Your answers, in short</h2>
+  <ul>
+    <li><b>The work:</b> tuning yes; a slightly duller grubby uniform; laundry every two weeks; all seven extra ideas (now side jobs); cabin 4-23; built on its own after Pillar 4.</li>
+    <li><b>Puzzles:</b> the diagnosing step done for real; all nine kinds; no setting; three grades with pins; wrong calls use a seal or cartridge from Tier 2; favours and old mysteries; keep the names; "the clash" at Tier 3; they start in your first days as an Officer.</li>
+    <li><b>Career:</b> the urgent summons; both promotions here, switched on right away; Senior Officer at the top, never command; Deck 2's visitors' suite; Calder walks you, with Tomas and Pell carrying your box; the move at 17:00; the ceremony; your rank on your uniform; reputation in words.</li>
+    <li><b>Scope:</b> "this is absolute bulk of the game", with every job mapped to rank; <b>10 to 15 hours</b>; the night shift once; junior jobs stay on the board; Engine Specialist is a badge; the reactor with a permit; leading teams; mentoring for one day; the Monday briefing; the career story.</li>
+    <li><b>What comes next:</b> Pillar 6 is ship-wide events and more traditions, rotating weekly; Pillar 7 is the story (narrative moments forming a through line, not cutscenes) and bigger crew stories.</li>
+  </ul>
+  <h3>One question left</h3>
   <ol class="q">
-    <li>Tuning, turning a setting and watching the machine respond: <em><b>Yes, as described.</b></em></li>
-    <li>A grubby uniform looks a little duller: <em><b>Yes, slightly.</b></em></li>
-    <li>Laundry duty: <em><b>Less often: about every two weeks</b>, with crew covering if you skip it.</em></li>
-    <li>The pace, a new mechanic every 2 or 3 days, promotion around day 20: <em><b>Yes.</b></em></li>
-    <li>The "more ideas": <em><b>All seven</b>, now on the ladder after promotion (see "Seven more").</em></li>
-    <li>Your own cabin, 4-23: <em><b>Yes.</b></em></li>
-    <li>An early coordinator: <em><b>No; and Pillar 5 is now built on its own</b>, after Pillar 4, by one small team (see "On its own", "Team" and "Order").</em></li>
-    <li>Deduction puzzles as the diagnosing step: <em><b>Yes.</b> The design doc says so.</em></li>
-    <li>The first puzzle about a third of the way in (day 13), then growing: <em><b>Yes, as planned.</b></em></li>
-    <li>A setting for more or fewer puzzles: <em><b>No setting.</b></em></li>
-    <li>The nine kinds: <em><b>Keep all nine.</b></em></li>
-    <li>Three fault-finder grades with pins: <em><b>Yes.</b></em></li>
-    <li>A Tier 2 wrong call uses up a seal or cartridge: <em><b>Yes.</b></em></li>
-    <li>Crew favour mysteries and the board of old mysteries: <em><b>Yes, both.</b></em></li>
-    <li>The names (head-scratchers, Fault notes, the Chief's notes): <em><b>Keep them.</b></em></li>
-    <li>"The clash": <em><b>Keep it for later tiers.</b> It comes at Tier 3, now in Pillar 5 (about day 52).</em></li>
-  </ol>
-  <h3>Your answers: career progression</h3>
-  <ol class="q">
-    <li>The urgent summons, and Calder finds you if you don't come: <em><b>Yes.</b></em></li>
-    <li>How many promotions: <em><b>Both</b>: Tier 3 is built into Pillar 5, so the second promotion and the Deck 2 move happen here.</em></li>
-    <li>Senior Officer as your top rank: <em><b>Yes</b>, and it turns on right away.</em></li>
-    <li>Which Deck 2 cabin: <em><b>The visitors' suite</b>, with the window.</em></li>
-    <li>Calder walks you to your cabin, with Tomas and Pell carrying your box: <em><b>Yes.</b></em></li>
-    <li>The move the same evening: <em><b>Yes, about 17:00.</b></em></li>
-    <li>The officer ceremony on Deck 1 the next afternoon: <em><b>Yes.</b></em></li>
-    <li>Your uniform shows your rank: <em><b>Yes.</b></em></li>
-    <li>Reputation in words, with a "What's next" line: <em><b>Yes.</b></em></li>
-    <li>Pillar 7: <em><b>Something else</b>: "Now. I know it's big. But this is absolute bulk of the game. So that makes sense. We also need to carefully map the new jobs with rank. Some jobs are reserved for certain rank." So everything moves into Pillar 5 (see Tiers 3 and 4).</em></li>
-  </ol>
-  <h3>New questions</h3>
-  <ol class="q">
-    <li>The puzzles start at day 13. That was a third of the way in, but on the new, longer journey it's only about 13% in. Keep it at day 13, or move it to your first days as an Officer (about day 25 to 30, about 30% in)? <em>Suggested: keep day 13.</em></li>
-    <li>About 98 ship days (14 ship weeks, about 65 real hours) of new things opening, then the ship carries on? <em>Suggested: yes.</em></li>
-    <li>The night shift: one week, once, during Tier 3. Should it come round again later? <em>Suggested: once in Pillar 5.</em></li>
-    <li>Junior jobs (laundry duty, the bunk inspection, the food cart, hauling runs, small chores) stop being left for you after promotion, though you can still help? <em>Suggested: yes.</em></li>
-    <li>Engine Specialist is a new badge and the engine crew's welcome, not a new rank? <em>Suggested: yes.</em></li>
-    <li>The reactor: a permit, a dosimeter badge, a short careful visit, nothing frightening? <em>Suggested: yes.</em></li>
-    <li>Leading team jobs: pick two or three crew, book the bridge, give each a spot, call the steps? <em>Suggested: yes.</em></li>
-    <li>Mentoring: a new cadet from Sunday's rotation is yours for two weeks? <em>Suggested: yes.</em></li>
-    <li>The Monday briefing: a seat at the senior table, choosing what Works raises? <em>Suggested: yes.</em></li>
-    <li>Your career story: four moments with Calder and Torres, ending with "Calder's question"? <em>Suggested: yes.</em></li>
-    <li>With all of it in Pillar 5, is there a Pillar 7 at all? <em>Suggested: none planned for now.</em></li>
+    <li>The night shift takes your second weekend as a Senior Officer (Friday and Saturday nights), with a half day on Friday to sleep first and Sunday off after. Fine, or would you rather it fell midweek? <em>Suggested: the weekend.</em></li>
   </ol>
 </section>
 
