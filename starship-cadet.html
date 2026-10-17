@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.1
+   STARSHIP CADET: CSV Wren                           build 0.35.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.26';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8873,6 +8873,13 @@ function tipShow(id, text) {
   D.tipsSeen[id] = true; TIP_Q.push({ id, text }); if (TIP_Q.length === 1) DEVICE_SKIN.tip(TIP_Q[0]);
   return true;
 }
+// tipSeen(id) (0.35.26, for section 21): marks a tip as seen without showing it, so the intro can skip tips a person
+// has already taught. A tip waiting its turn is dropped; one on screen stays. True if it wasn't seen before.
+function tipSeen(id) {
+  const D = SHIP.device; if (!id || typeof id !== 'string' || id.length >= 40) return false;
+  const i = TIP_Q.findIndex(x => x.id === id); if (i > 0) TIP_Q.splice(i, 1);
+  if (D.tipsSeen[id]) return false; D.tipsSeen[id] = true; return true;
+}
 function tipDone() { TIP_Q.shift(); if (TIP_Q.length) DEVICE_SKIN.tip(TIP_Q[0]); else DEVICE_SKIN.tip(null); }
 // the camera's framing on a phone (C11): while the sheet covers the bottom two thirds, the view eases down so you
 // stay in the visible top part, and eases back on close. deviceFrame(on); the eased amount (0 to 1) is DEV.fr.
@@ -9427,7 +9434,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     let gone = []; try { gone = typeof movedOn === 'function' ? movedOn() || [] : []; } catch (e) { gone = []; }   // 0.35.22: section 20's movedOn
     gone = gone.filter(x => x && typeof x === 'object');
     if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: String(x.name || x.id || 'Someone'),
-      sub: [x.role, isFinite(x.day) ? 'left on Day ' + x.day : 'left the ship'].filter(Boolean).join(' · ') + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
+      sub: [x.role, Number.isFinite(x.day) ? 'left on Day ' + x.day : 'left the ship'].filter(Boolean).join(' · ') + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
     if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
     return { title: 'Roster', blocks: B };
   } });
@@ -9744,7 +9751,7 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
   let ks = []; try { ks = typeof keepsakes === 'function' ? keepsakes() || [] : []; } catch (e) { ks = []; }   // gifts from friends (0.35.22, section 20)
   ks = ks.filter(k => k && typeof k === 'object');      // 0.35.24 (reviewer 2): a row with a missing field never breaks the page
   if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => { const w = String(k.what || 'a keepsake');
-    return { text: w.charAt(0).toUpperCase() + w.slice(1), sub: 'From ' + (k.name || k.from || 'a friend') + (isFinite(k.day) ? ', Day ' + k.day : '') }; }) });
+    return { text: w.charAt(0).toUpperCase() + w.slice(1), sub: 'From ' + (k.name || k.from || 'a friend') + (Number.isFinite(k.day) ? ', Day ' + k.day : '') }; }) });
   return { title: 'Wallet', blocks: B };
 } });
 

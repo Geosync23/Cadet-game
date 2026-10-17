@@ -175,6 +175,12 @@ def run(path):
               const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);
               D.settings.tips = false; out.push(tipShow('t2', 'Off')); D.settings.tips = true; out.push(!!D.tipsSeen.t1); D.tipsSeen = {}; return out; })()""")
             check(tp == [True, False, True, True, False, True], f'tips: once each, a tap closes, the switch: {tp}')
+            # tipSeen (0.35.26, for section 21): seen without showing; a waiting tip is dropped, the one on screen stays
+            ts = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const c = document.getElementById('devTip');
+              const out = [tipSeen('s1'), tipSeen('s1'), c.hidden, tipShow('s1', 'Never')];
+              tipShow('s2', 'On screen'); tipShow('s3', 'Waiting'); out.push(tipSeen('s3'), TIP_Q.length, tipSeen('s2'), TIP_Q.length, c.textContent.includes('On screen'), tipSeen(''), tipSeen(7));
+              c.click(); out.push(c.hidden, TIP_Q.length); D.tipsSeen = {}; return out; })()""")
+            check(ts == [True, False, True, False, False, 1, False, 1, True, False, False, True, 0], f'tipSeen: marks without showing, drops a waiting tip, leaves the one on screen: {ts}')
             # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none)
             sn = g.ev("""(() => { const own = typeof shipNews === 'function'; if (!own) window.shipNews = n => [{ text: 'The scrubber on Deck 4 is rattling.', from: 'Pell Varga', at: shipNow() - 30 }].slice(0, n);
               const out = [own, devNews().length]; deviceShow('ship'); const t = document.getElementById('devBody').textContent;
@@ -380,10 +386,10 @@ def run(path):
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               // 0.35.24 (reviewer 2): rows with missing fields don't break the pages
-              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas' }); else window.keepsakes = () => [{ from: 'tomas' }, null];
-              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell' }); else window.movedOn = () => [{ id: 'pell' }, null];
-              deviceShow('wallet'); out.keepBad = !document.getElementById('devBody').textContent.includes('failed to draw');
-              deviceShow('roster'); out.movedBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas', day: null }); else window.keepsakes = () => [{ from: 'tomas', day: null }, null];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell', day: null }); else window.movedOn = () => [{ id: 'pell', day: null }, null];
+              deviceShow('wallet'); out.keepBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);   // 0.35.26: a null day isn't 'Day null'
+              deviceShow('roster'); out.movedBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['keepsakes', 'movedOn']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               deviceShow('home'); out.own = own; return out; })()""")
