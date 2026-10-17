@@ -7,9 +7,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.14** (Head writer 2, f965f40):
-2,936 lines, 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.15.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.15** (Head writer 2, a4f10c2):
+3,374 lines, 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.16.
 
 ## What you own
 
@@ -39,7 +39,9 @@
 
 - **cadet_test** since 0.48.7 differs from 0.60.0 in two shots (`b_wander10s`, `i_tap1`), only a chatter bubble's words:
   Deck 4 crew have their own lines, which changes `lineFor`'s recently-said penalty, so a different stock small-talk line
-  wins. Proven: the new code with 0.48.6's content is ALL IDENTICAL. If any *other* shot differs, find out why.
+  wins. Proven: the new code with 0.48.6's content is ALL IDENTICAL. If any *other* shot differs, find out why. Since
+  0.48.15 the pixel counts are different (about 9,900 and 1,800): more smalltalk means a different bubble wins (checked by
+  cropping: only the bubble's words differ). The counts move whenever bubbles are added; check the crop, not the number.
 - **cadet_test** can time out loading the page once in this container; re-run it alone.
 - **social_check**'s gift test picks the first tea-lover (fixed by social A in 0.36.46 to skip guarded people).
 - **Rest-day lines:** `weekday:` must match the game ROSTER's `rota.offDays` (0 = Monday); writers have got it a day early. Torres's and Calder's day-off lines deliberately use the *planned* Pillar 4 days.
