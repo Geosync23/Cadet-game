@@ -47,14 +47,14 @@ them: I haven't decided anything. I just needed to say it out loud to someone. T
 
 == beat 7
 tone: resolution
-where: Observatory
+where: calm
 when: beat:tomas.6 trad:observatory-night
-hint: It's clear tonight. Come and look at something with me?
+hint: It's clear tonight. Can I show you something? It won't take long.
 mem: home
 flag: tomas.meets
 keepsake: a corner of his star map, with home marked in pencil
 learn: Tomas failed the Watch exam once and told Holt in the end. He's staying, and he'll meet the next new cadet.
-them: There. By the edge of the big window. That's home. Well, the star near home. Close enough.
+them: Look out there, past the edge of the window. That's home. Well, the star near home. Close enough.
 them: I told Holt. About the exam. I walked into his office and said it, all at once, before I could stop.
 them: He said, "I know. I read your file. You passed. That's the one I care about." And back to his paperwork he went.
 them: I've taken the transfer list off my locker. I don't need it there. This is home too. Both of them are.
