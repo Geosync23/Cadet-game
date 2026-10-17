@@ -12917,15 +12917,33 @@ const LINE_RANKS = ['junior', 'officer', 'senior', 'chief', 'xo', 'captain'];
 const LINE_RECENT = [];                                   // [{ id, who, h }] the last lines said (not saved)
 // section 20's and 13's queries by name, each typeof-guarded (they're consts, so not on window; a missing one gives undefined)
 function lineQ(name, ...a) {
-  try {
-    const f = { relTier: typeof relTier === 'function' && relTier, mem: typeof mem === 'function' && mem, memTold: typeof memTold === 'function' && memTold,
-      warmth: typeof warmth === 'function' && warmth, affBand: typeof affBand === 'function' && affBand, bondOf: typeof bondOf === 'function' && bondOf,
-      moodOf: typeof moodOf === 'function' && moodOf, beatOf: typeof beatOf === 'function' && beatOf, knowsNews: typeof knowsNews === 'function' && knowsNews,
-      repBand: typeof repBand === 'function' && repBand, repShip: typeof repShip === 'function' && repShip, knownFor: typeof knownFor === 'function' && knownFor,
-      cue: typeof cue === 'function' && cue, flag: typeof flag === 'function' && flag, season: typeof season === 'function' && season,
-      inWeek1: typeof inWeek1 === 'function' && inWeek1, leavingSoon: typeof leavingSoon === 'function' && leavingSoon, newHere: typeof newHere === 'function' && newHere,
-      movedOff: typeof movedOff === 'function' && movedOff, memThing: typeof memThing === 'function' && memThing, socialFill: typeof socialFill === 'function' && socialFill,
-      eventNow: typeof eventNow === 'function' && eventNow }[name];
+  let f = null;
+  try {                                                   // one name at a time, so a missing (or not yet loaded) one can't blank the others
+    switch (name) {
+      case 'relTier': f = typeof relTier === 'function' && relTier; break;
+      case 'mem': f = typeof mem === 'function' && mem; break;
+      case 'memTold': f = typeof memTold === 'function' && memTold; break;
+      case 'memThing': f = typeof memThing === 'function' && memThing; break;
+      case 'warmth': f = typeof warmth === 'function' && warmth; break;
+      case 'affBand': f = typeof affBand === 'function' && affBand; break;
+      case 'bondOf': f = typeof bondOf === 'function' && bondOf; break;
+      case 'moodOf': f = typeof moodOf === 'function' && moodOf; break;
+      case 'beatOf': f = typeof beatOf === 'function' && beatOf; break;
+      case 'knowsNews': f = typeof knowsNews === 'function' && knowsNews; break;
+      case 'repBand': f = typeof repBand === 'function' && repBand; break;
+      case 'repShip': f = typeof repShip === 'function' && repShip; break;
+      case 'knownFor': f = typeof knownFor === 'function' && knownFor; break;
+      case 'cue': f = typeof cue === 'function' && cue; break;
+      case 'flag': f = typeof flag === 'function' && flag; break;
+      case 'inWeek1': f = typeof inWeek1 === 'function' && inWeek1; break;
+      case 'leavingSoon': f = typeof leavingSoon === 'function' && leavingSoon; break;
+      case 'newHere': f = typeof newHere === 'function' && newHere; break;
+      case 'movedOff': f = typeof movedOff === 'function' && movedOff; break;
+      case 'socialFill': f = typeof socialFill === 'function' && socialFill; break;
+      case 'season': f = typeof season === 'function' && season; break;
+      case 'eventNow': f = typeof eventNow === 'function' && eventNow; break;
+      case 'habitsOn': f = typeof habitsOn === 'function' && habitsOn; break;
+    }
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
 }
@@ -12969,7 +12987,7 @@ function lineCond(k, v, p, ctx) {
     case 'dept': return any(v, x => p.dept === x);
     case 'rank': return any(v, x => p.rank === x);
     case 'trait': return any(v, x => (p.traits || []).includes(x));
-    case 'habit': return any(v, x => (p.habits || []).includes(x));
+    case 'habit': { const hs = lineQ('habitsOn', p, Math.floor(t / 1440) + 1) || p.habits || []; return any(v, x => hs.includes(x)); }   // today's habits (habit shifts too)
     case 'act': return any(v, x => (LINE_ACTS[x] || [x]).includes(ctx.act));
     case 'birthday': return any(v, x => x === 'me' ? !!(typeof isBirthday === 'function' && isBirthday(p, t)) : x === 'you' ? !!(typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && isBirthday(ROSTER_PLAYER, t)) : false);
     case 'topic': return !ctx.topic || any(v, x => ctx.topic === x);
@@ -13006,7 +13024,7 @@ function linesOk(e, p, ctx) {
   return true;
 }
 const lineHash = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
-const lineSpec = e => Object.keys(e).filter(k => !LINE_META.has(k)).length + (e.not ? Object.keys(e.not).length : 0);
+const lineSpec = e => Object.keys(e).filter(k => !LINE_META.has(k)).length + (e.not ? Object.keys(e.not).length : 0) + (e.tier ? (4 - e.tier[1] + e.tier[0]) / 10 : 0);   // a narrower tier is a little more specific
 // a voice token from the speaker's card, else their template's, else the plain word; picked by person and hour
 function lineWord(p, tok, h, i) {
   const v = typeof VOICE !== 'undefined' && VOICE[p.id], tp = v && typeof VOICE_TEMPLATES !== 'undefined' && VOICE_TEMPLATES[v.tpl || p.tpl];
@@ -13017,7 +13035,8 @@ function lineWord(p, tok, h, i) {
 // fill a line for speaker p: voice tokens, then placeholders. null when a placeholder can't be filled
 function linesFill(text, p, ctx = {}) {
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60);
-  let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => { const f = k === 'nick' && lineQ('socialFill', p, 'nick', ctx); return f || lineWord(p, k, h, i++); });
+  const cap = (x, off, str) => x && (off === 0 || /[.!?]\s+$/.test(str.slice(0, off))) ? x[0].toUpperCase() + x.slice(1) : x;   // a word filled in at a sentence's start gets a capital
+  let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k, off, str) => { const f = k === 'nick' && lineQ('socialFill', p, 'nick', ctx); const x = f || lineWord(p, k, h, i++); return x === '{me}' ? x : cap(x, off, str); });
   const bond = k => { const id = lineQ('bondOf', p.id, k); return id ? linesName(linesWho(id)) : null; };
   const chief = () => typeof ROSTER !== 'undefined' && ROSTER.find(q => q.dept === p.dept && q.rank === 'chief' && q !== p);
   const SOCIAL_FILL = ['me', 'partner', 'friend', 'best', 'rival', 'mentor', 'mentee', 'boss', 'thing', 'trad'];   // section 20's socialFill fills these when it's there
@@ -13038,7 +13057,7 @@ function linesFill(text, p, ctx = {}) {
     return null;
   };
   let ok = true;
-  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-z]+)\}/g, (m, k) => { const x = val(k); if (x == null) ok = false; return x == null ? m : x; });   // twice: {nick} can give {me}
+  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-z]+)\}/g, (m, k, off, str) => { const x = val(k); if (x == null) ok = false; return x == null ? m : cap(x, off, str); });   // twice: {nick} can give {me}
   return ok ? s : null;
 }
 function lineFor(who, kind, ctx = {}) {
@@ -14800,7 +14819,7 @@ function chatLine(p, t = shipNow()) {
   }
   return chatGreet(p, t);
 }
-const chatGreet = (p, t = shipNow()) => { const own = typeof lineFor === 'function' && VOICE[p.id] && VOICE[p.id].lines && lineFor(p, 'greet', { t }); if (own) return { text: own.text, kind: 'greet', say: true }; const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
+const chatGreet = (p, t = shipNow()) => { const own = typeof lineFor === 'function' && VOICE[p.id] && VOICE[p.id].lines && lineFor(p, 'greet', { t, peek: Math.floor(t / 60) !== Math.floor(shipNow() / 60) }); if (own) return { text: own.text, kind: 'greet', say: true }; const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
 // favours (0.36.2 fills this in): the favour that person has for you, or null
 // favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
 // favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or

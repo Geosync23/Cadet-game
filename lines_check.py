@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other'}
-TRAD_PLACEHOLDERS = {'host', 'names', 'season', 'time'}   # tradition texts only (plans/trad-format.md)
+TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
 VALUES = {
     'warmth': {'cold', 'warm'},
     'bond': {'best', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'friend'}, 'mood': {'low', 'ok', 'high'},
@@ -138,7 +138,7 @@ def main(argv):
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
         for tok in re.findall(r'\{([^}]*)\}', t):
-            if tok not in TOKENS | PLACEHOLDERS and not (kind.startswith('trad.') and tok in TRAD_PLACEHOLDERS):
+            if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')
         if t.count('{') != t.count('}'):
             errors.append(f'{tag}: unbalanced braces')
