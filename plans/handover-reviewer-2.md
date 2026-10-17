@@ -10,9 +10,9 @@ Chain of command: only the lead talks to the user.
 | Seat | Branch | Engineer (session) | Last passed | Open from me |
 | --- | --- | --- | --- | --- |
 | Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 46e948b (0.43.25) | none |
-| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng 2, 01WEEoe5DyRegEqVMZgKRHWB | 3377935 (0.34.47, PASS; 774eeb7 comments) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
+| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng 2, 01WEEoe5DyRegEqVMZgKRHWB | 4631a97 (0.34.48, PASS; extras-as-overflow design note) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
 | Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | ee3fcdd (0.35.32) | none |
-| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | a570274 (0.38.19): ternClear still ignores DECK_CREW (one-line fix asked) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
+| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | a71ac47 (0.38.20): ternClear still ignores DECK_CREW (one-line fix asked); trestle walk-through LOW | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
 | Performance (sections 4c/5, lead-assigned) | claude/crowd-render | lead | cfbfd76 (0.27.25) | none; context-restore note in reviews/crowd-render-cfbfd76.md |
 | Tiles (section 23) | claude/tiles | Tiles eng (idle; handover plans/handover-tiles.md) | 99609d3 (0.46.6) | none |
 | Content (content/ only, for combines) | claude/content | build master 2 asks per range | a3f151a..5d4b810 (0.48.47, PASS WITH FIXES) | Tomas's week-1 beats assume Fri/Sat off (game: Mon/Tue); facts.md days-off stale for 52/74 crew |
