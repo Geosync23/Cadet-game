@@ -137,6 +137,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_0142TQw4ke8caPSyAC93VT98 | Adversarial reviewer 2: dialogue, traditions, device, decks, tiles, content | `claude/reviews-2` (notes only) | — | Active | — |
 | session_016EJg9DempByUCWwpszyWmV | Player engineer 3 (Pillar 4 on-call: kit bag, device lock, gift tags; section 15) | `claude/player-needs` | 0.28.26+ | Active | `plans/handover-player.md` |
 | session_01ToE6RJFCw9deB3HcJRLKxS | P4 seat 8, Deck architect 2: seedling pots, Tiles station + boards, postbox, tasting board, lanterns, calm tags, tradition decor | `claude/decks-p3` | 0.38.10+ | Active | `plans/handover-deck-architect.md` |
+| session_01PGFJbAfDYddQRGYQJktgXj, session_012zFHAS6jkPUhCrpBn2zW9Q, session_01USkJjdw16L4K2tuK8otcc6, session_01V5ghkKLy1XQkZkKS9yKUkr, session_01PPVXqo8s4NvK8JkBWt3WoH, session_01L5Bg1nrCfowojNxeVZJHoi | Standing check runners R1-R6 (2026-10-17 ~02:36, the user's ask): R1 cadet_test, R2 day_check, R3 player+interactions, R4 events+intro, R5 food+machine+deck, R6 social+device+lines+content_gen; report to the build master; no pushes | — | — | Active (Full level) | — |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
 **Hiring for a retired role:** start a fresh session on `claude/ship-integration`, have it read its predecessor's handover note first, and give it a new branch and build range (the old branch can be reused if the new session is created with it).
