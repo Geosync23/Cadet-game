@@ -28,6 +28,8 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 | 0.38.10 | Sowing morning, Tiles | kit `seedlingStand` (garden NE corner), `DECKS[3].seedlings`, place `3-seedlings-1` (`sowing`), trace `seedlingYours`; kit `tilesTable` (bow lounge), places `3-tiles-1/2` (`tiles`), `TILES_KIT`/`tilesBoardGeo()`, `DECKS[3].tiles`, `tilesSeats(k)`, dress `tilesNight` (one InstancedMesh) |
 | 0.38.11 | Letters, tasting, lanterns, calm | kit `postbox` + `3-postbox-1` (`letters`); dress `tastingTable` (title, lines), `lanternWalk`; `3-lantern-1..12` (`lanterns`); calm false on 3-wbench-1/2, true on 2-obsnight-1/6/7 and the Tiles stools |
 | 0.38.12 | Review fixes | `TILES` renamed `TILES_KIT` (section 23 owns `TILES`); every Tiles-night board names at least two seats (sixth field) |
+| 0.38.17 | Tiles, approved design | `TILES_KIT` repainted; taps 'Tiles station' / 'Tiles board' (one per Tiles-night board via dressShow's `more`); trace `tilesTrophy` (Deck 4, `DECKS[4].keepsakes.trophy`) |
+| 0.38.18 | The walk-in Tern (plans/shuttle-plan.md) | kit `shuttle` rebuilt (aisle, benches, cockpit, lockers, roof group hidden inside, hinged ramp); `DECKS[5].tern`; places `5-tern-*`; `ternRamp`, `ternRampOpen`, `ternInside`, `ternClear`; shuttle-bay venue focus/leads moved. On ship integration 0.60.2. |
 | 0.38.14-16 | Traditions' asks | places `2-open-lab-*`, `1-bridge-hour-*`, `4-music-1` (`late-piano`), lantern places `lantern-walk`; traces `mugYours`; dress `longTables`, `harvestTables`, `cupBoard`, `talentStage`, `yearsEnd` (Deck 3), `openLab` (Deck 2). Mending day, rummage day and the crossover supper were cut by the user. |
 | 0.38.9 | Arrival evening | `keepsakeShelf` above berth 4's bunk + `DECKS[4].keepsakes` (slots, place `4-B1-4-keepsake`); `mugRack` in the Works tea corner + `DECKS[5].mugRack.yours`; `CALM_TYPES` / `placeCalm(p)` |
 
@@ -41,6 +43,8 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 ## Part 6, seat 8: status
 
 All of seat 8's places are built (0.38.9-0.38.12). Still to do: decor for each new tradition when the tradition designers ask (DECK_DRESS, at most 6 draw calls, its own deck only). The traditions engineer (now Traditions engineer 2, see TEAM.md; the first, session_018WZccmSvEfz2LC7DCfxdii, has handed over) lists a tradition's `ties: decor <id>` to dressShow from 30 minutes before to 15 after, and Sowing morning's `trace: seedlingYours` pushes `{ id, day }` to SHIP.traces. The Tiles engineer (session_01DG3in6CvFFta6NrLpoVCJV, section 23) may change the board's look once the user approves the design; keep the station and boards simple until then. When the Tiles game is built, its station places can become `lounge-seat` (this changes crew plans, to be explained then).
+
+**In flight (as of 0.38.18, eb0e776):** the onboarding engineer (session_01KaHzfqSqF8B4bkNFrH1tsx) wires the arrival scene to the Tern: ternRamp(true, 2.5) about 2 s after the fade-in, ternRamp(false, 3) once you're clear (ternClear()), the start at 5-tern-aisle-1, and Torres at 5-tern-ramp-foot. SHIP_START_ARRIVAL (section 13, the sim engineer) and INTRO_START (section 21) must move from [7, 8] (now under the hull) to [5, 7], face 0. Reviewer 2 hasn't seen 0.38.17-18 yet. Waiting on Tiles (section 23 pushes the tilesTrophy trace).
 
 ## Gotchas (learned the hard way)
 
