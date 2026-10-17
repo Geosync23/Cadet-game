@@ -27,3 +27,6 @@ My lean is (b) for now, because the dip is small and the forgiving sign-out was 
 
 ## leave_check
 LEAVE CHECK OK on ea89382 (run by 1f, about 25 minutes), including the two new lines: out at 10:00 gives a dip and keeps the run with no miss; out at 16:00 ends the run.
+
+## Follow-up: 0.61.19 (7c07465) and 0784b54
+**PASS (skim).** 0.61.19 re-bakes head writer 5's `clock.early` lines from content 0.48.80 (d494709, PASS). The `content/clock` and `banks/clock.lines` files are identical to d494709's, and the html diff is the baked lines plus the build number. 0784b54 changes only `plans/handover-career.md`. So the range da6abc6..0784b54 passes.
