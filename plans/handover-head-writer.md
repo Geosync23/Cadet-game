@@ -6,8 +6,9 @@ servery; `walk.call.<n>`; linger `walk.more.<n>`; meetings `introDinner`, `intro
 0.48.23 Writer 2 b6 + Writer 4 b1-2 (booth calls: generic ones carry `!who:torres-zeke|vance|calder|marrow|holt`);
 0.48.24 Writer 2 b7 + Writer 4 b3 (juniors); 0.48.25 Writer 2 b8 (16 of 31 visitors; Writer 2 RETIRED) + Writer 4 b4
 (`banks/tiles.lines`, kinds `tiles.*`; 30 Deck 3 pairs). Next build 0.48.26. Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U,
-claude/writer-commons) is on batch 5: the other 15 visitors. Asked dialogue engineer 2: `trait:dry_humour` (space in a
-trait), and whether A-only booth convos play with one person. A meeting choice takes ONE reply line (a second indented
+claude/writer-commons) is on batch 5: the other 15 visitors. DE2: one-sided booth convos play for one person (0.43.13; they need place: or act:);
+`tiles.*` kinds need no wiring; `trait:dry_humour` / `you:night_owl` coming in their next build. 0.48.26-31: all 31 visitors voiced,
+Zeke's ordinary weeks, goodbyes/letters (Commons 19, Works 16, Watch 9), dinner convos, repair reactions (Writer 4). A meeting choice takes ONE reply line (a second indented
 line overwrites the first). The notes below are head writer 2's, still accurate unless the lines above say otherwise.
 
 **Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) held the seat 0.48.11-0.48.21 and handed over at ~70% memory
