@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.3
+   STARSHIP CADET: CSV Wren                           build 0.27.34
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.34';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -31148,9 +31148,16 @@ cv.addEventListener('pointermove', e => {
 });
 const up = e => {
   if (steering) endSteer();
-  else if (downAt && pts.size === 1 && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < HOLD_PX && performance.now() - downAt[2] <= HOLD_MS) tap(e.clientX, e.clientY);
+  else if (downAt && pts.size === 1 && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < HOLD_PX && performance.now() - downAt[2] <= HOLD_MS) { tapUpAt = e.timeStamp; tap(e.clientX, e.clientY); }
   pts.delete(e.pointerId); if (!pts.size) downAt = null;
 };
+// 0.60.5, the ghost tap (the user: "I click the elevator controls and it selects a floor"): a tap on the deck can open a
+// card at once (the lift panel when you're already at it, a conversation). The browser's own click for that same tap
+// comes after the pointerup and, on a phone, lands on whatever is now under the finger: a deck button. So for GHOST_MS
+// after a tap on the deck, real clicks on anything but the deck are swallowed. Times are the events' own (real) clock;
+// scripted clicks (not isTrusted) and keys are never touched.
+const GHOST_MS = 350; let tapUpAt = -1e9;
+addEventListener('click', e => { if (e.isTrusted && e.target !== cv && e.timeStamp - tapUpAt < GHOST_MS) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', e => { pts.delete(e.pointerId); downAt = null; endSteer(); });
 cv.addEventListener('contextmenu', e => e.preventDefault());   // long-press must not open a menu
 cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(camera.zoom * (e.deltaY > 0 ? .92 : 1.08)); }, { passive: false });
