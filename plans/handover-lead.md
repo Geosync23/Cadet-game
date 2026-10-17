@@ -298,3 +298,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - 15:06 UTC: 0.60.3 RELEASED: claude/ship-integration 0477b15 (fast-forward), published https://claude.ai/artifact/SmL8Na1iTB2JQZDP4dYdou (new link; publish from scratchpad/pub/starship-cadet.html keeps it). Runners R1/R4/R5/R6 archived. 0.60.4 combine started.
 - 15:33 check-in: 0.60.4 candidate 1 pushed to claude/cand-0604 (2c4913a); day_check green, machine/intro re-runs pending. Nothing blocked.
 - ~15:45 user notes on 0.60.3: Zeke greeting line + far fewer tour stops (head writer 3 words, sim engineer 5 takes onboarding seat for tour code); speech bubbles more attractive (perf engineer 3, mock-up first). Both target 0.60.5. Told user ~3 builds left in Pillar 4 (0.60.4, 0.60.5, 0.60.6 wrap-up), more notes welcome.
+- ~15:50 USER RULE: do not start any 0.60.6 work until the user says all their notes are in. 0.60.4 and 0.60.5 proceed.
