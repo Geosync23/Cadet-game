@@ -222,9 +222,10 @@
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
 // The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
 // elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
-// walk.up.1-10, walk-and-talk across Deck 5 to the
+// walk.up.1-8, walk-and-talk across Deck 5 to the
 // lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
-// reach the lift are skipped). The Deck 5 points (bay, haulway, stores, works) are retired; their job material (the
+// reach the lift are skipped), and walk.works.1-2 as you pass the Works bay (no stop). The Deck 5 points bay, haulway
+// and stores are retired; their job material (the
 // board, the Chief's office, the tool wall, tea) is on Monday's walk.job.take/turnin. From the lift on, unchanged:
 // each point plays walk.<point>.1, .2, ... IN ORDER when you and Torres are near it; one flag key per line. Points:
 // lift, wing, officers, deck3, servery. walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger lines about
@@ -244,25 +245,26 @@
 - Bag all right? Right, onward. Stay close. She's big.
 // walking across Deck 5 to the lift
 ? flag:walk.up.1
-- Don't try to learn it all tonight. Nobody does.
+- Don't learn it all tonight. Nobody does. I didn't.
 ? flag:walk.up.2
-- Honestly? We've all been looking forward to you.   #warm
+- Honestly? We've all been waiting on you. Me most.   #warm
 ? flag:walk.up.3
-- Everyone's friendly. Say hello and you've made a mate.
+- Say hello to anyone. They'll say it back. Promise.
 ? flag:walk.up.4
-- Evenings are easy here. Tea, a game, a natter.
+- Evenings? Tea, Tiles, someone humming. Lovely, really.
 ? flag:walk.up.5
-- After dinner folk drift to the lounge. Come along.
+- After dinner it's the lounge. Bring a jumper. Trust me.   #funny
 ? flag:walk.up.6
-- Lost? Ask anyone. Every one of us got lost once.
+- Lost? Ask anyone. I got lost in a cupboard. An hour.   #funny
 ? flag:walk.up.7
-- I got lost my first week. In a cupboard. An hour.   #funny
+- Weekends are yours. I spend mine with the coils. Don't.   #funny
 ? flag:walk.up.8
-- Weekends are yours. Two whole days. Sleep in, if you like.
-? flag:walk.up.9
-- Bunk first, then dinner. Brennan's cooking. You're lucky.
-? flag:walk.up.10
 - You'll pick it all up in a week. Promise.   #warm
+// passing the Works bay (said as you walk past; no stop)
+? flag:walk.works.1
+- And that's us. Works. You and me, {me}.
+? flag:walk.works.2
+- This is where we'll be most days. You'll love it. I do.   #warm
 // point: lift
 ? flag:walk.lift.1
 - The lift. Runs right up the spine of the ship.
