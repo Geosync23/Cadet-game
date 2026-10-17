@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.73
+   STARSHIP CADET: CSV Wren                           build 0.48.74
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.73';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.74';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -21930,12 +21930,12 @@ const VOICE = {
         {"text": "Bag all right? Right, onward. Stay close. She's big.", "id": "5te2ww", "flag": "walk.shuttle.5"},
         {"text": "Don't learn it all tonight. Nobody does. I didn't.", "id": "gyqo0s", "flag": "walk.up.1"},
         {"text": "Honestly? We've all been waiting on you. Me most.", "id": "cx6j5o", "tone": "warm", "flag": "walk.up.2"},
-        {"text": "Say hello to anyone. They'll say it back. Promise.", "id": "1fytoxb", "flag": "walk.up.3"},
-        {"text": "Evenings? Tea, Tiles, someone humming. Lovely, really.", "id": "ig4pk0", "flag": "walk.up.4"},
-        {"text": "After dinner it's the lounge. Bring a jumper. Trust me.", "id": "s493ig", "tone": "funny", "flag": "walk.up.5"},
-        {"text": "Lost? Ask anyone. I got lost in a cupboard. An hour.", "id": "3w7zc2", "tone": "funny", "flag": "walk.up.6"},
-        {"text": "Weekends are yours. I spend mine with the coils. Don't.", "id": "2btt0p", "tone": "funny", "flag": "walk.up.7"},
-        {"text": "You'll pick it all up in a week. Promise.", "id": "16thn8d", "tone": "warm", "flag": "walk.up.8"},
+        {"text": "Lost? Ask anyone. I got lost in a cupboard. An hour.", "id": "3w7zc2", "tone": "funny", "flag": "walk.up.3"},
+        {"text": "You'll pick it all up in a week. Promise.", "id": "16thn8d", "tone": "warm", "flag": "walk.up.4"},
+        {"text": "Say hello to anyone. They'll say it back. Honest.", "id": "yv7slx", "flag": "walk.up.5"},
+        {"text": "Evenings? Tea, Tiles, someone humming. Lovely, really.", "id": "ig4pk0", "flag": "walk.up.6"},
+        {"text": "After dinner it's the lounge. Bring a jumper. Trust me.", "id": "s493ig", "tone": "funny", "flag": "walk.up.7"},
+        {"text": "Weekends are yours. I spend mine with the coils. Don't.", "id": "2btt0p", "tone": "funny", "flag": "walk.up.8"},
         {"text": "And that's us. Works. You and me, {me}.", "id": "r4xurq", "flag": "walk.works.1"},
         {"text": "This is where we'll be most days. You'll love it. I do.", "id": "wp6hku", "tone": "warm", "flag": "walk.works.2"},
         {"text": "The lift. Runs right up the spine of the ship.", "id": "1apen77", "flag": "walk.lift.1"},

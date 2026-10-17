@@ -222,7 +222,8 @@
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
 // The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
 // elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
-// walk.up.1-8, walk-and-talk across Deck 5 to the
+// walk.up.1-8 (measured: about 3 heard at Zeke's stroll, so the best come first; the rest are for dawdlers),
+// walk-and-talk across Deck 5 to the
 // lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
 // reach the lift are skipped), and walk.works.1-2 as you pass the Works bay (no stop). The Deck 5 points bay, haulway
 // and stores are retired; their job material (the
@@ -249,17 +250,17 @@
 ? flag:walk.up.2
 - Honestly? We've all been waiting on you. Me most.   #warm
 ? flag:walk.up.3
-- Say hello to anyone. They'll say it back. Promise.
-? flag:walk.up.4
-- Evenings? Tea, Tiles, someone humming. Lovely, really.
-? flag:walk.up.5
-- After dinner it's the lounge. Bring a jumper. Trust me.   #funny
-? flag:walk.up.6
 - Lost? Ask anyone. I got lost in a cupboard. An hour.   #funny
-? flag:walk.up.7
-- Weekends are yours. I spend mine with the coils. Don't.   #funny
-? flag:walk.up.8
+? flag:walk.up.4
 - You'll pick it all up in a week. Promise.   #warm
+? flag:walk.up.5
+- Say hello to anyone. They'll say it back. Honest.
+? flag:walk.up.6
+- Evenings? Tea, Tiles, someone humming. Lovely, really.
+? flag:walk.up.7
+- After dinner it's the lounge. Bring a jumper. Trust me.   #funny
+? flag:walk.up.8
+- Weekends are yours. I spend mine with the coils. Don't.   #funny
 // passing the Works bay (said as you walk past; no stop)
 ? flag:walk.works.1
 - And that's us. Works. You and me, {me}.
