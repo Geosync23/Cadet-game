@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.18
+   STARSHIP CADET: CSV Wren                           build 0.38.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6975,10 +6975,11 @@ DECKS[3].places.push(
 // 0.38.18: the walk-in Tern (plans/shuttle-plan.md). DECKS[5].tern: the tiles it blocks (`block`), its aisle and the
 // door's well (walkable inside), the ramp's tiles and its foot, and where a new game can start you (`start`: in the aisle,
 // facing the door). ternRamp(open, secs) opens (true) or closes (false) the ramp over secs seconds (default 2.5; it
-// snaps when you're on another deck); ternRampOpen() -> 0 (closed) to 1 (open); while it isn't fully open the door's
-// well is blocked. It starts open (as the Tern always was). ternInside() -> true while you're in the aisle or the well:
-// then, or while the Tern fades, its roof and upper hull hide. ternClear() -> true when nobody stands in the well or on
-// the ramp (for closing it behind you).
+// snaps when you're on another deck). It won't close while anyone is on the ramp or in the well: it returns false, and
+// a close already moving waits. ternRampOpen() -> 0 (closed) to 1 (open); while it's less than half open the door's well
+// is blocked. The ramp isn't saved: every load starts it open, as the Tern always was. ternInside() -> true while you're
+// in the aisle or the well: then, or while the Tern fades because you're behind it (both only where you stand), its roof
+// and upper hull hide. ternClear() -> true when nobody stands in the well or on the ramp (for closing it behind you).
 DECKS[5].tern = { block: [[2, 6], [2, 7], [2, 8], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [7, 7], [3, 8], [4, 8], [6, 8], [7, 8]],
   aisle: [[3, 7], [4, 7], [5, 7], [6, 7]], well: [5, 8], ramp: [[5, 9], [5, 10]], foot: [5, 11], start: { tile: [5, 7], face: 0 } };
 DECKS[5].places.push(
@@ -6988,7 +6989,11 @@ DECKS[5].places.push(
   { id: '5-tern-ramp-foot', type: 'event', event: 'tern', at: [5, 11], xy: [5.5, 11.3], face: 'n', pose: 'stand', room: 'S' },          // where the escort waits
 );
 const TERN = { open: 1, target: 1, secs: 2.5, roof: null, hinge: null, root: null };
-function ternRamp(open, secs = 2.5) { TERN.target = open ? 1 : 0; TERN.secs = Math.max(.1, secs); if (!TERN.root || TERN.root !== deckRoot || !deckDef || deckDef.num !== 5) TERN.open = TERN.target; }
+function ternRamp(open, secs = 2.5) {                  // -> false (and nothing changes) when asked to close with someone on the ramp or in the door's well
+  if (!open && !ternClear()) return false;
+  TERN.target = open ? 1 : 0; TERN.secs = Math.max(.1, secs); if (!TERN.root || TERN.root !== deckRoot || !deckDef || deckDef.num !== 5) TERN.open = TERN.target;
+  return true;
+}
 const ternRampOpen = () => TERN.open;
 const ternAt = () => { if (typeof player === 'undefined' || !player || !player.obj) return null; const p = player.obj.position; return [Math.floor(p.x + OX), Math.floor(p.z + OZ)]; };
 function ternInside() { const t = DECKS[5].tern, c = ternAt(); return !!c && deckDef && deckDef.num === 5 && (t.aisle.concat([t.well])).some(([i, j]) => i === c[0] && j === c[1]); }
@@ -6999,10 +7004,10 @@ function ternClear() {
 const ternRoof = R => { TERN.roof = R; };
 function ternHinge(P) {                                  // the kit hands over the ramp's hinge: snap to where it should be, then animate it once a frame
   TERN.hinge = P; TERN.root = deckRoot; TERN.open = TERN.target;
-  const well = DECKS[5].tern.well.join(','), pose = () => { const k = TERN.open, e = k * k * (3 - 2 * k); P.rotation.z = -1.52 * e; if (k < 1) BLOCKED.add(well); else BLOCKED.delete(well); };
+  const well = DECKS[5].tern.well.join(','), pose = () => { const k = TERN.open, e = k * k * (3 - 2 * k); P.rotation.z = -1.52 * e; if (k < .5) BLOCKED.add(well); else BLOCKED.delete(well); };   // the well shuts once it's half closed, so nobody gets caught in it
   pose();
   MOVERS.push({ place: null, tick(dt) {
-    if (TERN.open !== TERN.target) { const d = dt / TERN.secs; TERN.open = TERN.target > TERN.open ? Math.min(1, TERN.open + d) : Math.max(0, TERN.open - d); pose(); }
+    if (TERN.open !== TERN.target && (TERN.target > TERN.open || ternClear())) { const d = dt / TERN.secs; TERN.open = TERN.target > TERN.open ? Math.min(1, TERN.open + d) : Math.max(0, TERN.open - d); pose(); }   // closing waits while anyone steps on it
     const t = TALL_BY_ROOM.S; if (TERN.roof) TERN.roof.visible = !(ternInside() || (t && t.o < 1));
   } });
 }
@@ -7396,7 +7401,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.18';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.19';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
