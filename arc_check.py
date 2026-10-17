@@ -114,6 +114,7 @@ CALLS = r"""
   for (const k of HOME_ORDER) { out.beats[k] = homePeekC(k).b;
     out.unheard[k] = HCH[k].map((e, i) => heard[k].has(homeTag(e)) ? null : { i: i + 1, when: e.when || null, first: (e.lines.find(l => l.text) || {}).text }).filter(Boolean); }
   for (const id in HM) out.lines[id] = HM[id].lines.filter(l => l.text).length;
+  out.news = Object.fromEntries(Object.entries(HCH).map(([k, a]) => [k, a.filter(homeIsNews).length])); out.newsMax = HOME_NEWS_MAX;   // more would replay once the oldest drops (reviewer 1c)
   out.scenes = Object.fromEntries(Object.entries(HCH).map(([k, a]) => [k, a.map(e => e.lines.filter(l => l.text).length)]));
   return out;
 })()
@@ -127,7 +128,8 @@ with sync_playwright() as pw:
         print('In turn, 120 days, beats told:', json.dumps(r['beats']))
         for k, v in r['unheard'].items():
             for x in v: print('NEVER HEARD', k, json.dumps(x))
-        bad = [k for k, v in r['solo'].items() if v['end'] != 6 or v['failed']] + [k + ' in turn' for k, v in r['beats'].items() if v != 6]
+        print('News scenes per person:', json.dumps(r['news']), 'cap', r['newsMax'])
+        bad = [k for k, v in r['solo'].items() if v['end'] != 6 or v['failed']] + [k + ' in turn' for k, v in r['beats'].items() if v != 6] + [k + ' has more news scenes than HOME_NEWS_MAX' for k, v in r['news'].items() if v > r['newsMax']]
         print('errors', g.errors[:5])
         print('CALLS CHECK OK' if not bad and not g.errors and not any(r['unheard'].values()) else 'CALLS CHECK: ' + (', '.join(bad) or 'scenes never heard'))
         sys.exit(0)
