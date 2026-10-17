@@ -24,3 +24,8 @@ Low:
 - hobbyNoun "collecting" (Juarez, talent thread) gives "Me, teaching collecting. Imagine." and "I do a bit of collecting". "Collecting mission patches" would read better, or "patch collecting".
 
 Combine: as build master 2 says, it needs dialogue 46e948b, social 0811adc and roster d53cf40 in the same candidate.
+
+## Addendum: 5d4b810..5e2605e (0.48.48): PASS
+- facts.md's days off now match roster caedef2 (0.16.19) for **all 74** crew (none differ). Tomas is Mon/Tue.
+- Rina says "Food, energy, hygiene, social, fitness, bathroom", the app's six.
+- Tomas's d6 line: "Your day off. My lunch break. Holt said ten minutes." Note for **onboarding**: the game has **no lunch** (two meals; no 'lunch' act is ever planned). On Saturday 11:45 Tomas's plan has him on watch on Deck 2, so the beat only works if the onboarding hook brings him to the garden (an appointment or crewHold). Check that it does. Also, Holt is off on Saturdays ([5,6]); "said ten minutes" still reads fine as said earlier.
