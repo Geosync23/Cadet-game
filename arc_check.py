@@ -2,7 +2,7 @@
 # Steps DAYS ship days (default 70) on paper (the crew's social hours run too: bonds, rivals), every half hour from 06:00, as a diligent player would play: a chat and a
 # meal with each story person a day, a Works job a day (reputation), whatever moment is ready played at once (the first
 # reply each time), an appointment booked for 18:00 when a beat waits for one, a bunk visit at 20:00 from whoever's next
-# beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and a call home to each of Mum, Gran, Jo and Sam at 20:00. Then lists every arc
+# beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and one call home a day at 20:00 (the user's rule, 0.62.0: whoever the booth says has news, else the next of Mum, Gran, Jo and Sam in turn; a second call that day must be refused). Then lists every arc
 # that didn't finish, with its next beat and how often (in the last 7 days) its when and its where held.
 # The crew arcs need the writers' baked MOMENTS (a build with claude/dialogue and claude/content, content_gen run).
 # Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes]   (themes: one crew
@@ -23,7 +23,7 @@ JS = r"""
   const [MO] = momentBaked();
   const ppl = MODE === 'themes' ? [] : [...new Set(Object.values(MO || {}).map(m => m.who).concat(Object.keys(STORY_ARCS)))].map(id => socP(id)).filter(Boolean);
   const last = {}; for (const p of ppl) { let n = 0; for (const k in MO || {}) if (MO[k].who === p.id) n = Math.max(n, MO[k].beat); n = Math.max(n, (STORY_ARCS[p.id] || []).length); last[p.id] = n; }
-  const out0 = { appts: 0, visits: 0, partial: {} };
+  const out0 = { appts: 0, visits: 0, partial: {}, calls: 0, beats: 0 };
   const TH = momentBaked()[1] || {};                    // the struggle themes: the first crew member with each theme whose beats all apply to them
   if (MODE === 'themes') for (const th of Object.keys(TH).sort()) { const ok = q => !ppl.includes(q) && socAboard(q, 1) && (leaveDay(q) == null || leaveDay(q) > DAYS) && voiceOf(q.id).thread === th && [1, 2, 3].some(b => momentDef(q.id + ':' + b)), all = q => [1, 2, 3].every(b => momentDef(q.id + ':' + b));
     const p = SOC.crew.find(q => ok(q) && all(q)) || SOC.crew.find(ok);   // all three beats if anyone has them, else whoever has some
@@ -46,7 +46,13 @@ JS = r"""
         if (vis) VISIT = null;
         const b1 = beatNow(p); if (b1 !== b0) log.push(d + ' ' + p.id + ' ' + b1);
       }
-      if (m === 1200 && MODE !== 'themes') for (const k of HOME_ORDER) if (homeCall(k, t)) play();
+      if (m === 1200 && MODE !== 'themes') {             // one call home a day: whoever has news, else the next in turn
+        const can = homeCallable(t), pick = can.find(x => x.due && !x.first) || can.find(x => x.contact === HOME_ORDER[d % HOME_ORDER.length]) || can[0];
+        const b0 = pick && homePeekC(pick.contact).b;
+        if (pick && homeCall(pick.contact, t)) { play(); out0.calls++; if (homePeekC(pick.contact).b > b0) out0.beats++; if (d === 1 && homePeekC(pick.contact).b !== 1) out0.firstEmpty = true;
+          if (homeCallable(t + 1).length || homeCall(HOME_ORDER.find(k => k !== pick.contact), t + 1)) out0.twice = (out0.twice || 0) + 1;   // a second call that day: refused
+          else if (!homeBooth(t + 1)) out0.noBooth = true; else { const v = dialogueView(); if (!/one call a day/.test(v && v.text || '')) out0.boothText = v && v.text; play(); } }
+      }
     }
   }
   // why a stalled arc is stuck: the next beat's gates, tried every half hour of the last 7 days
@@ -78,11 +84,13 @@ with sync_playwright() as pw:
     r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [JS, [DAYS, MODE]])
     g.close()
     print('Finished:', ', '.join(f"{k} {v}/{r['last'][k]}" for k, v in r['done'].items()))
-    print('Home:', ', '.join(r['home']), '| booked appointments', r['sim']['appts'], '| visits', r['sim']['visits'])
+    print('Home:', ', '.join(r['home']), '| calls', r['sim']['calls'], 'beats', r['sim']['beats'], '| booked appointments', r['sim']['appts'], '| visits', r['sim']['visits'])
+    home_bad = [k for k in ('twice', 'noBooth', 'boothText', 'firstEmpty') if r['sim'].get(k)]
+    if home_bad: print('HOME FAIL', {k: r['sim'][k] for k in home_bad})
     for k, v in r['stalled'].items(): print('STALLED', k, json.dumps(v))
     print('Themes:', json.dumps(r['themes']))
     print('Crew bonds at the end:', json.dumps(r['bonds']))
     print('Theme beats nobody can have (missing details):', json.dumps({k: v for k, v in r['sim']['partial'].items() if v}))
     print('Days each beat was told:', ' '.join(l.replace(' ', '/') for l in r['log']))
     print('errors', g.errors[:5])
-    print('ARC CHECK OK' if not r['stalled'] and not g.errors and all(h.endswith(' 6') or h.endswith(' 0') for h in r['home']) else 'ARC CHECK: STALLS')
+    print('ARC CHECK OK' if not r['stalled'] and not g.errors and (MODE == 'themes' or (all(h.endswith(' 6') for h in r['home']) and not home_bad)) else 'ARC CHECK: STALLS')

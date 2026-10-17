@@ -11,7 +11,6 @@ min: 30
 jitter: 10
 where: 3 room Mess hall: mess-seat
 where: 3 room Mess hall: @long-table
-where: 3 room Promenade: @long-table
 hold: none
 who: brennan always, lingers-at-meals 85%, everyone 60%
 anim: talk

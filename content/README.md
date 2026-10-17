@@ -319,8 +319,9 @@ three differences:
 
 - **The header:** `@arc home.<contact>`, `who: home:<contact>`, `name: Mum` (what you call them), and `pron: they`
   where it applies.
-- **Beats** take every arc field plus `via: reply` (an ordinary call) or `via: live` (it waits for a clear line, Letters
-  evening). Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
+- **Beats** take every arc field plus `via: reply` (over the relay, a little lag) or `via: live` (that call comes on a clear
+  line). Since 0.62.0 every beat plays on an ordinary call (one call home a day in all; a beat is due a week after the
+  last), so don't write "tonight" or a weekday unless the beat's `when:` asks for it. Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
 - **After the beats**, two sections:
   - `== send`: things you can tell them on a call. `? conditions`, then `- text   flavour:share` (optionally `flag:<key>`
     or `mem:<word>`, set when you choose it) with their reaction indented under it (`  them: text [pose]`). Conditions

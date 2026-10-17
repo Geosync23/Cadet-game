@@ -668,12 +668,12 @@ with sync_playwright() as pw:
     if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
 
-    # 9b. tradOn (0.34.37, social B's calls home): letters evening's window in absolute ship minutes, null outside it
-    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'letters')); if (!d) return null;
-      const e = eventsOn(d).find(x => x.id === 'letters'), B = (d - 1) * 1440;
-      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('letters', t)), other: tradOn('letters', B + 600), none: tradOn('nope', B + e.from) }; })()""")
-    print('tradOn letters:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
-    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('letters'): {T}")
+    # 9b. tradOn (0.34.37, social B's calls home): the Sunday long table's window (Letters evening, its first user, went in 0.62.0) in absolute ship minutes, null outside it
+    T = g.ev("""(() => { const d = [...Array(28).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === 'sunday-table')); if (!d) return null;
+      const e = eventsOn(d).find(x => x.id === 'sunday-table'), B = (d - 1) * 1440;
+      return { d, at: [B + e.from - 1, B + e.from, B + e.to - 1, B + e.to].map(t => tradOn('sunday-table', t)), other: tradOn('sunday-table', B + 600), none: tradOn('nope', B + e.from) }; })()""")
+    print('tradOn sunday-table:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
+    if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('sunday-table'): {T}")
 
     # 9c. upcomingTraditions' deck and room (0.34.42, the device's Go there): a deck number, and a room key on that deck or null
     U = g.ev("upcomingTraditions(0, 8 * 1440).map(x => [x.id, x.deck, x.room, Number.isInteger(x.deck) && (x.room === null || !!(DECKS[x.deck].rooms || {})[x.room])])")
