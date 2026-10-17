@@ -126,7 +126,7 @@ Before each push, also run cadet_test against the previous build, deck_check, da
 
 ## Pillar 4: the traditions engineer (seat 5), from 0.34.19 (session_018WZccmSvEfz2LC7DCfxdii)
 
-Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and plans/social-deep-plan.md (Parts 5-6: invitations, `simNote('tradition')`). Report to the lead, session_01PxXKwc5mkC7tV5MPi3p7PP.
+Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and plans/social-deep-plan.md (Parts 5-6: invitations, `simNote('tradition')`). Report to the lead: session_01PJtmxWgAPLebXSZKP6ZRpG from 2026-10-17 ~02:40 (before: session_01PxXKwc5mkC7tV5MPi3p7PP). Chain of command: the user -> the lead -> everyone; helpers never contact the user.
 
 - **0.34.19:** new rhythms in `when` (`evDue`), `season(d)` / `seasonOf(d)`, `tradTies(kind, d)`.
 - **0.34.20:** the TRADITIONS loader (`tradLoad`, `TRAD_ERRORS`), the `.trad` grammar (`plans/trad-format.md`), the reference parser (`plans/trad_parse.py`), the sample Sowing morning (`content/traditions/sowing.trad`, k 434). events_check: a whole year on paper.
@@ -137,4 +137,6 @@ Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and pla
 - **Open for the seasons designer:** Sowing morning and harvest morning share days 6 and 188 (Sowing follows at 11:45).
 - **Next:** the Sunday "This week aboard" Mail (with the monthly designer); then collecting the three designers' files.
 - **Gotcha:** cadet_test's g_nocrew shot can catch section 15's "+N Energy" need label (a real-time fade): a 1921 px difference that vanishes on a re-run.
-- **Hash keys I give out:** 434 sowing; next free 435.
+- **Hash keys I give out:** 434 sowing. Blocks for the designers: weekly 435-454, every few weeks 455-474, seasons/year/life 475-499 (each designer numbers within their block; I check they're unique). The three designers report to me; I summarise for the lead.
+- **0.34.24-0.34.26:** simNote('choice') on meeting replies; events_check fails on an unloaded .trad; the storm pinned to day 10 (`spread`); tradition props (`ties.decor` -> the deck architect's DECK_DRESS via dressShow) and `trace` (Sowing: seedlingYours { id, day }).
+- **Agreed with the sim engineer (0.26.24):** hosts are planned first (5 minutes early, may join half late); errands don't start within 70 minutes of a gathering; dinner moves around one. For meal traditions (Sunday roast, harvest supper, long breakfast, the 06:00 crossover) put `meal: 'dinner' | 'breakfast'` on the eventPlan entry (from the tradition) and section 14 eats there instead of the servery: send the sim engineer the concrete asks when the designers deliver.

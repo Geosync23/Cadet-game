@@ -45,7 +45,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -218,7 +218,7 @@ OCC = r"""(() => {
   while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); dialogueStep(v.choices ? 2 : undefined); }
   R.lines = seen; tick(16 * 1440 + 662, 16 * 1440 + 690);
   R.after = SHIP.occasions.map(r => r.key + ' ' + r.status);
-  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); R.askOff = !!occasionAsk('progressTalk', 21 * 1440 + 840);   // day 22 is a Monday: Calder's off
+  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); const cOff = [19, 20, 21, 22, 23, 24, 25].find(d => !isWorkDay(schedPeople().find(p => p.id === 'calder'), d)); R.askOff = !!occasionAsk('progressTalk', (cOff - 1) * 1440 + 840);   // on a day Calder's off (the roster's days off)
   skipTo(18 * 1440 + 900); R.table = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);
   R.batch = eventMod('galley', 'batch', 19 * 1440 + 900); R.noBatch = eventMod('galley', 'batch', 18 * 1440 + 900);
   skipTo(20 * 1440 + 60); R.end = SHIP.occasions.map(r => r.key + ' ' + r.status); R.mails = mails; R.traces = SHIP.traces.slice();
@@ -387,7 +387,10 @@ with sync_playwright() as pw:
     sims = [(1, 'running'), (6, 'observatory-night'), (4, 'quiz'), (5, 'works-tea'), (5, 'jam'), (bd, 'birthday'), (6, 'film'), (6, 'harvest'), (7, 'market'), (24, 'hull-lights'), (100, 'founding'), (300, 'quiet-watch')]
     sims += [(next(x for x in yr['count'][b['id']] if x >= 1), b['id']) for b in yr['baked'] if any(x >= 1 for x in yr['count'].get(b['id'], []))]   # the baked ones too
     for d, i in sims:
-        if not g.ev(f"eventsOn({d}).some(e => e.id === '{i}')"): fail(f"{i} not on day {d}"); continue
+        if not g.ev(f"eventsOn({d}).some(e => e.id === '{i}')"):   # another tradition may take its day (the voice budget): its next one
+            d2 = g.ev(f"[...Array({max(DAYS, 28)}).keys()].map(x => x + 1).find(x => eventsOn(x).some(e => e.id === '{i}'))")
+            if not d2: fail(f"{i} not on day {d} nor any day to {max(DAYS, 28)}"); continue
+            print(f"  ({i} isn't on day {d} (the voice budget: {g.ev(f'(EV_DROPPED.get({d}) || []).join()') or '-'}); walking day {d2})"); d = d2
         s = g.ev(f"({SIM})({{ d: {d}, id: '{i}', step: {STEP} }})")
         for x in s['decks']:
             print(f"  {i} day {d}, Deck {x['n']}: {x['reached']}/{x['att']} reached their places, worst stuck {x['stuck']:.1f} min {x['stuckWho']}, draw calls {x['calls']} ({x['crew']} crew{', decor ' + str(x['decor']) + ' meshes' if x['decor'] else ''})")
@@ -449,6 +452,24 @@ with sync_playwright() as pw:
     print(f"Player in room {j['room']} during the quiz: joined {j['joined']}, social {j['n0']} -> {j['social']}")
     if j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player did not join the quiz')
 
+    # 4b. Pillar 4: joining Sowing morning (day 6) leaves your seedling (trace seedlingYours with its day); a tradition's
+    # ties.decor goes to dressShow only in its window
+    sw = g.ev("""(() => {
+      goToDeck(3); const at = (DECKS[3].places.find(p => p.id === '3-garden-5') || {}).at; if (!at) return { err: 'no 3-garden-5' };
+      player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player)));
+      const t0 = SHIP.traces.slice(); SHIP.events.joined.length = 0;
+      const e = eventsOn(6).find(x => x.id === 'sowing'); if (!e) return { err: 'sowing not on day 6' };
+      for (const m of [e.from + 1, e.from + 4, e.from + 7, e.from + 10]) { setShipNow(5 * 1440 + m); EV_MIN = -1; eventsTick(); }
+      const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
+      const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).join());
+      e.ev.ties = ties;
+      return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), tr, dec };
+    })()""")
+    print('Sowing morning joined:', sw)
+    if sw.get('err') or sw['joined'] != ['sowing@6'] or len(sw['tr']) != 1 or sw['tr'][0].get('day') != 6: fail(f"joining Sowing morning should plant your seedling once: {sw}")
+    if sw.get('dec') != ['', 'testDecor', 'testDecor', '']: fail(f"a tradition's decor window: {sw.get('dec')}")
+
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
     st = g.ev(STORM); a = st['a']
@@ -497,6 +518,16 @@ with sync_playwright() as pw:
     if not b['open'] or set(b.get('cast', {})) != {'calder', 'tech1', 'tech2'} or not L['panel']: fail(f"the briefing didn't open with its cast: {b}")
     if not any(x.startswith('[choice]') for x in L['lines']) or not any('Mind the lift' in x for x in L['lines']) or not L['closed']: fail('the briefing script did not play through with the reply')
     print('  ship notes for your replies:', L.get('choiceNotes'))
+    mo = g.ev("""(() => {   // social B's moments play on this panel: onPick and onEnd on the script (20c)
+      const got = []; MEETING_SCRIPTS['moment:test'] = { title: 'Test', lines: [{ who: 'tomas', text: 'Hi.' }, { choice: [{ text: 'A' }, { text: 'B' }] }, { who: 'tomas', text: 'Bye.' }],
+        onPick: (k, c) => { got.push('pick:' + k + ':' + c.text); throw new Error('a bad listener'); }, onEnd: f => got.push('end:' + f) };
+      const ev0 = SHIP.event; SHIP.event = { id: 'x', startDay: 1, phase: null, threads: {}, mine: {} };   // a moment never counts as the event's meeting
+      dialogueShow('moment:test'); dialogueStep(); dialogueStep(1); dialogueStep(); dialogueEnd(true);
+      if (Object.keys(SHIP.event.mine).length) got.push('counted:' + Object.keys(SHIP.event.mine).join()); SHIP.event = ev0;
+      delete MEETING_SCRIPTS['moment:test']; return got;
+    })()""")
+    print('  a moment on the panel:', mo)
+    if mo != ['pick:1:B', 'end:true']: fail(f"a moment's onPick / onEnd: {mo}")
     if not any(x.startswith('stormBriefing:0:') or x.startswith('calderStorm:0:') for x in L.get('choiceNotes') or []): fail(f"no simNote('choice') for the briefing reply: {L.get('choiceNotes')}")
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')

@@ -30,8 +30,9 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - **Run social_check before every push**, even one-liners (0.36.38 lost a helper and broke every card; reviewer 1 caught it).
 - Section 20 sits before ROSTER (section 9) and section 21: everything lazy (`socInit`); `typeof` on a later const throws during load, so keep such checks inside try or out of load-time code.
 - Plans' blocks (`planDay`) are in absolute ship minutes.
-- Test overrides: `window.foo = ...` doesn't replace a script's own function or const; move the player instead, or push onto the real array.
+- Test overrides: `window.foo = ...` doesn't replace a script's own function. social_check's `g.ev` runs inside the game's scope, so swap with a plain `foo = ...` there (save the real one first, put it back after); consts can't be swapped (move the player instead, or push onto the real array). Never set `SHIP.intro` to null (section 13/21 read it): restore the saved object. With section 10's `crewComeTo` merged, a visitor's card opens on arrival, later; tests stand in an instant arrival.
 - Before pushing a seam another seat depends on, a trial merge plus `node --check` on the main script catches name clashes.
+- **Trial merges: never `git merge -X ours`.** It keeps your side of a whole conflict block, and a block can swallow another seat's new code next to it (the build-number line sits right beside section 13's bus, so `-X ours` silently dropped the bus). Merge normally, take theirs for every conflict outside section 20 (a small script on the markers), and check the other seat's key function is in the result (e.g. `grep -c 'function simNote'`).
 
 ## How to test
 - `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (13 parts, ~3 min). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
