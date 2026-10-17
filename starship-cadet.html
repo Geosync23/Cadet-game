@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.40
+   STARSHIP CADET: CSV Wren                           build 0.36.41
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.40';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.41';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14560,6 +14560,7 @@ function bunkNote() {                                    // section 15's bunk ta
 // didn't say goodbye, a Mail. After, friends write now and then (letters, every two weeks for six weeks, then every six;
 // the engine's letter kind, else built from your memories), and they're under "Moved on" in the Crew app
 // (SHIP.social.moved, saved). Arrivals are news a week ahead, and new for their first week (newHere: ctx.newHere).
+const socP = x => x && x.id ? x : (socInit(), SOC.idx.has(x) ? SOC.crew[SOC.idx.get(x)] : null);   // a person, from a person or an id
 const leaveDay = p => { if (typeof crewLeaving === 'function') { try { const v = crewLeaving(p); if (v != null) return v; } catch (e) { } } return Array.isArray(p.aboard) && p.aboard[1] != null ? p.aboard[1] : null; };   // section 14's (the sim picks leavers), else the roster's window
 const arriveDay = p => { if (typeof crewArriving === 'function') { try { const v = crewArriving(p); if (v != null) return v; } catch (e) { } } return Array.isArray(p.aboard) && p.aboard[0] != null ? p.aboard[0] : null; };
 const socAboard = (p, d = SHIP.time.day) => { if (!p) return false; const a = arriveDay(p), l = leaveDay(p); if ((a != null && d < a) || (l != null && d > l)) return false; return typeof aboard !== 'function' || aboard(p, d); };
