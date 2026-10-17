@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.25
+   STARSHIP CADET: CSV Wren                           build 0.26.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.26';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7822,14 +7822,17 @@ function schedWants(p, d, k, base) {
 
 // ---- seating by friendship: section 20's affinityPlan (pure, memoised); nothing changes without it ----
 const SEAT_SOCIAL = new Set(['mess-seat', 'lounge-seat', 'bench']);
-// a person's friends (affinity 30+) and those they don't get on with (-30 or less), aboard or not; guests have none
-function seatMates(p, S) {
+// a person's friends (affinity 30+) and those they don't get on with (-30 or less) on day d, aboard or not; guests have
+// none. section 20's affinityPlan(a, b, d) reads its weekly snapshot (fixed and saved a week ahead), so a day planned
+// early or again gets the same answer; cached per person and day
+function seatMates(p, S, d) {
   if (typeof affinityPlan !== 'function' || p.guest) return null;
-  const c = S.mates || (S.mates = new Map()); if (c.has(p.id)) return c.get(p.id);
+  const c = S.mates || (S.mates = new Map()), key = p.id + '|' + d; if (c.has(key)) return c.get(key);
+  if (c.size > 6000) c.clear();
   const m = { fr: [], foe: [] };
-  try { for (const q of S.people) if (q !== p && !q.guest) { const a = affinityPlan(p, q); if (a >= 30) m.fr.push(q.id); else if (a <= -30) m.foe.push(q.id); } }
+  try { for (const q of S.people) if (q !== p && !q.guest) { const a = affinityPlan(p, q, d); if (a >= 30) m.fr.push(q.id); else if (a <= -30) m.foe.push(q.id); } }
   catch (e) { return null; }                             // section 20 not loaded yet: seat as before
-  c.set(p.id, m); return m;
+  c.set(key, m); return m;
 }
 // the seats (mess, lounge, bench) within 2 tiles of a place, on its deck
 function seatNear(S, id) {
@@ -7860,7 +7863,7 @@ function schedBuild(p, d, occ, S) {
   // seating by friendship (Pillar 3, with section 20's affinityPlan, pure): at a mess table, a lounge or a bench, a
   // seat within 2 tiles of a friend already planned there (affinity 30+) comes first, and one next to someone they
   // don't get on with (-30 or less) last. Without affinityPlan, or with nobody either way, seats are chosen as before
-  const mates = SEAT_SOCIAL && occ.who && seatMates(p, S);
+  const mates = SEAT_SOCIAL && occ.who && seatMates(p, S, d);
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
   const go = dk => {
     if (dk === deck) return;
@@ -16617,7 +16620,7 @@ class CrewAgent {
   }
   update(dt, now, N) {
     const w = whereIs(this.p, now);
-    if (w && w.escort) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you
+    if (w && w.escort && !(w.escort.mode === 'wait' && w.placeId)) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you (waiting at a place: they sit or stand there, below)
     this.esc = null;
     if (w && w.visit && !w.visit.arrived && this.spot && this.spot.id === w.visit.placeId && this.settled) {   // a visit: there
       w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
@@ -16686,6 +16689,16 @@ class CrewAgent {
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
 }
 const ESC_WAIT = 4, ESC_GO = 3, ESC_NEAR = 2;          // tiles: the escort waits for you, sets off again, keeps this close
+// seatsBeside(placeId, n = 2, types): the n free seats on this deck nearest a place (yours: playerHolds()), nearest
+// first, for sitting someone at your table (section 21: the escort waits at one, crewComeTo sends Calder to another).
+// Free: nobody settled there, nobody heading there, not yours. Types default to mess and lounge seats and benches
+function seatsBeside(placeId, n = 2, types = ['mess-seat', 'lounge-seat', 'bench']) {
+  const at = placeId && PLACE_OF.get(placeId); if (!at) return [];
+  const xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], [x, z] = xy(at);
+  const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id)));
+  return (deckDef.places || []).filter(q => types.includes(q.type) && !busy.has(q.id) && !BUSY.has(q.id))
+    .map(q => [q.id, Math.hypot(xy(q)[0] - x, xy(q)[1] - z)]).sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : 1)).slice(0, n).map(e => e[0]);
+}
 // where the escort heads, as a tile on this deck: `to` is a place id, a [c, r] tile, { deck, tile } or { deck, room }
 // (the room's open tile nearest them); on another deck, leading means to the lift (waiting means staying put)
 function escortGoal(e, a) {
