@@ -29,3 +29,9 @@ two overlapping:
 - Fix: deviceChoose returns false (or waits) while DIALOGUE / a panel is up, and deviceDialogue(v) with a new view
   cancels a pending question first (`if (DEV.choose) devChosen(-1)`). The New game choice at game start is the likely
   first caller, and the arrival evening's scripted meetings are the likely overlap.
+
+## Addendum: 8b502d4 (0.35.24): the two 459c534 fixes PASS
+- settleSure resets when you leave Settling in, and on device close; keepsake and "Left the Wren" rows are guarded.
+- Tiny: `isFinite(null)` is true, so a keepsake or leaver with `day: null` reads "Day null". Use `Number.isFinite`.
+- **Still open: the 89ab0ca deviceChoose / meeting-panel overlap** (addendum above). 0.35.24 doesn't touch it, and the
+  device engineer's handover says they're ready to retire, so the lead should give it to the next device owner.
