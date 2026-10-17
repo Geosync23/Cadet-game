@@ -25,3 +25,55 @@
 == joy
 ? tier>=colleague
 - The record cabinet's songs. With the right words. I'll sing you one, quietly.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Channels are quiet. Everyone's still on their first tea.
+? tier>=acquaintance warmth:cold
+- Oh, hello, {me}. It's been a while. All well? Good.
+
+== bye
+- Bye, then. Early to bed for me. Earlier than you'd think.   #funny
+
+== near
+? habit:tea-break
+- Tea break. Headset off. Five quiet minutes. Lovely.
+? place:musicroom
+- The record cabinet. I'm checking a lyric. Quietly. Torres had it wrong again.   #funny
+
+== invite
+- Friday jam? I'll sing the right words. Quietly. Somebody should.   #funny
+
+== accept
+- Yes. A fair trade: I come, you sing. Joking. Yes.   #funny
+- Thank you. I'd like that.
+
+== decline
+- Not tonight. Early bed. Very early. Another time?
+? weekday:fri|sat
+- Rest day. I'm sorting the record cabinet. Nobody asked. Sunday?
+
+== missed
+- You didn't come. That's all right. I listened to a record. A good one.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'll hum you a song. With the right words, of course.   #warm
+? birthday:me
+- My birthday. Four people sang to me. Four different sets of words. Lovely, all of them.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. The channels will be busy. I'll be listening. All night, if need be.
+
+== hint
+- {me}. Have you a minute later? I'd like to say something. Quietly.
+
+== about
+? aff:achterberg-lars:friend
+- Achterberg knows every song too. He sings them flat. We're very good friends.   #funny
+
+== life
+? tier>=friend
+- On Lisk the market was loud all day. I think that's why I like quiet so much now.

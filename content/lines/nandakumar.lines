@@ -25,3 +25,57 @@
 == joy
 ? tier>=colleague
 - My chillies. Same seeds my mother grew. They don't care which way is down.   #warm
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Run done, chillies watered. Have you had water? Thought not.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. Not seen you in a while. Not in my infirmary either. Good. Keep it that way.
+
+== bye
+- {bye}. Water. You know the rest.   #funny
+
+== near
+? habit:gardener
+- The garden. My corner. Chillies, a stool, and nobody bleeding. Bliss.
+? deck:3 act:work
+- Clinic's open. Sit there. Don't touch anything. Tell me the truth.
+
+== invite
+- Garden after shift? I'll show you the chillies. Don't touch. Then wash your hands.   #funny
+? tier>=acquaintance
+- A morning run? Ring corridor, six sharp. Bring water. Obviously.
+
+== accept
+- Yes. I'll be there. On time. With water.
+- Good. Yes. Bring water.   #funny
+
+== decline
+- Not tonight. Clinic notes. Another time.
+? weekday:mon|tue
+- Rest day. Garden, book, early night. Wednesday?
+
+== missed
+- You didn't come. That's all right. I hope you slept instead. Did you?
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. One chilli, mild. A doctor's gift. Drink some water after.   #funny
+? birthday:me
+- My birthday. Brennan put my chillies in a cake. Revenge, I think. It was lovely.   #funny
+
+== cue
+? cue:event.ionStorm.afterglow
+- Storm's over. Three bumps, one sprain, everyone fine. Drink some water.
+
+== hint
+- {me}. Have you a minute later? I'd like a word. Not a medical one.
+
+== about
+? aff:brennan:friend
+- Brennan says my chillies are too hot. Brennan uses every one. That's friendship.   #warm
+
+== life
+? tier>=friend
+- Off duty, I never take my own advice. Don't tell anyone. Drink some water.   #funny
