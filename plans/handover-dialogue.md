@@ -6,7 +6,7 @@ Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept 
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.27**, c084a1a). Reviewer 2 passed up to 0.43.25 and Tiles 0.46.6, then handed over; reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP) has 0.43.26 and 0.43.27. Also (lead-assigned, Tiles seat vacant) Tiles 0.46.6 = 99609d3 on claude/tiles (crewHold for the opponent), with reviewer 2. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.29**, ff2c3d6). Reviewer 2 passed up to 0.43.25 and Tiles 0.46.6, then handed over; reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP) passed 0.43.26 and 0.43.27 with must-fixes, done in 0.43.28 and 0.43.29, now with 2b. They gate content 0.48.50 for combined 0.60.4. Also (lead-assigned, Tiles seat vacant) Tiles 0.46.6 = 99609d3 on claude/tiles (crewHold for the opponent), with reviewer 2. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
   (7c888e4) the branch carries claude/ship-integration 0.60.1 (merged, the lead's call), so onSim, cue() and social are here.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
@@ -89,6 +89,9 @@ it is the full spec of the file formats and the condition vocabulary) first.
   gives identical lines before/after. Performance engineer 2 (session_01XAkY9U3mmstHQT2yAMTocA) may send phone numbers.
 - 0.43.27 goodbyes (social B2, session_014A3w2gK8FBNWs66YC3LfME): pair:best / pair:mentor, {missed}, a leaver's
   `leaving:` conversation first, once per pair (SHIP.lines.bye). That was the last Pillar 4 piece on this side.
+- 0.43.28: the minute's tries run in its own frame again (spreading them let section 20's chatter cut in; the lead: don't
+  touch section 20); picks identical to 0.43.25 in play. 0.43.29: pair:mentor one way (B is A's mentor), pair:mentee, a
+  goodbye counts once said to the end. Asked head writer 3 whether any goodbye needs mentee.
 - In flight (asked 07:5x UTC): head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565) and social B2
   (session_014A3w2gK8FBNWs66YC3LfME): what the arcs' last beats need from section 22 (head writer 3: nothing; Tiles: nothing more). Social B2 hasn't
   answered yet.
