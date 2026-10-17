@@ -1,0 +1,41 @@
+@crew teague-theo
+// Theo Teague (he/him), Works technician, days. The Works writer, batch 2. Blunt, quick; comic-strip beats.
+
+== greet
+? tier=stranger
+- {hi}. New hand? Take the short jobs first. You'll look good. I didn't.
+- {hi}. Theo. Works. The comics on the common room wall are mine. Some of them.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. You look like page one of a very long comic.   #funny
+? tier>=acquaintance
+- {hi}, {nick}. Stand still. No, the other way. Got you. You're in next week's.   #funny
+? tier>=colleague
+- {me}. Good. I need a second opinion on a joke. It's about Calder. It's very kind.
+? tier>=friend
+- {me}! There you are. I drew you a whole panel. You're the hero. Don't get big-headed.   #warm
+
+== bye
+- Laters. Don't trip, I'll have to draw it.   #funny
+- {bye}. Playlist's up on Friday. One song's yours. Guess which.
+
+== feel
+? mood:low
+- No comic this week. Nothing funny happened. That's never true. I just couldn't see it.
+? mood:high
+- This week's playlist is perfect. Twelve songs. Thirteen. Fine, fourteen.   #funny
+
+== near
+? act:work
+- Job done. I'd draw it, but a fixed lamp isn't funny. A broken one is.
+? act:leisure
+- Comics wall's getting full. Hart's are better. Don't tell Hart.
+
+== life
+? tier>=acquaintance
+- I drew Calder as a very tidy cloud. She saw it. She said, "Fair." Best day of my life.   #funny
+? tier>=colleague
+- O'Neill's playlist is wrong. Every week. We've agreed to settle it at the Friday jam.   #funny
+
+== joy
+? tier>=acquaintance
+- Someone laughed at the comics wall this morning. Out loud. I heard it from the corridor.

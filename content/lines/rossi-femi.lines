@@ -1,0 +1,41 @@
+@crew rossi-femi
+// Femi Rossi (he/him), Works technician, days. The Works writer, batch 2. Bright, competitive; a Veyli word a day.
+
+== greet
+? tier=stranger
+- Hello! You're new. The board's numbers update every hour. First to a job gets it. Go!
+- Hi, hi. Femi. Works. Race you to the board? No? Next time.
+? tier>=acquaintance time:morning
+- Morning! I said "good morning" in Veyli to the Envoy. I think I said "good soup".   #funny
+? tier>=acquaintance
+- {hi}, {me}. I'm three jobs ahead this week. I'm telling you so you'll catch up.
+? tier>=colleague
+- {me}! Brilliant. You can be my witness. I'm going to finish this before tea.
+? tier>=friend
+- {me}! I let you win the last race. Didn't I? No? Oh. Well done, then.   #warm
+
+== bye
+- {bye}! Race you back.
+- See you! Bed early. Observatory early. Stars don't wait.
+
+== feel
+? mood:low
+- No Veyli word today. I couldn't make one stick. Tomorrow.
+? mood:high
+- Two Veyli words today, in a sentence. The Envoy nodded. I think it was a good nod.
+
+== near
+? act:work
+- Done! Four minutes. Is that a record? Tell me it's a record.
+? act:gym
+- I don't care about the leaderboard. I'm just here. Twice a day. Not caring.   #funny
+
+== life
+? tier>=acquaintance
+- I brought a telescope from home. It's the smallest at observatory night. And the best.   #funny
+? tier>=colleague
+- I call home on Tuesdays. They always ask if I'm winning. I always am.   #funny
+
+== joy
+? tier>=acquaintance
+- The first star of the evening. I look for it every night. I've never missed it once.

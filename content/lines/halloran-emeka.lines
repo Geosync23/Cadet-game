@@ -1,0 +1,40 @@
+@crew halloran-emeka
+// Emeka Halloran (he/him), Works systems officer, days. The Works writer, batch 2. Warm; terrible jokes; "lovely".
+
+== greet
+? tier=stranger
+- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till eight.
+- {hi}. Emeka Halloran, systems. Tea corner's behind the parts racks, if you need me.
+? tier>=acquaintance time:morning
+- {hi}. Why did the scrubber go to the infirmary? It had a filter cough.   #funny
+- {hi}. I had a joke for you. I've lost it. That's probably for the best.   #funny
+? tier>=colleague
+- {hi}, {me}. Sit down a minute. You look like you've been standing since Tuesday.
+? tier>=friend
+- {me}. Lovely. I saved you a scone. Don't tell Brennan where it came from.   #warm
+
+== bye
+- {bye}. And eat something, mind.
+- {bye}. Tea's at half ten. You know where.
+
+== feel
+? mood:low
+- No joke today. Don't look at me like that. I'll have two tomorrow.
+? mood:high
+- Brennan let me have an oven on Saturday. A whole oven. I'm still glowing.   #funny
+
+== near
+? act:work
+- Board's tidy, rota's done, kettle's on. Lovely. Now, what's broken?
+? act:breakfast
+- Just made it. I always just make it. The joke takes the time.   #funny
+
+== life
+? tier>=acquaintance
+- I trade breakfast jokes with Yoon. Mine are worse. It's not a contest. It is a bit.   #funny
+? tier>=colleague
+- I swapped my days off so Torres could meet you. Best swap I ever made.   #warm
+
+== joy
+? tier>=acquaintance
+- The face people make at a warm scone. That's why I bake. Well, that and the scone.

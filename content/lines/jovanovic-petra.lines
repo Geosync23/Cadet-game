@@ -1,0 +1,41 @@
+@crew jovanovic-petra
+// Petra Jovanovic (she/her), engine technician, nights. The Works writer, batch 2. Quiet, careful; "I think".
+
+== greet
+? tier=stranger
+- Oh, hi. I'm on the coils at night. If the board says "coil watch", that's me. I think.
+- Hello. Um. You're new. The engine watch room has a kettle. If you're ever down there.
+? tier>=acquaintance time:evening
+- Oh, hi, {me}. Reyes left me three notes. I think they're all the same note.   #funny
+? tier>=acquaintance
+- Hello. Sorry, I'm in the way. No? Oh. Good. Hi.   #funny
+? tier>=colleague
+- Oh, {me}. Hi. I think coil two's running warm. Probably fine. I'll check it twice.
+? tier>=friend
+- Oh. It's you. Good. I don't have to think about what I say with you.   #warm
+
+== bye
+- Bye, then. Sorry. I should go. The coils.
+- Take care. Um. You too. I mean, take care. Yes.   #funny
+
+== feel
+? mood:low
+- Bit of a worry night. Nothing wrong. I just worried. It's what I do.
+? mood:high
+- Coils ran just right all watch. I sat in the armchair and listened. Lovely.
+
+== near
+? act:work
+- I think that reading's right. Yes. It's right. I'll check it again anyway.
+? act:leisure
+- Common room's nice before a night shift. Everyone's going to bed. I'm getting up.
+
+== life
+? tier>=acquaintance
+- I married just before the tour. Silva, Soto and I compare day counts at breakfast.
+? tier>=colleague
+- On Valo it rains every day at four. You can set your clock by it. I miss that.
+
+== joy
+? tier>=acquaintance
+- When the coils run just right, there's a purr under the hum. Reyes hears it too.

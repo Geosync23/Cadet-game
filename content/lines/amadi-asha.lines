@@ -1,0 +1,42 @@
+@crew amadi-asha
+// Asha Amadi (she/her), engine technician, days. The Works writer, batch 2. Sunny and dry; always by a window.
+// Never admits climbing the garden's big tree. Never sings on purpose where people can hear.
+
+== greet
+? tier=stranger
+- Hey. New hand? Best window on Deck 5 is in the shuttle bay. Don't tell anyone.
+- Oh, hello. Engines, days. If you need the overlook on Deck 6, it's past the coil rail.
+? tier>=acquaintance time:morning
+- Morning. Lovely day. Well, it's always the same day out there. Still lovely.   #funny
+? tier>=acquaintance
+- Hey, {me}. I was in the washroom earlier. You didn't hear anything. Good.   #funny
+? tier>=colleague
+- {me}. Come here. Look out there. Nothing. Miles of nothing. Isn't it great?
+? tier>=friend
+- Oh, it's you. I saved you the window side. It's the best side. You're worth it.   #warm
+
+== bye
+- See you round.
+- Bye! Find a window. Any window.
+
+== feel
+? mood:low
+- Bit grey today. I'll find a window. That usually does it.
+? mood:high
+- Sunny side up today. Coils behaving, window seat free. What more is there?
+
+== near
+? act:work
+- Coil two's lovely today. Look at the needle. Barely moving. Happy coil.
+? act:dinner
+- Late dinner, window seat, nobody in the queue. This is what winning looks like.   #funny
+
+== life
+? tier>=acquaintance
+- The whole washroom knows my songs. In order. I've stopped pretending they don't.   #funny
+? tier>=colleague
+- The big tree in the garden? Never climbed it. Why, is there a leaf in my hair?   #funny
+
+== joy
+? tier>=acquaintance
+- The best window aboard changes every week. This week it's the observatory.

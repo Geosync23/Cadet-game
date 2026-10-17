@@ -114,7 +114,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `time:` | the time of day | `morning` (6-12), `afternoon` (12-17), `evening` (17-22), `night` (22-6) |
 | `weekday:` | the day | `mon` `tue` `wed` `thu` `fri` `sat` `sun` |
 | `season:` | the ship's season | `sowing` `greening` `harvest` `lanterns` |
-| `place:` | where they are: a room's name or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
+| `place:` | where they are: a room's name with `_` for spaces (`place:junior_common_room`), a short alias (`mess`, `commons`, `lounge`, `booths`, `overlook`, `teacorner`, `worksbay`, `chartroom`, `musicroom`), or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
 | `deck:` | the deck | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
@@ -308,11 +308,14 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
 
 - **Length:** a chat card line 90 characters at most; a bubble (`smalltalk`, `rumour`, overheard) 60 (90 is an error);
   arc beats, moments, notes and meeting lines 140. A placeholder counts as about 9 characters.
-- **No romance or flirting** with anyone, **no swearing** beyond "blast", **no real-world brands or politics**, and
+- **No romance or flirting** with anyone (the checker catches the obvious words; the head writer also reads every
+  moment and arc beat for the no-romance-with-the-player rule, which no word list can fully catch), **no swearing** beyond "blast", **no real-world brands or politics**, and
   nothing the game doesn't have (no photos, cameras, phones, weapons).
 - **`#serious` lines are earned:** only behind `tier>=friend`, a `beat:`, `mem:moment...` or `leaving:soon`.
-- **Names:** only roster crew and guests. A name it doesn't know is a warning.
+- **Names:** only roster crew, guests and canon names (every capitalised word in `content/facts.md` counts). A name it
+  doesn't know is a warning.
 - **British spelling** (colour, favourite, mum, biscuit).
+- **Moments and meetings:** at most three replies in a choice; poses only `sigh`, `laugh`, `listen`, `nod`, `gesture`, `play`.
 - **Easy to read:** short words, short sentences. A file under 60 on the reading-ease score is a warning.
 - **Habits:** a `habit:` condition in someone's own file must be a habit they have.
 - The baked blocks must be up to date (the head writer re-runs `content_gen.py`).
@@ -335,4 +338,5 @@ their job. Never contradict the roster: bio, life lines, habits and birthdays ar
   `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS = [ ... ]`, one tradition a line, as `plans/trad_parse.py` reads it
   (the traditions engineer's shape, `plans/trad-format.md`).
 - A line's id is a short hash of its file, kind and text: rewording a line gives it a new id.
+- Lines gated on a flag nobody sets (Torres's walk, `? flag:walk.hello`) are fetched with `lineFor(who, kind, { flags: { 'walk.hello': true } })`: `ctx.flags` answers `flag:` for its keys.
 - Section 22 (`lineFor`, `overheardFor`, `linesOk`, `linesFill`) is the engine; see DEV_NOTES, "Lines (section 22)".

@@ -1,0 +1,41 @@
+@crew silva-bea
+// Bea Silva (she/her), Works technician, days. The Works writer, batch 2. Soft, drifting; hears the ship as weather.
+
+== greet
+? tier=stranger
+- Oh, hello. Filters are my thing. If one's clogged, the board will say. Then it's mine.
+- Mm, hi. You're new. The second tea's the good one. The urn's in the tea corner.
+? tier>=acquaintance time:morning
+- Mm. Morning. Don't mind me. I'm not here until the second tea.   #funny
+? tier>=acquaintance
+- {hi}, {me}. The vents are drizzly today. Can you hear it? Like rain on a roof.
+? tier>=colleague
+- Oh, it's you. Good. Come and listen to this filter. It's nearly singing.
+? tier>=friend
+- {me}. Sit here. It's the quiet end. I kept it quiet for you.   #warm
+
+== bye
+- {bye}. Mind the puddle. There isn't one. I just like saying it.   #funny
+- Bye, then. I'll be in the filters if anyone asks. Nobody asks.
+
+== feel
+? mood:low
+- Grey day. In my head, I mean. The ship's the same as always.
+? mood:high
+- The sprinklers ran in the garden this morning. I stood under the edge. Nearly rain.
+
+== near
+? act:work
+- Filter's out, filter's in. Hear that? Like wind dropping. That's a good filter.
+? act:breakfast
+- Tea first. Then I'll know who you are.   #funny
+
+== life
+? tier>=acquaintance
+- Coriel rains nearly every day. People complain. I'd give a week's credits for one shower.
+? tier>=colleague
+- I married just before the tour. I know the day count. Don't ask unless you want it.
+
+== joy
+? tier>=acquaintance
+- Rain on a window, on Coriel. If you ever go, sit by a window. That's all. Just sit.

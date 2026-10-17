@@ -1,0 +1,73 @@
+@bank dept:works
+// The Works writer, batch 2. Lines anyone in Works can say. Neutral in personality, specific in situation; the
+// voice tokens ({hi}, {bye}, {thanks}, {sigh}...) make them sound like each speaker. A person's own lines win.
+
+== greet
+? tier=stranger
+- {hi}. New to Works? The board's on Deck 5. Everything starts there.
+- {hi}. If you need a part, try main storage first, then the machine shop.
+- {hi}. Tea break's at half ten in the tea corner. It counts as work.
+? tier=stranger time:morning
+- {hi}. Calder's briefing is ten to eight. Not eight. Ten to.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. Board's busy this morning. Grab one before they're gone.
+- {hi}, {nick}. Kettle's on in the tea corner, if you're quick.
+? tier>=acquaintance time:afternoon
+- {hi}, {nick}. Nearly half four. Finish what you started, then we're done.
+? tier>=acquaintance time:evening
+- {hi}, {nick}. Shift's over. Go and eat something.
+? tier>=acquaintance act:work
+- {hi}, {nick}. Hand me that spanner? The other one. {thanks}.
+? tier>=colleague
+- {hi}, {nick}. Good to have another pair of hands on the board.
+- {hi}, {nick}. Saw your turn-in. Clean. Calder will have noticed.
+? tier>=friend
+- {hi}, {nick}. Saved you a mug at the tea corner.   #warm
+
+== bye
+- {bye}. Put the tools back where you found them.
+- {bye}. See you on the board.
+? act:work
+- {bye}. Back to it. That filter won't change itself.
+? time:evening
+- {bye}. Don't let the board follow you to bed.   #funny
+
+== feel
+? mood:low
+- {sigh}. Long one. Three jobs, and every one needed a part we didn't have.
+- {sigh}. The board kept filling up faster than I could empty it.
+? mood:high
+- Good day. Every job closed, nothing came back.
+- Good shift. The machine shop had every part I needed, first try.
+
+== near
+? act:work
+- Hold that panel steady? Just a second. {thanks}.
+- Check the seal twice. Then once more. That's Works.
+- The board says this one's quick. The board always says that.   #funny
+? act:breakfast
+- Eat now. You won't get another chance before tea.
+? act:dinner
+- {dish} tonight. Works eats first if we're quick. We're never quick.   #funny
+? act:gym
+- Turning spanners all day and I still come here. Says something.   #funny
+
+== life
+? tier>=acquaintance
+- Every Works tech aboard got certified by Calder. Every one.
+- The tea corner's mug rack has one hook for each of us. Yours is waiting.
+? tier>=colleague
+- Nobody thanks Works when the air's fine. That's the job.
+
+== smalltalk
+? act:work
+- Who took the long spanner?
+- Board's filling up again.
+- That fan on Deck 4 again.   #funny
+- Right. Next one.
+- Has anyone seen the seal kit?
+? act:breakfast
+- Half the board's scrubbers today.
+- Tea first. Board second.
+? time:afternoon
+- Nearly tea. Nearly.
