@@ -154,7 +154,7 @@ with sync_playwright() as pw:
       out.rep = [repBand('works'), repBand('galley'), repShip('work'), knownFor().length];
       out.warm = warmth('tomas');
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
-      out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
+      out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival'), fam: socialFill({ ...tomas, family: 'a brother in the Concord navy' }, 'family'), hob: socialFill({ ...tomas, habits: ['gardener'] }, 'hobby'), since: socialFill({ ...tomas, since: undefined }, 'since') };
       out.calm = memClass('readyroom.lights') === 'big' && memThing('fixed.oven') === 'the oven' && memThing('nothing') === null && memThing('came.quiz') === 'the quiz night' && memThing('show.pell-show') === 'the music boxes';
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
       const B0 = SHIP.social.bonds; SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
@@ -174,6 +174,7 @@ with sync_playwright() as pw:
     if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
     if q['rep'][:3] != ['new', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
+    if q['fill'].get('fam') != 'my brother in the Concord navy' or q['fill'].get('hob') != 'gardening' or q['fill'].get('since') is not None: fail(f"theme fill-ins wrong: {q['fill']}")
     if q['fill']['boss'] is None or q['fill']['none'] is not None or q['fill']['thing'] is None: fail(f"socialFill wrong: {q['fill']}")
     if q['cue'] != [True, True, True, False, True, True] or not q['cueSaved'] or not q['cueGone']: fail(f"cues wrong: {q['cue']} saved {q['cueSaved']} gone {q['cueGone']}")
 

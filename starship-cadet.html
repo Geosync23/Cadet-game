@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.54
+   STARSHIP CADET: CSV Wren                           build 0.36.55
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.54';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.55';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14025,7 +14025,7 @@ function affinityPlan(a, b, d) {
 //   cue(kind)         -> a ship note still talked about (SHIP.social.cues, from the bus), or null; kind matches by prefix,
 //                        and a trailing '.you' wants one you did: cue('repair.oven'), cue('repair.oven.you')
 //   socialFill(p, name, ctx) -> the words for a social placeholder ({me}, {nick}, {partner}, {friend}, {best}, {rival},
-//                        {mentor}, {mentee}, {boss}, {thing}, {trad}), or null when it can't be filled (skip the line)
+//                        {mentor}, {mentee}, {boss}, {thing}, {trad}, {home}, {family}, {hobby}, {since}), or null when it can't be filled (skip the line)
 SHIP.mem = {}; SHIP.rep = null;
 const REP_START = {},                   // a new arrival has no reputation anywhere, your own Works included (the lead's call, 0.36.43)
       REP_DEPTS = ['command', 'helm', 'comms', 'works', 'watch', 'survey', 'infirmary', 'galley', 'store'];
@@ -14135,6 +14135,8 @@ function memThing(key) {                                 // {thing}: a memory's 
   return null;
 }
 // place:calm (and moments' readiness) is the places' own: CALM_TYPES and placeCalm(p) in DECKS' kit (the deck architect, 0.38.9)
+const SOC_HOBBY = { musician: 'playing music', music: 'listening to records', gardener: 'gardening', 'garden-lover': 'pottering in the garden', runner: 'running', stargazer: 'stargazing',
+  'gym-regular': 'training in the gym', shopper: 'browsing the store', 'quiet-corner': 'reading in quiet corners', 'lounge-regular': 'playing Tiles in the lounge', 'common-room': 'playing games in the common room', 'window-seat': 'watching the stars go by' };
 function socialFill(p, name, ctx = {}) {
   socInit(); const tier = relTier(p.id), nameOf = id => id === 'you' ? chatName() : id && SOC.idx.has(id) ? shortName(SOC.crew[SOC.idx.get(id)]) : null;
   if (name === 'me') return chatName();
@@ -14148,6 +14150,11 @@ function socialFill(p, name, ctx = {}) {
     return top.length ? shortName(top[0]) : null;
   }
   if (name === 'thing') return memThing(ctx.mem && (ctx.mem.key || ctx.mem));
+  // theme fill-ins from the roster (the writers' {home}: a place, {family}: "my <someone>", {hobby}: an -ing activity, {since}: a duration)
+  if (name === 'home') return typeof p.home === 'string' && p.home ? p.home : null;
+  if (name === 'family') { const f = typeof p.family === 'string' && p.family.trim(); return f ? (/^(a|an|her|his|their|my|the)\s+/i.test(f) ? f.replace(/^(a|an|her|his|their|my|the)\s+/i, 'my ') : 'my ' + f) : null; }
+  if (name === 'hobby') { if (typeof p.hobby === 'string' && p.hobby) return p.hobby; const h = (p.habits || []).map(x => SOC_HOBBY[x]).find(Boolean); return h || null; }
+  if (name === 'since') return typeof p.since === 'string' && p.since ? p.since : null;   // not in the roster yet: lines that need it are skipped
   if (name === 'trad') {
     const id = ctx.trad, d = SHIP.time.day, es = typeof eventsOn === 'function' ? eventsOn(d) : [];
     const e = id ? es.find(x => x.id === id) || (typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS.find(x => x.id === id) : null) : es.find(x => !x.honorees || !x.honorees.length);
