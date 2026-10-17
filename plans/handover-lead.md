@@ -408,3 +408,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:22 career eng final checks OK (day_check 0.61.17, player_check); archived (~$35.51).
 - ~21:23 BM2 handed over at 68% (cand-0606 f28c79b note; game c20e8cd) and archived (~$110.32 total). Hired BM3 session_01WrXgDfR5dzwktKJfYwVwsV (replacement) on claude/cand-0606: re-run BM2's checks, merge the late pieces, final run. 1f/PE5/PE6/DA3 told.
 - ~21:24 DA3: poses 0.27.44 1845e533 (deep seats, option C, 36 seats) + 0.27.45 6493e5f8 (washrooms back to 2 showers, signs kept). To 1f/BM3. Shots sent to the user (plans/shots/seats-shallow.png).
+- ~21:30 user asked why a replacement helper costs ~30 min. Answer: startup is ~1-2 min; the cost was rerunning checks whose results lived only in BM2's container. New rule (TEAM.md): build masters push each check's result to plans/cand-<build>-results.md as it finishes.

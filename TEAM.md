@@ -24,6 +24,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Ship integration 0.41.6** (9bb9409, 2026-10-16 ~16:55): device 0.35.0-0.35.7, social to 0.36.6, the treadmill fix (0.28.17-0.28.18), job-loop tips, galley storm scores, events 0.34.10, decks to 0.38.3, crowd-render to 0.27.17, crew designer to 0.16.10. All checks pass. Next: 0.41.7 with the storm switched on.
 
+**Check results are saved as they finish (lead 8, 2026-10-17 ~21:30):** a build master pushes each check's one-line result (check, hash, OK/FAIL, key numbers) to `plans/cand-<build>-results.md` on the candidate branch as it finishes, so a replacement only reruns what hadn't finished. Hand over at a quiet point (between merges), not in the middle of a long run.
+
 **Closing sessions (the user, 2026-10-16 ~22:30):** the lead may archive finished, idle helpers whose work and handover notes are pushed (`.claude/settings.json` allows it). Archived sessions are kept and can be reopened.
 
 **Team cut (the user, 2026-10-17 ~14:05):** to reduce cost and speed up, the team is now: lead, build master 2, reviewer 1c (only reviewer; reviews behaviour/save changes in depth, skims content/test changes), onboarding engineer 2, sim engineer 5, performance engineer 3 (watchdog), head writer 3. Builds go out about every 2 hours with whatever is reviewed; each seat runs quick checks only for what it touched, the full set runs on the build going to the user; check runners cut to two after 0.60.3. A cheaper model for routine helpers was offered and declined for now.
