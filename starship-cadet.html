@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.0
+   STARSHIP CADET: CSV Wren                           build 0.42.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.1';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14573,7 +14573,8 @@ function chatTick() {
 // taught by people (the shadow shift on Monday, your first solo job on Tuesday, Sowing morning on Saturday).
 // On paper so far (0.42.0): the steps, the week's beats, the Settling-in list, the flags and the save. Nothing calls
 // in here yet, nothing here draws anything or calls R(), and test URLs (?nosave) never start the intro.
-//   SHIP.intro = { on, step, day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, name, flags }
+//   SHIP.intro = { on, step, day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, flags }
+//   (the name you type on the manifest is section 15's SHIP.player.name, set with playerNameSet)
 //   INTRO_STEPS  the arrival evening, A0-A13: { id, day, at, until, who, where, mode, meeting, checkpoint, fallback, rel }
 //   INTRO_WEEK   Days 1-7: one beat per person who teaches you something, in their real day (section 14 plans them)
 //   SETTLE       the Settling-in list (the device's app reads it); each item ticks itself from the ship notes
@@ -14684,7 +14685,7 @@ const SETTLE = [
   { id: 'shadow', title: 'Shadow a job', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'turnin' && d.reserved === 1 },
   { id: 'lead', title: 'Lead a job', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'turnin' && d.reserved === 2 },
   { id: 'eat', title: 'Eat with the crew', teacher: 'brennan', place: { deck: 3, room: 'Mess hall' }, done: (k, d) => k === 'act' && d.act === 'eat' && d.with > 0 },
-  { id: 'solo', title: 'Your first solo job', teacher: 'calder', place: { deck: 5, room: 'Works Chief\'s office' }, done: (k, d) => k === 'job' && d.step === 'turnin' && !d.reserved },
+  { id: 'solo', title: 'Your first solo job', teacher: 'calder', place: { deck: 5, room: 'Works Chief\'s office' }, done: (k, d) => k === 'job' && d.step === 'turnin' && (d.reserved === 3 || !d.reserved) },
   { id: 'health', title: 'Health check', teacher: 'rina', place: { deck: 3, room: 'Infirmary' }, done: (k, d) => k === 'apptKept' && d.id === 'intro-health' },
   { id: 'call', title: 'Call home', teacher: 'eklund-leila', place: { deck: 3, room: 'Call-home booths' }, done: (k, d) => k === 'act' && d.act === 'call' },
   { id: 'take', title: 'Take a job yourself', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'take' && !d.reserved },
@@ -14708,7 +14709,7 @@ function settleNote(kind, data) {
 }
 
 // ---- the state and the save (save.intro, read defensively) ----
-const introBlank = () => ({ on: false, step: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, name: '', flags: {} });
+const introBlank = () => ({ on: false, step: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, flags: {} });
 function introLoad(s) {
   const I = introBlank(), x = s && s.intro;
   if (!x || typeof x !== 'object') return I;
@@ -14717,7 +14718,6 @@ function introLoad(s) {
   I.day = Number.isInteger(x.day) ? x.day : 0;
   for (const k of ['done', 'settle', 'flags']) if (x[k] && typeof x[k] === 'object') for (const i in x[k]) if (isFinite(x[k][i]) || x[k][i] === true) I[k][i] = x[k][i];
   if (Array.isArray(x.missed)) I.missed = x.missed.filter(id => INTRO_STEPS.some(t => t.id === id));
-  if (typeof x.name === 'string') I.name = x.name.slice(0, 24);
   if (typeof x.escort === 'string') I.escort = x.escort;
   return I;
 }
@@ -14732,7 +14732,7 @@ const introMarkArrived = () => { try { if (!NOSAVE) localStorage.setItem(INTRO_K
 // a new arriving game (section 13's New game calls it in wave 2; never on a test URL): the state only, not the player
 function introBegin(name) {
   SHIP.intro = introBlank(); SHIP.intro.on = true; SHIP.intro.step = INTRO_STEPS[0].id;
-  SHIP.intro.name = String(name || '').trim().slice(0, 24);
+  if (name !== undefined) { if (typeof playerNameSet === 'function') playerNameSet(name); else SHIP.player.name = String(name).trim().slice(0, 24) || null; }
   introFlagSet('escort.' + INTRO_ESCORT); introFlagSet('week1');
 }
 
@@ -14786,7 +14786,7 @@ function introEnd(finished) {
 }
 // skip to Monday morning: the same state as after the arrival evening (points, flags, the device), Bunk 1 at 06:00
 function introSkip() {
-  introBegin(SHIP.intro.name);
+  introBegin();
   const I = SHIP.intro;
   for (const st of INTRO_STEPS) {
     I.done[st.id] = introAbs(INTRO_START.day, INTRO_START.min);
