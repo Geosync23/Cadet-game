@@ -1,0 +1,32 @@
+@voice lindqvist-isak
+// Writer (command: helm), from the roster. Isak Lindqvist, helm officer, days. Can feel a drift in the Wren's course
+// before the console shows it.
+//
+// HOW HE TALKS: restless, quick, a bit impatient; sentences that start before the last one finished. Stubborn about
+// small things (the right way to hold a pick). Talks about the helm in feelings: "she's pulling left".
+// WITH JUNIORS: friendly, a little competitive; challenges them to the rowing machine.
+// WHAT HE NOTICES: drift, in courses and in people; the rowing leaderboard; whose turn it is with the guitar book.
+// MOOD TELLS: restless = taps a rhythm on anything. Happy = boasts about a smooth turn. Low = rows.
+// NEVER: sits still for long; admits the guitar is going badly (it is).
+// RUNNING: the guitar club (Park, Larsen, Haddad: one battered book, endless turns); chasing Vance's name on the rowing
+// board, and suspecting Vance moved to the treadmill out of fear.
+tpl: playful
+talk: Restless and quick; talks about the helm in feelings ("she's pulling left"); stubborn about small things; challenges you.
+cares: the Wren's course | the rowing leaderboard | the guitar, whatever anyone says
+jokes: chasing Vance's name on the rowing board, and suspecting Vance is scared | it's always his turn with the guitar book, he says
+hi: Hey | Oh, hey | Hi
+bye: Off I go | See you | Gotta move
+yes: Sure | Yep | Go on
+thanks: Cheers | Thanks
+wow: Ooh, smooth
+sigh: Ugh
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: music | game
+likes: sweet | made
+invites: gym | jam
+joy: a smooth turn at the helm
+thread: stuck
+keepsake: a guitar pick, bitten at the edge
+avoid: sitting still

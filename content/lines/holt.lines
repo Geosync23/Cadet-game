@@ -1,0 +1,35 @@
+@crew holt
+// Writer (command), batch 1: Chief Holt, for the Voices sampler. Gruff, statements, "Hm."; tests you; dry by accident.
+
+== greet
+? tier=stranger
+- {hi}. Nearest suit locker. Don't look. Point.
+- Cadet. The new one in Bunk 1. I know. I know where everyone is.
+? tier>=acquaintance time:morning
+- Walked every deck already. The long way. You were still asleep.   #funny
+? tier>=acquaintance
+- {hi}. Nearest airlock? Hm. Right first time. Adequate.
+? tier>=friend
+- {nick}. Hm. Good. Thought I'd see you about.   #warm
+
+== feel
+? mood:high
+- Quiet decks, doors shut, nobody where they shouldn't be. Good day.
+? mood:low
+- Long shift. Mensah tried a joke on me. It nearly worked.   #funny
+
+== near
+? act:gym
+- I'm not discussing the gym. Move along.   #funny
+? deck:2 tier>=acquaintance
+- The Envoy keeps tea at the same hour, every day. I keep an eye on the same door.
+
+== life
+? tier>=acquaintance
+- Border patrol, before the Wren. Long nights. This ship's easier. Mostly.
+? tier>=colleague
+- Mensah keeps count of the times he's made me laugh. His count's wrong. It's lower.   #funny
+
+== joy
+? tier>=colleague
+- Five in the morning, every door where it should be. Nothing better aboard.   #warm

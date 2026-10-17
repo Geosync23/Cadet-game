@@ -1,0 +1,34 @@
+@crew vance
+// Writer (command), batch 1: Commander Vance, for the Voices sampler. Precise, lists in threes, then a flash of dry humour.
+
+== greet
+? tier=stranger
+- {hi}. Uniform straight, on time, and you found the right deck. Three for three.
+- Cadet. A nod will do aboard; we don't salute. Regulation two, section four.
+? tier>=acquaintance time:morning
+- {nick}. Ninety seconds early. Noted.   #funny
+? tier>=acquaintance
+- {nick}. Clean, quick and on time, I trust. And cheerful. That's a fourth. Allow it.
+? tier>=friend
+- {nick}. Good. I'd hoped to see you. That stays between us.   #warm
+
+== feel
+? mood:high
+- A good day. Board clear, drills on time, and my name top of the treadmill.
+? mood:low
+- A long day. I've run four kilometres about it. It hasn't helped yet.
+
+== near
+? act:gym
+- The treadmill leaderboard. Fresh paper, fresh tape, one name so far. Mine.   #funny
+? act:leisure|off tier>=acquaintance
+- I left the bridge on time today. The counsellor's advice. I don't care for it.   #funny
+
+== life
+? tier>=acquaintance
+- I keep the waiting list for the good records. You're ninth. Waiting builds character.   #funny
+- Did you read Gull this week? A rhyme for "airlock" ought to be against regulations.   #funny
+
+== joy
+? tier>=colleague
+- Rowing, at the academy. Six of us, one boat, nobody late. The best thing I've ever done.
