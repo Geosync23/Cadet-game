@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.45
+   STARSHIP CADET: CSV Wren                           build 0.28.46
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.45';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.46';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10350,7 +10350,7 @@ let TEACH_CK = -1e9, TEACH_ST = null;
 const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
-  ['t:rep', c => c.d >= 1 && (c.S.turnin || c.min >= 1020 || c.d >= 2), 'Your reputation grows with good work, kindness and joining in. Each department, and the ship as a whole, has its own view of you. The Record app shows where you stand.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end
+  ['t:rep', c => c.d >= 1 && (c.S.turnin || c.min >= 1020 || c.d >= 2), 'People notice good work, kindness and joining in. Each department has its own view of you, and so does the ship. The Record app shows where you stand.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
@@ -10360,7 +10360,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:queue', c => ACT && ACT.kind === 'queue', 'The line moves on its own. You\'ll get a tray at the front. Tap anywhere to leave the queue.'],
   ['t:tray', c => !!SHIP.player.tray && !(ACT && ACT.kind === 'eat'), 'Take your tray to any free seat and tap it to eat. Company at the table lifts your spirits too.'],
   ['t:lift', c => teachRecent(c.S.arrived, c), 'Six decks, one lift. Maps on your device shows where you are and what\'s on every deck.'],
-  ['t:deck3', c => c.deck === 3, 'Deck 3 is the Commons: the mess, the gym, the crew store, the call-home booths and the promenade.'],
+  ['t:deck3', c => c.deck === 3, 'Deck 3 is the Commons: the mess, the gym, the crew store, the call-home booths, the bow lounge and the promenade.'],
   ['t:deck5', c => c.deck === 5, 'Deck 5 is Operations: the Works bay and its job board, main storage and the machine shop. You work here.'],
   ['t:shift', c => c.work && c.min >= 450 && c.min < 480, 'Your shift is 08:00 to 17:00 in the Works bay, Deck 5. Take a job from the board when you get in.'],
   ['t:dayoff', c => c.work === false && c.min >= 420 && c.min < 1200, 'Day off! No shift today. The garden, a game of Tiles, a long call home, or nothing at all. Your choice.'],
@@ -10375,13 +10375,13 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
   ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
   ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
-  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1, Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
+  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1 on Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
   ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
   ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
   ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
   ['t:sit', c => c.n.energy < 50, 'Tired? Sit down anywhere for a bit; it slows the tiredness. Lying on your bunk rests you properly.'],
   ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout every few days keeps you fit and quick on your feet.'],
-  ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to family.'],
+  ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to Mum, Gran, Jo or Sam.'],
   ['t:bonus', c => c.now - c.S.start > 600000 && Object.values(needEffects(c.n).marks).some(m => m[0] === 'up'), 'Needs kept high give bonuses: well rested, you work faster. The Needs app shows what\'s helping and what isn\'t.'],
   ['t:view', c => c.now - c.S.start > 300000, 'Rotate turns the view. Walls lowers them so you can see into rooms. Pinch or scroll to zoom.'],
 ];
