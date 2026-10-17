@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.29.32
+   STARSHIP CADET: CSV Wren                           build 0.29.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.32';                          // keep in step with the header's build line
+const GAME_BUILD = '0.29.33';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11679,8 +11679,12 @@ function galleyCake(d) {
   // (a cake for a tradition held off Deck 3, or with its own decor 'cake', isn't on the servery: four weeks aboard's at Works tea)
   const away = e => !!(e.ev && ((e.ev.ties && e.ev.ties.decor === 'cake') || (Array.isArray(e.ev.where) && e.ev.where.length && e.ev.where.every(w => w.deck !== 3))));
   const bev = all.find(e => e.id === 'birthday'), other = all.find(e => e.id !== 'birthday' && (e.cake || (e.ev && e.ev.cake)) && !away(e));
-  if (who.length) return { who, name: '', gather: bev ? bev.from : null };
-  if (other) { const g = other.ev && other.ev.ties && other.ev.ties.galley; return { who: [], name: other.name, gather: other.from > CAKE.out ? other.from : null, pie: !!(g && /harvest/.test(g.dish || '')) }; }
+  if (who.length) return { who, name: '', gather: bev ? bev.from : null, out: CAKE.out };
+  if (other) {                                           // a gathering in the mess before 19:30 (the welcome tea at 18:40) has it out from its start
+    const g = other.ev && other.ev.ties && other.ev.ties.galley, mess = Array.isArray(other.ev && other.ev.where) && other.ev.where.some(w => w.deck === 3 && /Mess/.test(w.room || ''));
+    const early = mess && other.from >= FOOD.open.dinner && other.from < CAKE.out;
+    return { who: [], name: other.name, gather: other.from > CAKE.out || early ? other.from : null, out: early ? other.from : CAKE.out, pie: !!(g && /harvest/.test(g.dish || '')) };
+  }
   return null;
 }
 // what the cake's for, in words: "Rosa's birthday", "your birthday", "Founding Day"
@@ -11867,13 +11871,13 @@ function galleyStep(S, m, st) {
   }
   if (md === FOOD.open.breakfast) S.batch = null;
   // a cake: a birthday, or one of section 18's events with cake: true (Founding Day)
-  if (md === CAKE.mail || md === CAKE.bake || md === CAKE.out || md === CAKE.gone) {
+  if (md === CAKE.mail || md === CAKE.bake || (md >= FOOD.open.dinner && md <= CAKE.out) || md === CAKE.gone) {
     const c = galleyCake(d);
     if (md === CAKE.gone) S.cake = null;
     else if (c) {
-      if (md === CAKE.mail && !st) galleyMail(m, `${c.pie ? 'Pie' : 'Cake'} tonight`, `It's ${galleyCakeFor(c)}. The ${galleyCakeWord(c)}'s out on the servery from 19:30` + (c.gather ? `, and everyone's in the mess at ${hhmm(c.gather)}.` : '. Everyone welcome.'));
+      if (md === CAKE.mail && !st) galleyMail(m, `${c.pie ? 'Pie' : 'Cake'} tonight`, `It's ${galleyCakeFor(c)}. The ${galleyCakeWord(c)}'s out on the servery from ${hhmm(c.out)}` + (c.gather ? `, and everyone's in the mess at ${hhmm(c.gather)}.` : '. Everyone welcome.'));
       if (md === CAKE.bake) { const n = Math.min(CAKE.meals, S.cold.meals); S.cold.meals -= n; S.cake = n ? { d, who: c.who.map(p => p.id), out: false, pie: !!c.pie } : null; if (st && n) st.cakes++; }
-      if (md === CAKE.out && S.cake) S.cake.out = true;
+      if (md === c.out && S.cake) S.cake.out = true;
     }
   }
   // the tasting table: its tastes cooked an hour before (produce first), out from the start, one for each taster as
@@ -12154,7 +12158,7 @@ function galleyText(what = 'servery') {
   let extra = meal === 'dinner' && M.note ? ` Tonight: ${M.dinner}, ${M.note}.` : '';
   if (S.wait.length) extra = ` ${S.wait.length} waiting` + (now ? `: ${GALLEY_BUSY_TEXT[now.kind]}.` : '.') + extra;
   if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ck.pie ? ' A harvest pie on the end of the counter.' : ` A ${ck.name} cake on the end of the counter.`;
-  else if (ck && md < CAKE.out) extra += ` ${ck.pie ? 'Pie' : 'Cake'} after dinner: it's ${galleyCakeFor(ck)}.`;
+  else if (ck && md < ck.out) extra += ` ${ck.pie ? 'Pie' : 'Cake'} ${ck.out < CAKE.out ? 'at ' + hhmm(ck.out) : 'after dinner'}: it's ${galleyCakeFor(ck)}.`;
   if (meal === 'breakfast' && open && M.bnote) extra += ` It's the ${M.bnote}.`;
   if (S.tasting && S.tasting.d === day && S.tasting.out) extra += ' ' + galleyText('tasting');
   const fresh = produceByCrop(S).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name);

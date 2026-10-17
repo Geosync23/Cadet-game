@@ -474,6 +474,14 @@ with sync_playwright() as pw:
     print('Live line (stand-in for section 10' + ('; section 10 has its own' if ln['real'] else '') + '):', ln)
     if not ln['real'] and (not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.6, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
 
+    # 4r. a cake for a gathering in the mess before 19:30 (0.29.33: the crew welcome tea, 18:40) is out from its start
+    ec = g.ev(f"""(() => {{ const d = [...Array(120)].map((_, k) => {DAY} + k).find(d => {{ const c = galleyCake(d); return c && c.out < CAKE.out; }}); if (!d) return null;
+      const c = galleyCake(d), B = (d - 1) * 1440; SHIP.galley = null; setShipNow(B + c.out - 1); galleyAdvance(shipNow()); const before = !!(SHIP.galley.cake && SHIP.galley.cake.out);
+      setShipNow(B + c.out + 1); galleyAdvance(shipNow()); const after = !!(SHIP.galley.cake && SHIP.galley.cake.out), text = galleyText('servery'); SHIP.galley = null;
+      return {{ d, name: c.name, out: hhmm(c.out), before, after, text: text.slice(-90) }}; }})()""")
+    print('An early cake (a mess gathering before 19:30):', ec if ec else 'none in these days (the welcome tea comes with section 18\'s rotations)')
+    if ec and (ec['before'] or not ec['after']): fail(f"early cake: {ec}")
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
