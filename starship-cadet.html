@@ -16736,7 +16736,7 @@ function momentDone(p, d, c) {                           // the reply was picked
 // taught by people (the shadow shift on Monday, your first solo job on Tuesday, Sowing morning on Saturday).
 // On paper so far (0.42.0): the steps, the week's beats, the Settling-in list, the flags and the save. Nothing calls
 // in here yet, nothing here draws anything or calls R(), and test URLs (?nosave) never start the intro.
-//   SHIP.intro = { on, step, since, day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, flags }
+//   SHIP.intro = { on, step, since, near: [tiles, minute], day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, flags }
 //   (the name you type on the manifest is section 15's SHIP.player.name, set with playerNameSet)
 //   INTRO_STEPS  the arrival evening, A0-A13: { id, day, at, until, who, where, mode, meeting, checkpoint, fallback, rel }
 //   INTRO_WEEK   Days 1-7: one beat per person who teaches you something, in their real day (section 14 plans them)
@@ -16792,13 +16792,14 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
   { id: 'bunk', day: 0, at: 17 * 60 + 53, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, flags: ['intro.device'],
-    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you, so I left your bag in your locker in Bunk 1. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
+    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your locker when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
   { id: 'toMess', day: 0, at: 18 * 60 + 5, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
   { id: 'servery', day: 0, at: 18 * 60 + 12, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
     checkpoint: { deck: 3, tile: [33, 3], room: 'Mess hall' }, rel: { pell: 5, brennan: 3 }, fallback: { wait: 25, later: 'chief' } },
   { id: 'chief', day: 0, at: 18 * 60 + 30, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
-    checkpoint: { deck: 3, tile: [28, 2], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
+    checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
+    seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
     fallback: { until: 20 * 60, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to eight, the Works bay. — I. Calder' } } },
   { id: 'free', day: 0, at: 19 * 60, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },
   { id: 'tomas', day: 0, at: 19 * 60, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about' },
@@ -16833,7 +16834,7 @@ const INTRO_WEEK = [
   { id: 'd4-quiz', day: 4, at: 20 * 60, until: 21 * 60 + 30, who: 'pell', where: { deck: 3, room: 'Bow lounge' }, settle: 'tradition' },
   { id: 'd5-mug', day: 5, at: 10 * 60 + 30, until: 11 * 60, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'] },
   { id: 'd5-invite', day: 5, at: 18 * 60, who: 'tomas', invite: { trad: 'sowing', day: 6, from: 'tomas' } },
-  { id: 'd6-sowing', day: 6, at: 9 * 60, until: 10 * 60, who: 'tomas', where: { deck: 3, room: 'Hydroponics garden' }, settle: 'dayoff', flags: ['seedling'] },
+  { id: 'd6-sowing', day: 6, at: 11 * 60 + 45, until: 12 * 60 + 40, who: 'tomas', where: { deck: 3, room: 'Hydroponics garden' }, settle: 'dayoff', flags: ['seedling'] },
   { id: 'd7-calder', day: 7, at: 18 * 60, who: null, mail: { from: 'I. Calder', subject: 'One week', body: 'One week. You\'ll do. — I. Calder' } },
   { id: 'd8-done', day: 8, at: 0, who: null, flags: ['week1.done'], end: true },
 ];
@@ -16885,7 +16886,7 @@ function settleNote(kind, data) {
 }
 
 // ---- the state and the save (save.intro, read defensively) ----
-const introBlank = () => ({ on: false, step: null, since: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, flags: {} });
+const introBlank = () => ({ on: false, step: null, since: null, near: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, flags: {} });
 function introLoad(s) {
   const I = introBlank(), x = s && s.intro;
   if (!x || typeof x !== 'object') return I;
@@ -16893,15 +16894,20 @@ function introLoad(s) {
   I.step = INTRO_STEPS.some(t => t.id === x.step) || INTRO_WEEK.some(t => t.id === x.step) ? x.step : null;
   I.day = Number.isInteger(x.day) ? x.day : 0;
   I.since = x.since !== null && isFinite(x.since) ? +x.since : null;
+  I.near = Array.isArray(x.near) && x.near.length === 2 && x.near.every(isFinite) ? x.near.map(Number) : null;
   for (const k of ['done', 'settle', 'flags']) if (x[k] && typeof x[k] === 'object') for (const i in x[k]) if (isFinite(x[k][i]) || x[k][i] === true) I[k][i] = x[k][i];
   if (Array.isArray(x.missed)) I.missed = x.missed.filter(id => INTRO_STEPS.some(t => t.id === id));
   if (typeof x.escort === 'string') I.escort = x.escort;
   return I;
 }
 SHIP.intro = introLoad(SAVED);
+// a first launch arriving by shuttle (the lead's one design, with sim 0.26.25): section 13 starts every game as before
+// and this section decides; its first frame (introTick, once every section has run) calls section 13's
+// newGameStart(true) when there's no save, it isn't a test URL and this device has never arrived
+let INTRO_BOOT = typeof SAVED !== 'undefined' && !SAVED && !NOSAVE && introWanted();
 const introSave = () => JSON.parse(JSON.stringify(SHIP.intro));
 SAVE_EXTRA.push(s => { s.intro = introSave(); });
-const introOn = () => !!SHIP.intro.on && !SHIP.intro.ended;
+const introOn = () => !!(SHIP.intro && SHIP.intro.on && !SHIP.intro.ended);
 // the day you came aboard (section 18's "after arrival" rhythms count from it): always the arrival Sunday, Day 0, for
 // you, whether you walked the evening, skipped it or started before there was an arrival
 const introArrival = () => INTRO_START.day;
@@ -16920,7 +16926,8 @@ function introBegin(name) {
 // for section 13's New game (newGameStart): whether a new game should arrive by shuttle (never on a test URL; once
 // you've arrived before, wave 2's choice will ask; until then a returning player starts on Monday as before), and the
 // intro's side of the fresh start, called after section 13 has cleared the flags and set the clock
-const introWanted = () => !NOSAVE && !introArrived();
+// (a function declaration reading the key directly: section 13 asks this at load, before this section has run)
+function introWanted() { try { return !NOSAVE && !localStorage.getItem('starship-cadet-arrived'); } catch (e) { return false; } }
 function introNewGame(arriving) { if (arriving) introBegin(); else SHIP.intro = introBlank(); }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
 const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
@@ -16934,7 +16941,7 @@ function introDone(id, at = Math.floor(shipNow())) {
   for (const f of st.flags || []) introFlagSet(f);
   introNote('introStep', { step: id, who: st.who });
   const i = INTRO_STEPS.indexOf(st);
-  if (i >= 0) { I.step = i + 1 < INTRO_STEPS.length ? INTRO_STEPS[i + 1].id : null; I.since = at; }
+  if (i >= 0) { I.step = i + 1 < INTRO_STEPS.length ? INTRO_STEPS[i + 1].id : null; I.since = at; I.near = null; }
 }
 // the steps move on at minute t: here = { deck, tile } (the player), or null when the player isn't anywhere useful.
 // On paper the tests pass `here` themselves; wave 2's frame tick passes the player's.
@@ -16947,16 +16954,21 @@ function introAdvance(t, here) {
     const there = !cp || here && here.deck === cp.deck && introRoomAt(here.deck, here.tile) === cp.room
       && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= INTRO_REACH;
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
-    // the wait counts from when the step became yours; once you've missed one, he waits only 5 minutes at each until you
-    // catch up (so nobody slow loses a step, and the evening still ends by 20:00 if you never come)
+    // the wait counts from when the step became yours, or from the last minute you got nearer to it than the minute
+    // before, on its deck (so nobody on their way loses a step); once you've missed one, he waits only 5 minutes at
+    // each until you catch up (so the evening still ends by 20:00 if you never come)
+    if (cp && here && here.deck === cp.deck) {
+      const dist = Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1]));
+      I.near = [dist, I.near && dist < I.near[0] ? Math.floor(t) : I.near ? I.near[1] : at];   // [tiles away now, the last minute you got nearer]
+    }
     const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = prev && I.missed.includes(prev.id) ? Math.min(5, f.wait || 20) : (f.wait || 20);
-    const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since) + wait;
+    const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since, I.near ? I.near[1] : at) + wait;
     if (t < late) break;
     introMail(f.mail, late);                              // you weren't there: the gist by Mail, and on to the next one
     I.done[st.id] = late; I.missed.push(st.id); introNote('introStep', { step: st.id, who: st.who, missed: true });
     for (const fl of f.flags || []) introFlagSet(fl);
     const j = INTRO_STEPS.findIndex(x => x.id === f.later);
-    I.step = j >= 0 ? f.later : null; I.since = late;
+    I.step = j >= 0 ? f.later : null; I.since = late; I.near = null;
     for (const s of INTRO_STEPS.slice(INTRO_STEPS.indexOf(st) + 1, j)) if (I.done[s.id] === undefined) { I.done[s.id] = late; I.missed.push(s.id); }   // skipped over
   }
   for (const b of INTRO_WEEK) {                           // the week, by the clock
@@ -16994,10 +17006,21 @@ function introSkip() {
 }
 // the escort's walker mode at minute t (section 10 drives him with it): lead to the checkpoint, wait there, follow
 // you (Monday afternoon), or null (his own plan)
+// the dinner table (0.42.15, the lead: Calder comes visibly to your table and you all sit): who sits where from the
+// Chief's step until Torres lets you go at 19:00. Section 10 seats Torres and Calder, section 15 the player.
+function introSeat(who) {
+  if (!introOn()) return null;
+  const I = SHIP.intro; if (I.step !== 'chief' && I.step !== 'free') return null;
+  const st = introStepById('chief'); return (st.seats && st.seats[who === SHIP.intro.escort ? INTRO_ESCORT : who]) || null;
+}
+const introEscorting = st => !!(st && st.checkpoint && INTRO_STEPS.indexOf(st) >= 0 && INTRO_STEPS.indexOf(st) < INTRO_STEPS.findIndex(x => x.id === 'free'));
 function escortPlan(p, t) {
   const I = SHIP.intro; if (!introOn() || !p || p.id !== I.escort) return null;
   const st = introStepById(I.step);
-  if (st && st.who === p.id && st.checkpoint && st.mode !== 'free') return { mode: st.mode === 'lead' ? 'lead' : 'wait', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
+  // he's yours until he lets you go (the 'free' step): he waits where he's to meet you or show you something, and leads
+  // you everywhere else, including to the table where the Chief stops by (her step, not his)
+  if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: introSeat(p.id) || { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
+  if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until 19:00
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
   return null;
 }
@@ -17005,7 +17028,7 @@ function escortPlan(p, t) {
 function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
-  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}; out.push({ id: st.id, at: st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: st.checkpoint }); }
+  for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = st.seats && st.seats[id]; out.push({ id: st.id, at: st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
   for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push({ id: b.id, at: b.at, until: b.until, where: b.where });
   return out;
 }
@@ -17042,7 +17065,7 @@ const INTRO_STUB_SCRIPTS = {
     { who: 'calder', text: 'Eat something. That\'s an order, and I\'m not even here.' }] },
 };
 for (const id in INTRO_STUB_SCRIPTS) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
-const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, manifest: null };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [] };
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
@@ -17073,6 +17096,7 @@ function introManifest() {
   document.body.appendChild(el); setTimeout(() => input.focus(), 50);
 }
 function introTick() {
+  if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
   if (!introOn() || typeof player === 'undefined') return;
   const I = SHIP.intro;
   if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; introManifest(); return; }
@@ -17082,23 +17106,30 @@ function introTick() {
     const done = Object.keys(I.done).length;
     introAdvance(now, { deck: deckDef.num, tile: player.here() });
     // a meeting step you've just reached plays its script (walking out of the room closes it; its gist comes by Mail)
-    for (const id of Object.keys(I.done).slice(done)) {
-      const st = introStepById(id); if (!st || !st.meeting || I.missed.includes(id) || typeof dialogueShow !== 'function' || DIALOGUE) continue;
-      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
-      dialogueShow(st.meeting, { id: 'intro-' + id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now });
+    for (const id of Object.keys(I.done).slice(done)) { const st = introStepById(id); if (st && st.meeting && !I.missed.includes(id)) INTRO_UI.meet.push(st); }
+    // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
+    for (const st of INTRO_UI.meet.slice()) {
+      if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
+      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
+      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); continue; }
+      if (DIALOGUE) break;
+      INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(st.meeting, m);
     }
   }
-  if (I.step !== INTRO_UI.step) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
+  // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
+  const cur = introStepById(I.step);
+  if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
-  const st = introStep(), lead = !DIALOGUE && st && st.who === I.escort && st.checkpoint && st.mode !== 'free';   // not over a meeting
+  const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
   if (lead) {
     const a = introWalker(), d = st.checkpoint.deck;
     const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
-    if (typeof setGoal === 'function') setGoal(g); INTRO_UI.goal = true;
+    const key = g.deck + ':' + g.at, mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === g.label;   // only when he moves, or someone else's arrow took over
+    if ((key !== INTRO_UI.goalKey || !mine) && typeof setGoal === 'function') { setGoal(g); INTRO_UI.goalKey = key; } INTRO_UI.goal = true;
     if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && typeof bubbleSay === 'function') {
-      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[(now >> 1) % INTRO_CALL.length], 3.5);
+      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[((now >> 1) % INTRO_CALL.length + INTRO_CALL.length) % INTRO_CALL.length], 3.5);
     }
-  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; if (typeof clearGoal === 'function') clearGoal(); }
+  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
 
 // =====================================================================
