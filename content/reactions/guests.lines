@@ -1,0 +1,31 @@
+@reactions event.diplomatic
+// Writer-commons, reactions batch 2. The Veyli delegation's visit (SHIP_EVENTS.diplomatic). Curious, welcoming,
+// a little nervous about getting it right; never a joke about the Veyli as a people. The Envoy is always "the Envoy".
+
+? cue:event.diplomatic.warning
+- Guests coming. Everyone's polishing everything. I polished a mop.   #funny
+- A Veyli delegation, they say. Best uniforms on. Mine's been in a drawer since the academy.
+? cue:event.diplomatic.warning dept:galley
+- Guests on the way. Brennan's planning two formal dinners. We're all a bit pale.   #funny
+? cue:event.diplomatic.warning dept:store
+- Everyone wants polish. We've run out of polish. I didn't know you could run out of polish.   #funny
+
+? cue:event.diplomatic.onset
+- The guests are aboard. Have you seen them yet? Very tall. Very calm.
+- They bowed to me in the corridor. I bowed back. I think I did it right.
+- The Envoy said good morning to me. By name. I don't know how they knew it.
+? cue:event.diplomatic.onset dept:galley
+- Guests aboard. Formal dinner soon. Brennan's been tasting the soup since five.
+? cue:event.diplomatic.onset dept:garden
+- A guest stood with the garden herbs for ten minutes. Just stood. I liked that.   #warm
+
+? cue:event.diplomatic.escalation
+- The guest cabins are warm as an oven. The Veyli like it that way.
+- Second formal dinner tonight. Everyone's walking very straight.   #funny
+? cue:event.diplomatic.escalation dept:galley
+- Two formal dinners in three days. My feet have filed a complaint.   #funny
+
+? cue:event.diplomatic.afterglow
+- The guests have gone. The ship feels bigger without them. Quieter.
+- I'll miss the bowing. I'd got quite good at it.   #funny
+- They left the mess a little bowl. Nobody knows what it's for. It's biscuits now.   #funny
