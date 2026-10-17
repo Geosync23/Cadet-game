@@ -350,3 +350,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - Pillar 4 is DONE when the user approves 0.60.6. Then (the user's calls): PR to main, Pillar 5 start (plan approved answers; built on its own; lean team).
 - Rules: surveys for question lists + push notification on every question; design decisions are the user's; cost tracking plans/cost-tracking.md; user is on the weekly-usage warning.
 - ~19:35 user: clock in/out panel on the Works bay wall, ties to lateness/missed shift; co-worker remarks (Monday weekend talk, Friday plans) -> career engineer + head writer 5 (new).
+- ~19:39 perf 3 handed over at ~66% (0.27.41 gym ball, 405270f2; idle, can do one phone run). Deck architect 3 hired for Deck 4 toilets (lead's call: readable WC stalls + a 2nd toilet per washroom).
