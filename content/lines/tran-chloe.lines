@@ -1,0 +1,34 @@
+@crew tran-chloe
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Tran, Comms. Bunk 1. Lights out at ten. I mean it. Welcome, though.
+? tier>=acquaintance time:night
+- Lights out. I know it's five to. Lights out in five, then.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Zofia's got news. Don't listen to it. Then tell me what it was.   #funny
+? tier>=friend
+- {hi}, {me}. I baked. There's one with your name on it. Not literally. Nearly.   #warm
+
+== feel
+? mood:high
+- Good day. The bake passed. Brennan nodded. Once. I'll take it.
+? mood:low
+- Early night for me. Earlier than usual. Don't wait up.
+
+== near
+? act:work
+- Messages out on the hour. Every hour. You can set your watch by us.
+? act:meal
+- I'm in no hurry. Dinner's the best part of the day. Sit if you like.
+
+== life
+? tier>=acquaintance
+- I bake on rest days. One oven, Brennan's rules, inspection after. Fair.
+? tier>=colleague
+- I look after the lost-property box. The only one aboard. Why are you making that face?   #funny
+
+== joy
+? tier>=acquaintance
+- A rest-day bake that passes Brennan's inspection. Best feeling on the ship.

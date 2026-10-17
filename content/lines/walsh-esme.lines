@@ -1,0 +1,33 @@
+@crew walsh-esme
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Walsh, galley. Trays are on the left. Mind the wet patch.
+? tier>=acquaintance
+- {hi}, {me}. Your collar's folded. Other side.
+- {hi}. Soup's at ninety degrees. Give it two minutes.
+? tier>=friend
+- {hi}, {me}. I kept you a bread roll. The good end.   #warm
+
+== feel
+? mood:high
+- Good shift. Every carrot the same size. Nobody noticed. I noticed.   #funny
+? mood:low
+- Long one. Cleaned the clean pans twice. Brennan saw. Said nothing.
+
+== near
+? act:work
+- Hold the knife like this. Thumb back. There. Now it does the work.
+? act:gym
+- Promenade, then the treadmill. Same pace as yesterday. To the second.
+
+== life
+? tier>=acquaintance
+- My fish are back home on Port Halloran. My brother feeds them. Badly, I expect.
+? tier>=colleague
+- Gerald's on my windowsill. Every cactus aboard is Gerald. Mine's the tidiest one.   #funny
+
+== joy
+? tier>=acquaintance
+- Laps of the promenade before shift. Eight of them. Nobody talks to you on lap six.

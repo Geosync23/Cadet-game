@@ -1,0 +1,33 @@
+@crew esposito-yara
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Esposito, crew store. Eight till half two. You'll need soap. Everyone does.
+? tier>=acquaintance
+- {hi}, {me}. You're out of toothpaste. Don't ask how I know.   #funny
+- {hi}. New biscuits in. They'll be gone by nine.
+? tier>=friend
+- {hi}, {me}. I put one aside for you. Don't tell the queue.   #warm
+
+== feel
+? mood:high
+- Good morning. Shelves full by eight. Guessed six orders right. Personal best.
+? mood:low
+- Slow morning. Restocked the full shelves. Don't look at me like that.
+
+== near
+? act:work
+- Let me guess. Socks. No? Tea. I knew it was tea.   #funny
+? act:gym
+- Gym after shift. Stops me buying biscuits. Mostly.
+
+== life
+? tier>=acquaintance
+- I shop at my own store on my tea break. It's still shopping. Shush.   #funny
+? tier>=colleague
+- I keep a journal of every star I've seen. Wen and Farah keep one too. Mine's neater.
+
+== joy
+? tier>=acquaintance
+- Best bit of the job? Guessing what people came in for. I'm right four times in five.

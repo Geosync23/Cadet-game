@@ -1,0 +1,33 @@
+@crew bakshi-sol
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Bakshi. Helm, nights. Hold still a second. No reason. Well, a small reason.
+? tier>=acquaintance
+- {hi}, {me}. Turn left at that last star and we'd be somewhere warm by now.
+- {hi}. Hold still. No, the other side. Thanks. That's your nose done.   #funny
+? tier>=friend
+- {hi}, {me}. I plotted a course to your home. Just to see. It's a nice route.   #warm
+
+== feel
+? mood:high
+- Good night at the helm. The stars went past very politely.
+? mood:low
+- Bit grey today. I painted rain. Didn't help. Nice painting, though.
+
+== near
+? act:work
+- Course steady. I've a second one plotted for fun. It goes nowhere. It's lovely.
+? act:leisure
+- Common room's quiet. Good light in here for painting. Very small paintings.
+
+== life
+? tier>=acquaintance
+- I grew up on Lisk. It rained every day. I complained every day. Now I miss it.
+? tier>=colleague
+- Tiny portraits keep turning up on bunks. Some are mine. I'm not saying which.   #funny
+
+== joy
+? tier>=acquaintance
+- On rest days I plot courses to places we'll never go. Want to pick one?

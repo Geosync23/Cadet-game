@@ -1,0 +1,33 @@
+@crew cruz-tove
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hello. Cruz. Garden. Mind the hoses. And the seedlings. And, um. Hello.
+? tier>=acquaintance
+- Hello, {me}. That's a week-nine lettuce. Lovely age, week nine.
+- Oh. Hi. Do you need a cactus? I've got cuttings. They're called Gerald.   #funny
+? tier>=friend
+- Hello, {me}. I saved you a strawberry. Don't tell. It was the best one.   #warm
+
+== feel
+? mood:high
+- The beans came up. All of them. I talked to them a lot. Coincidence, probably.
+? mood:low
+- Bit low. I've repotted everything. Twice. The plants don't mind. I mind a bit.
+
+== near
+? act:work
+- Water at the root. Not the leaves. The leaves get sulky. Like people.
+? act:leisure
+- I stay late in here sometimes. It's quieter than the mess. The plants don't ask things.
+
+== life
+? tier>=acquaintance
+- Every cactus on this ship is called Gerald. That's my fault. Sort of.
+? tier>=colleague
+- I take the ladder between decks. For the exercise. It's very good exercise.
+
+== joy
+? tier>=acquaintance
+- Here. A Gerald cutting. For your windowsill. You don't need a windowsill. It'll cope.

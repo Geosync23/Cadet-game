@@ -1,0 +1,33 @@
+@crew varga-tariq
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Varga, galley, the early team. Breakfast is my fault, if it's good.
+? tier>=acquaintance
+- Hello, {me}. I hope this finds you well. It does find you. You're right here.   #funny
+- {hi}, {me}. Onions today: forty-one. Lukas: thirty-eight. Not that I'm counting.
+? tier>=friend
+- Ah, {me}. I wrote about you in my letter home. Only good things. Mostly.   #warm
+
+== feel
+? mood:high
+- Good morning's work. And a new record on the treadmill. A small one. Still a record.
+? mood:low
+- A slow day. I'll write a long letter tonight. It sorts my head out.
+
+== near
+? act:work
+- Early team's done before most people wake. I like it. The galley's quiet at five.
+? act:gym
+- Race you. No? Fair. I'd have won. I'm only saying.   #funny
+
+== life
+? tier>=acquaintance
+- I write home to Valo every rest day. On paper. Vera Ueda and I share the post bag.
+? tier>=colleague
+- I send voice messages to my gran on the Tevan belt. She answers in one long sentence.
+
+== joy
+? tier>=acquaintance
+- Letters on paper. You think harder when you can't delete anything.

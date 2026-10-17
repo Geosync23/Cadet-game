@@ -1,0 +1,33 @@
+@crew ishikawa-orla
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Ishikawa, the store. I'm here till nine. Take your time choosing.
+? tier>=acquaintance
+- {hi}, {me}. How was the tea you bought? Was it the right one?
+- {hi}. The stars are bright from the window tonight. Have a look on your way out.
+? tier>=friend
+- {hi}, {me}. I was hoping you'd come in. The evenings are quiet in here.   #warm
+
+== feel
+? mood:high
+- The ledger balanced to the last credit. I know it's small. It's lovely.
+? mood:low
+- Quiet evening. Everyone's at dinner. I've counted the till twice.
+
+== near
+? act:work
+- Wallet there, tap here. That's all. I'll show you again if you like. I don't mind.
+? habit:window-seat act:leisure
+- I always sit here. You can see the stars go past if you're patient.
+
+== life
+? tier>=acquaintance
+- I grow herbs on my windowsill for the galley. Brennan comes and collects. Very politely.
+? tier>=colleague
+- I once stayed an hour late over one missing credit. I found it. Under the till. Worth it.   #funny
+
+== joy
+? tier>=acquaintance
+- Closing time, and the ledger comes out exact. Nothing in the world quite like it.

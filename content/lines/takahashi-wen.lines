@@ -1,0 +1,33 @@
+@crew takahashi-wen
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Takahashi. Comms. Nights. If a message is late, it isn't me.
+? tier>=acquaintance
+- {hi}, {me}. Say what you need. Plainly. I've had static all night.
+- {hi}. You're up. Good. Someone should be.
+? tier>=friend
+- {hi}, {me}. Sit. I'll put a record on. The right words, this time.   #warm
+
+== feel
+? mood:high
+- Clean signal all night. Not a crackle. That's a good night.
+? mood:low
+- Static. All night. I'm tired of static.
+
+== near
+? act:work
+- Quiet. I'm listening for something. It isn't you.
+? act:leisure
+- Music room. Headphones on. Don't take that personally.
+
+== life
+? tier>=acquaintance
+- I call home every week. Short calls. We say what we mean and hang up. Efficient.
+? tier>=colleague
+- Five people aboard know every song. Four of them are wrong. Guess which one's right.   #funny
+
+== joy
+? tier>=acquaintance
+- The record cabinet. The right words. Put on track three and you'll see.

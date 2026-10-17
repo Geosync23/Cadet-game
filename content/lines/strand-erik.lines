@@ -1,0 +1,33 @@
+@crew strand-erik
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! Strand, helm. Learning, really. One watch at a time. Race you to the lift.
+? tier>=acquaintance
+- {hi}, {me}! Watch forty-two today. Nearly a pilot. Not really. A bit.
+- {hi}! Can't stop. Well, I can. I'm stopping. What's new?
+? tier>=friend
+- {hi}, {me}! Run with me tomorrow? It's better with someone. I'll go slow. Ish.   #warm
+
+== feel
+? mood:high
+- Good day! Raman let me hold the course for an hour. An hour! Didn't wobble once.
+? mood:low
+- Sitting still today. Don't worry. Just thinking. It happens sometimes.
+
+== near
+? act:work
+- Hand steady, eyes on the board. Raman says I'm getting there. I'm getting there!
+? act:gym
+- Five laps. Then five more. Then I'll stop. Probably.   #funny
+
+== life
+? tier>=acquaintance
+- That notebook? It's nothing. Just notes. Helm notes. Very boring. Don't look.   #funny
+? tier>=colleague
+- I paint tiny portraits sometimes. They end up on bunks. Shh.
+
+== joy
+? tier>=acquaintance
+- Counting the watches. Every one's a step closer to flying her properly.

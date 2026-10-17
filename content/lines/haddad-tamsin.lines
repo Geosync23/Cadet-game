@@ -1,0 +1,33 @@
+@crew haddad-tamsin
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! You're new! I'm Tamsin, galley. It's a nice ship. You'll be fine. You will.
+? tier>=acquaintance
+- {hi}, {me}! Breakfast went out on time. Nearly. It'll be fine. Won't it?
+- {hi}! I'm humming again, aren't I. Sorry. It's stuck in my head.
+? tier>=friend
+- {hi}, {me}! I was hoping you'd come by. You make the day go quicker.   #warm
+
+== feel
+? mood:high
+- I got the chord! Once. By accident. But I got it!   #funny
+? mood:low
+- Bit of a flat day. Don't worry. I'm fine. I'm mostly fine.
+
+== near
+? act:work
+- Sorry, mind your elbow! No, my fault. My elbow. Sorry.   #funny
+? habit:lingers-at-meals act:meal
+- Stay a bit? I always stay a bit. The mess is nicest when it's half empty.
+
+== life
+? tier>=acquaintance
+- I'm learning guitar with Hamid, from the same old book. It's going badly. For both of us.   #funny
+? tier>=colleague
+- Takahashi says I've got the words wrong to every song. I haven't. Takahashi has.
+
+== joy
+? tier>=acquaintance
+- Every song in the record cabinet. Every word. Go on, test me. Not that one.

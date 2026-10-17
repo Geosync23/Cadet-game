@@ -1,0 +1,33 @@
+@crew santos-zofia
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Santos, Comms. The bunk under yours. Tell you what: you don't snore, I won't.
+? tier>=acquaintance
+- {hi}, {me}. Tell you what. Tea for the gossip. The public stuff. Deal?
+- {hi}, upstairs. You kicked in your sleep. I'm adding it to your bill.   #funny
+? tier>=friend
+- {hi}, {nick}. Saved you the good chair. Normally that costs.   #warm
+
+== feel
+? mood:high
+- Up two places on the rowing board. Vance's name is in sight. He knows. He's scared.   #funny
+? mood:low
+- Rowing it off. Don't ask. Ask me later. Bring tea.
+
+== near
+? act:work
+- Messages sorted, stamped, sent. The private stuff stays private. That's the rule.
+? act:gym
+- Five hundred metres. Faster than yesterday. Vance moved to the treadmill. Coincidence?   #funny
+
+== life
+? tier>=acquaintance
+- I ran a market stall on Hesper Dock before this. Two for one, best in the row.
+? tier>=colleague
+- Five years, I'll be an officer. Ten, I'll be running Comms. Write it down.
+
+== joy
+? tier>=acquaintance
+- The rowing board. Every morning I'm a bit nearer the top. Every morning.
