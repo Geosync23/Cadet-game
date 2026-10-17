@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.27
+   STARSHIP CADET: CSV Wren                           build 0.43.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.27';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.28';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13639,15 +13639,15 @@ function lineQ(name, ...a) {
       case 'habitsOn': f = typeof habitsOn === 'function' && habitsOn; break;
     }
     if (f && name === 'cue') {                            // the same answer while the clock and the cue list stand still (0.43.26): one line pick asks it hundreds of times
-      const now = shipNow(), n = typeof SHIP !== 'undefined' && SHIP.social && Array.isArray(SHIP.social.cues) ? SHIP.social.cues.length : -1;
-      if (LINE_CUE.now !== now || LINE_CUE.n !== n) { LINE_CUE.now = now; LINE_CUE.n = n; LINE_CUE.m.clear(); }
+      const now = shipNow(), arr = typeof SHIP !== 'undefined' && SHIP.social ? SHIP.social.cues : null;   // the list itself: section 20 replaces it on every new cue (0.43.28)
+      if (LINE_CUE.now !== now || LINE_CUE.arr !== arr) { LINE_CUE.now = now; LINE_CUE.arr = arr; LINE_CUE.m.clear(); }
       if (!LINE_CUE.m.has(a[0])) LINE_CUE.m.set(a[0], f(...a));
       return LINE_CUE.m.get(a[0]);
     }
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
 }
-const LINE_CUE = { now: null, n: -1, m: new Map() };
+const LINE_CUE = { now: null, arr: null, m: new Map() };   // in practice the answers last a frame (the clock moves every frame)
 function linesWho(who) {
   if (who && typeof who === 'object') return who;
   if (typeof ROSTER === 'undefined') return null;
@@ -13720,9 +13720,9 @@ function linePair(v, a, b) {
 }
 const LINE_META = new Set(['text', 'id', 'tone', 'w', 'odds', 'not', 'old', 'lines', 'flavour', 'reply', 'sets', 'memo']);   // data, not conditions
 // the cheap conditions first (0.43.26, the performance pass): who, with, act, time, deck, weekday and place need no
-// social query (and cue's answers are kept for the minute), so a line failing one is dropped before linesOk asks section 20 anything. The same answer as linesOk
+// social query (and cue's answers are kept while the clock and the cue list stand still), so a line failing one is dropped before linesOk asks section 20 anything. The same answer as linesOk
 // alone (all conditions must hold either way), only sooner
-const LINE_FAST = new Set(['who', 'with', 'act', 'time', 'deck', 'weekday', 'place', 'cue']);   // cue: lineQ keeps its answers for the minute
+const LINE_FAST = new Set(['who', 'with', 'act', 'time', 'deck', 'weekday', 'place', 'cue']);   // cue: lineQ keeps its answers while the clock stands still
 function lineQuick(e, p, ctx) {
   for (const k in e) if (LINE_FAST.has(k)) { const v = e[k]; if (Array.isArray(v) ? !v.every(x => lineCond(k, x, p, ctx)) : !lineCond(k, v, p, ctx)) return false; }
   return true;
@@ -13879,9 +13879,11 @@ function linesHeard(id, day, tone) {
   if (tone === 'serious') L.serious = day;
 }
 const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
-// the minute's tries are queued and worked OVH_PER_FRAME a frame (0.43.26), so a ship minute's scan never lands in one
-// frame on a phone: the same tries in the same order, read at the minute's time, so the same picks
-const OVH_PER_FRAME = 1;
+// the minute's tries (goodbyes, reactions, then conversations) are worked in the minute's own frame, before section 20's
+// chatter rolls (0.43.28, reviewer 2b: 0.43.26 spread them over frames, so the chatter could speak in between and a
+// conversation was lost). Each try is about half the cost it was (0.43.26), and performance engineer 2 found section 22
+// in none of the slow frames. OVH_SCAN stays the queue's shape; OVH_PER_FRAME = Infinity works it all at once
+const OVH_PER_FRAME = Infinity;
 let OVH_SCAN = null;                                      // { t, day, tries: [{ x, y, ctx } | { x, react: true }], i }
 function linesTick() {
   if (OVH) { linesTalk(); return; }
