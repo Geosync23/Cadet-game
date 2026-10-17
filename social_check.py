@@ -316,6 +316,25 @@ with sync_playwright() as pw:
     if vs.get('closed') is not True: fail('a visitor should leave at 22:00')
     if not vs['notes'] or not vs['read'][0] or not vs['saved']: fail('notes on your bunk wrong')
 
+    # 13. crew come and go (0.36.28): a transfer's news, the goodbye, the day, letters after; an arrival's news, new for a week
+    cg = g.ev(r"""(() => {
+      const o = {}, keepS = JSON.stringify(socSave()), t0 = shipNow(), pell = SOC.crew[SOC.idx.get('pell')], x = SOC.crew.find(p => !p.story && p.dept === 'survey');
+      pell.aboard = [null, 20]; x.aboard = [15, null];
+      setShipNow(6 * 1440); socReset(6 * 24); relGet('pell').pts = 70; relGet('pell').tier = 3; relGet('pell').met = 6 * 1440; memAdd('pell', 'fav.lamp');
+      const step = (d0, d1) => { for (let d = d0; d <= d1; d++) { setShipNow((d - 1) * 1440 + 480); socialTo(shipNow()); } };
+      step(7, 10); o.news = NEWS.some(n => n.id === 'leaving:pell') && NEWS.some(n => n.id === 'arriving:' + x.id);
+      o.before = crewContacts({ all: true }).some(c => c.id === x.id);
+      step(11, 18); o.bye = chatLine(pell, shipNow()).kind; o.byeText = chatLine(pell, shipNow()).text;
+      const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id); o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
+      o.gone = !crewContacts({ all: true }).some(c => c.id === 'pell'); o.newHere = [newHere(x, 16), newHere(x, 23)];
+      const m1 = SHIP.social.mail.length; step(22, 50); o.letters = SHIP.social.mail.slice(m1).filter(m => m.from.startsWith(pell.name)).length;
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      delete pell.aboard; delete x.aboard; setShipNow(t0); socLoad(JSON.parse(keepS)); return o;
+    })()""")
+    print('Coming and going:', json.dumps(cg))
+    if not cg['news'] or cg['before'] or cg['bye'] != 'goodbye' or cg['moved'] != ['pell'] or not cg['gone']: fail('transfers wrong (news, goodbye, moved on)')
+    if not cg['sorry'] or cg['newHere'] != [True, False] or not (2 <= cg['letters'] <= 4) or not cg['saved']: fail('the day, new arrivals or letters wrong')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.27
+   STARSHIP CADET: CSV Wren                           build 0.36.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.27';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.28';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13917,10 +13917,10 @@ const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (con
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
 function socSave() {
   socInit();
-  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0]; }
+  const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -13930,14 +13930,15 @@ function socLoad(s) {
     SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ ...x })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
-      notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0 };
+      notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
+      moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [] };
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0 }; }
+    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? r[3].slice() : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     memLoad(s);
     SHIP.rep = s.rep && typeof s.rep === 'object' && s.rep.dept && s.rep.ship ? JSON.parse(JSON.stringify(s.rep)) : null;
@@ -13947,7 +13948,7 @@ function socLoad(s) {
 }
 function socInit() {
   if (SOC) return SOC;
-  const crew = ROSTER.filter(p => !p.player);
+  const crew = ROSTER.filter(p => !p.player).concat(typeof ROSTER_RESERVE !== 'undefined' && Array.isArray(ROSTER_RESERVE) ? ROSTER_RESERVE.filter(p => p && p.id && !p.player && !ROSTER.includes(p)) : []);   // the reserve too (A9): the save's shape never changes
   SOC = { crew, n: crew.length, idx: new Map(crew.map((p, i) => [p.id, i])), ids: crew.map(p => p.id).join(',') };
   if (!socLoad(SAVED && SAVED.social)) socReset(Math.floor(shipNow() / 60));
   return SOC;
@@ -14505,6 +14506,52 @@ function bunkNote() {                                    // section 15's bunk ta
   n.read = true; const p = SOC.idx.has(n.from) && SOC.crew[SOC.idx.get(n.from)];
   return { from: p ? p.name : n.from, text: n.text };
 }
+// ---- crew come and go (0.36.28, A9; plans/social-deep-plan.md Part 8b) ----
+// The roster's reserve (ROSTER_RESERVE, section 9, the crew designer) is in SOC.crew from day one, so affinity, memories
+// and the save never change shape; each person's aboard: [fromDay, toDay] (null ends: always) says when they're on the
+// ship (socAboard; section 14's aboard(p, d) too, when it knows). Off the ship, they're left out of the hours on paper,
+// news and the Crew app. A leaver's transfer is news 10 days ahead ("transferring to the Halcyon": the roster's
+// transferTo); a day or two before, anyone who knows you comes to say goodbye (their card's first line, kind 'goodbye':
+// 20c's goodbyeMoment(p) when there is one, else the engine's goodbye line, else one built from their heaviest memories
+// of you); on the day, a farewell at the shuttle bay at 15:00 (section 18's gathering, when it's there) and, if you
+// didn't say goodbye, a Mail. After, friends write now and then (letters, every two weeks for six weeks, then every six;
+// the engine's letter kind, else built from your memories), and they're under "Moved on" in the Crew app
+// (SHIP.social.moved, saved). Arrivals are news a week ahead, and new for their first week (newHere: ctx.newHere).
+const socAboard = (p, d = SHIP.time.day) => !!p && (!Array.isArray(p.aboard) || ((p.aboard[0] == null || d >= p.aboard[0]) && (p.aboard[1] == null || d <= p.aboard[1])))
+  && (typeof aboard !== 'function' || !p.aboard || aboard(p, d));
+const leavingSoon = (p, d = SHIP.time.day) => p && Array.isArray(p.aboard) && p.aboard[1] != null && d <= p.aboard[1] && p.aboard[1] - d <= 10 ? p.aboard[1] - d : null;
+const newHere = (p, d = SHIP.time.day) => !!(p && Array.isArray(p.aboard) && p.aboard[0] > 1 && d >= p.aboard[0] && d - p.aboard[0] < 7);
+function socTransfers(h) {                               // 07:00 each ship day (socialHour)
+  const d = Math.floor(h / 24) + 1, t = h * 60 + 30, M = SHIP.social.moved || (SHIP.social.moved = []);
+  for (const p of SOC.crew) {
+    if (!Array.isArray(p.aboard)) continue;
+    const n = shortName(p), to = p.transferTo ? 'the ' + p.transferTo.replace(/^the /i, '') : 'another ship', near = SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || socRoom(q) === socRoom(p)));
+    if (p.aboard[1] != null && d === p.aboard[1] - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
+      lines: ['Did you hear? ' + n + '\'s transferring to ' + to + '.', n + ' is leaving us. ' + to[0].toUpperCase() + to.slice(1) + ', in ten days.', 'Ten days and ' + n + '\'s off to ' + to + '. Can you believe it?'] });
+    if (p.aboard[0] != null && p.aboard[0] > 1 && d === p.aboard[0] - 7) newsAdd({ id: 'arriving:' + p.id, about: p.id, kind: 'arrival', weight: .6, life: 8, born: t, seed: socPick(SOC.crew.filter(q => q.dept === p.dept && socAboard(q, d)), 3, p.seed, d, 664).map(q => q.id),
+      lines: ['We\'ve got a new ' + (p.role || 'crew member').toLowerCase() + ' coming next week.', 'Someone new is joining ' + p.dept + ' next week. ' + n + ', I think.'] });
+    if (p.aboard[1] != null && d === p.aboard[1] && !M.some(x => x.id === p.id && x.day === d)) {
+      const r = SHIP.rel[p.id], tier = r ? r.tier : 0, mem = (SHIP.mem[p.id] || []).slice().sort((a, b) => b[2] - a[2]).slice(0, 3).map(m => m[0]);
+      M.push({ id: p.id, day: d, tier, mem, letters: 0, next: tier >= 3 ? d + 14 : null });
+      if (typeof gathering === 'function') { try { gathering({ id: 'farewell-' + p.id, where: { deck: 5, room: /^Shuttle bay$/ }, at: [(d - 1) * 1440 + 900, (d - 1) * 1440 + 930], who: [p.id].concat(SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || affinity(p, q) >= 40)).map(q => q.id)) }); } catch (e) { } }
+      if (tier >= 1 && !(r.bye >= d - 2)) SHIP.social.mail.push({ at: (d - 1) * 1440 + 960, from: p.name, subject: 'Sorry I missed you', body: 'Sorry I missed you at the shuttle. ' + byeLine(p, true) + ' ' + shortName(p) });
+    }
+  }
+  for (const x of M) if (x.next && d >= x.next) {           // letters from friends who moved on
+    const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; if (!p) { x.next = null; continue; }
+    x.letters++; x.next = d + (x.letters < 3 ? 14 : 42);
+    const l = socLine(p, 'letter', { t, tier: x.tier, mem: x.mem[0] || null }), thing = x.mem[0] && socialFill(p, 'thing', { mem: x.mem[0] });
+    SHIP.social.mail.push({ at: t + 600, from: p.name + (p.transferTo ? ', ' + p.transferTo.replace(/^the /i, 'the ') : ''), subject: ['News from out here', 'Hello from ' + (p.transferTo || 'my new ship'), 'Thinking of the Wren'][x.letters % 3],
+      body: (l ? l.text : 'The new ship\'s fine. Bigger, colder, nobody makes tea like Brennan.' + (thing ? ' I still think about ' + thing + '.' : '') + ' Say hello to everyone for me.') + ' ' + shortName(p) });
+  }
+}
+function byeLine(p, mail) {                              // a goodbye that talks about your friendship, from their heaviest memories of you
+  const l = socLine(p, 'goodbye', { t: shipNow(), tier: relTier(p.id), mail: !!mail }); if (l) return l.text;
+  const things = (SHIP.mem[p.id] || []).slice().sort((a, b) => b[2] - a[2]).map(m => socialFill(p, 'thing', { mem: m[0] })).filter(Boolean).slice(0, 2);
+  const tier = relTier(p.id), you = chatName();
+  return (tier >= 3 ? 'I\'m going to miss you, ' + you + '. ' : 'I\'m off soon. ') + (things.length ? things.map(x => x[0].toUpperCase() + x.slice(1)).join('. ') + '. I won\'t forget that. ' : '') + (tier >= 3 ? 'Write to me?' : 'Look after the old Wren.');
+}
+const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
 const repAskedFor = dept => ['well', 'theirs'].includes(repBand(dept));
 const repNotes = () => (repInit().notes || []).slice().reverse();
 function repView() {                                     // the Record's Reputation page (section 19 draws it): words only, never numbers
@@ -14518,7 +14565,7 @@ function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
   // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
   seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
-  const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s)), born, kind, event, life };
+  const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && (!SOC.crew[SOC.idx.get(s)].aboard || socAboard(SOC.crew[SOC.idx.get(s)]))), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
   return it;
 }
@@ -14574,6 +14621,7 @@ function socialHour(h) {
   const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
   if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
   for (let i = 0; i < n; i++) {
+    if (crew[i].aboard && !socAboard(crew[i], Math.floor(h / 24) + 1)) continue;   // off the ship (crew coming and going)
     const w = planWhere(crew[i], t); if (!w || w.moving || w.act === 'sleep' || !w.placeId) continue;
     const pl = S.byId.get(w.placeId), k = w.deck + '|' + (pl && pl.room || w.placeId);
     (rooms.get(k) || rooms.set(k, []).get(k)).push(i);
@@ -14612,7 +14660,7 @@ function socialHour(h) {
   socCourtesy(h, rooms);
   if (h % 24 === 4) memFade();
   if (h % 24 === 19) socCrewGift(h);
-  if (h % 24 === 7) socInvites(h);
+  if (h % 24 === 7) { socTransfers(h); socInvites(h); }
   if (h % 24 === 4 && (Math.floor(h / 24) + 1) % 7 === 0) repWeek(h);   // Sundays
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
@@ -14742,8 +14790,9 @@ function socialSeek(m) {
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
     const p = a.p, mentor = introOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
-    if (!SOC.idx.has(p.id) || !near(a) || !(mentor || (relTier(p.id) >= 3 && socGate('d3')))) continue;
-    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor ? .25 : SEEK_ODDS)) continue;
+    const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
+    if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
+    const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
     r.seekDay = day;
     const el = seekEl(), U = k => schedU(p.seed, m, k);
@@ -14789,6 +14838,7 @@ function crewContacts({ all = false } = {}) {
   socInit(); const t = shipNow(), out = [];
   for (const p of SOC.crew) {
     const r = SHIP.rel[p.id]; if (!all && !(r && r.met !== null)) continue;
+    if (!socAboard(p)) continue;                          // moved on, or not here yet: movedOn() lists those who left
     const tier = relTier(p.id), pts = r ? r.pts : 0, w = whereIs(p, t);
     const show = tier >= 1 || (w && w.act === 'work' && PUBLIC_WORK.has(p.dept));
     out.push({ id: p.id, name: p.name, role: p.role, dept: p.dept, tier, tierName: REL_NAMES[tier], pts, toNext: tier < 4 ? Math.ceil(REL_TIERS[tier + 1] - pts) : null,
@@ -14812,9 +14862,9 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon
       { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
       { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
-    const cs = crewContacts();
-    return { title: 'Crew', blocks: cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
-      : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }] };
+    const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
+    return { title: 'Crew', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
+      : [{ kind: 'text', text: 'Nobody yet. Tap someone aboard to say hello.' }]).concat(gone) };
   },
   act: (verb, arg) => { CREW_PICK = verb === 'show' ? arg : null; } });
 SIM_ADVANCE.push((from, to) => { socialTo(to); });
@@ -14954,11 +15004,13 @@ function socialMail(now) {                               // story Mail that's du
 function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahead (Chat's next thing), so the dialogue engine notes nothing
   socInit();
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
-  const ctx = { t, tier, peek }, eng = (kind, x) => { const l = socLine(p, kind, x ? { ...ctx, ...x } : ctx); return l ? { text: l.text, kind, say: true, line: l } : null; };
+  const ctx = { t, tier, peek, newHere: newHere(p, Math.floor(t / 1440) + 1), leaving: leavingSoon(p, Math.floor(t / 1440) + 1) }, eng = (kind, x) => { const l = socLine(p, kind, x ? { ...ctx, ...x } : ctx); return l ? { text: l.text, kind, say: true, line: l } : null; };
   const fill = s => s.replace('{me}', chatName());
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
   if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
     return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
+  const lv = ctx.leaving, rb = SHIP.rel[p.id]; if (lv !== null && lv <= 2 && tier >= 1 && !(rb && rb.bye >= Math.floor(t / 1440) - 1)) {   // leaving in a day or two: their goodbye
+    const gm = typeof goodbyeMoment === 'function' ? goodbyeMoment(p, t) : null; return { text: gm ? (gm.hint || byeLine(p)) : byeLine(p), kind: 'goodbye', moment: gm ? gm.id : undefined, say: true }; }
   if (introOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
   const mo = typeof momentReady === 'function' && socGate('done') ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
   if (mo) { const hint = typeof MOMENTS !== 'undefined' && MOMENTS[mo] && MOMENTS[mo].hint, l = hint ? null : eng('hint');
@@ -15069,6 +15121,7 @@ function chatOpen(p, greet, line) {                       // greet: they came to
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (CHAT.line.kind === 'story') arcTold(p);
   if (CHAT.line.kind === 'invite') CHAT.line.invite.said = true;
+  if (CHAT.line.kind === 'goodbye') relGet(p.id).bye = SHIP.time.day;
   if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
