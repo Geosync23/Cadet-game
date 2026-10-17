@@ -9764,8 +9764,7 @@ function queueAsk() {
 const lineAt = sp => sp && isFinite(sp.x) && isFinite(sp.z) ? { id: null, walk: sp.at, x: sp.x, z: sp.z, y: 0, face: isFinite(sp.face) ? sp.face : 0, pose: 'stand' } : null;   // lineSpot -> a spot
 function queueLeave() {
   if (!ACT || ACT.kind !== 'queue') return;
-  if (typeof lineLeave === 'function') try { lineLeave('player'); } catch (e) { /* not ours to mend */ }
-  actEnd(true); toast('Servery', 'You step out of the line.');
+  actEnd(true); toast('Servery', 'You step out of the line.');   // actEnd calls lineLeave (0.28.34)
 }
 // company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
 // at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.

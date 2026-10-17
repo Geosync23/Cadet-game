@@ -358,7 +358,7 @@ with sync_playwright() as pw:
         g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
         lv = g.ev("[!!ACT, window.__left]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; window.galleyTurn = window.__gt")
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
-        check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and lv[1] >= 1, f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
+        check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and lv[1] == 1, f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
