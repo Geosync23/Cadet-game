@@ -43,10 +43,15 @@ plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md fir
 ## Loose ends
 - B4 goes on as the writers deliver: head writer 2 (session_01HNrh3xCtczeZM5NVFrE6pa; the first head writer retired)
   has my notes on Calder (rep), Holt 1 (`where: meal`), Marrow 1 (`mem:readyroom`), Pell 7 (`duty: true`).
-- Asked the dialogue engineer (session_01UmrVVpV7eBqEsa4sBucASP) to make `rep:` mean "this band or better" in
-  `linesOk` and to confirm `deck:` is the player's deck. Until then Calder's arc locks once Works rates you higher.
-- New ask from the user via the lead: calls home with family and friends, with whole story arcs. Head writer 2 will
-  contact me to design how those calls play (contacts, arc shape, a call as a moment); they send the lead a proposal.
+- The dialogue engineer made `rep:` / `ship.*:` mean "this band or better" (claude/dialogue 0.43.9) and `deck:` the
+  player's deck (pass ctx.deck or leave it out), so Calder's and Holt's beats work as the writers meant.
+- New ask from the user via the lead: calls home (Mum, Gran, Jo, Sam) with whole arcs. Agreed shape with head writer 2
+  (they send the lead the proposal): HOME_CONTACTS, HOME_MOMENTS['<contact>:<n>'] (MOMENTS shape + `via: reply|live`),
+  HOME_SEND, HOME_REPLY baked by the dialogue engineer from content/home/; state in SHIP.social.stories.home; pacing:
+  a message since the last beat + 7 days; flags (home.gran.hip) and simNote('homeCall') for crew to ask after them.
+  Hooks to ask for: section 15's "Calling home" activity calls `homeCall()`; the device engineer plays a Mail with
+  `play: '<momentId>'` through `momentShow`; Letters evening (section 18) for live calls. Not built yet (B8, once the
+  lead OKs it). Non-crew speakers work in section 18's panel (an unknown `who` shows as its name).
 - Theme moments (MOMENT_THEMES) are baked but empty until the writers write them; the engine is tested with stand-ins.
 - The sim engineer (session_01R6RBwwBM9aorpsqDCrztDU) passes the day to `affinityPlan` from 0.26.26: seating follows
   the weekly snapshot from week 2 once combined (an explained day_check/cadet_test difference past day 14).
