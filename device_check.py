@@ -534,7 +534,7 @@ def run(path):
                   document.getElementById('room').textContent = keep.room; document.getElementById('deck').textContent = keep.deck;
                   return { n: names.size, bad, clock: clock.textContent }; })()"""
                 hud = {}
-                for vw, vh in [(320, 640), (340, 700), (360, 740), (375, 667), (390, 844), (412, 915), (430, 932), (480, 800), (540, 900), (600, 900), (601, 375), (667, 375), (740, 360), (844, 390), (900, 420), (1024, 600), (1280, 800)]:
+                for vw, vh in [(320, 640), (340, 700), (360, 740), (375, 667), (390, 844), (412, 915), (430, 932), (480, 800), (540, 900), (600, 900), (640, 960), (700, 1000), (720, 1100), (768, 1024), (601, 375), (667, 375), (740, 360), (844, 390), (900, 420), (900, 760), (1024, 600), (1280, 800)]:
                     g.page.set_viewport_size({'width': vw, 'height': vh}); g.step(1); r = g.ev(HUDCHK)
                     if r['bad']: hud[f'{vw}x{vh}'] = r['bad']
                 g.page.set_viewport_size({'width': w, 'height': h}); g.step(1); g.ev("updateClock()")

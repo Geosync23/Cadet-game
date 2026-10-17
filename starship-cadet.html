@@ -22,7 +22,7 @@ canvas{position:fixed;inset:0;display:block;z-index:1}
 button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-@media (max-width:600px),(max-height:500px){             /* 0.35.34: narrow phones (0.35.36: and short landscape ones): the six buttons as two rows of 44px icons beside the place and clock */
+@media (max-width:720px),(max-height:500px){             /* 0.35.34: narrow phones (0.35.36: and short landscape ones): the six buttons as two rows of 44px icons beside the place and clock */
   .controls{display:grid;grid-template-columns:repeat(3,44px);gap:8px;top:10px;max-width:none}
   .controls button{width:44px;height:44px;padding:0;justify-content:center;font-size:0;gap:0}
   .controls button svg{width:19px;height:19px}
@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.38
+   STARSHIP CADET: CSV Wren                           build 0.35.39
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7252,7 +7252,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.38';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.39';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7404,7 +7404,7 @@ const newBtn = document.getElementById('newgame'); let newAsk = 0;
 newBtn.onclick = () => {
   const span = newBtn.querySelector('span');
   if (!newAsk) { span.textContent = 'Tap again'; newBtn.classList.add('ask'); newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask'); }, 4000);
-    if (matchMedia('(max-width:600px),(max-height:500px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
+    if (matchMedia('(max-width:720px),(max-height:500px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
     return; }
   clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask');
   if (ride) return;                                      // not mid-ride
@@ -19750,10 +19750,20 @@ const clockEl = document.getElementById('clock'), roomEl = document.getElementBy
 function updateClock() {
   const night = nightAt() > .5;
   clockEl.textContent = clockText(); drawClock(hhmm(SHIP.time.min));
-  if (clockEl.scrollWidth > clockEl.clientWidth + 1)   // 0.35.36: too long for its line (a narrow phone, a long weekday): the short weekday
-    clockEl.textContent = 'Day ' + SHIP.time.day + ', ' + WEEKDAYS[weekday(SHIP.time.day)].slice(0, 3) + ' ' + hhmm(SHIP.time.min);
+  hudFit();
+  if (clockEl.scrollWidth > clockEl.clientWidth + 1) {   // 0.35.36: too long for its line (a narrow phone, a long weekday): the short weekday
+    const wd = WEEKDAYS[weekday(SHIP.time.day)]; clockEl.textContent = clockText().replace(wd, wd.slice(0, 3)); }   // 0.35.39: from clockText()
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
+}
+// 0.35.39 (reviewer 2b): the place and clock may use all the room up to the nearest button beside them (8px clear),
+// measured on resize and each minute; the CSS caps stay as the fallback
+const hudEl = document.querySelector('.hud');
+function hudFit() {
+  if (!hudEl) return; hudEl.style.maxWidth = '';
+  const h = hudEl.getBoundingClientRect(); let right = innerWidth - 12;
+  for (const b of document.querySelectorAll('.controls button')) { if (!b.offsetWidth) continue; const r = b.getBoundingClientRect(); if (r.top < h.bottom + 4 && r.left > h.left) right = Math.min(right, r.left - 8); }
+  hudEl.style.maxWidth = Math.max(120, Math.floor(right - h.left)) + 'px';
 }
 updateClock();
 addEventListener('resize', () => updateClock());          // 0.35.36: the clock's length follows the screen's width
