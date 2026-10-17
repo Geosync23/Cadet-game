@@ -23,12 +23,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
-                'kin', 'lost', 'hobbyNoun'}   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+                'kin', 'lost', 'hobbyNoun', 'missed'}   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+PAIR_WORDS = {'same', 'bunk', 'friend', 'rival', 'senior', 'couple', 'best', 'mentor'}   # section 22's linePair
 NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
 VALUES = {
     'warmth': {'cold', 'warm'},
-    'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
+    'bond': {'best', 'friends', 'friend', 'rivals', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'partner', 'missed'},   # section 20's BOND_KINDS and bondOf's aliases 'mood': {'low', 'ok', 'high'},
     'rep': {'new', 'known', 'well', 'theirs'}, 'ship.work': {'low', 'ok', 'high'}, 'ship.kindness': {'low', 'ok', 'high'},
     'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'},
     'guide': {'true', 'false'},
@@ -302,6 +303,8 @@ def main(argv):
                 if k == 'pair':
                     for x in (v if isinstance(v, list) else [v]):
                         for alt in str(x).split('|'):
+                            if '+' not in alt and alt not in PAIR_WORDS:
+                                errors.append(f'{tag}: pair:{alt} is not x+y or one of {", ".join(sorted(PAIR_WORDS))}')
                             for side in (alt.split('+') if '+' in alt else []):
                                 if side not in people and side not in VALUES['dept'] and side not in VALUES['rank'] and side != 'any':
                                     errors.append(f'{tag}: pair:{alt}: "{side}" is not a department, rank, crew id or any')
