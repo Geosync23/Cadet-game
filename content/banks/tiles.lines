@@ -1,0 +1,97 @@
+@bank all
+// Writer 4, batch 4. Tiles talk (claude/tiles, section 23): what your opponent says over the board. tiles.start
+// (a game begins), tiles.dock (they dock a three), tiles.miss (you missed a dock they saw), tiles.win (THEY win),
+// tiles.lose (you beat them). Bubbles, 60 characters. Friendly: no gloating at you; losing is gracious or comic.
+// trait: variants for competitive, chatty, shy, cheerful ("dry humour" has a space, so trait: can't reach it yet).
+
+== tiles.start
+- {hi}. Your move.
+- Right. Let's see what you've got.
+- Best of one? Best of one.
+- I'll go easy. No, I won't. Your move.   #funny
+- Tea's poured. Board's set. Off you go.
+- Lovely. I've been wanting a game.
+- Mind the corners. That's all I'll say.
+- Go on, then. I'm ready.
+? trait:competitive
+- I don't play for fun. Well. Mostly for fun.   #funny
+- Fair warning: I keep score.   #funny
+? trait:chatty
+- Oh good, a game. Did I tell you about my week?   #funny
+- Right, so, Tiles. I love Tiles. Your move.
+? trait:shy
+- Oh. A game? All right. Yes. You first.
+? trait:cheerful
+- Brilliant! A game! Your move, {nick}.
+
+== tiles.dock
+- Docked.
+- That's three.
+- There we go.
+- Oh, that's nice. That's three.
+- Three in. Lovely.
+- Sorry. Not sorry. Docked.   #funny
+- Didn't see that coming, did you? Neither did I.   #funny
+- One more for me.
+? trait:competitive
+- Three. Write it down.   #funny
+- And that's how it's done.
+? trait:chatty
+- Ooh, look at that! Three! Look!
+? trait:shy
+- Oh. That docked. Sorry.
+? trait:cheerful
+- Ha! Three! I love this game.
+
+== tiles.miss
+- Ooh. You could have docked there.
+- That was a three, just there. Next time.
+- Don't look now, but you missed one.   #funny
+- Close. There was a dock by the corner.
+- Shh. I didn't see that. I saw that.   #funny
+- Look left next time. Just saying.
+? trait:competitive
+- I'll take that dock, then. Thank you.   #funny
+? trait:chatty
+- Oh, you nearly had one! Just there! Never mind.
+? trait:shy
+- Um. There was a three. Sorry. Just there.
+? trait:cheerful
+- So close! You'll have it next go.
+
+== tiles.win
+- Good game.
+- Close one. Really close.
+- Good game. Again sometime?
+- I got lucky with that last three.
+- You'll have me next time. You nearly did.
+- Thanks for the game. That was fun.
+- Phew. That was a fight. Good game.
+- Shake? Good game, {nick}.
+? trait:competitive
+- Good game. Rematch whenever you like.
+? trait:chatty
+- I won! I never win! Well, sometimes. Today!   #funny
+? trait:shy
+- Oh. I won? Sorry. It was close.
+? trait:cheerful
+- That was lovely. Again? Let's go again.
+
+== tiles.lose
+- Well played.
+- You got me. Fair and square.
+- Good game. You earned that one.
+- Oh, that's me done. Well played.
+- Beaten. Lovely. I mean it. Well, nearly.   #funny
+- I'll get you next time. Good game.
+- Where did you learn that? Well played.
+- You're getting good at this. Too good.   #funny
+? trait:competitive
+- Again. Best of three. Starting now.   #funny
+- Hm. Well played. I'm writing that down.
+? trait:chatty
+- You're a natural! I knew it! Did I teach you that?   #funny
+? trait:shy
+- Oh, well done. Really. That was good.
+? trait:cheerful
+- Ha! Beaten! Brilliant. Well played.

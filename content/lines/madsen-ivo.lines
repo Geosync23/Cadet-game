@@ -174,3 +174,14 @@
 == rumour
 - Right, listen. You'll never guess. Go on, guess.
 - Did you hear? No? Sit down. It's a long one.   #funny
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- Right, listen. Tiles. I've got a system. It's new.   #funny
+- Your move, pal. I'll tell you a story while you think.
+== tiles.dock
+- Three! That's the system! The system works!   #funny
+== tiles.win
+- I won! Right, listen. Let me tell you how.   #funny
+== tiles.lose
+- Beaten. The system needs work. Well played.   #funny

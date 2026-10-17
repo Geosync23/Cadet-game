@@ -348,3 +348,31 @@
 - Your gran. New hip. Walking yet? Good. Tell her to drink water. From me.   #warm
 ? flag:home.gran.won tier>=colleague
 - A marrow called the Captain won? Mine would've cheated. Your gran didn't need to.   #funny
+
+// Writer 4, batch 4: Tiles talk (lineFor(who, 'tiles.<kind>')).
+== tiles.start
+- Best of one. Try to keep up.
+- Sit. Board's set. Don't touch my tea.
+- My gran taught me. She cheated. I don't need to.   #funny
+- Honestly, you're brave. Your move.   #funny
+- The notebook's open. No pressure.   #funny
+== tiles.dock
+- Three. Mine.
+- Docked. Obviously.   #funny
+- Honestly. You left that open.   #funny
+- Three. Gran would've turned the board for that.   #funny
+== tiles.miss
+- You had a dock there. I'm not saying where.   #funny
+- Look again. No, I'm not helping.   #funny
+- That was a three. I'd have taken it.
+== tiles.win
+- Good game. Again?
+- Another one for the notebook.   #funny
+- Close. Closer than most. That's a compliment.
+- Good game. Honestly. You're getting there.
+== tiles.lose
+- ...Again. Now.   #funny
+- No. No. Again. Sit down.   #funny
+- I'm writing this down. In pencil. For now.   #funny
+- Fine. Well played. Again. Now.   #funny
+- Don't tell Pell. Don't tell anyone. Again.   #funny
