@@ -1,6 +1,6 @@
 # Handover: Adversarial reviewer 2 (Pillar 4)
 
-**Written:** 2026-10-17 ~06:40 UTC. **Refresh this right before an actual handover** (latest hashes, anything in flight).
+**Written:** 2026-10-17 ~06:40 UTC, refreshed ~08:40 UTC. **Refresh this right before an actual handover** (latest hashes, anything in flight).
 **Branch:** `claude/reviews-2` (review notes only, under `plans/reviews/`). I write NO game code.
 **Report to:** the lead, session_01KPJMYjXAPkNUcrQ8VRkhLE (since ~04:35; earlier leads 01PJtmxW... and 01PxXKwc...),
 and for anything going into a combined build, also build master 2, session_01F8ph7FKqViF3heRn94YgBr.
@@ -10,12 +10,12 @@ Chain of command: only the lead talks to the user.
 | Seat | Branch | Engineer (session) | Last passed | Open from me |
 | --- | --- | --- | --- | --- |
 | Dialogue (section 22, content_gen, lines_check) | claude/dialogue | dialogue eng 2, 01S26bs4oMahyGJkuVaCKQGT | 46e948b (0.43.25) | none |
-| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | 2951e5b (0.34.44, PASS WITH FIXES) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
-| Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | 5f51b4f (0.35.29) | none |
-| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | eb0e776 (0.38.18, PASS WITH FIXES) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
+| Traditions (section 18, .trad, events_check) | claude/ship-events | traditions eng (01018WZcc... was 1; check TEAM.md) | 3377935 (0.34.47, PASS; 774eeb7 comments) | meal-tradition turnout waits on the sim's `meal` work (not this seat's) |
+| Device (section 19) | claude/device | device eng 3, 01SskqNx45iEGyQq2W9Fjg5Y | 2ef3cce (0.35.30) | none |
+| Decks (DECKS, DECK_DRESS) | claude/decks-p3 | deck architect 2, 01ToE6RJFCw9deB3HcJRLKxS | a570274 (0.38.19): ternClear still ignores DECK_CREW (one-line fix asked) | Tern plan sketch 8e8894b: PASS WITH FIXES (to the plan; reviews/decks-p3-8e8894b-tern-plan.md); check the build against it |
 | Performance (sections 4c/5, lead-assigned) | claude/crowd-render | lead | cfbfd76 (0.27.25) | none; context-restore note in reviews/crowd-render-cfbfd76.md |
 | Tiles (section 23) | claude/tiles | Tiles eng (idle; handover plans/handover-tiles.md) | 99609d3 (0.46.6) | none |
-| Content (head writer's bakes) | claude/content | not reviewed yet | - | next: the writers' batches |
+| Content (content/ only, for combines) | claude/content | build master 2 asks per range | a3f151a..5d4b810 (0.48.47, PASS WITH FIXES) | Tomas's week-1 beats assume Fri/Sat off (game: Mon/Tue); facts.md days-off stale for 52/74 crew |
 Combined builds: 0.60.2 released (142b503); build master 2 is combining 0.60.3 on claude/cand-0603.
 
 ## Known issues outside my seats (reported, for others)
