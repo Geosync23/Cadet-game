@@ -54,3 +54,11 @@ background. Fix:
 3. Add `\bdating\b`, `\bgoing out\b` and `\bseeing each other\b` to the couple-words list (so they're judged by the
    same rules).
 The allow list by line id is a good way out.
+
+## Addendum: 453c577 (0.43.5): PASS WITH ONE ONE-LINE FIX
+Re-tested. These are now errors: "in love" without a couple pair; "in love with the new hand" and "sweet on the
+cadet" even under pair:couple; "Torres is sweet on you" as a rumour. "My parents have been married forty years."
+passes, as it should.
+**Still open:** "dating" is on no list, so "Rumour is {me} and Pell are dating." passes both as an overheard line
+(under pair:couple) and as a rumour said to you. Add `\bdating\b`, `\bgoing out\b` and `\bseeing each other\b` to the
+couple words, so the player-reference rule catches them. Once that's in, writers can start on every kind.
