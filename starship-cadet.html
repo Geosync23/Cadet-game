@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.28
+   STARSHIP CADET: CSV Wren                           build 0.28.29
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.28';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.29';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9439,6 +9439,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
   make:   { mins: 60, pose: 'work', title: 'Machine shop' },   // section 17's JOB_MAKE: an hour a part, like the crew
   craft:  { mins: 15, pose: 'work', title: 'Machine shop' },   // a small gift, no job (0.28.25: section 20's GIFT_MAKES sets the minutes)
   sit:    { mins: 1, pose: 'sit', title: 'Sitting', until: () => false },   // sit anywhere (0.28.12): until you get up
+  lie:    { mins: 1, pose: 'lie', title: 'Your bunk', until: () => false },   // lying in your bunk (0.28.29): until you get up
   cartTake: { mins: 2, pose: 'stand', title: 'Cart bay' },     // the cart run (0.28.11): the crew's own times (section 17's jobRun)
   cartLoad: { mins: 10, pose: 'work+cart', title: 'Cargo hold' },
   cartUnload: { mins: 15, pose: 'work+cartfull', title: 'Unloading' },
@@ -9521,12 +9522,26 @@ function gardenGift() {
 // your bunk (0.28.25, Pillar 4): with section 20's bunkNote, a tap on your own bunk walks you there and shows a friend's
 // note if one was left (the oldest unread; marked read), else does what a bunk tap always did (offerSleep, section 13)
 function bunkTap(it, at) {
-  if (typeof bunkNote !== 'function' || typeof offerSleep !== 'function' || typeof playerBed !== 'function') return false;
+  if (typeof playerBed !== 'function' || typeof PLACE_OF === 'undefined') return false;   // section 20's bunkNote optional (0.28.29)
   const id = playerBed(), bed = PLACE_OF.get(id); if (!bed || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
   const p = at.clone();
-  approach(p, it.front, it.depth, () => { let n = null; try { n = bunkNote(); } catch (e) { n = null; }
-    if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else if (!offerSleep(p)) toast(it.t, it.x); });
+  approach(p, it.front, it.depth, () => { let n = null; try { n = typeof bunkNote === 'function' ? bunkNote() : null; } catch (e) { n = null; }
+    if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else bunkLie(id); });
   return true;
+}
+// lying down (0.28.29, the user's "I can't lay down in bed"): your bunk (only yours; the others' are private) lies you
+// down in it, the crowd's 'lie' pose at its mattress, until you tap anywhere to get up. Lying rests you: no energy
+// drain and LIE_GAIN a minute. From 20:00 (section 13's bedtime) you then sleep there (offerSleep: the fade, 06:00)
+// and wake still lying in it. Before 0.28.29 a tap only slept you at night (standing) or said "Too early".
+const LIE_GAIN = .05;                                    // energy a ship minute lying down: 3 an hour
+function bunkLie(id) {
+  const night = typeof bedtime === 'function' && bedtime();
+  actStart('lie', id, { title: 'Your bunk', sleep: night, after: night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
+}
+function bunkSleep(A) {                                  // once you're lying in it at night: sleep (section 13's fade and skip)
+  if (A.kind !== 'lie' || !A.o.sleep || A.o.slept || A.phase !== 'do') return;
+  A.o.slept = true; const bed = PLACE_OF.get(A.placeId);
+  if (bed && typeof offerSleep === 'function') offerSleep(cellPos(...bed.at));
 }
 const PLAYER_TAPS = [];                                  // other sections' taps (15b): f(item, itemPos, tapPoint) -> true if handled
 // an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
@@ -9768,6 +9783,7 @@ function actUpdate(dt, t) {
     if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = A.kind === 'eat' && A.o.fed ? 'walk+tray' : 'walk';
   } else if (A.phase === 'do') {
     if (A.def.until ? A.def.until(A) : A.done >= A.def.mins) { A.phase = 'out'; A.y = 0; }
+    bunkSleep(A);                                        // lying down at night: to sleep (0.28.29)
   }
   if (A.phase === 'out') {
     const p = player.obj.position;
@@ -9900,7 +9916,10 @@ function playerUpdate(dt, t) {
     let fx = playerFx();
     const sat = A && A.kind === 'sit' && A.phase === 'do';
     if (sat) fx = { ...fx, drain: { ...fx.drain, energy: fxD(fx, 'energy') * SIT_REST } };   // sitting rests you (0.28.12)
+    const lay = A && A.kind === 'lie' && A.phase === 'do';
+    if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
     needsT = now; needsDrain(dm, false, fx, doing || null);
+    if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
     if (sat) n.social = needClamp(n.social + SIT_GAIN * Math.min(sitCompany(A), COMPANY_MAX) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
       const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
@@ -9973,7 +9992,7 @@ function crawlTiles() {
 // a time skip: asleep if you chose Sleep (section 13), or for the debug Day button (a skip from the night);
 // otherwise awake. Any activity stops.
 SIM_ADVANCE.push((from, to) => {
-  actEnd(true); JOB_SEEN = null;                        // jobs posted while you slept aren't announced one by one
+  if (!(ACT && ACT.kind === 'lie')) actEnd(true); JOB_SEEN = null;   // asleep in your bunk you wake there, still lying (0.28.29)                        // jobs posted while you slept aren't announced one by one
   const d = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 0;   // a replay: section 17's pure record, never the live machines
   let fx = null; try { fx = typeof shipEffectsAt === 'function' && d ? shipEffectsAt(d, from) : null; } catch (e) { fx = null; }
   needsDrain(to - from, sleeping || nightAt(from % 1440) > .5, fx);

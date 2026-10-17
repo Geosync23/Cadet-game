@@ -25,6 +25,7 @@
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   the kit bag and the device lock (0.28.26): held from the ramp, into the locker in Bunk 1
+#   lying down in your bunk (0.28.29): by day to rest, at night to sleep, and getting up
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -202,12 +203,32 @@ with sync_playwright() as pw:
         g.step(5); notes.append([tp, g.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent")])
     if stubn: g.ev("delete window.bunkNote")
     print('  your bunk with a note, then again:', notes)
-    if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'Too early' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'lie down' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    # lying down (0.28.29, the user's "I can't lay down in bed"): a tap on your bunk by day lies you down in it to rest;
+    # walking off gets you up; at night you lie down, sleep to 06:00 and wake still lying there
+    for j in range(40):
+        g.step(10)
+        if g.ev("!!ACT && ACT.phase === 'do'"): break
+    ly = g.ev("[ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.pose, ACT && ACT.placeId === playerBed(), ACT && +ACT.y.toFixed(2), player.obj.visible]")
+    g.ev("SHIP.player.needs.energy = 50"); e0 = g.ev("SHIP.player.needs.energy"); g.ev("setShipNow(shipNow() + 60)"); g.step(3); e1 = g.ev("SHIP.player.needs.energy")
+    print('  lying down by day:', ly, 'energy over an hour:', round(e0, 2), '->', round(e1, 2))
+    check(ly[:4] == ['lie', 'do', 'lie', True] and ly[4] > .2 and ly[5] is False, f'a tap on your bunk should lie you down in it: {ly}')
+    check(e1 >= e0 + 2.5, f'lying down should rest you, not tire you: {e0} -> {e1}')
+    g.ev("(() => { const p = player.obj.position, c = nearestOpen(p.x + 1.2, p.z + 1.2, player); playerGo(c, null); })()")
+    for j in range(40):
+        g.step(10)
+        if g.ev("!ACT && player.obj.visible"): break
+    up = g.ev("[!!ACT, player.obj.visible]"); print('  walking off:', up)
+    check(up == [False, True], f'walking off should get you up: {up}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
-    day0 = g.ev("SHIP.time.day"); g.ev(BED); asked = g.ev("!sleepEl.hidden")
+    day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP); asked = g.ev("!sleepEl.hidden")
+    for j in range(60):
+        g.step(10)
+        if g.ev("sleeping || !!ACT && ACT.o.slept"): break
     g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
-    bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent]"); print('  at 21:00:', bed, 'dialog shown:', asked)
-    check(not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning', f'the bunk at 21:00 should sleep you to 06:00: {bed}')
+    bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent, ACT && ACT.kind, ACT && ACT.phase]"); print('  at 21:00:', tp, bed, 'dialog shown:', asked)
+    check(tp is True and not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
+    g.ev("actEnd(true)")
 
     print('One player day, tapping the real things:')
     g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20, bathroom: 20 }); basket = false")
