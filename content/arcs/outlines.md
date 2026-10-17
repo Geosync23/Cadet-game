@@ -5,7 +5,8 @@
 "Agreed" line under each. Writers write the beats from these (into `content/arcs/<id>.arc` once social B's format is
 in, wave 2-3); nobody writes a beat that isn't outlined here.
 
-**Status:** DRAFT 1 (2026-10-17), sent to social B for agreement.
+**Status:** AGREED with social B (2026-10-17, 03:15), all ten arcs as stories, with the shape notes below. Writers may
+write beats once the dialogue engineer's `.arc` grammar is out.
 
 ## How every arc works (the shared shape)
 
@@ -45,6 +46,36 @@ Tones by beat, at a glance:
 
 ---
 
+## Social B's shape notes (agreed 2026-10-17; they apply to every arc)
+
+- **Answers:** theme ids `notgood` and `startover` win (in social B's code since 0.39.1). Cards hold `thread: arc:<id>`
+  (the code strips `arc:` and finds `content/arcs/<id>.arc`). Arc ids as above; `beat:torres.4` style conditions.
+- **(a) Tomas, Pell, Rina:** beats 1-4 stay as told (1 a card line, 2-4 moments already in the game with placeholder
+  replies, which we may rewrite through `content/arcs`); new beats are 5+. **New arcs start with beat 1 as a moment.**
+- **(b) Gates default from the tone:** light = colleague, 3 days known; heartfelt or serious = friend, 7 days, 2 days
+  since their last moment; resolution = close, 3 days after the last heartfelt. Write `tier` / `metDays` / `gapDays`
+  only where a beat differs (Torres beat 2: `metDays 10`). Extra gates go on a `when:` line in the beat header, in the
+  frozen condition vocabulary (`rep:known`, `rep:well`, `flag:torres.askCalder`, `beat:x.n`, `flag:`/`event:` for the
+  diplomatic visit). One moment a day per person; one serious (heartfelt, serious or resolution) a day for you.
+- **(c) Where:** `calm` (the default: off duty at a seat, or visiting you), `visit` (your bunk), `appt` (an appointment
+  with them), or a room name, which only works if their own off-duty schedule takes them there (Marrow's music room on
+  a Thursday evening: check their habits). **Beats at work places** (Calder's glass office, the Works board, the Works
+  bay) need `duty: true` so they can open on shift: fine for light beats; heartfelt ones stay off duty (so Calder beat 3
+  is "the Works bay after shift", off duty; Pell beat 7 at the board is light, `duty: true`).
+- **Marrow:** close friend only (no Officer rank in Pillar 4); "or Officer" stays a note, not a condition.
+- **(d) Favours from practical replies** (Pell, Brennan, Holt, Kovac): a reply's `favour:` naming the job; social B
+  wires it to social A's favour API. The jobs themselves (the lift brakes, the garden crop) need the systems and galley
+  engineers' yes through the lead.
+- **(e)** Mail after a moment: `after: mail` on the beat. Keepsakes: the beat's `keepsake:` text. Both built.
+- **(f)** Calling back intro memories (`mem:intro.arrival` and so on) is fine.
+- **(g)** Holt beat 4's "carry the invitation" favour and the visit's flags are fine as conditions; the Envoy's lines are
+  writer-command's.
+- **Memory keys:** give each reply (or the beat) its word with `mem:`; social stores `moment.<arc>.<word>`. Without one,
+  it mints `moment.<arc>.<beat>.<flavour>`.
+- **Gift tags and invite kinds** are social A's lists (gifts A5, invitations A7); being confirmed with social A.
+
+---
+
 ## 1. Zeke Torres (`arc:torres`): "Ready"
 
 **The heart of it:** the man who trains you isn't sure he's ready for more himself. Passed over twice for Engine
@@ -65,7 +96,7 @@ The arc is the other side of him, so it opens only after `week1.done`.
 
 **Calls back:** your arrival (`mem:intro.arrival`), the shadow shift (`mem:intro.shadowShift`): "You held the spanner
 upside down. Then you didn't."  **Hooks:** `flag:` set from a meeting reply (beat 3), Mail after a moment (beat 5),
-keepsake (beat 6). Nothing else new.  **Agreed:** (social B)
+keepsake (beat 6). Nothing else new.  **Agreed** (social B, shape notes below).
 
 ## 2. Chief Ines Calder (`arc:calder`): "Well done"
 
@@ -89,7 +120,7 @@ her the work. Each beat also needs `rep:known` (beats 1-2) and `rep:well` (beats
 **Her first "well done"** is the payoff of the whole arc: **nobody writes "well done" in Calder's lines before beat 5.**
 (She says "Good. Clean work." instead.)  **Hooks:** `rep:` conditions on beats (social A's reputation, built);
 a beat at an appointment (the progress talk, `calderProgress`); the toolbox as a prop on your bench is optional (a
-note in Mail does the same job if the deck architect can't spare it).  **Agreed:** (social B)
+note in Mail does the same job if the deck architect can't spare it).  **Agreed** (social B, shape notes below).
 
 ## 3. Tomas Lind (`arc:tomas`): "Somewhere new"
 
@@ -107,7 +138,7 @@ new arrival.
 | 7 "Home, both of them" | close | the observatory, observatory night | resolution | He told Holt about the exam. Holt said: "I know. I read your file. You passed. That's the one I care about." He's taken the transfer list off his locker. He shows you where home is on the big window, then says this is home too. And he's asked to be the one who meets the next new cadet off the shuttle ("Nobody should have to get lost on their own. I did. It was awful."). | keepsake (the star map's corner); `flag:tomas.meets` (social's newcomer hook: he meets the next arrival) |
 
 **Hooks:** the newcomer escort role on rotation day (social's Part 8b) reads `flag:tomas.meets`; Holt's line in beat 7
-is Holt's (writer-command writes Holt's matching `callback`).  **Agreed:** (social B)
+is Holt's (writer-command writes Holt's matching `callback`).  **Agreed** (social B, shape notes below).
 
 ## 4. Pell Okafor (`arc:pell`): "Eat, sleep, call"
 
@@ -127,7 +158,7 @@ anything and is scared of.
 | 8 "Call" | close | the call-home booths, then the bow lounge | resolution | He called his mum. Told her he's staying, and that he'll walk her through fixing the shop's old press by message, one step a week, like a proper apprentice. She said: eat, sleep, call. He laughs. Then the secret: he nearly left the Wren in his first month, and he's glad every day he didn't. | keepsake (the four-note music box) |
 
 **Hooks:** a favour from a moment's practical reply (built: the favour API); `flag:pell.certified` read by his and
-Calder's lines.  **Agreed:** (social B)
+Calder's lines.  **Agreed** (social B, shape notes below).
 
 ## 5. Rina Deshi (`arc:rina`): "Sit the exam"
 
@@ -145,7 +176,7 @@ to the Wren, she can't face being the one who didn't make it.
 | 6 "Next quarter" | friend | the infirmary after hours, or the garden | heartfelt | Her sister's sent another exam date. Rina's said "next quarter" four quarters running. It comes out sideways: if she fails, her sister was right, and she's not doing that again. She doesn't say "scared". She says "I'd rather not." | memory by reply; cheer fits her (her card) |
 | 7 "Cheat if you have to" | close | the call-home booths, then wherever you are | resolution | She's booked it. Nandakumar will sit with her for it. Gran's message: "Cheat if you have to." Then, plainly, once: the hard year at home, the one where everything went wrong at once and she was the one holding it together, and how the Wren's routine helped more than she expected. Later Mail: she passed the first part. "Don't make a fuss. Fine. A small fuss." | keepsake (gran's cheating Tiles piece); `flag:rina.exam` |
 
-**Hooks:** Mail after a moment (built); Nandakumar's matching line (writer-command).  **Agreed:** (social B)
+**Hooks:** Mail after a moment (built); Nandakumar's matching line (writer-command).  **Agreed** (social B, shape notes below).
 
 ## 6. Chef Auda Brennan (`arc:brennan`): "Seventy-five covers"
 
@@ -163,7 +194,7 @@ sage** (new canon).
 | 5 "Seventy-five covers" | close | the mess, a Friday | resolution | The blue sage grew. The soup is right. She serves it to the whole mess and doesn't say why. To you, after: she wrote back to Nell. No. "My kitchen's here. It's got seventy-five people in it, and one of them's you." | keepsake (the page from her book, with your dish) |
 
 **Hooks:** a favour that the garden fulfils (galley/garden engineer: a one-off crop, or simply a timed favour);
-the tasting-table tradition (trad-weekly designer) if it exists, else the mess.  **Agreed:** (social B)
+the tasting-table tradition (trad-weekly designer) if it exists, else the mess.  **Agreed** (social B, shape notes below).
 
 ## 7. Commander Teo Vance (`arc:vance`): "Gull"
 
@@ -179,7 +210,7 @@ ship's newsletter under the name "Gull".
 | 4 "Opened" | friend, 2+ days after 3 | wherever you're sitting together | heartfelt | He opens the first with you there. His father followed his whole career. Has every posting written down. Wants to see him at the next port. Vance reads it twice and recites a regulation he doesn't need. | `mem:moment.vance.opened` |
 | 5 "The rule" | close | the observation room, late | resolution | The rule he broke: as a cadet he took a training shuttle out without leave to bring back another cadet stranded on a test flight. Nearly expelled; the stranded cadet is a captain now. He's replied to his father. Next week's newsletter has a poem by Gull about a father. It's still terrible, and it's the best thing in it. He admits it's his. "Tell no one. That's an order. Of sorts." | keepsake (the rowing pin he's "lending" you) |
 
-**Hooks:** the newsletter is flavour only (no new system); Mail after a moment.  **Agreed:** (social B)
+**Hooks:** the newsletter is flavour only (no new system); Mail after a moment.  **Agreed** (social B, shape notes below).
 
 ## 8. Captain Odile Marrow (`arc:marrow`): "The ready room"
 
@@ -199,7 +230,7 @@ and rare (she's the Captain; you see her on Thursdays, at observatory night, on 
 | 5 "Ask me in a year" | close (or Officer) | the ready room (an appointment) | resolution | She's been offered a post at the Concord academy, near her daughter. She's thought about it every night for a month. She asks you the truth: should she go? Whatever you say, she stays, for now: "Ask me again in a year." Her daughter has written: "Mum says there's a cadet who tells her the truth. Is that true?" | keepsake (a page of her Thursday piano music); `flag:marrow.stays` |
 
 **Hooks:** reading the reply you chose in `readyRoomFirst` (a `mem:` from a meeting's choice: social A's `choice`
-note); Officer rank as a gate (progression: may not exist in Pillar 4, then close friend only).  **Agreed:** (social B)
+note); Officer rank as a gate (progression: may not exist in Pillar 4, then close friend only).  **Agreed** (social B, shape notes below).
 
 ## 9. Chief Bram Holt (`arc:holt`): "One bad day"
 
@@ -222,7 +253,7 @@ couldn't answer. "Knowing doesn't help as much as you'd think."
 
 **Hooks:** the diplomatic visit's flags (events engineer: has it happened, did it go smoothly) as an optional
 condition (`flag:` or `event:`); a favour that is "carry this to someone" (social A's favour API); the Envoy's lines
-for the tea are writer-command's (Saruth).  **Agreed:** (social B)
+for the tea are writer-command's (Saruth).  **Agreed** (social B, shape notes below).
 
 ## 10. Zainab Kovac (`arc:kovac`): "Four, please"
 
@@ -242,7 +273,7 @@ job on Deck 5 or 4. She's grateful you didn't make a fuss.
 
 **Hooks:** a personal job on the lift (systems engineer: a favour job on the lift's brakes; a light one), the
 `kovac.liftjob` flag; Cruz and Keane get matching lines (writer-commons for Cruz, writer-works for Keane).
-**Agreed:** (social B)
+**Agreed** (social B, shape notes below).
 
 ---
 

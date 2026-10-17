@@ -231,11 +231,6 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 | Who | Pronouns |
 | --- | --- |
 
-### 4c. Command, helm and comms officers, Watch, Survey, guests (writer-command fills this in)
-
-| Who | Pronouns |
-| --- | --- |
-
 ### 4c. Command, Survey, Watch and the senior officers (writer-command, 2026-10-17)
 
 Set by the writer for command, Survey and Watch, a mix, for the people the roster's text doesn't settle (Raman, Oduya,
@@ -428,3 +423,12 @@ introduces them), unless noted.
 | The posting near the farm moon on the transfer list | Tomas | from `beat:tomas.6` |
 | Rina hasn't sat the qualifying exam (not failed: hasn't sat) | Rina | that she studies: any time (roster); the putting off: from `beat:rina.5` |
 | Marrow's offer of a post at the Concord academy | Marrow | from `beat:marrow.5` |
+
+## 11. Small canon from the writers' batches (approved by the head writer)
+
+| What | Who | From |
+| --- | --- | --- |
+| Regulation two, section four: no saluting aboard; a nod will do | Vance quotes it | writer-command, batch 1 |
+| You're ninth on Vance's waiting list for the good records | Vance | writer-command, batch 1 |
+| Vance rowed in a six-person boat at the academy | Vance | writer-command, batch 1 |
+| Sato's thread is the `notgood` theme (her tier-4 secret: the survey she's proudest of was mostly luck); she may get her own arc later | Sato | writer-command, batch 0 |
