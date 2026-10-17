@@ -59,11 +59,12 @@ BANNED = [
 # so these are errors in every player-facing line (chat, moments, replies, meetings, Mail) but not in overheard banks
 BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry me\b', r'\bwill you marry\b', r'\bmy heart\b',
                  r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
-                 r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b']   # "married", "wedding": family lines need them
+                 r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b', r'\bdating\b', r'\bgoing out\b',
+                 r'\bseeing (?:each other|anyone|someone|somebody)\b',
+                 r'\b(?:fancy|want|like) a date\b', r'\bask(?:ed)? (?:you|me) out\b']   # "married", "wedding": family lines need them
 # aimed at you: banned even in lines about crew couples
 BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
                  r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
-CREW_ABOUT_CREW = ('about', 'rumour', 'smalltalk', 'news')    # line kinds about other crew, where a couple may be mentioned
 US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': 'centre', 'realize': 'realise',
       'organize': 'organise', 'gray': 'grey', 'mom': 'mum', 'honor': 'honour', 'neighbor': 'neighbour', 'theater': 'theatre',
       'apologize': 'apologise', 'recognize': 'recognise', 'traveled': 'travelled', 'cozy': 'cosy', 'defense': 'defence',
@@ -74,14 +75,14 @@ Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ens
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
 Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
 Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh Marra Station Ostrander Tevan Port Halloran
-New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook'''.split())
+New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook Midtour Year Lantern'''.split())
 
 
 POSES = {'sigh', 'laugh', 'listen', 'nod', 'gesture', 'play'}   # the talk poses (section 8b) a meeting or moment line may ask for
 MAX_REPLIES = 3
 COMMON = set('''scanner patrol relay sweep telescope treadmill coffee ship odd somebody whose fridays mondays tuesdays wednesdays
 thursdays saturdays sundays someone anybody everybody nobody nothing everything morning tonight tomorrow yesterday today
-lunch dinner breakfast tea supper week weekend station deck dock'''.split())   # ordinary words a line may start with
+lunch dinner breakfast tea supper week weekend station deck dock rumour word news'''.split())   # ordinary words a line may start with
 
 
 def roster(game):
@@ -239,12 +240,12 @@ def main(argv):
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
         bonds = ' '.join(str(x) for x in (e.get('bond') if isinstance(e.get('bond'), list) else [e.get('bond', '')]))
-        # couple words are allowed only about crew: in an overheard conversation between a couple (pair:couple or bond:couple),
-        # or a crew-about-crew line, and never with a reference to you in it ({me}, the new hand, cadet; "you" too, except
-        # between the two speakers of an overheard conversation)
+        # couple words are allowed only in an overheard conversation between a couple (pair:couple or bond:couple) or a line
+        # gated on bond:couple, and never in a line with any reference to the player ({me}, {nick}, the new hand, cadet,
+        # newcomer, you, your), whatever the kind
         couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
-        at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadet\b", low) or (src != 'convo' and re.search(r"\byou(?:r|rs)?\b", low))
-        about_crew = not at_you and ((src == 'convo' and couple) or (src != 'convo' and (kind in CREW_ABOUT_CREW or couple)))
+        at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadets?\b|\bnewcomer\b|\byou(?:r|rs|rself)?\b", low)
+        about_crew = couple and not at_you
         romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
         for b in BANNED + romance:
             m = re.search(b, low)
