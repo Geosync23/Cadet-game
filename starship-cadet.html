@@ -14078,6 +14078,7 @@ function socialHour(h) {
   for (const [K, id] of learnt) K.add(id);
   socBorn(h, rooms);
   socCourtesy(h, rooms);
+  if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
   for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
@@ -14689,6 +14690,124 @@ function knowBlocks(id) {                                // for the Crew app (se
   const s = knowSections(id);
   if (!s.length) return [{ kind: 'list', rows: [{ text: 'Nothing yet. Ask them about themselves.' }] }];
   return s.flatMap(x => [{ kind: 'text', text: x.title, mark: 'head' }, { kind: 'list', rows: x.items.map(t => ({ text: t })) }]);
+}
+// ---- crew with each other: labelled bonds (0.39.1) ----
+// SHIP.social.bonds['a:b'] = { kind, since, peak, seen } for the pairs that matter (section 20 saves it). a:b in
+// ROSTER order, except a mentor's, which is 'mentor:mentee'. Kinds: friends (affinity BOND_AT.friends+), best (each
+// person's mutual closest friend, BOND_AT.best+; at most one each), rivals (BOND_AT.rivals or less, until it climbs
+// past rivalsOff), drifting (friends whose affinity fell BOND_AT.drift below its peak; ends at driftOff, or friends
+// again), mentor (same department, a rank or more apart, the senior's voice card mentors, BOND_AT.mentor+; at most
+// BOND_MENTEES each, one mentor each; until mentorOff). One bond a pair (best > mentor > the rest). Friends who
+// haven't spent time together for BOND_APART days drift down a point a day (key 680), which is how friendships
+// fade when shifts or bunks move people apart. storyHour(h, pairs) runs it each ship hour (section 20's socialHour
+// hands over who spent time together). socBondOf(id, kind) answers section 20's bondOf. Changes go on the ship notes
+// bus: simNote('bond', { a, b, kind, was })
+const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 20, driftOff: 20, mentor: 40, mentorOff: 25 };
+const BOND_MENTEES = 2, BOND_APART = 5;
+const BOND_KINDS = ['friends', 'best', 'rivals', 'drifting', 'mentor', 'mentee', 'couple', 'friend'];
+function storyHour(h, pairs) {
+  const { crew, n } = SOC, t = h * 60 + 30, aff = SHIP.aff, B = SHIP.social.bonds || (SHIP.social.bonds = {}), rank = p => RANK_ORDER.indexOf(p.rank);
+  const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return; B[k] = Object.assign({ kind, since: t }, extra);
+    if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind, was }); } };
+  const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
+  affWeekTake(h);
+  for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
+  // friends long apart fade a little, once a day at 04:00
+  if (h % 24 === 4) for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best' && b.kind !== 'drifting') continue;
+    const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
+    if (h - (b.seen ?? Math.floor(b.since / 60)) > BOND_APART * 24 && schedU(pairSeed(Math.min(i, j), Math.max(i, j)), h, 680) < .5) aff[pairIdx(i, j)] = Math.max(-100, aff[pairIdx(i, j)] - 1); }
+  // friends, rivals and drifting, pair by pair
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+    const k = crew[i].id + ':' + crew[j].id, b = B[k], v = aff[pairIdx(i, j)], cur = b ? b.kind : null;
+    if (cur === 'mentor' || cur === 'couple' || B[crew[j].id + ':' + crew[i].id]) continue;   // a mentor's key, the other way round
+    if (v <= BOND_AT.rivals || (cur === 'rivals' && v <= BOND_AT.rivalsOff)) set(k, 'rivals');
+    else if (cur === 'friends' || cur === 'best') { if (v > b.peak) b.peak = v; if (v <= b.peak - BOND_AT.drift) set(k, 'drifting', { seen: b.seen }); }
+    else if (v >= BOND_AT.friends) set(k, 'friends', { peak: v, seen: b ? b.seen : h });
+    else if (cur === 'drifting') { if (v < BOND_AT.driftOff) drop(k); }
+    else if (cur) drop(k);
+  }
+  // best friends: each person's closest friend, when it's mutual
+  const top = new Map();
+  for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best') continue;
+    const [a, c] = k.split(':'), v = affinity(a, c);
+    for (const [x, y] of [[a, c], [c, a]]) { const o = top.get(x); if (!o || v > o[1] || (v === o[1] && y < o[0])) top.set(x, [y, v]); } }
+  for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best') continue;
+    const [a, c] = k.split(':'), best = top.get(a)[0] === c && top.get(c)[0] === a && affinity(a, c) >= BOND_AT.best;
+    if (best && b.kind !== 'best') set(k, 'best', { peak: b.peak, seen: b.seen }); else if (!best && b.kind === 'best') set(k, 'friends', { peak: b.peak, seen: b.seen }); }
+  // mentors: kept while they get on; new ones once a day, the warmest senior first
+  for (const k in B) { if (B[k].kind !== 'mentor') continue; const [a, c] = k.split(':'); if (affinity(a, c) < BOND_AT.mentorOff) drop(k); }
+  if (h % 24 === 4) {
+    const has = new Set(), count = new Map();
+    for (const k in B) if (B[k].kind === 'mentor') { const [a, c] = k.split(':'); has.add(c); count.set(a, (count.get(a) || 0) + 1); }
+    for (let j = 0; j < n; j++) {
+      const q = crew[j]; if (has.has(q.id) || q.rank === 'guest') continue;
+      let pick = null, pv = BOND_AT.mentor - 1;
+      for (let i = 0; i < n; i++) { const p = crew[i];
+        if (p.dept !== q.dept || p.rank === 'guest' || rank(p) < 0 || rank(q) - rank(p) < 1 || (count.get(p.id) || 0) >= BOND_MENTEES || !voiceOf(p.id).mentors) continue;
+        const v = aff[pairIdx(i, j)], sk = (i < j ? p.id + ':' + q.id : q.id + ':' + p.id), sb = B[sk];
+        if (v > pv && !(sb && (sb.kind === 'best' || sb.kind === 'rivals' || sb.kind === 'couple'))) { pick = [p, sk]; pv = v; } }
+      if (pick) { delete B[pick[1]]; set(pick[0].id + ':' + q.id, 'mentor', { seen: h }); has.add(q.id); count.set(pick[0].id, (count.get(pick[0].id) || 0) + 1); }
+    }
+  }
+}
+function socBondOf(id, kind) {                           // for section 20's bondOf: a crewmate, null for none, undefined for "not mine"
+  if (!BOND_KINDS.includes(kind)) return undefined;
+  socInit(); id = id && id.id || id; const B = SHIP.social.bonds || {};
+  let pick = null, pv = -1e9;
+  for (const k in B) {
+    const b = B[k], [a, c] = k.split(':'); if (a !== id && c !== id) continue;
+    const ok = kind === 'friend' ? b.kind === 'friends' || b.kind === 'best' : kind === 'mentor' ? b.kind === 'mentor' && c === id : kind === 'mentee' ? b.kind === 'mentor' && a === id : b.kind === kind;
+    if (!ok) continue;
+    const o = a === id ? c : a, v = affinity(id, o); if (v > pv || (v === pv && o < pick)) { pick = o; pv = v; }
+  }
+  if (!pick && (kind === 'mentee' || kind === 'couple')) return undefined;   // section 20's own: you as the escort's mentee; couples come with B6
+  return pick;
+}
+// the weekly snapshot for planning (0.39.1): section 14 seats people by affinityPlan(a, b, d), which must give the same
+// answer however often a day is planned. At the start of each ship week (the first storyHour in it) the live affinity
+// is copied into SHIP.social.affWeek ('<week>:<base64>;<week>:<base64>', this week's and last week's; section 20
+// saves it), and a day in week W reads the snapshot taken at the start of week W-1: fixed and saved a week before any
+// day that might be planned ahead. Weeks with no snapshot (a new game's first two) get undefined, so affinityPlan
+// keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
+const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots, by week
+function affWeeks() {
+  const s = SHIP.social.affWeek || null;
+  if (AFF_WEEK.src !== s) { AFF_WEEK.src = s; AFF_WEEK.map = new Map();
+    for (const part of (s || '').split(';')) { const m = /^(\d+):(.+)$/.exec(part); if (!m) continue;
+      try { const bin = atob(m[2]), a = new Int8Array(bin.length); for (let k = 0; k < bin.length; k++) a[k] = bin.charCodeAt(k) << 24 >> 24; if (a.length === SHIP.aff.length) AFF_WEEK.map.set(+m[1], a); } catch (e) { /* a bad snapshot is ignored */ } } }
+  return AFF_WEEK.map;
+}
+function affWeekTake(h) {                                // storyHour: the first hour of a new ship week
+  const w = Math.floor(Math.floor(h / 24) / 7), M = affWeeks(); if (M.has(w) || [...M.keys()].some(k => k > w)) return;
+  let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
+  const keep = [...M.keys()].filter(k => k === w - 1).map(k => { let b = ''; for (const x of new Uint8Array(M.get(k).buffer)) b += String.fromCharCode(x); return k + ':' + btoa(b); });
+  SHIP.social.affWeek = keep.concat(w + ':' + btoa(bin)).join(';');
+}
+function affPlanWeek(i, j, d) {
+  socInit(); const a = affWeeks().get(Math.floor((d - 1) / 7) - 1);
+  return a ? a[pairIdx(i, j)] : undefined;
+}
+// you as the connector (0.39.1): "Do you know …?" on the chat card's Ask about. introOptions(p) -> up to three people
+// you know at colleague or better (as well as p) whom p hardly knows (affinity under INTRO_UNDER, not rivals),
+// your closest first. introDo(p, otherId) -> what p says: if they'd get on, their affinity rises by INTRO_PTS (to at
+// least INTRO_UNDER, so they aren't offered again), both remember it (memAdd 'introduced.<other>'), and it's news;
+// if their traits clash, a polite "we've met" and nothing changes
+const INTRO_UNDER = 20, INTRO_PTS = 15;
+function introOptions(p) {
+  socInit(); if (!p || !SOC.idx.has(p.id) || relTier(p.id) < 2) return [];
+  return SOC.crew.filter(q => q !== p && relTier(q.id) >= 2 && affinity(p, q) < INTRO_UNDER && socBondOf(p.id, 'rivals') !== q.id)
+    .sort((a, b) => SHIP.rel[b.id].pts - SHIP.rel[a.id].pts || (a.id < b.id ? -1 : 1)).slice(0, 3).map(q => ({ id: q.id, name: shortName(q) }));
+}
+function introDo(p, otherId) {
+  if (!introOptions(p).some(x => x.id === otherId)) return null;
+  const q = SOC.crew[SOC.idx.get(otherId)], i = SOC.idx.get(p.id), j = SOC.idx.get(otherId), n = shortName(q), t = Math.floor(shipNow());
+  if (socClash(p, q)) return 'We\'ve met. We\'re… different. But thanks.';
+  SHIP.aff[pairIdx(i, j)] = Math.min(100, Math.max(INTRO_UNDER, SHIP.aff[pairIdx(i, j)] + INTRO_PTS));
+  if (typeof memAdd === 'function') { memAdd(p.id, 'introduced.' + q.id); memAdd(q.id, 'introduced.' + p.id); }
+  newsAdd({ id: 'intro:' + p.id + ':' + q.id + ':' + t, about: p.id + ',' + q.id, kind: 'introduced', weight: .4, life: 3, born: t, seed: [p.id, q.id],
+    lines: [shortName(p) + ' and ' + n + ' got talking. Turns out they get on.', 'Have you seen ' + shortName(p) + ' and ' + n + '? New friends, by the look of it.', shortName(p) + ' and ' + n + ' were chatting for ages at dinner.'] });
+  if (typeof simNote === 'function') simNote('introduced', { a: p.id, b: q.id, you: true });
+  return voiceFill(p.id, ['{wow}. I\'ll say hello to ' + n + ' next time.', n + '? I\'ve seen them about. I\'ll go and say hi.', 'Oh, ' + n + '! {thanks}, I will.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 681) * 3)]);
 }
 // ---- end of 20c ----
 
