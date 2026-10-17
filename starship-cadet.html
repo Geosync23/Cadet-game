@@ -12090,13 +12090,16 @@ function galleyCanServe(t = shipNow()) {
 // section 10's live line on Deck 3 (sim engineer 3: lineJoin, lineSpot, lineFront, lineLeave, servLine), when it's
 // there: you stand in it behind the real crew and step up; your turn is GALLEY_SERVE.you after you reach the counter.
 // Without it, a spot at the back and a turn from who's standing in the line (galleyAhead)
-const galleyLine = () => typeof lineJoin === 'function' && typeof lineSpot === 'function' && typeof lineFront === 'function';
-function galleyJoin(who = 'player') {
+const galleyLine = () => typeof lineJoin === 'function' && typeof lineSpot === 'function' && typeof lineFront === 'function' && typeof servLine === 'function';
+// galleyJoin(who, { peek: true }): the spot at the back of the line now, without taking a place in it (section 15 walks
+// you there, then joins on arrival, so you don't hold the counter while crossing the mess)
+function galleyJoin(who = 'player', o = {}) {
   const now = shipNow(); galleyAdvance(now);
   const ahead = galleyAhead(now, who), j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + GALLEY_SERVE.you + ahead * galleyServeMins(now) };
   if (galleyLine()) {                                   // lineSpot: world x, z and face in radians; ours: the deck's x, y and degrees
-    lineJoin(who); const sp = lineSpot(who);
+    const had = servLine().includes(who); lineJoin(who); const sp = lineSpot(who);
     if (sp && sp.at) { j.at = sp.at.slice(); if (isFinite(sp.x)) j.xy = [sp.x + OX, sp.z + OZ]; if (isFinite(sp.face)) j.face = sp.face * 180 / Math.PI; }
+    if (o.peek && !had) { lineLeave(who); j.peek = true; return j; }
     j.line = true; j.front = null; if (typeof servLine === 'function') j.ahead = Math.max(0, servLine().indexOf(who));
   }
   GALLEY_JOINED.set(who, j); return j;
