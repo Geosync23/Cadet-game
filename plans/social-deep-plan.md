@@ -1,6 +1,6 @@
 # Pillar 4: the deep social system (plan)
 
-*Draft 2, 2026-10-16 (draft 2 folds in the interfaces agreed with the Pillar 4 planner: the content pipeline, the query API, the ship notes bus, onboarding's flags, `lineFor`, two social engineers), by the social system designer (session_01SMfS1WKqzQ93X6zyZ7NFpJ, branch `claude/social-design`). Written with the Pillar 4 planner (session_01KLFXcNJztCSVLXunD8Jt7R), who owns the overall Pillar 4 plan (arrival, first week, dialogue at scale, traditions, staffing). Nothing here is built until the user approves it. It builds on what section 20 already does (see "Where we start").*
+*Final draft for building, 2026-10-17: the user's answers of 2026-10-17 are folded in (grief yes, background couples yes, bunk visits and later your own room, machine-shop gifts, a fuller reputation system, no counts in "What you know", crew coming and going, guiding a newcomer, the escort is Zeke Torres or Pell). Draft 2 folded in the interfaces agreed with the Pillar 4 planner: the content pipeline, the query API, the ship notes bus, onboarding's flags, `lineFor`, two social engineers), by the social system designer (session_01SMfS1WKqzQ93X6zyZ7NFpJ, branch `claude/social-design`). Written with the Pillar 4 planner (session_01KLFXcNJztCSVLXunD8Jt7R), who owns the overall Pillar 4 plan (arrival, first week, dialogue at scale, traditions, staffing). Nothing here is built until the user approves it. It builds on what section 20 already does (see "Where we start").*
 
 ## The pitch (one page)
 
@@ -11,9 +11,10 @@ Pillar 3 gave the Wren's crew a relationship meter, a chat card, gossip, favours
 - **They remember.** Crew keep a handful of memories of you, which fade unless they were big: the lamp you fixed, the quiz you came to, the evening you listened. They bring them up ("Thanks again for the lamp, it's been perfect"), and big ones are kept for good.
 - **They have lives with each other.** Friendships form and fade, a few pairs fall out and make up, mentors take juniors under their wing, and crew talk about each other. You can bring two people together.
 - **Small kindnesses.** Give a small gift (a tin of tea from the store, herbs from the garden, a little thing you made in the machine shop). Friends drop by your bunk in the evening, leave a note if you're out, and invite you to things: dinner together, the observatory, their tradition, their show.
-- **Your name gets around.** Each department remembers what you've done for them (the galley knows who fixes their ovens). Strangers there start warmer, ask you for favours, and invite you to their things.
+- **Your name gets around.** A reputation system (the user's ask): each department remembers what you've done for them (the galley knows who fixes their ovens), and the whole ship forms a view of you as a worker, a shipmate and a part of ship life. It has real consequences, good and (gently) bad: warmer strangers, favours and invitations, officers who notice, Calder's view of you for promotion.
+- **People come and go.** Now and then crew are transferred off (they say goodbye a day or two before, talking about your friendship, and again at the shuttle on the day), new crew and new cadets like you arrive, and later you're asked to guide a newcomer the way you were guided.
 - **Lines that fit.** Everything anyone says is picked from banks of lines by who they are (a voice card for each of the 75), how well they know you, their mood, what they remember and what's happening on the ship. Writers fill plain files under `content/` that a generator bakes into the game (the planner's pipeline); they never touch the game's code.
-- **No romance** with the player, ever (the user's rule). **No fail state:** you can't lose a friend for good, and there's never a wrong answer.
+- **No romance** with the player, ever (the user's rule); a few established crew couples live in the background. **No fail state:** you can't lose a friend for good, and there's never a wrong answer.
 - **Cheap:** all of it runs on paper hour by hour for 75 people in well under a millisecond, saved compactly, and checked by an extended `social_check.py` (the writers' data by the planner's `lines_check.py`).
 
 ## Where we start (section 20, built in Pillar 3, 0.36.0 to 0.36.17)
@@ -43,7 +44,8 @@ What's thin today (from the social engineer's handover and a read of the code): 
 
 1. **Cozy first.** Tiers never drop. Memories fade, but fading only means they stop being mentioned. A neglected friendship cools in *words* ("Haven't seen you in ages!"), never in tier.
 2. **Generally light, heartfelt as you get close** (the user). Strangers and acquaintances are friendly and funny; colleagues share opinions and small worries; friends share struggles; close friends share what matters most. At most **one serious moment a ship day** for you, ship-wide, so the tone stays light.
-3. **No romance with the player** (the user's rule). No flirting lines, no dates, no "more than friends" moments. Writers' lines are checked for it (`lines_check` flags a short list of words). Crew-to-crew: see Open questions.
+3. **No romance with the player** (the user's rule). No flirting lines, no dates, no "more than friends" moments. Writers' lines are checked for it (`lines_check` flags a short list of words). **Crew-to-crew: a few established couples in the background** (the user, 2026-10-17): together from the start, no romance storylines, never involving you (Part 3).
+10. **Serious is allowed, gently** (the user, 2026-10-17: "all of it is OK"), including grief for someone they lost. **Nobody dies on screen.**
 4. **Never a wrong answer.** Every reply in a moment is kind in its own way; the one that fits the person best gives a little more and a warmer reply. Nothing you say makes anyone dislike you.
 5. **Nothing locked away by luck.** Every crew member's steps can be reached by ordinary play (chatting, eating together, favours, work); moments wait for you rather than expire (except time-bound ones, which come back in a new form).
 6. **Built from the simulation.** Lines and moments use what's really happening (their real schedule, the machine you really fixed, the tradition that really happened, who really came).
@@ -67,7 +69,7 @@ The tiers and their points stay as built (stranger 0, acquaintance 10, colleague
 | **Friend** | Their struggle, hinted then told; their past | Nickname (from their voice card); they seek you out | **Heartfelt moments** (their struggle thread); bunk visits; personal invitations (dinner, the observatory); they cover a job, tip you off about parts, a good word to Calder |
 | **Close friend** | The secret (the roster's tier-4 `about`); how the struggle turns out | "My favourite person aboard" | The **resolution moment**; a keepsake gift; they toast you at their birthday; they ask you for the favour that matters |
 
-**Your knowledge of them is the visible progress.** The Crew app's page for a person shows "What you know" in sections (Work, Home, Hobby, Past, Their story) with the count of what's left ("You know 5 of 11 things about Rina"). Each detail comes from the roster's `about`, the person's voice card, or a moment. This makes getting to know people something to collect, the way Stardew's hearts are, without turning it into a number race.
+**Your knowledge of them is the visible progress.** The Crew app's page for a person shows "What you know" in sections (Work, Home, Hobby, Past, Their story). Each detail comes from the roster's `about`, the person's voice card, or a moment. **No counts** (the user, 2026-10-17: "too gamey"): the page just grows, and a section you know nothing of yet simply isn't shown.
 
 ### Time as well as points
 
@@ -180,8 +182,9 @@ The pair affinity (`SHIP.aff`, Int8 per pair, hourly drift from time together) s
    - `drifting` (former friends whose affinity has dropped 20 since they became friends, usually because shifts or bunks moved them apart): a bittersweet line, and a chance for you to bring them back together.
 3. **Pair stories.** A bond changing can start a small two-person story you witness: an argument in a corridor (two bubbles, as now), a reconciliation dinner (they sit together; `affinityPlan` gets a day hint), a mentor and mentee at the machine shop. Each is a `CONVOS` script (Part 6) with pair conditions.
 4. **You as the connector.** On the chat card's Ask about… list, a new topic **"Do you know …?"** offers up to three people you know well who they don't (affinity under 20, you colleague+ with both). Picking one: if they're compatible (no clash), their affinity +15, both get a memory (`introduced.<other>`), and it's news. If they clash, a gentle "We've met. We're… different." and nothing changes. Mending a feud already works (chat to both).
-5. **They talk about each other.** Lines can name another crew member by bond: `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}` fill-ins ("Pell and I are doing the quiz together again." / "If you see Ade, don't mention the coffee machine.").
-6. **Seating and plans already use `affinityPlan`** (pure, from starting affinity). It must stay pure for determinism. The deep system adds a **weekly** plan affinity: `affinityPlan(a, b, d)` returns the affinity as it stood at the start of that ship week (a snapshot saved once a week, 2.7 KB), so seating follows friendships that changed without plans ever reading live numbers mid-week. (Needs the sim engineer's OK: plans already built for this week don't change.)
+5. **Couples in the background** (the user, 2026-10-17). A few established couples (about 4 to 6 pairs among the 74, fixed in the roster by the crew designer's generator as a `partner` field; adults of any gender, same rank band or not) are simply together: they start at affinity 90 with a `couple` bond, sit together, spend free time together, share a day off where rotas allow, and turn up in each other's lines ("{partner} says hello.", "{partner} and I are doing the quiz again."). No romance storylines, no break-ups, nothing that involves you; a couple can be part of someone's thread (missing a partner on another shift, a transfer that splits them; see Part 8b).
+6. **They talk about each other.** Lines can name another crew member by bond: `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{partner}` fill-ins ("Pell and I are doing the quiz together again." / "If you see Ade, don't mention the coffee machine.").
+7. **Seating and plans already use `affinityPlan`** (pure, from starting affinity). It must stay pure for determinism. The deep system adds a **weekly** plan affinity: `affinityPlan(a, b, d)` returns the affinity as it stood at the start of that ship week (a snapshot saved once a week, 2.7 KB), so seating follows friendships that changed without plans ever reading live numbers mid-week. (Needs the sim engineer's OK: plans already built for this week don't change.)
 
 ---
 
@@ -208,6 +211,8 @@ If you're **out**, sometimes they leave a **note on your bunk** instead: tap the
 Odds: at most one visit or note a ship day, at most one per friend every 5 days, higher with warmth. During the first week, the escort's visit on night 1 is scripted by onboarding (the planner).
 
 **How it's shown:** a visit is live and only on your deck: the crew member's agent walks to your bunk room door and in (section 10 needs a small hook, `crewComeTo(p, placeId, onArrive)`, which the friends-waving-you-over feature already wants). On paper their plan is unchanged; afterwards they walk back to it. Bunk 1's other residents (Tomas) are fine with it; at 22:00 visitors leave (quiet hours).
+
+**Your own room, later** (the user, 2026-10-17). Once you're promoted and move into an officer's cabin (design-doc: walking the officers' corridor with your own key is the moment of promotion), you can **invite people over**: from the Crew app or a chat card, "Come over" makes an appointment of kind `visit` at your cabin for one friend or a small group (up to four, about an hour, 19:00 to 22:00). They turn up, sit, talk among themselves as well as to you (overheard lines between guests who get on), and it counts as a calm place, so moments can happen there. Hosting gives each guest +3 and a medium memory (`visit.yours`), and a little to your Kindness standing (Part 8). Until promotion, the bunk room's visits above are the version you have. Built after the progression hooks give a cabin; the plan keeps the shape ready.
 
 **Visiting them:** crew quarters stay private (the privacy rule). A friend can **invite** you to their bunk room or cabin (an appointment of kind `visit`, using the sim engineer's `doorOpenFor`): an evening of Tiles with Rina, Tomas's star map. Without an invitation, their door stays locked as now.
 
@@ -245,18 +250,20 @@ What social needs from `lineFor` (the planner's dialogue engineer builds it): th
 | `mem(id, key)` | the memory, or null; keys are `kind.arg` with prefix match | `mem:fav`, `mem:fav.lamp`, `mem:fixed.oven`, `mem:came.quiz` |
 | `warmth(id)` | `'cold'` / `'warm'` (recent memories vs none for a while) | `warmth:cold` |
 | `affBand(a, b)` | `'rival'` (-40 or less), `'neutral'`, `'friend'` (60+) | `aff:rival` |
-| `bondOf(id, kind)` | a crewmate they have that bond with, or null | `bond:best`, `bond:mentor`, `bond:drifting` |
+| `bondOf(id, kind)` | a crewmate they have that bond with, or null | `bond:best`, `bond:mentor`, `bond:drifting`, `bond:couple` |
 | `moodOf(p)` | `'low'` / `'ok'` / `'high'` (crewMood bands) | `mood:low` |
 | `beatOf(arcId)` | beats told so far (`arcBeat(p, t)` already exists for "the next beat due", hence the new name) | `beat:tomas.3` |
 | `knowsNews(p, newsId)` | bool | `news:<id>` |
 | `repBand(dept)` | `'new'` / `'known'` / `'well'` / `'theirs'` | `rep:known` |
+| `repShip(kind)` | `'low'` / `'ok'` / `'high'` for work, kindness, spirit | `ship.work:high` |
+| `aboard(id, day)` | is that person on the ship that day | (engine only) |
 | `knownFor()` | your tags | `you:reliable` |
 | `cue(kind)` | a recent ship note still talked about (the bus, below) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:tradition.quiz` |
 | `flag(key)` | the shared flag store (section 13, beside the bus) | `flag:met.calder`, `week1:true` |
 
 Other conditions are the planner's (`event:ionStorm.onset`, `time:morning`, `place:mess`, traits, dept, act). The vocabulary freezes at the end of wave 1.
 
-**Placeholders social fills:** `{me}`, `{nick}` (what they call you, by tier, from the voice card), `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{boss}` (their Chief), `{thing}` (a memory's object: "the lamp"), `{trad}`. A line whose placeholder can't be filled is skipped.
+**Placeholders social fills:** `{me}`, `{nick}` (what they call you, by tier, from the voice card), `{partner}`, `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{boss}` (their Chief), `{thing}` (a memory's object: "the lamp"), `{trad}`. A line whose placeholder can't be filled is skipped.
 
 **Voice:** a voice card's `words` replace tokens in any line: `{hi}`, `{bye}`, `{yes}`, `{thanks}`, `{wow}`, `{sigh}`, `{nick}`. So one shared line ("{hi}, {nick}. Busy day?") sounds like Holt ("Cadet. Busy day?") or like Pell ("Oi oi, spanner. Busy day?"). This is how 75 voices come cheaply from shared banks.
 
@@ -318,43 +325,102 @@ Generated crew's moments come from **theme templates** (`MOMENT_THEMES.homesick 
 
 The planner owns the arrival and the first week: `SHIP.intro = { step, day, done, skipped }`, the scripts, tutorials and the "Settling in" list. The seam with social is small:
 
-- **Relationships:** onboarding calls `relAdd(id, 'intro:<step>', pts)`. After the arrival evening: the escort 10 (acquaintance), Tomas 10, Pell 5, Calder 3, Brennan 3 (the planner's numbers). Skip-intro sets the same end state.
-- **Flags:** onboarding sets flags in the shared store (`flagSet('met.calder')`, `escort.halloran`, `mug`, `seedling`, `week1.d2` at Tuesday 06:00 ... `week1.done`; the store is section 13's, beside the bus, owned by the sim engineer and saved in the main save); line conditions read them (`flag:met.calder`).
+- **Relationships:** onboarding calls `relAdd(id, 'intro:<step>', pts)`. After the arrival evening: the escort 10 (acquaintance), Tomas 10, Pell 5 (10 if Pell is the escort), Calder 3, Brennan 3 (the planner's numbers). Social never hard-codes the escort: it reads the escort's id from `SHIP.intro` (or the `escort.<id>` flag). Skip-intro sets the same end state.
+- **Flags:** onboarding sets flags in the shared store (`flagSet('met.calder')`, `escort.<id>`, `mug`, `seedling`, `week1.d2` at Tuesday 06:00 ... `week1.done`; the store is section 13's, beside the bus, owned by the sim engineer and saved in the main save); line conditions read them (`flag:met.calder`).
 - **Memories:** social listens for `simNote('introStep', { step, who })` and adds core memories (`intro.arrival` with the escort, `intro.dinner` with Calder and the escort, `intro.shadowShift` with the escort), so they can be called back for the rest of the game ("Remember your first day? You held the spanner upside down."). It also makes a **mentor bond** from the escort to you: extra week-1 lines (`week1:true`), a check-in each evening of week 1.
 - **Gating:** social features stay quiet until onboarding's flags open them: chat cards always; favours from `week1.d2`; friends waving you over from `week1.d3`; invitations from `week1.d5`; moments and bunk visits after `week1.done`. The first-weekend tradition invitation comes from **Tomas** (your bunkmate, free that Saturday), sent on Friday by the planner's script through `socialInvite({ trad: 'sowing', day: 6, from: 'tomas' })` so it becomes a real appointment (Sowing morning in the garden, then film night). Halloran's part that week is the Friday mug at Works tea. A scripted escort visit on night 1 is the planner's call.
 
-**The escort: Emeka Halloran** (the planner's proposal, to confirm with the user): Works systems officer, Officer rank (one notch above you), day shift, off Thursday and Friday, cabin 4-13; kind, loyal, terrible breakfast jokes, bakes. He becomes story crew with a full voice card and an arc (suggested thread: "not good enough", whether he's ready to be anyone's mentor).
+**The escort: Zeke Torres or Pell** (the user, 2026-10-17: "not Halloran, Zeke Torres or Pell, they're future friends"; the planner picks and aligns rotas so he's on duty that Sunday evening). Either way the escort becomes story crew with a full voice card, a mentor bond with you and an arc (suggested thread for Torres: ambitious and curious, wondering whether he wants Deck 6's engines for life; for Pell: already written, the music boxes, and now also "not good enough" as a first-time mentor). Halloran stays a Works officer with his Friday mug at Works tea.
 
-## Part 8: Reputation by department
+## Part 8: Reputation (a fuller system, the user's ask)
 
-Each department keeps a standing with you: `SHIP.rep[dept]`, 0 to 100, starting at 10 (Works at 20: they know you're coming). Nine departments: command, helm, comms, works, watch, survey, infirmary, galley, store.
+The user, 2026-10-17: reputation can dip, and "add a reputation system". So reputation is a system of its own, in two layers, with consequences you feel. It stays cozy: it never locks a friendship, never fails you, and always recovers with good work.
 
-**What raises it:**
+### Layer 1: standing with each department
 
-| What | How much |
+Each department keeps a standing with you: `SHIP.rep.dept[dept]`, 0 to 100, starting at 10 (Works at 20: they know you're coming). Nine departments: command, helm, comms, works, watch, survey, infirmary, galley, store.
+
+| Raises it | How much |
 | --- | --- |
 | A machine fixed that the department uses (the machine's room's owner: the galley's ovens, the infirmary's air, the bridge's relays) | +3 (+5 if it was failing) |
 | A favour for one of them | +2 |
 | Being at their tradition (Works tea, Survey's observatory night) | +1, once a week |
 | A meeting reply that helps them | +1 to +3 (the script says) |
-| Friends: each close friend in the department lifts its floor by 5 | |
+| A close friend in the department | lifts its floor by 5 each |
 
-**What lowers it** (gently, never below 0 or below the floor): a job you took on one of their machines and left unfinished past `YOU_KEEP` (the systems engineer's limit) -2. That's how "your work matters" reaches the people: neglect gets talked about.
+| Lowers it (gently) | How much |
+| --- | --- |
+| A job on one of their machines you took and left past `YOU_KEEP` (the systems engineer's limit) | -2 |
+| One of their machines failing while a job for it sat on the board unclaimed during your shift (and you were free) | -1, at most once a day |
+| A missed appointment with one of their officers | -1 |
 
-**What it does** (bands named in words, never a number on screen):
+Standing never goes below its floor (0, or 5 per close friend there), and drifts back up toward the floor by 1 a week when it's below it, so a bad patch fades.
 
-| Band | Name in Record | Effect |
+| Band | Name in Record | Consequences |
 | --- | --- | --- |
-| 0-19 | "New face" | nothing special |
-| 20-39 | "They know your name" | strangers there start at 4 points; reputation lines (`rep: 'known'`) |
-| 40-69 | "Well thought of" | strangers start at 8 (nearly acquaintance); favours from them 50% more often; their tradition invites you |
-| 70-100 | "One of theirs" | the department's Chief mentions you to Calder (a Record note toward promotion); their crew defend you in gossip; a department "thank you" (Brennan's biscuits for the galley; a round at the bar for Watch) |
+| 0-19 | "New face" | strangers start at 0; their gossip about you is neutral or grumbly when you've let them down ("Is the new tech ever going to look at our chiller?") |
+| 20-39 | "They know your name" | strangers there start at 4 points; reputation lines (`rep:known`) |
+| 40-69 | "Well thought of" | strangers start at 8 (nearly acquaintance); favours from them 50% more often; their tradition invites you; their crew **ask for you by name** on jobs (a job on their machine is marked "asked for you" on the board) |
+| 70-100 | "One of theirs" | their Chief mentions you to Calder (a Record note toward promotion); their crew defend you in gossip; a department "thank you" (Brennan's biscuits for the galley; a round at the bar for Watch); you're on their guest list for their occasions (a Survey briefing, the galley's tasting night) |
 
-The Record app shows the nine standings as words. Reputation feeds the progression hooks (Pillar 3 Part 4): Calder's judgement of you can read `SHIP.rep.works` and the others.
+### Layer 2: the ship's view of you
 
-**What crew say about you** (your "known for"): the system counts what you do (jobs, favours, traditions joined, chats, late nights) and gives you up to three tags with the most behind them (`reliable`, `chatty`, `night owl`, `quiz regular`, `gym rat`, `always at the garden`, `the one who fixes ovens`). Lines with `you: 'reliable'` conditions pick them up ("Ask {me}, they always turn up."). Cheap: a handful of counters, saved.
+Three ship-wide standings, `SHIP.rep.ship = { work, kindness, spirit }`, each 0 to 100, built from what you do (a running score with a slow pull toward the middle, so it tracks recent weeks, not a lifetime):
+
+| Standing | What builds it | What brings it down (gently) |
+| --- | --- | --- |
+| **Work** (reliable, skilled) | jobs finished and turned in, failing machines fixed, being at work on time (the sim knows where you are at shift start), event jobs taken in meetings | jobs left past `YOU_KEEP`, being well late for shift, skipping a summons |
+| **Kindness** (a good shipmate) | favours, gifts, visits hosted, moments where you listened, smoothing over feuds, guiding a newcomer | missed appointments, declining many favours in a row (only the streak counts, not one no) |
+| **Spirit** (part of ship life) | traditions joined, events joined, birthdays wished, chatting with people outside your department | none: staying in is never punished; it just doesn't build |
+
+**Consequences:**
+
+- **Promotion and trust.** Calder's view of you (the progression hooks, Pillar 3 Part 4) reads Work and Works' standing; certification steps want "Work: steady" or better. The Captain's table and briefings (the events engineer's C10) read all three.
+- **Gossip about you.** Each standing gives you a reputation that crew pass on as news: high ones ("Ask {me}, they always turn up.", "{me} sat with Rina all evening when her gran was ill."), low Work ones ("The new tech's been missing shift starts, Calder's noticed."). Strangers who've heard it greet you accordingly (`rep:` and `you:` conditions).
+- **Who comes to you.** High Kindness: more favours and visits, and crew confide sooner (moments' time gates shortened by a day). High Spirit: more invitations, and you're asked to help run a tradition now and then (carry the quiz answer sheets, hand out lanterns). High Work: crew bring you urgent jobs first ("asked for you").
+- **Low standings** never take tiers or friends away. They show as words: grumbles in gossip, a cooler first meeting with strangers, Calder's note in your Record ("Two late starts this week. Let's not make it a habit."), fewer invitations from officers. Doing well again lifts them within a week or two.
+- **Known for:** the system counts what you do and gives you up to three tags with the most behind them (`reliable`, `kind`, `chatty`, `night owl`, `quiz regular`, `gym rat`, `always at the garden`, `the one who fixes ovens`, `good with newcomers`). Lines with `you:reliable` conditions pick them up.
+
+**On screen:** the Record app (section 19) shows a "Reputation" page in words only, never numbers: the nine departments by band, the three ship standings as short phrases ("Work: dependable", "Kindness: the one people go to", "Spirit: often seen at things"), and what you're known for. A change of band is a quiet badge on the Record app, never a toast.
 
 ---
+
+## Part 8b: Crew come and go (the user's ask, 2026-10-17)
+
+"Not often." The Wren's crew changes a little over time: some are transferred off, new crew arrive, including new cadets like you, and at some point you're asked to guide a newcomer the way you were guided.
+
+### How it works without breaking the ship
+
+- **A fixed reserve pool.** The roster gains about **12 reserve crew** (`ROSTER_RESERVE`, generated like everyone else, with full data, voice cards and threads), who start off the ship. Social's arrays (affinity, knowledge, memories) are sized for all 74 + 12 from day one, so a transfer never changes their shape and **saves never reset**. Each person gets `aboard: [fromDay, toDay]` (null for always).
+- **Crew rotation day.** A deterministic calendar (the crew designer's generator, read by the sim engineer): about **every 6 ship weeks**, a Sunday shuttle takes **1 to 3** crew off and brings **1 to 3** on, the bunks and cabins they free going to the arrivals. Nobody leaves in the first 4 weeks of a game. The first rotation brings a new cadet; later ones sometimes do.
+- **Who leaves** (chosen when the rotation is planned, 10 days ahead, seeded): never the Captain, the Chiefs, the escort, Tomas, Pell or Rina; never someone mid-heartfelt-thread (a thread's beat in progress); preferably someone whose thread has ended, or whose thread is "Leaving soon?", which can now resolve either way. A couple transfers together, or one stays and it becomes part of the other's thread. The player's close friends **can** leave: the goodbye is the point (the user).
+- **What the sim does:** before `fromDay` and after `toDay` a person has no plan on board (`schedPeople` skips them); on rotation day the leavers walk to the shuttle bay for 15:00 and board; the arrivals walk off the ramp, to their quarters, to dinner (onboarding's escort lead mode, with a crew member as their escort).
+
+### Goodbyes (social)
+
+- **News first.** When a transfer is planned (10 days ahead) it's news, spread the usual way ("Did you hear? Okoro's transferring to the Halcyon."), and it changes what the leaver says (`trad:` style condition `leaving:soon`).
+- **A day or two before** (the user): anyone who knows you at **acquaintance or better** finds you (a wave-over prompt, or a visit at friend tier) for a **goodbye**: a short scene in the dialogue panel that **talks about your friendship**, built from their heaviest memories of you ("The lamp. The quiz. That night you sat with me when Gran was ill."), their tier, and their thread. Writers write goodbye scripts per tier and per voice template, with memory callbacks as slots; story crew and close friends get their own. A close friend gives you a keepsake (Part 4).
+- **On the day:** a small gathering at the shuttle bay (a gathering in the events engineer's format, `gathering({ id, where, at, who })`): their department, their friends and you if you come. A last line each; they walk up the ramp. If you weren't there, a Mail ("Sorry I missed you at the shuttle…").
+- **After:** they're not gone from your life. Friends and up send **letters** now and then (Mail from "the Halcyon", every couple of weeks at first, then rarer), using their voice and your memories, and they stay in the Crew app under "Moved on". Crew left behind talk about them (`bond:` lines with a "missed" form). A couple split by a transfer is a thread for the one who stays.
+
+### New arrivals
+
+- New crew arrive on rotation day: news before ("We've got a new navigator coming Sunday"), the dinner with their department, then they're strangers like anyone, with a short "new here" period (week-1 style lines of their own: lost in the lift, asking where things are).
+- **New cadets like you** arrive the same way you did, met by someone one notch above them. Tomas's thread ends with him meeting the next arrival (the planner's arc).
+
+### Guiding a newcomer (your assignment)
+
+"At some point you get an assignment to guide a newcomer the way you were guided." When the first new cadet arrives after you've been aboard at least **4 ship weeks** and Works thinks well of you (standing "They know your name" or better), Calder assigns them to you (a meeting, or a Mail if you miss it). Then:
+
+- **You are the escort.** The arrival steps run in reverse: you meet them at the ramp, lead them through the haulway to their bunk and to dinner, and shadow them on their first job (the onboarding engineer's escort modes with the newcomer as the follower; you're always in control, and you can hand them back to Calder at any point with no penalty).
+- **They ask you things.** Their lines come from a `newcomer` line bank (where is the mess, who's the scary one, is the food always this good), and your answers are reply choices (helpful, funny, honest), echoing your own first week.
+- **Social side:** a mentor bond from you to them, memories both ways, their tier with you starts at acquaintance, Kindness and Works standing go up as they settle in, a `good with newcomers` tag, and the first-week moments of *their* arc involve you. Later they're the one who waves you over at the quiz.
+
+### Data and checks
+
+- Roster fields (crew designer): `ROSTER_RESERVE`, `aboard`, `partner`, `transferTo` (the ship they go to, for letters).
+- Social state: `SHIP.social.moved` (who left, when, their last memories for letters), saved; letters ride on `SHIP.social.mail` (built).
+- `social_check`: run 14 weeks on paper with rotation on: nobody leaves mid-thread or in the first 4 weeks; arrays never change size; a save made before a rotation loads after it; goodbyes fire 1 to 2 days before for acquaintances and up; letters arrive; the newcomer assignment fires once its conditions hold.
 
 ## Part 9: The data writers fill (shapes)
 
@@ -434,7 +500,8 @@ Nothing new is drawn except the keepsake shelf (one instanced mesh) and visitors
 Everything new joins `save.social` (no new `SAVE_V`: missing fields load as empty, so old saves keep working):
 
 - `mem`: `{ crewId: [[keyIndex, day, w, told], …] }` with a key dictionary `memKeys: [...]` so keys are stored once (about 75 × 8 × 12 bytes ≈ 7 KB at the most, usually far less);
-- `rep`: nine numbers; `knownFor`: a handful of counters; `flags`: the week-1 and other flags;
+- `rep`: `{ dept: nine numbers, ship: { work, kindness, spirit } }`; `knownFor`: a handful of counters; `moved`: crew who left (id, day, their last memories for letters);
+- all per-crew arrays (affinity, knowledge, memories) sized for the roster **plus the reserve** (74 + 12 = 86: 3,655 pairs, 3.6 KB), so transfers never change the save's shape; the save's crew-list hash covers the whole list, reserve included;
 - `bonds`: the labelled pairs (about 3 KB at most);
 - `affWeek`: the weekly snapshot for planning (2.7 KB, base64 like `aff`);
 - per relationship (the array in `save.social.rel`), new slots: `giftWeek`, `moment` (beats told per thread), `momentDay`, `visitDay`, `inviteDay`.
@@ -466,12 +533,12 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 | **Pillar 4 planner** (onboarding, first week) | `relAdd(id, 'intro:<step>', pts)`, flags (`flagSet`), `simNote('introStep')`, the scripted first-weekend `socialInvite`; the ship notes bus and the flag store (section 13) | memories and the escort's mentor bond from intro notes; the gating of social features by week-1 flags (Part 7) |
 | **Planner's dialogue workstream** (dialogue engineer, head writer, writers) | `lineFor(p, kind, ctx)`; `content/` files baked by `content_gen.py`; `lines_check.py`; overheard conversations | the kind order; the query API (Part 6); the voice-card, theme and moment shapes (Part 9); `memTold` for callbacks |
 | **Events / traditions designers** (section 18) | `invite: { host, odds, line }` on traditions; `simNote('tradition', { id, day, came, you })` after each; `simNote('choice', ...)` for meeting replies | who's warm to you (`relTier`, `warmth`) for invitations and the Captain's table |
-| **Device engineer** (section 19) | the Crew app page draws "What you know" sections and counts; the Record app draws reputation bands and "known for"; Appointments takes `kind: 'invite'` and `'visit'`; the dialogue panel plays moments | `crewContacts()` gains `knowSections`, `knowLeft`, `warmth`; `repBands()`; `momentShow(id)` (wraps `dialogueShow`) |
-| **Sim engineer** (sections 10, 14) | `crewComeTo(p, placeId, onArrive)` for visits and friends walking over; appointments of kind `visit` with `doorOpenFor`; `affinityPlan` reading the weekly snapshot | the weekly snapshot, pure |
+| **Device engineer** (section 19) | the Crew app page draws "What you know" sections (no counts) and a "Moved on" list; the Record app's Reputation page (words only);  Appointments takes `kind: 'invite'` and `'visit'`; the dialogue panel plays moments | `crewContacts()` gains `knowSections`, `warmth`; `repView()` (department bands, the three ship standings as phrases, known-for tags); `momentShow(id)` (wraps `dialogueShow`) |
+| **Sim engineer** (sections 10, 14) | `crewComeTo(p, placeId, onArrive)` for visits and friends walking over; plans that skip people outside their `aboard` window and the rotation-day walks; the flag store and the bus in section 13; appointments of kind `visit` with `doorOpenFor`; `affinityPlan` reading the weekly snapshot | the weekly snapshot, pure |
 | **Systems engineer** (section 17) | `simNote('repair', { who, machine, kind, deck })` when a repair finishes; `simNote('jobAbandoned', ...)`; the machine's department (`machineDept(m)`, or a table social keeps); unfinished-job events for reputation | favours that matter (from moments' practical replies) on the existing favour API |
 | **Galley / garden** (section 16) | gift-tagged items (garden produce on harvest days); `simNote('lateMeal')`, `simNote('harvest')` | nothing new |
 | **Player engineer** (section 15) | carried items with a `gift` tag; the store's gift list; the bunk tap for notes | `Give` on the chat card |
-| **Crew designer** (section 9, the generator) | each person's `tpl`, `loves`, `likes`, `joy`, `thread`, `needs`, `openness`, `keepsake`, `home`/`family` fields for themes; more `about` details (45 today: aim for 6 or more per person) | the field list |
+| **Crew designer** (section 9, the generator) | `ROSTER_RESERVE` (about 12), `aboard`, `partner` (4 to 6 couples), `transferTo`, the rotation calendar; each person's `tpl`, `loves`, `likes`, `joy`, `thread`, `needs`, `openness`, `keepsake`, `home`/`family` fields for themes; more `about` details (45 today: aim for 6 or more per person) | the field list |
 | **Deck architect** | one keepsake shelf place by Bunk 1 berth 4; "calm" tags on places (which seats count as somewhere to sit and talk) | the list of calm place types |
 | **Performance engineer** (8/8b) | the `sigh`, `laugh`, `listen` talk poses for moments and visits; the keepsake instanced mesh | nothing new |
 
@@ -491,7 +558,7 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 | A2 | A | 0.36.21 | **Memories with decay**: `SHIP.mem`, `memAdd` from bus notes, daily fading, `memTold`, warmth; save | 20 | A1 |
 | A3 | A | 0.36.22 | **The kind order calls `lineFor`**: today's hard-coded lists (`CHAT_GREET`, `CHAT_NEAR`, `CHAT_LIFE`, `CHAT_DEPT`, `CHATTER_IDLE`) move to `content/` unchanged (same lines out, `cadet_test` identical); the extended order with callbacks and cues | 20 | A1, the dialogue engine |
 | A4 | A | 0.36.23 | **First week gating**: flags read, intro memories, the escort's mentor bond, `socialInvite` | 20 | A2, onboarding's flags |
-| B1 | B | 0.39.0 | **Voice cards and steps**: `VOICE` read (generator fields from the crew designer, fallback by traits until then), openness, "What you know" sections and counts for the Crew app, time-known gates | 20c (19 draws; 9 generator) | A1 |
+| B1 | B | 0.39.0 | **Voice cards and steps**: `VOICE` read (generator fields from the crew designer, fallback by traits until then), openness, "What you know" sections for the Crew app (no counts), time-known gates | 20c (19 draws; 9 generator) | A1 |
 | B2 | B | 0.39.1 | **Crew-to-crew**: clash tuning, bonds (friends, best, rivals, mentor, drifting), `bondOf`, "Do you know…?" introductions, the weekly affinity snapshot for `affinityPlan` | 20c (14 reads the snapshot) | A1 |
 
 **Wave 2 (the deep features):**
@@ -500,7 +567,7 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 | --- | --- | --- | --- | --- | --- |
 | B3 | B | 0.39.2 | **Moments**: arcs engine reading `content/arcs` and `content/themes`, readiness, the "Sit with them" button, `momentShow` on the dialogue panel, reply flavours, after-effects, one serious moment a day; Tomas, Pell and Rina's arcs moved into moments | 20c, 18 (`dialogueShow` takes a moment script: one line) | B1, A2 |
 | A5 | A | 0.36.24 | **Gifts**: gift tags, Give on the card, loves/likes, crew gifts, keepsakes and the shelf | 20, 15 (carried item tag), 16 (garden items), Deck 4 shelf (architect), 8b (instanced mesh) | A2, B1 |
-| A6 | A | 0.36.25 | **Reputation by department and "known for"**: `SHIP.rep`, bus sources, bands, warm starts, the Record's lines | 20, 17 (`jobAbandoned` note), 19 draws | A2 |
+| A6 | A | 0.36.25 | **The reputation system**: department standings and the three ship standings (Work, Kindness, Spirit), bus sources (repairs, jobs left, late for shift, favours, traditions), floors and recovery, bands and their consequences (warm starts, "asked for you" jobs, reputation gossip, Calder's Record notes), "known for", the Record's Reputation page | 20, 17 (`jobAbandoned` note, the "asked for you" mark), 14 (on time for shift), 19 draws | A2 |
 | A7 | A | 0.36.26 | **Invitations**: tradition invites, personal invites, `kind: 'invite'` appointments, Mail fallback | 20, 18 (`invite` fields), 19 (appointment kind) | A2, A4 |
 
 **Wave 3:**
@@ -508,12 +575,16 @@ Other checks: `cadet_test` stays pixel-identical on decks until the keepsake she
 | # | Who | Build | What | Sections touched | Depends on |
 | --- | --- | --- | --- | --- | --- |
 | A8 | A | 0.36.27 | **Bunk visits and notes**: the prompt, `crewComeTo`, visit lines, notes on the bunk, invitations to their quarters | 20, 10 and 14 (sim engineer), 15 (bunk tap) | A7, B3 |
-| B4 | B | 0.39.3+ | **Story crew arcs** as the writers deliver them (Halloran, Calder, Brennan, Holt, Vance, Sato, Marrow), the theme library filled, pair stories | 20c, `content/` | B3 |
-| A9/B5 | both | — | **Tuning pass** with `social_check` numbers and the user's play | 20, 20c | all |
+| B4 | B | 0.39.3+ | **Story crew arcs** as the writers deliver them (the escort, Calder, Brennan, Holt, Vance, Sato, Marrow), the theme library filled, pair stories | 20c, `content/` | B3 |
+| A9 | A | 0.36.28 | **Crew come and go, social side**: arrays sized for the roster plus the reserve, `aboard` windows respected, transfer news, goodbyes 1 to 2 days before (memory-built scenes) and at the shuttle, letters after, "Moved on" in the Crew app, new arrivals' "new here" lines | 20 (9: `ROSTER_RESERVE`, `aboard`, `partner`, `transferTo`, rotation calendar by the crew designer; 14: plans skip people not aboard, rotation-day walks, sim engineer; 18: the shuttle gathering) | A2, B3 |
+| B5 | B | 0.39.4 | **Couples in the background**: the `couple` bond from the roster's `partner`, `{partner}` lines, seating and free time together | 20c (9: `partner`) | B2 |
+| A10 | A | 0.36.29 | **Guiding a newcomer**: Calder's assignment, the newcomer's mentor bond and questions (`newcomer` lines with reply choices), standings and the `good with newcomers` tag | 20 (21: the onboarding engineer reuses the escort modes with you leading) | A9, the arrival |
+| A11 | A | later | **Your own room**: "Come over" visits to your cabin after promotion | 20, 14, 19 | A8, promotion (progression hooks) |
+| A12/B6 | both | — | **Tuning pass** with `social_check` numbers and the user's play | 20, 20c | all |
 
 The writers' work runs alongside from wave 1 (the shapes and vocabulary freeze at its end): story crew voice cards first, then line banks by kind, then moment themes, then the story arcs. Each delivery passes `lines_check` before the lead merges it.
 
-**Also needed:** the **crew designer** for the generator fields (B1), the **sim engineer** for `crewComeTo` and `affinityPlan`'s snapshot, this designer on call for questions and the tuning pass. Moments (B3) before the first-week check-in if possible, since the user asked for them by name.
+**Also needed:** the **crew designer** for the generator fields (B1) and the reserve pool, `aboard`, `partner`, `transferTo` and the rotation calendar (A9, B5), the **sim engineer** for `crewComeTo`, `affinityPlan`'s snapshot and people who aren't aboard (A9), the **onboarding engineer** for guiding a newcomer (A10), this designer on call for questions and the tuning pass. Moments (B3) before the first-week check-in if possible, since the user asked for them by name.
 
 ## Risks
 
@@ -525,27 +596,30 @@ The writers' work runs alongside from wave 1 (the shapes and vocabulary freeze a
 - **Determinism breaks** (memories or visits reading live state into plans). *Answer:* plans only read the weekly snapshot; live visits never change the paper plan; checks run twice and compare.
 - **File size on phones.** *Answer:* words kept compact (no repeated keys where a short form works), measured each build; if it grows past the lead's budget, move rarely-used banks (convos for decks you're not on) into a compressed string unpacked on first use.
 
-## Open questions for the user
+## The user's answers (2026-10-17), and where they went
 
-1. **The escort:** Emeka Halloran, a new Works systems officer (the planner's proposal, which I support), written as story crew? (The other option was Pell, a junior two years ahead and already your neighbour.)
-2. **Crew-to-crew romance:** none anywhere (simplest and safest), or a few established couples who are simply together in the background (no storylines, never involving you)?
-3. **How serious can it get?** Struggles like an ill grandparent and homesickness are in. Is grief (someone they lost) in, handled gently? (Merges with the planner's question on how serious.)
-4. **Visits to your bunk:** OK as designed (friends only, evenings, easy to ignore)?
-5. **Gifts from the machine shop** (making small trinkets) once Works lets you, or only bought and picked gifts?
-6. **Reputation dipping** when you leave a department's job unfinished: OK, or only ever up?
-7. **"What you know" counts** in the Crew app ("5 of 11 things"): nice to collect, or too gamey?
+1. **The escort:** not Halloran: **Zeke Torres or Pell**, "future friends"; the planner picks and aligns rotas (Part 7).
+2. **Crew-to-crew romance:** **yes, a few established couples in the background**, never involving the player (Part 3, B5).
+3. **How serious:** **all of it is OK**, including gentle grief; nobody dies on screen (ground rule 10; the "An old loss" theme stays).
+4. **Bunk visits:** **yes**, and **later your own room** to invite people over after promotion (Part 5, A11).
+5. **Machine-shop gifts:** **yes** (Part 4).
+6. **Reputation dipping:** **yes, and add a reputation system** (Part 8, rewritten as two layers with consequences; A6).
+7. **"What you know" counts:** **no, too gamey**; the page just grows (Part 1).
+8. **Also asked for:** crew transferred off with goodbyes a day or two before and on the day; new crew and new cadets arriving; an assignment to guide a newcomer (Part 8b; A9, A10). Varied days off for everyone (the sim's; visits, invitations and waving use each person's real days off). Tiles as a playable game later in the pillar (the planner's; social adds Tiles invitations and Rina's thread).
+
+No open questions remain on the social side. Numbers (points, half-lives, odds, gates) are starting values to tune in play.
 
 ## Appendix: the new shared formats, in one place
 
 ```js
 // 20. SOCIAL (deep, Pillar 4): pure queries (line conditions read only these)
 relTier(id) ; mem(id, key) ; warmth(id) ; affBand(a, b) ; bondOf(id, kind) ; moodOf(p) ; beatOf(arcId)
-knowsNews(p, newsId) ; repBand(dept) ; knownFor() ; cue(kind)
+knowsNews(p, newsId) ; repBand(dept) ; repShip(kind) ; knownFor() ; cue(kind) ; aboard(id, day)
 // state changes (section 20 only, mostly from bus notes)
 memAdd(crewId, key, { w }) ; memTold(crewId, key)
 socialInvite({ trad | kind, day, from, at, where }) -> appointment id | null
 momentReady(p) -> momentId | null ; momentShow(momentId)       // plays on section 18's dialogue panel
-SHIP.mem, SHIP.rep, SHIP.social.bonds, SHIP.social.affWeek     // all in save.social
+SHIP.mem, SHIP.rep = { dept, ship }, SHIP.social.bonds, SHIP.social.affWeek, SHIP.social.moved   // all in save.social
 // emits on the bus: tierUp, moment, bond, invite
 
 // the planner's, which social uses
@@ -560,5 +634,6 @@ MOMENTS[id] = { who, thread, beat, tone, tier, metDays, gapDays, where, hint, li
 crewComeTo(p, placeId, onArrive)        // section 10 (sim engineer)
 SHIP_TRADITIONS[i].invite = { host, odds, line }   // section 18
 machineDept(m) -> dept                  // section 17 (or a table in 20)
+ROSTER_RESERVE ; p.aboard = [fromDay, toDay] ; p.partner ; p.transferTo   // section 9 (crew designer)
 item.gift = '<tag>'                     // section 15/16 carried items
 ```
