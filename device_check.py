@@ -212,11 +212,15 @@ def run(path):
             print('  group meeting:', gm)
             check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
             # a need's bar pulses (0.35.19) while section 15's needPulse(k) says it just rose (a stand-in when there's none)
-            g.ev("window.__pk = 'energy'; window.__ownPulse = typeof needPulse === 'function'; if (!__ownPulse) window.needPulse = k => k === window.__pk; deviceShow('needs')"); g.step(2)
+            # with section 15's own needPulse (it reads NEED_PULSE[k], a time, and a const can't be swapped) the check sets that
+            # time; without it, a stand-in function
+            g.ev("""(() => { window.__ownPulse = typeof needPulse === 'function' && typeof NEED_PULSE !== 'undefined';
+              if (__ownPulse) { for (const k in NEED_PULSE) delete NEED_PULSE[k]; NEED_PULSE.energy = performance.now() + 1e9; }
+              else { window.__pk = 'energy'; window.needPulse = k => k === window.__pk; } deviceShow('needs'); })()"""); g.step(2)
             p1 = g.ev("[...document.querySelectorAll('#devBody .need.pulse')].map(r => r.getAttribute('aria-label'))")
-            g.ev("window.__pk = null"); g.step(2)
+            g.ev("if (window.__ownPulse) delete NEED_PULSE.energy; else window.__pk = null"); g.step(2)
             p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
-            g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")
+            g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")   # (0.35.20: works with the real needPulse too)
             check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
