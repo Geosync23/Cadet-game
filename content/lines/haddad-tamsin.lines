@@ -166,3 +166,13 @@
 == rumour
 - Oh, I shouldn't. Should I? I'll say a little.
 - Have you heard? It's nice news. I think it's nice.
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- A game? Oh, lovely. I'm not very good. Am I?
+== tiles.dock
+- Oh! Three! Sorry. Was that all right?
+== tiles.win
+- I won? Sorry! It'll be your turn next. It will.
+== tiles.lose
+- Well done! You were lovely at that. Really.   #warm

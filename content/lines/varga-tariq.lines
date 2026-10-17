@@ -177,3 +177,14 @@
 == rumour
 - I have news. I'll tell it properly. In order.
 - Forgive me. I heard something. Shall I?
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- A game. Splendid. I hope this finds you ready.   #funny
+- I warn you, I keep a tally. Of everything.   #funny
+== tiles.dock
+- Three. One to me. I'm counting.
+== tiles.win
+- Good game. A clear win. By one dock. A clear dock.   #funny
+== tiles.lose
+- Well played. I'll write it in the tally. Honestly.

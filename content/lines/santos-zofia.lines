@@ -236,3 +236,14 @@
 == rumour
 - Okay. Public news. Free of charge.   #funny
 - You'll want this. I'll throw it in for nothing.
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- Tiles? Winner picks pudding. Deal?   #funny
+- Tiles? I'll make you a deal. Your move first.
+== tiles.dock
+- Three. Good trade, that. For me.   #funny
+== tiles.win
+- Good game. Pudding's mine. Fair's fair.   #funny
+== tiles.lose
+- Well played. Pudding's yours. I'm good for it.

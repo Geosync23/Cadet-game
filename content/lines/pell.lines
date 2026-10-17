@@ -352,3 +352,24 @@
 - Your mum's mug. Bring it to Works tea. It leans? Good. So does the hook.   #warm
 ? flag:home.jo.launched tier>=colleague
 - Your Jo built a whole boat? By hand? Respect. Tell them I want a go. I'll fix the oars.   #funny
+
+// Writer 4, batch 4: Tiles talk (lineFor(who, 'tiles.<kind>')).
+== tiles.start
+- Oi oi. Tiles. Loser fetches the biscuits.   #funny
+- Go on, you first. I'm just waking up.   #funny
+- I play like I fix things. Badly, then brilliantly.   #funny
+== tiles.dock
+- Docked! Click, like a panel. Lovely.
+- Three. Did you see that? Tell Rina.   #funny
+- Snug as a screw in a tin.   #funny
+== tiles.miss
+- Ooh, you missed one. Just there. By the corner.
+- That's a three, that is. Was. Gone now.   #funny
+== tiles.win
+- I won? Write it down. Show Rina.   #funny
+- Good game. Biscuits are on you.   #funny
+- Close one. I nearly dozed off and still won.   #funny
+== tiles.lose
+- Fair. You got me. Biscuits are on me.   #funny
+- Beaten. Lovely. I'm going for a nap.   #funny
+- Well played. Don't tell Rina. She'll be thrilled.   #funny
