@@ -12,6 +12,7 @@
 | Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 945c447 (0.36.51) | PASS (cue key from the machine; bonds restored in the test; full merge social_check OK) |
 | Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
+| Galley engineer 3 (added 2026-10-17 ~04:00) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 812bedd (0.29.26) | PASS (two low notes; the galleyBirthdays aboard() fix still owed) |
 | Systems (retired; section 17 is the sim engineer's now) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa (inactive) | f211129 (0.33.39) | PASS |
 
 Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`; read the latest per branch before re-reviewing.
