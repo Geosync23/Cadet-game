@@ -362,8 +362,10 @@ with sync_playwright() as pw:
     # in the running game: with the screen quiet (heads-ups paused), a due tip comes up on its own
     g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; SHIP.device.settings.tips = true; TEACH_CK = -1e9; WARN_SAID = {}; Object.assign(SHIP.player.needs, { hunger: 45, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 }); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
     g.step(90)
-    tg = json.loads(g.ev("JSON.stringify([TIP_Q.map(x => x.id), !document.getElementById('devTip').hidden])")); print('  in the game:', tg)
-    check(len(tg[0]) == 1 and tg[0][0].startswith('t:') and tg[1], f'a due tip shows by itself in the running game: {tg}')
+    # a tip on screen goes after 9 real seconds (section 19's setTimeout), which a slow machine can pass during the 90 frames
+    # (0.28.70: seen on a loaded container): then it was shown (marked seen, POP.tip stamped) and has gone again
+    tg = json.loads(g.ev("JSON.stringify([TIP_Q.map(x => x.id), !document.getElementById('devTip').hidden, TEACH.map(x => x[0]).filter(id => SHIP.device.tipsSeen[id]), POP.tip > 0])")); print('  in the game:', tg)
+    check(len(tg[0]) == 1 and tg[0][0].startswith('t:') and tg[1] or not tg[0] and len(tg[2]) == 1 and tg[2][0].startswith('t:') and tg[3], f'a due tip shows by itself in the running game: {tg}')
     g.ev("TIP_Q.length = 0; DEVICE_SKIN.tip(null); SHIP.device.calendarRemind.on = true; for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]")
 
     print('Sleep and time skips:')
