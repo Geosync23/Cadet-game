@@ -17231,7 +17231,7 @@ function lineCond(k, v, p, ctx) {
     case 'rep': return any(v, x => lineQ('repBand', p.dept) === x);
     case 'ship.work': case 'ship.kindness': case 'ship.spirit': return any(v, x => lineQ('repShip', k.slice(5)) === x);
     case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x));
-    case 'cue': return any(v, x => !!lineQ('cue', x));
+    case 'cue': return any(v, x => { const [k, at] = x.split('@'), c = lineQ('cue', k); return !!c && (!at || (at === 'me' ? c.who === id : at === 'dept' ? c.dept === p.dept : false)); });   // cue:gift.you@me: about the speaker; @dept: their department's
     case 'flag': return any(v, x => ctx.flags && x in ctx.flags ? !!ctx.flags[x] : !!lineQ('flag', x));   // ctx.flags: { key: true } answers for those keys (onboarding asks for a step's lines)
     case 'week1': { const on = !!lineQ('inWeek1'); return any(v, x => (x === 'true') === on); }
     case 'leaving': return any(v, x => x === 'soon' ? !!lineQ('leavingSoon', id) : x === 'you' ? !!ctx.goodbye : false);
