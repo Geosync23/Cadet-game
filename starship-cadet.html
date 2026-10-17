@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.61
+   STARSHIP CADET: CSV Wren                           build 0.36.62
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.61';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.62';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15326,7 +15326,7 @@ function chatDo(id) {
     if (!f) chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
     else if (f.idea || f.status === 'offered') { C.offer = true; chatSay(f.idea ? f.ask : 'Still could use a hand: ' + f.title.toLowerCase() + '.'); }
     else if (f.workDone || !f.stops.length) {          // handing it back, face to face
-      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); const fk = f.chore === 'lamp' || f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job';   // section 17 keeps the favour's own kind in chore memAdd(p.id, 'fav.' + fk); repAdd(p.dept, 2, { kindness: 3 }, 'kind');
+      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); const fk = f.chore === 'lamp' || f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job'; memAdd(p.id, 'fav.' + fk); repAdd(p.dept, 2, { kindness: 3 }, 'kind');   // section 17 keeps the favour's own kind in chore
         if (typeof simNote === 'function') simNote('favour', { who: 'you', from: p.id, for: p.id, fav: fk, id: f.id });   // a favour you did for them
         C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
       else chatSay('Hmm, not quite done yet, is it?');

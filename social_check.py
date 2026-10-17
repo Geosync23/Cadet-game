@@ -408,6 +408,17 @@ with sync_playwright() as pw:
     if not walk.get('skip') and (walk['walked'] != 1 or not walk['chip'] or not walk['done'] or not walk['once']): fail(f'the asked-for wave does not happen: {walk}')
     if sk['ok'] != [True, False] or sk['win'] != [False, True, False] or not sk['saved'] or sk['fav'] is False: fail(f'socialSeekAsk wrong: {sk}')
 
+    # 15. a favour handed in on the card (0.36.62): the memory and the reputation it gives
+    fv = g.ev(r"""(() => { if (typeof favourPost !== 'function') return null;
+      const keep = JSON.stringify(socSave()), p = SOC.crew.find(q => !STORY_ARCS[q.id] && q.dept !== 'works');
+      SHIP.mem = {}; SHIP.rep = null;
+      const id = favourPost({ from: p.id, title: 'Test favour', kind: 'lamp', stops: [] }); favourAccept(id);
+      chatClose(); CHAT = { p, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 };
+      chatDo('help'); const o = { mem: !!mem(p.id, 'fav.lamp'), kind: SHIP.rep ? SHIP.rep.ship.kindness : null, dept: SHIP.rep ? SHIP.rep.dept[p.dept] : null };
+      chatClose(); socLoad(JSON.parse(keep)); return o; })()""")
+    print('A favour handed in:', fv)
+    if fv is not None and (not fv['mem'] or not fv['kind'] or fv['kind'] <= 50): fail(f'handing in a favour gives no memory or reputation: {fv}')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
