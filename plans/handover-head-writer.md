@@ -11,6 +11,12 @@ claude/writer-commons) is on batch 5: the other 15 visitors. DE2: one-sided boot
 Zeke's ordinary weeks, goodbyes/letters (Commons 19, Works 16, Watch 9), dinner convos, repair reactions (Writer 4).
 0.48.32-35: last goodbyes; everyday passes for Holt, Vance, Marrow, Kovac, Calder, Brennan (Writer 4, RETIRED). Writer 5
 (session_01HW7UxnuNvRXoEjn8tK4sQq, claude/writer-commons) now: Tomas, Pell, Rina passes, then story-crew goodbyes. Next build 0.48.36.
+**State at 0.48.47 (5d4b810, 08:22):** Writer 5 (session_01HW7UxnuNvRXoEjn8tK4sQq) STOOD DOWN after batch 9 (note 90ff510);
+wake them for (a) the ~15 "missing them" lines once DE2's `bond:missed`/`{missed}` reach lines_check, (b) newcomer replies
+once onboarding's wave-4 format exists. 0.48.43 themes use {kin}/{lost}/{hobbyNoun} (must combine with dialogue 0.43.24+
+and roster 0.16.15+); 0.48.44 crew goodbyes (pair:best|mentor need DE2's engine change); 0.48.45 no .trad here; 0.48.46
+voice `thread:` only arc:<id> (roster 0.16.16 matches); 0.48.47 week-1 scripts for onboarding (beat.<id>.<n>, mail.<id>
+"Subject | body", introHealth). Onboarding is handing over: their successor wires week 1 from plans/handover-onboarding.md.
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
 tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (lines_check.py + README at dialogue 0.43.22: checks trad:/came: ids too).
