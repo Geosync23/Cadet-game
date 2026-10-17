@@ -21,6 +21,7 @@
 #   food runs in live play (0.33.21): the crew take every food run soon after its wait (5f)
 #   the board through a week (0.33.32): jobs for you on every weekday shift, none held on your days off (5i)
 #   the garden (0.33.34): grow lights, gardenAt, the crate run and carryWaiting (5j)
+#   reserved jobs and job notes (Pillar 4): jobReserve, jobRelease, simNote('job') (5k)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -623,6 +624,54 @@ with sync_playwright() as pw:
         or not gd['same'] or not gd['forYou'] or not gd['claimedBy'] or gd['claimedBy'] == 'you' or not gd['arrived'] or not gd['after']
         or not gd['took'] or gd['mineWaiting'] != [True, False] or len(gd['landed']) != 1):
         fail('the garden')
+
+    # 5k. reserved jobs and job notes (Pillar 4, for onboarding's first week; simNote a stand-in here if section 13's
+    # isn't in): three slots on onboarding's cues; each a real machine with a panel, at your tier; not on the board
+    # before it's due, then faulty and "asked for you"; the crew never take one and see none; yours never lapses; its
+    # stops are fetch, make, job; one not taken is released at the end of your shift and the crew take it then.
+    # Notes: take, a stop with its tag, done, turnin, all with the slot; an ordinary job you leave lapses with a note
+    rs = g.ev("""(() => {
+      const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, notes = [];
+      const real = typeof simNote === 'function' ? simNote : null;
+      window.__notes = notes; window.__sc("window.__sn0 = typeof simNote === 'function' ? simNote : undefined; simNote = (k, d) => { window.__notes.push([k, d]); if (window.__sn0) window.__sn0(k, d); }");
+      JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0); machinesNow();
+      for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+      const a = jobReserve('lights', 1, 480, 1), b = jobReserve('washer', 1, 780, 2), c = jobReserve('lights', 2, 465, 3), a2 = jobReserve('lights', 1, 480, 1);
+      const J = id => SHIP.jobs.find(j => j.id === id), out = { ids: [a, b, c], again: a === a2, looked: [1, 2, 3].map(jobReserved).join() === [a, b, c].join() };
+      out.machines = [a, b, c].map(id => J(id).machine); out.makeMins = [a, b, c].map(id => J(id).makeMins); out.panels = out.machines.every(id => panelPlace(id)); out.tiers = [a, b, c].map(id => jobTier(J(id)));
+      setShipNow(t0 + 60); machinesNow(); out.early = openJobs('you').some(x => x.id === a);
+      setShipNow(t0 + 125); machinesNow();
+      const oa = openJobs('you').find(x => x.id === a); out.onBoard = !!oa; out.asked = !!(oa && oa.asked); out.faulty = SHIP.machines[J(a).machine].state;
+      out.crewSee = schedPeople().filter(jobCrew).some(p => openJobs(p).some(x => x.id === a));
+      out.took = claimJob(a); out.stops = jobStops(J(a)).map(x => x.step).join(' ');
+      // on (never backwards: that's a new game) to day 2 16:00: slot 2, never taken, is held to 17:00 on day 1, then the crew take it
+      let crewBefore = false, crewAfter = null;
+      for (let t = t0 + 150; t < t0 + 34 * 60; t += 30) {
+        setShipNow(t); machinesNow(); const j = J(b);
+        if (j && j.claimedBy && j.claimedBy !== 'you') { if (t < (t0 - 360) + 1020) crewBefore = true; else if (crewAfter === null) crewAfter = hhmm(t % 1440) + ' day ' + SHIP.time.day; }
+        if (t === t0 + 150 + 14 * 60) out.kept = J(a).claimedBy === 'you';
+      }
+      jobStops(J(a)).forEach((x, k) => jobStepDone(a, k)); out.turned = turnInJob(a);
+      out.crewBefore = crewBefore; out.crewAfter = crewAfter; out.released = jobRelease(3) === 1 && !heldForYou(J(c) || {});
+      const mine = notes.filter(([k, d]) => k === 'job' && d.id === a).map(([k, d]) => d.step + (d.tag ? ':' + d.tag : '') + '/' + d.reserved);
+      out.notes = mine.join(' ');
+      // an ordinary job left for 12 hours lapses, with a note
+      const o = openJobs('you').find(x => !x.asked); out.lapse = null;
+      if (o) { claimJob(o.id); setShipNow(shipNow() + 13 * 60); machinesNow(); out.lapse = notes.some(([k, d]) => k === 'job' && d.id === o.id && d.step === 'lapse'); }
+      window.__sc("simNote = window.__sn0"); if (!window.__sn0) window.__sc("simNote = undefined");
+      SHIP.jobs = SHIP.jobs.filter(j => !j.reserved); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+      setShipNow(t0);
+      return out;
+    })()""")
+    print(f"Reserved jobs: {rs['ids']} on {rs['machines']} (tiers {rs['tiers']}, panels {rs['panels']}, make minutes {rs['makeMins']}); asking again {rs['again']}, looked up {rs['looked']}")
+    print(f"  slot 1: early {rs['early']}, on the board {rs['onBoard']} asked {rs['asked']}, machine {rs['faulty']}, crew see it {rs['crewSee']}, took {rs['took']}, stops '{rs['stops']}', "
+          f"kept past 14 h {rs['kept']}, turned in {rs['turned']}; notes '{rs['notes']}'")
+    print(f"  slot 2 untaken: crew before 17:00 {rs['crewBefore']}, crew took it {rs['crewAfter']}; slot 3 released {rs['released']}; an ordinary job's lapse noted {rs['lapse']}")
+    if (len(set(rs['ids'])) != 3 or not rs['again'] or not rs['looked'] or not rs['panels'] or max(rs['tiers']) > 1 or rs['machines'][0] == rs['machines'][1]
+        or rs['early'] or not rs['onBoard'] or not rs['asked'] or rs['faulty'] not in ('faulty', 'failing') or rs['crewSee'] or not rs['took']
+        or rs['stops'] != 'fetch make job' or rs['makeMins'] != [30, 30, 30] or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False
+        or not all(x in rs['notes'].split() for x in ['take/1', 'stop:fetch/1', 'stop:make/1', 'stop:job/1', 'done/1', 'turnin/1'])):
+        fail('reserved jobs and job notes')
 
     # 6. the save
     rt = g.ev("""(() => {

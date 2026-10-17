@@ -1,0 +1,177 @@
+@bank all old
+// The lines section 20 had hard-coded before 0.43.0 (CHAT_GREET, CHAT_NEAR, CHAT_LIFE, CHAT_DEPT, CHATTER_IDLE),
+// moved here unchanged. "old" marks them so section 20 keeps picking them exactly as before until it asks lineFor.
+// Keep their order: the old picking counts on it. New shared lines go in other bank files.
+
+== greet
+? tier=stranger
+- Oh, hello.
+- Hi.
+- Can I help you?
+- Morning. Or is it evening? I lose track.
+- You're the new Works cadet, aren't you?
+- Hello there.
+- Mm? Oh, hi.
+- Don't think we've met.
+- Afternoon.
+- All right?
+? tier=acquaintance
+- Hey, {me}.
+- Oh, hi again.
+- Hello, cadet.
+- Good to see you.
+- How's Works treating you?
+- Hi! Settling in?
+- You again! Hi.
+- Hey. Busy day?
+- Hello, hello.
+- Nice to see a familiar face.
+? tier=colleague
+- {me}! Just who I wanted to see.
+- Hey, how's it going?
+- There you are.
+- Good timing, I could use a break.
+- Hi, {me}. Keeping out of trouble?
+- Oh good, it's you.
+- Hey, colleague.
+- How's your day been?
+- Pull up a chair.
+- Hi! Got a minute?
+? tier=friend
+- {me}! Come here, you.
+- Hey, friend.
+- Was hoping I'd run into you.
+- There's my favourite cadet.
+- You look like you need a tea.
+- Hey! Sit, sit.
+- Oh, I'm glad you're here.
+- Just the person.
+- How are you really?
+- Hi! Tell me everything.
+? tier=close
+- {me}! Best part of my day.
+- Hey, you.
+- I saved you a seat. Well, I would have.
+- There you are, I was about to come looking.
+- My favourite person aboard.
+- Hey! I've got so much to tell you.
+- Oh, thank the stars, a friendly face.
+- Hi, {me}. Missed you.
+- Come on, walk with me.
+- You always turn up at the right time.
+
+== near
+? act:work
+- Busy shift in the {room}.
+- Never a quiet minute in the {room}.
+- Can't stop long. Work.
+- The {room} keeps me on my toes.
+- Halfway through the shift. Nearly there.
+? act:breakfast|dinner
+- The food's good today.
+- Brennan's outdone herself.
+- I was starving.
+- Best part of the day, this.
+- Mind if I eat while we talk?
+? act:gym
+- Just warming up.
+- Don't mind me, I'm all sweat.
+- Trying to beat yesterday.
+- Gym's busy tonight.
+? act:wash
+- Not the best time for a chat, is it?
+- Give me a minute to dry off.
+?
+- Nice and quiet in the {room} right now.
+- I like it here in the {room}.
+- Just taking it easy.
+- Needed a moment to myself.
+- This is my favourite spot.
+
+== life
+? habit:early-riser
+- Up before the lights, me. Always have been.
+? habit:late-sleeper
+- Don't talk to me before my second tea.
+? habit:night-owl
+- I do my best thinking after midnight.
+? habit:early-to-bed
+- I'll be asleep by nine. No shame.
+? habit:skips-breakfast
+- Breakfast? Never had the habit.
+? habit:late-diner
+- I always end up eating last.
+? habit:lingers-at-meals
+- I could sit over dinner for hours.
+? habit:window-seat
+- I always grab a window seat. The stars never get old.
+? habit:workaholic
+- I'll stay late again tonight, probably.
+? habit:tea-break
+- My mid-shift tea is sacred.
+? habit:gym-regular
+- Gym after shift keeps me sane.
+? habit:garden-lover
+- You should see the tomatoes in the garden.
+? habit:lounge-regular
+- Come by the bow lounge some evening.
+? habit:quiet-corner
+- I know all the quiet corners on this ship.
+? habit:common-room
+- The common room's the best place on the ship.
+? habit:music
+- I like to sit in the music room after shift.
+? habit:calls-home
+- Called home yesterday. Everyone's well.
+? habit:evening-shower
+- An evening shower and I sleep like a stone.
+? habit:runner
+- I'm trying to beat my lap time on the treadmill.
+? habit:shopper
+- The store had new tea in. I bought too much.
+? habit:musician
+- I've been learning a new piece. Badly.
+? habit:gardener
+- The herbs in the garden are coming on nicely.
+? habit:bar-regular
+- One drink in the lounge after dinner. Tradition.
+? habit:stargazer
+- The observatory's amazing at night. You should come up.
+? dept:command
+- The bridge is calmer than people think.
+? dept:helm
+- Steady as she goes, on my watch.
+? dept:comms
+- You wouldn't believe the static we pick up.
+? dept:works
+- Something always needs fixing, doesn't it?
+? dept:watch
+- Quiet watch so far. I like it that way.
+? dept:survey
+- Sato has us chasing another reading.
+? dept:infirmary
+- Drink some water. Doctor's orders. Well, aide's orders.
+? dept:galley
+- Two hundred meals a day, and they still ask what's for dinner.
+
+== smalltalk
+? act:meal
+- Pass the salt?
+- Is this the new recipe?
+- I'm stuffed.
+- Brennan's outdone herself.
+- Seconds? Go on then.
+- Who made the bread?
+? act:work
+- Hand me that, would you?
+- Nearly done here.
+- Who logged this one?
+- Check that again for me.
+- Right, next.
+? act:free
+- Did you see the stars last night?
+- I could sit here all evening.
+- Long day.
+- Fancy a game later?
+- Heard from home lately?
+- Ha! No way.
