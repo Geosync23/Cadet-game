@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.44
+   STARSHIP CADET: CSV Wren                           build 0.27.45
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4039,11 +4039,11 @@ DECKS[4] = {
     { id: '4-23-wash', type: 'shower', at: [41, 13], face: 'w', pose: 'stand', room: 'W' },
     { id: '4-24-wash', type: 'shower', at: [41, 9], face: 'w', pose: 'stand', room: 'V' },
     { id: '4-shower-p1', type: 'shower', at: [2, 0], face: 'n', pose: 'stand', room: 'p' },
+    { id: '4-shower-p2', type: 'shower', at: [4, 0], face: 'n', pose: 'stand', room: 'p' },
     { id: '4-toilet-p1', type: 'toilet', at: [5, 0], face: 's', pose: 'sit', room: 'p', xy: [5.35, 0.5], y: 0.4 },
-    { id: '4-toilet-p2', type: 'toilet', at: [4, 0], face: 's', pose: 'sit', room: 'p', xy: [4.08, 0.5], y: 0.4 },   // was 4-shower-p2 (0.27.42)
+    { id: '4-shower-q1', type: 'shower', at: [4, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-shower-q2', type: 'shower', at: [5, 19], face: 's', pose: 'stand', room: 'q' },
     { id: '4-toilet-q1', type: 'toilet', at: [2, 19], face: 'n', pose: 'sit', room: 'q', xy: [2.65, 19.5], y: 0.4 },
-    { id: '4-toilet-q2', type: 'toilet', at: [3, 19], face: 'n', pose: 'sit', room: 'q', xy: [3.92, 19.5], y: 0.4 },   // was 4-shower-q1 (0.27.42)
     { id: '4-basin-p1', type: 'basin', at: [3, 2], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-p2', type: 'basin', at: [3, 3], face: 'w', pose: 'stand', room: 'p' },
     { id: '4-basin-q1', type: 'basin', at: [4, 16], face: 'e', pose: 'stand', room: 'q' },
@@ -4111,7 +4111,7 @@ DECKS[4] = {
       h: ['Curtain drawn. Someone on the night shift is asleep in there. Tiptoe.', 'Night shift. A sign says DAY SHIFT: PLEASE WHISPER.', 'Blackout blind down. Both berths belong to the night shift.'],
     };
     for (const k of 'abcdefgh') furnish(k, 'bunkRoom', { blankets: k === 'h' ? night : undefined, its: (bunkText[k] || []).map(x => IT('Bunk', x)) });
-    furnish('p', 'washroom', { wc: 2 }); furnish('q', 'washroom', { wc: 2 });   // a shower and two toilets each (0.27.42)
+    furnish('p', 'washroom'); furnish('q', 'washroom');   // two showers and a toilet each (0.27.45: the user kept the showers)
     furnish('l', 'laundry');
     // junior common room (6 x 8): stern windows, a sofa facing them, a Tiles table and a kettle
     place('j', 'rug', 3.3, 4, 'n', { tex: rugLounge, w: 2.6, d: 3.4 });
@@ -7571,7 +7571,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.44';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.45';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
