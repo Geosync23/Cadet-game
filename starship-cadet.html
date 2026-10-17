@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.76
+   STARSHIP CADET: CSV Wren                           build 0.36.77
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.76';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.77';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25550,6 +25550,7 @@ const setOfIds = (hex, ids) => { const s = new Set(); ids.forEach((id, i) => { i
 // 20c's bonds packed for the save (0.36.67): [a, b, kind, since, peak, seen(, other fields)] by crew index, kinds by
 // SOC_BOND_KINDS; about a third of the size of the 'a:b' object form, which older saves have and still load
 function bondsPack(B) {
+  if (typeof storyBondsPack === 'function') { const v = storyBondsPack(B); if (v) return v; }   // 20c's compact form
   const l = []; for (const k in B || {}) { const [a, b] = k.split(':'), x = B[k], i = SOC.idx.get(a), j = SOC.idx.get(b), ki = SOC_BOND_KINDS.indexOf(x.kind);
     if (i === undefined || j === undefined || ki < 0) continue;
     const { kind, since, peak, seen, ...rest } = x, r = [i, j, ki, since ?? null, peak ?? null, seen ?? null]; if (Object.keys(rest).length) r.push(rest); l.push(r); }
@@ -25557,6 +25558,7 @@ function bondsPack(B) {
 }
 function bondsUnpack(o, ids) {                            // ids: the save's crew list (idl)
   if (!o || typeof o !== 'object') return {};
+  if (o.v === 2 && typeof storyBondsUnpack === 'function') return storyBondsUnpack(o, ids);   // 20c's compact form
   if (o.v !== 1 || !Array.isArray(o.l)) return JSON.parse(JSON.stringify(o));   // the older form
   const B = {}; for (const r of o.l) { if (!Array.isArray(r)) continue; const a = ids[r[0]], b = ids[r[1]], kind = SOC_BOND_KINDS[r[2]]; if (!a || !b || !kind || !SOC.idx.has(a) || !SOC.idx.has(b)) continue;
     const x = { kind }; if (r[3] != null) x.since = r[3]; if (r[4] != null) x.peak = r[4]; if (r[5] != null) x.seen = r[5]; if (r[6] && typeof r[6] === 'object') Object.assign(x, r[6]); B[a + ':' + b] = x; }
