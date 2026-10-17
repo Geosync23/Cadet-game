@@ -200,7 +200,7 @@ with sync_playwright() as pw:
       const b = document.getElementById('devBody'), out = [[...b.querySelectorAll('.need em')].map(e => e.className + ':' + e.textContent), [...b.querySelectorAll('p.fx')].map(p => p.textContent)];
       device.close(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return out; })()""")
     print('  the device:', dv)
-    check(dv[0] == ['up:▲', 'down:▼'] and len(dv[1]) == 2 and 'fed' in dv[1][0] and 'wash' in dv[1][1], f'device marks: {dv}')
+    check(dv[0] == ['up:▲', 'down:▼'] and len(dv[1]) == 2 and sorted(['fed' if 'fed' in x else 'wash' if 'wash' in x.lower() else x for x in dv[1]]) == ['fed', 'wash'], f'device marks (either order; device 0.35.28 lists penalties first): {dv}')
 
     tk = g.ev(r"""(() => { const n = SHIP.player.needs, out = [];
       for (const st of [{ energy: 100, social: 50, hunger: 50 }, { energy: 50, social: 50, hunger: 10 }, { energy: 50, social: 50, hunger: 50 }]) {
