@@ -1,0 +1,378 @@
+@crew rina
+// Writer-commons, batch 1 (for the Voices sampler). Rina's card is the head writer's. Gran comes in from beat 1
+// (STORY_ARCS.rina); no exam talk until beat rina.5. Never says how she feels straight out.
+
+== greet
+? tier=stranger
+- {hi}. Infirmary's on Deck 3, if you need it. Try not to need it.
+? tier>=acquaintance time:morning
+- Morning. Breakfast closes at eight. I'm saying so, so you can't say nobody did.
+? tier>=acquaintance
+- {hi}. Have you drunk any water today? Don't lie. I'll know.
+? tier>=colleague
+- Oh, it's you. Tiles later? I'll go easy on you. That's a lie.   #funny
+? tier>=friend
+- There you are, {nick}. I was about to come looking. I wasn't. But I was about to.   #warm
+
+== feel
+? mood:high
+- Good day. Won at Tiles. Twice. Not that I'm counting. I'm counting.   #funny
+? mood:low
+- Long shift. Don't ask. Actually, ask me about anything else.
+
+== near
+? place:infirmary
+- Sit there. Arm out. This won't hurt. It might a bit. You'll live.
+? act:leisure
+- The Tiles table's free. That's not an invitation. It's a warning.
+
+== life
+? tier>=acquaintance
+- I study in the evenings. The journals make a decent pillow too. Two uses.
+? tier>=colleague
+- My sister's a doctor on a station. We argue by message. I'm winning. She'd disagree.   #funny
+
+== joy
+? tier>=acquaintance
+- Undefeated at Tiles, this common room. I keep count. The count is very precise.   #funny
+
+// Writer-commons, batch 4: up to about 60. Gran from beat:rina.1; the exam (putting it off) only from beat:rina.5.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}. Tiles table's free. I'm just saying. I'm not saying anything.
+? tier>=acquaintance time:afternoon
+- {hi}. Half the ship's yawning. Nobody drank water at lunch. I watched.
+? tier>=colleague warmth:cold
+- Oh, you're alive. Good. I was about to start a file on you.   #funny
+? tier>=colleague place:infirmary
+- {hi}. Visiting, or bleeding? If bleeding, sit. If visiting, also sit.   #funny
+? tier>=close
+- There you are, {nick}. You need a win. I'll let you have one. No, I won't.   #warm
+
+== bye
+? tier>=acquaintance
+- {bye}. Drink some water on the way.
+- Off you go. Don't break anything. If you do, you know where I am.
+? tier>=colleague time:night
+- Bed. Now. Eight hours. That's not advice, that's an order.   #funny
+? tier>=friend
+- Go on, then. And... thanks. For the company. Don't make it a thing.   #warm
+
+== feel
+? mood:ok
+- Fine. Busy. Normal. Ask me something interesting.
+? mood:low tier>=friend
+- Long day. Don't ask about it. Do sit here, though.
+
+== near
+? act:leisure
+- Sit. Pick a side. You'll lose either way, so it doesn't matter which.   #funny
+? act:meal
+- You're eating too fast. Slow down. That's medical advice. Sort of.   #funny
+? act:gym
+- I'm not here to exercise. I'm here to make sure nobody falls off the treadmill.
+
+== life
+? tier>=colleague
+- Nandakumar taught me "drink some water". Fixes half of everything. The rest is paperwork.
+? beat:rina.1 tier>=colleague
+- Gran taught me Tiles. She cheats. Shamelessly. Elbow on the board, every time.   #funny
+? beat:rina.5 tier>=friend
+- My sister sent another exam date. I've put it in a drawer. It's a very full drawer.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up. I'll tell you which stars I've beaten at Tiles.   #funny
+? tier>=colleague time:evening
+- Tiles. Common room. Tonight. Bring your dignity. You won't need it after.   #funny
+? trad:quiz tier>=colleague
+- Quiz tonight. I'm on the medicine questions. You're on everything else. Don't let me down.
+
+== accept
+- Fine. I'll be there. Don't make it weird.
+- Go on, then. But I'm winning. Just so you know.
+
+== decline
+- Can't. Late shift. Rain check. We don't have rain. Tiles check.
+- Not tonight. I'm studying. Ask me again. I'll say yes. Probably.
+
+== missed
+- You stood me up. I played Tiles against myself. I won. Barely.   #funny
+- Missed you earlier. You'd better have been drinking water somewhere.
+
+== birthday
+? birthday:me
+- Yes, it's my birthday. No, I don't want a fuss. A small fuss. A cake-sized fuss.   #funny
+? birthday:you
+- Happy birthday. I'll let you win at Tiles today. Once. Don't get used to it.   #warm
+
+== hint
+- Make yourself useful. Sit down a minute.
+
+== week1
+? week1:true weekday:tue place:infirmary
+- You're my two o'clock. Sit. Arm out. How much water have you drunk today? Wrong answer.   #funny
+? week1:true weekday:tue
+- Health check at two. Infirmary, Deck 3. Don't be late. Don't be early either.
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- Morning. Bunk 2's awake. Well, I am. Pell's talking to an engine in his sleep.   #funny
+? tier>=colleague
+- {hi}. Forty-something wins. I've stopped counting. That's a lie. Forty-three.   #funny
+
+== near
+? deck:3 act:work
+- Infirmary's quiet. Don't say it out loud. Things hear you.
+? habit:common-room act:leisure
+- Common room. Best seat's mine. Second best is yours, if you want it.   #warm
+
+== feel
+? mood:high tier>=colleague
+- Good day. Nobody fainted, everyone drank water, and I won twice. Perfect.
+
+== life
+? tier>=acquaintance
+- I study in the evenings. Medical journals. Very gripping. Thrilling stuff, bones.   #funny
+? tier>=friend
+- My sister and I argue by message. About everything. Mostly about who's right. Me.   #funny
+
+== bye
+? tier>=acquaintance time:morning
+- Off you go. Eat breakfast. Actually eat it. Don't just look at it.
+
+== greet
+? tier>=acquaintance act:work
+- {hi}. On shift. If you're not bleeding, I'm busy. If you are, I'm not.   #funny
+? tier>=friend time:night
+- Why are you up? Water, then bed. I'll know if you skip the water.
+
+== near
+? act:breakfast
+- Eat the eggs. Protein. Don't make that face. Eggs.
+? deck:4 act:leisure
+- Bunk 2's a zoo. Pell's snoring at engines. I'm hiding here.   #funny
+
+== life
+? tier>=colleague
+- I keep the Tiles count in a notebook. Dated. Signed. Nobody can say I made it up.   #funny
+? beat:rina.7
+- I came here after a hard year. The routine helps. Don't tell anyone I said that.
+
+== accept
+- Yes. Fine. Good. I mean, good. I'll be there.
+
+== about
+? aff:pell:friend
+- Pell? He talks to engines in his sleep. He's the best of us. Don't you dare repeat that.   #warm
+? bond:friends
+- {friend}'s all right. Loses at Tiles gracefully. Rare quality.   #funny
+
+// Writer 3, batch 1: callbacks, visits and notes (the game adds her name to a note). Moment memories are
+// moment.rina.<word> from beats 5-7. moment.rina.again is a reply in both beat 5 and beat 6, so no line leans on it;
+// beat 5's "I'll quiz you again" reply sets flag:rina.quizzes instead. Journals and quizzing only from beat:rina.5.
+
+== callback
+? told:moment.rina.brilliant
+- It was brilliant. The bones. I've started on lungs since. Don't tell anyone.   #funny
+? told:moment.rina.why
+- Ship's doctor. I said it out loud, to you. Now it's real. Thanks for that. I think.   #warm
+? flag:rina.quizzes mem:moment.rina.quiz !beat:rina.7
+- You said any time. It's any time. Journal's on the table. Lungs. Sit.
+? told:moment.rina.bones
+- Twenty-seven, hand and wrist. You remembered the number. I'm almost impressed.   #funny
+? told:moment.rina.nandakumar
+- I asked Nandakumar myself. She said yes before I'd finished. Typical. Don't look smug.   #funny
+? told:moment.rina.told
+- About the other night. Thanks. Don't answer that. Tiles?   #warm
+? told:moment.rina.doctor
+- "Brilliant doctor." You stole my word. I'm still annoyed. I'm keeping it, though.   #warm
+? told:moment.rina.quiznight
+- Lungs tonight. Nine sharp. You said every night. I wrote it down. Dated. Signed.   #funny
+? mem:moment.rina.booked
+- The exam's still in the calendar. I check every morning. Still there. Good.
+? told:came.observatory-night
+- You came up. I said I'd show you the stars I've beaten. That's all of them.   #funny
+? told:came.quiz
+- We won the medicine round. I won the medicine round. You were there. Well done.   #funny
+? told:fav.fetch
+- You fetched it. Quickly, too. I've put you down as useful. In pencil.   #funny
+? told:fav.lamp
+- Lamp's fixed. I can read in bed again. My journals thank you. My sleep doesn't.   #funny
+? told:fav.job
+- You did that job for me. Ta. I owe you a game. I'll still win it.   #funny
+? told:gift.game
+- That game you gave me? I've beaten myself at it six times. It's in the notebook.   #funny
+? told:gift.sweet
+- The sweets. Gone. I don't want to talk about it. Ta, though.   #funny
+? told:gift.book
+- Read the book. Twice. Don't ask me what I thought. It was good. There.   #warm
+? told:fixed.uv
+- You sorted the steriliser? Good. We need it. Wash your hands anyway.
+? told:bday
+- You remembered my birthday. I said no fuss. You made a small fuss. Correct amount.   #warm
+? told:grubby
+- You were filthy yesterday. Wash. Hands first. That's not advice.   #funny
+? told:heard.moment.pell
+- Pell says you've been good to him. He won't stop saying it. Ta. For him.   #warm
+? told:heard.moment.tomas
+- Tomas has put you on his star map. Don't let it go to your head. It's very high up.   #funny
+
+== visit
+- Pell's asleep and talking about engines. I've come for some peace. Shove over.   #funny
+- Have you drunk any water today? I've brought some. Drink. Then we'll talk.   #funny
+- I was passing. I wasn't. Fine. Pell's snoring. Don't make it a thing.   #warm
+- Tiles board's in my bag. Just in case. Just in case you want to lose.   #funny
+? beat:rina.5
+- Brought a journal. You're quizzing me. Bones, then lungs. Don't argue.
+
+== note
+- You weren't in. Drink some water. That's the whole note.   #funny
+- Came by to beat you at Tiles. You were out. I'm counting it as a win.   #funny
+- Knocked. Nobody. If you're in the infirmary, I'll know. If not, come and find me.
+- You looked tired today. Sleep. Eight hours. I'll ask tomorrow.   #warm
+? beat:rina.5
+- Left you a journal on bones. Light reading. Page twelve's the good bit.
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Sun, Mon (the game's roster);
+// rest-day lines use act:off. Gran's Tiles by message only from beat:rina.4 (she's home).
+
+== greet
+? tier>=acquaintance place:infirmary
+- {hi}. If you're here, something's wrong. Is something wrong? Sit.   #funny
+? tier>=colleague act:off
+- Day off. I'm not studying. I'm reading. It's different. It isn't.   #funny
+? tier>=friend time:night
+- It's late, {nick}. Why are you up? Don't say "fine". I can see you.   #warm
+? tier>=acquaintance season:lanterns
+- Lanterns. Everyone's cheerful. Suspicious. I'm keeping an eye on it.   #funny
+? tier>=acquaintance season:harvest
+- Harvest. Half the ship's got blisters from the garden. Gloves, people.   #funny
+
+== bye
+? tier>=acquaintance time:evening
+- Off you go. Water, then sleep. In that order.
+? tier>=close
+- Off you go, {nick}. Come back in one piece. I've only got so much gauze.   #warm
+
+== feel
+? mood:low tier>=colleague
+- Tired. Don't. I know. I'll drink some water. Happy?
+? mood:high tier>=friend
+- Good day. My sister admitted I was right. In writing. I've saved it.   #funny
+
+== near
+? place:infirmary
+- Infirmary's my second home. My first's the Tiles table.   #funny
+? act:breakfast
+- Breakfast. A real one. Not just tea. I'm watching you.   #funny
+? place:lounge
+- The lounge board's warped. I still win on it.   #funny
+? place:hydroponics_garden
+- Nandakumar's chillies live here. Don't touch them. Then don't touch your eyes.
+
+== life
+? tier>=acquaintance
+- Nandakumar's the best doctor I've worked under. Don't tell her. She'll get ideas.
+? tier>=colleague
+- My sister says I'm stubborn. I say I'm consistent. We've argued it for years.   #funny
+? beat:rina.4 tier>=friend
+- Gran plays Tiles with me by message now. She still cheats. I don't know how.   #funny
+
+== joy
+? tier>=colleague
+- Best sound aboard? The click of the last tile going down. Mine. Winning.   #funny
+
+== invite
+? tier>=colleague time:evening
+- Tiles. Now. I'm bored of beating myself.   #funny
+? trad:running tier>=acquaintance
+- Running club tonight. I'll be at the end with water. Come and run to it.
+
+== about
+? aff:nandakumar:friend
+- Nandakumar? Best in the Service. She'll tell you to drink water. She'll be right.   #warm
+? aff:tomas:friend
+- Tomas? Kind to a fault. He thanked a door once. It was closing on him.   #funny
+
+== smalltalk
+- Drink some water. Yes, you.   #funny
+- Forty-three. Not that I'm counting.   #funny
+- Hm. Someone's limping. Noted.
+- Honestly.
+
+== rumour
+- I don't gossip. I observe. Then I mention.   #funny
+- The infirmary hears everything. Mostly coughs.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm. Infirmary's ready. Please don't fall over anything.
+? cue:event.ionStorm.afterglow
+- Storm's done. Three bumps, one bruise. Nobody drank water. Typical.   #funny
+? cue:repair.uv.you
+- You did the steriliser? Clean work. Cleaner than Pell's. Don't tell him.   #funny
+? cue:tradition.quiz.you beat:rina.5
+- You got the bones question at quiz. I taught you that. You're welcome.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Nandakumar asked after you. By name. She doesn't do that. Drink some water.   #funny
+? rep:theirs
+- The infirmary's decided you're one of ours. Don't get hurt to celebrate.   #warm
+? you:kind
+- Half the ship says you're kind. The other half hasn't met you yet.
+? you:reliable
+- You turn up when you say. You'd be surprised how rare that is. I wouldn't be.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:game
+- A game. For me. You realise I'll beat you at it. You've armed the enemy.   #funny
+? gift:loved
+- Oh. Well, look at that. That's... very good. Ta. Don't make it a thing.   #warm
+? gift:liked
+- Ta. That's nice of you. I'll use it. I'll tell you if I did.
+? gift:polite
+- Thanks. Honestly. It's the thought. The thought was good.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- Your gran. New hip. Walking yet? Good. Tell her to drink water. From me.   #warm
+? flag:home.gran.won tier>=colleague
+- A marrow called the Captain won? Mine would've cheated. Your gran didn't need to.   #funny
+
+// Writer 4, batch 4: Tiles talk (lineFor(who, 'tiles.<kind>')).
+== tiles.start
+- Best of one. Try to keep up.
+- Sit. Board's set. Don't touch my tea.
+- My gran taught me. She cheated. I don't need to.   #funny
+- Honestly, you're brave. Your move.   #funny
+- The notebook's open. No pressure.   #funny
+== tiles.dock
+- Three. Mine.
+- Docked. Obviously.   #funny
+- Honestly. You left that open.   #funny
+- Three. Gran would've turned the board for that.   #funny
+== tiles.miss
+- You had a dock there. I'm not saying where.   #funny
+- Look again. No, I'm not helping.   #funny
+- That was a three. I'd have taken it.
+== tiles.win
+- Good game. Again?
+- Another one for the notebook.   #funny
+- Close. Closer than most. That's a compliment.
+- Good game. Honestly. You're getting there.
+== tiles.lose
+- ...Again. Now.   #funny
+- No. No. Again. Sit down.   #funny
+- I'm writing this down. In pencil. For now.   #funny
+- Fine. Well played. Again. Now.   #funny
+- Don't tell Pell. Don't tell anyone. Again.   #funny

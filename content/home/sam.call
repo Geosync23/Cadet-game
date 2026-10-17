@@ -1,0 +1,156 @@
+@arc home.sam
+who: home:sam
+name: Sam
+pron: they
+// Writer 3, from the head writer's model (mum.call) and the approved arc: Sam (they / them), your best friend since
+// school. Plainly platonic: old friends, never a partner, no "I miss you" that could read romantic (they say "the
+// bench is boring without you", "the quiz team's useless"). Messages get shorter across the distance; one beat where
+// you both admit it; then a standing "Sunday story" swap.
+//
+// HOW THEY TALK: fast and funny at first, all in one breath, old jokes and nicknames for places; then shorter, flatter
+//   messages as the gap grows; honest when it matters. Calls you {me}, or "you absolute idiot", fondly.
+// NEVER: romantic, jealous or possessive (they're glad you went); guilt-trips; genders you.
+// NEW HERE (to approve): you met on the bench by the school gate at seven; the café quiz on Thursdays (your old team,
+//   "the Bench"); Sam works at the library, reshelving; the Sunday story.
+// RUNNING: the bench; the quiz team losing without you; the library trolley with the wonky wheel; the Sunday story.
+
+== beat 1
+tone: light
+via: reply
+mem: firstcall
+flag: home.sam.called
+them: You absolute idiot, you actually went! Into space! I said you wouldn't. I owe the whole quiz team a cake.   [laugh]
+them: Tell me everything. Is there a window? Is there a bed? Do you float? Tell me you float a little.
+them: The Bench lost at quiz on Thursday. Third from last. Without you we knew nothing about anything. We guessed "a goat" twice.
+? choice
+* No floating. Lots of corridors. A very good chef.   flavour:cheer mem:nofloat
+  them: Disappointing. The chef's good, though? Fine. You're allowed to be happy. Just a bit.
+* Tell me about home first.   flavour:listen mem:homefirst
+  them: Home? Same as when you left. Four days ago. The bench is still there. It's boring without you on it.
+* It's big. I'm a bit lost.   flavour:share mem:lost
+  them: You were lost in the school car park for two years. You'll be fine in a spaceship. Give it a week.
+them: Right. Long message. Sorry. Not sorry. Write back properly. Pages. I want pages.
+
+== beat 2
+tone: light
+via: reply
+when: flag:home.sam.called
+mem: library
+flag: home.sam.library
+them: Busy week. Library's mad. Someone returned a book eleven years late and wanted a medal.   [laugh]
+them: The trolley's still got the wonky wheel. I've named it. It doesn't come when it's called.
+them: Quiz was fine. We came fourth. Anyway. How's space? Still big?
+? choice
+* Fourth! That's nearly a medal.   flavour:cheer mem:fourth
+  them: That's what I said! Nobody listened. You'd have listened.
+* Your message was shorter this time.   flavour:listen mem:shorter
+  them: Was it? Busy week. I'll do a long one next time. Promise.
+them: Write back. Tell me something weird about the ship. One weird thing.
+
+== beat 3
+tone: heartfelt
+via: live
+when: beat:home.sam.2
+mem: bench
+flag: home.sam.bench
+hint: The relay's clear tonight. Sam's on the line, live.
+them: Live! You're actually there. There's a hum on the line. Is that your ship? Hello, ship.
+them: I sat on the bench today. By the school gate. Where we met. We were seven and you had a plaster on your knee.
+them: It's daft. Everything here feels too small to tell you. Library, quiz, bench. You've got stars. I've got a trolley.   [sigh]
+? choice
+* Tell me the small things. I want the small things.   flavour:listen mem:smallthings
+  them: Really? All right. The café's changed its biscuits. It's a disaster. Everyone's furious.   [laugh]
+  + them: Really? Then here's one. The café's changed its biscuits and the whole quiz team has gone on strike. Small enough?
+* Stars are mostly just stars. Your trolley's got a name.   flavour:cheer mem:trolley
+  them: It does have a name. It's got more personality than most people. Fine. Point taken.
+* It's strange for me too, being this far.   flavour:share mem:strange
+  them: Is it? Good. I mean, not good. Good that it's not just me.
+them: I've got to go. The relay's beeping. Same bench next week. I'll be on it, anyway.
+
+== beat 4
+tone: light
+via: reply
+when: beat:home.sam.3
+mem: short
+them: Hi. Busy. Quiz Thursday. Lost. Wheel still wonky. You?   [laugh]
+them: That's the whole message. I'm sorry. I wrote a long one and deleted it. It sounded like a weather report.
+them: Tell me one thing. One. I'll tell you one back. Deal?
+? choice
+* Deal. Here's one: I learnt to fold a blanket properly.   flavour:share mem:blanket
+  them: You? Properly? I'm framing this message. Here's mine: Mrs Abbot from the café says hello. She never says hello.
+* Deal. You first.   flavour:listen mem:youfirst
+  them: Fine. I found a postcard in a returned book. Someone's holiday, years ago. I've stuck it on the trolley.
+them: See? One thing each. That wasn't so hard. Let's do it again.
+
+== beat 5
+tone: serious
+via: live
+when: beat:home.sam.4
+mem: drifting
+flag: home.sam.admitted
+hint: Clear line tonight. Sam's on, and they're quiet.
+them: Can I say it? We're getting shorter. The messages. Yours and mine. I've been counting words. That's how bad it is.   [sigh]
+them: I know it's the distance. It's nobody's fault. But we've been friends since the bench. I don't want us to fade out.
+them: I'm scared we'll end up as two people who used to be friends. Who send a card once a year. I'd hate that.
+? choice
+* I've noticed too. I didn't know how to say it.   flavour:listen mem:noticed
+  them: Oh, thank goodness. I thought it was just me, being dramatic. I am dramatic. But not about this.
+* You're my oldest friend. That doesn't stop because I'm far away.   flavour:share mem:oldest
+  them: Yeah. Yeah, it doesn't, does it. Since we were seven. That's a long time to just stop.
+  + them: Since we were seven. Plasters and the bench and everything. Right. Then we fix it. Friends fix things.
+* Let's make a rule. Something we always send.   flavour:practical mem:rule
+  them: A rule. Yes. You were always the one with rules. Go on. What rule?
+them: Here's an idea. Every Sunday, one story each. Any story. Even a boring one. Especially a boring one. Deal?
+
+== beat 6
+tone: resolution
+via: live
+when: beat:home.sam.5
+mem: sunday
+flag: home.sam.sundays
+keepsake: Sam's first Sunday story, written on the back of a library card
+learn: Sam, your oldest friend, felt you drifting apart. Now you swap one story every Sunday, however small.
+mail: 2880 | From Sam | In the post bag: an old library card, written on the back in tiny letters. "Sunday story number one. The wonky wheel came off. I carried it home. It's on my windowsill now. Your turn. Sam"
+them: It's Sunday! Story time. I've got a good one. The trolley wheel came off, and I carried it home on the bus.   [laugh]
+them: It's on my windowsill now. Like a trophy. A small, squeaky trophy. That's my story. That's the whole of it.
+them: This is working, isn't it? I look forward to Sundays now. I've written the first one down. On a library card. It's in the post.
+? choice
+* Best Sunday story yet.   flavour:cheer mem:best
+  them: It's the only Sunday story yet. But I'll take it. Best friend, best story.
+* Here's mine. I'll tell it slowly.   flavour:share mem:mine
+  them: Go on. Slowly. I've got all evening and a kettle.
+  + them: Go on. I've got a kettle, a biscuit, and the wheel watching. Slowly. Every bit of it.
+them: Same time next Sunday. Every Sunday. Even when there's nothing. Especially then.
+
+// ---- what you can tell them on a call
+== send
+? flag:intro.soloJob
+- I did my first job on my own.   flavour:share
+  them: Look at you! A proper job! The Bench is very proud. I've told them.
+? came:any
+- We had a {trad} on the ship. I went.   flavour:share
+  them: A {trad}? In space? Was there a quiz? Tell me there was a quiz.
+? friend:any
+- I've made a friend. {friend}.   flavour:share
+  them: Good. Tell {friend} hello from the Bench. And ask if they know anything about engines.
+?
+- Tell me one thing from home.   flavour:listen
+  them: The café's got the old biscuits back. Peace has returned to the town.
+- How did the Bench do at quiz?   flavour:cheer
+  them: Don't. Just don't. There was a question about engines. We needed you.
+
+// ---- everyday calls when no beat is due
+== chat
+them: Hello, you absolute idiot. Nothing happened today. I'm telling you anyway.
+? send
+them: Right. Off. The trolley needs me.
+--
+when: flag:home.sam.sundays weekday:sun
+them: It's Sunday! You know what that means. You first this time.   [laugh]
+? send
+them: Brilliant. Same time next week.
+--
+when: flag:home.sam.library
+them: Quick one from the library. I'm hiding in the atlas section. There's a map of the stars. You're not on it. Rude.
+? send
+them: Shush, someone's coming. Bye!

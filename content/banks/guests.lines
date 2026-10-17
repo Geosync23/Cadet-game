@@ -1,0 +1,40 @@
+@bank dept:guest
+// Writer (command: guests), batch 3b. Shared lines for guests and visitors (passengers, scientists, couriers, musicians):
+// people aboard for a few days. Neutral in personality; voice tokens carry the person. Event guests have their own files.
+
+== greet
+? tier=stranger
+- {hi}. I'm only aboard a few days. Is it always this friendly?
+- {hi}. Sorry, I'm a visitor. Which way is the mess? I keep ending up in the garden.   #funny
+- {hi}. You must be crew. The uniform gives it away.   #funny
+? tier>=acquaintance
+- {hi}, {me}. I've nearly learnt the lifts. Just in time to leave.   #funny
+? time:morning
+- {hi}. Breakfast here is better than on most stations. Don't tell the stations.   #funny
+
+== bye
+- {bye}. Thanks for the company.
+- {bye}. I'll remember this ship.
+
+== feel
+? mood:high
+- Lovely ship. Everyone says hello. Even the Chief of the Watch, nearly.   #funny
+? mood:low
+- Long way from home, and a long way to go. The tea helps.
+
+== near
+? deck:3 act:meal
+- Your mess is so busy. On my last ship we ate in shifts of three.
+? deck:3 act:free
+- I didn't expect a garden. It smells like somewhere I used to live.
+? deck:2
+- Is that the observatory? Am I allowed in? Oh, good.
+
+== chat
+- What's it like, living out here? Properly, I mean. Not the brochure.
+- I'm off again soon. Tell me one thing I shouldn't miss before I go.
+
+== smalltalk
+- Which deck is this again?
+- Lovely view from here.
+- Is the lift always this slow?   #funny

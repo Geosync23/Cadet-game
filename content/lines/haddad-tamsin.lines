@@ -1,0 +1,178 @@
+@crew haddad-tamsin
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! You're new! I'm Tamsin, galley. It's a nice ship. You'll be fine. You will.
+? tier>=acquaintance
+- {hi}, {me}! Breakfast went out on time. Nearly. It'll be fine. Won't it?
+- {hi}! I'm humming again, aren't I. Sorry. It's stuck in my head.
+? tier>=friend
+- {hi}, {me}! I was hoping you'd come by. You make the day go quicker.   #warm
+
+== feel
+? mood:high
+- I got the chord! Once. By accident. But I got it!   #funny
+? mood:low
+- Bit of a flat day. Don't worry. I'm fine. I'm mostly fine.
+
+== near
+? act:work
+- Sorry, mind your elbow! No, my fault. My elbow. Sorry.   #funny
+? habit:lingers-at-meals act:meal
+- Stay a bit? I always stay a bit. The mess is nicest when it's half empty.
+
+== life
+? tier>=acquaintance
+- I'm learning guitar with Hamid, from the same old book. It's going badly. For both of us.   #funny
+? tier>=colleague
+- Takahashi says I've got the words wrong to every song. I haven't. Takahashi has.
+
+== joy
+? tier>=acquaintance
+- Every song in the record cabinet. Every word. Go on, test me. Not that one.
+
+== about
+? aff:larsen-hamid:friend
+- Hamid and I practise guitar together. We're both awful. Best laugh of my week.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Breakfast's out! Nearly on time! That counts, doesn't it? It counts.
+? tier>=acquaintance time:evening
+- {hi}, {me}! Long day? Mine too. It was fine. Mostly fine.
+? tier>=colleague warmth:cold
+- Oh! There you are! I was worried. Not worried. A tiny bit worried.
+
+== bye
+? tier>=acquaintance
+- {bye}! Have a nice evening! Sorry. I always say that.
+? tier>=friend
+- Thanks for this. Really. You always make things feel fine.   #warm
+
+== feel
+? mood:ok
+- I'm fine! Really. Fine-fine. Not "fine". Fine.   #funny
+
+== near
+? act:leisure deck:4
+- Music room's free. I'll practise. You might want to leave. For your own good.   #funny
+? act:meal
+- Sit with me? I always stay a bit after. The mess is nicest half empty.
+
+== life
+? tier>=colleague
+- Takahashi says I sing the wrong words. I sing my words. That's different.   #funny
+? tier>=friend
+- I say "it'll be fine" a lot. Mostly to me. Sometimes I even believe it.
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight! I'm bringing the guitar. Sorry in advance. Come anyway?
+
+== accept
+- Yes! Oh, lovely. I'll be there. Early. Sorry. I'm always early.
+== decline
+- Oh no, I can't. I'm so sorry. Next time? I'll make it up to you.
+== missed
+- You didn't come. That's fine! Totally fine. I hope you're all right?
+== birthday
+? birthday:me
+- It's my birthday! Is it all right to say? I'm saying it. Sorry.   #funny
+? birthday:you
+- Happy birthday! I learnt the birthday song on guitar. Nearly. Here goes.   #funny
+== hint
+- Got a minute? It's nothing. It's a small something.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- It'll be fine. Won't it?
+- Sorry! Sorry. Was I humming?   #funny
+- Today's the day the chord comes right.
+- Oh, dear. Oh, that's fine, actually.
+? act:work
+- Sorry, coming through! Sorry!
+
+== rumour
+- I wasn't going to say anything. But.
+- Don't tell anyone I told you. Sorry.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it! Thank you. Sorry. Thank you. Was it heavy? Sorry.   #funny
+? told:fav.job
+- You did my job! I'd have got it wrong. I wouldn't. I might. Thank you!   #funny
+? told:fixed.oven
+- The oven's fixed! It'll be fine now. Won't it? It will. Thank you!
+? told:came.jam
+- You came to the jam! Did you hear the chord? Nearly. It nearly came right.   #funny
+? told:gift.music
+- I've played your music on repeat. Hamid's learnt the words. Wrong, but learnt.   #funny
+? told:gift.sweet
+- The sweets! Gone. Sorry. I shared them. Mostly. Thank you.   #funny
+? told:bday
+- You remembered my birthday! Oh, dear. I'm going to sing. Sorry.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Brennan said something nice about you! I wasn't listening. I was. Sorry.   #funny
+? rep:theirs
+- You're galley now! It'll be fine. It's lovely, actually. No "won't it". It is.   #warm
+? you:kind
+- Everyone says you're kind. Oh, good. I thought so too. I'd hoped so.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- For me? Oh! Oh, I love it. Sorry. I'm going to sing. I'm not. I am, a bit.   #warm
+? gift:liked
+- Oh, thank you! That's lovely. It'll be fine. It's better than fine.
+? gift:polite
+- Oh, thank you! Sorry. I mean, thank you. It's lovely of you to think of me.   #funny
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Pudding's good today. It is, isn't it?
+- Sorry, is this seat free? Sorry. Thanks.
+- I'll stay for tea. I always stay for tea.
+? act:off
+- Rest day. The chord's coming today. It will. Won't it?
+- Guitar, then a long shower, then guitar.
+- I'm learning the words to side two. Again.   #funny
+? act:wash
+- Oh, was I singing? Sorry. Was it nice, though?
+? time:evening
+- That song's on my mind. You know the one. La la.
+- Hamid and I had a practice. It went... it went.   #funny
+? trad:jam
+- Music night! I'll just sing quietly. Very quietly.
+? trad:quiz
+- If there's a song round, I'm ready. Am I ready?
+? season:lanterns
+- Lanterns is my favourite. It'll be fine. It's lovely.
+? time:night
+- Sorry, still humming. I'll stop. I've stopped.   #funny
+
+== rumour
+- Oh, I shouldn't. Should I? I'll say a little.
+- Have you heard? It's nice news. I think it's nice.
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- A game? Oh, lovely. I'm not very good. Am I?
+== tiles.dock
+- Oh! Three! Sorry. Was that all right?
+== tiles.win
+- I won? Sorry! It'll be your turn next. It will.
+== tiles.lose
+- Well done! You were lovely at that. Really.   #warm

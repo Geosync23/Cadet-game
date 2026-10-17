@@ -1,0 +1,12 @@
+@template warm
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/warm.lines) come in wave 2.
+talk: Kind, motherly or fatherly, generous with praise; asks after you.
+hi: Hello, love | Hiya
+bye: Take care | Look after yourself
+yes: Of course | Happily
+thanks: Thank you, really | Bless you
+wow: Oh, lovely
+sigh: Oh dear
+nick: - | - | - | love | love
+needs: share

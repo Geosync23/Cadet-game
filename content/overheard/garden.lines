@@ -1,0 +1,34 @@
+@overheard garden
+// Writer-commons, overheard batch 2. The hydroponics garden: gardeners, and anyone sitting among the plants.
+
+== overheard
+? pair:garden+garden act:work place:hydroponics_garden
+A: Week nine lettuces are ready.
+B: Week nine already?
+A: They grow up so fast.   #funny
+
+? pair:garden+any place:hydroponics_garden
+A: Can I pick a tomato?
+B: On harvest day.
+A: Just a small one?
+B: They're all small. That's the point.   #funny
+
+? pair:any+garden place:hydroponics_garden
+A: Why's it so warm in here?
+B: Tomatoes like it warm.
+A: So do I.
+B: Then you can stay.   #warm
+
+? pair:garden+garden time:morning place:hydroponics_garden
+A: Misters are on.
+B: Smells like rain.
+A: Don't tell Dlamini. He'll move in.   #funny
+
+? pair:any+any act:leisure place:hydroponics_garden
+A: I come in here when it's busy out there.
+B: Me too. Plants don't ask questions.
+A: They do listen, though.
+
+? pair:garden+any place:hydroponics_garden
+A: Who left a cactus by the beans?
+B: That's Gerald. He's visiting.   #funny

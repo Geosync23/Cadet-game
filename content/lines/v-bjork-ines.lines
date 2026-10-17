@@ -1,0 +1,27 @@
+@crew v-bjork-ines
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Ines. Astronomer. I'm borrowing your observatory for a week.
+? tier>=acquaintance
+- {hi}, {me}. I named a star last night. After a café. It had good buns.   #funny
+?
+
+== chat
+- Every new star gets a café's name. My mother says it's undignified.   #funny
+- A week of measurements. Then home, and a very long report.
+
+== near
+? deck:2 time:night
+- Clear skies. Rare, even out here. I'm not wasting them.
+? habit:calls-home
+- Calling home before bed. They like to know which café won.   #funny
+?
+
+== bye
+- {bye}. Look up tonight. Third from the left. That's a bakery.   #funny
+
+== smalltalk
+- Measure twice.
+- That one's a tea room.   #funny

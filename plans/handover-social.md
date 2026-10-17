@@ -1,49 +1,41 @@
-# Handover: social engineer (Pillar 3, C4/C5)
+# Handover: social engineer A (Pillar 4, seat 3)
 
-Written by session_01DzZ669spGpdSdVMYzUog2N while still working (ahead of the 70% rule), so a fresh session can pick up. Read CLAUDE.md, DEV_NOTES.md ("Social life (section 20)") and plans/pillar3-plan.md (Part 3, "How news spreads", favours) first.
+Written by session_012pK2XVi5UhqEd28fakYk68 (took over from session_01DzZ669spGpdSdVMYzUog2N, whose Pillar 3 note this replaces; its content is in DEV_NOTES "Social life"). Read CLAUDE.md, DEV_NOTES.md ("Social life (section 20)", all of it), plans/pillar4-plan.md (Part 6, seat 3) and plans/social-deep-plan.md on claude/social-design (the A steps, Parts 2, 4, 5, 6, 7, 8, 8b) first.
 
 ## Role, branch and builds
-- Branch `claude/social`, builds 0.36.x. Last: **0.36.13** (0fdf48d), fully checked. Based on ship integration 0.41.5 (merged at 0.36.7).
-- I own section **`// 20. SOCIAL`** in starship-cadet.html (after section 18, before `// 6. CAMERA`) and `social_check.py`.
-- Hooks outside section 20 (one line each): the main loop calls `socialTick()` after `eventsTick()`; New game calls `socialNew()` after `playerNew()`; section 10's `tapCrew` calls `if (typeof chatOpen === 'function' && chatOpen(a.p)) return true;`.
-- Report to the lead (now session_015QoyPWBdMPM4ywf5W2jMMs) with send_message after each push.
+- Branch `claude/social`, builds 0.36.20+. Last: **0.36.42** (e7dfa90). Based on ship integration 0.41.10.
+- 0.36.41 passed the full set (social, deck, day 1, player, events, interactions, food, machine; cadet_test vs 0.36.20 ALL IDENTICAL) and reviewer 1 (session_01HK4m33sUiLuVim8VWaCPMs) passed it. 0.36.42 is a one-liner, social_check OK.
+- I own section `// 20. SOCIAL` (except the sub-block `// 20c. SOCIAL STORIES` at its end, social B's) and `social_check.py`.
+- Report to the lead (session_01PxXKwc5mkC7tV5MPi3p7PP) after each push; the build master (session_012K7RZ3oSX2vpBb1rR66MBh) combines.
 
-## What's built (DEV_NOTES has the detail)
-- 0.36.0: on paper. `SHIP.rel` (relAdd/relTier, tiers 0/10/30/60/100), crew affinity `SHIP.aff` (Int8Array, 2,701 pairs, drifting hourly from `planWhere` room groups), the news model (`NEWS`, `SHIP.knows`, `newsAdd`, `newsKnownBy`, `playerHeard`), gossip from birthdays, traditions, habits, faults and pairs; `socialTo(t)` catches up by the hour; saved as `save.social`.
-- 0.36.1: chat cards (`chatLine`, `chatOpen`, `chatDo`, `CHAT_SKIN.draw` for the device skin). 0.36.2: time together (meal +3, work +6). 0.36.3: favours on section 17's favour API; Ask about by topic (the roster's `about`). 0.36.4: friends wave you over (`#seek`). 0.36.5: chatter bubbles (`bubbleSay`). 0.36.6: `crewContacts`, `newsFeed`. 0.36.7: merge + `affinityPlan`. 0.36.8: the device's Crew app. 0.36.9: Crew badge on tier up, `shipNews`. 0.36.10: story arcs (Tomas, Pell, Rina). 0.36.11: small dramas (feuds). 0.36.12: Crew app map/meet-up buttons, `where.placeId`. 0.36.13: kept/missed appointments.
+## What's built (DEV_NOTES has every detail and number)
+A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A4 0.36.23 week-1 gating, `socialInvite`; A5 0.36.24 gifts; A6 0.36.25 reputation; A7 0.36.26 invitations; A8 0.36.27 bunk visits and notes; A9 0.36.28 crew come and go; 0.36.29-0.36.42 lining up with the other seats and the reviewers' fixes.
 
-## Shared formats others rely on
-- `relAdd(id, why, pts)`, `relTier(id)`, `REL_NAMES`, `REL_PTS` (events engineer calls `relAdd(id, 'meeting:<id>', pts)`).
-- `newsAdd({ id, about, lines, weight, seed (ids, 'dept:<d>', 'all'), born, kind, event, life })` (events engineer feeds ion-storm news).
-- `affinityPlan(a, b, d)`: pure (affStart, memoised). The sim engineer (session_01R6RBwwBM9aorpsqDCrztDU) builds seating by friendship on it. **Never make it read live affinity**: plans would differ between runs.
-- `crewContacts()`, `newsFeed()`, `shipNews(limit)`, `deviceApp('crew')`: the device engineer (session_01LGbDXmiNuSmR6dPGjRj8mX) draws Maps and the Ship news from them.
-- Flags on appointment objects: `a.socKept`, `a.socSaid`.
-- schedU keys 600-642 are section 20's.
+## Shared formats and seams (others rely on these names)
+- Query API (frozen vocabulary): `relTier mem memTold warmth affBand bondOf moodOf beatOf knowsNews repBand repShip knownFor cue inWeek1 leavingSoon newHere movedOff memThing socialFill`. `CALM_TYPES` / `placeCalm` are the deck architect's, `aboard` / `crewLeaving` / `crewArriving` / `crewComeTo` the sim engineer's, `introOn` / `introNote` onboarding's (mine are `socIntroOn` / `socIntroNote`). `SOC_BOND_KINDS` (20c has `STORY_BONDS`).
+- Section 22 (dialogue) owns the five lines `CHAT_GREET`, `CHAT_NEAR`, `CHAT_LIFE`, `CHAT_DEPT`, `CHATTER_IDLE` (become `linesLegacy(...)`) and the first line of `chatGreet`: don't edit them or the lines next to them. `socLine` asks `lineFor` (ctx.peek on look-ahead calls).
+- 20c's seams in section 20 (keep them): `storyHour(h, pairs)` in socialHour, `relGain` in relAdd, `knowBlocks` in the Crew app person view, `socBondOf` first in bondOf, `friendCap(p)` in socialHour, `affPlanWeek(i, j, d)` in affinityPlan, `momentReady` / `momentShow` / `goodbyeMoment` in chatLine and the card, `introOptions` / `introDo` ("Do you know…?"). Section 20 saves/resets `SHIP.social.bonds` and `affWeek` for 20c.
+- Bus (section 13): I listen for repair, tradition, eventPhase, favour, gift, harvest, lateMeal, choice, introStep, jobAbandoned, jobUnclaimed, shiftStart, moment; I post tierUp, invite, gift.
+- For others: `giftAdd`, `GIFT_MAKES`, `SOC_GIFTS` (player engineer's store and machine shop), `bunkNote()` (bunk tap), `repView()`, `repAskedFor(dept)`, `keepsakes()`, `movedOn()`, `crewContacts()`.
+- schedU keys: social A 644-671 (used up to 665), social B 672-699.
 
 ## Loose ends
-- Privacy match with Maps: done in 0.36.16 (`crewWhere` is null when someone is asleep or washing). The user chose a Roster tab on the device instead of people dots on Maps; the device engineer builds it on `crewContacts`.
-- Discourtesy (0.36.16): the guest-meeting half only works once section 14 plans the Veyli guests (they weren't in `schedPeople()` on the 0.34.16 merge).
-- Seating by friendship is live in the sim engineer's 0.26.18: about 19% of seats are next to a friend. No starting pair is at <= -30, so their "keep rivals apart" rule never fires; if the user wants visible rivalries, make the clash penalty in `affStart` bigger (for example -12 to -30) and re-run social_check. `shipDay(d).occ.who` (person -> [[from, to, placeId]]) can tell who sat with whom.
-- **Pell's show:** done in 0.36.14 on the events engineer's eventOneOff (0.34.13). Re-test it once their build is merged into the integration.
-- Merge ship integration 0.41.6 when published (it has Appointments and the device).
-- On hold until the user plays the check-in build (the lead's call): arcs for the officers, tuning numbers.
-- Friends who wave you over don't walk over yet (it needs a hook in section 10's crew agents, the sim engineer).
-- Rivalries are rare (none in 14 days on paper; clashing pairs need about a month). Tune `socialHour`'s clash drift if the user wants more drama.
-- Gossip is thin on days with no tradition or birthday; more sources (guests arriving, jobs finished, meals) would help.
+- Garden produce as gifts: the galley engineer calls `giftAdd('herbs' | 'tomato' | 'flower')` on harvest days (asked via the lead).
+- The new store gifts (bar of chocolate, paper novel, music chip, pocket puzzle, spare tiles set) go into the store for the new player engineer (asked via the lead).
+- The sim engineer builds `crewLeaving` / `crewArriving` after crew 0.16.13; nothing for me to change unless names differ.
+- When social B's bonds merge, turn social_check's bond NOTE into a FAIL (friends 15-40, rivals 2-6, a mentor at day 14).
+- Not built: A10 guiding a newcomer (needs onboarding's escort modes reversed, wave 4), A11 your own room (needs promotion), A12 tuning pass with the user. Bunk visits come fairly often; invitations about 1 a day: tune with the user's play.
 
 ## Gotchas
-- Section 20 is placed before ROSTER (section 9) in the file: everything must be lazy (`socInit()` on first use). Load-time code must not touch ROSTER.
-- In tests, call `socInit()` **before** `setShipNow(...)`, or the social clock starts at the jumped-to hour and nothing runs.
-- `socialHour` calls `machinesNow()` when the hour's machine record is missing; keep it that way so faults are read hour by hour.
-- Chatter only picks speakers well inside the screen; the bubble itself is section 8b's.
-- The auto-mode classifier sometimes blocks long chained shell commands or a commit; plain single commands go through.
+- **Run social_check before every push**, even one-liners (0.36.38 lost a helper and broke every card; reviewer 1 caught it).
+- Section 20 sits before ROSTER (section 9) and section 21: everything lazy (`socInit`); `typeof` on a later const throws during load, so keep such checks inside try or out of load-time code.
+- Plans' blocks (`planDay`) are in absolute ship minutes.
+- Test overrides: `window.foo = ...` doesn't replace a script's own function. social_check's `g.ev` runs inside the game's scope, so swap with a plain `foo = ...` there (save the real one first, put it back after); consts can't be swapped (move the player instead, or push onto the real array). Never set `SHIP.intro` to null (section 13/21 read it): restore the saved object. With section 10's `crewComeTo` merged, a visitor's card opens on arrival, later; tests stand in an instant arrival.
+- Before pushing a seam another seat depends on, a trial merge plus `node --check` on the main script catches name clashes.
+- **Trial merges: never `git merge -X ours`.** It keeps your side of a whole conflict block, and a block can swallow another seat's new code next to it (the build-number line sits right beside section 13's bus, so `-X ours` silently dropped the bus). Merge normally, take theirs for every conflict outside section 20 (a small script on the markers), and check the other seat's key function is in the result (e.g. `grep -c 'function simNote'`).
 
 ## How to test
-- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html [DAYS]` (about 2 minutes).
-- The full set before each push, one at a time: social, deck, day 1, player, events, interactions, food, machine, then cadet_test against the previous build. Copy the build to a scratch file first, so editing doesn't change what's under test.
-- Feature tries used ad hoc scripts on cadet_test's `Game` class (open a card with `chatOpen(p)` after pushing a fake `{ p, x, z, settled }` into `DECK_CREW` beside the player; drive buttons with `chatDo(id)`).
+- `CADET_CHROME=/opt/pw-browsers/chromium python3 social_check.py BUILD.html` (13 parts, ~3 min). Then the full set one at a time (deck, day 1, player, events, interactions, food, machine, cadet_test vs the previous build), from a scratch copy of the build.
 
 ## Open questions for the user
-- Are the relationship numbers right once played (how fast Tomas becomes a friend; favour odds 0.2-0.45 a day)?
-- More drama (rivalries) or keep it gentle?
-- Which officers' arcs next (the plan: Captain, Vance, Calder, Brennan, Holt, Saruth)?
+- Are the numbers right once played (visits, invitations, gift points, reputation dips)? More drama or gentler?

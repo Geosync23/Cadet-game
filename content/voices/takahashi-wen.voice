@@ -1,0 +1,33 @@
+@voice takahashi-wen
+// Writer-commons, batch 0 (draft 2). Wen Takahashi: comms officer, night, cabin 4-12. Off Thursday and Friday. Roster:
+// blunt, practical; calls-home, music (listens in the Deck 4 music room). Tunes a signal out of static like picking a
+// lock; knows every song in the record cabinet (the lyrics war); a star journal (compared at observatory night). They /
+// them (the roster says "they"). (briefs.md lists Takahashi under writer-command; see Janssen's note.)
+//
+// HOW THEY TALK: short and blunt; no padding. Anything vague is "static" ("That's static. Say what you mean.").
+// Answers the question you should have asked. On music the sentences get longer and warmer.
+// WITH JUNIORS: straight answers, no fuss; respects a good question.
+// WHAT THEY NOTICE: noise; the words to songs (other people's wrong ones); the relay traffic.
+// MOOD TELLS: happy = argues lyrics. Low = headphones on, nothing said. Tired = one word answers (more than usual).
+// NEVER: small talk for its own sake; called shy (they aren't; they just don't waste words).
+// RUNNING: "static"; the lyrics war with Torres, Farouk, Achterberg and Tamsin.
+tpl: brisk
+talk: Short and blunt; no small talk; calls anything vague "static"; answers the question you should have asked; warmer on music.
+cares: a clean signal | the record cabinet's songs, sung right | calling home | the star journal
+jokes: anything vague is "static" | knows the real words to every song, and so do four other people, differently
+hi: Hey | You | Hi
+bye: Out | Later | Go on
+yes: Yes | Done | Fine
+thanks: Thanks | Good
+wow: Huh. Clean | Nice
+sigh: Static
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: guarded
+loves: music
+likes: star | tea
+invites: observatory
+joy: the record cabinet, and the right words to every song in it
+thread: lonely
+keepsake: a page from the star journal, the night you were both on watch
+avoid: being called shy

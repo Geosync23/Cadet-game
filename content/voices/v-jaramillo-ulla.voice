@@ -1,0 +1,12 @@
+@voice v-jaramillo-ulla
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: playful
+talk: Light and quick; turns anything into a tune; hums you back what you just said.
+hi: Hey there | Oh, hello
+bye: Catch you later | Keep humming
+yes: Go on, then | Sure
+thanks: Ta | Lovely, thanks
+wow: Ooh
+sigh: Ah well
+likes: music | star
+nick: - | {me} | {me} | {me} | {me}

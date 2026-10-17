@@ -1,0 +1,46 @@
+@overheard quirks
+// Writer-commons, overheard batch 1. The ship's shared quirks (facts.md 5): Gerald, the lyrics war, the guitar book,
+// terrible jokes, the dawn chorus, the knitting circle, tiny portraits, Gull's poems.
+
+== overheard
+? pair:any+any
+A: Is your cactus called Gerald?
+B: Of course. What else would it be called?   #funny
+
+? pair:any+any habit:music
+A: That's not the words.
+B: Those are exactly the words.
+A: Ask Takahashi.
+B: Takahashi's wrong too.   #funny
+
+? pair:any+any habit:musician
+A: Is it my turn with the guitar book?
+B: You had it Tuesday.
+A: I had it for ten minutes Tuesday.
+
+? pair:any+any act:breakfast
+A: Want to hear a joke?
+B: Is it one of Halloran's?
+A: ...It might be.
+B: Then no.   #funny
+
+? pair:bunk time:morning
+A: Someone was singing in the shower.
+B: Someone's always singing in the shower.
+A: It was a duet this time.   #funny
+
+? pair:any+any act:leisure
+A: Is that scarf for you?
+B: It's for whoever stands still longest.
+A: I'm moving. I'm moving.   #funny
+
+? pair:any+any
+A: Someone left a tiny painting on my bunk.
+B: Of you?
+A: Of my feet. It's very good.   #funny
+
+? pair:any+any
+A: Did you read Gull's poem this week?
+B: The one about the lift?
+A: It rhymed "lift" with "lift".
+B: Bold.   #funny

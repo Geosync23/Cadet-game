@@ -1,0 +1,105 @@
+@crew moreau-signe
+// Signe Moreau (she/her), Works technician, days. The Works writer, batch 2. Brisk, sharp; rowing, mysteries.
+
+== greet
+? tier=stranger
+- Hey. New hand. Check the seal before you close a panel. Every time. You'll thank me.
+- Right, you. Read the whole job card before you take it. The last line bites.
+? tier>=acquaintance time:morning
+- Morning. Rowed before breakfast. Two seconds off. Vance's name is still up there.
+? tier>=acquaintance
+- {hi}. Your panel on Deck 4's not flush. Left corner. Go and look. I'll wait.
+? tier>=colleague
+- {me}. Chapter two and I know who did it. The cook. It's always the cook.   #funny
+? tier>=friend
+- {me}. Good. You're the only one who doesn't spoil the ending. Sit.   #warm
+
+== bye
+- Go on. See you on the board.
+- Off you go. And check that seal.
+
+== feel
+? mood:low
+- Dropped a place on the leaderboard. Santos. Fair's fair. I'll be back.
+? mood:high
+- Guessed the ending. Wrong. Completely wrong. Best book in months.   #funny
+
+== near
+? act:work
+- Hold that. No, lower. There. See the crack? Nobody else saw that crack.
+? act:gym
+- Five hundred metres. Don't talk to me. Talk to me after.
+
+== life
+? tier>=acquaintance
+- Vance moved to the treadmill. We think he's scared of the rowing board. We're right.   #funny
+? tier>=colleague
+- Achterberg, Quist and I swap mysteries. Then we ruin them for each other. It's lovely.   #funny
+
+== joy
+? tier>=acquaintance
+- The moment in a mystery when you know. Right or wrong. That's the best page.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. Your sleeve's caught on something. Grease, by the look. Bench three.
+? tier>=acquaintance warmth:cold
+- There you are. You've been off the board for days. I noticed. I notice things.
+
+== near
+? habit:gym-regular
+- Gym after shift now. Rowing, then weights. Santos is ahead. Not for long.
+? habit:music
+- Music room. I'm allowed to be soft about one thing. This is the thing.
+
+== invite
+? tier>=acquaintance
+- Gym after shift? Rowing. I'll set the pace. You'll hate me. Then you'll thank me.   #funny
+? tier>=colleague
+- Friday jam. Sit with me. I'll tell you which song comes next. I'm always right.
+
+== accept
+- Yes. Good. Be on time. I'll know.
+- Fine. I'm in. Bring that book back while you're at it.
+
+== decline
+- Can't. I'm on the rower at seven. Tomorrow.
+? weekday:sat|sun
+- Rest day. One book, the whole thing. I'll have guessed by lunch. Another time.   #funny
+
+== missed
+- You didn't turn up. I noticed. I notice everything. Next time, yes?
+
+== birthday
+? birthday:you
+- Happy birthday. I got you a mystery. I haven't read it. That's my present to you.   #funny
+? birthday:me
+- My birthday. Achterberg gave me a book with the last page torn out. Best present ever.   #funny
+
+== cue
+? cue:repair.you@dept
+- I checked your seal. It's good. I'd have said if it wasn't.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Find me after shift. I need someone who'll be straight with me. That's you.
+
+== about
+? aff:achterberg-lars:friend
+- Achterberg lends me mysteries with the ending circled. I never look. Mostly.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Two seconds off the row. Santos, beware.
+- Chapter two. It's the cook.   #funny
+- Book swap. Nobody spoil it. Achterberg.   #funny
+? trad:jam
+- Friday jam. I'll know the next song.
+? act:work
+- That seal's not flush. Left corner.
+?
+
+== rumour
+- I spotted this first. Obviously.
+- Straight version, no fuss.

@@ -1,0 +1,27 @@
+@crew v-lindahl-milo
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hiya. Milo. Trader's apprentice. Want a better kettle? Everyone does.
+? tier>=acquaintance
+- {hi}, {me}. Sold a kettle to the Watch. Holt looked at it for an hour.   #funny
+?
+
+== chat
+- I'm learning the trade. Mostly I'm learning people say no.   #funny
+- Your garden's lovely. I'd sell it if I could. I can't. Good.
+
+== near
+? habit:shopper
+- Studying the competition. The crew store's very good. Annoyingly.   #funny
+? habit:garden-lover
+- The garden. Nobody here wants a kettle. Restful.
+?
+
+== bye
+- {bye}. Think about the kettle.   #funny
+
+== smalltalk
+- Better kettle. Just saying.   #funny
+- Two sold. Practically famous.

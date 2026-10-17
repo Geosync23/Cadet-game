@@ -1,0 +1,180 @@
+@crew esposito-yara
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Esposito, crew store. Eight till half two. You'll need soap. Everyone does.
+? tier>=acquaintance
+- {hi}, {me}. You're out of toothpaste. Don't ask how I know.   #funny
+- {hi}. New biscuits in. They'll be gone by nine.
+? tier>=friend
+- {hi}, {me}. I put one aside for you. Don't tell the queue.   #warm
+
+== feel
+? mood:high
+- Good morning. Shelves full by eight. Guessed six orders right. Personal best.
+? mood:low
+- Slow morning. Restocked the full shelves. Don't look at me like that.
+
+== near
+? act:work
+- Let me guess. Socks. No? Tea. I knew it was tea.   #funny
+? act:gym
+- Gym after shift. Stops me buying biscuits. Mostly.
+
+== life
+? tier>=acquaintance
+- I shop at my own store on my tea break. It's still shopping. Shush.   #funny
+? tier>=colleague
+- I keep a journal of every star I've seen. Wen and Farah keep one too. Mine's neater.
+
+== joy
+? tier>=acquaintance
+- Best bit of the job? Guessing what people came in for. I'm right four times in five.
+
+== about
+? aff:ishikawa-orla:friend
+- Orla does evenings, I do mornings. We leave each other notes. Very proper ones.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. Doors open. Socks on the left, soap on the right, gossip at the till.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Half an hour till Ishikawa takes over. Buy something now, I'll remember it.
+? tier>=colleague warmth:cold
+- Oh, look who's back. Your soap's been lonely. So's your toothpaste.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Come back when you run out. You will.
+? tier>=friend
+- See you, {me}. Good chat. Better than restocking. Much better.   #warm
+
+== feel
+? mood:ok
+- Fine. Shelves full, till balanced, kettle on. A good morning.
+
+== near
+? act:gym
+- Gym, then the store. It stops me eating the stock. Mostly.   #funny
+? deck:4 act:leisure
+- Common room. Feet up. Don't ask me where anything is. I'm off.
+
+== life
+? tier>=colleague
+- Same counter, a good few years. I love it. I wonder sometimes what else I'd love.
+? tier>=friend
+- I can guess what anyone came in for. Except you. You're a mystery. A small one.   #warm
+
+== invite
+? tier>=colleague time:afternoon
+- Gym after my shift? You lift, I'll tell you who bought what. Not really.   #funny
+
+== accept
+- Can do. I'll be there.
+== decline
+- Can't, sorry. Stock-take. Very thrilling. Another time.
+== missed
+- You didn't come. I'll put it on your tab. Kidding. Mostly.   #funny
+== birthday
+? birthday:me
+- My birthday. I bought myself a present. From me. At staff price.   #funny
+? birthday:you
+- Happy birthday. I've put something by. No charge. Don't tell anyone.   #warm
+== hint
+- Got a minute? Not for shopping. Just a minute.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- You'll want the thermal socks. Trust me.
+- Store's open. Gerald says hello.   #funny
+- Ah, well. Back on the shelf.
+- New stock. Old stock, newly dusted.   #funny
+? act:work
+- Next. I know what you're after.
+
+== rumour
+- I never say what anyone bought. Ever.
+- Heard it at the counter. Not from me.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it before I asked. That's my trick. I'm impressed.   #funny
+? told:fav.lamp
+- You fixed my lamp. I can see the till. And Gerald. Gerald's pleased.   #funny
+? told:fixed.lights
+- Lights on Deck 3 are steady. Was that you? Thought so. You've got the look.
+? told:came.running
+- Saw you at running club. You'll want better socks. I've got some.   #funny
+? told:gift.star
+- That's going in my star journal. Page of its own. Thank you.   #warm
+? told:bday
+- You remembered my birthday. I'll pretend I didn't notice. I noticed.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Store's heard good things. People buy you biscuits. I notice. I never say who.   #funny
+? you:kind
+- You're known for being kind. I can tell by what you buy. Mostly for other people.   #warm
+? you:chatty
+- You chat to everyone at my counter. The queue's longer. I don't mind.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:star
+- For my star journal. You knew. Course you knew. You've got the look.   #warm
+? gift:loved
+- I'd never have sold you that. I'd have kept it. Thank you.   #warm
+? gift:liked
+- Nice choice. I'd have guessed you'd pick that. Thank you.   #funny
+? gift:polite
+- Ah, well. Thank you. It's the thought. I'll know where it's from.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Someone's bought every biscuit. I won't say who.   #funny
+- Soup again. Good. I'm a soup person.
+? act:off
+- Rest day. Gym, Gerald, journal. In that order.
+- Gerald's leaning left. He's thinking.   #funny
+- I shopped at the store. Yes, my own. I know.   #funny
+? time:evening
+- Star three hundred and three tonight. Maybe.
+- Gym after shift. Then a sit. Then nothing.
+? time:night
+- Three hundred and four. Wrote it down. Bed.
+? trad:observatory
+- Observatory night. Bringing the journal. Obviously.
+? season:harvest
+- Harvest. Everyone's buying jars. Jam season.
+? place:commons
+- Common room's warm tonight. I'm staying put.
+- Who's got the Tiles board? No, keep it. I'll watch.
+? act:wash
+- Hot water. Five minutes. I'm timing it.   #funny
+
+== rumour
+- I can't say who. I can say it's lovely.
+- I don't tell what people buy. I'll tell you this.
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- I knew you'd come in for a game. Your move.   #funny
+== tiles.dock
+- Three. I saw that one coming. Like a shopping list.   #funny
+== tiles.miss
+- You missed a dock. I won't tell. I never tell.   #funny
+== tiles.win
+- Good game. Same time tomorrow? I'll keep the board.
+== tiles.lose
+- Well played. I'll put it in the journal. Next to the stars.   #warm

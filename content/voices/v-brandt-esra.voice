@@ -1,0 +1,12 @@
+@voice v-brandt-esra
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: gruff
+talk: Gruff and short; sealed pouches, sealed lips; warms up slowly over cards in the lounge.
+hi: Evening | Hm
+bye: Night | Right then
+yes: Fine | Aye
+thanks: Thanks | Ta
+wow: Hm. Not bad
+sigh: Hm
+likes: game | tea
+nick: - | {me} | {me} | {me} | {me}

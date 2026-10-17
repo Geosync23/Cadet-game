@@ -1,0 +1,26 @@
+@voice alvarez-luca
+// Writer (Survey), wave 1b. Survey assistant; playful, cheerful; a cactus called Gerald; a sister on Coriel who sends recipes.
+//
+// HOW THEY TALK: Cheerful and silly, says hello to plants. Introduces Gerald the cactus as if he were crew. Reads out his sister's recipes from Coriel with feeling. Dreams of naming a star, out loud.
+// WITH JUNIORS: the joker who checks you're all right.
+// MOOD TELLS: when worried, Gerald gets talked to more.
+tpl: playful
+talk: Cheerful and silly, says hello to plants. Introduces Gerald the cactus as if he were crew.
+cares: Gerald the cactus | his sister's recipes from Coriel | naming a star, one day
+jokes: Gerald the cactus is technically on the crew list, in Luca's head | his sister's recipes need things the ship doesn't have
+hi: Hiya | Hello | Hey, hey
+bye: Bye | See you | Gerald says bye
+yes: Yes | Sure | Course
+thanks: Thanks | Ta, lovely
+wow: Ooh, look
+sigh: Oh well
+nick: - | {me} | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: plant | garden
+likes: sweet | star
+invites: garden | observatory
+joy: Gerald the cactus
+thread: exams
+keepsake: a cutting of Gerald, in a tiny pot
+avoid: anyone being rude to Gerald

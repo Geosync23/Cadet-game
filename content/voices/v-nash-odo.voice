@@ -1,0 +1,12 @@
+@voice v-nash-odo
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: dreamy
+talk: Slow and soft; loses the thread, finds a song instead; talks to plants as if they were the audience.
+hi: Oh, hello | Hey
+bye: Mind how you go | See you around
+yes: Mm, yes | Why not
+thanks: Thanks | That's kind
+wow: Oh, look at that
+sigh: Mm
+likes: music | garden
+nick: - | {me} | {me} | {me} | {me}

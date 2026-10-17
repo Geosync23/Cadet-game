@@ -1,0 +1,93 @@
+@crew zamora-quinn
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hi. Zamora, Survey. Chart room's on Deck 2. The stars are labelled. Correctly.
+? tier>=acquaintance
+- {hi}, {me}. Clear tonight. Good for the telescope.
+- Hi, {me}. Somebody called a planet a star at breakfast. I've recovered.   #funny
+? tier>=friend
+- {hi}, {me}. I kept a seat at the window for you. Observatory, later?   #warm
+== feel
+? mood:high
+- Good night for seeing. I found three I'd only read about.
+? mood:low
+- Cloudy lens. Cleaned it twice. Still cloudy. Hm.
+== near
+? act:wash
+- I don't sing in the shower. The washroom is mistaken.   #funny
+? time:night
+- Still up. The sky doesn't do day shifts either.
+== life
+? tier>=acquaintance
+- I brought my telescope from home. It's small. It sees enough.
+== joy
+? tier>=colleague
+- My telescope, the bow window, and nobody naming things wrong. Perfect night.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {me}. Clear evening. Good for seeing.
+? tier>=acquaintance warmth:cold
+- Oh. {me}. It's been a while. Hello.
+
+== bye
+- {bye}. Look up on your way. Well. Through a window.
+
+== near
+? place:chartroom
+- Chart room. Every label right. I checked. Twice.
+? deck:2 time:night
+- The observatory's empty. Best time. Just the stars and the hum.
+
+== invite
+- Observatory night? I'll name them. Correctly. Ask me anything.
+
+== accept
+- Yes. Good. Clear skies expected.
+- Yes. I'll bring the small telescope.
+
+== decline
+- Not tonight. Chart corrections. Somebody labelled a moon a planet.   #funny
+? weekday:sat|sun
+- Rest day. Telescope, window, quiet. Monday?
+
+== missed
+- You didn't come. That's all right. The stars were there. They'll be there again.
+
+== birthday
+? birthday:you
+- Happy birthday. There's a star on the chart you'd like. I'll show you which.   #warm
+? birthday:me
+- My birthday. The washroom sang. I did not join in. I did not.   #funny
+
+== cue
+? cue:tradition.observatory
+- Last night someone called Rossi's telescope a toy. Rossi corrected them. Loudly.   #funny
+
+== hint
+- {me}. Have you a minute later? I've something to say. It isn't about stars.
+
+== about
+? aff:rossi-femi:friend
+- Rossi, Ueda, Mbeki and I bring small telescopes. Ours are better. We never say so.   #funny
+
+== life
+? tier>=friend
+- I name stars right because names matter. Someone should get them right.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- That's a planet. Not a star.   #funny
+- Clear tonight. Good seeing.
+- I don't sing. The washroom's wrong.   #funny
+- Labels correct. Checked.
+? time:night
+- Still up. So is the sky.
+?
+
+== rumour
+- Correctly: here's what happened.
+- Few words. All true.

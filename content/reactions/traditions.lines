@@ -1,0 +1,65 @@
+@reactions tradition
+// Writer-commons, reactions batch 2. The day after a tradition (social's cue tradition.<id>, one day): what people
+// say about it, and (.you) to someone who came. Said the next day, so it's past tense.
+
+? cue:tradition.quiz !cue:tradition.quiz.you
+- Did you hear about quiz night? Two teams tied on the reactor question. Again.   #funny
+- Missed you at the quiz. We could've used someone who knows engines.
+? cue:tradition.quiz.you tier>=acquaintance
+- Good team last night. You got the one about the coils. I'd never have got that.
+- Quiz night was brilliant. We were robbed on the reactor question, though.   #funny
+? cue:tradition.quiz.you tier>=friend
+- Same team next week? Don't say no. I've already told everyone.   #warm
+
+? cue:tradition.film !cue:tradition.film.you
+- Film night was a good one. Someone cried. Nobody's saying who.   #funny
+? cue:tradition.film.you tier>=acquaintance
+- Did you like the film? I liked the bit with the lighthouse.
+- You laughed at the right bits last night. Not everyone does.   #warm
+
+? cue:tradition.jam !cue:tradition.jam.you
+- The jam went late. Someone played the same song three times. Different words each time.   #funny
+? cue:tradition.jam.you tier>=acquaintance
+- Saw you at the jam. Did you sing? I think you sang. I'm counting it.   #funny
+- Good jam last night. The guitars were nearly in tune.
+
+? cue:tradition.observatory-night !cue:tradition.observatory-night.you
+- Clear sky at observatory night. Four little telescopes and the big one.
+? cue:tradition.observatory-night.you tier>=acquaintance
+- I saw a star go out last night. No, wait. It was a smudge on the window.   #funny
+- Good to see you up at the observatory. It's better with more people.   #warm
+
+? cue:tradition.running !cue:tradition.running.you
+- Running club went well. Nobody fell off the treadmill. A record.   #funny
+? cue:tradition.running.you tier>=acquaintance
+- You came running! Your legs will hate you by lunch. That's how you know it worked.   #funny
+
+? cue:tradition.market !cue:tradition.market.you
+- Swap meet was busy. Someone swapped a jumper for a cactus. Called Gerald, obviously.   #funny
+? cue:tradition.market.you tier>=acquaintance
+- Did you find anything good at the swap meet? I got a book with all the pages. Rare.
+
+? cue:tradition.harvest !cue:tradition.harvest.you
+- Harvest morning! Fresh salad with dinner tonight. Real tomatoes.
+- The garden picked a whole crate of beans. Brennan's thrilled. She hummed.   #funny
+? cue:tradition.harvest dept:galley
+- The harvest's in. Beans, roots, tomatoes. Dinner writes itself tonight.
+? cue:tradition.harvest dept:garden
+- Good harvest. Week fourteen tomatoes. Best age for a tomato.
+? cue:tradition.harvest.you tier>=acquaintance
+- You helped with the harvest! Your hands smell of tomato leaves. The good smell.   #warm
+? cue:tradition.harvest.you dept:garden
+- {thanks} for the help this morning. You pick gently. Not everyone does.   #warm
+
+? cue:tradition.birthday !cue:tradition.birthday.you
+- There was birthday cake in the mess last night. I had two slices.   #funny
+- Did you get any of the birthday cake? It went in about a minute.
+? cue:tradition.birthday dept:galley
+- Birthday cake went down well. We sang. Badly. That's tradition.
+? cue:tradition.birthday.you tier>=acquaintance
+- Good of you to come for the cake last night. Everyone notices who comes.   #warm
+
+? cue:tradition.hull-lights
+- The hull lights looked lovely last night. The whole ship glowing.
+? cue:tradition.founding
+- Founding Day. The Wren's older than all of us, and still flying.   #warm

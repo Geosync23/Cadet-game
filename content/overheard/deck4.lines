@@ -1,0 +1,217 @@
+@overheard deck4
+// Writer 4, batch 3. Juniors on Deck 4 talking as you pass: the bunks, mornings, the washrooms, the laundry,
+// the common room, weekends. Not about work.
+
+== overheard
+? pair:bunk time:morning
+A: Are you up?
+B: No.
+A: Breakfast's in ten.
+B: ...I'm up.   #funny
+
+? pair:bunk time:night
+A: You awake?
+B: I am now.
+A: Sorry. Night.
+B: Night.   #funny
+
+? pair:bunk
+A: Is that my jumper?
+B: It was on my bunk.
+A: Because you put it there.
+B: Fair. It's warm, though.   #funny
+
+? pair:bunk
+A: Whose turn to sweep?
+B: Yours. I did it last week.
+A: You said that last week.
+B: And I was right last week.   #funny
+
+? pair:bunk act:off
+A: Rest day. What's the plan?
+B: Nothing. All of it.
+A: Can I join in?
+B: There's room for two on nothing.   #warm
+
+? pair:bunk time:evening
+A: Did you leave the light on again?
+B: It's a reading light. I was reading.
+A: You were asleep.
+B: I was reading with my eyes shut.   #funny
+
+? pair:any+any place:port_washroom|starboard_washroom
+A: Was that you singing?
+B: Was it good?
+A: It was loud.
+B: So, yes.   #funny
+
+? pair:any+any place:port_washroom|starboard_washroom time:night
+A: Any hot water left?
+B: Ten past ten. What do you think?
+A: Character-building, then.   #funny
+
+? pair:any+any place:port_washroom|starboard_washroom time:morning
+A: You've got toothpaste on your chin.
+B: Where? Here?
+A: Other side. There. Gone.
+
+? pair:any+any place:laundry
+A: Is this sock yours?
+B: Is it odd?
+A: It's very odd.
+B: Then it's mine.   #funny
+
+? pair:any+any place:laundry
+A: How long's left on yours?
+B: Twenty minutes.
+A: I'll wait. It's warm in here.
+B: Best room on the deck, the laundry.   #warm
+
+? pair:any+any place:laundry
+A: Did you wash a red thing with the whites?
+B: Did I?
+A: Everything's pink.
+B: Pink's nice. Pink's very nice.   #funny
+
+? pair:friend place:commons
+A: Tiles?
+B: Only if you don't gloat.
+A: I never gloat.
+B: You gloated last week. For a week.   #funny
+
+? pair:any+any place:commons
+A: Have you seen the comics wall?
+B: I'm in it again. With a mop.
+A: You were holding a mop.
+B: Once!   #funny
+
+? pair:friend place:commons time:evening
+A: Budge up.
+B: There's a whole sofa.
+A: This is the warm end.
+B: Fine. Budge up, then.   #warm
+
+? pair:any+any place:commons
+A: Who started this jigsaw?
+B: Nobody knows. It's been here since Greening.
+A: It's all sky.
+B: That's why nobody finishes it.   #funny
+
+? pair:any+any place:commons !who:rina !with:rina
+A: Anyone fancy taking Rina on at Tiles?
+B: I've got a bad back.
+A: You're the youngest in the bunk.
+B: It's a very young bad back.   #funny
+
+? pair:friend place:commons act:off
+A: Tea?
+B: Is it your pot or mine?
+A: Mine. The good one.
+B: Then yes. Thank you.   #warm
+
+? pair:any+any deck:4 act:off weekday:sat
+A: Saturday. What are you doing?
+B: Laundry. Then lying down.
+A: Same. Sofas in the common room?
+B: Deal. Bring the big blanket.   #funny
+
+? pair:any+any deck:4 act:off weekday:sun
+A: Swap meet?
+B: What've you got?
+A: A book I've read twice.
+B: I'll swap you my one I've read three times.   #funny
+
+? pair:friend deck:4 act:off
+A: Garden after breakfast?
+B: Pond bench?
+A: Pond bench.
+B: Lovely. Bring a biscuit.   #warm
+
+? pair:any+any deck:4 time:evening
+A: Film tonight?
+B: Is it the long one again?
+A: It's always the long one.
+B: Bring two cushions, then.   #funny
+
+? pair:any+any deck:4 time:night
+A: Shh. Bunk eight's asleep.
+B: It's ten at night.
+A: It's their night. It's their morning. It's confusing.
+B: Shh, then.   #funny
+
+? pair:friend deck:4
+A: Did you get a letter?
+B: Two. From my aunt. Both about her hens.
+A: How are the hens?
+B: Laying well, apparently.   #funny
+
+? pair:any+any deck:4
+A: Somebody left a tiny portrait on my pillow.
+B: Of who?
+A: Of me. Sleeping.
+B: That's... nice? That's nice.   #funny
+
+? pair:any+any deck:4 season:lanterns
+A: Is that your lantern?
+B: It's meant to be a star.
+A: It's very lantern-shaped.
+B: It's a lantern-shaped star.   #funny
+
+? pair:any+any deck:4 season:sowing
+A: How's your seedling?
+B: Two leaves.
+A: Mine's got three.
+B: It's not a race. ...Three, though?   #funny
+
+? pair:any+any deck:4 time:morning
+A: Did you sleep?
+B: Like a log.
+A: You snore like one too.
+B: Logs don't snore.   #funny
+
+? pair:any+any deck:4 trad:quiz
+A: Quiz tonight. Are we a team?
+B: We came last last time.
+A: So we can only go up.
+B: That's the spirit.   #funny
+
+? pair:friend deck:4 time:evening
+A: Homesick today. Bit.
+B: Tea and Tiles?
+A: Tea and Tiles.
+B: Come on, then.   #warm
+
+? pair:bunk time:night
+A: Who's got the torch?
+B: What for?
+A: My book. It's the good bit.
+B: Read it in the morning. Night.   #funny
+
+? pair:any+any place:musicroom
+A: Is it your turn with the guitar book?
+B: It's always my turn.
+A: It's never your turn.
+B: Then whose turn is it?   #funny
+
+? pair:friend deck:4 act:off
+A: Letter from home?
+B: From my brother. Mostly drawings.
+A: Of what?
+B: Of me. As a spaceship.   #funny
+
+? pair:any+any place:commons time:evening
+A: Whose turn to flip the record?
+B: Not mine. I did side one.
+A: Fine. I'll get up, then.   #funny
+
+? pair:bunk time:morning
+A: It's raining.
+B: It's the vents.
+A: Let me have this.
+B: Fine. It's raining.   #warm
+
+? pair:any+any deck:4 time:evening
+A: Cocoa?
+B: Have you got a tin?
+A: I've got half a tin.
+B: Half a tin's a party.   #funny

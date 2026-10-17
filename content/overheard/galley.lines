@@ -1,0 +1,37 @@
+@overheard galley
+// Writer-commons, overheard batch 2. The galley hands at the pass, the sinks and the cold store.
+
+== overheard
+? pair:galley+galley act:work time:morning
+A: Porridge is ready.
+B: Brennan says it's two minutes off.
+A: How can she tell from over there?
+B: She listens.   #funny
+
+? pair:galley+galley act:work
+A: Onion count?
+B: Forty.
+A: Forty-two.
+B: You're making that up.   #funny
+
+? pair:galley+galley act:work
+A: Plate for the night shift?
+B: Two. Dr. Yoon eats double.
+A: Doctor's orders.   #funny
+
+? pair:galley+galley act:work time:evening
+A: Last pan.
+B: Last pan.
+A: Best words in the galley.   #warm
+
+? pair:galley+any act:meal
+A: Is it good?
+B: It's really good.
+A: I chopped the carrots.
+B: I could tell. Very even.   #warm
+
+? pair:galley+galley act:work weekday:thu
+A: Brennan's off tomorrow.
+B: Dlamini's in charge.
+A: Then it'll run itself.
+B: It won't. He will.   #funny

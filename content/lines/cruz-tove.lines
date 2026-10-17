@@ -1,0 +1,172 @@
+@crew cruz-tove
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh. Hello. Cruz. Garden. Mind the hoses. And the seedlings. And, um. Hello.
+? tier>=acquaintance
+- Hello, {me}. That's a week-nine lettuce. Lovely age, week nine.
+- Oh. Hi. Do you need a cactus? I've got cuttings. They're called Gerald.   #funny
+? tier>=friend
+- Hello, {me}. I saved you a strawberry. Don't tell. It was the best one.   #warm
+
+== feel
+? mood:high
+- The beans came up. All of them. I talked to them a lot. Coincidence, probably.
+? mood:low
+- Bit low. I've repotted everything. Twice. The plants don't mind. I mind a bit.
+
+== near
+? act:work
+- Water at the root. Not the leaves. The leaves get sulky. Like people.
+? act:leisure
+- I stay late in here sometimes. It's quieter than the mess. The plants don't ask things.
+
+== life
+? tier>=acquaintance
+- Every cactus on this ship is called Gerald. That's my fault. Sort of.
+? tier>=colleague
+- I take the ladder between decks. For the exercise. It's very good exercise.
+
+== joy
+? tier>=acquaintance
+- Here. A Gerald cutting. For your windowsill. You don't need a windowsill. It'll cope.
+
+== about
+? bond:friends
+- {friend} helps with the watering. Doesn't talk much. The plants like that. So do I.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh. Morning. The beans were up before me. They always are. Show-offs.   #funny
+? tier>=acquaintance time:evening
+- Hello. I'm staying late. The tomatoes need talking to.
+? tier>=colleague warmth:cold
+- Oh. You. Hello. I'd wondered. The basil wondered too.   #funny
+
+== bye
+? tier>=acquaintance
+- Bye, then. Mind the hoses.
+? tier>=friend
+- Thanks. You're easy to talk to. Like a plant. That's a compliment. Honestly.   #funny
+
+== feel
+? mood:ok
+- Mm. All right. Muddy. Normal.
+
+== near
+? act:meal
+- I eat slowly. My hands smell of tomato leaves. It makes everything taste of garden.
+? deck:3 act:leisure
+- Still here. Off shift. I like it in here more than anywhere. Don't tell my cabin.   #funny
+
+== life
+? tier>=colleague
+- Every Gerald came from one cutting. The first Gerald. He's still going. Very old now.
+? tier>=friend
+- People are harder than plants. Plants tell you what they need. People make you guess.
+
+== invite
+? tier>=colleague time:afternoon
+- Help me with the seedlings? You don't have to talk. Just hold the tray.
+
+== accept
+- Oh. Yes. All right. Good.
+== decline
+- I can't. Watering. Sorry. Another day?
+== missed
+- You didn't come. That's fine. The plants kept me company.
+== birthday
+? birthday:me
+- It's my birthday. I didn't tell anyone. The tomatoes know. They're very discreet.   #funny
+? birthday:you
+- Happy birthday. Here. A seedling. Week one. It'll grow up with you.   #warm
+== hint
+- Mm. Could we talk? In the garden. It's easier in here.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Sown week eight. Up by week ten. Lovely.
+- Oh, bother. Soil. Everywhere.
+- Hello, little one. Growing nicely.
+- Another Gerald. Needs a sill.
+? act:work
+- Mind the seedlings. Please. Thank you.
+
+== rumour
+- The tomatoes heard it. I heard it after.
+- Oh, bother. I wasn't meant to say.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. Oh, bother, thank you. Sorry about the soil.   #funny
+? told:fav.job
+- You did my job. Thank you. The seedlings say thank you too. Probably.   #warm
+? told:fixed.irrigation
+- Water's reaching the beds again. They're happy. Was that you? Thank you.
+? told:fixed.growlight
+- Grow lights are steady. Everything's leaning the right way again. Thank you.
+? told:came.harvest
+- You came to the harvest. You picked very gently. I noticed.   #warm
+? told:gift.plant
+- Your plant's doing well. I've given it its own sowing week. Thank you.   #warm
+? told:bday
+- My birthday. You remembered. Oh, bother. That's lovely. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The garden likes you. The plants, I mean. And us. Mostly the plants.   #funny
+? rep:theirs
+- You're garden now. Here. A Gerald. Every gardener has one. Oh, bother, soil.   #warm
+? you:kind
+- People say you're gentle. With people. Plants notice that too.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- Oh. A little one. I'll give it a sowing week. And a good sill. Thank you.   #warm
+? gift:loved
+- Oh, bother, that's lovely. Thank you. Sorry about the soil on my hands.   #warm
+? gift:liked
+- Thank you. That's kind. Very kind.
+? gift:polite
+- Oh. Thank you. I'll... thank you. Yes.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Mm. Tomatoes. Week nine. Good week.
+- Soil on my sleeve. Sorry. Always.
+? act:off
+- Rest day. Mm. I'm at the garden anyway.
+- New Gerald. Small one. Needs a windowsill.
+? time:evening
+- The beans are asleep. Shh.   #funny
+- Mm. Dinner. Then the ladder. For the exercise.
+? time:night
+- The garden's nice at night. The plants talk less.   #funny
+? season:sowing
+- Sowing. Week one. Everything's a maybe.
+? season:greening
+- Greening. Mm. Everyone's showing off.   #funny
+? season:harvest
+- Harvest. They grew. They always do. Still.
+? season:lanterns
+- Lanterns. The garden rests. So do I. Bit.
+? place:hydroponics_garden
+- Mm. Hello. No, not you. The lettuces.   #funny
+? trad:market
+- Swap meet. I'm taking five little Gerald cuttings.
+
+== rumour
+- Mm. Heard it from the tomatoes. No. From Imani.   #funny
+- Something... mm. It's nice. I'll tell you.

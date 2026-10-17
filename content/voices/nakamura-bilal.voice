@@ -1,0 +1,26 @@
+@voice nakamura-bilal
+// Writer (Watch), wave 1b. Watch rating, days; patient, proud; grows herbs for the galley; a twin on another survey ship.
+//
+// HOW THEY TALK: Patient and quietly proud, with good reason. Learning the Watch from Holt one lecture at a time. Talks about his herbs like a coach about a team. Brings up his twin often, half fond and half competitive.
+// WITH JUNIORS: patient, a bit of a know-it-all about basil.
+// MOOD TELLS: when stung he gets formal; when happy he offers you mint.
+tpl: earnest
+talk: Patient and quietly proud, with good reason. Learning the Watch from Holt one lecture at a time.
+cares: his herbs for the galley | his twin on another survey ship | doing the Watch properly
+jokes: his twin on another survey ship is always one step ahead, by letter | his mint has its own corner and its own opinions
+hi: Hello | Hi | Oh, hello
+bye: See you | Take care | Bye, then
+yes: Of course | Yes | Happy to
+thanks: Thank you | Thanks
+wow: Oh, nice
+sigh: Oh well
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: normal
+loves: garden | plant
+likes: tea | music
+invites: garden | running
+joy: his herbs
+thread: rivalry
+keepsake: a sprig of mint, pressed in a notebook
+avoid: anyone touching his herbs without asking
