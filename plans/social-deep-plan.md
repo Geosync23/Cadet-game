@@ -261,7 +261,9 @@ What social needs from `lineFor` (the planner's dialogue engineer builds it): th
 | `cue(kind)` | a recent ship note still talked about (the bus, below) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:tradition.quiz` |
 | `flag(key)` | the shared flag store (section 13, beside the bus) | `flag:met.calder`, `week1:true` |
 
-Other conditions are the planner's (`event:ionStorm.onset`, `time:morning`, `place:mess`, traits, dept, act). The vocabulary freezes at the end of wave 1.
+Other conditions are the dialogue engine's (`event:ionStorm.onset`, `time:morning`, `place:mess`, traits, dept, act, season, odds). The vocabulary freezes at the end of wave 1.
+
+**Agreed with the dialogue engineer (session_01UmrVVpV7eBqEsa4sBucASP, 2026-10-17)**, on top of the table: tiers as `tier>=friend` (names stranger, acquaintance, colleague, friend, close); `told:<key>` (an untold memory; `lineFor` calls `memTold` after saying it); `beat:<arc>.<n>` = at least n beats told and `beat=<arc>.<n>` = exactly n; `aff:rival|neutral|friend` toward `ctx.other`, plus `aff:<crewId>:<band>` toward a named crewmate; `ship.work:high` style for the ship standings; `week1:true` = `inWeek1()` (an intro is running and `week1.done` isn't set; skip-intro sets it), not `week1.d2`; new social conditions `leaving:soon` / `leaving:you` (`leavingSoon(id)`), `newhere` (`newHere(id)`: arrived within 7 days), `moved:<id>` (`movedOff(id)`), `guide:true` (`flag('guide.active')`); `place:calm` reads section 20's `CALM_TYPES` (also used for moment readiness); `{thing}` from `memThing(key)`. Tone `#serious` is allowed only behind `tier>=friend`, a `beat:`, a `mem:moment` or `leaving:soon`. Extra line kinds: `goodbye`, `letter`, `newcomer`, `host`. Any condition can be negated with `!`.
 
 **Placeholders social fills:** `{me}`, `{nick}` (what they call you, by tier, from the voice card), `{partner}`, `{friend}`, `{best}`, `{rival}`, `{mentor}`, `{mentee}`, `{boss}` (their Chief), `{thing}` (a memory's object: "the lamp"), `{trad}`. A line whose placeholder can't be filled is skipped.
 
