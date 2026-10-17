@@ -108,3 +108,10 @@ Gotchas added: a group meeting is one appointment per person (each a seat of the
 - **cadet_test:** the player engineer's #needFx notes are hidden in cadet_test from player-needs 2806e6d (0.60.0); before that, use a scratch copy that hides #needFx.
 - **Open with the user:** nothing pending from section 19.
 - **Next for a successor:** nothing assigned. Watch for: section 13 wiring New game to deviceChoose (sim engineer), the real-phone paint check of the CRT skin (performance engineer's notes in DEV_NOTES 0.35.14), and any device rows in Pillar 4 waves 3-4 (plans/pillar4-plan.md Part 6).
+
+## Device engineer 3 (from 2026-10-17, session_01SskqNx45iEGyQq2W9Fjg5Y)
+
+- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it). Reviewer 2 reviews each push.
+- **0.35.26 (b081853):** claude/device fast-forwarded onto ship integration 0.60.1 (it already held 0.35.25), so the branch now has sections 13-21 and intro_check.py. `tipSeen(id)` for section 21 (onboarding engineer told), and `Number.isFinite` for the keepsake / leaver days (reviewer 2's "Day null" nit). device_check, intro_check OK; cadet_test ALL IDENTICAL vs 0.60.1.
+- **Setup in a fresh container:** `pip install playwright`, then three.js r128 into /tmp/cadet-work/three (see DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
+- **In progress:** calls home in Mail with social B2 (session_014A3w2gK8FBNWs66YC3LfME). Today `mailSend({ from, subject, body, at })` (section 15) already puts a message in Mail; offered a "From home" group and a Reply / Call back button calling their function, waiting on their names and function. Then: stand by for the Needs display proposal (player engineer 3, session_016EJg9DempByUCWwpszyWmV); build the device part once the user approves.
