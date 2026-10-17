@@ -525,4 +525,5 @@ introduces them), unless noted.
 | Eklund's and Keane's grans both sent "the one about the goat" (a song); Hart's comic had a duck in it | Works, garden | Writer 2, batch 7 |
 | Pell's mum's shop has a one-station radio and a scrapyard dog; Tomas's brother keeps his letters in a biscuit tin; the Wren has 22 windows Tomas has counted | Pell, Tomas | Writer 5, batches 1-2 |
 | A voice card's `thread:` is only for story arcs (`arc:<id>`, the ten story crew); which struggle theme anyone else is on comes from the roster's `thread` (the lead's ruling, 0.48.46); don't write theme names in voice cards | everyone | head writer 3 |
+| Kovac grew up on Marra Station (her roster `home`, roster 0.16.17+); where she's from is no secret, the lift night is (beat 3) | Kovac | head writer 3, with crew designer 3 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |
