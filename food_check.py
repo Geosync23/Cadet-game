@@ -430,26 +430,32 @@ with sync_playwright() as pw:
       const standing = DECK_CREW.filter(a => a.spot && Q.has(a.spot.id) && Math.hypot(a.x - a.spot.x, a.z - a.spot.z) < GALLEY_SERVE.near).length;
       const planned = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length;
       const rush = galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to);
-      const j = galleyJoin('probe'); GALLEY_JOINED.delete('probe'); return [hhmm(md), standing, planned, j.ahead, +(j.turnAt - now).toFixed(2), rush, SHIP.galley.wait.length]; })()"""
+      const line = typeof servLine === 'function' ? servLine().length : standing, ahead = galleyAhead(now, 'probe');
+      return [hhmm(md), line, planned, ahead, +(GALLEY_SERVE.you + ahead * galleyServeMins(now)).toFixed(2), rush, SHIP.galley.wait.length]; })()"""
     for k in range(20):
         g.step(30); qq.append(g.ev(probe))
     g.ev(f"setShipNow({B} + 17 * 60 + 40); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; SHIP.galley.pots = []; SHIP.galley.carts = []; deckCrewFill()")
     empty = []
     for k in range(25):
         g.step(30); empty.append(g.ev(probe))
-    # your own turn, played: join at 17:12 with frames running, until galleyTurn
-    g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('tester')")
-    n = 0
-    while n < 300 and not g.ev("galleyTurn('tester')"): g.step(3); n += 3
-    mine = g.ev("[window.__j.ahead, +(shipNow() - window.__j.since).toFixed(2)]")
-    g.ev("galleyLeave('tester'); SHIP.galley = null; window.__sc('tickShip = () => {}')")
+    # your own turn, played: join at 17:12 with frames running, until galleyTurn (without section 10's line; with it,
+    # player_check plays your turn in the real line)
+    if not g.ev("typeof servLine === 'function'"): g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('tester')")
+    mine = None
+    if not g.ev("typeof servLine === 'function'"):
+        n = 0
+        while n < 300 and not g.ev("galleyTurn('tester')"): g.step(3); n += 3
+        mine = g.ev("[window.__j.ahead, +(shipNow() - window.__j.since).toFixed(2)]")
+        g.ev("galleyLeave('tester')")
+    g.ev("SHIP.galley = null; window.__sc('tickShip = () => {}')")
     print('Queue at dinner (time, standing at the queue spots, planned in a queue stop, ahead shown, minutes to your turn, rush, galley waiting):', qq[::4])
     print('  with an empty galley:', empty[::5])
-    print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
+    if mine: print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
+    print('  longest line seen:', max(r[1] for r in qq + empty))
     for r in qq + empty:
-        if r[3] != r[1] or r[1] > 4 or abs(r[4] - (1 + r[3] * (1 if r[5] else 0.6))) > .01: fail(f"queue: {r}")
+        if r[3] != r[1] or (r[1] > 4 and not g.ev("typeof servLine === 'function'")) or abs(r[4] - (1 + r[3] * (1 if r[5] else 0.6))) > .01: fail(f"queue: {r}")
     if not any(r[1] for r in empty): print('  (nobody reached a queue spot in this run: the crew walking to the line is section 10\'s, being rebuilt by sim engineer 3)')
-    if mine[1] > 1 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
+    if mine and mine[1] > 1 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
 
     # 4q. section 10's live line (sim engineer 3's lineJoin / lineSpot / lineFront / lineLeave), stood in for here: you
     # take the spot it gives, your turn comes GALLEY_SERVE.you after you reach the counter (never before), takePortion
