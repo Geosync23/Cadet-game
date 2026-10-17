@@ -62,10 +62,10 @@ The user, 2026-10-16: finish the diplomatic visit, keep it switched off, and sto
   - The gift exchange on day 7 at 09:00 (meeting `veyliGiftExchange`), then the farewell gathering at the shuttle bay.
   - The guests (GUESTS with event 'diplomatic') are aboard days 2-7 (`guestsArrive: 2`, their stay 5). `eventMod('effect', 'guests')` is on for those days.
   - Threads:
-    - dinnersLate and noHerbs: asked of the galley; not confirmed yet.
+    - dinnersLate and noHerbs: the galley agreed the shape and will build them (with the `herbs` key) when the lead says go. `extra` and `batch` already work.
     - coldCabins: systems 0.33.31, done.
     - discourtesy: social 0.36.16, done (Holt's warmth toward the guests), plus meeting choices here.
-  - Trace `veyliCordSculpture`: asked of the deck architect; not confirmed yet.
+  - Trace `veyliCordSculpture`: done by the deck architect (0.38.5, claude/decks-p3 d34bfe3): a brass ring of knotted cords on the bow lounge's west wall. The shuttle bay's 3 leads are the Captain, Saruth and the Speaker.
   - **To switch it on:** remove `draft: true` (the lead's call, ideally after the user plays the storm). Then run events_check, food_check, day_check 1 and 27 (the greeting day), deck_check, player_check and cadet_test.
 - **Meetings:** `MEETING_SCRIPTS` holds calderStorm, captainAllClear, veyliGreeting, veyliGiftExchange, readyRoomFirst, captainsTable and calderProgress.
   - `meetingsTick` plays a script when you're in the room. `meetingCast` fills casts from ROSTER, the guests (`evPerson`) and 'works:2'.
@@ -99,8 +99,7 @@ The user, 2026-10-16: finish the diplomatic visit, keep it switched off, and sto
 
 ### Open threads with other roles
 
-- Galley: dinnersLate and noHerbs for the visit (asked; `herbs: true` is a new galley key).
-- Deck architect: the `veyliCordSculpture` trace in DECK_DRESS (asked). It would be nice for the shuttle-bay leads to be the Captain, Saruth and the Speaker.
+- Galley: dinnersLate, noHerbs and the `herbs` key for the visit: agreed, waiting for the lead's go.
 - Device: `apptAdd` for occasions; Record reading `SHIP.occasions` (kept) and `SHIP.commendations`; a lasting count of your jobs (`yourJobsDone` reads `SHIP.jobs`).
 - The player now has two days off a week (Sat/Sun; the sim's `playerShiftOn`). Meetings and occasions still play on days off. Missing one is never missed work.
 
