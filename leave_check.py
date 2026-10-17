@@ -196,7 +196,7 @@ with sync_playwright() as pw:
       out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
       at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
-      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; careerTick(at(30, 800)); out.missTo = Math.round(careerWork());
+      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; careerTick(at(30, 800)); out.missTo = Math.round(careerWork()); out.missTip = !!(K.k & 2);
       careerSick(30); out.refund = Math.round(careerWork());
       const dueOf = gs => { SHIP.career.sd = 0; SHIP.career.gs = gs; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
       out.namesDiffer = dueOf(1) !== dueOf(2); out.seeded = typeof careerClean(JSON.parse(JSON.stringify(SHIP.career))).gs === 'number';
@@ -213,6 +213,7 @@ with sync_playwright() as pw:
     check(r['cure'] and r['after'][0] >= 0.99 and not r['after'][1] and not r['after'][2], 'the medicine did not cure it')
     check(r['nap'], 'sleeping it off did not cure it')
     check(r['refund'] == 30 and r['missTo'] < 30, f"a sick note gave back {r['refund'] - r['missTo']} for a miss that took {30 - r['missTo']}")
+    check(r['missTip'], 'the first missed shift did not mark its warning shown (k & 2)')
     check(r['namesDiffer'] and r['seeded'], 'every game is sick on the same days, or the game seed is not saved')
     if r['lines']: check(r['getwell'] == 'sick.getwell' and r['better'] == 'sick.better', 'crew have no get-well or glad-you-are-better line')
     else: print('  (no sick.getwell / sick.better lines baked yet)')
