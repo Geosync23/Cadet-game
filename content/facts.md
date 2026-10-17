@@ -524,4 +524,5 @@ introduces them), unless noted.
 | Torres came aboard as a junior; his first month, Calder had him on scrubbers; the arrival tour is `week1` lines gated by `flag:walk.<point>.<n>` (shuttle, bay, haulway, stores, works, lift, wing, officers, deck3, servery, call) and `walk.more.<n>`; meetings `introDinner` (`mem:intro.dinner.stars|fixing|unsure`) and `introAsk` | Torres | head writer 3, 0.48.22 |
 | Eklund's and Keane's grans both sent "the one about the goat" (a song); Hart's comic had a duck in it | Works, garden | Writer 2, batch 7 |
 | Pell's mum's shop has a one-station radio and a scrapyard dog; Tomas's brother keeps his letters in a biscuit tin; the Wren has 22 windows Tomas has counted | Pell, Tomas | Writer 5, batches 1-2 |
+| A voice card's `thread:` is only for story arcs (`arc:<id>`, the ten story crew); which struggle theme anyone else is on comes from the roster's `thread` (the lead's ruling, 0.48.46); don't write theme names in voice cards | everyone | head writer 3 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.45
+   STARSHIP CADET: CSV Wren                           build 0.48.46
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.45';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.46';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13015,7 +13015,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Quiet, watchful, and funny on paper. Draws comics about life aboard and pins them up in the common room, and is shy about them in person.",
-    "thread": "family",
     "tpl": "shy",
     "words": {"hi": ["Oh, hi", "Hello", "Hey"], "bye": ["Bye", "See you", "Off you go"], "yes": ["Sure", "OK", "Yes"], "thanks": ["Thanks", "Thank you"], "wow": ["Oh! Nice"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -13108,7 +13107,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Flat, calm, very dry. Says the alarming thing and the boring thing in the same voice.",
-    "thread": "family",
     "tpl": "dry",
     "words": {"hi": ["Evening", "Hello", "Ah, hello"], "bye": ["Carry on", "Mind the paperwork", "As you were"], "yes": ["Very well", "Yes", "I'll note it"], "thanks": ["Thank you", "Noted, thanks"], "wow": ["Well, well"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -13204,7 +13202,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Cheerful and silly, says hello to plants. Introduces Gerald the cactus as if he were crew.",
-    "thread": "exams",
     "tpl": "playful",
     "words": {"hi": ["Hiya", "Hello", "Hey, hey"], "bye": ["Bye", "See you", "Gerald says bye"], "yes": ["Yes", "Sure", "Course"], "thanks": ["Thanks", "Ta, lovely"], "wow": ["Ooh, look"], "sigh": ["Oh well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -13298,7 +13295,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Sunny and dry together; looks on the bright side and makes a dry joke about it; always near a window.",
-    "thread": "talent",
     "tpl": "playful",
     "words": {"hi": ["Hey", "Oh, hello", "Hi, you"], "bye": ["See you round", "Bye", "Off you go"], "yes": ["Why not", "Sure", "Yes, go on"], "thanks": ["Thanks", "Ta, that's nice"], "wow": ["Ooh, look", "Not bad at all"], "sigh": ["Ah well, sunny side", "Oh, go on"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -13395,7 +13391,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Easygoing and unhurried; drifts mid-sentence and comes back; plots courses to nowhere; wants you to hold still for a portrait.",
-    "thread": "homesick",
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hey", "Hello, you", "Hi"], "bye": ["Fair winds", "See you round", "Go gently"], "yes": ["Sure", "Why not", "Mm, yes"], "thanks": ["Thanks, friend", "That's nice of you"], "wow": ["Oh, wow", "Pretty, that"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14064,7 +14059,6 @@ const VOICE = {
     "needs": "share",
     "openness": "normal",
     "talk": "Drifts mid-sentence, then comes back with a better idea. Restless, always half-planning to be somewhere else.",
-    "thread": "stuck",
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hi", "Hello", "Hey, you"], "bye": ["See you", "Bye, then", "Off I drift"], "yes": ["Mm, sure", "Yes", "All right"], "thanks": ["Thanks", "Oh, thank you"], "wow": ["Oh, look"], "sigh": ["Oh, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14159,7 +14153,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Mumbles to people, chats to plants; dates everything by its sowing week; trails off; soil on everything.",
-    "thread": "lonely",
     "tpl": "shy",
     "words": {"hi": ["Oh. Hello", "Hi", "Mm, hello"], "bye": ["Mind the hoses", "Bye, then", "Go on"], "yes": ["Mm, yes", "All right", "Yes, fine"], "thanks": ["Thanks", "Oh, ta"], "wow": ["Oh, look", "Lovely"], "sigh": ["Oh, bother"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14285,7 +14278,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Practical and gentle; says the useful thing first. Thinks before she speaks and often answers a question with a better question.",
-    "thread": "loss",
     "tpl": "steady",
     "words": {"hi": ["Hello", "Hey there", "Oh, hello"], "bye": ["Take care", "See you round", "Off you go"], "yes": ["Sure", "Of course", "That works"], "thanks": ["Thanks", "That's kind"], "wow": ["Oh, nice"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14381,7 +14373,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Few words, all dry; says the true thing, then is kind about it; says a number with no context; softens about home only to friends.",
-    "thread": "homesick",
     "tpl": "dry",
     "words": {"hi": ["Hey", "You again", "Hm. Hello"], "bye": ["Go on", "See you in the bunk", "Right then"], "yes": ["Fine", "Suppose so", "Go on then"], "thanks": ["Ta", "Appreciated"], "wow": ["Huh. Not bad", "Well, look at that"], "sigh": ["Typical"], "nick": [null, null, "{me}", "bunkmate", "bunkmate"]},
     "lines": {
@@ -14539,7 +14530,6 @@ const VOICE = {
     "needs": "share",
     "openness": "guarded",
     "talk": "Deadpan and precise; says less than she means; the joke lands a second after the line.",
-    "thread": "family",
     "tpl": "dry",
     "words": {"hi": ["Oh. Hello", "Hi", "You again"], "bye": ["Off you go", "Don't get lost", "Bye, then"], "yes": ["Fine", "If I must", "Yes"], "thanks": ["Thanks", "Noted, thanks"], "wow": ["Huh", "Well, well"], "sigh": ["Of course", "Naturally"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14636,7 +14626,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Dry and warm underneath; reads people by what they buy; tells you what you need before you ask; never tells what others bought.",
-    "thread": "stuck",
     "tpl": "dry",
     "words": {"hi": ["Oh, hello", "Hey", "There you are"], "bye": ["Mind how you go", "Come back when you run out", "See you"], "yes": ["Can do", "Sure", "Easily"], "thanks": ["Thanks, you", "Ta very much"], "wow": ["Ooh, fancy", "Well, look at you"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14776,7 +14765,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Quiet and kind; soft short sentences; repeats your words back to check them; \"a fair trade\"; hums the right lyrics.",
-    "thread": "homesick",
     "tpl": "warm",
     "words": {"hi": ["Hello", "Oh, hello", "Hi there"], "bye": ["Take care", "Sleep well", "Bye now"], "yes": ["Of course", "Gladly", "Yes"], "thanks": ["Thank you", "That's kind"], "wow": ["Oh, lovely"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14869,7 +14857,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Quick and bright, a born host. Asks after everyone and remembers the answers.",
-    "thread": "lonely",
     "tpl": "chatty",
     "words": {"hi": ["Hello, hello", "There you are", "Hi"], "bye": ["Talk soon", "Bye for now", "Off you go, then"], "yes": ["Of course", "Leave it with me", "Yes, yes"], "thanks": ["Thank you", "Oh, you're kind"], "wow": ["Oh, lovely"], "sigh": ["Ah well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -14965,7 +14952,6 @@ const VOICE = {
     "needs": "share",
     "openness": "guarded",
     "talk": "Sarcastic and quick, competitive about small things. Labels everything twice and sees no joke in it.",
-    "thread": "lonely",
     "tpl": "dry",
     "words": {"hi": ["Oh, hey", "Hi", "You again"], "bye": ["Later", "Don't lose anything", "Off you go"], "yes": ["Fine", "Sure", "Obviously"], "thanks": ["Cheers", "Ta"], "wow": ["Huh. Not bad"], "sigh": ["Typical"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15059,7 +15045,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Sarcastic on the surface, soft underneath; the jokes are a wrapper. Friendly on patrol, firm at the airlock.",
-    "thread": "homesick",
     "tpl": "dry",
     "words": {"hi": ["Oh, hey", "Hi", "Look who it is"], "bye": ["Off you go", "Stay out of trouble", "Later"], "yes": ["Fine", "Sure, sure", "Go on"], "thanks": ["Ta", "Cheers"], "wow": ["Huh. Fancy"], "sigh": ["Typical"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15155,7 +15140,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Serious and a little anxious; careful complete sentences; says your blood type instead of hello; worries out loud, then fixes it.",
-    "thread": "exams",
     "tpl": "shy",
     "words": {"hi": ["Hello", "Oh. Hello", "Hi"], "bye": ["Look after yourself", "Drink some water", "Goodbye, then"], "yes": ["Yes, all right", "I can do that", "Yes"], "thanks": ["Thank you", "Thank you, really"], "wow": ["Oh. That's good", "Oh, well done"], "sigh": ["Oh, no"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15280,7 +15264,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Bright, quick to say it'll be fine, then \"won't it?\"; sings under her breath and stops when noticed; apologises too much.",
-    "thread": "homesick",
     "tpl": "warm",
     "words": {"hi": ["Hi", "Oh, hello", "Hey, you"], "bye": ["See you soon", "Look after yourself", "Bye for now"], "yes": ["Yes, easy", "Oh, definitely", "I'd love to"], "thanks": ["Oh, thank you", "You're lovely"], "wow": ["Oh, look at that", "Brilliant"], "sigh": ["Oh, dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15417,7 +15400,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "open",
     "talk": "Warm and unhurried; laughs before the punchline; says \"lovely\" a lot; always asks if you've eaten.",
-    "thread": "burnout",
     "tpl": "warm",
     "words": {"hi": ["Morning, morning", "Hello, you", "Ah, hello"], "bye": ["Look after yourself", "Off you pop", "Ta-ta for now"], "yes": ["Course I will", "Lovely, yes", "Happy to"], "thanks": ["Ah, lovely", "You're a treasure", "Thanks ever so"], "wow": ["Ooh, look at that", "Well, isn't that grand"], "sigh": ["Oh, dear me", "Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15522,7 +15504,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Gentle and slow, immovable once decided; grumbles about mornings and means none of it; short lines, a pause, then a good one.",
-    "thread": "startover",
     "tpl": "steady",
     "words": {"hi": ["Oh, hey", "Hello"], "bye": ["Go on, then", "See you", "Mind the hoses"], "yes": ["Fine by me", "Yeah", "All right"], "thanks": ["Ta", "Thanks for that"], "wow": ["Huh. Nice", "Look at that"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15889,7 +15870,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Quick and sarcastic, but the joke is usually on himself. Loses his train of thought, then finds a better one.",
-    "thread": "exams",
     "tpl": "playful",
     "words": {"hi": ["Oh, hey", "Hello, you", "Hi"], "bye": ["Right, where was I", "See you", "Off you go"], "yes": ["Sure", "Why not", "Go on, then"], "thanks": ["Cheers", "You're a gem"], "wow": ["Ooh, nice"], "sigh": ["Typical"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -15982,7 +15962,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Soft-spoken and careful; remembers what you bought and asks how it went; says what's out of the window; proud of the ledger.",
-    "thread": "lonely",
     "tpl": "warm",
     "words": {"hi": ["Oh, hello", "Hello there", "Hi"], "bye": ["Take care now", "See you soon", "Mind how you go"], "yes": ["Of course", "Happily", "Leave it with me"], "thanks": ["Thank you kindly", "That's very kind"], "wow": ["Oh, that's lovely", "Look at that"], "sigh": ["Oh dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -16106,7 +16085,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "guarded",
     "talk": "Almost nothing: a word or two, then a nod; watches every door.",
-    "thread": "lonely",
     "tpl": "gruff",
     "words": {"hi": ["Good day", "Hm"], "bye": ["Go well"], "yes": ["Yes"], "thanks": ["Thank you"], "wow": ["Hm. Good"], "sigh": ["Hm"], "nick": [null, null, null, "{me}", "{me}"]},
     "lines": {
@@ -16140,7 +16118,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "open",
     "talk": "Calm, slow night voice; curious, asks real questions; \"steady\"; talks about Gerald the cactus as a person.",
-    "thread": "family",
     "tpl": "warm",
     "words": {"hi": ["Hello there", "Ah, hello", "Hi"], "bye": ["Steady as she goes", "Mind how you go", "Off you go, then"], "yes": ["Steady, yes", "Of course", "Happy to"], "thanks": ["Thank you", "Much obliged"], "wow": ["Well now", "Look at that"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -16264,7 +16241,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Quiet and careful; qualifies everything (\"I think\", \"maybe\"); always right about the coils.",
-    "thread": "notgood",
     "tpl": "shy",
     "words": {"hi": ["Oh, hi", "Hello", "Um, hi"], "bye": ["Bye, then", "Take care", "Sorry, I should go"], "yes": ["I think so", "Yes, okay", "I can try"], "thanks": ["Thank you", "Oh, thanks"], "wow": ["Oh", "Oh, that's good"], "sigh": ["Oh dear", "Um, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -16362,7 +16338,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Cheerful and bright, even at three in the morning; proud of a clean floor; changes the subject fast when the lift comes up.",
-    "thread": "homesick",
     "tpl": "warm",
     "words": {"hi": ["Hey, hey", "Hiya", "Hello"], "bye": ["Night, then", "See you below", "Mind how you go"], "yes": ["Yes, mate", "Course", "Sure thing"], "thanks": ["Ah, cheers", "You're a good one"], "wow": ["Look at that shine", "Oh, nice"], "sigh": ["Ah, well", "Never mind"], "nick": [null, null, "{me}", "mate", "mate"]},
     "lines": {
@@ -16462,7 +16437,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Quick, polite and a little breathless; checks the time; writes everything down, jokes included.",
-    "thread": "notgood",
     "tpl": "earnest",
     "words": {"hi": ["Good day", "Hello"], "bye": ["Forgive me, I must go", "Be well"], "yes": ["Yes, of course", "Noted"], "thanks": ["Thank you", "Thank you, truly"], "wow": ["Oh! Remarkable"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -16496,7 +16470,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Quiet and curious; asks small questions that turn out to be big ones. Collects old maps of Marra Station and knows the corridors that aren't there any more.",
-    "thread": "homesick",
     "tpl": "shy",
     "words": {"hi": ["Oh, hi", "Hello", "Hey"], "bye": ["Bye", "See you", "Right, bye"], "yes": ["OK", "Sure", "Yes"], "thanks": ["Thanks", "Thank you"], "wow": ["Oh. Neat"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -16830,7 +16803,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Low and unhurried, a night voice. Wry asides, few words, a long pause before she answers.",
-    "thread": "stuck",
     "tpl": "dry",
     "words": {"hi": ["Evening, or near enough", "Hello", "Ah"], "bye": ["Quiet watch", "Go on, then", "Sleep well, if it's that time"], "yes": ["Fine", "All right", "Consider it done"], "thanks": ["Thanks", "Noted, with thanks"], "wow": ["Huh. Nice"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "night owl"]},
     "lines": {
@@ -16926,7 +16898,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Lots of words, all earnest; health facts nobody asked for, kindly; a plan for everything, especially the boat.",
-    "thread": "leaving",
     "tpl": "chatty",
     "words": {"hi": ["Hello hello", "Ah, there you are", "Hi there"], "bye": ["Drink some water", "Take care of yourself", "Off you go, then"], "yes": ["Absolutely", "Course I will", "Yes, good idea"], "thanks": ["Thanks so much", "That's brilliant, thanks"], "wow": ["Oh, look at that", "Brilliant"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17050,7 +17021,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Quiet most of the day, then a terrible joke at breakfast. Ambitious in a hopeful way: he has a list of stars he'd like to name.",
-    "thread": "stuck",
     "tpl": "earnest",
     "words": {"hi": ["Hello", "Hi", "Oh, hey"], "bye": ["See you", "Bye", "Clear skies"], "yes": ["Sure", "Yes", "Happy to"], "thanks": ["Thanks", "Thank you"], "wow": ["Wow"], "sigh": ["Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17144,7 +17114,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Delighted and fast, full of numbers; keeps looking out of the window mid-sentence.",
-    "thread": "exams",
     "tpl": "chatty",
     "words": {"hi": ["Oh, hello", "Hi there"], "bye": ["Must dash, it's moving", "Bye"], "yes": ["Yes, yes", "Absolutely"], "thanks": ["Thank you", "Oh, lovely"], "wow": ["Look at that"], "sigh": ["Oh, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17178,7 +17147,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Restless and quick; talks about the helm in feelings (\"she's pulling left\"); stubborn about small things; challenges you.",
-    "thread": "stuck",
     "tpl": "playful",
     "words": {"hi": ["Hey", "Oh, hey", "Hi"], "bye": ["Off I go", "See you", "Gotta move"], "yes": ["Sure", "Yep", "Go on"], "thanks": ["Cheers", "Thanks"], "wow": ["Ooh, smooth"], "sigh": ["Ugh"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17272,7 +17240,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Never stops, never unkind; every story from the beginning; \"Right, listen\"; stubborn about bowls and trays; laughs before the punchline.",
-    "thread": "stuck",
     "tpl": "chatty",
     "words": {"hi": ["Hey hey", "There you are", "Hello, hello"], "bye": ["Off you go", "Catch you later", "Don't be a stranger"], "yes": ["Oh, go on", "Easy", "Course I will"], "thanks": ["You're a legend", "Cheers for that"], "wow": ["Would you look at that", "Now that's something"], "sigh": ["Oh, honestly"], "nick": [null, null, "{me}", "pal", "pal"]},
     "lines": {
@@ -17655,7 +17622,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "open",
     "talk": "Cheerful and careful: smiles first, then checks the sum twice. Brought a telescope from home and keeps it spotless.",
-    "thread": "family",
     "tpl": "steady",
     "words": {"hi": ["Hey", "Hello", "Hi there"], "bye": ["See you", "Take care", "Bye now"], "yes": ["Sure", "Yes", "Can do"], "thanks": ["Thanks", "Cheers"], "wow": ["Oh, great"], "sigh": ["Ah well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17749,7 +17715,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Big, easy laugh; relaxed, but his eyes keep moving. Calls the ship \"she\".",
-    "thread": "leaving",
     "tpl": "warm",
     "words": {"hi": ["Hey, hey", "Evening", "There they are"], "bye": ["Mind how you go", "Sleep sound", "Off you pop"], "yes": ["Sure thing", "No trouble", "Course"], "thanks": ["Thanks, friend", "Good of you"], "wow": ["Ha! Look at that"], "sigh": ["Ah, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17845,7 +17810,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Eager and formal; all questions, each politely asked, then four more.",
-    "thread": "talent",
     "tpl": "earnest",
     "words": {"hi": ["Greetings", "Good day", "Ah, hello"], "bye": ["Thank you, go well", "Be well"], "yes": ["Yes!", "Certainly"], "thanks": ["Thank you", "That is very helpful"], "wow": ["Remarkable", "Oh, how strange"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17879,7 +17843,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "normal",
     "talk": "Brisk and sharp; spots things first and says so; competitive about rowing and mysteries; softer about music.",
-    "thread": "rivalry",
     "tpl": "brisk",
     "words": {"hi": ["Hey", "Right, you", "Oh, hi"], "bye": ["Go on", "See you on the board", "Off you go"], "yes": ["Done", "Sure", "Yes"], "thanks": ["Thanks", "Good, thanks"], "wow": ["Oh, nice", "Now that's sharp"], "sigh": ["Hm", "Not again"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -17976,7 +17939,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Quiet, precise, slightly too fast when nervous. Finishes other people's lists.",
-    "thread": "notgood",
     "tpl": "shy",
     "words": {"hi": ["Oh, hello", "Hi", "Hello"], "bye": ["Bye, then", "See you", "Oh, yes, bye"], "yes": ["Yes, of course", "I can do that", "Right away"], "thanks": ["Thank you", "Oh, thanks"], "wow": ["Oh, that's tidy"], "sigh": ["Oh dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18071,7 +18033,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "normal",
     "talk": "Patient and quietly proud, with good reason. Learning the Watch from Holt one lecture at a time.",
-    "thread": "rivalry",
     "tpl": "earnest",
     "words": {"hi": ["Hello", "Hi", "Oh, hello"], "bye": ["See you", "Take care", "Bye, then"], "yes": ["Of course", "Yes", "Happy to"], "thanks": ["Thank you", "Thanks"], "wow": ["Oh, nice"], "sigh": ["Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18167,7 +18128,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "normal",
     "talk": "Short, calm sentences, mostly instructions. Never raises her voice; never needs to.",
-    "thread": "homesick",
     "tpl": "brisk",
     "words": {"hi": ["Hello", "Ah, there you are", "Good"], "bye": ["Off you go", "Drink some water", "Look after yourself"], "yes": ["Yes", "Certainly", "That's fine"], "thanks": ["Thank you", "Kind of you"], "wow": ["Well, now", "That's good to see"], "sigh": ["Mm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18261,7 +18221,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Calm, exact, unhurried; short sentences; notices small things and mentions them kindly; \"It'll turn up.\"",
-    "thread": "lonely",
     "tpl": "steady",
     "words": {"hi": ["Hello", "Evening", "There you are"], "bye": ["Mind how you go", "Take care, then", "See you at handover"], "yes": ["Can do", "Noted", "Leave it with me"], "thanks": ["Thank you", "Much obliged", "That's a help"], "wow": ["Well, now", "That's neat work"], "sigh": ["Ah well", "It'll turn up"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18360,7 +18319,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Unhurried and warm, long gentle sentences. Asks good questions and lets the silence do the work.",
-    "thread": "burnout",
     "tpl": "warm",
     "words": {"hi": ["Hello, hello", "Ah, good to see you", "Hello there"], "bye": ["Look after yourself", "My door's open", "Take it easy"], "yes": ["Of course", "I'd be glad to", "Happily"], "thanks": ["Thank you, truly", "That's kind"], "wow": ["Well, isn't that something"], "sigh": ["Ah, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18456,7 +18414,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Cheerful and dry at once, good news delivered deadpan; everything has a soundtrack; numbers the weeks by playlist.",
-    "thread": "family",
     "tpl": "playful",
     "words": {"hi": ["Hey", "Hiya", "Oh, hi"], "bye": ["Laters", "Stay tuned", "Off you go"], "yes": ["Yep", "Sure thing", "Go on, then"], "thanks": ["Cheers", "Nice one"], "wow": ["Oh, tune", "Look at that"], "sigh": ["Oh, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18580,7 +18537,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "normal",
     "talk": "Calm, careful, a little too serious about saving up. Tidy in speech and in her locker.",
-    "thread": "burnout",
     "tpl": "earnest",
     "words": {"hi": ["Hi", "Hello", "Oh, hi there"], "bye": ["See you", "Take care", "Off I go"], "yes": ["Sure", "I can do that", "Yes"], "thanks": ["Thanks", "Thank you"], "wow": ["Oh, wow"], "sigh": ["Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -18997,7 +18953,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Quiet and slow, a little lost in time; asks what day it is; kind, with a sly smile.",
-    "thread": "homesick",
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hello", "Hello"], "bye": ["Goodnight", "See you"], "yes": ["All right", "Yes"], "thanks": ["Thank you", "That's kind"], "wow": ["Oh, look"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19031,7 +18986,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "open",
     "talk": "Warm, grateful and practical; thanks you, then asks what needs doing.",
-    "thread": "startover",
     "tpl": "warm",
     "words": {"hi": ["Oh, hello", "Hello, love"], "bye": ["Thank you. Truly", "Take care"], "yes": ["Yes, of course", "Gladly"], "thanks": ["Thank you. Thank you", "Oh, bless you"], "wow": ["Oh, would you look at that"], "sigh": ["Oh, well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19065,7 +19019,6 @@ const VOICE = {
     "needs": "share",
     "openness": "normal",
     "talk": "Slow and dry; drifts, then lands a deadpan line; talks about herbs like friends.",
-    "thread": "stuck",
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hello", "Hm? Hi", "Hello, you"], "bye": ["Bye, then", "Mind the basil", "See you"], "yes": ["Mm, all right", "Suppose so", "Yes, fine"], "thanks": ["Thanks", "That's nice of you"], "wow": ["Oh, that's good", "Huh. Lovely"], "sigh": ["Mm", "Well, then"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19162,7 +19115,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "guarded",
     "talk": "Short, sure and stubborn; argues for fun; dreams out loud about the boat and nothing else.",
-    "thread": "startover",
     "tpl": "brisk",
     "words": {"hi": ["Hey", "You", "All right"], "bye": ["Right", "Later", "Off with you"], "yes": ["Fine", "Sure", "Go on"], "thanks": ["Ta", "Cheers"], "wow": ["Huh. Nice", "Not bad"], "sigh": ["Pfft", "Whatever"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19259,7 +19211,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Soft and exact. Talks about flying the way some people talk about carrying soup.",
-    "thread": "notgood",
     "tpl": "steady",
     "words": {"hi": ["Hello there", "Ah, hello", "Good to see you"], "bye": ["Steady as she goes", "Mind how you go", "Gently, now"], "yes": ["Of course", "Gladly", "I can do that"], "thanks": ["Thank you kindly", "Much obliged"], "wow": ["Oh, that's lovely"], "sigh": ["Ah, me"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19358,7 +19309,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Fast and looping; nerves first, then warmth; jumps from the coils to the cat and back; ends with \"anyway\".",
-    "thread": "notgood",
     "tpl": "chatty",
     "words": {"hi": ["Oh! Hi", "Hey, hey", "Hello, hi"], "bye": ["Right, anyway", "Off I go", "Catch you later"], "yes": ["Yes, sure", "Course, course", "Sure thing"], "thanks": ["Oh, thanks", "Thanks, really", "You're kind"], "wow": ["Oh, wow", "Ha, look at that"], "sigh": ["Ah, anyway", "Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19768,7 +19718,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Bright and keen; turns small things into friendly races; tries a Veyli word in most chats.",
-    "thread": "exams",
     "tpl": "earnest",
     "words": {"hi": ["Hello", "Hi, hi", "Oh, hello"], "bye": ["See you", "Race you back", "Bye for now"], "yes": ["Yes", "Definitely", "On it"], "thanks": ["Thanks", "Brilliant, thanks"], "wow": ["Brilliant", "Oh, wow"], "sigh": ["Oh, bother", "Next time, then"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19865,7 +19814,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Cheerful, slow and patient; never rushes anyone; tells his twin's news like a serial.",
-    "thread": "family",
     "tpl": "steady",
     "words": {"hi": ["Hello, hello", "Hi there", "Oh, hello"], "bye": ["Night, then", "Take your time", "See you"], "yes": ["Sure", "No rush, yes", "Happy to"], "thanks": ["Thanks, friend", "Kind of you"], "wow": ["Oh, lovely", "That's nice work"], "sigh": ["Ah, well", "No matter"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -19962,7 +19910,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "open",
     "talk": "Market-stall patter; easy, quick, a deal for everything; ambitious under the ease; gossip, but never the private stuff.",
-    "thread": "exams",
     "tpl": "playful",
     "words": {"hi": ["Hey hey", "Oi", "There you are"], "bye": ["Laters", "Mind how you go", "Catch you up"], "yes": ["Deal", "Easy", "Go on, then"], "thanks": ["You're a star", "Cheers"], "wow": ["Ooh, nice", "Now that's a bargain"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "upstairs", "upstairs"]},
     "lines": {
@@ -20129,7 +20076,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Formal and exact, no contractions; long pauses; names small courtesies; a dry joke that arrives a sentence late.",
-    "thread": "startover",
     "tpl": "steady",
     "words": {"hi": ["Greetings", "Good day", "Ah. You"], "bye": ["Go well", "Until the next hour", "Be well"], "yes": ["Yes", "That is acceptable", "Gladly"], "thanks": ["Thank you", "That was courteous"], "wow": ["That is remarkable"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20189,7 +20135,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Fast, clever bursts; starts in the middle; drifts off mid-thought; explains the tea at length; \"No.\" is a full sentence.",
-    "thread": "notgood",
     "tpl": "brisk",
     "words": {"hi": ["Ah. You", "Hello", "Oh, good"], "bye": ["Off you go", "Back to it", "Don't touch the labels"], "yes": ["Yes, obviously", "Fine", "Yes, yes"], "thanks": ["Thank you", "Good. Thanks"], "wow": ["Oh, that's interesting"], "sigh": ["Mm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20285,7 +20230,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "guarded",
     "talk": "Quiet, few words, then a dry line that lands late. Better with machines than people, and knows it.",
-    "thread": "family",
     "tpl": "shy",
     "words": {"hi": ["Oh. Hi", "Hey", "Hello"], "bye": ["Bye", "See you", "Right, then"], "yes": ["Yes", "OK", "Sure"], "thanks": ["Thanks", "Cheers"], "wow": ["Huh"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20381,7 +20325,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Soft and drifting; trails off and comes back; hears the ship as weather; not awake before the second tea.",
-    "thread": "homesick",
     "tpl": "dreamy",
     "words": {"hi": ["Oh, hello", "Mm, hi", "Hello there"], "bye": ["Bye, then", "See you around", "Off I drift"], "yes": ["Mm, yes", "All right", "I can do that"], "thanks": ["Oh, thank you", "That's kind"], "wow": ["Oh, look", "That's lovely"], "sigh": ["Mm", "Oh, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20479,7 +20422,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Gruff and blunt; grumbles as affection; short lines; a soft centre that shows only with biscuits.",
-    "thread": "loss",
     "tpl": "gruff",
     "words": {"hi": ["Huh. You", "Hm. Hello", "Oh, it's you"], "bye": ["Go on, then", "Off", "Mind yourself"], "yes": ["Fine", "S'pose", "Yeah, all right"], "thanks": ["Ta", "Hm. Thanks"], "wow": ["Well, I never", "Huh, not bad"], "sigh": ["Typical", "Here we go"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20576,7 +20518,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Quick and sunny, always halfway to somewhere; finishes sentences over a shoulder; counts the watches on the way to pilot.",
-    "thread": "talent",
     "tpl": "earnest",
     "words": {"hi": ["Oh, hi", "Hey", "Hello"], "bye": ["Got to run", "See you round", "Onward"], "yes": ["Yes, course", "Definitely", "Go on, then"], "thanks": ["Thanks, really", "You're great"], "wow": ["Oh, wow", "Look at that"], "sigh": ["Ah, nuts"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20700,7 +20641,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "open",
     "talk": "Few common words, carefully used; points and sketches the rest; laughs easily at the gaps.",
-    "thread": "startover",
     "tpl": "playful",
     "words": {"hi": ["Hello!", "Good day"], "bye": ["Go well", "Goodbye, yes"], "yes": ["Yes, yes", "Good"], "thanks": ["Thank you", "Good, thank you"], "wow": ["Ah! Good machine"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20734,7 +20674,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "guarded",
     "talk": "Short and blunt; no small talk; calls anything vague \"static\"; answers the question you should have asked; warmer on music.",
-    "thread": "lonely",
     "tpl": "brisk",
     "words": {"hi": ["Hey", "You", "Hi"], "bye": ["Out", "Later", "Go on"], "yes": ["Yes", "Done", "Fine"], "thanks": ["Thanks", "Good"], "wow": ["Huh. Clean", "Nice"], "sigh": ["Static"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20857,7 +20796,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "open",
     "talk": "Blunt and quick; says what everyone was thinking; jokes in comic-strip beats; never mean.",
-    "thread": "leaving",
     "tpl": "playful",
     "words": {"hi": ["Oi", "Hey", "All right"], "bye": ["Laters", "Off you go", "Don't do anything I'd draw"], "yes": ["Yeah, go on", "Easy", "Done"], "thanks": ["Cheers", "Nice one"], "wow": ["No way", "Ha, look at that"], "sigh": ["Ugh", "Typical"], "nick": [null, "new hand", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -20954,7 +20892,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Grave, slow and ceremonial; every word chosen; long silences, meant.",
-    "thread": "leaving",
     "tpl": "steady",
     "words": {"hi": ["Greetings", "Good day"], "bye": ["Go well", "Be well"], "yes": ["It is so", "Yes"], "thanks": ["You honour us", "Thank you"], "wow": ["Remarkable"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -21618,7 +21555,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "normal",
     "talk": "Dry, reliable, unhurried; the voice of reason in Bunk 1 with a deadpan edge; \"lights out\" at ten; disapproves of gossip, then asks for the rest.",
-    "thread": "homesick",
     "tpl": "dry",
     "words": {"hi": ["Oh, hi", "Hey", "You're back"], "bye": ["Lights out at ten", "Night, when it comes", "See you"], "yes": ["Fine", "Sure", "If I must"], "thanks": ["Ta", "Thanks, you"], "wow": ["Huh. Not bad", "Oh, nice"], "sigh": ["Honestly"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -21783,7 +21719,6 @@ const VOICE = {
     "needs": "share",
     "openness": "normal",
     "talk": "Kind and thoughtful; slow to speak, sure when she does. Writes letters home to Valo on paper every rest day and thinks in letter-length thoughts.",
-    "thread": "exams",
     "tpl": "warm",
     "words": {"hi": ["Hello", "Hi there", "Oh, hello"], "bye": ["Take care", "Sleep well", "See you soon"], "yes": ["Of course", "Yes, gladly", "Sure"], "thanks": ["Thank you", "That's kind of you"], "wow": ["Oh, lovely"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23007,7 +22942,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Thinks before speaking, gentle and a little formal; then fiercely competitive about tiny things; sometimes talks like a letter.",
-    "thread": "family",
     "tpl": "steady",
     "words": {"hi": ["Hello", "Good to see you", "Ah, hello"], "bye": ["Take care", "Until later", "Be well"], "yes": ["Gladly", "Of course", "I can do that"], "thanks": ["Thank you, truly", "That's good of you"], "wow": ["Well now", "That's something"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23148,7 +23082,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "open",
     "talk": "Cheerful, bright and quick; the cheer is real and so is the homesickness under it. Learning the Watch from Holt one lecture at a time, and quotes him.",
-    "thread": "talent",
     "tpl": "chatty",
     "words": {"hi": ["Hi hi", "Hello", "Oh, hey"], "bye": ["Bye now", "See you", "Take care"], "yes": ["Yes", "Course", "Sure"], "thanks": ["Thank you", "Aw, thanks"], "wow": ["Ooh"], "sigh": ["Oh well"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23243,7 +23176,6 @@ const VOICE = {
     "needs": "share",
     "openness": "open",
     "talk": "Light and teasing; makes small games of work; kind under every joke; times things for fun.",
-    "thread": "lonely",
     "tpl": "playful",
     "words": {"hi": ["Hiya", "Ooh, hello", "Hey, you"], "bye": ["Ta-ra", "Run along", "See you"], "yes": ["Ooh, yes", "Go on then", "Easy"], "thanks": ["Ta muchly", "Thanks, you"], "wow": ["Ooh", "Look at you"], "sigh": ["Oh, go on", "Aw"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23340,7 +23272,6 @@ const VOICE = {
     "needs": "practical",
     "openness": "guarded",
     "talk": "Quiet, exact, kind sideways; says only the useful part; food in grams and minutes; few questions, and listens to the answers.",
-    "thread": "burnout",
     "tpl": "steady",
     "words": {"hi": ["Hello", "Oh, it's you", "Hi"], "bye": ["Mind the step", "Go on, then", "Right"], "yes": ["Yes", "That works", "Fine by me"], "thanks": ["Thanks", "That's kind"], "wow": ["That's neat work", "Oh, tidy"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23467,7 +23398,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Quiet until she's comfortable, then playful and silly. Tells terrible jokes at breakfast and is in a running contest with Nils over whose are worse.",
-    "thread": "rivalry",
     "tpl": "playful",
     "words": {"hi": ["Hello", "Hi", "Oh, hey"], "bye": ["Bye", "See you", "Off I go"], "yes": ["Sure", "OK", "Go on, then"], "thanks": ["Thanks", "Oh, ta"], "wow": ["Ooh"], "sigh": ["Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23560,7 +23490,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "normal",
     "talk": "Soft, nervous in company, apologises a lot; steady with a patient; tells a terrible joke when nervous, then winces.",
-    "thread": "notgood",
     "tpl": "warm",
     "words": {"hi": ["Oh, hello", "Hello", "Hi there"], "bye": ["Sleep well, when you do", "Take care", "Look after yourself"], "yes": ["Of course", "Yes, I can", "Mm, yes"], "thanks": ["Thank you, really", "Oh, thank you"], "wow": ["Oh, that's lovely", "Goodness"], "sigh": ["Oh dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23684,7 +23613,6 @@ const VOICE = {
     "needs": "listen",
     "openness": "guarded",
     "talk": "Quiet and exact until a star is named wrong, then not quiet at all. Few words, all of them correct.",
-    "thread": "talent",
     "tpl": "shy",
     "words": {"hi": ["Oh. Hi", "Hello", "Hey"], "bye": ["Bye", "See you", "Clear skies"], "yes": ["Yes", "All right", "Sure"], "thanks": ["Thanks", "Thank you"], "wow": ["Oh. That's good"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
@@ -23777,7 +23705,6 @@ const VOICE = {
     "needs": "cheer",
     "openness": "normal",
     "talk": "Fast and sharp, a market trader's patter with a bridge officer's precision. Sarcastic, never mean.",
-    "thread": "startover",
     "tpl": "dry",
     "words": {"hi": ["Oh, it's you", "Hey", "Hi"], "bye": ["Off you go", "Don't break anything", "Later"], "yes": ["Fine", "Done", "If I must"], "thanks": ["Ta", "Cheers, then"], "wow": ["Huh. Not bad"], "sigh": ["Typical"], "nick": [null, null, "{me}", "{me}", "{me}"]},
     "lines": {
