@@ -260,7 +260,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 
 **On call:** sim (rotas, musters, the duty officer, the stuck lift, crew at team jobs, `playerBed()`), performance (poses and decals), galley (oven tuning's effect on cooking, Brennan's lines), social A (Work reputation as trust; reactions), device (only if the skin needs something), interactions (tap targets for new places), crew designer (the junior laundry rota, if it's roster data). **This planner** stays on until the mechanic designer is hired, then hands over (`plans/handover-pillar5-planner.md`).
 
-*(Build ranges 0.51-0.53 look free in DEV_NOTES and git history; the build master confirms before the first push.)* The build master, reviewers, check runners, watchdog and the cross-pillar coordinators are in **Part 5**.
+*(Build ranges 0.44, 0.45, 0.47, 0.49 and 0.51-0.54 confirmed free by the build master, 2026-10-17.)* The build master, reviewers, check runners, watchdog and the cross-pillar coordinators are in **Part 5**.
 
 ### The briefs (ready to paste)
 
@@ -422,3 +422,4 @@ X2's watch list: two seats designing the same thing (as when two seats both buil
 4. **The ladder's pace:** about one new mechanic every 2-3 ship days after week 1, promotion at about Day 20. *Default:* yes.
 5. **Which "more ideas"** (leak hunting, tool upkeep, the lift roof, irrigation, coolant rounds, the logbook, rewiring) should join the ladder? *Default:* none yet; the designer brings the user's picks as spec pages after Step 2.
 6. **Your own cabin:** Spare 4-23 (no window)? *Default:* yes.
+7. **The coordinator in Step 1:** should X1 (the code coordinator) start in Step 1 to watch the career engineer's branch and draft the shared table early, or wait for Step 2 with the rest of the crew? *Default:* wait for Step 2; in Step 1 there's only one small new-section branch, which Pillar 4's build master and reviewers already cover.
