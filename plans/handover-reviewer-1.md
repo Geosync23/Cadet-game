@@ -4,28 +4,25 @@
 **Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; before that session_01PxXKwc5mkC7tV5MPi3p7PP). **Build master:** session_012K7RZ3oSX2vpBb1rR66MBh. Reviewer 2 covers dialogue, traditions, device, decks, tiles, content.
 **Chain of command (the user's rule):** the user → the lead → everyone. Never contact the user; report to the lead (and the helper).
 
-## My seats (session ids) — refreshed 2026-10-17 ~09:00 by reviewer 1 (session 2)
-Lead from ~04:35: **session_01KPJMYjXAPkNUcrQ8VRkhLE**. Build master 2: **session_01F8ph7FKqViF3heRn94YgBr**. Reviewer 1c (added ~08:15, notes on claude/reviews-3): **session_01YcSJkhhJ2MnCjsJs7QV8ud**; took player from 5e61e12 and roster d53cf40.
-| Seat | Branch | Session | Last reviewed | Verdict |
+## My seats (session ids) — refreshed 2026-10-17 ~10:20 by reviewer 1 (session 2)
+Lead: **session_01KPJMYjXAPkNUcrQ8VRkhLE**. Build master 2: **session_01F8ph7FKqViF3heRn94YgBr**. Reviewer 1c (notes on claude/reviews-3): **session_01YcSJkhhJ2MnCjsJs7QV8ud**; owns player (from 5e61e12), arrival 0.42.20+ and the roster. Reviewer 2b has galley 0.29.33+.
+| Seat | Branch | Session | Last reviewed | Verdict / open |
 | --- | --- | --- | --- | --- |
-| Sim engineer 4 (sections 10/13/14/17) | `claude/sim-engineer` | session_01EJUGywZv9BpcUezjXES9AC | bfcd864 (0.26.31) | PASS WITH FIXES. MUST: crew already in the food line never leave it while galleyCanServe() is false (38 late for shift). f9a145c (0.26.32) fixes a7673e0's two must-fixes (Calder's seat, repair note t); being verified |
-| Onboarding (21) | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | in progress: 4f6d0b2..54d7911 (0.42.18-0.42.21, Zeke's tour) | headline of 0.60.3 |
-| Social A (20) | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 3a68d74 (0.36.63) PASS WITH FIXES; 69876a7 (0.36.72) in progress | |
-| Social B2 (20c) | `claude/social-stories` | session_014A3w2gK8FBNWs66YC3LfME | 47b02d6 (0.39.17) PASS WITH FIXES (medium: storyM creates records on read); ba09f2b (0.39.18, top-300 snapshot pairs; asked the lead if approved) in progress | |
-| Galley (16) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 6abd36b PASS WITH FIXES; final 40166d6 (0.29.32) in progress (blocks 0.60.3); 2bfd042 (0.29.33) next | galley owns the player's line membership (lead) |
-| Player engineer 4 (15) | `claude/player-needs` | session_01XPwaJeT8eATK5At45zEJ5w | 5e61e12 (0.28.28-29) PASS WITH FIXES; later builds are reviewer 1c's | draft player-needs-fabc552-DRAFT.md |
-| Device engineer 3 (19) | `claude/device` | session_01SskqNx45iEGyQq2W9Fjg5Y | ee3fcdd (0.35.32, occasions as appointments) in progress, asked by the lead | |
-| Crew designer 3 | `claude/deck-plans-1-2-6` | - | d53cf40 is reviewer 1c's | |
+| Sim engineer 4 (10/13/14/17) | `claude/sim-engineer` | session_01EJUGywZv9BpcUezjXES9AC | 6e87e6b (0.26.33) | PASS WITH FIXES. MUST (0.60.3): Calder's 3-mess-9 shared with Torres (introLay free() ignores occ.res). food_check fails on full merge + ship-events Sunday day 7 (being traced). 236810f (0.26.34) addendum in progress. Deferred should: breakfast tray return lateness |
+| Galley (16) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 6abd36b PASS WITH FIXES; final 40166d6 (0.29.32) in progress, gates 0.60.3 | galley owns the player's line membership |
+| Social A (20) | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 2cfbc63 (0.36.76) PASS WITH FIXES | news uncapped; --long samples every 28 days (peaks missed); knownPack keyed by roster position |
+| Social B2 (20c) | `claude/social-stories` | session_014A3w2gK8FBNWs66YC3LfME | 3947822 (0.39.21) PASS WITH FIXES | arrival start never packs bonds (negative since) |
+| Onboarding 2 (21) | `claude/arrival` | ? (ask the lead) | partial 54d7911 (b7ad3e9) | 1c owns arrival now |
+| Device engineer 3 (19) | `claude/device` | session_01SskqNx45iEGyQq2W9Fjg5Y | partial ee3fcdd | off my queue |
 
-Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`; read the latest per branch before re-reviewing.
+Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`.
 
 ## Open items to follow up
-1. The full-merge jump test: fixed by social A 0.36.61 (SOC_IN, notes applied at the end of the hour) plus sim f9a145c's max(t, SIM_AT). Re-check on each full merge.
-2. Social save: social B 0.39.18 replaces the |aff| >= 30 snapshot rule with "strongest 300 pairs a week"; asked the lead whether approved.
-3. For the dialogue engineer: section 22's linesFill can add {home} {family} {hobby} {since} to SOCIAL_FILL now.
-4. For ship-events: events_check fails on ship-events 4e72597 alone at day 231 (dayReport double: 3-store-1).
-5. Social B's farewellCrew isn't wired yet; check against social A's 14:00 Sunday farewells when it is.
-6. A hook owner: section 16 (galley) owns the player's food-line membership (lineJoin/lineLeave), the lead's ruling.
+1. The lead's long-play save rule: every saved social part has a hard bound by design with its worst case in DEV_NOTES; social save <= 30 KB at day 140 and < 40 KB at any length; --long to day 280. My advice (sent): measure EVERY day from the real day-0 arrival start, not every 28 days from day 1 (peaks: 31.4 KB day 115/130, 35.6-35.7 KB day 242).
+2. The jump test on the newest full merge differed in social A's cues, rep and noteq (seen by the social B 0.39.21 review; not attributed).
+3. For the dialogue engineer: section 22's linesFill can add {home} {family} {hobby} {since} to SOCIAL_FILL.
+4. For ship-events: events_check fails on ship-events 4e72597 alone at day 231 (3-store-1 double).
+5. social and sim-engineer conflict in player_check.py (not a build line).
 
 ## Tools (on `claude/reviews`)
 - `name_check.py`: `python3 name_check.py COMBINED.html` (names declared twice, and `node --check`); `--branches BASE REF...` (names two branches both add; names a branch deleted but still uses). On a re-review, run `--branches <last reviewed> <new>`: it caught `socP` in social f05d7db. The build master runs it on every combine.
@@ -38,6 +35,9 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 - **Prove in the browser,** not by reading alone: New game, a fresh first launch (clear localStorage, `RELOAD`), a reload mid-walk, chatLine on a real person.
 
 ## Gotchas found so far (worth looking for again)
+- Parallel browser runs clash: cadet_test.py's Game copies every build to $CADET_WORK/test/_run_<name>.html, so give each parallel job its own CADET_WORK (with a test/ folder and a `three` link). Never share a probe script between agents (one was overwritten with a hard-coded build path).
+- Save-size checks that sample every 28 days miss the peaks: measure daily, from the real day-0 arrival start.
+- A mid-line `//` comment silently disables the rest of the line (social 0.36.61): name_check and node --check both pass.
 - `typeof X` doesn't guard a `const` that hasn't been declared yet (the temporal dead zone): it throws. It bit sim's `arriving()` → section 21's `introWanted`, and the checks of not-yet-baked `VOICE`.
 - A test that sets `window.X` is shadowed by the game's own `const X`.
 - A default argument that calls a deleted helper only fails at run time (`node --check` passes).
