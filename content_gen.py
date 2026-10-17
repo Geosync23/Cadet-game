@@ -26,7 +26,8 @@ COND_KEYS = {
     # social: section 20's pure queries
     'mem': 'social', 'told': 'social', 'warmth': 'social', 'aff': 'social', 'bond': 'social', 'mood': 'social',
     'beat': 'social', 'news': 'social', 'rep': 'social', 'ship.work': 'social', 'ship.kindness': 'social',
-    'ship.spirit': 'social', 'you': 'social', 'cue': 'social', 'flag': 'social', 'week1': 'social',
+    'ship.spirit': 'social', 'you': 'social', 'cue': 'social', 'flag': 'social', 'week1': 'social', 'beatIs': 'social',
+    'leaving': 'social', 'newhere': 'social', 'moved': 'social', 'guide': 'social',
     # the dialogue engine's (section 22)
     'time': 'lines', 'weekday': 'lines', 'season': 'lines', 'place': 'lines', 'deck': 'lines', 'event': 'lines',
     'trad': 'lines', 'dept': 'lines', 'rank': 'lines', 'trait': 'lines', 'habit': 'lines', 'act': 'lines',
@@ -77,6 +78,10 @@ def parse_conds(text, where):
             old = dst.get('tier', [0, 4])
             dst['tier'] = [max(lo, old[0]), min(hi, old[1])]
             continue
+        if tok.startswith('beat='):                # exactly n beats told
+            tok = 'beatIs:' + tok[5:]
+        if tok == 'newhere':                       # a bare word: arrived within the last 7 days
+            tok = 'newhere:true'
         if ':' not in tok:
             raise GenError(f'{where}: "{tok}" is not a condition (key:value or tier>=...)')
         k, v = tok.split(':', 1)

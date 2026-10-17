@@ -71,7 +71,9 @@ memory of something you did), `cue` (a reaction to something that happened), `in
 (at your bunk), `note` (left on your bunk), `gift` (thanks for a gift), `about` (about a crewmate they're close to),
 `rep` (your standing with their department), `knownFor`, `week1` (your first week), `smalltalk` (chatter between crew,
 a bubble), `rumour` (how they open with news), `hint` (a moment is ready: "Got a minute? Properly, I mean."),
-`missed` (you missed an appointment), `birthday`, `story.<arc>` (an arc beat).
+`missed` (you missed an appointment), `birthday`, `story.<arc>` (an arc beat), `goodbye` (someone leaving the Wren),
+`letter` (Mail from crew who've moved on), `newcomer` (the newcomer you guide asking you things), `host` (guests at
+your cabin, later).
 
 ## Conditions (the frozen vocabulary)
 
@@ -86,17 +88,22 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `mem:<what>` | they remember you doing it (starts-with match) | `mem:fav.lamp`, `mem:came.quiz`, `mem:intro.dinner` |
 | `told:<what>` | they remember it and haven't mentioned it yet; said once, then marked told | `told:fixed.oven` |
 | `warmth:` | `warm` (you've been around lately) or `cold` (not for a while) | `warmth:cold` |
-| `aff:` | how they get on with the other crew member in the scene: `rival`, `neutral`, `friend` | `aff:rival` |
+| `aff:` | how they get on with the other crew member in the scene: `rival`, `neutral`, `friend`; or with a named one: `aff:<crewId>:<band>` | `aff:rival`, `aff:saruth:rival` |
 | `bond:` | they have a crewmate who is their `best`, `rival`, `mentor`, `mentee`, `drifting`, `couple`, `friend` | `bond:best` |
 | `mood:` | `low`, `ok`, `high` | `mood:low` |
 | `beat:<arc>.<n>` | at least n beats of that story arc have been told | `beat:tomas.3` |
+| `beat=<arc>.<n>` | exactly n beats told (a line that belongs between two beats) | `beat=tomas.2` |
 | `news:<id>` | they know that piece of news | `news:storm` |
 | `rep:` | your standing with their department: `new`, `known`, `well`, `theirs` | `rep:well` |
 | `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you: `low`, `ok`, `high` | `ship.kindness:high` |
 | `you:<tag>` | you're known for it | `you:reliable` |
 | `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it) | `cue:repair.oven`, `cue:repair.oven.you` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
-| `week1:` | `true` during your first week | `week1:true` |
+| `week1:` | `true` during your first week (from the arrival evening until the week is done) | `week1:true` |
+| `leaving:` | `soon`: the speaker is transferring off within 10 days; `you`: this is a goodbye | `leaving:soon` |
+| `newhere` | the speaker arrived within the last 7 days (a bare word, no value) | `newhere` |
+| `moved:<id>` | that crew member has left the Wren | `moved:okoro` |
+| `guide:` | `true` while you're guiding a newcomer | `guide:true` |
 
 **About the moment** (the dialogue engine):
 
@@ -105,7 +112,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `time:` | the time of day | `morning` (6-12), `afternoon` (12-17), `evening` (17-22), `night` (22-6) |
 | `weekday:` | the day | `mon` `tue` `wed` `thu` `fri` `sat` `sun` |
 | `season:` | the ship's season | `sowing` `greening` `harvest` `lanterns` |
-| `place:` | where they are: a room's name or a place type | `place:mess`, `place:calm` |
+| `place:` | where they are: a room's name or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
 | `deck:` | the deck | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
@@ -124,7 +131,7 @@ skipped, so it's safe to use them.
 
 `{me}` your name, `{name}` the speaker's name, `{first}` their first name, `{nick}` what they call you,
 `{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{boss}` their chief,
-`{other}` the other crew member in the scene, `{thing}` what a memory is about ("the lamp"), `{trad}` the tradition,
+`{other}` the other crew member in the scene, `{thing}` what the line's memory is about (`mem:fav.lamp` gives "the lamp"), `{trad}` the tradition,
 `{machine}`, `{room}`, `{deck}`, `{dish}`, `{weekday}`, and from their roster entry `{home}`, `{family}`, `{hobby}`,
 `{since}`.
 
@@ -228,7 +235,7 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
   arc beats, moments, notes and meeting lines 140. A placeholder counts as about 9 characters.
 - **No romance or flirting** with anyone, **no swearing** beyond "blast", **no real-world brands or politics**, and
   nothing the game doesn't have (no photos, cameras, phones, weapons).
-- **`#serious` lines are earned:** only behind `tier>=friend` or a `beat:`.
+- **`#serious` lines are earned:** only behind `tier>=friend`, a `beat:`, `mem:moment...` or `leaving:soon`.
 - **Names:** only roster crew and guests. A name it doesn't know is a warning.
 - **British spelling** (colour, favourite, mum, biscuit).
 - **Easy to read:** short words, short sentences. A file under 60 on the reading-ease score is a warning.

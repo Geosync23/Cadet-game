@@ -12922,6 +12922,8 @@ function lineQ(name, ...a) {
       moodOf: typeof moodOf === 'function' && moodOf, beatOf: typeof beatOf === 'function' && beatOf, knowsNews: typeof knowsNews === 'function' && knowsNews,
       repBand: typeof repBand === 'function' && repBand, repShip: typeof repShip === 'function' && repShip, knownFor: typeof knownFor === 'function' && knownFor,
       cue: typeof cue === 'function' && cue, flag: typeof flag === 'function' && flag, season: typeof season === 'function' && season,
+      inWeek1: typeof inWeek1 === 'function' && inWeek1, leavingSoon: typeof leavingSoon === 'function' && leavingSoon, newHere: typeof newHere === 'function' && newHere,
+      movedOff: typeof movedOff === 'function' && movedOff, memThing: typeof memThing === 'function' && memThing,
       eventNow: typeof eventNow === 'function' && eventNow }[name];
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
@@ -12940,21 +12942,26 @@ function lineCond(k, v, p, ctx) {
     case 'mem': return any(v, x => lineQ('mem', id, x) != null);
     case 'told': return any(v, x => { const m = lineQ('mem', id, x); return m != null && !m.told; });
     case 'warmth': return any(v, x => lineQ('warmth', id) === x);
-    case 'aff': return !!ctx.other && any(v, x => lineQ('affBand', id, ctx.other.id || ctx.other) === x);
+    case 'aff': return any(v, x => { const i = x.lastIndexOf(':'); if (i > 0) return lineQ('affBand', id, x.slice(0, i)) === x.slice(i + 1); return !!ctx.other && lineQ('affBand', id, ctx.other.id || ctx.other) === x; });   // aff:band (with ctx.other) or aff:<crewId>:band
     case 'bond': return any(v, x => lineQ('bondOf', id, x) != null);
     case 'mood': return any(v, x => lineQ('moodOf', p) === x);
-    case 'beat': return any(v, x => { const i = x.lastIndexOf('.'); return (lineQ('beatOf', x.slice(0, i)) || 0) >= +x.slice(i + 1); });
+    case 'beat': return any(v, x => { const i = x.lastIndexOf('.'); return (lineQ('beatOf', x.slice(0, i)) || 0) >= +x.slice(i + 1); });   // at least n told
+    case 'beatIs': return any(v, x => { const i = x.lastIndexOf('.'); return (lineQ('beatOf', x.slice(0, i)) || 0) === +x.slice(i + 1); });   // beat=arc.n: exactly n told
     case 'news': return any(v, x => !!lineQ('knowsNews', p, x));
     case 'rep': return any(v, x => lineQ('repBand', p.dept) === x);
     case 'ship.work': case 'ship.kindness': case 'ship.spirit': return any(v, x => lineQ('repShip', k.slice(5)) === x);
     case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x));
     case 'cue': return any(v, x => !!lineQ('cue', x));
     case 'flag': return any(v, x => !!lineQ('flag', x));
-    case 'week1': { const on = !!lineQ('flag', 'week1.d2') && !lineQ('flag', 'week1.done'); return any(v, x => (x === 'true') === on); }
+    case 'week1': { const on = !!lineQ('inWeek1'); return any(v, x => (x === 'true') === on); }
+    case 'leaving': return any(v, x => x === 'soon' ? !!lineQ('leavingSoon', id) : x === 'you' ? !!ctx.goodbye : false);
+    case 'newhere': return any(v, x => (x === 'true') === !!lineQ('newHere', id));
+    case 'moved': return any(v, x => !!lineQ('movedOff', x));
+    case 'guide': return any(v, x => (x === 'true') === !!lineQ('flag', 'guide.active'));
     case 'time': { const m = ((t % 1440) + 1440) % 1440; return any(v, x => { const r = LINE_TIMES[x]; return !!r && (r[0] < r[1] ? m >= r[0] && m < r[1] : m >= r[0] || m < r[1]); }); }
     case 'weekday': return any(v, x => LINE_DAYS[weekday(Math.floor(t / 1440) + 1)] === x);
     case 'season': return any(v, x => lineQ('season', Math.floor(t / 1440) + 1) === x);
-    case 'place': return any(v, x => ctx.place === x || (ctx.room || '').toLowerCase() === x.toLowerCase());
+    case 'place': return any(v, x => x === 'calm' ? !!ctx.place && typeof CALM_TYPES !== 'undefined' && [].concat(CALM_TYPES.has ? [...CALM_TYPES] : CALM_TYPES).includes(ctx.place) : ctx.place === x || (ctx.room || '').toLowerCase() === x.toLowerCase());   // calm: section 20's CALM_TYPES
     case 'deck': return any(v, x => String(ctx.deck) === x);
     case 'event': return any(v, x => { const [ev, ph] = x.split('.'), n = lineQ('eventNow', t); return !!n && n.id === ev && (!ph || n.phase === ph); });
     case 'trad': return any(v, x => ctx.trad === x || (x === 'today' && !!ctx.trad));
@@ -13023,7 +13030,7 @@ function linesFill(text, p, ctx = {}) {
       case 'other': return ctx.other ? linesName(linesWho(ctx.other)) : null;
       case 'weekday': return WEEKDAYS[weekday(Math.floor(t / 1440) + 1)];
       case 'home': case 'family': case 'hobby': case 'since': return p[k] ? String(p[k]) : null;
-      case 'thing': { const m = ctx.mem && lineQ('mem', p.id, ctx.mem); return m && m.thing ? m.thing : null; }
+      case 'thing': { const k = ctx.mem; return k ? lineQ('memThing', k) || null : null; }   // from the memory the line matched (mem: or told:)
     }
     return null;
   };
@@ -13043,7 +13050,8 @@ function lineFor(who, kind, ctx = {}) {
     const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
     if (mine.some(r => r.id === x.e.id && r.h !== h)) x.sc -= 15;
     if (all.some(r => r.id === x.e.id && r.who !== p.id)) x.sc -= 8;
-    x.text = linesFill(x.e.text, p, c);
+    const mk = [].concat(x.e.told || x.e.mem || [])[0];
+    x.text = linesFill(x.e.text, p, mk && !c.mem ? { ...c, mem: mk } : c);
   }
   const ok = pool.filter(x => x.text != null); if (!ok.length) return null;
   const top = Math.max(...ok.map(x => x.sc)), best = ok.filter(x => x.sc === top);

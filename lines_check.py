@@ -23,10 +23,11 @@ TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other'}
 VALUES = {
-    'warmth': {'cold', 'warm'}, 'aff': {'rival', 'neutral', 'friend'},
+    'warmth': {'cold', 'warm'},
     'bond': {'best', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'friend'}, 'mood': {'low', 'ok', 'high'},
     'rep': {'new', 'known', 'well', 'theirs'}, 'ship.work': {'low', 'ok', 'high'}, 'ship.kindness': {'low', 'ok', 'high'},
-    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'},
+    'ship.spirit': {'low', 'ok', 'high'}, 'week1': {'true', 'false'}, 'leaving': {'soon', 'you'}, 'newhere': {'true', 'false'},
+    'guide': {'true', 'false'},
     'time': {'morning', 'afternoon', 'evening', 'night'}, 'weekday': {'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'},
     'season': {'sowing', 'greening', 'harvest', 'lanterns'}, 'birthday': {'me', 'you'},
     'dept': {'command', 'helm', 'comms', 'works', 'watch', 'survey', 'infirmary', 'galley', 'garden', 'store', 'civilian', 'guest'},
@@ -148,7 +149,17 @@ def main(argv):
                         for alt in str(x).split('|'):
                             if alt not in VALUES[k]:
                                 errors.append(f'{tag}: {k}:{alt} is not one of {", ".join(sorted(VALUES[k]))}')
-                if k == 'beat':
+                if k == 'aff':
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            band = alt.rsplit(':', 1)
+                            if band[-1] not in {'rival', 'neutral', 'friend'} or (len(band) == 2 and band[0] not in people):
+                                errors.append(f'{tag}: aff is aff:rival|neutral|friend or aff:<crewId>:<band>')
+                if k == 'moved':
+                    for x in (v if isinstance(v, list) else [v]):
+                        if x not in people:
+                            errors.append(f'{tag}: moved:{x} is not a crew id')
+                if k in ('beat', 'beatIs'):
                     for x in (v if isinstance(v, list) else [v]):
                         if not re.fullmatch(r'[\w-]+\.\d+', x):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
@@ -168,8 +179,10 @@ def main(argv):
         for us, uk in US.items():
             if re.search(r'\b' + us + r's?\b', low):
                 warns.append(f'{tag}: American spelling "{us}" (British: "{uk}")')
-        if e.get('tone') == 'serious' and not ((e.get('tier') and e['tier'][0] >= 3) or e.get('beat') or kind.startswith(('story', 'arc', 'moment'))):
-            errors.append(f'{tag}: #serious needs tier>=friend or a beat: condition (serious moments are earned)')
+        mems = [str(x) for x in (e.get('mem') if isinstance(e.get('mem'), list) else [e.get('mem')]) if x]
+        if e.get('tone') == 'serious' and not ((e.get('tier') and e['tier'][0] >= 3) or e.get('beat') or e.get('beatIs') or any(m.startswith('moment') for m in mems)
+                                               or 'soon' in str(e.get('leaving', '')) or kind.startswith(('story', 'arc', 'moment'))):
+            errors.append(f'{tag}: #serious needs tier>=friend, a beat:, mem:moment or leaving:soon (serious moments are earned)')
         if cid and e.get('habit'):
             have = set(people.get(cid, {}).get('habits', [])) | {h['add'] for h in people.get(cid, {}).get('habitShifts', [])}
             for h in (e['habit'] if isinstance(e['habit'], list) else [e['habit']]):
