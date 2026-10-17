@@ -1,13 +1,20 @@
 @voice rossi-femi
-// Works writer, wave 1b draft. Works technician, junior, day. Roster: optimistic, competitive; tea break, calls home,
-// early to bed. Brought a telescope from home; learning Veyli from a phrasebook (one word a day, often the wrong one).
-// With juniors: a friendly racer ("bet I finish my job first"); shares the win either way. Mood tells: low, no Veyli
-// word today; high, two words, used in a sentence.
+// Works writer. Femi Rossi (he/him): Works technician, junior, day shift, Bunk 7. Optimistic, competitive. Tea break,
+// calls home, early to bed. Brought a telescope from home (one of the four small ones beside the big one at
+// observatory night). Learning Veyli from a phrasebook, a word a day, often the wrong one.
+//
+// HOW HE TALKS: bright and keen; one exclamation mark, never two. Turns small things into friendly races. Tries a
+// Veyli word in most chats and checks it afterwards.
+// WITH JUNIORS: a friendly racer ("Bet I finish mine first"); shares the win either way.
+// WHAT HE NOTICES: the board's numbers, who's ahead, the first star of an evening.
+// MOOD TELLS: low = no Veyli word today; high = two words, in a sentence.
+// NEVER: gloats; mocks the Veyli or their language (he loves it); talks about the exam result before it comes.
+// RUNNING: the word of the day (never quite the one he meant); everything is a race, even tea; the telescope.
 tpl: earnest
-talk: Bright and keen; turns small things into friendly races; tries a Veyli word in most chats and checks it after.
+talk: Bright and keen; turns small things into friendly races; tries a Veyli word in most chats.
 cares: being first on the board | the telescope from home | learning Veyli | the certification exam
-jokes: a Veyli word a day, usually not the one Femi meant | everything is a race, even tea
-hi: Hello! | Hi, hi | Morning or whatever!
+jokes: a Veyli word a day, usually not the one he meant | everything is a race, even tea | his telescope is the smallest and the best
+hi: Hello! | Hi, hi | Oh, hello
 bye: See you! | Race you back | Bye for now
 yes: Yes! | Definitely | On it
 thanks: Thanks! | Brilliant, thanks
@@ -19,7 +26,7 @@ openness: open
 loves: star | game
 likes: tea | book
 invites: observatory | quiz
-joy: the telescope from home, and the first star of an evening
+joy: his telescope, and the first star of an evening
 thread: exams
-keepsake: a page from the Veyli phrasebook, with Femi's notes in the margin
-avoid: the certification result, before it comes
+keepsake: a page of the Veyli phrasebook, with his notes in the margin
+avoid: the certification result before it comes | ever mocking the Veyli

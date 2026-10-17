@@ -72,10 +72,16 @@ def conds(l):
     return out
 
 
+def day0(l):
+    """A Day 0 line: a walking line (flag:walk.<step>) or an arrival-evening chat line (Sunday evening of week 1)."""
+    f = l.get('flag')
+    return (isinstance(f, str) and f.startswith('walk.')) or (l.get('weekday') == 'sun' and l.get('week1'))
+
+
 def pick(card, n=12):
-    """Up to n of their own lines, round-robin over kinds so the sample is varied."""
+    """Up to n of their own lines, round-robin over kinds so the sample is varied (Day 0 lines go to the arrival)."""
     kinds = [k for k in card.get('lines', {}) if not k.startswith('old')]
-    pools = {k: list(card['lines'][k]) for k in kinds}
+    pools = {k: [l for l in card['lines'][k] if not day0(l)] for k in kinds}
     got = []
     while len(got) < n and any(pools.values()):
         for k in kinds:
@@ -114,8 +120,29 @@ def main():
         sc = out['MEETINGS_BAKED'].get(mid)
         if sc:
             sc_html += f'<h3>{esc(label)}</h3>' + scene(sc, names)
-    secs.append(f'<section id="arrival"><h2>The arrival evening</h2><p>The two scenes of your first evening aboard, as they play '
-                f'in the dialogue panel. You walk yourself the whole way; these open when you reach the place.</p>{sc_html}</section>')
+    walk, steps = V.get('torres-zeke', {}).get('lines', {}).get('week1', []), []
+    for l in walk:
+        f = l.get('flag')
+        if isinstance(f, str) and f.startswith('walk.'):
+            st = f[5:]
+            if not steps or steps[-1][0] != st:
+                steps.append((st, []))
+            steps[-1][1].append(fill(l['text'], V['torres-zeke'], 1))
+    STEP = {'hello': 'At the shuttle ramp', 'haulway': 'The haulway', 'works': 'The Works bay door', 'lift': 'The lift',
+            'wing': 'The junior wing', 'toMess': 'Off to dinner', 'servery': 'The servery', 'free': 'After dinner',
+            'call': 'If you wander off'}
+    if steps:
+        sc_html = ('<h3>Torres, as you walk (speech bubbles)</h3><ol class="scene">' + ''.join(
+            f'<li><b>{esc(STEP.get(st, st))}:</b> ' + ' '.join(f'"{esc(t)}"' for t in ts) + '</li>' for st, ts in steps)
+            + '</ol>') + sc_html
+    for cid, label in (('pell', 'Pell joins your table at dinner (if you tap him)'), ('tomas', 'Tomas finds you after dinner (if you tap him)')):
+        ls = [l for k, v in V.get(cid, {}).get('lines', {}).items() for l in v if day0(l)]
+        if ls:
+            sc_html += f'<h3>{esc(label)}</h3><ol class="scene">' + ''.join(
+                f'<li><b>{esc(names.get(cid, cid))}:</b> {esc(fill(l["text"], V[cid], 1))}</li>' for l in ls) + '</ol>'
+    secs.append(f'<section id="arrival"><h2>The arrival evening</h2><p>Your first evening aboard: Torres\'s lines as he walks you '
+                f'through the ship, the two scenes that play in the dialogue panel, and what Pell and Tomas say if you talk to them. '
+                f'You walk yourself the whole way.</p>{sc_html}</section>')
     nav.append('<a href="#arrival">Arrival</a>')
     for cid, name, role, who, story in CAST:
         card = V.get(cid, {})
