@@ -336,3 +336,11 @@
 - Bless you, love. That's very kind. Sit down, I'll find you a biscuit to say thanks.
 ? gift:polite
 - Thank you, love. It's the thinking that counts. You think lovely things.   #warm
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.won tier>=acquaintance
+- A marrow called the Captain, first prize! Tell your gran I want the recipe. And the seeds.   #funny
+? flag:home.mum.mug tier>=colleague
+- Your mum made you a mug, love? Bring it to breakfast. I'll fill it first. Every time.   #warm

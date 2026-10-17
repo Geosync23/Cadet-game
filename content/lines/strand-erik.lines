@@ -134,3 +134,9 @@
 - Thanks! Nice one. Back in a minute.
 ? gift:polite
 - Ah, nuts, you didn't have to. Thanks! Really.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Your Jo's boat! The Little Wren! Can't stop. Tell them it's a great name. Bye!   #funny

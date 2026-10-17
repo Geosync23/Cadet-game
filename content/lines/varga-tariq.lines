@@ -140,3 +140,11 @@
 - Thank you. That is kind of you. I'm grateful.
 ? gift:polite
 - Thank you. Ah, well. I shall find it a home. I'm sure I shall.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.sam.sundays tier>=colleague
+- A story every Sunday, to an old friend. That's a letter, in a way. I approve. Very much.   #warm
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- I hope this finds your gran well. I mean it properly. How is her hip?

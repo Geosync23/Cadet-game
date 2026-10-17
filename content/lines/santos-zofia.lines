@@ -199,3 +199,11 @@
 - Nice one. Thanks. I'd have paid for that.
 ? gift:polite
 - Ah, well. Thanks. I'll find it a buyer. No, I won't. Thanks.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Your Jo launched a boat? Hesper Dock would've bought it on the spot. Tell them that.   #funny
+? flag:home.gran.won tier>=colleague
+- First prize for a marrow? Your gran's a born trader. I'd sell those seeds by the packet.   #funny
