@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.11
+   STARSHIP CADET: CSV Wren                           build 0.39.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.11';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.12';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15751,6 +15751,19 @@ function momentWhere(p, t, d) {                          // the script's where: 
     return !!rm && String(rm.name || '').toLowerCase().includes(String(x).toLowerCase());
   });
 }
+const momentTrad = t => { const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(d) : []; } catch (e) { es = []; } const e = es.find(x => m >= x.from && m < x.to); return e ? e.id : null; };   // the tradition on now (trad: conditions)
+function momentCtx(p, t, id) {                             // the scene's ctx for a beat's when: the tradition on now, and the deck you're on (theirs: you're with them)
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && w.placeId && schedData().byId.get(w.placeId);
+  return { t, moment: id, trad: momentTrad(t), deck: pl ? pl.deck : undefined };
+}
+// momentWantsVisit(p, t) -> their next beat wants a bunk visit (where: visit) and its when holds now: section 20's
+// evening visits pick them first (Tomas's Wednesday exam night)
+function momentWantsVisit(p, t = shipNow()) {
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id)) return false;
+  const id = momentNextId(p), d = id && momentDef(id); if (!d || ![].concat(d.where || []).includes('visit')) return false;
+  if (!d.when) return true;
+  try { return typeof linesOk === 'function' && !!linesOk(d.when, p, momentCtx(p, t, id)); } catch (e) { return false; }
+}
 function momentReady(p, t = shipNow(), ctx = {}) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
   const id = momentNextId(p), d = id && momentDef(id); if (!d) return null;
@@ -15762,7 +15775,7 @@ function momentReady(p, t = shipNow(), ctx = {}) {
   if (ab && ((ab.afterShow && r.showDay && day <= r.showDay) || (r.arcDay || 0) >= day)) return null;   // Pell's last beat waits for his show; one beat a day
   if (MOMENT_SERIOUS.has(d.tone) && S.serious === day) return null;          // one serious moment a day for you
   if (!d.crisis) { let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return null; }
-  if (d.when) { let ok = false; try { ok = typeof linesOk === 'function' ? !!linesOk(d.when, p, { t, moment: id }) : false; } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions, judged by section 22 as for lines
+  if (d.when) { let ok = false; try { ok = typeof linesOk === 'function' ? !!linesOk(d.when, p, momentCtx(p, t, id)) : false; } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions, judged by section 22 as for lines
   if (!ctx.anywhere && !momentWhere(p, t, d)) return null;
   return id;
 }
