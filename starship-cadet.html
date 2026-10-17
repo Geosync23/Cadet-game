@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.11
+   STARSHIP CADET: CSV Wren                           build 0.61.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27106,7 +27106,7 @@ const careerOn = d => !!SHIP.career && SHIP.career.b.includes(d);   // a booked 
 function careerSick(d, on = true) {                      // a sick day: excused (a booked leave day comes back; a miss already counted is undone)
   const c = careerInit(); c.s = c.s.filter(x => x !== d); if (!on) return; c.s.push(d); c.s = c.s.slice(-8);
   if (c.b.includes(d)) { c.b = c.b.filter(x => x !== d); c.l++; }
-  if (c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
+  if (c.md > 0 && c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
 }
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
   const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go));
@@ -27238,7 +27238,7 @@ SIM_ADVANCE.push((from, to) => careerTick(to));
 // The words are head writer 4's (career.sick.*, career.tip.sick, sick.getwell / sick.nudge / sick.better, the meetings
 // sickExam1-3 and sickExamCover). Nothing here calls R().
 const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, floor: .4, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
-const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd === d;
+const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd > 0 && SHIP.career.sd === d;   // sd 0 is 'never', not day 0 (the arrival)
 const sickNow = () => sickToday() && !SHIP.career.sh;    // unwell and untreated, right now
 function sickDue(d) {                                   // seeded by the day and the game's own seed (gs), so each game has its own sick days (reviewer 1d)
   const c = SHIP.career, seed = SICK.seed ^ (c && c.gs || 0);

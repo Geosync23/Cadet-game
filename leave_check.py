@@ -219,6 +219,13 @@ with sync_playwright() as pw:
     else: print('  (no sick.getwell / sick.better lines baked yet)')
     check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
 
+    print('A new game on day 0 is not sick (player engineer 5\'s bug in 0.60.5):')
+    r = ev("""(() => { const el0 = document.getElementById('sickCard'); if (el0) el0.hidden = true;   // left open by the sickness case
+      SHIP.career = null; SHIP.time.day = 0; SHIP.time.min = 1060; careerTick(); const c = SHIP.career;
+      return { sd: c.sd, sick: sickToday(0), now: sickNow(), stage: sickStage(), walk: Math.round(needEffects().walk * 100) / 100, card: !document.getElementById('sickCard') || document.getElementById('sickCard').hidden, excused: c.s.includes(0) }; })()""")
+    print('  ', r)
+    check(not r['sick'] and not r['now'] and r['stage'] == -1 and r['card'] and not r['excused'], 'a new game arrives sick on day 0')
+
     print('(e) The save:')
     r = ev(f"({PAPER})({{ plan: 'casual', days: 280, friends: [] }})")
     rt = ev("JSON.stringify(careerClean(JSON.parse(JSON.stringify(SHIP.career)))) === JSON.stringify(SHIP.career)")
