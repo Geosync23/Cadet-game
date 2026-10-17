@@ -11067,6 +11067,7 @@ const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'r
 function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
+  if (typeof crateTap === 'function' && crateTap(point)) return true;   // the crate you set down (Put down, 0.28.60)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -12054,6 +12055,7 @@ function ixChoreTap(it, at) {
   if (st.deck !== deckDef.num) return false;
   const pid = st.places[0], spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null;
   if (!spot || !(ixDist(it, spot) < IX_NEAR + .6 || PLACE_OF.get(pid).room === room)) return false;
+  if (st.step === 'drop' && crateDown(j)) { toast(it.t, 'The crate is where you set it down, on Deck ' + SHIP.player.crate.deck + '. Pick it up first: follow the marker.'); return true; }   // Put down (0.28.60)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
   actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
@@ -12068,7 +12070,7 @@ function ixHold() {
   if (!j || j.workDone || j.kind === 'restock') return null;
   if (j.kind === 'chore' && j.chore === 'delivery' && typeof jobStops === 'function') {
     const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
-    return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) ? 'carry' : null;
+    return pick >= 0 && st[pick].done && !(drop >= 0 && st[drop].done) && !crateDown(j) ? 'carry' : null;   // not while it's set down (Put down, 0.28.60)
   }
   return 'toolbox';
 }
@@ -12111,6 +12113,124 @@ function ixTap(it, at, point) {
   return true;
 }
 PLAYER_TAPS.push(ixTap);
+
+// ---- Put down (0.28.60, the design doc's Repair step: "whenever your hands hold anything, a small 'Put down' button
+// lets you set it down; nothing is lost and the job stays yours"). A thumb-sized button, bottom right (#putDown), shown
+// while your hands hold a part, a tray or a delivery's crate. One tap puts all of them down: parts go back on the main
+// storage shelf (returnPart; a part your job makes waits finished at the machine shop's lathe instead, P.work.make), and
+// a chore's fetch stop opens again so you fetch them later; a tray goes to the tray return; the crate is set down where
+// you stand (SHIP.player.crate: { job, deck, x, z, at }, saved) and a tap on it picks it up again. Left overnight, or
+// once the job isn't yours, the crew take it back to the pickup (its pickup stop opens again). A gift and the kit bag
+// aren't put down: they have their own ways (give it to someone; your locker in Bunk 1). Hidden while you're busy. ----
+const PUT_NEAR = .6;                                     // a tap this close to the set-down crate picks it up (m)
+let PUT_CRATE = null;                                    // the crate's look, made the first time one is set down
+{ const c = SAVED && SAVED.player && SAVED.player.crate; SHIP.player.crate = c && (typeof c.job === 'string' || typeof c.job === 'number') && DECKS[c.deck] && isFinite(c.x) && isFinite(c.z) ? { job: c.job, deck: +c.deck, x: +c.x, z: +c.z, at: isFinite(c.at) ? +c.at : 0 } : null; }
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); if (SHIP.player.crate) p.crate = { ...SHIP.player.crate }; });
+const putGift = x => typeof giftOf === 'function' && !!giftOf(x);
+const putParts = () => SHIP.player.carry.filter(x => x !== KIT_BAG && !putGift(x));
+function crateDown(j) { const c = SHIP.player.crate; return !!(c && j && c.job === j.id); }
+function putDelivery() {                                 // your delivery job, with its pickup and drop stop indexes
+  const j = typeof myJob === 'function' ? myJob() : null;
+  if (!j || j.workDone || j.kind !== 'chore' || j.chore !== 'delivery' || typeof jobStops !== 'function') return null;
+  const st = jobStops(j), pick = st.findIndex(x => x.step === 'pickup'), drop = st.findIndex(x => x.step === 'drop');
+  return pick < 0 ? null : { j, st, pick, drop };
+}
+const crateHeld = () => { const d = putDelivery(); return !!d && d.st[d.pick].done && !(d.drop >= 0 && d.st[d.drop].done) && !crateDown(d.j); };
+const trayHeld = () => !!SHIP.player.tray;
+const putWhat = () => putParts().length > 0 || trayHeld() || crateHeld();
+function stepUndo(j, step) {                             // open a stop of your job again (section 17's stepsDone)
+  const k = jobStops(j).findIndex(x => x.step === step); if (k < 0 || !Array.isArray(j.stepsDone)) return;
+  j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function putDown() {
+  if (!putWhat()) return false;
+  const P = SHIP.player, said = [];
+  if (ACT) { actEnd(true); player.stop(); }              // whatever you were walking to, with it in your hands, is off
+  const parts = putParts();
+  if (parts.length) {
+    const mw = typeof myWork === 'function' && jobsOn() ? myWork() : null, made = mw && madeHere(mw.j), back = [];
+    let kept = null;
+    for (const p of parts) {
+      if (p === made && !kept && !(P.work.make && P.work.make.part)) { kept = p; P.work.make = { part: p, done: makeMins(mw.j) }; }   // made, not stocked: it waits at the lathe
+      else if (typeof returnPart === 'function' && returnPart(p)) back.push(p); else continue;
+      P.carry.splice(P.carry.indexOf(p), 1);
+    }
+    const ch = typeof ixChore === 'function' ? ixChore() : null;
+    if (ch && !ch.workDone && jobNeeds(ch, { fitted: [] }, P.carry).length) stepUndo(ch, 'fetch');   // fetch them again before the stop
+    if (back.length) said.push('You put ' + partList(back) + ' back on the shelf in main storage, Deck 5. Fetch ' + (back.length > 1 ? 'them' : 'it') + ' again when you need ' + (back.length > 1 ? 'them' : 'it') + '.');
+    if (kept) said.push('The ' + kept + ' waits for you at the lathe in the machine shop, Deck 5.');
+  }
+  if (trayHeld()) { P.tray = null; said.push('You take your tray back to the tray return by the servery.'); }
+  if (crateHeld()) {
+    const d = putDelivery(), p = player.obj.position, f = player.face || 0;
+    P.crate = { job: d.j.id, deck: deckDef.num, x: p.x + Math.sin(f) * .45, z: p.z + Math.cos(f) * .45, at: shipNow() };
+    said.push('You set the crate down here. Tap it to pick it up again; your job stays yours.');
+  }
+  if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  if (typeof device !== 'undefined' && device.refresh) device.refresh();
+  toast('Put down', said.join(' ') + (P.carry.length ? ' Still in your hands: ' + partList(P.carry) + '.' : ''));
+  return true;
+}
+function crateUp(quiet) {                                // pick the set-down crate up again
+  const d = putDelivery(); if (!d || !crateDown(d.j)) return false;
+  SHIP.player.crate = null; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+  if (!quiet) toast('Your job', 'You pick the crate up again. ' + d.j.title + '.');
+  return true;
+}
+function crateTap(point) {                               // a tap on (or right by) the set-down crate: walk there, pick it up
+  const c = SHIP.player.crate; if (!c || typeof deckDef === 'undefined' || c.deck !== deckDef.num || typeof ray === 'undefined') return false;
+  const o = ray.ray.origin, dr = ray.ray.direction; let best = Math.hypot(point.x - c.x, point.z - c.z);
+  for (let y = 0; y <= .5; y += .1) { const k = (y - o.y) / dr.y; if (k > 0) best = Math.min(best, Math.hypot(o.x + dr.x * k - c.x, o.z + dr.z * k - c.z)); }
+  if (best > PUT_NEAR) return false;
+  if (!crateDown(putDelivery() && putDelivery().j)) return false;
+  approach(new THREE.Vector3(c.x, 0, c.z), 0, 0, () => crateUp(false));
+  return true;
+}
+function putCrateLook() {                                // a small crate on the floor, made once (no R())
+  const g = new THREE.Group();
+  box(.5, .36, .4, KM.crate, 0, .185, 0, g);                 // just off the floor: no coplanar faces
+  for (const y of [.09, .27]) box(.52, .04, .42, M.slateDark, 0, y, 0, g);
+  box(.22, .06, .02, KM.label, 0, .18, .205, g);
+  g.visible = false; scene.add(g); return g;
+}
+let putShown = null, putLast = '';
+function putFrame() {
+  requestAnimationFrame(putFrame);
+  if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return;
+  const P = SHIP.player, c = P.crate;
+  if (c) {                                               // the crew take it back: the job isn't yours any more, or overnight
+    const d = putDelivery(), gone = !d || !crateDown(d.j), night = Math.floor(shipNow() / 1440) > Math.floor(c.at / 1440);
+    if (gone || night) {
+      P.crate = null; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
+      if (!gone) { stepUndo(d.j, 'pickup'); toast('Your job', 'The crew took the crate you left back to the pickup overnight. Pick it up there again: ' + d.j.title.charAt(0).toLowerCase() + d.j.title.slice(1) + '.'); }
+    }
+  }
+  const here = !!(P.crate && P.crate.deck === deckDef.num);
+  if (here && !PUT_CRATE) PUT_CRATE = putCrateLook();
+  if (PUT_CRATE) { PUT_CRATE.visible = here; if (here) PUT_CRATE.position.set(P.crate.x, 0, P.crate.z); }
+  const b = document.getElementById('putDown'); if (!b) return;
+  const busy = ACT && ACT.phase !== 'walk' || P.cart || (typeof PAUSE !== 'undefined' && PAUSE.on) || (typeof DEV !== 'undefined' && DEV.open)
+    || document.body.classList.contains('dlgon') || !document.getElementById('lift').hidden;
+  const show = !busy && putWhat();
+  if (show !== putShown) { putShown = show; b.hidden = !show; }
+  if (!show) return;
+  const t = document.getElementById('toast'), up = t && t.classList.contains('show') && innerWidth <= 720 ? t.offsetHeight + 10 : 0;   // phones: above a toast
+  const key = up + '';
+  if (key !== putLast) { putLast = key; b.style.bottom = up ? 'calc(' + (18 + up) + 'px + env(safe-area-inset-bottom))' : ''; }
+}
+(() => {
+  const st = document.createElement('style');
+  st.textContent = '#putDown{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:2;min-height:48px;min-width:48px;padding:0 16px;font-size:14px;font-weight:600;gap:8px;touch-action:manipulation;transition:bottom .35s}'
+    + '#putDown[hidden]{display:none}#putDown svg{width:19px;height:19px}@media (prefers-reduced-motion:reduce){#putDown{transition:none}}';
+  document.head.appendChild(st);
+  const b = document.createElement('button'); b.id = 'putDown'; b.type = 'button'; b.hidden = true;
+  b.setAttribute('aria-label', 'Put down what you\'re holding');
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><path d="M5 19h14"/></svg><span>Put down</span>';
+  b.addEventListener('pointerdown', e => e.stopPropagation());
+  b.onclick = e => { e.stopPropagation(); putDown(); };
+  document.body.appendChild(b);
+  requestAnimationFrame(putFrame);
+})();
 
 // ---- the look: the board panel and the goal pointer, made here (DOM and CSS), so the HTML stays as it was ----
 (() => {
@@ -12276,6 +12396,7 @@ function ixJobStep() {
     const lab = { cart: 'Take a hover cart from the Cart bay', load: 'Load the cart in the cargo hold', unload: 'Unload at ' + (meals ? 'the cold store' : 'main storage'), return: 'Dock the cart in the Cart bay' }[step];
     return st ? { deck: st.deck, place: st.places[0] || null, room: !st.places.length && step === 'load' ? /cargo/i : null, label: lab } : { deck: 5, room: /cargo/i, label: lab };
   }
+  if (crateDown(j)) { const c = SHIP.player.crate; return { deck: c.deck, xz: { x: c.x, z: c.z }, label: 'Pick up the crate you set down' }; }   // Put down (0.28.60)
   if (!j.machine) {                                      // a chore (section 17): parts first if it needs any, then its stops
     const P = SHIP.player, need = jobNeeds(j, { fitted: [] }, P.carry), nx = typeof jobStops === 'function' ? ixNextStop(j) : null;
     if (nx && nx.s.step === 'fetch' && need.length) return { deck: 5, room: 'r', label: 'Fetch ' + partList(need) + ' from main storage' };
@@ -12295,6 +12416,7 @@ function ixJobStep() {
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
+  if (g.xz) return g.xz;                                  // a spot on the floor (the set-down crate, 0.28.60)
   if (g.item) { const it = ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item); if (it) { it.hit.getWorldPosition(ixP); return { x: ixP.x, z: ixP.z }; } }
   if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
   if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
