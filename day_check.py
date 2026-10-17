@@ -22,6 +22,9 @@ STEP = 0.05                    # real seconds a step (the main loop's longest fr
 SIM = r"""(async ({ n, day, step, draw }) => {
   const B = (day - 1) * 1440, perMin = Math.round(1 / (step * SHIP_RATE)), perHour = perMin * 60, out = { deck: n, stuck: 0, stuckWho: '', shared: 0, sharedWho: [], notOwnBed: [], noPath: [], missing: 0, peakCrew: 0, calls: [], unexpected: [] };
   setShipNow(B); goToDeck(n);
+  const LL = typeof LINE_LOG === 'object' ? LINE_LOG : null;   // the servery line (0.26.30): counted afresh for this deck
+  if (LL) for (const k in LL) LL[k] = Array.isArray(LL[k]) ? [] : 0;
+  out.trayOut = 0; out.trayWho = []; out.trayStill = 0; out.stillWho = []; const still = new Map();
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
     setShipNow(B + k * step * SHIP_RATE);
@@ -30,6 +33,10 @@ SIM = r"""(async ({ n, day, step, draw }) => {
     for (const a of DECK_CREW) {
       if (a.stuckMax > out.stuck) { out.stuck = a.stuckMax; out.stuckWho = a.p.id + ' ' + hhmm(now - B); }
       if (a.noPath && !out.noPath.includes(a.p.id)) out.noPath.push(a.p.id);
+      if (a.hold === 'tray' && roomAt(...a.here()) !== 'M') { out.trayOut++; if (out.trayWho.length < 6) out.trayWho.push(a.p.id + ' ' + hhmm(now - B)); }   // a tray only in the mess hall
+      if (a.hold !== 'tray' || a.settled && a.spot && a.spot.pose === 'sit') still.delete(a.p.id);   // standing still a ship minute with a tray, not sat down
+      else { const s = still.get(a.p.id); if (!s || Math.hypot(s.x - a.x, s.z - a.z) > .05) still.set(a.p.id, { x: a.x, z: a.z, t: now });
+        else if (now - s.t >= 1 && !s.n) { s.n = 1; out.trayStill++; if (out.stillWho.length < 6) out.stillWho.push(a.p.id + ' ' + hhmm(now - B) + ' ' + a.goalId); } }
       if (a.settled && a.spot) {
         if (held.has(a.spot.id)) { out.shared++; const w = a.spot.id + ' ' + held.get(a.spot.id) + '/' + a.p.id; if (out.sharedWho.length < 6 && !out.sharedWho.some(x => x.startsWith(w))) out.sharedWho.push(w + ' from ' + hhmm(now - B)); }
         held.set(a.spot.id, a.p.id);
@@ -52,6 +59,7 @@ SIM = r"""(async ({ n, day, step, draw }) => {
       setShipNow(B + k * step * SHIP_RATE);
     }
   }
+  out.line = LL ? JSON.parse(JSON.stringify(LL)) : null;
   out.end = DECK_CREW.map(a => [a.p.id, Math.round(a.x * 1000), Math.round(a.z * 1000), a.pose]).sort().join('|');
   return out;
 })"""
@@ -109,6 +117,13 @@ with sync_playwright() as pw:
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")
         if o['missing']: fail(f"deck {n}: someone due on the deck wasn't there ({o['missing']} person-minutes)")
         if peak > BUDGET: fail(f"deck {n}: {peak} draw calls")
+        L = o.get('line')
+        if L and L['joined']:
+            print(f"  servery line: {L['joined']} joined, {L['served']} served, longest {L['long']}, longest wait {L['wait']:.1f} ship min, trays {L.get('trays', 0)}, returned {L['returned']} (longest walk back with one {L.get('back', 0):.1f} ship min), gave up {L['left']} {L['who']}")
+            if L.get('back', 0) > 12: fail(f"deck {n}: a {L['back']:.1f} ship minute walk to return a tray")
+            if L['left']: fail(f"deck {n}: {L['left']} gave up on the servery line: {L['who']}")
+        if o['trayStill']: fail(f"deck {n}: standing still with a tray {o['trayStill']} times: {o['stillWho']}")
+        if o['trayOut']: fail(f"deck {n}: a tray outside the mess hall {o['trayOut']} times: {o['trayWho']}")
 
     # jobs (section 17): the machine panels and other places the crew's jobs took them to, from the day just run
     jv = g.ev("typeof jobVisits === 'function' ? jobVisits() : null")
@@ -120,6 +135,16 @@ with sync_playwright() as pw:
     o2 = g.page.evaluate(f"s => window.__sc(s)({{ n: 4, day: {DAY}, step: {STEP}, draw: false }})", SIM)
     print('Deck 4 the same twice:', o1['end'] == o2['end'])
     if o1['end'] != o2['end']: fail('Deck 4 came out differently the second time')
+
+    # 5. the arrival on (section 21's intro, off in every test URL): day 0 and Monday's beats laid over the plans never
+    # put two people in one place at once (reviewer 1: Calder and Torres both at 5-stool-1 for Monday's briefing)
+    ia = g.ev(r"""(() => { if (typeof newGameStart !== 'function' || typeof introBeats !== 'function') return null;
+      newGameStart(true); const dbl = [];
+      for (const d of [0, 1]) for (const [id, L] of shipDay(d).occ) if (Array.isArray(L)) for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++)
+        if (L[i][0] < L[j][1] && L[j][0] < L[i][1] && L[i][2] !== L[j][2]) dbl.push(id + ' ' + L[i][2] + '/' + L[j][2] + '@' + (L[j][0] - (d - 1) * 1440));
+      return dbl; })()""")
+    print('Arrival on, days 0 and 1, places booked twice:', 'no arrival here' if ia is None else ia[:6] or 'none')
+    if ia: fail(f'arrival on: places booked twice {ia[:6]}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
