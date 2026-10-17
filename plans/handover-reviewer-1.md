@@ -1,7 +1,7 @@
 # Handover: adversarial reviewer 1 (Pillar 4)
 
 **Role:** adversarial reviewer 1. Before a helper's branch is combined, try hard to break it; report real problems, ranked, with evidence. No game code, ever. Push only review notes and reviewer tools to `claude/reviews`.
-**Lead:** session_01PxXKwc5mkC7tV5MPi3p7PP. **Build master:** session_012K7RZ3oSX2vpBb1rR66MBh. Reviewer 2 covers dialogue, traditions, device, decks, tiles, content.
+**Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; before that session_01PxXKwc5mkC7tV5MPi3p7PP). **Build master:** session_012K7RZ3oSX2vpBb1rR66MBh. Reviewer 2 covers dialogue, traditions, device, decks, tiles, content.
 **Chain of command (the user's rule):** the user → the lead → everyone. Never contact the user; report to the lead (and the helper).
 
 ## My seats (session ids)
@@ -18,7 +18,7 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 
 ## Open items to follow up
 1. **The first-launch arrival, crossing fixes.** Arrival 0.42.12 reads section 13's `ARRIVING` (`if (typeof ARRIVING !== 'undefined' && ARRIVING && !SAVED) introBegin();`). The sim's coming 0.26.25 removes `ARRIVING` and expects section 21 to call `newGameStart(true)`. Combined as they stand, the typeof guard hides the gap: a first launch starts on Monday again. Both seats and the lead are told. Check intro_check part 9 on their merge.
-2. **Social save size:** 27.8 kB with the reserve (budget 20 kB), mostly social B's `affWeek` snapshots. The lead decides; I suggested snapshotting only |aff| ≥ 40 pairs.
+2. **Social save size:** 27.8 kB with the reserve, mostly social B's `affWeek` snapshots. **Decided (the lead):** option (a), snapshots keep only pairs with |aff| ≥ 40, and the social budget is now 30 kB. Check social B's next push does it, and that social_check's limit says 30000.
 3. **Sim 0.26.25 review:** on rotation days (35, 77, ...) the leaver and the newcomer are both "aboard" by day and share one bed. Run day_check on day 35, and check that `ROSTER_ROTATIONS.out` (now a list of ids) is read right.
 4. **Social B 0.39.3** (moments engine) once it's marked final.
 
