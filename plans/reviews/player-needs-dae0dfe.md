@@ -14,3 +14,10 @@ Reviewer 1f, 2026-10-17. Builder: player engineer 5. A re-check of 1e's MEDIUM (
 ## LOWs (for later, not blocking)
 1. **Lower-casing breaks proper names:** "It's brennan's tasting table today." Fix: lower-case only the first letter, and only when the first word isn't a crew name. Or give traditions a `short` name for lines to use.
 2. **Pre-existing (since 0.28.44):** a "done" post (`trad.done.<id>`) also picks the bank's `trad:today` lines and the untagged filler. So just after a tradition you can read "A ship tradition today: long breakfast. Turn up and join in." or, after book circle, "Running club tonight…". 17 of the 30 traditions get no done post at all, which is fine (nothing fits). Fix, when the writers add `trad.done` lines: have done posts use only lines with a `flag:trad.done.*` or `trad:<id>` condition.
+
+## Follow-up: LOW 1 fixed in claude/player-needs-putdown 1116be4 ("0.28.60 feed names", player engineer 8)
+**PASS.**
+- `tradName()` changes only the first letter, and leaves it for a crew name, a weekday or a `TRAD_PROPER` word (possessives included). `newsPost` capitalises a post's first letter.
+- The same probe on 1116be4 (bank baked): "It's Brennan's tasting table today", "A ship tradition today: late piano", "observatory night". No ids.
+- One probe artefact: a done post fired on a day the tradition isn't on falls back to the id ("works tea", lower case). In play the note fires on its own day and gets the name ("Works Friday tea").
+- LOW 2 (done posts using today/filler lines) is still open, as before.
