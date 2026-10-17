@@ -9895,7 +9895,7 @@ function deviceLockLook() {
 // gently under NEED_LOW. A rise shows as "+N" beside its icon (rises close together merge) instead of a note over your
 // head. Tap the strip for names and numbers. DOM only (no draw calls), a fixed size; pulses and fades run on the frame
 // clock in floatsTick, like the notes (0.28.23).
-const NEED_LOW = 25, RISE_SECS = 2.2;
+const RISE_SECS = 2.2;                                   // NEED_LOW (25) is the needs' own line, above
 const cssCol = h => '#' + col(h).convertLinearToSRGB().getHexString();
 const NEED_COL = { hunger: cssCol('#e8a25c'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc') };
 const NEED_AMBER = cssCol('#ff9a3c');
