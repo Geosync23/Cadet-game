@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.23
+   STARSHIP CADET: CSV Wren                           build 0.42.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.23';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.24';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15294,6 +15294,19 @@ function introTernTick() {
   if (!INTRO_UI.ternOpened || deckDef.num !== 5 || ternRampOpen() < 1 || k < 0 || k >= free) return;
   const t = DECKS[5].tern, at = player.here();
   if (!t.aisle.concat([t.well], t.ramp).some(([i, j]) => i === at[0] && j === at[1]) && ternClear()) { INTRO_UI.ternShut = true; ternRamp(false, 3); }
+}
+// tap-to-ask (0.42.24; section 10's tapCrew calls it first, sim 0.26.31): while Torres is still showing you round (the
+// evening up to 'free'), tapping him at a tour place with extras left has him say the next at once; else it opens the writers' introAsk (three questions) instead of the chat card; three asks
+// at most (each counts as a meeting), then he's a plain tap again. Returns true when it opened.
+function introTap(p) {
+  if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
+  if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
+  if (h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())) { INTRO_UI.next = 0; return true; }
+  const I = SHIP.intro, n = [1, 2, 3].find(k => I.done['ask:' + k] === undefined); if (!n) return false;
+  I.done['ask:' + n] = Math.floor(shipNow());
+  if (typeof player !== 'undefined' && player.stop) player.stop();
+  return dialogueShow('introAsk', { id: 'intro-ask', who: [p.id], where: { deck: deckDef.num, room: /./ }, at: shipNow() });
 }
 // the week's meetings (Monday's briefing, Tuesday's first solo job): while one is on, being in its room plays it; if
 // you never came, its gist comes by Mail when it ends. Tuesday's job is yours either way: Calder hands it over in
