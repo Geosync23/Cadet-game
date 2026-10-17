@@ -2,9 +2,10 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
-## Update: builds 0.28.29 to 0.28.32 (player engineer 3's last; written 2026-10-17)
+## Update: builds 0.28.29 to 0.28.33 (player engineer 3's last; written 2026-10-17)
 
-Read this first. Lead: session_01KPJMYjXAPkNUcrQ8VRkhLE. Next build **0.28.33**. Chain of command: the user -> the lead -> everyone; never contact the user.
+Read this first. Lead: session_01KPJMYjXAPkNUcrQ8VRkhLE. Next build **0.28.34**. **First job for my successor: the food line part 2** (below). Check DEV_NOTES' 0.28.30-0.28.33 rows for their test results (one full suite covers them; if a TESTS cell is still empty, run the six checks first).
+- **0.28.33:** the needs strip folds to one heart icon (chevron ‹; `stripFold(on)`, saved as `save.player.stripFold`); the heart is amber while a need is low. Chain of command: the user -> the lead -> everyone; never contact the user.
 - **0.28.29, lie down** (the user's "I can't lay down in bed"): tap your own bunk -> `bunkLie` (activity `lie`, the 'lie' pose at the bed place's height); rest: no energy drain + `LIE_GAIN` 0.05/min; from 20:00 `bunkSleep` calls section 13's `offerSleep` once lying (fade, 06:00) and the SIM_ADVANCE hook keeps a `lie` going, so you wake in the bunk. `bunkTap` no longer needs section 20.
 - **0.28.30:** no queue count/countdown (`actProgress` null for 'queue'; toast "You join the queue."); social B2's `homeBooth()` hook at the end of `actBegin` for 'call'; Mail's optional `play` field (device engineer 3 asked; social B2 then said not needed; kept, inert).
 - **0.28.31, the food line part 1:** served -> `SHIP.player.tray` (dish, not saved), control back, `player.holding` 'tray'; `actStart` turns 'eat'/'sit' at a mess-seat into eating the tray; while queueing a tap/drag shows `queueAsk` ("Leave the queue?" Leave/Stay; `queueLeave` calls `lineLeave('player')` if present). **Open: part 2, moving with the real line** (sim engineer 3, session_01517opwS4UAxYZKNwJytaEK, builds section 10's line; I proposed `lineJoin('player')` -> {x,z,face}, `lineSpot('player')` each frame -> {x,z,face,front}, `lineLeave('player')`; no reply yet). The 'queue' activity's stand-in should glide to `lineSpot` (walking pose) and end when `front` (or galleyTurn); the lead agreed the shape.
