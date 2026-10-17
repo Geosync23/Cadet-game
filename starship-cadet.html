@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.31
+   STARSHIP CADET: CSV Wren                           build 0.26.32
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.31';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.32';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8336,6 +8336,7 @@ function shipDay(d) {
   // in let early planners take seats later guests wanted: the jam stayed empty). The places: eventPlaces(e)
   // (section 18), else its tagged places and rooms and its first pool
   occ.res = new Map();
+  const mealEv = new Set();                              // today's meal traditions (their diners are planned first; 0.26.32)
   if (typeof eventsOn === 'function') for (const e of eventsOn(d)) {
     const ids = typeof eventPlaces === 'function' ? (eventPlaces(e) || []).slice()
       : typeof eventOpts === 'function' ? eventOpts(e.ev, { rank: 'officer' })   // its tagged places and rooms, and its first pool (the event's own room)
@@ -8344,11 +8345,29 @@ function shipDay(d) {
       const n = S.people.filter(p => aboard(p, d) && (eventPlan(p, d) || []).some(x => x.id === e.id)).length, nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
       for (const w of e.ev.where) { const rx = w.room ? new RegExp(w.room instanceof RegExp ? w.room.source : String(w.room), 'i') : null, rooms = (DECKS[w.deck] || {}).rooms || {};
         for (const ty of w.types || []) ids.push(...(S.shared.get(w.deck + '|' + ty) || []).filter(pl => !rx || rx.test((rooms[pl.room] || {}).name || '')).sort(nat).map(pl => pl.id)); }
-      ids.splice(n);
+      ids.splice(n); mealEv.add(e.id);
     }
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
+  // section 21's named seats (Calder's across from yours) are held for whoever has them before anyone is planned, so an
+  // earlier riser never takes one (introLay books it; no 'ev-' tag matches 'intro:<id>', so nobody else may) (0.26.32)
+  if (typeof introPlan === 'function') for (const p of S.people) {
+    let add = null; try { add = introPlan(p, d); } catch (e) { add = null; }
+    for (const e of Array.isArray(add) ? add : []) if (e && e.placeId && !e.alts && e.to > e.from) {
+      if (!occ.res.has(e.placeId)) occ.res.set(e.placeId, []);
+      occ.res.get(e.placeId).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
+    }
+  }
+  // a meal tradition's diners are planned next (after any hosts), and then its held seats are let go (their own bookings
+  // keep theirs), so ordinary diners use the seats nobody took, or left early, not the lounge (reviewer 1b, 0.26.32)
+  const goer = mealEv.size ? new Set(S.people.filter(p => aboard(p, d) && (eventPlan(p, d) || []).some(x => mealEv.has(x.id))).map(p => p.id)) : null;
+  if (goer) order.sort((a, b) => (host ? host.has(b.id) - host.has(a.id) : 0) || goer.has(b.id) - goer.has(a.id));   // stable: wake order within each
+  let trimmed = !goer;
   for (const p of order) {
+    if (!trimmed && !goer.has(p.id) && !(host && host.has(p.id))) {
+      trimmed = true;
+      for (const [id, rs] of occ.res) occ.res.set(id, rs.filter(([x, y, ev]) => !mealEv.has(ev)));
+    }
     const plan = introLay(p, d, occ, guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : [])); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
@@ -12317,7 +12336,7 @@ function jobEffect(j, t, by) {
   if (j.machine) {
     const s = SHIP.machines[j.machine], was = s && s.state;
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
-    if (s && by) simLater('repair', { who: by, machine: j.machine, state: was, job: j.kind, deck: j.deck, id: j.id, t });   // the state it was in; job: service, repair or overhaul (a payload never says kind: that's the note's own)
+    if (s && by) simLater('repair', { who: by, machine: j.machine, state: was, job: j.kind, deck: j.deck, id: j.id, t: SIM_AT != null ? Math.max(t, SIM_AT) : t });   // never before the hour being run (social A's catch-up reads from there; 0.26.32); the state it was in; job: service, repair or overhaul (a payload never says kind: that's the note's own)
   } else if (j.cargo === 'meals') {
     // the meals left the hold when the run was set (cartClaim) and the galley lands them (section 16): at arriveAt
     // for the crew's runs, and when you unload for yours (0.33.19: cartWaiting held them till now)
@@ -18600,7 +18619,11 @@ class CrewAgent {
       if (!q) { const pv = whereIs(this.p, w.from - .01); m.tray = !!(pv && pv.act === w.act && lineSeg(pv)) && trayTo(w.placeId); }
     }
     if (!m.served) return this.mealLine(now);
-    if (m.next !== undefined && lineSeg(w)) return m.next;   // served before the plan's queue time is up
+    if (m.next !== undefined && lineSeg(w)) {            // served before the plan's queue time is up
+      if (m.tray && m.next && BUSY.has(m.next) && !this.elsewhere(m.next)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }   // the mess hall's full: no tray till they sit (seated diners show none; 0.26.32)
+      return m.next;
+    }
+    if (m.trayLate && this.settled && this.spot && trayTo(this.spot.id)) { m.tray = true; m.trayLate = false; LINE_LOG.trays++; }
     if (m.seat && !w.placeId) return m.seat;             // no seat planned: the one picked at the counter
     return undefined;
   }
