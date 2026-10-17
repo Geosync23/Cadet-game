@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.32
+   STARSHIP CADET: CSV Wren                           build 0.26.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.32';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.33';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -18606,7 +18606,8 @@ class CrewAgent {
     let m = this.meal;
     if (m && m.key !== key) {                            // over (or something else came up): out of the line, the tray back
       const k = m.served ? -1 : LINE.indexOf(this.p.id);
-      if (k >= 0) return lineSpotId(k);                  // already in the line: nobody misses a meal for it (served, they go on)
+      if (k >= 0 && now - (m.over || (m.over = now)) < LINE_LATE) return lineSpotId(k);   // already in the line: a little late for what's next (served, they go on)
+      if (k >= 0) lineLeave(this.p.id);                  // but not for ever (an empty galley serves nobody): out, a missed meal (reviewer 1b, 0.26.33)
       if (!m.served && key === null && now - (m.over || (m.over = now)) < LINE_LATE) return this.mealLine(now);   // on the way (a grab stop is shorter than the walk): a little late for what's next
       if (!m.served) { LINE_LOG.left++; if (LINE_LOG.who.length < 8) LINE_LOG.who.push(this.p.id + ' ' + hhmm(now % 1440)); }
       if (m.tray && N === 3) return this.trayBack(m, now);
