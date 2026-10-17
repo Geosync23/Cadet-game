@@ -667,6 +667,56 @@ def js_obj_of_lists(name, d):
     return o
 
 
+def js_str(s):
+    """raw text as the inside of a single-quoted JS string: \\ then ' then line breaks; </ as <\\/ (never </script>)"""
+    s = s.replace('\\', '\\\\').replace("'", "\\'").replace('\n', '\\n').replace('\r', '\\r')
+    return s.replace('\u2028', '\\u2028').replace('\u2029', '\\u2029').replace('</', '<\\/')
+
+
+def js_parsed(name, pieces):
+    """const NAME = JSON.parse('...'): plain data, which phones parse much faster than the same object written as code
+    (0.43.20, the performance pass). pieces: compact JSON text in the order it's written, one piece a line, so a change
+    to one entry changes one line of the file"""
+    o = [f'const {name} = JSON.parse(']
+    o += [f"  '{js_str(x)}'" + (' +' if i < len(pieces) - 1 else '') for i, x in enumerate(pieces)]
+    o.append(');')
+    return o
+
+
+def cj(v):
+    return json.dumps(v, ensure_ascii=False, separators=(',', ':'))
+
+
+def cards_parsed(name, d):
+    """the cards (VOICE): keys sorted, fields sorted with "lines" last, its kinds sorted; one piece an entry"""
+    p = ['{']
+    for n, k in enumerate(sorted(d)):
+        card = d[k]
+        fs = [f'{cj(f)}:{cj(card[f])}' for f in sorted(x for x in card if x != 'lines')]
+        head = ','.join(fs + (['"lines":{'] if 'lines' in card else []))
+        p.append(('' if n == 0 else ',') + cj(k) + ':{' + head)
+        if 'lines' in card:
+            for m, kind in enumerate(sorted(card['lines'])):
+                es = card['lines'][kind]
+                p.append(('' if m == 0 else ',') + cj(kind) + ':[' + ('' if es else ']'))
+                p += [cj(e) + (',' if i < len(es) - 1 else ']') for i, e in enumerate(es)]
+            p.append('}')
+        p.append('}')
+    p.append('}')
+    return js_parsed(name, p)
+
+
+def lists_parsed(name, d):
+    """{ "kind": [entries] } (LINES): kinds sorted; one piece an entry"""
+    p = ['{']
+    for n, k in enumerate(sorted(d)):
+        es = d[k]
+        p.append(('' if n == 0 else ',') + cj(k) + ':[' + ('' if es else ']'))
+        p += [cj(e) + (',' if i < len(es) - 1 else ']') for i, e in enumerate(es)]
+    p.append('}')
+    return js_parsed(name, p)
+
+
 def js_cards(name, d):
     o = [f'const {name} = {{']
     for k in sorted(d):
@@ -687,8 +737,8 @@ def js_cards(name, d):
 
 
 def blocks(out):
-    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + js_cards('VOICE', out['VOICE']) \
-        + js_obj_of_lists('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
+    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) \
+        + lists_parsed('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
         + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};'] \
         + sum(([f'const {n} = {{'] + [f'  {js(k)}: {js(out[n][k])},' for k in sorted(out[n])] + ['};']
