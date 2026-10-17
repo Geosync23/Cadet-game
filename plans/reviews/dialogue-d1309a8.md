@@ -26,3 +26,14 @@ Re-tested with the same inputs: "falling in love with you" and "fallen for you" 
 `[dance]` is an error. Note the trade-off: the wider list also stops innocent lines ("Brennan's in love with that new
 oven", "my heart can't take it") and background couples' lines ("those two are in love"). That's the safe side, but
 writers will hit it, so the README should say to reword, or have the head writer approve a specific line id.
+
+## Addendum: e507613 (0.43.4): PASS WITH ONE FIX
+- Player-facing kinds: the full ban holds. Overheard couples' "We should tell people we are in love." passes, as
+  intended.
+- **MEDIUM:** overheard lines *about the player* also pass: "I think I am in love with the new hand." is accepted
+  (only "crush" happened to be caught). That is romance involving the player, which is never allowed. Fix: in overheard
+  conversations, the romance words are allowed only when the line names no player reference (`{me}`, "the new hand",
+  "the cadet", "new cadet", "you"), and ideally only under a `bond:couple` pair condition.
+- LOW (false positives): "married" and "wedding" now stop ordinary family lines in moments ("My parents have been
+  married forty years."), which the family and homesick themes will want. Consider keeping those two for overheard
+  and you-directed checks only, or allow them when they don't sit next to you/me.
