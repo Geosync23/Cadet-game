@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.37
+   STARSHIP CADET: CSV Wren                           build 0.36.38
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.37';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.38';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14276,6 +14276,7 @@ function socialInvite(o = {}) {
 const SOC_GIFTS = {
   'tin of tea': { tag: 'tea', from: 'store' }, 'biscuits': { tag: 'sweet', from: 'store' }, 'postcard': { tag: 'star', from: 'store' }, 'little plant': { tag: 'plant', from: 'store' },
   'puzzle book': { tag: 'book', from: 'store' }, 'herbs': { tag: 'garden', from: 'garden' }, 'tomato': { tag: 'garden', from: 'garden' }, 'flower': { tag: 'plant', from: 'garden' },
+  'deck of cards': { tag: 'game', from: 'store' }, 'harmonica': { tag: 'music', from: 'store' },
   'keyring': { tag: 'made', from: 'made' }, 'bookend': { tag: 'made', from: 'made' }, 'gear pendant': { tag: 'made', from: 'made' },
 };
 const GIFT_MAKES = [{ item: 'keyring', mins: 10, needs: 'scrap' }, { item: 'bookend', mins: 20, needs: 'scrap' }, { item: 'gear pendant', mins: 15, needs: 'scrap' }];   // the machine shop's (section 15/17 build the making)
@@ -14558,25 +14559,25 @@ function bunkNote() {                                    // section 15's bunk ta
 // didn't say goodbye, a Mail. After, friends write now and then (letters, every two weeks for six weeks, then every six;
 // the engine's letter kind, else built from your memories), and they're under "Moved on" in the Crew app
 // (SHIP.social.moved, saved). Arrivals are news a week ahead, and new for their first week (newHere: ctx.newHere).
-const socAboard = (p, d = SHIP.time.day) => !!p && (!Array.isArray(p.aboard) || ((p.aboard[0] == null || d >= p.aboard[0]) && (p.aboard[1] == null || d <= p.aboard[1])))
-  && (typeof aboard !== 'function' || !p.aboard || aboard(p, d));
-const socP = x => x && x.id ? x : (socInit(), SOC.idx.has(x) ? SOC.crew[SOC.idx.get(x)] : null);   // a person, from a person or an id
-const leavingSoon = (x, d = SHIP.time.day, p = socP(x)) => p && Array.isArray(p.aboard) && p.aboard[1] != null && d <= p.aboard[1] && p.aboard[1] - d <= 10 ? p.aboard[1] - d : null;
-const newHere = (x, d = SHIP.time.day, p = socP(x)) => !!(p && Array.isArray(p.aboard) && p.aboard[0] > 1 && d >= p.aboard[0] && d - p.aboard[0] < 7);
+const leaveDay = p => { if (typeof crewLeaving === 'function') { try { const v = crewLeaving(p); if (v != null) return v; } catch (e) { } } return Array.isArray(p.aboard) && p.aboard[1] != null ? p.aboard[1] : null; };   // section 14's (the sim picks leavers), else the roster's window
+const arriveDay = p => { if (typeof crewArriving === 'function') { try { const v = crewArriving(p); if (v != null) return v; } catch (e) { } } return Array.isArray(p.aboard) && p.aboard[0] != null ? p.aboard[0] : null; };
+const socAboard = (p, d = SHIP.time.day) => { if (!p) return false; const a = arriveDay(p), l = leaveDay(p); if ((a != null && d < a) || (l != null && d > l)) return false; return typeof aboard !== 'function' || aboard(p, d); };
+const leavingSoon = (x, d = SHIP.time.day, p = socP(x)) => { const l = p && leaveDay(p); return l != null && d <= l && l - d <= 10 ? l - d : null; };
+const newHere = (x, d = SHIP.time.day, p = socP(x)) => { const a = p && arriveDay(p); return a != null && a > 1 && d >= a && d - a < 7; };
 function socTransfers(h) {                               // 07:00 each ship day (socialHour)
   const d = Math.floor(h / 24) + 1, t = h * 60 + 30, M = SHIP.social.moved || (SHIP.social.moved = []);
   for (const p of SOC.crew) {
-    if (!Array.isArray(p.aboard)) continue;
+    const L = leaveDay(p), A = arriveDay(p); if (L == null && A == null) continue;
     const n = shortName(p), to = p.transferTo ? 'the ' + p.transferTo.replace(/^the /i, '') : 'another ship', near = SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || socRoom(q) === socRoom(p)));
-    if (p.aboard[1] != null && d === p.aboard[1] - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 15:00 on a Sunday (rotation day), else 18:30 when the day shift can come
-      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: p.aboard[1], at: weekday(p.aboard[1]) === 6 ? [900, 930] : [1110, 1140], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
-        ask: weekday(p.aboard[1]) === 6 ? 'Coming to see me off at the shuttle? Three o\'clock.' : 'Coming to see me off at the shuttle? Half six, before dinner.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
+    if (L != null && d === L - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 15:00 on a Sunday (rotation day), else 18:30 when the day shift can come
+      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: L, at: weekday(L) === 6 ? [900, 930] : [1110, 1140], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
+        ask: weekday(L) === 6 ? 'Coming to see me off at the shuttle? Three o\'clock.' : 'Coming to see me off at the shuttle? Half six, before dinner.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
     }
-    if (p.aboard[1] != null && d === p.aboard[1] - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
+    if (L != null && d === L - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
       lines: ['Did you hear? ' + n + '\'s transferring to ' + to + '.', n + ' is leaving us. ' + to[0].toUpperCase() + to.slice(1) + ', in ten days.', 'Ten days and ' + n + '\'s off to ' + to + '. Can you believe it?'] });
-    if (p.aboard[0] != null && p.aboard[0] > 1 && d === p.aboard[0] - 7) newsAdd({ id: 'arriving:' + p.id, about: p.id, kind: 'arrival', weight: .6, life: 8, born: t, seed: socPick(SOC.crew.filter(q => q.dept === p.dept && socAboard(q, d)), 3, p.seed, d, 664).map(q => q.id),
+    if (A != null && A > 1 && d === A - 7) newsAdd({ id: 'arriving:' + p.id, about: p.id, kind: 'arrival', weight: .6, life: 8, born: t, seed: socPick(SOC.crew.filter(q => q.dept === p.dept && socAboard(q, d)), 3, p.seed, d, 664).map(q => q.id),
       lines: ['We\'ve got a new ' + (p.role || 'crew member').toLowerCase() + ' coming next week.', 'Someone new is joining ' + p.dept + ' next week. ' + n + ', I think.'] });
-    if (p.aboard[1] != null && d === p.aboard[1] && !M.some(x => x.id === p.id && x.day === d)) {
+    if (L != null && d === L && !M.some(x => x.id === p.id && x.day === d)) {
       const r = SHIP.rel[p.id], tier = r ? r.tier : 0, mem = (SHIP.mem[p.id] || []).slice().sort((a, b) => b[2] - a[2]).slice(0, 3).map(m => m[0]);
       M.push({ id: p.id, day: d, tier, mem, letters: 0, next: tier >= 3 ? d + 14 : null });
       if (tier >= 1 && !(r.bye >= d - 2)) SHIP.social.mail.push({ at: (d - 1) * 1440 + 960, from: p.name, subject: 'Sorry I missed you', body: 'Sorry I missed you at the shuttle. ' + byeLine(p, true) + ' ' + shortName(p) });
@@ -14611,7 +14612,7 @@ function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
   // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
   seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
-  const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && (!SOC.crew[SOC.idx.get(s)].aboard || socAboard(SOC.crew[SOC.idx.get(s)]))), born, kind, event, life };
+  const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && socAboard(SOC.crew[SOC.idx.get(s)])), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
   return it;
 }
@@ -14667,7 +14668,7 @@ function socialHour(h) {
   const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
   if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
   for (let i = 0; i < n; i++) {
-    if (crew[i].aboard && !socAboard(crew[i], Math.floor(h / 24) + 1)) continue;   // off the ship (crew coming and going)
+    if (!socAboard(crew[i], Math.floor(h / 24) + 1)) continue;   // off the ship (crew coming and going, guests away)
     const w = planWhere(crew[i], t); if (!w || w.moving || w.act === 'sleep' || !w.placeId) continue;
     const pl = S.byId.get(w.placeId), k = w.deck + '|' + (pl && pl.room || w.placeId);
     (rooms.get(k) || rooms.set(k, []).get(k)).push(i);
