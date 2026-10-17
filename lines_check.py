@@ -190,6 +190,16 @@ def main(argv):
     known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
         src = 'home' if where.startswith('call ') else 'moment'
+        # a roster word used in a theme beat must be in its needs: (else social lets in people without it, and those lines
+        # drop: a loss beat for someone who lost nobody); in story arcs (one known person) only {lost} must be
+        if src == 'moment':
+            texts = [b.get(k) or '' for k in ('hint', 'keepsake', 'learn')] + [(b.get('after') or {}).get('mail', {}).get('body', '')]
+            for l in b['lines']:
+                texts += [l['text']] if 'text' in l else [c[r]['text'] if r in ('reply', 'warm') else c['text'] for c in l['choice'] for r in ('text', 'reply', 'warm') if r == 'text' or r in c]
+            used = set(re.findall(r'\{(home|since|kin|lost|hobbyNoun)\}', ' '.join(texts)))
+            want = used if where.startswith('theme ') else used & {'lost'}
+            for n in sorted(want - set(b.get('needs') or [])):
+                errors.append(f'{where}: uses {{{n}}} but its needs: lacks {n} (people without it would get this beat with the line missing)')
         for n in b.get('needs') or []:
             if n not in NEEDS:
                 errors.append(f'{where}: needs: {n} is not one of {", ".join(sorted(NEEDS))}')
