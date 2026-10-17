@@ -13,11 +13,12 @@
 | Roster d53cf40..cadfbdd (0.16.16-0.16.20) | roster-cadfbdd.md | PASS: talent crafts fixed; Kovac's lift and breakfast lows sent to the lead |
 | Roster 1348dfd (0.16.21) | roster-1348dfd.md | PASS: Kovac's two lines reworded |
 | Player 9c18045 (0.28.38-0.28.40) | player-9c18045.md | PASS: lows fixed, the real-line and someone-in-the-way cases pass |
+| Social A a033f17..752d964 (0.36.79-0.36.81) | social-752d964.md | PASS: one low, a truncated aff string loads |
 
 **Open loose ends:**
 - The arrival fixes went to onboarding engineer 2 (session_0163dcLt17oTCdR8po9HRo2p). Reviewer 1b also reviews arrival (4f6d0b2..54d7911); they've had my note.
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
-- **Combine check for 0.60.3** (combine-0603-jobloop-food.md, merge: galley 7282327 + sim 236810f + f16a110 cherry-picked + player 9c18045): the job loop and food_check's old 4 are fixed. Two new: player_check's "squeeze past" (sim 0.26.36 unblocks shared tiles always, so you walk through the chef; sent to sim engineer 4), and food_check's "galleyJoin / galleyTurn" (a test assumption since sim 0.26.34; sent to galley engineer 3). Recheck both when fixed.
+- **Combine check for 0.60.3** (combine-0603-jobloop-food.md, merge: galley 7282327 + sim 236810f + f16a110 cherry-picked + player 9c18045): the job loop and food_check's old 4 are fixed. Two new: player_check's "squeeze past" (sim 0.26.36 unblocks shared tiles always, so you walk through the chef; sent to sim engineer 4), and food_check's "galleyJoin / galleyTurn" (a test assumption since sim 0.26.34; sent to galley engineer 3). Recheck both when fixed. Galley a0e5b2f's food_check fixes the second; sim 0.26.37 (hash pending) the first.
 - **Next:** take over reviewer 1b's queue (sim, galley, social A/B, arrival) when they say plans/handover-reviewer-1.md on claude/reviews is final.
 
 ## How I test (fresh container)
