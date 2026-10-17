@@ -7057,7 +7057,7 @@ const GAME_BUILD = '0.60.0';                           // keep in step with the 
 // Function declarations and lazily made state, so a section anywhere in the file may call these while it loads.
 // Nothing here calls R(); a note never changes a plan (plans are pure), only what listeners do with it.
 var SIM_ON = null, SIM_DEPTH = 0;
-const SIM_CUE = 2880, SIM_RING = 200;                    // cues last two ship days; at most 200 kept
+var SIM_CUE = 2880, SIM_RING = 200;                      // cues last two ship days; at most 200 kept (var: usable from sections 1-5 too)
 function onSim(kind, fn) {
   if (typeof fn !== 'function') return () => {};
   const m = SIM_ON || (SIM_ON = new Map()); if (!m.has(kind)) m.set(kind, []); m.get(kind).push(fn);
@@ -7065,7 +7065,9 @@ function onSim(kind, fn) {
 }
 function simNote(kind, data) {
   const t = typeof SHIP !== 'undefined' && SHIP.time ? (SHIP.time.day - 1) * 1440 + SHIP.time.min : 0;
-  const note = Object.assign({}, data && typeof data === 'object' ? data : {}, { kind, t });
+  let note;                                              // a plain copy, so it always saves: an object that won't (a walker, a cycle) drops the note
+  try { note = Object.assign(JSON.parse(JSON.stringify(data && typeof data === 'object' ? data : {})), { kind, t }); }
+  catch (e) { if (typeof DEBUG !== 'undefined' && DEBUG) console.warn('simNote ' + kind + ': data is not plain JSON; note dropped'); return null; }
   if (typeof SHIP !== 'undefined') {
     const ring = SHIP.notes || (SHIP.notes = []);
     ring.push(note);
@@ -7090,6 +7092,11 @@ function flagSet(key, value = true) {
 }
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
+// a new game that arrives by shuttle (Pillar 4): day 0, a real ship Sunday, 17:40, at the foot of the Tern's ramp on
+// Deck 5 (day 1 stays Monday, so the calendar never moves). Only when section 21 asks for it (introWanted(), a
+// function that reads nothing but the URL and storage) and never with ?nosave: the tests keep day 1 at 06:00
+const SHIP_START_ARRIVAL = { day: 0, min: 17 * 60 + 40, deck: 5, tile: [7, 8], face: Math.PI / 2 };   // on the ramp, facing east (section 21's INTRO_START)
+const arriving = () => { try { return !NOSAVE && typeof introWanted === 'function' && !!introWanted(); } catch (e) { return false; } };
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const shipNow = () => (SHIP.time.day - 1) * 1440 + SHIP.time.min;    // absolute ship minutes
@@ -7125,7 +7132,7 @@ function tickShip(dt) {
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
   SHIP.time.min += dt * SHIP_RATE;
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
-  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); }   // section 14: appointments kept or missed
+  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); }   // section 14: appointments kept or missed; your shift's start
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
@@ -7160,14 +7167,17 @@ function loadGame() {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!s || !(s.v === 1 || s.v === SAVE_V)) return null;   // no save, or one this build doesn't know: start fresh
     const t = s.time, p = s.player, tile = p && p.tile;
-    if (!t || !(t.day >= 1 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !DECKS[p.deck]) return null;
+    if (!t || !(t.day >= 0 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !DECKS[p.deck]) return null;
     if (!Array.isArray(tile) || tile.length !== 2 || !tile.every(Number.isInteger) || !isFinite(p.facing)) return null;
     return s;
   } catch (e) { return null; }
 }
 const SAVED = loadGame();
 // where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
-const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };
+const ARRIVING = !SAVED && arriving();
+const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing }
+  : ARRIVING ? { deck: SHIP_START_ARRIVAL.deck, tile: SHIP_START_ARRIVAL.tile, face: SHIP_START_ARRIVAL.face } : { deck: SHIP_START.deck };
+if (ARRIVING) { SHIP.time.day = SHIP_START_ARRIVAL.day; SHIP.time.min = SHIP_START_ARRIVAL.min; }
 if (SAVED) {
   SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
   const decks = (SAVED.ship && SAVED.ship.decks) || {};
@@ -7188,21 +7198,32 @@ newBtn.onclick = () => {
   if (!newAsk) { span.textContent = 'Tap again'; newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; }, 4000); return; }
   clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game';
   if (ride) return;                                      // not mid-ride
+  newGameStart(arriving());
+};
+// a new game (Pillar 4): by shuttle on day 0 at 17:40 (arrival true: section 21 then calls introBegin), or in Bunk 1
+// on Monday at 06:00 (false; section 21 calls introSkip when you skipped the arrival). Clears the save, the decks'
+// state, the habit changes, the flag store and the notes, then sections 15, 20 start again
+function newGameStart(arrival) {
+  const arr = !!arrival;
   try { if (!NOSAVE) localStorage.removeItem(SAVE_KEY); } catch (e) {}
   for (const n in SHIP.decks) delete SHIP.decks[n];
   HABIT_SAVED = null; HABIT_WEEKS.length = 1;           // section 14: the habit changes start again
-  SHIP.time.day = SHIP_START.day; SHIP.time.min = SHIP_START.min; nightT = nightAt();
+  SHIP.flags = {}; SHIP.notes = [];                      // the flag store and the notes start again too
+  const S0 = arr ? SHIP_START_ARRIVAL : SHIP_START;
+  SHIP.time.day = S0.day; SHIP.time.min = S0.min; nightT = nightAt();
   if (!liftEl.hidden) closeLiftPanel();
-  goToDeck(SHIP_START.deck);
-  let c = PLAYER_SPEC.start;
+  goToDeck(S0.deck);
+  let c = arr ? SHIP_START_ARRIVAL.tile : PLAYER_SPEC.start;
   if (!free(...c)) { const p = cellPos(...c); c = nearestOpen(p.x, p.z, player) || c; }
-  player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = Math.PI;
+  player.obj.position.copy(cellPos(...c)); player.face = player.obj.rotation.y = arr ? SHIP_START_ARRIVAL.face : Math.PI;
   target.copy(player.obj.position).setY(.7); lastRoom = null;
   playerNew();                                           // section 15: fresh needs
   if (typeof socialNew === 'function') socialNew();      // section 20: strangers again
+  if (typeof introNewGame === 'function') introNewGame(arr);   // section 21: the arrival begins, or a blank intro (Monday)
+  simNote('newGame', { arrival: arr });                  // anyone else with state of their own starts again
   updateClock(); saveGame();
-  toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
-};
+  if (!arr) toast('Deck 4, CSV Wren', 'A new game. You wake in Bunk 1, in the junior wing, at 06:00 on a Monday.');
+}
 // Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
 const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
@@ -7339,7 +7360,8 @@ function schedData() {
     sub('window', [...new Set([...shared.entries()].filter(([k]) => k.startsWith(n + '|') && !/\|work:/.test(k)).flatMap(([, l]) => l))].filter(pl => pl.window));   // answer 21: seats by a window
   }
   if (typeof eventPools === 'function') eventPools(shared);   // section 18: the events' own place lists
-  SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare };
+  const deskIds = new Set(desks.values());               // the desks someone has (desks aren't booked in occ)
+  SCHED_DATA = { people, places, byId, owner, shared, own, desks, spare, deskOf: id => deskIds.has(id) };
   return SCHED_DATA;
 }
 const deckOf = id => +String(id).split('-')[0];
@@ -7376,6 +7398,18 @@ function schedU(seed, day, k) {
   return (h >>> 0) / 4294967296;
 }
 const isWorkDay = (p, d) => !!p.work && !((p.rota && p.rota.offDays) || []).includes(weekday(d));
+// your shift's start (Pillar 4, for section 20's reputation): on a work day, the first minute from 08:00 that you're in
+// a Works room on Deck 5, simNote('shiftStart', { late: minutes after 08:00 }); not there by 10:00, { late: 120,
+// missed: true }. Once a day (the flag 'shiftSent' holds the day, so a reload doesn't send it again)
+function shiftTick() {
+  const d = SHIP.time.day, m = SHIP.time.min;
+  if (m < 480 || flag('shiftSent') === d || !playerShiftOn(d)) return;
+  let here = false;
+  try { here = deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }
+  if (!here && m < 600) return;
+  flagSet('shiftSent', d);
+  simNote('shiftStart', here ? { late: Math.max(0, Math.round(m - 480)) } : { late: 120, missed: true });
+}
 // whether you (the player) are on shift on day d: your own rota, like a Works junior's (ROSTER_PLAYER.rota.offDays,
 // section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
 // when used (ROSTER_PLAYER comes later in the file); before it exists, Saturday and Sunday are the days off
@@ -7515,9 +7549,9 @@ function apptTick() {
     if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2) continue;
     const pl = apptPlace(a);
     if (pl && typeof deckDef !== 'undefined' && deckDef.num === pl.deck && typeof player !== 'undefined') {
-      const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; continue; }
+      const c = cellPos(...pl.at); if (Math.hypot(player.obj.position.x - c.x, player.obj.position.z - c.z) < 2.2) { a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); continue; }
     }
-    if (now >= a.at + APPT_WAIT) a.status = 'missed';
+    if (now >= a.at + APPT_WAIT) { a.status = 'missed'; simNote('apptMissed', { id: a.id, with: a.with }); }
   }
 }
 // ---- doors for invitations and summons (C3, C10): the ready room, Deck 2 bedrooms, officers' cabins ----
@@ -7558,7 +7592,7 @@ function guestStay(p, d) {
   if (!p.guest) return 'in';
   let a = p.arrive, l = p.leave, y = d;
   if (a == null) { const ev = typeof eventGuestDays === 'function' ? eventGuestDays(p) : null; if (!ev) return 'away'; [a, l] = ev; }
-  else y = (d - 1) % 364 + 1;                            // the day of the year
+  else y = ((d - 1) % 364 + 364) % 364 + 1;              // the day of the year (day 0, the arrival Sunday, is the last of the year before)
   if (y === a) return 'arrive';
   if (y === l) return 'leave';
   return (a <= l ? y > a && y < l : y > a || y < l) ? 'in' : 'away';   // a <= l, or across the year's end
@@ -7686,7 +7720,8 @@ function gatherings(p, d, F) {
 // 07:15, so the bridge is never empty and the two never meet at a shared desk), patrol (the Watch walks the decks in turn), closed (take() passes those places by), stayIn (that
 // share of free time in their own quarters), rush (a call owed: a booth at the first chance in `at`). Inert with no event.
 const EV_DAY = new Map(); let EV_SIG = '';
-const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0);
+const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0)
+  + (typeof introSig === 'function' ? '/' + introSig() : '');   // section 21: the intro's state (on, skipped, ended) changes who's busy
 function evDay(d) {
   if (EV_DAY.has(d)) return EV_DAY.get(d);
   let out = null;
@@ -7845,6 +7880,7 @@ function schedBuild(p, d, occ, S) {
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
+          if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           linger(s - (dk !== deck ? C : 0)); go(dk);
           if (!mine) hold(pl.id, s, end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
@@ -8214,6 +8250,7 @@ function shipDay(d) {
     const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(strSeed(pl.id), d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });   // by the station's id, so a new station never reshuffles the others
   });
+  occ.rotIds = new Set([...occ.rot.values()].map(r => r.id));   // today's stand-in stations (a guest never takes one)
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
   // an event's host (section 18's eventPlan, host: true: Pell at his own show) is planned first, so their seat is theirs
   const host = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.host) ? new Set(S.people.filter(p => eventPlan(p, d).some(e => e.host)).map(p => p.id)) : null;
@@ -8231,7 +8268,7 @@ function shipDay(d) {
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
   for (const p of order) {
-    const plan = guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : []); plans.set(p.id, plan);   // a guest away has no day here
+    const plan = introLay(p, d, occ, guestTrim(p, d, aboard(p, d) ? schedBuild(p, d, occ, S) : [])); plans.set(p.id, plan);   // a guest away has no day here
     for (const s of plan) if (s.deck === 3) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < s.to - (d - 1) * 1440; m++) occ.heads[m]++;
   }
   const day = { d, plans, occ };
@@ -8240,12 +8277,66 @@ function shipDay(d) {
   return day;
 }
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
+// the arrival's beats (Pillar 4, section 21's introPlan(p, d) -> [{ from, to, deck, placeId?, act?, tag?, anim? }],
+// minutes from that day's midnight): laid over the person's planned day as fixed blocks, the way an accepted
+// appointment is, so the escort and the teachers are really busy then (whereIs, needs, dayReport all see it). The
+// escort's steps on the deck come from section 10's lead and follow (escortPlan), not from here. A block's place is
+// held in occ. Pure: introPlan reads the intro's saved state only, and shipDay plans again when that changes (introSig)
+// introPlan(p, d): section 21's introBeats(p.id, d) -> [{ id, at, until, where }] (day minutes) as blocks. where:
+// { deck, tile, room } (the arrival evening: at the place in that room nearest the tile, e.g. a mess seat by your
+// table for Calder; the escort's is only a stand-in, since section 10's escort does the walking),
+// { deck, room } (a week beat: the first free place in that room, by id, nobody's own and nobody's desk) or 'seek'
+// (section 20's seek finds you: nothing planned). [] when the intro is off
+function introPlan(p, d) {
+  if (typeof introBeats !== 'function') return null;
+  let beats = null; try { beats = introBeats(p.id, d); } catch (e) { return null; }
+  if (!Array.isArray(beats) || !beats.length) return null;
+  const S = schedData(), nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
+  return beats.filter(x => x && x.where && x.where !== 'seek' && x.until > x.at).map(x => {
+    const w = x.where, rooms = (DECKS[w.deck] && DECKS[w.deck].rooms) || {};
+    const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
+    const cand = S.places.filter(inRoom).sort(nat), dist = q => Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]);
+    const pl = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b))[0] : cand[0];   // a tile: the place nearest it (a seat by Calder's table)
+    return { from: x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, tag: 'intro-' + x.id };
+  });
+}
+function introLay(p, d, occ, segs) {
+  let add = null;
+  try { add = typeof introPlan === 'function' ? introPlan(p, d) : null; } catch (e) { add = null; }
+  if (!Array.isArray(add) || !add.length) return segs;
+  const B = (d - 1) * 1440, byId = schedData().byId;
+  let out = segs.slice();
+  for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
+    const a = B + Math.max(0, e.from), b = B + Math.min(1440, e.to), pl = e.placeId ? byId.get(e.placeId) : null, cut = [];
+    for (const x of out) {
+      if (x.to <= a || x.from >= b) { cut.push(x); continue; }
+      if (x.from < a) cut.push({ ...x, to: a });
+      if (x.to > b) cut.push({ ...x, from: b });
+    }
+    const seg = { from: a, to: b, act: e.act || 'intro', deck: e.deck != null ? e.deck : pl ? pl.deck : 0, type: pl ? pl.type : null, placeId: pl ? pl.id : null, tag: e.tag || 'intro' };
+    if (e.anim) seg.anim = e.anim;
+    cut.sort((x, y) => x.from - y.from);
+    const prev = cut.filter(x => x.to <= a).pop();          // coming from another deck: the lift ride comes out of what they were doing
+    if (prev && prev.to === a && prev.deck && seg.deck && prev.deck !== seg.deck && prev.to - prev.from > SCHED_COMMUTE) {
+      prev.to = a - SCHED_COMMUTE; cut.push({ from: a - SCHED_COMMUTE, to: a, act: 'commute', deck: seg.deck, type: 'lift', placeId: null, fromDeck: prev.deck });
+    }
+    const next = cut.find(x => x.from >= b);                // and back afterwards: the ride comes out of what's next
+    if (next && next.from === b && next.deck && seg.deck && next.deck !== seg.deck && next.act !== 'commute' && next.to - next.from > SCHED_COMMUTE) {
+      next.from = b + SCHED_COMMUTE; cut.push({ from: b, to: b + SCHED_COMMUTE, act: 'commute', deck: next.deck, type: 'lift', placeId: null, fromDeck: seg.deck });
+    }
+    cut.push(seg); cut.sort((x, y) => x.from - y.from); out = cut;
+    if (pl) { if (!occ.has(pl.id)) occ.set(pl.id, []); occ.get(pl.id).push([a, b, p.id]); if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([a, b, pl.id]); }
+  }
+  return out;
+}
 // whereIs: where someone is at ship minute t. A job they've claimed (section 17's jobWhere: to the parts shelf, the
 // machine's panel and back) is laid over their plan; otherwise it's the plan (planWhere). Anything that needs the
 // plan alone (section 17's jobRun, which fits jobs into it) calls planWhere, never whereIs: whereIs from inside
 // machinesNow would run an hour's jobs twice. The flag stops jobWhere reaching jobWhere again through whereIs.
 let JOB_WHERE_BUSY = false;
 function whereIs(person, t) {
+  const es = escortWhere(person, t); if (es) return es;   // section 21's escort goes where you go (section 10 walks them)
+  const cv = comeWhere(person, t); if (cv) return cv;       // a visit (crewComeTo): to a place on your deck, then back
   const ap = apptWhere(person, t); if (ap) return withHold(person, ap, false);   // an accepted appointment comes first
   if (typeof jobWhere === 'function' && !JOB_WHERE_BUSY) {
     JOB_WHERE_BUSY = true; let j;
@@ -8253,6 +8344,39 @@ function whereIs(person, t) {
     if (j) return withHold(person, j, true);
   }
   return withHold(person, planWhere(person, t), false);
+}
+// the escort (Pillar 4): while section 21's escortPlan(p, t) gives { mode: 'lead'|'follow'|'wait', to: placeId | [c, r] }
+// for someone, they're on your deck (crossing decks with you: they step out of the lift after you), at `to` if it's a
+// place there. Only in play (the deck you're on); plans never see it. Section 10's CrewAgent walks them (escortStep)
+function escortPlanOf(p, t) {
+  if (typeof escortPlan !== 'function') return null;     // (before section 10 has run, deckDef and player don't exist yet)
+  try { if (!deckDef || !player) return null; const e = escortPlan(p, t); return e && /^(lead|follow|wait)$/.test(e.mode) ? e : null; } catch (e) { return null; }
+}
+function escortWhere(p, t) {
+  const e = escortPlanOf(p, t); if (!e) return null;
+  let pl = null; try { pl = typeof e.to === 'string' ? PLACE_OF.get(e.to) : null; } catch (x) { pl = null; }   // a place id here (or a { deck, tile | room })
+  const deck = e.mode === 'wait' && e.to && e.to.deck != null ? e.to.deck : deckDef.num;   // waiting on another deck: there; else with you
+  return { deck, act: 'intro', type: pl ? pl.type : null, placeId: pl ? e.to : null, moving: false, from: t - 1, until: t + 1, tag: 'escort', escort: e };
+}
+// crewComeTo(p, placeId, onArrive, { until }) (Pillar 4: visits, friends walking over): a crew member walks to a
+// place on the deck you're on (by lift if they're elsewhere), onArrive(agent) is called once when they get there, and
+// at `until` (ship minutes; default an hour from now, never past 22:00, quiet hours) or when the returned function is
+// called, they go back to their own plan. Live only: their plan on paper is unchanged and nothing is saved.
+// p: a person or an id. Calling it again for the same person replaces the visit; placeId null ends it
+const COME_TO = new Map();
+function crewComeTo(p, placeId, onArrive, o = {}) {
+  const id = p && (p.id || p); if (!id) return () => {};
+  if (!placeId) { COME_TO.delete(id); return () => {}; }
+  const now = shipNow(), quiet = (Math.floor(now / 1440)) * 1440 + 1320;
+  const v = { placeId, onArrive: typeof onArrive === 'function' ? onArrive : null, until: Math.min(o.until != null ? o.until : now + 60, now < quiet ? quiet : now + 60), arrived: false };
+  COME_TO.set(id, v);
+  return () => { if (COME_TO.get(id) === v) COME_TO.delete(id); };
+}
+function comeWhere(p, t) {
+  const v = COME_TO.size && COME_TO.get(p.id); if (!v) return null;
+  if (t >= v.until) { COME_TO.delete(p.id); return null; }
+  let N = null; try { N = deckDef.num; } catch (e) { return null; }
+  return { deck: N, act: 'visit', type: null, placeId: v.placeId, moving: false, from: t - 1, until: v.until, tag: 'visit', visit: v };
 }
 // what someone carries (answer 23; the performance engineer draws it from the pose's '+hold'): what the job or plan
 // says first (a cart, parts), else a tray at a mess-hall meal, a toolbox for Works crew out on a job, a datapad for
@@ -8295,7 +8419,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + 480, B + 1020]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag));
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -18125,7 +18249,7 @@ class Walker {
 }
 
 const player = new Walker({ ...PLAYER_SPEC, deck: START.deck }, START.tile || PLAYER_SPEC.start, true);
-if (SAVED) player.face = player.obj.rotation.y = START.face;
+if (START.face != null) player.face = player.obj.rotation.y = START.face;
 // The nine placeholder walkers are gone (0.22.1): the crew are the scheduled CrewAgents now. CREW (section 9)
 // stays as data; `crew` stays, empty, for the code that still loops over it.
 const crew = [];
@@ -18241,6 +18365,11 @@ class CrewAgent {
   }
   update(dt, now, N) {
     const w = whereIs(this.p, now);
+    if (w && w.escort) return this.escortStep(dt, w.escort);   // section 21's escort: lead, follow or wait, with you
+    this.esc = null;
+    if (w && w.visit && !w.visit.arrived && this.spot && this.spot.id === w.visit.placeId && this.settled) {   // a visit: there
+      w.visit.arrived = true; if (w.visit.onArrive) { try { w.visit.onArrive(this); } catch (e) { /* the caller's problem */ } }
+    }
     this.hold = w && w.hold || null;                      // something in hand: a hover cart on a run (section 17's whereIs)
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
@@ -18253,7 +18382,7 @@ class CrewAgent {
     else goalId = w.placeId || null;
     this.tag = w.placeId === goalId ? w.tag || null : null;   // what they'll do there (the plan's tag)
     if (goalId && goalId === PLAYER_PLACE) goalId = null;  // you're using it (section 15): they wait nearby
-    if (typeof galleyHold === 'function') {                // section 16: waiting for food, at a queue spot nobody else is heading for
+    if (typeof galleyHold === 'function' && w.deck === N) {   // section 16: waiting for food, at a queue spot nobody else is heading for (on the plan's deck)
       const h = galleyHold(this.p, now);
       if (h !== undefined) goalId = h && DECK_CREW.some(o => o !== this && o.goalId === h) ? null : h;
     }
@@ -18276,7 +18405,47 @@ class CrewAgent {
     this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
     return true;
   }
+  // the escort (Pillar 4, section 21's escortPlan): 'lead' walks to `to` (a place id or a [c, r] tile) and stops,
+  // facing you, while you're more than ESC_WAIT tiles behind (on again within ESC_GO); 'follow' keeps about ESC_NEAR
+  // tiles from you; 'wait' stands at `to` (or where they are). Paths are made again when the goal moves (you, or a new
+  // `to`), at most twice a second. They may go anywhere you can (the rooms on their way are allowed)
+  escortStep(dt, e) {
+    const pp = player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
+    const goal = e.mode === 'follow' ? you : escortGoal(e, this);
+    const key = e.mode + '|' + (goal ? goal.join(',') : '-');
+    this.escT = (this.escT || 0) - dt;
+    if (key !== this.esc && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
+      this.esc = key; this.escT = .5; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
+      let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
+      if (goal) { const p = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this); if (p) this.path = p; }
+    }
+    if (e.mode !== 'lead' || dist < ESC_GO) this.escHeld = false;
+    else if (dist > ESC_WAIT) this.escHeld = true;
+    const near = e.mode === 'follow' && dist <= ESC_NEAR;
+    if (this.path.length && !this.escHeld && !near) {
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      this.pose = 'walk';
+    } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
+    this.y = 0; this.stuck = 0; this.tag = 'escort';
+    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    return true;
+  }
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
+}
+const ESC_WAIT = 4, ESC_GO = 3, ESC_NEAR = 2;          // tiles: the escort waits for you, sets off again, keeps this close
+// where the escort heads, as a tile on this deck: `to` is a place id, a [c, r] tile, { deck, tile } or { deck, room }
+// (the room's open tile nearest them); on another deck, leading means to the lift (waiting means staying put)
+function escortGoal(e, a) {
+  const to = e.to, N = deckDef.num;
+  if (!to) return null;
+  if (typeof to === 'string') { const sp = placeSpot(to); return sp ? sp.walk : null; }
+  if (Array.isArray(to)) return to;
+  if (to.deck != null && to.deck !== N) return e.mode === 'lead' ? a.liftCell : null;
+  if (Array.isArray(to.tile)) return to.tile;
+  const tiles = to.room && ROOM_TILES[to.room];
+  if (!tiles || !tiles.length) return null;
+  return tiles.reduce((b, t) => { const c = cellPos(...t), d = Math.hypot(c.x - a.x, c.z - a.z); return d < b[1] ? [t, d] : b; }, [null, Infinity])[0];
 }
 // Story crew close to you get a full rig (makeCharacter, baked) instead of a crowd body: FULL_MAX of them at most,
 // within FULL_NEAR tiles, back to the crowd beyond FULL_FAR. A FullPerson takes the crowd's set() and its posing
@@ -18323,6 +18492,13 @@ function deckCrewFill() {
 }
 function crewArrive(p, w, now, mid) {
   const N = deckDef.num, lift = liftTiles();
+  if (w.visit) { DECK_CREW.push(new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null))); return; }   // a visitor comes by lift
+  if (w.escort) {                                        // the escort comes with you: out of the lift nearest you (waiting at a place: already there)
+    const sp = w.escort.mode === 'wait' && w.placeId && placeSpot(w.placeId), wt = w.escort.mode === 'wait' && w.escort.to && Array.isArray(w.escort.to.tile) ? w.escort.to.tile : null;
+    if (sp || wt) { DECK_CREW.push(new CrewAgent(p, sp ? sp.walk : wt)); return; }
+    const pp = player.obj.position, near = lift.length ? lift.slice().sort((a, b) => cellPos(...a).distanceTo(pp) - cellPos(...b).distanceTo(pp))[0] : nearestOpen(pp.x, pp.z, null);
+    DECK_CREW.push(new CrewAgent(p, near)); return;
+  }
   if (w.act === 'commute') {                             // riding in: step out of the car when the ride's done
     if (now < w.until - .5) return;
     const a = new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null)); DECK_CREW.push(a); return;
