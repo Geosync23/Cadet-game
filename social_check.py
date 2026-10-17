@@ -162,6 +162,7 @@ with sync_playwright() as pw:
       const B0 = SHIP.social.bonds; SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
       out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = B0;
       out.pure = JSON.stringify(socSave()) === before;
+      if (!out.pure) { const a = JSON.parse(before), b = socSave(); out.impure = Object.keys({ ...a, ...b }).filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])).map(k => k + ': ' + JSON.stringify(a[k]).slice(0, 80) + ' -> ' + JSON.stringify(b[k]).slice(0, 80)); }   // which part changed
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); out.cueSaved = s === JSON.stringify(socSave()) && !!cue('repair.oven.you');
@@ -174,7 +175,7 @@ with sync_playwright() as pw:
     if not q.get('beatMap'): fail('beatOf does not map an arc id to its crew member')
     if q['bonds'] != ['Pell', 'pell', 'tomas', 'Chief Calder', 'tomas', None]: fail(f"bonds and their placeholders wrong: {q['bonds']}")
     if q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
-    if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
+    if not q['bandsOk'] or not q['mood'] or not q['pure']: fail(f"affBand, moodOf or purity wrong (changed: {q.get('impure')})")
     if q['rep'][:3] != ['new', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if q['fill'].get('fam') != 'a brother in the Concord navy' or q['fill'].get('grow') != q['fill'].get('growWant') or q['fill'].get('hob') != 'gardening' or q['fill'].get('since') is not None: fail(f"theme fill-ins wrong: {q['fill']}")
