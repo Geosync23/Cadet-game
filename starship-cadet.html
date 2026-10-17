@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.29.26
+   STARSHIP CADET: CSV Wren                           build 0.29.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.26';                          // keep in step with the header's build line
+const GAME_BUILD = '0.29.27';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10876,6 +10876,10 @@ function galleyTies(d) {
   for (const x of (f && f('galley', d)) || []) {
     const t = x.tie && typeof x.tie === 'object' ? x.tie : {}, o = out[t.meal === 'breakfast' ? 'breakfast' : 'dinner'] || (out[t.meal === 'breakfast' ? 'breakfast' : 'dinner'] = { ids: [] });
     o.ids.push(x.id);
+    if (t.extra === 'tasting' && !o.taste) {             // the tasting table: when, and its tally's choices (section 18's tally tie)
+      const tl = ((f && f('tally', d)) || []).find(y => y.id === x.id);
+      o.taste = { id: x.id, from: x.from, to: x.to, choices: tl && tl.tie && Array.isArray(tl.tie.choices) ? tl.tie.choices : [] };
+    }
     for (const k of ['dish', 'until', 'side', 'extra', 'batch']) if (t[k] != null && o[k] == null) o[k] = t[k];
     if (t.dish === 'favourite' && !o.honorees) { const e = x.honorees ? x : typeof eventsOn === 'function' ? eventsOn(d).find(e => e.id === x.id) : null; o.honorees = e && e.honorees || []; }
   }
@@ -10897,6 +10901,42 @@ function galleyPlan(role, d) {
   const head = role === 'chef' ? [[290, 450 + x, 'cook'], [450 + x, 470 + x, 'breakfast'], [470 + x, 540 + x, 'clean']] : [[330, 360, 'bake'], [360, 480 + x, 'line'], [480 + x, 500 + x, 'breakfast'], [500 + x, 570 + x, 'wash']];
   const end = head[head.length - 1][1];
   return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 600 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
+}
+// Brennan's tasting table (a dinner tie with extra: 'tasting', Wednesdays 18:15): `batch` tastes (20) of two small
+// dishes, cooked from an hour before (the garden's produce first) and set out at the servery's end while it runs. The
+// week's two are the next two of the tally's choices (two a week, round the list). Everyone there votes (seeded; each
+// dish has its own appeal); your token (galleyVote) is one more vote and wins a tie. galleyTasting(d) -> null |
+// { id, from, to, tastes, keys, choices, voters: [{ id, at, pick }], votes, you, win, winner }. Pure but for your vote
+const GALLEY_TASTE = new Map();
+function galleyTasting(d) {
+  const T = galleyTies(d).dinner, tt = T && T.taste; if (!tt) return null;
+  let o = GALLEY_TASTE.get(d);
+  if (!o) {
+    const L = tt.choices.length >= 2 ? tt.choices : ['herb-flatbread', 'pickled-beans'], w = Math.floor((d - 1) / 7), ki = [(2 * w) % L.length, (2 * w + 1) % L.length];
+    const pa = Math.max(.15, Math.min(.85, .5 + .5 * (galleyU(1000 + ki[0], 951) - galleyU(1000 + ki[1], 951)))), voters = [], tag = 'ev-' + tt.id;
+    for (const p of schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)) {
+      const s = planDay(p, d).find(s => s.tag && (s.tag === tag || s.tag.startsWith(tag + '-')));
+      if (s) voters.push({ id: p.id, at: Math.floor(s.from), pick: schedU(p.seed, d, 950) < pa ? 0 : 1 });
+    }
+    o = { id: tt.id, from: tt.from, to: tt.to, tastes: Math.round(galleyEvNum(T.batch, 20)), keys: ki.map(k => L[k]), choices: ki.map(k => String(L[k]).replace(/-/g, ' ')), voters };
+    GALLEY_TASTE.set(d, o); for (const k of GALLEY_TASTE.keys()) if (k < d - 10 || k > d + 10) GALLEY_TASTE.delete(k);
+  }
+  const you = SHIP.galley && SHIP.galley.votes ? SHIP.galley.votes[d] : undefined, votes = [0, 0];
+  for (const v of o.voters) votes[v.pick]++;
+  if (you === 0 || you === 1) votes[you]++;
+  const win = votes[0] > votes[1] || (votes[0] === votes[1] && you !== 1) ? 0 : 1;
+  return { ...o, votes, you: you === 0 || you === 1 ? you : null, win, winner: o.choices[win] };
+}
+// your token at the tasting table (the tap that offers it is the interactions engineer's): choice 0 or 1, a key or a
+// name; once a tasting, from 15 minutes before to 15 after. You try both (two tastes, if there are any left)
+function galleyVote(choice) {
+  const d = SHIP.time.day, md = SHIP.time.min, o = galleyTasting(d); if (!o || md < o.from - 15 || md >= o.to + 15) return false;
+  const k = choice === 0 || choice === 1 ? choice : o.keys.indexOf(choice) >= 0 ? o.keys.indexOf(choice) : o.choices.indexOf(choice);
+  const S = galleyAdvance(shipNow()); if (k < 0 || (S.votes && S.votes[d] !== undefined)) return false;
+  if (!S.votes) S.votes = {};
+  S.votes[d] = k; for (const x of Object.keys(S.votes)) if (+x < d - 14) delete S.votes[x];
+  if (S.tasting && S.tasting.d === d && S.tasting.out) S.tasting.left = Math.max(0, S.tasting.left - 2);
+  GALLEY_MENU.clear(); return true;
 }
 // a day's menu: { breakfast, dinner, note, pudding, fav: person, votes: [[dish, n], ...] }. Sunday's vote: everyone
 // aboard votes for their favourite, or their second choice if the favourite was on this week's menu; about one in
@@ -10938,6 +10978,10 @@ function galleyMenu(d) {
     else { out.dinner = MENU.treat[w % MENU.treat.length]; out.note = 'a farewell supper'; }
   } else if (dt) out.dinner = dish(dt);
   if (dt === 'first-fruits' || dt === 'harvest-supper') out.supper = true;
+  const tz = galleyTasting(d); if (tz) add(`tasting table at ${hhmm(tz.from)}: ${tz.choices.join(' and ')}`);
+  if (T.dinner && T.dinner.side === 'tasting') {         // Sunday's side: the last tasting table's winner (within the week)
+    for (let k = 1; k <= 7; k++) { const z = galleyTasting(d - k); if (z) { out.side = z.winner; add(`with Wednesday's winner: ${z.winner}`); break; } }
+  }
   GALLEY_MENU.set(d, out);
   for (const k of GALLEY_MENU.keys()) if (k < d - 8 || k > d + 8) GALLEY_MENU.delete(k);
   return out;
@@ -11224,6 +11268,18 @@ function galleyStep(S, m, st) {
       if (md === CAKE.out && S.cake) S.cake.out = true;
     }
   }
+  // the tasting table: its tastes cooked an hour before (produce first), out from the start, one for each taster as
+  // they arrive (one of each dish: those already there when it opens, then at their minute); what's left goes 15 minutes
+// after the end
+  const tt = galleyTies(d).dinner && galleyTies(d).dinner.taste;
+  if (tt) {
+    if (md === tt.from - 60) { const n = galleyTasting(d).tastes, f = produceTake(S, n), k = Math.min(n - f, S.cold.meals); S.cold.meals -= k; S.tasting = { d, left: f + k, out: false }; if (st) { st.tastes += f + k; st.fresh += f; } }
+    if (S.tasting && S.tasting.d === d) {
+      if (md === tt.from) S.tasting.out = true;
+      if (S.tasting.out && md < tt.to + 15) for (const v of galleyTasting(d).voters) if ((v.at === m || (md === tt.from && v.at < m)) && S.tasting.left > 0) { const k = Math.min(2, S.tasting.left); S.tasting.left -= k; if (st) st.tasted += k; }   // one of each
+      if (md === tt.to + 15) { if (st) st.waste += S.tasting.left; S.tasting = null; }
+    }
+  }
   // plates come back, and the dish pit washes what it can
   if (S.back.length) { const keep = []; for (const b of S.back) if (b[0] <= m) { S.inUse -= b[1]; S.dirty += b[1]; } else keep.push(b); S.back = keep; }
   const w = Math.min(S.dirty, E.wash[md] * FOOD.washRate); S.dirty -= w; if (st) st.washed += w;
@@ -11409,6 +11465,12 @@ function galleyText(what = 'servery') {
     return (r.length ? `Ripe: ${r.join(', ')}.` : 'Nothing ripe just now.') + (c.grow < .7 ? ' ' + GARDEN_WHY[['water', 'feed', 'light', 'tend'].sort((a, b) => c[a] - c[b])[0]] : ' Growing well.')
       + ` Next harvest morning: ${next === SHIP.time.day ? 'today' : WEEKDAYS[weekday(next)]}.` + (G.crates.length ? ' Crates waiting to go to the cold store.' : '');
   }
+  if (what === 'tasting') {                              // the tasting table: what's on, then (from its start) the vote so far
+    const z = galleyTasting(SHIP.time.day); if (!z) return '';
+    const left = S.tasting && S.tasting.d === SHIP.time.day ? S.tasting.left : 0, mine = z.you !== null ? ` You voted for ${z.choices[z.you]}.` : '';
+    if (md < z.from) return `Brennan's tasting table at ${hhmm(z.from)}: ${z.choices.join(' and ')}.`;
+    return `Brennan's tasting table: ${z.choices.join(' and ')}` + (left ? `, ${left} taste${left > 1 ? 's' : ''} left.` : '.') + (md >= z.to ? ` ${z.winner[0].toUpperCase() + z.winner.slice(1)} won, ${z.votes[z.win]} vote${z.votes[z.win] === 1 ? '' : 's'} to ${z.votes[1 - z.win]}.` : '') + mine;
+  }
   if (what === 'event') return S.batch && S.batch.d === SHIP.time.day ? `Brennan is cooking for ${S.batch.label} (${S.batch.meals} meals).` : '';
   const open = md >= FOOD.open[meal] && md < galleyServeEnd(day, meal);
   const evd = galleyEvDish(S.ev && S.ev.menu), M = evd ? { dinner: evd, note: '' } : galleyMenu(SHIP.time.day), ck = galleyCake(SHIP.time.day), now = galleyEvents(SHIP.time.day).busy.find(b => md >= b.from && md < b.to);
@@ -11417,6 +11479,7 @@ function galleyText(what = 'servery') {
   if (S.cake && S.cake.out && ck) extra += ck.who.length ? ` Birthday cake for ${galleyNames(ck.who)} on the end of the counter.` : ck.pie ? ' A harvest pie on the end of the counter.' : ` A ${ck.name} cake on the end of the counter.`;
   else if (ck && md < CAKE.out) extra += ` ${ck.pie ? 'Pie' : 'Cake'} after dinner: it's ${galleyCakeFor(ck)}.`;
   if (meal === 'breakfast' && open && M.bnote) extra += ` It's the ${M.bnote}.`;
+  if (S.tasting && S.tasting.d === day && S.tasting.out) extra += ' ' + galleyText('tasting');
   const fresh = produceByCrop(S).slice(0, 2).map(x => GARDEN_CROPS[x[0]].name);
   if (fresh.length && (S.servery.portions || open)) extra += ` Fresh from the garden: ${fresh.join(' and ')}.`;
   if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}` + (S.batch.late ? ', running late' : '') + (S.batch.herbs === false ? ', without the garden\'s herbs' : '') + '.';
@@ -11436,7 +11499,7 @@ function galleyReport(day, days = 1) {
   const S = { at: (day - 1) * 1440, ...GALLEY_START() }, out = [];
   for (const E of GALLEY_EV.values()) E.k = 0;
   for (let d = day; d < day + days; d++) {
-    const st = { day: d, picked: 0, fresh: 0, produceBinned: 0, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
+    const st = { day: d, tastes: 0, tasted: 0, picked: 0, fresh: 0, produceBinned: 0, spoiled: 0, cakes: 0, batch: 0, trays: 0, mealMax: { breakfast: 0, dinner: 0 }, busy: galleyBusy(d), ate: 0, eaten: 0, grabbed: 0, waits: [], maxWait: 0, maxWho: '', missed: [], cooked: 0, baked: 0, washed: 0, waste: 0, delivered: 0, coldOut: 0, coldMin: Infinity, ready: {}, hours: [] };
     for (let m = (d - 1) * 1440; m < d * 1440; m++) galleyStep(S, m, st);
     const rota = galleyRota(d), staff = [];
     for (const [id, g] of rota) if (g.role) staff.push({ id, role: g.role, wake: g.wake, bedBy: g.bedBy, first: g.blocks.length ? g.blocks[0].from : null, blocks: g.blocks.length });
@@ -11480,6 +11543,8 @@ function galleyVisuals() {
     V.cake = new THREE.Mesh(new THREE.CylinderGeometry(.1, .1, .09, 20), std('#f3e4d4', .6));
     V.cake.position.set(1.15, .887, .46); V.cake.visible = false; V.cake.castShadow = false; V.cake.raycast = nope; sv.g.add(V.cake);
     V.candles = im(new THREE.CylinderGeometry(.006, .006, 1, 6), std('#ffffff', .5), 10, sv.g, [...Array(10)].map((_, k) => col(k < 5 ? ['#e86a8a', '#6ab0e8', '#f0c050', '#7ad08a', '#c08ae8'][k] : '#ffcf5a')));
+    // the tasting table's two small plates beside it (x .8 and .95, plates' top .852) and what's left on each
+    V.taste = im(new THREE.CylinderGeometry(1, 1, 1, 14), std('#ffffff', .5), 4, sv.g, ['#e9e4da', '#e9e4da', '#b5c46a', '#c9884a'].map(c => col(c)));
     for (let k = 0; k < 10; k++) { const a = (k % 5) * 1.2566, r = .055; put0(V.candles, k, 1.15 + r * Math.cos(a), k < 5 ? .955 : .993, .46 + r * Math.sin(a), k < 5 ? 1 : 1.6, k < 5 ? .05 : .012, k < 5 ? 1 : 1.6); }
   }
   if (gs && gs.g.userData.live) {                        // rolls on the top shelf, wraps below: 8 places, one for every 2 items
@@ -11504,7 +11569,8 @@ function galleyShow() {
   const bk = SHIP.time.day + '|' + (galleyEvDish(S.ev && S.ev.menu) || '');   // redrawn each day, and when an event changes the menu
   if (GV.board && GV.boardDay !== bk) { GV.boardDay = bk; galleyBoardDraw(GV.board, SHIP.time.day); }
   const bags = Math.min(3, Math.ceil((S.bin || 0) / 10)), cake = !!(S.cake && S.cake.out), pie = cake && !!S.cake.pie;
-  const key = p + '|' + g + '|' + dirty + '|' + bags + '|' + cake + pie; if (key === GV.key) return; GV.key = key;
+  const T = S.tasting && S.tasting.d === SHIP.time.day && S.tasting.out ? S.tasting : null, tz = T && galleyTasting(SHIP.time.day), tl = T && tz ? Math.ceil(4 * T.left / Math.max(1, tz.tastes)) : 0;
+  const key = p + '|' + g + '|' + dirty + '|' + bags + '|' + cake + pie + '|' + tl; if (key === GV.key) return; GV.key = key;
   const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
   if (GV.food) {
     const h = .008 + .05 * Math.min(1, p / FOOD.serveryCap);   // from just over the pans' own food (top at .98) up
@@ -11525,6 +11591,14 @@ function galleyShow() {
   }
   if (GV.cake) { GV.cake.visible = cake; GV.cake.material.color.copy(col(pie ? '#c98a4b' : '#f3e4d4')); GV.candles.count = cake && !pie ? 10 : 0;   // a pie: golden crust, no candles
     GV.candles.instanceMatrix.needsUpdate = true; }
+  if (GV.taste) {                                       // the tastes go down in quarters; the plates stay till they're cleared
+    GV.taste.count = T ? (tl ? 4 : 2) : 0;
+    for (let k = 0; k < 2; k++) {
+      const h = .004 + .016 * tl / 4;
+      put(GV.taste, k, .8 + k * .15, .847, .46, .06, .01, .06); put(GV.taste, k + 2, .8 + k * .15, .851 + h / 2, .46, .04, h, .04);
+    }
+    GV.taste.instanceMatrix.needsUpdate = true;
+  }
   if (GV.bin) {                                         // up to three bags, one for every 10 meals binned, against the wall by the pit's end
     GV.bin.count = bags;
     [[-1.06, .15, -.19, .14, .15, .13], [-1.06, .15, .09, .14, .15, .13], [-1.06, .39, -.05, .12, .11, .11]].forEach((b, k) => put(GV.bin, k, ...b));
