@@ -1252,13 +1252,6 @@ const KIT = {
     for (const sd of [-1, 1]) { cyl(.17, .17, .06, LNG.rust, sd * .6, .46, 0, g, 16); cyl(.025, .025, .43, LNG.brass, sd * .6, .215, 0, g, 8); cyl(.14, .16, .02, M.slateDark, sd * .6, .01, 0, g, 16); }
     return { w: .72, d: .72 };
   },
-  postbox(g) {                                           // a pillar box for paper letters, by the call-home booths (Pillar 4, seat 8; scenery)
-    cyl(.21, .22, .06, M.slateDark, 0, .03, 0, g, 18); cyl(.19, .19, .89, LNG.rust, 0, .505, 0, g, 18);
-    soft(LNG.rust, 0, .95, 0, .2, .1, .2, g); cyl(.205, .205, .05, LNG.brass, 0, .88, 0, g, 18);   // the domed cap and a brass band
-    box(.2, .025, .03, M.slateDark, 0, .78, .185, g); box(.24, .015, .04, LNG.brass, 0, .802, .19, g);   // the slot, and its lip
-    box(.16, .1, .012, LNG.cream, 0, .6, .19, g);        // the collection plate
-    return { w: .44, d: .44 };
-  },
   cardTable(g) {
     box(.9, .05, .9, std('#2f5e4f', .9), 0, .72, 0, g);
     box(.94, .04, .94, M.wood, 0, .69, 0, g);
@@ -5307,7 +5300,6 @@ DECKS[3] = {
     // ---- Pillar 4, seat 8 (0.38.10): the seedling stand in the garden's north-east corner (Sowing morning) and the bow lounge's Tiles station ----
     place('G', 'seedlingStand', 9.63, .42, 'n', { yours: DECKS[3].seedlings.yours, it: IT('Seedlings', 'A little stepped stand of pots by the grow racks: one seedling for everyone who came to the last Sowing morning. One pot is only soil, waiting.') });
     place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles station', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
-    place('B', 'postbox', .4, 4.5, 'w', { it: IT('Postbox', 'For paper letters. They go home in a sealed bag with the next shuttle, weeks behind any call. Some people say that is the point.') });   // 0.38.11
   },
 
 };
@@ -7098,7 +7090,7 @@ DECKS[3].places.push(
   { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },
 );
 // 0.38.11: twelve lantern places on the promenade's two outer lanes (Lantern walk: crew stand under the lanterns, facing
-// the middle), event-tagged like the rest. (The postbox's place went with Letters evening in 0.62.0; the postbox stays, scenery.)
+// the middle), event-tagged like the rest. (The postbox and its place went with Letters evening: 0.62.0, 0.62.5.)
 DECKS[3].places.push(
   ...[26, 28, 30, 32, 34, 36, 38].map(c => [c, 9]).concat([28, 30, 34, 36, 38].map(c => [c, 12])).map(([c, r], k) =>
     ({ id: '3-lantern-' + (k + 1), type: 'event', event: 'lantern-walk', at: [c, r], xy: [c + .5, r === 9 ? 9.45 : 12.55], face: r === 9 ? 's' : 'n', pose: 'stand', anim: 'talk', room: '=' })),
