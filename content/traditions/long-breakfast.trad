@@ -1,0 +1,39 @@
+@tradition long-breakfast
+// Long breakfast (weekly, seat 15). On Saturdays the galley keeps breakfast going until 10:00, with pancakes, for the
+// crew who are off. The gathering is 08:00-09:30 (after the usual window), ending before the fortnightly harvest
+// morning starts at 09:30, so the two never overlap on Deck 3. A meal tradition:
+// meal: breakfast    (the sim engineer's field, still to be added to the grammar: going counts as your breakfast)
+// Design note: plans/trad-notes-weekly.md.
+k: 439
+title: Long breakfast
+when: weekly saturday
+at: 08:00-09:30
+min: 25
+jitter: 20
+where: 3 room Mess hall: mess-seat
+hold: none
+who: late-sleeper 85%, lingers-at-meals 80%, juniors 50%, everyone 40%
+anim: talk
+from: brennan
+ties: galley meal=breakfast dish=pancakes until=10:00
+
+== mail
+- Long breakfast tomorrow: Saturday pancakes in the mess hall until ten. Sleep in. We'll keep the griddle warm.
+
+== ask
+- Long breakfast this morning. Pancakes until ten.
+- I slept in on purpose. It's Saturday. There are pancakes.   #funny
+- Coming down for pancakes? There's no rush. That's the whole point.   #warm
+
+== here
+- Pass the syrup? No, the other syrup.   #funny
+- Third pancake. I'm not counting. You're not counting.   #funny
+- No shift, no hurry. This is the life.   #warm
+
+== thanks
+- You take a stack of pancakes to a table in the sun lamps' light. Nobody's in a hurry.   #warm
+
+== chatter
+- Saturday pancakes are what gets me through the week.   #funny
+- The long breakfast table is the only place you see the whole galley sitting down.
+- Best thing about a day off: pancakes until ten.

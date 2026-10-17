@@ -1,0 +1,43 @@
+@tradition tasting-table
+// Brennan's tasting table (weekly, seat 15). Wednesday dinner is already a crew member's favourite (section 17's
+// menu); the tasting table sits beside it: two small new dishes on the servery end, everyone who tries them drops a
+// token in one of two jars, and the winner comes back as a side with Sunday's long table. A meal tradition:
+// meal: dinner    (the sim engineer's field, still to be added to the grammar: going counts as your dinner)
+// Design note: plans/trad-notes-weekly.md.
+k: 436
+title: Brennan's tasting table
+when: weekly wednesday
+at: 18:15-19:15
+min: 20
+where: 3 room Mess hall: mess-seat
+hold: none
+who: brennan always, galley 70%, lingers-at-meals 60%, everyone 35%
+anim: talk
+host: brennan
+from: brennan
+ties: galley meal=dinner extra=tasting batch=20
+ties: tally tasting choices=herb-flatbread|pickled-beans|tomato-jam-oatcakes|root-crisps|miso-greens|bean-fritters|carrot-ginger-soup|chilli-lime-corn
+invite: host=brennan odds=25% line="Two new dishes at the end of the servery tonight. Taste both and vote. Honestly."
+
+== mail
+- Tasting table tomorrow at dinner, from {time}: two small new dishes by the servery. Try both, drop your token in a jar. The winner comes back on Sunday.
+
+== ask
+- Tasting table tonight. I'm voting for whichever one has more garlic.   #funny
+- Brennan's trying two new dishes at dinner. One of them is green. Very green.   #funny
+- Tasting table at dinner. Bring an open mind and an empty plate.
+- Did you vote last week? I did. Twice. Don't tell anyone.   #funny
+
+== here
+- Try this one first. Then that one. Then tell me honestly.
+- Hmm. Hmm! Give me another spoonful, I need to be sure.   #funny
+- Which jar are you going for?
+
+== thanks
+- You try both little dishes and drop your token in a jar. Brennan watches the jars like a hawk.   #funny
+- You join the tasting table. Both dishes are good; one of them is better. You vote.
+
+== chatter
+- Last week's winner was so good I had thirds.
+- Brennan pretends not to care which dish wins. Then counts the tokens twice.   #funny
+- I voted for the green one. It lost. I'm not bitter.   #funny
