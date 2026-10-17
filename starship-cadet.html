@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.2
+   STARSHIP CADET: CSV Wren                           build 0.27.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2752,6 +2752,73 @@ function tallCombine() {
   }
   tallSync();
 }
+// 0.27.25: shadow stand-ins. The shadow pass drew every furniture mesh, wall piece and hull piece again, one draw per
+// material, more draws than the picture itself. A shadow only needs the shape, so after the build their triangles are
+// copied, positions only, into a few plain meshes, and the originals stop casting:
+//   - things that never move (the merged furniture, the tall pieces): one stand-in per 10 x 10 tile block;
+//   - wall pieces: one per wall run, shown only while that run's pieces are up (they drop with the cutaway together);
+//   - hull pieces, their decor and the curved walls: one per piece, following its height as the cutaway lowers it.
+// One per face side as well, since the shadow pass follows each material's side. The stand-ins are hidden except while
+// the shadow pass runs (the main pass has already picked what it draws), so they never reach the picture. Same depth
+// from the same triangles, so the same shadows. Left alone: instanced things (walls, door leaves, plants, the crowd),
+// anything marked noMerge (it moves), and materials with alphaTest or their own shadowSide.
+let SHADOW_PROXY = [];
+const SHADOW_PROXY_MAT = [THREE.FrontSide, THREE.BackSide, THREE.DoubleSide].map(side => new THREE.MeshBasicMaterial({ side }));
+function shadowStandIns() {
+  SHADOW_PROXY = [];
+  deckRoot.updateMatrixWorld(true);
+  const buckets = new Map(), v = new THREE.Vector3(), inv = new THREE.Matrix4(), m4 = new THREE.Matrix4(), CELL = 10;
+  // a mesh's triangles into a bucket, in frame's own space (world when frame is null); key(x, z) names the bucket.
+  // Two passes: the first counts each bucket's triangles, the second fills one Float32Array each (no big JS arrays)
+  let fill = false;
+  const take = (m, frame, key, follow, vis) => {
+    if (!m.isMesh || m.isInstancedMesh || m.isSkinnedMesh || !(fill ? m.userData.shadowProxy : m.castShadow) || m.userData.noMerge) return;
+    const mats = Array.isArray(m.material) ? m.material : [m.material], side = mats[0].side;
+    if (mats.some(x => x.alphaTest > 0 || x.shadowSide != null || !x.visible || x.side !== side)) return;
+    for (let p = m.parent; p && p !== frame && p !== deckRoot; p = p.parent) if (p.userData.noMerge) return;
+    const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry, P = geo.attributes.position;
+    m4.multiplyMatrices(frame ? inv.copy(frame.matrixWorld).invert() : inv.identity(), m.matrixWorld);
+    for (let t = 0; t + 2 < P.count; t += 3) {
+      let cx = 0, cz = 0;
+      for (let k = 0; k < 3; k++) { v.fromBufferAttribute(P, t + k).applyMatrix4(m4); tri[k * 3] = v.x; tri[k * 3 + 1] = v.y; tri[k * 3 + 2] = v.z; cx += v.x; cz += v.z; }
+      const id = side + '|' + key(cx / 3, cz / 3); let b = buckets.get(id);
+      if (!b) buckets.set(id, b = { side, n: 0, P: null, at: 0, follow, vis });
+      if (!fill) b.n += 9; else { b.P.set(tri, b.at); b.at += 9; }
+    }
+    if (geo !== m.geometry) geo.dispose();
+    m.castShadow = false; m.userData.shadowProxy = true;
+  };
+  const cell = (x, z) => 'c' + Math.floor(x / CELL) + ',' + Math.floor(z / CELL), tri = new Float32Array(9);
+  for (fill of [false, true]) {
+  if (fill) for (const b of buckets.values()) b.P = new Float32Array(b.n);
+  for (const m of staticRoot.children) take(m, null, cell);
+  for (const b of TALL_ALL) take(b.mesh, null, cell);
+  for (const t of TALL) for (const o of t.own || []) o.castShadow = false;   // a fading room's own meshes: the stand-ins cast for them
+  const runs = new Map();
+  for (const d of WALL_DECOR) {
+    const run = d.e && (d.e.type === 'hull' ? d.e.hrun : d.e.run);
+    if (!run) { d.g.traverse(m => take(m, null, cell)); continue; }
+    if (!runs.has(run)) runs.set(run, { id: 'w' + runs.size, vis: d.g });
+    const r = runs.get(run); d.g.traverse(m => take(m, null, () => r.id, null, r.vis));
+  }
+  HULL_RUNS.forEach((hr, k) => {
+    hr.g.traverse(m => take(m, hr.g, () => 'h' + k, hr.g, hr.g));
+    hr.decor.traverse(m => take(m, hr.decor, () => 'hd' + k, hr.decor, hr.decor));
+  });
+  CURVES.forEach((c, k) => c.g.traverse(m => take(m, c.g, () => 'cv' + k, c.g, c.g)));
+  }
+  for (const b of buckets.values()) {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(b.P, 3).onUpload(function () { this.array = null; })); geo.computeBoundingSphere();   // once on the GPU the copy here isn't needed
+    const mesh = new THREE.Mesh(geo, SHADOW_PROXY_MAT[b.side]); mesh.castShadow = true; mesh.receiveShadow = false; mesh.visible = false;
+    mesh.matrixAutoUpdate = false; mesh.raycast = () => {}; deckRoot.add(mesh); SHADOW_PROXY.push({ mesh, follow: b.follow, vis: b.vis });
+  }
+}
+const shownChain = o => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
+{ const sm = renderer.shadowMap, draw = sm.render.bind(sm);   // the stand-ins show only to the shadow pass, each where its original is
+  sm.render = (...a) => {
+    for (const p of SHADOW_PROXY) { p.mesh.visible = !p.vis || shownChain(p.vis); if (p.follow) p.mesh.matrixWorld.copy(p.follow.matrixWorld); }
+    try { draw(...a); } finally { for (const p of SHADOW_PROXY) p.mesh.visible = false; }
+  }; }
 function tallSync() {
   let key = ''; TALL.forEach((t, i) => { if (t.o !== 1) key += i + ','; });
   if (key === TALL_KEY) return;
@@ -3223,6 +3290,7 @@ function buildDeck(def) {
   tallCombine();
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
+  shadowStandIns();                                      // 0.27.25: shadows drawn from a few stand-ins, not every piece
   for (const it of ITEMS) it.hit.userData.item = it;
 }
 // Working-deck floor markings: gold-and-charcoal bands across every doorway onto a steel floor,
@@ -3292,7 +3360,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = []; SHADOW_PROXY = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -7322,7 +7390,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.25';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two

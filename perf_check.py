@@ -10,8 +10,10 @@
 #   tris    triangles drawn (thousands)
 #   js      milliseconds of game code per frame (the best of 3 batches of 20 frames) (simulation, crew, crowd, effects; rendering skipped). Headless
 #           SwiftShader can't say how fast a real phone renders, so this is the part we can compare build to build.
+#   gl      every draw sent to the GPU in that frame, the shadow pass included (the budget's 'calls' counts the picture only)
+#           (a mid phone runs game code roughly 4 to 5 times slower; Chrome's CPU throttle gave no steady numbers headless)
 #   crew    people on the deck (the crowd's count)
-# Then a deck round trip (every deck, twice) checks geometries, textures and the JS heap come back to the same numbers.
+# Then a week of play (7 ship days, 28 deck changes) and a deck round trip (every deck, twice) check geometries, textures and the JS heap come back to the same numbers.
 # With OLD.html it runs both and marks regressions: over BUDGET calls, calls up more than 10% or 25, js up more than
 # 30%, or memory that grows across round trips. Ends "PERF CHECK OK" or "PERF CHECK: N problem(s)".
 # Add a scene when a new tradition or moment lands: name, day (1 = the Monday of a new game), time, deck, room (a
@@ -45,13 +47,21 @@ SCENE_JS = r"""(sc => {
   player.obj.position.copy(cellPos(...at)); target.copy(player.obj.position).setY(.7);
   return { room: ROOMS[k].name };
 })"""
+GL_JS = r"""(() => {                                   // counts every real draw sent to the GPU, the shadow pass included
+  if (window.__glOn) return; window.__glOn = true; window.__gl = 0; const gl = renderer.getContext(), wrap = (o, f) => { const g = o[f] && o[f].bind(o); if (g) o[f] = (...a) => { window.__gl++; return g(...a); }; };
+  for (const f of ['drawElements', 'drawArrays', 'drawElementsInstanced', 'drawArraysInstanced']) wrap(gl, f);
+  const ext = gl.getExtension('ANGLE_instanced_arrays'); if (ext) for (const f of ['drawElementsInstancedANGLE', 'drawArraysInstancedANGLE']) wrap(ext, f);
+})()"""
 MEASURE_JS = r"""(n => {
-  window.__skip = false; window.__step(1, 1000 / 30);   // one drawn frame: draw calls, triangles, crew (before the timing, so the ship time is the same every run)
-  const st = crowd.stats(), r = { calls: renderer.info.render.calls, tris: Math.round(renderer.info.render.triangles / 1000), crew: st.people };
+  window.__gl = 0; window.__skip = false; window.__step(1, 1000 / 30);   // one drawn frame: draw calls, triangles, crew (before the timing, so the ship time is the same every run)
+  const st = crowd.stats(), r = { calls: renderer.info.render.calls, gl: window.__gl, tris: Math.round(renderer.info.render.triangles / 1000), crew: st.people };
   window.__skip = true; let js = 1e9; for (let k = 0; k < 3; k++) { const a = window.__realNow(); window.__step(n, 1000 / 30); js = Math.min(js, (window.__realNow() - a) / n); } window.__skip = false;   // the best of 3 batches (less noise)
   r.js = +js.toFixed(2); return r;
 })"""
 MEM_JS = r"""(() => { const m = renderer.info.memory; return { geo: m.geometries, tex: m.textures, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null }; })()"""
+
+def mem(g):                                              # memory after a full garbage collection, so garbage doesn't count
+    g.page.context.new_cdp_session(g.page).send('HeapProfiler.collectGarbage'); return g.ev(MEM_JS)
 
 def run(path):
     out = {'scenes': [], 'trip': None, 'errors': [], 'size': os.path.getsize(path), 'load': []}
@@ -63,6 +73,7 @@ def run(path):
             for vname, w, h, zoom in VIEWS:
                 g = Game(pw, path, w, h, out['errors'])
                 g.page.evaluate("window.__realNow = (() => { const f = Object.getPrototypeOf(performance).now.bind(performance); return () => f(); })()")
+                g.ev(GL_JS)
                 r = g.page.evaluate(f"s => window.__sc(s)({json.dumps(sc)})", SCENE_JS)
                 row['room'] = r.get('room')
                 g.ev(f"camera.zoom = {zoom}; camera.updateProjectionMatrix()")
@@ -76,17 +87,27 @@ def run(path):
         for lap in range(3):
             for n in g.ev("Object.keys(DECKS).map(Number)") + [4]:
                 g.ev(f"goToDeck({n})"); g.step(3)
-            g.step(10); laps.append(g.ev(MEM_JS))
+            g.step(10); laps.append(mem(g))
         out['trip'] = laps
+        g.close()
+        # long play: a week of ship days, four deck changes a day, back on Deck 4 at the end; memory then vs after day 1
+        g = Game(pw, path, 390, 844, out['errors'])
+        for n in g.ev("Object.keys(DECKS).map(Number)") + [4]: g.ev(f"goToDeck({n})"); g.step(3)   # every deck once first: shared kit uploads once
+        g.step(10); start = mem(g)
+        for d in range(1, 8):
+            for k, n in enumerate((3, 5, 2, 4)):
+                g.ev(f"skipTo({d * 1440 + 420 + k * 180}); goToDeck({n})"); g.step(20)
+        g.ev("goToDeck(4)"); g.step(10); out['long'] = [start, mem(g)]
         g.close()
     return out
 
 def show(tag, o):
     print(f'== {tag}')
     for s in o['scenes']:
-        v = '  '.join(f"{k} {x['calls']}c {x['tris']}kt {x['js']}ms {x['crew']}p" for k, x in s['views'].items())
+        v = '  '.join(f"{k} {x['calls']}c/{x.get('gl', '?')}gl {x['tris']}kt {x['js']}ms {x['crew']}p" for k, x in s['views'].items())
         print(f"  {s['name']:<42} [{s.get('room')}]  {v}")
     print(f"  file {o['size'] / 1e6:.2f} MB, load {o['load']} s")
+    if o.get('long'): print('  a week of play (geometries, textures, JS heap MB): after day 1', '/'.join(str(v) for v in o['long'][0].values()), '-> after day 8', '/'.join(str(v) for v in o['long'][1].values()))
     print('  deck round trips (geometries, textures, JS heap MB):', ' -> '.join(f"{m['geo']}/{m['tex']}/{m['heap']}" for m in o['trip']))
 
 def problems(new, old):
@@ -102,6 +123,8 @@ def problems(new, old):
     if old and new['size'] > old['size'] * 1.25: print(f"NOTE file size {old['size'] / 1e6:.2f} -> {new['size'] / 1e6:.2f} MB (more to download on a phone; not a failure)")
     t = new['trip']
     if t[-1]['geo'] != t[1]['geo'] or t[-1]['tex'] != t[1]['tex']: bad.append(f"memory grows across deck round trips: {t}")
+    L = new.get('long')
+    if L and (L[1]['geo'] > L[0]['geo'] + 20 or L[1]['tex'] > L[0]['tex'] + 2 or (L[1]['heap'] or 0) > (L[0]['heap'] or 0) + 60): bad.append(f"memory grows over a week of play: {L}")
     if new['errors']: bad.append(f"errors: {new['errors'][:4]}")
     return bad
 
