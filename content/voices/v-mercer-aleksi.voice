@@ -1,0 +1,12 @@
+@voice v-mercer-aleksi
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: warm
+talk: A retired captain going to see the grandchildren; up early and up late; gentle stories, never finished, always happy.
+hi: Hello there | Evening
+bye: Off you go, then | Bless
+yes: Oh, certainly | Of course
+thanks: Thank you | Lovely
+wow: My word
+sigh: Oh, well
+likes: sweet | tea | made
+nick: - | {me} | {me} | {me} | {me}

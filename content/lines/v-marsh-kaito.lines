@@ -1,0 +1,28 @@
+@crew v-marsh-kaito
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Oh, hello. Dr. Kaito Marsh. Relief. Just a week. I'm good, don't worry.
+- Hi. Sorry. I'm new here. Well, for a week. Where's the tea?
+? tier>=acquaintance
+- {hi}, {me}. I called home. They say hello. They don't know you. Still.   #funny
+?
+
+== chat
+- Every ship's galley is different. This one smells like Sunday at home.
+- I call home every night. It's a long way. It doesn't feel so long, after.
+
+== near
+? place:booths
+- Calling home. Every night. They'd worry otherwise. So would I.
+? place:lounge
+- Quiet drink. Then the booths. Then bed. Good evening.
+?
+
+== bye
+- {bye}. Sleep well. I'll be at the booths if you need a doctor. Or a chat.
+
+== smalltalk
+- Just calling home.
+- Nice ship, this.

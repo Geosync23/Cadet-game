@@ -1,0 +1,28 @@
+@crew v-rocha-dilan
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Oh, hi. Sorry. Dilan Rocha. Charts. Am I in your seat?
+- Hello. I'm only here a few days. I'll keep out of the way.
+? tier>=acquaintance
+- {hi}, {me}. I saved you the window seat. Well. Half of it.   #warm
+?
+
+== chat
+- I draw the view from every ship I'm on. This one's the best so far.
+- The pencils are behind my ears so I don't lose them. I lose them anyway.   #funny
+
+== near
+? place:lounge
+- That window. I could draw it all week. I think I will.
+? time:night
+- More stars at night. Obviously. Sorry. It's just nice.
+?
+
+== bye
+- {bye}. Thanks for talking to me. Really.   #warm
+
+== smalltalk
+- Sorry. Is this seat...?
+- That one's new.

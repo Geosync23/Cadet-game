@@ -1,0 +1,12 @@
+@voice v-ellery-teo
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: playful
+talk: A trader's apprentice with a better kettle for everyone; a patter you can't help liking; loves the garden.
+hi: Hello hello | Hiya
+bye: Must dash | Ta-ra
+yes: Done deal | Course
+thanks: Ta | Cheers
+wow: Ooh
+sigh: Ah, go on
+likes: sweet | made | garden
+nick: - | {me} | {me} | {me} | {me}

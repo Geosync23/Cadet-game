@@ -1,0 +1,28 @@
+@crew v-tamura-keira
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Keira Tamura. I've brought seeds. Lots of seeds.
+- Oh, hello. Do you know where the garden's warmest corner is?
+? tier>=acquaintance
+- {hi}, {me}. The cuttings took. All six. I nearly cried.   #warm
+?
+
+== chat
+- The orchard on Kesh has a tree older than my gran. I've brought a bit of it.
+- If the seeds take, you'll have plums by Lanterns. Well. Someone will.   #funny
+
+== near
+? place:hydroponics_garden
+- Tove's shown me every bed by its sowing week. Lovely system.
+? place:booths
+- Calling the orchard. They want to know if the cuttings are homesick.   #funny
+?
+
+== bye
+- {bye}. Say hello to the plum cuttings if you pass. They like company.   #funny
+
+== smalltalk
+- Grow, little ones.
+- Plums by Lanterns. Maybe.

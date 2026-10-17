@@ -1,0 +1,12 @@
+@voice v-upton-iver
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: gruff
+talk: Thirty years on a freighter; a big voice softened by the window seat; can't help advising, and knows it.
+hi: Hello | Ah
+bye: Carry on | Mind how you go
+yes: Aye | Right you are
+thanks: Thanks | Much obliged
+wow: Well, I never
+sigh: Hm
+likes: tea | book | card
+nick: - | {me} | {me} | {me} | {me}

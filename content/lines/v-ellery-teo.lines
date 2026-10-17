@@ -1,0 +1,28 @@
+@crew v-ellery-teo
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello hello! Teo Ellery. Do you own a kettle? I have a better one.   #funny
+- Hiya! Just passing. Unless you need a kettle. Do you need a kettle?   #funny
+? tier>=acquaintance
+- {hi}, {me}! Two kettles sold. Three, if Brennan says yes. She won't.   #funny
+?
+
+== chat
+- Lesson one of the trade: everybody needs a kettle. They just don't know it.   #funny
+- Your garden's the best part of this ship. No sales in here. Promise.
+
+== near
+? place:hydroponics_garden
+- No kettles in the garden. That's my rule. Lovely here.
+? place:crew_store
+- Your storekeepers drive a hard bargain. I've learnt a lot.   #funny
+?
+
+== bye
+- {bye}! If the kettle question changes, you know where I am.   #funny
+
+== smalltalk
+- Kettle? No? Fair enough.   #funny
+- Lovely garden.

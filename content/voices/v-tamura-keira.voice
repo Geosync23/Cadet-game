@@ -1,0 +1,12 @@
+@voice v-tamura-keira
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: warm
+talk: Soft and glad; talks about the Kesh orchard as if it were family; offers you fruit you can't have yet.
+hi: Hello | Oh, hello
+bye: Off to the seedlings | Take care
+yes: Of course | Gladly
+thanks: Thank you | How kind
+wow: Oh, look at that
+sigh: Ah, well
+likes: plant | garden | tea
+nick: - | {me} | {me} | {me} | {me}

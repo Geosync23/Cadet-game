@@ -1,0 +1,12 @@
+@voice v-kessler-lio
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: earnest
+talk: A student on placement; keen, a bit lost; takes notes on everything the juniors say; up too late in the lounge.
+hi: Hi | Oh, hi
+bye: Better go | Thanks, bye
+yes: Yes | Sure
+thanks: Thanks so much | Thank you
+wow: Whoa
+sigh: Oh no
+likes: game | book | music
+nick: - | {me} | {me} | {me} | {me}

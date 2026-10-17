@@ -1,0 +1,28 @@
+@crew v-ferro-rhea
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Evening. Rhea Ferro, charts office. That sofa's mine for the week.
+- Hello. I'm meant to be mapping your corridors. I'm mapping your lounge.   #funny
+? tier>=acquaintance
+- {hi}, {me}. I know where everything is now. I'm a little sad about it.   #funny
+?
+
+== chat
+- The charts office thinks I'm working. I am. On this sofa. Thoroughly.   #funny
+- Every ship's lounge has a best seat. Yours is by the curve of the window.
+
+== near
+? place:lounge
+- The office. Pull up a chair. Not that one, it squeaks.   #funny
+? deck:2
+- The stars here aren't on any chart yet. I like that more than I should.
+?
+
+== bye
+- {bye}. If anyone asks, I was working.   #funny
+
+== smalltalk
+- This is the office.   #funny
+- Not bad, this ship.

@@ -1,0 +1,28 @@
+@crew v-grimaldi-iver
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello hello! Iver Grimaldi. Seeds, soil, and a lot of talking.
+- Morning! Have you met the tomatoes yet? They're shy. Mostly.   #funny
+? tier>=acquaintance
+- {hi}, {me}! The tomatoes asked after you. Well. I asked for them.   #funny
+?
+
+== chat
+- I talk to the tomatoes. Tove talks to the beans. We've agreed not to compete.   #funny
+- Up at five. Best hour. The plants are fresh and nobody's queueing for toast.
+
+== near
+? place:hydroponics_garden
+- Good morning, row three. Lovely colour today. Keep it up.   #funny
+? place:crew_store
+- The store sells string. Good string. I've bought far too much.   #funny
+?
+
+== bye
+- {bye}! If a tomato says anything, write it down.   #funny
+
+== smalltalk
+- Come on, row three. You can do it.   #funny
+- Lovely soil. Lovely.
