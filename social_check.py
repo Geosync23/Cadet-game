@@ -116,10 +116,13 @@ with sync_playwright() as pw:
       out.mood = ['low', 'ok', 'high'].includes(moodOf(tomas)) && moodOf('nobody') === 'ok';
       out.rep = [repBand('works'), repBand('galley'), repShip('work'), knownFor().length];
       out.warm = warmth('tomas');
+      newsAdd({ id: 'test:one', lines: ['A test.'], seed: ['tomas'], born: Math.floor(shipNow()) - 1 });
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
       out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
       out.calm = CALM_TYPES.has('lounge-seat') && memThing('fixed.oven') === 'the oven' && memThing('nothing') === null;
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
+      SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
+      out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = {};
       out.pure = JSON.stringify(socSave()) === before;
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
@@ -130,6 +133,8 @@ with sync_playwright() as pw:
     print('Query API:', json.dumps(q))
     if q['missing']: fail(f"query functions missing: {q['missing']}")
     if not q.get('calm'): fail('CALM_TYPES or memThing wrong')
+    if q['bonds'] != ['Pell', 'pell', 'tomas', 'Chief Calder', 'tomas', None]: fail(f"bonds and their placeholders wrong: {q['bonds']}")
+    if q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
     if q['rep'][:3] != ['known', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")

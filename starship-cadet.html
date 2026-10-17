@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.29
+   STARSHIP CADET: CSV Wren                           build 0.36.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.29';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.30';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14034,8 +14034,11 @@ function warmth(id, now = shipNow()) {
   return l.reduce((a, m) => a + m[2], 0) >= 40 || (r && r.lastTalk !== null && now - r.lastTalk < 3 * 1440) ? 'warm' : 'cold';
 }
 const affBand = (a, b) => { const v = affinity(a, b); return v <= -40 ? 'rival' : v >= 60 ? 'friend' : 'neutral'; };
+// the bond kinds, spelt once (shared with 20c and the line conditions bond:<kind>); BOND_FILL: placeholder -> kind
+const BOND_KINDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'], BOND_ALIAS = { friend: 'friends', rival: 'rivals', partner: 'couple' };
+const BOND_FILL = { partner: 'couple', friend: 'friends', best: 'best', rival: 'rivals', mentor: 'mentor', mentee: 'mentee' };
 function bondOf(id, kind) {
-  socInit(); id = socId(id);
+  socInit(); id = socId(id); kind = BOND_ALIAS[kind] || kind;
   if (typeof socBondOf === 'function') { const b = socBondOf(id, kind); if (b !== undefined) return b; }   // 20c's, when it has an answer
   if (kind === 'couple') { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)]; if (p && p.partner && SOC.idx.has(p.partner)) return p.partner; }
   if (kind === 'mentee' && SHIP.social.mentor && SHIP.social.mentor === id) return 'you';   // your escort mentors you (A4)
@@ -14054,7 +14057,7 @@ function knowsNews(p, newsId) {
   return NEWS.some(x => x.id.startsWith(newsId + ':') && SHIP.knows[x.id] && SHIP.knows[x.id].has(id));
 }
 const repOf = dept => SHIP.rep && SHIP.rep.dept && isFinite(SHIP.rep.dept[dept]) ? SHIP.rep.dept[dept] : REP_START[dept] || 10;
-const repBand = dept => REP_BANDS.find(([v]) => repOf(dept) >= v)[1];
+const repBand = dept => (REP_BANDS.find(([v]) => repOf(dept) >= v) || REP_BANDS[REP_BANDS.length - 1])[1];
 const repShip = kind => { const v = SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship[kind]) ? SHIP.rep.ship[kind] : 50; return v < 35 ? 'low' : v >= 65 ? 'high' : 'ok'; };
 function knownFor() {                                   // up to three tags with the most behind them (REP_TAGS: [tag, counter, how many it takes])
   const c = SHIP.rep && SHIP.rep.cnt || {};
@@ -14101,7 +14104,7 @@ function socialFill(p, name, ctx = {}) {
     const n = typeof VOICE !== 'undefined' && VOICE[p.id] && VOICE[p.id].words && VOICE[p.id].words.nick, v = Array.isArray(n) ? n[tier] : null;
     return v ? v.replace('{me}', chatName()) : tier >= 2 ? chatName() : 'cadet';
   }
-  if (['partner', 'friend', 'best', 'rival', 'mentor', 'mentee'].includes(name)) return nameOf(bondOf(p.id, name === 'partner' ? 'couple' : name === 'rival' ? 'rivals' : name));
+  if (BOND_FILL[name]) return nameOf(bondOf(p.id, BOND_FILL[name]));
   if (name === 'boss') {
     const top = SOC.crew.filter(q => q.dept === p.dept && q !== p && (q.rank === 'chief' || q.rank === 'captain'));
     return top.length ? shortName(top[0]) : null;
@@ -14209,8 +14212,8 @@ if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice
 // socialInvite({ trad | kind, day, from, at, where, len }) -> an appointment id, or null: an invitation you accept or
 // decline on the device (Appointments, status 'asked', kind 'invite'). For a tradition, it's where and when the host's
 // plan has them there that day (their 'ev-<trad>' block), so the host keeps their own day; else at / where as given.
-const INTRO_MEM = { hello: 'intro.arrival', bunk: 'intro.arrival', arrival: 'intro.arrival', chief: 'intro.dinner', dinner: 'intro.dinner', shadow: 'intro.shadowShift', shadowShift: 'intro.shadowShift' };   // section 21's step ids
-const introOn = () => !(typeof flag === 'function' && flag('week1.done')) && (SHIP.intro && typeof SHIP.intro === 'object' ? !SHIP.intro.done && !SHIP.intro.skipped : !!escortId());
+const INTRO_MEM = { hello: 'intro.arrival', bunk: 'intro.arrival', arrival: 'intro.arrival', chief: 'intro.dinner', dinner: 'intro.dinner', shadow: 'intro.shadowShift', shadowShift: 'intro.shadowShift', 'd1-shadow': 'intro.shadowShift' };   // section 21's step ids
+const introOn = () => !(typeof flag === 'function' && flag('week1.done')) && (SHIP.intro && typeof SHIP.intro === 'object' ? SHIP.intro.on !== false && !SHIP.intro.ended && !SHIP.intro.skipped : !!escortId());   // section 21: done is a map of steps, ended the end
 const inWeek1 = () => introOn();                        // the line condition week1:true (the frozen vocabulary)
 const socGate = stage => !introOn() || (typeof flag === 'function' && !!flag(stage === 'done' ? 'week1.done' : 'week1.' + stage));
 function escortId() {                                   // SHIP.intro.escort, else the flag escort.<roster id> (section 21 sets escort.torres-zeke)
