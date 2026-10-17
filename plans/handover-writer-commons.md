@@ -90,6 +90,7 @@ list is done. Onboarding seat 1 (session_01KaHzfqSqF8B4bkNFrH1tsx) is inactive: 
 | 6 | seasons and traditions gaps for the ten (exact trad ids) + `trad:today` | the ten | cd488f8, 78d55a4, 7335bee, be0bd77 |
 | 7 | 39 overheard conversations, off duty in work places | `overheard/deck2`, `deck5`, `deck6.lines` | 4721c26 |
 | 8 | 17 crew-to-crew goodbyes for rotation days (A is `leaving:soon`; pair:friend/best/mentor/couple + 8 named leavers) | `overheard/goodbyes.lines` | 4a3879d |
+| 10 | missing someone who moved on (`{missed}`), for social B2 | `banks/missing.lines` | see git log |
 | 9 | week 1 for onboarding's hook: `beat.<beatId>.<n>` bubbles (tomas d1-wash, d5-invite, d6-sowing; brennan d1-dinner; eklund-leila d2-booths; ishikawa-orla d3-store; torres-zeke d3-pick; pell d4-quiz), Mail `mail.d4-mail` (Torres), `mail.d7-calder` + `mail.settled` (Calder), `mail.d5-mug` (Halloran) as one line "Subject \| body", unsigned; `meetings/introHealth.meet` (Rina, Tue 14:00) | those files' `== week1` | b4a86bf |
 
 Head writer 3's edits and rulings this seat: story crew never leave, so their goodbyes only play if that ever changes
@@ -135,9 +136,8 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 
 ## Loose ends / next
 
-- **On hold:** ~15 "missing them" lines (`bond:missed`, `{missed}`) for social B2 (session_014A3w2gK8FBNWs66YC3LfME):
-  wait for dialogue engineer 2 (session_01S26bs4oMahyGJkuVaCKQGT) to add `{missed}`, `bond:missed` and `pair:best|mentor`
-  to lines_check/content_gen in claude/content; social B2 or head writer 3 will say. Warm, a little wistful, light.
+- Batch 10: 20 "missing them" lines in `banks/missing.lines` (`{missed}` only: no bond condition; the engine skips
+  the line for people who miss nobody; name only, no pronouns; partners only plainly).
 - **Stood down** 2026-10-17 ~08:20 (all batches merged to 0.48.47). Head writer 3 messages this session when
   DE2's `bond:missed`/`{missed}` lands or the newcomer format exists. Candidates: newcomer lines (wait on onboarding's wave 4), more overheard
   for other quiet places (the cart bay, machine shop, Deck 1 observation room), about/invite for the 19.
