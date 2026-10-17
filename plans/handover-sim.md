@@ -1,7 +1,48 @@
 # Handover: the sim engineer
 
-Written at build 0.40.8 and brought up to date at 0.26.18 (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
+Written at build 0.40.8, brought up to date at 0.26.18 and at 0.26.31 (sim engineer 3: see the first "Start here") (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
+
+## Start here: 0.26.30 and 0.26.31 (sim engineer 3, session_01517opwS4UAxYZKNwJytaEK, 17 October)
+
+Read this first, then sim engineer 2's section below it. **Last build: 0.26.31 (bfcd864) on `claude/sim-engineer`.** You own sections 10, 13, 14 and 17, plus `day_check.py` and `machine_check.py`. The lead is session_01KPJMYjXAPkNUcrQ8VRkhLE (report to it only, by send_message; never the user). Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews each build. Push only to `claude/sim-engineer`; never merge `claude/ship-systems`.
+
+### What I built (DEV_NOTES rows 0.26.30 and 0.26.31 have the details and test numbers)
+- **The real food line (section 10).**
+  - `LINE`: who stands in it, front first. Crew ids, and 'player' when section 15 joins. Crew join on reaching its back.
+  - Spots `LINE_AT`, front first: (33,6) = 3-queue-4 at the servery's south end, up column 33 to 3-queue-1, then (32,3), then west along the row-2 aisle. 15 spots; past them, stand where you are.
+  - `lineTick` serves the first `LINE_COUNTER` (1) after `galleyServeMins(t)` (section 16, galley 3: 0.6, or 1 in a rush; fallback `LINE_SERVE` 0.6) when `galleyCanServe(t)`. 'player' at the front is skipped: galley 3's `galleyTurn`/`takePortion` serve you and call `lineLeave('player')`.
+  - API (agreed with galley 3, session_018cicfPQZQXbxmtn6ygmL84, and player 3, session_016EJg9DempByUCWwpszyWmV): `servLine()`, `lineJoin(id)`, `lineLeave(id)`, `lineSpot(id)` -> `{ x, z, face (radians), at, front }` or null, `lineFront(id)`.
+  - Galley 3's 0.29.31/32 (`claude/galley-food`) uses them, and its galleyTick drops 'player' from LINE when section 15 isn't queueing. Player 3's a2fe957 (`claude/player-needs`) follows lineSpot. Neither has been trial-merged with mine by me: the lead / build master combine them.
+- **Trays (section 10, `CrewAgent.mealStep`, `served`, `trayBack`).**
+  - A tray is handed over at the counter, only if the next seat is in the mess hall (`trayTo`).
+  - After the meal, the tray goes to the tray return (`TRAY_AT` [33,2]/[33,1], by idHash), dropped on arrival. No waiting spots; crew pass through each other.
+  - While carrying one in the mess hall, the path avoids every non-mess tile (`messOnly()`).
+  - Anyone already in the line stays until served. Anyone on the way when the meal's time ends keeps going for `LINE_LATE` (12) minutes.
+  - `withHold` (14) no longer plans trays. Crew no longer use `galleyHold`.
+  - Meal traditions (act dinner at a seat, tag ev-<id>, no queue) get no line and no tray.
+- **Planned walk (section 14, schedBuild's `meal()`).** A sit-down meal starts with a placeless segment, tag 'queue', the walk to the line: `LINE_WALK` = 4 min + 0.55 per manhattan tile from the last place on Deck 3 (or the lift) to (33,4). Then the queue stop, only if free at once (a wait would split the meal into two for the galley's counting). Then the seat. Grab-and-go when under 15 + walk minutes are left. Result: diners sit on time (median 0). Grab-and-go is 15-21 a day (was 7-15).
+- **Someone in your seat (section 10, `elsewhere`).** If you or a settled crew member is in someone's mess seat, lounge seat or bench (`ALT_SEAT`), they take the nearest free one of that kind (`seatsBeside`), kept while their plan's place stays the same. A visit arrives there too.
+- **`crewHold(p, placeId)` (10)** keeps someone put whatever their plan says (for Tiles' opponent). It returns a release function and is cleared with the deck. The Tiles session hasn't been told directly: the lead was asked to pass it on.
+- **Section 17, day 0:**
+  - `machUse`, `choresHour` and `cartClaim` used `h % 24`, which is negative on day 0, so the arrival's wear was NaN and 40 machines read broken. Now `(h % 24 + 24) % 24`.
+  - `machinesNew()`, called from `newGameStart` before `introNewGame`, resets machines and jobs at once.
+- **Gatherings for night workers (14).** `gatherings` returned nothing for anyone on a night shift tonight. Now they get section 18's events (eventFree keeps them clear of the shift), but not Deck 1's routines.
+- **day_check** has a servery-line line per deck, and fails on: a tray outside the mess hall, standing still a ship minute with a tray, anyone giving up on the line, a walk back with a tray over 12 minutes.
+
+### Loose ends and asks waiting
+- **Onboarding** (session_01KaHzfqSqF8B4bkNFrH1tsx): `SHIP_START_ARRIVAL` should start at place 5-tern-aisle-1 once the deck architect's bigger Tern lands; they'll send the tile.
+- **Tradition capacity:** the mess hall's 44 seats cap the Sunday table (up to 50 want) and harvest supper (57 want). A deck architect or traditions call; told the lead.
+- **Section 20 (social A)** uses `h % 24` too (around lines 15551-15663), so day-0 hourly checks never match. Told the lead.
+- **Day 231 store-till double booking:** not reproduced on a trial merge with ship-events f4adcde (dayReport(231) clean). If events_check on the integration build still shows it, run it there and trace with planDay for 3-store-1 14:30.
+- **The performance engineer** (session_01XAkY9U3mmstHQT2yAMTocA) saw 2.9 ms game code per frame once at Sunday dinner (was 1.4). They're rechecking on the combined build. If it's real, look at `lineTick`/`mealStep`: `whereIs` per agent per frame, plus `seatsBeside` when someone's seat is taken.
+- **Seated diners show no tray on the table:** the crowd draws held props only when standing or walking. That's the performance engineer's, if the user wants it.
+
+### Gotchas from this round
+- The order in `CrewAgent.update` matters. mealStep's goal first, then the seat-taken check (`elsewhere`), then `crewHold`, then retarget. When the seat check ran before mealStep, served diners walked into seats still in use.
+- `lineSeg(w)` is any meal segment with type servery-queue or tag 'queue' (the walk-in has no place).
+- Identity test for a plan change: a copy with `LINE_WALK = [0, 0, ...]` and the grab rule back at 18 was ALL IDENTICAL to 0.26.29. Use the same trick (switch the change off in a copy) for any crew difference.
+- events_check must run from the repo folder (it builds cadet_test's path from its own name), so copy builds into that folder.
 
 ## Start here: 0.26.19 to 0.26.29 (the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU, 17 October)
 
