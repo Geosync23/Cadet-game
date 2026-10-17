@@ -48,3 +48,107 @@
 - Welcome aboard, honestly. It's a good ship. Good people. You'll see.   #warm
 ? week1:true weekday:sun time:evening !flag:week1.d2 act:dinner
 - Quick tip: the Chief's coming over. Sit up. Not that straight. Just normal straight.   #funny
+
+// Writer-commons, batch 4: up to about 60. His mum's shop only from tier friend; the practical from beat:pell.5.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}, {nick}. Dinner was good. I had two. Don't tell Brennan. She knows.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Afternoon's the worst bit. Too late for a nap, too early for dinner.
+? tier>=colleague warmth:cold
+- There you are! I was about to send a search party. Of one. Me. After lunch.   #funny
+? tier>=colleague place:calm
+- {hi}, {nick}. Pull up a seat. This one's warm. I've been warming it.
+? tier>=close
+- {nick}! Best person on the ship. Don't tell the others. Tell the others.   #warm
+
+== bye
+? tier>=acquaintance
+- Right, I'm off. Things to fix. Things to eat. Mostly eat.   #funny
+- {bye}. Mind the Deck 5 panel. It bites.
+? tier>=colleague time:night
+- Night, {nick}. If you hear engine noises, that's me asleep. Ignore it.   #funny
+? tier>=friend
+- Cheers for this. You're a good one, {nick}. I mean it.   #warm
+
+== feel
+? mood:ok
+- Fine. Fed. Mostly awake. Can't ask for more.
+? mood:low tier>=friend
+- Bit flat. Mum's messages again. I'll be all right. Sit with me a minute?
+
+== near
+? act:leisure
+- Screw tin's out. New music box. This one plays a sea shanty. Eventually.
+? act:gym
+- Gym. My idea. I regret it. I'll regret it less after lunch.   #funny
+? deck:5
+- Know which panel sticks? That one. Hip-height kick. Gently. Like a friend.
+
+== life
+? tier>=colleague
+- I can sleep anywhere. Except my bunk, at night. Science can't explain it.   #funny
+? tier>=friend
+- Mum runs a mending shop back home. Kettles, radios, coats. That's where I learnt.
+? beat:pell.5
+- Calder's practical. Every time I think of it, I need a biscuit. I've had a lot.   #funny
+
+== invite
+? trad:quiz tier>=acquaintance
+- Quiz tonight. We need someone who knows the engines. And someone to eat my crisps. You in?
+? trad:jam tier>=acquaintance
+- Music jam tonight. I'm bringing a music box. Don't laugh. Laugh a bit.
+? tier>=colleague time:evening
+- Tea corner? I've got biscuits nobody's supposed to know about.
+
+== accept
+- Go on, then! I'll bring snacks. I always bring snacks.
+- You bet. Wouldn't miss it. Unless I fall asleep. I won't. Probably.   #funny
+
+== decline
+- Ah, nuts. Can't. Calder's got me on a pump. Another time? Promise?
+- Not tonight. I'm asleep. Well, I will be. Planning ahead.   #funny
+
+== missed
+- You weren't there! I ate your share. As a lesson. A delicious lesson.   #funny
+- Missed you earlier. No harm done. Next time, eh?
+
+== birthday
+? birthday:me
+- It's my birthday. I've told everyone. Twice. Is there cake? There's always cake.   #funny
+? birthday:you
+- Happy birthday, {nick}! I made you something. Three notes. The fourth's coming.   #warm
+
+== hint
+- Got a minute? A proper one. Not a Pell minute. Those are long.
+
+== week1
+? week1:true weekday:mon time:morning
+- Morning, new hand! Tea break's ten-thirty. That's the important bit. The rest is work.
+? week1:true weekday:wed tier<=acquaintance
+- There you are. Settling in? Come and chat. Quiz is tomorrow. You're on my team now.
+? week1:true weekday:thu time:evening
+- Quiz night! Sit there. Know anything about engines? Good. Food? Even better.
+
+== greet
+? tier>=acquaintance deck:4 time:night
+- {hi}. Can't sleep. Classic Pell. I'll sleep at lunch. In a cupboard. Possibly.   #funny
+? tier>=acquaintance act:work
+- {hi}, {nick}. Hand me that. No, that. Thanks. You're hired.
+
+== near
+? act:breakfast
+- I'm awake. I'm awake! Is there toast? There's toast. Good. Now I'm awake.   #funny
+? act:work
+- Listen. Hear that? The bearing's going. Week, maybe. I'll put it on the board.
+
+== life
+? tier>=acquaintance
+- I nearly didn't come to the Wren. Best decision I nearly didn't make.
+? tier>=colleague
+- Found both secret biscuit tins aboard. Told nobody. I'm a vault. A hungry vault.   #funny
+
+== feel
+? mood:high tier>=colleague
+- Good day! Fixed a fan, found a biscuit, had a nap. In that order. Perfect.

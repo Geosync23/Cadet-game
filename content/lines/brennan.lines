@@ -35,3 +35,131 @@
 == joy
 ? tier>=acquaintance
 - Best sound on the ship? A pan telling you it's ready. Listen. There. Hear it?
+
+// Writer-commons, batch 4: up to about 60. Blue sage from beat:brennan.2; the fire and Nell only from beat:brennan.3.
+// Off Friday and Saturday (Lukas covers).
+
+== greet
+? tier>=acquaintance time:evening
+- Evening, {nick}. Dinner's on. You've not eaten. Don't argue. Tray.
+? tier>=acquaintance time:afternoon
+- {hi}. Lunch is done, dinner's not started. This is my quiet hour. Come in anyway.
+? tier>=colleague warmth:cold
+- Where've you been, love? You've not been eating. I can tell. Sit.
+? tier>=colleague time:morning
+- Morning, {nick}. Porridge, toast, or both? Both. I've decided.   #funny
+? tier>=close
+- There you are, {nick}. I kept your favourite back. In the warm. Don't tell a soul.   #warm
+? tier>=acquaintance weekday:sun
+- Sunday, love. Slow breakfast. Sit as long as you like. Nobody's rushing anyone.
+
+== bye
+? tier>=acquaintance
+- {bye}. Take a biscuit for later.
+- Go on, love. And eat something before bed. A biscuit counts. Just.
+? tier>=colleague
+- Off you go. Mind the floor, it's wet. It's always wet. It's a galley.   #funny
+? tier>=friend
+- Thank you, love. You're good company. Come back soon.   #warm
+
+== feel
+? mood:ok
+- All right, love. Busy. Busy's good. Busy's how I like it.
+? mood:low tier>=friend
+- Bit tired, love. I've cleaned a clean galley twice. That's how you can tell.
+
+== near
+? place:galley act:work
+- Out of my kitchen, love. No, stay. No, out. Pass me that spoon first.   #funny
+? act:meal
+- How is it? Honestly. If it's bad, say. It won't be. Say anyway.
+? place:galley
+- That's the cold store. Don't touch the door. It's moody. So am I, about it.   #funny
+
+== life
+? tier>=acquaintance
+- I send biscuits down to the junior wing. Juniors run on biscuits. It's science.   #funny
+? tier>=colleague
+- Nandakumar grows me chillies. Far too hot. I use every one. Don't tell her.   #funny
+? beat:brennan.2 tier>=colleague
+- Still no blue sage. I've lost count of the tries at that soup. Nearly.
+? beat:brennan.3 tier>=friend
+- I think about Port Halloran sometimes. The window. The harbour. Not the fire.
+
+== invite
+? tier>=colleague time:afternoon
+- Come by after the rush tonight, love. I'm trying something. I need a taster.
+? tier>=friend
+- Help me with the bread on Sunday? You knead, I'll talk. Fair trade.
+
+== accept
+- Oh, lovely. I'll put a plate by.
+- Course, love. I'll be there. I'll bring something. I always bring something.
+
+== decline
+- Can't, love. Seventy-five dinners won't cook themselves. Another night?
+- Not tonight, love. It's early to bed for me. Ask me again?
+
+== missed
+- You missed me earlier, love. I kept a plate warm. It's a bit dry now. Eat it anyway.
+- No harm done. But you'll eat with me next time. That's not a question.
+
+== birthday
+? birthday:me
+- Is it my birthday? Who told? I'm not making my own cake. Well. Just a small one.   #funny
+? birthday:you
+- Happy birthday, love! There's a cake. Of course there's a cake. Your favourite, too.   #warm
+
+== hint
+- Stay a minute, love. Sit. I've got something to ask you.
+
+== week1
+? week1:true weekday:mon act:dinner
+- Dinner's six till eight, love. Tray, then the servery, then sit with someone. Anyone.
+? week1:true weekday:mon act:dinner tier<=acquaintance
+- See that shelf? The grab shelf. For emergencies. And Pell.   #funny
+
+== greet
+? tier=stranger time:evening
+- {hi}. New, are you? Dinner's till eight. Don't make me come and find you.
+? tier>=acquaintance act:work
+- {hi}, love. Can't stop. Pans. Say hello to the pans. They like it.   #funny
+? tier>=friend time:night
+- What are you doing up, love? Warm milk. No arguments. Sit.   #warm
+
+== feel
+? mood:high tier>=colleague
+- Good day, love. The bread rose, the soup sang, and the cold store behaved. All three!
+
+== near
+? act:breakfast
+- Eat your breakfast. All of it. Breakfast is the one you can't make up for later.
+? place:galley time:evening
+- Hear that? The pans settling. That's the galley saying goodnight.   #warm
+
+== life
+? tier>=acquaintance
+- Seventy-five people aboard. I know what every one of them likes. Ask me. Go on.
+? tier>=friend
+- My mother taught me to cook by ear. I still hear her. "That's done, Auda. Take it off."   #warm
+
+== bye
+? tier>=acquaintance time:night
+- Bed, love. You've an early start. I'll have the porridge on.
+
+== decline
+- Oh, love, I can't. The cold store's playing up. I've to be very polite to it.   #funny
+
+== near
+? act:dinner
+- Plates back on the rack, love. Thank you. You'd be amazed how many people don't.
+? deck:3 act:leisure weekday:fri|sat
+- My day off and here I am, in the mess. Don't tell Lukas. He'll shoo me out.   #funny
+
+== invite
+? tier>=colleague weekday:sun
+- Sunday bread, love. Come and knead. It's good for the soul. And the arms.
+
+== life
+? tier>=colleague
+- The cold store and I have an understanding. It stays cold. I stay calm. It never lasts.   #funny

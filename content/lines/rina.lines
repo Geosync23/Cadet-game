@@ -35,3 +35,130 @@
 == joy
 ? tier>=acquaintance
 - Undefeated at Tiles, this common room. I keep count. The count is very precise.   #funny
+
+// Writer-commons, batch 4: up to about 60. Gran from beat:rina.1; the exam (putting it off) only from beat:rina.5.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}. Tiles table's free. I'm just saying. I'm not saying anything.
+? tier>=acquaintance time:afternoon
+- {hi}. Half the ship's yawning. Nobody drank water at lunch. I watched.
+? tier>=colleague warmth:cold
+- Oh, you're alive. Good. I was about to start a file on you.   #funny
+? tier>=colleague place:infirmary
+- {hi}. Visiting, or bleeding? If bleeding, sit. If visiting, also sit.   #funny
+? tier>=close
+- There you are, {nick}. You need a win. I'll let you have one. No, I won't.   #warm
+
+== bye
+? tier>=acquaintance
+- {bye}. Drink some water on the way.
+- Off you go. Don't break anything. If you do, you know where I am.
+? tier>=colleague time:night
+- Bed. Now. Eight hours. That's not advice, that's an order.   #funny
+? tier>=friend
+- Go on, then. And... thanks. For the company. Don't make it a thing.   #warm
+
+== feel
+? mood:ok
+- Fine. Busy. Normal. Ask me something interesting.
+? mood:low tier>=friend
+- Long day. Don't ask about it. Do sit here, though.
+
+== near
+? act:leisure
+- Sit. Pick a side. You'll lose either way, so it doesn't matter which.   #funny
+? act:meal
+- You're eating too fast. Slow down. That's medical advice. Sort of.   #funny
+? act:gym
+- I'm not here to exercise. I'm here to make sure nobody falls off the treadmill.
+
+== life
+? tier>=colleague
+- Nandakumar taught me "drink some water". Fixes half of everything. The rest is paperwork.
+? beat:rina.1 tier>=colleague
+- Gran taught me Tiles. She cheats. Shamelessly. Elbow on the board, every time.   #funny
+? beat:rina.5 tier>=friend
+- My sister sent another exam date. I've put it in a drawer. It's a very full drawer.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up. I'll tell you which stars I've beaten at Tiles.   #funny
+? tier>=colleague time:evening
+- Tiles. Common room. Tonight. Bring your dignity. You won't need it after.   #funny
+? trad:quiz tier>=colleague
+- Quiz tonight. I'm on the medicine questions. You're on everything else. Don't let me down.
+
+== accept
+- Fine. I'll be there. Don't make it weird.
+- Go on, then. But I'm winning. Just so you know.
+
+== decline
+- Can't. Late shift. Rain check. We don't have rain. Tiles check.
+- Not tonight. I'm studying. Ask me again. I'll say yes. Probably.
+
+== missed
+- You stood me up. I played Tiles against myself. I won. Barely.   #funny
+- Missed you earlier. You'd better have been drinking water somewhere.
+
+== birthday
+? birthday:me
+- Yes, it's my birthday. No, I don't want a fuss. A small fuss. A cake-sized fuss.   #funny
+? birthday:you
+- Happy birthday. I'll let you win at Tiles today. Once. Don't get used to it.   #warm
+
+== hint
+- Make yourself useful. Sit down a minute.
+
+== week1
+? week1:true weekday:tue place:infirmary
+- You're my two o'clock. Sit. Arm out. How much water have you drunk today? Wrong answer.   #funny
+? week1:true weekday:tue
+- Health check at two. Infirmary, Deck 3. Don't be late. Don't be early either.
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- Morning. Bunk 2's awake. Well, I am. Pell's talking to an engine in his sleep.   #funny
+? tier>=colleague
+- {hi}. Forty-something wins. I've stopped counting. That's a lie. Forty-three.   #funny
+
+== near
+? deck:3 act:work
+- Infirmary's quiet. Don't say it out loud. Things hear you.
+? habit:common-room act:leisure
+- Common room. Best seat's mine. Second best is yours, if you want it.   #warm
+
+== feel
+? mood:high tier>=colleague
+- Good day. Nobody fainted, everyone drank water, and I won twice. Perfect.
+
+== life
+? tier>=acquaintance
+- I study in the evenings. Medical journals. Very gripping. Thrilling stuff, bones.   #funny
+? tier>=friend
+- My sister and I argue by message. About everything. Mostly about who's right. Me.   #funny
+
+== bye
+? tier>=acquaintance time:morning
+- Off you go. Eat breakfast. Actually eat it. Don't just look at it.
+
+== greet
+? tier>=acquaintance act:work
+- {hi}. On shift. If you're not bleeding, I'm busy. If you are, I'm not.   #funny
+? tier>=friend time:night
+- Why are you up? Water, then bed. I'll know if you skip the water.
+
+== near
+? act:breakfast
+- Eat the eggs. Protein. Don't make that face. Eggs.
+? deck:4 act:leisure
+- Bunk 2's a zoo. Pell's snoring at engines. I'm hiding here.   #funny
+
+== life
+? tier>=colleague
+- I keep the Tiles count in a notebook. Dated. Signed. Nobody can say I made it up.   #funny
+? beat:rina.7
+- I came here after a hard year. The routine helps. Don't tell anyone I said that.
+
+== accept
+- Yes. Fine. Good. I mean, good. I'll be there.
