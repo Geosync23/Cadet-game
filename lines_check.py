@@ -222,6 +222,11 @@ def main(argv):
                             band = alt.rsplit(':', 1)
                             if band[-1] not in {'rival', 'neutral', 'friend'} or (len(band) == 2 and band[0] not in people):
                                 errors.append(f'{tag}: aff is aff:rival|neutral|friend or aff:<crewId>:<band>')
+                if k == 'cue':
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            if '@' in alt and alt.split('@', 1)[1] not in ('me', 'dept'):
+                                errors.append(f'{tag}: cue:{alt}: after @ only "me" or "dept"')
                 if k == 'moved':
                     for x in (v if isinstance(v, list) else [v]):
                         if x not in people:
