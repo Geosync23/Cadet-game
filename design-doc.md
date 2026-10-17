@@ -551,6 +551,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
 - **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour (day 22, a Monday), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 

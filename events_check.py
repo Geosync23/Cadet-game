@@ -228,6 +228,35 @@ OCC = r"""(() => {
   return R;
 })()"""
 
+# the bridge invite (0.34.35): Vance at breakfast in the mess on day 22, the day before the first bridge hour; a reply
+# sets flag bridge.invited and bridge hour is then on day 23; slept through (day 50), it's missed, the gist comes and the flag too
+INVITE = r"""(() => {
+  const R = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
+  const keep = SHIP.occasions.slice(); SHIP.occasions.length = 0; MEETINGS.length = 0; flagSet('bridge.invited', null);
+  const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
+  R.eves = [...Array(120).keys()].filter(d => d >= 15 && occBridgeEve(d)); R.before = eventsOn(23).some(e => e.id === 'bridge-hour');
+  tick(21 * 1440 + 300, 21 * 1440 + 300); R.booked = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);   // set, not skipped: earlier parts leave the clock past day 22
+  const r = SHIP.occasions.find(x => x.id === 'bridgeInvite'), v = schedPeople().find(p => p.id === 'vance');
+  R.vanceThere = !!r && planDay(v, 22).some(s => s.placeId && s.placeId.startsWith('3-mess-') && s.from <= r.at && s.to >= r.at);
+  R.appt = typeof APPTS !== 'undefined' ? APPTS.some(a => /^bridgeInvite/.test(a.id)) : false;
+  if (r) {
+    goToDeck(3); const b = ROOM_BOX.M; player.obj.position.copy(cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2))); target.copy(player.obj.position).setY(.7);
+    tick(21 * 1440 + 301, r.at + 1);
+    R.open = DIALOGUE ? DIALOGUE.id : null; const seen = []; let n = 0;
+    while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); if (v.choices) R.flagBefore = !!flag('bridge.invited'); dialogueStep(v.choices ? 1 : undefined); }
+    R.lines = seen; R.flagAfter = !!flag('bridge.invited'); tick(r.at + 2, r.at + r.len + 2);
+  }
+  R.after = SHIP.occasions.map(r => r.key + ' ' + r.status); R.on23 = eventsOn(23).some(e => e.id === 'bridge-hour');
+  R.going = schedPeople().filter(p => planDay(p, 23).some(s => s.tag && s.tag.startsWith('ev-bridge-hour'))).length;
+  skipTo(21 * 1440 + 18 * 60 + 5); R.mails1 = mails.slice();
+  // slept through: the next eve (day 50) with no flag, skipped straight to 09:00, past Vance's breakfast
+  SHIP.occasions.length = 0; MEETINGS.length = 0; flagSet('bridge.invited', null); mails.length = 0;
+  skipTo(48 * 1440 + 22 * 60); skipTo(49 * 1440 + 540);
+  R.slept = SHIP.occasions.map(r => r.key + ' ' + r.status); R.sleptFlag = !!flag('bridge.invited'); R.mails2 = mails.slice();
+  mailSend = send; SHIP.occasions.length = 0; SHIP.occasions.push(...keep); MEETINGS.length = 0; flagSet('bridge.invited', null); if (DIALOGUE) dialogueEnd(true);
+  return R;
+})()"""
+
 # the hooks for others (0.34.13): the party through eventPlan (in play, day 13), eventRoutines, eventGuestDays,
 # a one-off (Pell's show) added for a later day and planned like a tradition
 HOOKS = r"""(() => {
@@ -637,6 +666,18 @@ with sync_playwright() as pw:
     if len(a['addr']) != 2 or len(a['meets']) != 2 or not a['farewell'] or a['going'] < 3: fail('the visit\'s addresses, meetings or farewell')
     if a['guests'][0] != 'teshavi:2-7' and a['guests'][0] != 'teshavi:-': fail(f"the guests' days: {a['guests']}")
     if 'Speaker Teshavi' not in V['names'] or 'Envoy Saruth' not in V['names']: fail(f"the greeting's cast: {V['names']}")
+
+    # 10. the bridge invite (0.34.35), last: it skips on to day 50
+    I = g.ev(INVITE)
+    print('Bridge invite: eves', I['eves'][:4], '| booked', I['booked'], '| Vance there', I['vanceThere'], '| open', I.get('open'), '| flag', I.get('flagBefore'), '->', I.get('flagAfter'), '| after', I['after'], '| bridge hour day 23', I['before'], '->', I['on23'], f"({I['going']} going)")
+    print('  slept through:', I['slept'], 'flag', I['sleptFlag'], '| Mail', [x for x in I['mails1'] + I['mails2'] if 'invitation' in x or 'Bridge hour' in x])
+    if I['eves'][:2] != [22, 50] or I['before']: fail(f"the bridge invite's days: {I['eves']} (bridge hour on day 23 before the invite: {I['before']})")
+    if len(I['booked']) != 1 or not I['booked'][0].startswith('bridgeInvite@22 ') or not I['booked'][0].endswith(' asked'): fail(f"the bridge invite wasn't booked for day 22: {I['booked']}")
+    if not I['vanceThere'] or I['appt']: fail(f"the bridge invite: Vance not at breakfast in the mess, or an appointment made: {I['vanceThere']} {I['appt']}")
+    if I.get('open') != 'bridgeInvite' or I.get('flagBefore') or not I.get('flagAfter') or not any('best view' in x for x in I.get('lines', [])): fail(f"the bridge invite didn't play, or its reply didn't set the flag: {I.get('open')} {I.get('lines')}")
+    if I['after'] != ['bridgeInvite@22 kept'] or not I['on23'] or not I['going']: fail(f"after the invite: {I['after']}, bridge hour on day 23 {I['on23']} ({I['going']} going)")
+    if any('An invitation (notes)' in x for x in I['mails1']) or not any(x.startswith('22 18:00') and 'Bridge hour' in x for x in I['mails1']): fail(f"the Mail around a played invite: {I['mails1']}")
+    if I['slept'] != ['bridgeInvite@50 missed'] or not I['sleptFlag'] or not any('An invitation (notes)' in x for x in I['mails2']): fail(f"a slept-through invite: {I['slept']} flag {I['sleptFlag']} {I['mails2']}")
 
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
