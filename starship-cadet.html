@@ -16060,13 +16060,14 @@ function lineCond(k, v, p, ctx) {
   }
   return false;
 }
-// pair:x+y (x for speaker A, y for B: a department, a rank, or 'any') or pair:same|bunk|friend|rival|senior
+// pair:x+y (x for speaker A, y for B: a department, a rank, or 'any') or pair:same|bunk|friend|rival|senior|couple
 function linePair(v, a, b) {
   if (!b) return false;
   return String(v).split('|').some(x => {
     if (x === 'same') return a.dept === b.dept;
     if (x === 'bunk') return !!a.bed && !!b.bed && a.bed.split('-').slice(0, 2).join('-') === b.bed.split('-').slice(0, 2).join('-');
     if (x === 'friend' || x === 'rival') return lineQ('affBand', a.id, b.id) === x;
+    if (x === 'couple') return lineQ('bondOf', a.id, 'couple') === b.id;   // a couple living quietly in the background
     if (x === 'senior') return LINE_RANKS.indexOf(a.rank) > LINE_RANKS.indexOf(b.rank);
     const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w;
     return side(a, s) && side(b, o);

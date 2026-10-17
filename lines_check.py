@@ -44,8 +44,6 @@ BANNED = [
     # romance and flirting with anyone (the user: no romance with the player; couples live quietly in the background)
     r'\bkiss\w*', r'\bflirt\w*', r'\bdarling\b', r'\bsweetheart\b', r'\bbabe\b', r'\bsexy\b', r'\bgorgeous\b', r'\bcrush\b',
     r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
-    r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmy heart\b', r'\bsoulmate\w*',
-    r'\bbe mine\b', r'\bsweet on\b', r'\bhold my hand\b',
     # swearing (the ship's "blast" is fine)
     r'\bdamn\w*', r'\bhell\b', r'\bbloody\b', r'\bcrap\w*', r'\bshit\w*', r'\bfuck\w*', r'\bbastard\w*', r'\bpiss\w*',
     r'\barse\w*', r'\bass\b', r'\bbollocks\b', r'\bgod\b', r'\bjesus\b', r'\bchrist\b',
@@ -57,6 +55,15 @@ BANNED = [
     r'\bphotos?\b', r'\bphotograph\w*', r'\bcamera\b', r'\bselfie\w*', r'\bguns?\b', r'\bweapons?\b', r'\bblaster\w*',
     r'\bphone\b', r'\binternet\b',
 ]
+# romance said to you (the user: none with the player). Crew couples may speak of each other in overheard conversations,
+# so these are errors in every player-facing line (chat, moments, replies, meetings, Mail) but not in overheard banks
+BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry me\b', r'\bwill you marry\b', r'\bmy heart\b',
+                 r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
+                 r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b']   # "married", "wedding": family lines need them
+# aimed at you: banned even in lines about crew couples
+BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
+                 r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
+CREW_ABOUT_CREW = ('about', 'rumour', 'smalltalk', 'news')    # line kinds about other crew, where a couple may be mentioned
 US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': 'centre', 'realize': 'realise',
       'organize': 'organise', 'gray': 'grey', 'mom': 'mum', 'honor': 'honour', 'neighbor': 'neighbour', 'theater': 'theatre',
       'apologize': 'apologise', 'recognize': 'recognise', 'traveled': 'travelled', 'cozy': 'cosy', 'defense': 'defence',
@@ -180,6 +187,13 @@ def main(argv):
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
                 allx.append((f'meeting {mid}', 'moment', {'text': x['text'], 'id': mid}, None, 'meet'))
 
+    allowed = set()                                    # line ids the head writer has approved past the romance check
+    al = os.path.join(cg.CONTENT, 'allow.list')
+    if os.path.exists(al):
+        for l in open(al, encoding='utf-8'):
+            l = l.split('#')[0].strip()
+            if l:
+                allowed.add(l.split()[0])
     vocab = set()
     for x in allx:
         vocab.update(re.findall(r"\b[a-z][a-z']+\b", x[2]['text']))
@@ -224,10 +238,18 @@ def main(argv):
             elif n > lim:
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
-        for b in BANNED:
+        bonds = ' '.join(str(x) for x in (e.get('bond') if isinstance(e.get('bond'), list) else [e.get('bond', '')]))
+        # couple words are allowed only about crew: in an overheard conversation between a couple (pair:couple or bond:couple),
+        # or a crew-about-crew line, and never with a reference to you in it ({me}, the new hand, cadet; "you" too, except
+        # between the two speakers of an overheard conversation)
+        couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
+        at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadet\b", low) or (src != 'convo' and re.search(r"\byou(?:r|rs)?\b", low))
+        about_crew = not at_you and ((src == 'convo' and couple) or (src != 'convo' and (kind in CREW_ABOUT_CREW or couple)))
+        romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in BANNED + romance:
             m = re.search(b, low)
             if m:
-                errors.append(f'{tag}: "{m.group(0)}" is on the banned list')
+                errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))
         for us, uk in US.items():
             if re.search(r'\b' + us + r's?\b', low):
                 warns.append(f'{tag}: American spelling "{us}" (British: "{uk}")')
