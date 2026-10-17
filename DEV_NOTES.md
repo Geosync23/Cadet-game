@@ -9,12 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.60.1 (about 19,800 lines)
-## Current build: 0.43.9 (about 17,250 lines)
-## Current build: 0.43.11 (about 17,250 lines)
-## Current build: 0.60.0 (about 18,700 lines)
-## Current build: 0.43.14 (about 17,405 lines)
-## Current build: 0.43.15 (about 17,405 lines)
+## Current build: 0.60.2 (about 30,200 lines; the writers' content is about 10,000 of them)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -1225,10 +1220,10 @@ Pillar 4, Part 1 (plans/pillar4-plan.md). Section 21 sits right after section 20
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.
 
-| Line (where) | Calls | Owner of the call | Status in 0.60.1 |
+| Line (where) | Calls | Owner of the call | Status in 0.60.2 |
 | --- | --- | --- | --- |
 | section 13 (the bus itself) | `simNote`, `onSim`, `simNotes`, `flag`, `flagSet`: function declarations, so any section may call them while it loads; a note keeps the `t` its sender gives (0.26.27) | sim engineer | in |
-| section 13 `newGameStart(arrival)` | `introWanted()`, `introNewGame(arriving)`, `introArrived()`, `introSkip()` (21); `deviceChoose` (19); `socialNew` (20) | sim engineer | in (0.26.23-0.26.25) |
+| section 13 `newGameStart(arrival)` | `introWanted()`, `introNewGame(arriving)`, `introArrived()`, `introSkip()` (21); `deviceChoose` (19); `socialNew` (20); `linesNew()` (22: nothing heard yet, after `socialNew` and before `introNewGame`; dialogue 0.43.12, joined in the 0.60.2 combine) | sim engineer | in (0.26.23-0.26.25; `linesNew` 0.60.2) |
 | section 14 plan cache, `introPlan(p, d)` | `introSig()`, `introBeats(p.id, d)` (21) | sim engineer | in |
 | section 10 walkers | `escortPlan(p, t)` (21), inside try/catch; it wins over the person's plan when not null | sim engineer | in |
 | section 12 main loop, after `socialTick()` | `introTick()` (21) | onboarding | in (0.42.5) |
