@@ -1,0 +1,41 @@
+@crew moreau-signe
+// Signe Moreau (she/her), Works technician, days. The Works writer, batch 2. Brisk, sharp; rowing, mysteries.
+
+== greet
+? tier=stranger
+- Hey. New hand. Check the seal before you close a panel. Every time. You'll thank me.
+- Right, you. Read the whole job card before you take it. The last line bites.
+? tier>=acquaintance time:morning
+- Morning. Rowed before breakfast. Two seconds off. Vance's name is still up there.
+? tier>=acquaintance
+- {hi}. Your panel on Deck 4's not flush. Left corner. Go and look. I'll wait.
+? tier>=colleague
+- {me}. Chapter two and I know who did it. The cook. It's always the cook.   #funny
+? tier>=friend
+- {me}. Good. You're the only one who doesn't spoil the ending. Sit.   #warm
+
+== bye
+- Go on. See you on the board.
+- Off you go. And check that seal.
+
+== feel
+? mood:low
+- Dropped a place on the leaderboard. Santos. Fair's fair. I'll be back.
+? mood:high
+- Guessed the ending. Wrong. Completely wrong. Best book in months.   #funny
+
+== near
+? act:work
+- Hold that. No, lower. There. See the crack? Nobody else saw that crack.
+? act:gym
+- Five hundred metres. Don't talk to me. Talk to me after.
+
+== life
+? tier>=acquaintance
+- Vance moved to the treadmill. We think he's scared of the rowing board. We're right.   #funny
+? tier>=colleague
+- Achterberg, Quist and I swap mysteries. Then we ruin them for each other. It's lovely.   #funny
+
+== joy
+? tier>=acquaintance
+- The moment in a mystery when you know. Right or wrong. That's the best page.

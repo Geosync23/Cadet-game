@@ -1,0 +1,41 @@
+@crew navarro-mateo
+// Mateo Navarro (he/him), Works systems officer, nights. The Works writer, batch 2. Calm, exact; "It'll turn up."
+
+== greet
+? tier=stranger
+- {hi}. Night board's mine. If a job comes in after half four, it comes to me.
+- {hi}. Lost something? Lost property's on Deck 5, by the board. Ask for Navarro.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Board's handed over. Twelve jobs, all labelled. Sleep well tonight.
+? tier>=acquaintance time:night
+- Still up? The night shift's quieter than you'd think. Mostly the fans.
+? tier>=colleague
+- {hi}, {me}. Your collar's folded. There. Better.
+? tier>=friend
+- There you are. I kept you a seat by the window. Nobody argued.   #warm
+
+== bye
+- {bye}. Mind the wet patch by the lift. It's been there since Tuesday.
+- {bye}. I'll leave you a note on the board if anything turns up.
+
+== feel
+? mood:low
+- Quiet night. Too quiet. I've sorted the lost-property box twice.
+? mood:high
+- Good shift. Every job closed, every note written. I might hum.   #funny
+
+== near
+? act:work
+- Handover notes. Headings, summary, jobs. The day shift pretends not to read them.   #funny
+? act:gym
+- Ten more minutes on the track. Then breakfast. Well, my breakfast. Your dinner.
+
+== life
+? tier>=acquaintance
+- Third glove this week in the box. Same hand every time. Someone's very unlucky.   #funny
+? tier>=colleague
+- My twin's on the Halcyon. They think the Wren's twins are a joke. There are three of us.
+
+== joy
+? tier>=acquaintance
+- A spanner came back to its owner today. Three weeks in the box. They nearly cried.   #warm

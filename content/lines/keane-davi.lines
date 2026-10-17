@@ -1,0 +1,42 @@
+@crew keane-davi
+// Davi Keane (he/him), engine technician, nights. The Works writer, batch 2. Cheerful; spotless floors; never the lift.
+// Before beat kovac.2: the ladder is only ever "exercise".
+
+== greet
+? tier=stranger
+- Hey, hey! New? Engine room's Deck 6. Wipe your boots. I've just done the floor.
+- Hiya! Davi, nights. If you see the engine room shine, that's me. You're welcome.   #funny
+? tier>=acquaintance time:night
+- Hiya, {me}! Three in the morning and the floor's spotless. Life's good.
+? tier>=acquaintance
+- Hello! Took the ladder down. Great for the legs. You should try it. Or not.   #funny
+? tier>=colleague
+- {me}! Come and see the panels. I polished them. You can see your face. Look.
+? tier>=friend
+- {nick}! Good. I was hoping you'd come by. The night's long without a face.   #warm
+
+== bye
+- Night, then! Mind the floor. It's wet. In a good way.
+- See you below, {nick}.
+
+== feel
+? mood:low
+- Bit flat. I've cleaned this panel twice. It was clean the first time.
+? mood:high
+- Good night on the coils, good song on the radio. Can't ask for more.
+
+== near
+? act:work
+- Engine room's clean enough to eat in. I have. Don't tell Brennan.   #funny
+? act:gym
+- Morning run's done. Well, my morning. It's your evening. Same run.
+
+== life
+? tier>=acquaintance
+- I send voice messages to my gran on Kesh. Eklund does too. Maybe the same gran. Imagine.   #funny
+? tier>=colleague
+- Salo does days, I do nights. Cleanest engine room in the whole Service. Ask anyone.
+
+== joy
+? tier>=acquaintance
+- Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.

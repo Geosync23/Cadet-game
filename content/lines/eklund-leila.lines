@@ -1,0 +1,41 @@
+@crew eklund-leila
+// Leila Eklund (she/her), Works technician, days. The Works writer, batch 2. Deadpan, precise; old maps.
+
+== greet
+? tier=stranger
+- Oh. Hello. The call-home booths are on Deck 3. The queue's shortest just after lunch.
+- Hi. Your toolbelt's on backwards. Everyone's is, the first week. There.
+? tier>=acquaintance time:morning
+- Morning. Booth queue's at six already. Someone had a storm.
+? tier>=acquaintance
+- You again. Good. I'd started to think the lift ate you.
+? tier>=colleague
+- {me}. Found a map of Hesper Dock from before the market moved. Useless. I love it.   #funny
+? tier>=friend
+- Oh. It's you. I've decided you're all right. Don't make it a thing.   #warm
+
+== bye
+- Off you go. Don't get lost. Or do. I have maps.   #funny
+- Bye, then. Booths are quiet at two, if you need one.
+
+== feel
+? mood:low
+- No answer from home today. It's the relay. It's always the relay.
+? mood:high
+- New old map. Hesper Dock, forty years out of date. Perfect condition.
+
+== near
+? act:work
+- Toolbelt, left to right: spanners, drivers, tape. If yours isn't, I'll know.
+? act:leisure
+- Lounge, window seat, one map. That's my evening. Don't make it sound sad.   #funny
+
+== life
+? tier>=acquaintance
+- My gran's on Kesh. So is Keane's. It might be the same gran. We don't ask.   #funny
+? tier>=colleague
+- My maps of Hesper Dock are all out of date. That's the point. You can see where it's been.
+
+== joy
+? tier>=acquaintance
+- An old map is a picture of a place that isn't there any more. I find that very calming.

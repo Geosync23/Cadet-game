@@ -244,6 +244,7 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 | Hamid Larsen (infirmary aide) | he / him |
 | Dr. Elif Yoon (night doctor) | she / her |
 | Sol Bakshi (helm rating, night) | they / them |
+| Hugo Janssen (helm officer, night) | he / him |
 | Tove Cruz (senior gardener) | they / them |
 | Imani O'Neill (gardener) | she / her |
 | Ravi Hart (gardener) | he / him |
@@ -460,3 +461,10 @@ introduces them), unless noted.
 | Sato's tea: smoked leaf, dried kelp, a pinch of pepper | Sato | writer-command, batch 2 |
 | Nandakumar's chillies grow from the same seeds her mother grew | Nandakumar | writer-command, batch 2 |
 | Each step of Torres's Day 0 walk is a `week1` line gated by `flag:walk.<step>` (not a story fact: a hook) | Torres | head writer |
+| Alejandro Reyes's neighbour back home looks after his cat and writes to him about it | Reyes | writer-works, batch 2 |
+| Femi Rossi calls home on Tuesdays | Rossi | writer-works, batch 2 |
+| Keane: "the cleanest engine room in the whole Service" (the Survey Service) | Keane | writer-works, batch 2 |
+| Silva, Soto and Jovanovic compare their day counts at breakfast | the newlyweds | writer-works, batch 2 |
+| Amadi: the best window on Deck 5 is in the shuttle bay | Amadi | writer-works, batch 2 |
+| "Calder is the clock" (Works joke); in Teague's comic she's a very tidy cloud who says "Fair." | Works | writer-works, batch 2 |
+| The Veyli like their cabins warm | the delegation | writer-commons, reactions |
