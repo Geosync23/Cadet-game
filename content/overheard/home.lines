@@ -1,0 +1,31 @@
+@overheard home
+// Writer-commons, overheard batch 1. Home, letters and the people left behind. Light; nobody's sad for long.
+
+== overheard
+? pair:any+any habit:calls-home
+A: Did you get through?
+B: Second try. Relay lag.
+A: How are they?
+B: Same as ever. Good.   #warm
+
+? pair:any+any habit:calls-home weekday:sun
+A: Booth queue's long tonight.
+B: Everyone's mum knows it's Sunday.
+A: Mine thinks it's always Sunday.   #funny
+
+? pair:friend
+A: What's it like at home right now?
+B: Raining, probably.
+A: You miss it.
+B: I miss being rained on.
+
+? pair:any+any act:off
+A: Writing home again?
+B: Every rest day. On paper.
+A: Does it get there?
+B: Slowly. That's the nice part.
+
+? pair:friend time:evening
+A: I nearly didn't sign up, you know.
+B: Glad you did.
+A: Yeah. Me too.   #warm

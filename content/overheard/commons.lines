@@ -1,0 +1,46 @@
+@overheard commons
+// Writer-commons, overheard batch 1. The garden, the store, the infirmary and the galley, by the people who work there.
+
+== overheard
+? pair:garden+any
+A: Who's been picking the flowers?
+B: Couldn't say.
+A: There's a gap in the row.
+B: Must have been the misters.   #funny
+
+? pair:any+garden
+A: When are the tomatoes ready?
+B: Week twelve. Not a day sooner.
+
+? pair:store+any
+A: You've run out of soap.
+B: How do you know that?
+A: I know everything.   #funny
+
+? pair:any+store
+A: Do you have any of the good biscuits?
+B: Gone by nine. Every day.
+A: Who buys them all?
+B: I never say.
+
+? pair:infirmary+any
+A: Have you had water today?
+B: I had tea.
+A: Tea isn't water.
+B: It's mostly water.   #funny
+
+? pair:galley+galley act:work
+A: Six trays.
+B: Show off.
+A: Seven tomorrow.   #funny
+
+? pair:galley+galley act:work
+A: Cold store's up two degrees.
+B: Don't tell Brennan.
+A: Too late. She heard.
+B: Run.   #funny
+
+? pair:galley+any time:evening
+A: There's a plate on the grab shelf.
+B: Whose?
+A: Whoever needs it most.   #warm
