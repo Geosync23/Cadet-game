@@ -233,3 +233,4 @@ Supersedes the 04:03 summary where they differ.
 - 05:30 The user: many crew stand in the mess with trays instead of sitting → sim 3 (find cause; everyone sits to eat; count standing-with-tray at peaks). design-doc updated.
 - 05:32 Writer 3 archived; Writer 4 hired: session_01AB5f3VLMh8huiLWbEnqa8U. Head writer 2 at ~68%: asked for its handover note now. Content c6a1e40 (4,060 lines; 60 everyday non-work bubbles).
 - 05:34 Head writer 2 handed over (ccea7bc) and archived; head writer 3 hired: session_01FopKMT2ZKxuWcNDcmF7565 (first job Zeke's tour). Onboarding told to reply to it.
+- 05:40 0.60.2 blocked by a real device_check FAIL: one-week-aboard tea on day 7 15:30 while Zeke works (new roster) → traditions 2 urgent fix → c4 (+ newest content). Social B2 0.39.7 (8892ac9) calls home built; decided: one live beat per contact on Letters evening; build recorded messages + Mail replies. Tiles 0.46.4 PASS (trophy traceAdd pending) → 0.60.3.
