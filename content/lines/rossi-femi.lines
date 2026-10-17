@@ -103,3 +103,19 @@
 == rumour
 - Guess what. No, guess. Fine, I'll say.   #funny
 - First to know. I always am.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Race you to the shuttle. Kidding. Mostly.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Here's a Veyli word for goodbye. I've forgotten it. Sorry.
+? leaving:you tier>=friend
+- Thanks for racing me. And losing. Sometimes. Mostly I lost. Thanks anyway.   #warm
+
+== letter
+- New ship's observatory has no tiny telescopes. Mine's the only one. I've made friends with it. Still calling home Tuesdays.
+? tier>=friend
+- I learnt the Veyli word for goodbye. It's long. I practised it on the window. It means something like 'see you'. So: that.

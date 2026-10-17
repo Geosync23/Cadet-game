@@ -103,3 +103,19 @@
 == rumour
 - Bright side? Here's the bright side.
 - Don't tell anyone. Except everyone.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Window seat on the shuttle's booked. Obviously.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. Look on the bright side: someone else gets my window.
+? leaving:you tier>=friend
+- You found the good windows too. Best company for looking out of them. Thanks.   #warm
+
+== letter
+- New ship. Found the best window on day one. It's in the cargo bay. Of course it is.
+? tier>=friend
+- There's a tree in the new garden. Small one. I haven't climbed it. Yet. Hello from near a window.

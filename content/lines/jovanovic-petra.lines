@@ -105,3 +105,19 @@
 == rumour
 - Um. I heard something. I think.
 - Probably true. I'd check it twice.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. I think. Maybe. Yes, packing.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Um, I'm leaving soon. I think. Yes. Bye. I'll miss the coils.
+? leaving:you tier>=friend
+- You always listened when I said 'I think'. Most people don't wait for the rest. Thank you.   #warm
+
+== letter
+- New ship. The coils are fine. I think. They're fine. The count's higher. It rained on Valo, they say.
+? tier>=friend
+- I was right about a coil today. First week. I said 'I think' and then I said 'I know'. Hello from here.

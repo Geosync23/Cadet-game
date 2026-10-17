@@ -102,3 +102,19 @@
 == rumour
 - Hm? Oh. The thyme told me.   #funny
 - Slowly, then. Here's the thing.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the herbs. Hm. They're sulking.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh. I'm off soon. Water the windowsills. Somebody has to.
+? leaving:you tier>=friend
+- Hm. You were nice to my herbs. And to me. In that order, probably. Thanks.   #warm
+
+== letter
+- New ship. The basil came with me. It's thriving. Read a mystery. Guessed it. Of course I did.
+? tier>=friend
+- The thyme flowered. I thought, the Wren would like that. So, hello from the thyme.

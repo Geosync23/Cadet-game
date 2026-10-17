@@ -98,3 +98,19 @@
 == rumour
 - Calm, careful version. Ready?
 - Saved this one. Tidily.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Tidily. Everything folded in three.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Keep your locker tidy. It's a good habit.
+? leaving:you tier>=friend
+- You never asked my boat's name. Thank you. That's very rare. Very kind.   #warm
+
+== letter
+- New ship. Tidy lockers. Good. The boat fund's growing. The guitar's not improving.
+? tier>=friend
+- Played the guitar today. Still badly. Thought of the music room and the book. The boat's got a name. Still secret.

@@ -103,3 +103,19 @@
 == rumour
 - Argue with this, then.   #funny
 - Heard something. I'll argue it either way.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The boat fund comes with me. Obviously.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Leaving. Short version: it was good. The boat's nearer.
+? leaving:you tier>=friend
+- You let me talk about the boat. Every time. You can sail in it. Once. Maybe.   #warm
+
+== letter
+- New ship. Four hundred and ten stars now. The boat fund's at three quarters. Not long.
+? tier>=friend
+- Saw the Hesper Dock lights from the window. Nearly cried. Didn't. Boat's nearly paid for. Hello.

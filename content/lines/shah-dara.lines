@@ -98,3 +98,19 @@
 == rumour
 - Quietly: this.
 - The coffee machine told me.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The coffee machine will miss me. Not you. The machine.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh. Hi. I'm leaving. ...It was good. That's all.
+? leaving:you tier>=friend
+- You never minded the quiet. Good company, quiet. Thanks.   #warm
+
+== letter
+- New ship. Coffee machine works. Because of me. Took a day. Hello.
+? tier>=friend
+- Looked for my parent's name on the new ship's crew lists. Not there. Fine. Coffee's good. Hello.
