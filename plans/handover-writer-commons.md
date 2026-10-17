@@ -47,7 +47,8 @@ the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contact
 ## Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U): batches 1-12, reviewed by head writer 3
 
 Head writer 2 went inactive before Writer 4 started. **Head writer 3 is session_01FopKMT2ZKxuWcNDcmF7565**: send it
-each batch hash. Batches 1-12 merged (to 0.48.32); 13-17 pushed (Holt 734b51d, Vance 1f4d588, Marrow 0a1591f, Kovac ce59950, Calder 872395c), awaiting review.
+each batch hash. Batches 1-16 merged (to 0.48.34); Calder (872395c) and Brennan (020b55a) pushed, awaiting review. **Writer 4 stood down
+after batch 18 (2026-10-17, ~65% memory).** A fresh writer starts from this note.
 
 | Batch | What | Files |
 | --- | --- | --- |
@@ -60,7 +61,7 @@ each batch hash. Batches 1-12 merged (to 0.48.32); 13-17 pushed (Holt 734b51d, V
 | 7, 11, 12 | goodbyes (`leaving:you`), packing (`feel` `leaving:soon`), letters, for the Commons 19, 25 Works/Watch, 20 Survey/officers/seniors | own files |
 | 8 | the mess at dinner: 40 convos, 20 crowd bubbles | `overheard/dinner.lines`, `banks/mess.lines` |
 | 9, 10 | reactions: Commons repairs, favours, gifts, harvest, late meals; Works repairs; Brennan's and Pell's `cue:repair.you` | `reactions/repairs-commons.lines`, `reactions/repairs-works.lines` + appends |
-| 13-17 | story-crew everyday passes (~50 lines + 8 callbacks each, `!week1:true`, arc gates kept): Holt, Vance, Marrow, Kovac, Calder | their own `lines/` under "// Writer 4, batch N" |
+| 13-18 | story-crew everyday passes (~50 lines + 8 callbacks each, `!week1:true`, arc gates kept): Holt, Vance, Marrow, Kovac, Calder, Brennan | their own `lines/` under "// Writer 4, batch N" |
 
 Gotchas found: "love you" and "thinking about you" are on the romance list even in family calls or as jokes; no poems,
 dedications or "thought of you" to the player (letters say "thought of the Wren"); "apple" is banned (brand); words
@@ -68,8 +69,12 @@ like "Gardening", "Retirement", "Power" at a sentence start warn as names; `trai
 goodbye lines also go into the engine's "Sorry I missed you at the shuttle" Mail; `place:crew_store`,
 `place:infirmary`, `place:gym`, `place:laundry`, `place:port_washroom|starboard_washroom`, `place:bunk_1..8` match
 room names; head writer 3's style note: don't end many lines on "Lovely".
+Head writer 3's later edits, for the next writer: a line that pre-empts a beat's reveal waits for that beat
+(Marrow's daughter's short letters now need beat:marrow.4); a callback must not assume when its memory happened
+("on your first week" dropped); mentor warmth points outward ("The bay's better for it"), never private ("I say it to
+myself"); keep age and year counts vague unless canon ("thirty years").
 
-Still open: everyday passes for the remaining story crew (Tomas, Pell, Rina, Brennan: ask the head writer); story crew goodbyes/letters; a dry-humour
+Still open: everyday passes for Tomas, Pell and Rina (they have ~135 lines each already; ask the head writer); story crew goodbyes/letters; a dry-humour
 Tiles variant waits on `_` support in `trait:`.
 
 ## Formats and hooks that bite
