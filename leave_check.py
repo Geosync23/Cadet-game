@@ -227,6 +227,9 @@ with sync_playwright() as pw:
       careerTick(at(11, 0)); careerClock(at(11, 480)); careerTick(at(11, 1070)); out.notYet = !(c.co > c.ci); careerTick(at(11, 1090)); out.auto = c.co % 1440;
       careerTick(at(12, 0)); careerTick(at(12, 760)); out.missedNoClock = c.md === 12;
       out.sat = careerClock(at(13, 600));
+      careerTick(at(15, 0)); out.early = careerClock(at(15, 180)); flagSet('shiftSent', null); SHIP.notes = [];
+      const sent = []; const stop = onSim('shiftStart', n => sent.push(n)); careerClock(at(15, 690)); shiftTick(); at(15, 691); shiftTick(); stop();
+      out.lateNote = sent.map(n => [n.late, !!n.missed]);
       c.b.push(16); careerTick(at(16, 500)); out.leave = careerClock(at(16, 500));
       careerTick(at(17, 0)); out.back = careerBack(17);
       const S = schedData(), pl = S.byId.get('5-timeclock-1'), w = SOC.crew.filter(p => p.dept === 'works' && p.shift !== 'night' && isWorkDay(p, 10) && socAboard(p, 10) && planDay(p, 10).some(x => x.act === 'work' && /^5-/.test(x.placeId || '')));   // aboard, stationed on Deck 5
@@ -239,6 +242,8 @@ with sync_playwright() as pw:
     check(r['missedNoClock'], 'a workday after the first week with no clock-in was not missed')
     check(r['sat'] is None and r['leave'] is None, 'the clock let you clock in on a day off or on leave')
     check(r['back'], 'the first clock-in after leave is not "back"')
+    check(r['early'] is None, 'the clock let you clock in at 03:00')
+    check(r['lateNote'] == [[210, False]], f"clocking in at 11:30: the shift's start note was {r['lateNote']} (late 210, not missed, wanted)")
     check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
 
     print('Reputation you can see (0.61.15): a chip on turning a job in, one at a time, and a small gain:')

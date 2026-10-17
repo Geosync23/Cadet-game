@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.16
+   STARSHIP CADET: CSV Wren                           build 0.61.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7577,7 +7577,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.17';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7954,9 +7954,10 @@ function shiftTick() {
   if (m < 480 || flag('shiftSent') === d || !playerShiftOn(d)) return;
   let here = false;
   try { here = typeof careerAtWork === 'function' ? careerAtWork() : deckDef.num === 5 && (DECKS[5].places || []).some(pl => pl.type === 'work:works' && pl.room === roomAt(...player.here())); } catch (e) { here = false; }   // clocked in (the career engineer's time clock, 0.61.13)
-  if (!here && m < 600) return;
+  if (!here && m < (typeof CAREER !== 'undefined' ? CAREER.missBy : 600)) return;   // the career engineer's time clock (0.61.17): missed only if not clocked in by 12:30, as the career counts it
   flagSet('shiftSent', d);
-  simNote('shiftStart', here ? { late: Math.max(0, Math.round(m - 480)) } : { late: 120, missed: true });
+  const inAt = typeof careerClockedIn === 'function' && careerClockedIn(d) ? SHIP.career.ci % 1440 : m;   // late by the clock-in time
+  simNote('shiftStart', here ? { late: Math.max(0, Math.round(inAt - 480)) } : { late: 120, missed: true });
 }
 // whether you (the player) are on shift on day d: your own rota, like a Works junior's (ROSTER_PLAYER.rota.offDays,
 // section 9: Saturday and Sunday off). A day off has no shift and no jobs expected; the job board stays open. Read
@@ -27602,7 +27603,7 @@ function careerStarted(t) {                              // you started your shi
 }
 onSim('shiftStart', n => { if (!n.missed) careerStarted(n.t); else return;
   const c = careerInit(); if (n.late >= 20 && !(c.k & 1)) { c.k |= 1; careerTip('late'); } });
-onSim('repair', n => { if (n.who === 'you') careerStarted(n.t); });
+onSim('repair', n => { if (n.who === 'you' && Math.floor(n.t / 1440) + 1 <= CAREER.grace) careerStarted(n.t); });   // a repair starts your day only in your first week; after that, the clock (reviewer 1e)
 // at work: clocked in at the time clock (0.61.13, the user's); in your first week (the grace) being in a Works room on Deck
 // 5 still counts, while you learn the clock (section 14's shiftTick asks this too)
 function careerAtWork() {
@@ -27622,6 +27623,7 @@ function careerClock(now = shipNow()) {                  // -> 'in' | 'out' | nu
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
     if (m >= CAREER.clockOut) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
+    if (m < 420) { toast('Time clock', 'Too early: the clock opens at 07:00. The shift starts at 08:00.'); return null; }   // reviewer 1e
     c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
     careerRemark('in', now, m - 480); simNote('clock', { what: 'in' }); return 'in';
   }
