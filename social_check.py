@@ -19,7 +19,7 @@ SAVE_MAX = 20000               # bytes of the save's social part
 RUN = r"""(({ days, player, jump }) => {
   const h0 = 6, h1 = h0 + days * 24, stats = { born: {}, spread: [] };
   setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();   // an earlier clock: machines afresh
-  socInit(); socReset(h0);
+  socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;   // invitations become appointments
   const watch = () => { for (const x of NEWS) stats.born[x.id] = x.kind; };
   if (jump) { setShipNow(h1 * 60); socialTo(h1 * 60); watch(); }
   else for (let h = h0 + 1; h <= h1; h++) {
@@ -162,7 +162,7 @@ with sync_playwright() as pw:
     # as before; with one, chatLine asks it by kind, the new kinds (callback, cue) included
     e = g.ev(r"""(() => {
       const o = {}, crew = SOC.crew.slice(0, 30), t0 = Math.floor(shipNow() / 60) * 60;
-      for (const id of ['tomas', 'pell', 'rina']) relAdd(id, 'chat', 30);
+      for (const id of ['tomas', 'pell', 'rina']) { relAdd(id, 'chat', 30); relGet(id).arc = 99; }   // no story beats in the way
       const all = () => JSON.stringify(crew.flatMap(p => [0, 1, 2, 3, 4, 5].map(k => chatLine(p, t0 + 60 * k))));
       const base = all(); window.lineFor = () => null; o.nullSame = all() === base;
       const asked = {}; window.lineFor = (p, kind, ctx) => { asked[kind] = (asked[kind] || 0) + 1; return { text: kind + ':' + p.id, id: kind, kind }; };
@@ -200,7 +200,7 @@ with sync_playwright() as pw:
       if (hit) {
         const keep = SHIP.device.appts.slice(), t = shipNow(); setShipNow((hit.d - 1) * 1440 + 360);
         const id = socialInvite({ trad: hit.id, day: hit.d, from: hit.p }), a = SHIP.device.appts.find(x => x.id === id);
-        o.invite = { trad: hit.id, day: hit.d, ok: !!a && a.status === 'asked' && a.kind === 'invite' && a.by === hit.p && a.where === hit.seg.placeId && a.at === (hit.d - 1) * 1440 + hit.seg.from,
+        o.invite = { trad: hit.id, day: hit.d, ok: !!a && a.status === 'asked' && a.kind === 'invite' && a.by === hit.p && a.where === hit.seg.placeId && a.at === hit.seg.from,
                      again: socialInvite({ trad: hit.id, day: hit.d, from: hit.p }), none: socialInvite({ trad: 'nothing', day: hit.d, from: hit.p }) };
         SHIP.device.appts.length = 0; SHIP.device.appts.push(...keep); setShipNow(t);
       }
@@ -224,7 +224,7 @@ with sync_playwright() as pw:
       o.known = relGet(p.id).known.some(k => /^Loves /.test(k));
       o.keep = [giftKeepsake(p, 'a test keepsake'), giftKeepsake(p), keepsakes().length, !!mem(p.id, 'keepsake')];
       // a crew gift: make Tomas a warm friend, run a few evenings
-      relAdd('tomas', 'chat', 70); memAdd('tomas', 'chat'); SHIP.social.given = []; const m0 = SHIP.social.mail.length;
+      relAdd('tomas', 'chat', 70); memAdd('tomas', 'moment.test'); SHIP.social.given = []; const m0 = SHIP.social.mail.length;
       for (let h = SHIP.social.hour - SHIP.social.hour % 24 + 19, k = 0; k < 28; k++, h += 24) socCrewGift(h);
       o.given = SHIP.social.given.length; o.mail = SHIP.social.mail.length - m0;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
@@ -267,6 +267,30 @@ with sync_playwright() as pw:
     if rq['band'] not in ('well', 'theirs') or not rq['asked'] or rq['warmStart'] != 8: fail('bands and their consequences wrong')
     if 'reliable' not in rq['knownFor'] or not rq['calder'] or not any('late' in t for t in rq['calder']): fail('known for, or Calder\'s note, wrong')
     if not rq['saved'] or any(c.isdigit() for c in json.dumps(rq['view']['ship'])): fail('the reputation view shows numbers, or the save differs')
+
+    # 11. invitations (0.36.26): at most two a day, to traditions and from friends, each fitting the person's real plan
+    iv = g.ev(r"""(() => {
+      const o = { days: [], bad: [] }, keepS = JSON.stringify(socSave()), keepA = SHIP.device.appts.slice(), t0 = shipNow(); SHIP.device.appts.length = 0;
+      for (const id of ['tomas', 'pell', 'rina']) { relGet(id).pts = 70; relGet(id).tier = 3; }
+      for (const p of SOC.crew.slice(0, 25)) if (!SHIP.rel[p.id]) { relGet(p.id).pts = 35; relGet(p.id).tier = 2; }
+      SHIP.social.invites = [];
+      for (let d = 2; d <= 15; d++) {
+        setShipNow((d - 1) * 1440 + 420); socInvites((d - 1) * 24 + 7);
+        const today = SHIP.social.invites.filter(x => x.day === d); o.days.push(today.length);
+        for (const x of today) {
+          const a = SHIP.device.appts.find(y => y.id === x.appt), p = SOC.crew[SOC.idx.get(x.from)];
+          const fits = a && planDay(p, d).some(s => s.placeId === a.where && s.from <= a.at && s.to >= a.at + Math.min(a.len, 15));
+          if (!fits) o.bad.push([d, x.from, x.kind, x.trad]);
+        }
+        if (d === 9) { const x = today[0]; if (x) { o.line = chatLine(SOC.crew[SOC.idx.get(x.from)], shipNow()); setShipNow((d - 1) * 1440 + 905); const m0 = (SHIP.mail || []).length; socInviteMail(shipNow()); o.mail = (SHIP.mail || []).length - m0; } }
+      }
+      o.kinds = {}; for (const x of SHIP.social.invites) o.kinds[x.kind] = (o.kinds[x.kind] || 0) + 1;
+      SHIP.device.appts.length = 0; SHIP.device.appts.push(...keepA); setShipNow(t0); socLoad(JSON.parse(keepS));
+      return o;
+    })()""")
+    print('Invitations:', json.dumps(iv))
+    if max(iv['days']) > 2 or sum(iv['days']) < 4 or iv['bad']: fail(f"invitations wrong: per day {iv['days']}, not fitting their plan {iv['bad']}")
+    if iv.get('line') and iv['line']['kind'] != 'invite': fail(f"the inviter's tap line should be the invitation: {iv.get('line')}")
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
