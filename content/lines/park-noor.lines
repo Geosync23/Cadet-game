@@ -25,3 +25,61 @@
 == joy
 ? tier>=colleague
 - The boat. Water slapping the side, nothing to fix, nowhere to be. One day.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Shift's done. Locker's tidy. Bed next. In that order.
+? tier>=acquaintance warmth:cold
+- Oh, hello, {me}. It's been a while. I hope you've been resting. Properly.
+
+== near
+? habit:shopper
+- I only look in the crew store. I don't buy. Every credit's a plank.
+? place:musicroom
+- Guitar practice. Lindqvist has the book till nine. Then it's mine. I wrote it down.
+
+== invite
+- Friday jam? I'll play one song. Badly. Come and clap anyway.   #funny
+? tier>=acquaintance
+- Observatory night? I've worked out where Coriel is. Roughly. Come and see.
+
+== accept
+- Yes. I'll come. I'll be on time. I always am.
+- Thank you. Yes. I'd like that.
+
+== decline
+- I can't. Extra shift. The boat, you know. Another night?
+? weekday:wed|thu
+- Rest day. I'm actually resting. Oduya made me promise. Friday?
+
+== missed
+- You didn't come. That's all right. I practised guitar. My bunk wasn't so lucky.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'll play you a song. Or I won't. Your choice. Choose won't.   #funny
+? birthday:me
+- My birthday. I bought one thing. A little brass hook for the boat. Don't laugh.
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I'll be on patrol. You stay in your bunk. Please.
+
+== hint
+- {me}, have you a minute later? There's something I'd like to tell you.
+
+== about
+? aff:rahman-farah:friend
+- Rahman's saving for a boat too. Hesper Dock. We trade sums. It helps, somehow.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Bye, {me}. Mind your locker. Labels face out.
+- Goodnight. I mean, good day. I'm on nights. It's confusing.   #funny
+== greet
+? tier>=acquaintance time:evening
+- Evening, {me}. Night shift soon. Patrol route's printed. And labelled.
+== life
+? tier>=friend
+- The boat's name is a secret. Even from me. I'll know it when I see the water.

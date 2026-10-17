@@ -25,3 +25,61 @@
 == joy
 ? tier>=colleague
 - Getting a laugh out of Holt. It's like fishing. Patience, and the right line.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! I'm off to bed. She's all yours for the day. Look after her.
+? tier>=acquaintance warmth:cold
+- {me}! There you are. I looked for you on my rounds. Every deck. Nothing.   #funny
+
+== near
+? habit:runner
+- Twelve laps of the ring corridor before my shift. She's a good track.
+? deck:2 time:night
+- Senior corridor, all quiet. Even the Chief's door sounds stern.   #funny
+
+== invite
+- A run before my shift? Ring corridor, easy pace. I talk the whole way. Fair warning.   #funny
+? tier>=acquaintance
+- Tiles tonight? I'll lose. I always lose. I just like the noise of the pieces.
+
+== accept
+- Ha! Yes. Good. I'll be there.
+- Yes, I'll come. I might even bring the Chief, if he's in the mood.   #funny
+
+== decline
+- Can't, I'm on the night round. Every deck. Another time?
+? weekday:sat|sun
+- Rest day. I'm sleeping like a stone. Ask me Monday.
+
+== missed
+- You missed it! No harm. I told your empty chair a story. It laughed.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I'll say it to every deck on my round. Deck 4 gets it twice.   #warm
+? birthday:me
+- My birthday. The Chief said "Many happy returns." Then nearly smiled. Best present going.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. I'll walk every deck twice tonight. You stay put and sleep.
+
+== hint
+- {me}. Have you a minute later? I've something on my mind. Not a joke, for once.
+
+== about
+? aff:holt:friend
+- Holt's the best Chief I've had. Don't tell him. He'd only frown about it.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}! Sleep well. I'll keep an eye on her.
+== greet
+? tier>=acquaintance time:night
+- {hi}, {me}! Past midnight. I'll pretend I didn't see you. Bed!   #funny
+== life
+? tier>=friend
+- I say good night to every deck by name. Deck 5's my favourite. Don't tell the others.   #funny
+- The trick with the Chief is timing. Wait for the pause. Then one line. Never two.
