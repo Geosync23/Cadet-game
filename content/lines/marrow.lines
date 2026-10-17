@@ -309,7 +309,9 @@
 - I learnt to bake bread on my first ship. It was terrible. I still do it. It's better.
 ? tier>=friend !week1:true
 - My daughter's at the Concord academy. She's cleverer than I was. Busier, too.
+? beat:marrow.4 !week1:true
 - My daughter sent a letter. Short. Very short. I've read it eleven times.   #warm
+? tier>=friend !week1:true
 - The last piece on Thursdays is for the crew who've moved on. Now you know.
 ? tier>=close !week1:true
 - Thank you for telling me the truth when I ask. It's the most useful thing aboard.   #warm
@@ -362,7 +364,7 @@
 
 == callback
 ? told:moment.marrow.answer tier>=colleague
-- I still think about the answer you gave me on your first week. Page forty. Underlined.   #warm
+- I still think about the answer you gave me. Page forty. Underlined.   #warm
 ? told:moment.marrow.admiral tier>=colleague
 - Your theory about the Admiral. I've told no one. I've thought about it often.   #funny
 ? told:came.observatory tier>=acquaintance
