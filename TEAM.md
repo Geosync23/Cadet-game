@@ -36,6 +36,30 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Playable build (the one link the user uses):** https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, owned by the Deck 6 architect. New builds are republished to this same link.
 
+## Staffing levels (the user, 2026-10-17): how to scale up and back down
+
+The user asked for a bigger team now, and for a ready way back to a smaller one if usage needs reining in. The lead switches levels in one step: tell the user, message the roles below, update this section's "Current level".
+
+**Current level: Full** (from 2026-10-17 ~01:15 UTC).
+
+| Level | Who is active | Who merges and checks | When |
+| --- | --- | --- | --- |
+| **Full** | All Pillar 4 seats in their waves + **build master** + **2 adversarial reviewers** + **check-runner pool** (short-lived) + performance engineer 2 as **phone-speed watchdog** (+ playtester from wave 2) | Build master combines and checks on `claude/integration-test`; reviewers review each branch before it's combined; the lead approves and pushes `claude/ship-integration` and publishes | Now |
+| **Normal** (the structure before 2026-10-17 01:15) | Pillar 4 seats in their waves only | The lead combines with a background helper in `/home/user/si-work` (branch lead-wip), check runners only when needed | Usage getting high |
+| **Lean** | The lead + at most 3-4 seats (the ones on the critical path of the current wave); everyone else on standby (idle, handover note current) | The lead combines; checks run one at a time | Usage must drop sharply |
+
+**Scaling down from Full to Normal (the lead):**
+1. Build master: finish the current combine, push its state to `claude/integration-test`, write `plans/handover-build-master.md` (what's merged, what's pending, check results), then idle; the lead archives it. The lead takes merging back with a background helper in `/home/user/si-work` (`git worktree add -B lead-wip /home/user/si-work origin/claude/ship-integration` if missing).
+2. Reviewers: finish the review in hand, post findings to the lead, then idle and are archived. Helpers self-check against the reviewer checklist (`plans/review-checklist.md`, written by the reviewers in their first turn).
+3. Check-runner pool: stop starting new runners; archive the ones that reported.
+4. Watchdog: performance engineer 2 goes back to on call.
+5. Playtester (if hired): write its findings, idle, archive.
+Nothing is lost: every role's work is on its branch and in its handover note, and archived sessions can be reopened.
+
+**Scaling down to Lean:** as Normal, then pause every seat not on the current wave's critical path (message: "finish your current turn, push, update your handover note, idle"). Writers and tradition designers pause first (their work is text and waits safely), then on-call helpers. Resume by messaging them.
+
+**Scaling back up:** reverse the steps; reopen archived sessions or hire fresh ones from the handover notes.
+
 ## Rules for helper sessions
 
 - One job per session, one branch per job. Touch only the files the brief names.
