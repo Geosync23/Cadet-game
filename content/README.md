@@ -17,7 +17,7 @@ Read this with the voice bible and `content/facts.md` (the head writer's), and t
 | `overheard/<topic>.lines` | two or three crew talking as you pass | topic |
 | `reactions/<cue>.lines` | lines about something that really happened (a repair, a tradition, the storm) | kind of happening |
 | `meetings/<id>.meet` | meeting scripts with replies to choose | meeting |
-| `traditions/<id>.trad` | a tradition's data and words (the traditions engineer's grammar) | tradition |
+| `traditions/<id>.trad` | a tradition's data and words: fields in the traditions engineer's grammar (`plans/trad-format.md`), texts in `== mail`, `== ask`, `== here`, `== thanks`, `== chatter` sections | tradition |
 | `themes/`, `arcs/`, `gifts.list` | coming in wave 2 with social engineer B | |
 
 Crew ids are the roster's (`tomas`, `pell`, `rina`, `torres-zeke`, `calder`, ...): see `plans/crew-roster.html`.
@@ -206,6 +206,12 @@ A: No promises.
 ?
 - Someone fixed the lamp at last.
 ```
+
+## Traditions (.trad)
+
+The fields (`when:`, `where:`, `who:`, `ties:`, ...) follow the traditions engineer's grammar in `plans/trad-format.md`;
+content_gen.py checks them with `plans/trad_parse.py`. The words go in sections, as `- text   #tone` lines:
+`== mail`, `== ask`, `== here`, `== thanks`, `== chatter`. lines_check checks those texts like any other line.
 
 ## Meetings (.meet)
 

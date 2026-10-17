@@ -165,7 +165,7 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        lim = 60 if kind in BUBBLE_KINDS or kind == 'trad.chatter' else 400 if kind in ('trad.mail', 'letter') else 140 if kind.startswith(LONG_KINDS) else CARD
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')

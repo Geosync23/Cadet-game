@@ -16,6 +16,11 @@ Nobody hand-edits a generated block. Running it again with no changes to content
 Syntax errors stop the bake with the file and line; style (lengths, names, tone, coverage) is lines_check.py's job.
 """
 import json, os, re, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plans'))
+try:
+    import trad_parse    # the traditions engineer's .trad field grammar (plans/trad_parse.py, plans/trad-format.md)
+except ImportError:      # before their branch is merged: fields stay raw strings, and section 18's loader reports them
+    trad_parse = None
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONTENT = os.path.join(ROOT, 'content')
@@ -397,7 +402,13 @@ def parse_tradition(path, rel, out):
             m = re.fullmatch(r'([a-z][a-zA-Z0-9]*):\s*(.+)', s)
             if not m:
                 raise GenError(f'{where}: tradition fields are "key: value"')
-            tr[m.group(1)] = m.group(2)
+            if trad_parse:
+                try:
+                    trad_parse.parse_field(tr, m.group(1), m.group(2), where)   # the field grammar: plans/trad-format.md
+                except trad_parse.TradError as e:
+                    raise GenError(str(e))
+            else:
+                tr[m.group(1)] = m.group(2)
             continue
         if s.startswith('?'):
             conds = parse_conds(s[1:], where)
@@ -406,7 +417,14 @@ def parse_tradition(path, rel, out):
             raise GenError(f'{where}: lines start with "- "')
         text, tone = split_tone(s[2:], where)
         tr['text'][sec].append(entry(rel, 'trad.' + hd[1] + '.' + sec, text, tone, conds))
-    out['TRADITIONS'][hd[1]] = tr
+    if trad_parse:
+        try:
+            out['TRADITIONS'][hd[1]] = trad_parse.finish(tr, hd[1], path)
+            trad_parse.check_all(list(out['TRADITIONS'].values()))
+        except trad_parse.TradError as e:
+            raise GenError(str(e))
+    else:
+        out['TRADITIONS'][hd[1]] = tr
 
 
 def bake():
