@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.28
+   STARSHIP CADET: CSV Wren                           build 0.36.29
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.28';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.29';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13908,7 +13908,7 @@ function socReset(hour) {
   const { crew, n } = SOC, a = new Int8Array(n * (n - 1) / 2);
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) a[pairIdx(i, j)] = affStart(crew[i], crew[j]);
   SHIP.aff = a; SHIP.rel = {}; SHIP.knows = {}; SHIP.heard = []; NEWS.length = 0; SHIP.mem = {}; SHIP.rep = null;
-  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {}, cues: [] };
+  SHIP.social = { hour, fault: {}, pairs: {}, mail: [], feuds: {}, courtesy: {}, cues: [], bonds: {}, affWeek: null };
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
 // rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay, showDay, giftWeek] } }, mail (story Mail to come), cues, mentor,
@@ -13920,7 +13920,7 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -13931,7 +13931,8 @@ function socLoad(s) {
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
-      moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [] };
+      moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
+      bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null };   // 20c's bonds and weekly snapshot ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
@@ -14035,6 +14036,7 @@ function warmth(id, now = shipNow()) {
 const affBand = (a, b) => { const v = affinity(a, b); return v <= -40 ? 'rival' : v >= 60 ? 'friend' : 'neutral'; };
 function bondOf(id, kind) {
   socInit(); id = socId(id);
+  if (typeof socBondOf === 'function') { const b = socBondOf(id, kind); if (b !== undefined) return b; }   // 20c's, when it has an answer
   if (kind === 'couple') { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)]; if (p && p.partner && SOC.idx.has(p.partner)) return p.partner; }
   if (kind === 'mentee' && SHIP.social.mentor && SHIP.social.mentor === id) return 'you';   // your escort mentors you (A4)
   const B = SHIP.social.bonds || {}, want = kind === 'mentee' ? 'mentor' : kind;
@@ -14083,6 +14085,15 @@ function socNote(kind, d) {
 }
 if (typeof onSim === 'function') for (const k in SOC_CUE_OF) onSim(k, d => socNote(k, d));
 const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', fixed: 'the repair', came: 'coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday' };
+function memThing(key) {                                 // {thing}: a memory's object in words ('fixed.oven' -> 'the oven'), or null
+  if (typeof key !== 'string' || !key) return null;
+  const mk = /^fixed\.(.+)/.exec(key), kind = mk && typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[mk[1]];
+  if (kind) return 'the ' + kind.name.toLowerCase();
+  for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (SOC_THING[s]) return SOC_THING[s];
+  return null;
+}
+// place:calm (and moments' readiness): the place types where people sit and talk
+const CALM_TYPES = new Set(['lounge-seat', 'bench', 'common-room', 'garden', 'music', 'mess-seat']);
 function socialFill(p, name, ctx = {}) {
   socInit(); const tier = relTier(p.id), nameOf = id => id === 'you' ? chatName() : id && SOC.idx.has(id) ? shortName(SOC.crew[SOC.idx.get(id)]) : null;
   if (name === 'me') return chatName();
@@ -14095,13 +14106,7 @@ function socialFill(p, name, ctx = {}) {
     const top = SOC.crew.filter(q => q.dept === p.dept && q !== p && (q.rank === 'chief' || q.rank === 'captain'));
     return top.length ? shortName(top[0]) : null;
   }
-  if (name === 'thing') {
-    const k = ctx.mem && (ctx.mem.key || ctx.mem); if (!k) return null;
-    const mk = /^fixed\.(.+)/.exec(k), kind = mk && typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[mk[1]];
-    if (kind) return 'the ' + kind.name.toLowerCase();
-    for (let s = k; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (SOC_THING[s]) return SOC_THING[s];
-    return null;
-  }
+  if (name === 'thing') return memThing(ctx.mem && (ctx.mem.key || ctx.mem));
   if (name === 'trad') {
     const id = ctx.trad, d = SHIP.time.day, es = typeof eventsOn === 'function' ? eventsOn(d) : [];
     const e = id ? es.find(x => x.id === id) || (typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS.find(x => x.id === id) : null) : es.find(x => !x.honorees || !x.honorees.length);
@@ -14109,6 +14114,22 @@ function socialFill(p, name, ctx = {}) {
   }
   return null;
 }
+
+// lines through the dialogue engine (0.36.22, A3): section 20 picks which kind of line matters most (chatLine's order),
+// section 22's lineFor(p, kind, ctx) -> { text, id, kind } | null finds the words (the person's own lines, their voice
+// template's, the shared bank; plans/social-deep-plan.md Part 6). Null, or no engine yet: chatLine goes on down its
+// order, and the lists below are the fallback, so without section 22 every line is as before. ctx: { t, tier, peek,
+// act, room, placeId, warmth, talk, bubble }; peek means only looking ahead, so the engine should note nothing
+// (recently said, memTold) for it. New kinds in the order: hint (a moment ready, 20c's momentReady), callback (a memory,
+// 60%), cue (a ship note, 50%), joy and about (a bonded crewmate), and near, life, greet and smalltalk ahead of the lists
+const SOC_LEGACY = new Set(['greet', 'near', 'life', 'smalltalk']);   // kinds the old lists still answer (section 22's linesLegacy): the engine only for people with their own lines
+function socLine(p, kind, ctx = {}) {
+  if (typeof lineFor !== 'function') return null;
+  if (SOC_LEGACY.has(kind) && !(typeof VOICE !== 'undefined' && VOICE[p.id] && VOICE[p.id].lines)) return null;
+  try { const l = lineFor(p, kind, ctx); return l && typeof l.text === 'string' && l.text ? l : null; } catch (e) { return null; }
+}
+
+const socGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'greet', { t, tier: relTier(p.id), warmth: warmth(p.id), peek }); return l ? { text: l.text, kind: 'greet', say: true, line: l } : chatGreet(p, t); };   // greet: the engine first, else chatGreet's list
 
 // ---- memories with decay (0.36.21, A2; plans/social-deep-plan.md Part 2) ----
 // Each crew member keeps up to MEM_MAX memories of you: SHIP.mem[id] = [[key, day, w, told, half], ...] (saved). key is
@@ -14188,18 +14209,20 @@ if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice
 // socialInvite({ trad | kind, day, from, at, where, len }) -> an appointment id, or null: an invitation you accept or
 // decline on the device (Appointments, status 'asked', kind 'invite'). For a tradition, it's where and when the host's
 // plan has them there that day (their 'ev-<trad>' block), so the host keeps their own day; else at / where as given.
-const INTRO_MEM = { arrival: 'intro.arrival', dinner: 'intro.dinner', shadowShift: 'intro.shadowShift' };
-const introOn = () => !!(SHIP.intro && typeof SHIP.intro === 'object' && !SHIP.intro.done && !SHIP.intro.skipped) && !(typeof flag === 'function' && flag('week1.done'));
+const INTRO_MEM = { hello: 'intro.arrival', bunk: 'intro.arrival', arrival: 'intro.arrival', chief: 'intro.dinner', dinner: 'intro.dinner', shadow: 'intro.shadowShift', shadowShift: 'intro.shadowShift' };   // section 21's step ids
+const introOn = () => !(typeof flag === 'function' && flag('week1.done')) && (SHIP.intro && typeof SHIP.intro === 'object' ? !SHIP.intro.done && !SHIP.intro.skipped : !!escortId());
+const inWeek1 = () => introOn();                        // the line condition week1:true (the frozen vocabulary)
 const socGate = stage => !introOn() || (typeof flag === 'function' && !!flag(stage === 'done' ? 'week1.done' : 'week1.' + stage));
-function escortId() {
+function escortId() {                                   // SHIP.intro.escort, else the flag escort.<roster id> (section 21 sets escort.torres-zeke)
   socInit(); const e = SHIP.intro && SHIP.intro.escort; if (e && SOC.idx.has(e)) return e;
+  if (SHIP.social.mentor) return SHIP.social.mentor;
   if (typeof flag === 'function') for (const p of SOC.crew) if (flag('escort.' + p.id)) return p.id;
   return null;
 }
 function introNote(d) {                                  // the bus's introStep { step, who }
   socInit(); const e = escortId(); if (e && !SHIP.social.mentor) SHIP.social.mentor = e;
   const key = INTRO_MEM[d.step]; if (!key) return;
-  for (const id of [].concat(d.who || [], d.step === 'dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
+  for (const id of [].concat(d.who || [], INTRO_MEM[d.step] === 'intro.dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
 }
 if (typeof onSim === 'function') onSim('introStep', d => introNote(d || {}));
 function socialInvite(o = {}) {
@@ -14519,8 +14542,9 @@ function bunkNote() {                                    // section 15's bunk ta
 // (SHIP.social.moved, saved). Arrivals are news a week ahead, and new for their first week (newHere: ctx.newHere).
 const socAboard = (p, d = SHIP.time.day) => !!p && (!Array.isArray(p.aboard) || ((p.aboard[0] == null || d >= p.aboard[0]) && (p.aboard[1] == null || d <= p.aboard[1])))
   && (typeof aboard !== 'function' || !p.aboard || aboard(p, d));
-const leavingSoon = (p, d = SHIP.time.day) => p && Array.isArray(p.aboard) && p.aboard[1] != null && d <= p.aboard[1] && p.aboard[1] - d <= 10 ? p.aboard[1] - d : null;
-const newHere = (p, d = SHIP.time.day) => !!(p && Array.isArray(p.aboard) && p.aboard[0] > 1 && d >= p.aboard[0] && d - p.aboard[0] < 7);
+const socP = x => x && x.id ? x : (socInit(), SOC.idx.has(x) ? SOC.crew[SOC.idx.get(x)] : null);   // a person, from a person or an id
+const leavingSoon = (x, d = SHIP.time.day, p = socP(x)) => p && Array.isArray(p.aboard) && p.aboard[1] != null && d <= p.aboard[1] && p.aboard[1] - d <= 10 ? p.aboard[1] - d : null;
+const newHere = (x, d = SHIP.time.day, p = socP(x)) => !!(p && Array.isArray(p.aboard) && p.aboard[0] > 1 && d >= p.aboard[0] && d - p.aboard[0] < 7);
 function socTransfers(h) {                               // 07:00 each ship day (socialHour)
   const d = Math.floor(h / 24) + 1, t = h * 60 + 30, M = SHIP.social.moved || (SHIP.social.moved = []);
   for (const p of SOC.crew) {
@@ -14551,6 +14575,7 @@ function byeLine(p, mail) {                              // a goodbye that talks
   const tier = relTier(p.id), you = chatName();
   return (tier >= 3 ? 'I\'m going to miss you, ' + you + '. ' : 'I\'m off soon. ') + (things.length ? things.map(x => x[0].toUpperCase() + x.slice(1)).join('. ') + '. I won\'t forget that. ' : '') + (tier >= 3 ? 'Write to me?' : 'Look after the old Wren.');
 }
+const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === socId(id)));   // moved:<id>: they've left the Wren
 const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
 const repAskedFor = dept => ['well', 'theirs'].includes(repBand(dept));
 const repNotes = () => (repInit().notes || []).slice().reverse();
@@ -14842,7 +14867,7 @@ function crewContacts({ all = false } = {}) {
     const tier = relTier(p.id), pts = r ? r.pts : 0, w = whereIs(p, t);
     const show = tier >= 1 || (w && w.act === 'work' && PUBLIC_WORK.has(p.dept));
     out.push({ id: p.id, name: p.name, role: p.role, dept: p.dept, tier, tierName: REL_NAMES[tier], pts, toNext: tier < 4 ? Math.ceil(REL_TIERS[tier + 1] - pts) : null,
-               met: r ? r.met : null, lastTalk: r ? r.lastTalk : null, known: r ? r.known.filter(k => k !== 'news' && k !== 'work') : [], where: show ? crewWhere(p, t) : null });
+               met: r ? r.met : null, lastTalk: r ? r.lastTalk : null, known: r ? r.known.filter(k => k !== 'news' && k !== 'work' && k[0] !== '@') : [], where: show ? crewWhere(p, t) : null });
   }
   return out.sort((a, b) => b.pts - a.pts || (a.name < b.name ? -1 : 1));
 }
@@ -14879,17 +14904,6 @@ SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // SHIP.rel[id].known for the Crew app), Help? (favourOf: a favour to accept in person, or "Done: here you go" to hand
 // one back) and Meet up (Appointments with them picked, once the device has it). The look is a plain panel for now;
 // the device engineer's skin (section 19) takes it over through CHAT_SKIN.
-// lines through the dialogue engine (0.36.22, A3): section 20 picks which kind of line matters most (chatLine's order),
-// section 22's lineFor(p, kind, ctx) -> { text, id, kind } | null finds the words (the person's own lines, their voice
-// template's, the shared bank; plans/social-deep-plan.md Part 6). Null, or no engine yet: chatLine goes on down its
-// order, and the lists below are the fallback, so without section 22 every line is as before. ctx: { t, tier, peek,
-// act, room, placeId, warmth, talk, bubble }; peek means only looking ahead, so the engine should note nothing
-// (recently said, memTold) for it. New kinds in the order: hint (a moment ready, 20c's momentReady), callback (a memory,
-// 60%), cue (a ship note, 50%), joy and about (a bonded crewmate), and near, life, greet and smalltalk ahead of the lists
-function socLine(p, kind, ctx = {}) {
-  if (typeof lineFor !== 'function') return null;
-  try { const l = lineFor(p, kind, ctx); return l && typeof l.text === 'string' && l.text ? l : null; } catch (e) { return null; }
-}
 const CHAT_GREET = [
   ['Oh, hello.', 'Hi.', 'Can I help you?', 'Morning. Or is it evening? I lose track.', 'You\'re the new Works cadet, aren\'t you?', 'Hello there.', 'Mm? Oh, hi.', 'Don\'t think we\'ve met.', 'Afternoon.', 'All right?'],
   ['Hey, {me}.', 'Oh, hi again.', 'Hello, cadet.', 'Good to see you.', 'How\'s Works treating you?', 'Hi! Settling in?', 'You again! Hi.', 'Hey. Busy day?', 'Hello, hello.', 'Nice to see a familiar face.'],
@@ -15040,10 +15054,9 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
     if (l) return { text: l, kind: 'life', say: true };
   }
   if (tier >= 1 && U(647) < .3) { const l = eng('joy') || (['best', 'friend', 'partner', 'mentor', 'mentee'].some(k => socialFill(p, k)) ? eng('about') : null); if (l) return l; }   // their joy, or a crewmate they're close to
-  return chatGreet(p, t, peek);
+  return socGreet(p, t, peek);
 }
-const chatGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'greet', { t, tier: relTier(p.id), warmth: warmth(p.id), peek }); if (l) return { text: l.text, kind: 'greet', say: true, line: l };
-  const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
+const chatGreet = (p, t = shipNow()) => { const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
 // favours (0.36.2 fills this in): the favour that person has for you, or null
 // favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
 // favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or
@@ -15117,7 +15130,7 @@ function chatOpen(p, greet, line) {                       // greet: they came to
   if (w && w.act === 'sleep') { chatClose(); toast(p.name, p.role + '. Fast asleep. Better not wake them.'); return true; }
   const r = relGet(p.id); if (r.met === null) r.met = Math.floor(shipNow());
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p), d = a ? Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) : 0;
-  CHAT = { p, line: line || (greet ? chatGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
+  CHAT = { p, line: line || (greet ? socGreet(p) : chatLine(p)), ask: false, fav: favourOf(p), at: shipNow(), reach: Math.max(4, d + 1.5) };   // walk off further than that and it closes
   if (CHAT.line.news) playerHeard(CHAT.line.news, p.id);
   if (CHAT.line.kind === 'story') arcTold(p);
   if (CHAT.line.kind === 'invite') CHAT.line.invite.said = true;

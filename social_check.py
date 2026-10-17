@@ -110,7 +110,7 @@ with sync_playwright() as pw:
     q = g.ev(r"""(() => {
       const out = {}, works = SOC.crew.find(p => p.dept === 'works' && p.rank !== 'chief'), tomas = SOC.crew[SOC.idx.get('tomas')];
       const before = JSON.stringify(socSave());
-      out.missing = ['mem', 'warmth', 'affBand', 'bondOf', 'moodOf', 'beatOf', 'knowsNews', 'repBand', 'repShip', 'knownFor', 'cue', 'socialFill', 'memTold'].filter(f => { try { return typeof eval(f) !== 'function'; } catch (e) { return true; } });
+      out.missing = ['mem', 'warmth', 'affBand', 'bondOf', 'moodOf', 'beatOf', 'knowsNews', 'repBand', 'repShip', 'knownFor', 'cue', 'socialFill', 'memTold', 'inWeek1', 'leavingSoon', 'newHere', 'movedOff', 'memThing'].filter(f => { try { return typeof eval(f) !== 'function'; } catch (e) { return true; } });
       out.band = [affBand('tomas', 'pell'), affinity('tomas', 'pell')];
       out.bandsOk = SOC.crew.slice(0, 20).every(p => SOC.crew.slice(0, 20).every(q => { const v = affinity(p, q), b = affBand(p, q); return b === (v <= -40 ? 'rival' : v >= 60 ? 'friend' : 'neutral'); }));
       out.mood = ['low', 'ok', 'high'].includes(moodOf(tomas)) && moodOf('nobody') === 'ok';
@@ -118,6 +118,7 @@ with sync_playwright() as pw:
       out.warm = warmth('tomas');
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
       out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
+      out.calm = CALM_TYPES.has('lounge-seat') && memThing('fixed.oven') === 'the oven' && memThing('nothing') === null;
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
       out.pure = JSON.stringify(socSave()) === before;
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
@@ -128,6 +129,7 @@ with sync_playwright() as pw:
     })()""")
     print('Query API:', json.dumps(q))
     if q['missing']: fail(f"query functions missing: {q['missing']}")
+    if not q.get('calm'): fail('CALM_TYPES or memThing wrong')
     if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
     if q['rep'][:3] != ['known', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
@@ -294,27 +296,27 @@ with sync_playwright() as pw:
 
     # 12. bunk visits and notes (0.36.27): a friend knocks in the evening when you're in your bunk room; notes when you're out
     vs = g.ev(r"""(() => {
-      const o = { visits: [], notes: [] }, keepS = JSON.stringify(socSave()), t0 = shipNow(), inBunk = playerInBunk;
+      const o = { visits: [], notes: [] }, keepS = JSON.stringify(socSave()), t0 = shipNow();
       for (const id of ['tomas', 'pell', 'rina']) { relGet(id).pts = 70; relGet(id).tier = 3; }
       o.home = playerInBunk();
-      window.playerInBunk = () => true;
       for (let d = 8; d <= 17 && o.visits.length < 3; d++) for (let m = 1100; m < 1340; m++) {
         setShipNow((d - 1) * 1440 + m); socialVisit((d - 1) * 1440 + m);
         if (VISIT && !VISIT.inside) { o.visits.push([d, m, VISIT.p.id]); if (o.visits.length === 1) { visitIn(); o.card = CHAT && [CHAT.line.kind, CHAT.visit, !!mem(VISIT.p.id, 'visit')]; } else { VISIT.until = 0; socialVisit(0); } }
         if (m === 1325 && o.visits.length === 1 && o.closed === undefined) o.closed = VISIT === null;
+        if (m === 1325) chatClose();
         if (m > 1290 && VISIT && !VISIT.inside) o.late = true;
       }
-      chatClose(); seekEnd(); VISIT = null; window.playerInBunk = () => false; SHIP.social.notes = [];
+      chatClose(); seekEnd(); VISIT = null; SHIP.social.notes = []; const P0 = player.obj.position.clone(); player.obj.position.copy(cellPos(...deckDef.lift)); o.out = !playerInBunk();
       for (let d = 20; d <= 34 && o.notes.length < 2; d++) for (let m = 1140; m < 1290; m++) { setShipNow((d - 1) * 1440 + m); socialVisit((d - 1) * 1440 + m); const n = SHIP.social.notes.length; if (n > o.notes.length) o.notes.push([d, m]); }
       o.read = [bunkNote(), bunkNote()]; o.read[1] = o.read[1] && o.read[1].text;
       o.days = new Set(o.visits.map(v => v[0])).size === o.visits.length;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
-      window.playerInBunk = inBunk; setShipNow(t0); socLoad(JSON.parse(keepS)); return o;
+      player.obj.position.copy(P0); setShipNow(t0); socLoad(JSON.parse(keepS)); return o;
     })()""")
     print('Visits:', json.dumps(vs))
     if len(vs['visits']) < 2 or not vs['days'] or vs.get('late') or vs.get('card', [None])[:2] != ['visit', True] or not vs['card'][2]: fail('bunk visits wrong')
     if vs.get('closed') is not True: fail('a visitor should leave at 22:00')
-    if not vs['notes'] or not vs['read'][0] or not vs['saved']: fail('notes on your bunk wrong')
+    if not vs.get('out') or not vs['notes'] or not vs['read'][0] or not vs['saved']: fail('notes on your bunk wrong')
 
     # 13. crew come and go (0.36.28): a transfer's news, the goodbye, the day, letters after; an arrival's news, new for a week
     cg = g.ev(r"""(() => {
@@ -326,7 +328,7 @@ with sync_playwright() as pw:
       o.before = crewContacts({ all: true }).some(c => c.id === x.id);
       step(11, 18); o.bye = chatLine(pell, shipNow()).kind; o.byeText = chatLine(pell, shipNow()).text;
       const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id); o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
-      o.gone = !crewContacts({ all: true }).some(c => c.id === 'pell'); o.newHere = [newHere(x, 16), newHere(x, 23)];
+      o.gone = !crewContacts({ all: true }).some(c => c.id === 'pell') && movedOff('pell') && !movedOff('tomas') && newHere(x.id, 16); o.newHere = [newHere(x, 16), newHere(x, 23)];
       const m1 = SHIP.social.mail.length; step(22, 50); o.letters = SHIP.social.mail.slice(m1).filter(m => m.from.startsWith(pell.name)).length;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
       delete pell.aboard; delete x.aboard; setShipNow(t0); socLoad(JSON.parse(keepS)); return o;
