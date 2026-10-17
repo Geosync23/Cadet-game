@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pillar 5 Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1>Pillar 5: your career, and the ship's big stories <span class="draft">Draft · for your answers</span></h1>
+  <div class="sub">Two parts, each standing on its own: your Works job becomes a career, and the ship gets its big events. It is built alongside Pillar 4 without getting in its way. Nothing is built until you approve it. The questions are in <code>plans/pillar5-notes.md</code>; this page assumes the suggested answers. The detailed version for the team is <code>plans/pillar5-plan.md</code>.</div>
+</header>
+<nav><div>
+  <a href="#big">In short</a><a href="#day">Your work day</a><a href="#promo">Promotion</a><a href="#tier2">Tier 2 work</a><a href="#off">Off shift</a><a href="#events">Events</a><a href="#alone">On its own</a><a href="#p4">Alongside Pillar 4</a><a href="#team">Team</a><a href="#waves">Order</a><a href="#risks">Risks</a><a href="#q">Questions</a>
+</div></nav>
+<main>
+
+<section id="big">
+  <h2>In short</h2>
+  <p>Today your job on day 40 feels the same as on day 2: the crew fix nearly everything before you get to it, looking at a machine simply tells you what's wrong, and there's no way to grow past your first rank. And of the big ship-wide events, only the ion storm is switched on. Pillar 5 fixes both.</p>
+  <div class="grid">
+    <div class="card"><b>1. Real faults reach you</b><span>You still get 3 to 6 jobs a day, but about half are machines really misbehaving, with a cause to find.</span></div>
+    <div class="card"><b>2. Working out what's wrong</b><span>Looking at a machine shows its parts and a reading for each. You work out which part is failing. A wrong guess just means a walk back to storage, never a fail.</span></div>
+    <div class="card"><b>3. You get better</b><span>Repairs on a kind of machine get quicker with practice. Your Record says it in words ("Ovens: you know these well"). No points, no numbers.</span></div>
+    <div class="card"><b>4. Your first promotion</b><span>Calder's talks tell you how close you are, then she sets a supervised test job. Pass it and you're an Officer, with a new badge and your own cabin. You're never passed over, only asked to try again in a week.</span></div>
+    <div class="card"><b>5. Deeper work</b><span>After promotion, faults can start in one place and show in another: weak showers on Deck 4, a valve on Deck 5. You trace them through the pipes. New rooms open with your key.</span></div>
+    <div class="card"><b>6. The ship's big events</b><span>The comet viewing and the diplomatic visit switched on; then the power surge, the late supply shuttle, something in the garden (the ship gets a pet) and the ship-wide cough. Each one stands on its own.</span></div>
+  </div>
+  <p class="note">About 3-4 helpers for the career, starting as soon as you approve; 2 more for the events, after Pillar 4's third wave, when Pillar 4 is mostly writing. Four check-ins with you.</p>
+</section>
+
+<section id="day">
+  <h2>Your work day</h2>
+  <ol class="steps">
+    <li><b>Morning at the board</b><span>About half the jobs waiting for you are real faults: a pump losing pressure, a light relay chattering. The crew leave your kind of faults for you a little longer than now. On your days off and at night they take everything, so the ship never suffers for your rest.</span></li>
+    <li><b>The scanner</b><span>Calder hands you a handheld scanner early on. Point it at a machine on your way past and it tells you if it's starting to wear. Catch it early and it's a quick service instead of a repair later. Jobs you find yourself are marked "found by you".</span></li>
+    <li><b>Looking it over</b><span>At the machine, a small panel in the device's old-screen style shows its parts, each with a reading. Usually one is clearly off. Sometimes two are, and what you saw on the deck (the drip, the flicker) tells you which.</span></li>
+    <li><b>Fetch and fix</b><span>You fetch the part you chose. If you guessed wrong, the machine tells you ("Fitted a new seal. Still low flow: it's the pump") and you go back. That's all a wrong guess costs.</span></li>
+    <li><b>Getting quicker</b><span>The tenth oven repair is clearly quicker than the first. Crew notice the first time you fix something fast.</span></li>
+  </ol>
+  <h3>The week's small duties, made real</h3>
+  <ul>
+    <li><b>Wednesday drill</b> (15:00, already in the crew's week): you muster at the Works bay for 15 minutes. Turning up counts toward Calder's trust; missing it gets a word from her the next day.</li>
+    <li><b>Thursday inspection:</b> the duty officer walks the junior wing at 06:30. A grubby uniform or an untidy berth gets a gentle remark, a tidy one a nod.</li>
+  </ul>
+</section>
+
+<section id="promo">
+  <h2>Your first promotion</h2>
+  <div class="flow">
+    <span class="box">Steady work</span><span class="arrow">→</span><span class="box">Calder: "getting there"</span><span class="arrow">→</span><span class="box">The test job</span><span class="arrow">→</span><span class="box">Your badge</span><span class="arrow">→</span><span class="box">Your own cabin</span>
+  </div>
+  <ul>
+    <li><b>How you get there:</b> doing jobs well, catching faults early, picking the right part, and being reliable (turning up, finishing what you start). Reliability is the same "Work" reputation Pillar 4 builds, so the ship has one idea of how reliable you are. Roughly 2 to 3 ship weeks of steady work (about 10 to 14 hours of play).</li>
+    <li><b>The test job:</b> Calder sets a real bigger job (the water recycler or an air scrubber) and follows you through it, saying a word at each step (Zeke Torres if it's her day off). Go wrong and she tells you what to practise and sets another in a week.</li>
+    <li><b>The moment:</b> next morning at the board, in front of the Works crew, Calder hands you the Officer's badge. The Captain sends her congratulations by Mail, and the ship talks about it.</li>
+    <li><b>Your own cabin:</b> the spare cabin 4-23 on Deck 4's officers' corridor. Your bed and locker move, Tomas says goodbye as a bunkmate, and Pillar 4's "come over" visits start.</li>
+  </ul>
+</section>
+
+<section id="tier2">
+  <h2>Deeper work after promotion</h2>
+  <ul>
+    <li><b>Connected systems.</b> Water and air machines are joined by pipes and ducts. A fault can show in one place and start somewhere else. The job card says where the symptom is; finding the cause is yours.</li>
+    <li><b>The pipe kit</b> lets you read the flow board in Deck 5's manifold room and follow the low reading back along the pipes.</li>
+    <li><b>New rooms open with your key:</b> Deck 5's air plant, fan hall and manifold room, the pipe galleries and the crawlways in the ship's spine, each with real machines you can walk to.</li>
+    <li><b>Night on call</b> (you choose to join): about one night a week. If something breaks overnight your device wakes you; fix it, back to bed, and a lie-in the next morning. Never more than once a night.</li>
+    <li>The two higher ranks (planning shutdowns around the crew; leading team jobs on the engines) wait for a later pillar.</li>
+  </ul>
+</section>
+
+<section id="off">
+  <h2>Off shift</h2>
+  <div class="grid">
+    <div class="card"><b>Tinkering</b><span>Make small things in the machine shop on your own time: a lamp, a mug rack, a toy for the ship's pet. Give them as gifts (Pillar 4) or keep them.</span></div>
+    <div class="card"><b>Your cabin</b><span>After promotion, a few spots in your cabin take things you bought or made: a rug, a plant, a lamp, a shelf of keepsakes.</span></div>
+    <div class="card"><b>Logging stars</b><span>Spend an evening at the observatory telescope logging stars for Survey. The Survey crew warm to you a little.</span></div>
+    <div class="card"><b>Your device</b><span>A work log of what you've fixed and who noticed, your progress toward the test job in words, your tools, and the on-call switch.</span></div>
+  </div>
+</section>
+
+<section id="events">
+  <h2>The ship's big events</h2>
+  <p>As agreed in Pillar 3, an event is something the whole ship lives through, never a mission you're given: rumours, Mail, the Captain's address, gatherings, new jobs on the board, and crew talking about it for days. In the agreed order:</p>
+  <div class="grid">
+    <div class="card"><b>Comet viewing</b><span>One gentle evening at the bow lounge windows and the observatory. Already written and tested; just switched on.</span><span class="meta"><span class="tag">short</span><span class="tag old">ready</span></span></div>
+    <div class="card"><b>Diplomatic visit</b><span>The Veyli delegation: the greeting in the shuttle bay, formal dinners, the gift exchange. Built in Pillar 3; the galley's last piece, then switched on.</span><span class="meta"><span class="tag">main</span><span class="tag old">built</span></span></div>
+    <div class="card"><b>Power surge</b><span>A Deck 6 junction trips. Two decks drop to emergency lighting for up to an hour; the lift runs slow; Works rushes.</span><span class="meta"><span class="tag">short</span><span class="tag new">new</span></span></div>
+    <div class="card"><b>The late supply shuttle</b><span>The Wednesday delivery doesn't come. Filters run short, the machine shop gets busy, the menu goes plain for a few days.</span><span class="meta"><span class="tag">short</span><span class="tag new">new</span></span></div>
+    <div class="card"><b>Something in the garden</b><span>Nibbled leaves, then the herb wall stripped bare. You make traps in the machine shop; volunteers watch at night. It's caught, named, and becomes the ship's pet for good.</span><span class="meta"><span class="tag">main</span><span class="tag new">new</span></span></div>
+    <div class="card"><b>The Wren cough</b><span>The infirmary fills; the sick stay in their bunks; a fifth of the crew are off, so more jobs are left for you. You can catch it if you skip showers (you just tire faster).</span><span class="meta"><span class="tag">main</span><span class="tag new">new</span></span></div>
+    <div class="card"><b>The Fleet inspection</b><span>Only if you'd like it: an inspector arrives, the ship spends a day fixing and tidying, the tour, questions at the board, and a report by Mail.</span><span class="meta"><span class="tag">main</span><span class="tag new">your call</span></span></div>
+    <div class="card"><b>Nebula drift and salvage</b><span>If the pillar has room: every window full of colour and strange dreams; then the shuttle flies out for the first time and comes back with crates of odd finds.</span><span class="meta"><span class="tag">main</span><span class="tag new">if room</span></span></div>
+    <div class="card"><b>Small incidents</b><span>About one a week between the big events: a burst pipe, the lift stuck with someone in it, a scorched pan setting off the galley alarm.</span><span class="meta"><span class="tag">an hour or two</span><span class="tag new">new</span></span></div>
+  </div>
+  <p class="note">Later pillars: the Founding Day festival (waits for the real-phone crowd test), the Veyli ship that needs help, and the déjà vu day (replaying a whole day is the riskiest thing on the list). Crew rotation day is already Pillar 4's crew coming and going. After the list runs out, events come back in new versions, more rarely.</p>
+  <p class="note">After promotion, every event has a part only you can do: tracing the surge's cause, rigging a filter bypass, walking the inspector through the manifold room. The first senior briefing at the conference table comes with the power surge.</p>
+</section>
+
+<section id="alone">
+  <h2>Each event stands on its own</h2>
+  <ul>
+    <li><b>One event, one piece.</b> Each lives in its own block, switched on or off by itself. Taking one out breaks nothing else.</li>
+    <li><b>No event needs another to have happened.</b> A new game still runs them in the agreed order.</li>
+    <li><b>You can try any one by itself:</b> a special link starts a chosen event on a chosen day, for reviewing.</li>
+    <li><b>Each has its own test,</b> and you play and sign off each one like a deck (or two at a time).</li>
+  </ul>
+</section>
+
+<section id="p4">
+  <h2>Alongside Pillar 4, without getting in its way</h2>
+  <p>Pillar 4 has about 15 helpers working on one game file. Pillar 5 keeps clear by working in different parts of it, and by timing.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Part of the game</th><th>Pillar 4</th><th>Pillar 5</th></tr>
+    <tr><td>Machines and jobs</td><td>hardly touched</td><td>from the start</td></tr>
+    <tr><td>Your needs and activities</td><td>a few small rows</td><td>from the start (same engineer, Pillar 4's rows first)</td></tr>
+    <tr><td>Your career</td><td>—</td><td>a brand-new part of the file with its own owner</td></tr>
+    <tr><td>Your device</td><td>busy (waves 2-3)</td><td>adds its pages from its own part; the device engineer only later</td></tr>
+    <tr><td>Crew schedules, beds</td><td>busy throughout</td><td>two or three small asks, after Pillar 4's wave 3 (your cabin move waits for then)</td></tr>
+    <tr><td>Events and traditions</td><td>busy (about 30 traditions)</td><td>events start only after Pillar 4's wave 3, each in its own block</td></tr>
+    <tr><td>The decks</td><td>mostly Deck 3 (garden, lounge, mess)</td><td>a second deck builder, in different rooms (Deck 5's machine rooms, the spine, your cabin)</td></tr>
+  </table></div>
+  <p class="note">Pillar 5's work is merged after Pillar 4's in every round, and the career is checked every time against Pillar 4's first week, which holds special jobs for you on your first days.</p>
+</section>
+
+<section id="team">
+  <h2>The team</h2>
+  <div class="tablewrap"><table>
+    <tr><th>Seat</th><th>New?</th><th>Does</th><th>When</th></tr>
+    <tr><td>Systems engineer</td><td>existing role</td><td>real faults, machine parts and readings, the scanner's readings, connected pipes, the machine side of events</td><td>steps 1-3</td></tr>
+    <tr><td>Progression engineer</td><td>new</td><td>your career: getting better, tools, the drill and inspection, the test job, promotion, the cabin move, on-call, your device's work pages</td><td>steps 1-3</td></tr>
+    <tr><td>Player engineer</td><td>existing</td><td>the parts panel, using the scanner, waking on call, tinkering, cabin spots, logging stars, catching the cough</td><td>steps 1-3</td></tr>
+    <tr><td>Deck builder 2</td><td>new</td><td>the new rooms and machines on Deck 5 and in the spine, your cabin, event props</td><td>steps 2-4</td></tr>
+    <tr><td>Events engineer A</td><td>new</td><td>the "try this event" switch and incidents; the comet, the visit, the surge, the late shuttle, the inspection</td><td>steps 3-4</td></tr>
+    <tr><td>Events engineer B</td><td>new</td><td>the garden creature, the cough, nebula drift, salvage</td><td>steps 3-4</td></tr>
+  </table></div>
+  <p class="note">At most 4 Pillar 5 helpers before Pillar 4's third wave is done, 6 at the busiest. Others (device, schedules, galley, crowds, crew list, writers) help with small asks.</p>
+</section>
+
+<section id="waves">
+  <h2>Order</h2>
+  <div class="waves">
+    <div class="wave"><b>Step 0: now</b>You answer the questions and approve this plan. Nothing is built before that.</div>
+    <div class="wave"><b>Step 1: the work day</b>Real faults, the parts panel, the scanner, getting quicker, the drill and inspection. Runs alongside Pillar 4's waves 2-3.<span class="ci">Check-in A: play a work day.</span></div>
+    <div class="wave"><b>Step 2: promotion</b>The test job, promotion, your cabin, connected faults, the new rooms, night on call, tinkering.<span class="ci">Check-in B: from near the test job to your own cabin.</span></div>
+    <div class="wave"><b>Step 3: first events</b>After Pillar 4's wave 3. The comet, the diplomatic visit, the power surge, small incidents.<span class="ci">Check-in C: try each event, then a new game from the storm to the visit.</span></div>
+    <div class="wave"><b>Step 4: the big events</b>The late shuttle, the garden creature, the cough; the inspection if you want it; nebula and salvage if there's room.<span class="ci">Check-in D: each event played, then a milestone into the main version with your OK.</span></div>
+  </div>
+</section>
+
+<section id="risks">
+  <h2>Risks, and what we do about them</h2>
+  <ul>
+    <li><b>Phones slowing down.</b> New rooms, a furnished cabin, event props, the pet, crowds. Each prop has a small fixed allowance and only appears on its deck while its event runs; every new room and every event's busiest moment is measured against the 450 limit.</li>
+    <li><b>The game must play the same every time.</b> Everything that's chosen (which part fails, when incidents happen, on-call nights) is worked out from the day and the machine, never by chance, and each check runs twice to prove it.</li>
+    <li><b>Two big pieces of work in one file.</b> New parts of the file with one owner each, Pillar 5 merged after Pillar 4, and the events held back until Pillar 4 is mostly writing.</li>
+    <li><b>Breaking your first week.</b> The career never touches the jobs Pillar 4 holds for you, and the first-week test runs on every change.</li>
+    <li><b>Too gamey.</b> Words everywhere, never numbers or points.</li>
+    <li><b>The parts panel feeling like a quiz.</b> Usually one reading is clearly off, a wrong guess costs only a walk, and we tune it after you play it at check-in A.</li>
+    <li><b>Too much going on.</b> Incidents never on an event day or a tradition evening; on-call only if you choose it.</li>
+  </ul>
+</section>
+
+<section id="q">
+  <h2>Questions for you</h2>
+  <p>The 20 questions in <code>plans/pillar5-notes.md</code> (this page assumes their suggested answers), plus five more:</p>
+  <ol class="q">
+    <li>Your own cabin: the spare 4-23 (no window), or should a window cabin open up? <em>Suggested: 4-23.</em></li>
+    <li>Calder follows you on the test job (Torres on her days off)? <em>Suggested: yes.</em></li>
+    <li>The Fleet inspection as a new main event? <em>Suggested: yes, after the cough.</em></li>
+    <li>Who writes the events' words: the events engineers, checked for tone by Pillar 4's head writer, or a Pillar 4 writer moved over later? <em>Suggested: the events engineers, checked by the head writer.</em></li>
+    <li>Reviewing events: one at a time like decks, or two at a time? <em>Suggested: two at a time.</em></li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
