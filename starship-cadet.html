@@ -15211,7 +15211,7 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -15232,7 +15232,8 @@ function socLoad(s) {
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
-      bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {} };   // 20c's bonds, weekly snapshot and moment state ride here
+      bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
+      noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
       const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
@@ -15385,11 +15386,31 @@ const SOC_CUE_OF = {
 function socNote(kind, d) {
   socInit(); d = d || {};
   const c = SOC_CUE_OF[kind]; if (!c) return;
-  const now = Math.floor(shipNow()), key = c[0](d), you = d.who === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
+  const now = Math.floor(socNow()), key = c[0](d), you = d.who === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || null });
   SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).slice(-30);
 }
-if (typeof onSim === 'function') for (const k in SOC_CUE_OF) onSim(k, d => socNote(k, d));
+// notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
+// big time jump and the same hours played one by one come out the same (0.36.49)
+let SOC_T = null;
+const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floor(socNow() / 1440) + 1;
+const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
+function socHear(kind, d) {
+  socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
+  if (t < SHIP.social.hour * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
+  Q.push([t, kind, JSON.parse(JSON.stringify(d))]);
+}
+function socApply(kind, d, t) {
+  const was = SOC_T; SOC_T = t;
+  try { if (SOC_CUE_OF[kind]) socNote(kind, d); memNote(kind, d); if (kind === 'introStep') socIntroNote(d); repNote(kind, d); } finally { SOC_T = was; }
+}
+function socNotesTo(tEnd) {                              // apply the queued notes before tEnd, oldest first (arrival order on a tie)
+  const Q = SHIP.social.noteq; if (!Q || !Q.length) return;
+  const due = Q.filter(x => x[0] < tEnd).sort((a, b) => a[0] - b[0]); if (!due.length) return;
+  SHIP.social.noteq = Q.filter(x => x[0] >= tEnd);
+  for (const [t, kind, d] of due) socApply(kind, d, t);
+}
+if (typeof onSim === 'function') for (const k of SOC_HEARS) onSim(k, d => socHear(k, d));
 const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', 'fav.fetch': 'you fetching my things', fixed: 'the repair', came: 'you coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday',
   show: 'the show', 'show.pell-show': 'the music boxes', appt: 'our catch-ups', mended: 'you patching things up', helped: 'your help' };
 function memThing(key) {                                 // {thing}: a memory's object in words ('fixed.oven' -> 'the oven'), or null
@@ -15455,7 +15476,7 @@ const memClass = key => { for (let s = key; s; s = s.includes('.') ? s.slice(0, 
 function memAdd(id, key, o = {}) {
   socInit(); id = socId(id); if (!SOC.idx.has(id) || typeof key !== 'string' || !key) return null;
   const cls = MEM_CLASS[o.cls] ? o.cls : memClass(key), [w0, half] = MEM_CLASS[cls], w = isFinite(o.w) ? Math.max(0, Math.min(100, o.w)) : w0;
-  const day = Math.floor(shipNow() / 1440) + 1, l = SHIP.mem[id] || (SHIP.mem[id] = []);
+  const day = socDay(), l = SHIP.mem[id] || (SHIP.mem[id] = []);
   let m = l.find(x => x[0] === key);
   if (m) { m[1] = day; m[2] = Math.max(m[2], w); m[4] = half && m[4] ? Math.max(m[4], half) : 0; }
   else {
@@ -15492,7 +15513,7 @@ function memFade() {                                     // once a ship day, at 
 function memRepair(d) {
   if (d.who !== 'you' || typeof machineById !== 'function') return;
   const m = d.machine && machineById(d.machine); if (!m || !m.room) return;
-  const S = schedData(), day = Math.floor(shipNow() / 1440) + 1;
+  const S = schedData(), day = socDay();
   const users = SOC.crew.filter(p => planDay(p, day).some(s => { const pl = s.placeId && S.byId.get(s.placeId); return pl && pl.deck === m.deck && pl.room === m.room; }))
     .sort((a, b) => relTier(b.id) - relTier(a.id) || schedU(a.seed, day, 644) - schedU(b.seed, day, 644)).slice(0, 6);
   for (const p of users) memAdd(p.id, 'fixed.' + m.kind);
@@ -15503,7 +15524,6 @@ function memNote(kind, d) {
     for (const id of d.came) if (id !== 'you' && SHIP.rel[id] && SHIP.rel[id].met !== null) memAdd(id, 'came.' + d.id);
   if (kind === 'choice' && d.script) for (const id of [].concat(d.who || [])) memAdd(id, typeof d.mem === 'string' && d.mem ? d.mem : 'meeting.' + d.script + '.' + (d.k ?? 0));   // the choice's own mem key when the script gives one
 }
-if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice']) onSim(k, d => { socInit(); memNote(k, d || {}); });
 
 // ---- the first week (0.36.23, A4; plans/social-deep-plan.md Part 7) ----
 // Onboarding (section 21) runs the arrival and week 1 and sets flags in section 13's store (flag / flagSet). While its
@@ -15537,7 +15557,6 @@ function socIntroNote(d) {                                  // the bus's introSt
   const key = INTRO_MEM[d.step]; if (!key) return;
   for (const id of [].concat(d.who || [], INTRO_MEM[d.step] === 'intro.dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
 }
-if (typeof onSim === 'function') onSim('introStep', d => socIntroNote(d || {}));
 function socialInvite(o = {}) {
   socInit(); const from = o.from, p = SOC.idx.has(from) ? SOC.crew[SOC.idx.get(from)] : null;
   if (!p || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
@@ -15582,7 +15601,7 @@ const GIFT_HABIT = { 'tea-break': 'tea', 'garden-lover': 'garden', gardener: 'pl
 const GIFT_NOTES = [['a biscuit, wrapped in a napkin', 'Saved you one. Don\'t tell the others.'], ['a little sketch of the Wren', 'Drew this on my break. It\'s you, by the lift. Sort of.'],
   ['a cutting from the garden', 'It\'ll root if you keep it wet. Put it by your bunk.'], ['a cup of tea, gone cold', 'Made you a tea and you weren\'t here. It\'s the thought that counts.'], ['a folded paper star', 'Found the instructions in an old book. Took me six tries.']];
 const giftOf = item => { const k = item && (item.name || item); return typeof k === 'string' && SOC_GIFTS[k.toLowerCase()] ? { item: k.toLowerCase(), ...SOC_GIFTS[k.toLowerCase()] } : null; };
-const socWeek = (d = SHIP.time.day) => Math.floor((d - 1) / 7);
+const socWeek = (d = socDay()) => Math.floor((d - 1) / 7);
 const GIFT_TAG_ALIAS = { card: 'star', postcard: 'star', books: 'book', games: 'game', plants: 'plant', sweets: 'sweet' };   // writers' words -> SOC_GIFTS tags
 function giftTaste(p) {                                  // { loves: [tags], likes: [tags] }
   const v = typeof VOICE !== 'undefined' && VOICE[p.id], tag = x => GIFT_TAG_ALIAS[x] || x;
@@ -15668,7 +15687,7 @@ function repAdd(dept, n, ship, why) {                    // n to the department 
   if (why) R.cnt[why] = (R.cnt[why] || 0) + 1;
   if (dept) repBandCheck(dept);
 }
-const repOnce = (what, day = SHIP.time.day) => { const R = repInit(); if (R.day[what] === day) return false; R.day[what] = day; return true; };
+const repOnce = (what, day = socDay()) => { const R = repInit(); if (R.day[what] === day) return false; R.day[what] = day; return true; };
 const REP_DEPT_OF = new Map();
 function repDeptOf(m) {                                  // the department that uses a machine: who works in its room (day 1's plans), else by system
   if (!m) return 'works'; if (REP_DEPT_OF.has(m.id)) return REP_DEPT_OF.get(m.id);
@@ -15696,7 +15715,6 @@ function repNote(kind, d) {                              // from the bus
     if (d.late >= 20) { repAdd(null, 0, { work: -2 }); repInit().cnt.late = (repInit().cnt.late || 0) + 1; } else repAdd(null, 0, { work: 1 });
   } else if (kind === 'moment' && d.flavour === 'listen') repAdd(null, 0, { kindness: 2 }, 'kind');
 }
-if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment']) onSim(k, d => repNote(k, d));
 function repBandCheck(dept) {                            // a band changed: a quiet badge on the Record; reaching 'theirs', their thank-you
   const R = repInit(), b = repBand(dept); if (R.bands[dept] === b) return;
   const was = R.bands[dept]; R.bands[dept] = b;
@@ -15706,12 +15724,12 @@ function repBandCheck(dept) {                            // a band changed: a qu
     R.thanks.push(dept);
     const chief = SOC.crew.find(p => p.dept === dept && (p.rank === 'chief' || p.rank === 'captain')) || SOC.crew.find(p => p.dept === dept);
     if (chief) {
-      SHIP.social.mail.push({ at: Math.floor(shipNow()) + 30, from: chief.name, subject: 'From all of us', body: 'The ' + dept + ' crew asked me to say thank you. You\'ve been a real help to us. Consider yourself one of ours. ' + shortName(chief) });
+      SHIP.social.mail.push({ at: Math.floor(socNow()) + 30, from: chief.name, subject: 'From all of us', body: 'The ' + dept + ' crew asked me to say thank you. You\'ve been a real help to us. Consider yourself one of ours. ' + shortName(chief) });
       if (dept !== 'works') repNoteAdd(chief.name, shortName(chief) + ' told Chief Calder you\'ve been a great help to ' + dept + '.');
     }
   }
 }
-function repNoteAdd(from, text) { const R = repInit(); R.notes.push({ day: SHIP.time.day, from, text }); if (R.notes.length > 20) R.notes.shift(); }
+function repNoteAdd(from, text) { const R = repInit(); R.notes.push({ day: socDay(), from, text }); if (R.notes.length > 20) R.notes.shift(); }
 function repWeek(h) {                                    // Sunday 04:00 (socialHour): the pull to the middle, floors, Calder's note, gossip about you
   const R = repInit(), d = Math.floor(h / 24) + 1;
   for (const k in R.ship) R.ship[k] = Math.round((R.ship[k] + (50 - R.ship[k]) * .1) * 100) / 100;
@@ -15965,6 +15983,7 @@ function socBorn(h, rooms) {
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
 function socialHour(h) {
+  socNotesTo((h + 1) * 60);                               // the bus notes of this hour, at their own times
   const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
   if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
   for (let i = 0; i < n; i++) {

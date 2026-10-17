@@ -16,14 +16,20 @@ DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
 SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
-RUN = r"""(({ days, player, jump }) => {
+RUN = r"""(({ days, player, jump, notes }) => {
   const h0 = 6, h1 = h0 + days * 24, stats = { born: {}, spread: [] };
   setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();   // an earlier clock: machines afresh
   socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;   // invitations become appointments
   const watch = () => { for (const x of NEWS) stats.born[x.id] = x.kind; };
-  if (jump) { setShipNow(h1 * 60); socialTo(h1 * 60); watch(); }
+  // stand-in bus notes (a repair by you and by a crew member, a tradition you came to), each with the time it happened:
+  // hour by hour they arrive as they happen; in a jump they all arrive at once, as section 13's bus sends them after a skip
+  const oven = typeof machineList === 'function' && machineList().find(x => x.kind === 'oven'), N = notes && oven ? [[h0 * 60 + 200, 'repair', { who: 'you', machine: oven.id, state: 'failing' }],
+    [h0 * 60 + 900, 'repair', { who: 'pell', machine: oven.id }], [h0 * 60 + 1500, 'tradition', { id: 'quiz', came: ['tomas', 'pell'], you: true }], [h0 * 60 + 2300, 'repair', { who: 'you', machine: oven.id }]] : [];
+  const hear = (a, b) => { for (const [t, k, d] of N) if (t >= a && t < b) socHear(k, { ...d, t }); };
+  if (notes) relAdd('tomas', 'chat', 1);
+  if (jump) { setShipNow(h1 * 60); hear(-1e9, h1 * 60); socialTo(h1 * 60); watch(); }
   else for (let h = h0 + 1; h <= h1; h++) {
-    setShipNow(h * 60); socialTo(h * 60); watch();
+    setShipNow(h * 60); hear((h - 1) * 60, h * 60); socialTo(h * 60); watch();
     for (const x of NEWS) if (h * 60 - x.born >= 720 && h * 60 - x.born < 780) stats.spread.push([x.kind, x.seed.length, SHIP.knows[x.id].size]);
     if (player && h === h0 + 3 * 24 + 6) { memAdd('rina', 'moment.test.1'); memAdd('pell', 'missed.test'); memAdd('pell', 'intro.arrival'); }
     if (player && h % 24 === 12) { relAdd('tomas', 'chat', REL_PTS.chat); memAdd('tomas', 'chat'); if ((h / 24 | 0) % 2) relAdd('pell', 'chat', REL_PTS.chat); for (const x of newsKnownBy('rina')) playerHeard(x.id, 'rina'); }
@@ -121,10 +127,11 @@ with sync_playwright() as pw:
     if not rt: fail('save and load differ')
 
     # 4. one jump over two days against the same two days hour by hour (no player)
-    c = run(days=2, player=False, jump=False)
-    d = run(days=2, player=False, jump=True)
-    print('Two days in one jump the same as hour by hour:', c['key'] == d['key'])
+    c = run(days=2, player=False, jump=False, notes=True)
+    d = run(days=2, player=False, jump=True, notes=True)
+    print('Two days in one jump the same as hour by hour (with bus notes):', c['key'] == d['key'])
     if c['key'] != d['key']: fail('a time jump gives a different social life')
+    if 'fixed.oven' not in c['key'] or 'came.quiz' not in c['key']: fail('the stand-in bus notes left no memories')
 
     # 5. the query API (0.36.20): what the dialogue engine's line conditions read; pure, and right on a known state
     q = g.ev(r"""(() => {
