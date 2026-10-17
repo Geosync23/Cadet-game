@@ -70,7 +70,7 @@ def roster(game):
     with open(game, encoding='utf-8') as f:
         html = f.read()
     people = {}
-    for name in ('ROSTER', 'ROSTER_GUESTS'):
+    for name in ('ROSTER', 'ROSTER_GUESTS', 'GUESTS'):     # crew, guests living aboard, and event guests and visitors
         m = re.search(r'^const ' + name + r' = \[\n(.*?)^\];', html, re.M | re.S)
         for l in (m.group(1).split('\n') if m else []):
             l = l.strip().rstrip(',')
