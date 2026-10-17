@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.49
+   STARSHIP CADET: CSV Wren                           build 0.48.50
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.49';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.50';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -23844,6 +23844,8 @@ const LINES = {
   "chat": [
     {"text": "What's it like, living out here? Properly, I mean. Not the brochure.", "id": "1riop94", "dept": "guest"},
     {"text": "I'm off again soon. Tell me one thing I shouldn't miss before I go.", "id": "e8586c", "dept": "guest"},
+    {"text": "{missed} left me a mug. I use it every morning. Don't tell anyone.", "id": "14fdcqd", "tone": "warm", "tier": [2, 4]},
+    {"text": "I still save things up to tell {missed}. Then I write them all down. Long letters.", "id": "uyiu9m", "tier": [3, 4]},
   ],
   "cue": [
     {"text": "My lamp's still going. Every night I switch it on and think, that was {me}.", "id": "1jvw16d", "tone": "warm", "cue": ["favour", "favour.lamp.you@me"]},
@@ -24153,6 +24155,12 @@ const LINES = {
   "feel": [
     {"text": "Lovely ship. Everyone says hello. Even the Chief of the Watch, nearly.", "id": "1ibgymf", "tone": "funny", "dept": "guest", "mood": "high"},
     {"text": "Long way from home, and a long way to go. The tea helps.", "id": "f902ce", "dept": "guest", "mood": "low"},
+    {"text": "I'm all right. Bit quiet without {missed}. You get used to it. Slowly.", "id": "14h77ee"},
+    {"text": "Wrote to {missed} last night. Three pages. Mostly about the food.", "id": "65kugl", "tone": "funny"},
+    {"text": "{missed} says the new ship's fine. Bigger. Colder. Nobody makes tea like Brennan.", "id": "13skgqg", "tone": "funny"},
+    {"text": "Good day! {missed} wrote back. Settling in fine, apparently.", "id": "4imus2", "tone": "warm", "mood": "high"},
+    {"text": "I miss {missed}. Silly, isn't it. It's only one ship over.", "id": "1kj0o64", "tone": "warm", "tier": [3, 4]},
+    {"text": "Missing {missed} today. That's all. Sit a minute? That helps.", "id": "1xksrsr", "tone": "warm", "mood": "low", "tier": [3, 4]},
     {"text": "{sigh}. Long one. Three jobs, and every one needed a part we didn't have.", "id": "meztuy", "dept": "works", "mood": "low"},
     {"text": "{sigh}. The board kept filling up faster than I could empty it.", "id": "zwx8dw", "dept": "works", "mood": "low"},
     {"text": "Good day. Every job closed, nothing came back.", "id": "6irr4v", "dept": "works", "mood": "high"},
@@ -24268,6 +24276,10 @@ const LINES = {
     {"text": "Your mess is so busy. On my last ship we ate in shifts of three.", "id": "18nk055", "act": "meal", "deck": "3", "dept": "guest"},
     {"text": "I didn't expect a garden. It smells like somewhere I used to live.", "id": "1nln0q5", "act": "free", "deck": "3", "dept": "guest"},
     {"text": "Is that the observatory? Am I allowed in? Oh, good.", "id": "1mcjl5p", "deck": "2", "dept": "guest"},
+    {"text": "{missed}'s seat's empty. I keep looking at it. Then I eat the toast.", "id": "mtsnwe", "act": "breakfast"},
+    {"text": "{missed}'s old bunk's still made up. Nobody's moved in yet. Odd.", "id": "thoedq", "deck": "4", "time": "night"},
+    {"text": "{missed} used to play that one. Badly. I miss it anyway.", "id": "jf0sdd", "tone": "funny", "place": "musicroom"},
+    {"text": "This was {missed}'s favourite. Still is, probably.", "id": "81kyqw", "act": "meal"},
     {"text": "Busy shift in the {room}.", "id": "1dg0fn1", "act": "work", "old": 1},
     {"text": "Never a quiet minute in the {room}.", "id": "vcq2w3", "act": "work", "old": 1},
     {"text": "Can't stop long. Work.", "id": "3xky3z", "act": "work", "old": 1},
@@ -24554,6 +24566,13 @@ const LINES = {
     {"text": "I could eat this every night. Well. Most nights.", "id": "1jr072e", "act": "dinner", "place": "mess"},
     {"text": "Don't let me have a third roll. ...Pass the rolls.", "id": "17y2vin", "tone": "funny", "act": "dinner", "place": "mess"},
     {"text": "Tea after? I'll put the pot on.", "id": "tfbcu", "act": "dinner", "place": "mess"},
+    {"text": "{missed} would've laughed at that.", "id": "6v9dn7", "tone": "funny"},
+    {"text": "Still save a seat for {missed}. Habit.", "id": "12lxd26"},
+    {"text": "Letter from {missed} today. Two pages.", "id": "ne23hx", "tone": "warm"},
+    {"text": "{missed} always had the last biscuit. Now I do.", "id": "yh5rsc", "tone": "funny"},
+    {"text": "Wonder what {missed} is having for dinner.", "id": "1ew19jj"},
+    {"text": "{missed} knew every answer in this round.", "id": "19d4zin", "tone": "funny", "trad": "quiz"},
+    {"text": "{missed} would be telling a story about now.", "id": "yllelg", "time": "evening"},
     {"text": "Pass the salt?", "id": "lhgsld", "act": "meal", "old": 1},
     {"text": "Is this the new recipe?", "id": "abo0h8", "act": "meal", "old": 1},
     {"text": "I'm stuffed.", "id": "oifro", "act": "meal", "old": 1},
