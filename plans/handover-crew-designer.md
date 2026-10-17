@@ -1,11 +1,11 @@
 # Handover: the crew designer
 
-Written at the end of Pillar 2 (combined build 0.40.8), so a fresh session can take over the crew.
+Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.13, 98df62f), so a fresh session can take over the crew.
 
 ## The role
 
 - **Branch:** `claude/deck-plans-1-2-6`.
-- **Builds:** 0.16.x (0.16.1 to 0.16.5 so far). The lead merges them onto `claude/ship-integration`.
+- **Builds:** 0.16.x (0.16.1 to 0.16.13 so far; the next is 0.16.14). The lead merges them onto `claude/ship-integration`.
 - **What I own:**
   - section 9 of `starship-cadet.html` (`// 9. CREW DATA`): the generated ROSTER block and the two lines after it;
   - `plans/crew-roster-gen.py`;
@@ -56,6 +56,21 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - The generator asserts there's a chef plus at least one early and one late hand every day.
   - Section 16 also still accepts an older `galley: chef|cook|hand` field, but nothing sets it now.
 - **The story crew** (Marrow, Vance, Sato, Holt, Pell, Rina, Brennan, Tomas) have looks and bios copied exactly from `CREW` and must stay identical. Section 14 and the crowd rely on their ids.
+
+### Added since (0.16.6 to 0.16.13)
+
+DEV_NOTES' crew roster section has every detail; in short:
+- **Birthdays and door plates (0.16.6):** `birthday` (a ship day of the year, 1–364) on everyone; `plate: { rank, name }` on everyone with a cabin.
+- **Habit changes (0.16.7):** `habitShifts: [{ add?, drop?, why }]`; the sim's `habitWeek` applies them.
+- **Visitors (0.16.8–0.16.10):** `GUESTS` (60: event guests and 52 everyday visitors) and `GUEST_TEMPLATES`, after `ROSTER_PLAYER`; `rosterSpec` returns a plain-clothes guest's own `spec`.
+- **Gardeners (0.16.11):** Tove Cruz (senior), Ravi Hart (early) and Imani O'Neill (late), dept `garden`, with `rota.hoursOn` for Tove's cover days.
+- **Pillar 4, seat 9 (0.16.12–0.16.13):**
+  - varied days off (`days_off`), with fixed days for Torres, Halloran and Calder;
+  - the social fields on everyone (`tpl`, `openness`, `needs`, `loves`, `likes`, `joy`, `thread`, `keepsake`, `home`, `family`, `mentors`, 6 or more `about`); thread spellings are frozen with social B;
+  - four couples (`partner`, sharing a day off and a `transferTo`);
+  - `stays` and `transferTo`;
+  - `ROSTER_RESERVE` (12, four cadets, each `replaces` a same-role leaver and copies their bed, work, shift and rota) and `ROSTER_ROTATIONS` (six Sundays, `out` and `in` ids). Leavers have `aboard: [null, day]`.
+- **Every later pass runs at the end of the generator,** on its own random stream (`NEW_R`, `BDAY_R`, `SHIFT_R`, `VIS_R`, `P4_R`). Keep it that way, so nobody already written moves.
 
 ## How to regenerate
 
