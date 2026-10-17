@@ -79,3 +79,18 @@
 == life
 ? tier>=friend
 - I carry the boxes now. One day it'll be my name on the chart. I'm patient. Mostly.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- I've a joke. Breakfast's soon.   #funny
+- List of star names: forty-one.
+- Karin's joke was worse. I'm proud.   #funny
+? act:breakfast
+- Why did the comet... no. Wait.   #funny
+? act:off
+- Calling home. Mum laughs.
+?
+
+== rumour
+- This isn't a joke. Rare, I know.   #funny
+- Heard it at breakfast. Between jokes.

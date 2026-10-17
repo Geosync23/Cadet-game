@@ -101,3 +101,19 @@
 == about
 ? aff:eklund-leila:friend
 - Eklund and I might share a gran. She says don't check. I'd love to check.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Gran sent a song. Possibly Eklund's gran.   #funny
+- Ladder? Leg day. Every day's leg day.   #funny
+? act:work
+- Floor's spotless. Life's good.
+? time:night
+- Night radio's playing a good one.
+? act:gym
+- Three laps. Then breakfast. My breakfast.
+?
+
+== rumour
+- Oh, you'll like this one.
+- Heard it at three in the morning. Still true.   #funny

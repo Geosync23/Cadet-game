@@ -89,3 +89,19 @@
 == about
 ? aff:torres-zeke:friend
 - Torres leaves me a note every shift. He's wrong about coil three. He's a good friend.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- My cat's written again. Well, my neighbour has.   #funny
+- Two pages in and I haven't started the letter.   #funny
+? act:meal
+- I'll stay a bit. I like the mess emptying.
+? act:work
+- Coil three's shy, not sulking. Anyway.   #funny
+? time:night
+- Music room's empty. Perfect. Anyway.
+?
+
+== rumour
+- Oh, did you hear? Sorry. Anyway. So.
+- Torres's note says this. Well, sort of.
