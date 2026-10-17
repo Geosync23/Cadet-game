@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.31
+   STARSHIP CADET: CSV Wren                           build 0.35.32
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7239,7 +7239,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.31';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.32';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8781,7 +8781,8 @@ function devTraditions(a, b) {
 function devOccasions(a, b) {
   try {
     if (!Array.isArray(SHIP.occasions) || typeof OCCASIONS === 'undefined') return [];
-    return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance).map(r => {
+    const booked = new Set(SHIP.device.appts.map(x => x.occ).filter(Boolean));   // 0.35.32: those apptAdd booked are listed as appointments
+    return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance && !booked.has(r.key)).map(r => {
       const rm = DECKS[r.deck] && DECKS[r.deck].rooms && DECKS[r.deck].rooms[r.room];
       return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + 'Deck ' + r.deck };
     });
@@ -8795,7 +8796,7 @@ function devDay(d) {
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
-    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
@@ -8822,6 +8823,9 @@ function deviceTick() {
   if (SHIP.time.day !== devMorning && SHIP.time.min >= 360) {   // a new morning
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
+  }
+  if (Array.isArray(SHIP.occasions)) for (const a of SHIP.device.appts) if (a.occ && (a.status === 'yes' || a.status === 'missed')) {   // 0.35.32: an occasion you met is kept,
+    const r = SHIP.occasions.find(x => x.key === a.occ); if (r && (r.met || r.status === 'kept')) { a.status = 'kept'; a.keptAt = t; }  // wherever in the room you stood
   }
   for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
     for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
@@ -9698,6 +9702,29 @@ function apptKind(where, withId) {
   const r = apptPlaces().find(x => x.id === where), p = apptPerson(withId);
   return r && /infirmary/i.test(r.name) ? 'checkup' : r && /office/i.test(r.name) || p && /chief/i.test(p.role || '') && r && /office/i.test(r.name) ? 'work' : 'social';
 }
+// apptAdd (0.35.32, the lead): section 18's occasions (the ready room summons, the Captain's table, a progress talk) become
+// real appointments, as the Pillar 3 plan had it: occasionAdd calls apptAdd({ id: key, with: [by], at, len,
+// where: 'deck|room', kind, status: 'yes', by, title }). The room becomes a spot in it (a seat if there is one), so
+// section 14 walks the host there and keeps or misses it, and section 20 counts it like any other. Once per occasion
+// (a.occ = its key); the record keeps title and occ (deviceLoad keeps extra fields). Returns the appointment or null.
+function apptOccSpot(n, key) {                           // a spot in a room, locked ones too (the ready room, the Captain's quarters)
+  const P = (DECKS[n] && DECKS[n].places || []).filter(x => x.room === key && !x.machine);
+  const q = P.find(x => APPT_SEATS.includes(x.type)) || P.find(x => /seat|chair|bench|stand|desk/.test(x.type || '')) || P[0];
+  return q ? q.id : null;
+}
+function apptAdd(o) {
+  if (!o || typeof o !== 'object' || !Array.isArray(o.with) || !Number.isFinite(o.at)) return null;
+  const D = SHIP.device, occ = typeof o.id === 'string' ? o.id : null;
+  if (occ) { const had = D.appts.find(a => a.occ === occ); if (had) return had; }
+  let where = typeof o.where === 'string' ? o.where : null; const m = where && /^(\d+)\|(.+)$/.exec(where);
+  if (m) where = apptOccSpot(+m[1], m[2]);
+  if (!where || !(typeof apptPlace === 'function' ? apptPlace({ where }) : null)) return null;
+  const a = { id: D.appts.reduce((x, y) => Math.max(x, y.id), 0) + 1, with: o.with.filter(x => typeof x === 'string').slice(0, 8), at: +o.at, len: Number.isFinite(o.len) ? +o.len : 30,
+    where, kind: typeof o.kind === 'string' ? o.kind : 'meeting', status: o.status === 'asked' ? 'asked' : 'yes', by: typeof o.by === 'string' ? o.by : null,
+    ...(typeof o.title === 'string' ? { title: o.title.slice(0, 80) } : {}), ...(occ ? { occ } : {}) };
+  D.appts.push(a); if (D.appts.length > 60) D.appts.splice(0, D.appts.length - 60);
+  deviceRefresh(); return a;
+}
 function apptBook(ids, at, len, kind) {                  // accepted: one appointment each, a seat each, one grp for a group
   const D = SHIP.device, spots = apptSpots(apptDraft.where, at, len, ids.length), id0 = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
   ids.forEach((pid, i) => D.appts.push({ id: id0 + i, with: [pid], at, len, where: spots[i], kind, status: 'yes', by: null, ...(ids.length > 1 ? { grp: id0 } : {}) }));
@@ -9787,7 +9814,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
     B.push({ kind: 'text', text: 'Coming up', mark: 'head' });
     if (!up.length) B.push({ kind: 'text', text: 'Nothing booked.' });
-    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
+    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: a.occ ? null : 'Cancel it', action: a.occ ? null : { app: 'appointments', do: 'drop', arg: a.id } }] });
     const past = apptGroups(D.appts.filter(a => a.status === 'kept' || a.status === 'missed')).slice(-4).reverse();
     if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: names + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
     return { title: 'Appointments', blocks: B };

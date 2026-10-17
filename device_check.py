@@ -175,6 +175,20 @@ def run(path):
               DEVICE_SKIN.heads(null); made.forEach(e => e.remove()); return out; })()""")
             print('  heads-up vs needs strip:', ov)
             check(ov['hit'] == [] and ov['inside'] and ov['bottom'] > ov['top'], f'heads-up: never over the needs strip or activity bar: {ov}')
+            # apptAdd (0.35.32): section 18's occasionAdd books a real appointment: once, a spot in the room (locked rooms too),
+            # the host in `with`, listed by its title, no Cancel; meeting it (the occasion's met) keeps it; saved and read back
+            aa = g.ev("""(() => { if (typeof occasionAdd !== 'function') return { own: false };
+              const D = SHIP.device, keepA = D.appts.slice(), keepO = SHIP.occasions.slice(), d = SHIP.time.day + 3, T = (d - 1) * 1440 + 1170;
+              D.appts = []; SHIP.occasions.length = 0; const r = occasionAdd('captainsTable', T, true); occasionAdd('captainsTable', T, true);
+              const a = D.appts[0], pl = a && apptPlace(a), out = { own: true, n: D.appts.length, host: a && a.with.join(), kind: a && a.kind, room: pl && [pl.deck, pl.room], occ: a && a.occ };
+              out.sched = devDay(d).filter(x => x.title === OCCASIONS.captainsTable.title).map(x => x.kind);
+              deviceShow('appointments'); out.cancel = [...document.querySelectorAll('#devBody button')].some(b => b.textContent === 'Cancel it');
+              out.saved = deviceLoad(JSON.parse(JSON.stringify({ device: D }))).appts.some(x => x.occ === a.occ && x.title === OCCASIONS.captainsTable.title);
+              if (r) { r.met = true; a.status = 'missed'; devTickMin = -1; deviceTick(); out.kept = a.status; }
+              D.appts = keepA; SHIP.occasions.length = 0; SHIP.occasions.push(...keepO); deviceShow('home'); return out; })()""")
+            print('  apptAdd:', aa)
+            check(not aa['own'] or (aa['n'] == 1 and aa['host'] == 'marrow' and aa['kind'] == 'invite' and aa['room'] == [2, 'C'] and aa['occ'] == 'captainsTable@' + str(aa['occ']).split('@')[-1]
+                and aa['sched'] == ['appt'] and not aa['cancel'] and aa['saved'] and aa['kept'] == 'kept'), f'apptAdd: an occasion becomes one appointment, listed, kept when met: {aa}')
             print('  occasions:', oc)
             check(not oc['own'] or (oc['listed'] and oc['chance'] and oc['kept'] and oc['hu'].startswith("The Captain's table starts in 15 min") and oc['go'] == [2, 'C']), f'occasions: in the Schedule with a heads-up and Go there; no surprises, none kept: {oc}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
