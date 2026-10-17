@@ -269,3 +269,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - 06:35 Hourly check-in. Lead memory ~56%: plan to release 0.60.3 then hand over (~65%).
 - 06:40 The user's rule: a handover note written in advance is always refreshed right before the actual handover. Added to TEAM.md (handover rule); told all helpers.
 - 07:35 Session resumed after the usage reset. Content rule: claude/content stays on its base; build master takes content/ only (git checkout <hash> -- content/) + content_gen on the combine.
+- 07:35 Hourly check-in + usage-reset sweep: restarted 8 helpers stopped by the limit (player 4, sim 3, galley 3, deck architect, reviewer 2, social A, perf 2, traditions 2; earlier reviewer 1b + onboarding). Writers, dialogue 2, device 3, social B2 already running. Dialogue engineer 1 archived. 07:36 reset trigger deleted (done).
