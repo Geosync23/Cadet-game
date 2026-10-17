@@ -11,11 +11,13 @@
 | Player claude/player-needs 4776216 (0.28.29-0.28.35) | player-4776216.md | PASS WITH FIXES: MEDIUM, joining the line at tap time stalls the counter; lows on the tray, lie-to-sleep, the strip |
 | Player 7959655 (0.28.36-0.28.37) | player-7959655.md | PASS: joins on arrival (probe), reviewer 1b's four fixes in; lows on the tray, null dish and strip still open |
 | Roster d53cf40..cadfbdd (0.16.16-0.16.20) | roster-cadfbdd.md | PASS: talent crafts fixed; Kovac's lift and breakfast lows sent to the lead |
+| Roster 1348dfd (0.16.21) | roster-1348dfd.md | PASS: Kovac's two lines reworded |
+| Player 9c18045 (0.28.38-0.28.40) | player-9c18045.md | PASS: lows fixed, the real-line and someone-in-the-way cases pass |
 
 **Open loose ends:**
 - The arrival fixes went to onboarding engineer 2 (session_0163dcLt17oTCdR8po9HRo2p). Reviewer 1b also reviews arrival (4f6d0b2..54d7911); they've had my note.
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
-- The open discrepancy: player engineer 4 reports player_check and food_check OK on galley+sim+0.28.37, but mine FAIL (merged html md5 2f1d251f0492; galley+sim alone 9aaedd1ac6d2). I've asked them and the build master to compare.
+- **To do:** once sim 0.26.36 (`crewMakeWay`, the cook steps aside) and galley 0.29.34 (the Sunday-table burst) are final, rerun player_check's job loop and food_check on galley + sim + player 9c18045. The lead asked for it. The earlier discrepancy is settled: player engineer 4 had run the checks on their branch alone.
 
 ## How I test (fresh container)
 - `pip install playwright`; three r128 unpacked at /tmp/cadet-work/three (DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
