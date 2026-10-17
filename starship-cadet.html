@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.22
+   STARSHIP CADET: CSV Wren                           build 0.35.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.22';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.23';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8508,8 +8508,23 @@ function deviceDialogue(v, onTap) {
   DEVICE_SKIN.dialogue(v || null);
   return true;
 }
+// deviceChoose(view, onPick) (0.35.23, Pillar 4): a question with buttons in the meeting panel's style, e.g. section 13's
+// New game: { title, text, choices: [label, ...], cancel } (cancel: the last button's label, 'Not now' by default, false
+// for none). onPick(k) gets the index of the choice, or -1 for Not now or the ×. One question at a time.
+function deviceChoose(v, onPick) {
+  if (!v || !Array.isArray(v.choices) || !v.choices.length) return false;
+  const n = v.choices.length, choices = v.choices.map(String).concat(v.cancel === false ? [] : [v.cancel || 'Not now']);
+  DEV.choose = typeof onPick === 'function' ? onPick : () => {};
+  deviceDialogue({ title: v.title || 'Choose', name: '', text: v.text || '', choices }, k => devChosen(k < n ? k : -1));
+  return true;
+}
+function devChosen(k) {
+  const f = DEV.choose; DEV.choose = null; devDlgTap = null; DEVICE_SKIN.dialogue(null);
+  if (f) try { f(k); } catch (e) { DEV.errors.push('deviceChoose: ' + (e && e.message || e)); }
+}
 function devDialogueDo(what, k) {
   try {
+    if (what === 'close' && DEV.choose) { devChosen(-1); return; }   // the × on a question: Not now
     if (what === 'close') { DEVICE_SKIN.dialogue(null); devDlgTap = null; if (typeof dialogueClose === 'function') dialogueClose(); return; }
     if (devDlgTap) devDlgTap(what === 'choose' ? k : undefined);
     else if (what === 'choose' && typeof dialogueChoose === 'function') dialogueChoose(k);   // section 18's own flow (0.34.10)
@@ -8671,7 +8686,7 @@ const DEVICE_SKIN = (() => {
       if (!v) { if (TIP_Q.length) skin.tip(TIP_Q[0]); return; }   // a tip waiting behind the meeting comes back
       c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Walk away'); x.onclick = e => { e.stopPropagation(); devDialogueDo('close'); };
-      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + ' · ' : '') + (v.name || '') + (v.n ? ' · ' + ((v.i || 0) + 1) + '/' + v.n : '')));
+      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + (v.name ? ' · ' : '') : '') + (v.name || '') + (v.n ? ' · ' + ((v.i || 0) + 1) + '/' + v.n : '')));
       if (v.text) { const t = mk('p', '', v.text); c.appendChild(t); }
       if (v.choices && v.choices.length) {
         const box = mk('div', 'btns');

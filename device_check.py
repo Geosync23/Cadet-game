@@ -10,6 +10,7 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
+#   deviceChoose (0.35.23): a question with buttons for section 13's New game; Not now and the × give -1
 #   Pillar 4 pages (0.35.22): the season, reputation in the Record, keepsakes in the Wallet, Left the Wren in the Roster
 #   the arrival (0.35.21): locked until handed over, the first switch-on, Settling in with Go there and the end button
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
@@ -336,6 +337,14 @@ def run(path):
             check(ar.get('locked') == [False, True] and ar.get('bootReset') and ar.get('boot') == [True, 'boot', True] and ar.get('second') == 'home'
                   and ar.get('listed') and ar.get('count') and ar.get('done') and ar.get('go') and ar.get('goal') and ar.get('home')
                   and ar.get('firstTap') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
+            # deviceChoose (0.35.23): a question in the panel's style (section 13's New game asks it); the choice's index, -1 for
+            # Not now and for the ×; the panel goes
+            ch = g.ev("""(() => { const got = [], q = { title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] };
+              deviceChoose(q, k => got.push(k)); const p = document.getElementById('devDlg'), out = [!p.hidden, p.textContent.includes('How do you want to start?'), p.querySelectorAll('.btns .act').length];
+              p.querySelectorAll('.btns .act')[1].click(); out.push(p.hidden);
+              deviceChoose(q, k => got.push(k)); p.querySelectorAll('.btns .act')[2].click();
+              deviceChoose(q, k => got.push(k)); p.querySelector('.x').click(); out.push(p.hidden, got.join(','), !DEV.choose); return out; })()""")
+            check(ch == [True, True, 3, True, True, '1,-1,-1', True], f'deviceChoose: the question, a choice, Not now, the ×: {ch}')
             # Pillar 4 pages (0.35.22): the season on Home and the Calendar (section 18's seasonOf), reputation in the Record
             # (section 20's repView, words only), keepsakes in the Wallet (keepsakes), "Left the Wren" in the Roster
             # (movedOn; they leave the lists). Stand-ins without them; with them, section 20's own state is set and put back
