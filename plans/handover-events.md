@@ -2,6 +2,12 @@
 
 Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by session_018WZccmSvEfz2LC7DCfxdii, handing over at about 70% memory. The older notes further down (Pillars 2-3, the storm, the diplomatic visit) still hold.
 
+## FIRST, for the fresh session (open items after 0.34.34)
+1. **Play the bridge invite** (the lead, 04:20): the head writer's `content/meetings/bridgeInvite.meet` (claude/content aa50647) bakes into `MEETINGS_BAKED` and reaches `MEETING_SCRIPTS` through section 22's `linesMeetings` (hook already in section 18). Schedule it as a section 18 meeting: Vance at breakfast in the mess on day 22 (the Monday before the first possible bridge hour, day 23), or the first meeting with Vance from day 15; every reply sets `flag:bridge.invited`. Bridge hour is already gated on that flag (0.34.34). Pattern: `meeting({ id, where, at, who, script })` as the storm's briefing does, or an occasion in `OCCASIONS` (kind 'meeting'); test in events_check like the briefing (the flag set after a reply; bridge hour then due on day 23 if it's a week-4 Tuesday: check).
+2. **Collect** claude/trad-weekly e9a88ff (late piano's texts for two nights) and claude/trad-monthly a93bf36 (notes only); re-bake.
+3. **The deck architect's tally props:** cupBoard takes `{ id, lines }` like tastingTable (decks-p3 021a553); `tradDecor` already sends title and lines for any decor with a tally.
+4. **The galley** (944f520) relies on `tradTies`' `{ id, from, to }` and the tally choices' dashed ids: keep both. It reads the crossover dish too, but crossover supper is cut.
+
 ## Role, branch, builds, people
 - **Role:** section 18 SHIP EVENTS: the ship traditions (hand-written `SHIP_TRADITIONS` + the designers' baked ones), ship-wide events, meetings, occasions; `events_check.py`; the `.trad` grammar (`plans/trad-format.md`, `plans/trad_parse.py`); collecting the three tradition designers' files; the Traditions calendar page.
 - **Branch:** `claude/ship-events` only (never push elsewhere without the user's explicit permission: the lead once asked for a side branch; I sent the build master a diff instead). Builds 0.34.19-0.34.34; next **0.34.35**. Combined builds are the build master's (session_012K7RZ3oSX2vpBb1rR66MBh): 0.60.0 had up to 0.34.24; 0.60.1 = ca8c040 + the birthday diff; 0.60.2 should take a597a37.
