@@ -370,3 +370,27 @@
 - That Thursday, your first week. You fetched the part and didn't make a fuss. I remember.   #warm
 ? told:intro.arrival tier>=colleague !week1:true
 - I saw you come in, your first night. I didn't say hi. I wanted to. Sorry. Hi.   #funny
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: the ladder stays "exercise" unless beat:kovac.2; no Marra lift, no two-colour knit.
+
+== feel
+? leaving:soon
+- Packing. Very neatly. Ten days. Sorry. I don't know why I said sorry.   #funny
+- I re-sorted the spanner wall. One last time. Don't tell anyone.
+? leaving:soon tier>=friend
+- I'll miss the garden. And the scrubbers. Is that strange? It's a bit strange.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm going to a new ship. Um. Mind the seals. That's... that's it. Bye.
+? leaving:you tier>=colleague
+- Nine and a half minutes, for a scrubber. You can beat it. I think you can.   #warm
+? leaving:you tier>=friend
+- Thank you. For being patient, when I didn't talk much. I talk more now. A bit.   #warm
+
+== letter
+- New ship. Their scrubbers are a different model. Eleven minutes. I'll get it down. Hello to the bay.
+- I found their garden. It's small. I've planted beans. Tell Cruz they're coming up. Mind the seals.
+? tier>=friend beat:kovac.2
+- The lift here is very quiet. I still take the ladder. Mostly. Some days I don't. I thought you'd like to know.   #warm

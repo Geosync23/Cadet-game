@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.36
+   STARSHIP CADET: CSV Wren                           build 0.48.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.36';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.37';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -18578,6 +18578,8 @@ const VOICE = {
         {"text": "Cheers for this. You're a good one, {nick}. I mean it.", "id": "1j2u8p7", "tone": "warm", "tier": [3, 4]},
         {"text": "Off to dinner. Second dinner. First dinner was a test run.", "id": "1n61kw2", "tone": "funny", "tier": [1, 4], "time": "evening"},
         {"text": "Laters, {nick}. You're a good one. Don't tell the grab shelf.", "id": "1ofz6c0", "tone": "warm", "tier": [4, 4]},
+        {"text": "Right, so. Lunch. Then the thing after lunch. Also lunch.", "id": "1e1cmmg", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{bye}, {nick}. Eat something. Mum says it to me, so I'm saying it to you.", "id": "17qpy9o", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "You timed me every night. Then I passed. Those two things are related. I've checked.", "id": "16i9c72", "tone": "warm", "beat": "pell.7", "told": "moment.pell.timed"},
@@ -18605,6 +18607,35 @@ const VOICE = {
         {"text": "You were grubbier than me yesterday. Never thought I'd see the day. Respect.", "id": "14i1x5m", "tone": "funny", "told": "grubby"},
         {"text": "Rina rates you. She won't say. She's stopped counting your losses out loud. Huge.", "id": "13m3akd", "tone": "funny", "told": "heard.moment.rina"},
         {"text": "Tomas reckons you're the best bunkmate on the Wren. After the star map. Close second.", "id": "7qc2l9", "tone": "warm", "told": "heard.moment.tomas"},
+        {"text": "Your first night, I sat at your table without asking. Got a pudding and a mate. Good move.", "id": "qiwink", "tone": "warm", "told": "intro.dinner", "not": {"week1": "true"}},
+        {"text": "You came to the swap meet! You traded better than me. I got a bolt. You got a story.", "id": "4p4250", "tone": "funny", "told": "came.market"},
+        {"text": "Harvest! You carried crates. I carried one thing. A plate. A very full plate.", "id": "ybe36f", "tone": "funny", "told": "came.harvest"},
+        {"text": "Film night! You stayed awake for the ending. I didn't. How did it end?", "id": "1ragodv", "tone": "funny", "told": "came.film"},
+        {"text": "You went to running club. I watched from a bench. Very supportive bench.", "id": "1h0dsb8", "tone": "funny", "told": "came.running"},
+        {"text": "Works tea! You took the last biscuit. I let you. I'll remember that forever.", "id": "xkj5rx", "tone": "funny", "told": "came.works-tea", "not": {"week1": "true"}},
+        {"text": "That game you gave me? Rina's beaten me at it already. Twice. Cheers, really.", "id": "eefhqs", "tone": "funny", "told": "gift.game"},
+        {"text": "You fixed the oven? That's pudding saved. That's lives saved, basically. Legend.", "id": "h8enxe", "tone": "warm", "told": "fixed.oven"},
+      ],
+      "chat": [
+        {"text": "Rina says I snore in tune. I'm taking that as praise.", "id": "xwwvae", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Swap meet's the best day aboard. I traded a bolt for a better bolt. Very proud.", "id": "1gnikcb", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Ivo's carried trays for three years. Never dropped one. I drop spoons just watching.", "id": "vmca0g", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Brennan's sponge pudding. I plan my week round it. Badly, but round it.", "id": "1tqu27r", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "The gym's my idea every time. Every time I'm wrong. I keep going anyway.", "id": "d7fpi9", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Tomas next door counts windows. I count biscuits. We both lose count.", "id": "1357u20", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Rest days I sleep till ten, eat, nap, eat. It's a system. It works.", "id": "bjzrp3", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I'm building a music box that plays the mess bell. Brennan's asked me not to.", "id": "1907k69", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tariq and Lukas race at chopping onions. I'm the judge. I'm paid in onions. Bad deal.", "id": "1tqjuhr", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Laundry day, I wear the shirt with the fewest holes. It's a short list.", "id": "19iwumr", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Quiz night I do the engines round. And the pudding round. There's no pudding round. Yet.", "id": "1yi6zlh", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tomas asked how I sleep anywhere. I said practice. He's been practising. Badly.", "id": "1aucxd6", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Erik says he's the fastest in Bunk 2. Tariq says otherwise. I stay out of it. With snacks.", "id": "1wd4k29", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Rina and me: two years of insults. She's ahead. She keeps count. Course she does.", "id": "n4cf6x", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Mum taught me to darn a sock. I darn everything now. Even things that aren't socks.", "id": "26t5jr", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "The shop had a radio that only got one station. Mum liked it that way. So did I.", "id": "1r60nrj", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Every ship, I find the warmest spot in my first week. Here it's the tea corner.", "id": "1bj4t7e", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Some evenings I wind all the music boxes at once. Sounds like rain on the shop roof.", "id": "6rp0ei", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Know what I like here? Nobody minds a nap. Well, Calder. But quietly.", "id": "4g9wnw", "tone": "funny", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Storm's here. Grab shelf's stocked. I checked first. Priorities.", "id": "1oxt0d4", "tone": "funny", "cue": "event.ionStorm.onset"},
@@ -18635,6 +18666,9 @@ const VOICE = {
         {"text": "Good day! Fixed a fan, found a biscuit, had a nap. In that order. Perfect.", "id": "1dhqfpf", "mood": "high", "tier": [2, 4]},
         {"text": "I'm fine. I'm fine. Bit tired. Bit hungry. Same as ever, really.", "id": "1322u49", "mood": "low", "tier": [2, 4]},
         {"text": "Calder said \"Hm\" at my work. A good \"Hm\". You can tell by the eyebrows.", "id": "11dn697", "tone": "funny", "mood": "high", "tier": [1, 4]},
+        {"text": "Good day. Slept, ate, wound a music box. It played every note in order. Get in.", "id": "x98p95", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine, ta. Bit full. Bit sleepy. Classic.", "id": "yc0btj", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "I'm fine. I'm fine. Bit homesick for the smell of solder and Mum's tea.", "id": "1wmknso", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "Is this for me? All of it? Don't answer. I've started. You're a legend, {nick}.", "id": "1x7wqup", "tone": "funny", "gift": "sweet"},
@@ -18667,6 +18701,14 @@ const VOICE = {
         {"text": "Everyone knows you. You chat more than me. I'm impressed. Bit worried, but impressed.", "id": "1kk1d68", "tone": "funny", "you": "chatty"},
         {"text": "Your mum's mug. Bring it to Works tea. It leans? Good. So does the hook.", "id": "1ld7up0", "tone": "warm", "flag": "home.mum.mug", "tier": [2, 4]},
         {"text": "Your Jo built a whole boat? By hand? Respect. Tell them I want a go. I'll fix the oars.", "id": "t4rtn2", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
+        {"text": "{hi}, {nick}. Have you eaten? I have. Twice. Just checking on you.", "id": "1uqoxxm", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{hi}. I'm on my way to a nap. Walk me halfway. Keep me awake.", "id": "1tpxgrc", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Morning. I'm here in body. The rest of me's still in bed.", "id": "vz5co", "tone": "funny", "tier": [1, 4], "time": "morning", "not": {"week1": "true"}},
+        {"text": "Day off! Tuesday. Everyone's at work but me. Best feeling there is.", "id": "1sske73", "tone": "funny", "act": "off", "tier": [2, 4], "weekday": "tue", "not": {"week1": "true"}},
+        {"text": "{hi}, {nick}. Tell me something good. Food counts.", "id": "3wbip8", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}! Just the person. I need a second opinion on a sandwich.", "id": "1bw6z89", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are. Sit. I've got crumbs and news. Mostly crumbs.", "id": "16erzg4", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}! Sit. Tell me everything. Skip the boring bits. Keep the food bits.", "id": "fgo031", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Got a minute? A proper one. Not a Pell minute. Those are long.", "id": "1orua8l"},
@@ -18677,10 +18719,15 @@ const VOICE = {
         {"text": "Tea corner? I've got biscuits nobody's supposed to know about.", "id": "1i2hime", "tier": [2, 4], "time": "evening"},
         {"text": "Tea break? I've found the good biscuits. Don't ask where. Come on.", "id": "12x6kzw", "tier": [1, 4], "time": "afternoon"},
         {"text": "Film night! Bring snacks. I'll bring more snacks. We'll share. Some.", "id": "1iyc0oc", "tone": "funny", "tier": [1, 4], "trad": "film"},
+        {"text": "Day off? Come to the mess. Second breakfast. It's a real thing. I've made it real.", "id": "rdrg5i", "tone": "funny", "act": "off", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Running club? I'll come. I'll walk most of it. Moral support.", "id": "54sp1e", "tone": "funny", "tier": [2, 4], "trad": "running"},
+        {"text": "Swap meet! Bring something. Anything. I'll trade you a screw for it.", "id": "6gu4i3", "tone": "funny", "tier": [1, 4], "trad": "market"},
       ],
       "joy": [
         {"text": "Every screw in this tin's from a ship I've fixed. One day they'll play a whole tune.", "id": "1a7eclz", "tier": [1, 4]},
         {"text": "Best feeling? Something was broken, now it isn't, and nobody noticed. Perfect.", "id": "qnst8r", "tier": [2, 4]},
+        {"text": "Winding a new music box for the first time. You never know what it'll play.", "id": "1uo0u23", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "A hot plate from the grab shelf at midnight. That's joy, that is.", "id": "iry1t9", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "Taught myself engines from an old manual. Half the pages were missing. Worked it out.", "id": "5hitbn", "tier": [1, 4]},
@@ -18694,6 +18741,9 @@ const VOICE = {
         {"text": "Calder knows I nap in the parts store. She's never said. That's how I know she knows.", "id": "4kg4nd", "tone": "funny", "tier": [2, 4]},
         {"text": "Mum mends coats too. Proper stitching. Mine always looks a bit scared.", "id": "1fgi53q", "tone": "funny", "tier": [3, 4]},
         {"text": "Mum sends \"eat, sleep, call\" every week. I eat. I'm working on the other two.", "id": "uiaymi", "tone": "funny", "tier": [3, 4]},
+        {"text": "I've got one good jumper and one bad jumper. The bad one's warmer.", "id": "1xni2vd", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I can cook one thing: beans on toast. I've perfected it. Brennan disagrees.", "id": "96wnx6", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "A dog lived in the scrapyard behind Mum's shop. Not ours. It came for the sandwiches.", "id": "ygg1p0", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You weren't there! I ate your share. As a lesson. A delicious lesson.", "id": "44choo", "tone": "funny"},
@@ -18712,6 +18762,13 @@ const VOICE = {
         {"text": "Wound up a music box in here once. Vance shushed it. In the music room.", "id": "1caj986", "tone": "funny", "place": "musicroom"},
         {"text": "Down below. Hear the coils? Torres says three's sulking. I say three's thinking.", "id": "gid67m", "deck": "6"},
         {"text": "Is the hot water still on? Don't tell me. I'll find out the hard way.", "id": "gkmxtf", "tone": "funny", "act": "wash"},
+        {"text": "Toast, tea, toast. I'm awake by the second toast. Mostly.", "id": "13bfjrw", "tone": "funny", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "Rest day. Nap's booked for eleven. Lunch at twelve. Nap at one. Busy.", "id": "11smrw5", "tone": "funny", "act": "off", "not": {"week1": "true"}},
+        {"text": "Weights. Three. Then a sit-down. The sit-down's the important bit.", "id": "qwdwt9", "tone": "funny", "act": "gym"},
+        {"text": "Laundry's warm. If I'm not back in an hour, I'm asleep on the dryer.", "id": "8ybgc2", "tone": "funny", "place": "laundry"},
+        {"text": "Rina's at the Tiles table. Don't sit opposite her. Learn from my mistakes.", "id": "1x769mr", "tone": "funny", "place": "junior_common_room", "not": {"week1": "true"}},
+        {"text": "Cruz lets me sit by the big tree if I don't touch anything. I touch nothing.", "id": "16gphd5", "place": "hydroponics_garden"},
+        {"text": "Swap meet! I've brought three bolts. Very good bolts. Nearly round.", "id": "1p3k4xq", "tone": "funny", "trad": "market"},
       ],
       "note": [
         {"text": "Came by. You were out. I ate one of your biscuits and left you the other. Fair's fair.", "id": "152jcqf", "tone": "funny"},
@@ -18723,6 +18780,8 @@ const VOICE = {
       "rumour": [
         {"text": "Right, so. You didn't hear this from me.", "id": "1tk5c8a"},
         {"text": "Heard it at the grab shelf. Very reliable source.", "id": "o6gilt", "tone": "funny"},
+        {"text": "Grab shelf gossip. Very fresh. Still warm.", "id": "1ym9ptb", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Heard it in the laundry. The dryers know everything.", "id": "6a8u3l", "tone": "funny", "not": {"week1": "true"}},
       ],
       "smalltalk": [
         {"text": "Is that toast? Someone's got toast.", "id": "1vuehe4", "tone": "funny"},
@@ -18730,6 +18789,11 @@ const VOICE = {
         {"text": "Nap at lunch. That's the plan.", "id": "18wkjfv", "tone": "funny"},
         {"text": "Hear that? Bearing. I'll put it on the board.", "id": "1kh6o5m"},
         {"text": "Hold this. Ta. No, the other end.", "id": "1kwg70f", "act": "work"},
+        {"text": "Biscuit o'clock. It's always biscuit o'clock.", "id": "12mhl6c", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Is it lunch yet? It's nearly lunch.", "id": "hzy50w", "not": {"week1": "true"}},
+        {"text": "I could sleep right here. I might.", "id": "4vm74t", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Day off. Nap first. Then a bigger nap.", "id": "ix5ut5", "tone": "funny", "act": "off"},
+        {"text": "Warm towels. Best thing aboard.", "id": "9a1ejo", "place": "laundry"},
       ],
       "tiles.dock": [
         {"text": "Docked! Click, like a panel. Lovely.", "id": "2yg911"},
@@ -19271,6 +19335,8 @@ const VOICE = {
         {"text": "Off you go. Eat breakfast. Actually eat it. Don't just look at it.", "id": "12jpot2", "tier": [1, 4], "time": "morning"},
         {"text": "Off you go. Water, then sleep. In that order.", "id": "10sya1h", "tier": [1, 4], "time": "evening"},
         {"text": "Off you go, {nick}. Come back in one piece. I've only got so much gauze.", "id": "10r5qtp", "tone": "warm", "tier": [4, 4]},
+        {"text": "Right. Go. Water. You know the rest.", "id": "i56gt4", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{bye}. And sleep. Not lie there thinking. Sleep.", "id": "xbnrna", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "It was brilliant. The bones. I've started on lungs since. Don't tell anyone.", "id": "1avon2v", "tone": "funny", "told": "moment.rina.brilliant"},
@@ -19295,6 +19361,36 @@ const VOICE = {
         {"text": "You were filthy yesterday. Wash. Hands first. That's not advice.", "id": "1mo80mw", "tone": "funny", "told": "grubby"},
         {"text": "Pell says you've been good to him. He won't stop saying it. Ta. For him.", "id": "y730f7", "tone": "warm", "told": "heard.moment.pell"},
         {"text": "Tomas has put you on his star map. Don't let it go to your head. It's very high up.", "id": "1lvyqky", "tone": "funny", "told": "heard.moment.tomas"},
+        {"text": "Your seedling. You're overwatering it. I can tell from here. Less. Trust me.", "id": "dcu3td", "tone": "funny", "told": "came.sowing", "not": {"week1": "true"}},
+        {"text": "Swap meet. You looked bored and traded well. I taught you that.", "id": "1y5biez", "tone": "funny", "told": "came.market"},
+        {"text": "Film night. I told you the ending. You stayed anyway. Respect.", "id": "d2vps4", "tone": "funny", "told": "came.film"},
+        {"text": "The jam. You clapped on the beat. Most people don't. Noted.", "id": "1nwhhxq", "told": "came.jam"},
+        {"text": "Running club. You took the water. Good. Both cups.", "id": "jqydtj", "tone": "funny", "told": "came.running"},
+        {"text": "Harvest. You wore gloves. Only one who did. Noted, dated, signed.", "id": "1mfp1qz", "tone": "funny", "told": "came.harvest"},
+        {"text": "You fixed the corridor lights. Fewer people walking into doors. Fewer bruises. Ta.", "id": "hq9a5z", "told": "fixed.lights"},
+        {"text": "That tea you gave me. I make it after late shifts. It's good. Don't gloat.", "id": "1d1wie0", "tone": "warm", "told": "gift.tea"},
+      ],
+      "chat": [
+        {"text": "I read in the washroom queue. It's long enough for a chapter. Most nights two.", "id": "jjsrei", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Sweets? The sour ones. Don't bring me the soft ones. I'll know.", "id": "170jh1g", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Pell talks in his sleep. Last night it was a pump. He was very firm with it.", "id": "1ipsdha", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Hot water till ten. I'm in by nine. That's not luck. That's planning.", "id": "1vc07za", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Got a book at the swap meet. Two pages missing. I've guessed them. Probably right.", "id": "rd2yea", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Tomas thanked the lift today. Out loud. It didn't answer. He seemed fine about it.", "id": "3os2d5", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "My sister says the station has better tea. She's never had Brennan's. She's wrong.", "id": "14ldvyj", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Rest days I sleep in till seven. Then I feel guilty and read till nine.", "id": "er36uw", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The laundry ate a sock. One. It always takes one. I've stopped arguing with it.", "id": "c94kul", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I'm not competitive. I just win a lot. There's a difference. It's small.", "id": "1jhjbm4", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Booth calls on Sunday mornings. Short queue. My sister's always up first. Annoying.", "id": "1q28dyh", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Esme asked me to teach her Tiles. I said yes. I didn't say I'd go easy.", "id": "d5q2qn", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tariq and Erik still argue about that race. I timed it. I'm not telling either of them.", "id": "z7xz8w", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Ivo brings me tea after a long shift. Never asked him to. That's the good kind.", "id": "6y6t28", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I write the Tiles count in pen now. Pencil was for when I was new.", "id": "1oxx86i", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "My sister and I argued about soup for a week. By message. I won. She'd say she did.", "id": "ahk666", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Some evenings I sit in the common room and don't study. Don't spread that about.", "id": "k6wom3", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Can't sleep? Read the boring journals. Kidneys. Works every time.", "id": "1ydzglw", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Gran sent a message. Two lines. One was \"drink some water\". She got that from me.", "id": "1e1vyiw", "tone": "funny", "beat": "rina.4", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "The ordinary days here are the good ones. Don't quote me on that.", "id": "14e2w1d", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Storm. Infirmary's ready. Please don't fall over anything.", "id": "1wn3ijt", "cue": "event.ionStorm.onset"},
@@ -19314,6 +19410,9 @@ const VOICE = {
         {"text": "Good day. Nobody fainted, everyone drank water, and I won twice. Perfect.", "id": "kzdy6y", "mood": "high", "tier": [2, 4]},
         {"text": "Tired. Don't. I know. I'll drink some water. Happy?", "id": "flq4aw", "mood": "low", "tier": [2, 4]},
         {"text": "Good day. My sister admitted I was right. In writing. I've saved it.", "id": "jykful", "tone": "funny", "mood": "high", "tier": [3, 4]},
+        {"text": "Good day. Three wins, hot water and nobody fainted. Rare set.", "id": "lvxetz", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine. Busy, then not. That's a good day, really.", "id": "gvuu21", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Tired. Not ill. Tired. Tea would help. You could make it. Just saying.", "id": "9vcxg0", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "A game. For me. You realise I'll beat you at it. You've armed the enemy.", "id": "rr1pb6", "tone": "funny", "gift": "game"},
@@ -19347,6 +19446,14 @@ const VOICE = {
         {"text": "You turn up when you say. You'd be surprised how rare that is. I wouldn't be.", "id": "136aks9", "tone": "funny", "you": "reliable"},
         {"text": "Your gran. New hip. Walking yet? Good. Tell her to drink water. From me.", "id": "8gdty0", "tone": "warm", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
         {"text": "A marrow called the Captain won? Mine would've cheated. Your gran didn't need to.", "id": "1aq3s71", "tone": "funny", "flag": "home.gran.won", "tier": [2, 4]},
+        {"text": "{hi}. You look like you skipped breakfast. Did you? Thought so.", "id": "ahbsdf", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Oh, it's you. Good. I needed someone to be right at.", "id": "r6p070", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Sunday. Day off. Up anyway. Swap meet. Someone has to haggle properly.", "id": "ledq7u", "tone": "funny", "act": "off", "tier": [1, 4], "time": "morning", "weekday": "sun", "not": {"week1": "true"}},
+        {"text": "{hi}, {me}. Sit. You're blocking my light. I'm reading.", "id": "ahmc6j", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{hi}. My sister's written. Four pages. Three of them are wrong.", "id": "19hdb6f", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good timing. I've got tea and an opinion. You get both.", "id": "129iha", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are. Pell's asleep in the doorway again. Step over him. Carefully.", "id": "4s5p3h", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Sit. Not for anything. Just sit. Fine, there's a biscuit.", "id": "1vmbyou", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Make yourself useful. Sit down a minute.", "id": "6qi3sv"},
@@ -19357,10 +19464,15 @@ const VOICE = {
         {"text": "Quiz tonight. I'm on the medicine questions. You're on everything else. Don't let me down.", "id": "1b73ub8", "tier": [2, 4], "trad": "quiz"},
         {"text": "Tiles. Now. I'm bored of beating myself.", "id": "qkt29k", "tone": "funny", "tier": [2, 4], "time": "evening"},
         {"text": "Running club tonight. I'll be at the end with water. Come and run to it.", "id": "noi41a", "tier": [1, 4], "trad": "running"},
+        {"text": "Day off? Swap meet, then Tiles. I'll trade you a biscuit for a rematch.", "id": "2cmhkw", "tone": "funny", "act": "off", "tier": [2, 4], "weekday": "sun", "not": {"week1": "true"}},
+        {"text": "Film night. I sit at the back and say what happens next. Come and be told.", "id": "d17z0", "tone": "funny", "tier": [1, 4], "trad": "film"},
+        {"text": "Music jam. I don't play. I judge. Come along. Bring an opinion.", "id": "89bbnh", "tone": "funny", "tier": [2, 4], "trad": "jam"},
       ],
       "joy": [
         {"text": "Undefeated at Tiles, this common room. I keep count. The count is very precise.", "id": "6jq6zn", "tone": "funny", "tier": [1, 4]},
         {"text": "Best sound aboard? The click of the last tile going down. Mine. Winning.", "id": "1vv186z", "tone": "funny", "tier": [2, 4]},
+        {"text": "A new journal, spine not even creased. Lovely. Don't tell anyone I said lovely.", "id": "erjohw", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Someone new at the Tiles table. A fresh opponent. Best feeling there is.", "id": "1awmpdp", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "I study in the evenings. The journals make a decent pillow too. Two uses.", "id": "16n2j13", "tier": [1, 4]},
@@ -19375,6 +19487,9 @@ const VOICE = {
         {"text": "Nandakumar's the best doctor I've worked under. Don't tell her. She'll get ideas.", "id": "7xhc1u", "tier": [1, 4]},
         {"text": "My sister says I'm stubborn. I say I'm consistent. We've argued it for years.", "id": "wlhyyf", "tone": "funny", "tier": [2, 4]},
         {"text": "Gran plays Tiles with me by message now. She still cheats. I don't know how.", "id": "izc5eq", "tone": "funny", "beat": "rina.4", "tier": [3, 4]},
+        {"text": "My one good jumper is my sister's. She thinks it's lost. It's not lost.", "id": "1frvdv2", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "As kids, my sister and I played under the table so Gran couldn't see. Gran still won.", "id": "1l86d8m", "tone": "funny", "beat": "rina.1", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I keep all my sister's messages. For evidence. Mostly for evidence.", "id": "wmsvop", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You stood me up. I played Tiles against myself. I won. Barely.", "id": "p52fva", "tone": "funny"},
@@ -19394,6 +19509,13 @@ const VOICE = {
         {"text": "Breakfast. A real one. Not just tea. I'm watching you.", "id": "42ts2u", "tone": "funny", "act": "breakfast"},
         {"text": "The lounge board's warped. I still win on it.", "id": "bqjl5h", "tone": "funny", "place": "lounge"},
         {"text": "Nandakumar's chillies live here. Don't touch them. Then don't touch your eyes.", "id": "13o2563", "place": "hydroponics_garden"},
+        {"text": "Porridge. Every day. It's not boring. It's reliable. Sit.", "id": "3ssspv", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "{dish}. Fine. Eat the green bit. I'm watching.", "id": "1ow71vt", "tone": "funny", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Day off. No journals. One journal. A short one.", "id": "pjfiiu", "tone": "funny", "act": "off", "not": {"week1": "true"}},
+        {"text": "Waiting on a line to my sister. She's late. She's never late. She's doing it on purpose.", "id": "1vg99xn", "tone": "funny", "place": "booths"},
+        {"text": "My table. My chair. Yours is that one, opposite. Where the losing happens.", "id": "1n5263e", "tone": "funny", "place": "junior_common_room", "not": {"week1": "true"}},
+        {"text": "Fold it now or iron it later. I don't iron. So, fold.", "id": "ze0ilw", "place": "laundry"},
+        {"text": "Swap meet. Don't offer first. Look bored. They'll come to you.", "id": "cl60qs", "trad": "market"},
       ],
       "note": [
         {"text": "You weren't in. Drink some water. That's the whole note.", "id": "1s8h2nw", "tone": "funny"},
@@ -19405,12 +19527,19 @@ const VOICE = {
       "rumour": [
         {"text": "I don't gossip. I observe. Then I mention.", "id": "1ih35id", "tone": "funny"},
         {"text": "The infirmary hears everything. Mostly coughs.", "id": "1j0yg99", "tone": "funny"},
+        {"text": "Don't spread this. I'm only telling you.", "id": "16ysuak", "not": {"week1": "true"}},
+        {"text": "My sister heard it first. On a station. Somehow.", "id": "15p42n9", "tone": "funny", "not": {"week1": "true"}},
       ],
       "smalltalk": [
         {"text": "Drink some water. Yes, you.", "id": "1cg1ac", "tone": "funny"},
         {"text": "Forty-three. Not that I'm counting.", "id": "1ov1ktu", "tone": "funny"},
         {"text": "Hm. Someone's limping. Noted.", "id": "eb8206"},
         {"text": "Honestly.", "id": "13nmbcv"},
+        {"text": "Sour sweets. The only kind.", "id": "6xw866", "not": {"week1": "true"}},
+        {"text": "Pell's asleep again. On a chair.", "id": "1ay0sb9", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Someone's in my seat. Bold.", "id": "yy13u6", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Day off. Reading. Not studying. Reading.", "id": "9dleg6", "tone": "funny", "act": "off"},
+        {"text": "Board's set. Anyone? No? Fine. I'll wait.", "id": "12ydvwv", "place": "junior_common_room"},
       ],
       "tiles.dock": [
         {"text": "Three. Mine.", "id": "1mhvchb"},
@@ -20742,7 +20871,7 @@ const VOICE = {
         {"text": "Your seedling stands up straight. Mine leans. Yours is like Holt. Mine's like me.", "id": "16o5tfp", "tone": "funny", "told": "came.sowing", "not": {"week1": "true"}},
         {"text": "You came to quiz! I knew one answer. It was \"the Tern\". I said it far too loud.", "id": "1avaa3x", "tone": "funny", "told": "came.quiz"},
         {"text": "You came to the jam! You clapped in time. I didn't. We balanced out.", "id": "1p8rng8", "tone": "funny", "told": "came.jam"},
-        {"text": "The market! We looked at everything and bought nothing. Good afternoon, that.", "id": "hgivqi", "tone": "warm", "told": "came.market"},
+        {"text": "The swap meet! We looked at everything and traded nothing. Proper Sunday, that.", "id": "157232o", "tone": "warm", "told": "came.market"},
         {"text": "Harvest! You carried more than me. I'm telling everyone I carried more.", "id": "vmj0wd", "tone": "funny", "told": "came.harvest"},
         {"text": "I'm reading your book slowly, so it lasts. I'm on the bit with the storm.", "id": "1xn5nb4", "tone": "warm", "told": "gift.book"},
         {"text": "Was it you who fixed the lights? The corridor's brighter. I nearly didn't get lost.", "id": "18nmqkz", "tone": "funny", "told": "fixed.lights"},
@@ -20844,8 +20973,8 @@ const VOICE = {
         {"text": "Observatory after dinner? I've found a new star. Possibly a smudge.", "id": "161nf1j", "tone": "funny", "tier": [2, 4], "time": "evening"},
         {"text": "Quiz tonight! I'm useless at it. Will you be useless with me?", "id": "1qwgxck", "tone": "funny", "tier": [1, 4], "trad": "quiz"},
         {"text": "Rest day walk? The long way round Deck 2. I'll show you the good windows.", "id": "ydutbh", "act": "off", "tier": [2, 4], "not": {"week1": "true"}},
-        {"text": "Market's on! Come and look at things we can't afford? It's my favourite.", "id": "1xchfo9", "tone": "funny", "tier": [1, 4], "trad": "market"},
-        {"text": "Music jam tonight. I can't play anything. I clap. Come and clap with me?", "id": "ya3djg", "tone": "funny", "tier": [2, 4], "trad": "jam"},
+        {"text": "Swap meet's on! Come and look at everything? I never trade. I just look.", "id": "1nvbn7z", "tone": "funny", "tier": [1, 4], "trad": "market"},
+        {"text": "Music jam tonight. I can't play anything. I clap. Come and clap too?", "id": "1fjnqgc", "tier": [2, 4], "trad": "jam"},
       ],
       "joy": [
         {"text": "Observatory night! I've named three stars. Not officially. They don't know yet.", "id": "1n70fta", "tone": "funny", "tier": [1, 4]},
