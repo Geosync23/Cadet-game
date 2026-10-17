@@ -35,7 +35,7 @@ When the crew keep up, the ship hums. When they fall behind, or the player skips
 ### Ground rules
 
 - **Everything functional, everything simulated** (the project's ethos, agreed 2026-10-15). Every room and every function aboard is used, by the crew in their day-to-day and by the player. The gym is for working out, the booths are for calling home, the store is for shopping, the galley really cooks. Where full simulation isn't possible, get as close as we can, and never build a room that is only scenery.
-- **No fail state.** A neglected ship gets shabby, uncomfortable and talked about. It is never lost. Losing would break the feeling of being just another crew member.
+- **One fail state, and it is very hard to reach** (the user, 2026-10-17, replacing "no fail state"). A neglected ship gets shabby, uncomfortable and talked about; it is never lost, and needs never fail you. The only way to lose is to stop turning up for work, again and again, until the ship lets you go (see "Leave, missed shifts and being let go"). You really have to not try.
 - **The player climbs but never commands.** They start on simple jobs (filters, lamps, carts), then move up to the engines and eventually sit in briefings with the Captain. Rank decides which jobs and which parts of an event reach the player.
 - **18 ship hours take 30 real minutes** (agreed 2026-10-16). A whole 24-hour ship day lasts 40 real minutes, one ship hour is 100 real seconds, and a 7-day ship week is about 4⅔ hours of play.
 - **The ship doesn't run while the game is closed.** Time stops when you leave and resumes where you were. Nothing catches up while you're away (confirmed 2026-10-16).
@@ -430,6 +430,12 @@ Daily routines belong to the crew's ordinary day instead: the bridge watch hands
 ## The player: Works technician
 
 You work the day shift as a Works maintenance tech, with **two days off a week** like a Works junior (the user's choice, 2026-10-16): Saturday and Sunday, no shift and no jobs expected, though the board stays open if you want work. On shift you take jobs from the same list as the rest of the crew and do them with your own hands.
+
+**Leave, missed shifts and being let go** (the user, 2026-10-17; the lead's defaults in brackets, easy to change).
+- **Paid leave.** Besides the weekend you have a few days of leave, booked on your device (Schedule): very few [3 to start, 1 more every 4 ship weeks, at most 5 held]. Book a workday at least the evening before [or before 07:30 the same day]; cancel to get it back. Time in the infirmary when you're ill never counts.
+- **Missing work.** Skipping a workday shift without leave is a big hit to your reputation (Works and ship-wide work) [missing most of the shift counts; being a bit late is a small dip]. Working well lifts it again as usual.
+- **Going down, step by step, with plenty of warning.** As your work reputation falls, tips explain what's happening and how to fix it, and friends come and find you, worried. Low: the Chief calls you in (an appointment) for a talking-to. Very low: the Captain calls you to his ready room and reprimands you. At the bottom for several days in a row [3 ship days], you are let go.
+- **Being let go** is the game's only fail state. You get a goodbye like any crew member leaving: friends say goodbye a day before and on the day, and see you off in the shuttle bay. Then that save ends and the game offers a new game (the user's choice).
 
 **Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1.
 
