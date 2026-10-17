@@ -13,7 +13,9 @@ Zeke's ordinary weeks, goodbyes/letters (Commons 19, Works 16, Watch 9), dinner 
 (session_01HW7UxnuNvRXoEjn8tK4sQq, claude/writer-commons) now: Tomas, Pell, Rina passes, then story-crew goodbyes. Next build 0.48.36.
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
-tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (done at dialogue 0.43.19).
+tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (lines_check.py + README at dialogue 0.43.22: checks trad:/came: ids too).
+DON'T copy content_gen.py past 0.43.19: from 0.43.20 it bakes VOICE etc. as JSON.parse (the performance pass), which
+rewrites the game file; that belongs with the engine merge at build master 2, not here.
 My recurring edits: callbacks mustn't assume when a beat happened; nothing that pre-empts a beat; no poems or
 "thinking about you" to the player; Day 0 callbacks must match introChief/introDinner as written. A meeting choice takes ONE reply line (a second indented
 line overwrites the first). The notes below are head writer 2's, still accurate unless the lines above say otherwise.
