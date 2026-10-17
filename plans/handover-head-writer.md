@@ -2,14 +2,14 @@
 
 **Now held by Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa, from 0.48.11).
 
-**Role:** head writer for Starship Cadet's Pillar 4. Report ONLY to the lead (session_01PJtmxWgAPLebXSZKP6ZRpG) with
+**Role:** head writer for Starship Cadet's Pillar 4. Report ONLY to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE, from ~04:35; was session_01PJtmxWgAPLebXSZKP6ZRpG) with
 `send_message`; never contact the user. Writers report to you; you are the only one who merges their work. Reviewer 2
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.15** (Head writer 2, a4f10c2):
-3,374 lines, 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.16.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.16** (Head writer 2, 7eb91e5):
+3,620 lines, 1 home contact (Mum), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.17.
 
 ## What you own
 
@@ -64,7 +64,7 @@
 | Writer | Session | Branch | State |
 | --- | --- | --- | --- |
 | writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
-| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); on batch 3 (Zielinski, day officers, Survey assistants, Nandakumar, Sato) |
+| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); batches 1-3 merged (everyone in their area at ~30); on batch 4 (Calder, Kovac toward ~100), then 5 (Vance, Marrow, Holt), then overheard pairs, visitor cards last |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
 | writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
 | **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-2 merged (0.48.14); on batch 3 (story crew to ~120), then Gran, Jo, Sam call-home arcs from mum.call. rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
@@ -88,9 +88,9 @@ overheard can now be written.
 ## In flight (Head writer 2)
 
 - **Call home:** APPROVED (fixed cast Mum, Gran, Jo, Sam; home unnamed; live calls any day, once per person per day;
-  Letters evening = the clear-line window where `via: live` beats land). Model: `content/home/mum.call` (5a07b86; `.call`
-  so content_gen doesn't read it as a crew arc). Waiting on the dialogue engineer's baker and social B's B8 (send-condition
-  names marked (?) in the file). Writer 3 writes Gran, Jo, Sam from it.
+  Letters evening = the clear-line window where `via: live` beats land). Model: `content/home/mum.call`, baked since 0.48.16
+  (dialogue 0.43.11: README "Calls home (.call)"; send conditions came:any, friend:any, flag:intro.soloJob). Writer 3
+  writes Gran, Jo, Sam from it. The calls themselves wait on social B's successor (B8) and the booth hook.
 - **Bridge invite:** `meetings/bridgeInvite.meet` (Vance, day 22, `flag:bridge.invited`); trigger not wired yet.
 - **Holt beat 1** has `where: meal` (social B's 0.39.6 word; plays once their engine is in the integration build).
 - Dialogue engineer: session_01UmrVVpV7eBqEsa4sBucASP (claude/dialogue; tool requests go direct).
