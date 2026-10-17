@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.36
+   STARSHIP CADET: CSV Wren                           build 0.27.37
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.36';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.37';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30354,6 +30354,7 @@ const crowd = {
   update(dt, t) {
     machineFx.tick(dt, t);                               // wear and faults on the machines (0.27.9)
     gardenView.tick(t);                                  // the garden's crops grow with the galley's beds (0.27.23)
+    tableTrays.tick();                                   // trays on the mess tables in front of seated diners (0.27.37)
     deviceHook(); bubbles.tick(dt);                      // the device pose's hook and chatter bubbles (0.27.13)
     if (CROWD_DEMO) CROWD_DEMO.tick(dt, t);
     if (POSE_DEMO) POSE_DEMO.tick(dt, t);
@@ -30540,6 +30541,53 @@ function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() /
 // crop on the deck is the galley's nth bed of it; beds with no place in the garden (the third bean bed, the root
 // vegetables) aren't shown. The grow racks' microgreens and the flower beds stay as they were. Plants in a tall piece
 // (the bean trellises) get their own copies of the materials, in that room's fade list, so they fade with it (0.27.24).
+// 0.27.37 (the user: "look how many crew members don't have trays"): a seated diner who has a tray (section 10's
+// meal.served && meal.tray, read only) has it on the table in front of them: the tray in one of the mess's three
+// colours, a plate and a mug, like yours (TRAY_ON). All of them are two instanced meshes (2 draw calls; no shadows; the
+// trays' colours are set while the count is full, since r128 sizes the colour buffer by the count). A long table's own
+// tray and cup (section 4b's longTable) stands in for the diner's at the one seat it's in front of. They're
+// placed again only when someone sits down or gets up, checked every 15th frame.
+const tableTrays = {
+  tray: null, ware: null, n: 0, sig: 0, fr: 0, MAX: 96, d: new THREE.Object3D(), c: null, own: null, ownOf: null,
+  make() {
+    const tray = new THREE.BoxGeometry(.42, .02, .3), plate = new THREE.CylinderGeometry(.09, .09, .016, 16), cup = new THREE.CylinderGeometry(.035, .03, .08, 10);
+    plate.translate(-.06, .018, .02); cup.translate(.13, .05, -.07);
+    const ware = new THREE.BufferGeometry(), P = [], N = [], I = [];   // the plate and the mug as one shape
+    for (const g of [plate, cup]) { const o = P.length / 3; P.push(...g.attributes.position.array); N.push(...g.attributes.normal.array); for (const i of g.index.array) I.push(i + o); g.dispose(); }
+    ware.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); ware.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); ware.setIndex(I);
+    this.tray = new THREE.InstancedMesh(tray, std('#ffffff', .5), this.MAX); this.ware = new THREE.InstancedMesh(ware, MESS.white, this.MAX);
+    this.c = MESS.trays.map(m => m.color.clone()); for (let k = 0; k < this.MAX; k++) this.tray.setColorAt(k, this.c[0]);
+    for (const m of [this.tray, this.ware]) { m.count = 0; m.castShadow = false; m.receiveShadow = true; m.frustumCulled = false; m.raycast = () => {}; m.visible = false; scene.add(m); }
+  },
+  tick() {
+    if (++this.fr % 15 !== 1) return;
+    const on = typeof DECK_CREW !== 'undefined' && deckDef && deckDef.num === 3 && (typeof crewOn === 'undefined' || crewOn);
+    let sig = 0, n = 0;
+    if (on) for (let k = 0; k < DECK_CREW.length && n < this.MAX; k++) {
+      const a = DECK_CREW[k], m = a.meal, sp = a.spot;
+      if (!m || !m.served || !m.tray || !a.settled || !sp || sp.pose !== 'sit' || sp.room !== 'M') continue;
+      sig = (sig * 31 + k * 977 + (sp.x * 100 | 0)) | 0; n++;
+    }
+    if (n === this.n && sig === this.sig) return;
+    this.n = n; this.sig = sig;
+    if (!this.tray) { if (!n) return; this.make(); }
+    if (this.ownOf !== deckRoot) {                       // the long tables' own trays, where they are on this deck (as longTable puts them)
+      this.ownOf = deckRoot; this.own = []; const b = ROOM_BOX.M;
+      if (b) for (const [x, z] of [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]]) { const d = this.d; d.position.set(X0(b.i0) + x, 0, Z0(b.j0) + z); d.rotation.set(0, FACING.n || 0, 0); d.updateMatrixWorld(); this.own.push(d.localToWorld(new THREE.Vector3(.4, 0, .22))); }
+    }
+    let i = 0;
+    if (n) for (let k = 0; k < DECK_CREW.length && i < n; k++) {
+      const a = DECK_CREW[k], m = a.meal, sp = a.spot;
+      if (!m || !m.served || !m.tray || !a.settled || !sp || sp.pose !== 'sit' || sp.room !== 'M') continue;
+      const f = sp.face || 0, x = sp.x + Math.sin(f) * TRAY_REACH, z = sp.z + Math.cos(f) * TRAY_REACH, d = this.d;
+      if (this.own.some(o => Math.hypot(o.x - x, o.z - z) < .3)) continue;   // the table's own tray is theirs
+      d.position.set(x, .78, z); d.rotation.set(0, f, 0); d.updateMatrix();
+      this.tray.setMatrixAt(i, d.matrix); this.ware.setMatrixAt(i, d.matrix); this.tray.setColorAt(i, this.c[idHash(a.p.id) % this.c.length]); i++;
+    }
+    for (const m of [this.tray, this.ware]) { m.count = i; m.visible = i > 0; m.instanceMatrix.needsUpdate = true; }
+    this.tray.instanceColor.needsUpdate = true;
+  },
+};
 const gardenView = {
   root: null, list: [], key: '', next: 0, m: new THREE.Matrix4(), p: new THREE.Matrix4(), v: new THREE.Vector3(), s: new THREE.Vector3(), q: new THREE.Quaternion(),
   make() {                                               // the deck's instanced meshes, once per deck build
