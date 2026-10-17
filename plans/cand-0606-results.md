@@ -11,3 +11,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - c20e8cd perf (perf 3): FAIL phone speed: dinner 6.1→9.2 ms, slow frames 29→279/h, breakfast worst 213 ms; cause poses 0.27.40 seatCushion ray (~9 ms). Calls peak 431, memory 150 flat. Fix pending (lead's call).
 - c20e8cd lines PASS (0 err, 3 warn) · tiles ALL OK · arc OK · booth (arc 70 booth) OK · device FAIL 'no leak' 496→497 (poses 0.27.42 crowd change), device OK on b679455
 - c20e8cd events FAIL: dayReport 'work' shift-short most days (= leave's time clock, clock-in wait, owner career engineer) + day 20 fonseca-arjun film 20:02-22:33. cadet_test diffs all explained per step (see DEV_NOTES row later).
+- c20e8cd player (R3): FAIL one: cart run loading in the hold, player.holding 'cart' not 'cartfull' (bisecting) · interactions OK · path OK (2872/2872)
