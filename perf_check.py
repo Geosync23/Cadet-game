@@ -8,7 +8,7 @@
 # 1.5 and the widest 0.7; landscape 844x390 at 1.15):
 #   calls   draw calls in the main pass (renderer.info, the budget's number; shadows aren't counted there)
 #   tris    triangles drawn (thousands)
-#   js      milliseconds of game code per frame (simulation, crew, crowd, effects; rendering skipped). Headless
+#   js      milliseconds of game code per frame (the best of 3 batches of 20 frames) (simulation, crew, crowd, effects; rendering skipped). Headless
 #           SwiftShader can't say how fast a real phone renders, so this is the part we can compare build to build.
 #   crew    people on the deck (the crowd's count)
 # Then a deck round trip (every deck, twice) checks geometries, textures and the JS heap come back to the same numbers.
@@ -45,7 +45,7 @@ SCENE_JS = r"""(sc => {
   return { room: ROOMS[k].name };
 })"""
 MEASURE_JS = r"""(n => {
-  window.__skip = true; const a = window.__realNow(); window.__step(n, 1000 / 30); const js = (window.__realNow() - a) / n; window.__skip = false;
+  window.__skip = true; let js = 1e9; for (let k = 0; k < 3; k++) { const a = window.__realNow(); window.__step(n, 1000 / 30); js = Math.min(js, (window.__realNow() - a) / n); } window.__skip = false;   // the best of 3 batches (less noise)
   window.__step(1, 1000 / 30);
   const st = crowd.stats();
   return { calls: renderer.info.render.calls, tris: Math.round(renderer.info.render.triangles / 1000), js: +js.toFixed(2), crew: st.people };
