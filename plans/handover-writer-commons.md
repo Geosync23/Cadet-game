@@ -3,7 +3,8 @@
 **Role:** writer for the Commons and juniors. Reports ONLY to **head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) with
 `send_message` after each batch; never the lead or the user. The head writer reviews, merges into `claude/content`
 and sets the next batch. Project lead (for reference only): session_01KPJMYjXAPkNUcrQ8VRkhLE.
-Writer 3 is session_01AS3Tzju3TuFbM9XAEYdvPX (took the seat from session_01DfadYjSP8skcVF72f6JxBw, 2026-10-17).
+Writer 3 was session_01AS3Tzju3TuFbM9XAEYdvPX (took the seat from session_01DfadYjSP8skcVF72f6JxBw, handed over
+2026-10-17 at about two thirds memory, after batch 10).
 
 **Branch:** `claude/writer-commons` (push only there). Merge `claude/content` into it before every push. Writers have
 no build numbers. Commit messages end with the Co-Authored-By line the lead gave; no model names anywhere else.
@@ -25,7 +26,7 @@ the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contact
 | Themes | `themes/*.arc` (all twelve) |
 | Call home | `home/gran.call`, `jo.call`, `sam.call` (`mum.call` is the head writer's model) |
 
-## Done this seat (all MERGED by head writer 2 up to batch 8, 0.48.17; batch 9 pushed b007f02, awaiting review)
+## Done this seat (batches 1-9 MERGED by head writer 2, last 0.48.19; batch 10 pushed, awaiting review)
 
 1. Story four: callbacks (`told:` on moment.<arc>.<word>, came.<trad>, fav.*, gift.*, fixed.<kind>, bday, grubby,
    heard.moment.<friend>; Pell's `told:moment.pell.timed beat:pell.7`), visits, notes.
@@ -37,8 +38,12 @@ the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contact
 7. Call-home contacts Gran, Jo, Sam (6 beats, send, chat each).
 8. Gift thanks (`== gift`, `gift:loved|liked|polite` or the loved tag) for the four and my 19.
 9. Crew asking after your people (greet lines gated on home flags) for the four and the bunkmates.
+10. `banks/everyday.lines` (`@bank all`): 60 non-work smalltalk/rumour bubbles (food, days off, letters, seasons,
+    traditions, vents, hot water, Gerald), gated by act:/time:/season:/trad:/place:; lines naming Rina use `!who:rina`.
 
 ## Formats and hooks that bite
+
+- A bank line that names a crew member ("Not against Rina") needs `!who:<id>` so that person never says it.
 
 - Card words no end punctuation. Lengths: card lines 90, bubbles 60, moments/calls 140, choices 90, hints 90.
 - `rep:` means "this band or better" (`!rep:known` = new only; `rep:new` warns).
@@ -62,7 +67,8 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 
 ## Loose ends / next
 
-- Batch 9 awaiting notes.
+- Batch 10 awaiting notes. After it the seat is handed over: head writer 2 asks the lead to retire it and hire
+  fresh when needed. A fresh writer starts from this note.
 - Head writer is asking the dialogue engineer for a one-sided booth overheard format (crew on calls home): likely
   a later batch.
 - Theme fill-in `{since}` still not live (lines using it are skipped).
