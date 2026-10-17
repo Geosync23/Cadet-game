@@ -26,7 +26,7 @@ ul,ol{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
 li{margin:3px 0}
 b{color:#eef6f4}
 .note{font-size:12.5px;color:var(--muted)}
-.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
 .card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
 .card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
 .card span{font-size:13px;color:#cfd9dc}
@@ -36,13 +36,14 @@ b{color:#eef6f4}
 .rules li::before{counter-increment:r;content:counter(r);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
 .verb{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#03141a;background:#6ff0dc;border-radius:6px;padding:1px 7px;margin-right:4px}
 .verb.dock{background:var(--gold)}
-.boards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));align-items:start}
+.boards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));align-items:start}
 .boards figure{margin:0;border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(0,0,0,.18)}
 .boards figcaption{font-size:13px;color:#cfd9dc;margin-top:6px}
 .boards figcaption b{color:#ffe08a}
-svg .cl{font-size:10px;fill:#93a6ae;text-anchor:middle;font-family:ui-monospace,Menlo,Consolas,monospace}
+svg .cl{font-size:12.5px;font-weight:600;fill:#93a6ae;text-anchor:middle;font-family:ui-monospace,Menlo,Consolas,monospace}
 .key{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;color:#cfd9dc}
 .key span{display:inline-flex;align-items:center;gap:6px}
+.key span:first-child{flex-wrap:wrap;max-width:100%}
 table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:#bdeee6;font-weight:600}
@@ -55,7 +56,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 </head>
 <body>
 <header>
-  <h1>Tiles <span class="draft">Design draft, for your OK</span></h1>
+  <h1>Tiles <span class="draft">Design draft 2, for your OK</span></h1>
   <div class="sub">Seat 10, the Tiles engineer. A two-player tile game you play at the Tiles station in the bow lounge, or at any lounge table on Tiles night. Checkers-style moves, block-matching scores. Nothing is built yet: this page is the design for you to approve, change or turn down.</div>
 </header>
 <nav><div>
@@ -558,7 +559,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 <h2>Accessibility</h2>
 <div class="grid">
 <div class="card"><b>Colour-blind safe</b><span>Every mark is a shape (circle, triangle, star) and a colour. Whose tile it is shows as solid light versus hollow dark with a dashed edge, a brightness difference, not a colour. It still reads on the one-colour phosphor screen.</span></div>
-<div class="card"><b>Big tap targets</b><span>On a phone the board fills the screen width: each square is about 56 points wide, and never under 44 (the usual minimum) even on the smallest 320-point phones. Tap a tile, then tap where it goes. No dragging. Tap the tile again to cancel.</span></div>
+<div class="card"><b>Big tap targets</b><span>On a phone the board fills the screen width: each square is about 56 points wide, and never under 44 (the usual minimum): on the smallest 320-point phones the board is 6 × 44 = 264 points, which fits inside the device screen with the a–f and 1–6 labels in a thin margin outside it. Tap a tile, then tap where it goes. No dragging. Tap the tile again to cancel.</span></div>
 <div class="card"><b>No timers, no reflexes</b><span>Take as long as you like. The ship keeps running around you, but the board waits. Your needs keep ticking slowly, as they do when you sit anywhere.</span></div>
 <div class="card"><b>One-handed</b><span>The board sits low on the screen, in thumb reach, with your hold in a row just under it. Everything is a single tap.</span></div>
 <div class="card"><b>Calm motion</b><span>Effects are short and follow the device's existing "reduced motion" setting: with it on, tiles simply appear in place.</span></div>
