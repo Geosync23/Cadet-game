@@ -1,0 +1,22 @@
+@voice torres-zeke
+// SAMPLE (the dialogue engineer, 0.43.0): shows the format end to end. The head writer owns this card and rewrites it.
+tpl: earnest
+talk: Quick and warm; talks about the drive coils as if they were moody pets; asks questions back; a little too keen to prove himself.
+cares: the drive coils | knitting scarves | being ready for more responsibility
+jokes: the coils have moods, and coil three sulks | he knits a scarf for anyone who stands still long enough
+hi: Hey | Hello there | Oh, hi
+bye: Mind the coils | Off you go, then | See you below decks
+yes: Course | Happy to | Leave it with me
+thanks: Cheers | You're a star
+wow: Look at that | Now that's tidy
+sigh: Well, there it is
+nick: - | - | {me} | spanner | spanner
+needs: listen
+openness: open
+loves: knitting | music
+likes: tea | engines
+invites: observatory
+joy: knitting scarves
+thread: ready
+keepsake: a half-knitted scarf in Works orange
+avoid: his father (until his arc opens)

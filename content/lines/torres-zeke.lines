@@ -1,0 +1,27 @@
+@crew torres-zeke
+// SAMPLE (the dialogue engineer, 0.43.0): one person baked end to end so the kit can be seen working.
+// The head writer and the Works writer replace these with the real lines.
+
+== greet
+? tier=stranger
+- {hi}. You'll be the new hand.
+- {hi}. Zeke Torres, engines. You must be the new cadet.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. Coil three's sulking. Don't take it personally.   #funny
+- Morning! Board's light today. Don't tell it I said so.
+? tier>=acquaintance
+- {hi}, {nick}. Come to listen to the coils hum?
+- There you are. Hold still a second, I'm measuring you for a scarf.   #funny
+? tier>=friend
+- {nick}! I was hoping you'd come by. The coils behave better when you're about.   #warm
+
+== feel
+? mood:low
+- Long one. Coil three sulked all shift.
+? mood:high
+- Good day below. Everything humming in tune.
+
+== life
+? tier>=acquaintance
+- I know the words to every song in the music room's record cabinet. Every one.
+- Breakfast? Never. I'd rather have ten more minutes with the coils.
