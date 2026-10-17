@@ -24704,14 +24704,16 @@ MEETING_SCRIPTS.veyliGiftExchange = {
   ],
 };
 
-// ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order
+// ---- the Calendar's list (section 19): the ship traditions between two ship minutes, in time order:
+// [{ id, title, at, where (words), deck, room (key, or null when its places span several rooms) }]
 function upcomingTraditions(fromMin, toMin) {
   const out = [], S = schedData();
   for (let d = Math.floor(fromMin / 1440) + 1; d <= Math.floor(toMin / 1440) + 1; d++) for (const e of eventsOn(d)) {
     const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;
-    const w = e.ev.where[0], pl = (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [])[0];
-    const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
-    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck });
+    const w = e.ev.where[0], pool = S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':0' : w.pool)) || [], pl = pool[0];
+    const room = pl && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room], one = !!pl && pool.every(q => q.room === pl.room);
+    out.push({ id: e.id, title: e.name + (e.names ? ' (' + e.names + ')' : ''), at, where: (room ? room.name + ', ' : '') + 'Deck ' + w.deck,
+      deck: pl ? pl.deck : w.deck, room: one ? pl.room : null });   // for the device's Go there (deck, room key; null: a pool over several rooms)
   }
   return out.sort((a, b) => a.at - b.at);
 }

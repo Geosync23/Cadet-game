@@ -675,6 +675,11 @@ with sync_playwright() as pw:
     print('tradOn letters:', T and T['d'], T and [x and (x['from'], x['to']) for x in T['at']])
     if not T or T['at'][0] or not T['at'][1] or not T['at'][2] or T['at'][3] or T['other'] or T['none'] or T['at'][1]['day'] != T['d']: fail(f"tradOn('letters'): {T}")
 
+    # 9c. upcomingTraditions' deck and room (0.34.42, the device's Go there): a deck number, and a room key on that deck or null
+    U = g.ev("upcomingTraditions(0, 8 * 1440).map(x => [x.id, x.deck, x.room, Number.isInteger(x.deck) && (x.room === null || !!(DECKS[x.deck].rooms || {})[x.room])])")
+    print('upcomingTraditions, days 1-8:', len(U), 'with a room key:', sum(1 for u in U if u[2]))
+    if not U or not all(u[3] for u in U) or not any(u[2] for u in U): fail(f"upcomingTraditions' deck/room: {[u for u in U if not u[3]][:5]}")
+
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)
     print('Bridge invite: eves', I['eves'][:4], '| booked', I['booked'], '| Vance there', I['vanceThere'], '| open', I.get('open'), '| flag', I.get('flagBefore'), '->', I.get('flagAfter'), '| after', I['after'], '| bridge hour day 23', I['before'], '->', I['on23'], f"({I['going']} going)")
