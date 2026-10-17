@@ -419,6 +419,41 @@ with sync_playwright() as pw:
     print('A favour handed in:', fv)
     if fv is not None and (not fv['mem'] or not fv['kind'] or fv['kind'] <= 50): fail(f'handing in a favour gives no memory or reputation: {fv}')
 
+    # 16. guiding a newcomer (0.36.65, A10): only once promoted; Calder assigns a new cadet a week ahead (card, else Mail),
+    # it starts on their arrival day (onboarding's introGuide), their questions with three answers, settled a week on; hand back
+    gd = g.ev(r"""(() => {
+      const keep = JSON.stringify(socSave()), t0 = shipNow(), F = SHIP.flags || (SHIP.flags = {}), kf = { promoted: F.promoted, ga: F['guide.active'] };
+      const x = SOC.crew.find(p => p.cadet), cal = SOC.crew[SOC.idx.get('calder')], ab = x && x.aboard, A = 43, o = {};
+      if (!x || !cal) return { skip: true };
+      const stub = typeof introGuide !== 'function', calls = []; if (stub) { window.introGuide = id => calls.push(['go', id]); window.introGuideEnd = id => calls.push(['end', id]); }
+      const step = (d0, d1) => { for (let d = d0; d <= d1; d++) { setShipNow((d - 1) * 1440 + 480); socialTo(shipNow()); } };
+      x.aboard = [A, null]; setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40);
+      step(34, 37); o.off = !SHIP.social.guide;                       // not promoted: nothing
+      flagSet('promoted', true); setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40);
+      step(34, 36); const G = SHIP.social.guide; o.assigned = G ? [G.id === x.id, G.at, G.day] : null; o.ask = chatLine(cal, shipNow()).kind;
+      step(37, 37); o.mail = SHIP.social.mail.some(m => m.subject === 'A newcomer for you') && G.told; o.notYet = !G.on;
+      step(38, A); o.on = [G.on, !!flag('guide.active'), relTier(x.id), bondOf(x.id, 'mentor'), stub ? calls.some(c => c[0] === 'go' && c[1] === x.id) : true];
+      socIntroNote({ step: 'hello', who: x.id }); o.stepMem = !!mem(x.id, 'guide.hello');
+      const q = chatLine(x, shipNow()); o.q = [q.kind, (q.answers || []).length];
+      chatClose(); CHAT = { p: x, line: q, ask: false, fav: null, at: shipNow(), reach: 99 }; let got = []; const dr = CHAT_SKIN.draw; CHAT_SKIN.draw = (el, v) => { got = v.buttons.map(b => b.label); }; chatShow();
+      o.buttons = got.length;
+      const k0 = repInit().ship.kindness; chatDo('nq:2'); o.answered = [G.qs, repInit().ship.kindness > k0, chatLine(x, shipNow()).kind !== 'newcomer'];
+      CHAT = { p: cal, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatShow();
+      o.handBtn = got.some(b => /^Hand /.test(b)); CHAT_SKIN.draw = dr; chatClose();
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      step(A + 1, A + 8); const G2 = SHIP.social.guide; o.settled = [G2.end, !!flag('guide.active'), knownFor().includes('good with newcomers'), SHIP.social.mail.some(m => /settled in/.test(m.subject))];
+      setShipNow(32 * 1440); socReset(32 * 24); repAdd('works', 40); step(34, A);   // hand back on Calder's card
+      CHAT = { p: cal, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 }; chatDo('guide-back'); chatClose();
+      o.back = [SHIP.social.guide && SHIP.social.guide.end, !!flag('guide.active'), bondOf(x.id, 'mentor') === 'you', stub ? calls.some(c => c[0] === 'end') : true];
+      if (stub) { delete window.introGuide; delete window.introGuideEnd; }
+      x.aboard = ab; if (kf.promoted === undefined) delete F.promoted; else F.promoted = kf.promoted; if (kf.ga === undefined) delete F['guide.active']; else F['guide.active'] = kf.ga;
+      setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('Guiding a newcomer:', json.dumps(gd))
+    if not gd.get('skip'):
+        if not gd['off'] or not gd['assigned'] or gd['assigned'] != [True, 36, 43] or gd['ask'] != 'guide' or not gd['mail'] or not gd['notYet']: fail(f'the newcomer assignment wrong: {gd}')
+        if gd['on'] != [True, True, 1, 'you', True] or not gd['stepMem'] or gd['q'] != ['newcomer', 3] or gd['buttons'] != 3: fail(f'guiding a newcomer does not start right: {gd}')
+        if gd['answered'] != [1, True, True] or not gd['handBtn'] or not gd['saved'] or gd['settled'] != ['settled', False, True, True] or gd['back'] != ['handed', False, False, True]: fail(f'guiding a newcomer wrong: {gd}')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')

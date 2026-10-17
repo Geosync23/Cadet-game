@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.64
+   STARSHIP CADET: CSV Wren                           build 0.36.65
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.64';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.65';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25552,7 +25552,7 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -25575,6 +25575,7 @@ function socLoad(s) {
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
       bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
       seekAsks: Array.isArray(s.seekAsks) ? s.seekAsks.filter(x => x && typeof x.id === 'string' && isFinite(x.from)).map(x => ({ ...x })) : [],
+      guide: s.guide && typeof s.guide.id === 'string' && isFinite(s.guide.day) ? { ...s.guide } : null,
       noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
@@ -25685,6 +25686,7 @@ const SOC_BOND_KINDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifti
 const BOND_FILL = { partner: 'couple', friend: 'friends', best: 'best', rival: 'rivals', mentor: 'mentor', mentee: 'mentee' };
 function bondOf(id, kind) {
   socInit(); id = socId(id); kind = BOND_ALIAS[kind] || kind;
+  if (kind === 'mentor' && SHIP.social.guide && SHIP.social.guide.id === id && SHIP.social.guide.on && SHIP.social.guide.end !== 'handed') return 'you';   // you guide a newcomer (A10), before 20c's
   if (typeof socBondOf === 'function') { const b = socBondOf(id, kind); if (b !== undefined) return b; }   // 20c's, when it has an answer
   if (kind === 'couple') { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)]; if (p && p.partner && SOC.idx.has(p.partner)) return p.partner; }
   if (kind === 'mentee' && SHIP.social.mentor && SHIP.social.mentor === id) return 'you';   // your escort mentors you (A4)
@@ -25840,7 +25842,7 @@ const socGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'gre
 //   memAdd(id, key, { w, cls }) -> the memory (a repeat refreshes it: today, and the heavier weight)
 const MEM_CLASS = { small: [30, 7], medium: [60, 21], big: [90, 60], core: [100, 0], sour: [40, 4] };
 const MEM_KIND = { chat: 'small', came: 'small', meeting: 'small', heard: 'small', fav: 'medium', fixed: 'medium', appt: 'medium', visit: 'medium', introduced: 'medium',
-  bday: 'medium', mended: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', readyroom: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
+  bday: 'medium', mended: 'medium', gift: 'medium', moment: 'big', show: 'big', helped: 'big', readyroom: 'big', guide: 'big', intro: 'core', keepsake: 'core', missed: 'sour', grubby: 'sour' };
 const MEM_MAX = 8, MEM_FORGET = 10;
 const memClass = key => { for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (MEM_KIND[s]) return MEM_KIND[s]; return 'small'; };
 function memAdd(id, key, o = {}) {
@@ -25922,7 +25924,8 @@ function escortId() {                                   // SHIP.intro.escort, el
   return null;
 }
 function socIntroNote(d) {                                  // the bus's introStep { step, who, missed }
-  socInit(); const e = escortId(); if (e && !SHIP.social.mentor) SHIP.social.mentor = e;
+  socInit(); if (socGuideStep(d)) return;   // a newcomer's step while you guide them (A10)
+  const e = escortId(); if (e && !SHIP.social.mentor) SHIP.social.mentor = e;
   if (d.missed) return;                                  // a step you missed leaves no memory
   const key = INTRO_MEM[d.step]; if (!key) return;
   for (const id of [].concat(d.who || [], INTRO_MEM[d.step] === 'intro.dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
@@ -26287,6 +26290,88 @@ function byeLine(p, mail) {                              // a goodbye that talks
 }
 const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === socId(id)));   // moved:<id>: they've left the Wren
 const movedOn = () => (socInit(), (SHIP.social.moved || []).map(x => { const p = SOC.idx.has(x.id) && SOC.crew[SOC.idx.get(x.id)]; return p ? { id: x.id, name: p.name, role: p.role, day: x.day, to: p.transferTo || null } : null; }).filter(Boolean));
+// ---- guiding a newcomer (0.36.65, A10; plans/social-deep-plan.md Part 8b) ----
+// Only after you've been promoted (the user's rule: the flag 'promoted', onboarding's and mine; off in normal play until
+// promotion exists). When a new cadet (the roster's cadet: true) is due within a week, you've been aboard four ship weeks by
+// their arrival day and Works knows your name (repBand('works') 'known' or better), Calder assigns them to you: her card's
+// first line, else a Mail at 15:30, and simNote('guideAssigned', { id, day }) (day: their arrival) so onboarding can plan the
+// arrival. On the day (07:00) socialGuide(id) starts it: onboarding's introGuide(id) runs the arrival steps the other way
+// round (you the escort, them following), the flag guide.active is set (the line condition guide:true), they know you
+// (acquaintance) and you're their mentor (bondOf(id, 'mentor') -> 'you'). Their introStep notes (who: them) give them core
+// and big memories of you and a little Kindness. Each ship day of their first week their card asks you something (the
+// engine's newcomer lines, else GUIDE_QS) with three answers (helpful, funny, honest), all fine. A week on they've settled:
+// Works +4, Kindness +3, "good with newcomers", Calder's thank-you. Calder's card has "Hand <name> back" any time, no
+// penalty (onboarding's introGuideEnd(id) when it's there). SHIP.social.guide { id, day, at, told, on, qs, qDay, end }, saved.
+const GUIDE_WEEKS = 4, GUIDE_AHEAD = 7, GUIDE_LONG = 7;
+const GUIDE_QS = [
+  ['Where\'s the mess? I\'ve walked past the same door three times.', ['Down by the galley. Follow the smell of toast.', 'Follow anyone holding a mug. Works every time.', 'I got lost for two days. You\'ll get it.']],
+  ['Who\'s the scary one? Everyone looks at me like I should know.', ['Be on time and nobody\'s scary. Fair crew.', 'Whoever\'s mug you just borrowed.', 'Nobody, really. They just remember being new.']],
+  ['Is the food always this good?', ['Mostly. Get there early for the good bread.', 'Only when Calder\'s eating with us.', 'It is. One of the best things about the Wren.']],
+  ['What do people do in the evenings?', ['Check the Schedule on your device. There\'s always something.', 'Pretend not to be revising for quiz night.', 'Some nights, nothing much. That\'s allowed too.']],
+  ['What if I break something on my first job?', ['Tell your Chief and log it. That\'s all anyone wants.', 'Then you\'re officially one of us.', 'You probably will. I did. Nobody minded.']],
+  ['Does it get less strange, being out here?', ['Give it a week. Find one place on the ship that\'s yours.', 'No. You just get used to strange.', 'It does. Slowly, then all at once.']],
+  ['How do I get people to like me?', ['Say yes to a favour or two. Turn up to things.', 'Biscuits. Bribery works.', 'Just be around. They\'ll come to you.']],
+  ['Can I come and ask you things, if I get stuck?', ['Any time. Find me, or send a message.', 'Only on Tuesdays. Kidding. Any time.', 'Please do. Someone did that for me.']]];
+const GUIDE_ANS = [['Thanks. That actually helps.', 'Right. Got it. Thank you.'], ['Ha! Okay. Noted.', 'You\'re ridiculous. Thanks, though.'], ['That\'s... really good to know. Thank you.', 'Oh. That helps more than you think.']];
+const GUIDE_GEN = ['Here, let me show you.', 'Ha. Welcome aboard.', 'Honestly? It gets easier.'];   // answers for the engine's own newcomer lines
+const guideOn = () => { const g = SHIP.social && SHIP.social.guide; return g && g.on && !g.end ? g : null; };
+function socGuideDay(h) {                                  // 07:00 each ship day (socialHour): assign, start, settle
+  if (typeof flag !== 'function' || !flag('promoted')) return;
+  const d = Math.floor(h / 24) + 1, t = h * 60 + 30, G = SHIP.social.guide, cal = SOC.idx.has('calder') ? SOC.crew[SOC.idx.get('calder')] : null;
+  if (G && !G.end && !G.on && d >= G.day) socialGuide(G.id);
+  if (G && G.on && !G.end && d >= G.day + GUIDE_LONG) {
+    const p = socP(G.id); G.end = 'settled'; if (typeof flagSet === 'function') flagSet('guide.active', false);
+    if (p) { memAdd(p.id, 'guide.settled', { cls: 'core' }); repAdd('works', 4, { kindness: 3 }, 'newcomer');
+      if (cal) SHIP.social.mail.push({ at: t + 600, from: cal.name, subject: shortName(p) + '\'s settled in', body: shortName(p) + '\'s settled in well. That\'s your doing, more than you know. Thank you. ' + shortName(cal) }); }
+  }
+  if (G && !G.end) return;                                 // one at a time
+  if (!['known', 'well', 'theirs'].includes(repBand('works'))) return;
+  const p = SOC.crew.find(q => { const A = q.cadet && arriveDay(q); return A > 1 && A - 1 >= GUIDE_WEEKS * 7 && A - d >= 1 && A - d <= GUIDE_AHEAD && !(G && G.id === q.id); });
+  if (!p) return;
+  SHIP.social.guide = { id: p.id, day: arriveDay(p), at: d, told: false, on: false, qs: 0, qDay: 0, end: null };
+  if (typeof simNote === 'function') simNote('guideAssigned', { id: p.id, day: arriveDay(p) });
+}
+function socGuideMail(h) {                                 // 15:00's hour: Calder didn't catch you, so a Mail
+  const G = SHIP.social.guide, cal = SOC.idx.has('calder') ? SOC.crew[SOC.idx.get('calder')] : null;
+  if (!G || G.told || G.end || !cal) return; G.told = true;
+  SHIP.social.mail.push({ at: h * 60 + 30, from: cal.name, subject: 'A newcomer for you', body: guideAskLine(G) + ' ' + shortName(cal) });
+}
+function guideAskLine(G) {
+  const p = socP(G.id), m = SHIP.social.mentor && socP(SHIP.social.mentor), wd = typeof weekday === 'function' ? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekday(G.day)] : null;
+  return 'A new cadet comes aboard ' + (wd ? 'on ' + wd : 'soon') + ': ' + (p ? p.name + ', ' + (p.role || 'cadet').toLowerCase() : 'one of ours') + '. I\'d like you to meet them at the ramp and show them round, the way ' + (m ? shortName(m) + ' did' : 'you were shown') + ' for you. Hand them back to me any time, no harm done.';
+}
+function socialGuide(id) {                                 // you start guiding them: onboarding's introGuide runs the steps
+  socInit(); const p = socP(id), G = SHIP.social.guide; if (!p || !G || G.id !== p.id || G.end) return false;
+  if (G.on) return true;
+  G.on = true; if (typeof flagSet === 'function') flagSet('guide.active', true);
+  const r = relGet(p.id); if (r.pts < REL_TIERS[1]) { r.pts = REL_TIERS[1]; r.tier = relTierOf(r.pts); } if (r.met === null) r.met = Math.floor(socNow());
+  memAdd(p.id, 'guide.met', { cls: 'core' });
+  if (typeof introGuide === 'function') { try { introGuide(p.id); } catch (e) { } }
+  return true;
+}
+function socialGuideEnd(why = 'handed') {                   // Hand them back (Calder's card): no penalty
+  const G = guideOn() || (SHIP.social.guide && !SHIP.social.guide.end ? SHIP.social.guide : null); if (!G) return false;
+  G.end = why; if (typeof flagSet === 'function') flagSet('guide.active', false);
+  if (typeof introGuideEnd === 'function') { try { introGuideEnd(G.id); } catch (e) { } }
+  return true;
+}
+function socGuideStep(d) {                                 // introStep { step, who: the newcomer } while you guide them
+  const G = guideOn(); if (!G || d.missed || ![].concat(d.who || []).includes(G.id)) return false;
+  memAdd(G.id, 'guide.' + d.step, { cls: INTRO_MEM[d.step] === 'intro.arrival' ? 'core' : 'big' });
+  if (repOnce('guide.' + d.step)) repAdd(null, 0, { kindness: 1 });
+  return true;
+}
+function guideQuestion(p, t, eng) {                        // their card's first line in their first week: something they ask you
+  const G = guideOn(), d = Math.floor(t / 1440) + 1; if (!G || G.id !== p.id || G.qDay === d || d < G.day || d >= G.day + GUIDE_LONG) return null;
+  const l = eng('newcomer'), q = GUIDE_QS[G.qs % GUIDE_QS.length];
+  return l ? { ...l, kind: 'newcomer', answers: GUIDE_GEN } : { text: q[0], kind: 'newcomer', answers: q[1], say: true };
+}
+function guideAnswer(p, k) {                               // 0 helpful, 1 funny, 2 honest: all fine
+  const G = guideOn(); if (!G || G.id !== p.id) return null;
+  G.qDay = SHIP.time.day; G.qs++; relAdd(p.id, 'guide', 3); repAdd(null, 0, { kindness: .5 });
+  if (G.qs === 1) memAdd(p.id, 'guide.asked');
+  const a = GUIDE_ANS[k] || GUIDE_ANS[0]; return a[Math.floor(schedU(p.seed, SHIP.time.day, 666) * a.length)];
+}
 const repAskedFor = dept => ['well', 'theirs'].includes(repBand(dept));
 const repNotes = () => (repInit().notes || []).slice().reverse();
 function repView() {                                     // the Record's Reputation page (section 19 draws it): words only, never numbers
@@ -26400,7 +26485,8 @@ function socialHour(h) {
   if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
   if (h % 24 === 4) memFade();
   if (h % 24 === 19) socCrewGift(h);
-  if (h % 24 === 7) { socTransfers(h); socInvites(h); }
+  if (h % 24 === 7) { socTransfers(h); socInvites(h); socGuideDay(h); }
+  if (h % 24 === 15) socGuideMail(h);
   if (h % 24 === 4 && (Math.floor(h / 24) + 1) % 7 === 0) repWeek(h);   // Sundays
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
@@ -26770,6 +26856,8 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
   const lv = ctx.leaving, rb = SHIP.rel[p.id]; if (lv !== null && lv <= 2 && tier >= 1 && !(rb && rb.bye >= Math.floor(t / 1440) - 1)) {   // leaving in a day or two: their goodbye
     const gm = typeof goodbyeMoment === 'function' ? goodbyeMoment(p, t) : null; return { text: gm ? (gm.hint || byeLine(p)) : byeLine(p), kind: 'goodbye', moment: gm ? gm.id : undefined, say: true }; }
   if (socIntroOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
+  const G = SHIP.social.guide; if (p.id === 'calder' && G && !G.told && !G.end) return { text: guideAskLine(G), kind: 'guide', say: true };   // A10: Calder assigns you a newcomer
+  const gq = guideQuestion(p, t, eng); if (gq) return gq;   // the newcomer you guide asks you something
   const mo = typeof momentReady === 'function' && socGate('done') ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
   if (mo) { const hint = typeof momentHint === 'function' ? momentHint(mo) : typeof MOMENTS !== 'undefined' && MOMENTS[mo] && MOMENTS[mo].hint, l = hint ? null : eng('hint');
     return { text: hint || (l ? l.text : 'Got a minute? Properly, I mean.'), kind: 'hint', moment: mo, say: true, line: l ? l.line : undefined }; }
@@ -26864,6 +26952,8 @@ function chatShow() {
     : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
     : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
        { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
+  if (!C.ask && !C.offer && C.line.kind === 'newcomer' && Array.isArray(C.line.answers)) buttons.splice(0, buttons.length, ...C.line.answers.slice(0, 3).map((a, k) => ({ id: 'nq:' + k, label: a })));   // A10: helpful, funny, honest
+  if (!C.ask && !C.offer && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
   if (!C.ask && !C.offer && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
@@ -26882,6 +26972,7 @@ function chatOpen(p, greet, line) {                       // greet: they came to
   if (CHAT.line.kind === 'story') arcTold(p);
   if (CHAT.line.kind === 'invite') CHAT.line.invite.said = true;
   if (CHAT.line.kind === 'goodbye') relGet(p.id).bye = SHIP.time.day;
+  if (CHAT.line.kind === 'guide') SHIP.social.guide.told = true;
   if (CHAT.line.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
   if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
   chatShow();
@@ -26909,11 +27000,15 @@ function chatDo(id) {
     if (l.news) playerHeard(l.news, p.id);
     if (l.kind === 'story') arcTold(p);
     if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
+    if (l.kind === 'guide') SHIP.social.guide.told = true;
+    if (l.kind === 'newcomer') { C.line = l; return chatShow(); }   // their question, with your answers
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
   } else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
+  else if (id.startsWith('nq:')) chatSay(guideAnswer(p, +id.slice(3)) || 'Thanks.');
+  else if (id === 'guide-back') { const G = guideOn(), n = G && shortName(socP(G.id)); if (socialGuideEnd('handed')) chatSay('Of course. I\'ll look after ' + n + ' from here. Thank you for what you did.'); }
   else if (id === 'ask-intro') { C.ask = 'intro'; chatSay(pick(['Who did you have in mind?', 'Go on, who?', 'Introduce me to someone? All right.'], 665)); }
   else if (id.startsWith('intro:')) { const l = typeof introDo === 'function' ? introDo(p, id.slice(6)) : null; C.ask = true; chatSay(l || 'Maybe another time.'); }
   else if (id === 'ask-news') {
