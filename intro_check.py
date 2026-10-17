@@ -22,10 +22,10 @@ from playwright.sync_api import sync_playwright
 # run the intro on paper, minute by minute from Day 0 17:40 to `to` (absolute ship minutes); `who`: 'happy' (always at
 # the checkpoint), 'wander' (misses every other step of the evening), 'idle' (never anywhere). reload: save and load
 # section 21's state at every step change. Returns the intro, the points, the flags, the Mail it sent and the order.
-RUN = r"""(({ who, reload, to, skip }) => {
-  const FLAGS = ['escort.' + INTRO_ESCORT, 'week1', 'intro.device', 'met.calder', 'week1.d2', 'week1.d3', 'week1.d4', 'week1.d5', 'week1.d6', 'week1.d7', 'week1.done', 'mug', 'seedling'];
+RUN = r"""(({ who, reload, to, skip, endAt }) => {
+  const FLAGS = INTRO_FLAGS;
   socInit(); socReset(0); SHIP.mail.length = 0;
-  SHIP.intro = introBlank(); SHIP.flags = {}; SHIP.notes = [];   // section 13's flag store and notes, when it's there
+  SHIP.intro = introBlank(); SHIP.notes = [];   // section 13's flags are NOT reset: introBegin must clear what the last run left
   const t0 = introAbs(INTRO_START.day, INTRO_START.min), order = [], flagAt = {};
   if (skip) { setShipNow(t0); introSkip(); }
   else introBegin('Sam');
@@ -35,6 +35,8 @@ RUN = r"""(({ who, reload, to, skip }) => {
     const st = SHIP.intro.step && introStepById(SHIP.intro.step);
     let here = st && st.checkpoint ? { deck: st.checkpoint.deck, tile: st.checkpoint.tile } : { deck: 4, tile: [8, 3] };
     if (who === 'idle' || (who === 'wander' && st && INTRO_STEPS.indexOf(st) % 2)) here = null;
+    if (who === 'slow' && st && t < Math.max(introAbs(st.day, st.at), SHIP.intro.since === null ? -1e9 : SHIP.intro.since) + 10) here = null;   // 10 ship minutes behind
+    if (endAt !== undefined && t === endAt) introEnd(false);
     introAdvance(t, here);
     for (const f of FLAGS) if (flagAt[f] === undefined && introFlag(f)) flagAt[f] = t;
     if (SHIP.intro.step !== last) {
@@ -67,6 +69,11 @@ DATA = r"""(() => {
     else if (r.name !== c.room) bad.push(s.id + ': checkpoint ' + c.tile + ' is in ' + r.name + ', not ' + c.room);
     else if (r.void) bad.push(s.id + ': checkpoint in a void');
   }
+  for (let i = 1; i < INTRO_STEPS.length; i++) {      // a step must not count from the one before's checkpoint
+    const p = INTRO_STEPS[i - 1].checkpoint, c = INTRO_STEPS[i].checkpoint; if (!p || !c || p.deck !== c.deck || p.room !== c.room) continue;
+    const d = Math.max(Math.abs(p.tile[0] - c.tile[0]), Math.abs(p.tile[1] - c.tile[1]));
+    if (d > 0 && d <= INTRO_REACH) bad.push(INTRO_STEPS[i].id + '\'s checkpoint is within reach of ' + INTRO_STEPS[i - 1].id + '\'s');
+  }
   prev = -1e9;
   for (const b of INTRO_WEEK) {
     const at = introAbs(b.day, b.at); if (at < prev) bad.push(b.id + ' is earlier than the beat before it'); prev = at;
@@ -82,7 +89,9 @@ DATA = r"""(() => {
     if (!INTRO_WEEK.some(b => b.settle === s.id) && s.id !== 'laundry') bad.push('Settling in, ' + s.id + ': nobody teaches it in the week');
   }
   for (const m in INTRO_MEETINGS) for (const w of INTRO_MEETINGS[m].cast) if (!/^works:/.test(w) && !ids.has(w)) bad.push(m + ': nobody called ' + w);
-  return { bad, steps: INTRO_STEPS.length, week: INTRO_WEEK.length, settle: SETTLE.length };
+  const off = id => { const p = ROSTER.find(x => x.id === id); return p && p.rota ? (p.rota.offDays || []).slice().sort().join(',') : '?'; };
+  const rota = { 'torres-zeke': [off('torres-zeke'), '3,4'], calder: [off('calder'), '5,6'], 'halloran-emeka': [off('halloran-emeka'), '5,6'] };
+  return { bad, rota, steps: INTRO_STEPS.length, week: INTRO_WEEK.length, settle: SETTLE.length };
 })()"""
 
 # one note that should tick each item (the kinds other sections will send; DEV_NOTES "Hook register")
@@ -134,6 +143,8 @@ with sync_playwright() as pw:
     d = g.ev(DATA)
     print(f"  {d['steps']} steps on the arrival evening, {d['week']} beats in the week, {d['settle']} Settling-in items")
     for b in d['bad']: fail(b)
+    for who, (has, want) in d['rota'].items():
+        print(f"  {who} off days {has}{'' if has == want else ', WAITING for the crew designer: the week needs ' + want}")
 
     run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
     EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
@@ -166,11 +177,21 @@ with sync_playwright() as pw:
         print(f"  {who}: by Day 0 20:01 step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
         if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by 20:01 (left: {', '.join(late)})")
         if who == 'idle' and not {'Your bunk', 'Tomorrow'} <= {m[2] for m in e['mail']}: fail('idle: the fallback Mail did not all arrive')
+        if who == 'wander' and len(miss) < 5: fail(f'wander: only {len(miss)} steps missed; a step should not count from a nearby checkpoint')
         w = run(who=who)
         if not (w['flags']['intro.device'] and w['flags']['met.calder']): fail(who + ': no device or no Calder by the end of the week')
         if who == 'idle' and e['flags']['intro.device']: fail('idle: the device counts as handed over though you never came')
         if not w['I']['ended'] or not w['flags']['week1.done']: fail(who + ': the week did not end on Day 8')
 
+    sl = run(who='slow', to=EVENING)
+    print(f"  slow (10 ship minutes behind at every step): missed {len(sl['I']['missed'])} {sl['I']['missed']}")
+    if sl['I']['missed']: fail('a player 10 minutes behind missed steps: ' + ', '.join(sl['I']['missed']))
+    en = run(who='idle', endAt=1440 + 7 * 60)
+    print('  idle, then "I know my way around" on Monday 07:00:', ', '.join(f for f, v in en['flags'].items() if not v) or 'every flag set', 'unset')
+    for f in ['intro.device', 'met.calder', 'week1.done'] + [f'week1.d{d}' for d in range(2, 8)]:
+        if not en['flags'][f]: fail('ending early leaves ' + f + ' unset')
+    a2 = run(who='idle', to=EVENING)
+    if a2['flags']['intro.device'] or a2['flags']['week1.done']: fail('a second arrival kept the last game\'s flags')
     print('4. Save and reload at every step')
     r = run(reload=True)
     print(f"  {r['steps']} reloads; the same as without: {r['intro'] == a['intro'] and r['rel'] == a['rel']}")
