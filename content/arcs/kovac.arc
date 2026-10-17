@@ -1,23 +1,23 @@
 @arc kovac
 who: kovac-zainab
 // "Four, please" (content/arcs/outlines.md, section 10). The Works writer, arc batch. Small, funny and kind. She
-// tells the ladder meetings rather than staging them, so no other cast has to be present. needs: listen.
+// tells the lift-club meetings (everyone rides the lift; they hold the rail) rather than staging them, so no other cast has to be present. needs: listen.
 // The lift isn't admitted until beat 2. Marra Station's night is told only in beat 3.
 
 == beat 1
 tone: light
 where: calm
-hint: Oh. Hi. I'm a bit out of breath. Exercise.
+hint: Oh. Hi. I'm a bit wobbly. It's nothing.
 mem: ladder
-them: Oh. Hi. Sorry. Out of breath. I took the ladder. From Deck 5. Exercise.
-them: Tove Cruz was on it too. Coming down. They said, "Exercise." I said, "Exercise."
-them: Then Davi Keane, coming up. He said, "Exercise." Nobody said anything else. We all just climbed.   [laugh]
+them: Oh. Hi. Sorry. Bit wobbly. The lift, from Deck 5. I held the rail the whole way.
+them: Tove Cruz was in it too. Eyes shut. They said, "Lovely lift." I said, "Lovely lift."
+them: Then Davi Keane got in at Four. Both hands on the rail. "Lovely lift." Nobody said anything else.   [laugh]
 ? choice
-* The ladder's very good exercise.   flavour:cheer mem:verygood
-  them: It is. Very. That's the only reason. Yes.
-* Do you ever take the lift?   flavour:listen mem:askedlift
-  them: Sometimes. Not often. It's. Um. The ladder's good.
-  + them: Sometimes. Not often. Um. Ask me another day. I might tell you a thing. Maybe.   [sigh]
+* Lifts can be a lot.   flavour:cheer mem:verygood
+  them: They can. Not that I. Um. It's a lovely lift. Yes.
+* Do you not like the lift?   flavour:listen mem:askedlift
+  them: It's fine. It's. Um. The rail's good.
+  + them: It's fine. Mostly. Um. Ask me another day. I might tell you a thing. Maybe.   [sigh]
 them: Anyway. Nine and a half minutes, the scrubber this morning. I timed it.
 
 == beat 2
@@ -28,13 +28,13 @@ hint: Can I tell you something? It's very small. Sorry.
 mem: club
 them: Can I tell you something? It's small. I'm afraid of the lift. There. Said it.
 them: Not a lot. Just. All of it. The doors. The bit between floors.
-them: Oh. Oh no. Cruz. And Keane. That's why they're on the ladder.   [laugh]
+them: Oh. Oh no. Cruz. And Keane. That's why they hold the rail like that.   [laugh]
 them: We're a club. Oh no. We're a club. I'm delighted. That's awful. I'm delighted.
 ? choice
 * Thank you for telling me. I won't say a word.   flavour:listen mem:keptsecret
   them: I know you won't. That's why I told you.
   + them: I know. That's why it was you. Thank you, {me}. Um. That's twice I've said thank you. Sorry. Three.   [laugh]
-* The ladder club. You need badges.   flavour:cheer mem:badges
+* The lift club. You need badges.   flavour:cheer mem:badges
   them: Don't. I'll knit them. You know I'll knit them.
 them: Right. Back to the scrubbers. Scrubbers don't have doors.
 

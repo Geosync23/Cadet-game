@@ -287,7 +287,7 @@ not coincidences. Use them as running jokes and small links between people:
 | Detail | Who | What it means aboard (canon from here) |
 | --- | --- | --- |
 | Knits scarves for anyone who stands still long enough | Zeke Torres, Mira Dahl, Zainab Kovac | **The knitting circle.** Three knitters, very different: Kovac's are perfect, Dahl's are practical, Torres's are long, lumpy and enthusiastic. They knit together at the tea corner or the junior common room on quiet evenings. Torres is knitting **you** a scarf in Works orange from your first week; it grows. |
-| Is secretly afraid of the lift | Zainab Kovac, Tove Cruz, Davi Keane | **The ladder club.** Each thinks they're the only one, and takes the maintenance ladder "for the exercise". They keep meeting on it. Kovac's arc is the story of this. |
+| Is secretly afraid of the lift | Zainab Kovac, Tove Cruz, Davi Keane | **The lift club.** Each thinks they're the only one. They ride the lift like everyone (the game moves everyone by lift: never write that they take the ladder), hold the rail with both hands, and say "Lovely lift." to each other. Kovac's arc is the story of this. |
 | Knows the lyrics to every song in the record cabinet | Zeke Torres, Wen Takahashi, Olu Farouk, Lars Achterberg, Tamsin Haddad | Five people who each say they know every song. They don't agree on the words. An old argument; it flares at the Friday music jam and at quiz night. |
 | Keeps a cactus called Gerald on the windowsill | Hugo Janssen, Tove Cruz, Yara Esposito, Luca Alvarez, Esme Walsh | **Every cactus on the Wren is called Gerald.** Nobody remembers who started it. Cruz grows the cuttings in the garden and gives them out; the name comes with the plant. |
 | Got married just before the tour and counts the days | Bea Silva, Marta Soto, Petra Jovanovic, Lukas Dlamini | Married to people back home (not aboard). They compare their day counts. Nothing romantic is ever shown or said beyond "I miss them" and the count. |
@@ -335,7 +335,7 @@ stories. These are the facts to keep straight.
 
 - **Zeke Torres** (Works engine officer, cabin 4-14 "the one with the music"; short, blonde, bearded; curious,
   ambitious). Meets you off the Tern on Day 0 and trains you in your first week. Talks to the drive coils; coil three
-  sulks. Knits (the knitting circle; your scarf). Knows every song in the record cabinet (he says). Skips breakfast for
+  sulks. Knits (the knitting circle; your scarf). Knows every song in the record cabinet (he says). Last in to breakfast:
   ten more minutes with the coils. Passed over twice for Engine Specialist. His father, also an engine man, lives back
   home and is losing his memory (arc only: never before it opens).
 - **Chief Ines Calder** (Head of Works, cabin 2-O, the glass office on Deck 5). Exacting, fair, dry. Started as a
@@ -389,7 +389,7 @@ stories. These are the facts to keep straight.
   the Wren. Distrusts the Veyli because of one bad day years ago, and knows it isn't fair. Only his deputy (**Kofi
   Mensah**) can make him laugh. Has started to like the Envoy. Took up the gym after shift.
 - **Zainab Kovac** (Works technician, Bunk 6 berth 1; tall, auburn ponytail). Meticulous, shy. Can strip a scrubber in
-  ten minutes flat. Knits (the knitting circle: hers are perfect). Secretly afraid of the lift (the ladder club). Skips
+  ten minutes flat. Knits (the knitting circle: hers are perfect). Secretly afraid of the lift (the lift club: she holds the rail and says "Lovely lift"). Bolts
   breakfast; loves the garden; browses the store. Her birthday is the day after Calder's (and she's never told Calder,
   who wouldn't know it anyway).
 
@@ -518,11 +518,12 @@ introduces them), unless noted.
 | Pell's screw tin holds screws from seven ships; he naps in the parts store (Calder knows); Brennan's mother posts her recipes ("until it sounds right"); the farm moon had one road and three fences; the bow lounge's Tiles board is warped | story crew | Writer 3, batch 3 |
 | Varga and Strand still dispute their running races; O'Neill names playlist forty-one after you if you do her job | commons | Writer 3, batch 5 |
 | Zielinski's first-ever store discount came on her birthday; she haggles daily with Esposito; Pell found Ibarra's tin and left a card in it; Teague and Hart drew Abara a birthday comic; Kim taught Garcia the musical card; Brennan put Nandakumar's chillies in a cake; Lemaire keeps names ready for gaps on the chart; Marra Station once had two mess halls; Alvarez takes his Gerald to the observatory | officers, Survey, doctors | Writer 2, batch 3 |
-| Kovac knitted the ladder-club badges (ladder-shaped; Cruz wears theirs, Keane lost his); her knitted tea-urn cover at Lanterns; her beans in the garden; Torres made the whole bay sing on her birthday | Kovac | Writer 2, batch 4 |
+| Kovac knitted the lift-club badges (a little frowning lift; Cruz wears theirs, Keane lost his); her knitted tea-urn cover at Lanterns; her beans in the garden; Torres made the whole bay sing on her birthday | Kovac | Writer 2, batch 4 |
 | Marrow underlined one word on page forty; her quiz team came third; Mensah bought Holt a cup with a knot on it; Vance's waiting list can move you to eighth | command | Writer 2, batch 5 |
 | Torres came aboard as a junior; his first month, Calder had him on scrubbers; the arrival tour is `week1` lines gated by `flag:walk.<point>.<n>` (shuttle, bay, haulway, stores, works, lift, wing, officers, deck3, servery, call) and `walk.more.<n>`; meetings `introDinner` (`mem:intro.dinner.stars|fixing|unsure`) and `introAsk` | Torres | head writer 3, 0.48.22 |
 | Eklund's and Keane's grans both sent "the one about the goat" (a song); Hart's comic had a duck in it | Works, garden | Writer 2, batch 7 |
 | Pell's mum's shop has a one-station radio and a scrapyard dog; Tomas's brother keeps his letters in a biscuit tin; the Wren has 22 windows Tomas has counted | Pell, Tomas | Writer 5, batches 1-2 |
 | A voice card's `thread:` is only for story arcs (`arc:<id>`, the ten story crew); which struggle theme anyone else is on comes from the roster's `thread` (the lead's ruling, 0.48.46); don't write theme names in voice cards | everyone | head writer 3 |
 | Kovac grew up on Marra Station (her roster `home`, roster 0.16.17+); where she's from is no secret, the lift night is (beat 3) | Kovac | head writer 3, with crew designer 3 |
+| **The writing follows the game** (the lead, 0.48.51): never claim what the player will see contradicted. Everyone rides the lift (no crew takes the ladder) and everyone eats breakfast ("skips-breakfast" crew bolt it, eat it standing, or turn up late; they don't miss it) | everyone | head writer 3 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |

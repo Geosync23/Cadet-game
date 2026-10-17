@@ -1,6 +1,7 @@
 @overheard goodbyes
 // Writer 5, for social B2: crew-to-crew goodbyes on rotation days. Speaker A is the one leaving (leaving:soon, a day
-// or two before); B is their friend, best friend, mentor or partner. Warm, a little wistful, light. Couple talk only
+// or two before); B is their friend, best friend, mentor (pair:mentor: B taught A), mentee (pair:mentee: A taught B)
+// or partner. Warm, a little wistful, light. Couple talk only
 // under pair:couple. Named ones are for the current leavers and their canon closest.
 
 == overheard
@@ -38,6 +39,16 @@ B: Still true.   #warm
 A: Thank you. For all of it.
 B: You did the work. I just watched.   #warm
 
+? pair:mentee leaving:soon
+A: You don't need me now. You haven't for a while.
+B: I'll still ask you things.
+A: Write them down. I'll answer every one.   #warm
+
+? pair:mentee leaving:soon
+A: Your first job on your own. I still think about it.
+B: I dropped the part. Twice.
+A: Then you didn't. That's the whole story.   #warm
+
 ? pair:couple leaving:soon
 A: Two ships. That's all it is.
 B: Two ships and a lot of letters.
@@ -63,9 +74,9 @@ B: Nobody reads it like you do.
 A: Write me the best bits. Daily.   #warm
 
 ? pair:any+any who:keane-davi with:kovac-zainab|cruz-tove leaving:soon
-A: Last climb up the ladder.
-B: For the exercise.
-A: Yes. For the exercise.   #warm
+A: Last ride in that lift.
+B: Lovely lift.
+A: Yes. Lovely. I'll miss holding the rail with you.   #warm
 
 ? pair:any+any who:alvarez-luca with:kim-yusuf|mbeki-bo leaving:soon
 A: Gerald's coming with me.

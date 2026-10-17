@@ -99,7 +99,7 @@
 // ---- the lift ----
 ? cue:repair.lift !cue:repair.lift.you
 - Lift's running smooth. No more clunk at Deck 4.
-- Somebody fixed the lift. The ladder club's sad.   #funny
+- Somebody fixed the lift. Three people I know just breathed out.   #funny
 ? cue:repair.lift.you tier>=acquaintance
 - The lift was you? {thanks}. Four, please. Smoothly.   #funny
 ? cue:repair.lift.you@dept dept:works

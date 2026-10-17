@@ -258,18 +258,19 @@ for the tea are writer-command's (Saruth).  **Agreed** (social B, shape notes be
 ## 10. Zainab Kovac (`arc:kovac`): "Four, please"
 
 **The heart of it:** small, funny and kind, to show anyone aboard can matter. She can strip a scrubber in ten minutes
-flat, she knits perfect scarves, and she's secretly afraid of the lift. She takes the maintenance ladder "for the
-exercise", where she keeps meeting Tove Cruz and Davi Keane, who are also taking it for the exercise.
+flat, she knits perfect scarves, and she's secretly afraid of the lift. She rides the lift like everyone, both hands on
+the rail ("Lovely lift"), and keeps sharing it with Tove Cruz and Davi Keane, who hold the rail too. (Was: the ladder;
+changed in 0.48.51 because the game moves everyone by lift.)
 
 **Before the arc:** she gives you your first favour on Thursday of week 1 (onboarding's), which is a small personal
 job on Deck 5 or 4. She's grateful you didn't make a fuss.
 
 | Beat | Tier, gate | Where | Tone | What happens | Leaves |
 | --- | --- | --- | --- | --- | --- |
-| 1 "Exercise" | colleague | the maintenance ladder by the lift, or its landing | light | You find her on the ladder between Decks 4 and 5. "Exercise." Cruz comes down the ladder. "Exercise," says Cruz. Then Keane, coming up. Nobody says anything. Everybody climbs on. | `mem:moment.kovac.ladder` |
-| 2 "The ladder club" | colleague | the tea corner, knitting | light | She tells you, so quietly you nearly miss it: she's afraid of the lift. Then she guesses about Cruz and Keane, and is delighted, and then horrified that she's delighted. "We're a club. Oh no. We're a club." | `mem:moment.kovac.club` |
+| 1 "Lovely lift" | colleague | calm | light | She's wobbly from the lift, both hands on the rail the whole way. Cruz was in it, eyes shut: "Lovely lift." Then Keane got in at Four: "Lovely lift." Nobody said anything else. | `mem:moment.kovac.ladder` |
+| 2 "The lift club" | colleague | the tea corner, knitting | light | She tells you, so quietly you nearly miss it: she's afraid of the lift. Then she guesses about Cruz and Keane, and is delighted, and then horrified that she's delighted. "We're a club. Oh no. We're a club." | `mem:moment.kovac.club` |
 | 3 "A whole night" | friend | the garden, or the junior common room | heartfelt | Why: when she was small, a lift on Marra Station stuck between floors with her in it, alone, a whole night. Nobody came till morning; she counted the bolts in the ceiling (there were 112). She's fine. She just doesn't like the counting. Practical reply: "We could service the lift together. You'd see how it works." | memory by reply; practical: sets `flag:kovac.liftjob` (a personal job: the lift's brakes, with Calder's OK) |
-| 4 "Four, please" | close | the lift | resolution | You service the lift's brakes together (or, if you didn't, she does it with Calder). She knows every bolt now. She steps in and says "Four, please" (your first words on the Wren, from your arrival). Then she tells Cruz and Keane, and the ladder club becomes a lift club, which is just three people riding the lift together and being very brave about it. | keepsake (a perfect scarf in Works orange and garden green) |
+| 4 "Four, please" | close | the lift | resolution | You service the lift's brakes together (or, if you didn't, she does it with Calder). She knows every bolt now. She steps in and says "Four, please" (your first words on the Wren, from your arrival). Then she tells Cruz and Keane, and the lift club rides together, and for the first time nobody holds the rail. Very brave, all three. | keepsake (a perfect scarf in Works orange and garden green) |
 
 **Hooks:** a personal job on the lift (systems engineer: a favour job on the lift's brakes; a light one), the
 `kovac.liftjob` flag; Cruz and Keane get matching lines (writer-commons for Cruz, writer-works for Keane).

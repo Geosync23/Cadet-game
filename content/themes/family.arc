@@ -1,10 +1,12 @@
 @theme family
 // Writer-commons, themes batch. From content/arcs/outlines.md, "The struggle themes". Any department, either shift.
-// Fill-ins assumed: {home} a place ("Lisk"), {family} with "my" ("my gran"), {hobby} an activity ("painting"),
+// Fill-ins: {home} a place ("Lisk"), {kin} a living relative with "my" ("my gran"), {lost} (canon deaths only, with "my"),
+// {hobbyNoun} an activity noun ("knitting"),
 // {since} a length of time ("five years"). A beat that names one lists it in needs:, so people without it skip it.
 
 == beat 1
 tone: light
+needs: kin
 hint: Has the Mail come yet? It hasn't, has it. I'll check again.
 mem: mail
 them: I keep checking my Mail. Don't mind me. Nothing's wrong. I'm just checking.
@@ -18,10 +20,10 @@ them: Right. I'll check again in an hour. Or ten minutes.
 
 == beat 2
 tone: heartfelt
-needs: family
+needs: kin
 hint: Sit with me a bit? I don't want to talk about it. I want to talk about it.
 mem: worry
-them: It's {family}. Not well. They've gone into hospital, back home. For tests.   [sigh]
+them: It's {kin}. Not well. They've gone into hospital, back home. For tests.   [sigh]
 them: They say it's probably nothing. "Probably" is a big word from this far away.
 them: I can't do anything from here. I can't even sit with them.
 ? choice
@@ -36,10 +38,10 @@ them: Thanks for sitting. I'll be all right. I'm all right now, actually. For no
 
 == beat 3
 tone: resolution
-needs: family
+needs: kin
 hint: News came. Come here. I want to tell someone, and I want it to be you.
 mem: news
-them: News came this morning. {family}'s home. Tired, still a bit poorly, but home.
+them: News came this morning: {kin}'s home. Tired, still a bit poorly, but home.
 them: They read my letter in the hospital. Twice, they said. It was a terrible letter.   [laugh]
 them: I was so far away. And it was all right anyway. I didn't know that could happen.
 ? choice

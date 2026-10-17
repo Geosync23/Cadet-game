@@ -44,7 +44,7 @@
 ? tier>=acquaintance warmth:cold
 - There you are. Thought the lift had eaten you. Where've you been hiding?   #funny
 ? tier>=colleague time:morning
-- Morning! Skipped breakfast. Don't tell Brennan. She'll send a tray down.   #funny
+- Morning! Last in to breakfast again. Coils. Don't tell Brennan.   #funny
 ? tier>=colleague
 - {hi}, {nick}. Come down to Deck 6 one day. I'll introduce you to the coils.
 ? tier>=close
@@ -296,7 +296,7 @@
 ? flag:walk.lift.4
 - Two's Survey and the seniors. Three's food. Important.   #funny
 ? flag:walk.lift.5
-- Ladder's behind the glass. Some take it. For the exercise.   #funny
+- The ladder's behind the glass. Maintenance only. Thirty-one rungs.
 // point: wing
 ? flag:walk.wing.1
 - Deck 4. Quarters. The junior wing's this way.
@@ -378,7 +378,7 @@
 ? flag:walk.more.6
 - Reyes and I leave each other notes about them. Every shift.
 ? flag:walk.more.7
-- I skip breakfast most days. Ten more minutes with the coils.
+- I'm last in to breakfast most days. Ten more minutes with the coils.
 ? flag:walk.more.8
 - Never skip tea, though. That's a rule. My rule.   #funny
 ? flag:walk.more.9
@@ -390,7 +390,7 @@
 
 // ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
 == smalltalk
-- Ten more minutes with the coils. Breakfast can wait.
+- Ten more minutes with the coils. Breakfast in five.
 ? mem:moment.torres.scarf
 - Row forty-two of the scarf. It's getting long.   #funny
 ?
@@ -407,7 +407,7 @@
 - Don't tell Calder I told you. Well. Do.   #funny
 
 // Writer 4, batch 6: Zeke's ordinary weeks, after week one. Mostly not work: music and the record cabinet, the
-// lyric argument, knitting badly with Kovac and Dahl, tea, sweet things, skipping breakfast, the gym after shift
+// lyric argument, knitting badly with Kovac and Dahl, tea, sweet things, late breakfasts, the gym after shift
 // (new), the observatory, Reyes's notes. Card gates kept: no father, no Engine Specialist list; no scarf here.
 
 == greet

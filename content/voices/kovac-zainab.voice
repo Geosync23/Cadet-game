@@ -8,16 +8,16 @@
 // precise way once she trusts you. Counts things.
 // WITH YOU: grateful you didn't make a fuss; slowly, a friend who notices what you need before you do.
 // WHAT SHE NOTICES: tolerances, seals, how a thing is put back together, who left the spanners out of order.
-// MOOD TELLS: happy = knits at the tea corner, talks about filters. Low = re-sorts the spanners. Scared = "I'll take the
-// ladder. Exercise."
+// MOOD TELLS: happy = knits at the tea corner, talks about filters. Low = re-sorts the spanners. Scared = holds the lift
+// rail with both hands: "Lovely lift."
 // NEVER: loud; cruel; admits the lift thing until her arc (beat:kovac.2); hurries a job.
 // RUNNING: ten minutes flat for a scrubber (she's timed it: it's nine and a half); the knitting circle (her scarves
-// are perfect; Torres's are not, and she's too kind to say so); the ladder club (she, Cruz and Keane each think
+// are perfect; Torres's are not, and she's too kind to say so); the lift club (she, Cruz and Keane each think
 // they're the only one afraid of the lift); her birthday is the day after Calder's.
 tpl: shy
 talk: Shy, careful, exact; short sentences, a word then a pause; says sorry for nothing; fluent and even bossy about scrubbers; quietly funny once she trusts you.
 cares: doing a job exactly right | her knitting | the garden | not being noticed (and being noticed, a little)
-jokes: ten minutes flat for a scrubber (it's nine and a half) | her scarves are perfect, Torres's are not | "I'll take the ladder. Exercise." | re-sorts the spanner wall when nobody's looking
+jokes: ten minutes flat for a scrubber (it's nine and a half) | her scarves are perfect, Torres's are not | "Lovely lift." (both hands on the rail) | re-sorts the spanner wall when nobody's looking
 hi: Oh. Hi | Um, hello | Hi
 bye: Bye, then | See you | Mind the seals
 yes: Okay | If you like | Yes. Yes, fine

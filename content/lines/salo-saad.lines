@@ -6,7 +6,7 @@
 - Hello, hello. New? Take your time. Nobody's hurried down here. The coils don't like it.
 - Hi there. Engine room's Deck 6. Ask me anything. Twice, if you like. No rush.
 ? tier>=acquaintance time:morning
-- Hello, {me}. Skipped breakfast again. I'll eat at tea. Tea's a meal if you try.   #funny
+- Hello, {me}. Two-bite breakfast again. I'll eat at tea. Tea's a meal if you try.   #funny
 ? tier>=acquaintance
 - Oh, hello. Last time on the Halcyon: my twin lost a boot. More news Friday.   #funny
 ? tier>=colleague
@@ -95,7 +95,7 @@
 ? time:evening
 - Ten o'clock soon. Bed. Always.
 ? act:breakfast
-- Skipped breakfast. Tea's a meal.   #funny
+- Two-bite breakfast. Tea's a meal.   #funny
 ? act:work
 - Once more, slowly. There.
 ?
