@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.27
+   STARSHIP CADET: CSV Wren                           build 0.28.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.27';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.28';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9917,6 +9917,7 @@ function playerUpdate(dt, t) {
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
+  dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
     : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
@@ -10074,6 +10075,31 @@ function bagLockerTap(point) {                           // a tap in Bunk 1 with
   if (!rm || rm.name !== 'Bunk 1') return false;
   approach(new THREE.Vector3(point.x, 0, point.z), 0, 0, () => bagStow(false));
   return true;
+}
+// the arrival dinner (0.28.28, the lead's polish row): you sit at the table instead of standing. playerSitNear(deck,
+// tile, title) sits you at the free public seat nearest that tile (within DINNER_NEAR m; false if none or you're
+// elsewhere); section 21 may call it. dinnerTick() does it once by itself: section 21's 'chief' step (your table in the
+// mess) while it's yours, or in its first DINNER_MINS after you reached it, when you stand idle within DINNER_NEAR of
+// its checkpoint. Tap anywhere to get up, as with any seat.
+const DINNER_NEAR = 3, DINNER_MINS = 30;
+let DINNER_SAT = false;
+function playerSitNear(deck, tile, title = 'Mess table') {
+  if (typeof PLACE_OF === 'undefined' || typeof deckDef === 'undefined' || deckDef.num !== deck) return false;
+  const c = cellPos(...tile), seat = [...PLACE_OF.values()].filter(pl => SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl) && !heldBy(pl.id))
+    .map(pl => [pl, placeSpot(pl.id)]).filter(([, sp]) => sp && sp.pose === 'sit' && Math.hypot(sp.x - c.x, sp.z - c.z) < DINNER_NEAR)
+    .sort((m, n) => Math.hypot(m[1].x - c.x, m[1].z - c.z) - Math.hypot(n[1].x - c.x, n[1].z - c.z))[0];
+  if (!seat) return false;
+  actStart('sit', seat[0].id, { pose: seat[1].pose, title, after: 'You sit down at the table. Tap anywhere to get up.' });
+  return true;
+}
+function dinnerTick() {
+  if (DINNER_SAT || ACT || player.path.length || typeof introOn !== 'function' || !introOn()) return;
+  const I = SHIP.intro, st = typeof introStepById === 'function' ? introStepById('chief') : null, cp = st && st.checkpoint;
+  if (!cp || deckDef.num !== cp.deck) return;
+  const done = (I.done || {}).chief, yours = I.step === 'chief' || done !== undefined && !(I.missed || []).includes('chief') && shipNow() - done < DINNER_MINS;
+  if (!yours) return;
+  const c = cellPos(...cp.tile), p = player.obj.position; if (Math.hypot(p.x - c.x, p.z - c.z) > DINNER_NEAR) return;
+  DINNER_SAT = playerSitNear(cp.deck, cp.tile);
 }
 const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };

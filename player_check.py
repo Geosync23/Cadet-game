@@ -749,6 +749,19 @@ with sync_playwright() as pw:
       return JSON.stringify(out);
     })()"""))
     print('  kit bag and device lock (0.28.26):', kb, walked, kb2)
+    # the arrival dinner (0.28.28): at your table for the Chief's step, idle, you sit down by yourself, once
+    dn0 = json.loads(ev("""(() => {
+      const real = typeof introBegin === 'function';
+      if (real) { introBegin(); setShipNow(introAbs(0, 1111)); for (const st of INTRO_STEPS) { if (st.id === 'chief') break; SHIP.intro.done[st.id] = introAbs(0, st.at); } }
+      else { SHIP.intro = { on: true, ended: false, done: {}, missed: [], flags: {} }; window.introStepById = id => id === 'chief' ? { id, checkpoint: { deck: 3, tile: [28, 2] } } : null; }
+      SHIP.intro.step = 'chief'; SHIP.player.carry = []; actEnd(true); goToDeck(3);
+      const w = cellPos(28, 2), c = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...c)); player.path.length = 0;
+      return JSON.stringify([real, c]); })()"""))
+    for _ in range(10): page.evaluate('window.__step(15, 1000 / 30)')
+    dn = json.loads(ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.placeId, DINNER_SAT])"))
+    print('  the arrival dinner (0.28.28):', dn0, dn)
+    check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True, f'at your table for the dinner you sit down: {dn}')
+    ev("actEnd(true); SHIP.intro.ended = true; goToDeck(4)")
     check(kb[0] == ['kitbag'], f'at the ramp you hold one kit bag: {kb[0]}')
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
