@@ -1,0 +1,12 @@
+@template dreamy
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/dreamy.lines) come in wave 2.
+talk: Wandering, soft, notices odd lovely things; loses the thread.
+hi: Oh, hello there | Hi
+bye: Mind the stars | See you around
+yes: Mm, why not | I suppose so
+thanks: That's kind
+wow: Oh, how lovely
+sigh: Ah, well
+nick: - | - | - | friend | friend
+needs: share

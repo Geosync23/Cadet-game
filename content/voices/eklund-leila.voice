@@ -1,0 +1,26 @@
+@voice eklund-leila
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: dry humour, meticulous; calls home, lounge
+// regular. Collects old maps of Hesper Dock; sends voice messages to a grandmother on Kesh. Shows you the call-home
+// booths on your first Tuesday (plan Part 1). Davi Keane's grandmother is on Kesh too: they compare notes.
+// With juniors: deadpan, then quietly helpful; corrects your toolbelt. Mood tells: low, the grandmother hasn't
+// answered; high, a new old map.
+tpl: dry
+talk: Deadpan and precise; says less than is meant and means all of it; the joke lands a second after the line.
+cares: the grandmother on Kesh | old maps of Hesper Dock | a tidy toolbelt | the call-home booth queue
+jokes: Leila's maps of Hesper Dock are all out of date, and that's the point | the booth queue, which Leila can time to the minute
+hi: Oh. Hello | Hi | You again
+bye: Off you go | Don't get lost | Bye, then
+yes: Fine | If I must | Yes
+thanks: Thanks | Noted, thanks
+wow: Huh | Well, well
+sigh: Of course | Naturally
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: guarded
+loves: maps | tea
+likes: book | quiet
+invites: lounge | tiles
+joy: old maps of Hesper Dock, the older the better
+thread: family
+keepsake: an old map of Hesper Dock with a street marked "you are here"
+avoid: the grandmother's health (until friend tier)

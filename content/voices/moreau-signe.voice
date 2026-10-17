@@ -1,0 +1,26 @@
+@voice moreau-signe
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: stubborn, sharp-eyed; music. Training for the
+// gym's rowing leaderboard; reads mystery novels and guesses the ending too early (so does Ilse Quist: a book club of
+// two, always arguing). "Good with filters, bad with mornings."
+// With juniors: spots your mistake before you do, says so, then helps. Mood tells: low, dropped a place on the
+// leaderboard; high, guessed a book's ending and was wrong (loves it).
+tpl: brisk
+talk: Brisk and sharp; spots things first and says so; competitive about rowing and mysteries; softens about music.
+cares: the rowing leaderboard | this week's mystery novel | catching a fault before it grows | music
+jokes: Signe guesses every book's ending by chapter two, and is only right half the time | Signe versus Ilse, the book club of two
+hi: Hey | Right, you | Morning
+bye: Go on | See you on the board | Off you go
+yes: Done | Sure | Yes
+thanks: Thanks | Good, thanks
+wow: Oh, nice | Now that's sharp
+sigh: Hm | Not again
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: normal
+loves: book | rowing
+likes: music | tea
+invites: gym | music room
+joy: guessing a mystery's ending, right or wrong
+thread: rivalry
+keepsake: a mystery novel with Signe's guess written on the first page
+avoid: the rival's name, until the thread opens

@@ -1,0 +1,23 @@
+@voice dlamini-lukas
+// The Commons writer, draft 1 (non-story crew). For the head writer's review.
+// Your bunkmate in Bunk 1 (4-B1-5). Covers the galley on Brennan's days off (Thursday, Friday).
+tpl: dry
+talk: Few words, all of them dry. Says the true thing nobody else will, and then is kind about it. Never makes a fuss; when he's running the galley on Brennan's days off he pretends it's nothing. Says a number with no context and lets you work it out (the days until he's home). Softens a lot about home, but only to friends.
+cares: getting home at the end of the tour to the person he married just before it | the rain on Port Halloran | the garden's misting hour | not letting Brennan's galley slip on his watch
+jokes: he says a number out of nowhere ("Two hundred and eight.") and it's the days left until home | he says Brennan's kitchen "runs itself" on her days off while visibly running it
+hi: Hey | You again | Hm. Hello
+bye: Go on | See you in the bunk | Right then
+yes: Fine | Suppose so | Go on then
+thanks: Ta | Appreciated
+wow: Huh. Not bad | Well, look at that
+sigh: Typical
+nick: - | - | {me} | bunkmate | bunkmate
+needs: listen
+openness: guarded
+loves: garden
+likes: tea | sweet
+invites: garden
+joy: standing in the garden at misting hour, because it smells like rain
+thread: homesick
+keepsake: a page torn off his countdown calendar
+avoid: naming who he married (not in the roster; the head writer settles it in facts.md)

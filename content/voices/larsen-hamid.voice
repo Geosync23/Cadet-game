@@ -1,0 +1,22 @@
+@voice larsen-hamid
+// The Commons writer, draft 1 (non-story crew). Infirmary aide, day.
+tpl: chatty
+talk: Talks a lot, all of it in earnest. Shares health facts nobody asked for, kindly and at length. Has a plan for everything, especially the boat. Learning the guitar, badly, with Tamsin, and is honest that it isn't going well. Has started going to bed on time and is a bit smug about it.
+cares: the boat he's saving for on the Ostrander colonies | getting the guitar right | everyone drinking enough water | the infirmary running smoothly
+jokes: the boat has a name already, and the name changes every week | he and Tamsin practise guitar together, which makes it worse
+hi: Hello hello | Ah, there you are | Hi there
+bye: Drink some water! | Take care of yourself | Off you go, then
+yes: Absolutely | Course I will | Yes, good idea
+thanks: Thanks so much | That's brilliant, thanks
+wow: Oh, look at that | Brilliant
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: music
+likes: sweet | book
+invites: music
+joy: counting up the boat fund
+thread: leaving
+keepsake: a sketch of the boat, with every name he's given it crossed out but one
+avoid: telling anyone their own health details (he talks facts, never patients)
