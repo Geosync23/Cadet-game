@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.35
+   STARSHIP CADET: CSV Wren                           build 0.26.36
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.35';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.36';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -18259,7 +18259,7 @@ const K = c => c[0] + ',' + c[1];
 function occupiedBy(except) {                 // cells other people stand in, or are heading to
   const s = new Set();
   for (const o of walkers) if (o !== except && o.active) { s.add(K(o.here())); if (o.goal) s.add(K(o.goal)); }
-  for (const a of DECK_CREW) if (a.settled && a.spot && a.spot.onTile) s.add(K(a.spot.walk));   // crew standing at their place
+  for (const a of DECK_CREW) if (a.settled && a.spot && a.spot.onTile && !(except && except.isPlayer && sharedTile(a.spot.walk))) s.add(K(a.spot.walk));   // crew standing at their place (on a tile two places share, they make way for you: 0.26.36)
   return s;
 }
 function nearestOpen(x, z, who) {
@@ -18517,6 +18517,38 @@ function crewHold(p, placeId) {
   if (placeId === undefined) { CREW_HELD.delete(id); return () => {}; }
   CREW_HELD.set(id, placeId); return () => { if (CREW_HELD.get(id) === placeId) CREW_HELD.delete(id); };
 }
+// crewMakeWay(tile, mins) clears any tile for you (0.26.36; a shared tile clears by itself, sharedTile): crew whose place stands on it, or who stand on it, step to an
+// open tile beside it in the same room and wait there, until the function it returns is called or `mins` ship minutes
+// pass (default 10). For section 15 before walking you to a place that shares its tile with a crew station (the galley
+// cook at 3-galley-2 stands on 3-range-1's panel tile [39, 4]). Cleared with the deck
+const CREW_WAY = new Map();                              // tile key -> until (ship minutes)
+function crewMakeWay(tile, mins = 10) {
+  if (!Array.isArray(tile)) return () => {};
+  const k = K(tile), until = shipNow() + mins; CREW_WAY.set(k, until);
+  return () => { if (CREW_WAY.get(k) === until) CREW_WAY.delete(k); };
+}
+// a tile two places on this deck share as their walk-to tile (the galley cook's station 3-galley-2 on 3-range-1's
+// panel): a crew member settled there makes way while you head for it or use a place on it (the lead, 0.26.36)
+let SHARED_T = null;
+function sharedTile(t) {
+  if (!SHARED_T || SHARED_T.d !== deckDef) { const n = new Map(); for (const pl of PLACE_OF.values()) { const sp = placeSpot(pl.id), k = sp && K(sp.walk); if (k) n.set(k, (n.get(k) || 0) + 1); }
+    SHARED_T = new Set([...n].filter(([, c]) => c > 1).map(([k]) => k)); SHARED_T.d = deckDef; }
+  return !!t && SHARED_T.has(K(t));
+}
+function crewWayOn(now) {
+  for (const [k, u] of CREW_WAY) if (u <= now) CREW_WAY.delete(k);
+  const you = [player.path.length && player.goal, PLAYER_PLACE && placeSpot(PLAYER_PLACE) && placeSpot(PLAYER_PLACE).walk].filter(t => t && sharedTile(t));
+  if (!you.length) return CREW_WAY.size ? CREW_WAY : null;
+  const out = new Map(CREW_WAY); for (const t of you) out.set(K(t), now + 1); return out;
+}
+function asideTile(at, way) {                            // an open tile next to `at`, same room, not one being kept clear
+  const rm = roomAt(...at);
+  for (let r = 1; r <= 2; r++) for (let di = -r; di <= r; di++) for (let dj = -r; dj <= r; dj++) {
+    if (Math.max(Math.abs(di), Math.abs(dj)) !== r) continue;
+    const t = [at[0] + di, at[1] + dj]; if (free(...t) && !way.has(K(t)) && roomAt(...t) === rm) return t;
+  }
+  return null;
+}
 const liftTiles = () => (ROOM_TILES['@'] || []).slice().sort((a, b) => a[1] - b[1] || a[0] - b[0]);
 class CrewAgent {
   constructor(p, cell) {
@@ -18570,6 +18602,17 @@ class CrewAgent {
     if (goalId && (goalId === PLAYER_PLACE || BUSY.has(goalId) && !(this.settled && this.spot && this.spot.id === goalId))) goalId = this.elsewhere(goalId);   // you're using it (section 15), or someone's sat there: another seat, else wait nearby
     const held = CREW_HELD.get(this.p.id);
     if (held !== undefined) { goalId = held || (this.goalId !== '@lift' ? this.goalId : null); this.tag = null; }   // crewHold: kept here, whatever the plan says
+    const way = crewWayOn(now);                          // crewMakeWay: off a tile you're heading for, waiting beside it
+    if (way && goalId !== '@lift') {
+      const sp = goalId && placeSpot(goalId), here = this.here();
+      if (sp && (way.has(K(sp.walk)) || way.has(K(cellAt(sp.x, sp.z)))) || way.has(K(here))) {
+        if (this.goalId !== '@aside') {
+          const to = asideTile(here, way); this.retarget(null); this.goalId = '@aside';
+          const pth = to && crewPath(this.here(), to, new Set([...this.rooms, roomAt(...this.here())]), this); if (pth) this.path = pth;
+        }
+        goalId = '@aside'; this.tag = null;
+      }
+    }
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
     if (this.path.length) {
@@ -18744,7 +18787,7 @@ function crewDetail() {                                  // who gets a full rig:
 const BUSY = new Set(); let PLAYER_PLACE = null;
 const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); CREW_WAY.clear(); }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
