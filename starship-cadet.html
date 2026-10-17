@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.6
+   STARSHIP CADET: CSV Wren                           build 0.42.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.6';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.7';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14573,7 +14573,7 @@ function chatTick() {
 // taught by people (the shadow shift on Monday, your first solo job on Tuesday, Sowing morning on Saturday).
 // On paper so far (0.42.0): the steps, the week's beats, the Settling-in list, the flags and the save. Nothing calls
 // in here yet, nothing here draws anything or calls R(), and test URLs (?nosave) never start the intro.
-//   SHIP.intro = { on, step, since, day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, flags }
+//   SHIP.intro = { on, step, since, near: [tiles, minute], day, done: { stepId: shipMin }, missed: [stepId], settle: { itemId: shipMin }, skipped, ended, escort, flags }
 //   (the name you type on the manifest is section 15's SHIP.player.name, set with playerNameSet)
 //   INTRO_STEPS  the arrival evening, A0-A13: { id, day, at, until, who, where, mode, meeting, checkpoint, fallback, rel }
 //   INTRO_WEEK   Days 1-7: one beat per person who teaches you something, in their real day (section 14 plans them)
@@ -14670,7 +14670,7 @@ const INTRO_WEEK = [
   { id: 'd4-quiz', day: 4, at: 20 * 60, until: 21 * 60 + 30, who: 'pell', where: { deck: 3, room: 'Bow lounge' }, settle: 'tradition' },
   { id: 'd5-mug', day: 5, at: 10 * 60 + 30, until: 11 * 60, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'] },
   { id: 'd5-invite', day: 5, at: 18 * 60, who: 'tomas', invite: { trad: 'sowing', day: 6, from: 'tomas' } },
-  { id: 'd6-sowing', day: 6, at: 9 * 60, until: 10 * 60, who: 'tomas', where: { deck: 3, room: 'Hydroponics garden' }, settle: 'dayoff', flags: ['seedling'] },
+  { id: 'd6-sowing', day: 6, at: 11 * 60 + 45, until: 12 * 60 + 40, who: 'tomas', where: { deck: 3, room: 'Hydroponics garden' }, settle: 'dayoff', flags: ['seedling'] },
   { id: 'd7-calder', day: 7, at: 18 * 60, who: null, mail: { from: 'I. Calder', subject: 'One week', body: 'One week. You\'ll do. — I. Calder' } },
   { id: 'd8-done', day: 8, at: 0, who: null, flags: ['week1.done'], end: true },
 ];
@@ -14722,7 +14722,7 @@ function settleNote(kind, data) {
 }
 
 // ---- the state and the save (save.intro, read defensively) ----
-const introBlank = () => ({ on: false, step: null, since: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, flags: {} });
+const introBlank = () => ({ on: false, step: null, since: null, near: null, day: 0, done: {}, missed: [], settle: {}, skipped: false, ended: false, escort: INTRO_ESCORT, flags: {} });
 function introLoad(s) {
   const I = introBlank(), x = s && s.intro;
   if (!x || typeof x !== 'object') return I;
@@ -14730,6 +14730,7 @@ function introLoad(s) {
   I.step = INTRO_STEPS.some(t => t.id === x.step) || INTRO_WEEK.some(t => t.id === x.step) ? x.step : null;
   I.day = Number.isInteger(x.day) ? x.day : 0;
   I.since = x.since !== null && isFinite(x.since) ? +x.since : null;
+  I.near = Array.isArray(x.near) && x.near.length === 2 && x.near.every(isFinite) ? x.near.map(Number) : null;
   for (const k of ['done', 'settle', 'flags']) if (x[k] && typeof x[k] === 'object') for (const i in x[k]) if (isFinite(x[k][i]) || x[k][i] === true) I[k][i] = x[k][i];
   if (Array.isArray(x.missed)) I.missed = x.missed.filter(id => INTRO_STEPS.some(t => t.id === id));
   if (typeof x.escort === 'string') I.escort = x.escort;
@@ -14771,7 +14772,7 @@ function introDone(id, at = Math.floor(shipNow())) {
   for (const f of st.flags || []) introFlagSet(f);
   introNote('introStep', { step: id, who: st.who });
   const i = INTRO_STEPS.indexOf(st);
-  if (i >= 0) { I.step = i + 1 < INTRO_STEPS.length ? INTRO_STEPS[i + 1].id : null; I.since = at; }
+  if (i >= 0) { I.step = i + 1 < INTRO_STEPS.length ? INTRO_STEPS[i + 1].id : null; I.since = at; I.near = null; }
 }
 // the steps move on at minute t: here = { deck, tile } (the player), or null when the player isn't anywhere useful.
 // On paper the tests pass `here` themselves; wave 2's frame tick passes the player's.
@@ -14784,16 +14785,21 @@ function introAdvance(t, here) {
     const there = !cp || here && here.deck === cp.deck && introRoomAt(here.deck, here.tile) === cp.room
       && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= INTRO_REACH;
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
-    // the wait counts from when the step became yours; once you've missed one, he waits only 5 minutes at each until you
-    // catch up (so nobody slow loses a step, and the evening still ends by 20:00 if you never come)
+    // the wait counts from when the step became yours, or from the last minute you got nearer to it than the minute
+    // before, on its deck (so nobody on their way loses a step); once you've missed one, he waits only 5 minutes at
+    // each until you catch up (so the evening still ends by 20:00 if you never come)
+    if (cp && here && here.deck === cp.deck) {
+      const dist = Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1]));
+      I.near = [dist, I.near && dist < I.near[0] ? Math.floor(t) : I.near ? I.near[1] : at];   // [tiles away now, the last minute you got nearer]
+    }
     const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = prev && I.missed.includes(prev.id) ? Math.min(5, f.wait || 20) : (f.wait || 20);
-    const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since) + wait;
+    const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since, I.near ? I.near[1] : at) + wait;
     if (t < late) break;
     introMail(f.mail, late);                              // you weren't there: the gist by Mail, and on to the next one
     I.done[st.id] = late; I.missed.push(st.id); introNote('introStep', { step: st.id, who: st.who, missed: true });
     for (const fl of f.flags || []) introFlagSet(fl);
     const j = INTRO_STEPS.findIndex(x => x.id === f.later);
-    I.step = j >= 0 ? f.later : null; I.since = late;
+    I.step = j >= 0 ? f.later : null; I.since = late; I.near = null;
     for (const s of INTRO_STEPS.slice(INTRO_STEPS.indexOf(st) + 1, j)) if (I.done[s.id] === undefined) { I.done[s.id] = late; I.missed.push(s.id); }   // skipped over
   }
   for (const b of INTRO_WEEK) {                           // the week, by the clock

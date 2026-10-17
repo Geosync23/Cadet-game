@@ -22,7 +22,7 @@ from playwright.sync_api import sync_playwright
 # run the intro on paper, minute by minute from Day 0 17:40 to `to` (absolute ship minutes); `who`: 'happy' (always at
 # the checkpoint), 'wander' (misses every other step of the evening), 'idle' (never anywhere). reload: save and load
 # section 21's state at every step change. Returns the intro, the points, the flags, the Mail it sent and the order.
-RUN = r"""(({ who, reload, to, skip, endAt }) => {
+RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
   const FLAGS = INTRO_FLAGS;
   socInit(); socReset(0); SHIP.mail.length = 0;
   SHIP.intro = introBlank(); SHIP.notes = [];   // section 13's flags are NOT reset: introBegin must clear what the last run left
@@ -37,6 +37,10 @@ RUN = r"""(({ who, reload, to, skip, endAt }) => {
     if (who === 'idle' || (who === 'wander' && st && INTRO_STEPS.indexOf(st) % 2)) here = null;
     if (who === 'slow' && st && t < Math.max(introAbs(st.day, st.at), SHIP.intro.since === null ? -1e9 : SHIP.intro.since) + 10) here = null;   // 10 ship minutes behind
     if (endAt !== undefined && t === endAt) introEnd(false);
+    if (who === 'pace' && st && st.checkpoint) {         // walking in: tiles away = minutes left until you arrive (one step slow, then a steady pace)
+      const took = pace[st.id] !== undefined ? pace[st.id] : pace.rest, left = Math.max(introAbs(st.day, st.at), SHIP.intro.since === null ? -1e9 : SHIP.intro.since) + took - t;
+      const c = st.checkpoint; here = left <= 0 ? { deck: c.deck, tile: c.tile } : { deck: c.deck, tile: [c.tile[0] + left, c.tile[1]] };
+    }
     introAdvance(t, here);
     for (const f of FLAGS) if (flagAt[f] === undefined && introFlag(f)) flagAt[f] = t;
     if (SHIP.intro.step !== last) {
@@ -91,7 +95,8 @@ DATA = r"""(() => {
   for (const m in INTRO_MEETINGS) for (const w of INTRO_MEETINGS[m].cast) if (!/^works:/.test(w) && !ids.has(w)) bad.push(m + ': nobody called ' + w);
   const off = id => { const p = ROSTER.find(x => x.id === id); return p && p.rota ? (p.rota.offDays || []).slice().sort().join(',') : '?'; };
   const rota = { 'torres-zeke': [off('torres-zeke'), '3,4'], calder: [off('calder'), '5,6'], 'halloran-emeka': [off('halloran-emeka'), '5,6'] };
-  return { bad, rota, steps: INTRO_STEPS.length, week: INTRO_WEEK.length, settle: SETTLE.length };
+  const v = GAME_BUILD.split('.').map(Number);
+  return { bad, rota, combined: v[0] > 0 || v[1] >= 60, steps: INTRO_STEPS.length, week: INTRO_WEEK.length, settle: SETTLE.length };
 })()"""
 
 # one note that should tick each item (the kinds other sections will send; DEV_NOTES "Hook register")
@@ -145,6 +150,7 @@ with sync_playwright() as pw:
     for b in d['bad']: fail(b)
     for who, (has, want) in d['rota'].items():
         print(f"  {who} off days {has}{'' if has == want else ', WAITING for the crew designer: the week needs ' + want}")
+        if has != want and d['combined']: fail(f'{who} has days off {has}; the first week needs {want} (combined builds 0.60+)')
 
     run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
     EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
@@ -186,6 +192,11 @@ with sync_playwright() as pw:
     sl = run(who='slow', to=EVENING)
     print(f"  slow (10 ship minutes behind at every step): missed {len(sl['I']['missed'])} {sl['I']['missed']}")
     if sl['I']['missed']: fail('a player 10 minutes behind missed steps: ' + ', '.join(sl['I']['missed']))
+    for pc in ({'haulway': 25, 'rest': 7}, {'lift': 25, 'rest': 6}, {'bunk': 35, 'rest': 7}):
+        pr = run(who='pace', pace=pc, to=EVENING)
+        slow = [k for k in pc if k != 'rest']
+        print(f"  one slow step then steady {pc}: missed {pr['I']['missed']}")
+        if [m for m in pr['I']['missed'] if m not in slow]: fail(f'one slow step costs others: {pr["I"]["missed"]}')
     en = run(who='idle', endAt=1440 + 7 * 60)
     print('  idle, then "I know my way around" on Monday 07:00:', ', '.join(f for f, v in en['flags'].items() if not v) or 'every flag set', 'unset')
     for f in ['intro.device', 'met.calder', 'week1.done'] + [f'week1.d{d}' for d in range(2, 8)]:
