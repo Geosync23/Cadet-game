@@ -3,7 +3,7 @@
 #   0. test URLs (?nosave&debug) start with the intro off: Day 1 06:00, no escort, no beats (so every other check is unchanged)
 #   1. the data: steps and beats in time order, everyone named is on the roster, every checkpoint tile is in its room on
 #      its deck's map, every fallback leads to a real step, every meeting and Settling-in item is known
-#   2. the happy path on paper: a player always at the checkpoint, Day 0 17:40 to Day 8; every step in order, the
+#   2. the happy path on paper: a player always at the checkpoint, Day 0 17:30 to Day 8; every step in order, the
 #      week's flags at their times, the arrival evening's points (Torres 10, Tomas 10, Pell 5, Calder 3, Brennan 3)
 #   3. the wanderer (misses every other step) and the idler (never there): the fallbacks' Mail, the evening still ends
 #      by 20:00, the week still ends on Day 8
@@ -21,7 +21,7 @@ import sys, json
 exec(open(__file__.replace('intro_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
-# run the intro on paper, minute by minute from Day 0 17:40 to `to` (absolute ship minutes); `who`: 'happy' (always at
+# run the intro on paper, minute by minute from Day 0 17:30 to `to` (absolute ship minutes); `who`: 'happy' (always at
 # the checkpoint), 'wander' (misses every other step of the evening), 'idle' (never anywhere). reload: save and load
 # section 21's state at every step change. Returns the intro, the points, the flags, the Mail it sent and the order.
 RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
@@ -212,6 +212,7 @@ def week(g):
             if not sow['sow']: fail('Tomas was never brought to the garden for Sowing')
 
 WEEK_ONLY = '--week' in sys.argv
+EVENING_ONLY = '--evening' in sys.argv   # part 8 alone: the evening walked in the real game (the tour's quick check)
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
@@ -221,109 +222,111 @@ with sync_playwright() as pw:
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
 
-    print('0. Test URLs start with the intro off')
-    st = g.ev("({ on: introOn(), s: SHIP.intro.on, day: SHIP.time.day, min: Math.floor(SHIP.time.min), esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), beats: introBeats(INTRO_ESCORT, 1).length })")
-    print(f"  intro {'on' if st['on'] else 'off'}, Day {st['day']} {st['min'] // 60:02d}:{st['min'] % 60:02d}, escort plan {st['esc']}, beats {st['beats']}")
-    if st['on'] or st['s']: fail('the intro is on at a test URL')
-    if (st['day'], st['min']) != (1, 360): fail('a test URL should start at Day 1 06:00')
-    if st['esc'] is not None or st['beats']: fail('the escort or the beats are live with the intro off')
+    steps = g.ev("INTRO_STEPS.map(s => s.id)")   # (part 8 needs it with --evening too)
+    if not EVENING_ONLY:   # --evening: part 8 alone (the tour's quick check)
+        print('0. Test URLs start with the intro off')
+        st = g.ev("({ on: introOn(), s: SHIP.intro.on, day: SHIP.time.day, min: Math.floor(SHIP.time.min), esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), beats: introBeats(INTRO_ESCORT, 1).length })")
+        print(f"  intro {'on' if st['on'] else 'off'}, Day {st['day']} {st['min'] // 60:02d}:{st['min'] % 60:02d}, escort plan {st['esc']}, beats {st['beats']}")
+        if st['on'] or st['s']: fail('the intro is on at a test URL')
+        if (st['day'], st['min']) != (1, 360): fail('a test URL should start at Day 1 06:00')
+        if st['esc'] is not None or st['beats']: fail('the escort or the beats are live with the intro off')
 
-    print('1. The data')
-    d = g.ev(DATA)
-    print(f"  {d['steps']} steps on the arrival evening, {d['week']} beats in the week, {d['settle']} Settling-in items")
-    for b in d['bad']: fail(b)
-    for who, (has, want) in d['rota'].items():
-        print(f"  {who} off days {has}{'' if has == want else ', WAITING for the crew designer: the week needs ' + want}")
-        if has != want and d['combined']: fail(f'{who} has days off {has}; the first week needs {want} (combined builds 0.60+)')
+        print('1. The data')
+        d = g.ev(DATA)
+        print(f"  {d['steps']} steps on the arrival evening, {d['week']} beats in the week, {d['settle']} Settling-in items")
+        for b in d['bad']: fail(b)
+        for who, (has, want) in d['rota'].items():
+            print(f"  {who} off days {has}{'' if has == want else ', WAITING for the crew designer: the week needs ' + want}")
+            if has != want and d['combined']: fail(f'{who} has days off {has}; the first week needs {want} (combined builds 0.60+)')
 
-    run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
-    EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
-    WANT = {'torres-zeke': 10, 'tomas': 10, 'pell': 5, 'calder': 3, 'brennan': 3}
+        run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
+        EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
+        WANT = {'torres-zeke': 10, 'tomas': 10, 'pell': 5, 'calder': 3, 'brennan': 3}
 
-    print('2. The happy path, on paper (Day 0 17:40 to Day 8 00:00)')
-    a = run()
-    steps = g.ev("INTRO_STEPS.map(s => s.id)")
-    order = [k for k in a['I']['done'] if k in steps]
-    print('  order:', ' > '.join(order))
-    if order != steps: fail('the steps did not run in order: ' + ', '.join(order))
-    missed = a['I']['missed']
-    if missed: fail('missed with the player there: ' + ', '.join(missed))
-    if a['rel'] != WANT: fail(f"points after the week: {a['rel']}, wanted {WANT}")
-    print('  points:', a['rel'])
-    when = {f'week1.d{d}': (d - 1) * 1440 + 360 for d in range(2, 8)}
-    when['week1.done'] = 7 * 1440
-    print('  flags:', ', '.join(f"{f} {mins(a['flagAt'][f])}" for f in when if f in a['flagAt']))
-    for f, t in when.items():
-        if a['flagAt'].get(f) != t: fail(f"{f} at {mins(a['flagAt'][f]) if f in a['flagAt'] else 'never'}, wanted {mins(t)}")
-    if not a['I']['ended']: fail('the intro did not end on Day 8')
-    if 'd2-health:appt' not in a['I']['done']: fail('Tuesday\'s health check was never booked')
-    print('  mail:', '; '.join(f"{mins(int(m[0]))} {m[1]}: {m[2]}" for m in a['mail']))
-    if any(m[2] in ('Your bunk', 'Tomorrow') for m in a['mail']): fail('a fallback Mail went out with the player there')
+        print('2. The happy path, on paper (Day 0 17:30 to Day 8 00:00)')
+        a = run()
+        steps = g.ev("INTRO_STEPS.map(s => s.id)")
+        order = [k for k in a['I']['done'] if k in steps]
+        print('  order:', ' > '.join(order))
+        if order != steps: fail('the steps did not run in order: ' + ', '.join(order))
+        missed = a['I']['missed']
+        if missed: fail('missed with the player there: ' + ', '.join(missed))
+        if a['rel'] != WANT: fail(f"points after the week: {a['rel']}, wanted {WANT}")
+        print('  points:', a['rel'])
+        when = {f'week1.d{d}': (d - 1) * 1440 + 360 for d in range(2, 8)}
+        when['week1.done'] = 7 * 1440
+        print('  flags:', ', '.join(f"{f} {mins(a['flagAt'][f])}" for f in when if f in a['flagAt']))
+        for f, t in when.items():
+            if a['flagAt'].get(f) != t: fail(f"{f} at {mins(a['flagAt'][f]) if f in a['flagAt'] else 'never'}, wanted {mins(t)}")
+        if not a['I']['ended']: fail('the intro did not end on Day 8')
+        if 'd2-health:appt' not in a['I']['done']: fail('Tuesday\'s health check was never booked')
+        print('  mail:', '; '.join(f"{mins(int(m[0]))} {m[1]}: {m[2]}" for m in a['mail']))
+        if any(m[2] in ('Your bunk', 'Tomorrow') for m in a['mail']): fail('a fallback Mail went out with the player there')
 
-    print('3. The wanderer and the idler')
-    for who in ('wander', 'idle'):
-        e = run(who=who, to=EVENING)
-        late = [s for s in steps if s not in e['I']['done']]
-        miss = e['I']['missed']
-        print(f"  {who}: by Day 0 20:01 step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
-        if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by 20:01 (left: {', '.join(late)})")
-        if who == 'idle' and not {'Your bunk', 'Tomorrow'} <= {m[2] for m in e['mail']}: fail('idle: the fallback Mail did not all arrive')
-        if who == 'wander' and len(miss) < 5: fail(f'wander: only {len(miss)} steps missed; a step should not count from a nearby checkpoint')
-        w = run(who=who)
-        if not (w['flags']['intro.device'] and w['flags']['met.calder']): fail(who + ': no device or no Calder by the end of the week')
-        if who == 'idle' and e['flags']['intro.device']: fail('idle: the device counts as handed over though you never came')
-        if not w['I']['ended'] or not w['flags']['week1.done']: fail(who + ': the week did not end on Day 8')
+        print('3. The wanderer and the idler')
+        for who in ('wander', 'idle'):
+            e = run(who=who, to=EVENING)
+            late = [s for s in steps if s not in e['I']['done']]
+            miss = e['I']['missed']
+            print(f"  {who}: by Day 0 20:01 step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
+            if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by 20:01 (left: {', '.join(late)})")
+            if who == 'idle' and not {'Your bunk', 'Tomorrow'} <= {m[2] for m in e['mail']}: fail('idle: the fallback Mail did not all arrive')
+            if who == 'wander' and len(miss) < 5: fail(f'wander: only {len(miss)} steps missed; a step should not count from a nearby checkpoint')
+            w = run(who=who)
+            if not (w['flags']['intro.device'] and w['flags']['met.calder']): fail(who + ': no device or no Calder by the end of the week')
+            if who == 'idle' and e['flags']['intro.device']: fail('idle: the device counts as handed over though you never came')
+            if not w['I']['ended'] or not w['flags']['week1.done']: fail(who + ': the week did not end on Day 8')
 
-    sl = run(who='slow', to=EVENING)
-    print(f"  slow (10 ship minutes behind at every step): missed {len(sl['I']['missed'])} {sl['I']['missed']}")
-    if sl['I']['missed']: fail('a player 10 minutes behind missed steps: ' + ', '.join(sl['I']['missed']))
-    for pc in ({'haulway': 25, 'rest': 7}, {'lift': 25, 'rest': 6}, {'bunk': 35, 'rest': 7}):
-        pr = run(who='pace', pace=pc, to=EVENING)
-        slow = [k for k in pc if k != 'rest']
-        print(f"  one slow step then steady {pc}: missed {pr['I']['missed']}")
-        if [m for m in pr['I']['missed'] if m not in slow]: fail(f'one slow step costs others: {pr["I"]["missed"]}')
-    en = run(who='idle', endAt=1440 + 7 * 60)
-    print('  idle, then "I know my way around" on Monday 07:00:', ', '.join(f for f, v in en['flags'].items() if not v) or 'every flag set', 'unset')
-    for f in ['intro.device', 'met.calder', 'week1.done'] + [f'week1.d{d}' for d in range(2, 8)]:
-        if not en['flags'][f]: fail('ending early leaves ' + f + ' unset')
-    a2 = run(who='idle', to=EVENING)
-    if a2['flags']['intro.device'] or a2['flags']['week1.done']: fail('a second arrival kept the last game\'s flags')
-    print('4. Save and reload at every step')
-    r = run(reload=True)
-    print(f"  {r['steps']} reloads; the same as without: {r['intro'] == a['intro'] and r['rel'] == a['rel']}")
-    if r['intro'] != a['intro'] or r['rel'] != a['rel'] or r['flags'] != a['flags']: fail('reloading changed the run')
+        sl = run(who='slow', to=EVENING)
+        print(f"  slow (10 ship minutes behind at every step): missed {len(sl['I']['missed'])} {sl['I']['missed']}")
+        if sl['I']['missed']: fail('a player 10 minutes behind missed steps: ' + ', '.join(sl['I']['missed']))
+        for pc in ({'haulway': 25, 'rest': 7}, {'lift': 25, 'rest': 6}, {'bunk': 35, 'rest': 7}):
+            pr = run(who='pace', pace=pc, to=EVENING)
+            slow = [k for k in pc if k != 'rest']
+            print(f"  one slow step then steady {pc}: missed {pr['I']['missed']}")
+            if [m for m in pr['I']['missed'] if m not in slow]: fail(f'one slow step costs others: {pr["I"]["missed"]}')
+        en = run(who='idle', endAt=1440 + 7 * 60)
+        print('  idle, then "I know my way around" on Monday 07:00:', ', '.join(f for f, v in en['flags'].items() if not v) or 'every flag set', 'unset')
+        for f in ['intro.device', 'met.calder', 'week1.done'] + [f'week1.d{d}' for d in range(2, 8)]:
+            if not en['flags'][f]: fail('ending early leaves ' + f + ' unset')
+        a2 = run(who='idle', to=EVENING)
+        if a2['flags']['intro.device'] or a2['flags']['week1.done']: fail('a second arrival kept the last game\'s flags')
+        print('4. Save and reload at every step')
+        r = run(reload=True)
+        print(f"  {r['steps']} reloads; the same as without: {r['intro'] == a['intro'] and r['rel'] == a['rel']}")
+        if r['intro'] != a['intro'] or r['rel'] != a['rel'] or r['flags'] != a['flags']: fail('reloading changed the run')
 
-    print('5. Skip-intro')
-    s = run(skip=True)
-    e = run(to=EVENING)
-    # skip (0.42.6): the evening's points and steps, no scripted week, every gate open (all flags but mug and seedling)
-    want = {f: f not in ('mug', 'seedling') for f in s['flags']}
-    print(f"  points {s['rel']} (the evening's: {s['rel'] == e['rel']}); every gate open: {s['flags'] == want}; the week off: {s['I']['ended']}")
-    if s['rel'] != e['rel']: fail(f"skip gives {s['rel']}, the evening {e['rel']}")
-    if s['flags'] != want: fail(f"skip's flags: {[f for f in want if s['flags'][f] != want[f]]} wrong")
-    if any(e['flags'][f] and not s['flags'][f] for f in e['flags']): fail('skip lacks a flag the evening sets')
-    if sorted(s['I']['done']) != sorted(e['I']['done']): fail('skip marks different steps done')
-    if not (s['I']['skipped'] and s['I']['ended']): fail('skip is not marked skipped and ended')
-    sk = g.ev("(() => { introSkip(); const r = { on: introOn(), beats: introBeats('torres-zeke', 1).length + introBeats('calder', 2).length, esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), 1440 + 600) }; SHIP.intro = introBlank(); return r; })()")
-    if sk['on'] or sk['beats'] or sk['esc']: fail(f'skip still runs the week: {sk}')
+        print('5. Skip-intro')
+        s = run(skip=True)
+        e = run(to=EVENING)
+        # skip (0.42.6): the evening's points and steps, no scripted week, every gate open (all flags but mug and seedling)
+        want = {f: f not in ('mug', 'seedling') for f in s['flags']}
+        print(f"  points {s['rel']} (the evening's: {s['rel'] == e['rel']}); every gate open: {s['flags'] == want}; the week off: {s['I']['ended']}")
+        if s['rel'] != e['rel']: fail(f"skip gives {s['rel']}, the evening {e['rel']}")
+        if s['flags'] != want: fail(f"skip's flags: {[f for f in want if s['flags'][f] != want[f]]} wrong")
+        if any(e['flags'][f] and not s['flags'][f] for f in e['flags']): fail('skip lacks a flag the evening sets')
+        if sorted(s['I']['done']) != sorted(e['I']['done']): fail('skip marks different steps done')
+        if not (s['I']['skipped'] and s['I']['ended']): fail('skip is not marked skipped and ended')
+        sk = g.ev("(() => { introSkip(); const r = { on: introOn(), beats: introBeats('torres-zeke', 1).length + introBeats('calder', 2).length, esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), 1440 + 600) }; SHIP.intro = introBlank(); return r; })()")
+        if sk['on'] or sk['beats'] or sk['esc']: fail(f'skip still runs the week: {sk}')
 
-    print('6. Determinism')
-    b = run()
-    print('  the same twice:', b['intro'] == a['intro'] and b['mail'] == a['mail'])
-    if b['intro'] != a['intro'] or b['mail'] != a['mail']: fail('the happy path came out differently the second time')
+        print('6. Determinism')
+        b = run()
+        print('  the same twice:', b['intro'] == a['intro'] and b['mail'] == a['mail'])
+        if b['intro'] != a['intro'] or b['mail'] != a['mail']: fail('the happy path came out differently the second time')
 
-    print('7. The Settling-in list, and the job notes')
-    jn = g.ev("(() => { introBegin(); introJobNote({ step: 'take', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 0 }); const r = Object.keys(SHIP.intro.done); SHIP.intro = introBlank(); return r; })()")
-    print('  slot 1 turned in ->', jn)
-    if jn != ['d1-shadow:job']: fail('the shadow shift\'s note: ' + str(jn))
-    t = g.ev(SETTLE_NOTES)
-    print('  every item ticks from its own note:', not t['bad'], '| all done sends the note:', t['all'])
-    for x in t['bad']: fail(x)
-    if not t['all']: fail('ticking everything did not finish the list')
+        print('7. The Settling-in list, and the job notes')
+        jn = g.ev("(() => { introBegin(); introJobNote({ step: 'take', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 1 }); introJobNote({ step: 'turnin', reserved: 0 }); const r = Object.keys(SHIP.intro.done); SHIP.intro = introBlank(); return r; })()")
+        print('  slot 1 turned in ->', jn)
+        if jn != ['d1-shadow:job']: fail('the shadow shift\'s note: ' + str(jn))
+        t = g.ev(SETTLE_NOTES)
+        print('  every item ticks from its own note:', not t['bad'], '| all done sends the note:', t['all'])
+        for x in t['bad']: fail(x)
+        if not t['all']: fail('ticking everything did not finish the list')
 
-    tl = g.ev("typeof introTourLines === 'function' ? INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, introWriterLine('walk.' + x.id + '.1') ? 'writers' : 'stand-ins']) : null")
-    if tl: print('  Torres\'s tour (lines per place):', ', '.join(f'{i} {n} ({w})' for i, n, w in tl))
-    if tl and g.ev("typeof LINES !== 'undefined' && !!LINES.crew && !!LINES.crew['torres-zeke']") and any(w != 'writers' for i, n, w in tl): fail('the writers\' tour lines are in this build but a place has none: ' + str([i for i, n, w in tl if w != 'writers']))
+        tl = g.ev("typeof introTourLines === 'function' ? INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, introWriterLine('walk.' + x.id + '.1') ? 'writers' : 'stand-ins']) : null")
+        if tl: print('  Torres\'s tour (lines per place):', ', '.join(f'{i} {n} ({w})' for i, n, w in tl))
+        if tl and g.ev("typeof LINES !== 'undefined' && !!LINES.crew && !!LINES.crew['torres-zeke']") and any(w != 'writers' and c for (i, n, w), c in zip(tl, g.ev('INTRO_TOUR.map(x => x.core)'))): fail('the writers\' tour lines are in this build but a talking place has none: ' + str([i for (i, n, w), c in zip(tl, g.ev('INTRO_TOUR.map(x => x.core)')) if w != 'writers' and c]))   # 0.42.27: the quiet places (core 0) have none
     print('8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)')
     if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
@@ -371,6 +374,8 @@ with sync_playwright() as pw:
             if r['step'] == 'table' and dinner is None:   # the lead's condition for the longer tour: dinner still hot, seats and crew there
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
+                hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
+                if tmin > 18 * 60 + 20: fail(f'the tour is too long: you reach the table at {hm} (the user after 0.60.3: a little after 18:00, from 17:30)')   # 0.42.27
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
@@ -381,6 +386,11 @@ with sync_playwright() as pw:
         if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
         elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
         if not bunkAt: fail('the first-night arrow never pointed to your bunk before 20:00')
+        gn = g.ev("[SHIP.intro.done.goodnight, (window.__said || []).slice(-3).map(x => x[0] + ' ' + x[2])]") if g.ev("typeof INTRO_GOODNIGHT !== 'undefined'") else None
+        if gn is not None:   # 0.42.27 (the user): Torres's goodnight after dinner, and only then the bunk arrow
+            print(f'  his goodnight at {gn[0]} (ship minute; -1: not with you), last lines said: {gn[1]}')
+            if gn[0] is None: fail('Torres never said goodnight (or the fallback never ran)')
+            elif bunkAt and gn[0] != -1 and int(bunkAt.split()[-1][:2]) * 60 + int(bunkAt.split()[-1][3:]) - 1440 < gn[0]: fail(f'the bunk arrow came before his goodnight ({bunkAt})')
         if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
@@ -409,6 +419,9 @@ with sync_playwright() as pw:
             if not shut: fail('the Tern\'s ramp never closed behind you')
             elif shut[1] not in ('ramp', 'hello', 'haulway', 'works'): fail(f'the ramp closed late, at step {shut[1]}')
             if not reopened or g.ev('TERN.target') != 1: fail('the Tern\'s ramp was left shut after Torres let you go')
+    if EVENING_ONLY:
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     print('9. A first launch arrives (no save, never arrived, not a test URL), and its Day 0 save loads at the same step')
     if not g.ev("typeof newGameStart === 'function'"):
         fail('no newGameStart (section 13): a first launch cannot arrive')
@@ -419,7 +432,7 @@ with sync_playwright() as pw:
         g.step(5)
         f = g.ev("({ t: clockText(), deck: deckDef.num, on: introOn(), step: SHIP.intro.step, form: !!document.querySelector('form input[maxlength=\"24\"]') })")
         print(f"  {f['t']}, Deck {f['deck']}, intro {'on' if f['on'] else 'off'} at {f['step']}, manifest {'up' if f['form'] else 'not up'}")
-        if not (f['t'].startswith('Day 0, Sunday 17:40') and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
+        if not (f['t'].startswith('Day 0, Sunday 17:30') and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(30)
         g.ev('saveGame()'); before = g.ev('({ step: SHIP.intro.step, day: SHIP.time.day })')
         g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
