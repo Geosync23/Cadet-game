@@ -1,0 +1,28 @@
+@voice quill
+// Writer (command: guests). Mara Quill (she/her), survivor from the derelict (the salvage, 7 days). Was the derelict's
+// cook. Has not stopped thanking people. Wants to help in the galley as soon as Dr. Nandakumar lets her.
+// Roster: "lost everything but a photo of a dog" (canon; but photos aren't in the game: write around it, "a picture of
+// my dog" never; say "my dog, back home" or nothing).
+// HOW SHE TALKS: warm, grateful, practical; thanks you for everything, then asks what needs doing. Cooks in her head.
+// Gentle: her losses are things, not people (nobody died; the crew were all rescued). Brave, a little shaky at first.
+// NEVER: dwells; refuses a job.
+tpl: warm
+talk: Warm, grateful and practical; thanks you, then asks what needs doing.
+cares: being useful | the galley | the crew who found her
+jokes: has not stopped thanking people, and knows it | cooks dinner in her head while she rests
+hi: Oh, hello | Hello, love
+bye: Thank you. Truly | Take care
+yes: Yes, of course | Gladly
+thanks: Thank you. Thank you | Oh, bless you
+wow: Oh, would you look at that
+sigh: Oh, well
+nick: - | {me} | {me} | {me} | {me}
+needs: practical
+openness: open
+loves: garden | tea
+likes: sweet | plant
+invites: tasting
+joy: a hot kitchen and something on to simmer
+thread: startover
+keepsake: a recipe card in her handwriting
+avoid: what was lost (unless she brings it up)

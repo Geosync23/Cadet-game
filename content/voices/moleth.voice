@@ -1,0 +1,25 @@
+@voice moleth
+// Writer (command: guests). Moleth (they/them), Veyli scholar (the diplomatic visit). Cabin 4-02. Studies human ships and
+// asks questions nobody has asked before. Wants to see the engine room more than anything. Forty questions for Calder.
+// HOW THEY TALK: eager, formal, all questions; "May I ask..." then four more questions. Delighted by ordinary things.
+// NEVER: stops asking; is rude about a human thing (only curious).
+tpl: earnest
+talk: Eager and formal; all questions, each politely asked, then four more.
+cares: human ships | the engine room | getting all forty questions to Calder
+jokes: forty questions for Chief Calder, and counting | asks why humans say "cheers"
+hi: Greetings | Good day | Ah, hello
+bye: Thank you, go well | Be well
+yes: Yes! | Certainly
+thanks: Thank you | That is very helpful
+wow: Remarkable | Oh, how strange
+sigh: Ah
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: book | made
+likes: star | garden
+invites: observatory
+joy: an answer to a question nobody asked before
+thread: talent
+keepsake: a list of questions, with your answers beside them
+avoid: nothing; they ask about everything

@@ -262,6 +262,8 @@ Mori, Ferreira, Sato and Nandakumar were already set from the roster's own words
 | Dev Raman, Matthias Oduya, Kofi Mensah, Lars Achterberg, Rafael Ibarra, Bilal Nakamura, Nils Lemaire, Arjun Fonseca, Yusuf Kim, Luca Alvarez, Bo Mbeki, Isak Lindqvist | he / him |
 | Hana Mori, Lucia Ferreira, Anja Kowalczyk, Oona Zielinski, Mira Dahl, Greta Garcia, Noor Park, Uma Vasquez, Carmen Chen, Vera Ueda, Karin Yilmaz, Rosa Abara | she / her |
 | Quinn Zamora, Dara Shah, Olu Farouk | they / them |
+| Guests: Dr. Soraya Lindgren, Mara Quill | she / her |
+| Guests: Speaker Teshavi, Kesrin, Moleth, Ithra, Taavek (the Veyli, like Saruth), Jonah Petrie | they / them |
 
 ## 5. Shared quirks: details the roster gives to several people
 

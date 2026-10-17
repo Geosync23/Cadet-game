@@ -1,0 +1,22 @@
+@crew ithra
+// Writer (command: guests), batch 3b. Ithra: a word or two, then a nod.
+
+== greet
+? tier=stranger
+- Good day.
+- Hm. You. New. Good.
+? tier>=acquaintance
+- {me}. Good day. Doors are shut. Good.
+== feel
+? mood:high
+- Good run. Good doors.
+? mood:low
+- Long day. Many doors.
+== near
+? time:morning
+- Running. Plaza. Every dawn. Join, if you keep up.   #funny
+? deck:2
+- Your Chief Holt watches this corridor. So do I. We nod.   #funny
+== life
+? tier>=acquaintance
+- I fly the shuttle. I watch the doors. That is all. It is enough.

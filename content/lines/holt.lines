@@ -33,3 +33,124 @@
 == joy
 ? tier>=colleague
 - Five in the morning, every door where it should be. Nothing better aboard.   #warm
+
+// ---- batch 3: greet by time, bye, invite, accept, decline, missed, birthday, hint, near by place ----
+
+== greet
+? tier=stranger time:morning
+- Cadet. Up. Good. I've walked five decks already.
+? tier=stranger time:night
+- Cadet. It's late. Where are you going? Hm. Fine. Go there.
+? tier=stranger deck:2
+- Cadet. Watch office is that way. Don't knock twice. Once is plenty.
+? tier>=acquaintance time:morning
+- Hm. You. Deck 4 smells of toast. You'll be wanting that.
+- Morning. Every door on Deck 3 shut properly. Yours too. Good.
+? tier>=acquaintance time:afternoon
+- Cadet. Nearest fire point? Behind you. Don't turn round. Just know.
+? tier>=acquaintance time:evening
+- Evening. Off shift? Then sit down somewhere. Don't wander. I'll know.   #funny
+? tier>=acquaintance time:night
+- Cadet. Up late. Hm. Mensah's on. He'll walk you back if you look lost.
+? tier>=acquaintance warmth:cold
+- There you are. Haven't seen you on my rounds. Noticed. That's my job.
+? tier>=colleague
+- Hm. Cadet. You did the drill right on Tuesday. Didn't say. Saying now.
+? tier>=friend time:morning
+- {nick}. Walked the long way this morning. Thought you'd be up. You weren't.   #funny
+
+== bye
+? tier=stranger
+- Right. Off you go.
+- As you were, cadet.
+? tier>=acquaintance
+- Off with you. Mind the hatch on Deck 4. It sticks.
+- Right. Back to it. Both of us.
+? tier>=friend
+- Off you go, {nick}. Hm. Good talk. Don't tell anyone.   #warm
+
+== invite
+? tier>=colleague time:morning
+- Walking the decks before breakfast. Long way round. Come, if you're up.
+? trad:running tier>=acquaintance
+- Running club. Vance'll be there. Someone has to keep him honest.   #funny
+? trad:today tier>=colleague
+- {trad} today. I'll be at the door. Watching it. Come and stand near.   #funny
+
+== accept
+? tier>=acquaintance
+- Fine. I'll be there. On time. Early, more likely.
+- Hm. Yes. All right.
+
+== decline
+? tier>=acquaintance
+- Can't. Rounds. Another day.
+- No. Not that one. But ask again. I mean that.
+
+== missed
+? tier>=acquaintance
+- You didn't turn up. I noticed. I notice everything. Next time, then.
+? tier>=friend
+- Waited by the lift. Mensah asked if I'd been stood up. I had. Hm.   #funny
+
+== birthday
+? birthday:you tier>=acquaintance
+- Happy birthday, cadet. That's all. Hm. Enjoy the cake.   #warm
+? birthday:you tier=stranger
+- Your birthday, I'm told. Happy birthday. Stay out of trouble today.
+? birthday:me tier>=acquaintance
+- Who told you? Mensah. Of course. Hm. Thank you.   #funny
+
+== hint
+? tier>=friend
+- Cadet. Walk with me. One deck. Not about work.
+
+== near
+? deck:2
+- Watch office. Best view of the lift on the ship. Tomas is right about that.
+? deck:5
+- Shuttle bay doors. I check them twice a day. Once is luck. Twice is the job.
+? deck:3 act:gym
+- I'm here for the weights. Not discussing it further.   #funny
+? act:meal
+- Late dinner. The mess is quieter. I can see every door from this seat.
+? place:calm tier>=colleague
+- Sit. Hm. Five minutes. I'm off duty. My eyes aren't.   #funny
+
+== feel
+? mood:high tier>=acquaintance
+- Drill went well. Every junior to their post in under two minutes. Adequate.   #funny
+? mood:ok
+- Ordinary day. Doors shut, people safe. That's what ordinary is for.
+
+== life
+? tier>=colleague
+- My juniors call it "learning the Watch from Holt, one lecture at a time". It's fair.   #funny
+- I asked for the cabin next to the Envoy's. To keep an eye out. That's all it is.
+
+== joy
+? tier>=acquaintance
+- A deck at five in the morning. Lights low, doors shut, the ship breathing. Good.
+
+== chat
+? tier=stranger
+- Questions? Ask now. In an emergency, there isn't time.
+? tier>=acquaintance
+- Where's the nearest suit locker from your bunk? Good. Now from the mess? Hm. Learn it.
+- Watch is easy. Know where everyone is, and stay calm. The second bit's harder.
+? tier>=colleague
+- Mensah says I should smile more at juniors. This is me smiling. Hm.   #funny
+
+== smalltalk
+- Hm.
+- Door's not shut. Fix that.
+- Long way round. Always.
+
+== rumour
+- Heard something. Don't repeat it.
+
+== near
+? deck:4 time:night
+- Junior wing, lights out. Quiet. Except Pell. Pell talks in his sleep.   #funny
+? deck:2 tier>=colleague
+- The Envoy's door. New knot this month. Hm. I counted. Don't ask why.
