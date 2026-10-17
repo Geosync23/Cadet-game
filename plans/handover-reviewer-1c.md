@@ -22,6 +22,20 @@
 | Arrival 9de4291 (0.42.25-0.42.26: the week in play, health rebook, seek Mail, the pilot on the frame clock) | arrival-9de4291.md | PASS WITH FIXES: everything new works; with the Tern + sim head the evening has ~1 min of slack before 19:00 (intro_check part 8 FAIL, servery 2/3). A design call sent to the lead; onboarding 2's session was inactive |
 | Arrival claude/arrival-0603 046a019 (0.42.21b, for 0.60.3) | arrival-0603-046a019.md | PASS: 27/27 core tour lines in order; reviewer 1's three fixes. Test on arrival-0603 + sim + content 910e88e baked with content_gen (archive content/ + content_gen.py, run it on the merged html) |
 
+**Pending (as of 16:15):** one combined re-check of **arrival 0.42.27+** (sim engineer 5, session_01Do3HU5Rh96tgUsPTUbsF8a, builds it on claude/arrival and sends one hash). The lead's design call on my 9de4291 finding was all three:
+- a 17:30 start;
+- a much shorter tour: 5 core stops, 10 lines, your bunk first;
+- a goodnight from Zeke before the bed arrow, which starts 'free' (fallback ~19:30);
+- plus my intro_check guard on the table time.
+Check on arrival + decks-p3 Tern + the sim head + content (text 29e52c9, 89a496b, f6fb0c5), baked with that commit's content_gen:
+- intro_check (all parts; part 12 with `--week`);
+- core lines heard, in order;
+- the table well before 19:00, with dinner chat and Chief;
+- the goodnight, then the bed arrow;
+- dinner seats 3-mess-10/12/9;
+- the ramp and pilot.
+Otherwise the lead says stay idle; a fresh reviewer is started only for real new work.
+
 **Open loose ends:**
 - Arrival is mine now (the lead's split); onboarding engineer 2 is session_0163dcLt17oTCdR8po9HRo2p. Reviewer 1's remaining arrival lows (health kind, missed health check, seek-ask Mail fallback, standing at Dinner with Torres, double health booking) will come later on claude/arrival (0.42.23+).
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
