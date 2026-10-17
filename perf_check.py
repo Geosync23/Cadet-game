@@ -16,7 +16,7 @@
 # 30%, or memory that grows across round trips. Ends "PERF CHECK OK" or "PERF CHECK: N problem(s)".
 # Add a scene when a new tradition or moment lands: name, day (1 = the Monday of a new game), time, deck, room (a
 # regexp on the room's name), and optionally setup (JS run after the skip, e.g. to start an event).
-import sys, os, json, re
+import sys, os, json, re, time
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -53,8 +53,10 @@ MEASURE_JS = r"""(n => {
 MEM_JS = r"""(() => { const m = renderer.info.memory; return { geo: m.geometries, tex: m.textures, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null }; })()"""
 
 def run(path):
-    out = {'scenes': [], 'trip': None, 'errors': []}
+    out = {'scenes': [], 'trip': None, 'errors': [], 'size': os.path.getsize(path), 'load': []}
     with sync_playwright() as pw:
+        for k in range(3):                               # load time: a fresh page to playable (headless), 3 times
+            t = time.time(); g = Game(pw, path, 390, 844, out['errors']); out['load'].append(round(time.time() - t, 1)); g.close()
         for sc in SCENES:
             row = {'name': sc['name'], 'views': {}}
             for vname, w, h, zoom in VIEWS:
@@ -83,6 +85,7 @@ def show(tag, o):
     for s in o['scenes']:
         v = '  '.join(f"{k} {x['calls']}c {x['tris']}kt {x['js']}ms {x['crew']}p" for k, x in s['views'].items())
         print(f"  {s['name']:<42} [{s.get('room')}]  {v}")
+    print(f"  file {o['size'] / 1e6:.2f} MB, load {o['load']} s")
     print('  deck round trips (geometries, textures, JS heap MB):', ' -> '.join(f"{m['geo']}/{m['tex']}/{m['heap']}" for m in o['trip']))
 
 def problems(new, old):
@@ -95,6 +98,7 @@ def problems(new, old):
                 y = old['scenes'][i]['views'][k]
                 if x['calls'] > y['calls'] * 1.1 and x['calls'] > y['calls'] + 25: bad.append(f"{s['name']} {k}: draw calls {y['calls']} -> {x['calls']}")
                 if x['js'] > y['js'] * 1.3 and x['js'] > y['js'] + 1: bad.append(f"{s['name']} {k}: js {y['js']} -> {x['js']} ms a frame")
+    if old and new['size'] > old['size'] * 1.25: bad.append(f"file size {old['size'] / 1e6:.2f} -> {new['size'] / 1e6:.2f} MB (a note, not a failure)")
     t = new['trip']
     if t[-1]['geo'] != t[1]['geo'] or t[-1]['tex'] != t[1]['tex']: bad.append(f"memory grows across deck round trips: {t}")
     if new['errors']: bad.append(f"errors: {new['errors'][:4]}")
