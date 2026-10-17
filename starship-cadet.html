@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.16
+   STARSHIP CADET: CSV Wren                           build 0.38.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -2531,13 +2531,25 @@ function tilesBoardGeo() {
   for (let v = 0; v < uv.count; v++) if (v < 8 || v >= 12) uv.setXY(v, .02, .02);   // every face but the top (+y) takes the frame's colour
   return g;
 }
-const TILES_KIT = { tex: tex(128, 128, (c, w, h) => {
-  c.fillStyle = '#6b4a2e'; c.fillRect(0, 0, w, h); c.fillStyle = '#24453c'; c.fillRect(8, 8, w - 16, h - 16);
-  c.strokeStyle = '#3d6b5e'; c.lineWidth = 1;
-  for (let k = 0; k <= 6; k++) { c.beginPath(); c.moveTo(10 + k * 18, 10); c.lineTo(10 + k * 18, 118); c.stroke(); c.beginPath(); c.moveTo(10, 10 + k * 18); c.lineTo(118, 10 + k * 18); c.stroke(); }
-  for (const [i, j, f] of [[1, 1, '#e9c46a'], [2, 1, '#e9c46a'], [2, 2, '#5fd6c6'], [3, 2, '#f1ece2'], [3, 3, '#e07a5f'], [4, 3, '#5fd6c6'], [1, 4, '#f1ece2'], [2, 4, '#e07a5f'], [4, 4, '#e9c46a']]) {
-    c.fillStyle = f; c.fillRect(12 + i * 18, 12 + j * 18, 14, 14);
-    c.fillStyle = '#2b2b2b'; c.beginPath(); c.arc(19 + i * 18, 19 + j * 18, 2.5, 0, Math.PI * 2); c.fill();   // a star on each tile
+const TILES_KIT = { tex: tex(256, 256, (c, w, h) => {   // the approved design (plans/tiles-plan.html, 0.38.17): a game at its start
+  c.fillStyle = '#03141a'; c.fillRect(0, 0, w, h); c.strokeStyle = '#2f6f68'; c.lineWidth = 3; c.strokeRect(8, 8, w - 16, h - 16);   // the frame
+  const S = 38, O = 14, cell = (i, j) => [O + i * S, O + j * S];
+  for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) { c.fillStyle = (i + j) % 2 ? '#061d22' : '#0a2a30'; c.fillRect(...cell(i, j), S, S); }
+  c.setLineDash([3, 4]); c.lineWidth = 1.5;                // the home rows, two at each end
+  c.strokeStyle = 'rgba(76,195,181,.5)'; c.strokeRect(O, O + 4 * S, 6 * S, 2 * S); c.strokeStyle = 'rgba(159,180,196,.45)'; c.strokeRect(O, O, 6 * S, 2 * S);
+  const mark = (k, x, y) => {                             // circle, triangle or star on a tile
+    c.setLineDash([]); c.lineWidth = 1.4; c.strokeStyle = '#0b1420'; c.beginPath();
+    if (k === 0) { c.fillStyle = '#5fd3c6'; c.arc(x, y, 8, 0, Math.PI * 2); }
+    else if (k === 1) { c.fillStyle = '#f08a6c'; c.moveTo(x, y - 9); c.lineTo(x + 9, y + 7); c.lineTo(x - 9, y + 7); c.closePath(); }
+    else { c.fillStyle = '#f2c14e'; for (let p = 0; p < 10; p++) { const a = -Math.PI / 2 + p * Math.PI / 5, r = p % 2 ? 4 : 9; c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } c.closePath(); }
+    c.fill(); c.stroke();
+  };
+  const round = (x, y, s, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + s, y, x + s, y + s, r); c.arcTo(x + s, y + s, x, y + s, r); c.arcTo(x, y + s, x, y, r); c.arcTo(x, y, x + s, y, r); c.closePath(); };
+  const marks = [0, 1, 2, 2, 1, 0, 1, 2, 0, 0, 2, 1];      // both sides the same set, mirrored
+  for (let k = 0; k < 12; k++) {
+    const i = k % 6, jl = k < 6 ? 5 : 4, jd = 5 - jl, [xl, yl] = cell(i, jl), [xd, yd] = cell(5 - i, jd);
+    round(xl + 3, yl + 3, S - 6, 6); c.setLineDash([]); c.fillStyle = '#e9f1ee'; c.fill(); c.strokeStyle = '#ffffff'; c.lineWidth = 1.2; c.stroke(); mark(marks[k], xl + S / 2, yl + S / 2);   // yours: light
+    round(xd + 4, yd + 4, S - 8, 6); c.fillStyle = '#142233'; c.fill(); c.setLineDash([4, 3]); c.strokeStyle = '#9fb4c4'; c.lineWidth = 2; c.stroke(); mark(marks[k], xd + S / 2, yd + S / 2);   // theirs: dark, a dashed edge
   }
 }) };
 TILES_KIT.mat = new THREE.MeshStandardMaterial({ map: TILES_KIT.tex, roughness: .7 }); TILES_KIT.geo = tilesBoardGeo();
@@ -5140,7 +5152,7 @@ DECKS[3] = {
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
     // ---- Pillar 4, seat 8 (0.38.10): the seedling stand in the garden's north-east corner (Sowing morning) and the bow lounge's Tiles station ----
     place('G', 'seedlingStand', 9.63, .42, 'n', { yours: DECKS[3].seedlings.yours, it: IT('Seedlings', 'A little stepped stand of pots by the grow racks: one seedling for everyone who came to the last Sowing morning. One pot is only soil, waiting.') });
-    place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
+    place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles station', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
     place('B', 'postbox', .4, 4.5, 'w', { it: IT('Postbox', 'For paper letters. They go home in a sealed bag with the next shuttle, weeks behind any call. Some people say that is the point.') });   // 0.38.11
   },
 
@@ -6913,7 +6925,7 @@ DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', 
 // with your bed's). mugRack: the Works tea corner's rack; `yours` is the free hook's mug spot. CALM_TYPES / placeCalm(p):
 // where people sit and talk (the social plan's where: ['calm']): seats of those types, unless a place says calm: false.
 DECKS[4].places.push({ id: '4-B1-4-keepsake', type: 'event', at: [9, 0], xy: [9.25, .8], face: -127, pose: 'stand', room: 'a' });
-DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots: [8.14, 8.28, 8.43, 8.57, 8.72, 8.86].map(x => [x, 2.17, .2]) };
+DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots: [8.14, 8.28, 8.43, 8.57, 8.72, 8.86].map(x => [x, 2.17, .2]), trophy: [8.79, 2.17, .13] };   // trophy: the Tiles trophy's spot, at the back (0.38.17)
 DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
 const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
 const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
@@ -7084,8 +7096,8 @@ const DECK_DRESS = {
     const im = new THREE.InstancedMesh(tilesBoardGeo(), mat, B.length); im.userData.noMerge = true; im.frustumCulled = false;
     B.forEach(([x, y, z, turn, w], k) => im.setMatrixAt(k, m.compose(new THREE.Vector3(x - r.i0, y + .002, z - r.j0), q.setFromAxisAngle(up, turn), new THREE.Vector3(w, 1, w))));
     s.add(im);
-    const [cx, cy, cz] = B[5];                           // the tap: the coffee table's board
-    return { t: 'Tiles night', x: 'A Tiles board on every table tonight, and a game going on most of them. Rina is defending her title, and saying so.', floor: ['L', cx - r.i0, cz - r.j0], y: cy + .05, w: .3, h: .1, d: .3 };
+    const tap = ([x, y, z]) => ({ floor: ['L', x - r.i0, z - r.j0], y: y + .05, w: .3, h: .1, d: .3 });   // a tap on every board ('Tiles board': section 23 seats you there)
+    return { t: 'Tiles board', x: 'Tiles night: a board on every table, and a game going on most of them. Rina is defending her title, and saying so.', ...tap(B[5]), more: B.filter((b, k) => k !== 5).map(tap) };
   } },
   // 0.38.14. mugYours: a lasting trace from your new hand's tea ({ id: 'mugYours', day } in SHIP.traces): your own mug on
   // the free hook of the Works tea corner's rack (DECKS[5].mugRack). On the rack's wall, so it lowers with it. 1 draw call.
@@ -7172,6 +7184,15 @@ const DECK_DRESS = {
     for (const sd of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(.32, .12), cm); p.position.set(0, .97, sd * .03); p.rotation.set(-sd * .45, sd > 0 ? 0 : Math.PI, 0); s.add(p); }   // a tent card, readable from both sides
     return { t: 'Open lab', x: 'Dr. Sato\'s open lab: trays of samples from the last survey, a card saying OPEN LAB, and the Survey team pretending they are not delighted to be asked about rocks.', floor: ['L', 3.0, 4.5], y: 1.0, w: .6, h: .3, d: .4 };
   } },
+  // 0.38.17. tilesTrophy: a lasting trace once you first beat Rina at Tiles (section 23 pushes { id: 'tilesTrophy', day }
+  // to SHIP.traces): a small gold trophy at the back of your keepsake shelf, between slots 5 and 6
+  // (DECKS[4].keepsakes.trophy), clear of the keepsakes in front. On the shelf's wall, so it lowers with it. 1 draw call.
+  tilesTrophy: { deck: 4, what: 'your Tiles trophy on the keepsake shelf above your bunk', make(g) {
+    const s = dressAt(g, 'a', 'n', 2.5), [tx, ty, tz] = DECKS[4].keepsakes.trophy, x = tx - (ROOM_BOX.a.i0 + 2.5), z = tz - (Z0(ROOM_BOX.a.j0) + T / 2 + OZ), m = dressMat('#e8c06a');
+    const add = (geo, y) => { const k = new THREE.Mesh(geo, m); k.position.set(x, ty + y, z); s.add(k); };
+    add(new THREE.BoxGeometry(.04, .014, .036), .007); add(new THREE.CylinderGeometry(.005, .007, .035, 6), .031); add(new THREE.CylinderGeometry(.022, .01, .04, 10), .068);
+    return { t: 'Tiles trophy', x: 'A little gold cup: the day you beat Rina at Tiles. She says she let you win. She has never let anyone win.', wall: ['a', 'n', 2.5], y: 2.25, w: .2, h: .2 };
+  } },
   // 0.38.11. tastingTable: Brennan's tasting table on Wednesday's dinner (o.title: the dish; o.lines: up to five lines in
   // chalk, the votes so far): the chalkboard by the mess door and a tray of tasting cups and a bowl of vote tokens on the
   // end of a long table. 5 draw calls.
@@ -7235,7 +7256,7 @@ function dressHide(id) {
   const e = DRESS.on.get(id); if (!e) return;
   const shared = new Set(Object.values(DRESS_MATS).concat(HIT_MAT));   // the cached colours and the tap boxes' stay; a piece's own materials go (0.38.13)
   e.g.parent && e.g.parent.remove(e.g); e.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !shared.has(o.material)) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
-  ITEMS = ITEMS.filter(it => it !== e.item); WALL_DECOR = WALL_DECOR.filter(d => !e.decor.includes(d));
+  ITEMS = ITEMS.filter(it => !e.items.includes(it)); WALL_DECOR = WALL_DECOR.filter(d => !e.decor.includes(d));
   DRESS.on.delete(id);
 }
 function dressShow(list) {
@@ -7257,7 +7278,13 @@ function dressShow(list) {
     else { const r = ROOM_BOX[it.floor[0]]; hit.position.set(X0(r.i0) + it.floor[1], it.y || .05, Z0(r.j0) + it.floor[2]); }
     host.add(hit);
     const item = { t: it.t, x: it.x, hit, g: host, front, depth: it.wall ? .1 : .6, wall: !!it.wall }; hit.userData.item = item; ITEMS.push(item);
-    DRESS.on.set(id, { g, item, decor, o: JSON.stringify(o) });
+    const items = [item];
+    for (const m of it.more || []) {                     // 0.38.17: more floor taps with the same text (Tiles night: one on every board)
+      const r = ROOM_BOX[m.floor[0]], h2 = new THREE.Mesh(new THREE.BoxGeometry(m.w || .6, m.h || .1, m.d || .3), HIT_MAT); h2.userData.noMerge = true;
+      h2.position.set(X0(r.i0) + m.floor[1], m.y || .05, Z0(r.j0) + m.floor[2]); g.add(h2);
+      const i2 = { t: it.t, x: it.x, hit: h2, g, front: 0, depth: .6, wall: false }; h2.userData.item = i2; ITEMS.push(i2); items.push(i2);
+    }
+    DRESS.on.set(id, { g, item, items, decor, o: JSON.stringify(o) });
   }
   if (typeof refreshPickables === 'function') refreshPickables();
 }
@@ -7322,7 +7349,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.16';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.17';                          // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
