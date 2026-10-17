@@ -447,7 +447,7 @@ with sync_playwright() as pw:
     print('  with an empty galley:', empty[::5])
     print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
     for r in qq + empty:
-        if r[3] != r[1] or r[1] > 4 or abs(r[4] - (0.5 + r[3] * (1 if r[5] else 0.5))) > .01: fail(f"queue: {r}")
+        if r[3] != r[1] or r[1] > 4 or abs(r[4] - (0.5 + r[3] * (1 if r[5] else 0.6))) > .01: fail(f"queue: {r}")
     if not any(r[1] for r in empty): fail(f"queue: nobody stood in the line with an empty galley: {empty}")
     if mine[1] > 0.5 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
 
@@ -464,7 +464,7 @@ with sync_playwright() as pw:
       if (!real) window.__sc("lineJoin = lineSpot = lineFront = lineLeave = undefined");
       SHIP.galley = null; return out; }})()""")
     print('Live line (stand-in for section 10' + ('; section 10 has its own' if ln['real'] else '') + '):', ln)
-    if not ln['real'] and (not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.5, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
+    if not ln['real'] and (not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.6, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
 
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there

@@ -11922,7 +11922,7 @@ function takePortion(who = 'player') {
 // GALLEY_SERVE.you after the last of them. galleyTurn(who) is true from then on while there's food (empty pans: you
 // wait for the next pot); takePortion(who) serves them and ends it
 const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();   // face: a letter, or degrees (0 south, 90 east)
-const GALLEY_SERVE = { each: .5, you: .5, near: .8 };   // ship minutes a serve; how close to a queue spot counts as standing in it (m)
+const GALLEY_SERVE = { each: .6, you: .5, near: .8 };   // ship minutes a serve (a line of 6 clears in about 3.6; the user's ask: 5-8 at peaks, cleared in a few minutes); how close to a queue spot counts as standing in it (m)
 // the crew really in the line: on Deck 3, those standing at (or right by) the queue spots (section 10's DECK_CREW, the
 // bodies you see); elsewhere (a test, another deck) each person in a queue stop or waiting for food, once
 function galleyAhead(now) {
