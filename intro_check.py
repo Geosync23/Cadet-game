@@ -375,7 +375,7 @@ with sync_playwright() as pw:
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
                 hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
-                if tmin > 18 * 60 + 20: fail(f'the tour is too long: you reach the table at {hm} (the user after 0.60.3: a little after 18:00, from 17:30)')   # 0.42.27
+                if tmin > 18 * 60 + 50: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c)')   # 0.42.27
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
@@ -387,10 +387,15 @@ with sync_playwright() as pw:
         elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
         if not bunkAt: fail('the first-night arrow never pointed to your bunk before 20:00')
         gn = g.ev("[SHIP.intro.done.goodnight, (window.__said || []).slice(-3).map(x => x[0] + ' ' + x[2])]") if g.ev("typeof INTRO_GOODNIGHT !== 'undefined'") else None
+        ch = g.ev("[SHIP.intro.done['chief:met'], SHIP.intro.done['chief:end'], SHIP.intro.done.goodnight, SHIP.intro.missed.includes('chief')]")
+        print(f'  the Chief\'s welcome (introChief): shown {ch[0]}, ended {ch[1]} (None: cut short), goodnight {ch[2]}')
+        if ch[3] or ch[0] is None: fail('the Chief\'s welcome never played (the user on 0.60.4: "the Chief didn\'t give their speech")')
+        elif ch[1] is None: fail(f'the Chief\'s welcome was cut short or never ended: {ch}')
+        elif ch[2] is not None and ch[2] < ch[1]: fail(f'his goodnight came before the Chief had finished: {ch}')
         if gn is not None:   # 0.42.27 (the user): Torres's goodnight after dinner, and only then the bunk arrow
-            print(f'  his goodnight at {gn[0]} (ship minute; -1: not with you), last lines said: {gn[1]}')
-            if gn[0] is None: fail('Torres never said goodnight (or the fallback never ran)')
-            elif bunkAt and gn[0] != -1 and int(bunkAt.split()[-1][:2]) * 60 + int(bunkAt.split()[-1][3:]) - 1440 < gn[0]: fail(f'the bunk arrow came before his goodnight ({bunkAt})')
+            print(f'  his goodnight at {gn[0]} (ship minute; None: not with you), last lines said: {gn[1]}')
+            if g.ev('SHIP.intro.done.goodnight === undefined'): fail('Torres never said goodnight (or the fallback never ran)')
+            elif bunkAt and gn[0] is not None and int(bunkAt.split()[-1][:2]) * 60 + int(bunkAt.split()[-1][3:]) - 1440 < gn[0]: fail(f'the bunk arrow came before his goodnight ({bunkAt})')
         if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
