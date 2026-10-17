@@ -12,14 +12,27 @@ html,body{margin:0;height:100%;overflow:hidden;background:#121a27;font-family:"A
 body.night #bg{opacity:.4}
 canvas{position:fixed;inset:0;display:block;z-index:1}
 .hud,.controls,.toast{z-index:2}
-.hud{position:fixed;left:14px;top:12px;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.hud{position:fixed;left:14px;top:10px;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.5);padding:5px 11px 6px;border-radius:12px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .hud .room{font-size:17px;font-weight:600}
 .hud .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
-.hud .clock{font-size:12.5px;color:#cfe9e4;margin-top:6px;font-variant-numeric:tabular-nums}
+.hud .clock{font-size:12.5px;color:#cfe9e4;margin-top:3px;font-variant-numeric:tabular-nums}
+.hud{max-width:max(150px,calc(30vw - 26px))}              /* 0.35.36: every line on one line, at every width: the buttons own the rest */
+.hud .room,.hud .sub,.hud .clock{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .controls{position:fixed;right:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:70vw}
 button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:720px),(max-height:500px){             /* 0.35.34: narrow phones (0.35.36: and short landscape ones): the six buttons as two rows of 44px icons beside the place and clock */
+  .controls{display:grid;grid-template-columns:repeat(3,44px);gap:8px;top:10px;max-width:none}
+  .controls button{width:44px;height:44px;padding:0;justify-content:center;font-size:0;gap:0}
+  .controls button svg{width:19px;height:19px}
+  .controls #newgame.ask{background:var(--teal);color:#08201d}
+  .hud{max-width:calc(100vw - 14px - 148px - 12px - 12px)}
+}
+@media (max-width:360px){                                 /* 0.35.36: the narrowest phones: a little tighter, so "Day 100, Wed 06:00" fits on one line */
+  .hud{padding:5px 8px 6px;max-width:calc(100vw - 14px - 148px - 12px - 8px)}
+  .hud .sub,.hud .clock{font-size:12px}
+}
 .toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,10px);width:min(440px,calc(100% - 24px));background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast b{display:block;font-size:14.5px;margin-bottom:3px;color:#bdeee6;font-weight:600}
@@ -7680,8 +7693,10 @@ const welcomeBack = () => 'Welcome back. ' + clockText() + '.';
 const newBtn = document.getElementById('newgame'); let newAsk = 0;
 newBtn.onclick = () => {
   const span = newBtn.querySelector('span');
-  if (!newAsk) { span.textContent = 'Tap again'; newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; }, 4000); return; }
-  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game';
+  if (!newAsk) { span.textContent = 'Tap again'; newBtn.classList.add('ask'); newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask'); }, 4000);
+    if (matchMedia('(max-width:720px),(max-height:500px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
+    return; }
+  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask');
   if (ride) return;                                      // not mid-ride
   // how to start (agreed with section 21 and the device): the tests and anyone without section 21 wake on Monday; a
   // device that has never arrived arrives by shuttle; one that has gets the choice (arrive, or skip to Monday)
@@ -9134,6 +9149,19 @@ function devTraditions(a, b) {
   }
   return out.sort((x, y) => x.at - y.at);
 }
+// section 18's booked occasions (0.35.30: the ready room, the Captain's table, a progress talk), read only: SHIP.occasions
+// still 'asked', not a chance one (a surprise), between two ship minutes. Section 18 calls apptAdd for them, which no
+// section has, so until then the Schedule lists them from here
+function devOccasions(a, b) {
+  try {
+    if (!Array.isArray(SHIP.occasions) || typeof OCCASIONS === 'undefined') return [];
+    const booked = new Set(SHIP.device.appts.map(x => x.occ).filter(Boolean));   // 0.35.32: those apptAdd booked are listed as appointments
+    return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance && !booked.has(r.key)).map(r => {
+      const rm = DECKS[r.deck] && DECKS[r.deck].rooms && DECKS[r.deck].rooms[r.room];
+      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + 'Deck ' + r.deck };
+    });
+  } catch (e) { return []; }
+}
 // one day's items, in time order: [{ from, to, title, where, kind }] in minutes of that day
 function devDay(d) {
   const B = (d - 1) * 1440, out = [
@@ -9142,9 +9170,10 @@ function devDay(d) {
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
-    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where, aid: g.a.grp || g.a.id });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
+  for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
   return out.sort((x, y) => x.from - y.from);
 }
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
@@ -9169,6 +9198,9 @@ function deviceTick() {
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
   }
+  if (Array.isArray(SHIP.occasions)) for (const a of SHIP.device.appts) if (a.occ && a.status === 'yes') {   // 0.35.32: an occasion you met is kept, wherever in the
+    const r = SHIP.occasions.find(x => x.key === a.occ); if (r && (r.met || r.status === 'kept')) { a.status = 'kept'; a.keptAt = t; }   // room you stood; 0.35.38 (the lead):
+  }                                                       // once section 14 has marked it missed (15 minutes in), missed is final
   for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
     for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
   devHeadsTick(t);
@@ -9180,7 +9212,7 @@ function deviceTick() {
 // own items (devDay), never two at once, never over a meeting, a question, a tip, the Captain's address, a chat card or
 // sleep (they wait; stale ones drop), never while the device is locked, each once (R.heard, saved). Tap: the Schedule;
 // Go there: the goal arrow. Traditions keep their rules: Don't (R.per) skips them, and on shift they're a quiet Calendar
-// badge unless you chose Remind me. Meals and your shift can be switched off (R.everyday); all of it with R.on. ----
+// badge unless you chose Remind me. Meals and your shift can be switched off (R.everyday); all but your appointments with R.on (0.35.33). ----
 const HU_Q = [];                                         // waiting heads-ups, oldest first; HU_Q[0] is on screen when DEV.hu
 const devHeard = k => SHIP.device.calendarRemind.heard.includes(k);
 function devHear(k) { const h = SHIP.device.calendarRemind.heard; h.push(k); if (h.length > 80) h.splice(0, h.length - 80); }
@@ -9192,7 +9224,7 @@ function devItemGoal(x) {
   if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
   if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
-  if (x.kind === 'tradition' && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
@@ -9204,10 +9236,12 @@ function devHuBusy() {
 }
 function devHeadsTick(t) {
   const R = SHIP.device.calendarRemind;
-  if (!R.on || devLocked()) { HU_Q.length = 0; if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } return; }
+  if (devLocked()) { HU_Q.length = 0; if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } return; }
+  if (DEV.hu && devHuBusy()) devHeadsBack();             // 0.35.33: something that takes the screen (a chat card...) sends a showing strip back to wait
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
-    const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + x.title;
+    const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
     if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
+    if (!R.on && x.kind !== 'appt') continue;            // 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift') && !R.everyday) continue;
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
@@ -9229,7 +9263,10 @@ function devHeadsShow(t = shipNow()) {
     where: h.where, soft: h.stage === 'start', go: !!h.goal });
 }
 function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
-if (typeof onSim === 'function') onSim('newGame', () => devHeadsReset());   // the clock starts again: nothing is heard yet
+if (typeof onSim === 'function') onSim('newGame', () => {   // the clock starts again: nothing is heard yet; 0.35.37 (reviewer 1b): no appointments
+  devHeadsReset(); SHIP.device.appts = []; DEV.notes = {};  // carry over from the last game (they'd list, remind and walk people to old times)
+  try { apptDraft = null; apptSay = null; } catch (e) { /* not made yet */ }
+});
 function devHeadsBack() { if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } }   // a tip or the address takes the top: the strip waits (still HU_Q[0])
 function devHeadsDo(verb) {                              // the strip's taps: 'open' (the Schedule), 'go' (the goal arrow), 'done'
   const h = DEV.hu; if (!h) return; DEV.hu = null; HU_Q.shift(); DEVICE_SKIN.heads(null);
@@ -9562,6 +9599,10 @@ const DEVICE_SKIN = (() => {
       c.dataset.ph = SHIP.device.settings.phosphor; c.classList.toggle('soft', !!h.soft); c.textContent = '';
       const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
       if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
+      c.style.top = ''; const me = c.getBoundingClientRect(); let top = me.top;   // 0.35.31: below section 15's needs strip and activity bar when they'd overlap (a phone)
+      for (const id of ['needStrip', 'actBar']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;
+        const r = e.getBoundingClientRect(); if (r.right > me.left && r.left < me.right && r.bottom + 8 > top) top = r.bottom + 8; }
+      if (top !== me.top) c.style.top = Math.round(top) + 'px';
       c._t = setTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
     },
     notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
@@ -10040,6 +10081,29 @@ function apptKind(where, withId) {
   const r = apptPlaces().find(x => x.id === where), p = apptPerson(withId);
   return r && /infirmary/i.test(r.name) ? 'checkup' : r && /office/i.test(r.name) || p && /chief/i.test(p.role || '') && r && /office/i.test(r.name) ? 'work' : 'social';
 }
+// apptAdd (0.35.32, the lead): section 18's occasions (the ready room summons, the Captain's table, a progress talk) become
+// real appointments, as the Pillar 3 plan had it: occasionAdd calls apptAdd({ id: key, with: [by], at, len,
+// where: 'deck|room', kind, status: 'yes', by, title }). The room becomes a spot in it (a seat if there is one), so
+// section 14 walks the host there and keeps or misses it, and section 20 counts it like any other. Once per occasion
+// (a.occ = its key); the record keeps title and occ (deviceLoad keeps extra fields). Returns the appointment or null.
+function apptOccSpot(n, key) {                           // a spot in a room, locked ones too (the ready room, the Captain's quarters)
+  const P = (DECKS[n] && DECKS[n].places || []).filter(x => x.room === key && !x.machine);
+  const q = P.find(x => APPT_SEATS.includes(x.type)) || P.find(x => /seat|chair|bench|stand|desk/.test(x.type || '')) || P[0];
+  return q ? q.id : null;
+}
+function apptAdd(o) {
+  if (!o || typeof o !== 'object' || !Array.isArray(o.with) || !Number.isFinite(o.at)) return null;
+  const D = SHIP.device, occ = typeof o.id === 'string' ? o.id : null;
+  if (occ) { const had = D.appts.find(a => a.occ === occ); if (had) return had; }
+  let where = typeof o.where === 'string' ? o.where : null; const m = where && /^(\d+)\|(.+)$/.exec(where);
+  if (m) { where = apptOccSpot(+m[1], m[2]); if (where) where = apptSpot(where, +o.at, Number.isFinite(o.len) ? +o.len : 30); }   // 0.35.35 (sim engineer 4): a seat nobody's plan holds then
+  if (!where || !(typeof apptPlace === 'function' ? apptPlace({ where }) : null)) return null;
+  const a = { id: D.appts.reduce((x, y) => Math.max(x, y.id), 0) + 1, with: o.with.filter(x => typeof x === 'string').slice(0, 8), at: +o.at, len: Number.isFinite(o.len) ? +o.len : 30,
+    where, kind: typeof o.kind === 'string' ? o.kind : 'meeting', status: o.status === 'asked' ? 'asked' : 'yes', by: typeof o.by === 'string' ? o.by : null,
+    ...(typeof o.title === 'string' ? { title: o.title.slice(0, 80) } : {}), ...(occ ? { occ } : {}) };
+  D.appts.push(a); if (D.appts.length > 60) D.appts.splice(0, D.appts.length - 60);
+  deviceRefresh(); return a;
+}
 function apptBook(ids, at, len, kind) {                  // accepted: one appointment each, a seat each, one grp for a group
   const D = SHIP.device, spots = apptSpots(apptDraft.where, at, len, ids.length), id0 = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
   ids.forEach((pid, i) => D.appts.push({ id: id0 + i, with: [pid], at, len, where: spots[i], kind, status: 'yes', by: null, ...(ids.length > 1 ? { grp: id0 } : {}) }));
@@ -10129,7 +10193,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     const up = D.appts.filter(a => a.status === 'yes' && a.at + 15 >= now).sort((a, b) => a.at - b.at);
     B.push({ kind: 'text', text: 'Coming up', mark: 'head' });
     if (!up.length) B.push({ kind: 'text', text: 'Nothing booked.' });
-    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: 'Cancel it', action: { app: 'appointments', do: 'drop', arg: a.id } }] });
+    for (const { a, names } of apptGroups(up)) B.push({ kind: 'list', rows: [{ text: devWhen(a.at) + '  ' + names, sub: devDayName(Math.floor(a.at / 1440) + 1) + ' · ' + apptWhereName(a.where), button: a.occ ? null : 'Cancel it', action: a.occ ? null : { app: 'appointments', do: 'drop', arg: a.id } }] });
     const past = apptGroups(D.appts.filter(a => a.status === 'kept' || a.status === 'missed')).slice(-4).reverse();
     if (past.length) B.push({ kind: 'text', text: 'Earlier', mark: 'head' }, { kind: 'list', rows: past.map(({ a, names }) => ({ text: names + (a.status === 'kept' ? ': met' : ': missed'), sub: devDayName(Math.floor(a.at / 1440) + 1) + ' ' + devWhen(a.at) + ' · ' + apptWhereName(a.where), mark: 'past' })) });
     return { title: 'Appointments', blocks: B };
@@ -10219,7 +10283,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
-      { kind: 'text', text: 'Heads-ups before things on your Schedule start' }, { kind: 'buttons', items: on(R.on, 'heads') },
+      { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
       { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
       { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }] };
   } });
@@ -31286,10 +31350,23 @@ const clockEl = document.getElementById('clock'), roomEl = document.getElementBy
 function updateClock() {
   const night = nightAt() > .5;
   clockEl.textContent = clockText(); drawClock(hhmm(SHIP.time.min));
+  hudFit();
+  if (clockEl.scrollWidth > clockEl.clientWidth + 1) {   // 0.35.36: too long for its line (a narrow phone, a long weekday): the short weekday
+    const wd = WEEKDAYS[weekday(SHIP.time.day)]; clockEl.textContent = clockText().replace(wd, wd.slice(0, 3)); }   // 0.35.39: from clockText()
   lightBtn.querySelector('span').textContent = night ? 'Day' : 'Night';
   lightBtn.setAttribute('aria-label', night ? 'Debug: sleep until 07:40' : 'Debug: skip to 21:40');
 }
+// 0.35.39 (reviewer 2b): the place and clock may use all the room up to the nearest button beside them (8px clear),
+// measured on resize and each minute; the CSS caps stay as the fallback
+const hudEl = document.querySelector('.hud');
+function hudFit() {
+  if (!hudEl) return; hudEl.style.maxWidth = '';
+  const h = hudEl.getBoundingClientRect(); let right = innerWidth - 12;
+  for (const b of document.querySelectorAll('.controls button')) { if (!b.offsetWidth) continue; const r = b.getBoundingClientRect(); if (r.top < h.bottom + 4 && r.left > h.left) right = Math.min(right, r.left - 8); }
+  hudEl.style.maxWidth = Math.max(120, Math.floor(right - h.left)) + 'px';
+}
 updateClock();
+addEventListener('resize', () => updateClock());          // 0.35.36: the clock's length follows the screen's width
 let lastRoom = null;
 
 // ---- changing decks: you step out by the lift on deck n. The lift will call this (milestone step 6c). ----
