@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.31
+   STARSHIP CADET: CSV Wren                           build 0.28.32
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.31';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.32';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9853,7 +9853,8 @@ function needFxLayer() {
   el = document.createElement('div'); el.id = 'needFx'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el);
   return el;
 }
-function needFloat(text) {                               // one note over your head (the stand-in's while you're at a place)
+function needFloat(text, k, v) {                         // one note over your head (the stand-in's while you're at a place)
+  if (k && NEED_COL[k]) { stripRise(k, v); FLOAT_LOG.push(text); if (FLOAT_LOG.length > 20) FLOAT_LOG.shift(); PULSE_AT = performance.now(); return; }   // 0.28.32: beside its icon in the strip
   if (typeof camera === 'undefined' || typeof player === 'undefined') return;
   const A = ACT && ACT.body && ACT.phase !== 'walk' ? ACT : null, p = player.obj.position;
   floatV.set(A ? A.x : p.x, (A ? A.y : 0) + 2, A ? A.z : p.z).project(camera);
@@ -9873,7 +9874,7 @@ function floatsTick() {
     n.style.opacity = (f < .15 ? f / .15 : f > .7 ? (1 - f) / .3 : 1).toFixed(3);
     n.style.marginTop = still ? '0px' : (6 - 40 * (1 - (1 - f) * (1 - f))).toFixed(1) + 'px';   // ease-out, 6 px down to 34 up
   }
-  deviceLockLook();
+  deviceLockLook(); stripTick(now, still);
   const b = document.getElementById('devBtn'), g = (now - PULSE_AT) / (PULSE_SECS_BTN * 1000);
   if (b && (g < 1 || b.style.boxShadow)) b.style.boxShadow = g < 1 && !still && !DEV_LOCK_SHOWN ? '0 0 0 ' + (12 * g).toFixed(1) + 'px rgba(76,195,181,' + (.7 * (1 - g)).toFixed(3) + ')' : '';
 }
@@ -9889,6 +9890,67 @@ function deviceLockLook() {
   b.style.opacity = on ? '.6' : ''; b.setAttribute('aria-label', on ? 'No device yet' : 'Your device: the time and your needs');
 }
 { const b = document.getElementById('devBtn'); if (b) b.addEventListener('click', e => { if (deviceLocked()) { e.stopImmediatePropagation(); deviceLockedTap(); } }, true); }
+// the needs strip (0.28.32, the user's "needs should be cleanly displayed", approved design): under the Device button,
+// six small icons, each with a short bar in its own colour (NEED_COL, through col()); a bar turns amber and pulses
+// gently under NEED_LOW. A rise shows as "+N" beside its icon (rises close together merge) instead of a note over your
+// head. Tap the strip for names and numbers. DOM only (no draw calls), a fixed size; pulses and fades run on the frame
+// clock in floatsTick, like the notes (0.28.23).
+const NEED_LOW = 25, RISE_SECS = 2.2;
+const cssCol = h => '#' + col(h).convertLinearToSRGB().getHexString();
+const NEED_COL = { hunger: cssCol('#e8a25c'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc') };
+const NEED_AMBER = cssCol('#ff9a3c');
+const NEED_ICON = {                                       // 24-unit stroke icons: fork and knife, bolt, droplet, dumbbell, two people, door
+  hunger: 'M7 3v7M5 3v4a2 2 0 0 0 4 0V3M7 10v11M17 3c-2 1-3 4-3 8h3v10', energy: 'M13 2 5 13h6l-1 9 8-12h-6z',
+  hygiene: 'M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z', fitness: 'M3 10v4M6.5 7v10M17.5 7v10M21 10v4M6.5 12h11',
+  social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M6 21V3h12v18M4 21h16M14 12h1' };
+const RISES = {};                                         // need -> { v, at }: the "+N" showing beside its icon
+let STRIP_SIG = '';
+function needStrip() {
+  let el = document.getElementById('needStrip'); if (el) return el;
+  const st = document.createElement('style');
+  st.textContent = '#needStrip{position:fixed;left:14px;top:124px;z-index:2;display:flex;gap:7px;padding:6px 9px;border-radius:12px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer;touch-action:manipulation}'
+    + '#needStrip .ns{position:relative;display:flex;flex-direction:column;align-items:center;width:22px}'
+    + '#needStrip svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+    + '#needStrip i{display:block;width:20px;height:3px;margin-top:4px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden}'
+    + '#needStrip i b{display:block;height:100%;width:100%;background:currentColor;transform-origin:left center}'
+    + '#needStrip em{position:absolute;left:15px;top:-9px;font-style:normal;font-size:10.5px;font-weight:700;line-height:14px;padding:0 4px;border-radius:7px;background:rgba(12,20,30,.85);opacity:0;pointer-events:none;white-space:nowrap}'
+    + '#needStrip span,#needStrip u{display:none;text-decoration:none}'
+    + '#needStrip.open{flex-direction:column;gap:5px}#needStrip.open .ns{flex-direction:row;width:auto;gap:7px}'
+    + '#needStrip.open i{width:70px;margin:0}#needStrip.open span{display:block;width:62px;font-size:12px;color:var(--ink)}'
+    + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:auto;right:-6px;top:-1px}';
+  document.head.appendChild(st);
+  el = document.createElement('div'); el.id = 'needStrip'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Your needs: tap for names and numbers');
+  el.innerHTML = NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('');
+  el.onclick = e => { e.stopPropagation(); el.classList.toggle('open'); STRIP_SIG = ''; };
+  document.body.appendChild(el);
+  return el;
+}
+function stripRise(k, v) {                               // a rise beside its icon; a new one while it shows adds to it
+  const now = performance.now(), r = RISES[k];
+  RISES[k] = { v: (r && now - r.at < RISE_SECS * 1000 ? r.v : 0) + v, at: now, txt: '' };
+}
+function stripTick(now, still) {
+  const el = needStrip(), n = SHIP.player.needs, low = NEED_KEYS.filter(k => n[k] < NEED_LOW);
+  const g = low.length && !still ? .55 + .45 * Math.abs(Math.sin(now / 520)) : 1;   // the gentle pulse, on the frame clock
+  const sig = NEED_KEYS.map(k => Math.round(n[k])).join(',') + '|' + (low.length ? g.toFixed(2) : '');
+  if (sig !== STRIP_SIG) {
+    STRIP_SIG = sig;
+    for (const d of el.children) {
+      const k = d.dataset.k, v = Math.max(0, Math.min(100, n[k])), lo = v < NEED_LOW;
+      d.style.color = lo ? NEED_AMBER : NEED_COL[k]; d.style.opacity = lo ? g.toFixed(2) : '';
+      d.children[2].children[0].style.transform = 'scaleX(' + (v / 100).toFixed(3) + ')'; d.children[3].textContent = Math.round(v);
+      d.title = NEED_LABEL[k] + ' ' + Math.round(v);
+    }
+  }
+  for (const d of el.children) {
+    const k = d.dataset.k, r = RISES[k], em = d.children[4];
+    if (!r) { if (em.style.opacity !== '0' && em.style.opacity) em.style.opacity = '0'; continue; }
+    const f = (now - r.at) / (RISE_SECS * 1000);
+    if (f >= 1) { delete RISES[k]; em.style.opacity = '0'; continue; }
+    const txt = '+' + Math.round(r.v); if (r.txt !== txt) { r.txt = txt; em.textContent = txt; }
+    em.style.opacity = (f < .1 ? f / .1 : f > .7 ? (1 - f) / .3 : 1).toFixed(3);
+  }
+}
 function needsSeen() {                                   // once a frame: what rose since the last frame
   const n = SHIP.player.needs, now = performance.now();
   if (!NEED_SEEN) { NEED_SEEN = { ...n }; return; }
@@ -9898,7 +9960,7 @@ function needsSeen() {                                   // once a frame: what r
     if (d > 0) { if (!(r.v > 0)) r.t0 = now; r.v += d; r.t = now; }
     const stopped = now - r.t > FLOAT_WAIT * 1000;      // a slow trickle under FLOAT_MIN keeps adding up until it stops
     if (r.v > 0 && (stopped || r.v >= FLOAT_MIN && now - r.t0 > FLOAT_EVERY * 1000)) {
-      if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k]); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
+      if (r.v >= FLOAT_MIN) { needFloat('+' + Math.round(r.v) + ' ' + NEED_LABEL[k], k, r.v); NEED_PULSE[k] = now + PULSE_SECS * 1000; }
       r.v = 0;
     }
   }
@@ -9924,7 +9986,7 @@ function actBar() {
   if (!el) {
     needFxLayer();
     const st = document.createElement('style');
-    st.textContent = '#actBar{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:124px;margin:-34px 0 0 -62px;padding:4px 9px 6px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#cfd9dc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+    st.textContent = '#actBar{position:fixed;left:14px;top:0;z-index:2;pointer-events:none;width:180px;margin:0;padding:4px 9px 6px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#cfd9dc;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
       + '#actBar[hidden]{display:none}#actBar i{display:block;height:4px;margin-top:3px;border-radius:2px;background:rgba(150,200,196,.22);overflow:hidden}'
       + '#actBar b{display:block;height:100%;background:var(--teal);transform-origin:left center}';
     document.head.appendChild(st);
@@ -9935,8 +9997,9 @@ function actBar() {
   if (txt !== BAR_TXT) { BAR_TXT = txt; el.children[0].textContent = txt; el.setAttribute('aria-label', txt); }
   el.children[1].children[0].style.transform = 'scaleX(' + pr.frac.toFixed(3) + ')'; el.setAttribute('aria-valuenow', Math.round(pr.frac * 100));
   floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
-  const x = Math.max(66, Math.min(innerWidth - 66, (floatV.x + 1) * innerWidth / 2)), y = Math.max(44, (1 - floatV.y) * innerHeight / 2);
-  el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; el.hidden = false;
+  const sb = document.getElementById('needStrip'), y = sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;   // under the needs strip (0.28.32)
+  el.style.transform = 'translateY(' + y + 'px)'; el.style.width = sb ? sb.offsetWidth + 'px' : '';
+  el.hidden = typeof DEV !== 'undefined' && !!DEV.open;  // never over the device
 }
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {

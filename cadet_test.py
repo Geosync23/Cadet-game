@@ -50,7 +50,7 @@ class Game:
         # (their text is still read from the DOM) so shots don't depend on how fast the machine runs
         # the player's floating "+N" need notes and the device button's glow (section 15, 0.28.20) came and went on real-time
         # timers until 0.28.23: kept out too, so builds before and after compare (their text isn't compared)
-        self.page.add_style_tag(content='#toast{opacity:0!important} #needFx{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important}')
+        self.page.add_style_tag(content='#toast{opacity:0!important} #needFx{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important}')
         try:
             self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         except Exception:
