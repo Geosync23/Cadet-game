@@ -265,3 +265,108 @@
 == rumour
 - Um. I heard something. Sorry. It's probably nothing.
 - Don't tell anyone I told you. I don't tell anyone anything.   #funny
+
+// Writer 4, batch 16: Kovac's ordinary weeks, after week one. Mostly not work: knitting (perfect), the garden and
+// her beans, tea that counts as breakfast, browsing the store for wool, the circle with Torres and Dahl, counting.
+// Gates kept: the lift only as "exercise" or the ladder; nothing of Marra Station or the bolts before her beats.
+
+== greet
+? tier>=acquaintance !week1:true
+- Oh. Hi, {me}. Um. Nice day. I think. I've been in the garden. It's nice there.
+- Hi. Sorry. I was counting stitches. Forty. Hi.   #funny
+? tier>=acquaintance !week1:true weekday:tue|wed
+- Oh. Hi. Day off. I'm doing nothing. Well. Knitting. That's nothing.   #funny
+? tier>=colleague !week1:true
+- Oh, {me}. Good. I've a spare biscuit. I counted. There's one spare.   #funny
+- Um, hello. Do you want to see something? It's a stitch. It's very tidy.
+? tier>=friend !week1:true
+- {me}. Oh, good. Sit? The pot's big. There's plenty. Sorry. There's always plenty.   #warm
+? tier>=close !week1:true
+- Oh. It's you. Good. Um. Sit. Tell me a thing. Any thing.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- I knitted a cover for my teapot. Then the cup. Then the spoon. Sorry. It got away from me.   #funny
+- The beans in the garden are mine. Well. Everyone's. I just talk to them. Quietly.
+- I browse the store every day. I buy wool once a week. Esposito knows. They never say.   #funny
+- Torres dropped a stitch in the circle and laughed so loud the kettle rattled.   #funny
+- Dahl knits sensibly. I knit exactly. Torres knits loudly. It's a good circle.   #funny
+- I had tea for breakfast. Then tea for second breakfast. Tea counts.   #funny
+? tier>=colleague !week1:true
+- I've counted the tiles in the tea corner. Two hundred and eight. Sorry. It's a habit.   #funny
+- I like the garden after shift. The misters come on and nobody talks. It's perfect.
+- Cruz showed me a new Gerald. Tiny. I'm not allowed one yet. I'm on a list.   #funny
+- I took the ladder to Deck 3. Exercise. Very good for you. Thirty-one rungs.   #funny
+- My scarves are perfect. I know. I'm not proud. I'm a bit proud.   #funny
+- Brennan let me shell peas once. Two hundred and twelve. She said "tidy". I glowed.   #warm
+- Quiz night. I knew the bolt question. I didn't say. Somebody else did. That's fine.
+? tier>=friend !week1:true
+- You never make a fuss of me. In public. I notice that. Thank you.   #warm
+- I used to sit alone at the tea corner. Now I sit with the circle. Better. Louder.
+- I'm teaching Torres to cast off. It's going. Slowly. Very slowly.   #funny
+? tier>=close !week1:true
+- You know when it's quiet and it's nice? Not lonely quiet. The garden after shift. That.   #warm
+- I counted my friends aboard. It took longer than last year. Sorry. That's a good thing.   #warm
+
+== near
+? act:breakfast !week1:true
+- Tea. Just tea. I'll eat at lunch. Twice.   #funny
+? act:dinner !week1:true
+- Dinner. I sit at the end. Near the door. Sorry. I like the end.
+? act:off
+- Day off. Garden in the morning. Knitting after. The tea corner if it's quiet.
+? place:hydroponics_garden
+- The beans. Hello, beans. Sorry. I talk to them. Cruz does too.   #funny
+? place:crew_store
+- Just looking. At the wool. Mostly the wool. Only the wool.   #funny
+? place:teacorner !week1:true
+- Knitting circle. Row sixty. Torres is on row nine. Of the same scarf. Since Sowing.   #funny
+? trad:market
+- Swap meet. I swapped a scarf for a jar of buttons. Very good buttons.
+
+== feel
+? mood:high !week1:true
+- Good day. The beans are up. The stitches are even. Somebody said hello first.   #warm
+? mood:ok !week1:true
+- Fine. Normal. Normal's good. I like normal.
+? mood:low tier>=friend !week1:true
+- Bit quiet. I've re-sorted the wool. By colour, then by weight. Sorry. It helps.
+
+== life
+? tier>=acquaintance !week1:true
+- I learnt to knit from a book. Then I read it again. Then I didn't need it.
+? tier>=colleague !week1:true
+- My knitting bag has six pockets. Each one has a job. Don't put anything in the wrong one.   #funny
+- I keep a notebook of stitches. And of nice things people said. Mostly stitches.
+? tier>=friend !week1:true
+- My birthday's the day after the Chief's. I like it that way. Nobody notices. Mostly.
+
+== joy
+? tier>=acquaintance !week1:true
+- The last stitch of a scarf. When it's even. I always sit very still for a minute.
+? tier>=colleague !week1:true
+- Somebody wearing a thing I knitted. Without knowing I'm looking. That's the best.   #warm
+
+== bye
+? !week1:true
+- Bye. Um. See you. Mind the seals. And the beans.   #funny
+- Oh. Okay. See you at the circle? If you like. No pressure.
+- {bye}, {me}. Thank you. For the chat. It was nice. Sorry. It was.   #warm
+
+== callback
+? told:came.quiz tier>=acquaintance
+- Quiz night. You sat on our table. You didn't shout. I liked that. Sorry. I did.   #warm
+? told:came.observatory tier>=acquaintance
+- Observatory night. You counted stars with me. Under your breath. I heard.   #funny
+? told:came.harvest tier>=acquaintance
+- Harvest. You picked beans next to me. Gently. The beans noticed. So did I.   #warm
+? told:came.jam tier>=acquaintance
+- Music night. You clapped in time. Exactly in time. I counted.   #funny
+? told:gift.made tier>=acquaintance
+- The thing you gave me. Hand-made. I can tell. I've looked at the stitches. Thank you.   #warm
+? told:gift.plant tier>=acquaintance
+- Your plant's on my windowsill. It's doing well. I talk to it. Sorry.   #funny
+? told:fav.fetch tier>=colleague
+- That Thursday, your first week. You fetched the part and didn't make a fuss. I remember.   #warm
+? told:intro.arrival tier>=colleague !week1:true
+- I saw you come in, your first night. I didn't say hi. I wanted to. Sorry. Hi.   #funny
