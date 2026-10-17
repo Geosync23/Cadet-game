@@ -99,3 +99,19 @@
 == rumour
 - I'm not sure I should say. I'm worried.
 - Someone said something. I've been fretting.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. Thank you. I was worried it wouldn't come. It came.   #warm
+? told:fav.job
+- You did my job for me. Thank you. I checked it. Twice. It was right.
+? told:fixed.uv
+- The steriliser's working again. Thank you. I've stopped checking it. Mostly.
+? told:came.observatory-night
+- You came up to the observatory. I was nervous to ask. I'm glad I asked.   #warm
+? told:gift.book
+- I'm reading your book. Slowly. I don't want it to end.   #warm
+? told:bday
+- You remembered my birthday. Oh, no, I'm going to cry. Happily. Sorry.   #warm

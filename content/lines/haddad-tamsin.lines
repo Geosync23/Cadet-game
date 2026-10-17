@@ -99,3 +99,21 @@
 == rumour
 - I wasn't going to say anything. But.
 - Don't tell anyone I told you. Sorry.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it! Thank you. Sorry. Thank you. Was it heavy? Sorry.   #funny
+? told:fav.job
+- You did my job! I'd have got it wrong. I wouldn't. I might. Thank you!   #funny
+? told:fixed.oven
+- The oven's fixed! It'll be fine now. Won't it? It will. Thank you!
+? told:came.jam
+- You came to the jam! Did you hear the chord? Nearly. It nearly came right.   #funny
+? told:gift.music
+- I've played your music on repeat. Hamid's learnt the words. Wrong, but learnt.   #funny
+? told:gift.sweet
+- The sweets! Gone. Sorry. I shared them. Mostly. Thank you.   #funny
+? told:bday
+- You remembered my birthday! Oh, dear. I'm going to sing. Sorry.   #funny

@@ -99,3 +99,19 @@
 == rumour
 - Here's the signal. Skip the static.
 - Not gossip. Information.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Fast. Thanks.   #warm
+? told:fav.job
+- You did my job. Clean signal. Thanks.   #warm
+? told:fixed.relay
+- Relay's clear. No static. Was that you? Good work.
+? told:came.observatory-night
+- You came to observatory night. Good. Ask me which ones I've logged.
+? told:gift.music
+- Your record. I know all the words. The real ones. Thanks.   #warm
+? told:bday
+- You remembered my birthday. No static. Thanks.   #warm

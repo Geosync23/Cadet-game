@@ -161,3 +161,19 @@
 == rumour
 - I disapprove. Here's what I heard.
 - Not gossip. A public service.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Reliable. That's the best thing I can say. Thanks.   #warm
+? told:fav.job
+- You did my job. Honestly. You didn't have to. Thank you.   #warm
+? told:fixed.relay
+- Relay's clean. Messages are coming through on time. Was that you? Good.
+? told:came.film
+- You came to film night. You didn't talk through it. You're welcome back.   #funny
+? told:gift.sweet
+- Your sweets. Gone. I'll say they were for the bunk. They weren't.   #funny
+? told:bday
+- You remembered my birthday. Honestly. Thank you. Lights out's at ten, still.   #funny

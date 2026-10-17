@@ -166,3 +166,19 @@
 == rumour
 - Fact. Not gossip. Fact.
 - Heard it. Probably true. Typical.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Quick. Thanks. That's all. Thanks.   #warm
+? told:fav.job
+- You did my job. Saved me an hour. I spent it sitting down. Thanks.   #funny
+? told:fixed.chiller
+- Chiller's fixed. Brennan smiled at the cold store. First time in weeks.   #funny
+? told:came.harvest
+- You came to the harvest. Carried a basket. Didn't drop it. Good.   #funny
+? told:gift.garden
+- From the garden. Smells like rain. Nearly. Thanks, {nick}.   #warm
+? told:bday
+- My birthday. You noticed. One less day. In a good way.   #warm

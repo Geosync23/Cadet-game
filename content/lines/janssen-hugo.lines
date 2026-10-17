@@ -99,3 +99,19 @@
 == rumour
 - Heard something on the night watch.
 - Gerald heard it first. Gerald knows.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Steady work. Thank you.   #warm
+? told:fav.lamp
+- Lamp's working. Gerald can see now. He's very grateful. So am I.   #funny
+? told:came.observatory-night
+- You came up to the observatory. What did you think? Truly. I'm curious.
+? told:gift.plant
+- Your plant's next to Gerald. They're getting on. Slowly. Like plants do.   #funny
+? told:gift.tea
+- Your tea's my helm tea now. One hand on the cup. You know how it is.   #funny
+? told:bday
+- You remembered my birthday. Steady and kind. Thank you.   #warm

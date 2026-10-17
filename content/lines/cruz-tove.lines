@@ -99,3 +99,21 @@
 == rumour
 - The tomatoes heard it. I heard it after.
 - Oh, bother. I wasn't meant to say.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. Oh, bother, thank you. Sorry about the soil.   #funny
+? told:fav.job
+- You did my job. Thank you. The seedlings say thank you too. Probably.   #warm
+? told:fixed.irrigation
+- Water's reaching the beds again. They're happy. Was that you? Thank you.
+? told:fixed.growlight
+- Grow lights are steady. Everything's leaning the right way again. Thank you.
+? told:came.harvest
+- You came to the harvest. You picked very gently. I noticed.   #warm
+? told:gift.plant
+- Your plant's doing well. I've given it its own sowing week. Thank you.   #warm
+? told:bday
+- My birthday. You remembered. Oh, bother. That's lovely. Thank you.   #warm

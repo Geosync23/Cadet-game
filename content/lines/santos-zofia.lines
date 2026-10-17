@@ -160,3 +160,19 @@
 == rumour
 - Fresh today. Not the private stuff.
 - Heard it first. Telling it best.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Free of charge. I'll owe you one. Two for one, if you like.   #funny
+? told:fav.job
+- You did my job. Deal's a deal. I'll do one of yours. When you're not looking.   #funny
+? told:fixed.databus
+- Comms board's quick again. Was that you? I'll put in a good word. Several.
+? told:came.running
+- You came to running club! Vance looked worried. That was us. Good work.   #funny
+? told:gift.game
+- That game you gave me? I've won it eleven times. Rina's asked for a go. No.   #funny
+? told:bday
+- You remembered my birthday, {nick}. Best deal I've had all year.   #warm

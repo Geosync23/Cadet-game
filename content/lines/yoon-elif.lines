@@ -99,3 +99,19 @@
 == rumour
 - I heard something. Oh dear. Sorry.
 - Nights hear things. Very quietly.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Oh, thank you. Sorry I needed it. Thank you.   #warm
+? told:fav.job
+- You did my job. I don't know what to say. Thank you. That's what to say.   #warm
+? told:fixed.uv
+- The steriliser's fixed. Oh, good. Nights are calmer when it's working.
+? told:came.quiz
+- You came to quiz! I told a joke in the break. You laughed. Oh, thank you.   #funny
+? told:gift.tea
+- Your tea's my night tea now. Two in the morning. It helps.   #warm
+? told:bday
+- You remembered my birthday. Oh dear. Thank you. I've no joke ready.   #warm

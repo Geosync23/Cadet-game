@@ -99,3 +99,19 @@
 == rumour
 - I never say what anyone bought. Ever.
 - Heard it at the counter. Not from me.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it before I asked. That's my trick. I'm impressed.   #funny
+? told:fav.lamp
+- You fixed my lamp. I can see the till. And Gerald. Gerald's pleased.   #funny
+? told:fixed.lights
+- Lights on Deck 3 are steady. Was that you? Thought so. You've got the look.
+? told:came.running
+- Saw you at running club. You'll want better socks. I've got some.   #funny
+? told:gift.star
+- That's going in my star journal. Page of its own. Thank you.   #warm
+? told:bday
+- You remembered my birthday. I'll pretend I didn't notice. I noticed.   #warm
