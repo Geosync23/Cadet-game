@@ -7,8 +7,8 @@
 ## My seats (session ids)
 | Seat | Branch | Session | Last reviewed | Verdict |
 | --- | --- | --- | --- | --- |
-| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 2f6d8dd (0.26.27) | PASS (also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (repair cues are `repair.repair`); agreed fix: section 17's `mkind` |
-| Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 7abf466 (0.42.15) | PASS (first launch from section 21's first frame) |
+| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 2f6d8dd (0.26.27) | PASS (also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (social's cue key works around it); `introPlan` double-books places (Calder and Torres on 5-stool-1) |
+| Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 4f6d0b2 (0.42.17) | PASS WITH FIXES: the Monday briefing starts before its cast is in the room (intro_check part 10 fails on the full merge); writes device tipsSeen directly |
 | Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 945c447 (0.36.51) | PASS (cue key from the machine; bonds restored in the test; full merge social_check OK) |
 | Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
