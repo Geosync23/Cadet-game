@@ -7101,11 +7101,10 @@ function flagSet(key, value = true) {
 }
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
-// a new game that arrives by shuttle (Pillar 4): day 0, a real ship Sunday, 17:40, at the foot of the Tern's ramp on
-// Deck 5 (day 1 stays Monday, so the calendar never moves). Only when section 21 asks for it (introWanted(), a
-// function that reads nothing but the URL and storage) and never with ?nosave: the tests keep day 1 at 06:00
+// a new game that arrives by shuttle (Pillar 4): day 0, a real ship Sunday, 17:40, on the Tern's ramp on Deck 5 (day 1
+// stays Monday, so the calendar never moves). Section 21 starts it: newGameStart(true), from New game or, on a first
+// launch with no save, from its own load (this section can't see section 21 while it loads). Never with ?nosave
 const SHIP_START_ARRIVAL = { day: 0, min: 17 * 60 + 40, deck: 5, tile: [7, 8], face: Math.PI / 2 };   // on the ramp, facing east (section 21's INTRO_START)
-const arriving = () => { try { return !NOSAVE && typeof introWanted === 'function' && !!introWanted(); } catch (e) { return false; } };
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const shipNow = () => (SHIP.time.day - 1) * 1440 + SHIP.time.min;    // absolute ship minutes
@@ -7166,6 +7165,7 @@ function saveGame() {
       player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {},
       flags: SHIP.flags || {}, notes: SHIP.notes || [],
     };
+    if (typeof crewState === 'function') save.crew = crewState(SHIP.time.day);   // who's aboard, who left, who arrived (rebuilt from the roster on load)
     for (const f of SAVE_EXTRA) f(save);
     localStorage.setItem(SAVE_KEY, JSON.stringify(save));
   } catch (e) { /* no storage, or full: the game carries on unsaved */ }
@@ -7183,10 +7183,7 @@ function loadGame() {
 }
 const SAVED = loadGame();
 // where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
-const ARRIVING = !SAVED && arriving();
-const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing }
-  : ARRIVING ? { deck: SHIP_START_ARRIVAL.deck, tile: SHIP_START_ARRIVAL.tile, face: SHIP_START_ARRIVAL.face } : { deck: SHIP_START.deck };
-if (ARRIVING) { SHIP.time.day = SHIP_START_ARRIVAL.day; SHIP.time.min = SHIP_START_ARRIVAL.min; }
+const START = SAVED ? { deck: SAVED.player.deck, tile: SAVED.player.tile, face: SAVED.player.facing } : { deck: SHIP_START.deck };
 if (SAVED) {
   SHIP.time.day = SAVED.time.day; SHIP.time.min = SAVED.time.min;
   const decks = (SAVED.ship && SAVED.ship.decks) || {};
@@ -7207,7 +7204,12 @@ newBtn.onclick = () => {
   if (!newAsk) { span.textContent = 'Tap again'; newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; }, 4000); return; }
   clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game';
   if (ride) return;                                      // not mid-ride
-  newGameStart(arriving());
+  // how to start (agreed with section 21 and the device): the tests and anyone without section 21 wake on Monday; a
+  // device that has never arrived arrives by shuttle; one that has gets the choice (arrive, or skip to Monday)
+  if (NOSAVE || typeof introArrived !== 'function') return newGameStart(false);
+  if (!introArrived() || typeof deviceChoose !== 'function') return newGameStart(true);
+  deviceChoose({ title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] },
+    i => { if (i === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } });
 };
 // a new game (Pillar 4): by shuttle on day 0 at 17:40 (arrival true: section 21 then calls introBegin), or in Bunk 1
 // on Monday at 06:00 (false; section 21 calls introSkip when you skipped the arrival). Clears the save, the decks'
@@ -7320,7 +7322,7 @@ const RANK_ORDER = ['captain', 'xo', 'chief', 'senior', 'officer', 'junior', 'gu
 let SCHED_DATA = null;
 function schedData() {
   if (SCHED_DATA) return SCHED_DATA;
-  const people = ROSTER.concat(ROSTER_GUESTS, guestPeople())   // and the visitors aboard for a few days (Pillar 3)
+  const people = ROSTER.concat(ROSTER_GUESTS, guestPeople(), typeof ROSTER_RESERVE !== 'undefined' ? ROSTER_RESERVE : [])   // and the visitors aboard for a few days (Pillar 3), and the crew still to come (Pillar 4)
     .filter(p => !p.player);                             // you live your own day
   const places = [];
   // a machine's panel place isn't handed out as a desk (A5b). Event places (an `event` field) are listed by event
@@ -7348,7 +7350,8 @@ function schedData() {
   for (const l of shared.values()) l.sort(nat);
   const own = new Map();                                 // bed -> its own places
   for (const [id, bs] of owner) for (const b of bs) { if (!own.has(b)) own.set(b, []); own.get(b).push(byId.get(id)); }
-  const desks = schedDesks(people, shared);
+  const desks = schedDesks(people.filter(p => !p.replaces), shared);   // an arrival takes the desk of the one they replace, so no one else's moves
+  for (const p of people) if (p.replaces && desks.has(p.replaces)) desks.set(p.id, desks.get(p.replaces));
   // stations nobody on the day shift has, outside locked rooms: someone from that department stands in each day
   const taken = new Set(people.filter(p => p.shift !== 'night').map(p => desks.get(p.id)));
   const spare = [...shared.entries()].filter(([k]) => /\|work:/.test(k)).flatMap(([, l]) => l)
@@ -7598,13 +7601,35 @@ function guestPeople() {
 // where a guest's stay stands on ship day d: 'away', 'arrive', 'leave' or 'in' (aboard all day); crew are always 'in'.
 // Stays from the data are days of the year; an event guest's are ship days from section 18
 function guestStay(p, d) {
-  if (!p.guest) return 'in';
+  if (!p.guest) return crewStay(p, d);
   let a = p.arrive, l = p.leave, y = d;
   if (a == null) { const ev = typeof eventGuestDays === 'function' ? eventGuestDays(p) : null; if (!ev) return 'away'; [a, l] = ev; }
   else y = ((d - 1) % 364 + 364) % 364 + 1;              // the day of the year (day 0, the arrival Sunday, is the last of the year before)
   if (y === a) return 'arrive';
   if (y === l) return 'leave';
   return (a <= l ? y > a && y < l : y > a || y < l) ? 'in' : 'away';   // a <= l, or across the year's end
+}
+// crew coming and going (Pillar 4): the crew designer's `aboard: [fromDay, toDay]` (either end null for open; missing
+// or null for always). They leave on toDay at 15:00 by the shuttle bay and arrive on fromDay at 17:40 off the
+// Sunday shuttle (ROSTER_ROTATIONS lists the days); an arrival `replaces` a leaver, taking their bed and desk.
+// Pure (roster data only), so any day planned early or again agrees. crewLeaving(p) / crewArriving(p): those days, or null
+const ROTA_OFF = 900, ROTA_ON = 1060;                 // a transfer: off at 15:00, on at 17:40
+function crewStay(p, d) {
+  const ab = p.aboard; if (!Array.isArray(ab)) return 'in';
+  const [a, l] = ab;
+  if (a != null && d < a || l != null && d > l) return 'away';
+  if (a != null && d === a) return 'arrive';
+  if (l != null && d === l) return 'leave';
+  return 'in';
+}
+const crewLeaving = p => Array.isArray(p && p.aboard) ? p.aboard[1] : null;
+const crewArriving = p => Array.isArray(p && p.aboard) ? p.aboard[0] : null;
+// who's aboard on day d, who has left and who has arrived by then (the save's `crew`, the device's Roster)
+function crewState(d) {
+  const P = schedPeople().filter(p => !p.guest), st = p => crewStay(p, d);
+  return { aboard: P.filter(p => st(p) !== 'away').map(p => p.id),
+    left: P.filter(p => crewLeaving(p) != null && crewLeaving(p) < d).map(p => ({ id: p.id, day: crewLeaving(p) })),
+    arrived: P.filter(p => crewArriving(p) != null && crewArriving(p) <= d).map(p => ({ id: p.id, day: crewArriving(p) })) };
 }
 const aboard = (p, d) => guestStay(p, d) !== 'away';
 const aboardAllDay = (p, d) => guestStay(p, d) === 'in';
@@ -7621,7 +7646,7 @@ function guestTrim(p, d, segs) {
   if (aboardAllDay(p, d)) return segs;
   const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
   if (!aboard(p, d)) return [away(B, B + 1440)];
-  const cut = B + GUEST_AT, arriving = guestStay(p, d) === 'arrive', out = [];
+  const arriving = guestStay(p, d) === 'arrive', cut = B + (p.guest ? GUEST_AT : arriving ? ROTA_ON : ROTA_OFF), out = [];   // crew: off at 15:00, on at 17:40
   if (arriving) {
     out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
     for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
@@ -7660,7 +7685,7 @@ const HABIT_WEEKS = [[]];                                // week w (days 7w+1 ..
 let HABIT_SAVED = null;                                  // the saved log, kept for the weeks it covers
 function habitWeek(w) {
   while (HABIT_WEEKS.length <= w) {
-    const k = HABIT_WEEKS.length, ppl = schedPeople().filter(q => !q.guest), out = [], d0 = 7 * k + 1;
+    const k = HABIT_WEEKS.length, ppl = schedPeople().filter(q => !q.guest && !q.replaces), out = [], d0 = 7 * k + 1;   // never a guest or someone still to come
     if (HABIT_SAVED && HABIT_SAVED.some(c => c.day > 7 * k + 7)) { HABIT_WEEKS.push(HABIT_SAVED.filter(c => c.day >= d0 && c.day < d0 + 7)); continue; }
     const U = j => schedU(9100, k, j), n = U(0) < .35 ? 0 : U(0) < .8 ? 1 : 2;
     // the crew designer's own changes first (ROSTER[i].habitShifts: [{ add?, drop?, why }], why a whole sentence),
@@ -8053,12 +8078,15 @@ function schedBuild(p, d, occ, S) {
     // answer 11: some days (about 2 in 5) half the day shift heads straight for dinner when the shift ends: a rush at the servery
     if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, F.workEnd + 3 + Math.round(10 * U(74)));
     const ho = meet.find(e => e.tag === 'handover'); if (ho && dinnerAt < ho.at + ho.dur && S.shared.has('1|@handover')) dinnerAt = ho.at + ho.dur;   // eat after the handover
-    for (const e of meet) if (e !== ho && !e.done && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt)   // dinner clear of a gathering: after it if there's time, else before
-      dinnerAt = e.at + e.dur + 25 <= MEALS.dinner[1] ? Math.max(dinnerAt, e.at + e.dur) : Math.max(t, Math.min(dinnerAt, e.at - 45));
+    let dinnerBy = 1440;                                 // dinner before a gathering ends when it starts (a grab if that's too soon)
+    for (const e of meet) if (e !== ho && !e.done && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt) {   // dinner clear of a gathering: after it if there's time, else before
+      if (e.at + e.dur + 25 <= MEALS.dinner[1]) dinnerAt = Math.max(dinnerAt, e.at + e.dur);
+      else { dinnerAt = Math.max(t, Math.min(dinnerAt, e.at - 45)); dinnerBy = Math.min(dinnerBy, e.at); }
+    }
     if (sp.length && t + 45 < dinnerAt && clear(70)) sp.shift()();
     leisureUntil(Math.min(dinnerAt, until - 40), 71);
     if (ateDinner) {}
-    else if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0)));
+    else if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0), dinnerBy));
     else grab('dinner', 72);
     while (sp.length && t < until - 60 && clear(70)) sp.shift()();
     if (toWork) { leisureUntil(until - C, 80); go(wd); work(1440); return; }
@@ -8264,7 +8292,7 @@ function shipDay(d) {
   occ.rot = new Map();
   occ.who = new Map();                                   // who -> the places they hold (seating by friendship)
   S.spare.forEach((pl, i) => {
-    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d));
+    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d) && aboardAllDay(p, d));
     if (c.length) occ.rot.set(c[Math.floor(schedU(strSeed(pl.id), d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });   // by the station's id, so a new station never reshuffles the others
   });
   occ.rotIds = new Set([...occ.rot.values()].map(r => r.id));   // today's stand-in stations (a guest never takes one)
@@ -8457,7 +8485,10 @@ function dayReport(day) {
   // at the same time (desks are fixed per shift; the galley's stations are booked by its rota)
   const bedOf = new Map(), atWork = new Map();
   for (const p of S.people) for (const s of planDay(p, day)) if (s.placeId) {
-    if (s.type === 'bed') { const h = bedOf.get(s.placeId); if (h && h !== p.id) rep.double.push(s.placeId + ' ' + h + '/' + p.id); bedOf.set(s.placeId, p.id); }
+    if (s.type === 'bed') {                              // a bed is its owner's: two people in it at once is wrong (a transfer hands it over on the day)
+      const l = bedOf.get(s.placeId) || bedOf.set(s.placeId, []).get(s.placeId), o = l.find(x => x[2] !== p.id && x[0] < s.to && s.from < x[1]);
+      if (o) rep.double.push(s.placeId + ' ' + o[2] + '/' + p.id); l.push([s.from, s.to, p.id]);
+    }
     else if (s.act === 'work' && /^work:/.test(s.type)) (atWork.get(s.placeId) || atWork.set(s.placeId, []).get(s.placeId)).push([s.from, s.to, p.id]);
   }
   for (const [id, v] of atWork) { v.sort((x, y) => x[0] - y[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1] && v[i][2] !== v[i - 1][2]) rep.double.push(id + ' ' + v[i - 1][2] + '/' + v[i][2] + '@' + hhmm(v[i][0] % 1440)); }
