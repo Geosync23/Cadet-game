@@ -141,7 +141,9 @@ skipped, so it's safe to use them.
 `{friend}` `{best}` `{rival}` `{partner}` `{mentor}` `{mentee}` a crewmate with that bond, `{boss}` their chief,
 `{other}` the other crew member in the scene, `{thing}` what the line's memory is about (`mem:fav.lamp` gives "the lamp"), `{trad}` the tradition,
 `{machine}`, `{room}`, `{deck}`, `{dish}`, `{weekday}`, and from their roster entry `{home}`, `{family}`, `{hobby}`,
-`{since}`.
+`{since}`. In story arcs and themes use the short, line-ready forms instead (0.43.24): `{kin}` and `{lost}` (they
+include the "my": "my gran", "my wife"; write `{kin}`, never "my {kin}") and `{hobbyNoun}` ("knitting", "the piano");
+there `{family}` and `{hobby}` are errors, because the roster's are descriptions ("late wife, who I still talk about").
 
 **Voice tokens** come from the speaker's voice card, so one shared line sounds like each person:
 `{hi}` `{bye}` `{yes}` `{thanks}` `{wow}` `{sigh}` `{nick}`.
@@ -293,7 +295,7 @@ them: Was I any good, as your trainer?   [sigh]
 | `keepsake:` | what they give you to keep (resolution beats) |
 | `learn:` | one line for the Crew app's "What you know" (their story) |
 | `mail:` | a Mail from them afterwards: `<minutes later> \| <subject> \| <body>` |
-| `needs:` | themes only: the roster details a beat uses (`needs: home, family`); people without them skip it |
+| `needs:` | themes only: the roster details a beat uses (`needs: home, kin`): `home`, `since`, `kin`, `lost`, `hobbyNoun`; people without them skip it |
 
 - **The script** follows: `them: text [pose]` (`them` is the arc's person; a crew id or `you` also work;
   `them > you: ...` for a line said to you). Poses: `sigh`, `laugh`, `listen`, `nod`, `gesture`.

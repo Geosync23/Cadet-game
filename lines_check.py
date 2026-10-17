@@ -22,7 +22,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
-                'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other'}
+                'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
+                'kin', 'lost', 'hobbyNoun'}   # kin, lost: "my gran", "my wife" (with the my); hobbyNoun: "knitting", "the piano"
+NEEDS = {'home', 'family', 'hobby', 'since', 'kin', 'lost', 'hobbyNoun'}   # what a theme beat's needs: can name
 TRAD_PLACEHOLDERS = {'trad', 'host', 'names', 'first', 'season', 'weekday', 'time'}   # tradition texts: only these (plans/trad-format.md, tradFill)
 VALUES = {
     'warmth': {'cold', 'warm'},
@@ -188,6 +190,11 @@ def main(argv):
     known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
         src = 'home' if where.startswith('call ') else 'moment'
+        for n in b.get('needs') or []:
+            if n not in NEEDS:
+                errors.append(f'{where}: needs: {n} is not one of {", ".join(sorted(NEEDS))}')
+            elif src == 'moment' and n in ('family', 'hobby'):
+                errors.append(f'{where}: needs: {n}: use {"kin or lost" if n == "family" else "hobbyNoun"} (short, line-ready; the roster\'s {n} is a description)')
         if who not in people and who != 'them' and who not in home_ids:
             errors.append(f'{where}: who "{who}" is not a crew member or guest')
         allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, src)) if b.get('hint') else None
@@ -247,6 +254,10 @@ def main(argv):
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
         if not t and src not in ('moment', 'home'):
             continue
+        if src == 'moment' and re.search(r'\{(family|hobby)\}', t):   # story arcs and themes: the roster's descriptions don't fit a sentence
+            errors.append(f'{tag}: {{family}} / {{hobby}} read as descriptions ("late wife, who I still talk about"): use {{kin}} or {{lost}} ("my gran") or {{hobbyNoun}} ("knitting")')
+        if re.search(r'\bmy \{(kin|lost)\}', t, re.I):
+            errors.append(f'{tag}: {{kin}} and {{lost}} include the "my" ("my gran"): write {{kin}}, not "my {{kin}}"')
         for tok in re.findall(r'\{([^}]*)\}', t):
             if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')

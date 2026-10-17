@@ -501,7 +501,7 @@ introduces them), unless noted.
 | Hamid Larsen's boat is "the Morning Tide" this week (renamed often; never "Gull") | Larsen | writer-commons, batch 3 |
 | Zofia Santos has a five-year plan | Santos | writer-commons, batch 3 |
 | Tariq Varga leads Lukas Dlamini at onions, 41 to 38 | the galley | writer-commons, batch 3 |
-| The struggle themes use `{family}`, `{home}`, `{hobby}`, `{since}`, `{boss}`, `{rival}`; "an old loss" is always years ago | everyone | head writer |
+| The struggle themes use `{home}`, `{since}`, `{boss}`, `{rival}`, and crew designer 3's short fields `{kin}` (a living relative, with "my"), `{lost}` (only where canon already has a death: Oduya's wife and the generated loss-theme crew; never invent one) and `{hobbyNoun}` ("knitting"); never write "my {kin}". "An old loss" is always years ago | everyone | head writer 3, 0.48.43 (reviewer 2's HIGH) |
 | Rina's Tiles count is 43, dated and signed in a notebook | Rina | writer-commons, batch 4 |
 | Brennan bakes bread on Sundays and lets juniors knead; her mother's phrase: "That's done, Auda. Take it off." | Brennan | writer-commons, batch 4 |
 | The person in the "loss" theme taught them to whistle, badly (generic for every theme user) | the loss theme | writer-commons, themes |
