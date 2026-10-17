@@ -182,6 +182,7 @@ LIVE = r"""(() => {
   const seen = []; let n = 0;
   while (DIALOGUE && n++ < 30) { const v = dialogueView(); seen.push((v.choices ? '[choice] ' + v.choices.join(' / ') : v.name + ': ' + v.text)); dialogueStep(v.choices ? 0 : undefined); }
   D.lines = seen; D.mine = { ...SHIP.event.mine }; D.closed = !DIALOGUE;
+  D.choiceNotes = (window.__notes || []).filter(x => x.kind === 'choice').map(x => x.script + ':' + x.k + ':' + x.who.length);   // the ship note for your reply
   // the front: day 11, 14:00, on Deck 3
   skipTo(10 * 1440 + 13 * 60 + 50); put(3, '3-grab-1'); tick(10 * 1440 + 13 * 60 + 51, 10 * 1440 + 14 * 60 + 1);
   D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(ADDRESS_EL && !ADDRESS_EL.hidden) || !!(document.getElementById('devAddr') && !document.getElementById('devAddr').hidden); D.flicker = FEEL.flicker; D.calls2 = frames();   // the banner: the plain one, or section 19's
@@ -370,6 +371,14 @@ with sync_playwright() as pw:
     exp = ['0:lanterns:13', '1:sowing:1', '91:sowing:13', '92:greening:1', '182:greening:13', '183:harvest:1', '273:harvest:13', '274:lanterns:1', '364:lanterns:13', '365:sowing:1']
     if yr['seasons'] != exp: fail(f"seasons {yr['seasons']}")
     for b in yr['baked']: print(f"  baked {b['id']}: from {b['from']}; ties {b['ties']}; Mail: {b['mail']}")
+    import os, re as _re                                  # every .trad file in the repo is in the game (an empty baked block must not hide one)
+    tdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'content', 'traditions')
+    files = sorted(f for f in os.listdir(tdir) if f.endswith('.trad')) if os.path.isdir(tdir) else []
+    want_ids = [m.group(1) for f in files for m in [_re.search(r'^@tradition\s+(\S+)', open(os.path.join(tdir, f), encoding='utf-8').read(), _re.M)] if m]
+    loaded = g.ev("SHIP_TRADITIONS.filter(e => e.baked).map(e => e.id)")
+    print(f"Tradition files: {len(files)} ({', '.join(want_ids)}); loaded from the baked block or stand-in: {', '.join(loaded) or 'none'}")
+    for i in want_ids:
+        if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     for x in yr['errors']: fail('TRAD_ERRORS: ' + x)
     for b in yr['bad'][:20]: fail(b)
 
@@ -403,7 +412,7 @@ with sync_playwright() as pw:
     # 3. the Mail the evening before: a week of skips from Day 1 (and the ship note after each tradition, Pillar 4:
     # the sim engineer's bus when it's in, else a stand-in simNote that only records)
     g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0")
-    g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') onSim('tradition', n => __notes.push(n)); else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
+    g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') { onSim('tradition', n => __notes.push(n)); onSim('choice', n => __notes.push(n)); } else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
     g.ev("for (let t = 360 + 600; t <= 7 * 1440; t += 600) skipTo(t)")
     nt = g.ev("""(() => {
       const want = [1, 2, 3, 4, 5, 6].flatMap(d => eventsOn(d).filter(e => (d - 1) * 1440 + e.to > 360).map(e => ({ key: e.id + '@' + d, n: schedPeople().filter(p => planDay(p, d).some(s => s.tag && /^ev-/.test(s.tag) && evTagId(s.tag) === e.id)).length })));
@@ -487,6 +496,8 @@ with sync_playwright() as pw:
     b = L['briefing']
     if not b['open'] or set(b.get('cast', {})) != {'calder', 'tech1', 'tech2'} or not L['panel']: fail(f"the briefing didn't open with its cast: {b}")
     if not any(x.startswith('[choice]') for x in L['lines']) or not any('Mind the lift' in x for x in L['lines']) or not L['closed']: fail('the briefing script did not play through with the reply')
+    print('  ship notes for your replies:', L.get('choiceNotes'))
+    if not any(x.startswith('stormBriefing:0:') or x.startswith('calderStorm:0:') for x in L.get('choiceNotes') or []): fail(f"no simNote('choice') for the briefing reply: {L.get('choiceNotes')}")
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
