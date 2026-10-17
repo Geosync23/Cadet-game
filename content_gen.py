@@ -380,7 +380,7 @@ def parse_meeting(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'TRAD_JS': 'const TRADITIONS = [\n];'}
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MEETINGS_BAKED': {}, 'TRADITIONS': []}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -394,20 +394,22 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
-    # traditions: the traditions engineer's grammar and baked shape (plans/trad-format.md), made by their trad_parse.py
-    # byte for byte: const TRADITIONS = [ one tradition a line ];
+    # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.py (its
+    # functions are frozen and theirs). Same as trad_parse.read_all, except that lines starting with # are dropped
+    # first, as // comments are. Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
-    if os.path.isdir(tdir) and any(f.endswith('.trad') for f in os.listdir(tdir)):
+    tfiles = sorted(f for f in os.listdir(tdir) if f.endswith('.trad')) if os.path.isdir(tdir) else []
+    if tfiles:
         if not trad_parse:
             raise GenError('content/traditions has .trad files but plans/trad_parse.py (the traditions engineer\'s) is missing')
         try:
-            js_block = trad_parse.bake_traditions(tdir)
-            for f in sorted(os.listdir(tdir)):
-                if f.endswith('.trad'):
-                    out['TRADITIONS'] += trad_parse.parse_trad(open(os.path.join(tdir, f), encoding='utf-8').read(), f)
+            for f in tfiles:
+                src = open(os.path.join(tdir, f), encoding='utf-8').read()
+                src = '\n'.join('' if l.lstrip().startswith('#') else l for l in src.split('\n'))   # keep line numbers
+                out['TRADITIONS'].append(trad_parse.parse_trad(src, f))
+            trad_parse.check_all(out['TRADITIONS'])
         except trad_parse.TradError as e:
             raise GenError('content/traditions/' + str(e))
-        out['TRAD_JS'] = js_block[js_block.index('const TRADITIONS'):js_block.index('// ---- END TRADITIONS')].rstrip('\n')
     ids = {}
     for kind, es in out['LINES'].items():
         for e in es:
@@ -455,7 +457,7 @@ def blocks(out):
     lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + js_cards('VOICE', out['VOICE']) \
         + js_obj_of_lists('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];']
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
-    trad = out['TRAD_JS'].split('\n')
+    trad = ['const TRADITIONS = ['] + [f'  {js(t)},' for t in out['TRADITIONS']] + ['];']
     return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad}
 
 

@@ -89,7 +89,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `told:<what>` | they remember it and haven't mentioned it yet; said once, then marked told | `told:fixed.oven` |
 | `warmth:` | `warm` (you've been around lately) or `cold` (not for a while) | `warmth:cold` |
 | `aff:` | how they get on with the other crew member in the scene: `rival`, `neutral`, `friend`; or with a named one: `aff:<crewId>:<band>` | `aff:rival`, `aff:saruth:rival` |
-| `bond:` | they have a crewmate who is their `best`, `rival`, `mentor`, `mentee`, `drifting`, `couple`, `friend` | `bond:best` |
+| `bond:` | they have a crewmate who is their `best`, `friends`, `rivals`, `mentor`, `mentee`, `drifting`, `couple` (`friend`, `rival`, `partner` work too) | `bond:best` |
 | `mood:` | `low`, `ok`, `high` | `mood:low` |
 | `beat:<arc>.<n>` | at least n beats of that story arc have been told | `beat:tomas.3` |
 | `beat=<arc>.<n>` | exactly n beats told (a line that belongs between two beats) | `beat=tomas.2` |
@@ -209,8 +209,7 @@ A: No promises.
 
 ## Traditions (.trad)
 
-A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (it differs a little from `.lines`:
-comments start with `#`, and there are no `?` conditions). content_gen.py bakes it with their `plans/trad_parse.py`
+A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (comments start with `//`, or `#`). content_gen.py bakes it with their `plans/trad_parse.py`
 into `const TRADITIONS = [ ... ]`. The words go in `== mail`, `== ask`, `== here`, `== thanks` and `== chatter`;
 besides the usual placeholders they can use `{host}`, `{names}`, `{season}` and `{time}`. lines_check checks the words
 (chatter, ask and here 90 characters, mail and thanks 200) but not the fields: content_gen.py does.
@@ -265,7 +264,7 @@ their job. Never contradict the roster: bio, life lines, habits and birthdays ar
   likes, invites, joy, thread, keepsake, avoid, lines: { kind: [...] } }`, `VOICE_TEMPLATES[name] = { words, lines }`,
   `LINES[kind] = [{ text, id, tone, w, odds, ...conditions, not: { ... } }]` (a condition's value is a string, `'a|b'`
   for either, an array when all must hold; `tier: [lo, hi]`), `CONVOS = [{ id, topic, pair, ..., lines: [{ who, text }] }]`,
-  `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS = [ ... ]` exactly as `plans/trad_parse.py` makes it
+  `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS = [ ... ]`, one tradition a line, as `plans/trad_parse.py` reads it
   (the traditions engineer's shape, `plans/trad-format.md`).
 - A line's id is a short hash of its file, kind and text: rewording a line gives it a new id.
 - Section 22 (`lineFor`, `overheardFor`, `linesOk`, `linesFill`) is the engine; see DEV_NOTES, "Lines (section 22)".
