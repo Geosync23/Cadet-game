@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.4
+   STARSHIP CADET: CSV Wren                           build 0.60.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -590,11 +590,12 @@ const edgeBlocks = (e, who) => e && e.type !== 'door' && e.type !== 'open' && e.
 // Service hatches (Pillar 2): a deck lists in `service` the hatches into utility rooms whose insides are built.
 // The player and Works crew pass them; everyone else, and every other hatch (the spine ladder's), treats them as walls.
 // crewPath (section 10) asks this for each person. Tier locks (answer 4): a hatch with a `tier` lets through only
-// those of that tier or more (hatchTier, section 17: you are Tier 1, Works crew by rank).
+// those of that tier or more (hatchTier, section 17: Works crew by rank). The player passes them all (0.27.35).
 function hatchPassable(key, who) {
   const e = EDGES.get(key); if (!e || !e.service || !who) return false;
+  if (who === 'player' || who.isPlayer) return true;   // 0.27.35, the user: you can enter any utility space from the start (job tiers are still progression)
   if (e.tier > 1 && typeof hatchTier === 'function' && hatchTier(who) < e.tier) return false;
-  return who === 'player' || !!who.isPlayer || (who.p || who).dept === 'works';
+  return (who.p || who).dept === 'works';
 }
 // the corner between two lift edges in a line: the middle of one wide lift doorway
 const liftJoint = touch => touch.length === 2 && touch.every(t => t.type === 'lift') && touch[0].horiz === touch[1].horiz;
@@ -4843,8 +4844,8 @@ DECKS[3] = {
     B: { name: 'Call-home booths', floor: 'warm' },
     // sealed until their tier
     g: { name: 'Galley plant', floor: 'grate', still: true, tap: 'Extractor fans, the dishwasher pumps and the cold store\'s chillers. Tier 1 access, once the job list is running.' },
-    R: { name: 'Water recycler', floor: 'steel', still: true, tap: 'Every deck\'s water comes back here, gets cleaned and goes out again. When it struggles, the showers on Deck 4 run weak. Tier 2 access.' },
-    i: { name: 'Irrigation room', floor: 'steel', still: true, tap: 'Nutrient tanks and pumps for the garden. Tier 2 access.' },
+    R: { name: 'Water recycler', floor: 'steel', still: true, tap: 'Every deck\'s water comes back here, gets cleaned and goes out again. When it struggles, the showers on Deck 4 run weak.' },
+    i: { name: 'Irrigation room', floor: 'steel', still: true, tap: 'Nutrient tanks and pumps for the garden.' },
   },
   windows: ['M', 'L', 'I', 'G', 'F', 'B'].map(room => ({ room })),
   closedDoors: {
@@ -6052,8 +6053,8 @@ DECKS[2] = {
     // sealed until their tier
     // utility rooms (0.32.2): built, behind service hatches (`service`); their floors draw no random numbers (`still`)
     u: { name: 'Utility closet', floor: 'plate', still: true, tap: 'Deck 2\'s power junction and light relays. Tier 1 access, once the job list is running.' },
-    g: { name: 'Lab gas plant', floor: 'grate', still: true, tap: 'Gas bottles in racks, regulators and the lines that feed both labs. Tier 2 access.' },
-    n: { name: 'Cable crawl', floor: 'grate', still: true, tap: 'A low crawl along the starboard hull, carrying the array\'s cables aft. Tier 3 access.' },
+    g: { name: 'Lab gas plant', floor: 'grate', still: true, tap: 'Gas bottles in racks, regulators and the lines that feed both labs.' },
+    n: { name: 'Cable crawl', floor: 'grate', still: true, tap: 'A low crawl along the starboard hull, carrying the array\'s cables aft.' },
   },
   windows: ['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'W', 'K', 'L', 'J', 'Q'].map(room => ({ room })),
   closedDoors: {
@@ -6824,8 +6825,8 @@ DECKS[1] = {
     R: { name: 'Ready room', floor: 'wood', tap: 'The Captain\'s ready room. The door is shut, and you have not been sent for.' },
     // sealed until their tier
     k: { name: 'Utility closet', floor: 'grate', still: true, tap: 'Deck 1\'s light relays and the lobby\'s power junction. Tier 1 access, once the job list is running.' },
-    u: { name: 'Relay room', floor: 'grate', still: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor. Tier 3 access.' },
-    c: { name: 'Sub-floor crawl', floor: 'grate', still: true, tap: 'A low crawl under the rear stations, from the relay room. Tier 3 access.' },
+    u: { name: 'Relay room', floor: 'grate', still: true, tap: 'Racks of bridge relays, clicking under blue status lights, and the way down into the sub-floor.' },
+    c: { name: 'Sub-floor crawl', floor: 'grate', still: true, tap: 'A low crawl under the rear stations, from the relay room.' },
   },
   windows: ['O', 'R'].map(room => ({ room })),
   closedDoors: {
@@ -7564,7 +7565,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.4';                           // keep in step with the header's build line
+const GAME_BUILD = '0.60.5';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -32259,9 +32260,16 @@ cv.addEventListener('pointermove', e => {
 });
 const up = e => {
   if (steering) endSteer();
-  else if (downAt && pts.size === 1 && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < HOLD_PX && performance.now() - downAt[2] <= HOLD_MS) tap(e.clientX, e.clientY);
+  else if (downAt && pts.size === 1 && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) < HOLD_PX && performance.now() - downAt[2] <= HOLD_MS) { tapUpAt = e.timeStamp; tap(e.clientX, e.clientY); }
   pts.delete(e.pointerId); if (!pts.size) downAt = null;
 };
+// 0.60.5, the ghost tap (the user: "I click the elevator controls and it selects a floor"): a tap on the deck can open a
+// card at once (the lift panel when you're already at it, a conversation). The browser's own click for that same tap
+// comes after the pointerup and, on a phone, lands on whatever is now under the finger: a deck button. So for GHOST_MS
+// after a tap on the deck, real clicks on anything but the deck are swallowed. Times are the events' own (real) clock;
+// scripted clicks (not isTrusted) and keys are never touched.
+const GHOST_MS = 350; let tapUpAt = -1e9;
+addEventListener('click', e => { if (e.isTrusted && e.target !== cv && e.timeStamp - tapUpAt < GHOST_MS) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', e => { pts.delete(e.pointerId); downAt = null; endSteer(); });
 cv.addEventListener('contextmenu', e => e.preventDefault());   // long-press must not open a menu
 cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(camera.zoom * (e.deltaY > 0 ? .92 : 1.08)); }, { passive: false });

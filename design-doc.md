@@ -500,7 +500,7 @@ What makes it interesting:
 
 You progress by earning clearance to work on deeper, more connected systems, and each tier changes how the job plays, not just how big the numbers are. Tier 2 is also your first promotion: Officer rank and your own cabin. Rank also decides which parts of a ship-wide event reach you.
 
-| Tier | Title | Rank | Room | Systems you can work on | What's new in the gameplay | Parts of the ship opened |
+| Tier | Title | Rank | Room | Systems you can work on | What's new in the gameplay | Where its jobs are (you can walk in at any tier) |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Junior Technician | Junior Officer | Bunk, junior wing | Galley oven, lights, doors, washroom fixtures, laundry washers, cabin fixtures | One machine, one fault. Learn the loop: diagnose, fetch, repair, service | Works bay, storage, machine shop, utility closets |
 | 2 | Technician | Officer (first promotion) | Own cabin, officers' corridor | Air scrubbers, water recycler, heating, air plant, fan | Connected systems. Ducts and pipes run between rooms and decks, so a fault can start upstream. Trace it from the manifold room and junctions | Air plant, fan hall, manifold room, pipe galleries, Deck 4 scrubbers and heating, Deck 3 recycler |
@@ -515,7 +515,7 @@ How you earn a tier:
 
 What each tier gives you:
 
-- **Access.** Keycards to new rooms and systems. The ship literally opens up as you grow, and at tier 2 your key opens a cabin of your own.
+- **Access.** Work on new systems. You can already walk into every utility room (2026-10-17); each tier makes the jobs in them yours, and at tier 2 your key opens a cabin of your own.
 - **Tools.** A diagnostic scanner, a pipe kit, a conduit tester, a calibration rig. Each one makes new kinds of faults readable.
 - **Responsibility.** Night on-call duty, where emergencies can wake you. Later, a junior tech to mentor.
 - **Skill.** Repairs get faster and cleaner in tiers you have mastered, so old jobs become quick wins while new ones stay challenging.
