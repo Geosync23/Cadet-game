@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.23
+   STARSHIP CADET: CSV Wren                           build 0.43.24
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.23';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.24';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13741,10 +13741,12 @@ function linesFill(text, p, ctx = {}) {
   let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k, off, str) => { const f = k === 'nick' && lineQ('socialFill', p, 'nick', ctx); const x = f || lineWord(p, k, h, i++); return x === '{me}' ? x : cap(x, off, str); });
   const bond = k => { const id = lineQ('bondOf', p.id, k); return id ? linesName(linesWho(id)) : null; };
   const chief = () => typeof ROSTER !== 'undefined' && ROSTER.find(q => q.dept === p.dept && q.rank === 'chief' && q !== p);
+  const LINE_ROSTER_FILL = ['kin', 'lost', 'hobbyNoun'];   // ready to drop into a line, from the roster (crew designer 3)
   const SOCIAL_FILL = ['me', 'partner', 'friend', 'best', 'rival', 'mentor', 'mentee', 'boss', 'thing', 'trad', 'home', 'family', 'hobby', 'since'];   // section 20's socialFill fills these when it's there ({since} grows with the game: social 0.36.60)
   const val = k => {
     if (ctx[k] != null && typeof ctx[k] !== 'object') return String(ctx[k]);
     if (SOCIAL_FILL.includes(k) && typeof socialFill === 'function') { const x = lineQ('socialFill', p, k, ctx); return x == null ? null : String(x); }
+    if (LINE_ROSTER_FILL.includes(k) && typeof socialFill === 'function') { const x = lineQ('socialFill', p, k, ctx); if (x != null) return String(x); }   // social's answer if it has one, else the roster's own
     switch (k) {
       case 'me': return linesMe();
       case 'name': return linesName(p);
@@ -13754,12 +13756,13 @@ function linesFill(text, p, ctx = {}) {
       case 'other': return ctx.other ? linesName(linesWho(ctx.other)) : null;
       case 'weekday': return WEEKDAYS[weekday(Math.floor(t / 1440) + 1)];
       case 'home': case 'family': case 'hobby': case 'since': return p[k] ? String(p[k]) : null;
+      case 'kin': case 'lost': case 'hobbyNoun': return typeof p[k] === 'string' && p[k] ? p[k] : null;   // the roster's line-ready forms (0.43.24: "my gran", "my wife", "the piano")
       case 'thing': { const k = ctx.mem; return k ? lineQ('memThing', k) || null : null; }   // from the memory the line matched (mem: or told:)
     }
     return null;
   };
   let ok = true;
-  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-z]+)\}/g, (m, k, off, str) => { const x = val(k); if (x == null) ok = false; return x == null ? m : cap(x, off, str); });   // twice: {nick} can give {me}
+  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-zA-Z]+)\}/g, (m, k, off, str) => { const x = val(k); if (x == null) ok = false; return x == null ? m : cap(x, off, str); });   // twice: {nick} can give {me}
   return ok ? s : null;
 }
 function lineFor(who, kind, ctx = {}) {
