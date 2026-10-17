@@ -21,4 +21,4 @@
 - On a trial merge with sim e1bb1e6 (0.26.37, crewMakeWay), decks-p3 (the trestle's tile block) and ship-events,
   with a **different random seed**: all decks the same, a played Monday **3,072/3,072**, and a Sunday evening on
   Deck 3 from 17:20 to about 19:20 (the trestle out and its tiles blocked) **616/616**.
-- cadet_test vs 0.27.28: as the author reports (ALL IDENTICAL); I didn't re-run it, since path_check compares every call.
+- cadet_test 0.27.28 vs 0.27.29: **ALL IDENTICAL**.
