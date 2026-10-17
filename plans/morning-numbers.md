@@ -11,4 +11,4 @@ Measured with the computer's CPU slowed 4x to stand in for a mid-range phone, st
 
 Plain words: busy meals now need about half the phone's time; visible hitches at Sunday dinner drop from about one every 5-6 minutes to about two an hour. Picture is pixel-identical; routes identical.
 
-Cost: loading on a phone is ~0.8 s slower (12.0-12.6 s vs 11.3-11.8 s), from the shadow stand-ins; being looked at (0.27.33, build them lazily).
+Loading: unchanged (about 12 s at 4x slower CPU, about 7 s at normal speed; re-measured 6 runs each, an earlier "0.8 s slower" reading was noise). The shadow stand-ins do add a little to changing decks (Deck 3 most: maybe ~0.7 s on a phone); staggering them is the next optimization (0.27.33).
