@@ -1,0 +1,29 @@
+@crew v-wexley-hale
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Hale. Works, between postings. Anything broken? Asking for me.   #funny
+? tier=stranger
+- Morning. I'm off to Marra Station. Till then I'm bored. Help.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Calder let me hold a spanner. I'm calmer now.   #funny
+?
+
+== chat
+- Marra Station's been rebuilt twice. I'll probably help with the third.   #funny
+- Window seat at sunrise. Well, ship's morning. Still counts.
+
+== near
+? habit:window-seat
+- Best part of a transfer: windows. Worst part: nothing to fix.
+? place:worksbay
+- Just watching. I won't touch. I might touch.   #funny
+?
+
+== bye
+- {bye}. Shout if anything rattles. Please.
+
+== smalltalk
+- Is that a loose panel? Can I?   #funny
+- Marra Station soon. Then work.

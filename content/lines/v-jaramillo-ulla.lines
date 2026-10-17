@@ -1,0 +1,29 @@
+@crew v-jaramillo-ulla
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello! Ulla. I play lounges. Hum me something. Anything.
+? tier=stranger
+- Oh, hi. Passing through. Is the bow lounge always this cosy?
+? tier>=acquaintance
+- {hi}, {me}. I turned your hello into a tune. It's in three-four.   #funny
+?
+
+== chat
+- Every ship hums a different note. The Wren's a low G. Very calm.
+- I call home after every show. They ask if anyone clapped. Somebody always does.
+
+== near
+? place:lounge
+- Best room I've played all season. The windows do half the work.
+? habit:stargazer
+- Stars after a show. That's the encore I like.
+?
+
+== bye
+- {bye}. If you hear a tune tonight, that was you.
+
+== smalltalk
+- Hum it. I'll play it.   #funny
+- The Wren's a low G.

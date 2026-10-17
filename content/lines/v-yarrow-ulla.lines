@@ -1,0 +1,27 @@
+@crew v-yarrow-ulla
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Courier. Don't ask about the case. Nobody tells me either.   #funny
+? tier>=acquaintance
+- Mm, {me}. Slept with the case again. It snores.   #funny
+?
+
+== chat
+- Three ships this month. The Wren's got the best toast.
+- The crew store sells good sweets. That's the only thing I'm taking home.
+
+== near
+? habit:stargazer
+- Observatory. Quiet, dark, nobody asking about the case. Perfect.
+? habit:shopper
+- Window shopping. My case is full. Of what, I couldn't say.   #funny
+?
+
+== bye
+- {bye}. If anyone asks, you didn't see a case.   #funny
+
+== smalltalk
+- It's just a case.
+- Toast. Good toast.

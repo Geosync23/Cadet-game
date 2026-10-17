@@ -1,0 +1,27 @@
+@crew v-lowe-adaeze
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Adaeze. Works, on my way to Marra Station. Need a hand?
+? tier>=acquaintance
+- {hi}, {me}. Kovac let me hold the stopwatch. Big day.   #funny
+?
+
+== chat
+- Between postings is the strangest job. Nothing to do and all day to do it.   #funny
+- Marra Station next. Three panels, I'm told. Can't wait.
+
+== near
+? habit:window-seat
+- Window seat. I've counted the same stars every night. They're still there.
+? habit:stargazer
+- Observatory. Your big telescope's lovely. Tell nobody I said so.
+?
+
+== bye
+- {bye}. If anything needs a second pair of hands, I'm free.
+
+== smalltalk
+- Need a hand?
+- Still there. Good stars.
