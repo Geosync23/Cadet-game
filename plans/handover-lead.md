@@ -401,3 +401,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:09 career eng: claude/leave tip 0784b54 (0.61.19, clock.early lines). ~70%, handover-career.md pushed; finishing the running checks, then idle. Pillar 5 needs a fresh career engineer.
 - ~21:15 USER: NOTES ARE IN for 0.60.6, wants ETA. Build master 2 told to combine cand-0606 now with all PASSed branches; late pieces (DA3 0.27.44, PE5 trad-id, PE6 lamp/Put down/Repair/pause/Tiles/shuffle) join as they pass; ~90 min cutoff, else 0.60.7.
 - ~21:20 USER APPROVED the final Pillar 5 plan (e3b96c5). Night shift: taken as the plan's suggestion (weekend) unless the user says otherwise. DO NOT hire or start Pillar 5 production until the user says so.
+- ~21:17 plan republished as APPROVED (06814f8, v6). Archived idle helpers: Pillar 5 designer (~$15.93) and social & traditions eng (~$17.68); handovers on their branches.
