@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.48
+   STARSHIP CADET: CSV Wren                           build 0.48.49
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.48';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.49';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -21514,8 +21514,8 @@ const VOICE = {
         {"text": "Door's heavy. Lean on it. There. You've got it.", "id": "1qpnh17", "flag": "walk.bay.5"},
         {"text": "This is the haulway. Everything big comes through here.", "id": "pscaz", "flag": "walk.haulway.1"},
         {"text": "Cargo hold on the left. Cart bay on the right.", "id": "1kx5m6w", "flag": "walk.haulway.2"},
-        {"text": "Mind the carts. They don't mind you.", "id": "gm11j1", "tone": "funny", "flag": "walk.haulway.3"},
-        {"text": "Hear that hum? The drive coils, one deck down. I mind them.", "id": "hbc52x", "flag": "walk.haulway.4"},
+        {"text": "Hear that hum? The drive coils, one deck down. I mind them.", "id": "hbc52x", "flag": "walk.haulway.3"},
+        {"text": "Mind the carts. They don't mind you.", "id": "gm11j1", "tone": "funny", "flag": "walk.haulway.4"},
         {"text": "They've got moods, the coils. You'll see. Don't laugh.", "id": "9oadq3", "tone": "funny", "flag": "walk.haulway.5"},
         {"text": "I'll take you down to the engines this week. Promise.", "id": "1ysbqgm", "flag": "walk.haulway.6"},
         {"text": "Machine shop. If we can't find a part, we make it.", "id": "1jt2b3l", "flag": "walk.stores.1"},
@@ -21525,44 +21525,44 @@ const VOICE = {
         {"text": "Pell naps in there sometimes. You didn't hear it from me.", "id": "1ljj6lo", "tone": "funny", "flag": "walk.stores.5"},
         {"text": "And this is us. Works. Home from eight till half four.", "id": "18euqyp", "flag": "walk.works.1"},
         {"text": "That's the job board. Every fault on the ship lands there.", "id": "1qsje9y", "flag": "walk.works.2"},
-        {"text": "Take a job, fix it properly, turn it in. That's the heart of it.", "id": "td5sbz", "flag": "walk.works.3"},
-        {"text": "Tea corner's behind the racks. Half ten. It's sacred.", "id": "11fqtkf", "tone": "funny", "flag": "walk.works.4"},
-        {"text": "Glass office is the Chief's. Calder. Exact, but fair.", "id": "1pk79fx", "flag": "walk.works.5"},
-        {"text": "She's off today. She'll find you anyway. She always does.", "id": "yb3iqc", "tone": "funny", "flag": "walk.works.6"},
-        {"text": "Blue crate's hers too. Don't sit on it. Learnt that one.", "id": "rf2ees", "tone": "funny", "flag": "walk.works.7"},
-        {"text": "Tool wall. Every tool has its outline. Back in it, after.", "id": "1xptek6", "flag": "walk.works.8"},
-        {"text": "Tomorrow, ten to eight. Right here. Not eight. Ten to.", "id": "hw32ba", "flag": "walk.works.9"},
+        {"text": "Glass office is the Chief's. Calder. Exact, but fair.", "id": "1pk79fx", "flag": "walk.works.3"},
+        {"text": "Tomorrow, ten to eight. Right here. Not eight. Ten to.", "id": "hw32ba", "flag": "walk.works.4"},
+        {"text": "Take a job, fix it properly, turn it in. That's the heart of it.", "id": "td5sbz", "flag": "walk.works.5"},
+        {"text": "Tea corner's behind the racks. Half ten. It's sacred.", "id": "11fqtkf", "tone": "funny", "flag": "walk.works.6"},
+        {"text": "She's off today. She'll find you anyway. She always does.", "id": "yb3iqc", "tone": "funny", "flag": "walk.works.7"},
+        {"text": "Blue crate's hers too. Don't sit on it. Learnt that one.", "id": "rf2ees", "tone": "funny", "flag": "walk.works.8"},
+        {"text": "Tool wall. Every tool has its outline. Back in it, after.", "id": "1xptek6", "flag": "walk.works.9"},
         {"text": "The lift. Runs right up the spine of the ship.", "id": "1apen77", "flag": "walk.lift.1"},
         {"text": "Six decks. Bridge at the top, engines at the bottom.", "id": "la6uhq", "flag": "walk.lift.2"},
-        {"text": "Two's Survey and the seniors. Three's food. Important.", "id": "utxntf", "tone": "funny", "flag": "walk.lift.3"},
-        {"text": "Ladder's behind the glass. Some take it. For the exercise.", "id": "xa6apv", "tone": "funny", "flag": "walk.lift.4"},
-        {"text": "Four, please. Go on, the panel's all yours.", "id": "ayonit", "flag": "walk.lift.5"},
+        {"text": "Four, please. Go on, the panel's all yours.", "id": "ayonit", "flag": "walk.lift.3"},
+        {"text": "Two's Survey and the seniors. Three's food. Important.", "id": "utxntf", "tone": "funny", "flag": "walk.lift.4"},
+        {"text": "Ladder's behind the glass. Some take it. For the exercise.", "id": "xa6apv", "tone": "funny", "flag": "walk.lift.5"},
         {"text": "Deck 4. Quarters. The junior wing's this way.", "id": "1szury2", "flag": "walk.wing.1"},
-        {"text": "Washrooms. Hot water till ten, then it's character-building.", "id": "1z8h6n", "tone": "funny", "flag": "walk.wing.2"},
-        {"text": "Laundry there. Put your name in everything. Trust me.", "id": "shqjiw", "tone": "funny", "flag": "walk.wing.3"},
+        {"text": "Eight bunk rooms. You're in One. Good room, One.", "id": "yl19sh", "flag": "walk.wing.2"},
+        {"text": "Washrooms. Hot water till ten, then it's character-building.", "id": "1z8h6n", "tone": "funny", "flag": "walk.wing.3"},
         {"text": "Common room's at the end, by the windows. Tiles, mostly.", "id": "1n1yntp", "flag": "walk.wing.4"},
         {"text": "Don't play Rina at Tiles. Or do. Just don't expect to win.", "id": "mcrug4", "tone": "funny", "flag": "walk.wing.5"},
-        {"text": "Eight bunk rooms. You're in One. Good room, One.", "id": "yl19sh", "flag": "walk.wing.6"},
+        {"text": "Laundry there. Put your name in everything. Trust me.", "id": "shqjiw", "tone": "funny", "flag": "walk.wing.6"},
         {"text": "Officers' corridor. Cabins, all the way along.", "id": "143rgm6", "flag": "walk.officers.1"},
         {"text": "Fourteen's mine. The one with the music. Sorry in advance.", "id": "1deimsk", "tone": "funny", "flag": "walk.officers.2"},
-        {"text": "Music room's at the end. The record cabinet lives there.", "id": "1orvt1i", "flag": "walk.officers.3"},
-        {"text": "I know every song in it. So do four others. We disagree.", "id": "lecn7g", "tone": "funny", "flag": "walk.officers.4"},
-        {"text": "The Captain plays the piano in there. Late Thursdays.", "id": "1yd5458", "flag": "walk.officers.5"},
-        {"text": "Need anything, knock on fourteen. I mean it.", "id": "ojhhg2", "tone": "warm", "flag": "walk.officers.6"},
+        {"text": "Need anything, knock on fourteen. I mean it.", "id": "ojhhg2", "tone": "warm", "flag": "walk.officers.3"},
+        {"text": "Music room's at the end. The record cabinet lives there.", "id": "1orvt1i", "flag": "walk.officers.4"},
+        {"text": "I know every song in it. So do four others. We disagree.", "id": "lecn7g", "tone": "funny", "flag": "walk.officers.5"},
+        {"text": "The Captain plays the piano in there. Late Thursdays.", "id": "1yd5458", "flag": "walk.officers.6"},
         {"text": "Deck 3. Commons. Everyone ends up here sooner or later.", "id": "okm71h", "flag": "walk.deck3.1"},
-        {"text": "Garden's that way. One big tree. Don't ask who climbs it.", "id": "5ko213", "tone": "funny", "flag": "walk.deck3.2"},
-        {"text": "Gym. Vance's leaderboards. Don't look at them too long.", "id": "8zb32k", "tone": "funny", "flag": "walk.deck3.3"},
-        {"text": "Crew store. Snacks, socks, small things. Bring credits.", "id": "1m2r8ok", "flag": "walk.deck3.4"},
-        {"text": "Booths down there. That's where you call home.", "id": "197rmo7", "flag": "walk.deck3.5"},
-        {"text": "Infirmary. Dr. Nandakumar. She'll tell you to drink water.", "id": "1dn3q2w", "flag": "walk.deck3.6"},
-        {"text": "Lounge at the bow. Big curved windows. Best seats aboard.", "id": "7dsfbj", "flag": "walk.deck3.7"},
-        {"text": "And the mess. Smell that? That's Brennan. Hurry.", "id": "6kjnfi", "tone": "funny", "flag": "walk.deck3.8"},
+        {"text": "And the mess. Smell that? That's Brennan. Hurry.", "id": "6kjnfi", "tone": "funny", "flag": "walk.deck3.2"},
+        {"text": "Booths down there. That's where you call home.", "id": "197rmo7", "flag": "walk.deck3.3"},
+        {"text": "Garden's that way. One big tree. Don't ask who climbs it.", "id": "5ko213", "tone": "funny", "flag": "walk.deck3.4"},
+        {"text": "Gym. Vance's leaderboards. Don't look at them too long.", "id": "8zb32k", "tone": "funny", "flag": "walk.deck3.5"},
+        {"text": "Crew store. Snacks, socks, small things. Bring credits.", "id": "1m2r8ok", "flag": "walk.deck3.6"},
+        {"text": "Infirmary. Dr. Nandakumar. She'll tell you to drink water.", "id": "1dn3q2w", "flag": "walk.deck3.7"},
+        {"text": "Lounge at the bow. Big curved windows. Best seats aboard.", "id": "7dsfbj", "flag": "walk.deck3.8"},
         {"text": "Tray first, then the servery. Take what smells best.", "id": "rl2xnr", "flag": "walk.servery.1"},
         {"text": "That's Chef Brennan. Thank her on the way past. It matters.", "id": "16z9pgu", "flag": "walk.servery.2"},
-        {"text": "She keeps a book of everyone's favourite dish. Think hard.", "id": "yz5ys", "flag": "walk.servery.3"},
-        {"text": "Sunday's bread day. She lets juniors knead, if you're early.", "id": "1lpr89k", "flag": "walk.servery.4"},
-        {"text": "Grab shelf. Covered plates. For emergencies, and Pell.", "id": "194y6mh", "tone": "funny", "flag": "walk.servery.5"},
-        {"text": "I'll find us a table. Window side, if it's free.", "id": "sgpe67", "flag": "walk.servery.6"},
+        {"text": "I'll find us a table. Window side, if it's free.", "id": "sgpe67", "flag": "walk.servery.3"},
+        {"text": "She keeps a book of everyone's favourite dish. Think hard.", "id": "yz5ys", "flag": "walk.servery.4"},
+        {"text": "Sunday's bread day. She lets juniors knead, if you're early.", "id": "1lpr89k", "flag": "walk.servery.5"},
+        {"text": "Grab shelf. Covered plates. For emergencies, and Pell.", "id": "194y6mh", "tone": "funny", "flag": "walk.servery.6"},
         {"text": "This way! Over here.", "id": "1whjp08", "flag": "walk.call.1"},
         {"text": "Over here, {me}. She's bigger than she looks.", "id": "1vkatjh", "flag": "walk.call.2"},
         {"text": "I'll wait. No rush. Well, a bit of rush.", "id": "ilp5c9", "tone": "funny", "flag": "walk.call.3"},
