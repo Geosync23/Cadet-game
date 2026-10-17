@@ -45,10 +45,10 @@ SCENE_JS = r"""(sc => {
   return { room: ROOMS[k].name };
 })"""
 MEASURE_JS = r"""(n => {
+  window.__skip = false; window.__step(1, 1000 / 30);   // one drawn frame: draw calls, triangles, crew (before the timing, so the ship time is the same every run)
+  const st = crowd.stats(), r = { calls: renderer.info.render.calls, tris: Math.round(renderer.info.render.triangles / 1000), crew: st.people };
   window.__skip = true; let js = 1e9; for (let k = 0; k < 3; k++) { const a = window.__realNow(); window.__step(n, 1000 / 30); js = Math.min(js, (window.__realNow() - a) / n); } window.__skip = false;   // the best of 3 batches (less noise)
-  window.__step(1, 1000 / 30);
-  const st = crowd.stats();
-  return { calls: renderer.info.render.calls, tris: Math.round(renderer.info.render.triangles / 1000), js: +js.toFixed(2), crew: st.people };
+  r.js = +js.toFixed(2); return r;
 })"""
 MEM_JS = r"""(() => { const m = renderer.info.memory; return { geo: m.geometries, tex: m.textures, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null }; })()"""
 
