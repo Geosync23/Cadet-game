@@ -91,3 +91,19 @@
 == rumour
 - Small question. Big news.
 - Quietly: did you know?
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the maps. Carefully. Marra Station in a tube.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hi. I'm leaving. Can I ask you something small? Will you write?
+? leaving:you tier>=friend
+- You always answered my little questions. Even the big little ones. Thank you.   #warm
+
+== letter
+- New ship. Fixed four pairs of headphones already. Tell Greta it's a race now.
+? tier>=friend
+- Found an old map of a corridor that isn't there any more. Thought of the Wren's. Hello.

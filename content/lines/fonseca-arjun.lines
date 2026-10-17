@@ -93,3 +93,19 @@
 == rumour
 - Filed under: news.   #funny
 - Found this. Like everything.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Labelled twice. Obviously.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Leaving. Someone else can run the lost-property box. Badly.   #funny
+? leaving:you tier>=friend
+- You never once tried to beat me at labelling. Wise. Thank you. Really.   #warm
+
+== letter
+- New ship has no lost-property box. I've made two. Labelled. Pressed a flower from their garden.
+? tier>=friend
+- Found an odd sock on the new ship and thought: that's a Wren sock. It wasn't. Hello.

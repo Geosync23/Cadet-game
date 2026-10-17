@@ -99,3 +99,19 @@
 == rumour
 - Ha. Wait. You'll like this.
 - Heard it on my rounds. Deck 3.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Last walk round the ship tonight. Every deck.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Hey, hey. I'm off. Keep Holt laughing for me. Somebody has to.
+? leaving:you tier>=friend
+- You were good on the late rounds. Good eyes. Good company. Thanks.   #warm
+
+== letter
+- New posting. Walked the whole ship the first night. Smaller. Tidy. She's a good one. Not the Wren.
+? tier>=friend
+- Told my airlock joke on the new ship. Nobody laughed. Tell Holt he's still the only one.

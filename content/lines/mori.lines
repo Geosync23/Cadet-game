@@ -96,3 +96,19 @@
 == rumour
 - Sorry. I made a note of this.
 - I've written it down, so it's true.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Lists first. Then the lists of the lists.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- A charts office posting. I'll miss the chart room. And the people. No. The other order.
+? leaving:you tier>=friend
+- You never minded me finishing your lists. Thank you. I'll keep one of yours.   #warm
+
+== letter
+- The charts office is very tidy. Too tidy. I've taped a star chart over my nameplate again.
+? tier>=friend
+- I named a tiny rock on the last survey. After the Wren's tea corner. That's all I'll say.

@@ -91,3 +91,19 @@
 == rumour
 - Out loud, not drawn: news.
 - It'll be a comic. You hear it first.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The comics come down last.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hi. I'm leaving. The comics wall's yours now. Sort of.
+? leaving:you tier>=friend
+- You laughed at my comics. Quietly, so I'd hear. Thank you.   #warm
+
+== letter
+- New ship. Pinned up one comic. Somebody laughed. I hid. Hello.
+? tier>=friend
+- Drew a comic of the Wren's mess at dinner. Everyone's in it. Even the gravy. Hello.

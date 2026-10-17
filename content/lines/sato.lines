@@ -94,3 +94,19 @@
 == rumour
 - Ah. Middle of the story. Here.
 - Interesting. Very odd. Listen.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The samples are labelled. The tea is not negotiable.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ah. You. I'm leaving. A post at a survey station. No. Don't make the tea.
+? leaving:you tier>=friend
+- You drank my tea once. Voluntarily. Nobody else has. I won't forget it.   #warm
+
+== letter
+- The station has a lab and a window. The tea here is weak. I've brought my own. Obviously.
+? tier>=friend
+- Found a good rock today. Labelled it in my own hand. Thought of the Wren's specimen store.

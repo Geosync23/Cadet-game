@@ -91,3 +91,19 @@
 == rumour
 - Correctly: here's what happened.
 - Few words. All true.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The telescope first. Wrapped twice.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh. I'm leaving. Soon. Name your stars properly.
+? leaving:you tier>=friend
+- You never named a star wrong in front of me. Thank you. Truly.   #warm
+
+== letter
+- New ship. Their charts call a red star blue. I've written a note. A long note.
+? tier>=friend
+- Saw the Wren's patch of sky from the new observatory. Correctly named. Hello.

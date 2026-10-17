@@ -94,3 +94,19 @@
 == rumour
 - Gerald heard this first.   #funny
 - Cheerful news. Mostly.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Gerald's coming too. Gerald's very excited.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off! Say goodbye to Gerald. Go on. He likes you.   #funny
+? leaving:you tier>=friend
+- You always said hello to Gerald. Most people don't. Thank you, from both of us.   #warm
+
+== letter
+- New ship. Gerald's got a window. He says hello. My sister sent a recipe. It went brown.
+? tier>=friend
+- Took Gerald to the new observatory. He was very quiet. Impressed, I think. Hello from us.

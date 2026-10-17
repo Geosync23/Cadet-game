@@ -92,3 +92,19 @@
 == rumour
 - Not a joke. Promise. Mostly.
 - Heard it by the ovens. Warm news.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. And baking. One last loaf. Brennan's inspecting.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon! Why did the bread cry? It was kneaded. Sorry. Bye.   #funny
+? leaving:you tier>=friend
+- You were nice to me before I was silly. And after. Thank you for that.   #warm
+
+== letter
+- New ship. Their oven's tricky. Baked anyway. Told a joke at breakfast. Nils would've groaned.
+? tier>=friend
+- Made the Wren's Sunday bread today. Nobody here knew it. Now they do. Hello.
