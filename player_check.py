@@ -579,21 +579,34 @@ with sync_playwright() as pw:
       setShipNow(shipNow() + 1440); out.push(chat('a', 50)); setShipNow(shipNow() - 1440); n.hygiene = 50; return out; })()""")
     print('  first chat, again, clean, unwashed (and the remark), next day:', ch)
     check(ch[:4] == [6, 1, 9, 3] and ch[4] is True and ch[5] == 6, f'chatting: {ch}')
-    cp = g.ev(r"""(() => { const n = SHIP.player.needs, seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat'), s0 = placeSpot(seats[0].id);
-      const near = seats.slice(1).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - s0.x, s.z - s0.z) < COMPANY_NEAR).slice(0, 4);
-      const fake = near.map(([q, s]) => ({ settled: true, goalId: q.id, x: s.x, z: s.z, p: { name: 'Test' } })); const out = [];
-      for (const k of [0, 2, 4]) {
-        DECK_CREW.push(...fake.slice(0, k)); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
+    cf = g.ev("(() => { if (!SHIP.rel) return null; const n = SHIP.player.needs, k = SHIP.rel['tst-f']; SHIP.rel['tst-f'] = { pts: 0, tier: 3, met: 1, known: true }; n.social = 50; delete SHIP.player.chats['tst-f']; playerChat({ id: 'tst-f', name: 'Test F' }); const g = Math.round((n.social - 50) * 10) / 10; if (k === undefined) delete SHIP.rel['tst-f']; else SHIP.rel['tst-f'] = k; delete SHIP.player.chats['tst-f']; return g; })()")
+    print('  first chat with a friend (0.28.43):', cf)
+    check(cf is None or cf == 12, f'a chat with a friend counts twice: {cf}')
+    # company at a meal (0.28.43, the user's): only your own table counts, each person by your bond (bondMult); capped
+    cp = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && /^3-/.test(q.id));
+      const me = seats[0], tb = seatTable(me.id), mates = seats.filter(q => q.id !== me.id && seatTable(q.id) === tb), others = seats.filter(q => seatTable(q.id) !== tb).slice(0, 2);
+      const sizes = {}; for (const q of seats) { const t = seatTable(q.id); sizes[t] = (sizes[t] || 0) + 1; }
+      const s0 = placeSpot(me.id), rel = SHIP.rel || {}, keep = {}, out = [];
+      const fake = (q, id) => { const s = placeSpot(q.id); return { settled: true, goalId: q.id, x: s.x, z: s.z, spot: { pose: 'sit', room: 'M' }, p: { id, name: 'Test' } }; };
+      const ids = ['tst-a', 'tst-b', 'tst-c', 'tst-d', 'tst-e', 'tst-f']; for (const id of ids) keep[id] = rel[id];
+      const was = DECK_CREW.filter(a => a.settled && a.goalId && seatTable(a.goalId) === tb); DECK_CREW.splice(0, DECK_CREW.length, ...DECK_CREW.filter(a => !was.includes(a)));   // the table to ourselves
+      const meal = (crew, tiers = {}) => {
+        for (const id in tiers) if (SHIP.rel) SHIP.rel[id] = { pts: 0, tier: tiers[id], met: 1, known: true };
+        DECK_CREW.push(...crew); Object.assign(n, { hunger: 50, social: 50, hygiene: 50, energy: 50, fitness: 50, bathroom: 50 });
         FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: {}, drain: {}, notes: [] };
-        ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
-        needsT = shipNow() - 10; playerUpdate(0, 0); out.push([company(ACT), Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10]);
-        DECK_CREW.splice(DECK_CREW.length - k, k); ACT = null; }
-      FX_MIN = -1; return [near.length, out]; })()""")
-    print('  ten minutes eating with 0, 2, 4 (counts as 3) at the table: [company, social gained]', cp)
-    if check(cp[0] >= 3, f'company: need three mess seats near each other ({cp[0]})'):
-        check(all(abs(gn - 2 * min(c, 3)) < .15 for c, gn in cp[1]) and cp[1][1][0] - cp[1][0][0] == 2 and cp[1][2][0] - cp[1][0][0] == 4,
-              f'company at the table: +0.2 a minute for each of up to three ({cp[1]}; the first is whoever was already eating)')
-
+        ACT = { kind: 'eat', def: PLAYER_ACTS.eat, phase: 'do', done: 0, o: {}, placeId: me.id, spot: s0, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+        needsT = shipNow() - 10; playerUpdate(0, 0); const r = [Math.round(company(ACT) * 10) / 10, Math.round((n.social - 50 + NEED_DRAIN.social[0] / 6) * 10) / 10];
+        DECK_CREW.splice(DECK_CREW.length - crew.length, crew.length); ACT = null; for (const id in tiers) if (SHIP.rel) delete SHIP.rel[id]; return r; };
+      out.push(meal([]), meal([fake(mates[0], 'tst-a'), fake(mates[1], 'tst-b')]), meal(mates.slice(0, 4).map((q, i) => fake(q, ids[i]))),
+        meal(others.map((q, i) => fake(q, ids[i]))), meal([fake(mates[0], 'tst-e'), fake(mates[1], 'tst-f')], { 'tst-e': 4, 'tst-f': 4 }),
+        meal(mates.slice(0, 4).map((q, i) => fake(q, ids[i])), { 'tst-a': 4, 'tst-b': 4, 'tst-c': 4, 'tst-d': 4 }));
+      for (const id of ids) { if (keep[id] === undefined) { if (SHIP.rel) delete SHIP.rel[id]; } else SHIP.rel[id] = keep[id]; }
+      DECK_CREW.push(...was); FX_MIN = -1; return JSON.stringify({ tables: Object.values(sizes).sort(), mates: mates.length, out, mult: BOND_MULT, rel: !!SHIP.rel }); })()"""))
+    print('  mess tables (seats each), your table-mates; ten minutes eating with [company, social]: nobody, 2 and 4 strangers at your table, 2 at another table, 2 and 4 close friends:', cp)
+    o = cp['out']
+    check(cp['tables'] == [4, 4, 4, 8, 8, 8, 8] and cp['mates'] == 7, f"the mess's tables: four long ones of eight, three round ones of four ({cp['tables']}, mates {cp['mates']})")
+    check(o[0] == [0, 0] and o[1] == [2, 4] and o[2] == [4, 8] and o[3] == [0, 0], f'only your own table counts, +0.2 a minute a stranger, an empty table nothing: {o[:4]}')
+    if cp['rel']: check(o[4] == [6, 12] and o[5] == [6, 12], f"close friends count three times, at most six strangers' worth: {o[4:]}")
     print('The note bus (0.28.22: simNote acts, inert until section 13 has simNote):')
     sn = g.ev(r'''(() => { const log = [], real = typeof simNote === 'function';
       if (!real) window.simNote = (k, o) => log.push([k, o]); else return 'real';

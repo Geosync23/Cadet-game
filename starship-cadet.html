@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.42
+   STARSHIP CADET: CSV Wren                           build 0.28.43
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.42';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.43';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10671,8 +10671,8 @@ function playerFloorTap(point) {
   return playerTap({ t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at, at);
 }
 // crew near you (0.28.12, for sitting): settled at a place you'd sit at, within COMPANY_NEAR m
-const sitCompany = A => !A || !A.spot || typeof DECK_CREW === 'undefined' ? 0
-  : DECK_CREW.filter(a => a.settled && a.spot && a.spot.pose === 'sit' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).length;
+const sitCompany = A => !A || !A.spot || typeof DECK_CREW === 'undefined' ? 0   // 0.28.43: each by the bond (bondMult)
+  : bondSum(DECK_CREW.filter(a => a.settled && a.spot && a.spot.pose === 'sit' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).map(crewId), COMPANY_CAP);
 // a machine (0.28.11): the nearest of this deck's machines within MACHINE_NEAR m of the thing tapped. Section 17's
 // machineUse(id, 'player') says what the tap does ({ text, ran }: a line about it, and whether it started it). You
 // walk up to it first. Without machineUse, or no machine there, the tap does what it always did.
@@ -10813,13 +10813,44 @@ function queueLeave() {
   if (!ACT || ACT.kind !== 'queue') return;
   actEnd(true); toast('Servery', 'You step out of the line.');   // actEnd calls galleyLeave
 }
-// company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
-// at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.
-const COMPANY_NEAR = 3, COMPANY_MAX = 3, COMPANY_GAIN = .2;
-function company(A) {
-  if (!A || !A.spot || typeof DECK_CREW === 'undefined') return 0;
-  return DECK_CREW.filter(a => a.settled && a.goalId && (PLACE_OF.get(a.goalId) || {}).type === 'mess-seat' && Math.hypot(a.x - A.spot.x, a.z - A.spot.z) < COMPANY_NEAR).length;
+// social comes from people, scaled by the bond (0.28.43, the user's "that last part is always true"): bondMult(id) is
+// how much one person's company or chat counts, by your tier with them (section 20's relTier: stranger, acquaintance,
+// colleague, friend, close friend). A close friend is worth three strangers. Without section 20 everyone counts 1.
+// bondSum(ids, cap): the people together, at most cap; bondBest(ids): the best of them (0 for nobody).
+const BOND_MULT = [1, 1.2, 1.5, 2, 3];
+function bondMult(id) {
+  let t = 0; try { t = typeof relTier === 'function' && id ? relTier(id) || 0 : 0; } catch (e) { t = 0; }
+  return BOND_MULT[Math.max(0, Math.min(BOND_MULT.length - 1, t | 0))];
 }
+const bondSum = (ids, cap = Infinity) => Math.min(cap, ids.reduce((a, id) => a + bondMult(id), 0));
+const bondBest = ids => ids.reduce((a, id) => Math.max(a, bondMult(id)), 0);
+const crewId = a => (a.p || a).id;
+// tables (0.28.43): mess seats close together (TABLE_LINK m, seat to seat) make one table: the long tables seat eight, the
+// round ones four. seatTable(placeId) -> the first seat id of its table, or null; made once a deck, from the places.
+const TABLE_LINK = 1.3, TABLES = new Map();
+function seatTable(id) {
+  const pl = PLACE_OF.get(id); if (!pl || pl.type !== 'mess-seat') return null;
+  const dk = id.split('-')[0]; if (!TABLES.has(dk)) {
+    const seats = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && q.id.split('-')[0] === dk && q.xy), m = new Map();
+    for (const q of seats) if (!m.has(q.id)) {             // single linkage: everything within TABLE_LINK of the table so far
+      const todo = [q]; m.set(q.id, q.id);
+      while (todo.length) { const a = todo.pop(); for (const b of seats) if (!m.has(b.id) && Math.hypot(a.xy[0] - b.xy[0], a.xy[1] - b.xy[1]) < TABLE_LINK) { m.set(b.id, q.id); todo.push(b); } }
+    }
+    TABLES.set(dk, m);
+  }
+  return TABLES.get(dk).get(id) || null;
+}
+// company at a meal (0.28.10; your table only, 0.28.43, the user's "you should only get social at a meal if people are
+// sitting next to you", then "anyone at YOUR table"): crew settled at the other seats of your table, nobody at other
+// tables. COMPANY_GAIN social a minute for each, times their bondMult, the lot at most COMPANY_CAP (two close friends).
+// A 20-minute meal with three strangers at your table: about +12 (times needEffects' socialGain); an empty table, nothing.
+const COMPANY_CAP = 6, COMPANY_GAIN = .2, COMPANY_NEAR = 3;   // COMPANY_NEAR: sitting elsewhere (sitCompany), not meals
+function tableCrew(A) {
+  if (!A || !A.placeId || typeof DECK_CREW === 'undefined') return [];
+  const tb = seatTable(A.placeId); if (!tb) return [];
+  return DECK_CREW.filter(a => a.settled && a.goalId && a.goalId !== A.placeId && seatTable(a.goalId) === tb).map(crewId);
+}
+const company = A => bondSum(tableCrew(A), COMPANY_CAP);
 // chatting (0.28.10): a tap on a crew member (section 10) calls playerChat(person). The first chat with someone each
 // ship day gives CHAT_GAIN social, later ones CHAT_AGAIN; times needEffects' socialGain (clean: more, unwashed: half).
 // It adds a line to the tap's toast.
@@ -10827,7 +10858,7 @@ const CHAT_GAIN = 6, CHAT_AGAIN = 1;
 function playerChat(p) {
   if (!p) return 0;
   const P = SHIP.player, key = String(p.id || p.name), fx = needEffects(), first = P.chats[key] !== SHIP.time.day;
-  const gain = (first ? CHAT_GAIN : CHAT_AGAIN) * fx.socialGain;
+  const gain = (first ? CHAT_GAIN : CHAT_AGAIN) * fx.socialGain * bondMult(p.id);   // by the bond (0.28.43)
   P.chats[key] = SHIP.time.day;
   for (const k in P.chats) if (P.chats[k] < SHIP.time.day - 1) delete P.chats[k];   // only today's (and yesterday's) are kept
   P.needs.social = needClamp(P.needs.social + gain);
@@ -11097,17 +11128,18 @@ function playerUpdate(dt, t) {
     if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
     needsT = now; needsDrain(dm, false, fx, doing || null);
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
-    if (sat) n.social = needClamp(n.social + SIT_GAIN * Math.min(sitCompany(A), COMPANY_MAX) * needEffects(n).socialGain * dm);
+    if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
       const dw = A.def.until ? dm : dm * needEffects(n).task;   // tasks go faster or slower with your needs (needEffects)
       const m = Math.max(0, Math.min(dw, A.def.mins - A.done)); A.done += dw;
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
-      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * m);
+      const bm = A.def.need === 'social' && A.o.opp ? bondMult(A.o.opp) : 1;   // a game of Tiles: by your bond with them (0.28.43)
+      if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * bm * m);
       if (A.def.cost) for (const k in A.def.cost) n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m);   // a workout tires you (0.28.17)
-      if (A.kind === 'eat' && m > 0) {                   // company at the table (0.28.10): social for each one near you, up to COMPANY_MAX
-        const c = company(A); A.o.company = Math.max(A.o.company || 0, c);
-        n.social = needClamp(n.social + COMPANY_GAIN * Math.min(c, COMPANY_MAX) * needEffects(n).socialGain * m);
+      if (A.kind === 'eat' && m > 0) {                   // company at your table (0.28.10, 0.28.43): by the bond, up to COMPANY_CAP
+        const c = company(A); A.o.company = Math.max(A.o.company || 0, c);   // bond-weighted, capped (0.28.43)
+        n.social = needClamp(n.social + COMPANY_GAIN * c * needEffects(n).socialGain * m);
       }
     }
   }
@@ -11542,6 +11574,7 @@ function ixKind(pl, it) {
 Object.assign(PLAYER_ACTS, IX_ACTS);
 // company: crew settled near the spot (or anyone sitting in the same room)
 const ixCompany = s => DECK_CREW.filter(c => c.settled && c.spot && (Math.hypot(c.x - s.x, c.z - s.z) < IX_COMPANY || c.spot.room === s.room && s.room)).length;
+const ixBond = s => typeof bondBest === 'function' ? bondBest(DECK_CREW.filter(c => c.settled && c.spot && (Math.hypot(c.x - s.x, c.z - s.z) < IX_COMPANY || c.spot.room === s.room && s.room)).map(c => (c.p || c).id)) : ixCompany(s) > 0 ? 1 : 0;   // 0.28.43: the best bond there
 // the side gains as the minutes pass (ixFrame, below, each frame while one of ours runs): also{}, plus `with` more
 // social for company (scaled by needEffects' socialGain). They follow A.done, so needEffects' task speed applies
 function ixSide(A) {
@@ -11549,7 +11582,7 @@ function ixSide(A) {
   if (!A.o.ixSide) {
     let mult = 1; try { const e = typeof needEffects === 'function' ? needEffects(SHIP.player.needs) : null; if (e && isFinite(e.socialGain)) mult = e.socialGain; } catch (e) { mult = 1; }
     const side = { ...(d.also || {}) };
-    if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult;
+    if (A.o.company && d.with) side.social = (side.social || 0) + d.with * mult * (A.o.company === true ? 1 : A.o.company);   // by the best bond there (0.28.43)
     if (side[d.need]) { d.gain += side[d.need]; delete side[d.need]; }   // more of the main need: section 15 spreads d.gain over the minutes
     A.o.ixSide = side; A.o.ixGiven = {};
     if (A.o.company && d.with) d.done = (d.done || '') + ' The company helped.';
@@ -11657,7 +11690,7 @@ function ixTap(it, at, point) {
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
   const free = near.find(([pl]) => !busy(pl.id));
   if (!free) { const a = heldBy(near[0][0].id); toast(it.t, 'In use' + (a ? ': ' + a.p.name + ' is there.' : '.') + ' ' + it.x); return true; }
-  const [pl, spot, kind] = free, company = ixCompany(spot) > 0;
+  const [pl, spot, kind] = free, company = ixBond(spot);   // 0 or the best bond (0.28.43; truthy as before)
   const pose = kind === 'gym' ? (typeof poseOf === 'function' ? poseOf(pl) : pl.anim || 'lift') : ixPose(kind, pl, spot, company);
   actStart(kind, pl.id, { pose, title: it.t, flavour: it.x, company });
   return true;
@@ -24563,7 +24596,8 @@ function eventsPlayer(now) {
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key)) return;
   SHIP.events.joined.push(key);
   if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
-  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12);
+  const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
+  const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12 * bb);
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
 }
