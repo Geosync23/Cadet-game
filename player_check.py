@@ -222,6 +222,22 @@ with sync_playwright() as pw:
     check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
     check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
 
+    print('Pause (0.28.48, the user\'s "Need a pause button"):')
+    S1 = "JSON.stringify([SHIP.time.day, Math.round(SHIP.time.min * 1000) / 1000, Math.round(SHIP.player.needs.hunger * 1000) / 1000, player.obj.position.x.toFixed(3), player.obj.position.z.toFixed(3)])"
+    g.ev("(() => { actEnd(true); const c = cellPos(...player.here()), n = nearestOpen(c.x + 1.2, c.z, player); if (n) playerGo(n, null); })()"); g.step(3)
+    pz = json.loads(g.ev("(() => { POP.tip = performance.now() - 1000; const t0 = POP.tip; pauseSet(true); return JSON.stringify([t0, PAUSE.on, getComputedStyle(document.getElementById('pauseCard')).display !== 'none', document.querySelector('#pauseBtn span').textContent]); })()"))
+    a0 = g.ev(S1); g.step(90); a1 = g.ev(S1)
+    rs = json.loads(g.ev("(() => { const t = performance.now(), d = t - PAUSE.since; pauseSet(false); return JSON.stringify([PAUSE.on, getComputedStyle(document.getElementById('pauseCard')).display === 'none', Math.round(POP.tip - " + str(pz[0]) + " - d)]); })()"))
+    g.step(60); a2 = g.ev(S1)
+    print('  paused [on, overlay, button]:', pz[1:], '| before, after 3 s paused, 2 s after resuming:', a0, a1, a2, '| resumed [on, overlay hidden, tips gap moved by the pause]:', rs)
+    check(pz[1:] == [True, True, 'Resume'] and a0 == a1, f'paused: the overlay shows, ship time, needs and you stand still: {a0} {a1}')
+    check(rs == [False, True, 0] and json.loads(a2)[1] != json.loads(a1)[1], f'resumed: the overlay goes, time runs again, the pacing stamps moved on by the pause: {rs} {a2}')
+    g.ev("player.stop(); actEnd(true)"); g.step(30)
+    # the frozen clock (0.28.50): a simTimeout (the tip card's, the heads-up's) waits out a pause; simNow doesn't jump
+    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
+    print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
+    check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
+
     print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
     ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
       const t0 = shipNow(), c = careerInit(), keep = { sd: c.sd, sh: c.sh }, n = SHIP.player.needs, n0 = { ...n }; Object.assign(n, NEEDS_FRESH);
@@ -254,9 +270,9 @@ with sync_playwright() as pw:
     print('Need warnings (0.28.41):')
     wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
       let t = performance.now() + 1e6;
-      const quiet = () => { POP.toast = POP.card = POP.warn = -1e9; POP.busy = false; te.classList.remove('show'); };
+      const quiet = () => { POP.toast = POP.card = POP.warn = -1e9; POP.busy = false; te.classList.remove('show'); TOAST_AT = -1e9; };
       const tick = (gap = true) => { if (gap) quiet(); t += 1000; const k = needWarnTick(t); return k ? [k, document.getElementById('tt').textContent] : null; };
-      deviceClose(); WARN_SAID = {}; Object.assign(n, { hunger: 60, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
+      deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); WARN_SAID = {}; Object.assign(n, { hunger: 60, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
       out.push(tick());                                      // 0 nothing low
       n.hunger = 24; out.push(tick(), tick(false), tick());  // 1 the gentle one, 2 not again at once, 3 nor later
       n.hunger = 9; out.push(tick());                        // 4 the firm one
@@ -266,15 +282,16 @@ with sync_playwright() as pw:
       n.energy = 20; DEV.open = true; out.push(tick()); DEV.open = false;   // 11 not with the device open
       quiet(); POP.busy = true; t += 1000; out.push(needWarnTick(t)); // 12 not while busy
       sleeping = true; POP.at = -1e9; popupWatch(t); out.push(POP.busy); sleeping = false; POP.at = -1e9; popupWatch(t + 1); out.push(POP.busy);   // 13, 14
-      out.push(tick());                                      // 15 energy now
+      out.push(JSON.stringify([POP_PANELS.filter(popOn), !!ride, !!DEV.choose, TIP_Q.length, document.body.classList.contains('dlgon')]));   // 15: what's busy, if anything
+      out.push(tick());                                      // 16 energy now
       WARN_SAID = {}; Object.assign(n, NEEDS_FRESH); return JSON.stringify(out); })()"""))
     for i, x in enumerate(wn): print('   ', i, x)
     check(wn[0] is None and wn[1] == ['hunger', 'Hungry'] and wn[2] is None and wn[3] is None, f'a gentle warning once when food drops under 25: {wn[:4]}')
     check(wn[4] == ['hunger', 'Very hungry'] and wn[5] is None and wn[6] == ['hunger', 'Hungry'], f'a firmer one under 10; re-armed only at 40+: {wn[4:7]}')
     check(wn[7] == ['bathroom', 'Bursting'] and wn[8] is None and wn[9] == ['social', 'A bit lonely'] and wn[10] is None, f'the lowest need first, one at a time, after a gap: {wn[7:11]}')
-    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[15] == ['energy', 'Tired'], f'never with the device open, while busy or asleep: {wn[11:]}')
+    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[16] == ['energy', 'Tired'], f'never with the device open, while busy or asleep: {wn[11:]}')
     # and in the running game: food under 25 says so within a few seconds once the screen is quiet
-    g.ev("WARN_SAID = {}; POP.toast = POP.card = POP.warn = -1e9; document.getElementById('toast').classList.remove('show'); deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); Object.assign(SHIP.player.needs, { hunger: 20, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 })")
+    g.ev("WARN_SAID = {}; POP.toast = POP.card = POP.warn = -1e9; document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); Object.assign(SHIP.player.needs, { hunger: 20, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 })")
     g.step(30)
     wl = json.loads(g.ev("JSON.stringify([WARN_SAID.hunger || 0, document.getElementById('tt').textContent])")); print('  in the game:', wl)
     check(wl == [1, 'Hungry'], f'the warning shows in the running game: {wl}')
@@ -285,7 +302,7 @@ with sync_playwright() as pw:
       const ids = TEACH.map(x => x[0]); out.list = [ids.length, new Set(ids).size, Math.max(...ids.map(x => x.length)), Math.max(...TEACH.map(x => x[2].length))];
       let t = performance.now() + 5e6;
       const clear = () => { TIP_Q.length = 0; DEVICE_SKIN.tip(null); };
-      const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); };
+      const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; };
       const tick = () => { t += 1000; POP.busy = false; return teachTick(t); };
       if (SHIP.intro) SHIP.intro.ended = true; deviceClose(); D.settings.tips = true;
       for (const id of ids) delete D.tipsSeen[id];
@@ -297,8 +314,8 @@ with sync_playwright() as pw:
       quiet(); POP.toast = t - 3000; out.gap.push(tick());                   // a toast 3 s ago
       const seen0 = ids.filter(k => D.tipsSeen[k]).length; quiet(); D.settings.tips = false; out.off = [tick(), ids.filter(k => D.tipsSeen[k]).length - seen0]; D.settings.tips = true;
       if (SHIP.intro) { SHIP.intro.on = true; SHIP.intro.ended = false; SHIP.intro.step = 'chief'; quiet(); out.intro = tick(); SHIP.intro.step = null; SHIP.intro.ended = true; }
-      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = false; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
-      out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = true; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = false; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
+      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = undefined; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
+      out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = shipNow() - 10; out.rep.push(tick() || 'not yet'); TEACH_ST.turnin = shipNow() - 40; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = undefined; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
       for (const id of ids) delete D.tipsSeen[id];
       quiet(); DEV.open = true; DEV.app = 'home'; out.dev = [tick()]; DEV.app = 'needs'; quiet(); out.dev.push(tick()); DEV.open = false; DEV.app = 'home';
       for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:queue']; delete D.tipsSeen['t:needs'];
@@ -312,7 +329,7 @@ with sync_playwright() as pw:
     check(tt['gap'][0] is None and tt['gap'][1] is None and tt['gap'][3] is True and tt['gap'][4] is None, f'pacing: 3 minutes apart, 60 s after a card, not just after a toast: {tt["gap"]}')
     check(tt['off'] == [None, 0], f'Tips off: none shown, none marked seen: {tt["off"]}')
     check(tt.get('intro') is None, f'none during the arrival: {tt.get("intro")}')
-    check(tt['rep'] == [1, None, 't:rep', 't:rep'], f'the reputation tip on Monday: after your first job is turned in, or at 17:00, whatever the pacing: {tt["rep"]}')
+    check(tt['rep'] == [1, None, 'not yet', 't:rep', 't:rep'], f'the reputation tip on Monday: after your first job is turned in, or at 17:00, whatever the pacing: {tt["rep"]}')
     check(tt['dev'] == [None, 't:a-needs'], f'over the device only the open app\'s tip: {tt["dev"]}')
     check(tt['prio'] == ['t:queue', 't:needs'], f'the first due tip in priority order: {tt["prio"]}')
     check(tt['size'] < 800, f'all the tips seen fit in a small save: {tt["size"]} bytes')
@@ -321,7 +338,7 @@ with sync_playwright() as pw:
     nf = json.loads(g.ev(r"""(() => { const out = {}, added = [], keep = { news: SHIP.news, used: SHIP.newsUsed, at: SHIP.newsAt, rows: SHIP.newsRows };
       for (const k of Object.keys(NEWS_SRC)) if (!LINES['news.' + k]) { added.push(k);   // stand-ins until head writer 3's bank is in the build
         LINES['news.' + k] = Array.from({ length: 12 }, (_, i) => ({ text: NEWS_SRC[k] + ' post ' + i + ' about {first}.', id: 'tn' + k + i }));
-        if (k === 'trad') LINES['news.trad'].push({ text: 'On today: come along.', id: 'tntoday', trad: 'today' }); }
+        if (k === 'trad') LINES['news.trad'].push({ text: 'On today: {trad}. Come along.', id: 'tntoday', trad: 'today' }); }
       SHIP.news = []; SHIP.newsUsed = []; SHIP.newsAt = null; SHIP.newsRows = {};
       const d0 = SHIP.time.day + 1, days = 14, per = {}; let t = (d0 - 1) * 1440;
       newsTick(t); for (let h = 1; h <= days * 24; h++) { t += 60; newsTick(t);
@@ -337,7 +354,7 @@ with sync_playwright() as pw:
       const sv = {}; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) { /* not ours */ } out.bytes = JSON.stringify([sv.news, sv.newsUsed, sv.newsAt, sv.newsRows]).length;
       deviceShow('ship'); const body = document.getElementById('devBody').textContent; out.app = [DEVICE_APPS.get('ship').title, !!SHIP.news[0] && body.includes(SHIP.news[0].text), body.includes('Systems')];
       deviceShow('crew'); out.rel = DEVICE_APPS.get('crew').title; deviceClose();
-      out.trad = SHIP.news.some(x => x.id === 'tntoday') || SHIP.news.some(x => /^Today aboard/.test(x.text)) || null;
+      const tp = SHIP.news.filter(x => x.id === 'tntoday'); out.trad = tp.length ? tp.every(x => !/-/.test(x.text) && /On today: [a-z]/.test(x.text)) : SHIP.news.some(x => /^Today aboard/.test(x.text)) || null; out.tradText = tp.length ? tp[0].text : null;
       for (const k of added) delete LINES['news.' + k]; Object.assign(SHIP, { news: keep.news, newsUsed: keep.used, newsAt: keep.at, newsRows: keep.rows });
       return JSON.stringify(out); })()"""))
     print('  ', nf)
@@ -345,9 +362,10 @@ with sync_playwright() as pw:
     check(min(c) >= 2 and max(c) <= 10 and 3 <= sum(c) / len(c) <= 8, f'about 3 to 8 posts a ship day: {c}')
     check(nf['srcMax'] <= 2 and not nf['repeat'] and nf['sources'] >= 5, f'at most 2 a source a day, no post again within 7 days, a mix of sources: {nf}')
     check(nf['kept'] == 40 and nf['sorted'] and nf['bytes'] < 9000, f'the last 40 kept, newest first, small in the save: {nf["kept"]}, {nf["bytes"]} bytes')
+    check(nf['trad'] is True, f"tradition posts name it, not its id (reviewer 1e): {nf.get('tradText')}")
     check(nf['app'] == ['News feed', True, True] and nf['rel'] == 'Relationships', f'the apps renamed; the feed and the system bars show: {nf["app"]}, {nf["rel"]}')
     # in the running game: with the screen quiet (heads-ups paused), a due tip comes up on its own
-    g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; TEACH_CK = -1e9; Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
+    g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; SHIP.device.settings.tips = true; TEACH_CK = -1e9; WARN_SAID = {}; Object.assign(SHIP.player.needs, { hunger: 45, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 }); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TOAST_AT = -1e9; TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
     g.step(90)
     tg = json.loads(g.ev("JSON.stringify([TIP_Q.map(x => x.id), !document.getElementById('devTip').hidden])")); print('  in the game:', tg)
     check(len(tg[0]) == 1 and tg[0][0].startswith('t:') and tg[1], f'a due tip shows by itself in the running game: {tg}')
