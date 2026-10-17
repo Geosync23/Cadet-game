@@ -54,7 +54,7 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag)) continue;
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0) ||   // the sim plans a host 5 minutes early
+      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41)
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
