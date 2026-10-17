@@ -385,6 +385,17 @@ with sync_playwright() as pw:
     if not cg['news'] or cg['before'] or cg['bye'] != 'goodbye' or cg['moved'] != ['pell'] or not cg['gone']: fail('transfers wrong (news, goodbye, moved on)')
     if not cg['sorry'] or cg['newHere'] != [True, False] or not (2 <= cg['letters'] <= 4) or not cg['saved']: fail('the day, new arrivals or letters wrong')
 
+    # 14. section 21's asked-for waves (0.36.58): socialSeekAsk windows, once each, saved; a 'favour' why makes their favour come that day
+    sk = g.ev(r"""(() => { const keep = JSON.stringify(socSave()), t = Math.floor(shipNow());
+      const ok = [socialSeekAsk('tomas', { from: t + 10, until: t + 100, why: 'intro:tomas' }), socialSeekAsk('nobody', { from: t, until: t + 10 })];
+      const win = [!!seekAskFor('tomas', t), !!seekAskFor('tomas', t + 50), !!seekAskFor('tomas', t + 100)];
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); const saved = !!seekAskFor('tomas', t + 50);
+      const p = SOC.crew.find(q => q.work && q.work.place && !STORY_ARCS[q.id] && !SHIP.rel[q.id]);
+      let fav = null; if (p && typeof favourPost === 'function') { socialSeekAsk(p.id, { from: t, until: t + 90, why: 'intro:d4-favour' }); fav = !!favourOf(p); }
+      socLoad(JSON.parse(keep)); return { ok, win, saved, fav }; })()""")
+    print('Asked-for waves:', sk)
+    if sk['ok'] != [True, False] or sk['win'] != [False, True, False] or not sk['saved'] or sk['fav'] is False: fail(f'socialSeekAsk wrong: {sk}')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
