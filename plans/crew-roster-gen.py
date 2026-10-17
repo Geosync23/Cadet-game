@@ -585,6 +585,7 @@ TPLS = [t for t, _ in TPL_OF]
 OPEN_OF = {'shy': 'guarded', 'gruff': 'guarded', 'chatty': 'open', 'warm': 'open', 'playful': 'open'}
 NEEDS_OF = {'warm': 'share', 'dry': 'cheer', 'shy': 'listen', 'brisk': 'practical', 'chatty': 'share', 'earnest': 'practical',
             'gruff': 'practical', 'dreamy': 'share', 'steady': 'listen', 'playful': 'cheer'}
+MENTOR_TRAITS = ['patient', 'kind', 'steady', 'gentle', 'warm', 'calm', 'generous']   # who takes a newcomer under their wing (social B's mentor bonds)
 GIFT_TAGS = ['tea', 'sweet', 'plant', 'garden', 'made', 'book', 'music', 'star', 'game']
 TAGS_OF_HABIT = {'gardener': ['garden', 'plant'], 'garden-lover': ['plant', 'garden'], 'musician': ['music'], 'music': ['music'], 'stargazer': ['star'],
                  'window-seat': ['star'], 'tea-break': ['tea'], 'lounge-regular': ['tea'], 'early-riser': ['tea'], 'shopper': ['sweet'], 'lingers-at-meals': ['sweet'],
@@ -727,6 +728,8 @@ def social_fields(out):
         a = e['about']
         assert len(a) >= 6 and sum(x['tier'] == 4 for x in a) >= 1 and all(x['tier'] in range(5) and x['topic'] in ('home', 'work', 'hobby', 'past', 'secret') for x in a), e['id']
         for k in ('tpl', 'loves', 'likes', 'joy', 'thread', 'needs', 'openness', 'keepsake', 'home', 'family'): assert e.get(k), (e['id'], k)
+        assert e['thread'] in THEMES or e['thread'].startswith('arc:'), e['thread']      # spellings frozen with social B (DEV_NOTES, Social stories)
+        e['mentors'] = any(t in e.get('traits', []) for t in MENTOR_TRAITS) or e['id'] in ('torres-zeke', 'calder', 'oduya', 'brennan')
 # ---- who may be transferred (the social plan, Part 8b): never the Captain, the Chiefs, the escort, the story crew, Saruth
 STAYS = {'marrow', 'vance', 'sato', 'holt', 'calder', 'nandakumar', 'torres-zeke', 'tomas', 'pell', 'rina', 'brennan', 'saruth'}
 def couples_and_moves(out):
@@ -747,6 +750,19 @@ def couples_and_moves(out):
         if b['thread'] == 'lonely': b['thread'] = 'family'
         b['transferTo'] = a['transferTo']             # a couple transfers together
         made.append((a['id'], b['id'])); pool = [e for e in pool if e not in (a, b)]
+    # a couple shares at least one day off where the rotas allow: the partner who is free to move takes the other's
+    # days if department staffing still holds
+    fixed = lambda p: p['id'] in DAYS_FIXED or p['dept'] in ('galley', 'store', 'garden')
+    def staffed(p, off):
+        team = [q for q in crew if q['dept'] == p['dept'] and q['shift'] == p['shift'] and q is not p]
+        return not team or all(any(d not in q['rota']['offDays'] for q in team) or d not in off for d in range(7))
+    by = {e['id']: e for e in crew}
+    for x, y in made:
+        a, b = by[x], by[y]
+        if set(a['rota']['offDays']) & set(b['rota']['offDays']): continue
+        for p, q in ((b, a), (a, b)):
+            if not fixed(p) and p['shift'] == q['shift'] and staffed(p, q['rota']['offDays']):
+                p['rota'] = dict(p['rota'], offDays=list(q['rota']['offDays'])); break
     return made
 # ---- the reserve pool: about 12 future crew, a third of them new cadets; and the rotation calendar
 RES_LAST = ['Achebe', 'Bramwell', 'Castellano', 'Dufresne', 'Eriksen', 'Fontaine', 'Gallagher', 'Haverford', 'Ishikawa-Lund', 'Juarez', 'Kowal', 'Lindgren-Bay',
@@ -786,12 +802,26 @@ def reserve(out):
         if rank != 'junior': e['plate'] = {'rank': PLATE_RANK[rank], 'name': e['name']}
         e['transferTo'] = None
         res.append(e)
+    # each arrival replaces one leaver of the same role (the sim engineer's ask): they take the leaver's bed, work
+    # station, shift and rota, so nobody else's desk or bunk moves; leavers are never kept crew or half of a couple
+    base_role = {'Works cadet': 'Works technician', 'Survey cadet': 'Survey assistant', 'Watch cadet': 'Watch rating', 'Galley cadet': 'Galley hand'}
+    crew = sorted([e for e in out if e['rank'] != 'guest' and not e.get('player') and not e.get('stays') and not e.get('partner')], key=lambda e: e['id'])
+    gone = set()
+    for e in res:
+        want = base_role.get(e['role'], e['role'])
+        cand = [c for c in crew if c['role'] == want and c['shift'] == e['shift'] and c['id'] not in gone]
+        assert cand, e['role']
+        c = P4_R.choice(cand); gone.add(c['id'])
+        e['replaces'] = c['id']
+        e.update(bed=c['bed'], work=dict(c['work']), rota=json.loads(json.dumps(c['rota'])), dept=c['dept'], uniform=c['uniform'])
     social_fields(res)
     k = 0; rot = []
     for day, n in zip(ROTATION_DAYS, ROTATION_IN):
         arr = res[k:k + n]; k += n
-        for e in arr: e['aboard'] = [day, None]
-        rot.append(dict(day=day, out=n, **{'in': [e['id'] for e in arr]}))
+        for e in arr:
+            e['aboard'] = [day, None]
+            lv = next(c for c in out if c['id'] == e['replaces']); lv['aboard'] = [None, day]
+        rot.append(dict(day=day, out=[e['replaces'] for e in arr], **{'in': [e['id'] for e in arr]}))
     assert k == len(res) and res[0]['cadet'] and all(d % 7 == 0 for d in ROTATION_DAYS)
     return res, rot
 
@@ -1075,7 +1105,7 @@ THEME_WORDS = {'homesick': 'homesick', 'exams': 'exam nerves', 'family': 'family
                'rivalry': 'an old rivalry', 'startover': 'starting over'}
 def social_words(x, entries):
     if not x.get('tpl'): return 'you'
-    th = x['thread']; th = 'their own story' if th.startswith('arc:') else THEME_WORDS[th]
+    th = x['thread']; th = THEME_WORDS.get(th, 'their own story')
     w = '%s voice, %s; loves %s, likes %s; joy: %s; from %s, with %s; struggle: %s; keepsake: %s' % (
         x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x['home'], x['family'], th, x['keepsake'])
     if x.get('partner'): w += '. Partner: ' + next(y['name'] for y in entries if y['id'] == x['partner'])
