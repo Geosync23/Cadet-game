@@ -7,9 +7,9 @@
 ## My seats (session ids)
 | Seat | Branch | Session | Last reviewed | Verdict |
 | --- | --- | --- | --- | --- |
-| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | f9a4843 (0.26.25) | PASS WITH FIXES: the leaver vanishes at 15:00 and misses social A's 15:00 Sunday farewell (agree with social A) |
+| Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | f9a4843 (0.26.25) | PASS (the farewell clash was fixed on social's side, 0.36.48; a cosmetic leftover: the leaver vanishes at 15:00 wherever they are) |
 | Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 7abf466 (0.42.15) | PASS (first launch from section 21's first frame) |
-| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | cee9d3e (0.36.45) | PASS |
+| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 108cd6f (0.36.48) | PASS |
 | Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
 | Systems (on call, the lead added it) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa | f211129 (0.33.39) | PASS |
@@ -18,7 +18,8 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 
 ## Open items to follow up
 1. Resolved: the first-launch crossing (one design: section 21's first frame calls `newGameStart(true)`; intro_check part 9 OK on the merge).
-1b. **Open:** the leaver's 15:00 departure vs social A's 15:00 Sunday farewell (sim-engineer-f9a4843.md, finding 1).
+1b. Resolved: Sunday farewells at 14:00 (social 0.36.48), before the 15:00 shuttle.
+1c. Also reviewed: the build master's test-only machine_check fix on claude/cand-0601 (7ab17bc), PASS.
 2. **Social save size:** 27.8 kB with the reserve, mostly social B's `affWeek` snapshots. **Decided (the lead):** option (a), snapshots keep only pairs with |aff| ≥ 30 (section 14 seats on ±30; the lead changed it from 40), budget 30 kB. Check social B 0.39.3 keeps ≥ 30 pairs, that seating on paper is unchanged by it, and that social_check.s limit is 30000.
 3. Done (day_check day 35 OK, bunk handed over by time). Was: **Sim 0.26.25 review:** on rotation days (35, 77, ...) the leaver and the newcomer are both "aboard" by day and share one bed. Run day_check on day 35, and check that `ROSTER_ROTATIONS.out` (now a list of ids) is read right.
 4. Done: social B 0.39.3 passed (31f8aea). Its section 18 hooks (onPick / onEnd) were pointed out to the lead for reviewer 2.
