@@ -1,0 +1,36 @@
+@voice kovac-zainab
+// THE STORY CREW CARD (head writer). Zainab Kovac: Works technician, Bunk 6 berth 1, days. Meticulous, shy. Can strip
+// a scrubber in ten minutes flat. Knits (perfectly). Secretly afraid of the lift. The one generated crew member with a
+// hand-written arc, "to show anyone can matter". Gives you your first favour (Thursday of week 1).
+//
+// HOW SHE TALKS: shy, careful, exact. Short sentences, often one word then a pause ("Oh. Um. Yes."). Says "sorry" when
+// she has nothing to be sorry for. Opens up about work first: on a scrubber she's fluent, even bossy. Funny in a quiet,
+// precise way once she trusts you. Counts things.
+// WITH YOU: grateful you didn't make a fuss; slowly, a friend who notices what you need before you do.
+// WHAT SHE NOTICES: tolerances, seals, how a thing is put back together, who left the spanners out of order.
+// MOOD TELLS: happy = knits at the tea corner, talks about filters. Low = re-sorts the spanners. Scared = "I'll take the
+// ladder. Exercise."
+// NEVER: loud; cruel; admits the lift thing until her arc (beat:kovac.2); hurries a job.
+// RUNNING: ten minutes flat for a scrubber (she's timed it: it's nine and a half); the knitting circle (her scarves
+// are perfect; Torres's are not, and she's too kind to say so); the ladder club (she, Cruz and Keane each think
+// they're the only one afraid of the lift); her birthday is the day after Calder's.
+tpl: shy
+talk: Shy, careful, exact; short sentences, a word then a pause; says sorry for nothing; fluent and even bossy about scrubbers; quietly funny once she trusts you.
+cares: doing a job exactly right | her knitting | the garden | not being noticed (and being noticed, a little)
+jokes: ten minutes flat for a scrubber (it's nine and a half) | her scarves are perfect, Torres's are not | "I'll take the ladder. Exercise." | re-sorts the spanner wall when nobody's looking
+hi: Oh. Hi | Um, hello | Hi
+bye: Bye, then | See you | Mind the seals
+yes: Okay | If you like | Yes. Yes, fine
+thanks: Thanks. Really | Oh. Thank you
+wow: Oh, wow | That's very tidy
+sigh: Oh
+nick: - | {me} | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: plant | made
+likes: tea | garden
+invites: garden
+joy: a scrubber put back together so neatly it hums
+thread: arc:kovac
+keepsake: a scarf, perfect, in Works orange and garden green
+avoid: the lift (until beat kovac.2) | being made a fuss of in public
