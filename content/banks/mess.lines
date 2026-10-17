@@ -1,0 +1,26 @@
+@bank all
+// Writer 4, batch 8. Crowd texture at dinner in the mess: the little things people say over a plate.
+// Bubbles: 60 characters. Neutral in voice.
+
+== smalltalk
+? place:mess act:dinner
+- Could you pass the salt, please?
+- Is anyone sitting here? Lovely.
+- Mind your elbow. Gravy.   #funny
+- Budge up a bit?
+- Is there more bread? There's more bread.
+- This is good. This is really good.
+- Who's got the jug? Water, please.
+- Seconds? Go on. Just a little.
+- Has anyone seen my fork? I had a fork.   #funny
+- Save me a pudding. I'll be two minutes.
+- {dish}! Oh, good.
+- Long day. Good dinner. Fair trade.   #warm
+- Can you reach the pepper? Thanks.
+- Room for one more on the end?
+- Napkin? Here. You've got gravy.   #funny
+- Brennan's humming. That's a good sign.
+- Whose turn to clear the table?
+- I could eat this every night. Well. Most nights.
+- Don't let me have a third roll. ...Pass the rolls.   #funny
+- Tea after? I'll put the pot on.
