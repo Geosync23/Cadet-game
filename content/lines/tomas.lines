@@ -467,7 +467,7 @@
 ? trad:market tier>=acquaintance
 - Swap meet's on! Come and look at everything? I never trade. I just look.   #funny
 ? trad:jam tier>=colleague
-- Music jam tonight. I can't play anything. I clap. Come and clap too? We can be the audience.
+- Music jam tonight. I can't play a thing. I clap. Come and clap too?   #funny
 
 == bye
 ? tier>=acquaintance !week1:true
