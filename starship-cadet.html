@@ -13924,7 +13924,7 @@ function socSave() {
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
   return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), rel, ...memSave() };
+           heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ ...x })), rel, ...memSave() };
 }
 function socLoad(s) {
   try {
@@ -13946,6 +13946,7 @@ function socLoad(s) {
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
       bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
+      seekAsks: Array.isArray(s.seekAsks) ? s.seekAsks.filter(x => x && typeof x.id === 'string' && isFinite(x.from)).map(x => ({ ...x })) : [],
       noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
@@ -14881,7 +14882,23 @@ function seekEl() {
   el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, true); } };
   return el;
 }
+function seekShow(p, m) {                               // the chip: '<name> waves you over.'
+  const el = seekEl(), U = k => schedU(p.seed, m, k);
+  el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
+  el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
+  el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000 };
+}
 function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
+// socialSeekAsk(id, { from, until, why }) (0.36.58, for section 21's first week): between from and until (absolute ship
+// minutes), when that person is on your deck, near you and free (not at work, asleep or washing), they wave you over
+// once, whatever your tier and the odds. A why with 'favour' in it also has them offer a favour that day. SHIP.social.seekAsks (saved)
+function socialSeekAsk(id, o = {}) {
+  socInit(); if (!SOC.idx.has(id) || !isFinite(o.from) || !isFinite(o.until)) return false;
+  const A = SHIP.social.seekAsks || (SHIP.social.seekAsks = []);
+  if (A.some(a => a.id === id && a.from === o.from)) return true;
+  A.push({ id, from: o.from, until: o.until, why: o.why || null, done: false }); return true;
+}
+const seekAskFor = (id, t) => (SHIP.social.seekAsks || []).find(a => a.id === id && !a.done && t >= a.from && t < a.until) || null;
 function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
@@ -14891,14 +14908,12 @@ function socialSeek(m) {
   for (const a of DECK_CREW) {
     const p = a.p, mentor = socIntroOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
     const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
+    const ask = SOC.idx.has(p.id) && near(a) && seekAskFor(p.id, shipNow());   // section 21 asked for this wave (the first week)
+    if (ask) { const w = whereIs(p, shipNow()); if (w && !w.moving && !['work', 'sleep', 'wash'].includes(w.act)) { ask.done = true; relGet(p.id).seekDay = day; seekShow(p, m); return; } continue; }
     if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
     const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
     const w = whereIs(p, shipNow()); if (!w || !(w.act === 'leisure' || w.act === 'off') || w.tag === 'tea') continue;
-    r.seekDay = day;
-    const el = seekEl(), U = k => schedU(p.seed, m, k);
-    el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
-    el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
-    el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000 };
+    r.seekDay = day; seekShow(p, m);
     return;
   }
 }
@@ -15147,7 +15162,8 @@ function favourOf(p) {
   const open = favoursOf(p.id)[0]; if (open) return open;
   if (!socGate('d2')) return null;                       // the first week: favours from Tuesday
   const r = relGet(p.id), d = SHIP.time.day, U = k => schedU(p.seed, d, k), tier = relTier(p.id);
-  if (r.favDay === d || U(624) >= FAVOUR_ODDS[tier] * (repAskedFor(p.dept) ? 1.5 : 1)) return null;   // 50% more often where you're well thought of
+  const asked = (SHIP.social.seekAsks || []).some(a => a.id === p.id && /favour/.test(a.why || '') && Math.floor(a.from / 1440) + 1 === d);   // section 21: their favour that day
+  if (r.favDay === d || (!asked && U(624) >= FAVOUR_ODDS[tier] * (repAskedFor(p.dept) ? 1.5 : 1))) return null;   // 50% more often where you're well thought of
   const S = schedData(), left = planDay(p, d - 1).filter(s => s.placeId && SOCIAL_TYPES.has(s.type) && s.type !== 'servery-queue').map(s => S.byId.get(s.placeId)).filter(pl => pl && DECKS[pl.deck]);
   if (left.length && U(625) < .6) {
     const pl = left[Math.floor(U(626) * left.length)], room = ((DECKS[pl.deck].rooms || {})[pl.room] || {}).name || 'the ' + pl.type, thing = FAVOUR_THINGS[Math.floor(U(627) * FAVOUR_THINGS.length)];
