@@ -273,7 +273,22 @@ with sync_playwright() as pw:
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
     else:
         g.ev('newGameStart(true)'); g.step(5)
+        tern = g.ev("typeof ternRamp === 'function' && !!DECKS[5].tern")
+        if tern:   # the walk-in Tern (deck architect 0.38.18): you start in its aisle with the ramp shut
+            t0 = g.ev("({ me: player.here(), start: SHIP_START_ARRIVAL.tile, open: ternRampOpen() })")
+            print(f"  the Tern: you start at {t0['me']} (start {t0['start']}, INTRO_START {g.ev('INTRO_START.tile')}), ramp {t0['open']}")
+            if t0['me'] != g.ev('INTRO_START.tile'): fail(f"a new arriving game starts you at {t0['me']}, not INTRO_START's tile (section 13's SHIP_START_ARRIVAL is {t0['start']})")
+            if t0['open'] != 0: fail('the Tern\'s ramp is open while you sign the manifest')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        if tern:   # about 2 s after signing, the pilot's line and the ramp opens (2.5 s)
+            r0 = g.ev('ternRampOpen()'); g.page.wait_for_timeout(2400); g.step(100)
+            r1 = g.ev("({ open: ternRampOpen(), toast: (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
+            src = "the writers' line" if r1['pilot'] else 'the stand-in'
+            print(f"  the ramp right after signing {r0}, 2.4 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
+            if r0 != 0: fail('the ramp opened before the pilot spoke')
+            if r1['open'] != 1: fail('the ramp did not open after the pilot\'s line')
+            if 'Raman' not in r1['toast']: fail('no pilot\'s line when the ramp opened')
+        shut, reopened = None, None
         tl2 = g.ev("(() => { const L = (typeof VOICE !== 'undefined' && VOICE['torres-zeke'] && VOICE['torres-zeke'].lines && VOICE['torres-zeke'].lines.week1) || []; return INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, L.filter(e => (e.flag || '').startsWith('walk.' + x.id + '.')).length]); })()")
         wrong = [i for i, n, w in tl2 if w and n != w]
         print('  tour lines with the week under way (place, played, written):', tl2)
@@ -284,6 +299,8 @@ with sync_playwright() as pw:
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
             if r['esc'] and r['esc'][2] == 'escort': led += 1
+            if tern and shut is None and g.ev('INTRO_UI.ternShut'): shut = (r['t'], r['step'], r['me']); print(f"  {r['t']}  the ramp closes behind you (you at {r['me']}, ramp {g.ev('ternRampOpen().toFixed(2)')})")
+            if tern and shut and reopened is None and not g.ev('INTRO_UI.ternShut'): reopened = (r['t'], r['step'])
             if not order or order[-1] != r['step']: order.append(r['step']); print(f"  {r['t']}  {r['step']}  (you: Deck {r['deck']} {r['me']}; Torres {r['esc'][0] if r['esc'] else 'not here'}{'; his seat ' + r['seat'] if r['seat'] else ''})")
             if r['step'] is None: break
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
@@ -294,6 +311,11 @@ with sync_playwright() as pw:
         if not (w['device'] and w['calder']): fail('no device or no Calder after the real walk')
         if max(peak.values()) >= 450: fail(f'draw calls {max(peak.values())} at the arrival (budget 450)')
         if led < 20: fail('Torres hardly led you')
+        if tern:
+            print(f'  the ramp: closed behind you at {shut}, open again at {reopened} (target {g.ev("TERN.target")})')
+            if not shut: fail('the Tern\'s ramp never closed behind you')
+            elif shut[1] not in ('ramp', 'hello', 'haulway', 'works'): fail(f'the ramp closed late, at step {shut[1]}')
+            if not reopened or g.ev('TERN.target') != 1: fail('the Tern\'s ramp was left shut after Torres let you go')
     print('9. A first launch arrives (no save, never arrived, not a test URL), and its Day 0 save loads at the same step')
     if not g.ev("typeof newGameStart === 'function'"):
         fail('no newGameStart (section 13): a first launch cannot arrive')
@@ -312,16 +334,19 @@ with sync_playwright() as pw:
         print(f"  saved at {before}, loaded at step {after['step']} on Day {after['day']}, manifest {'up' if after['form'] else 'gone'}, name {after['name']}")
         if after['step'] != before['step'] or after['day'] != 0 or after['form']: fail('a Day 0 save did not load at its step')
         if after['name'] != 'Sam': print('  (the name comes back once section 15 saves SHIP.player.name: player engineer 3)')
-        print('11. Reload mid-walk: follow Torres to the lift, save and reload there, then on to your bunk')
+        print('11. Reload mid-walk: follow Torres to the lift (or the wing), save and reload short of it, then on to your bunk')
         mid = None
         for k in range(120):
             g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
-            if r['step'] == 'lift': mid = r; break
+            # save on the lift or wing step while you're still short of its checkpoint (within reach, the step is done
+            # on the next minute either way, so a reload there would rightly move on)
+            far = r['step'] in ('lift', 'wing') and g.ev(f"(() => {{ const c = introStepById('{r['step']}').checkpoint, h = player.here(); return c.deck !== deckDef.num || Math.max(Math.abs(h[0] - c.tile[0]), Math.abs(h[1] - c.tile[1])) > INTRO_REACH; }})()")
+            if far: mid = r; break
         g.ev('saveGame()')
         g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
         back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
         print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
-        if not mid or back['step'] != 'lift' or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
+        if not mid or back['step'] != mid['step'] or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
         for k in range(200):
             g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             if r['step'] == 'toMess': break
