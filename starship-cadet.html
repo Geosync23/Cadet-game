@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.26
+   STARSHIP CADET: CSV Wren                           build 0.27.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7410,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.27';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -28273,6 +28273,8 @@ const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sp
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
 const CROWD_GATHER = 40, CROWD_GATHER2 = 12;             // at an event's gathering: more than 40 on the deck, coarse from 12 tiles (0.27.19)
+const CROWD_POSE_EVERY = 10, CROWD_POSE_MARGIN = 4;      // 0.27.27: off-screen people are posed every 10th frame; 'on screen' has a 4 m margin
+const _poseFr = new THREE.Frustum(), _poseM = new THREE.Matrix4(), _poseS = new THREE.Sphere(), _poseV = new THREE.Vector3(), _poseKeep = new Set();
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -28762,13 +28764,24 @@ const crowd = {
     // level of detail starts nearer (CROWD_GATHER2 tiles) once the deck holds more than CROWD_GATHER people
     const gather = FEEL_S.gather && this.people.length > CROWD_GATHER, many = this.people.length > CROWD_MANY || gather;
     const allFar = camera.zoom < CROWD_FAR_ZOOM, far2 = gather ? CROWD_GATHER2 : CROWD_FAR2;
-    for (const p of this.people) {
+    // 0.27.27: posing (limbs only) is the crowd's main cost, and in a busy room at the usual zoom most people are off
+    // screen. Each frame only those in view, with a CROWD_POSE_MARGIN margin that covers shadows thrown on screen from
+    // just outside, are posed; the rest every CROWD_POSE_EVERY frames with the time they missed. Anyone the player is
+    // talking to or following (a crew agent's talking or esc), a new person, and everyone after the camera turns or
+    // zooms are posed at once. Posing uses each person's own random stream and writes only their rig: nothing the sim reads.
+    const az0 = this.poseAz, zm0 = this.poseZoom; this.poseAz = az; this.poseZoom = camera.zoom; this.poseN = (this.poseN || 0) + 1;
+    const all = az0 === undefined || Math.abs(az - az0) > .002 || zm0 !== camera.zoom;
+    if (!all) { _poseFr.setFromProjectionMatrix(_poseM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)); _poseKeep.clear(); for (const a of DECK_CREW) if (a.h && (a.talking > 0 || a.esc)) _poseKeep.add(a.h); }
+    this.people.forEach((p, i) => {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
       let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
       if (many && lod && (allFar || d > far2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
-      p.update(dt, t);
-    }
+      p.poseDt = (p.poseDt || 0) + dt;
+      if (all || p.fresh || p.chunk.dirty || (this.poseN + i) % CROWD_POSE_EVERY === 0 || _poseKeep.has(p) || _poseFr.intersectsSphere(_poseS.set(_poseV.set(p.pos.x, 1, p.pos.z), CROWD_POSE_MARGIN))) {
+        p.update(Math.min(p.poseDt, .5), t); p.poseDt = 0;
+      }
+    });
     for (const c of this.chunks) {
       if (c.dirty) c.rebuild();
       const ps = c.slots.filter(Boolean); c.mesh.visible = this.visible && ps.length > 0;
