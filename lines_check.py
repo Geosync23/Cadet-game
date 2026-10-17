@@ -149,6 +149,8 @@ def main(argv):
     for c in out['CONVOS']:
         if all(l['who'] == 'A' for l in c['lines']):       # one speaker (a call home, a mutter): nobody else is in it
             bad = [k for k in ('pair', 'with') if c.get(k)] + (['{other}'] if any('{other}' in l['text'] for l in c['lines']) else [])
+            if not (c.get('place') or c.get('act')):
+                errors.append(f'overheard {c["topic"]} "{c["lines"][0]["text"]}": a one-speaker conversation needs place: or act: (where, or what they are doing)')
             if bad:
                 errors.append(f'overheard {c["topic"]} "{c["lines"][0]["text"]}": a one-speaker conversation has no other person ({", ".join(bad)})')
         for l in c['lines']:
