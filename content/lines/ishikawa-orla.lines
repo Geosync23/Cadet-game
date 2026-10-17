@@ -181,3 +181,20 @@
 - The view here is different. Fewer stars, more of a moon. The herbs made the trip. The basil sulked for a day.
 ? tier>=friend
 - My ledger balanced again today. To the credit. I thought you'd like to know. Hello from my window seat.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d3-store: Wednesday 16:30, the crew store
+? flag:beat.d3-store.1
+- Oh, hello. First visit? Have a look round.
+? flag:beat.d3-store.2
+- It's all credits. Your wallet's on your device.
+? flag:beat.d3-store.3
+- What you buy goes in your locker. Safe and sound.
+? flag:beat.d3-store.4
+- Snacks for a little hunger. Small comforts too.
+? flag:beat.d3-store.5
+- I'll remember what you bought. Tell me how it went.

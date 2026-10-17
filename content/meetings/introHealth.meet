@@ -1,0 +1,21 @@
+@meeting introHealth
+// Day 2, Tuesday 14:00, the infirmary: Rina's new-crew health check (Writer 5, batch 9, for onboarding's hook).
+// Needs, energy, the Needs app, bonuses and penalties, in her dry way. One choice, no wrong answer. Nothing about
+// her exam.
+title: Your health check
+from: Rina Deshi
+gist: Rina's health check: your needs are in the Needs app. High ones help, low ones slow you down. Drink some water.
+== lines
+rina: You're my two o'clock. Sit. Arm out. Don't touch anything blue.   [gesture]
+rina > you: Needs. Hunger, energy, hygiene, social, fitness. They're on your device, in the Needs app.
+rina: Keep one high and it helps. You work faster, or walk faster. That's the good news.
+rina: Let one drop low and it slows you down. Nothing worse. You'll just feel it.
+rina: Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must.
+? choice
+* What if I forget?   flavour:practical
+  rina: Your device marks it. Up for good, down for bad. You'll learn.   [nod]
+* Do you check yours?   flavour:share
+  rina: Every hour. Mostly I just drink water.
+* (Hold out your arm)
+  rina: Good. You're a better patient than Pell already.   [laugh]
+rina: Done. Drink some water on the way out. That's not a suggestion.

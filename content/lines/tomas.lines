@@ -561,3 +561,38 @@
 - Something's on tonight! Is it tonight? It's tonight.   #funny
 ? trad:hull-lights
 - We're glowing. The whole ship. Look!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Tomas is off Fri-Sat, so d5 and d6 are his own time.
+
+== week1
+// beat d1-wash: Monday 06:00, Bunk 1
+? flag:beat.d1-wash.1
+- Morning! Washroom first. Hot water runs out at ten.
+? flag:beat.d1-wash.2
+- Breakfast's till eight. Then Works. Then everything.
+? flag:beat.d1-wash.3
+- Towel's in your locker. Top shelf. I think.
+? flag:beat.d1-wash.4
+- Out the door, then left. Probably left.   #funny
+// beat d5-invite: Friday 18:00, wherever he finds you
+? flag:beat.d5-invite.1
+- Sowing morning's tomorrow! You plant your own seedling.
+? flag:beat.d5-invite.2
+- Garden, before lunch. Bring your hands. That's all.
+? flag:beat.d5-invite.3
+- Film night after dinner, too. Come? I'll save a seat.
+? flag:beat.d5-invite.4
+- It's your first day off. Sleep in. A bit.
+// beat d6-sowing: Saturday 11:45, the garden
+? flag:beat.d6-sowing.1
+- Here! Pick a pot. Any pot. That one's yours.
+? flag:beat.d6-sowing.2
+- Seed in, soil on, a little water. Not too much.
+? flag:beat.d6-sowing.3
+- Day off. Nobody's working. Well, the garden is.   #funny
+? flag:beat.d6-sowing.4
+- It'll grow all year. So will you, I think.   #warm
+? flag:beat.d6-sowing.5
+- Film night later! You're coming. I've decided.   #funny

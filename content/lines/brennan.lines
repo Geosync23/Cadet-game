@@ -525,3 +525,20 @@
 - Something's on. I've baked.
 ? trad:founding
 - Cake's out! Three layers!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d1-dinner: Monday 18:00, the mess
+? flag:beat.d1-dinner.1
+- Dinner's on, love. Grab a tray, then a plate.
+? flag:beat.d1-dinner.2
+- Sit with someone. Food's better with company.
+? flag:beat.d1-dinner.3
+- Miss dinner? Covered plates on the grab shelf.
+? flag:beat.d1-dinner.4
+- The grab shelf's for emergencies. And Pell.   #funny
+? flag:beat.d1-dinner.5
+- Eat properly, love. I'll know if you don't.

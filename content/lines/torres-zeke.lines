@@ -587,3 +587,23 @@
 - Lanterns! Every corridor's a story.
 ? trad:works-tea
 - Tea! Mugs off the hook, everyone!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned. Torres's planned days off are Thu-Fri (facts 3), hence the Thursday Mail.
+
+== week1
+// beat d3-pick: Wednesday 08:00, the Works bay
+? flag:beat.d3-pick.1
+- Your pick today. Board's there. Choose one you like.
+? flag:beat.d3-pick.2
+- Start small. A scrubber, a fan. Nothing that hisses.   #funny
+? flag:beat.d3-pick.3
+- I'm on Deck 6 all morning. Find me on the Roster.
+? flag:beat.d3-pick.4
+- Stuck? Tap my name on the Roster. I'll come up.
+? flag:beat.d3-pick.5
+- Right, onward. You've got this.
+// mail d4-mail: Thursday 07:00, his day off
+? flag:mail.d4-mail
+- On your own today | My day off. The board's yours. You're ready. Don't break anything big.
