@@ -418,7 +418,7 @@
 ? tier>=acquaintance !week1:true weekday:fri
 - {hi}, {nick}. Friday. Music night. You've no excuse, you know.   #funny
 ? tier>=colleague !week1:true
-- {nick}! I was just thinking about you. Well, about biscuits. Then you.   #funny
+- {nick}! Perfect timing. I was just about to open the biscuits.   #funny
 - {hi}, {nick}. Sit a minute? Tell me something that isn't about work.
 ? tier>=friend !week1:true
 - {nick}. Good. I've got tea and nothing to fix. Stay?   #warm
@@ -448,7 +448,7 @@
 - I used to think a good day was the coils behaving. Now it's tea with people. Bit of both.   #warm
 - Sometimes I sit at the overlook with tea and just listen. Is that odd? It's not odd.
 ? tier>=close !week1:true
-- Glad you came, you know. Out here. To the Wren. I say it to myself sometimes.   #warm
+- Glad you came out here, you know. To the Wren. The bay's better for it.   #warm
 - If I ever get serious, tell me to put a record on. It works. Every time.   #funny
 
 == near
@@ -508,7 +508,7 @@
 ? told:intro.shadowShift tier>=acquaintance !week1:true
 - Your shadow shift. You asked why three times. Best questions I'd had all month.   #warm
 ? told:intro.shadowShift tier>=colleague
-- You held the spanner the right way round on day one. Do you know how rare that is?   #funny
+- Day one, you held the spanner upside down. Then you didn't. I noticed.   #warm
 ? told:intro.dinner.stars tier>=acquaintance !week1:true
 - You came for the stars, you said. Have you had your window seat yet? Properly?   #warm
 ? told:intro.dinner.stars tier>=friend
