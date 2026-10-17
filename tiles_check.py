@@ -221,8 +221,8 @@ def seat(pw, path):
     # beating Rina: news once, her memory, the day kept
     gg.ev("tilesPlay('rina', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } TL_GAME.s.sc = [6, 0]; TL_GAME.s.p = 0")
     gg.ev("""(() => { const G = TL_GAME; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()""")
-    b = gg.ev("[TL_GAME.s.win, SHIP.tiles.beatRina !== null, NEWS.filter(n => n.id === 'tiles-rina-beaten').length, (SHIP.mem.rina || []).some(m => m[0] === 'moment.tiles')]")
-    check(b == [0, True, 1, True], f'beating Rina: news once, her memory, the day kept: {b}')
+    b = gg.ev("[TL_GAME.s.win, SHIP.tiles.beatRina !== null, NEWS.filter(n => n.id === 'tiles-rina-beaten').length, (SHIP.mem.rina || []).some(m => m[0] === 'moment.tiles'), SHIP.traces.filter(x => (x && x.id || x) === 'tilesTrophy').length]")
+    check(b == [0, True, 1, True, 1], f'beating Rina: news once, her memory, the day kept, the trophy trace once: {b}')
     sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x' } }))]; })()")
     check(sv[0], f'save.tiles round-trips: {sv}')
     check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"first":{},"relDay":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
