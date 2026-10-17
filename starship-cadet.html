@@ -15638,7 +15638,7 @@ function momentReady(p, t = shipNow(), ctx = {}) {
   if (ab && ((ab.afterShow && r.showDay && day <= r.showDay) || (r.arcDay || 0) >= day)) return null;   // Pell's last beat waits for his show; one beat a day
   if (MOMENT_SERIOUS.has(d.tone) && S.serious === day) return null;          // one serious moment a day for you
   if (!d.crisis) { let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return null; }
-  if (Array.isArray(d.when) && d.when.length) { let ok = false; try { ok = typeof linesCond === 'function' && !!linesCond(d.when, p, { t, moment: id }); } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions (section 22 judges them)
+  if (d.when) { let ok = false; try { ok = typeof linesOk === 'function' ? !!linesOk(d.when, p, { t, moment: id }) : false; } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions, judged by section 22 as for lines
   if (!ctx.anywhere && !momentWhere(p, t, d)) return null;
   return id;
 }
