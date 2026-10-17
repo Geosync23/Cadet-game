@@ -15646,8 +15646,9 @@ function momentCalm(p, t, duty) {                        // off duty (or on, for
   const pl = w.placeId && schedData().byId.get(w.placeId);
   return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type) || (duty && w.act === 'work'));
 }
-function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', or a room's name
+function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', 'any' (played in place, wherever you meet), or a room's name
   return (Array.isArray(d.where) ? d.where : [d.where || 'calm']).some(x => {
+    if (x === 'any') return true;
     if (x === 'calm') return momentCalm(p, t, d.duty);
     if (x === 'visit') return momentVisit(p);
     if (x === 'appt') return momentAppt(p, t);
@@ -15696,7 +15697,7 @@ function momentDone(p, d, c) {                           // the reply was picked
   relAdd(p.id, 'moment', pts);
   const word = c.c && c.c.mem || d.mem;                 // the writers' memory word (moment.<arc>.<word>), else one made from the beat
   memAdd(p.id, 'moment.' + th + '.' + (word || d.beat + '.' + flavour), d.tone === 'resolution' ? { cls: 'core' } : {});
-  if (typeof flagSet === 'function') for (const f of [d.flag, c.c && c.c.flag]) if (f) flagSet(f);   // the beat's flag, and the reply's, for later beats
+  if (typeof flagSet === 'function') for (const f of [d.flag, c.c && c.c.flag, c.c && c.c.favour]) if (f) flagSet(f);   // the beat's flag, the reply's, and a favour done in the scene itself, for later beats
   if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
   if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
