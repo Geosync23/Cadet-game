@@ -394,3 +394,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:02 1e: leave c08342c PASS WITH FIXES (MEDIUM: section 14 calls a shift missed at 10:00 vs clock 12:30 -> career eng cleared to edit section 14 (no sim owner); LOWs: repair without clock-in counts as worked, night clock-in on time -> career eng; clock-in-then-out = full day -> asked the user). 1e at ~60%: hire reviewer 1f when 1e reports ~65-70%.
 - ~21:04 1e: leave 0.61.17 da6abc6 PASS (only open: leaving-early design question with the user). 1e ~62%.
 - ~21:04 hired reviewer 1f session_015UH1fbKg2nCRNi9Y3D96YA (claude/reviews-4); 1e to go idle, archive after 1f confirms.
+- ~21:06 user chose A: leaving early = short shift (small rep dip if out before 15:00; not a full day worked) -> career eng; design-doc updated.
