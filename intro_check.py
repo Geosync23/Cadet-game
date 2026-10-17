@@ -27,7 +27,7 @@ from playwright.sync_api import sync_playwright
 RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
   const FLAGS = INTRO_FLAGS;
   socInit(); socReset(0); SHIP.mail.length = 0;
-  SHIP.intro = introBlank(); SHIP.notes = [];   // section 13's flags are NOT reset: introBegin must clear what the last run left
+  SHIP.intro = introBlank(); SHIP.notes = []; if (SHIP.device) SHIP.device.appts = [];   // each run books its own health check   // section 13's flags are NOT reset: introBegin must clear what the last run left
   const t0 = introAbs(INTRO_START.day, INTRO_START.min), order = [], flagAt = {};
   if (skip) { setShipNow(t0); introSkip(); }
   else introBegin('Sam');
@@ -200,6 +200,8 @@ with sync_playwright() as pw:
     for f, t in when.items():
         if a['flagAt'].get(f) != t: fail(f"{f} at {mins(a['flagAt'][f]) if f in a['flagAt'] else 'never'}, wanted {mins(t)}")
     if not a['I']['ended']: fail('the intro did not end on Day 8')
+    if 'd2-health:appt' not in a['I']['done']: fail('Tuesday\'s health check was never booked')
+    if 'd5-mug:met' not in a['I']['done']: fail('the Friday mug moment never happened (or its Mail)')
     print('  mail:', '; '.join(f"{mins(int(m[0]))} {m[1]}: {m[2]}" for m in a['mail']))
     if any(m[2] in ('Your bunk', 'Tomorrow') for m in a['mail']): fail('a fallback Mail went out with the player there')
 
