@@ -31,3 +31,9 @@
 == joy
 ? tier>=acquaintance
 - The garden at misting hour. Best smell aboard. Don't tell Brennan it beats her bread.
+
+== about
+? aff:bakshi-sol:friend
+- Sol misses the rain too. We stand in the garden at misting hour. Don't say anything.   #warm
+? bond:friends
+- {friend}. Good sort. Doesn't fuss. High praise from me.
