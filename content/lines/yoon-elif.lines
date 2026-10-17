@@ -85,3 +85,17 @@
 - Happy birthday. Here's a joke as a present. No, wait, here's a biscuit instead. Better.   #funny
 == hint
 - Could you sit with me a moment? No hurry.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Oh dear. Sorry. Was that me?
+- Coffee machine's fine. For me.   #funny
+- Why did the scrubber... no. Sorry.   #funny
+- Quiet night. Don't say it.
+? act:work
+- Steady. You're all right. Breathe.
+
+== rumour
+- I heard something. Oh dear. Sorry.
+- Nights hear things. Very quietly.

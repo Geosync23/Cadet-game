@@ -85,3 +85,17 @@
 - Happy birthday. Your blood type's a lucky one. That's not a real thing. Happy birthday.   #funny
 == hint
 - Could we talk? Somewhere quiet. Not the infirmary.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- O negative. Someone's O negative.
+- Oh, no. Is that a sock? Lost property.
+- I've checked twice. I'll check again.
+- Have you washed your hands? Sorry.
+? act:work
+- Infirmary's open. Please don't need it.
+
+== rumour
+- I'm not sure I should say. I'm worried.
+- Someone said something. I've been fretting.

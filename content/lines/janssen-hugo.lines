@@ -85,3 +85,17 @@
 - Happy birthday. A cutting of Gerald. Look after it. It'll outlive us all.   #warm
 == hint
 - Have you a minute? Sit with me. Bring your tea.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Steady as she goes.
+- Gerald's seen more stars than me.   #funny
+- Tea in one hand. Helm in the other.
+- Ah, well. Long night. Good night.
+? act:work
+- Course holding. Nice and steady.
+
+== rumour
+- Heard something on the night watch.
+- Gerald heard it first. Gerald knows.

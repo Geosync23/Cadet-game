@@ -87,3 +87,17 @@
 - Happy birthday. I've written you a card. On paper. Properly.   #warm
 == hint
 - Have you a minute? I'd like to say something. Properly.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Forty-one onions to thirty-eight.   #funny
+- I hope this finds you well.   #funny
+- Ah, well. Tomorrow, then.
+- The post bag's due. I hope.
+? act:work
+- Another onion. Another point.
+
+== rumour
+- I should not say. I will, though.
+- A small piece of news, if I may.

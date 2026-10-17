@@ -85,3 +85,17 @@
 - Happy birthday. I've put something by. No charge. Don't tell anyone.   #warm
 == hint
 - Got a minute? Not for shopping. Just a minute.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- You'll want the thermal socks. Trust me.
+- Store's open. Gerald says hello.   #funny
+- Ah, well. Back on the shelf.
+- New stock. Old stock, newly dusted.   #funny
+? act:work
+- Next. I know what you're after.
+
+== rumour
+- I never say what anyone bought. Ever.
+- Heard it at the counter. Not from me.
