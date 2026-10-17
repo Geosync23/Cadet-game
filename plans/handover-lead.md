@@ -349,3 +349,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
   - content: 5417aeb news.lines + later through 51bda1c.
 - Pillar 4 is DONE when the user approves 0.60.6. Then (the user's calls): PR to main, Pillar 5 start (plan approved answers; built on its own; lean team).
 - Rules: surveys for question lists + push notification on every question; design decisions are the user's; cost tracking plans/cost-tracking.md; user is on the weekly-usage warning.
+- ~19:35 user: clock in/out panel on the Works bay wall, ties to lateness/missed shift; co-worker remarks (Monday weekend talk, Friday plans) -> career engineer + head writer 5 (new).
