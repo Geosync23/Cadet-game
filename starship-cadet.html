@@ -15368,7 +15368,7 @@ function voiceWord(id, token, t = shipNow()) {
 }
 function voiceFill(id, text, t = shipNow()) {          // section 22's linesFill when it's there (one filler for every line), else the tokens here
   if (typeof linesFill === 'function') { try { const p = socP(id && id.id || id), r = p && linesFill(String(text), p, { t }); if (typeof r === 'string') return r; } catch (e) { /* fall back */ } }
-  return String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
+  return String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName()).replace(/([!?])\./g, '$1');   // 'Hey hey!' + '.' -> 'Hey hey!'
 }
 function relGain(id, why, pts) {                         // openness, for section 20's relAdd; onboarding's numbers and moments stay as given
   const v = voiceOf(id); if (!(pts > 0) || !v.opennessSet || /^(intro:|moment)/.test(String(why))) return pts;   // a guessed openness changes nothing
