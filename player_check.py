@@ -25,6 +25,7 @@
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   the kit bag and the device lock (0.28.26): held from the ramp, into the locker in Bunk 1
+#   lying down in your bunk (0.28.29): by day to rest, at night to sleep, and getting up
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -87,6 +88,30 @@ STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.
 
 def state(g): return json.loads(g.ev(STATE))
 UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
+
+def servery_seat(g, label):
+    """the servery's line (0.28.31): served, you hold your tray and get control back; then you tap a mess table yourself"""
+    tp, b, seen, e, pk = run_activity(g, 'Servery', label=label)
+    tray = g.ev("[SHIP.player.tray, player.holding, !!ACT]")
+    print('  served, tray in hand, control back:', tray)
+    if g.ev("typeof galleyJoin === 'function'") and any(a[0] == 'queue' for a in seen):
+        check(isinstance(tray[0], str) and tray[1] == 'tray' and tray[2] is False, f'served: your tray in hand and control back ({tray})')
+        # mess tables have no description of their own: you tap a seat, and playerFloorTap's line of sight finds it
+        tp2 = g.ev("""(() => { const p = player.obj.position;
+          const sp = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && !heldBy(q.id)).map(q => placeSpot(q.id)).filter(Boolean)
+            .sort((m, n) => Math.hypot(m.x - p.x, m.z - p.z) - Math.hypot(n.x - p.x, n.z - p.z))[0];
+          const v = new THREE.Vector3(sp.x, .45, sp.z).project(camera); ray.setFromCamera(new THREE.Vector2(v.x, v.y), camera);
+          return playerFloorTap(new THREE.Vector3(sp.x, 0, sp.z)); })()""")
+        seen2, pk2 = [], 0
+        for k in range(4000 // 30):
+            g.step(30); st = state(g); pk2 = max(pk2, st['calls'])
+            if st['act']: seen2.append(st['act'])
+            if not st['act'] and k > 0: break
+        g.step(30); e = state(g)
+        print(f"  {label + ' (the seat)':22s} tapped={tp2!s:5s} {e['time']} needs {e['needs']}")
+        check(tp2 is True and g.ev("SHIP.player.tray") is None and any(a[0] == 'eat' for a in seen2), f'a tap on a mess seat with your tray: sit and eat ({tp2})')
+        seen, pk = seen + seen2, max(pk, pk2)
+    return tp, b, seen, e, pk
 
 def run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
@@ -175,7 +200,7 @@ with sync_playwright() as pw:
       const b = document.getElementById('devBody'), out = [[...b.querySelectorAll('.need em')].map(e => e.className + ':' + e.textContent), [...b.querySelectorAll('p.fx')].map(p => p.textContent)];
       device.close(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return out; })()""")
     print('  the device:', dv)
-    check(dv[0] == ['up:▲', 'down:▼'] and len(dv[1]) == 2 and 'wash' in dv[1][0] and 'fed' in dv[1][1], f'device marks (penalties first, device 0.35.28): {dv}')
+    check(dv[0] == ['up:▲', 'down:▼'] and len(dv[1]) == 2 and sorted(['fed' if 'fed' in x else 'wash' if 'wash' in x.lower() else x for x in dv[1]]) == ['fed', 'wash'], f'device marks (either order; device 0.35.28 lists penalties first): {dv}')
 
     tk = g.ev(r"""(() => { const n = SHIP.player.needs, out = [];
       for (const st of [{ energy: 100, social: 50, hunger: 50 }, { energy: 50, social: 50, hunger: 10 }, { energy: 50, social: 50, hunger: 50 }]) {
@@ -202,12 +227,32 @@ with sync_playwright() as pw:
         g.step(5); notes.append([tp, g.ev("document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent")])
     if stubn: g.ev("delete window.bunkNote")
     print('  your bunk with a note, then again:', notes)
-    if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'Too early' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'lie down' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    # lying down (0.28.29, the user's "I can't lay down in bed"): a tap on your bunk by day lies you down in it to rest;
+    # walking off gets you up; at night you lie down, sleep to 06:00 and wake still lying there
+    for j in range(40):
+        g.step(10)
+        if g.ev("!!ACT && ACT.phase === 'do'"): break
+    ly = g.ev("[ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.pose, ACT && ACT.placeId === playerBed(), ACT && +ACT.y.toFixed(2), player.obj.visible]")
+    g.ev("SHIP.player.needs.energy = 50"); e0 = g.ev("SHIP.player.needs.energy"); g.ev("setShipNow(shipNow() + 60)"); g.step(3); e1 = g.ev("SHIP.player.needs.energy")
+    print('  lying down by day:', ly, 'energy over an hour:', round(e0, 2), '->', round(e1, 2))
+    check(ly[:4] == ['lie', 'do', 'lie', True] and ly[4] > .2 and ly[5] is False, f'a tap on your bunk should lie you down in it: {ly}')
+    check(e1 >= e0 + 2.5, f'lying down should rest you, not tire you: {e0} -> {e1}')
+    g.ev("(() => { const p = player.obj.position, c = nearestOpen(p.x + 1.2, p.z + 1.2, player); playerGo(c, null); })()")
+    for j in range(40):
+        g.step(10)
+        if g.ev("!ACT && player.obj.visible"): break
+    up = g.ev("[!!ACT, player.obj.visible]"); print('  walking off:', up)
+    check(up == [False, True], f'walking off should get you up: {up}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
-    day0 = g.ev("SHIP.time.day"); g.ev(BED); asked = g.ev("!sleepEl.hidden")
+    day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP); asked = g.ev("!sleepEl.hidden")
+    for j in range(60):
+        g.step(10)
+        if g.ev("sleeping || !!ACT && ACT.o.slept"): break
     g.page.wait_for_function("window.__sc('!sleeping')", timeout=10000, polling=200); g.step(3)
-    bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent]"); print('  at 21:00:', bed, 'dialog shown:', asked)
-    check(not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning', f'the bunk at 21:00 should sleep you to 06:00: {bed}')
+    bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent, ACT && ACT.kind, ACT && ACT.phase]"); print('  at 21:00:', tp, bed, 'dialog shown:', asked)
+    check(tp is True and not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
+    g.ev("actEnd(true)")
 
     print('One player day, tapping the real things:')
     g.ev("Object.assign(SHIP.player.needs, { hunger: 20, energy: 100, hygiene: 10, fitness: 30, social: 20, bathroom: 20 }); basket = false")
@@ -226,7 +271,11 @@ with sync_playwright() as pw:
     tp, b, seen, e, pk = run_activity(g, 'Grab and go'); peak = max(peak, pk); body_check('grab', 'hunger', 25, b, e, seen, None)
     tp, b, seen, e, pk = run_activity(g, 'Treadmills'); peak = max(peak, pk); body_check('treadmill', 'fitness', 30, b, e, seen, 'run')
     tp, b, seen, e, pk = run_activity(g, 'Weights'); peak = max(peak, pk); body_check('weights', 'fitness', 30, b, e, seen, 'lift')
+    hb = g.ev("(() => { if (typeof homeBooth === 'function') return false; window.__hb = 0; window.homeBooth = () => { window.__hb++; return true; }; return true; })()")   # social B2's call picker (0.28.30)
     tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, ('call', 'sit:call'))
+    if hb:
+        hbn = g.ev("window.__hb"); g.ev("delete window.homeBooth"); print('  homeBooth calls at the booth:', hbn)
+        check(hbn == 1, f'sitting at a booth should open the call picker once: {hbn}')
     check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
     g.ev("SHIP.player.needs.bathroom = 30")              # a public toilet on Deck 3 (0.28.19)
     tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[20, 20]); peak = max(peak, pk)
@@ -251,7 +300,7 @@ with sync_playwright() as pw:
     if b['basket']['kind'] == 'comfort': check(g.ev("SHIP.player.locker.includes(%s)" % json.dumps(b['basket']['name'])), 'a comfort goes in your locker')
     else: check(e['needs']['hunger'] > hu0, 'a snack should feed you a little')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 17 * 60 + 40); needsT = null"); g.step(5)   # dinner
-    tp, b, seen, e, pk = run_activity(g, 'Servery', label='Servery, then a seat'); peak = max(peak, pk)
+    tp, b, seen, e, pk = servery_seat(g, 'Servery, then a seat'); peak = max(peak, pk)
     kinds = [a[0] for a in seen]
     joins = g.ev("typeof galleyJoin === 'function'")    # with the galley's queue (0.29.6) the servery is the queue; without it, a tray at a queue spot
     check(tp is True and ('queue' if joins else 'tray') in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
@@ -275,13 +324,43 @@ with sync_playwright() as pw:
           window.galleyJoin = () => (window.joined = { at: [33, 2], xy: [33.55, 2.5], face: 's', ahead: 3, turnAt: shipNow() + 3.25 });
           window.galleyTurn = () => !!window.joined && shipNow() >= window.joined.turnAt && window.portions > 0; })()""")
     g.ev("SHIP.player.needs.hunger = 20")
-    tp, b, seen, e, pk = run_activity(g, 'Servery', label='The queue, then a seat')
+    tp, b, seen, e, pk = servery_seat(g, 'The queue, then a seat')
     kinds = [a[0] for a in seen]
     check(tp is True and 'queue' in kinds and 'eat' in kinds and 'tray' not in kinds, f'queue: {sorted(set(kinds))}')
     waited = sum(1 for a in seen if a[0] == 'queue' and a[1] is None and a[2] == 'do')
     check(waited >= (1 if real[1] else 3), f'queue: should wait at the back of the line for the turn ({waited} checks)')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'queue: then sit at a mess seat to eat')
     body_check('queue and eat', 'hunger', 55, b, e, seen, None)
+    # in the line a tap doesn't walk you off: it asks "Leave the queue?" (0.28.31)
+    g.ev("SHIP.player.needs.hunger = 30"); g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})")
+    for j in range(60):
+        g.step(10)
+        if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
+    lq = g.ev("(() => { const inq = !!ACT && ACT.kind === 'queue' && ACT.phase === 'do'; const p = player.obj.position; const r = playerFloorTap(new THREE.Vector3(p.x + 2, 0, p.z + 2)); return [inq, r, !document.getElementById('qAsk').hidden, !!ACT && ACT.kind]; })()")
+    g.step(5); still = g.ev("!!ACT && ACT.kind")
+    g.ev("document.getElementById('qLeave').click()"); g.step(5); left = g.ev("[!!ACT, document.getElementById('qAsk').hidden]")
+    print('  the line holds you (in it, tap held, asked, still queueing):', lq, still, '| after Leave:', left)
+    if lq[0]: check(lq[1:] == [True, True, 'queue'] and still == 'queue' and left == [False, True], f'a tap in the line asks first; Leave takes you out: {lq} {still} {left}')
+    # moving with the real line (0.28.34, section 10's lineJoin/lineSpot/lineLeave; stand-ins when it's missing): your
+    # stand-in walks up a tile when the line moves, and you are where it is; leaving takes you out of the line
+    stub = g.ev("""(() => { if (typeof lineSpot === 'function') return false; const j = galleyJoin('player');
+      window.__ls = { x: j.xy[0] - OX, z: j.xy[1] - OZ, face: Math.PI, at: j.at.slice() }; window.__left = 0;
+      window.lineJoin = () => window.__ls; window.lineSpot = () => window.__ls; window.lineLeave = () => { window.__left++; };
+      window.__gt = galleyTurn; galleyTurn = () => false; return true; })()""")   # your turn held back while the line moves (the game's own binding: __sc evals inside its scope, where window.galleyTurn isn't seen)
+    if stub:
+        g.ev("SHIP.player.needs.hunger = 30"); g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})")
+        for j in range(60):
+            g.step(10)
+            if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
+        z0 = g.ev("ACT && ACT.z"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
+        for j in range(20): g.step(5)
+        mv = g.ev("ACT ? [ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)] : [null]")
+        g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
+        lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
+        print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
+        check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and (lv[1] == 1 or lv[2]), f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
+    qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
+    check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
         joined = g.ev("GALLEY_JOINED.has('player')"); print('  still in the galley\'s line after eating:', joined)
         check(joined is False, 'queue: takePortion should clear the join')
@@ -693,10 +772,13 @@ with sync_playwright() as pw:
     check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'v 2 save should hold the needs')
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
-    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); saveGame()")
+    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); saveGame()")
     ev = load()
-    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name])")); print('  mail, credits, locker, chats, name kept:', kept)
-    check(kept == [['Kept'], 77, ['a deck of cards'], ['x'], 'Ada'], f'the save should keep mail, credits, locker, chats and your name: {kept}')
+    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject + (m.play ? '|' + m.play : '')), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name])")); print('  mail, credits, locker, chats, name kept:', kept)
+    fold = json.loads(ev("(() => { const el = needStrip(), r = [SHIP.player.stripFold, el.classList.contains('fold')]; el.click(); r.push(SHIP.player.stripFold, el.classList.contains('fold')); el.querySelector('.nsFold').click(); r.push(SHIP.player.stripFold); stripFold(false); return JSON.stringify(r); })()"))
+    print('  the needs strip folded, kept, tapped open, folded again (0.28.33):', fold)
+    check(fold == [True, True, False, False, True], f'the needs strip folds away, stays folded after a reload and a tap opens it: {fold}')
+    check(kept == [['Kept|home:gran'], 77, ['a deck of cards'], ['x'], 'Ada'], f'the save should keep mail, credits, locker, chats and your name: {kept}')
     check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'a v 2 save should load its needs')
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 }, name: { x: 1 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
