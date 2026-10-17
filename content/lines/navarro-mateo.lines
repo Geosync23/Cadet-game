@@ -83,3 +83,11 @@
 - Saw your job closed on the board. Neat notes, too. That's how it's done.
 ? cue:event.ionStorm.onset
 - Storm's on. Strap down anything loose. Or it'll end up in my box.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you a moment later? Somewhere quiet. Nothing's lost. I'd just like to talk.
+
+== about
+? aff:salo-saad:friend
+- Salo and I both have twins on the Halcyon. We compare letters. His twin's are funnier.   #funny

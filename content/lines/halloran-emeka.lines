@@ -92,3 +92,11 @@
 == cue
 ? cue:repair.you@dept
 - Saw your job on the board. Done, signed, closed. Lovely. Have a biscuit.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Could I borrow you a minute later? Not for a job. For me, for once.
+
+== about
+? aff:yoon-elif:friend
+- Yoon's breakfast jokes are nearly as bad as mine. Nearly. I'm very proud of her.   #funny

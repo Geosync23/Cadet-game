@@ -93,3 +93,11 @@
 == cue
 ? cue:repair.you@dept
 - Saw your job. Tidy work, and you swept up after. That's a friend for life, that is.   #warm
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Got a minute later, {nick}? Not about the floor. Something else.
+
+== about
+? aff:eklund-leila:friend
+- Eklund and I might share a gran. She says don't check. I'd love to check.   #funny

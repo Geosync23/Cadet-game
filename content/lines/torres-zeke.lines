@@ -217,3 +217,30 @@
 ? flag:walk.job.turnin
 - Turned in. Your first one in the Record. Right, onward.
 - Lunch, then you lead the next one. I'll just follow.   #warm
+
+// ---- Writer 2: job 2 (Day 1 afternoon: you lead, he follows) and job 3 (Tuesday: Calder's solo job).
+// Gated by flag:walk.job2.<step> and flag:walk.job3.<step>, which the onboarding hook sets. 60 characters or fewer.
+// Job 2: one line a step, only "if you're stuck" nudges, then a proud turn-in.
+== week1
+? flag:walk.job2.take
+- Your pick. Your lead. I'm just your shadow.
+- Your lead. I'm just the shadow. A chatty shadow.   #funny
+? flag:walk.job2.fetch
+- Stuck? Part number's on the card. The shelf's yours to find.
+? flag:walk.job2.make
+- Not saying a word. Well. Mind your fingers.   #funny
+? flag:walk.job2.panel
+- Look before you touch. You know this bit.
+? flag:walk.job2.done
+- Quiet as anything. Hear that? That's you.   #warm
+? flag:walk.job2.turnin
+- Two in one day. Start to end, all yours.   #warm
+- I barely spoke. Calder will never believe it.   #funny
+// Job 3: his one check-in at the tea break, and the turn-in.
+? flag:walk.job3.tea
+- How's the solo going? Don't tell me. No, tell me.   #funny
+- Calder gave you a real one, then. Good. You're ready.
+- Stuck on anything? Ask. Asking isn't failing.
+? flag:walk.job3.turnin
+- Solo, and turned in. Look at you. Right, onward.   #warm
+- Saw it on the board. I didn't help once. Proud of us both.   #funny

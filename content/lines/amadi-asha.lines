@@ -80,3 +80,11 @@
 == cue
 ? cue:repair.you@dept
 - Was that your fix on Deck 6? The coils look happier. I'm telling everyone.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Meet me at a window later? Any window. I'll find you.
+
+== about
+? aff:salo-saad:friend
+- Salo reads his twin's letters out at tea. I save him the window seat for it.

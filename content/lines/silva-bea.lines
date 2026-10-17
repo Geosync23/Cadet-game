@@ -80,3 +80,11 @@
 - Was that your filter? It sounds lovely now. Like wind dropping.
 ? cue:event.ionStorm.onset
 - Storm's here. The ship sounds like thunder. I don't mind it. Is that strange?
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Sit with me a bit, later? Somewhere with a window. I've been thinking.
+
+== about
+? aff:soto-marta:friend
+- Marta and I compare day counts at breakfast. She pretends it's a contest. It isn't.

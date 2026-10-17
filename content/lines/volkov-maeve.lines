@@ -79,3 +79,11 @@
 == cue
 ? cue:repair.you@dept
 - Was that your job? How long? Don't tell me. It was faster than mine. Was it?   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Fancy a cuppa later? Just us. No races. Promise.
+
+== about
+? aff:kovac-zainab:friend
+- Kovac says our scrubber races don't matter. She times every one. I love that.   #warm

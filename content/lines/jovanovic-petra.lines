@@ -81,3 +81,11 @@
 - Storm's in. The coils will be twitchy. I'll watch them. I'm good at watching.
 ? cue:repair.you@dept
 - I looked at your repair. Sorry. I check everything. It's right. I'm sure. Yes.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Um. Have you a minute later? It's nothing. Probably. I'd like to tell someone.
+
+== about
+? aff:reyes-alejandro:friend
+- Reyes and I swap coil worries at handover. It halves them, somehow. I think.   #warm

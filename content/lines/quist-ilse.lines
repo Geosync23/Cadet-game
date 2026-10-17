@@ -79,3 +79,11 @@
 == cue
 ? cue:repair.you@dept
 - Was that your pump job? The garden's wetter than it was. In a good way.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Come to the garden later? I'd like to say something. The basil can listen too.
+
+== about
+? aff:moreau-signe:friend
+- Moreau talked me into the gym. She runs ahead, then waits. She always waits.   #warm

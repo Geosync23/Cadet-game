@@ -80,3 +80,11 @@
 == cue
 ? cue:repair.you@dept
 - I checked your seal. It's good. I'd have said if it wasn't.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Find me after shift. I need someone who'll be straight with me. That's you.
+
+== about
+? aff:achterberg-lars:friend
+- Achterberg lends me mysteries with the ending circled. I never look. Mostly.   #funny

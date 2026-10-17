@@ -81,3 +81,11 @@
 - Storm's in. The coils hate it. I'll sit with them. You stay where it's warm.
 ? cue:repair.you@dept
 - You fixed that? Good! I'll put it in the notes for Torres. He'll say he knew.   #funny
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Have you got a minute? A real one? I'll try not to talk too much. Anyway.
+
+== about
+? aff:torres-zeke:friend
+- Torres leaves me a note every shift. He's wrong about coil three. He's a good friend.   #warm

@@ -80,3 +80,11 @@
 == cue
 ? cue:repair.you@dept
 - That washer. You did it? Hm. Good. It spins. That's all I'll say.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Hm. You. Later, the quiet corner. Bring nothing. Just come.
+
+== about
+? aff:pell:friend
+- Pell found my tin. Of course he did. I let him have one. One. He's a good lad.   #warm
