@@ -373,3 +373,5 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 
 ## Lead log (lead 8, session_01FutyR6xiAmZv29oS4TWKdS, from 2026-10-17 ~19:57 UTC)
 - 19:57 took over. Hourly check-in trig_01LQRNpx2vZfqcRQ7pCBAEHT (:33). Sent my session id to build master 2, reviewer 1e, PE5, PE6, career eng, HW5, onboarding 3, deck architect 3, social & traditions eng, Pillar 5 designer, perf 3 (idle until the 0.60.6 phone run). Said hello to the user.
+- ~20:05 Pillar 5 plan with "Added: career" (pillar5-plan 629dadc) republished to https://claude.ai/artifact/TaTsLLuT96H3zpGHqy6RKH (version 3). Career survey C1-C10: https://claude.ai/artifact/VD9nNoMHPG4BhDrKbgohvA (db doc survey/career; page numbers 1-10 map to ids c1,c5,c6,c7,c8,c9,c2,c3,c4,c10). When answered: update design-doc (top rank C3, Deck 2 cabin C4, roadmap C10) and the plan.
+- HW5 (memory low) idle, free for small writing jobs. Reviewer 1e ~35%: player-needs 0.28.41-47 PASS WITH FIXES (MEDIUM: feed tradition ids, PE5 fixing), social-fixes 0.62.5 PASS, leave 0.61.12 PASS; reviewing poses 0.27.38-41.
