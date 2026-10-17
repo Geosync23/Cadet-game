@@ -1,0 +1,35 @@
+@crew kovac-zainab
+// Zainab Kovac: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
+// Never admits the lift before beat 2 ("The ladder club"); the ladder is "exercise".
+
+== greet
+? tier=stranger
+- Oh. Hi. Scrubber jobs are on the left of the board. If you were wondering.
+? tier>=acquaintance
+- Um, hello, {nick}. Your spanners are back in order. I didn't. Well. I did.   #funny
+? tier>=friend
+- Oh, good. It's you. I saved you a seat. Sorry. Is that odd?   #warm
+
+== feel
+? mood:high
+- Nine and a half minutes. The scrubber on Deck 5. I timed it. Twice.
+? mood:low
+- Sorry. Bit quiet today. I've sorted the spanner wall. Twice.
+
+== near
+? act:work
+- Hold the seal there. No, there. Yes. Sorry. That's perfect.
+
+== life
+? tier>=acquaintance
+- I don't take the lift much. The ladder's good exercise. Very good exercise.   #funny
+? tier>=colleague
+- Torres's scarves are very long. He's very keen. I don't say anything.   #funny
+
+== joy
+? tier>=colleague
+- A scrubber put back right hums. You feel it through the panel. That's my favourite bit.
+
+== week1
+? week1:true
+- Um. If you get stuck, I'm on the board most days. Just. You know. Ask.

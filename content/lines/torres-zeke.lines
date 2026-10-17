@@ -1,27 +1,84 @@
 @crew torres-zeke
-// SAMPLE (the dialogue engineer, 0.43.0): one person baked end to end so the kit can be seen working.
-// The head writer and the Works writer replace these with the real lines.
+// Zeke Torres: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
+// Before his arc opens (after week1.done): no father, no Engine Specialist list. The scarf joke only after
+// beat 1 ("The scarf", mem:moment.torres.scarf).
 
 == greet
 ? tier=stranger
-- {hi}. You'll be the new hand.
-- {hi}. Zeke Torres, engines. You must be the new cadet.
+- {hi}. You'll be the new hand. Zeke Torres, engines. Ask me anything.
+- {hi}. Lost? The lift's in the middle of the ship. Everything starts there.
 ? tier>=acquaintance time:morning
 - {hi}, {nick}. Coil three's sulking. Don't take it personally.   #funny
-- Morning! Board's light today. Don't tell it I said so.
 ? tier>=acquaintance
-- {hi}, {nick}. Come to listen to the coils hum?
-- There you are. Hold still a second, I'm measuring you for a scarf.   #funny
+- {hi}, {nick}. What did you fix today? Go on, tell me properly.
 ? tier>=friend
-- {nick}! I was hoping you'd come by. The coils behave better when you're about.   #warm
+- {nick}! Good. I saved you the last biscuit. Mostly saved it.   #warm
+? mem:moment.torres.scarf
+- Hold still. Arms out. I need to know how long you are, for the scarf.   #funny
 
 == feel
-? mood:low
-- Long one. Coil three sulked all shift.
 ? mood:high
-- Good day below. Everything humming in tune.
+- All three coils humming in tune today. You can hear it from the overlook.
+? mood:low
+- Quiet one. Coil three's tired. Or I am. One of us is.
+
+== near
+? act:work
+- Hear that tick? That's coil two thinking. Give her a minute.
+? act:dinner
+- {dish} tonight. I'd queue twice if Brennan let me. She won't.   #funny
 
 == life
 ? tier>=acquaintance
-- I know the words to every song in the music room's record cabinet. Every one.
-- Breakfast? Never. I'd rather have ten more minutes with the coils.
+- I know the words to every song in the record cabinet. So do four other people. Wrongly.   #funny
+? tier>=colleague
+- Reyes leaves me notes about coil three. Says she's shy. She isn't shy. She sulks.
+
+== joy
+? tier>=acquaintance
+- Kovac's teaching me to knit. Properly, she says. I'm on my third go at properly.
+
+// ---- week 1: Torres is your trainer (his mentor role; the confident side of him) ----
+== week1
+? week1:true mem:intro.shadowShift
+- You did the turn-in yourself. Good. That's the bit everyone forgets.
+? week1:true
+- How's the first week? Honestly, mind. I'll know if you're being polite.
+
+// ---- Day 0: his walking lines, replacing section 21's INTRO_LINES and INTRO_CALL ----
+// Conditions left blank on purpose: the head writer and the onboarding engineer are settling the hook. Each block is
+// one step, in order; the step's name is in the comment above it. Said as bubbles, so 60 characters or fewer.
+?
+// step: hello
+- You must be the new hand. Zeke Torres. Works, engines.
+- Welcome to the Wren. She's glad you're here. So am I.
+- Bag all right? Right, onward. Stay close.
+// step: haulway
+- Cargo hold on the left. Cart bay on the right.
+- Mind the carts. They don't mind you.   #funny
+- Hear that hum? That's the coils, one deck down.
+// step: works
+- That's us. Works. The board, the tea corner, the office.
+- Glass office is the Chief's. Calder. Exact, but fair.
+- Tomorrow, ten to eight. Right here. Not eight. Ten to.
+// step: lift
+- Four, please. Go on, the panel's all yours.
+// step: wing
+- Washrooms. Hot water till ten, then it's character-building.   #funny
+- Laundry there. Common room at the end, by the windows.
+- Nearly there. First walks are always the longest.
+// step: toMess
+- Dinner. Mess is on Deck 3. You know the lift now.
+- Brennan's cooking. Trust me, you want to be early.
+// step: servery
+- Tray first, then the servery. Take what smells best.
+- Thank Chef on the way past. It matters to her.
+- I'll find us a table. Window side, if it's free.
+// step: free
+- That's it. You're free. The bunk's yours any time from eight.
+- I'm on Deck 4 if you need me. 14, the one with the music.
+- Good first night. Properly good. Sleep well.   #warm
+// step: call (the "this way" calls when you wander)
+- This way! Over here.
+- Over here, {me}. She's bigger than she looks.
+- I'll wait. No rush. Well, a bit of rush.   #funny

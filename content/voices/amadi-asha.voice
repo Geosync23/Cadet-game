@@ -1,13 +1,20 @@
 @voice amadi-asha
-// Works writer, wave 1b draft. Engine technician, junior, day. Roster: dry humour, optimistic; window seat, late
-// diner. "Tends the coils on the long engine watch." Sings in the shower (the whole washroom knows); climbs the
-// garden's big tree when nobody is looking.
-// With juniors: sunny and dry at once; points out the best window on every deck. Mood tells: low, no singing in the
-// washroom; high, singing at the window seat too.
+// Works writer. Asha Amadi (she/her): engine technician, junior, day shift, Bunk 5. Dry humour, optimistic. Window
+// seat, late diner. "Tends the coils on the long engine watch." Sings in the shower: the whole washroom knows (the
+// junior washrooms' dawn chorus, with Zamora, Ishikawa, Chen and Madsen). Climbs the garden's big tree when nobody is
+// looking.
+//
+// HOW SHE TALKS: sunny and dry at once; looks on the bright side and makes a dry joke about it. Always near a window.
+// WITH JUNIORS: points out the best window on every deck; takes you to see the coils from the overlook.
+// WHAT SHE NOTICES: the view, the light, which windows have the best stars.
+// MOOD TELLS: low = no singing in the washroom (people ask); high = singing at the window seat too.
+// NEVER: sings on purpose where people can hear (until her thread opens); admits the tree.
+// RUNNING: the dawn chorus, in which she is the lead; the big tree in the garden, which she has never climbed (she
+// has); the best window, which changes every week.
 tpl: playful
 talk: Sunny and dry together; looks on the bright side and makes a dry joke about it; always near a window.
-cares: the best window on every deck | singing (everyone knows) | the garden's big tree | the coils, on a good day
-jokes: the whole washroom knows Asha's shower songs, in order | the big tree in the garden, which Asha has never climbed (Asha has)
+cares: the best window on every deck | singing (everyone knows) | the garden's big tree | the coils on a good day
+jokes: the whole washroom knows her songs, in order | she has never climbed the big tree (she has) | the best window on the ship moves every week
 hi: Hey | Oh, hello | Hi, you
 bye: See you round | Bye! | Off you go
 yes: Why not | Sure | Yes, go on
@@ -18,9 +25,9 @@ nick: - | - | {me} | {me} | {me}
 needs: cheer
 openness: open
 loves: music | garden
-likes: window | sweet
-invites: observatory | garden
+likes: star | sweet
+invites: observatory | jam
 joy: singing, which everyone hears and nobody minds
 thread: talent
 keepsake: a leaf from the top of the big tree
-avoid: being heard singing on purpose (until the thread opens)
+avoid: being heard singing on purpose (until her thread opens)

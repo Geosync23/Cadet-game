@@ -1,13 +1,20 @@
 @voice silva-bea
-// Works writer, wave 1b draft. Works technician, junior, day. Roster: dreamy, reliable; early riser. "Good with
-// filters, bad with mornings": up early, not awake until the second tea. Grew up on Coriel, misses the rain. Married
-// just before the tour and counts the days (the other half is off the ship; quiet background, never romance with you).
-// With juniors: gentle, a bit vague, very good at filters. Mood tells: low, the day count comes up twice; high, Bea
-// talks about rain.
+// Works writer. Bea Silva (she/her): Works technician, junior, day shift, Bunk 7. Dreamy, reliable. "Good with
+// filters, bad with mornings": an early riser who isn't awake until her second tea. Grew up on Coriel; misses the
+// rain (one of the people who do). Married just before the tour and counts the days (to someone back home; she
+// compares counts with Soto, Jovanovic and Dlamini; never more than "I miss them" and the count).
+//
+// HOW SHE TALKS: soft and drifting; trails off mid-thought and comes back. Describes the ship's sounds as weather
+// ("the vents are drizzly today").
+// WITH JUNIORS: gentle, a bit vague, and very, very good at filters.
+// WHAT SHE NOTICES: sounds, light, the garden's sprinklers ("nearly rain").
+// MOOD TELLS: low = the day count comes up twice; high = she talks about rain.
+// NEVER: rushes; complains about mornings before the second tea (she doesn't talk at all).
+// RUNNING: the day count, always to hand; the second tea; filters done properly.
 tpl: dreamy
-talk: Soft and drifting; trails off mid-thought and comes back; describes the ship's sounds as weather.
-cares: filters, done properly | the rain on Coriel | the day count until the tour ends | the second tea of the morning
-jokes: Bea knows the day count to the end of the tour, always, without looking | Bea is awake by the second tea, not before
+talk: Soft and drifting; trails off and comes back; hears the ship as weather; not awake before the second tea.
+cares: filters, done properly | the rain on Coriel | the day count | the second tea of the morning
+jokes: she knows the day count without looking | she's awake by the second tea, not before | the vents have weather
 hi: Oh, hello | Mm, hi | Hello there
 bye: Bye, then | See you around | Off I drift
 yes: Mm, yes | All right | I can do that
@@ -17,10 +24,10 @@ sigh: Mm | Oh, well
 nick: - | - | {me} | {me} | {me}
 needs: listen
 openness: normal
-loves: tea | rain
+loves: tea | plant
 likes: garden | music
 invites: observatory | garden
-joy: the sound of the garden's sprinklers, "nearly rain"
+joy: the garden's sprinklers, which are nearly rain
 thread: homesick
-keepsake: a bottle of Coriel rainwater, kept for a bad day
-avoid: the day count, when it's a bad day (until friend tier)
+keepsake: a little bottle of Coriel rainwater, kept for a bad day
+avoid: the day count on a bad day (until friend tier)
