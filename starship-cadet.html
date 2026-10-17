@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.41
+   STARSHIP CADET: CSV Wren                           build 0.36.42
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.41';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.42';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14541,7 +14541,7 @@ function visitIn() {                                     // you tapped "knocks a
     chatOpen(p, false, mo ? null : { text: l ? l.text : VISIT_LINES[Math.floor(schedU(p.seed, Math.floor(t / 60), 661) * VISIT_LINES.length)], kind: 'visit', say: true });
     if (CHAT) CHAT.visit = true; relAdd(p.id, 'visit', REL_PTS.appt); memAdd(p.id, 'visit'); repAdd(null, 0, { kindness: 1 }); };
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === p);
-  if (a && typeof crewComeTo === 'function') { try { crewComeTo(p, id, open); return; } catch (e) { } }
+  if (a && typeof crewComeTo === 'function') { try { crewComeTo(p, id, open, { until: (SHIP.time.day - 1) * 1440 + VISIT_END }); return; } catch (e) { } }   // they walk in; gone by 22:00
   open();
 }
 function bunkNote() {                                    // section 15's bunk tap: the oldest unread note, marked read, or null
