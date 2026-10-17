@@ -85,3 +85,40 @@
 - Happy birthday. A tiny portrait. Of you. Don't look at the nose.   #warm
 == hint
 - Got a minute? Sit. Hold still. Not for a painting. Just to talk.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Hold still. No, you moved.   #funny
+- Course to nowhere, plotted. Lovely.
+- Ah, well. Where was I? Oh, yes.
+- Rain on a window. I miss that.
+? act:work
+- Steady. Drifting. Steady. Fine.
+
+== rumour
+- Heard something. Or dreamt it. Hm.
+- Someone said a thing. Ages ago. Today.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Oh, lovely. Where was I? Thanking you. Thank you.   #funny
+? told:fav.lamp
+- My lamp works. I can paint at night now. Tiny portraits, nice light. Thank you.   #warm
+? told:came.observatory-night
+- You came up to the observatory. I plotted a course while you looked. To that one.
+? told:gift.star
+- Your present's beside my charts. I keep looking at it. Ah, well. Thank you.   #warm
+? told:bday
+- My birthday. You remembered. I'll paint you something. Hold still. Later.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The night shift likes you. I'd paint you, if you held still. Ah, well.   #funny
+? you:kind
+- They say you're kind. I've been meaning to paint that. It's a hard thing to paint.

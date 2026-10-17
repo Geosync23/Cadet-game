@@ -85,3 +85,42 @@
 - Happy birthday. I grew you a little basil. It's in the pot by the till.   #warm
 == hint
 - Have you a minute? Sit by the window with me.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Ledger balances. To the credit.
+- Oh, look. Stars out the window.
+- Did those boots fit? Someone's boots.
+- One credit short. I'll find it.
+? act:work
+- Store's open till close. Take your time.
+
+== rumour
+- Oh dear. I probably shouldn't. Well.
+- It was in the ledger. Well, nearly.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- Thank you for fetching that. I've written it in the ledger. Under kind things.   #warm
+? told:fav.job
+- You did my job. Oh dear, I'll owe you. I keep a careful note. You're on it.   #warm
+? told:fixed.lights
+- The lights are steady now. I can see out of the window properly. Thank you.
+? told:came.observatory-night
+- You came to the observatory! Did you see the cluster? Low and to the left.
+? told:gift.star
+- I've put your present by the window. It catches the light. Thank you.   #warm
+? told:bday
+- You remembered my birthday. Oh dear. I'm going to be soppy. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The store speaks well of you. It's in the ledger. Well, not the ledger. In me.   #warm
+? you:reliable
+- They say you're reliable. I could have told them. The ledger agrees.

@@ -87,3 +87,44 @@
 - Happy birthday. I've written you a card. On paper. Properly.   #warm
 == hint
 - Have you a minute? I'd like to say something. Properly.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Forty-one onions to thirty-eight.   #funny
+- I hope this finds you well.   #funny
+- Ah, well. Tomorrow, then.
+- The post bag's due. I hope.
+? act:work
+- Another onion. Another point.
+
+== rumour
+- I should not say. I will, though.
+- A small piece of news, if I may.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- I hope this finds you well. It did. Thank you for fetching it.   #funny
+? told:fav.job
+- You did my work. I'm grateful. I'll write it down. In a letter. To you.   #warm
+? told:fixed.oven
+- The oven is mended. Was it you? Then thank you. Formally.
+? told:came.running
+- You came running. I won by a step. Don't tell Strand. He'll ask for a rematch.   #funny
+? told:gift.card
+- Your card is on my shelf, beside the letters from Valo. Good company.   #warm
+? told:bday
+- You marked my birthday. It went into my letter home. You're in it now.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The galley speaks well of you. I wrote it in my letter. Valo will know in six weeks.   #funny
+? rep:theirs
+- You are counted as galley now. That is not a small thing. I hope you know.   #warm
+? you:reliable
+- They say you are reliable. I had already decided so. I'm pleased to be agreed with.

@@ -85,3 +85,44 @@
 - Happy birthday. I've put something by. No charge. Don't tell anyone.   #warm
 == hint
 - Got a minute? Not for shopping. Just a minute.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- You'll want the thermal socks. Trust me.
+- Store's open. Gerald says hello.   #funny
+- Ah, well. Back on the shelf.
+- New stock. Old stock, newly dusted.   #funny
+? act:work
+- Next. I know what you're after.
+
+== rumour
+- I never say what anyone bought. Ever.
+- Heard it at the counter. Not from me.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it before I asked. That's my trick. I'm impressed.   #funny
+? told:fav.lamp
+- You fixed my lamp. I can see the till. And Gerald. Gerald's pleased.   #funny
+? told:fixed.lights
+- Lights on Deck 3 are steady. Was that you? Thought so. You've got the look.
+? told:came.running
+- Saw you at running club. You'll want better socks. I've got some.   #funny
+? told:gift.star
+- That's going in my star journal. Page of its own. Thank you.   #warm
+? told:bday
+- You remembered my birthday. I'll pretend I didn't notice. I noticed.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Store's heard good things. People buy you biscuits. I notice. I never say who.   #funny
+? you:kind
+- You're known for being kind. I can tell by what you buy. Mostly for other people.   #warm
+? you:chatty
+- You chat to everyone at my counter. The queue's longer. I don't mind.

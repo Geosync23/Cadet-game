@@ -85,3 +85,42 @@
 - Happy birthday! I made you a playlist. Track one's the best. Obviously.   #warm
 == hint
 - Got a minute? Turn the music down. I'll talk.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- This is a track-three moment.   #funny
+- Week of the tour? Playlist forty.
+- Good news. Nothing died.   #funny
+- Teague's playlist is wrong again.   #funny
+? act:work
+- Water, light, music. In that order.
+
+== rumour
+- Headline: news. Details: hold on.
+- Good news. Delivered flat. As usual.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Good news: thanks. That's the whole news.   #funny
+? told:fav.job
+- You did my job. Playlist forty-one is named after you now.   #funny
+? told:fixed.nutrient
+- Nutrient feed's running. Plants are thrilled. Very quietly.   #funny
+? told:came.jam
+- You came to the jam! Track five was for you. You didn't notice. That's fine.   #funny
+? told:gift.music
+- Your music's on this week's playlist. Top spot. Teague's furious.   #funny
+? told:bday
+- You remembered my birthday. Good news. Delivered flat. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Good news: the garden rates you. Delivered flat. But it's good.   #funny
+? you:chatty
+- You chat to everyone. You'd be a whole playlist. A long one.   #funny

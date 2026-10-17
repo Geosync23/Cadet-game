@@ -85,3 +85,46 @@
 - Happy birthday. I made you something small. It's perfectly square.   #warm
 == hint
 - Got a minute? A quiet one.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Forty grams. Not forty-two.
+- Someone chopped these big. Ivo.   #funny
+- Hm. Soup's two minutes off.
+- Same pace as yesterday. To the second.
+? act:work
+- Lids on. Labels out.
+
+== rumour
+- I don't repeat things. This once.
+- Heard it at the pass. Usually true.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. On time. Correct weight. Thank you.   #warm
+? told:fav.job
+- You did my job. Properly. I checked. It was proper.   #warm
+? told:fixed.range
+- The range holds its heat now. Steady. Was that you? Good.
+? told:fixed.extractor
+- Extractor's pulling clean. Steam goes where it should. Thank you.
+? told:came.running
+- You ran the promenade with us. Your pace was even. That's rare.   #warm
+? told:gift.book
+- I read your book. In order. Twice. It was good. That's all.   #warm
+? told:bday
+- You noticed my birthday. Hm. Thank you. That was nice.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Galley thinks you're tidy. I agree. That's two.
+? rep:theirs
+- You're on the galley list now. The good list. Short list.   #warm
+? you:reliable
+- You're known for turning up on time. So am I. Good company.

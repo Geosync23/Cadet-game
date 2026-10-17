@@ -228,3 +228,107 @@
 - Grab shelf's just been restocked. Act natural. You didn't hear it from me.
 - Knocked, nobody home. Tea corner tomorrow? I'll bring the nice biscuits.
 - Waited ages. Fell asleep in the doorway. Tomas stepped over me. Sorry.   #funny
+
+// Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Tue, Wed (the game's roster); rest-day
+// lines use act:off. His mum only from tier friend.
+
+== greet
+? tier>=acquaintance place:mess
+- {hi}. Grab shelf's looking healthy today. I've checked. Twice.   #funny
+? tier>=colleague act:off
+- Day off! I'm sleeping in. It's already eleven. I'm sleeping in more.   #funny
+? tier>=friend time:morning
+- Morning, {nick}. I'm up. Before tea. Write it down somewhere.   #funny
+? tier>=acquaintance season:harvest
+- Harvest! More food. I support this season. Fully.   #funny
+? tier>=acquaintance season:lanterns
+- Lanterns are up. I wired half of them. Don't look at the wonky one.   #funny
+? tier>=acquaintance season:sowing
+- Sowing. Garden's all seedlings. Don't tread on mine. It's the leaning one.
+
+== bye
+? tier>=acquaintance time:evening
+- Off to dinner. Second dinner. First dinner was a test run.   #funny
+? tier>=close
+- Laters, {nick}. You're a good one. Don't tell the grab shelf.   #warm
+
+== feel
+? mood:low tier>=colleague
+- I'm fine. I'm fine. Bit tired. Bit hungry. Same as ever, really.
+? mood:high tier>=acquaintance
+- Calder said "Hm" at my work. A good "Hm". You can tell by the eyebrows.   #funny
+
+== near
+? place:teacorner
+- Tea corner. Best room on the ship. It's not a room. Still the best.   #funny
+? act:dinner
+- {dish}! Second helping's mine. Third's up for discussion.   #funny
+? place:musicroom
+- Wound up a music box in here once. Vance shushed it. In the music room.   #funny
+? deck:6
+- Down below. Hear the coils? Torres says three's sulking. I say three's thinking.
+? act:wash
+- Is the hot water still on? Don't tell me. I'll find out the hard way.   #funny
+
+== life
+? tier>=acquaintance
+- Spare screws from every ship I've worked on. Seven ships. One tin. Very heavy tin.
+? tier>=colleague
+- Calder knows I nap in the parts store. She's never said. That's how I know she knows.   #funny
+? tier>=friend
+- Mum mends coats too. Proper stitching. Mine always looks a bit scared.   #funny
+? tier>=friend
+- Mum sends "eat, sleep, call" every week. I eat. I'm working on the other two.   #funny
+
+== joy
+? tier>=colleague
+- Best feeling? Something was broken, now it isn't, and nobody noticed. Perfect.
+
+== invite
+? tier>=acquaintance time:afternoon
+- Tea break? I've found the good biscuits. Don't ask where. Come on.
+? trad:film tier>=acquaintance
+- Film night! Bring snacks. I'll bring more snacks. We'll share. Some.   #funny
+
+== about
+? aff:brennan:friend
+- Brennan's the best. She feeds me. That's not why. Well. It's a bit why.   #funny
+? aff:calder:friend
+- Calder? Toughest chief on the Wren. Fairest, too. I'd fix anything she asked.   #warm
+
+== smalltalk
+- Is that toast? Someone's got toast.   #funny
+- That panel's going to stick. I can feel it.
+- Nap at lunch. That's the plan.   #funny
+- Hear that? Bearing. I'll put it on the board.
+? act:work
+- Hold this. Ta. No, the other end.
+
+== rumour
+- Right, so. You didn't hear this from me.
+- Heard it at the grab shelf. Very reliable source.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's here. Grab shelf's stocked. I checked first. Priorities.   #funny
+? cue:event.ionStorm.resolution
+- Storm's done. Everything held. Told you she's a good ship.   #warm
+? cue:lateMeal
+- Late plate? Welcome to my world. The grab shelf's a way of life.   #funny
+? cue:tradition.quiz.you
+- You were brilliant at quiz! The engine round. I nearly cried.   #warm
+? cue:repair.you@dept
+- Saw your job on the board. Clean. Calder'll say "Fine." That's a medal.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Calder put your name on the good jobs list. Don't tell her I peeked. I peeked.   #funny
+? rep:theirs
+- You're Works now, {nick}. Properly. The tea corner's got your mug on the good hook.   #warm
+? you:reliable
+- Word in the bay is you finish what you start. Rarest thing aboard. After biscuits.   #funny
+? you:chatty
+- Everyone knows you. You chat more than me. I'm not jealous. I'm a bit impressed.   #funny

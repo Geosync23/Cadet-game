@@ -152,3 +152,44 @@
 - Brennan trusts me with her galley two days a week. I try not to let it go to my head.
 ? tier>=colleague
 - Varga thinks we're racing at onions. We are. He's winning. Don't tell him I know.   #funny
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Two hundred and six.   #funny
+- Runs itself, this galley.   #funny
+- Typical.
+- Rain on the vents. No. Just vents.
+? act:work
+- Onions. Thirty-nine. Close.
+
+== rumour
+- Fact. Not gossip. Fact.
+- Heard it. Probably true. Typical.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Quick. Thanks. That's all. Thanks.   #warm
+? told:fav.job
+- You did my job. Saved me an hour. I spent it sitting down. Thanks.   #funny
+? told:fixed.chiller
+- Chiller's fixed. Brennan smiled at the cold store. First time in weeks.   #funny
+? told:came.harvest
+- You came to the harvest. Carried a basket. Didn't drop it. Good.   #funny
+? told:gift.garden
+- From the garden. Smells like rain. Nearly. Thanks, {nick}.   #warm
+? told:bday
+- My birthday. You noticed. One less day. In a good way.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Galley rates you. Brennan, Walsh, me. Three votes. That's all of them that count.   #funny
+? rep:theirs
+- You're galley. Officially. Don't let it go to your head. Let it go to your stomach.   #funny
+? you:reliable
+- Reliable. That's the word about you. Good word. Rare word.

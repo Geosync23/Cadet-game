@@ -85,3 +85,44 @@
 - Happy birthday! I pressed you a flower. It's from the week you arrived.   #warm
 == hint
 - Right, listen. Not a story this time. Well. A different kind.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Right, listen. Six trays. Watch.
+- Bowls. It should be bowls.   #funny
+- Seven trays one day. One day.
+- Who's singing? Oh. Me.   #funny
+? act:work
+- Mind your backs! Trays coming through!
+
+== rumour
+- Right, listen, you'll love this one.
+- Heard it from start to finish. Twice.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- Right, listen. You fetched it, and I want you to know, from the start, cheers.   #funny
+? told:fav.job
+- You did my job! I'll tell everyone. I've told three people. Four.   #funny
+? told:fixed.galleyplant
+- Galley plant's purring again. Was that you? Course it was. Legend.
+? told:came.harvest
+- You came to the harvest! Did you see me carry six baskets? Five. It was five.   #funny
+? told:gift.garden
+- That from the garden? For me? I've told the whole galley. Twice.   #warm
+? told:bday
+- You remembered my birthday, {nick}! Right, listen, I'm telling everyone.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Right, listen, the whole galley's talking about you. Good things. I started it.   #funny
+? rep:theirs
+- You're one of us now, {nick}. Galley. You get the warm tray. Don't tell.   #warm
+? you:chatty
+- They say you talk to everyone. Finally, competition. Right, listen.   #funny

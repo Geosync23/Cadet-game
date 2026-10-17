@@ -86,3 +86,42 @@
 - Happy birthday. Here, a comic. It's you, winning at something. Don't ask what.   #warm
 == hint
 - Got a minute? Sit down. I'll stop drawing.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Mornings. Honestly.
+- New comic's up. You're in it.   #funny
+- Ah, well. Fine. Up, then.
+- That's decided. Not moving.
+? act:work
+- Gently. Roots don't like a fuss.
+
+== rumour
+- Heard something. Thought about it.
+- It's on the comics wall by tonight.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Early, too. Mornings. Honestly. Thanks.   #warm
+? told:fav.job
+- You did my job. I'm drawing you in this week's comic. As a hero. Small one.   #funny
+? told:fixed.irrigation
+- Water's back in the beds. The roots stopped sulking. Thanks.
+? told:came.harvest
+- You came to the harvest. Good. You're in the comic now. Holding a marrow.   #funny
+? told:gift.card
+- Your card's on the comics wall. Pride of place. Nobody's allowed to cover it.   #warm
+? told:bday
+- My birthday. You remembered. That's decided: you're a good one.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Garden thinks you're all right. That's decided. Not moving on it.
+? you:reliable
+- They say you're reliable. Good. Mornings need reliable people. I'm not one.

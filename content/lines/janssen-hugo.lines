@@ -85,3 +85,42 @@
 - Happy birthday. A cutting of Gerald. Look after it. It'll outlive us all.   #warm
 == hint
 - Have you a minute? Sit with me. Bring your tea.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Steady as she goes.
+- Gerald's seen more stars than me.   #funny
+- Tea in one hand. Helm in the other.
+- Ah, well. Long night. Good night.
+? act:work
+- Course holding. Nice and steady.
+
+== rumour
+- Heard something on the night watch.
+- Gerald heard it first. Gerald knows.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Steady work. Thank you.   #warm
+? told:fav.lamp
+- Lamp's working. Gerald can see now. He's very grateful. So am I.   #funny
+? told:came.observatory-night
+- You came up to the observatory. What did you think? Truly. I'm curious.
+? told:gift.plant
+- Your plant's next to Gerald. They're getting on. Slowly. Like plants do.   #funny
+? told:gift.tea
+- Your tea's my helm tea now. One hand on the cup. You know how it is.   #funny
+? told:bday
+- You remembered my birthday. Steady and kind. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The night crew rates you. Steady, they say. That's my favourite word.   #warm
+? you:reliable
+- Reliable, they say about you. Like a good heading. Steady.
