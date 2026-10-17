@@ -166,3 +166,19 @@
 == rumour
 - Heard something, steady now. It's good.
 - Slowly, now. Here's what I heard.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing, steady now. Gerald goes in last, on top.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Steady as she goes, eh? Look after the Wren.
+? leaving:you tier>=friend
+- Gerald and I will both miss our evenings on the Wren. Mostly I will. Thank you.   #warm
+
+== letter
+- Steady out here. The new helm's a bit heavy. Gerald has a window. He's well. He sends his best. Mostly I do.
+? tier>=friend
+- Looked out at the stars last night and thought: the Wren's out there, steady. Hope it's treating you well.

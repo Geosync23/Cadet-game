@@ -171,3 +171,19 @@
 - I won? I was thinking about rain. Good game.   #funny
 == tiles.lose
 - Well played. Hold still. That face. I'm painting it.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Oh, I'm packing. I think. Where was I? Packing.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off, you know. Soon. Hold still a moment. There. Now I'll remember.
+? leaving:you tier>=friend
+- I painted you, tiny. It's on your bunk. Or it will be. You'll know it. Thank you.   #warm
+
+== letter
+- It rained here. Properly. On a window. I stood there an hour. Then I painted it, tiny. I'll post it.
+? tier>=friend
+- Plotted a course from here to the Wren. Just for fun. It's not far, on paper. Hello from the end of it.

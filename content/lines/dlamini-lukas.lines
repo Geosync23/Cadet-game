@@ -242,3 +242,19 @@
 == rumour
 - Heard something. One word: true.
 - Not gossip. Facts. Two of them.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Two bags. Done. Typical.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off, then. Hm. It was good. Bye.
+? leaving:you tier>=friend
+- Number's zero, nearly. Funny. Thought I'd be gladder. Look after the misting hour for me.   #warm
+
+== letter
+- New post. Galley runs itself. It doesn't. Hm. Rains here, sometimes. Through the window. Good.
+? tier>=friend
+- Still on the same stool at night. Different bar. Same drink. Thought of the Wren. Hm. That's all. Typical.

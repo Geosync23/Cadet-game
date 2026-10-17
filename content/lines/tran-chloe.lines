@@ -245,3 +245,19 @@
 - Good game. Now bed. It's nearly ten.   #funny
 == tiles.lose
 - Well played. That's a fair result. Bed, though.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Neatly. Lights out at ten, even tonight.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving. Get some sleep. Somebody has to say it.
+? leaving:you tier>=friend
+- You always went to bed when I asked. Nearly always. Thank you. Bunk 1 was a good bunk.   #warm
+
+== letter
+- New ship. Nobody here says lights out. I've started saying it. They're coming round.
+? tier>=friend
+- Baked my gran's scones for the new mess. Passed inspection. I thought of Bunk 1. Lights out at ten, all right?

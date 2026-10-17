@@ -185,3 +185,19 @@
 - I won! Right, listen. Let me tell you how.   #funny
 == tiles.lose
 - Beaten. The system needs work. Well played.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Right, listen. I'm packing. I've got eleven pressed flowers and one bag.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Right, listen. I'm off. Carry a tray for me sometime. Just one.
+? leaving:you tier>=friend
+- Right, listen. I've got a whole speech. I'll skip to the end: thanks, pal. Really.   #warm
+
+== letter
+- Right, listen. New ship, new trays. I carried six on the first day. They clapped. Well, one person did.
+? tier>=friend
+- Pressed a flower from the new garden. It's not as good as ours. I put it next to the Wren ones, though.

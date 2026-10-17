@@ -164,3 +164,19 @@
 == rumour
 - I heard something. Health-wise, it's fine. News-wise...
 - Right, so. This is good news, mostly.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Did you know lifting with your knees saves your back? Lift with your knees.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon! Drink water. Stretch. Eat breakfast. Do as I say.
+? leaving:you tier>=friend
+- You let me talk about the boat. For weeks. Thank you. Come and sail on it. One day.   #warm
+
+== letter
+- New ship, same guitar. Still bad. The boat's called the Long Way Home this week. Drink some water.
+? tier>=friend
+- Saved the last of it. I've put a deposit on the boat. A real one. I wanted to tell someone who'd listened. That's you.
