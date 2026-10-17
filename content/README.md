@@ -206,6 +206,11 @@ A: No promises.
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
   (A outranks B), `couple` (one of the established crew couples).
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
+- In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
+  or so, A and B taking turns. `act:`, `place:` and `deck:` are where speaker A is and what they're doing. Once you've
+  heard a conversation it isn't played again for 7 ship days, and only one `#serious` conversation plays a day, so
+  a place you visit often needs plenty of them. Give a conversation that only makes sense somewhere its `place:` (a
+  plants talk without `place:garden` can turn up in the mess).
 
 ## Reactions
 
