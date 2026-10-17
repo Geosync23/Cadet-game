@@ -1216,6 +1216,20 @@ const KIT = {
     cyl(.18, .18, .06, M.tealFab, 0, .46, 0, g, 18); cyl(.03, .03, .42, M.metal, 0, .22, 0, g, 10); cyl(.16, .18, .02, M.slateDark, 0, .01, 0, g, 18);
     return { w: .36, d: .36, noBlock: true };
   },
+  tilesTable(g) {                                        // the bow lounge's Tiles station: a square table, a board always set up, two stools (Pillar 4, seat 8)
+    box(.72, .04, .72, LNG.wood, 0, .7, 0, g); cyl(.05, .06, .68, M.slateDark, 0, .34, 0, g, 12); cyl(.26, .28, .03, M.slateDark, 0, .015, 0, g, 20);
+    const b = new THREE.Mesh(TILES_KIT.geo, TILES_KIT.mat); b.scale.set(.44, 1, .44); b.position.set(0, .722, 0); b.receiveShadow = true; g.add(b);
+    box(.16, .05, .08, LNG.wood, .26, .747, -.28, g);    // the tray of spare tiles
+    for (const sd of [-1, 1]) { cyl(.17, .17, .06, LNG.rust, sd * .6, .46, 0, g, 16); cyl(.025, .025, .43, LNG.brass, sd * .6, .215, 0, g, 8); cyl(.14, .16, .02, M.slateDark, sd * .6, .01, 0, g, 16); }
+    return { w: .72, d: .72 };
+  },
+  postbox(g) {                                           // a pillar box for paper letters, by the call-home booths (Pillar 4, seat 8: Letters evening)
+    cyl(.21, .22, .06, M.slateDark, 0, .03, 0, g, 18); cyl(.19, .19, .89, LNG.rust, 0, .505, 0, g, 18);
+    soft(LNG.rust, 0, .95, 0, .2, .1, .2, g); cyl(.205, .205, .05, LNG.brass, 0, .88, 0, g, 18);   // the domed cap and a brass band
+    box(.2, .025, .03, M.slateDark, 0, .78, .185, g); box(.24, .015, .04, LNG.brass, 0, .802, .19, g);   // the slot, and its lip
+    box(.16, .1, .012, LNG.cream, 0, .6, .19, g);        // the collection plate
+    return { w: .44, d: .44 };
+  },
   cardTable(g) {
     box(.9, .05, .9, std('#2f5e4f', .9), 0, .72, 0, g);
     box(.94, .04, .94, M.wood, 0, .69, 0, g);
@@ -1624,6 +1638,23 @@ const KIT = {
     }
     glow('#ff7ae0', .8, 0, 1.2, .1, g, .3);
     return { w: 1.8, d: .6, tall: true };
+  },
+  seedlingStand(g, o = {}) {                             // three timber steps of pots, a seedling in each but o.yours (Pillar 4, seat 8: Sowing morning)
+    for (let t = 0; t < 3; t++) {                        // front step lowest; plank tops at .28, .52, .76
+      const y = .26 + t * .24, z = .17 - t * .17;
+      box(.62, .04, .2, GD.bed, 0, y, z, g);
+      for (const x of [-.31, .31]) box(.03, y + .01, .18, GD.post, x, (y + .01) / 2, z, g);   // the stepped sides, under the plank's ends
+      for (let k = 0; k < 4; k++) {
+        const i = t * 4 + k, x = -.225 + k * .15, top = y + .02;
+        cyl(.055, .042, .1, GD.pot, x, top + .05, z, g, 10); cyl(.05, .05, .012, GD.soil, x, top + .1, z, g, 10);   // the soil heaped just over the rim
+        if (i === o.yours) continue;
+        const s = .7 + ((i * 7 + 3) % 5) * .12;          // sown the same morning, grown a little differently
+        leaf(GD.leaves[(i + t) % 5], x - .018 * s, top + .13 + .02 * s, z, .03 * s, .045 * s, .03 * s, g);
+        leaf(GD.leaves[(i + 2) % 5], x + .02 * s, top + .14 + .025 * s, z + .01, .028 * s, .04 * s, .028 * s, g);
+        if (s > 1) leaf(GD.leaves[(i + 4) % 5], x, top + .17 + .03 * s, z - .01, .024 * s, .035 * s, .024 * s, g);
+      }
+    }
+    return { w: .64, d: .58 };
   },
   trellis(g, o = {}) {                                   // a climbing frame lost under beans and vines
     for (const x of [-.75, .75]) box(.05, 2.0, .05, GD.post, x, 1.0, 0, g);
@@ -2492,6 +2523,24 @@ const GD = {
   pad: std('#3f8a4a', .6), fish: std('#f08a2e', .4), pot: std('#b4553f', .8), post: std('#5a4636', .7),
   wing: ['#f2c94c', '#e86a9a', '#7ac7e8'].map(c => std(c, .6, 0, { side: THREE.DoubleSide })),
 };
+// a Tiles board (Pillar 4, seat 8): a game half played on a 6 x 6 grid, painted on one canvas. tilesBoardGeo() is a unit
+// box 2 cm thick standing on y 0, its top showing the board and its sides the frame, so a board is one material and one
+// draw call (and Tiles night's boards one InstancedMesh). Made at load, no R().
+function tilesBoardGeo() {
+  const g = new THREE.BoxGeometry(1, .02, 1), uv = g.attributes.uv; g.translate(0, .01, 0);
+  for (let v = 0; v < uv.count; v++) if (v < 8 || v >= 12) uv.setXY(v, .02, .02);   // every face but the top (+y) takes the frame's colour
+  return g;
+}
+const TILES_KIT = { tex: tex(128, 128, (c, w, h) => {
+  c.fillStyle = '#6b4a2e'; c.fillRect(0, 0, w, h); c.fillStyle = '#24453c'; c.fillRect(8, 8, w - 16, h - 16);
+  c.strokeStyle = '#3d6b5e'; c.lineWidth = 1;
+  for (let k = 0; k <= 6; k++) { c.beginPath(); c.moveTo(10 + k * 18, 10); c.lineTo(10 + k * 18, 118); c.stroke(); c.beginPath(); c.moveTo(10, 10 + k * 18); c.lineTo(118, 10 + k * 18); c.stroke(); }
+  for (const [i, j, f] of [[1, 1, '#e9c46a'], [2, 1, '#e9c46a'], [2, 2, '#5fd6c6'], [3, 2, '#f1ece2'], [3, 3, '#e07a5f'], [4, 3, '#5fd6c6'], [1, 4, '#f1ece2'], [2, 4, '#e07a5f'], [4, 4, '#e9c46a']]) {
+    c.fillStyle = f; c.fillRect(12 + i * 18, 12 + j * 18, 14, 14);
+    c.fillStyle = '#2b2b2b'; c.beginPath(); c.arc(19 + i * 18, 19 + j * 18, 2.5, 0, Math.PI * 2); c.fill();   // a star on each tile
+  }
+}) };
+TILES_KIT.mat = new THREE.MeshStandardMaterial({ map: TILES_KIT.tex, roughness: .7 }); TILES_KIT.geo = tilesBoardGeo();
 const MED = {
   white: std('#eef1ef', .45), frame: std('#b9c2c6', .3, .6), mattress: std('#dfe9ec', .8), sheet: std('#c9e2e6', .85),
   curtain: std('#9fcfd6', .8, 0, { transparent: true, opacity: .8, side: THREE.DoubleSide }), cross: std('#c8463c', .5),
@@ -4021,6 +4070,8 @@ DECKS[4] = {
     place('t', 'radio', .5, 3.5, 'w', { y: .56, turn: .3 });
     place('k', 'mug', .68, 3.6, 's', { y: 1.995, tall: true });
     placeWall('s', 'calendar', 'w', 3.2, { upTo: 16, ring: 20 });
+    // Pillar 4 (seat 8, 0.38.9): the keepsake shelf above berth 4's bunk (yours), last so nothing above moves
+    placeWall('a', 'keepsakeShelf', 'n', 2.5, { hitW: .9, it: IT('Your shelf', 'A plank above your bunk, just within reach from the top berth. Empty for now. People on the Wren tend to fill theirs.') });
   },
 };
 'abcdefgh'.split('').forEach((k, n) => { DECKS[4].rooms[k] = { name: 'Bunk ' + (n + 1) + (k === 'h' ? ', night shift' : ''), floor: 'plate' }; });
@@ -4326,10 +4377,25 @@ DECKS[5] = {
     placeWall('a', 'plate', 'w', 1.0, { text: 'No naked flames' });
     placeWall('m', 'calendar', 'w', .5, { upTo: 9, ring: 12 });
     place('u', 'mug', 1.7, 1.3, 'e', { y: 1.995, tall: true });
+    placeWall('t', 'mugRack', 's', 1.1, { hitW: .8, it: IT('Mug rack', 'Six hooks over the hot water, a Works mug on five of them. The sixth hook is empty. Nobody says whose it is.') });   // Pillar 4 (seat 8, 0.38.9)
   },
 };
 for (const [key, r] of Object.entries(DECKS[5].sealed)) DECKS[5].closedDoors[key] = { t: DECKS[5].rooms[r].name, x: DECKS[5].rooms[r].tap };
 
+// ---- Wall kit for Pillar 4's arrival evening (seat 8, 0.38.9, the deck architect; made at load, no R(), existing materials) ----
+Object.assign(WALL_KIT, {
+  keepsakeShelf(g) {                                     // a plank above your bunk's head, for the keepsakes friends give you (8b draws them)
+    box(.92, .04, .2, M.wood, 0, 2.15, .1, g);
+    for (const x of [-.38, .38]) box(.03, .12, .16, M.slateDark, x, 2.07, .09, g);
+  },
+  mugRack(g) {                                           // six hooks over the hot water, five Works mugs and one free hook (yours, one day)
+    box(.72, .1, .03, M.wood, 0, 1.55, .015, g);
+    [KM.red, KM.teal, KM.gold, M.cream, KM.teal, null].forEach((m, k) => {
+      const x = -.3 + k * .12; cyl(.008, .008, .05, M.metal, x, 1.52, .045, g, 6).rotation.x = Math.PI / 2;
+      if (m) { cyl(.036, .032, .08, m, x, 1.44, .075, g, 12); box(.012, .04, .02, m, x + .042, 1.44, .075, g); }
+    });
+  },
+});
 // ---- Gym kit (Pillar 3, C9, 0.38.2, the deck architect; made at load, no R()): a punch bag on its stand and a single stretching mat ----
 Object.assign(KIT, {
   punchBag(g, o = {}) {                                  // a stand with an arm, and a bag that swings while someone's punching (MOVERS)
@@ -4804,8 +4870,8 @@ DECKS[3] = {
     { id: '3-toilet-4', type: 'toilet', at: [17, 21], xy: [17.83, 21.5], walk: [17, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-basin-1', type: 'basin', at: [21, 16], xy: [21.93, 16.7], walk: [21, 16], face: 'e', pose: 'stand', room: 'w' },
     { id: '3-basin-2', type: 'basin', at: [21, 17], xy: [21.93, 17.7], walk: [21, 17], face: 'e', pose: 'stand', room: 'w' },
-    { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', room: 'w' },
-    { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', room: 'w' },
+    { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', calm: false, room: 'w' },
+    { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', calm: false, room: 'w' },
     { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
@@ -5072,6 +5138,10 @@ DECKS[3] = {
     // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
     [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
+    // ---- Pillar 4, seat 8 (0.38.10): the seedling stand in the garden's north-east corner (Sowing morning) and the bow lounge's Tiles station ----
+    place('G', 'seedlingStand', 9.63, .42, 'n', { yours: DECKS[3].seedlings.yours, it: IT('Seedlings', 'A little stepped stand of pots by the grow racks: one seedling for everyone who came to the last Sowing morning. One pot is only soil, waiting.') });
+    place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
+    place('B', 'postbox', .4, 4.5, 'w', { it: IT('Postbox', 'For paper letters. They go home in a sealed bag with the next shuttle, weeks behind any call. Some people say that is the point.') });   // 0.38.11
   },
 
 };
@@ -5946,13 +6016,13 @@ DECKS[2] = {
     // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
     // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
     // type 'event' so the everyday habits leave them alone. window: by the bow glass.
-    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.6, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.6, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night', calm: true },
     { id: '2-obsnight-2', type: 'event', at: [44, 1], face: 'n', pose: 'stand', room: 'J', window: true, event: 'observatory-night' },
     { id: '2-obsnight-3', type: 'event', at: [41, 2], face: 'n', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
     { id: '2-obsnight-4', type: 'event', at: [41, 3], face: 'e', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
     { id: '2-obsnight-5', type: 'event', at: [43, 3], face: 'w', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
-    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night' },
-    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night', calm: true },
+    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night', calm: true },
     // the comms room
     { id: '2-comms-1', type: 'work:comms', at: [29, 20], face: 'n', pose: 'work', room: 'Q' }, { id: '2-comms-2', type: 'work:comms', at: [26, 20], face: 'n', pose: 'work', room: 'Q' },
     { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q', xy: [26.84, 15.79], y: 0.5, anim: 'talk' },
@@ -6837,6 +6907,46 @@ DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R'
   // you at the far end. The room has open glass doors, so there's nothing to unlock (door: null)
   conference: { name: 'the conference table', room: 'O', door: null, host: '1-observation-lead-1', places: ['1-conf-10', '1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8', '1-conf-9'] } };
 DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
+// ---- Pillar 4, seat 8 (0.38.9; plans/pillar4-plan.md, Part 6 and the social plan's interfaces): the arrival evening ----
+// keepsakes: the shelf above your bunk (Bunk 1, berth 4's bunk); `slots` are where section 8b's one instanced keepsake mesh
+// puts each gift (tile units for x and z, metres for y); `place` is where you stand to look at it (yours: its id starts
+// with your bed's). mugRack: the Works tea corner's rack; `yours` is the free hook's mug spot. CALM_TYPES / placeCalm(p):
+// where people sit and talk (the social plan's where: ['calm']): seats of those types, unless a place says calm: false.
+DECKS[4].places.push({ id: '4-B1-4-keepsake', type: 'event', at: [9, 0], xy: [9.25, .8], face: -127, pose: 'stand', room: 'a' });
+DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots: [8.14, 8.28, 8.43, 8.57, 8.72, 8.86].map(x => [x, 2.17, .2]) };
+DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
+const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
+const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
+// 0.38.10: seedlings: the garden's seedling stand (kit seedlingStand, north-east corner by the grow racks); `pots` are the
+// twelve pots' soil tops (x and z in tiles, y in metres), front step first, west to east; `yours` is the empty pot, where
+// Sowing morning's trace seedlingYours (DECK_DRESS) plants your seedling; `place` is where you stand to plant and tend it.
+// tiles: the bow lounge's Tiles station (kit tilesTable; places `station`, west stool then east) and its board's centre;
+// `boards` are Tiles night's boards, one on every lounge table ([x, y (the table top), z, turn, size, seats]: the three booths,
+// the two high tables, the coffee table, the two tea tables), drawn by DECK_DRESS.tilesNight. tilesSeats(k) -> board k's
+// seats, at least two each, the two who play first (k = 'station' for the station's own two). The board kit is TILES_KIT
+// (section 23, the Tiles game, owns the name TILES).
+// The new places are type 'event' with an event tag ('sowing', 'tiles'), so nobody uses them day to day (crew plans unchanged).
+DECKS[3].places.push(
+  { id: '3-seedlings-1', type: 'event', event: 'sowing', at: [11, 1], xy: [11.6, 1.2], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // in front of the stand
+  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },   // the station's stools
+  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },
+);
+// 0.38.11: the postbox's place (Letters evening: posting a letter) and twelve lantern places on the promenade's two
+// outer lanes (Lantern walk: crew stand under the lanterns, facing the middle), all event-tagged like the rest.
+DECKS[3].places.push(
+  { id: '3-postbox-1', type: 'event', event: 'letters', at: [37, 17], xy: [37.15, 17.5], face: 'w', pose: 'stand', anim: 'pay', room: 'B' },   // at the postbox's slot
+  ...[26, 28, 30, 32, 34, 36, 38].map(c => [c, 9]).concat([28, 30, 34, 36, 38].map(c => [c, 12])).map(([c, r], k) =>
+    ({ id: '3-lantern-' + (k + 1), type: 'event', event: 'lanterns', at: [c, r], xy: [c + .5, r === 9 ? 9.45 : 12.55], face: r === 9 ? 's' : 'n', pose: 'stand', anim: 'talk', room: '=' })),
+);
+DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
+DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
+  boards: [[42.25, .765, 14.52, 0, .26, [16, 14, 15, 13]], [42.25, .765, 16.52, 0, .26, [20, 18, 19, 17]], [42.25, .765, 18.52, 0, .26, [24, 22, 23, 21]],
+    [45.7, 1.08, 2.84, 0, .26, [10, 9]], [44.587, 1.08, 1.93, .8, .26, [12, 11]],
+    [49.4, .405, 10.895, 0, .26, [28, 29, 26]], [47.6, .445, 6.27, 0, .24, [31, 30]], [47.6, .445, 16.27, 0, .24, [32, 33]]].map(b => (b[5] = b[5].map(n => '3-lounge-' + n), b)) };
+function tilesSeats(k) {
+  const T3 = DECKS[3].tiles;
+  return k === 'station' ? T3.station.slice() : T3.boards[k] ? T3.boards[k][5].slice() : [];
+}
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
     const v = (DECKS[n].visits || {})[id]; if (!v) continue;
@@ -6938,6 +7048,66 @@ const DECK_DRESS = {
       for (const f of [.45, 1]) { const b = new THREE.Mesh(new THREE.SphereGeometry(f === 1 ? .03 : .02, 8, 6), dressMat(C[(k + 1) % 3])); b.position.set(x, y - len * f, z); s.add(b); }
     }
     return { t: 'Veyli cord sculpture', x: 'A gift from the Veyli delegation: knotted cords in three colours, hung from a brass ring. Envoy Saruth says each knot is a promise, and that it would be rude to count them.', wall: ['L', 'w', 17.6], y: 1.9, w: .7, h: 1.0 };
+  } },
+  // Pillar 4, seat 8 (0.38.10). seedlingYours: a lasting trace from your first Sowing morning (SHIP.traces gets
+  // { id: 'seedlingYours', day }: the day you planted it). It grows by how long ago that was, looked at whenever Deck 3 is built.
+  seedlingYours: { deck: 3, what: 'your seedling in the garden\'s seedling stand, with your name on a stake', make(g, o) {
+    const S3 = DECKS[3].seedlings, r = ROOM_BOX.G, [px, py, pz] = S3.pots[S3.yours], x = px - r.i0, z = pz - r.j0, s = dressAt(g, 'G', 'floor', 0, 0);
+    const today = typeof shipNow === 'function' ? Math.floor(shipNow() / 1440) + 1 : 1, age = Math.max(0, today - (o.day || today));
+    const st = age < 7 ? 0 : age < 28 ? 1 : age < 91 ? 2 : 3, h = [.03, .07, .13, .22][st], n = [2, 4, 6, 8][st], k = [.6, .85, 1.1, 1.4][st];
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(.004 * k, .005 * k, h, 5), dressMat('#4c8a57')); stem.position.set(x, py + h / 2, z); s.add(stem);
+    for (let i = 0; i < n; i++) {                        // leaves in pairs up the stem, each pair turned a quarter
+      const a = i * Math.PI / 2 + (i % 2) * Math.PI, y = py + h * (.35 + .65 * Math.floor(i / 2) / Math.max(1, n / 2 - 1)), l = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 4), dressMat(i % 2 ? '#6ba86a' : '#4c8a57'));
+      l.scale.set(.022 * k, .009 * k, .012 * k); l.rotation.y = a; l.position.set(x + Math.cos(a) * .02 * k, Math.min(y, py + h), z - Math.sin(a) * .02 * k); s.add(l);
+    }
+    dressBox(s, .006, .12, .006, '#a07a4f', x + .03, py + .04, z + .028);       // the stake, pushed into the soil
+    dressBox(s, .05, .028, .005, '#f4efe2', x + .03, py + .1, z + .034);        // and its tag, your name on it
+    const say = ['Two leaves, barely up. You check on it more often than it needs.', 'Four true leaves now, leaning toward the grow lights like everything else in here.',
+      'A proper little plant. Someone waters it on the days you forget.', 'It has outgrown its pot twice, and the gardeners keep finding it a bigger one.'][st];
+    return { t: 'Your seedling', x: 'Planted on your first Sowing morning, your name on the stake. ' + say, floor: ['G', x, z], y: py + .08, w: .2, h: .25, d: .2 };
+  } },
+  // tilesNight: Tuesday's Tiles night (section 18 lists it while the night is on): a board on every lounge table, one
+  // InstancedMesh (one draw call, no shadow), from DECKS[3].tiles.boards
+  tilesNight: { deck: 3, what: 'Tiles night: a Tiles board on every table in the bow lounge', make(g) {
+    const B = DECKS[3].tiles.boards, r = ROOM_BOX.L, s = dressAt(g, 'L', 'floor', 0, 0), m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0);
+    const mat = new THREE.MeshStandardMaterial({ map: TILES_KIT.tex.clone(), roughness: .7 }); mat.map.needsUpdate = true;   // its own copies, which dressHide disposes
+    const im = new THREE.InstancedMesh(tilesBoardGeo(), mat, B.length); im.userData.noMerge = true; im.frustumCulled = false;
+    B.forEach(([x, y, z, turn, w], k) => im.setMatrixAt(k, m.compose(new THREE.Vector3(x - r.i0, y + .002, z - r.j0), q.setFromAxisAngle(up, turn), new THREE.Vector3(w, 1, w))));
+    s.add(im);
+    const [cx, cy, cz] = B[5];                           // the tap: the coffee table's board
+    return { t: 'Tiles night', x: 'A Tiles board on every table tonight, and a game going on most of them. Rina is defending her title, and saying so.', floor: ['L', cx - r.i0, cz - r.j0], y: cy + .05, w: .3, h: .1, d: .3 };
+  } },
+  // 0.38.11. tastingTable: Brennan's tasting table on Wednesday's dinner (o.title: the dish; o.lines: up to five lines in
+  // chalk, the votes so far): the chalkboard by the mess door and a tray of tasting cups and a bowl of vote tokens on the
+  // end of a long table. 5 draw calls.
+  tastingTable: { deck: 3, what: 'Brennan\'s tasting table: a chalkboard, a tray of tasting cups and a bowl of vote tokens', make(g, o) {
+    const b = dressAt(g, 'M', 'w', 2.9), dish = o.title || 'Something new from the galley';
+    dressBox(b, .62, .5, .03, '#5a3b26', 0, 1.5, .015); dressBox(b, .62, .03, .06, '#5a3b26', 0, 1.235, .045);   // the frame, and the chalk ledge
+    const t = tex(256, 200, (c, w, h) => {
+      c.fillStyle = '#1f2b26'; c.fillRect(0, 0, w, h); c.fillStyle = '#efe9dc'; c.font = '700 22px system-ui,sans-serif'; c.fillText('TASTING TABLE', 16, 32);
+      c.font = 'italic 600 17px Georgia,serif'; String(dish).split('\n').slice(0, 2).forEach((l, k) => c.fillText(l, 16, 62 + k * 21));
+      c.font = '500 15px system-ui,sans-serif'; (o.lines || ['Try a cup, then vote:', 'gold token: on the menu', 'white token: back to the galley']).slice(0, 5).forEach((l, k) => c.fillText(l, 16, 112 + k * 19));
+    });
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(.56, .44), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); pl.position.set(0, 1.5, .032); b.add(pl);
+    const s = dressAt(g, 'M', 'floor', 1.3, 4.0);        // the west end of the third long table (its top at .77)
+    dressBox(s, .5, .02, .3, '#5a3b26', 0, .781, 0);
+    for (let k = 0; k < 8; k++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.022, .018, .035, 8), dressMat('#f4f1e8')); c.position.set(-.2 + (k % 4) * .085, .809, k < 4 ? -.07 : .07); s.add(c); }
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.06, .045, .04, 12), dressMat('#f4f1e8')); bowl.position.set(.16, .811, 0); s.add(bowl);
+    [[-.02, -.015], [.015, .02], [.025, -.02], [-.025, .02], [0, 0]].forEach(([x, z]) => { const k = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .006, 8), dressMat('#e9c46a')); k.position.set(.16 + x, .832, z); s.add(k); });
+    return { t: 'Tasting table', x: 'Brennan\'s tasting table. ' + String(dish).replace(/\n/g, ' ') + '. Take a cup, then drop a token in the bowl: gold if it should go on the menu.', wall: ['M', 'w', 2.9], y: 1.5 };
+  } },
+  // lanternWalk: the Lantern walk at dusk: paper lanterns on strings down both sides of the promenade, one InstancedMesh of
+  // lanterns (unlit, so they glow) and the strings merged: 2 draw calls, no shadows.
+  lanternWalk: { deck: 3, what: 'paper lanterns strung down both sides of the promenade', make(g) {
+    const r = ROOM_BOX['='], s = dressAt(g, '=', 'floor', 0, 0), pts = [], C = ['#ffb35c', '#ff8a5c', '#ffd27a', '#f2c94c'];
+    for (const [x0, x1] of [[12.5, 16.6], [23.5, 39.7]]) for (const z of [9.35, 12.65]) {
+      dressBox(s, x1 - x0 + .4, .01, .01, '#3a3a3a', (x0 + x1) / 2 - r.i0, 2.34, z - r.j0);   // the string
+      for (let x = x0; x <= x1; x += 1.15) { const y = 2.12 + .06 * Math.sin(x * 2.1); pts.push([x - r.i0, y, z - r.j0]); dressBox(s, .006, 2.34 - y - .16, .006, '#3a3a3a', x - r.i0, (2.34 + y + .16) / 2, z - r.j0); }
+    }
+    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ toneMapped: false }), pts.length), m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(.13, .17, .13);
+    pts.forEach(([x, y, z], k) => { im.setMatrixAt(k, m.compose(new THREE.Vector3(x, y, z), q, sc)); im.setColorAt(k, col(C[k % 4])); });
+    im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
+    return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
   } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
