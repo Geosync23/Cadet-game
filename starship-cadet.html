@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.27
+   STARSHIP CADET: CSV Wren                           build 0.26.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.27';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.28';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7129,6 +7129,7 @@ const SIM_ADVANCE = [];
 function skipTo(abs) {
   const from = shipNow(); if (!(abs > from)) return;
   setShipNow(abs);
+  if (typeof machinesNow === 'function') machinesNow();  // the machines' hours first, so their notes (stamped with their hour) are out before anyone catches up
   for (const f of SIM_ADVANCE) f(from, abs);
   updateClock(); saveGame();
 }
@@ -7616,7 +7617,7 @@ function guestStay(p, d) {
 // or null for always). They leave on toDay at 15:00 by the shuttle bay and arrive on fromDay at 17:40 off the
 // Sunday shuttle (ROSTER_ROTATIONS lists the days); an arrival `replaces` a leaver, taking their bed and desk.
 // Pure (roster data only), so any day planned early or again agrees. crewLeaving(p) / crewArriving(p): those days, or null
-const ROTA_OFF = 900, ROTA_ON = 1060;                 // a transfer: off at 15:00, on at 17:40
+const ROTA_OFF = 900, ROTA_ON = 1060, ROTA_WAIT = 30;  // a transfer: off at 15:00 (waiting in the shuttle bay from 14:30), on at 17:40
 function crewStay(p, d) {
   const ab = p.aboard; if (!Array.isArray(ab)) return 'in';
   const [a, l] = ab;
@@ -7653,9 +7654,16 @@ function guestTrim(p, d, segs) {
   if (arriving) {
     out.push(away(B, cut), { from: cut, to: cut + 10, act: 'off', deck: 5, type: null, placeId: null, tag: 'arrive' });
     for (const s of segs) if (s.to > cut + 10) out.push({ ...s, from: Math.max(s.from, cut + 10) });
-  } else {
+  } else if (p.guest) {
     for (const s of segs) if (s.from < cut - 10) out.push({ ...s, to: Math.min(s.to, cut - 10) });
     out.push({ from: cut - 10, to: cut, act: 'off', deck: 5, type: null, placeId: null, tag: 'leave' }, away(cut, B + 1440));
+  } else {                                               // crew: from 14:30 they wait in the shuttle bay (after their farewell there), boarding at 15:00
+    const w0 = cut - ROTA_WAIT;
+    for (const s of segs) if (s.from < w0) out.push({ ...s, to: Math.min(s.to, w0) });
+    const last = out[out.length - 1], bay = (schedData().shared.get('5|event') || []).filter(pl => /shuttle-bay-crowd/.test(pl.id));
+    const placeId = last && last.deck === 5 && /shuttle-bay/.test(last.placeId || '') ? last.placeId : bay.length ? bay[strSeed(p.id) % bay.length].id : null;
+    if (last && last.deck !== 5 && last.to - last.from > SCHED_COMMUTE) { last.to = w0 - SCHED_COMMUTE; out.push({ from: w0 - SCHED_COMMUTE, to: w0, act: 'commute', deck: 5, type: 'lift', placeId: null, fromDeck: last.deck }); }
+    out.push({ from: w0, to: cut, act: 'off', deck: 5, type: null, placeId, tag: 'leave' }, away(cut, B + 1440));
   }
   return out;
 }
@@ -7891,7 +7899,8 @@ function schedBuild(p, d, occ, S) {
     if (to <= t) return;
     const l = segs[segs.length - 1];
     const solo = id => id === p.bed || (S.owner.get(id) || []).length === 1;   // yours alone: nobody else can want it
-    if (l && l.act !== 'commute' && l.act !== 'wash' && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || solo(l.placeId) || isFree(l.placeId, t, to))) {
+    const deskTwin = (id, a, b) => S.people.some(q => q !== p && S.desks.get(q.id) === id && aboard(q, d) && ((shiftBlocks(q, d) || {}).blocks || []).some(([x, y]) => x < b && a < y));   // the desk's other shift is on then
+    if (l && l.act !== 'commute' && l.act !== 'wash' && !(l.act === 'work' && l.placeId && deskTwin(l.placeId, t, to)) && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || solo(l.placeId) || isFree(l.placeId, t, to))) {   // not past the shift's end at a desk the next shift shares
       if (l.placeId && !solo(l.placeId)) hold(l.placeId, t, to);
       l.to = to; t = to;
     } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
