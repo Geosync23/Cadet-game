@@ -33,6 +33,14 @@
 == career.tip.up
 - Your work standing is climbing. Keep turning up. People have noticed.
 
+== career.tip.clock
+- Clock in by the job board at shift start, out at the end. Leave and sick days need none.
+
+== clock.auto
+- The clock signed you out at 17:00. It does that.
+- 17:00. The clock signed you out for you. Go and eat.
+- Shift over: the clock signed you out at 17:00.
+
 == career.mail.chief
 - My office | Come to my office, Deck 5, today. Missed shifts. We'll talk it through.
 

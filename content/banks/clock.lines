@@ -1,12 +1,12 @@
 @bank dept:works
 // Head writer 5: clock-in remarks, for the Career engineer's clock-in/out panel on the Works bay wall (claude/leave).
-// Co-workers in the bay say one as you clock in or out. Keys (provisional until the engine names them):
-// work.clock.in (start of day), work.clock.out (end of day), work.clock.monday (clocking in on a Monday: your weekend),
-// work.clock.friday (clocking out on a Friday: weekend plans), work.clock.back (first shift back from leave or sick).
+// Co-workers in the bay say one as you clock in or out. Keys (the Career engineer's, 2026-10-17):
+// clock.in (start of day), clock.out (end of day), clock.monday (clocking in on a Monday: your weekend),
+// clock.friday (clocking out on a Friday: weekend plans), clock.back (first shift back from leave or sick).
 // Shift 08:00-17:00, tea at 10:30, your days off are Sat-Sun. Not everyone in Works is off at the weekend, so shared
 // lines ask about YOUR weekend and never claim the speaker's. One short line each, readable on a phone.
 
-== work.clock.in
+== clock.in
 - {hi}, {nick}. Board's full this morning. Pick a good one.
 - Morning. Kettle's on in the tea corner, if you're quick.
 - Eight o'clock. Somebody should do something about eight o'clock.   #funny
@@ -17,7 +17,7 @@
 - You look awake. How? Tell me how.   #funny
 - Quiet night, the night lot say. Let's keep it that way.
 - {hi}. Grab a job before the Chief gives you one.
-- Morning, {nick}. Bay smells of oil and toast. Someone's had breakfast in here.   #funny
+- Bay smells of oil and toast. Someone ate breakfast in here.   #funny
 - Mind the panel by the racks. It sticks. It always sticks.
 - First job's always the hardest. After that it's just the day.
 - Saw the stars on the way down. Nice start, that.
@@ -31,7 +31,7 @@
 ? time:afternoon
 - Afternoon start? Lucky. You missed the morning rush.
 
-== work.clock.out
+== clock.out
 - Five o'clock. That's us. {bye}.
 - Good day, that. Nothing caught fire. Nothing even smoked.   #funny
 - Off you go, {nick}. Dinner's on till half eight.
@@ -56,7 +56,7 @@
 ? cue:repair.you@dept
 - You fixed it today. I heard it start up. Lovely sound.   #warm
 
-== work.clock.monday
+== clock.monday
 - Monday. {hi}. Good weekend?
 - Back again! Did you get any rest, or did the ship keep you busy?
 - {hi}, {nick}. Do anything nice at the weekend?
@@ -71,7 +71,7 @@
 - There you are. Quiet bay without you, Monday or not.   #warm
 - I want the whole weekend. Every bit. At tea, mind.   #warm
 
-== work.clock.friday
+== clock.friday
 - Friday! Two days off for you. Any plans?
 - That's the week. {bye}, {nick}. Enjoy the weekend.
 - Off for two days? Rest. Properly. No fixing anything.
@@ -85,7 +85,7 @@
 ? tier>=friend
 - Have a good one, {nick}. Tell me all about it Monday.   #warm
 
-== work.clock.back
+== clock.back
 - You're back! Good to see you, {nick}.   #warm
 - Welcome back. Bay wasn't the same.   #warm
 - {hi}. Feeling better? Take it easy today.   #warm
@@ -97,3 +97,15 @@
 ? tier>=friend
 - Oh, you're back. I've saved up all the gossip.   #warm
 - Missed you on the bay. Don't do that again. Well, do, if you need to.   #warm
+
+== clock.late
+// Gentle teasing when you clock in after 08:00.
+- Afternoon! Oh, sorry. It just felt like afternoon.   #funny
+- There you are. The board ate two jobs while you were out.   #funny
+- Lie-in? Don't let the Chief see the clock.   #funny
+- Late one. Grab a job, quick, look busy.   #funny
+- Morning, {nick}. Well. Most of it's still morning.   #funny
+- Hot water ran out, did it? Happens to us all.   #funny
+- The kettle waited for you. It's that kind of kettle.   #funny
+? tier>=friend
+- Saved you a job. Not a good one. You were late.   #funny

@@ -1,30 +1,33 @@
 @crew pell
 // Head writer 5: clock-in remarks. Pell is off Tue and Wed, so he works the weekend.
 
-== work.clock.in
+== clock.in
 - Oi oi. I'm awake. Technically. Ask again after tea.   #funny
 - Right, so. Board's full and I've already had two breakfasts.   #funny
 - {hi}, {nick}. That panel on Five's sticking again. It knows me.
 - Morning! Slept like a log. For an hour. Then I didn't.   #funny
 - There's a scrubber on the board calling your name. I'm taking the fan.
 
-== work.clock.out
+== clock.out
 - Five! Mess. Now. Before the stew goes.   #funny
 - Good shift, {nick}. You were quicker than me. Don't tell anyone.
 - Off you go. I'm having a nap. At five. Then I won't sleep. Classic.   #funny
-- Clocked out. Grab shelf if you miss dinner. It's for emergencies. And me.   #funny
+- Grab shelf if you miss dinner. It's for emergencies. And me.   #funny
 
-== work.clock.monday
+== clock.monday
 - Monday! How was your weekend? I was down here. Bay's ace on a Sunday.
 - Good weekend? Tell me. I worked mine. I found a biscuit tin.   #funny
 - Oi oi. Rested? You look rested. Rude.   #funny
 
-== work.clock.friday
+== clock.friday
 - Off for the weekend? I'm on. Bay's all mine. Mwah ha.   #funny
 - Friday! Enjoy it, {nick}. I'll keep the scrubbers in line.
 - Two days off for you. Sleep in for me, yeah? Someone should.   #funny
 
-== work.clock.back
+== clock.back
 - Spanner! You're back! The bay was so boring.   #warm
 - Welcome back. I did your jobs. Badly. You'll see.   #funny
 - Oi oi. Feeling better? Good. Tea's on me. Well, on the kettle.   #warm
+
+== clock.late
+- Late? You? Welcome to my world, spanner. It's comfy here.   #funny

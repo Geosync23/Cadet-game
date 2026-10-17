@@ -126,7 +126,7 @@
 - Spotted in the Works bay: {me}, fixing things properly. Good to have you.
 ? weekday:mon
 - Monday: the job board is full of weekend faults. Grab one early.
-? weekday:fri
+? weekday:fri time:afternoon
 - Friday tea and tool cleaning in the Works bay this afternoon. Bring a cloth.
 ? trad:works-tea
 - Works Friday tea today. Tools cleaned, tea poured, biscuits rationed. Deck 5.
@@ -380,7 +380,7 @@
 - Brennan tasted the porridge and said "fine". From Brennan, that's a medal.
 - Please tell the galley if you can't eat something. They'll make you something you can.
 ? time:morning
-- Breakfast is on till 08:00. Porridge, eggs, toast, tea. Brennan says don't skip it.
+- Breakfast runs 06:00 to 08:00 every day. Porridge, eggs, toast, tea. Don't skip it.
 ? time:evening
 - Dinner's on till half eight. There's still pudding. There's always still pudding.
 

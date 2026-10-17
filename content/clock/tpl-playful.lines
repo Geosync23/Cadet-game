@@ -1,23 +1,23 @@
 @template playful
 
-== work.clock.in
-- Morning, {nick}! First to the board gets the good job. Too late. I'm first.   #funny
+== clock.in
+- First to the board gets the good job. Too late. I'm first.   #funny
 - Clocked in! Points for being on time. You're winning. Slightly.   #funny
 - Eight o'clock! Who invented eight o'clock? I'd like a word.   #funny
 
-== work.clock.out
+== clock.out
 - Five! That's the bell. Race you to the mess.   #funny
 - Clocked out. I fixed four things today. You? Don't answer if it's five.   #funny
 - Done! Off to do absolutely nothing at top speed.   #funny
 
-== work.clock.monday
+== clock.monday
 - Monday! Weekend score out of ten? Go.   #funny
 - Back! What did you get up to? Anything I should've been at?
 
-== work.clock.friday
+== clock.friday
 - Friday! Weekend plans? Points for anything that isn't sleeping.   #funny
 - Two days off! Go have fun. Report back Monday. Full report.   #funny
 
-== work.clock.back
+== clock.back
 - They're back! The bay's fun again. Officially.   #warm
 - You're back! I kept your spot. I may have put a sign on it.   #funny

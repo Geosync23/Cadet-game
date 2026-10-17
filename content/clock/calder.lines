@@ -1,7 +1,7 @@
 @crew calder
 // Head writer 5: clock-in remarks. Calder is off Sat and Sun; she gave up her tea break.
 
-== work.clock.in
+== clock.in
 - 07:59. Good.
 - Morning. Fan on Five, bay two. You'll hear it. Then fix it.
 - Board's long. Start at the top.
@@ -9,7 +9,7 @@
 - Morning. Gloves.
 - Seven jobs on the board. By five, fewer.
 
-== work.clock.out
+== clock.out
 - 17:00. Off you go.
 - Done. Board's shorter. That's the measure.
 - Clocked out. Rest. I want you sharp tomorrow.
@@ -17,17 +17,20 @@
 ? cue:repair.you@dept
 - That job today. Done right. Don't make me say it twice.   #warm
 
-== work.clock.monday
+== clock.monday
 - Monday. Weekend? Brief, please.   #funny
 - My weekend? I read a manual. It was a good manual.   #funny
 - Rested? Good. The ship wasn't.
 
-== work.clock.friday
+== clock.friday
 - Friday. Rest. Properly. That's an order.
 - Two days off. Use them. I'll know if you don't.   #funny
 - Weekend. Monday, 08:00. Not 08:01.
 
-== work.clock.back
+== clock.back
 - Back. Good. Light jobs today. Then normal.   #warm
 - Welcome back. The board missed you. So did I. That's all.   #warm
 - You're back. Don't overdo it. That's also an order.   #warm
+
+== clock.late
+- The clock says what it says. Tomorrow, eight.
