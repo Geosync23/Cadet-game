@@ -18,6 +18,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `food_check.py`: runs the galley over whole ship days and checks food is ready, nobody waits too long, the dish pit clears and the rota holds.
 - `machine_check.py`: runs the ship's machines on paper and checks wear, faults, repairs, the jobs left for the player and ship health.
 - `arc_check.py` (social stories, on claude/social-stories): plays 70 ship days on paper as a diligent player and checks every story arc and call-home arc reaches its last beat.
+- `path_check.py` (on claude/crowd-render): compares the fast route-finder with the old one on thousands of searches per deck and a played day's real calls; every path must match.
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
 - `plans/`: deck plan pages, pillar plans, and `handover-<role>.md` notes for each role.
 
