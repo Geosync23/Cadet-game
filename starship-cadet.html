@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.30
+   STARSHIP CADET: CSV Wren                           build 0.34.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.31';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13807,7 +13807,50 @@ function eventsNoted(from, to) {
     simNote('tradition', { id: e.id, day: d, at, came, you: SHIP.events.joined.includes(key), host: e.ev.host || null, src: SHIP_TRADITIONS.includes(e.ev) ? 'tradition' : e.ev.when.ship ? 'shipwide' : 'oneoff' });
   }
 }
-SIM_ADVANCE.push((from, to) => { eventsMail(from, to, true); eventsNoted(from, to); EV_LAST = to; });
+// ---- the Sunday "This week aboard" Mail (Pillar 4; the monthly tradition designer's words and rules, in
+// content/traditions/this-week-aboard.mail; events_check checks this copy against the file, so copy it again when the
+// file changes). Sunday 18:00, from the first Sunday after you arrive: the week from Monday, the traditions that aren't
+// weekly in full, birthdays, a weekly one the voice budget left out; the weekly ones in one line, except the first time
+const WEEK_MAIL = {"from": "oduya", "subject": "This week aboard", "open": ["Here's the week ahead aboard the Wren.", "The week ahead, all in one place. Mark the ones you like on your Calendar.", "A new week aboard. Here's what's on."], "season": ["{season} starts this week. New season, new seedlings.", "A new season this week: {season}. The garden's been waiting."], "day": ["{weekday}"], "item": ["{trad}, {time}, {place}."], "birthday": ["{names}'s birthday: cake in the mess, 20:15."], "dropped": ["No {trad} this {weekday}: something rarer is on."], "weekly": ["And all the usual weekly ones: the Calendar has them.", "Plus the usual weekly ones. They're on your Calendar."], "quiet": ["A quiet week: just the usual weekly ones, on your Calendar.", "Nothing special this week. Sometimes that's the best kind."], "close": ["See you there. Matthias", "Come to one, if you can. Matthias", "That's the week. Rest well tonight. Matthias"]};
+const WEEK_MAILS = [];                                   // what was sent (the checks)
+const evWeekly = w => !w.after && !w.birthday && !w.ship && !w.date && (w.every === 'week' || (w.weekday != null && !w.every));
+function evPlaceName(ev) {
+  const w = ev.where[0], pool = { gym: 'the gym', garden: 'the garden', 'garden-tend': 'the garden', 'common-room': 'the junior common room', music: 'the music room', 'mess-seat': 'the mess', 'lounge-seat': 'the bow lounge', bench: 'the promenade' };
+  const room = w.room ? 'the ' + w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').toLowerCase() : pool[w.pool] || 'Deck ' + w.deck;
+  return room + (w.room && w.deck <= 2 ? ', Deck ' + w.deck : '');
+}
+function weekMail(d) {                                   // d: a Sunday; -> { at, from, subject, body } or null
+  const arr = evArrival(); if (weekday(d) !== 6 || d < arr + 7) return null;
+  const wk = Math.floor((d - 1) / 7), pick = k => { const l = WEEK_MAIL[k] || []; return l.length ? l[((wk % l.length) + l.length) % l.length] : null; };
+  const fill = (t, o) => { let ok = true; const r = t.replace(/\{(\w+)\}/g, (_, k) => o[k] != null ? o[k] : (ok = false, '')); return ok ? r : null; };
+  const first = d === arr + 7, out = [pick('open')], days = []; let listed = 0;
+  if (evYearDay(d + 1) % 91 === 1) { const l = fill(pick('season'), { season: seasonOf(d + 1).name }); if (l) out.push(l); }
+  for (let x = d + 1; x <= d + 7; x++) {
+    const on = eventsOn(x), lines = [];
+    for (const e of on) {
+      if (!SHIP_TRADITIONS.includes(e.ev)) continue;
+      if (e.ev.when.birthday) { const l = fill(pick('birthday'), { names: e.names }); if (l) lines.push([e.from, l]); continue; }
+      if (evWeekly(e.ev.when) && !first) continue;
+      const l = fill(pick('item'), { trad: e.name, time: hhmm(e.from), place: evPlaceName(e.ev), weekday: WEEKDAYS[weekday(x)] }); if (l) lines.push([e.from, l]);
+    }
+    for (const id of EV_DROPPED.get(x) || []) { const ev = SHIP_TRADITIONS.find(t => t.id === id); if (ev && evWeekly(ev.when)) { const l = fill(pick('dropped'), { trad: ev.name, weekday: WEEKDAYS[weekday(x)] }); if (l) lines.push([ev.at[0], l]); } }
+    if (lines.length) { days.push(fill(pick('day'), { weekday: WEEKDAYS[weekday(x)] }), ...lines.sort((a, b) => a[0] - b[0]).map(l => l[1])); listed += lines.length; }   // in time order
+  }
+  out.push(...days); if (!first) out.push(listed ? pick('weekly') : pick('quiet')); out.push(pick('close'));
+  const p = typeof schedPeople === 'function' && schedPeople().find(q => q.id === WEEK_MAIL.from);
+  return { at: (d - 1) * 1440 + EV_MAIL_AT, from: p ? p.name : WEEK_MAIL.from, subject: WEEK_MAIL.subject, body: out.filter(Boolean).join('\n'), day: d };
+}
+function weekMailSend(from, to, quiet) {
+  from = Math.max(from, to - 3 * 1440);
+  for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++) {
+    const at = (d - 1) * 1440 + EV_MAIL_AT, key = 'week@' + d;
+    if (weekday(d) !== 6 || at <= from || at > to || SHIP.events.sent.includes(key)) continue;
+    const m = weekMail(d); if (!m) continue;
+    SHIP.events.sent.push(key); WEEK_MAILS.push(m); if (WEEK_MAILS.length > 8) WEEK_MAILS.shift();
+    if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet });
+  }
+}
+SIM_ADVANCE.push((from, to) => { eventsMail(from, to, true); weekMailSend(from, to, true); eventsNoted(from, to); EV_LAST = to; });
 // the player joins by being in one of the event's rooms for 5 ship minutes while it's on: a little social, a toast,
 // and a thank-you in the Mail
 let EV_IN = { key: null, since: 0 };
@@ -13875,7 +13918,7 @@ function eventsTick() {
   if (m === EV_MIN) return;
   const prev = EV_MIN;
   EV_MIN = m; eventTags();
-  if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
+  if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); weekMailSend(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now);
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play

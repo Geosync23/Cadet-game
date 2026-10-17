@@ -427,7 +427,7 @@ with sync_playwright() as pw:
 
     # 3. the Mail the evening before: a week of skips from Day 1 (and the ship note after each tradition, Pillar 4:
     # the sim engineer's bus when it's in, else a stand-in simNote that only records)
-    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0")
+    g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0; WEEK_MAILS.length = 0")
     g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') { onSim('tradition', n => __notes.push(n)); onSim('choice', n => __notes.push(n)); } else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
     g.ev("for (let t = 360 + 600; t <= 7 * 1440; t += 600) skipTo(t)")
     nt = g.ev("""(() => {
@@ -446,6 +446,22 @@ with sync_playwright() as pw:
     print(f"Mail: {len(m)} announcements for days 2-8 ({len(due)} events due); e.g. {m[0][2] if m else '-'}")
     for k in due:
         if k not in got: fail(f"no Mail for {k}")
+    # the Sunday "This week aboard" Mail (Pillar 4): sent on day 7 at 18:00 (the first Sunday after you arrive), once,
+    # in time order within a day; section 18's WEEK_MAIL is a copy of content/traditions/this-week-aboard.mail
+    wm = g.ev("WEEK_MAILS.map(m => [m.day, m.at, m.body])")
+    print(f"This week aboard: {[(x[0], x[1]) for x in wm]}; day 7 reads: " + (wm[0][2].replace(chr(10), ' / ')[:300] if wm else '-'))
+    if [x[0] for x in wm] != [7] or wm[0][1] != 6 * 1440 + 1080: fail(f"the Sunday Mail: {[(x[0], x[1]) for x in wm]}")
+    import json as _json, re as _re2
+    tw = os.path.join(tdir, 'this-week-aboard.mail')
+    if os.path.exists(tw):
+        want, sec = {}, None
+        for l in open(tw, encoding='utf-8').read().splitlines():
+            st = l.strip()
+            if not st or st.startswith('//') or st.startswith('@'): continue
+            if st.startswith('=='): sec = st[2:].strip(); want[sec] = []; continue
+            if sec is None: k, v = st.split(':', 1); want[k.strip()] = v.strip(); continue
+            t = st[2:].strip(); mt = _re2.search(r'\s#(\w+)\s*$', t); want[sec].append(t[:mt.start()].rstrip() if mt else t)
+        if g.ev("WEEK_MAIL") != want: fail('WEEK_MAIL in section 18 differs from content/traditions/this-week-aboard.mail: copy it again')
     if len(got) != len(set(got)): fail('a Mail sent twice')
     for k, at, _ in m:
         d = int(k.split('@')[1])
