@@ -17,3 +17,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - 157c0dd (poses 0.27.46) phone.py (DA3) vs 0.60.5b: dinner 3.7-4.5 ms vs 3.6-4.0, >16.7 ms 6-17 vs 11; breakfast in range. Stutter fixed.
 - player cart-run fail: not the hand-merged held-prop line (fresh-game cart run gives cartfull on 7b57bb6, c20e8cd, 0d8072c); R3 re-running player_check alone on 0d8072c. intro_check running on 0d8072c (alone).
 - c707b5f = + poses 0.27.47 (day-35 tray fix, DA3-tested on 0d8072c: cadet_test identical, tray fail gone)
+- d571db4 (+ player-needs 0.28.50, Put down 0.28.60): smoke OK · newgame OK · device OK · NAMES OK · content_gen up to date · cadet_test vs c707b5f: data/taps/walks identical, every shot ~15k px only in the top control bar (the Pause button, 0.28.48/50)
