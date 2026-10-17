@@ -31,7 +31,7 @@ Today the Works job is one verb: **fetch a part and replace it** (or hold to wor
 
 Around the ladder: **more real faults reach you**; **repairs get quicker with practice** (in words); **tools arrive one at a time, each with training**; **off-shift tinkering, cabin touches and star logging**; **the device's work pages** (your training record, work log, tools). Still Works only.
 
-**How it's built:** each mechanic is **one self-contained sub-block of a new section 24 with one owner**, on top of a small shared foundation (the unlock ladder, training moments, work-step building blocks). A **mechanic designer** writes each mechanic's one-page spec for the user ahead of the builders. Staffing is tiered and generous (the user: "don't be afraid to hire as many as needed"): up to about 13 Pillar 5 seats, joining in waves as Pillar 4 winds down. **A check-in with the user after every one or two mechanics.**
+**How it's built:** each mechanic is **one self-contained sub-block of a new section 24 with one owner**, on top of a small shared foundation (the unlock ladder, training moments, work-step building blocks). A **mechanic designer** writes each mechanic's one-page spec for the user ahead of the builders. Staffing is tiered and generous (the user: "don't be afraid to hire as many as needed"): up to 11 building seats, plus a **Pillar 5 build master**, **two cross-pillar coordinators** who keep Pillar 4 and Pillar 5 from colliding, adversarial reviewers and check runners, mirroring Pillar 4's Full level (Part 5), with steps to scale down. **A check-in with the user after every one or two mechanics.**
 
 ---
 
@@ -223,14 +223,14 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 - **`playerTier()`** replaces `PLAYER_TIER` once, early and inert, with `cadet_test` identical.
 - **Hash keys** (checked free by the build master): 850-899 for all of Pillar 5 (24 core 850-859, then ten keys per two mechanics as the career engineer hands them out). Incidents are in section 24, not section 18, so no `k + 100` jitter range is needed. *(Pillar 6's events will take 950-999 as the build master suggested.)*
 - **The save:** `save.career` (tier, the ladder, tools, skill by kind, uniform, the work log ring, certification) and one small part per mechanic inside it; read defensively; `SAVE_V` stays 2.
-- **Merge order:** Pillar 5 after Pillar 4 each round: … → systems (17) → player (15) → career (24 core) → mechanics (24a…) → deck architect 2. A **Pillar 5 collector** merges the mechanic branches into one branch first, so the lead takes about four Pillar 5 branches a round, not ten.
+- **Merge order:** Pillar 5 after Pillar 4 each round: … → systems (17) → player (15) → career (24 core) → mechanics (24a…) → deck architect 2. The **Pillar 5 build master** combines Pillar 5's branches on its own candidate branch, on top of the latest released Pillar 4 build, and the **cross-pillar coordinators** check every combine for clashes first (Part 5).
 - **Notes on the bus:** `simNote('trained', { mech })`, `simNote('found', { machine })`, `simNote('incident', { id, step })`, `simNote('promoted')`, `simNote('uniform', { state })`, so Pillar 4's lines and reputation can react without new hooks.
 
 ---
 
 ## Part 4: staffing, waves and check-ins
 
-### The seats (tiered; up to 13)
+### The building seats (tiered; up to 11; the build and coordination crew is in Part 5)
 
 **Tier 1, the foundation (start when the user approves):**
 
@@ -257,34 +257,31 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 | --- | --- | --- | --- | --- | --- |
 | S1 | Deck architect 2 | new | `claude/decks-p5` | 0.47.x | `// P5 places` blocks in `DECKS[n]`, kit at the end of 4b |
 | S2 | Works writer | new (or a Pillar 4 writer moved over in their wave 4) | `claude/writer-p5` | — | `content/` lines for training moments, incidents, inspection remarks, the promotion; reports to Pillar 4's head writer |
-| S3 | Pillar 5 collector | new | `claude/p5-mechanics` | 0.54.x | merges M-A…M-E (and S2's baked lines via the head writer) into one branch, runs every check, hands the lead one branch a round |
-| S4 | Check runner | as Pillar 4 | `claude/integration-test` | — | runs the checks in parallel |
 
 **On call:** sim (rotas, musters, the duty officer, the stuck lift, crew at team jobs, `playerBed()`), performance (poses and decals), galley (oven tuning's effect on cooking, Brennan's lines), social A (Work reputation as trust; reactions), device (only if the skin needs something), interactions (tap targets for new places), crew designer (the junior laundry rota, if it's roster data). **This planner** stays on until the mechanic designer is hired, then hands over (`plans/handover-pillar5-planner.md`).
 
-*(Build ranges 0.51-0.54 look free in DEV_NOTES and git history; the build master confirms before the first push. The user's staffing answer was cut off ("some workers focused on keeping the…"); the collector and the check runner are the planner's guess at it, to be adjusted.)*
+*(Build ranges 0.51-0.53 look free in DEV_NOTES and git history; the build master confirms before the first push.)* The build master, reviewers, check runners, watchdog and the cross-pillar coordinators are in **Part 5**.
 
 ### The briefs (ready to paste)
 
-**Every brief starts with this paragraph:** "You are the <seat> for Starship Cadet's Pillar 5 (new ways to work). Read CLAUDE.md, then DEV_NOTES.md, plans/pillar5-plan.md (Parts 1 and 3, your seat in Part 4, and your mechanics in Part 2), plans/pillar5-notes.md (the user's answers), the approved spec page for each mechanic you build (plans/mechanics/<id>.html), plans/pillar4-plan.md Part 6 (the rules for sharing the one game file with Pillar 4, which is building at the same time), TEAM.md, and your predecessor's handover note if your role had one. Push only to <branch>. Touch only what your seat owns; anything else goes through its owner via the lead (mechanic engineers: via the collector). Each turn: small exact-string edits (never rewrite the game file), bump the build in the HUD, add a DEV_NOTES row, run the tests (one browser check at a time; always `intro_check` when you touch jobs, the player or the clock), commit, push, and report to the lead (session_01PJtmxWgAPLebXSZKP6ZRpG) with send_message (mechanic engineers report to the collector). Hooks into other sections are one-line, typeof-guarded, and listed in DEV_NOTES' hook register. Hand over at about 70% memory with plans/handover-<role>.md. Commit messages end with the Co-Authored-By line; never put model names anywhere else."
+**Every brief starts with this paragraph:** "You are the <seat> for Starship Cadet's Pillar 5 (new ways to work). Read CLAUDE.md, then DEV_NOTES.md, plans/pillar5-plan.md (Parts 1 and 3, your seat in Part 4, and your mechanics in Part 2), plans/pillar5-notes.md (the user's answers), the approved spec page for each mechanic you build (plans/mechanics/<id>.html), plans/pillar4-plan.md Part 6 (the rules for sharing the one game file with Pillar 4, which is building at the same time), TEAM.md, and your predecessor's handover note if your role had one. Push only to <branch>. Touch only what your seat owns; anything else goes through its owner via the lead. Each turn: small exact-string edits (never rewrite the game file), bump the build in the HUD, add a DEV_NOTES row, run the tests (one browser check at a time; always `intro_check` when you touch jobs, the player or the clock), commit, push, and report to the lead (session_01PJtmxWgAPLebXSZKP6ZRpG) with send_message; the Pillar 5 build master takes your branch from there. Hooks into other sections are one-line, typeof-guarded, and listed in DEV_NOTES' hook register. Hand over at about 70% memory with plans/handover-<role>.md. Commit messages end with the Co-Authored-By line; never put model names anywhere else."
 
 - **F1 Mechanic designer.** For each mechanic in Part 2, in ladder order, write `plans/mechanics/<id>.html` in the style of `plans/pillar5-plan.html`: what you do step by step (with a small sketch), who teaches it and the training script outline, how it unlocks and grows, what the crew do, what changes on the deck, what it asks of each section, the phone budget, and 2-3 questions for the user. Stay one or two pages ahead of the builders; the lead shows each page to the user; nothing is built from a page the user hasn't approved. Also weigh the "more ideas" list with the user's picks.
 - **F2 Systems engineer.** Section 17. First: take section 17 back from the sim engineer (session_01R6RBwwBM9aorpsqDCrztDU) and read `plans/handover-systems.md`. Then: `playerTier()` (inert); real faults for you (`CREW_LEAVE_FAULT`, the `found` delay, crew busier on bigger jobs, measured in `machine_check`); **job kinds with steps** (a job carries a mechanic id and its steps, so each mechanic's jobs post, are claimed by crew, and are done by you through section 24); then each mechanic's machine side as its spec asks: rounds' found jobs, the washers as real machines, manifests and stock counts, tuning drift, parts and readings, incidents, team jobs, the pipe graph. Never change a reserved job.
 - **F3 Player engineer.** Section 15. The work-step building blocks (`look`, `choose`, `turn`, `wait`, and `hold`/`carry` as now) as data a mechanic can describe; `careerSpeed(kind)` in task minutes; your uniform (worn, grubby, changed at the locker) and its hygiene effect; tidying your berth; the off-shift activities (tinkering, cabin spots, star logging). Keep `player_check` current.
 - **F4 Career engineer.** New lazy section `// 24. WORK` (after section 21) with the core: `SHIP.career` and `save.career`, `CAREER_LADDER`, `careerHas`, training moments (a `train` slot on `jobReserve`, the teacher leading then following, meeting lines, `simNote('trained')`), tools, skill in words, trust (reads Work reputation; a stand-in until it's in), the drill and inspection hooks for M-B, certification and promotion (with the sim engineer for the bed and door), the device pages (Training, Work log, Tools via `deviceApp`). `career_check.py`, and the frame of `mech_check.py` that each mechanic adds a part to. Give out hash keys from 850-899.
-- **M-A … M-E Mechanic engineers.** Build your mechanics from their approved spec pages, each in its own sub-block of section 24 (`// 24a. ROUNDS` and so on), on the foundation's building blocks; ask F2/F3/F4 (via the collector) for anything the foundation lacks rather than editing their sections. Add your part to `mech_check.py`. One mechanic at a time: build it, test it, the user plays it at a check-in, then the next.
+- **M-A … M-E Mechanic engineers.** Build your mechanics from their approved spec pages, each in its own sub-block of section 24 (`// 24a. ROUNDS` and so on), on the foundation's building blocks; ask F2/F3/F4 directly (sideways, as TEAM.md allows) for anything the foundation lacks rather than editing their sections. Add your part to `mech_check.py`. One mechanic at a time: build it, test it, the user plays it at a check-in, then the next.
 - **S1 Deck architect 2.** Read the Pillar 4 deck architect's handover and DEV_NOTES "How decks work". Places and dressing for Pillar 5's rooms in `// P5 places` blocks: the laundry (load, dryer, fold, the linen cart dock), storage count spots and the hold's crates, valves by the corridors, the extinguisher and bulkhead, your cabin 4-23 with its spots, the Deck 5 machine rooms and the spine (M9), the machine shop's order board. `deck_check` on every push; other decks pixel-identical.
 - **S2 Works writer.** Follow `content/README.md`, the voice bible and the voice cards. Write the training moments, the incidents' lines, the inspection's nods and remarks, the drill, the promotion and the workshop orders; report to the head writer.
-- **S3 Pillar 5 collector.** Merge the mechanic engineers' branches into `claude/p5-mechanics` in a fixed order, run every check, fix merge seams with their owners, and hand the lead one branch a round.
 
 ### Waves (tied to Pillar 4's progress)
 
 **Wave 0: approval (now).** The user approves this plan. F1 (the designer) is hired first and writes the spec pages for M1-M3.
 
-**Wave 1: the foundation (alongside Pillar 4's waves 2-3).** F2, F3, F4 (+F1). The ladder, training moments, work steps, `playerTier()`, real faults, skill in words, the device pages, `career_check`, `mech_check`'s frame. **Gate:** everything inert in a combined build (`cadet_test` ALL IDENTICAL, every check passes, `intro_check` included), then the real faults switched on.
+**Wave 1: the foundation (alongside Pillar 4's waves 2-3).** F2, F3, F4 (+F1), with B1, X1 and X2 (Part 5) from the start. The ladder, training moments, work steps, `playerTier()`, real faults, skill in words, the device pages, `career_check`, `mech_check`'s frame. **Gate:** everything inert in a combined build (`cadet_test` ALL IDENTICAL, every check passes, `intro_check` included), then the real faults switched on.
 - **Check-in 1:** play a work day with more real faults and quicker repairs; approve the spec pages for M1-M3.
 
-**Wave 2: rounds, laundry, the drill and the inspection.** M-A (M1), M-B (M2, M3), S1, S2, S3. **Check-in 2:** play week 2: your first round, a laundry duty, a drill and an inspection.
+**Wave 2: rounds, laundry, the drill and the inspection.** M-A (M1), M-B (M2, M3), S1, S2. **Check-in 2:** play week 2: your first round, a laundry duty, a drill and an inspection.
 
 **Wave 3: hauling and tuning** (after Pillar 4's wave 3). M-C (M4), M-A (M5). **Check-in 3.**
 
@@ -292,7 +289,7 @@ Each card: **the verb · how it's taught · how it unlocks · how it grows · wh
 
 **Wave 5: after promotion.** M-D (M8 team jobs), M-E (M9 tracing), M-C (M10 workshop, tinkering), F3 (cabin touches, star logging). **Check-in 5:** Pillar 5 final; then a pull request to `main` with the user's OK.
 
-At most about 9 Pillar 5 sessions at once (wave 2-3), while Pillar 4 thins out into writing.
+At most about 9 building seats at once (waves 2-3), plus the Part 5 crew, while Pillar 4 thins out into writing. The Pillar 5 build master and the coordinators start in wave 1, before the first Pillar 5 branch is combined.
 
 ### Test changes
 
@@ -306,13 +303,90 @@ At most about 9 Pillar 5 sessions at once (wave 2-3), while Pillar 4 thins out i
 
 ---
 
+## Part 5: the build and coordination crew (mirrors Pillar 4's Full level)
+
+The user (2026-10-17): "don't be afraid to hire as many as needed. Like some workers focused on keeping the two pillar development straight. Like our reviewers but specifically for this task", and "We might want a 2nd master builder for Pillar 5. We should mirror our current structure to the appropriate scale." So Pillar 5 gets its own copy of Pillar 4's Full-level crew (TEAM.md, "Staffing levels"), smaller, plus **two cross-pillar coordinators** whose only job is keeping the two pillars from colliding.
+
+### The seats
+
+| # | Seat | New? | Branch | Builds | Does |
+| --- | --- | --- | --- | --- | --- |
+| B1 | **Pillar 5 build master** | new | `claude/integration-test-p5` | candidates numbered by the lead's release line | combines and checks Pillar 5's branches on its own candidate branch, always on top of the latest released `claude/ship-integration`; runs the Pillar 5 check runners; hands the lead each candidate: what's in, every check result, explained differences, the hash to release |
+| X1 | **Cross-pillar coordinator 1: the code** | new | `claude/cross-pillar` (notes and a script only) | — | owns the shared ownership table and the shared hook register for both pillars (`plans/cross-pillar.md`); writes and runs `clash_check.py`; checks every Pillar 5 branch against Pillar 4's current branches (and the reverse) before it's combined |
+| X2 | **Cross-pillar coordinator 2: the work** | new | `claude/cross-pillar-2` (notes only) | — | watches for duplicate or overlapping work across the two pillars' seats (designs, data, lines, places, Mail, device pages); keeps the clash log; settles small overlaps sideways and sends anything bigger to the lead |
+| R3 | **Adversarial reviewer 3** | new | `claude/reviews-3` (notes only) | — | reviews every Pillar 5 branch before it's combined (PASS / PASS WITH FIXES / BLOCK), using `plans/review-checklist.md` plus a Pillar 5 section it adds: mechanics stay physical, words not numbers, the ladder's rules, determinism, phone budget |
+| R4 | Adversarial reviewer 4 (from wave 3, when five mechanic engineers are active) | new | `claude/reviews-4` | — | splits the Pillar 5 branches with R3 (R3: foundation and M-A, M-B; R4: M-C, M-D, M-E, S1) |
+| CR | **Pillar 5 check runners** (2-3, short-lived) | new each time | — | — | run one check each on B1's candidate in parallel, report to B1, archived when they report |
+| W | **Phone-speed watchdog** | shared: performance engineer 2 (`claude/crowd-render`) | — | — | `perf_check` on every combined build from either pillar; a second watchdog only if it can't keep up |
+| PT | Playtester (from wave 2, shared with Pillar 4's if there is one) | — | — | — | plays each Pillar 5 check-in build as a new player would, before the user does |
+
+**Reporting** (TEAM.md's chain of command): all of these report to the lead. B1 and X1 also send every clash straight to Pillar 4's build master (session_012K7RZ3oSX2vpBb1rR66MBh), sideways, so both build masters see it at once.
+
+### How the two build masters share one ship
+
+- **One `claude/ship-integration`, one release line, one releaser.** Only the lead pushes `claude/ship-integration` and publishes the playable link. Releases stay in one sequence (0.60.N, …); each release note says whose round it was.
+- **Separate candidate branches.** Pillar 4's build master builds candidates on `claude/integration-test`; Pillar 5's on `claude/integration-test-p5`. Neither ever pushes to the other's.
+- **Pillar 4 releases first each round.** When both have a candidate ready, Pillar 4's goes first. Pillar 5's build master then **merges** the new release into its candidate (a merge, never a rebase, so helpers' checkouts stay valid), re-runs every check, and only then offers it to the lead. A Pillar 5 candidate built on an older release is never released as it is.
+- **Never racing.** While a Pillar 4 candidate is with the lead, B1 finishes its checks but waits. If Pillar 4 has nothing ready, Pillar 5 can release on its own. If one pillar is blocked for long, the lead may alternate rounds instead.
+- **Before every combine, either pillar's:** X1 runs `clash_check.py` on the incoming branches against the other pillar's latest candidate; X2 confirms nothing duplicates work in flight; then the build master combines.
+- **Generated blocks** (ROSTER, LINES, MEETINGS, TRADITIONS) are always re-generated after a merge, never merged by hand (Pillar 4's rule).
+- **Pillar 5's merge order inside a round:** systems (17) → player (15) → career (24 core) → mechanics (24a…, in ladder order) → deck architect 2 → Works writer's lines (through the head writer's generated blocks).
+
+### What the coordinators check
+
+`clash_check.py` (X1's, run on any two branches or a branch against a candidate):
+- **Sections touched:** every changed line is mapped to its section; a branch touching a section it doesn't own (by the shared ownership table) is flagged.
+- **Names:** any new top-level `const`, `let`, `function` or `class` that already exists elsewhere (the player engineer's handover lists two real collisions this caused).
+- **Hash keys:** every `schedU(..., k)` / `k:` against the shared key list (Pillar 4: 434-849; Pillar 5: 850-899; Pillar 6 later: 950-999; section 18's `k + 100` rule).
+- **Save fields:** new `save.*` and `SAVE_EXTRA` entries, and anything that changes `SAVE_V`.
+- **Build ranges and HUD lines:** each branch's build number inside its seat's range.
+- **Hooks:** every new one-line cross-section call is in the shared hook register.
+- **Merge order:** the branch's base is the latest release (or it says why not).
+
+X2's watch list: two seats designing the same thing (as when two seats both built a tasting vote); the same machine, room or place changed by both pillars' architects; the same crew member's lines or schedule changed by both; device pages that say the same thing; Mail that would arrive twice; traditions or events that would stack on the same evening. X2 reads both pillars' seat lists, their latest pushes and the spec pages each round.
+
+**The shared page `plans/cross-pillar.md`** (X1 and X2): the ownership table for every section and sub-block across both pillars, the shared hook register (DEV_NOTES keeps its copy in step), the hash-key list, the save fields, the build ranges, and the clash log (open and settled).
+
+### Briefs (ready to paste; each starts with Part 4's common paragraph)
+
+- **B1 Pillar 5 build master.** Read TEAM.md ("Chain of command", "Staffing levels") and Pillar 4's build master's notes first; agree the hand-off in this part with them (session_012K7RZ3oSX2vpBb1rR66MBh) before your first combine. Combine Pillar 5 branches on `claude/integration-test-p5`, always on top of the latest `claude/ship-integration`, in the merge order above, after X1's clash check and R3/R4's verdicts. Run every check (start check runners for the slow ones, one check each); explain every difference; never release: hand the lead the candidate's hash, what's in and every result. When Pillar 4 releases while you have a candidate, merge the release in and re-run everything.
+- **X1 Cross-pillar coordinator (the code).** Build `plans/cross-pillar.md` from both plans, DEV_NOTES' hook register and key list, and the current branches. Write `clash_check.py` (git diff by section, names, keys, save fields, builds, hooks, base). Run it on every Pillar 5 branch before B1 combines it and on every Pillar 4 branch that touches a section Pillar 5 uses, and on each pair of candidates before a release. Send each clash to the owners of both branches, both build masters and the lead; log it. You never edit the game file.
+- **X2 Cross-pillar coordinator (the work).** Each round, read both pillars' seat lists, the latest pushes, the spec pages and the tradition and line work in flight; look for duplicated or overlapping work (X2's watch list above). Settle small overlaps directly with the two seats (who does it, who drops it); anything that changes a seat's scope or the design goes to the lead. Keep the clash log in `plans/cross-pillar.md` with X1.
+- **R3 / R4 Adversarial reviewers.** Read `plans/review-checklist.md` and add a Pillar 5 section (mechanics physical, no timers or scores, words not numbers, the ladder's rules, `intro_check` run, determinism twice, phone budget, one owner per sub-block). Review each Pillar 5 branch before it's combined: try to break it, then give PASS / PASS WITH FIXES / BLOCK with a note to the lead and the branch's owner.
+- **CR Check runners.** Run the one check you're given on B1's candidate, report the result and any failure's details to B1, then idle to be archived.
+
+### Pillar 5's staffing levels (like TEAM.md's)
+
+| Level | Who is active (Pillar 5) | Who merges and checks Pillar 5 |
+| --- | --- | --- |
+| **Full** | the wave's seats + B1 + X1 + X2 + R3 (+R4 from wave 3) + 2-3 check runners + the shared watchdog (+ playtester from wave 2) | B1 on `claude/integration-test-p5`; X1/X2 before each combine; R3/R4 before each branch; the lead releases |
+| **Normal** | the wave's seats + B1 + one coordinator (X1 takes X2's watch list) | B1 combines; seats self-check against the review checklist; check runners only when needed |
+| **Lean** | at most 2-3 seats on the current mechanic's critical path; everyone else on standby | Pillar 4's build master combines Pillar 5 branches in its own rounds (after Pillar 4's); X1 runs `clash_check.py` only |
+
+**Scaling down from Full to Normal (the lead):**
+1. R3/R4: finish the review in hand, send findings, idle; archived. Seats self-check against `plans/review-checklist.md`.
+2. X2: write its open watch items into `plans/cross-pillar.md`, idle; archived. X1 takes the watch list.
+3. Check runners: stop starting new ones; archive those that reported.
+4. Playtester (if any): write findings, idle, archive.
+
+**Normal to Lean:**
+1. B1: finish the current combine, push its state to `claude/integration-test-p5`, write `plans/handover-build-master-p5.md` (what's merged, what's pending, check results), idle; archived. Pillar 4's build master takes Pillar 5 branches in its rounds.
+2. Pause every seat not on the current mechanic's critical path ("finish your turn, push, update your handover note, idle"): the writer and the designer first (their work is text), then the mechanic engineers not on the current mechanic.
+3. X1 stays (light: `clash_check.py` before each combine), or hands its table to Pillar 4's build master if usage must drop further.
+
+**Scaling back up:** the reverse; reopen archived sessions or hire fresh ones from the handover notes. Nothing is lost: every role's work is on its branch and in its handover note.
+
+**Head count at Full:** 4 foundation seats + up to 5 mechanic engineers + 2 support (deck architect 2, the writer) + B1 + 2 coordinators + 1-2 reviewers + 2-3 short-lived check runners: about 16-19 Pillar 5 sessions at the busiest (waves 2-3), alongside Pillar 4's waves 3-4 (when Pillar 4 is mostly writers, who are light on usage). The lead can drop to Normal or Lean at any time with the steps above.
+
+---
+
 ## Risks
 
 - **Too much at once for a new player.** *Answer:* the ladder: one mechanic at a time, taught by a person, never two on a day, waiting for you to use the last one; everything earlier keeps working the simple way.
 - **Mechanics turning into mini-games** (the design's "no mini-games standing in for the job"). *Answer:* every verb happens in the world with your hands; feedback is the machine itself; no timers or scores; tuning flagged to the user.
 - **Phone draw calls (450).** Laundry baskets, crates, puddles, smoke, made things, the new rooms. *Answer:* each mechanic's props at most 2-3 draw calls (instanced, its deck only, only while in use); cabin spots at most 4; the M9 rooms measured by `deck_check`; the performance engineer on call.
 - **Determinism.** Faults, drift, incidents and which part fails are chosen. *Answer:* hashed from ids and the day or hour, never `R()`; every check runs twice.
-- **The one-file merge load.** Up to 13 new seats next to Pillar 4. *Answer:* one new section with a sub-block per mechanic; the collector merges mechanics first; Pillar 5 after Pillar 4 each round; mechanics two or three at a time.
+- **The one-file merge load.** Up to about 19 Pillar 5 sessions next to Pillar 4 at the busiest. *Answer:* one new section with a sub-block per mechanic; a Pillar 5 build master and two cross-pillar coordinators (Part 5); Pillar 4 releases first each round; mechanics two or three at a time.
 - **Breaking Pillar 4's first week.** *Answer:* reserved jobs untouched; the ladder starts on Day 8; `intro_check` on every relevant push.
 - **The crew still do everything.** *Answer:* each mechanic's crew side is measured in `mech_check` (they do it when you don't, but slower) so the ship never depends on you, and there's still work for you.
 - **Two ideas of reliability.** *Answer:* trust reads Pillar 4's Work reputation.
@@ -329,4 +403,4 @@ At most about 9 Pillar 5 sessions at once (wave 2-3), while Pillar 4 thins out i
 4. **The ladder's pace:** about one new mechanic every 2-3 ship days after week 1, promotion at about Day 20. *Default:* yes.
 5. **Which "more ideas"** (leak hunting, tool upkeep, the lift roof, irrigation, coolant rounds, the logbook, rewiring) should join the ladder? *Default:* none yet; the designer brings the user's picks as spec pages after wave 2.
 6. **Your own cabin:** Spare 4-23 (no window)? *Default:* yes.
-7. **Staffing:** the rest of the user's sentence ("some workers focused on keeping the…"): the collector and the check runner are the planner's guess.
+7. **Staffing level to start at:** Pillar 5 Full (Part 5) from wave 1, or Normal until wave 2 when the mechanic engineers arrive? *Default:* Full from wave 1 for the coordinators and build master (they set up the shared table and the clash check before the first Pillar 5 branch lands); reviewers and the second check runners from wave 2.
