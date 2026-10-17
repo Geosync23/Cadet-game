@@ -106,6 +106,7 @@ def run(path):
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
             # heads-ups (0.35.29, built on the calendar reminders): R.ahead (15) ship minutes before a tradition, the strip off
             # shift and a quiet Calendar badge on shift; nothing earlier; none for Don't; Remind me shows even on shift
+            g.ev("while (TIP_Q.length) tipDone()")   # tip cards close on the game clock since 0.28.48 (they used to on real seconds): clear any waiting, so heads-ups aren't held behind one
             rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15; R.on = true;
               const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
               const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min }, hu = () => document.getElementById('devHu');
@@ -127,6 +128,7 @@ def run(path):
             # heads-ups for everything in the Schedule (0.35.29): an appointment 15 and 0 minutes before, with Go there; a meal;
             # Meals and your shift off; one at a time (a queue); waits behind a meeting; no repeat (saved); a tap opens the
             # Schedule; off with the switch; inside the screen on a phone
+            g.ev("while (TIP_Q.length) tipDone()")
             hu = g.ev("""(() => { const ev0 = __ev.slice(), wasOpen = DEV.open, D = SHIP.device, R = D.calendarRemind, save = { day: SHIP.time.day, min: SHIP.time.min }, keepAppts = D.appts; R.ahead = 15;
               const el = () => document.getElementById('devHu'), txt = () => { const h = el(); return h && !h.hidden ? h.textContent : ''; };
               const go = (m, keep) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; if (!keep) devHeadsReset(); devTickMin = -1; deviceTick(); return txt(); };
@@ -155,6 +157,7 @@ def run(path):
             check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'].startswith('With ') and hu['offMeal'] == '', f'heads-up: on screen, a tap opens the Schedule; switched off, only appointments: {hu}')
             # 0.35.33 (reviewer 2): a showing strip steps back when a chat card opens (it waits); a group that gains a person
             # isn't announced again
+            g.ev("while (TIP_Q.length) tipDone()")
             cb = g.ev("""(() => { const D = SHIP.device, keepA = D.appts, save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 2, T = (d - 1) * 1440 + 1290;
               const pl = apptPlaces()[0], ps = apptPeople().slice(0, 2).map(p => p.id), el = document.getElementById('devHu');
               D.appts = [{ id: 911, grp: 911, with: [ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
@@ -169,6 +172,7 @@ def run(path):
             check(cb == {'shown': True, 'back': True, 'again': True, 'grown': True}, f'heads-up: waits while a chat card is open; a grown group is not new: {cb}')
             # section 18's occasions in the Schedule and heads-ups (0.35.30): a booked Captain's table is listed and gets a heads-up
             # with Go there; a chance one (the bridge invite, a surprise) never shows; one already kept doesn't either
+            g.ev("while (TIP_Q.length) tipDone()")
             oc = g.ev("""(() => { if (typeof OCCASIONS === 'undefined' || !Array.isArray(SHIP.occasions)) return { own: false };
               const keep = SHIP.occasions.slice(), save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 3, T = (d - 1) * 1440 + 1170, ct = OCCASIONS.captainsTable;
               const ch = Object.keys(OCCASIONS).find(k => OCCASIONS[k].chance);

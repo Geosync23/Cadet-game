@@ -28,6 +28,8 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   .controls button svg{width:19px;height:19px}
   .controls #newgame.ask{background:var(--teal);color:#08201d}
   .hud{max-width:calc(100vw - 14px - 148px - 12px - 12px)}
+  .controls #pauseBtn{position:fixed;top:86px;height:31px}   /* 0.28.50: beside the Device button (section 15's pausePlace), not a third row */
+  .controls #pauseBtn::after{content:"";position:absolute;inset:-7px -4px}   /* a 44px tap target, clear of the clock above and the needs strip below */
 }
 @media (max-width:360px){                                 /* 0.35.36: the narrowest phones: a little tighter, so "Day 100, Wed 06:00" fits on one line */
   .hud{padding:5px 8px 6px;max-width:calc(100vw - 14px - 148px - 12px - 8px)}
@@ -7648,13 +7650,37 @@ function sleepUntil(min) {
   const now = shipNow(), today = (SHIP.time.day - 1) * 1440 + min;
   skipTo(today > now ? today : today + 1440);
 }
+// ---- the frozen clock (0.28.50, under section 15's Pause, 0.28.48): while the ship is frozen (PAUSE.on, or a game of
+// Tiles being played: section 23's PAUSE.tiles) the main loop skips the sim. freezeSync() (once a frame, and from
+// pauseSet) starts and stops the freeze; simNow() is performance.now() less the time spent frozen, for the sim's own
+// real-time pacing (cool-downs, timeouts, auto-advances) so nothing jumps afterwards; simTimeout(fn, ms) / simClear(id)
+// are setTimeout on that clock, run by the main loop (the tip card, the heads-up, the Captain's address, the intro's
+// spoken lines). Leaving a freeze also calls section 15's pauseShift(ms) for the stamps that stay on real time.
+// Toasts, input and the ghost-tap guard keep real time. Frozen time simply doesn't pass. Nothing here calls R().
+const FREEZE = { frozen: false, at: 0, ms: 0 };
+function simNow() { return (FREEZE.frozen ? FREEZE.at : performance.now()) - FREEZE.ms; }
+function freezeSync() {
+  let f = false; try { f = !!(PAUSE.on || PAUSE.tiles && PAUSE.tiles()); } catch (e) { f = false; }
+  if (f === FREEZE.frozen) return f;
+  const n = performance.now();
+  if (f) FREEZE.at = n; else { const d = n - FREEZE.at; FREEZE.ms += d; if (typeof pauseShift === 'function') pauseShift(d); }
+  FREEZE.frozen = f; return f;
+}
+const SIM_TIMERS = []; let SIM_TID = 0;
+function simTimeout(fn, ms) { const id = ++SIM_TID; SIM_TIMERS.push({ id, at: simNow() + (ms || 0), fn }); return id; }
+function simClear(id) { const i = SIM_TIMERS.findIndex(x => x.id === id); if (i >= 0) SIM_TIMERS.splice(i, 1); }
+function simTimers() {                                   // main loop, when not frozen
+  if (!SIM_TIMERS.length) return;
+  const n = simNow();
+  for (let k = 0; k < SIM_TIMERS.length; k++) { const x = SIM_TIMERS[k]; if (x.at > n) continue; SIM_TIMERS.splice(k--, 1); try { x.fn(); } catch (e) { console.error(e); } }
+}
 // the clock's frame step (main loop): the HUD clock each ship minute, a save each ship hour
 function tickShip(dt) {
   if (document.hidden) return;                           // time never runs while the tab is hidden
   const m = Math.floor(SHIP.time.min), h = Math.floor(shipNow() / 60);
   SHIP.time.min += dt * SHIP_RATE;
   if (SHIP.time.min >= 1440) { SHIP.time.min -= 1440; SHIP.time.day++; }
-  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); if (typeof careerTick === 'function') careerTick(); }   // section 14: appointments kept or missed; your shift's start
+  if (Math.floor(SHIP.time.min) !== m) { updateClock(); if (typeof pausePlace === 'function') pausePlace(); if (typeof apptTick === 'function') apptTick(); if (typeof shiftTick === 'function') shiftTick(); if (typeof careerTick === 'function') careerTick(); }   // section 14: appointments kept or missed; your shift's start
   if (Math.floor(shipNow() / 60) !== h) saveGame();
 }
 
@@ -9604,9 +9630,9 @@ const DEVICE_SKIN = (() => {
     tip(t) {                                   // the tip card, in the screen's style; null hides it
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
-      clearTimeout(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
+      simClear(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
       devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
-      c._t = setTimeout(() => tipDone(), 9000);
+      c._t = simTimeout(() => tipDone(), 9000);   // section 13's frozen clock (0.28.50): a pause holds it
     },
     dialogue(v) {                              // the meeting panel: a strip across the bottom, in the screen's style
       let c = $('devDlg');
@@ -9630,10 +9656,10 @@ const DEVICE_SKIN = (() => {
       let c = $('devAddr');
       if (!c) { c = mk('div', 'devaddr'); c.id = 'devAddr'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
         c.addEventListener('pointerdown', e => e.stopPropagation()); c.onclick = () => skin.address(null); }
-      clearTimeout(c._t); c.hidden = !a; if (!a) return;
+      simClear(c._t); c.hidden = !a; if (!a) return;
       devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       c.append(mk('small', '', ((a.from || 'The Captain') + ', to all hands').toUpperCase()), mk('p', '', a.text));
-      c._t = setTimeout(() => skin.address(null), 20000);
+      c._t = simTimeout(() => skin.address(null), 20000);
     },
     chat(el, v) {                              // section 20's chat card (CHAT_SKIN.draw), in the screen's style
       el.className = 'devchat'; el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = '';
@@ -9647,7 +9673,7 @@ const DEVICE_SKIN = (() => {
       let c = $('devHu');
       if (!c) { c = mk('div', 'devhu'); c.id = 'devHu'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
         c.addEventListener('pointerdown', e => e.stopPropagation()); c.onclick = () => devHeadsDo('open'); }
-      clearTimeout(c._t); c.hidden = !h; if (!h) return;
+      simClear(c._t); c.hidden = !h; if (!h) return;
       c.dataset.ph = SHIP.device.settings.phosphor; c.classList.toggle('soft', !!h.soft); c.textContent = '';
       const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
       if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
@@ -9655,7 +9681,7 @@ const DEVICE_SKIN = (() => {
       for (const id of ['needStrip', 'actBar']) { const e = document.getElementById(id); if (!e || e.hidden || !e.offsetWidth) continue;
         const r = e.getBoundingClientRect(); if (r.right > me.left && r.left < me.right && r.bottom + 8 > top) top = r.bottom + 8; }
       if (top !== me.top) c.style.top = Math.round(top) + 'px';
-      c._t = setTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
+      c._t = simTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
     },
     notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
   };
@@ -10547,7 +10573,7 @@ let TEACH_CK = -1e9, TEACH_ST = null;
 const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
-  ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.49)
+  ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
   ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
   ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
@@ -10594,7 +10620,7 @@ function teachWatch(now) {                               // what's happened, for
 }
 if (typeof onSim === 'function') {
   onSim('tierUp', x => { if (TEACH_ST && x && x.tier > TEACH_ST.tierUp) TEACH_ST.tierUp = x.tier; });
-  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin' && TEACH_ST.turnin === undefined) TEACH_ST.turnin = shipNow(); });   // when (0.28.49)
+  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin' && TEACH_ST.turnin === undefined) TEACH_ST.turnin = shipNow(); });   // when (0.28.50)
 }
 // the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
 // day 8) with tips, which is when they're most use.
@@ -10723,7 +10749,7 @@ function newsTick(now) {                                 // once a ship minute (
 // stays paused. Resuming moves the real-time stamps that pace things (the warnings' and tips' gaps, a dialogue's
 // auto-advance) on by the pause, so nothing jumps; toasts and the ghost-tap guard keep their own real time. Paused time
 // simply doesn't pass: determinism is untouched.
-const PAUSE = { on: false, since: 0 };
+const PAUSE = { on: false, since: 0, tiles: null, tilesTap: null };   // tiles / tilesTap: section 23's (0.28.50)
 function pauseSet(on) {
   on = !!on; if (on === PAUSE.on) return PAUSE.on;
   const now = performance.now(), btn = document.getElementById('pauseBtn');
@@ -10739,15 +10765,27 @@ function pauseSet(on) {
   }
   if (on) {
     PAUSE.on = true; PAUSE.since = now; try { saveGame(); } catch (e) { /* the save's own problem */ }
-  } else {
-    const d = Math.max(0, now - PAUSE.since); PAUSE.on = false;
-    for (const k of ['at', 'toast', 'card', 'warn', 'tip']) POP[k] += d; TOAST_AT += d;
-    TEACH_CK += d; if (typeof DIALOGUE !== 'undefined' && DIALOGUE && isFinite(DIALOGUE.at)) DIALOGUE.at += d;
-  }
+  } else PAUSE.on = false;
+  freezeSync();                                          // section 13's frozen clock (0.28.50): it calls pauseShift as the freeze ends
   el.hidden = !on; el.style.display = on ? 'flex' : 'none';   // the inline display would beat [hidden]
   if (btn) { btn.setAttribute('aria-pressed', String(on)); btn.setAttribute('aria-label', on ? 'Resume the game' : 'Pause the game'); const sp = btn.querySelector('span'); if (sp) sp.textContent = on ? 'Resume' : 'Pause'; }
   return PAUSE.on;
 }
+// leaving any freeze (Pause, a game of Tiles): the real-time stamps that pace things move on by it (section 13's freezeSync)
+function pauseShift(d) {
+  if (!(d > 0)) return;
+  for (const k of ['at', 'toast', 'card', 'warn', 'tip']) POP[k] += d; TOAST_AT += d;
+  TEACH_CK += d; if (typeof DIALOGUE !== 'undefined' && DIALOGUE && isFinite(DIALOGUE.at)) DIALOGUE.at += d;
+}
+// narrow phones (0.28.50): the 3 x 2 icon grid has no room for a 7th (a third row would sit under the tip card and the
+// heads-up), so Pause sits beside the Device button at its height (CSS), lined up here; a 44px tap target
+function pausePlace() {
+  const b = document.getElementById('pauseBtn'), d = document.getElementById('devBtn'); if (!b || !d) return;
+  if (!matchMedia('(max-width:720px),(max-height:500px)').matches) { b.style.left = b.style.top = b.style.height = ''; return; }
+  const r = d.getBoundingClientRect(); b.style.left = Math.round(r.right + 8) + 'px'; b.style.top = Math.round(r.top) + 'px'; b.style.height = Math.round(r.height) + 'px';
+}
+addEventListener('resize', pausePlace); setTimeout(pausePlace, 0);
+if (typeof ResizeObserver === 'function') new ResizeObserver(() => pausePlace()).observe(document.getElementById('devBtn'));   // the mail count widens it
 { const b = document.getElementById('pauseBtn'); if (b) b.onclick = e => { e.stopPropagation(); pauseSet(!PAUSE.on); }; }
 document.addEventListener('visibilitychange', () => { if (document.hidden) pauseSet(true); });
 
@@ -24687,7 +24725,7 @@ function lineCond(k, v, p, ctx) {
       const r = (LINE_PLACES[x] || x.replace(/_/g, ' ')).toLowerCase(); return ctx.place === x || (ctx.room || '').toLowerCase().replace(/^the /, '') === r; });   // a room: its name with _ for spaces, or a short alias
     case 'deck': { const d = ctx.deck != null ? ctx.deck : typeof deckDef !== 'undefined' && deckDef ? deckDef.num : null; return any(v, x => String(d) === x); }   // the scene's deck (where you are), not the speaker's home deck
     case 'event': return any(v, x => { const [ev, ph] = x.split('.'), n = lineQ('eventNow', t); return !!n && n.id === ev && (!ph || n.phase === ph); });
-    case 'trad': return any(v, x => ctx.trad === x || ctx.tradId === x || (x === 'today' && !!ctx.trad));   // ctx.tradId: the id when ctx.trad is the name (0.28.49)
+    case 'trad': return any(v, x => ctx.trad === x || ctx.tradId === x || (x === 'today' && !!ctx.trad));   // ctx.tradId: the id when ctx.trad is the name (0.28.50)
     case 'gift': return any(v, x => ctx.how === x || ctx.tag === x);
     case 'came': return any(v, x => !!ctx.trad && (x === 'any' || ctx.trad === x || ctx.tradId === x));   // you went to a tradition lately (the caller passes ctx.trad)
     case 'friend': return any(v, x => !!ctx.friend && (x === 'any' || ctx.friendId === x));   // you have a friend aboard (ctx.friend: their name)   // the gift being thanked: how it landed (loved|liked|polite, ctx.how) or its tag (ctx.tag)
@@ -24894,7 +24932,7 @@ function linesTick() {
   if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined') return;
   const t = shipNow(), ovh = typeof CONVOS !== 'undefined' && CONVOS.length > 0 && schedU(m, 0, 752) < OVH_ODDS;
   const react = typeof LINES !== 'undefined' && !!LINES.cue && LINES.cue.length > 0 && (t - REACT_AT < REACT_FRESH || schedU(m, 0, 754) < REACT_ODDS);
-  const now = performance.now(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
+  const now = simNow(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
   const byes = typeof CONVOS !== 'undefined' && CONVOS.some(e => e.leaving);   // goodbye conversations exist (leaving:soon)
   if (!(ovh || react || byes) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
   const day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
@@ -24945,7 +24983,7 @@ function linesScan() {
 }
 // the conversation playing: the next line when it's due; it ends after the last, or stops when the budget says hush
 function linesTalk() {
-  const o = OVH, now = performance.now();
+  const o = OVH, now = simNow();
   const gone = s => !DECK_CREW.includes(s) || !s.h, apart = !!o.b && Math.hypot(o.a.x - o.b.x, o.a.z - o.b.z) > OVH_PAIR + 1.5;
   if (linesHush() || gone(o.a) || (o.b && gone(o.b)) || apart) { for (const b of o.bub) { b.el.remove(); const k = bubbles.list.indexOf(b); if (k >= 0) bubbles.list.splice(k, 1); } OVH = null; OVH_AT = now; return; }
   if (now < o.next) return;
@@ -24982,7 +25020,7 @@ function linesReact(near, t, day) {
     if (!l || !bubbleSay(x.a.h, l.text, REACT_SECS)) continue;
     const k = reactKind(l); done[p.id] = { day, kinds: k ? mine.concat(k) : mine };
     linesHeard(l.id, day, l.tone);
-    const now = performance.now(); OVH_AT = now; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = now;
+    const now = simNow(); OVH_AT = now; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = now;
     return true;
   }
   return false;
@@ -26068,7 +26106,7 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
   }
   ADDRESS_EL.innerHTML = '<div style="font-weight:600;color:#9fe0cf;margin-bottom:2px">' + from + ', to all hands</div>';
   ADDRESS_EL.appendChild(document.createTextNode(text));
-  ADDRESS_EL.hidden = false; clearTimeout(ADDRESS_T); ADDRESS_T = setTimeout(() => { if (ADDRESS_EL) ADDRESS_EL.hidden = true; }, 20000);
+  ADDRESS_EL.hidden = false; simClear(ADDRESS_T); ADDRESS_T = simTimeout(() => { if (ADDRESS_EL) ADDRESS_EL.hidden = true; }, 20000);
 }
 
 // ---- meetings with dialogue (the fourth kind of moment): scripts are data; section 19 (the device engineer) draws
@@ -26208,11 +26246,11 @@ const FEEL = { until: 0, t0: 0, kinds: [], flicker: false, log: [] };
 function eventFeel(kinds, len = 4) {
   FEEL.log.push({ at: shipNow(), kinds: kinds.slice() }); if (FEEL.log.length > 20) FEEL.log.shift();
   if (typeof shipFeel === 'function') return shipFeel(kinds, len);
-  FEEL.t0 = performance.now(); FEEL.until = FEEL.t0 + len * 1000; FEEL.kinds = kinds.slice();
+  FEEL.t0 = simNow(); FEEL.until = FEEL.t0 + len * 1000; FEEL.kinds = kinds.slice();
 }
 function eventFeelFrame() {                              // every frame, after the lights and camera are set, before the render
   if (typeof shipFeel === 'function') return;
-  const now = performance.now(); let k = 1;
+  const now = simNow(); let k = 1;
   if (now < FEEL.until) {
     const s = (now - FEEL.t0) / 1000;
     if (FEEL.kinds.includes('jolt') && s < .7) { const a = .25 * (1 - s / .7); camera.position.x += a * Math.sin(s * 60); camera.position.y += a * .6 * Math.sin(s * 47 + 1); }
@@ -27290,7 +27328,7 @@ function playerInBunk() {
 function socialVisit(m) {
   const min = SHIP.time.min, day = SHIP.time.day;
   if (VISIT) {
-    if (!VISIT.inside && performance.now() > VISIT.until) { const p = VISIT.p; seekEnd(); VISIT = null; toast(shortName(p), '"' + ['No answer. I\'ll catch you tomorrow.', 'Must be asleep. Night!', 'Another time, then.'][Math.floor(schedU(p.seed, day, 657) * 3)] + '" They head off.'); }
+    if (!VISIT.inside && simNow() > VISIT.until) { const p = VISIT.p; seekEnd(); VISIT = null; toast(shortName(p), '"' + ['No answer. I\'ll catch you tomorrow.', 'Must be asleep. Night!', 'Another time, then.'][Math.floor(schedU(p.seed, day, 657) * 3)] + '" They head off.'); }
     if (VISIT && VISIT.inside && (min >= VISIT_END || !CHAT || CHAT.p !== VISIT.p)) { const p = VISIT.p; VISIT = null; if (min >= VISIT_END && CHAT && CHAT.p === p) { chatSay('Is that the time? Quiet hours. Night, ' + chatName() + '.'); setTimeout(() => { if (CHAT && CHAT.p === p) chatClose(); }, 2500); } }
     return;
   }
@@ -27308,7 +27346,7 @@ function socialVisit(m) {
   }
   const el = seekEl(); el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
   el.appendChild(document.createTextNode(' knocks at the door.')); el.hidden = false;
-  SEEK = { p, until: performance.now() + SEEK_SECS * 1000, visit: true }; VISIT = { p, until: SEEK.until, inside: false };
+  SEEK = { p, until: simNow() + SEEK_SECS * 1000, visit: true }; VISIT = { p, until: SEEK.until, inside: false };
 }
 function visitIn() {                                     // you tapped "knocks at the door": they come in
   const p = VISIT && VISIT.p; if (!p) return;
@@ -27982,7 +28020,7 @@ const CHATTER_LAST = [];                                 // the last few lines s
 function socialChatter(m) {
   if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
   if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
-  if (CHAT || sleeping || performance.now() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
+  if (CHAT || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
   const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a))
@@ -27994,7 +28032,7 @@ function socialChatter(m) {
     if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null;
       const l = k && socLine(a.p, 'smalltalk', { t, act: w.act, talk: k, bubble: true }); if (l) text = l.text; else if (k) text = CHATTER_IDLE[k][Math.floor(schedU(a.p.seed, m, 639) * CHATTER_IDLE[k].length)]; }
     if (!text || CHATTER_LAST.includes(text)) continue;
-    if (bubbleSay(a.h, text)) { CHATTER_AT = performance.now(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); if (n) playerHeard(n.id, a.p.id, true); }
+    if (bubbleSay(a.h, text)) { CHATTER_AT = simNow(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); if (n) playerHeard(n.id, a.p.id, true); }
     return;
   }
 }
@@ -28017,7 +28055,7 @@ function seekShow(p, m, why) {                          // the chip: '<name> wav
   const el = seekEl(), U = k => schedU(p.seed, m, k);
   el.innerHTML = ''; const b = document.createElement('b'); b.textContent = shortName(p); el.appendChild(b);
   el.appendChild(document.createTextNode(' ' + ['waves you over.', 'spots you and smiles.', 'calls out: "Got a minute?"', 'beckons you over.'][Math.floor(U(634) * 4)]));
-  el.hidden = false; SEEK = { p, until: performance.now() + SEEK_SECS * 1000, line: why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null };
+  el.hidden = false; SEEK = { p, until: simNow() + SEEK_SECS * 1000, line: why && typeof careerSeekLine === 'function' ? careerSeekLine(p, why) : null };
 }
 function seekEnd() { SEEK = null; const el = document.getElementById('seek'); if (el) el.hidden = true; }
 // socialSeekAsk(id, { from, until, why }) (0.36.58, for section 21's first week): between from and until (absolute ship
@@ -28074,7 +28112,7 @@ function socialSeek(m) {
   if (typeof DECK_CREW === 'undefined') return;
   if (!SEEK && socialSeekAsks(m)) return;
   const near = a => Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= SEEK_NEAR;
-  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || performance.now() > SEEK.until || CHAT) seekEnd(); return; }
+  if (SEEK) { if (SEEK.visit) return; const a = DECK_CREW.find(x => x.p === SEEK.p); if (!a || !near(a) || simNow() > SEEK.until || CHAT) seekEnd(); return; }
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
@@ -29544,7 +29582,7 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 function introUiReset() {
-  const U = INTRO_UI; (U.said || []).forEach(clearTimeout); U.night = null; U.chiefD = null;
+  const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === 'Your bunk' || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
   Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
@@ -29747,7 +29785,7 @@ function introTourLines(id, stub) {
 function introTourTick() {
   const I = SHIP.intro, st = introStep(), fin = st && st.id === 'free' && INTRO_UI.tour.length;   // (the last core lines may run on past dinner's steps)
   if ((!introEscorting(st) && !fin) || typeof player === 'undefined') return;
-  const here = player.here(), now = performance.now(), a = introWalker(), Q = INTRO_UI.tour;
+  const here = player.here(), now = simNow(), a = introWalker(), Q = INTRO_UI.tour;
   const t = INTRO_TOUR.find(x => I.done['tour:' + x.id] === undefined);   // only the next place can be reached
   if (t && deckDef.num === t.deck && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1])) <= t.r) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
     I.done['tour:' + t.id] = Math.floor(shipNow()); { const L = introTourSplit(t); Q.push({ t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }); }
@@ -29797,7 +29835,7 @@ function introNightTick() {
   // after the Chief's welcome (her step done and her meeting over, or missed), or once 'free' came by the clock (19:30)
   const said = I.done['chief:end'] !== undefined || I.missed.includes('chief');
   if (I.done.free === undefined && (I.done.chief === undefined || !said || DIALOGUE || INTRO_UI.meet.length)) return;
-  const p = player.obj.position, U = INTRO_UI, now = performance.now(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
+  const p = player.obj.position, U = INTRO_UI, now = simNow(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
   if (!U.night) {
     if (U.tour.some(q => q.core.length)) return;          // his last tour lines first
     if (!near) { I.done.goodnight = null; introDone('free'); return; }
@@ -29830,8 +29868,8 @@ function introLines(step) {
   return step === 'call' ? [INTRO_CALL[((Math.floor(shipNow()) >> 1) % INTRO_CALL.length + INTRO_CALL.length) % INTRO_CALL.length]] : INTRO_LINES[step];
 }
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
-  INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
-  (lines || []).forEach((text, i) => INTRO_UI.said.push(setTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
+  INTRO_UI.said.forEach(simClear); INTRO_UI.said = [];
+  (lines || []).forEach((text, i) => INTRO_UI.said.push(simTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
 }
 // A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:30 (INTRO_START) until you've typed your name.
 function introManifest() {
@@ -29853,7 +29891,7 @@ function introManifest() {
     introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
     if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
     if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
-    INTRO_UI.pilotAt = performance.now() + 2000;   // introTernTick, on the frame clock (reviewer 1c: not a timer)
+    INTRO_UI.pilotAt = simNow() + 2000;   // introTernTick, on the frame clock (reviewer 1c: not a timer)
     saveGame();
   };
   document.body.appendChild(el); setTimeout(() => input.focus(), 50);
@@ -29873,8 +29911,8 @@ function introTernTick() {
   if (typeof ternRamp !== 'function' || !DECKS[5].tern) return;
   const I = SHIP.intro, k = INTRO_STEPS.findIndex(x => x.id === I.step), free = INTRO_STEPS.findIndex(x => x.id === 'free');
   if (I.step === 'ramp' && I.done.pilot === undefined) {   // the pilot's line is due (after a reload too: shut it again, then he speaks)
-    if (!INTRO_UI.pilotAt) { INTRO_UI.pilotAt = performance.now() + 2000; ternRamp(false, 0); }
-    else if (performance.now() >= INTRO_UI.pilotAt) introPilot();
+    if (!INTRO_UI.pilotAt) { INTRO_UI.pilotAt = simNow() + 2000; ternRamp(false, 0); }
+    else if (simNow() >= INTRO_UI.pilotAt) introPilot();
     return;
   }
   if (INTRO_UI.ternShut) { if (k < 0 || k >= free) { INTRO_UI.ternShut = false; ternRamp(true); } return; }
@@ -29944,7 +29982,7 @@ function introBeatHere(b, a) {
 }
 function introBeatTick() {
   if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return;
-  const I = SHIP.intro, U = INTRO_UI, now = shipNow(), t = performance.now(), crew = id => DECK_CREW.find(x => x.p && x.p.id === id);
+  const I = SHIP.intro, U = INTRO_UI, now = shipNow(), t = simNow(), crew = id => DECK_CREW.find(x => x.p && x.p.id === id);
   if (U.beat) {
     const a = crew(U.beat.b.who);
     if (!introBeatHere(U.beat.b, a)) U.beat = null;   // you (or they) left: the rest is dropped
@@ -30050,8 +30088,8 @@ function introTick() {
     const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
     const key = g.deck + ':' + g.at, mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === g.label;   // only when he moves, or someone else's arrow took over
     if ((key !== INTRO_UI.goalKey || !mine) && typeof setGoal === 'function') { setGoal(g); INTRO_UI.goalKey = key; } INTRO_UI.goal = true;
-    if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && performance.now() >= INTRO_UI.next && typeof bubbleSay === 'function') {
-      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5); INTRO_UI.next = performance.now() + INTRO_TOUR_GAP;   // never over a tour line
+    if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && simNow() - INTRO_UI.callAt > 15000 && simNow() >= INTRO_UI.next && typeof bubbleSay === 'function') {
+      INTRO_UI.callAt = simNow(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5); INTRO_UI.next = simNow() + INTRO_TOUR_GAP;   // never over a tour line
     }
   } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
@@ -31727,7 +31765,7 @@ const FEEL_MOODS = {                                     // by event id: its moo
 };
 const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
-function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = performance.now() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
+function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = simNow() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
 // ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
 // bean trellises grow with the galley's beds (SHIP.galley.garden.beds: [crop, grown, days]): bare soil just after a
 // pick, seedlings, then full and fruiting when ripe. The kits record each plant (GARDEN_PLOTS, o.live) instead of
@@ -31785,12 +31823,12 @@ const gardenView = {
 // a jolt's look up (0-1), for 8b's people: each a beat apart (by their animation offset), up for about two seconds
 function feelLook(t0) {
   const s = FEEL_S; if (!s.kinds.includes('jolt')) return 0;
-  const e = performance.now() / 1000 - s.t0 - .25 - (t0 % 1) * .5;
+  const e = simNow() / 1000 - s.t0 - .25 - (t0 % 1) * .5;
   return e <= 0 || e > 3 ? 0 : e < .4 ? ss(e / .4) : e < 2.2 ? 1 : 1 - ss((e - 2.2) / .8);
 }
 const feelHash = (a, b) => { const h = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return h - Math.floor(h); };
 function shipFeelFrame(t, dt) {
-  const s = FEEL_S, now = performance.now() / 1000, dn = deckDef ? deckDef.num : null;
+  const s = FEEL_S, now = simNow() / 1000, dn = deckDef ? deckDef.num : null;
   if (now >= s.check || dn !== s.deck) {                 // twice a second: the event's phase, its flicker, this deck's blackout
     s.check = now + .5;
     const ev = typeof eventNow === 'function' ? eventNow() : null, md = ev && FEEL_MOODS[ev.id];
@@ -32995,6 +33033,7 @@ function reachableSide(e) {
 }
 function tap(cx, cy) {
   if (ride) return;
+  if (FREEZE.frozen) { if (!PAUSE.on && PAUSE.tilesTap) PAUSE.tilesTap(); return; }   // nothing on the deck moves while frozen (0.28.50): mid-Tiles, the board comes back
   if (!liftEl.hidden) { closeLiftPanel(); return; }       // a tap outside the panel puts it away
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   const h = pick(cx, cy); if (!h) return;
@@ -33216,7 +33255,8 @@ const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the w
 const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
-  const run = !PAUSE.on;                                 // section 15's pause (0.28.48): paused, nothing moves and ship time stands still; the view still draws
+  const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws
+  if (!run) clock.elapsedTime -= dt;                     // the frame clock too, so poses and blinks carry on where they stopped (0.28.50)
   if (run) {
   updateSteer();
   // 0.27.32: the per-frame loops here count through their arrays (a for...of here made an iterator result every step, about 600 a frame)
@@ -33224,6 +33264,7 @@ function loop() {
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
+  simTimers();                                           // section 13's simTimeout (0.28.50)
   }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
 
@@ -33302,7 +33343,7 @@ function loop() {
     D_.geo.attributes.position.needsUpdate = true;
   }
   for (let k = 0; k < SPINS.length; k++) { const sp = SPINS[k]; sp.o.rotation[sp.ax] += sp.w * dt; }
-  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (let k = 0; k < MOVERS.length; k++) MOVERS[k].tick(dt, !!(pb && pb(MOVERS[k].place))); }   // section 10's placeBusy
+  if (MOVERS.length && run) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (let k = 0; k < MOVERS.length; k++) MOVERS[k].tick(dt, !!(pb && pb(MOVERS[k].place))); }   // section 10's placeBusy
   for (const p of PULSES) p.m[p.key] = p.base + p.amp * (.5 + .5 * Math.sin(t * p.w + p.ph));
   for (let q = 0; q < STEAM.length; q++) { const s = STEAM[q], k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
