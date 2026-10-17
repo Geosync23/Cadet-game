@@ -630,8 +630,9 @@ The look is locked: textured low-poly in a cozy isometric cutaway, with every te
 - **Curved hull:** the deck keeps its tile grid for walking, but the outer hull follows the ship's curved shape, with rounded corners and an elliptical bow. Every deck draws its hull in one smooth piece per facing, so the stripes run unbroken (Decks 3 to 5 joined the others on 2026-10-16). Windows are openings in the curved hull, onto the stars. Inner glass walls let you see into sealed rooms and machine rooms.
 - **Characters:** built from a one-line spec with skin tone, hair style and colour, height, build, accessories, department colour and badge. Walk animation with planted feet.
 - **Controls:** tap to walk to a spot or object, press and hold to walk toward your finger, tap a person to talk, tap a free seat to sit, tap a machine to look at it or use it. Walk into the lift car (or tap a lift door) and press the panel on its back wall to choose one of the six decks. Doors slide open for anyone nearby; sealed rooms give tap text.
+- **Pause** (the user, 2026-10-17; built in 0.28.48 and 0.28.50). A Pause button first in the top row of buttons (on a narrow phone, an icon beside the Device button) stops the ship: its time and the whole sim (crew, needs, the galley, events, dialogue and speech bubbles, heads-ups, tips), with a calm "Paused" panel; a tap anywhere on it resumes. The game saves when it pauses. Switching away from the game (the tab hidden) pauses it too, and it stays paused until you resume. Toasts keep their real time. Playing a game of Tiles stops time the same way (see "Tiles").
 - Crawlways get low ceilings, and their tiles slow you to a crouch-walk with a crouching pose.
-- **UI:** the personal device (its old-school screen look and apps are under "The player"), the machine inspection panel and a two-slot carry indicator. No time controls (dropped, see Open questions).
+- **UI:** the personal device (its old-school screen look and apps are under "The player"), the machine inspection panel and a two-slot carry indicator. The only time control is Pause (above).
 
 
 ## Technical plan: how decks work in the build
@@ -754,7 +755,7 @@ Done so far:
 
 - Needs give a bonus at 75 and over and a penalty under 25 (agreed 2026-10-16; replaces "fitness gains nothing" from 2026-10-15). See "The player".
 - Your needs show on your personal device, the main interface; a placeholder until its design is done (agreed 2026-10-15).
-- No time controls (time speed, crew and systems panels): dropped for now (agreed 2026-10-15).
+- No time controls (time speed, crew and systems panels): dropped for now (agreed 2026-10-15). Pause is the exception (the user, 2026-10-17): see "Art, camera & controls".
 
 - The player starts in Bunk 1 with Tomas, and Pell and Rina are in Bunk 2 (answered since v3).
 - 18 ship hours take 30 real minutes, so a whole day is 40 (agreed 2026-10-16; first 30 minutes a day, before that a guess of 10). This sets every wear rate.

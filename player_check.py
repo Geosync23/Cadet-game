@@ -233,6 +233,10 @@ with sync_playwright() as pw:
     check(pz[1:] == [True, True, 'Resume'] and a0 == a1, f'paused: the overlay shows, ship time, needs and you stand still: {a0} {a1}')
     check(rs == [False, True, 0] and json.loads(a2)[1] != json.loads(a1)[1], f'resumed: the overlay goes, time runs again, the pacing stamps moved on by the pause: {rs} {a2}')
     g.ev("player.stop(); actEnd(true)"); g.step(30)
+    # the frozen clock (0.28.50): a simTimeout (the tip card's, the heads-up's) waits out a pause; simNow doesn't jump
+    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
+    print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
+    check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
 
     print('Walking speed on arrival (0.28.47, the user\'s "walking very slowly at the start"):')
     ar = g.ev(r"""(() => { if (typeof sickNow !== 'function' || typeof careerInit !== 'function') return null;
