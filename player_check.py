@@ -372,6 +372,30 @@ with sync_playwright() as pw:
         lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; delete window.galleyLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
         check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and (lv[1] == 1 or lv[2]), f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
+    elif g.ev("typeof servLine === 'function' && typeof galleyLeave === 'function'"):   # a combined build: the real line (0.28.36, reviewer 1c)
+        far = g.ev("""(() => { actEnd(true); SHIP.player.tray = null; SHIP.player.needs.hunger = 30; const w = cellPos(19, 10), c = nearestOpen(w.x, w.z, player);
+          player.obj.position.copy(cellPos(...c)); player.path.length = 0; const it = ITEMS.find(i => i.t === 'Servery'); it.hit.getWorldPosition(_wp);
+          return [c, +Math.hypot(_wp.x - player.obj.position.x, _wp.z - player.obj.position.z).toFixed(1)]; })()""")
+        g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})"); walk_in, do_in, phases = set(), set(), []
+        for j in range(400):
+            g.step(10); r = g.ev("[ACT && ACT.kind, ACT && ACT.phase, servLine().includes('player'), SHIP.player.tray]")
+            if r[0] == 'queue': (walk_in if r[1] == 'walk' else do_in).add(r[2]); phases.append(r[1]) if not phases or phases[-1] != r[1] else None
+            if not r[0] and j > 0: break
+        print('  the real line from', far, 'tiles/m away: in the line while walking', walk_in, '| while queueing', do_in, '| phases', phases, '| tray', r[3])
+        check(far[1] >= 10 and walk_in == {False} and True in do_in and isinstance(r[3], str), f'from across the room you join the real line only on reaching it, then are served: {far} {walk_in} {do_in} {phases} {r}')
+        g.ev("SHIP.player.tray = null")
+    # someone on the tile you need (sim 0.26.36's crewMakeWay; a stand-in when it's missing): they step aside, you go, and they go back when you're done (0.28.40)
+    mw0 = g.ev("""(() => { actEnd(true); window.__pg = playerGo; let n = 0; playerGo = (c, cb) => n++ ? window.__pg(c, cb) : false;   // the first try refused, as with a cook on the tile
+      window.__rel = 0; window.__mwStub = typeof crewMakeWay !== 'function'; if (window.__mwStub) window.crewMakeWay = () => () => { window.__rel++; };
+      const q = [...PLACE_OF.values()].find(q => q.type === 'mess-seat' && !heldBy(q.id)); actStart('sit', q.id, { title: 'Mess table' }); return [q.id, ACT && ACT.phase]; })()""")
+    mws = []
+    for j in range(80):
+        g.step(5); ph = g.ev("ACT && ACT.phase")
+        if not mws or mws[-1] != ph: mws.append(ph)
+        if ph == 'do': break
+    mw = g.ev("(() => { const r0 = window.__rel; actEnd(true); playerGo = window.__pg; const r = [window.__mwStub, r0, window.__rel]; if (window.__mwStub) delete window.crewMakeWay; return r; })()")
+    print('  someone in the way:', mw0, '->', mws, '| stand-in, released before/after getting up:', mw)
+    check(mw0[1] == 'wait' and 'walk' in mws and mws[-1] == 'do' and (not mw[0] or mw[1:] == [0, 1]), f'someone in the way steps aside, you get there, and they go back after: {mw0} {mws} {mw}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
@@ -390,11 +414,16 @@ with sync_playwright() as pw:
       basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const a = [P.credits, P.locker.slice(), Math.round(n.social), basket];   // not a gift (0.28.25)
       basket = { ...storePick('snack'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); const b = [P.credits, P.locker.length, Math.round(n.hunger)];
       P.credits = 1; basket = storePick('comfort'); const it = ITEMS.find(i => i.t === 'Counter'); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone());
-      const c = [r, !!ACT, basket, document.getElementById('tx').textContent]; P.credits = 40; return [a, b, c]; })()""")
+      const c = [r, !!ACT, basket, document.getElementById('tx').textContent];
+      actEnd(true); P.credits = 1; P.locker = []; basket = { ...storePick('comfort'), gift: null }; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false);   // too little at the till (0.28.39)
+      const d = [P.credits, P.locker.length, basket];
+      P.credits = 20; P.locker = Array.from({ length: LOCKER_MAX }, (_, i) => 'old ' + i); basket = { ...storePick('comfort'), gift: null }; const nm = basket.name; ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false);
+      d.push(P.locker.length === LOCKER_MAX, P.locker[P.locker.length - 1] === nm, P.locker[0]); P.locker = []; P.credits = 40; return [a, b, c, d]; })()""")
     print(' ', sh)
     check(sh[0][1] and sh[0][0] < 20 and sh[0][2] > 50 and sh[0][3] is None, f'a comfort: credits down, in the locker, social up: {sh[0]}')
     check(sh[1][0] < sh[0][0] and sh[1][1] == len(sh[0][1]) and sh[1][2] > 50, f'a snack: credits down, eaten (food up), not in the locker: {sh[1]}')
     check(sh[2][0] is True and not sh[2][1] and sh[2][2] is None and 'credits' in sh[2][3], f'not enough credits: a toast, no sale: {sh[2]}')
+    check(sh[3] == [1, 0, None, True, True, 'old 1'], f'too little at the till: no sale; a full locker keeps the new comfort (the oldest goes): {sh[3]}')
     print('Gifts and your bunk (0.28.25: section 20\'s giftAdd, GIFT_MAKES, bunkNote; stand-ins when they\'re missing):')
     gf = g.ev(r'''(() => { const P = SHIP.player, stub = typeof giftAdd !== 'function', out = {};
       if (stub) { window.giftAdd = x => P.carry.length < CARRY_MAX ? (P.carry.push(x), true) : false; window.GIFT_MAKES = [{ item: 'keyring', mins: 10, needs: 'scrap' }]; }
