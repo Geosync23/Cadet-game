@@ -467,7 +467,7 @@
 ? trad:market tier>=acquaintance
 - Swap meet's on! Come and look at everything? I never trade. I just look.   #funny
 ? trad:jam tier>=colleague
-- Music jam tonight. I can't play anything. I clap. Come and clap too?
+- Music jam tonight. I can't play a thing. I clap. Come and clap too?   #funny
 
 == bye
 ? tier>=acquaintance !week1:true
@@ -508,3 +508,32 @@
 - Your first night, you found the common room in an hour. It took me three days.   #funny
 ? mem:came.observatory-night tier>=friend
 - Observatory night's better with the bunk there. You, Chloe, Zofia. Even Lukas, once.   #warm
+
+// Writer 5, batch 4: if Tomas is ever transferred (the engine's leavers: goodbye with leaving:you, packing as feel
+// with leaving:soon, letters after; the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). It
+// resolves nothing of his arc: no exam, no transfer list; the newcomer hand-over only from beat:tomas.7.
+
+== feel
+? leaving:soon
+- Packing. I rolled the star map up. Then unrolled it. Then rolled it again.   #funny
+- A new ship. New corridors to get lost in. Nervous. A bit excited. Mostly nervous.
+? leaving:soon tier>=friend
+- I keep taking the long way round Deck 2. Saying goodbye to the windows. All of them.   #warm
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off to a new ship. I'll get lost there too. Look after the bunk for me.
+? leaving:you tier>=colleague
+- You were the first person I ever showed round. Badly. Thanks for letting me.   #warm
+? leaving:you tier>=friend
+- You made the Wren feel like somewhere I fit. I'll write. Every week. Like my brother.   #warm
+? leaving:you tier>=close beat:tomas.7
+- The next new cadet's yours to meet now. Show them the long way. It's the nice way.   #warm
+
+== letter
+- The new ship's bigger. I've been lost four times. Only twice on purpose. Say hello to the star map for me. Well, it's rolled up in my bag. Say hello to where it was.   #funny
+- Found the observatory here on my first day. My first day! Tell Holt. Actually, don't. Just say hello to everyone. Is the toast still good?
+? tier>=friend
+- My brother says my letters are more about the Wren than the new ship. He's right. How's the bunk? Is Lukas still up at five? Does Chloe still do lights out like a weather report?
+? mem:came.observatory-night
+- Saw a star tonight that I'm sure is the one I named. It's wobbly. Still mine. Hope observatory night's still on up there. Hello from out here.

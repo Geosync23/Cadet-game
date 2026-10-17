@@ -521,3 +521,28 @@
 - That game you gave me? Rina's beaten me at it already. Twice. Cheers, really.   #funny
 ? told:fixed.oven
 - You fixed the oven? That's pudding saved. That's lives saved, basically. Legend.   #warm
+
+// Writer 5, batch 4: if Pell is ever transferred (goodbye leaving:you, packing as feel leaving:soon, letters after;
+// the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). Nothing of his arc: no practical, no
+// shop, no first month. "Eat, sleep, write" is his mum's three messages turned round, and safe from tier friend.
+
+== feel
+? leaving:soon
+- Packing. Screw tin's packed. Then I needed a screw. Packed it again.   #funny
+- New ship in ten days. I asked about their grab shelf. They haven't got one. Worrying.   #funny
+? leaving:soon tier>=friend
+- Bit odd, going. I know which panel sticks here. Now I've got to learn a whole new one.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off to a new ship, me. Mind the Deck 5 panel. Kick it gently. Like a friend.
+? leaving:you tier>=colleague
+- Take a screw from the tin. The Wren pile. So there's a bit of Bunk 2 in your toolbox.   #warm
+? leaving:you tier>=friend
+- You're a good one, {nick}. Eat. Sleep. Write. That's three messages. Answer them.   #warm
+
+== letter
+- New ship's all right. Their biscuits are hidden badly. Found the tin on day two. Told nobody. Some things don't change. Hello to Bunk 2.   #funny
+- The bay here hums in a different key. I'm getting used to it. Tell Calder their job board's longer than ours. She'll pretend she doesn't care.
+? tier>=friend
+- Built a music box out of this ship's spares. Three notes. Wound it up and thought of the Wren. Eat something. Sleep. Write back.   #warm

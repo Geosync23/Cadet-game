@@ -507,3 +507,30 @@
 - You fixed the corridor lights. Fewer people walking into doors. Fewer bruises. Ta.
 ? told:gift.tea
 - That tea you gave me. I make it after late shifts. It's good. Don't gloat.   #warm
+
+// Writer 5, batch 4: if Rina is ever transferred (goodbye leaving:you, packing as feel leaving:soon, letters after;
+// the goodbye also goes into the "Sorry I missed you at the shuttle" Mail). Nothing of her arc: no exam, no hard
+// year. Gran from beat:rina.4 only. She still says it sideways.
+
+== feel
+? leaving:soon
+- Packing. Journals first, then everything else. The journals are most of it.   #funny
+- Ten days. The notebook stays here. The Wren's board, the Wren's count.
+? leaving:soon tier>=friend
+- I'm fine about going. I'm fine. Drink some water. You look worse than me.   #funny
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. New infirmary. Drink some water. That's my goodbye. It's a good one.
+? leaving:you tier>=colleague
+- One last game before the shuttle? I'll let you win. No, I won't. Bye, {me}.   #funny
+? leaving:you tier>=friend
+- You were all right, {nick}. More than all right. Don't make it a thing. Write.   #warm
+
+== letter
+- New infirmary. Nobody drinks water here either. I've made a sign. Say hello to Nandakumar. Tell her the sign's hers really.   #funny
+- Found a Tiles board on the new ship. Nine games, nine wins. New notebook. The Wren's count stays the Wren's.   #funny
+? tier>=friend
+- My sister says my letters sound happy. I've told her she's wrong. She isn't. Don't tell her. How's Bunk 2? Is Pell still asleep on the chairs?
+? tier>=friend beat:rina.4
+- Gran says hello. To "the friend who listened", her words. She's still cheating, by message. I've no idea how. Drink some water.   #warm
