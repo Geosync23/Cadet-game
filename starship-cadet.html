@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.20
+   STARSHIP CADET: CSV Wren                           build 0.39.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.20';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.21';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27383,7 +27383,12 @@ function affWeeks() {
   const s = SHIP.social.affWeek || null;
   if (AFF_WEEK.src !== s) { AFF_WEEK.src = s; AFF_WEEK.map = new Map();
     for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(.*)$/.exec(part); if (!m || +m[2] !== SOC.n) continue;
-      try { const bin = atob(m[3]), P = new Map(); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); AFF_WEEK.map.set(+m[1], { P, raw: part }); }
+      try { const P = new Map();
+        if (m[3][0] === '~') {                                // 0.39.21: a bit per pair (in i < j order), then the values of those set
+          const bin = atob(m[3].slice(1)), n = SOC.n, nb = Math.ceil(n * (n - 1) / 2 / 8); let q = 0, v = nb;
+          for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++, q++) if (bin.charCodeAt(q >> 3) >> (q & 7) & 1) P.set(pairIdx(i, j), bin.charCodeAt(v++) << 24 >> 24);
+        } else { const bin = atob(m[3]); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); }   // the older form: [i, j, v] triples
+        AFF_WEEK.map.set(+m[1], { P, raw: part }); }
       catch (e) { /* a bad snapshot is ignored */ } } }
   return AFF_WEEK.map;
 }
@@ -27393,9 +27398,12 @@ function affWeekTake(h) {                                // storyHour: the first
   let L = [];
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const v = aff[pairIdx(i, j)]; if (v >= AFF_SNAP || v <= -AFF_SNAP) L.push([i, j, v]); }
   if (L.length > AFF_SNAP_MAX) L = L.sort((a, b) => Math.abs(b[2]) - Math.abs(a[2]) || a[0] - b[0] || a[1] - b[1]).slice(0, AFF_SNAP_MAX).sort((a, b) => a[0] - b[0] || a[1] - b[1]);   // the strongest, back in pair order
-  for (const [i, j, v] of L) bin += String.fromCharCode(i, j, v & 255);
+  const bits = new Uint8Array(Math.ceil(n * (n - 1) / 2 / 8)), on = new Set(L.map(([i, j]) => i * n + j)); let q = 0, vals = '';   // a bit per pair, then the values in pair order (0.39.21: about 40% smaller)
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++, q++) if (on.has(i * n + j)) bits[q >> 3] |= 1 << (q & 7);
+  for (const [, , v] of L) vals += String.fromCharCode(v & 255);
+  for (const b of bits) bin += String.fromCharCode(b);
   const keep = [...M.keys()].filter(k => k === w - 1).map(k => M.get(k).raw);
-  SHIP.social.affWeek = keep.concat(w + ':' + n + ':' + btoa(bin)).join(';');
+  SHIP.social.affWeek = keep.concat(w + ':' + n + ':~' + btoa(bin + vals)).join(';');
 }
 function affPlanWeek(i, j, d) {
   if (!Number.isFinite(d)) return undefined;              // no day: the starting affinity, as before
@@ -27677,6 +27685,35 @@ function goodbyeDone(p, d, c) {
   memAdd(p.id, 'moment.bye.' + flavour, { cls: 'core' });
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':bye', who: p.id, beat: 'bye', flavour, tone: 'goodbye', fit: !!c.fit });
   if (relTier(p.id) >= 4 && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
+}
+// ---- bonds in the save, compact (0.39.21, the lead's headroom job) ----
+// section 20's socSave asks storyBondsPack(B) for SHIP.social.bonds and bondsUnpack hands { v: 2 } back to
+// storyBondsUnpack(o, ids): 12 bytes a bond in base64 (i, j: crew indexes in the save's id list; kind; since, 3 bytes,
+// 0xFFFFFF for none; peak, a signed byte, -128 for none; seen, 2 bytes, 0xFFFF for none; flags: 1 spar; gone, 2 bytes,
+// 0 for none), and any other field a bond carries in x: [[row, { ... }]]. Every value is a whole number (affinity is an
+// Int8Array, times are ship minutes and hours), so a load gives back exactly what was saved
+function storyBondsPack(B) {
+  let bin = ''; const x = [], b3 = v => String.fromCharCode(v >> 16 & 255, v >> 8 & 255, v & 255), b2 = v => String.fromCharCode(v >> 8 & 255, v & 255);
+  for (const k in B || {}) { const [a, c] = k.split(':'), o = B[k], i = SOC.idx.get(a), j = SOC.idx.get(c), ki = SOC_BOND_KINDS.indexOf(o.kind);
+    if (i === undefined || j === undefined || ki < 0) continue;
+    const { kind, since, peak, seen, spar, gone, ...rest } = o, ok = v => v == null || (Number.isInteger(v) && v >= 0);
+    if (!ok(since) || since >= 0xFFFFFF || !ok(seen) || seen >= 0xFFFF || (gone != null && (!Number.isInteger(gone) || gone < 1 || gone > 0xFFFF)) || (peak != null && (!Number.isInteger(peak) || peak < -127 || peak > 127)) || (spar != null && spar !== true)) return null;   // not a shape this form holds: section 20's own form
+    if (Object.keys(rest).length) x.push([bin.length / 12, rest]);
+    bin += String.fromCharCode(i, j, ki) + b3(since ?? 0xFFFFFF) + String.fromCharCode((peak ?? -128) & 255) + b2(seen ?? 0xFFFF) + String.fromCharCode(spar ? 1 : 0) + b2(gone ?? 0); }
+  return x.length ? { v: 2, b: btoa(bin), x } : { v: 2, b: btoa(bin) };
+}
+function storyBondsUnpack(o, ids) {
+  const B = {}; let bin = ''; try { bin = atob(o.b || ''); } catch (e) { return B; }
+  const X = new Map((Array.isArray(o.x) ? o.x : []).filter(r => Array.isArray(r) && r[1] && typeof r[1] === 'object').map(r => [r[0], r[1]]));
+  for (let r = 0, k = 0; k + 11 < bin.length; r++, k += 12) {
+    const u = q => bin.charCodeAt(k + q), a = ids[u(0)], c = ids[u(1)], kind = SOC_BOND_KINDS[u(2)];
+    if (!a || !c || !kind || !SOC.idx.has(a) || !SOC.idx.has(c)) continue;
+    const since = u(3) << 16 | u(4) << 8 | u(5), peak = u(6) << 24 >> 24, seen = u(7) << 8 | u(8), gone = u(10) << 8 | u(11), b = { kind };
+    if (since !== 0xFFFFFF) b.since = since; if (peak !== -128) b.peak = peak; if (seen !== 0xFFFF) b.seen = seen; if (u(9) & 1) b.spar = true; if (gone) b.gone = gone;
+    if (X.has(r)) Object.assign(b, X.get(r));
+    B[a + ':' + c] = b;
+  }
+  return B;
 }
 // ---- farewells (0.39.16, the overnight plan; social-deep-plan Part 8b "On the day") ----
 // Who comes to the shuttle bay to see a leaver off on their last day (rotation days: crewLeaving), for section 14's
