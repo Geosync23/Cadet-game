@@ -1,0 +1,17 @@
+@meeting sickExam3
+// Head writer 4: being ill, Rina's exam, variant three: the one honest sentence.
+title: The infirmary
+from: Rina Deshi
+gist: Rina in the infirmary: a fever, some medicine, and a scolding for waiting so long.
+== lines
+rina: How long have you been walking about like that? Don't answer. Too long.
+rina > you: Hand out. Pulse. Hm. Fast. Temperature. Hm. High.   [listen]
+rina: A fever. A small one. You should've come at breakfast.
+rina: Here. One now, one after dinner. With food. Brennan will feed you. Brennan always feeds people.
+rina > you: You did come, though. That's the bit that counts. Most people wait till they fall over.   [nod]
+? choice
+* I didn't want to miss shift.   rel:rina+1
+  rina: Ill isn't missing. It doesn't count. Not against your leave, not against anything.
+* Thank you. Really.   rel:rina+1
+  rina: Fine. You're welcome. Now go away and get better. That's an order.
+rina: Bed. Water. Sleep. In that order. I'll check on you after shift.

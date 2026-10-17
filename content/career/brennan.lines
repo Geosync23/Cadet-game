@@ -39,3 +39,11 @@
 == career.back
 ?
 - Back! Sit down. You've a day's eating to catch up on.
+
+// Being ill (head writer 4)
+== sick.getwell
+? tier>=acquaintance
+- Oh, love, you're peaky. Infirmary first. Then I'll send soup.
+== sick.better
+? tier>=acquaintance
+- Better? Then you're having seconds. Doctor's orders. Well, mine.   #funny

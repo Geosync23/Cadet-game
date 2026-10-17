@@ -39,3 +39,8 @@
 == career.back
 ?
 - Back! Coil three behaved while you were off. Suspicious, honestly.   #funny
+
+// Being ill (head writer 4)
+== sick.getwell
+? tier>=acquaintance
+- Off you go, shipmate. Board'll keep. Coil three's had colds. She recovered.   #funny
