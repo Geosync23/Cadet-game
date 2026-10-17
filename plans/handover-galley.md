@@ -141,3 +141,24 @@ Also run cadet_test (Deck 4 must stay identical), deck_check, day_check (Deck 3 
 - **A job for the player:** should the player be able to help in the galley (wash up, carry a crate), or is the galley crew-only?
 - **Queues:** should queues happen more often? A slow oven or a big event (Envoy Saruth's formal dinner) would make the galley visibly busy.
 - **The grab shelf:** should it empty overnight (stale food binned), so the morning bake matters?
+
+## Pillar 4: the traditions' meals (builds 0.29.26–0.29.28, on 0.60.0)
+
+Full detail in the DEV_NOTES build table, rows 0.29.26 to 0.29.28. All inert until the traditions engineer's ties (claude/ship-events 0.34.29+) are combined; food_check stands in with `GALLEY_TEST.tradTies`.
+
+- **`galleyTies(d)`** folds section 18's `tradTies('galley', d)` by meal: `{ breakfast?, dinner? }`, each `{ ids, dish, until, side, extra, batch, honorees, taste }`.
+- **Long breakfast:** `until: '10:00'` -> `galleyServeEnd(d, meal)` and `galleyClose(d, meal)` replace the fixed 08:00/08:30; `galleyPlan(role, d)` keeps the chef and early hand on. Pancakes on Saturday (Tuesday got the spiced beans).
+- **Suppers:** first fruits on the tables; the harvest supper all from the garden, with a pie (`galleyCake(d).pie`); a farewell supper serves the first honoree's favourite. A cake whose tradition has decor `cake` (four weeks aboard) isn't the galley's.
+- **Tasting table:** the vote is section 18's tally (`tallyOf`, `tallyVote`; one vote engine, the lead's ruling in 0.29.29). `galleyTasting(d)` cooks and serves (the tasters from the plans' `ev-<id>` segments) and reads the tally; `galleyVote(choice)` is a thin call to `tallyVote`. 20 tastes, two each; Sunday's `side: 'tasting'` gets the winner. Two small plates on the tray slide.
+- **0.29.29 also:** `galleyFresh()` clears the day caches when `evSig()` changes; `galleyBirthdays` uses schedPeople + aboard() + birthdayOf; lateMeal has `dish`; the crossover supper's note.
+- **Late meals:** `simNote('lateMeal', { who, meal, late, how, deck: 3 })`, live only, once per person and meal a day (`galleyLate`, `galleyLateBy`, `LATE_WAIT`).
+- **Waiting on:** the sim engineer (do meal-tradition segments keep act 'dinner'/'breakfast'? if so the galley feeds them unchanged). The dialogue engineer agreed the lateMeal payload (+ dish); writers' cue keys `cue:lateMeal`, `cue:lateMeal.you`. Head writer 2 is session_01HNrh3xCtczeZM5NVFrE6pa.
+- **Trial merges** with claude/ship-events conflict only on the header build line and `GAME_BUILD`.
+- **Tests:** needs `pip install playwright`, three r128 in /tmp/cadet-work/three (see cadet_test.py's header), and `CADET_CHROME=/opt/pw-browsers/chromium`.
+
+## The food queue (builds 0.29.31-0.29.32, on 0.60.2)
+
+- **The user's report (0.60.1):** too slow, and a queue number that wasn't real. Fixed: "ahead" is the people really in the line; serving pace `GALLEY_SERVE` (0.6 ship min a person, a minute in a rush, yours a minute after the last ahead). No numbers on screen anywhere (sections 15 and 19 removed theirs).
+- **The live line is section 10's** (sim engineer 3, 0.26.30: `servLine`, `lineJoin`, `lineSpot`, `lineFront`, `lineLeave`); section 15 (player engineer 4, 0.28.34+) walks you up it. Section 16 gives `galleyServeMins(t)`, `galleyCanServe(t)`, `galleyLeave(who)`; `galleyJoin` / `galleyTurn` / `takePortion` use the line when it exists. Both section 15 and 16 call `lineJoin`/`lineLeave` for the player (idempotent); the reviewer asked the lead to name one owner.
+- **Open:** the tasting table has 25 tasters now and 20 tastes at two each (about 10 get one): ask whether it should be one each, or a bigger batch. The welcome tea for new crew (traditions engineer 2, 234a454) will get `cake: true`; next build: put a mess gathering's cake out at its start when that's before 19:30. galleyFresh misses one-off events and tradition flags (reviewer's low note).
+- **Latest:** see the DEV_NOTES build table's last galley row for the hash and tests.
