@@ -178,6 +178,35 @@ with sync_playwright() as pw:
         check(n >= 2, f'{step} did not come again after recovering')
         check(r['letGo'] is None, f'{plan}: let go')
 
+    print('Sickness (0.61.5): rare, never the first week, three weeks apart; excused; worse untreated; two cures:')
+    r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
+      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(1, 0)); const c = SHIP.career, days = [];
+      for (let d = 1; d <= 420; d++) { c.e = c.z = d - 1; careerTick(at(d, 330)); if (c.sd === d) { days.push(d); c.sh = 3; } }
+      const out = { days };
+      SHIP.career = null; careerTick(at(1, 0)); const C = SHIP.career, d = days[0] || 50; C.e = C.z = d - 1; C.w = Math.floor((d - 1) / 28); C.b.push(d); C.l--;
+      const l0 = C.l, w0 = careerWork(); careerTick(at(d, 330)); out.sick = sickToday(d); out.excused = !playerShiftOn(d); out.leaveBack = C.l === l0 + 1 && !C.b.includes(d);
+      out.speeds = [420, 600, 780, 930].map(m => { careerTick(at(d, m)); return [Math.round(needEffects().walk * 100) / 100, sickBent()]; });
+      careerTick(at(d, 760)); out.noMiss = careerWork() >= w0 - 0.01 && C.ms === 0;
+      const p = SOC.crew.find(q => q.dept === 'works'); out.getwell = (sickChatLine(p, shipNow(), true) || {}).kind || null;
+      out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
+      at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
+      SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
+      out.save = JSON.stringify(SHIP.career).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
+    gaps = [b - a for a, b in zip(r['days'], r['days'][1:])]
+    print(f"  sick days in 60 weeks: {r['days']} (gaps {gaps})")
+    print(f"  on a sick day: {dict((k, v) for k, v in r.items() if k != 'days')}")
+    check(r['days'] and min(r['days']) > 7, 'sick in the first week')
+    check(all(g >= 21 for g in gaps), 'sick twice within three weeks')
+    check(len(r['days']) >= 4 and 35 <= 420 / len(r['days']) <= 105, f"sick {len(r['days'])} times in 60 weeks (about every 6-8 weeks wanted)")
+    check(r['sick'] and r['excused'] and r['leaveBack'] and r['noMiss'], 'a sick day is not excused, or the leave not given back, or a miss counted')
+    sp = [x[0] for x in r['speeds']]
+    check(all(a > b for a, b in zip(sp, sp[1:])) and r['speeds'][-1][1] and not r['speeds'][0][1], f"untreated it doesn't get worse through the day to doubled over: {r['speeds']}")
+    check(r['cure'] and r['after'][0] >= 0.99 and not r['after'][1] and not r['after'][2], 'the medicine did not cure it')
+    check(r['nap'], 'sleeping it off did not cure it')
+    if r['lines']: check(r['getwell'] == 'sick.getwell' and r['better'] == 'sick.better', 'crew have no get-well or glad-you-are-better line')
+    else: print('  (no sick.getwell / sick.better lines baked yet)')
+    check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
+
     print('(e) The save:')
     r = ev(f"({PAPER})({{ plan: 'casual', days: 280, friends: [] }})")
     rt = ev("JSON.stringify(careerClean(JSON.parse(JSON.stringify(SHIP.career)))) === JSON.stringify(SHIP.career)")
