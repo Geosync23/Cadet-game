@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.1
+   STARSHIP CADET: CSV Wren                           build 0.61.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15432,8 +15432,7 @@ const VOICE = JSON.parse([
   '{"text":"Can\'t. Ask me next week. I\'ll mean it.","id":"4mr78a"},',
   '{"text":"It\'s my day off. I\'m going to listen to a fan for an hour. Alone.","id":"5kt43q","tone":"funny","weekday":"sat|sun"}]',
   ',"farewell.day":[',
-  '{"text":"The Tern won\'t wait. Don\'t be late for that one.","id":"p86op5"},',
-  '{"text":"I came to check the ramp seals.","id":"1va5y6d"}]',
+  '{"text":"The Tern won\'t wait. Don\'t be late for that one.","id":"p86op5"}]',
   ',"feel":[',
   '{"text":"The air\'s nominal on every deck. Nobody\'s noticed. Good.","id":"jhrl7r","mood":"high"},',
   '{"text":"Nineteen jobs today. Eighteen done. It\'s the nineteenth I\'m thinking about.","id":"pb3ifz","mood":"low"},',
@@ -19528,7 +19527,7 @@ const VOICE = JSON.parse([
   '{"text":"Not tonight. I\'m studying. Ask me again. I\'ll say yes. Probably.","id":"1h5e3nc"}]',
   ',"farewell.day":[',
   '{"text":"Look after yourself. Sleep. Eat. That\'s not advice, that\'s an order.","id":"tk75ue","tone":"warm","tier":[1,4]},',
-  '{"text":"I\'m only here to check you\'re fit to fly. You are. Go on.","id":"30f1k3","tone":"warm","tier":[1,4]}]',
+  '{"text":"Came to check you\'re fit to fly. You are. I\'ll see you at the bay.","id":"lh1cy3","tone":"warm","tier":[1,4]}]',
   ',"farewell.eve":[',
   '{"text":"Tomorrow. Right. I\'ll lose at Tiles once, as a send-off. Don\'t tell anyone.","id":"2k50po","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
@@ -20905,7 +20904,7 @@ const VOICE = JSON.parse([
   '{"text":"It\'s my day off and I\'m going to sit still for once. Tomorrow? Ask me tomorrow.","id":"1cz7p54","tone":"funny","weekday":"thu|fri"}]',
   ',"farewell.day":[',
   '{"text":"Today, then. I\'ll walk you down. Least I can do.","id":"6o9tgd","tone":"warm","tier":[1,4]},',
-  '{"text":"Window seat. Every time. You remember.","id":"o37o4z","tone":"warm","tier":[1,4]}]',
+  '{"text":"Half two, the bay. I\'ll be there. Where else would I be?","id":"1qxw1e1","tone":"warm","tier":[1,4]}]',
   ',"farewell.eve":[',
   '{"text":"Tomorrow, then. I\'ll be at the Tern. Same spot as when you came.","id":"1vm6jq5","tone":"warm","tier":[1,4]},',
   '{"text":"I keep going over it. What I\'d have said. Doesn\'t matter now. I\'m sorry, shipmate.","id":"spgkso","tone":"serious","tier":[3,4]}]',
@@ -23077,7 +23076,7 @@ const LINES = JSON.parse([
   '{"text":"{bye}, {nick}. Safe trip on the Tern.","id":"1rz0hru","tier":[1,4]},',
   '{"text":"Off today, then. Good luck out there. I mean it.","id":"1etbqx6","tier":[1,4]},',
   '{"text":"Go well. Turn up wherever you land. The rest comes.","id":"nt2rd8","tone":"warm","tier":[2,4]},',
-  '{"text":"Came to see you off. Couldn\'t not.","id":"1wca0dh","tone":"warm","tier":[3,4]},',
+  '{"text":"Came to find you. Couldn\'t let today go without it.","id":"1nglpyy","tone":"warm","tier":[3,4]},',
   '{"text":"Window seat. Promise me.","id":"13kmyqa","tone":"warm","tier":[3,4]},',
   '{"text":"Write when you land. Proper Mail.","id":"1phxnb2","tone":"warm","tier":[3,4]}]',
   ',"farewell.eve":[',
