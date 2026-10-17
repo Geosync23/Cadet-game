@@ -19,3 +19,14 @@ Fine:
    match.
 3. LOW: the conversation is marked heard before its first line plays, so one cut short by a chat card counts as heard
    for 7 days. That's acceptable; just noting it.
+
+## Addendum: 4cbf62c (0.43.13, one-speaker lines for the call booths): PASS WITH ONE FIX
+- **MEDIUM (it never fires as documented):** the game's activity in the booths is `callhome` (whereIs, PLACE_ANIM,
+  the planner), but lines_check's act vocabulary has `call`, and LINE_ACTS has no `call` group. So a writer's
+  `? act:call` passes lines_check and then never matches in game (`ctx.act` is 'callhome'), and `? act:callhome`
+  fails lines_check. Add `call: ['callhome']` to LINE_ACTS (or rename the value), and test one end to end.
+  (`place:booths` works: the alias maps to the Call-home booths room.)
+- LOW: a one-speaker conversation with no condition plays for anyone standing alone near you, anywhere, as a
+  monologue. lines_check should require a place:/act: condition on A-only conversations.
+- Fine: callers aren't paired with the next booth; a solo conversation stops when its speaker leaves; the seeding
+  with no b is stable.
