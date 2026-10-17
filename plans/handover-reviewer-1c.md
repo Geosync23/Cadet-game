@@ -15,6 +15,8 @@
 | Player 9c18045 (0.28.38-0.28.40) | player-9c18045.md | PASS: lows fixed, the real-line and someone-in-the-way cases pass |
 | Social A a033f17..752d964 (0.36.79-0.36.81) + c345a96 (0.36.82) | social-752d964.md | PASS: the truncated-aff low fixed in 0.36.82 |
 | Sim 13a6fe9 (0.26.38 farewell friends) | sim-13a6fe9.md | PASS: day_check 161/35 OK, no doubles |
+| Sim 7ca2249 (0.26.39 arrival-dinner seats held) | sim-7ca2249.md | PASS on the 0.60.3 combine: you 3-mess-10, Torres 12, Calder 9; intro_check, day_check 0 OK |
+| Arrival 7cca991 (0.42.22-0.42.24, for 0.60.4) | arrival-7cca991.md | PASS: Tern start, ramp, tap-to-ask; low: the pilot on setTimeout |
 | Arrival claude/arrival-0603 046a019 (0.42.21b, for 0.60.3) | arrival-0603-046a019.md | PASS: 27/27 core tour lines in order; reviewer 1's three fixes. Test on arrival-0603 + sim + content 910e88e baked with content_gen (archive content/ + content_gen.py, run it on the merged html) |
 
 **Open loose ends:**
@@ -22,7 +24,7 @@
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
 - **Combine check for 0.60.3** (combine-0603-jobloop-food.md, merge: galley 7282327 + sim 236810f + f16a110 cherry-picked + player 9c18045): the job loop and food_check's old 4 are fixed. Two new: player_check's "squeeze past" (sim 0.26.36 unblocks shared tiles always, so you walk through the chef; sent to sim engineer 4), and food_check's "galleyJoin / galleyTurn" (a test assumption since sim 0.26.34; sent to galley engineer 3). **Rechecked with sim 0.26.37 (e4d6ace):** player_check OK (squeeze past back). food_check's galleyJoin case passes with a0e5b2f's check; that check needs galley 0.29.35 (7464b97) code, so the two go together in 0.60.3.
 - **I now hold reviewer 1b's queue too** (sim, galley, social A/B, arrival, player, roster). Their final note: plans/handover-reviewer-1.md on claude/reviews (5394712). Its open items:
-  1. The arrival-dinner seat: **reproduced on the 0.60.3 combine** (lemaire-nils in Torres's 3-mess-12, Torres takes your 3-mess-10, you get 3-mess-8; arrival-0603-046a019.md addendum). Should-fix sent to sim engineer 5 (hold the 3 seats on Day 0) and onboarding 2 (assert your seat).
+  1. The arrival-dinner seat: FIXED by sim 0.26.39 (sim-7ca2249.md); it was **reproduced on the 0.60.3 combine** (lemaire-nils in Torres's 3-mess-12, Torres takes your 3-mess-10, you get 3-mess-8; arrival-0603-046a019.md addendum). Should-fix sent to sim engineer 5 (hold the 3 seats on Day 0) and onboarding 2 (assert your seat).
   2. A 2-day jump sends 4 section-17 notes that hour-by-hour doesn't (social_check --long); the sim seat owns it.
   3. Social save rule: <= 30 KB every day to 140, < 40 KB to 280, measured daily from the arrival.
   4. Sim lows: crewMakeWay lists per frame; the step-aside spot can be another station's tile; the breakfast tray return makes crew late to the lift; a crewHold in the line blocks the counter.
