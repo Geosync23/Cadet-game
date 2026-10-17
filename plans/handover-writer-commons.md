@@ -47,7 +47,7 @@ the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contact
 ## Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U): batches 1-12, reviewed by head writer 3
 
 Head writer 2 went inactive before Writer 4 started. **Head writer 3 is session_01FopKMT2ZKxuWcNDcmF7565**: send it
-each batch hash. Batches 1-11 merged (to 0.48.31); batch 12 pushed, awaiting review.
+each batch hash. Batches 1-12 merged (to 0.48.32); 13-17 pushed (Holt 734b51d, Vance 1f4d588, Marrow 0a1591f, Kovac ce59950, Calder 872395c), awaiting review.
 
 | Batch | What | Files |
 | --- | --- | --- |
@@ -60,6 +60,7 @@ each batch hash. Batches 1-11 merged (to 0.48.31); batch 12 pushed, awaiting rev
 | 7, 11, 12 | goodbyes (`leaving:you`), packing (`feel` `leaving:soon`), letters, for the Commons 19, 25 Works/Watch, 20 Survey/officers/seniors | own files |
 | 8 | the mess at dinner: 40 convos, 20 crowd bubbles | `overheard/dinner.lines`, `banks/mess.lines` |
 | 9, 10 | reactions: Commons repairs, favours, gifts, harvest, late meals; Works repairs; Brennan's and Pell's `cue:repair.you` | `reactions/repairs-commons.lines`, `reactions/repairs-works.lines` + appends |
+| 13-17 | story-crew everyday passes (~50 lines + 8 callbacks each, `!week1:true`, arc gates kept): Holt, Vance, Marrow, Kovac, Calder | their own `lines/` under "// Writer 4, batch N" |
 
 Gotchas found: "love you" and "thinking about you" are on the romance list even in family calls or as jokes; no poems,
 dedications or "thought of you" to the player (letters say "thought of the Wren"); "apple" is banned (brand); words
@@ -68,7 +69,7 @@ goodbye lines also go into the engine's "Sorry I missed you at the shuttle" Mail
 `place:infirmary`, `place:gym`, `place:laundry`, `place:port_washroom|starboard_washroom`, `place:bunk_1..8` match
 room names; head writer 3's style note: don't end many lines on "Lovely".
 
-Still open: everyone not story crew now has goodbyes/letters (check story crew with the head writer); a dry-humour
+Still open: everyday passes for the remaining story crew (Tomas, Pell, Rina, Brennan: ask the head writer); story crew goodbyes/letters; a dry-humour
 Tiles variant waits on `_` support in `trait:`.
 
 ## Formats and hooks that bite
