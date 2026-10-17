@@ -15391,7 +15391,7 @@ function knowBlocks(id) {                                // for the Crew app (se
 // hands over who spent time together). socBondOf(id, kind) answers section 20's bondOf. Changes go on the ship notes
 // bus: simNote('bond', { a, b, kind, was })
 const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 15, driftOff: 20, mentor: 40, mentorOff: 25 };
-const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'];
+const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'], COUPLE_AFF = 90;
 const STORY_BONDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'];   // section 20's frozen BOND_KINDS
 // how many friends (60+) someone makes room for: section 20's hourly drift stops new friendships climbing past 60
 // once either of the pair has this many (the designer's numbers)
@@ -15404,6 +15404,11 @@ function storyHour(h, pairs) {
   const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
   affWeekTake(h);
   for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
+  // couples (B6): the roster's partners are a couple from the start and stay one, at COUPLE_AFF or more; no story of
+  // their own, never involving you. Their bond outranks the others, so they're never best friends, rivals or mentor
+  for (let i = 0; i < n; i++) { const q = crew[i].partner, j = q !== undefined ? SOC.idx.get(q) : undefined; if (j === undefined || j <= i) continue;
+    const k = crew[i].id + ':' + crew[j].id; delete B[crew[j].id + ':' + crew[i].id]; if (!B[k] || B[k].kind !== 'couple') set(k, 'couple');
+    if (aff[pairIdx(i, j)] < COUPLE_AFF) aff[pairIdx(i, j)] = COUPLE_AFF; }
   // friends long apart fade a little, once a day at 04:00
   if (h % 24 === 4) for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best' && b.kind !== 'drifting') continue;
     const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
@@ -15452,7 +15457,7 @@ function socBondOf(id, kind) {                           // for section 20's bon
     if (!ok) continue;
     const o = a === id ? c : a, v = affinity(id, o); if (v > pv || (v === pv && o < pick)) { pick = o; pv = v; }
   }
-  if (!pick && (kind === 'mentee' || kind === 'couple')) return undefined;   // section 20's own: you as the escort's mentee; couples come with B6
+  if (!pick && (kind === 'mentee' || kind === 'couple')) return undefined;   // section 20's own: you as the escort's mentee, and a partner from the roster before the first hour
   return pick;
 }
 // the weekly snapshot for planning (0.39.1, sparse since 0.39.3): section 14 seats people by affinityPlan(a, b, d),
