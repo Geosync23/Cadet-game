@@ -61,3 +61,86 @@ B: I'll put it on the board.   #funny
 A: Biscuit?
 B: Where did you get a biscuit?
 A: Don't ask. Take one.   #warm
+
+// ---- Writer 2, batch 7: named pairs (who: is A, with: is B), placed where the talk belongs. Mostly not about work.
+? pair:any+any who:reyes-alejandro with:torres-zeke deck:6
+A: Coil three hummed for me last night.
+B: She sulked for me all day.
+A: Maybe it's you, Zeke.   #funny
+
+? pair:any+any who:torres-zeke with:reyes-alejandro deck:6
+A: Left you a note. Two pages.
+B: I left you three.
+A: We should just talk more.   #funny
+
+? pair:any+any who:soto-marta with:pell place:teacorner
+A: Hm. My tin's lighter.
+B: Is it? Strange. Very strange.
+A: You've crumbs on your collar.   #funny
+
+? pair:any+any who:halloran-emeka with:silva-bea place:mess time:morning
+A: Why did the filter go to school?
+B: Not before my second tea, Emeka.
+A: Fair. I'll save it for lunch.   #funny
+
+? pair:any+any who:teague-theo with:hart-ravi place:junior_common_room
+A: Your comic got more laughs than mine.
+B: Mine had a duck in it.
+A: That's cheating.   #funny
+
+? pair:any+any who:volkov-maeve with:kovac-zainab place:worksbay
+A: Rematch. Friday. Scrubbers.
+B: Nine and a half. You won't.
+A: Bring a stopwatch anyway.
+
+? pair:any+any who:rahman-farah with:park-noor place:lounge
+A: Sails or engine?
+B: Sails. Quieter.
+A: Engine. Faster. We'll never agree.
+B: That's what makes it fun.   #funny
+
+? pair:any+any who:eklund-leila with:keane-davi place:booths
+A: Did your gran send the song?
+B: The one about the goat?
+A: Same gran. Definitely.
+B: We said we wouldn't check.   #funny
+
+? pair:any+any who:moreau-signe with:achterberg-lars place:lounge
+A: Don't tell me the ending.
+B: I won't.
+A: You're smiling. You've told me.   #funny
+
+? pair:any+any who:quist-ilse with:moreau-signe act:gym
+A: You waited for me again.
+B: I didn't. I was stretching.
+A: For four minutes.
+
+? pair:any+any who:jovanovic-petra with:reyes-alejandro deck:6 time:night
+A: I think coil two's warm.
+B: She's always warm at midnight.
+A: Probably. I'll check twice.
+
+? pair:any+any who:amadi-asha with:salo-saad place:mess
+A: Window seat's free. Read us the letter.
+B: Episode six. My twin lost the other boot.   #funny
+
+? pair:any+any who:salo-saad with:navarro-mateo
+A: Your twin wrote to mine.
+B: About us?
+A: About boots, mostly.   #funny
+
+? pair:any+any who:silva-bea with:soto-marta place:mess time:morning
+A: Two hundred and twelve.
+B: Eleven. I married on a Tuesday.
+A: Close enough.
+
+? pair:any+any who:halloran-emeka with:calder place:teacorner
+A: Tea, Chief?
+B: I don't take a break.
+A: It's not a break. It's a mug.
+B: Fine.   #funny
+
+? pair:any+any who:calder with:torres-zeke place:worksbay act:work
+A: Your trainee's good.
+B: I know!
+A: Don't tell them. Yet.

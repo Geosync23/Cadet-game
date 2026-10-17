@@ -26,3 +26,43 @@ A: I can't stop thinking about it. Not in a good way.   #funny
 A: Ninety seconds early.
 B: Is that good?
 A: For him, it's practically late.   #funny
+
+// ---- Writer 2, batch 7: named pairs (who: is A, with: is B), placed where the talk belongs. Mostly not about work.
+? pair:any+any who:kowalczyk with:vance deck:1 time:morning
+A: Night log. Nothing happened.
+B: Colour-coded?
+A: Your bookmark's on page three.   #funny
+
+? pair:any+any who:mensah with:vance act:gym
+A: Treadmill board's got a new name.
+B: Whose?
+A: Tomas. Fourth.
+B: He'll be third by Friday.
+
+? pair:any+any who:nandakumar with:brennan place:mess
+A: Too hot?
+B: Much too hot.
+A: You used all of them.
+B: I'm brave.   #funny
+
+? pair:any+any who:oduya with:brennan place:mess
+A: The green sweets. No takers.
+B: Put them in a pudding.
+A: That's genius.
+B: That's cooking.   #funny
+
+? pair:any+any who:raman with:marrow deck:1
+A: Six years. You've never grabbed the rail.
+B: I've wanted to.
+A: That's not the same thing.   #funny
+
+? pair:any+any who:ferreira with:lindqvist-isak place:lounge
+A: Have you met the new cadet yet?
+B: Briefly. Quick on the board.
+A: Good. You'll get on.
+
+? pair:any+any who:zielinski-oona with:esposito-yara deck:3
+A: Two for one?
+B: One for one.
+A: One and a half?
+B: Fine. Today only.   #funny

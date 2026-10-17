@@ -33,3 +33,52 @@ A: Every day, that's the job.   #warm
 A: The Envoy's door's got a new knot.
 B: How do you know?
 A: The Chief counts them. Don't tell him I know.
+
+// ---- Writer 2, batch 7: named pairs (who: is A, with: is B), placed where the talk belongs. Mostly not about work.
+? pair:any+any who:mensah with:holt deck:2 time:night
+A: Why did the airlock leave the hatch?
+B: Don't.
+A: Too many seals.
+B: Hm.   #funny
+
+? pair:any+any who:vasquez-uma with:holt deck:2
+A: "A good Watch sees everything."
+B: And says little, Vasquez.
+A: Sorry, Chief. Little. Yes.   #funny
+
+? pair:any+any who:garcia-greta with:kim-yusuf place:mess
+A: Spare speaker wire?
+B: Two metres. I'll trade you a jack.
+A: Done. The night shift thanks you.
+
+? pair:any+any who:park-noor with:lindqvist-isak place:musicroom
+A: It's nine. The book's mine.
+B: Nine-oh-two. You're late.
+A: Then I keep it till eleven-oh-two.   #funny
+
+? pair:any+any who:dahl-mira with:ueda-vera place:musicroom
+A: Play it again, slower.
+B: I'll be in bed by then.
+A: Faster, then.   #funny
+
+? pair:any+any who:achterberg-lars with:farouk-olu place:musicroom
+A: It's "the long road home".
+B: It's "the lone road home".
+A: That's a different song.
+B: It's a better one.   #funny
+
+? pair:any+any who:chen-carmen with:amadi-asha time:morning deck:4
+A: You went high on the last bit.
+B: You went low. It worked.
+A: Same again tomorrow?   #funny
+
+? pair:any+any who:shah-dara with:volkov-maeve place:mess time:morning
+A: You fixed it before I got here.
+B: It beeped. I was nearby.
+A: It beeps for me.
+B: It beeps for everyone.   #funny
+
+? pair:any+any who:ueda-vera with:varga-tariq place:mess
+A: The post bag goes Thursday.
+B: Mine's four pages.
+A: Mine's two. I write small.
