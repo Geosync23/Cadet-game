@@ -301,3 +301,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~15:50 USER RULE: do not start any 0.60.6 work until the user says all their notes are in. 0.60.4 and 0.60.5 proceed.
 - ~15:55 user notes: bathroom-0 pose + slower walk, low-need warnings, many more tips (paced). Hired player engineer 5 (session_01SyRmwPxQEVKab6re9UgyrD), plan first. Tour notes (bunk first, start 17:30, goodnight + bed arrow) with sim 5 + head writer 3.
 - ~16:15 user design change: player may enter any (built) utility room from the start; tier now gates jobs only. perf 3 builds it as 0.27.35 on claude/fix-ghost-tap (0.60.5). design-doc updated here.
+- ~16:20 user notes: meal social only from people sitting next to you; device 'Ship' -> 'News feed' with a big line bank (head writer 3, 250-400 posts); 'Crew' -> 'Relationships' (Roster covers crew). All to player engineer 5, same build as the tips (0.60.6, held until the user's notes are in).
