@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.43.7 (about 17,250 lines)
+## Current build: 0.43.8 (about 17,250 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -357,6 +357,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.43.5 | Reviewer 2's follow-up: romance words are allowed only about crew couples (an overheard conversation under `pair:couple` or `bond:couple`, or an `about`/`rumour`/`smalltalk`/`bond:couple` line) and never with a reference to the player in the line ({me}, the new hand, cadet, or "you" said to you): "I think I am in love with the new hand." fails anywhere; "married" and "wedding" leave the list (family lines), "marry me", "will you marry" and "propose to you" stay. New `pair:couple` (section 22's `linePair`: `bondOf(a, 'couple') === b`). cadet_test ALL IDENTICAL. |
 | 0.43.6 | Reviewer 2's second follow-up (lines_check and README; the game only gets the build number): couple words only in an overheard conversation under `pair:couple`/`bond:couple` or a `bond:couple` line, and never in any line with a player reference ({me}, {nick}, new hand, cadet, newcomer, you, your), overheard included; `about`, `rumour`, `smalltalk` back under the full ban; dating, going out, seeing each other/anyone/someone, fancy a date, ask you out added. "married"/"wedding" stay allowed in family lines. Writers' eebe874 content still clean; cadet_test ALL IDENTICAL. |
 | 0.43.7 | `cue:` conditions take `@me` (the newest matching cue is about the speaker: `cue.who === p.id`, e.g. `cue:gift.you@me` for the receiver's thanks) and `@dept` (`cue.dept === p.dept`, a repair in their department), reading the `who`/`dept` fields social A added to cue records (0.36.53). Writers' guide updated. cadet_test ALL IDENTICAL. |
+| 0.43.8 | For overheard conversations about particular people (the head writer's ask): new conditions `who:<id>|...` (the speaker, overheard speaker A) and `with:<id>|...` (`ctx.other`, speaker B), and `pair:x+y` sides may be crew ids. lines_check checks the ids. cadet_test ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
