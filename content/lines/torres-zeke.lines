@@ -146,10 +146,6 @@
 // Each step's lines are gated by flag:walk.<step>, which nothing sets yet, so they're never said as ordinary week-1
 // chat (the head writer). The onboarding engineer's hook will ask for them by step. Bubbles: 60 characters or fewer.
 // (0.48.22: hello, haulway, works, lift, wing, servery and call moved to the arrival tour below: walk.<point>.<n>.)
-// step: toMess
-? flag:walk.toMess
-- Dinner. Mess is on Deck 3. You know the lift now.
-- Brennan's cooking. Trust me, you want to be early.
 // step: goodnight (0.48.57, the user's note): his goodnight when he lets you go after the arrival dinner (the
 // 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
 // ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
@@ -164,6 +160,8 @@
 == week1
 // step: take (you take the job at the board)
 ? flag:walk.job.take
+- Every fault on the ship lands on that board. Pick one.
+- Glass office is the Chief's. She sees the whole bay.
 - That one's ours. It's on your device now, under Jobs.
 - Follow the arrow. I'm right behind you. Promise.
 // step: fetch (main storage)
@@ -185,6 +183,8 @@
 - Not done till it's turned in, though. Back to the board.
 // step: turnin (at the board)
 ? flag:walk.job.turnin
+- Tool wall. Every tool has its outline. Back in it, after.
+- Tea corner's behind the racks. Half ten. It's sacred.   #funny
 - Turned in. Your first one in the Record. Right, onward.
 - Lunch, then you lead the next one. I'll just follow.   #warm
 
@@ -215,146 +215,60 @@
 - Solo, and turned in. Look at you. Right, onward.   #warm
 - Saw it on the board. I didn't help once. Proud of us both.   #funny
 
-// ---- Day 0: the arrival tour (head writer 3, 0.48.22; the onboarding engineer's hooks, arrival 0.42.20+).
-// Each tour point plays walk.<point>.1, .2, ... IN ORDER (about 5 s apart) when you and Torres are near it; one
-// flag key per line, so lineFor returns exactly that line. Points in walking order: shuttle, bay, haulway, stores,
-// works, lift, wing, officers, deck3, servery. walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger
-// lines (you stand near him ~8 s), about himself, in order, never repeated. No scarf (beat 1), no father, no list.
-// CORE: at every place, .1-.3 are the core lines (who Zeke is / what the place is / the key action); .4+ are extras.
-// introDinner and introAsk are meetings (content/meetings/). Bubbles: 60 characters or fewer.
+// ---- Day 0: the arrival tour (rewritten by head writer 4, 0.48.69, the user's note on 0.60.5: "Zeke stops too much
+// still. A lot of what he's saying should be next-day stuff. He should just say more welcoming, general stuff about
+// life on the ship."). Two stops only: your bunk (introBunk) and the mess (introDinner, then introChief). Everything
+// else is walk-and-talk: walk.shuttle.1-3 at the Tern's ramp; walk.up.<n> on the way to your bunk; walk.down.<n> from
+// the bunk to the mess; IN ORDER, a line every few seconds while you walk with him, wherever you are; one flag key per
+// line. Job things (the board, the Chief's office, the tool wall, tea) wait for Monday's walk.job.* lines.
+// walk.call.<n>: his "this way" when you lag. walk.more.<n>: linger lines about himself. Bubbles: 60 characters or fewer.
+// Retired keys: walk.bay|haulway|stores|works|lift|wing|officers|deck3|servery.*, walk.toMess, walk.extra.*.
 == week1
-// point: shuttle
+// at the ramp
 ? flag:walk.shuttle.1
-- {me}? There you are. Zeke Torres. Works, engines.
+- {me}? There you are. Zeke Torres. Welcome aboard!
 ? flag:walk.shuttle.2
 - Welcome to the Wren. She's glad you're here. So am I.   #warm
 ? flag:walk.shuttle.3
-- That's the Tern behind you. She brought you the whole way.
-? flag:walk.shuttle.4
-- Long trip? I bet. Tell me all about it at dinner.
-? flag:walk.shuttle.5
-- Bag all right? Right, onward. Stay close. She's big.
-// point: bay
-? flag:walk.bay.1
-- Shuttle bay. The Tern lives here when she's home.
-? flag:walk.bay.2
-- Best window on Deck 5, this. Amadi says so. She's right.
-? flag:walk.bay.3
-- Those are stars, not lights. You'll stop staring. Eventually.
-? flag:walk.bay.4
-- Deck 5's Operations. Works, stores, cargo. Us, mostly.
-? flag:walk.bay.5
-- Door's heavy. Lean on it. There. You've got it.
-// point: haulway
-? flag:walk.haulway.1
-- This is the haulway. Everything big comes through here.
-? flag:walk.haulway.2
-- Cargo hold on the left. Cart bay on the right.
-? flag:walk.haulway.3
-- Hear that hum? The drive coils, one deck down. I mind them.
-? flag:walk.haulway.4
-- Mind the carts. They don't mind you.   #funny
-? flag:walk.haulway.5
-- They've got moods, the coils. You'll see. Don't laugh.   #funny
-? flag:walk.haulway.6
-- I'll take you down to the engines this week. Promise.
-// point: stores
-? flag:walk.stores.1
-- Machine shop. If we can't find a part, we make it.
-? flag:walk.stores.2
-- Main storage. Every part on the ship has its own shelf.
-? flag:walk.stores.3
-- You'll know every shelf by Friday. Everyone does.
-? flag:walk.stores.4
-- Smell that? Oil and dust. Best smell on the ship.
-? flag:walk.stores.5
-- Pell naps in there sometimes. You didn't hear it from me.   #funny
-// point: works
-? flag:walk.works.1
-- And this is us. Works. Home from eight till five.
-? flag:walk.works.2
-- That's the job board. Every fault on the ship lands there.
-? flag:walk.works.3
-- Glass office is the Chief's. Calder. Exact, but fair.
-? flag:walk.works.4
-- Tomorrow, ten to eight. Right here. Not eight. Ten to.
-? flag:walk.works.5
-- Take a job, fix it properly, turn it in. That's the heart of it.
-? flag:walk.works.6
-- Tea corner's behind the racks. Half ten. It's sacred.   #funny
-? flag:walk.works.7
-- She's off today. She'll find you anyway. She always does.   #funny
-? flag:walk.works.8
-- Blue crate's hers too. Don't sit on it. Learnt that one.   #funny
-? flag:walk.works.9
-- Tool wall. Every tool has its outline. Back in it, after.
-// point: lift
-? flag:walk.lift.1
-- The lift. Runs right up the spine of the ship.
-? flag:walk.lift.2
-- Six decks. Bridge at the top, engines at the bottom.
-? flag:walk.lift.3
-- Four, please. Go on, the panel's all yours.
-? flag:walk.lift.4
-- Two's Survey and the seniors. Three's food. Important.   #funny
-? flag:walk.lift.5
-- The ladder's behind the glass. Maintenance only. Thirty-one rungs.
-// point: wing
-? flag:walk.wing.1
-- Deck 4. Quarters. The junior wing's this way.
-? flag:walk.wing.2
-- Eight bunk rooms. You're in One. Good room, One.
-? flag:walk.wing.3
-- Washrooms. Hot water till ten, then it's character-building.   #funny
-? flag:walk.wing.4
-- Common room's at the end, by the windows. Tiles, mostly.
-? flag:walk.wing.5
-- Don't play Rina at Tiles. Or do. Just don't expect to win.   #funny
-? flag:walk.wing.6
-- Laundry there. Put your name in everything. Trust me.   #funny
-// point: officers
-? flag:walk.officers.1
-- Officers' corridor. Cabins, all the way along.
-? flag:walk.officers.2
-- Fourteen's mine. The one with the music. Sorry in advance.   #funny
-? flag:walk.officers.3
-- Need anything, knock on fourteen. I mean it.   #warm
-? flag:walk.officers.4
-- Music room's at the end. The record cabinet lives there.
-? flag:walk.officers.5
-- I know every song in it. So do four others. We disagree.   #funny
-? flag:walk.officers.6
-- The Captain plays the piano in there. Late Thursdays.
-// point: deck3
-? flag:walk.deck3.1
-- Deck 3. Commons. Everyone ends up here sooner or later.
-? flag:walk.deck3.2
-- And the mess. Smell that? That's Brennan. Hurry.   #funny
-? flag:walk.deck3.3
+- Long trip? Bunk first, then food. Follow me.
+// walking up to your bunk
+? flag:walk.up.1
+- Don't try to learn it all tonight. Nobody does.
+? flag:walk.up.2
+- Everyone's friendly. Say hello and you've made a mate.
+? flag:walk.up.3
+- Six decks, one lift. You can't really get lost.
+? flag:walk.up.4
+- You're on Deck 4, with the juniors. Good lot. Noisy.   #funny
+? flag:walk.up.5
+- Breakfast from six. Dinner from five. Brennan cooks.
+? flag:walk.up.6
+- Hot water's best before ten. After that it's bracing.   #funny
+? flag:walk.up.7
+- Weekends are yours. Two whole days. Sleep in, if you like.
+? flag:walk.up.8
+- Lost? Ask anyone. Every one of us got lost once.
+? flag:walk.up.9
+- Pell's a bunk along. Talks in his sleep. About engines.   #funny
+? flag:walk.up.10
+- You'll pick it all up in a week. Promise.   #warm
+// walking down to the mess
+? flag:walk.down.1
+- Right. Food. The mess is on Deck 3. Everyone eats there.
+? flag:walk.down.2
+- Deck 3's the Commons. Lounge, garden, gym, the lot.
+? flag:walk.down.3
+- The garden's got a proper tree. Sit under it sometime.
+? flag:walk.down.4
 - Booths down there. That's where you call home.
-? flag:walk.deck3.4
-- Garden's that way. One big tree. Don't ask who climbs it.   #funny
-? flag:walk.deck3.5
-- Gym. Vance's leaderboards. Don't look at them too long.   #funny
-? flag:walk.deck3.6
-- Crew store. Snacks, socks, small things. Bring credits.
-? flag:walk.deck3.7
-- Infirmary. Dr. Nandakumar. She'll tell you to drink water.
-? flag:walk.deck3.8
-- Lounge at the bow. Big curved windows. Best seats aboard.
-// point: servery
-? flag:walk.servery.1
-- Tray first, then the servery. Take what smells best.
-? flag:walk.servery.2
-- That's Chef Brennan. Thank her on the way past. It matters.
-? flag:walk.servery.3
-- I'll find us a table. Window side, if it's free.
-? flag:walk.servery.4
-- She keeps a book of everyone's favourite dish. Think hard.
-? flag:walk.servery.5
-- Sunday's bread day. She lets juniors knead, if you're early.
-? flag:walk.servery.6
-- Grab shelf. Covered plates. For emergencies, and Pell.   #funny
+? flag:walk.down.5
+- The bow lounge has the best windows. Stars all evening.
+? flag:walk.down.6
+- Most weeks there's something on. Quiz, music, bread day.
+? flag:walk.down.7
+- Thank Brennan on the way past. It matters to her.   #warm
+? flag:walk.down.8
+- Save room for pudding. That's the only rule tonight.   #funny
 // point: call
 ? flag:walk.call.1
 - This way! Over here.
