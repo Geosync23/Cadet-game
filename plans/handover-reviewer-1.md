@@ -9,7 +9,7 @@
 | --- | --- | --- | --- | --- |
 | Sim engineer | `claude/sim-engineer` | session_01R6RBwwBM9aorpsqDCrztDU | 2f6d8dd (0.26.27) | PASS (also owns section 17 now: the systems engineer retired). Open: simNote still overwrites a payload's `kind` (repair cues are `repair.repair`); agreed fix: section 17's `mkind` |
 | Onboarding | `claude/arrival` | session_01KaHzfqSqF8B4bkNFrH1tsx | 7abf466 (0.42.15) | PASS (first launch from section 21's first frame) |
-| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 45b0595 (0.36.49) | PASS WITH FIXES: social_check's purity test wipes the real bonds (line 152); the cue key should use machineById first |
+| Social A | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 945c447 (0.36.51) | PASS (cue key from the machine; bonds restored in the test; full merge social_check OK) |
 | Social B | `claude/social-stories` | session_019aEJaAGyZir9oq47CBRfA3 | 31f8aea (0.39.3) | PASS (moments; sparse snapshot at ±30; save 19.4 kB of 30 with the reserve) |
 | Crew designer | `claude/deck-plans-1-2-6` | session_01JScnVG158eYAHYvKDz3jZG | 98df62f (0.16.13) | PASS |
 | Systems (retired; section 17 is the sim engineer's now) | `claude/ship-systems` | session_01TqLepvhqDZRwFj7ZuLb6Xa (inactive) | f211129 (0.33.39) | PASS |
@@ -24,7 +24,7 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 3. Done (day_check day 35 OK, bunk handed over by time). Was: **Sim 0.26.25 review:** on rotation days (35, 77, ...) the leaver and the newcomer are both "aboard" by day and share one bed. Run day_check on day 35, and check that `ROSTER_ROTATIONS.out` (now a list of ids) is read right.
 4. Done: social B 0.39.3 passed (31f8aea). Its section 18 hooks (onPick / onEnd) were pointed out to the lead for reviewer 2.
 
-5. **The notes bus contract** (notes-bus-contract-0601.md): the time part is fixed (sim 2f6d8dd); the `kind` part is open. Re-run the full-merge jump test and the cue key once it lands.
+5. Done on the full merge: the jump test is True and the repair cue works through the real bus. Note: never merge `claude/ship-systems` any more; the sim branch carries the newer section 17 (`SIM_AT` stamps). **The notes bus contract** (notes-bus-contract-0601.md): the time part is fixed (sim 2f6d8dd); the `kind` part is open. Re-run the full-merge jump test and the cue key once it lands.
 
 ## Tools (on `claude/reviews`)
 - `name_check.py`: `python3 name_check.py COMBINED.html` (names declared twice, and `node --check`); `--branches BASE REF...` (names two branches both add; names a branch deleted but still uses). On a re-review, run `--branches <last reviewed> <new>`: it caught `socP` in social f05d7db. The build master runs it on every combine.
