@@ -15454,29 +15454,36 @@ function socBondOf(id, kind) {                           // for section 20's bon
   if (!pick && (kind === 'mentee' || kind === 'couple')) return undefined;   // section 20's own: you as the escort's mentee; couples come with B6
   return pick;
 }
-// the weekly snapshot for planning (0.39.1): section 14 seats people by affinityPlan(a, b, d), which must give the same
-// answer however often a day is planned. At the start of each ship week (the first storyHour in it) the live affinity
-// is copied into SHIP.social.affWeek ('<week>:<base64>;<week>:<base64>', this week's and last week's; section 20
-// saves it), and a day in week W reads the snapshot taken at the start of week W-1: fixed and saved a week before any
-// day that might be planned ahead. Weeks with no snapshot (a new game's first two) get undefined, so affinityPlan
-// keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
-const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots, by week
+// the weekly snapshot for planning (0.39.1, sparse since 0.39.3): section 14 seats people by affinityPlan(a, b, d),
+// which must give the same answer however often a day is planned. At the start of each ship week (the first
+// storyHour in it) the pairs whose live affinity is AFF_SNAP or more either way (seating's lines: next to friends at
+// 30+, away from people at -30 or less) are copied into SHIP.social.affWeek, '<week>:<crew count>:<base64 of [i, j,
+// v] bytes>', this week's and last week's joined by ';' (section 20 saves it), so its size follows the friendships,
+// not the square of the crew. A day in week W reads the snapshot taken at the start of week W-1: fixed and saved a
+// week before any day that might be planned ahead. A pair not in it reads 0 (between the lines). No snapshot for
+// that week (a new game's first two, a save from before, a crew list of another size) gives undefined, so
+// affinityPlan keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
+const AFF_SNAP = 30;
+const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots: week -> Map(pairIdx -> v)
 function affWeeks() {
   const s = SHIP.social.affWeek || null;
   if (AFF_WEEK.src !== s) { AFF_WEEK.src = s; AFF_WEEK.map = new Map();
-    for (const part of (s || '').split(';')) { const m = /^(\d+):(.+)$/.exec(part); if (!m) continue;
-      try { const bin = atob(m[2]), a = new Int8Array(bin.length); for (let k = 0; k < bin.length; k++) a[k] = bin.charCodeAt(k) << 24 >> 24; if (a.length === SHIP.aff.length) AFF_WEEK.map.set(+m[1], a); } catch (e) { /* a bad snapshot is ignored */ } } }
+    for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(.*)$/.exec(part); if (!m || +m[2] !== SOC.n) continue;
+      try { const bin = atob(m[3]), P = new Map(); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); AFF_WEEK.map.set(+m[1], { P, raw: part }); }
+      catch (e) { /* a bad snapshot is ignored */ } } }
   return AFF_WEEK.map;
 }
 function affWeekTake(h) {                                // storyHour: the first hour of a new ship week
   const w = Math.floor(Math.floor(h / 24) / 7), M = affWeeks(); if (M.has(w) || [...M.keys()].some(k => k > w)) return;
-  let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
-  const keep = [...M.keys()].filter(k => k === w - 1).map(k => { let b = ''; for (const x of new Uint8Array(M.get(k).buffer)) b += String.fromCharCode(x); return k + ':' + btoa(b); });
-  SHIP.social.affWeek = keep.concat(w + ':' + btoa(bin)).join(';');
+  const { n } = SOC, aff = SHIP.aff; let bin = '';
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const v = aff[pairIdx(i, j)]; if (v >= AFF_SNAP || v <= -AFF_SNAP) bin += String.fromCharCode(i, j, v & 255); }
+  const keep = [...M.keys()].filter(k => k === w - 1).map(k => M.get(k).raw);
+  SHIP.social.affWeek = keep.concat(w + ':' + n + ':' + btoa(bin)).join(';');
 }
 function affPlanWeek(i, j, d) {
+  if (!Number.isFinite(d)) return undefined;              // no day: the starting affinity, as before
   socInit(); const a = affWeeks().get(Math.floor((d - 1) / 7) - 1);
-  return a ? a[pairIdx(i, j)] : undefined;
+  return a ? a.P.get(pairIdx(i, j)) ?? 0 : undefined;
 }
 // you as the connector (0.39.1): "Do you know …?" on the chat card's Ask about. introOptions(p) -> up to three people
 // you know at colleague or better (as well as p) whom p hardly knows (affinity under INTRO_UNDER, not rivals),
