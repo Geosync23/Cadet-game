@@ -6,7 +6,8 @@ Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept 
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.14**, 6e090ea; 0.43.11-0.43.14 waiting on reviewer 2's re-check), on ship integration 0.41.10.
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.22**, 6fed418). Reviewer 2 passed up to 0.43.19; 0.43.20-0.43.22 are with them. Since 0.43.17
+  (7c888e4) the branch carries claude/ship-integration 0.60.1 (merged, the lead's call), so onSim, cue() and social are here.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
 - Not mine: everything else under content/ (head writer 2, session_01HNrh3xCtczeZM5NVFrE6pa, branch claude/content,
@@ -39,14 +40,21 @@ it is the full spec of the file formats and the condition vocabulary) first.
   the saved ring `SHIP.lines = { ring: [[id, day]], serious }` in save.lines via SAVE_EXTRA (no sim-engineer hook needed).
 - 0.43.13 one-speaker conversations (only `A:`), booth callers talk only to home.
 - 0.43.14 reviewer 2's fixes (calls home: family warmth only; contacts mum/gran/jo/sam; "my love"; `linesNew` on New game;
-  cheaper pair scan: OVH_NEAR 6, OVH_TRIES 8, overheardFor fills only its top group).
+  cheaper pair scan: OVH_NEAR 6, OVH_TRIES 8, overheardFor fills only its top group). 0.43.15 act:call = callhome;
+  one-speaker lines need place:/act:.
+- 0.43.16 reactions (`linesReact`, onSim('*'), SHIP.lines.reacted). 0.43.17 the merge; New game resets through
+  onSim('newGame'). 0.43.18 trait:/you: take `_`, values checked. 0.43.19 `lines_check.py --day` (the voice budget in a browser).
+- 0.43.20 VOICE and LINES bake as `JSON.parse('...')` (perf item 4; one literal per entry joined with +; performance
+  engineer 2, session_01XAkY9U3mmstHQT2yAMTocA, measures it). 0.43.21 {home} {family} {hobby} {since} through socialFill
+  (needs social A's 0.36.60 in the same build; build master 2 is session_01F8ph7FKqViF3heRn94YgBr). 0.43.22 lines_check
+  checks trad:/came: ids. save.lines is separate from social_check's 30 KB social budget (about 10 KB worst case).
 
 ## Hooks outside section 22 (the hook register)
 - Section 20 (mine, approved by the lead): `const CHATTER_IDLE/CHAT_GREET/CHAT_NEAR/CHAT_LIFE/CHAT_DEPT = linesLegacy(...)`
   and the first statement of `chatGreet` (own lines via lineFor, peek when asked about another hour). Social A doesn't
   touch those lines; when they move chatLine to `lineFor` (socLine), the legacy reads can go.
 - Section 20 (0.43.12): `if (typeof linesTick === 'function') linesTick();` after `chatTick();` in socialTick; section 22
-  sets section 20's `CHATTER_AT` while a conversation plays. Section 13 (0.43.14): `linesNew()` in the New game handler.
+  sets section 20's `CHATTER_AT` while a conversation plays. (0.43.14's section 13 hook went in the 0.43.17 merge: section 22 listens to onSim('newGame').)
 - Section 18 (traditions engineer's): `if (typeof linesMeetings === 'function') linesMeetings(MEETING_SCRIPTS);`.
 
 ## Gotchas
@@ -70,12 +78,12 @@ it is the full spec of the file formats and the condition vocabulary) first.
 - Browser checks one at a time; social/deck/day/player/events/interactions/food/machine all passed on 0.43.0.
 
 ## Loose ends / next (wave 2, waiting for the lead's go-ahead)
+- Wave 2 is done (overheard, the ring, booth lines, reactions, the --day check).
+- In flight (asked 07:5x UTC): head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565) and social B2
+  (session_014A3w2gK8FBNWs66YC3LfME): what the arcs' last beats need from section 22; whether Tiles needs more
+  (trait:dry_humour under == tiles.* already works). Build what they ask, after the lead agrees.
 - (done: overheard played, the ring, booth one-speaker lines.) Test script for overheard in a browser: see
   DEV_NOTES 0.43.12 (stand the player by a group on Deck 3 at dinner, step, log `bubbles.list` and `OVH`).
-- Reactions from `onSim` cues (sim engineer's bus: simNote/onSim/simNotes), once per person per kind per day; the
-  galley's `lateMeal` note carries { who, meal, late, how, dish, deck }.
-- lines_check's simulated voice-budget day in a browser (now only a report of the rules and the supply).
-- mum.call needs two edits by the writers (drop "(?)", add a bare `?` before the anyone-can-say send lines).
 
 ## Open questions for the user (via the lead)
 - None of mine outstanding.

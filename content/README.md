@@ -118,7 +118,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `place:` | where they are: a room's name with `_` for spaces (`place:junior_common_room`), a short alias (`mess`, `commons`, `lounge`, `booths`, `overlook`, `teacorner`, `worksbay`, `chartroom`, `musicroom`), or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
 | `deck:` | the deck where it happens (where you are) | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
-| `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
+| `trad:` | a tradition, by its id in the game (`observatory-night`, not `observatory`; lines_check knows them), or `today`: any tradition today | `trad:quiz`, `trad:today` |
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait (one of the roster's, `_` for a space) or habit | `dept:galley`, `rank:junior`, `trait:dry_humour`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either), `call` (on a call home) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |

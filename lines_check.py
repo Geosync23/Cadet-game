@@ -2,6 +2,7 @@
 """lines_check.py: checks the writers' files under content/ before they're baked (writers run it before every push).
 
     python3 lines_check.py [GAME.html] [--strict] [--quiet]
+    python3 lines_check.py --day [GAME.html]     the voice budget in the game itself (a browser; a few minutes)
 
 Errors (exit 1): a file content_gen.py can't read; an unknown {token} or condition value; a line too long; an
 unknown crew id; the banned list (romance and flirting, swearing beyond the ship's mild "blast", real-world brands
@@ -130,7 +131,13 @@ def main(argv):
     m = re.search(r'^const REP_TAGS = \[(.*?)\];', html, re.M | re.S)
     VALUES['you'] = {t.replace(' ', '_') for t in re.findall(r"\['([^']+)'", m.group(1))} if m else None
     VALUES['trait'] = {t.replace(' ', '_') for p in people.values() for t in p.get('traits', [])} or None
-    for k in ('you', 'trait'):
+    # trad: and came: values: section 18's traditions (SHIP_TRADITIONS) and the baked ones, plus today / any
+    m = re.search(r'^const SHIP_TRADITIONS = \[\n(.*?)^\];', html, re.M | re.S)
+    trads = set(re.findall(r"^  \{ id: '([^']+)'", m.group(1), re.M)) if m else set()
+    trads |= {t['id'] for t in out['TRADITIONS'] if t.get('id')}
+    VALUES['trad'] = (trads | {'today'}) if trads else None
+    VALUES['came'] = (trads | {'any'}) if trads else None
+    for k in ('you', 'trait', 'trad', 'came'):
         if not VALUES[k]:
             del VALUES[k]                                  # an older build without them: not checked
     names = set()
@@ -410,5 +417,93 @@ def main(argv):
     return 1 if errors else 0
 
 
+# ---- the voice budget, played (0.43.19): --day runs the real game in a browser (cadet_test.py's Game: a virtual
+# clock, frames stepped by hand) through a ship day's busy places with the player standing among the crew, logs every
+# speech bubble (section 8b's bubbleSay, wrapped), and checks the budget's rules: at most two bubbles on screen, one
+# conversation at a time and no other talk while it plays, nothing new while a chat card or meeting is open, at most one
+# #serious conversation or reaction a day, nobody reacting to a kind twice a day, nothing from the ring said twice.
+DAY_VISITS = [   # deck, ship minute of Day 1, what to stand by (a crowd, or someone doing this), real seconds
+    (3, 7 * 60 + 10, 'crowd', 90), (5, 10 * 60, 'work', 60), (4, 13 * 60, 'crowd', 60), (3, 18 * 60 + 10, 'crowd', 120),
+    (3, 19 * 60 + 30, 'callhome', 60), (3, 20 * 60 + 40, 'crowd', 90)]
+DAY_WRAP = r"""(() => {
+  window.__B = []; window.__R = 0;
+  const say = bubbleSay; bubbleSay = (who, text, secs) => { const b = say(who, text, secs);
+    const a = DECK_CREW.find(x => x.h === who);
+    if (b) __B.push({ t: Math.floor(shipNow()), who: a ? a.p.id : '?', text, ovh: OVH ? OVH.lines.id : null, react: __R, chat: !!CHAT,
+      dlg: typeof DIALOGUE !== 'undefined' && !!DIALOGUE, on: bubbles.list.length }); return b; };
+  const lr = linesReact; linesReact = (...a) => { __R = 1; try { return lr(...a); } finally { __R = 0; } };
+})()"""
+DAY_STAND = r"""(F => { const c = DECK_CREW.filter(a => a.h); let best = F === 'crowd' ? null : c.find(a => (whereIs(a.p, shipNow()) || {}).act === F), n = -1;
+  if (!best) for (const a of c) { const k = c.filter(b => Math.hypot(a.x - b.x, a.z - b.z) < 3).length; if (k > n) { n = k; best = a; } }
+  if (best) { player.obj.position.set(best.x + 1, 0, best.z + 1); target.copy(player.obj.position).setY(.7); }
+  return best ? best.p.id : null; })"""
+
+
+def voice_day(game):
+    import pathlib
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = open(os.path.join(here, 'cadet_test.py'), encoding='utf-8').read().split('a, shots = run(')[0]
+    env = {'__name__': 'cadet_day'}
+    exec(src, env)
+    errors, notes = [], []
+    with env['sync_playwright']() as pw:
+        g = env['Game'](pw, game)
+        if not g.ev("typeof linesTick === 'function' && typeof CONVOS !== 'undefined'"):
+            print('lines_check --day: this build has no overheard conversations (section 22 before 0.43.12)'); g.close(); return 1
+        g.ev(DAY_WRAP)
+        peak, overlap = 0, 0
+        for n, (deck, at, focus, secs) in enumerate(DAY_VISITS):
+            g.ev(f'goToDeck({deck}); skipTo({at});'); g.step(30)
+            who = g.ev(DAY_STAND + f"('{focus}')")
+            for k in range(secs):
+                if n == 3 and k == secs // 2:      # a chat card mid-dinner: nothing new while it's open, and a conversation stops
+                    g.ev("(() => { const a = DECK_CREW.find(a => a.h); if (a) chatOpen(a.p); })()")
+                if n == 3 and k == secs // 2 + 10:
+                    g.ev('chatClose()')
+                g.step(30)
+                r = g.ev("[bubbles.list.length, OVH ? OVH.lines.id : null, bubbles.list.filter(b => OVH && !OVH.bub.includes(b)).length]")
+                peak = max(peak, r[0])
+                if r[1] and r[2]:
+                    overlap += 1
+            notes.append(f'visit {n + 1}: Deck {deck} {at // 60:02d}:{at % 60:02d} by {who or "nobody"}')
+        B = g.ev('__B')
+        L = g.ev('SHIP.lines')
+        serious = g.ev("(SHIP.lines.ring || []).filter(([id]) => (CONVOS.find(c => c.id === id) || (LINES.cue || []).find(e => e.id === id) || {}).tone === 'serious').length")
+        errs = g.errors
+        g.close()
+    convs = sorted({b['ovh'] for b in B if b['ovh']})
+    reacts = [b for b in B if b['react']]
+    other = [b for b in B if not b['ovh'] and not b['react']]
+    if peak > 2:
+        errors.append(f'{peak} bubbles on screen at once (at most two)')
+    if serious > 1:
+        errors.append(f'{serious} #serious conversations or reactions in a day (at most one)')
+    if overlap:
+        errors.append(f'other talk on screen during a conversation ({overlap} seconds)')
+    for b in B:
+        if b['chat'] or b['dlg']:
+            errors.append(f'a bubble while a chat card or meeting was open: {b["who"]}: {b["text"]}')
+    ids = [r[0] for r in L.get('ring', [])]
+    if len(ids) != len(set(ids)):
+        errors.append('a conversation or reaction was heard twice in a day: ' + ', '.join(sorted({i for i in ids if ids.count(i) > 1})))
+    for pid, r in (L.get('reacted') or {}).items():
+        if len(r['kinds']) != len(set(r['kinds'])):
+            errors.append(f'{pid} reacted to the same kind twice in a day')
+    if errs:
+        errors += ['game: ' + e for e in errs[:5]]
+    for x in notes:
+        print('  ' + x)
+    print(f'  {len(convs)} conversations, {len(reacts)} reactions, {len(other)} other bubbles (section 20\'s chatter); peak {peak} bubbles')
+    for b in B[:400]:
+        print(f'    {b["t"] // 60 % 24:02d}:{b["t"] % 60:02d} {"conv " if b["ovh"] else "react" if b["react"] else "other"} {b["who"]}: {b["text"]}')
+    for e in errors:
+        print('ERROR ' + e)
+    print(f'lines_check --day: {"FAIL" if errors else "PASS"} ({len(errors)} errors)')
+    return 1 if errors else 0
+
+
 if __name__ == '__main__':
+    if '--day' in sys.argv:
+        a = [x for x in sys.argv[1:] if not x.startswith('--')]
+        sys.exit(voice_day(os.path.abspath(a[0]) if a else os.path.join(ROOT, 'starship-cadet.html')))
     sys.exit(main(sys.argv[1:]))
