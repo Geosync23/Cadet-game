@@ -147,3 +147,17 @@ def champ(st,R,p,rng,ms):
         v+=rng.random()*0.01
         if v>bv: bv=v;best=m
     return best
+
+# The page's exact rules (plans/tiles-plan.html): diagonal steps forward, diagonal jumps both ways,
+# shuffled mirrored marks, dock after any step/jump/launch, first to 7, 14 turns each, ties to whoever docked last.
+PAGE_RULES=dict(steps='diag',jumps='diag4',layout='random',tie='last',drop='home',target=7,rounds=14)
+
+if __name__=='__main__':
+    import sys
+    n=int(sys.argv[1]) if len(sys.argv)>1 else 3000  # 3000 reproduces the page table exactly (seed 2026)
+    R=R3(**PAGE_RULES)
+    print('players            games  first-player  draws  turns  behind-at-half-won')
+    for k,m in ((('random','random'),n),(('easy','easy'),n),(('greedy','greedy'),n),(('greedy2','greedy2'),max(1,n//2))):
+        s=stats(R,k,m,seed=2026)
+        print(f"{k[0]+' vs '+k[1]:18s} {m:5d}  {s['p1']*100:11.1f}%  {s['draw']*100:4.1f}%  {s['plies']:5.1f}  {s['cb']*100:5.0f}%")
+    print('(easy = Easy, greedy = Medium, greedy2 = Hard, champ = the rejected champion level)')
