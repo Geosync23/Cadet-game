@@ -94,7 +94,7 @@ Each beat is something a person does in their real day: it is scheduled in their
 | **Mon 1** | Tomas | Bunk 1, 06:00 | Wash and use the washroom before breakfast; "breakfast's till eight" | Washed and fed |
 | | Calder, then Torres | Works bay, 07:50 (the Monday briefing) | Calder runs the briefing and hands you to Torres in two sentences. The board; a short meeting introduces the Works team on shift. | Meet the team |
 | | Torres | the whole morning | **The shadow shift:** one reserved, real Tier 1 job end to end. He takes it at the board with you, walks you to the machine, you inspect it (he explains the panel), fetch a part from storage, **make** a part in the machine shop, repair it (hold to work), and turn it in at the board. He talks you through each step; you do every step with your own hands. | Shadow a job |
-| | the Works team | Tea corner, 10:30 | The tea break counts as work; Torres's coffee; Pell's introductions | — |
+| | the Works team | Tea corner, 10:30 | The tea break counts as work; Torres hums along to the radio; Pell's introductions | — |
 | | Torres | the afternoon | **You lead, he follows**: a second reserved job; the escort switches to **follow** mode and only speaks if you're stuck for a while ("Storage is down one deck, I think you'll find."). Your first job in your Record. | Lead a job |
 | | Brennan | Mess, dinner | The dinner window, the grab shelf ("for emergencies, and Pell"), sitting with others for social | Eat with the crew |
 | **Tue 2** | Calder | Her glass office, 07:45 | **Meeting: your first solo job.** She hands you a job by name and explains your Record and progress talks ("Any time. Book it."). Torres works his own job nearby and checks in once at the tea break. | Your first solo job |
@@ -201,13 +201,13 @@ content/
 A `.lines` file (sketch; the dialogue engineer settles the exact grammar in wave 1, and the condition words are agreed with the social designer):
 
 ```
-@crew halloran-emeka
+@crew torres-zeke
 
 == greet
 ? tier=stranger
 - Evening. You'll be the new hand.
 ? tier>=acquaintance time:morning
-- {hi}, {me}. Coffee's terrible. I made it.   #funny
+- {hi}, {me}. Coil three's sulking. Don't take it personally.   #funny
 - Morning! Board's light today. Don't tell it I said so.
 
 == react
@@ -216,11 +216,11 @@ A `.lines` file (sketch; the dialogue engineer settles the exact grammar in wave
 
 == feel
 ? mood:low
-- Long one. I'll be fine after bread.
+- Long one. Coil three sulked all shift.
 
-== arc halloran.4
+== arc torres.4
 ? tier>=friend flag:certified.tier2
-- I had a junior once. Didn't make it through. I used to think that was on me.   #serious
+- Dad called me by my uncle's name again. Third time this month.   #serious
 ```
 
 ```
