@@ -17,4 +17,4 @@ Reviewer 1c, 2026-10-17. Diff: `git diff 7959655 9c18045` (section 15, player_ch
 
 ## Note (low)
 - With no dish, `dishName` turns the tray into "the hot meal", so you'd get a meal from an empty servery rather than no tray. That can't happen today: `galleyTurn` already requires `galleyCanServe` in the same tick as `foodFrom`. If it ever can, end the queue with `A.o.why` and no tray instead.
-- When sim 0.26.36 lands, make sure its release function can be called twice safely. `actEnd` and the walk-off path can both reach it for one stepping-aside.
+- When sim 0.26.36 lands, make its release function safe to call twice. Today each way out calls it once (`actEnd`, or the walk-off path, which sets `ACT = null` without `actEnd`), but that's cheap insurance.
