@@ -483,9 +483,12 @@ with sync_playwright() as pw:
       setShipNow(7 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); setShipNow(9 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g1 = repInit().dept.galley;
       setShipNow(15 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g2 = repInit().dept.galley; setShipNow(t0); socLoad(JSON.parse(keep));
       const q = seekSpot(), kp = PLAYER_PLACE; let mine = true; if (q) { PLAYER_PLACE = q.id; const q2 = seekSpot(); mine = !q2 || q2.id !== q.id; PLAYER_PLACE = kp; }   // never your own seat (0.36.72)
-      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2, socDuration(600), socDuration(650), mine]; })()""")
+      const D = SHIP.device, n0 = D && D.appts ? D.appts.length : 0; let occ = true;   // occasions' appointments (section 19's apptAdd, a.occ): no points, no remark (0.36.74)
+      if (D && D.appts) { const r0 = relGet('holt').pts; D.appts.push({ id: 9901, with: ['holt'], at: shipNow() - 60, len: 30, where: 'x', kind: 'summons', status: 'kept', occ: 'readyroom' }, { id: 9902, with: ['holt'], at: shipNow() - 30, len: 30, where: 'x', kind: 'summons', status: 'missed', occ: 'readyroom' });
+        socialAppts(); occ = relGet('holt').pts === r0 && !apptMissedBy(SOC.crew[SOC.idx.get('holt')]); D.appts.length = n0; }
+      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2, socDuration(600), socDuration(650), mine, occ]; })()""")
     print('Small seams:', sm)
-    if sm != ['my gran', None, 'chess', 19, 7, 1, 2, 'twenty months', 'nearly two years', True]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
+    if sm != ['my gran', None, 'chess', 19, 7, 1, 2, 'twenty months', 'nearly two years', True, True]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
