@@ -25,7 +25,7 @@ from playwright.sync_api import sync_playwright
 RUN = r"""(({ who, reload, to, skip }) => {
   const FLAGS = ['escort.' + INTRO_ESCORT, 'week1', 'intro.device', 'met.calder', 'week1.d2', 'week1.d3', 'week1.d4', 'week1.d5', 'week1.d6', 'week1.d7', 'week1.done', 'mug', 'seedling'];
   socInit(); socReset(0); SHIP.mail.length = 0;
-  SHIP.intro = introBlank();
+  SHIP.intro = introBlank(); SHIP.flags = {}; SHIP.notes = [];   // section 13's flag store and notes, when it's there
   const t0 = introAbs(INTRO_START.day, INTRO_START.min), order = [], flagAt = {};
   if (skip) { setShipNow(t0); introSkip(); }
   else introBegin('Sam');
