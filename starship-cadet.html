@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.46.0
+   STARSHIP CADET: CSV Wren                           build 0.46.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.46.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.46.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16567,8 +16567,9 @@ function tilesDeal(rng, teach) {   // 12 tiles a side, mirrored; no three of a m
     if (teach || !b.some((t, i) => t && tilesGroup(b, i).length >= 3)) return b;
   }
 }
-function tilesNew(mode, rng, teach) {
-  return { b: tilesDeal(rng, teach), hold: [[], []], sc: [0, 0], p: 0, plies: 0, last: -1, mode: TL_MODES[mode] ? mode : 'full',
+function tilesNew(mode, rng, teach, first) {   // first: the seat that moves first (0 unless given)
+  const f = first ? 1 : 0;
+  return { b: tilesDeal(rng, teach), hold: [[], []], sc: [0, 0], p: f, first: f, plies: 0, last: -1, mode: TL_MODES[mode] ? mode : 'full',
            over: false, win: -1, why: '', reached: -1 };
 }
 function tilesMoves(s, p) {   // { k: 's'tep | 'j'ump | 'l'aunch, from, to, over, m }
@@ -16610,7 +16611,7 @@ function tilesApply(s, mv) {
   const g = tilesGroup(b, mv.to), dock = g.length >= 3 ? g : [];
   for (const c of dock) b[c] = 0;
   const sc = s.sc.slice(); sc[p] += dock.length;
-  return { s: { b, hold, sc, p, plies: s.plies, last: dock.length ? p : s.last, mode: s.mode, over: false, win: -1, why: '', reached: s.reached },
+  return { s: { b, hold, sc, p, first: s.first | 0, plies: s.plies, last: dock.length ? p : s.last, mode: s.mode, over: false, win: -1, why: '', reached: s.reached },
            take, dock, pts: dock.length };
 }
 // a whole turn: apply, pass the turn, and end the game when it's over
@@ -16621,7 +16622,8 @@ function tilesStep(s, mv) {
   let end = '';
   if (n.reached >= 0) {
     // equal turns (quick game): if the first player got there, the second has one last turn
-    if (!R.finish || n.reached === 1 || p === 1) end = 'target';
+    const second = 1 - (n.first | 0);
+    if (!R.finish || n.reached === second || p === second) end = 'target';
   }
   if (!end && n.plies >= R.turns * 2) end = 'turns';
   if (!end && !tilesMoves(n, n.p).length) end = 'stuck';
@@ -16685,6 +16687,213 @@ function tilesStyle(p) {
   const u = k => schedU(p.seed | 0, 0, k), lv = u(806), comp = (p.traits || []).some(t => /competitive/i.test(t));
   return { level: comp || lv > .8 ? 'hard' : lv > .3 ? 'medium' : 'easy', bold: u(803) < .35, patient: u(804) < .3, chatty: u(805) < .4 };
 }
+// ---- the board on your device (0.46.1): the Tiles app. A game in play draws as a 6 x 6 board in the device's
+// phosphor screen; tap a tile, then where it goes (legal squares glow, a square that docks shows a spark); tap your
+// hold to launch. The crew member answers a moment later. No timers on you, no drag, words for every move.
+SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, firstWin: null, beatRina: null };   // save.tiles (0.46.2)
+let TL_GAME = null;   // { s, opp, name, style, rng, where, teach, hint, sel, log: [lines], fx, timer }
+const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<kind>')) arrive
+  start: { rina: ['Best of one. Try to keep up.'], chatty: ['Oh good, a game. Did I tell you about the hydroponics leak?', 'Go easy on me. Or don\'t, I\'ll learn more.'], any: ['Your move.', 'Let\'s see what you\'ve got.'] },
+  dock:  { rina: ['That\'s three.', 'Docked.'], chatty: ['Ooh, look at that!', 'Three in a row, well, three in a lump.'], any: ['Docked.', 'There we go.'] },
+  miss:  { chatty: ['Ooh, you could\'ve docked there.'], any: [] },
+  win:   { rina: ['Good game. Again?'], chatty: ['I won? I never win! Well, sometimes.'], any: ['Good game.', 'Close one.'] },
+  lose:  { rina: ['...Again. Now.'], chatty: ['You\'re a natural! I knew it.'], any: ['Well played.', 'You got me.'] },
+};
+function tilesTalk(kind) {
+  const G = TL_GAME; if (!G) return null;
+  if (typeof lineFor === 'function') { try { const l = lineFor(G.opp, 'tiles.' + kind, {}); if (l && l.text) return l.text; } catch (e) { /* no line yet */ } }
+  const bank = TL_TALK[kind] || {}, l = bank[G.opp] || (G.style.chatty && bank.chatty) || bank.any || [];
+  if (!l.length) return null;
+  return l[Math.floor(G.rng() * l.length)];
+}
+const tlName = (t, mine) => (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)];
+function tilesSay(text) { const G = TL_GAME; if (!G || !text) return; G.log.push(text); if (G.log.length > 3) G.log.shift(); }
+// start a game: opponentId (a crew id), where (a place id or null), mode 'full' | 'quick'
+function tilesPlay(opponentId, where, mode) {
+  if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer);
+  const T = SHIP.tiles, p = (typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === opponentId)) || { id: opponentId || 'tomas', name: 'Tomas Lind', seed: 7 };
+  const teach = !T.played, style = teach ? Object.assign({}, tilesStyle(p), { level: 'easy' }) : tilesStyle(p);
+  const seed = Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 800) * 4294967296);
+  const rng = tilesRng(seed), first = teach ? 0 : T.played % 2;   // you go first in your first game, then turn about
+  TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, where: where || null,
+              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false };
+  tilesSay(TL_GAME.name + ': ' + (tilesTalk('start') || 'Your move.'));
+  if (first) tilesCrewSoon();
+  deviceShow('tiles');
+  return TL_GAME;
+}
+function tilesCrewSoon() {
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 1) return;
+  if (G.timer) clearTimeout(G.timer);
+  G.timer = setTimeout(() => { G.timer = 0; tilesCrewMove(); }, 700);
+}
+function tilesCrewMove() {   // the crew member's turn (tiles_check calls it directly)
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 1) return;
+  const mv = tilesAI(G.s, G.style.level, G.rng, G.style);
+  if (!mv) { tilesFinish(G.s, 'stuck'); tilesOver(); return; }
+  tilesDo(mv);
+}
+// one move by whoever's turn it is, with the words and the effects
+function tilesDo(mv) {
+  const G = TL_GAME, s0 = G.s, p = s0.p, who = p ? G.name : 'You', mine = p === 0, t = mv.k === 'l' ? tlT(p, mv.m) : s0.b[mv.from];
+  if (mine && G.style.chatty) {   // Tomas notices a dock you passed up (once a game)
+    const could = tilesMoves(s0, 0).some(m => tilesApply(s0, m).pts);
+    G.missOk = G.missOk === undefined ? true : G.missOk;
+    if (could && G.missOk && !tilesApply(s0, mv).pts) { const l = tilesTalk('miss'); if (l) { G.missLater = l; G.missOk = false; } }
+  }
+  const r = tilesStep(s0, mv); G.s = r.s; G.sel = null;
+  const ghosts = {}; for (const c of r.dock) ghosts[c] = c === mv.to ? t : s0.b[c] || t;
+  if (mv.k === 'j') ghosts[mv.over] = s0.b[mv.over];
+  G.fx = { to: mv.to, from: mv.k === 'l' ? -1 : mv.from, dock: r.dock.slice(), over: mv.k === 'j' ? mv.over : -1, ghosts, big: r.dock.length >= 4 };
+  let line = mv.k === 'l' ? who + ' launched ' + (mine ? 'a ' : 'a ') + TL_MARKS[mv.m] + ' from ' + (mine ? 'your' : 'their') + ' hold.'
+    : mv.k === 'j' ? who + ' jumped ' + tlName(s0.b[mv.over], !mine) + ' and took it.' : who + ' stepped ' + (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)] + '.';
+  if (r.pts) line += ' Dock! ' + r.pts + ' point' + (r.pts > 1 ? 's' : '') + '.';
+  tilesSay(line);
+  if (!mine && r.pts) { const l = tilesTalk('dock'); if (l) tilesSay(G.name + ': ' + l); }
+  if (mine && G.missLater) { tilesSay(G.name + ': ' + G.missLater); G.missLater = null; }
+  if (G.hint && mv.k === 'j' && mine) G.hint = false;
+  setTimeout(() => { if (TL_GAME === G && G.fx && G.fx.to === mv.to) { G.fx = null; tilesDraw(); } }, 520);
+  if (G.s.over) tilesOver(); else tilesCrewSoon();
+  tilesDraw();
+}
+function tilesOver() {   // the end of a game: words now; social, Record and the save follow in 0.46.2
+  const G = TL_GAME; if (!G || G.done) return; G.done = true;
+  const s = G.s, you = s.win === 0, T = SHIP.tiles;
+  T.played++; if (you) T.won++; else if (s.win === 1) T.lost++;
+  const v = T.vs[G.opp] || (T.vs[G.opp] = [0, 0]); if (you) v[0]++; else if (s.win === 1) v[1]++;
+  const how = s.why.indexOf('tie') >= 0 ? ' (level on points: ' + (s.why.indexOf('target') >= 0 || TL_MODES[s.mode].finish ? 'decided by tiles left' : 'whoever docked last wins') + ')' : '';
+  tilesSay((you ? 'You win, ' : s.win === 1 ? G.name + ' wins, ' : 'A draw, ') + s.sc[0] + ' to ' + s.sc[1] + '.' + how);
+  const l = tilesTalk(you ? 'lose' : 'win'); if (l && s.win >= 0) tilesSay(G.name + ': ' + l);
+  if (typeof simNote === 'function') simNote('tiles', { opp: G.opp, win: you, sc: s.sc.slice(), mode: s.mode, where: G.where });
+}
+function tilesTap(c) {   // a tap on square c (0-35), or on the hold ('h' + mark)
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 0) return;
+  const ms = tilesMoves(G.s, 0);
+  if (typeof c === 'string') { const m = +c.slice(1); G.sel = G.sel && G.sel.h === m ? null : { h: m }; tilesDraw(); return; }
+  if (G.sel) {
+    const mv = ms.find(m => m.to === c && (G.sel.h !== undefined ? m.k === 'l' && m.m === G.sel.h : m.from === G.sel.c));
+    if (mv) { tilesDo(mv); return; }
+  }
+  const t = G.s.b[c];
+  G.sel = t && tlO(t) === 0 && ms.some(m => m.from === c) && !(G.sel && G.sel.c === c) ? { c } : null;
+  tilesDraw();
+}
+const TL_CSS = `
+.tlx{margin:2px 0 8px}
+.tlx .tl-sc{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;margin:2px 0 2px;font-variant-numeric:tabular-nums}
+.tlx .tl-sc b{color:var(--crt-hot);font-weight:700}
+.tlx .tl-bd{display:grid;grid-template-columns:repeat(6,1fr);width:min(100%,336px,max(264px,calc(66vh - 230px)));margin:4px auto 8px;border:2px solid var(--crt-dim);border-radius:10px;overflow:hidden;touch-action:manipulation}
+.tlx .tl-c{position:relative;min-height:44px;aspect-ratio:1;padding:0;margin:0;border:0;border-radius:0;background:transparent}
+.tlx .tl-c.dk{background:rgba(255,255,255,.045)}
+.tlx .tl-c.home{box-shadow:inset 0 -2px 0 rgba(255,255,255,.06)}
+.tlx .tl-t{position:absolute;inset:11%;border-radius:20%;display:flex;align-items:center;justify-content:center;color:var(--crt-bg)}
+.tlx .tl-t.o0{background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.tlx .tl-t.o1{border:2px dashed var(--crt-ink);background:var(--crt-bg);color:var(--crt-ink)}
+.tlx .tl-t.o1.m2{color:var(--crt-hot)}
+.tlx .tl-t::after{content:"";width:56%;height:56%;background:currentColor}
+.tlx .tl-t.m0::after{border-radius:50%;width:48%;height:48%}
+.tlx .tl-t.m1::after{clip-path:polygon(50% 4%,97% 92%,3% 92%)}
+.tlx .tl-t.m2::after{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.tlx .tl-c.sel .tl-t{outline:3px solid var(--crt-hot);outline-offset:1px}
+.tlx .tl-c.to::before{content:"";position:absolute;inset:34%;border-radius:50%;border:2px solid var(--crt-hot)}
+.tlx .tl-c.to.dock::before{background:var(--crt-hot);inset:30%;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);border:0;border-radius:0}
+.tlx .tl-c.last{box-shadow:inset 0 0 0 2px var(--crt-dim)}
+.tlx .tl-c.hint .tl-t{animation:tlhint 1.2s ease-in-out infinite}
+.tlx .tl-t.arrive{animation:tlin .28s ease-out}
+.tlx .tl-t.gone{animation:tldock .5s ease-out forwards}
+.tlx .tl-t.gone.big{animation-name:tldock2}
+.tlx .tl-t.taken{animation:tltake .5s ease-in forwards}
+.tlx .tl-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:48px;margin:0 0 6px}
+.tlx .tl-hd button{position:relative;width:48px;height:48px;padding:0}
+.tlx .tl-hd button.sel{border-color:var(--crt-hot)}
+.tlx .tl-now{margin:2px 0 4px;min-height:2.7em}
+.tlx .tl-log{margin:4px 0;color:var(--crt-dim)}
+.tlx .tl-log p{margin:2px 0}
+.tlx .tl-card{color:var(--crt-dim);margin:6px 0}
+@keyframes tlin{from{transform:scale(.6);opacity:.4}to{transform:none;opacity:1}}
+@keyframes tldock{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow)}100%{transform:translateY(-30%) scale(1.15);opacity:0;box-shadow:0 0 0 12px transparent}}
+@keyframes tldock2{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow),0 0 0 0 var(--crt-glow)}100%{transform:translateY(-40%) scale(1.25);opacity:0;box-shadow:0 0 0 10px transparent,0 0 0 20px transparent}}
+@keyframes tltake{to{transform:translateY(60%) scale(.5);opacity:0}}
+@keyframes tlhint{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.tlx .tl-t{animation:none!important}.tlx .tl-t.gone,.tlx .tl-t.taken{display:none}}
+`;
+const TL_UI = { root: null };
+function tilesDraw() {   // draw the game into its persistent element (the device's dom block re-attaches it)
+  const G = TL_GAME; if (!G) return null;
+  if (!TL_UI.root) {
+    const st = document.createElement('style'); st.textContent = TL_CSS; document.head.appendChild(st);
+    const root = document.createElement('div'); root.className = 'tlx';
+    root.innerHTML = '<p class="tl-sc"></p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-hd"></div><div class="tl-log"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
+    const bd = root.querySelector('.tl-bd');
+    for (let y = 5; y >= 0; y--) for (let x = 0; x < 6; x++) {
+      const c = y * 6 + x, b = document.createElement('button'); b.type = 'button'; b.className = 'tl-c' + ((x + y) % 2 ? '' : ' dk') + (y < 2 ? ' home' : '');
+      b.dataset.c = c; bd.appendChild(b);
+    }
+    root.onclick = e => {
+      e.stopPropagation(); const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.c !== undefined) tilesTap(+b.dataset.c);
+      else if (b.dataset.h !== undefined) tilesTap('h' + b.dataset.h);
+      else if (b.dataset.end) tilesEnd(b.dataset.end);
+    };
+    TL_UI.root = root;
+  }
+  const root = TL_UI.root, s = G.s, ms = !s.over && s.p === 0 ? tilesMoves(s, 0) : [], R = TL_MODES[s.mode], fx = G.fx;
+  const sel = G.sel, tos = sel ? ms.filter(m => sel.h !== undefined ? m.k === 'l' && m.m === sel.h : m.from === sel.c) : [];
+  const hintC = G.hint ? (ms.find(m => m.k === 'j') || {}).from : undefined;
+  const sc = root.querySelector('.tl-sc'); sc.textContent = '';
+  const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '’s turn';
+  const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
+  pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
+  sc.append(pts,
+            Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }));
+  for (const b of root.querySelectorAll('.tl-c')) {
+    const c = +b.dataset.c, t = s.b[c], ghost = fx && fx.ghosts[c], to = tos.find(m => m.to === c);
+    b.classList.toggle('sel', !!(sel && sel.c === c)); b.classList.toggle('to', !!to); b.classList.toggle('dock', !!(to && tilesApply(s, to).pts));
+    b.classList.toggle('last', !!(fx && (c === fx.to || c === fx.from))); b.classList.toggle('hint', hintC === c);
+    const show = t || ghost;
+    b.textContent = '';
+    if (show) {
+      const i = document.createElement('i'); i.className = 'tl-t o' + tlO(show) + ' m' + tlM(show);
+      if (!t && ghost) i.classList.add(fx.over === c ? 'taken' : 'gone'); if (!t && ghost && fx.big) i.classList.add('big');
+      if (t && fx && c === fx.to) i.classList.add('arrive');
+      b.appendChild(i);
+    }
+    const x = 'abcdef'[c % 6] + (Math.floor(c / 6) + 1);
+    b.setAttribute('aria-label', x + ': ' + (t ? tlName(t, tlO(t) === 0) : 'empty') + (to ? ', move here' + (b.classList.contains('dock') ? ', docks' : '') : ''));
+  }
+  const hd = root.querySelector('.tl-hd'); hd.textContent = '';
+  hd.appendChild(Object.assign(document.createElement('span'), { textContent: s.hold[0].length ? 'Your hold:' : 'Your hold is empty.' }));
+  s.hold[0].forEach(m => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.h = m; b.className = sel && sel.h === m ? 'sel' : '';
+    b.setAttribute('aria-label', 'Launch a ' + TL_MARKS[m] + ' from your hold');
+    const i = document.createElement('i'); i.className = 'tl-t o0 m' + m; b.appendChild(i); hd.appendChild(b);
+  });
+  if (s.hold[1].length) hd.appendChild(Object.assign(document.createElement('span'), { textContent: '· ' + G.name + ' holds ' + s.hold[1].length }));
+  const lg = root.querySelector('.tl-log'); lg.textContent = '';   // the latest line above the board, the two before it below
+  const lines = G.hint && hintC !== undefined ? G.log.concat(['Jump their tile to take it. It’s yours now.']) : G.log;
+  root.querySelector('.tl-now').textContent = lines[lines.length - 1] || '';
+  for (const l of lines.slice(0, -1).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
+  root.querySelector('.tl-card').hidden = SHIP.tiles.played >= 3 && !G.teach;
+  root.querySelector('.tl-card span').textContent = R.target;
+  const end = root.querySelector('.tl-end'); end.textContent = '';
+  if (s.over) for (const [k, label] of [['full', 'Again'], ['quick', 'Quick game (to 5)'], ['done', 'Done']]) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'act'; b.dataset.end = k; b.textContent = label; end.appendChild(b);
+  }
+  return root;
+}
+function tilesEnd(k) {
+  const G = TL_GAME; if (!G) return;
+  if (k === 'done') { TL_GAME = null; deviceRefresh(); return; }
+  tilesPlay(G.opp, G.where, k);
+}
+deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
+  view: () => {
+    if (TL_GAME) return { title: 'Tiles with ' + TL_GAME.name, blocks: [{ kind: 'dom', render: box => { const r = tilesDraw(); if (r) box.appendChild(r); } }] };
+    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at a Tiles table or the Tiles station in the bow lounge to play whoever’s there.' }];
+    blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven’t played yet.' });
+    if (T.beatRina) blocks.push({ kind: 'text', mark: 'hot', text: 'You beat Rina on day ' + T.beatRina + '.' });
+    return { title: 'Tiles', blocks };
+  } });
 
 // =====================================================================
 // 6. CAMERA

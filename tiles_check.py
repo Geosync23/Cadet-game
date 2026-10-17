@@ -8,6 +8,10 @@
 #   skill: Hard beats Medium and Medium beats Easy more than 60% of the time, from both seats
 #   the same seed plays the same game twice; crew styles are the same every time (Rina hard, Tomas easy)
 #   section 23 never calls R() or Math.random and declares no top-level TILES; the page has no errors
+#   the board (0.46.1): tilesPlay opens the Tiles app on the device; 36 squares at least 44px on a 320px phone and a
+#   390px one, no text under 15px, no sideways scroll; tap a tile and its squares glow, tap one to move; the crew
+#   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
+#   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
 # Setup and environment as for cadet_test.py.
 # Run:  python3 tiles_check.py BUILD.html [GAMES]   (GAMES per level and mode, default 4000; Hard plays half as many)
 import sys, json, re
@@ -89,6 +93,68 @@ BAL = r"""((mode, games, seed) => {
   return out;
 })"""
 
+
+UI_PLAY = r"""(() => {
+  const out = { log: [] }, bd = () => document.querySelector('#devBody .tlx .tl-bd');
+  window.__tn = []; if (!window.__tnOn) { window.__tnOn = true; onSim('tiles', d => window.__tn.push(d)); }
+  const G = TL_GAME; out.teach = G.teach && JSON.stringify(G.s.b.slice(0, 12).map(tlM)) === JSON.stringify(TL_TEACH);
+  out.cells = bd() ? bd().querySelectorAll('.tl-c').length : 0;
+  // tap a tile that can move: its squares glow; tap one: the move is made, and it's the crew's turn
+  const ms = tilesMoves(G.s, 0), m = ms.find(x => x.k === 's');
+  bd().querySelector(`.tl-c[data-c="${m.from}"]`).click();
+  out.glow = [...bd().querySelectorAll('.tl-c.to')].map(b => +b.dataset.c).sort((a, c) => a - c);
+  out.want = ms.filter(x => x.from === m.from).map(x => x.to).sort((a, c) => a - c);
+  bd().querySelector(`.tl-c[data-c="${m.to}"]`).click();
+  out.moved = G.s.b[m.to] !== 0 && G.s.b[m.from] === 0 && G.s.p === 1;
+  if (G.timer) { clearTimeout(G.timer); G.timer = 0; } tilesCrewMove();
+  out.answered = G.s.p === 0 && G.s.plies === 2;
+  // the rest of the game by taps (the player plays Medium's choice through the board, the crew answer at once)
+  let guard = 0;
+  while (!G.s.over && guard++ < 80) {
+    if (G.s.p === 1) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } tilesCrewMove(); continue; }
+    const mv = tilesAI(G.s, 'medium', tilesRng(guard));
+    if (mv.k === 'l') document.querySelector(`#devBody .tl-hd button[data-h="${mv.m}"]`).click();
+    else bd().querySelector(`.tl-c[data-c="${mv.from}"]`).click();
+    bd().querySelector(`.tl-c[data-c="${mv.to}"]`).click();
+  }
+  if (G.timer) { clearTimeout(G.timer); G.timer = 0; }
+  out.over = G.s.over; out.sc = G.s.sc; out.win = G.s.win;
+  out.end = [...document.querySelectorAll('#devBody .tl-end button')].map(b => b.textContent);
+  out.now = document.querySelector('#devBody .tl-now').textContent;
+  out.note = window.__tn.length; out.played = SHIP.tiles.played;
+  return out;
+})()"""
+LOOKS = r"""(() => {
+  const dev = document.getElementById('devBody'), cells = [...dev.querySelectorAll('.tl-c')].map(b => b.getBoundingClientRect());
+  const small = [...dev.querySelectorAll('.tlx *')].filter(e => e.offsetParent !== null && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()) && parseFloat(getComputedStyle(e).fontSize) < 15).map(e => e.textContent.slice(0, 20));
+  return { minCell: Math.min(...cells.map(r => Math.min(r.width, r.height))), small: small.slice(0, 3), scroll: dev.scrollWidth - dev.clientWidth };
+})()"""
+
+def board(g, path):
+    for name, w, h in (('phone 320', 320, 640), ('phone 390', 390, 844), ('wide', 1280, 800)):
+        gg = Game(g, path, w, h); gg.step(3)
+        MEM = "[scene.children.length, renderer.info.memory.geometries, renderer.info.memory.textures]"
+        gg.ev("SHIP.device.tipsSeen.device = true; deviceShow('home')"); gg.step(2)   # the device's own first open uploads its prop once
+        m0 = gg.ev(MEM)
+        gg.ev("tilesPlay('tomas', null, 'full')"); gg.step(2)
+        lk = gg.ev(LOOKS)
+        check(lk['minCell'] >= 44 and not lk['small'] and lk['scroll'] <= 0, f'{name}: squares at least 44px ({lk["minCell"]:.1f}), no text under 15px {lk["small"]}, no sideways scroll ({lk["scroll"]})')
+        check(gg.ev(MEM) == m0, f'{name}: opening the board adds nothing to the 3D scene')
+        if name == 'phone 390':
+            r = gg.ev(UI_PLAY)
+            check(r['teach'] and r['cells'] == 36, f'the first game: teaching layout, 36 squares: {r["teach"]}, {r["cells"]}')
+            check(r['glow'] == r['want'] and r['glow'], f'tapping a tile lights its squares: {r["glow"]} (want {r["want"]})')
+            check(r['moved'] and r['answered'], f'tapping a lit square moves it; the crew member answers: {r["moved"]}, {r["answered"]}')
+            check(r['over'] and r['end'] == ['Again', 'Quick game (to 5)', 'Done'] and r['note'] == 1 and r['played'] == 1, f'a whole game by taps: over, result and buttons, one tiles note: {r}')
+            print(f'  a game by taps: {r["sc"][0]}-{r["sc"][1]}, "{r["now"]}"')
+            gg.page.click('#devBody .tl-end button[data-end="quick"]'); gg.step(1)
+            q = gg.ev("[TL_GAME.s.mode, TL_GAME.teach, TL_GAME.s.p, TL_GAME.s.first]")
+            check(q[0] == 'quick' and not q[1] and q[3] == 1, f'Quick game: to 5, no teaching, the crew member goes first in your second game: {q}')
+            gg.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
+            gg.page.click('#devClose'); gg.step(1)
+        check(not gg.errors and not gg.ev("DEV.errors.length"), f'{name}: no errors: {gg.errors[:3]} {gg.ev("DEV.errors.slice(0, 3)")}')
+        gg.close()
+
 def run(path, games):
     src = open(path).read(); sec = section23(src)
     check(len(sec) > 1000, 'section 23 is there')
@@ -130,6 +196,7 @@ def run(path, games):
         check(sty == ['hard', 'easy', True], f'crew styles: Rina hard, Tomas easy, the same every time: {sty}')
         check(not g.errors, f'no page errors: {g.errors[:3]}')
         g.close()
+        board(pw, path)
 
 if __name__ == '__main__':
     run(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 4000)
