@@ -216,7 +216,7 @@ with sync_playwright() as pw:
     ev = g.ev(f"""(() => {{ const real = typeof eventsOn === 'function', keep = real ? eventsOn : undefined, fd = {DAY} + 3, hv = {DAY} + 5;
       if (!real) window.__sc(`eventsOn = d => d === ${{fd}} ? [{{ id: 'founding', name: 'Founding Day', from: 1170, to: 1290, ev: {{ cake: true }}, honorees: [] }}] : d === ${{hv}} ? [{{ id: 'harvest', name: 'Harvest morning', from: 570, to: 690, ev: {{}}, honorees: [] }}] : []`);
       const days = real ? [...Array(364)].map((_, k) => {DAY} + k) : [fd, hv];
-      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => e.cake || (e.ev && e.ev.cake))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
+      const f = days.find(d => !galleyBirthdays(d).length && eventsOn(d).some(e => (e.cake || (e.ev && e.ev.cake)) && !(e.ev && e.ev.ties && e.ev.ties.decor === 'cake'))), h = days.find(d => eventsOn(d).some(e => e.id === 'harvest'));
       GALLEY_MENU.clear(); for (const E of GALLEY_EV.values()) E.k = 0;
       const out = {{ real, f, h }};
       if (f) {{ out.cakes = galleyReport(f, 1)[0].cakes; out.board = galleyBoard(f); const mail = []; window.__keepMail = window.mailSend; window.__mailBox = mail; window.__sc("mailSend = x => window.__mailBox.push(x)");
@@ -323,6 +323,35 @@ with sync_playwright() as pw:
           GALLEY_TEST.eventMod = null; SHIP.event = keep; SHIP.galley = null; GALLEY_SCORED.clear(); return out; }})()""")
         print('Formal dinner: with herbs', fd['fine']['threads'], '| without', fd['noHerbs']['threads'], '| worn ovens', fd['late']['threads'], '|', fd['late']['text'][-90:])
         if fd['fine']['threads'].get('noHerbs') or fd['fine']['threads'].get('dinnersLate') or fd['noHerbs']['threads'].get('noHerbs') != 1 or fd['late']['threads'].get('dinnersLate', 0) <= 0: fail(f"formal dinner: {fd}")
+
+    # 4m. the traditions (0.29.26): section 18's tradTies('galley', d), here a stand-in through GALLEY_TEST. A long
+    # breakfast (pancakes, serving to 10:00, the morning rota runs on), a harvest supper (all from the garden), a
+    # farewell supper's favourite; with the real traditions (once combined) the same is shown, not stood in for
+    clr = "GALLEY_TIES.clear(); GALLEY_MENU.clear(); GALLEY_ROTA.clear(); GALLEY_EV.clear(); SHIP_DAYS.clear();"
+    tr = g.ev(f"""(() => {{ let sat = {DAY} + 50; while (weekday(sat) !== 5) sat++; const sup = sat + 2, fw = sat + 3, who = schedPeople().slice().sort((a, b) => a.id < b.id ? -1 : 1)[3];
+      GALLEY_TEST.tradTies = (kind, d) => kind !== 'galley' ? [] : d === sat ? [{{ id: 'long-breakfast', tie: {{ meal: 'breakfast', dish: 'pancakes', until: '10:00' }} }}]
+        : d === sup ? [{{ id: 'harvest-supper', tie: {{ meal: 'dinner', dish: 'harvest-supper', batch: 60 }} }}] : d === fw ? [{{ id: 'farewell-supper', honorees: [who], tie: {{ meal: 'dinner', dish: 'favourite' }} }}] : [];
+      {clr}
+      const M = galleyMenu(sat), rota = galleyRota(sat), roles = [...rota.values()].filter(x => x.role), blk = r => (roles.find(x => x.role === r) || {{ blocks: [] }}).blocks;
+      const cookTo = Math.max(...blk('chef').filter(b => b.from < 840 && (b.task === 'cook' || b.task === 'prep')).map(b => b.to)), lineTo = Math.max(...blk('early').filter(b => b.from < 600 && b.from >= 360 && (b.task === 'serve' || b.task === 'wash')).map(b => b.to));
+      const rep = galleyReport(sat, 4), at = (st, h) => st.hours.find(x => x[0] === h);
+      SHIP.galley = null; setShipNow((sat - 1) * 1440 + 9 * 60 + 15); const txt = galleyText('servery'), board = galleyBoard(sat);
+      const out = {{ sat, breakfast: M.breakfast, bnote: M.bnote, end: galleyServeEnd(sat, 'breakfast'), close: galleyClose(sat, 'breakfast'), endSun: galleyServeEnd(sat + 1, 'breakfast'), cookTo, lineTo,
+        at0915: at(rep[0], '09:00'), txt, board: board.slice(0, 120), supper: galleyMenu(sup), farewell: galleyMenu(fw), fav: galleyFav(who),
+        days: rep.map(st => ({{ day: st.day, ate: st.ate, got: st.eaten + st.grabbed, missed: st.missed.length, end: st.end, fresh: st.fresh, mealMax: st.mealMax, busy: st.busy }})) }};
+      GALLEY_TEST.tradTies = null; {clr} SHIP.galley = null;
+      out.real = typeof tradTies === 'function' ? [...Array(21)].map((_, k) => {DAY} + k).map(d => [d, Object.keys(galleyTies(d)).map(m => m + ':' + (galleyTies(d)[m].dish || galleyTies(d)[m].extra || '') + (galleyTies(d)[m].until ? '-' + galleyTies(d)[m].until : '')).join(' ')]).filter(x => x[1]) : null;
+      return out; }})()""")
+    print(f"Long breakfast (stand-in, day {tr['sat']}): {tr['breakfast']} ({tr['bnote']}); serving to {tr['end']}, leftovers at {tr['close']} (Sunday {tr['endSun']}); chef cooks to {tr['cookTo']}, early hand on the line to {tr['lineTo']}; 09:00 {tr['at0915']}")
+    print('  ', tr['txt'][:150], '|', tr['board'])
+    print(f"Harvest supper (stand-in): {tr['supper']['dinner']} ({tr['supper']['note']}) | farewell supper: {tr['farewell']['dinner']} ({tr['farewell']['note']}), favourite {tr['fav']}")
+    for x in tr['days']: print(f"   day {x['day']}: came {x['ate']}, got {x['got']}, missed {x['missed']}, fresh {x['fresh']}, longest {x['mealMax']}")
+    print('Real traditions with galley ties, 21 days:', tr['real'] if tr['real'] else 'none (section 18 has no galley ties yet)')
+    if tr['breakfast'] != 'pancakes, fruit and syrup' or tr['end'] != 600 or tr['close'] != 630 or tr['endSun'] != 480 or tr['cookTo'] < 560 or tr['lineTo'] != 600: fail(f"long breakfast: {tr}")
+    if 'long breakfast' not in tr['txt'] or 'long breakfast' not in tr['board'] or not tr['at0915'] or tr['at0915'][2] + tr['at0915'][6] <= 0: fail(f"long breakfast texts or food at 09:00: {tr['txt']} | {tr['board']} | {tr['at0915']}")
+    if not tr['supper']['dinner'].startswith('the harvest supper') or not tr['supper'].get('supper') or tr['farewell']['dinner'] != tr['fav']: fail(f"suppers: {tr['supper']} {tr['farewell']}")
+    for x in tr['days']:
+        if x['missed'] or x['ate'] != x['got'] or x['end']['dirty'] or x['end']['inUse'] or x['end']['wait'] or not wait_ok(x, x['mealMax']): fail(f"traditions, day {x['day']}: {x}")
 
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
