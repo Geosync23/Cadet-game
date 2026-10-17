@@ -60,7 +60,7 @@ def fail(msg):
     ok = False
     print('  FAIL', msg)
 
-# long play: a steady stand-in player (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
+# long play: a steady stand-in player who hears all the news going round each evening (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
 # lunch with Tomas, quiz and Tiles night each week) for LONG_DAYS days on paper, story Mail delivered as the game would
 LONG_RUN = r"""((days) => {
   const h0 = 6; setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();
@@ -74,6 +74,7 @@ LONG_RUN = r"""((days) => {
     if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
       const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat'); }
     if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
+    if (hr === 18) for (const x of NEWS.slice()) if (x.born <= h * 60 && x.seed.length) playerHeard(x.id, x.seed[0]);   // a heavy listener: hears everything going round each evening
     if (hr === 10 && typeof machineList === 'function' && u < .7) { const ms = machineList(); repNote('repair', { who: 'you', machine: ms[Math.floor(schedU(d, h, 9004) * ms.length)].id }); }
     if (hr === 20 && (d % 7 === 2 || d % 7 === 5)) repNote('tradition', { id: d % 7 === 2 ? 'quiz' : 'tiles-night', you: true });
     if (hr === 23 && d % 28 === 0) { let r = 0; for (const v of SHIP.aff) if (v <= -40) r++; weeks.push({ day: d, ...parts(), rivals: r }); }
@@ -142,6 +143,11 @@ with sync_playwright() as pw:
     print(f"Save: social part {a['size']} bytes (limit {SAVE_MAX})")
     if a['size'] > SAVE_MAX: fail('the save is too big')
     rt = g.ev("(() => { const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); return s === JSON.stringify(socSave()); })()")
+    mm = g.ev(r"""(() => { for (const x of NEWS) if (x.seed.length) playerHeard(x.id, x.seed[0]); socNote('repair', { who: 'you', kind: 'oven', deck: 3 });   // in memory the same after a save (0.36.75)
+      const live = new Set(NEWS.map(x => x.id)), m = () => JSON.stringify([SHIP.social.cues, SHIP.social.pairs, SHIP.heard.filter(h => live.has(h.id))]), a = m(); socLoad(JSON.parse(JSON.stringify(socSave())));
+      return [a === m(), SHIP.heard.filter(h => live.has(h.id)).length, SHIP.social.cues.length, Object.keys(SHIP.social.pairs).length]; })()""")
+    print('In memory the same after a save (cues, pair news, heard):', mm)
+    if not mm[0]: fail('a save and load changes cues, pair news or what you heard')
     print('Save and load give back the same:', rt)
     xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});
       const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R && JSON.stringify(SHIP.social.bonds) === Bd;
