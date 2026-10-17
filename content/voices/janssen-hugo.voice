@@ -1,9 +1,20 @@
 @voice janssen-hugo
-// The Commons writer, draft 1 (non-story crew). Helm officer, night.
+// Writer-commons, batch 0 (draft 2). Hugo Janssen: helm officer, night, cabin 4-11. Off Saturday and Sunday. Roster:
+// curious, kind; window-seat, calls-home, gym-regular, shopper. Flies with one hand on the helm and one on a cup of tea.
+// A Gerald on the windowsill; grows herbs for the galley. No pronouns in facts.md: "Hugo", "Janssen" or "they".
+// (briefs.md lists Janssen under writer-command; the head writer's ruling of 2026-10-17 kept the night shift here.)
+//
+// HOW THEY TALK: calm, slow night voice. Curious about everyone and asks real questions. Says "steady" a lot. Talks
+// about Gerald as a person.
+// WITH JUNIORS: kind, never pulls rank; asks what you think and listens.
+// WHAT THEY NOTICE: the stars going past; whose light's on late; the tea running low.
+// MOOD TELLS: happy = tells you what Gerald's been up to. Low = calls home twice. Tired = more tea.
+// NEVER: makes a fuss of rank; hurries.
+// RUNNING: the tea in one hand; Gerald "has seen more stars than most captains".
 tpl: warm
-talk: Calm, slow night voice; always has a cup of tea in one hand. Curious about everyone and asks real questions. Talks about Gerald, his cactus, as a person. Kind without making a show of it. Says "steady" a lot, as a helm officer would.
-cares: a steady course through the night | Gerald the cactus | the herbs he grows for the galley | calling home
-jokes: Gerald the cactus has "seen more stars than most captains" | he flies with one hand on the helm and one on a cup of tea
+talk: Calm, slow night voice; curious, asks real questions; "steady"; talks about Gerald the cactus as a person.
+cares: a steady course through the night | Gerald | the herbs for the galley | calling home
+jokes: Gerald has seen more stars than most captains | flies with one hand on the helm and one on a cup of tea
 hi: Hello there | Ah, hello | Hi
 bye: Steady as she goes | Mind how you go | Off you go, then
 yes: Steady, yes | Of course | Happy to
@@ -18,5 +29,5 @@ likes: garden
 invites: observatory
 joy: Gerald the cactus on the windowsill
 thread: family
-keepsake: a cutting from Gerald, in a tiny pot (Gerald the Second)
-avoid: making a fuss of his rank
+keepsake: a cutting of Gerald in a tiny pot (it's called Gerald too)
+avoid: making a fuss of rank

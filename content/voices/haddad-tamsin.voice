@@ -1,22 +1,33 @@
 @voice haddad-tamsin
-// The Commons writer, draft 1 (non-story crew). For the head writer's review.
+// Writer-commons, batch 0 (draft 2). Tamsin Haddad: galley hand, early team, Bunk 6 berth 2. Off Wednesday and
+// Thursday. Roster: optimistic, nervous; evening-shower, lingers-at-meals. Knows every song in the record cabinet (one
+// of five who say so, none agreeing); learning the guitar, badly (from the same battered book as Hamid, Noor Park and
+// Isak Lindqvist). Pronouns: she / her (facts.md 4b).
+//
+// HOW SHE TALKS: bright, quick to say it'll all be fine, then a small "won't it?" on the end. Sings under her breath
+// and stops when noticed. Apologises for things that aren't her fault.
+// WITH JUNIORS: delighted to help; slightly too much.
+// WHAT SHE NOTICES: the radio; the words to anything; anyone left out.
+// MOOD TELLS: happy = sings out loud. Nervous = "It'll be fine!" twice. Low = lingers at the table long after the meal.
+// NEVER: unkind; sure of herself for long.
+// RUNNING: today is always the day the chord comes right; the lyrics war; guitar practice with Hamid, which helps neither.
 tpl: warm
-talk: Bright and quick to say it'll all be fine, then a small worried "won't it?" on the end. Sings under her breath while she works and stops when she's noticed. Apologises for things that aren't her fault. Kind to everyone, especially anyone newer than her.
-cares: the record cabinet's songs | getting the guitar right one day | the early team's breakfast going out on time | home
-jokes: today is always the day she gets the chord right | she and Hamid practise guitar together, and it isn't helping either of them
-hi: Hi! | Oh, hello! | Hey you
-bye: See you soon! | Look after yourself | Bye for now
-yes: Yes! Easy | Oh, definitely | I'd love to
-thanks: Oh, thank you! | You're lovely
-wow: Oh, look at that! | Brilliant
+talk: Bright, quick to say it'll be fine, then "won't it?"; sings under her breath and stops when noticed; apologises too much.
+cares: the record cabinet's songs | the chord that won't come | the early team's breakfast out on time | home
+jokes: today is always the day the chord comes right | knows every word to every song, and so does everyone else, differently | practises guitar with Hamid, which helps neither of them
+hi: Hi! | Oh, hello | Hey, you
+bye: See you soon | Look after yourself | Bye for now
+yes: Yes, easy | Oh, definitely | I'd love to
+thanks: Oh, thank you | You're lovely
+wow: Oh, look at that | Brilliant
 sigh: Oh, dear
 nick: - | - | {me} | {me} | {me}
 needs: cheer
 openness: open
 loves: music | sweet
 likes: tea
-invites: music
+invites: jam
 joy: singing along to the record cabinet
 thread: homesick
-keepsake: a song she wrote out for you, chords and all
+keepsake: a song written out for you, chords and all
 avoid: being told she's always cheerful (she isn't, and it costs her)

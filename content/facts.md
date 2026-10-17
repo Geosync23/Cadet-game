@@ -233,6 +233,23 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 
 | Who | Pronouns |
 | --- | --- |
+| Esme Walsh (galley) | she / her |
+| Ivo Madsen (galley) | he / him |
+| Tariq Varga (galley) | he / him |
+| Tamsin Haddad (galley) | she / her |
+| Lukas Dlamini (galley; covers Brennan Fri, Sat) | he / him (his spouse: they / them, unnamed) |
+| Yara Esposito (store, mornings) | they / them (head writer, from the roster) |
+| Orla Ishikawa (store, evenings) | she / her |
+| Thea Grieve (infirmary aide) | she / her |
+| Hamid Larsen (infirmary aide) | he / him |
+| Dr. Elif Yoon (night doctor) | she / her |
+| Sol Bakshi (helm rating, night) | they / them |
+| Tove Cruz (senior gardener) | they / them |
+| Imani O'Neill (gardener) | she / her |
+| Ravi Hart (gardener) | he / him |
+| Erik Strand (helm rating) | he / him |
+| Zofia Santos (comms rating) | she / her |
+| Chloe Tran (comms rating) | she / her |
 
 ### 4c. Command, Survey, Watch and the senior officers (writer-command, 2026-10-17)
 

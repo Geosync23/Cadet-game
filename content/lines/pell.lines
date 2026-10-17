@@ -1,0 +1,49 @@
+@crew pell
+// Writer-commons, batch 1 (for the Voices sampler). Pell's card is the head writer's. Nothing about his mum's shop
+// before tier friend; the music boxes are told from beat 1 (acquaintance), so the screw tin is safe there.
+
+== greet
+? tier=stranger
+- {hi}. New hand? Pell, Works. If it's broken, I've probably fixed it once.
+? tier>=acquaintance time:morning
+- {hi}, {nick}. Is it morning? It feels like it shouldn't be morning.   #funny
+? tier>=acquaintance
+- {hi}, {nick}. Grab shelf's just been restocked. Act natural.
+? tier>=colleague
+- Calder looked at my weld and said "Fine." I'm having it framed.   #funny
+? tier>=friend
+- {nick}! Sit down. I saved you a biscuit. Well, half. It was a long walk.   #warm
+
+== feel
+? mood:high
+- Good day. Fixed a pump, ate twice, and nobody caught me napping.
+? mood:low
+- I'm fine. I'm fine. Just tired. Ask me again after a nap.
+
+== near
+? act:work
+- Hold this. No, the other end. Perfect. You're a natural, {nick}.
+? act:meal
+- Is that pudding? Are you going to eat all of that pudding?   #funny
+
+== life
+? tier>=acquaintance
+- Taught myself engines from an old manual. Half the pages were missing. Worked it out.
+? tier>=colleague
+- I talk in my sleep. About engines. Rina's taken notes. They're not flattering.   #funny
+
+== joy
+? tier>=acquaintance
+- Every screw in this tin's from a ship I've fixed. One day they'll play a whole tune.
+
+== week1
+// The arrival evening, steps A9-A10: Pell joins your table in the mess (if he's there), before Calder stops by.
+// Day 0 only: Sunday, before the week1.d2 flag. The head writer and onboarding may want an intro-step condition.
+? week1:true weekday:sun time:evening !flag:week1.d2
+- Oi oi. Mind if I sit? I'm Pell. Works. Bunk 2, next door to yours.
+- You're the new hand! Brilliant. Has Torres talked your ear off yet? Give him time.   #funny
+- Tip one: the grab shelf. It's for emergencies. And me.   #funny
+- Tip two: the Chief's coming over. Sit up. Not that straight. Just normal straight.   #funny
+- Tip three: there's a panel on Deck 5 that sticks. I'll show you which. Don't tell Calder.
+- Eat the pudding first. Brennan's pudding goes fast and life's short.
+- Welcome aboard, honestly. It's a good ship. Good people. You'll see.   #warm

@@ -1,0 +1,50 @@
+@crew tomas
+// Writer-commons, batch 1 (for the Voices sampler). Tomas's card is the head writer's. Nothing here goes past what
+// STORY_ARCS.tomas has told (beats 1-4): no exam, no transfer list.
+
+== greet
+? tier=stranger
+- {hi}. You're new too, aren't you? I'm Tomas. Watch. I'm sort of new as well.
+? tier>=acquaintance time:morning
+- Morning! The washroom's free. Hot water till ten, then it's character-building.
+? tier>=acquaintance time:night
+- You're up too? I keep looking at the star map instead of sleeping.
+? tier>=colleague
+- {hi} I took the long way round Deck 2 again. On purpose. Mostly on purpose.   #funny
+? tier>=friend
+- There you are! I saved you the window seat. Well, I sat in it. Same thing.   #warm
+
+== feel
+? mood:high
+- Good day! Holt nodded at me. Just once. I think it was a nod.   #funny
+? mood:low
+- Bit quiet today. Sort of grey inside. It usually lifts by dinner.
+
+== near
+? act:gym
+- Vance said "one more kilometre" and walked off. So I'm still going. I think he's gone.   #funny
+? act:work
+- On patrol. The Watch office has the best view of the lift. So, of everyone, really.
+
+== life
+? tier>=acquaintance
+- I write to my little brother every week. I make the job sound exciting. It is, mostly.
+? tier>=colleague
+- Where I grew up, the sky was the same grey every day. Out here it's never the same twice.
+
+== joy
+? tier>=acquaintance
+- Observatory night! I've named three stars. Not officially. They don't know yet.   #funny
+
+== week1
+// The arrival evening, step A12 (plans/pillar4-plan.md Part 1): after dinner Tomas finds you in the junior common
+// room or Bunk 1 and you have your first chat card. Day 0 only: Sunday, before the week1.d2 flag (Tuesday 06:00).
+// The head writer and the onboarding engineer may want a sharper hook (an intro-step condition).
+? week1:true weekday:sun time:evening !flag:week1.d2
+- Oh good, you found the common room. It took me three days. I'm Tomas, from the bunk.
+- How was dinner? Did Brennan call you "love"? She calls everyone that. You get used to it.
+- That's how you chat, by the way. Tap someone and talk. I was terrible at it at first.
+- Ask me anything. I know everything. Well. A week's worth of everything.   #funny
+- Sleep whenever you like. Lights out is ten, Chloe says. Chloe means it.
+- I'm really glad you're here. I was the newest for a whole week. It was a long week.   #warm
+- Night, {me}. If you wake up and don't know where you are, that's normal. It's Deck 4.   #funny

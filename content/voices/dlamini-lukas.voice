@@ -1,10 +1,21 @@
 @voice dlamini-lukas
-// The Commons writer, draft 1 (non-story crew). For the head writer's review.
-// Your bunkmate in Bunk 1 (4-B1-5). Covers the galley on Brennan's days off (Thursday, Friday).
+// Writer-commons, batch 0 (draft 2). Lukas Dlamini: galley hand, early team, Bunk 1 berth 5 (your bunk room). Off
+// Tuesday and Wednesday; covers the galley on Brennan's days off (Friday, Saturday). Roster: dry humour, blunt;
+// garden-lover, skips-breakfast, night-owl, bar-regular. Grew up on Port Halloran and misses the rain; got married just
+// before the tour and counts the days (spouse unnamed, they/them: facts.md). Pronouns: he / him (facts.md 4b).
+//
+// HOW HE TALKS: few words, all dry. Says the true thing nobody else will, then is kind about it. Says a number with no
+// context and lets you work it out (the days until home).
+// WITH JUNIORS: a bunkmate first. Up at five, back late, quietly makes sure you know where breakfast is.
+// WHAT HE NOTICES: the weather (there isn't any); the count; whether the galley's running right on his watch.
+// MOOD TELLS: happy = a longer sentence than usual. Low = the number, said twice. Tired = a nap on the garden bench.
+// NEVER: makes a fuss; admits the galley is hard work on Brennan's days off.
+// RUNNING: the countdown ("Two hundred and eight."); "the galley runs itself" (it doesn't; Lukas runs it); the
+// married crew compare counts (Bea Silva, Marta Soto, Petra Jovanovic).
 tpl: dry
-talk: Few words, all of them dry. Says the true thing nobody else will, and then is kind about it. Never makes a fuss; when he's running the galley on Brennan's days off he pretends it's nothing. Says a number with no context and lets you work it out (the days until he's home). Softens a lot about home, but only to friends.
-cares: getting home at the end of the tour to the person he married just before it | the rain on Port Halloran | the garden's misting hour | not letting Brennan's galley slip on his watch
-jokes: he says a number out of nowhere ("Two hundred and eight.") and it's the days left until home | he says Brennan's kitchen "runs itself" on her days off while visibly running it
+talk: Few words, all dry; says the true thing, then is kind about it; says a number with no context; softens about home only to friends.
+cares: getting home at the end of the tour | rain on Port Halloran | the garden's misting hour | Brennan's galley not slipping on his watch
+jokes: says a number out of nowhere, and it's the days left until home | says Brennan's galley "runs itself" on her days off while visibly running it
 hi: Hey | You again | Hm. Hello
 bye: Go on | See you in the bunk | Right then
 yes: Fine | Suppose so | Go on then
@@ -19,5 +30,5 @@ likes: tea | sweet
 invites: garden
 joy: standing in the garden at misting hour, because it smells like rain
 thread: homesick
-keepsake: a page torn off his countdown calendar
-avoid: naming who he married (not in the roster; the head writer settles it in facts.md)
+keepsake: a page torn off the countdown calendar
+avoid: naming the person he married (facts.md: unnamed)
