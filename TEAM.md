@@ -36,6 +36,24 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Playable build (the one link the user uses):** https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y, owned by the Deck 6 architect. New builds are republished to this same link.
 
+## Chain of command (the user, 2026-10-17)
+
+**The user → the lead → everyone else.** The lead is directly under the user, reports only to the user, and is the ONLY session that talks to the user. No helper ever contacts the user (no messages, no notifications); anything for the user goes to the lead.
+
+The lead keeps the highest level of organisation: what gets built and in what order, hiring and retiring, design calls, releasing builds to `claude/ship-integration` and the playable link, and every report to the user. The support roles do the hands-on work and report up:
+
+| Reports to the lead | Who reports to them | What they send the lead |
+| --- | --- | --- |
+| Build master | check-runner sessions | each combined candidate: what's in, every check result, explained differences, the hash to release |
+| Reviewer 1, reviewer 2 | — | every verdict (PASS / PASS WITH FIXES / BLOCK) with its note |
+| Head writer (from wave 1b) | the three writers | each merged batch, the Voices sampler, anything needing a decision |
+| Traditions engineer | the three tradition designers | collected traditions, the calendar page, open questions |
+| Social system designer, Pillar 4 planner | — | design rulings and plan changes |
+| Every engineer seat and on-call helper | — | each push (commit, checks, memory %) |
+| Phone-speed watchdog | — | perf_check results for each combined build |
+
+Rules: helpers coordinate sideways directly (that's encouraged), but decisions that change the plan, a seat's scope, or the design go up to the lead; a manager (build master, head writer, traditions engineer) summarises for the lead rather than forwarding everything; the lead's word settles disputes between seats.
+
 ## Staffing levels (the user, 2026-10-17): how to scale up and back down
 
 The user asked for a bigger team now, and for a ready way back to a smaller one if usage needs reining in. The lead switches levels in one step: tell the user, message the roles below, update this section's "Current level".
