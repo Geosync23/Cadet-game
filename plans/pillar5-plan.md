@@ -1,6 +1,6 @@
 # Pillar 5 plan: your Works career
 
-**The final plan (2026-10-17, the Pillar 5 designer, branch `claude/pillar5-plan`),** built from all of the user's answers (logged at the end and in `plans/pillar5-notes.md`). Pillar 5 is **the core of the game**: new ways to work, deductive repair puzzles, and your whole career from Junior Officer to Senior Officer and Engine Specialist. **Nothing is built until the user approves this plan, and each mechanic gets a short spec page the user reviews before it's built.** Pillar 5 is built **on its own, after Pillar 4 is finished**, by one small team.
+**APPROVED by the user (2026-10-17, ~21:15).** **The final plan (2026-10-17, the Pillar 5 designer, branch `claude/pillar5-plan`),** built from all of the user's answers (logged at the end and in `plans/pillar5-notes.md`). Pillar 5 is **the core of the game**: new ways to work, deductive repair puzzles, and your whole career from Junior Officer to Senior Officer and Engine Specialist. **The user has approved this plan; no hiring and no building yet** (the user, 2026-10-17). When building starts, each mechanic still gets a short spec page the user reviews first. Pillar 5 is built **on its own, after Pillar 4 is finished**, by one small team.
 
 Read with `design-doc.md` ("The player", "Works progression", "Roadmap after Pillar 4"), `plans/pillar4-plan.md` (the first week), `TEAM.md`, `DEV_NOTES.md` ("Machines and wear", "Chores and openJobs", "Player needs and the device", "Hook register"). The plain-language version for the user is `plans/pillar5-plan.html`; phone mock-ups of the puzzle screens are in `plans/pillar5-puzzles-mockup.html`.
 
@@ -710,6 +710,8 @@ Each step ends in a playable build the user plays at a check-in; the user can pa
 
 The full history of questions and answers is in `plans/pillar5-notes.md` and this file's git history.
 
+- **Final approval (~21:15):** the plan approved; the night shift on the weekend as suggested (Friday and Saturday nights, a half day before, Sunday off after); no hiring and no production yet.
+
 ## Open questions
 
-1. **The night shift takes your second weekend** (Friday and Saturday nights, Days 26-27), with a half day on Friday to sleep first and Sunday off after. Fine, or put it in the middle of a week? *Default:* the weekend, as above.
+None.
