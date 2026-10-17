@@ -227,6 +227,17 @@ def main(argv):
                         for alt in str(x).split('|'):
                             if '@' in alt and alt.split('@', 1)[1] not in ('me', 'dept'):
                                 errors.append(f'{tag}: cue:{alt}: after @ only "me" or "dept"')
+                if k in ('who', 'with'):
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            if alt not in people:
+                                errors.append(f'{tag}: {k}:{alt} is not a crew id')
+                if k == 'pair':
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            for side in (alt.split('+') if '+' in alt else []):
+                                if side not in people and side not in VALUES['dept'] and side not in VALUES['rank'] and side != 'any':
+                                    errors.append(f'{tag}: pair:{alt}: "{side}" is not a department, rank, crew id or any')
                 if k == 'moved':
                     for x in (v if isinstance(v, list) else [v]):
                         if x not in people:

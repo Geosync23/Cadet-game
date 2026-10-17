@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} checks on me when I'm worrying. I worry less with {friend} about.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. Did you sleep? Properly? Seven hours is the minimum. I'm just saying.
+? tier>=acquaintance time:evening
+- Hello. Long day. I've made every bed twice. Nobody's in them. That's good news.
+? tier>=colleague warmth:cold
+- Oh. You're back. I was going to check the records. In case. I didn't. I nearly did.
+
+== bye
+? tier>=acquaintance
+- Goodbye. Drink some water. That's what Nandakumar would say. So I'm saying it.
+? tier>=friend
+- Thank you. I worry less when I've talked to you. I don't know why that is.   #warm
+
+== feel
+? mood:ok
+- Fine. All right. Nothing went wrong. Something might have. It didn't.
+
+== near
+? deck:2 time:night
+- The stars are steady. I like that about them. They're always exactly where they were.
+? act:meal
+- I stay a while after meals. It's calmer. Nobody needs a bed changed in the mess.
+
+== life
+? tier>=colleague
+- My fish back home are called One, Two and Three. My sister says they're doing well.
+? tier>=friend
+- I'm studying for my nursing exams. I'm very scared of them. Don't tell anyone.
+
+== invite
+? trad:observatory-night tier>=colleague
+- Observatory night? It's very calm. Nobody bleeds. Would you come?
+
+== accept
+- Yes. All right. Yes. I'll be there. I'll be early.
+== decline
+- I can't. I'm sorry. Late shift. Can we do another day? A specific day?
+== missed
+- You didn't come. I hope nothing's wrong. Is anything wrong? Good.
+== birthday
+? birthday:me
+- It's my birthday. I didn't tell anyone. Then I told you. That's fine.
+? birthday:you
+- Happy birthday. Your blood type's a lucky one. That's not a real thing. Happy birthday.   #funny
+== hint
+- Could we talk? Somewhere quiet. Not the infirmary.

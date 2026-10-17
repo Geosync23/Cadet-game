@@ -35,3 +35,53 @@
 == about
 ? aff:dlamini-lukas:friend
 - Lukas and I stand in the garden when the misters run. It smells like home. Both our homes.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh, morning. I'm going to bed. Or I'm going to paint. One of those.
+? tier>=acquaintance time:evening
+- {hi}. Off to the helm soon. Want me to steer us somewhere nice tonight?
+? tier>=colleague warmth:cold
+- There you are. I painted you from memory. Your nose came out a bit wrong.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Go gently.
+? tier>=friend
+- Thanks for the talk. It'll go in a painting somehow. They always do.   #warm
+
+== feel
+? mood:ok
+- All right. Drifty. Nice drifty.
+
+== near
+? act:work time:night
+- Quiet watch. The stars go by. I count the blue ones. There are a lot.
+? deck:3 act:leisure
+- Lounge. Good light here in the evening. Perfect for very small paintings.
+
+== life
+? tier>=colleague
+- Lisk rains every day. I used to paint the rain. Now I paint it from memory.
+? tier>=friend
+- I'm saving up. For what, I'm not saying yet. Something with a lot of rain in it.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night? I'll show you where I'd go, if I could steer anywhere.
+
+== accept
+- Sure. Why not. I'll be there.
+== decline
+- Can't tonight. Night watch. Another evening?
+== missed
+- You didn't come. That's all right. I painted the empty chair. It's quite good.   #funny
+== birthday
+? birthday:me
+- It's my birthday. I'm painting myself, tiny. It's very hard. I keep looking away.   #funny
+? birthday:you
+- Happy birthday. A tiny portrait. Of you. Don't look at the nose.   #warm
+== hint
+- Got a minute? Sit. Hold still. Not for a painting. Just to talk.

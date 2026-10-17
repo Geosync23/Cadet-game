@@ -35,3 +35,53 @@
 == about
 ? bond:best
 - {best} runs with me. Same pace, no talking. Perfect.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. You're early. Good. Early's the only time worth being anywhere.
+? tier>=acquaintance time:evening
+- {hi}. Late team's on. Dinner's ninety degrees and falling. Go now.
+? tier>=colleague warmth:cold
+- You're back. You've missed four soups. I counted.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Mind your elbows in the queue.
+? tier>=friend
+- Thanks. That was a good talk. I don't say that much.   #warm
+
+== feel
+? mood:ok
+- Fine. Steady. Everything where it should be.
+
+== near
+? act:dinner
+- Tray straight, please. It's not a rule. It should be.
+? deck:3 time:morning
+- Lap six. Don't talk to me on lap six. Lap seven's fine.   #funny
+
+== life
+? tier>=colleague
+- Brennan says I'm the only one who can dice like she does. I wrote it down.
+? tier>=friend
+- I stay late too often. I know. Someone has to finish the clean-down. Someone always is me.
+
+== invite
+? trad:running tier>=acquaintance
+- Running club. Come along. I don't talk while I run. You'll like it.
+
+== accept
+- Yes. I'll be there. On time.
+== decline
+- No. Sorry. Clean-down. Another time.
+== missed
+- You didn't come. I waited eight minutes. Then I left. That's my rule.
+== birthday
+? birthday:me
+- My birthday. I've told nobody. Now I've told you. Don't make it a thing.   #funny
+? birthday:you
+- Happy birthday. I made you something small. It's perfectly square.   #warm
+== hint
+- Got a minute? A quiet one.

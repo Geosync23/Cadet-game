@@ -5,8 +5,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: see the top of the
-0.48.x rows in DEV_NOTES.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.10** (2026-10-17 ~04:10):
+2,209 lines, 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.11.
 
 ## What you own
 
@@ -58,11 +59,18 @@
 | writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
 | **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | new (2026-10-17 ~03:58); briefed with the batch order in "Open work" below |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
-| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | working (about 50%): their 19 crew toward 30 own lines (bunkmates toward 60) |
+| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | handed over (`plans/handover-writer-commons.md`, 9eb51fa), idle: ask the lead to retire it and hire a fresh writer-commons when needed |
 
-Asked of the dialogue engineer: a `who:` speaker condition for overheard (the newlyweds, the knitting circle).
+Writer 2 is on batch 1 (Works 1-8 and Kovac to ~30, Torres's job-2/job-3 bubbles under `flag:walk.job2.<step>` and
+`flag:walk.job3.tea|turnin`, telling onboarding when they're in). Newcomer replies are on hold (they wait for the guide
+script's format). `who:` / `with:` speaker conditions are in (dialogue 0.43.8): the newlyweds' and the knitting circle's
+overheard can now be written.
 
 ## Open work (in rough order)
+
+0. Hire a fresh writer-commons (from `plans/handover-writer-commons.md`). Its suggested next batches: callbacks
+   (`mem:`/`told:`), visits and notes, `rep` and `knownFor`, rumour and smalltalk for their people, the story crew toward
+   about 120 lines each, the newlyweds' overheard with `who:`, Pell's `mem:moment.pell.timed` callback.
 
 1. Works crew to ~30 own lines each (now ~15); Kovac, command, Watch and Survey crew the same; visitor cards.
 2. Torres's job-2 and job-3 bubbles (onboarding's INTRO_JOB_LINES); newcomer reply sets (a `.meet`?).
@@ -71,9 +79,8 @@ Asked of the dialogue engineer: a `who:` speaker condition for overheard (the ne
 
 ## Open questions with others
 
-- Roster fields `{home}`, `{family}`, `{hobby}`, `{since}` (who owns them now the crew designer has retired?). Theme
-  beats needing them don't play until they exist.
-- Social A is wiring `{home}`, `{family}`, `{hobby}`, `{since}` (the lead asked, 2026-10-17).
+- Theme fill-ins (social A, 0.36.55): `{home}` and `{family}` are live, `{hobby}` for 60 of 74 crew, `{since}` not yet
+  (the lead is deciding who adds it): lines with `{since}` are skipped, so keep them as extras.
 - Favour jobs: `liftBrakes`, `pellPractice` (sim engineer), `brennanSage` (galley engineer 3), `holt.invite` (social B,
   played in place).
 - readyRoomFirst's choices to carry `readyroom.lights|filters|month` (social A asked the traditions engineer via the lead).

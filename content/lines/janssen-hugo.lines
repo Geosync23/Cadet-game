@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} brings me tea at three in the morning. That's friendship, out here.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. I'm off to bed. Gerald's keeping watch. He's very reliable.   #funny
+? tier>=acquaintance time:night
+- Ah, hello. Up late? Tea? There's always tea at the helm. Not that you can come up. Well.
+? tier>=colleague warmth:cold
+- There you are. I asked Gerald where you'd gone. He didn't know either.   #funny
+
+== bye
+? tier>=acquaintance
+- Steady as she goes. Off you go, then.
+? tier>=friend
+- Thank you for the chat. Nights are better with a good one in your head.   #warm
+
+== feel
+? mood:ok
+- Steady. Like the ship. Like my tea, mostly.
+
+== near
+? act:gym
+- Treadmill, then bed. My morning's your evening. We pass in the corridor, you and I.
+? deck:3 act:leisure
+- The lounge window. I like watching the stars when I'm not steering past them.
+
+== life
+? tier>=colleague
+- I call home twice a week. My mother asks if I'm eating. I'm always eating. Tea counts.   #funny
+? tier>=friend
+- Nights at the helm can be lonely. I talk to Gerald. I talk to the stars. I talk to my tea.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up before my watch. I'll tell you which stars we've passed.
+
+== accept
+- Happy to. I'll bring the tea.
+== decline
+- Can't, I'm afraid. On watch. Another time, steady.
+== missed
+- Missed you. No matter. Another night.
+== birthday
+? birthday:me
+- It's my birthday. Gerald's given me nothing. He never does. He's a cactus.   #funny
+? birthday:you
+- Happy birthday. A cutting of Gerald. Look after it. It'll outlive us all.   #warm
+== hint
+- Have you a minute? Sit with me. Bring your tea.

@@ -35,3 +35,53 @@
 == about
 ? aff:haddad-tamsin:friend
 - Tamsin's a terrible guitarist. Like me. That's why we get on.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Did you eat breakfast? Me? No. Do as I say, not as I do.   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Guess how much is in the boat fund. Higher. Higher. Lower. There.
+? tier>=colleague warmth:cold
+- There you are! Hydrated, I hope. You look slightly underwatered. Like a plant.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}! Sit up straight on the way out!
+? tier>=friend
+- See you, {me}. Thanks for listening. I do talk a lot. I know. I'm working on it.   #warm
+
+== feel
+? mood:ok
+- Fine! Good, actually. Did you know people blink fifteen times a minute? I'm fine.   #funny
+
+== near
+? act:work
+- Pillow corners, sheet corners, bed corners. Corners are the whole job, really.
+? act:meal
+- Eat slowly. Your stomach takes twenty minutes to notice. Fact.
+
+== life
+? tier>=colleague
+- Tamsin and I are the worst guitarists aboard. Together we're nearly one good one.   #funny
+? tier>=friend
+- The boat. I keep saving. One day I'll leave the Wren for it. Not soon. One day.
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight! I'll play. Badly. Come and be supportive. Loudly.
+
+== accept
+- Absolutely! Brilliant. I'll be there. I'll bring water. For both of us.
+== decline
+- Can't tonight, sorry. Guitar practice. The neighbours insist I do it far away.   #funny
+== missed
+- You didn't come! I had a whole fact ready. I'll save it.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I'm putting all the presents in the boat fund. Kidding. Mostly.   #funny
+? birthday:you
+- Happy birthday! Drink some water. That's from me. Also here's a biscuit.   #warm
+== hint
+- Got a minute? I'll talk less this time. Promise.
