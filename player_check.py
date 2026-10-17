@@ -287,6 +287,36 @@ with sync_playwright() as pw:
     check(tt['dev'] == [None, 't:a-needs'], f'over the device only the open app\'s tip: {tt["dev"]}')
     check(tt['prio'] == ['t:queue', 't:needs'], f'the first due tip in priority order: {tt["prio"]}')
     check(tt['size'] < 800, f'all the tips seen fit in a small save: {tt["size"]} bytes')
+
+    print('The News feed (0.28.44):')
+    nf = json.loads(g.ev(r"""(() => { const out = {}, added = [], keep = { news: SHIP.news, used: SHIP.newsUsed, at: SHIP.newsAt, rows: SHIP.newsRows };
+      for (const k of Object.keys(NEWS_SRC)) if (!LINES['news.' + k]) { added.push(k);   // stand-ins until head writer 3's bank is in the build
+        LINES['news.' + k] = Array.from({ length: 12 }, (_, i) => ({ text: NEWS_SRC[k] + ' post ' + i + ' about {first}.', id: 'tn' + k + i }));
+        if (k === 'trad') LINES['news.trad'].push({ text: 'On today: come along.', id: 'tntoday', trad: 'today' }); }
+      SHIP.news = []; SHIP.newsUsed = []; SHIP.newsAt = null; SHIP.newsRows = {};
+      const d0 = SHIP.time.day + 1, days = 14, per = {}; let t = (d0 - 1) * 1440;
+      newsTick(t); for (let h = 1; h <= days * 24; h++) { t += 60; newsTick(t);
+        for (const x of SHIP.news) { const d = Math.floor(x.at / 1440) + 1; ((per[d] = per[d] || {})[x.at + '|' + x.text] = x); } }
+      const counts = [], srcMax = [], ids = {};
+      for (let d = d0; d < d0 + days; d++) { const xs = Object.values(per[d] || {}); counts.push(xs.length);
+        const c = {}; for (const x of xs) if (x.src !== 'trad' && x.src !== 'works') c[x.src] = (c[x.src] || 0) + 1; srcMax.push(Math.max(0, ...Object.values(c)));
+        for (const x of xs) if (x.id) (ids[x.id] = ids[x.id] || []).push(d); }
+      out.counts = counts; out.srcMax = Math.max(...srcMax);
+      out.repeat = Object.values(ids).some(ds => ds.some((d, i) => i > 0 && d - ds[i - 1] < NEWS_COOL));
+      out.kept = SHIP.news.length; out.sources = [...new Set(SHIP.news.map(x => x.src))].length;
+      out.sorted = SHIP.news.every((x, i) => !i || SHIP.news[i - 1].at >= x.at);
+      const sv = {}; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) { /* not ours */ } out.bytes = JSON.stringify([sv.news, sv.newsUsed, sv.newsAt, sv.newsRows]).length;
+      deviceShow('ship'); const body = document.getElementById('devBody').textContent; out.app = [DEVICE_APPS.get('ship').title, !!SHIP.news[0] && body.includes(SHIP.news[0].text), body.includes('Systems')];
+      deviceShow('crew'); out.rel = DEVICE_APPS.get('crew').title; deviceClose();
+      out.trad = SHIP.news.some(x => x.id === 'tntoday') || SHIP.news.some(x => /^Today aboard/.test(x.text)) || null;
+      for (const k of added) delete LINES['news.' + k]; Object.assign(SHIP, { news: keep.news, newsUsed: keep.used, newsAt: keep.at, newsRows: keep.rows });
+      return JSON.stringify(out); })()"""))
+    print('  ', nf)
+    c = nf['counts']
+    check(min(c) >= 2 and max(c) <= 10 and 3 <= sum(c) / len(c) <= 8, f'about 3 to 8 posts a ship day: {c}')
+    check(nf['srcMax'] <= 2 and not nf['repeat'] and nf['sources'] >= 5, f'at most 2 a source a day, no post again within 7 days, a mix of sources: {nf}')
+    check(nf['kept'] == 40 and nf['sorted'] and nf['bytes'] < 9000, f'the last 40 kept, newest first, small in the save: {nf["kept"]}, {nf["bytes"]} bytes')
+    check(nf['app'] == ['News feed', True, True] and nf['rel'] == 'Relationships', f'the apps renamed; the feed and the system bars show: {nf["app"]}, {nf["rel"]}')
     # in the running game: with the screen quiet (heads-ups paused), a due tip comes up on its own
     g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; TEACH_CK = -1e9; Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
     g.step(90)
