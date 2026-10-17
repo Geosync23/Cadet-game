@@ -10,6 +10,10 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
+#   deviceChoose (0.35.23): a question with buttons for section 13's New game; Not now and the × give -1; refused while
+#   a meeting is up, cancelled by a meeting drawn over it (0.35.25)
+#   Pillar 4 pages (0.35.22): the season, reputation in the Record, keepsakes in the Wallet, Left the Wren in the Roster
+#   the arrival (0.35.21): locked until handed over, the first switch-on, Settling in with Go there and the end button
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
 #   and a drag up from the bottom edge leave it shut; only the Device button opens it
@@ -212,11 +216,15 @@ def run(path):
             print('  group meeting:', gm)
             check(gm == [2, True, True, 2, True, True, True, True, 'kept', 'no,no'], f'group meetings: ask all, a seat each, saved, one row, kept together, cancelled together: {gm}')
             # a need's bar pulses (0.35.19) while section 15's needPulse(k) says it just rose (a stand-in when there's none)
-            g.ev("window.__pk = 'energy'; window.__ownPulse = typeof needPulse === 'function'; if (!__ownPulse) window.needPulse = k => k === window.__pk; deviceShow('needs')"); g.step(2)
+            # with section 15's own needPulse (it reads NEED_PULSE[k], a time, and a const can't be swapped) the check sets that
+            # time; without it, a stand-in function
+            g.ev("""(() => { window.__ownPulse = typeof needPulse === 'function' && typeof NEED_PULSE !== 'undefined';
+              if (__ownPulse) { for (const k in NEED_PULSE) delete NEED_PULSE[k]; NEED_PULSE.energy = performance.now() + 1e9; }
+              else { window.__pk = 'energy'; window.needPulse = k => k === window.__pk; } deviceShow('needs'); })()"""); g.step(2)
             p1 = g.ev("[...document.querySelectorAll('#devBody .need.pulse')].map(r => r.getAttribute('aria-label'))")
-            g.ev("window.__pk = null"); g.step(2)
+            g.ev("if (window.__ownPulse) delete NEED_PULSE.energy; else window.__pk = null"); g.step(2)
             p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
-            g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")
+            g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")   # (0.35.20: works with the real needPulse too)
             check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
@@ -298,6 +306,90 @@ def run(path):
             check(m1 == m2, f'opening again adds nothing (no leak): {m1} -> {m2}')
             ev = g.ev("__ev")
             check(ev == ['open', 'close', 'open', 'close', 'open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
+            # the arrival (0.35.21): locked until it's handed over (section 15's deviceLocked, section 21's flag), the first
+            # switch-on once, Settling in (section 21's SETTLE) with Go there and "I know my way around" (introEnd).
+            # Stand-ins when the build has no sections 15/21 for this; with them, their real state is set and put back
+            g.ev("deviceClose()"); g.step(1)
+            ar = g.ev("""(() => { const out = {}, real = typeof SETTLE !== 'undefined' && typeof introOn === 'function' && typeof deviceLocked === 'function';
+              const keepIntro = SHIP.intro ? JSON.parse(JSON.stringify(SHIP.intro)) : undefined, keepBoot = SHIP.device.booted;
+              const lock = on => { if (real) { SHIP.intro.on = true; SHIP.intro.ended = false; if (typeof introFlagSet === 'function') introFlagSet('intro.device', on ? null : true); } else window.deviceLocked = () => on; };
+              if (!real) { SHIP.intro = { on: true, skipped: false, ended: false, settle: {} }; window.introOn = () => true; window.introEnd = () => { window.__ended = true; };
+                window.SETTLE = [{ id: 'washed', title: 'Washed and fed', teacher: 'tomas', place: { deck: 4, room: 'Port washroom' } }, { id: 'eat', title: 'Eat with the crew', teacher: 'brennan', place: { deck: 3, room: 'Mess hall' } }, { id: 'friend', title: 'Make a friend', teacher: 'pell', place: null }]; }
+              else { window.__ended = false; SHIP.intro.settle = {}; }
+              lock(true); mailSend({ from: 'Stores', subject: 'Locked test', body: '.' }); deviceRefresh();
+              document.getElementById('devBtn').click(); out.locked = [DEV.open, document.getElementById('devMail') ? document.getElementById('devMail').hidden : true];
+              devTickMin = -1; deviceTick(); out.bootReset = SHIP.device.booted === false;
+              lock(false); document.getElementById('devBtn').click(); out.boot = [DEV.open, DEV.app, document.getElementById('devBody').textContent.includes('Assigned to')];
+              deviceClose(); document.getElementById('devBtn').click(); out.second = DEV.app;
+              const L = SETTLE; SHIP.intro.settle = { [L[0].id]: 100 };
+              out.listed = deviceApps().some(a => a.id === 'settle'); deviceShow('settle'); const t = document.getElementById('devBody').textContent;
+              out.count = t.includes('1 of ' + L.length); out.done = t.includes('✓ ' + L[0].title);
+              const go = [...document.querySelectorAll('#devBody .row button')].find(b => b.textContent === 'Go there'); out.go = !!go; if (go) { go.click(); out.goal = !!IX_GOAL; clearGoal(); }
+              deviceShow('home'); out.home = document.getElementById('devBody').textContent.includes('Settling in: 1 of ' + L.length);
+              if (real) { const endF = introEnd; window.__endCalls = 0; }
+              deviceShow('settle'); const endB = () => [...document.querySelectorAll('#devBody .btns .act')].find(b => /way around|end the welcome/.test(b.textContent));
+              endB().click(); out.firstTap = /end the welcome/.test(endB().textContent);
+              deviceShow('home'); deviceShow('settle'); out.reset = /way around/.test(endB().textContent);   // 0.35.24: leaving clears the confirm
+              endB().click(); endB().click();
+              out.ended = real ? !!SHIP.intro.ended : !!window.__ended;
+              SHIP.intro.settle = { all: 1 }; out.hiddenWhenAll = !deviceApps().some(a => a.id === 'settle');
+              deviceShow('home');
+              if (real) { SHIP.intro = keepIntro; } else { SHIP.intro = keepIntro; for (const k of ['deviceLocked', 'introOn', 'introEnd', 'SETTLE', '__ended']) delete window[k]; }
+              SHIP.device.booted = keepBoot; SHIP.mail = SHIP.mail.filter(m => m.subject !== 'Locked test'); settleSure = false; return out; })()""")
+            print('  arrival:', ar)
+            check(ar.get('locked') == [False, True] and ar.get('bootReset') and ar.get('boot') == [True, 'boot', True] and ar.get('second') == 'home'
+                  and ar.get('listed') and ar.get('count') and ar.get('done') and ar.get('go') and ar.get('goal') and ar.get('home')
+                  and ar.get('firstTap') and ar.get('reset') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
+            # deviceChoose (0.35.23): a question in the panel's style (section 13's New game asks it); the choice's index, -1 for
+            # Not now and for the ×; the panel goes
+            ch = g.ev("""(() => { const got = [], q = { title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] };
+              deviceChoose(q, k => got.push(k)); const p = document.getElementById('devDlg'), out = [!p.hidden, p.textContent.includes('How do you want to start?'), p.querySelectorAll('.btns .act').length];
+              p.querySelectorAll('.btns .act')[1].click(); out.push(p.hidden);
+              deviceChoose(q, k => got.push(k)); p.querySelectorAll('.btns .act')[2].click();
+              deviceChoose(q, k => got.push(k)); p.querySelector('.x').click(); out.push(p.hidden, got.join(','), !DEV.choose); return out; })()""")
+            check(ch == [True, True, 3, True, True, '1,-1,-1', True], f'deviceChoose: the question, a choice, Not now, the ×: {ch}')
+            # 0.35.25 (reviewer 2): one panel for both. A question is refused while a meeting is up; a meeting drawn over a
+            # question cancels it (-1) and keeps its own taps and ×
+            cm = g.ev("""(() => { const got = [], taps = [], q = { title: 'New game', text: 'Start?', choices: ['A', 'B'] }, p = document.getElementById('devDlg');
+              deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Gather round.', choices: null, i: 0, n: 1 }, k => taps.push(k === undefined ? 'next' : k));
+              const out = [deviceChoose(q, k => got.push(k)), p.textContent.includes('Gather round.')];
+              deviceDialogue(null); out.push(deviceChoose(q, k => got.push('q' + k)));
+              deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Over here.', choices: null, i: 0, n: 1 }, k => taps.push(k === undefined ? 'next' : k));
+              out.push(got.join(','), !DEV.choose, p.textContent.includes('Over here.')); p.querySelector('.next').click(); out.push(taps.join(','));
+              deviceDialogue(null); out.push(p.hidden); return out; })()""")
+            check(cm == [False, True, True, 'q-1', True, True, 'next', True], f'deviceChoose and meetings share the panel safely: {cm}')
+            # Pillar 4 pages (0.35.22): the season on Home and the Calendar (section 18's seasonOf), reputation in the Record
+            # (section 20's repView, words only), keepsakes in the Wallet (keepsakes), "Left the Wren" in the Roster
+            # (movedOn; they leave the lists). Stand-ins without them; with them, section 20's own state is set and put back
+            p4 = g.ev("""(() => { const out = {}, has = n => { try { return eval('typeof ' + n) === 'function'; } catch (e) { return false; } };
+              const own = { season: has('seasonOf'), rep: has('repView'), keep: has('keepsakes'), moved: has('movedOn') };
+              if (!own.season) window.seasonOf = d => ({ id: 'sowing', name: 'Sowing', day: d, week: Math.ceil(d / 7) });
+              if (!own.rep) window.repView = () => ({ depts: [{ dept: 'works', band: 'known', name: 'They know your name' }, { dept: 'helm', band: 'new', name: 'New face' }],
+                ship: { work: 'Work: steady', kindness: 'Kindness: kind', spirit: 'Spirit: cheerful' }, knownFor: ['fixing fans'], notes: [{ day: 3, from: 'Chief Calder', text: 'Good work on the scrubber.' }] });
+              const keepSoc = own.keep || own.moved ? JSON.stringify({ k: SHIP.social.keepsakes || null, m: SHIP.social.moved || null }) : null;
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas', what: 'a brass compass', day: 4 });
+              else window.keepsakes = () => [{ from: 'tomas', what: 'a brass compass', day: 4, name: 'Tomas' }];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell', day: 9 });
+              else { window.movedOn = () => [{ id: 'pell', name: apptName('pell'), role: 'Works technician', day: 9, to: null }]; window.movedOff = id => id === 'pell'; }
+              const sn = seasonOf(SHIP.time.day).name;
+              deviceShow('home'); out.home = document.getElementById('devBody').textContent.includes('Season: ' + sn);
+              deviceShow('calendar'); out.cal = document.getElementById('devBody').textContent.includes('Season: ' + sn);
+              deviceShow('record'); const r = document.getElementById('devBody').textContent; out.rep = r.includes('Reputation') && (own.rep || r.includes('They know your name') && r.includes('Known for: fixing fans'));
+              deviceShow('wallet'); out.keep = document.getElementById('devBody').textContent.includes('A brass compass');
+              deviceShow('roster'); const ro = document.getElementById('devBody').textContent; out.left = ro.includes('Left the Wren') && !rosterPeople().some(x => x.p.id === 'pell');
+              if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
+              for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
+              // 0.35.24 (reviewer 2): rows with missing fields don't break the pages
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas' }); else window.keepsakes = () => [{ from: 'tomas' }, null];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell' }); else window.movedOn = () => [{ id: 'pell' }, null];
+              deviceShow('wallet'); out.keepBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              deviceShow('roster'); out.movedBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
+              for (const n of ['keepsakes', 'movedOn']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
+              deviceShow('home'); out.own = own; return out; })()""")
+            print('  pillar 4 pages:', p4)
+            check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left', 'keepBad', 'movedBad']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
+            g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)
             g.ev("deviceClose()"); g.step(2)
