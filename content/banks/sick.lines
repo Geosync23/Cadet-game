@@ -1,0 +1,51 @@
+@bank all
+// Head writer 4: being ill (the user's design via the lead; the Career engineer's keys, claude/leave 0.60.6).
+// Rarely, you wake up unwell; it gets worse through the day until you see the infirmary (Deck 3) or sleep it off.
+// A sick day never uses leave and never counts against you. TEXTS are shown by the game (no tokens but {me});
+// "title | body". The bug is never named as anything serious: "a ship cold", "the Wren sniffles".
+
+== career.sick.card
+- Feeling rough | You've woken up unwell. See the infirmary on Deck 3, or rest in your bunk.
+- Under the weather | Your head's thick, your legs slow. Infirmary on Deck 3, or bed.
+- Not right today | You're unwell. Infirmary on Deck 3, or sleep it off in your bunk.
+
+== career.tip.sick
+- Being sick doesn't use your leave. You're excused. See Rina in the infirmary, or rest.
+
+== career.sick.worse
+- Your head's pounding. Everything's slow.
+- Your legs feel like wet rope. The infirmary's on Deck 3.
+- You're doubled over. You really need the infirmary, or your bunk.
+
+== career.sick.well
+- You wake up clear-headed. Whatever it was, you slept it off.
+- Better. Much better. Your bunk did the job.
+
+== career.sick.cured
+- The medicine's working. Your head clears and your legs come back.
+- Already easier to breathe. Rina was right. Annoyingly.
+
+// Crew who see you while you're unwell.
+== sick.getwell
+? tier>=acquaintance
+- You look awful. Infirmary. Now.
+- {sigh}. You're grey. Go and see the infirmary, would you?
+- Are you all right? You don't look all right.
+? tier>=colleague
+- Ship cold? Everyone gets one. Infirmary, then bed. In that order.
+- Don't you dare come to shift like that. Go and lie down.   #warm
+
+// A friend comes and finds you while you're unwell and untreated.
+== sick.nudge
+? tier>=friend
+- {nick}, you look terrible. I'll walk you to the infirmary. No arguing.   #warm
+- Bed or the infirmary. Pick one. I'm not leaving till you do.   #warm
+- You're not excused from being looked after. Go and see Rina. Please.   #warm
+
+// The next day or two.
+== sick.better
+? tier>=acquaintance
+- Colour's back in your face. Good.
+- Better? Glad. You looked half-mopped yesterday.
+? tier>=friend
+- There you are. Properly you again. Don't do that to me.   #warm

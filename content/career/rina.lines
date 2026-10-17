@@ -41,3 +41,14 @@
 == career.back
 ?
 - Rested? Let me look. Hm. Better. You'll live.   #funny
+
+// Being ill (head writer 4): Rina is the one who notices first and says it as an order.
+== sick.getwell
+? tier>=acquaintance
+- You look like a dropped tray. Infirmary. I'm on till five.
+== sick.nudge
+? tier>=friend
+- I've kept a bed warm. Not a metaphor. Come and get in it. Infirmary, now.   #warm
+== sick.better
+? tier>=acquaintance
+- Temperature down? Good. Drink some water. That's not a suggestion.

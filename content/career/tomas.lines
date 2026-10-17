@@ -37,3 +37,8 @@
 == career.back
 ?
 - Welcome back, bunkmate. I kept your side tidy. Mostly.
+
+// Being ill (head writer 4)
+== sick.nudge
+? tier>=friend
+- You were coughing all night. I don't mind. But please go and see Rina.   #warm
