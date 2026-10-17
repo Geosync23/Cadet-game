@@ -14,3 +14,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - c20e8cd player (R3): FAIL one: cart run loading in the hold, player.holding 'cart' not 'cartfull' (bisecting) · interactions OK · path OK (2872/2872)
 - a6ad933 day_check (R2) days 0/6/7/35: still shift short (leave clock, PE8); day 35 Deck 3 tray-still quist-ilse 17:59 (from poses ce1c84f, R2 bisect). intro_check started on b679455 (baseline).
 - 0d8072c (+ poses 0.27.46, no seat ray) cadet_test vs b679455: data/taps/walks identical; one tap shot ~97k px that moves between runs (tip timing, real-time noise). intro_check on b679455 died (page-load timeout, busy machine): to re-run.
+- 157c0dd (poses 0.27.46) phone.py (DA3) vs 0.60.5b: dinner 3.7-4.5 ms vs 3.6-4.0, >16.7 ms 6-17 vs 11; breakfast in range. Stutter fixed.
