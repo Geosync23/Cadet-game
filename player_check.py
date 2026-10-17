@@ -309,12 +309,19 @@ with sync_playwright() as pw:
       ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); out.bought = [P.carry.slice(), P.locker.length, P.credits];
       out.gifts = Object.values(STORE).flat().filter(x => x[3]).map(x => x[3]);
       P.carry = []; ACT = { kind: 'craft', def: { ...PLAYER_ACTS.craft }, o: { gift: 'keyring', needs: 'scrap' }, face: 0 }; actEnd(false); out.made = P.carry.slice(); P.carry = [];
+      if (typeof gardenCarry === 'function' && SHIP.galley && SHIP.galley.garden) {   // a garden run with herbs and tomatoes: both into your hands once picked up
+        const id = gardenCarry({ at: Math.floor(shipNow()) - 1, crates: 2 }), j = SHIP.jobs.find(x => x.id === id), hi = GARDEN_CROPS.findIndex(c => c.id === 'herbs'), ti = GARDEN_CROPS.findIndex(c => c.id === 'tomatoes');
+        SHIP.galley.garden.crates.push({ at: shipNow(), items: [[hi, 5], [ti, 20]], id });
+        j.claimedBy = 'you'; j.status = 'claimed'; j.stepsDone = [0]; gardenGift(); out.garden = P.carry.slice(); P.carry = []; gardenGift(); out.again = P.carry.slice();
+        SHIP.galley.garden.crates = SHIP.galley.garden.crates.filter(c => c.id !== id); SHIP.jobs = SHIP.jobs.filter(x => x !== j); P.carry = [];
+      }
       if (stub) { delete window.giftAdd; delete window.GIFT_MAKES; }
       out.stub = stub; return out; })()''')
     print(' ', gf)
     check(gf['bought'] == [['postcard'], 0, 37], f"a gift from the store goes into your hands, not the locker ({gf['bought']})")
     check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book'} and len(gf['gifts']) == 5, f"the store's gifts are section 20's names ({gf['gifts']})")
     check(gf['made'] == ['keyring'], f"a gift made in the machine shop goes into your hands ({gf['made']})")
+    if 'garden' in gf: check(gf['garden'] == ['herbs', 'tomato'] and gf['again'] == [], f"a garden run's herbs and tomato into your hands, once ({gf.get('garden')}, {gf.get('again')})")
 
     print('Social from chatting and company:')
     ch = g.ev(r"""(() => { const n = SHIP.player.needs, out = []; SHIP.player.chats = {};

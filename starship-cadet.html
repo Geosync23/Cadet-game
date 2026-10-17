@@ -9504,6 +9504,20 @@ function foodFrom(where, peek) {
   if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
   return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 08:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
 }
+// a gift from the garden (0.28.25, the galley engineer's notes): on a harvest day (section 16's gardenHarvestDay), once
+// your garden run (section 17's chore 'garden', id 'garden@<minute>') has its pickup ticked off, a sprig of herbs and/or
+// a tomato from that lot (SHIP.galley.garden.crates, matched by id; GARDEN_CROPS) go into your hands as gifts (giftAdd),
+// once a run. Checked each ship minute. Flowers aren't a crop, so none for now.
+const GARDEN_GIFTS = { herbs: 'herbs', tomatoes: 'tomato' }, GARDEN_GIVEN = new Set();
+function gardenGift() {
+  if (typeof giftAdd !== 'function' || typeof myJob !== 'function' || typeof GARDEN_CROPS === 'undefined' || !SHIP.galley || !SHIP.galley.garden) return;
+  const j = myJob(); if (!j || j.chore !== 'garden' || GARDEN_GIVEN.has(j.id) || !(j.stepsDone || []).length) return;
+  GARDEN_GIVEN.add(j.id);
+  if (typeof gardenHarvestDay === 'function' && !gardenHarvestDay(SHIP.time.day)) return;
+  const lot = (SHIP.galley.garden.crates || []).find(c => c && c.id === j.id), got = [];
+  for (const [ci] of (lot && lot.items) || []) { const g = GARDEN_GIFTS[(GARDEN_CROPS[ci] || {}).id]; if (g && !got.includes(g) && giftAdd(g)) got.push(g); }
+  if (got.length) toast('The garden', 'You tuck ' + got.map(g => g === 'herbs' ? 'a sprig of herbs' : 'a ripe tomato').join(' and ') + ' aside to give to someone.');
+}
 // your bunk (0.28.25, Pillar 4): with section 20's bunkNote, a tap on your own bunk walks you there and shows a friend's
 // note if one was left (the oldest unread; marked read), else does what a bunk tap always did (offerSleep, section 13)
 function bunkTap(it, at) {
@@ -9906,7 +9920,7 @@ function playerUpdate(dt, t) {
   needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); gardenGift(); device.refresh(); }
 }
 // squeezing past (0.28.12): crew settled at their places hold their tile (section 10's occupiedBy), which can close
 // the only way through (Chef Brennan at the galley's middle station, the plant panel behind her). When the player's
