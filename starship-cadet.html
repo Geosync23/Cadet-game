@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.1
+   STARSHIP CADET: CSV Wren                           build 0.48.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.1';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.2';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13004,7 +13004,7 @@ const VOICE = {
   "abara-rosa": {
     "avoid": ["explaining her comics"],
     "cares": ["her comics", "her family's stall on Valo", "her friends, quietly"],
-    "invites": ["dinner"],
+    "invites": ["swap"],
     "jokes": ["you may turn up in her next comic, drawn kindly", "she labels everything twice, in speech bubbles"],
     "joy": "her comics",
     "keepsake": "a comic of you, drawn kindly",
@@ -13020,7 +13020,7 @@ const VOICE = {
   "achterberg-lars": {
     "avoid": ["rushing anything"],
     "cares": ["forms filled in properly", "mystery novels", "calling home"],
-    "invites": ["tiles", "music"],
+    "invites": ["tiles", "jam"],
     "jokes": ["he guesses the ending of every mystery by chapter two", "he knows the lyrics to every song in the record cabinet"],
     "joy": "guessing the ending of a mystery",
     "keepsake": "a mystery novel with the ending folded over",
@@ -13132,7 +13132,7 @@ const VOICE = {
   "dahl-mira": {
     "avoid": ["her parent (until her thread opens)"],
     "cares": ["the Watch running smoothly", "knitting", "the Wren, which her parent served on"],
-    "invites": ["music"],
+    "invites": ["jam"],
     "jokes": ["she knits for anyone who stands still long enough, so people keep moving", "she measures time in rows, not minutes"],
     "joy": "knitting",
     "keepsake": "a pair of mittens in Watch colours",
@@ -13193,10 +13193,26 @@ const VOICE = {
     "tpl": "dry",
     "words": {"hi": ["Oh, hello", "Hey"], "bye": ["Mind how you go", "Come back when you run out", "See you"], "yes": ["Can do", "Sure", "Easily"], "thanks": ["Thanks, you", "Ta very much"], "wow": ["Ooh, fancy", "Well, look at you"], "sigh": ["Ah, well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
   },
+  "farouk-olu": {
+    "avoid": ["anything they heard on the channels"],
+    "cares": ["voices on the channels", "the record cabinet's songs, with the right words", "a fair trade"],
+    "invites": ["jam"],
+    "jokes": ["one of five who know every song in the record cabinet, and the only one quiet about it", "they recognise you by voice before they see you"],
+    "joy": "the songs in the record cabinet",
+    "keepsake": "a list of songs, the right words written out small",
+    "likes": ["book", "sweet"],
+    "loves": ["music", "tea"],
+    "needs": "listen",
+    "openness": "normal",
+    "talk": "Quiet and kind; soft short sentences; repeats your words back to check them; \"a fair trade\"; hums the right lyrics.",
+    "thread": "homesick",
+    "tpl": "warm",
+    "words": {"hi": ["Hello", "Oh, hello", "Hi there"], "bye": ["Take care", "Sleep well", "Bye now"], "yes": ["Of course", "Gladly", "Yes"], "thanks": ["Thank you", "That's kind"], "wow": ["Oh, lovely"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+  },
   "ferreira": {
     "avoid": ["anything anyone has said in a message (never, ever)"],
     "cares": ["messages home getting through", "languages, Veyli most of all", "the lounge being a friendly place"],
-    "invites": ["dinner"],
+    "invites": ["quiz"],
     "jokes": ["every message home passes through her hands and she never reads them", "the headset on her door handle, just in case"],
     "joy": "learning Veyli",
     "keepsake": "her first Veyli phrasebook, with her notes",
@@ -13304,6 +13320,30 @@ const VOICE = {
     "thread": "arc:holt",
     "tpl": "gruff",
     "words": {"hi": ["Hm. You", "Cadet", "There you are"], "bye": ["Off with you", "Right", "As you were"], "yes": ["Fine", "If I must", "Hm. Yes"], "thanks": ["Hm. Thanks", "Adequate"], "wow": ["Huh"], "sigh": ["Typical"], "nick": [null, null, null, "{me}", "kid"]},
+    "lines": {
+      "feel": [
+        {"text": "Quiet decks, doors shut, nobody where they shouldn't be. Good day.", "id": "r67rg", "mood": "high"},
+        {"text": "Long shift. Mensah tried a joke on me. It nearly worked.", "id": "xcwmf2", "tone": "funny", "mood": "low"},
+      ],
+      "greet": [
+        {"text": "{hi}. Nearest suit locker. Don't look. Point.", "id": "2sxan5", "tier": [0, 0]},
+        {"text": "Cadet. The new one in Bunk 1. I know. I know where everyone is.", "id": "ix9m4u", "tier": [0, 0]},
+        {"text": "Walked every deck already. The long way. You were still asleep.", "id": "157yg0e", "tone": "funny", "tier": [1, 4], "time": "morning"},
+        {"text": "{hi}. Nearest airlock? Hm. Right first time. Adequate.", "id": "1jke9cz", "tier": [1, 4]},
+        {"text": "{nick}. Hm. Good. Thought I'd see you about.", "id": "1samzhr", "tone": "warm", "tier": [3, 4]},
+      ],
+      "joy": [
+        {"text": "Five in the morning, every door where it should be. Nothing better aboard.", "id": "1uormhg", "tone": "warm", "tier": [2, 4]},
+      ],
+      "life": [
+        {"text": "Border patrol, before the Wren. Long nights. This ship's easier. Mostly.", "id": "1w53fbl", "tier": [1, 4]},
+        {"text": "Mensah keeps count of the times he's made me laugh. His count's wrong. It's lower.", "id": "19uqeoj", "tone": "funny", "tier": [2, 4]},
+      ],
+      "near": [
+        {"text": "I'm not discussing the gym. Move along.", "id": "ir3wrh", "tone": "funny", "act": "gym"},
+        {"text": "The Envoy keeps tea at the same hour, every day. I keep an eye on the same door.", "id": "ktzfa8", "deck": "2", "tier": [1, 4]},
+      ],
+    },
   },
   "ibarra-rafael": {
     "avoid": ["where he put things"],
@@ -13452,7 +13492,7 @@ const VOICE = {
   "lemaire-nils": {
     "avoid": ["being called \"just the sample carrier\""],
     "cares": ["naming a star one day", "the music room", "a joke that lands at breakfast"],
-    "invites": ["observatory", "music"],
+    "invites": ["observatory", "jam"],
     "jokes": ["he tells terrible jokes at breakfast, and keeps score", "he has a list of names for stars that haven't been found yet"],
     "joy": "his list of star names",
     "keepsake": "a card with the star name he'd pick, if they let him",
@@ -13464,6 +13504,22 @@ const VOICE = {
     "thread": "stuck",
     "tpl": "earnest",
     "words": {"hi": ["Hello", "Hi", "Oh, hey"], "bye": ["See you", "Bye", "Clear skies"], "yes": ["Sure", "Yes", "Happy to"], "thanks": ["Thanks", "Thank you"], "wow": ["Wow"], "sigh": ["Oh well"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+  },
+  "lindqvist-isak": {
+    "avoid": ["sitting still"],
+    "cares": ["the Wren's course", "the rowing leaderboard", "the guitar, whatever anyone says"],
+    "invites": ["gym", "jam"],
+    "jokes": ["chasing Vance's name on the rowing board, and suspecting Vance is scared", "it's always his turn with the guitar book, he says"],
+    "joy": "a smooth turn at the helm",
+    "keepsake": "a guitar pick, bitten at the edge",
+    "likes": ["sweet", "made"],
+    "loves": ["music", "game"],
+    "needs": "cheer",
+    "openness": "open",
+    "talk": "Restless and quick; talks about the helm in feelings (\"she's pulling left\"); stubborn about small things; challenges you.",
+    "thread": "stuck",
+    "tpl": "playful",
+    "words": {"hi": ["Hey", "Oh, hey", "Hi"], "bye": ["Off I go", "See you", "Gotta move"], "yes": ["Sure", "Yep", "Go on"], "thanks": ["Cheers", "Thanks"], "wow": ["Ooh, smooth"], "sigh": ["Ugh"], "nick": [null, null, "{me}", "{me}", "{me}"]},
   },
   "madsen-ivo": {
     "avoid": ["his singing being mentioned to his face (he goes red and stops for a week)"],
@@ -13496,11 +13552,35 @@ const VOICE = {
     "thread": "arc:marrow",
     "tpl": "steady",
     "words": {"hi": ["Hello", "Ah, there you are", "Good to see you"], "bye": ["Thank you. Back to it", "Carry on", "Mind the step"], "yes": ["Yes", "Of course", "Let's"], "thanks": ["Thank you", "That helps"], "wow": ["Well, now", "Look at that"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+    "lines": {
+      "feel": [
+        {"text": "A good day. Everyone where they should be, and two people told me the truth.", "id": "1scr9y5", "mood": "high"},
+        {"text": "A long day up top. The Admiral was no help at all.", "id": "1ueeoj3", "tone": "funny", "mood": "low"},
+      ],
+      "greet": [
+        {"text": "{hi}. You're our new cadet. One question, then: what's the best thing aboard so far?", "id": "fz50br", "tier": [0, 0]},
+        {"text": "Cadet. Welcome aboard. If you ever reach the ready room, mind the step.", "id": "1qd4ssk", "tone": "funny", "tier": [0, 0]},
+        {"text": "{hi}, {me}. How does the ship look from where you stand today?", "id": "zp0vl1", "tier": [1, 4]},
+        {"text": "{me}. Tell me one thing that went wrong this week. Nobody up top will.", "id": "19x5zit", "tier": [1, 4]},
+        {"text": "Thursday. I'll be at the piano later. If you hear a wrong note, it was on purpose.", "id": "g8v8ei", "tone": "funny", "tier": [1, 4], "time": "afternoon|evening", "weekday": "thu"},
+        {"text": "There you are. I was hoping someone would give me an honest answer today.", "id": "7tmnve", "tone": "warm", "tier": [3, 4]},
+      ],
+      "joy": [
+        {"text": "The piano, late on a Thursday, with the ship asleep around us. Best hour of the week.", "id": "1cg13li", "tone": "warm", "tier": [2, 4]},
+      ],
+      "life": [
+        {"text": "I learnt the piano as a girl, and took it up again on my first command. It helps.", "id": "d1cc7j", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "Varga, Moro, Brenner. I say good morning to every one of them. Not to mine.", "id": "1iylvv1", "tone": "funny", "deck": "2", "tier": [1, 4]},
+        {"text": "I come up to the observatory to see what you all see. It beats the bridge.", "id": "1immxk9", "deck": "2", "time": "evening|night"},
+      ],
+    },
   },
   "mbeki-bo": {
     "avoid": ["sloppy sums"],
     "cares": ["the telescope from home", "the music room", "his sister's recipes, followed exactly"],
-    "invites": ["music", "observatory"],
+    "invites": ["jam", "observatory"],
     "jokes": ["he follows his sister's recipes to the gram, even the ones that say \"a handful\"", "his telescope is cleaner than the observatory's"],
     "joy": "playing in the music room",
     "keepsake": "a lens cloth, folded exactly",
@@ -13612,7 +13692,7 @@ const VOICE = {
   "oduya": {
     "avoid": ["what anyone says in his office (never)"],
     "cares": ["seventy-five people a long way from home", "everyone's birthday", "the garden, where people talk"],
-    "invites": ["garden", "dinner"],
+    "invites": ["garden", "tasting"],
     "jokes": ["he knows everyone's birthday, including yours, before you've told him", "the sweets bowl, and who takes the green ones"],
     "joy": "the garden at the quiet hour",
     "keepsake": "a green sweet from the bowl, the kind nobody takes",
@@ -13628,7 +13708,7 @@ const VOICE = {
   "park-noor": {
     "avoid": ["borrowing money (she won't)"],
     "cares": ["saving for a boat on Coriel", "a tidy patrol", "learning the guitar"],
-    "invites": ["music", "observatory"],
+    "invites": ["jam", "observatory"],
     "jokes": ["she is learning the guitar, badly, and says so first", "she knows exactly how many shifts a boat costs"],
     "joy": "picturing the boat",
     "keepsake": "a little paper boat she folded on a quiet patrol",
@@ -13692,7 +13772,7 @@ const VOICE = {
   "raman": {
     "avoid": ["the near miss years ago (until his thread opens)"],
     "cares": ["flying smooth", "the model of the Wren on his shelf", "his helm officers"],
-    "invites": ["observatory", "music"],
+    "invites": ["observatory", "jam"],
     "jokes": ["he flies the Wren like it might spill", "he dusts the model ship more often than his cabin"],
     "joy": "his model of the Wren",
     "keepsake": "a spare hull plate from the model Wren",
@@ -13769,18 +13849,34 @@ const VOICE = {
     "tpl": "steady",
     "words": {"hi": ["Hello, hello", "Hi there", "Oh, hello"], "bye": ["Night, then", "Take your time", "See you"], "yes": ["Sure", "No rush, yes", "Happy to"], "thanks": ["Thanks, friend", "Kind of you"], "wow": ["Oh, lovely", "That's nice work"], "sigh": ["Ah, well", "No matter"], "nick": [null, null, "{me}", "{me}", "{me}"]},
   },
+  "sato": {
+    "avoid": ["the survey she's proudest of being luck (until close)", "the third comet mattering"],
+    "cares": ["the survey", "her specimen store, labelled in her hand", "the frontier", "her tea"],
+    "invites": ["observatory", "tasting"],
+    "jokes": ["the tea nobody else will drink, which she offers to everyone", "three comets named, and the third \"doesn't count\"", "Mori runs the labs while Sato runs everyone"],
+    "joy": "explaining her tea",
+    "keepsake": "a sample label in her own handwriting, with your name on it",
+    "likes": ["book", "plant"],
+    "loves": ["tea", "star"],
+    "needs": "cheer",
+    "openness": "normal",
+    "talk": "Fast, clever bursts; starts in the middle; drifts off mid-thought; explains the tea at length; \"No.\" is a full sentence.",
+    "thread": "notgood",
+    "tpl": "brisk",
+    "words": {"hi": ["Ah. You", "Hello", "Oh, good"], "bye": ["Off you go", "Back to it", "Don't touch the labels"], "yes": ["Yes, obviously", "Fine", "Yes, yes"], "thanks": ["Thank you", "Good. Thanks"], "wow": ["Oh, that's interesting"], "sigh": ["Mm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+  },
   "shah-dara": {
-    "avoid": ["being compared with his parent"],
+    "avoid": ["being compared with their parent"],
     "cares": ["the coffee machine", "doing right by the Watch", "living up to a parent who served aboard"],
-    "invites": ["music"],
-    "jokes": ["he's the best at fixing the coffee machine, which makes him very popular at 06:00", "he talks to the coffee machine, never to people, before breakfast"],
+    "invites": ["jam"],
+    "jokes": ["Dara is the best at fixing the coffee machine, which makes them very popular at 06:00", "Dara talks to the coffee machine, never to people, before breakfast"],
     "joy": "a coffee machine that works",
     "keepsake": "a spare coffee machine valve, polished",
     "likes": ["sweet", "tea"],
     "loves": ["made", "music"],
     "needs": "cheer",
     "openness": "guarded",
-    "talk": "Quiet, few words, then a dry line that lands late. Better with machines than people, and knows it. Mends the coffee machine and lets others take the credit. With other juniors: shy at first, then loyal. Mood tells: when worried he hides in the coffee machine; when happy, the coffee is better.",
+    "talk": "Quiet, few words, then a dry line that lands late. Better with machines than people, and knows it. Mends the coffee machine and lets others take the credit. With other juniors: shy at first, then loyal. Mood tells: when worried they hide in the coffee machine; when happy, the coffee is better.",
     "thread": "family",
     "tpl": "shy",
     "words": {"hi": ["Oh. Hi", "Hey", "Hello"], "bye": ["Bye", "See you", "Right, then"], "yes": ["Yes", "OK", "Sure"], "thanks": ["Thanks", "Cheers"], "wow": ["Huh"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
@@ -13903,7 +13999,7 @@ const VOICE = {
   "ueda-vera": {
     "avoid": ["hurrying her"],
     "cares": ["letters home to Valo, on paper", "her telescope", "the people at the edge of things"],
-    "invites": ["observatory", "music"],
+    "invites": ["observatory", "jam"],
     "jokes": ["she writes letters on paper, so they arrive weeks after the news", "she plays music and early-to-bed both, so her concerts are short"],
     "joy": "writing letters on paper",
     "keepsake": "a sheet of her good letter paper",
@@ -13931,6 +14027,30 @@ const VOICE = {
     "thread": "arc:vance",
     "tpl": "brisk",
     "words": {"hi": ["Cadet", "Good", "As you were"], "bye": ["Carry on", "Dismissed. Kindly", "As you were"], "yes": ["Agreed", "Correct", "Very well"], "thanks": ["Noted. Thank you", "Well done"], "wow": ["Impressive", "Hm. Correct"], "sigh": ["Regrettable"], "nick": ["Cadet", "Cadet", "Cadet {me}", "{me}", "{me}"]},
+    "lines": {
+      "feel": [
+        {"text": "A good day. Board clear, drills on time, and my name top of the treadmill.", "id": "1ehz06p", "mood": "high"},
+        {"text": "A long day. I've run four kilometres about it. It hasn't helped yet.", "id": "10y36ml", "mood": "low"},
+      ],
+      "greet": [
+        {"text": "{hi}. Uniform straight, on time, and you found the right deck. Three for three.", "id": "1afgnbe", "tier": [0, 0]},
+        {"text": "Cadet. A nod will do aboard; we don't salute. Regulation two, section four.", "id": "pbixkh", "tier": [0, 0]},
+        {"text": "{nick}. Ninety seconds early. Noted.", "id": "m1bcfg", "tone": "funny", "tier": [1, 4], "time": "morning"},
+        {"text": "{nick}. Clean, quick and on time, I trust. And cheerful. That's a fourth. Allow it.", "id": "8lydi2", "tier": [1, 4]},
+        {"text": "{nick}. Good. I'd hoped to see you. That stays between us.", "id": "1b10nf6", "tone": "warm", "tier": [3, 4]},
+      ],
+      "joy": [
+        {"text": "Rowing, at the academy. Six of us, one boat, nobody late. The best thing I've ever done.", "id": "17kt1mf", "tier": [2, 4]},
+      ],
+      "life": [
+        {"text": "I keep the waiting list for the good records. You're ninth. Waiting builds character.", "id": "wsteyd", "tone": "funny", "tier": [1, 4]},
+        {"text": "Did you read Gull this week? A rhyme for \"airlock\" ought to be against regulations.", "id": "11m4ejl", "tone": "funny", "tier": [1, 4]},
+      ],
+      "near": [
+        {"text": "The treadmill leaderboard. Fresh paper, fresh tape, one name so far. Mine.", "id": "1b33dqg", "tone": "funny", "act": "gym"},
+        {"text": "I left the bridge on time today. The counsellor's advice. I don't care for it.", "id": "15noikx", "tone": "funny", "act": "leisure|off", "tier": [1, 4]},
+      ],
+    },
   },
   "varga-tariq": {
     "avoid": ["how old his grandmother is getting (until his thread opens)"],
@@ -13999,7 +14119,7 @@ const VOICE = {
   "yilmaz-karin": {
     "avoid": ["being rushed in the mornings"],
     "cares": ["baking on rest days", "the breakfast joke contest", "samples, carried safely"],
-    "invites": ["dinner"],
+    "invites": ["tasting"],
     "jokes": ["she and Nils are in a contest for the worst breakfast joke", "she bakes on rest days, if Brennan allows it, which is a treaty"],
     "joy": "baking on rest days",
     "keepsake": "a small loaf, still warm",
@@ -14029,17 +14149,17 @@ const VOICE = {
     "words": {"hi": ["Oh, hello", "Hello", "Hi there"], "bye": ["Sleep well, when you do", "Take care", "Goodnight, or good morning"], "yes": ["Of course", "Yes, I can", "Mm, yes"], "thanks": ["Thank you, really", "Oh, thank you"], "wow": ["Oh, that's lovely", "Goodness"], "sigh": ["Oh dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
   },
   "zamora-quinn": {
-    "avoid": ["being asked to sing (until her thread opens)"],
-    "cares": ["getting the star names right", "her telescope from home", "singing (in the shower only)"],
+    "avoid": ["being asked to sing (until their thread opens)"],
+    "cares": ["getting the star names right", "their telescope from home", "singing (in the shower only)"],
     "invites": ["observatory"],
-    "jokes": ["she can name every star in the chart room and argues about the rest", "she sings in the shower and the whole washroom knows"],
-    "joy": "the night sky through her telescope",
-    "keepsake": "a star chart with a star she named in tiny writing",
+    "jokes": ["Quinn can name every star in the chart room and argues about the rest", "they sing in the shower and the whole washroom knows"],
+    "joy": "the night sky through their telescope",
+    "keepsake": "a star chart with a star they named in tiny writing",
     "likes": ["book", "tea"],
     "loves": ["star", "music"],
     "needs": "listen",
     "openness": "guarded",
-    "talk": "Quiet and exact until a star is named wrong, then not quiet at all. Few words, all of them correct. Brought a telescope from home. Pretends not to know the whole washroom hears her sing. With juniors: shy, but lights up if they ask about the sky. Mood tells: when happy she hums; when low, she corrects nobody.",
+    "talk": "Quiet and exact until a star is named wrong, then not quiet at all. Few words, all of them correct. Brought a telescope from home. Pretends not to know the whole washroom hears them sing. With juniors: shy, but lights up if they ask about the sky. Mood tells: when happy they hum; when low, they correct nobody.",
     "thread": "talent",
     "tpl": "shy",
     "words": {"hi": ["Oh. Hi", "Hello", "Hey"], "bye": ["Bye", "See you", "Clear skies"], "yes": ["Yes", "All right", "Sure"], "thanks": ["Thanks", "Thank you"], "wow": ["Oh. That's good"], "sigh": ["Hm"], "nick": [null, null, "{me}", "{me}", "{me}"]},
@@ -14047,7 +14167,7 @@ const VOICE = {
   "zielinski-oona": {
     "avoid": ["mornings, before coffee"],
     "cares": ["honest status lights", "a good bargain", "being more than \"the one from the market stall\""],
-    "invites": ["dinner"],
+    "invites": ["swap"],
     "jokes": ["she haggles with the crew store till", "every status light on the bridge is a little liar until proven honest"],
     "joy": "a good bargain at the crew store",
     "keepsake": "a brass weight from her old market scales",
