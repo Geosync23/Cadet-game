@@ -31,7 +31,7 @@
 ? tier>=acquaintance time:morning
 - Morning, {me}. Was that me singing in the washroom? It might have been me.   #funny
 ? tier>=acquaintance warmth:cold
-- Oh, {me}! I was just thinking about Lisk. Then about you. Hello.
+- Oh, {me}! I was miles away. Lisk, mostly. Hello.
 
 == near
 ? place:booths

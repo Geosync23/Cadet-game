@@ -29,7 +29,7 @@
 // ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
 == greet
 ? tier>=acquaintance time:evening
-- {hi}, {me}. Long day? You don't have to answer. Sweet?
+- {hi}, {me}. Long day? You don't have to answer. Have a sweet.
 ? tier>=acquaintance warmth:cold
 - {me}. It's been a while. No questions. Well, one. Are you eating?
 

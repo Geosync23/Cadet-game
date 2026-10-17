@@ -497,4 +497,8 @@ introduces them), unless noted.
 | Speaker conditions for overheard: `who:` (A is one of) and `with:` (B is one of), crew ids (dialogue 0.43.8) | everyone | head writer |
 | Femi Rossi and Lucia Ferreira practise Veyli together (Rossi from a phrasebook; Ferreira is better, Rossi louder); Rossi is learning a Veyli song in the music room | Rossi, Ferreira | Writer 2, batch 1 |
 | Rahman is about to log a four hundredth star; Reyes's letters to Lisk run to pages; Moreau gets a mystery with the last page torn out from Achterberg | Works | Writer 2, batch 1 |
+| Raman learnt to fly on a noisy cargo hauler; twenty years on, he checks the model ship before every long turn; Brennan made him a Wren-shaped cake | Raman | Writer 2, batch 2 |
+| Mori names one tiny rock on each survey after someone aboard (a secret); Achterberg's dad reads him endings on purpose; Ferreira learnt her first language from her gran and her fourth from a cook; Park's boat name is a secret even from her | command, Watch | Writer 2, batch 2 |
+| Kim made Garcia a card that plays a tune; Volkov beat Shah to the coffee machine on Shah's birthday; Nakamura and Garcia argue about planters | Watch | Writer 2, batch 2 |
+| Thirty-one rungs on the ladder from Deck 4 to Deck 5; the Halcyon calls the three twins "the set"; Lukas Dlamini counts down the days to home, the other newlyweds count up from the wedding | the circles | Writer 3, batch 2 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |

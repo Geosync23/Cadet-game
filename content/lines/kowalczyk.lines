@@ -31,7 +31,7 @@
 ? tier>=acquaintance time:morning
 - Morning, for you. Bedtime, for me. Same book. Next chapter.
 ? tier>=acquaintance warmth:cold
-- {me}. Haven't seen you on the night side lately. The bridge noticed. Well. I did.
+- {me}. Not seen you on the night side lately. The kettle noticed.
 ? tier>=colleague time:night
 - Up past midnight, {me}? She's at her best now. Then go to bed. That's an order.   #funny
 
