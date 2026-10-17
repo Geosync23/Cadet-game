@@ -25567,11 +25567,14 @@ function bondsUnpack(o, ids) {                            // ids: the save's cre
 // what you've heard, for the save (0.36.75): everything about news still going round (it decides what crew still tell you,
 // so picks never change), and the HEARD_FEED latest of the rest for the Ship app's feed; in heard order, as short arrays
 const HEARD_FEED = 12;
-// what you know about someone, for the save (0.36.76): their roster lines as '#a<i>' (about) / '#l<i>' (life), the rest as written
-function knownPack(id, K) { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)], A = p && (p.about || []).map(x => x && x.text), L = p && p.life || [];
-  return K.map(k => { const i = A ? A.indexOf(k) : -1; if (i >= 0) return '#a' + i; const j = L.indexOf(k); return j >= 0 ? '#l' + j : k; }); }
-function knownUnpack(id, K) { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)];
-  return K.map(k => { const m = typeof k === 'string' && /^#([al])(\d+)$/.exec(k); if (!m) return k; const x = m[1] === 'a' ? p && p.about && p.about[+m[2]] && p.about[+m[2]].text : p && p.life && p.life[+m[2]]; return x || null; }).filter(k => typeof k === 'string'); }
+// what you know about someone, for the save (0.36.76, by text hash since 0.36.78): their roster lines as '#xxxx' (a hash), the rest as written
+const knownLines = p => p ? (p.about || []).map(x => x && x.text).concat(p.life || []).filter(x => typeof x === 'string') : [];
+const knownTag = x => '#' + ((socHash(x) >>> 0) % 1679616).toString(36).padStart(4, '0');   // four characters of a hash of the fact's text: a roster edit can't show a fact you weren't told
+function knownPack(id, K) { const L = knownLines(SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)]), T = L.map(knownTag);
+  return K.map(k => { const i = L.indexOf(k); return i >= 0 && T.indexOf(T[i]) === T.lastIndexOf(T[i]) ? T[i] : k; }); }   // two of their lines with the same tag: kept as written
+function knownUnpack(id, K) { const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)], L = knownLines(p), H = new Map(L.map(x => [knownTag(x), x]));
+  return K.map(k => { if (typeof k !== 'string' || k[0] !== '#') return k; if (/^#[0-9a-z]{4}$/.test(k)) return H.get(k) || null;   // a line the roster no longer has is forgotten
+    const m = /^#([al])(\d+)$/.exec(k); if (!m) return k; const x = m[1] === 'a' ? p && p.about && p.about[+m[2]] && p.about[+m[2]].text : p && p.life && p.life[+m[2]]; return x || null; }).filter(k => typeof k === 'string'); }   // '#a3' / '#l1': 0.36.76's saves
 const PAIRS_MAX = 300, MOVED_MAX = 24;                    // the pair news already told, and who moved on, at most (oldest go first; 04:00 each day)
 function socTrim() {
   const P = SHIP.social.pairs, ks = Object.keys(P); for (let k = 0; k < ks.length - PAIRS_MAX; k++) delete P[ks[k]];
@@ -25582,12 +25585,17 @@ function heardKept() {
   const keep = new Set(old); return H.filter(h => live.has(h.id) || keep.has(h)).map(h => live.has(h.id) ? [h.id, h.from, h.at] : [h.id, h.from, h.at, h.line]);   // [id, from, at(, line)]: a live item's line comes back from NEWS on load
 }
 const cueSaved = c => Object.fromEntries(Object.entries(c).filter(([, v]) => v !== null && v !== false && v !== undefined));   // empty fields left off (socLoad puts them back)
+function pairsLoad(E, old) {                             // crew positions moved across by id when the save's crew list differs (none known: dropped)
+  if (!old) return Object.fromEntries(E);
+  const P = {}; for (const [k, v] of E) { const [a, b] = k.split('-').map(Number), x = SOC.idx.get(old[a]), y = SOC.idx.get(old[b]); if (x !== undefined && y !== undefined) P[Math.min(x, y) + '-' + Math.max(x, y)] = v; }
+  return P;
+}
 const pairsSaved = P => Object.entries(P).map(([k, v]) => k + v).join(',');   // '12-45f,3-9r': the pair news already told
 function socSave() {
   socInit();
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
-  return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
+  return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(({ seed, ...x }) => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueSaved), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel, ...memSave() };
 }
 function socLoad(s) {
@@ -25604,18 +25612,18 @@ function socLoad(s) {
         const x = SOC.idx.get(old[i]), y = SOC.idx.get(old[j]); if (x !== undefined && y !== undefined) a[pairIdx(x, y)] = bin.charCodeAt(k) << 24 >> 24;
       }
     }
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: typeof s.pairs === 'string' ? Object.fromEntries(s.pairs.split(',').filter(Boolean).map(x => [x.slice(0, -1), x.slice(-1)])) : { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ key: x.key, at: x.at, until: x.until, you: x.you ?? false, deck: x.deck ?? null, who: x.who ?? null, dept: x.dept ?? null, room: x.room ?? null })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: pairsLoad(typeof s.pairs === 'string' ? s.pairs.split(',').filter(Boolean).map(x => [x.slice(0, -1), x.slice(-1)]) : Object.entries(s.pairs || {}), same ? null : old || []), mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ key: x.key, at: x.at, until: x.until, you: x.you ?? false, deck: x.deck ?? null, who: x.who ?? null, dept: x.dept ?? null, room: x.room ?? null })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
-      bonds: bondsUnpack(s.bonds, typeof s.idl === 'string' ? s.idl.split(',') : SOC.crew.map(p => p.id)), affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
+      bonds: bondsUnpack(s.bonds, typeof s.idl === 'string' ? s.idl.split(',') : SOC.crew.map(p => p.id)), affWeek: typeof s.affWeek === 'string' && (typeof s.idl !== 'string' || s.idl === SOC.ids) ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
       seekAsks: Array.isArray(s.seekAsks) ? s.seekAsks.filter(x => x && typeof x.id === 'string' && isFinite(x.from)).map(x => ({ ...x })) : [],
       guide: s.guide && typeof s.guide.id === 'string' && isFinite(s.guide.day) ? { ...s.guide } : null,
       noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
     for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
-      const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
+      const { k, ...it } = x; if (!Array.isArray(it.seed)) it.seed = []; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.map(h => Array.isArray(h) ? { id: h[0], from: h[1] ?? null, at: h[2], line: h.length > 3 ? h[3] : (NEWS.find(x => x.id === h[0]) || { lines: [null] }).lines[0] } : h).filter(h => h && typeof h.id === 'string').slice(-60) : [];   // arrays since 0.36.75, objects before
     SHIP.rel = {};
@@ -25768,6 +25776,7 @@ const SOC_CUE_OF = {
   tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
   gift: [d => 'gift' + (d.tag ? '.' + d.tag : ''), 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
 };
+const CUE_MAX = 24;                                    // ship notes kept at once (0.36.78: was 30)
 function socNote(kind, d) {
   socInit(); d = d || {};
   const c = SOC_CUE_OF[kind]; if (!c) return;
@@ -25775,7 +25784,7 @@ function socNote(kind, d) {
   const m = kind === 'repair' && typeof machineById === 'function' && d.machine ? machineById(d.machine) : null;   // who it's about (the dialogue engineer's cue:...@me)
   const who = kind === 'gift' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || (m && m.deck) || null, who, dept: m ? repDeptOf(m) : null, room: m ? m.room || null : null });
-  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0) || (String(a.who) < String(b.who) ? -1 : String(a.who) > String(b.who) ? 1 : 0) || (a.you === b.you ? 0 : a.you ? -1 : 1)).slice(-30);   // in time order, whatever order they came in
+  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0) || (String(a.who) < String(b.who) ? -1 : String(a.who) > String(b.who) ? 1 : 0) || (a.you === b.you ? 0 : a.you ? -1 : 1)).slice(-CUE_MAX);   // in time order, whatever order they came in
 }
 // notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
 // big time jump and the same hours played one by one come out the same (0.36.49)
@@ -26456,12 +26465,14 @@ function repView() {                                     // the Record's Reputat
 }
 
 // ---- news ----
+const NEWS_MAX = 20;                                   // news going round at most (0.36.78: a bound for the save)
 function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
   // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
   seed = [...new Set(seed.flatMap(s => s === 'all' ? SOC.crew.map(p => p.id) : /^dept:/.test(s) ? SOC.crew.filter(p => p.dept === s.slice(5)).map(p => p.id) : [s]))];
   const it = { id, about, lines: lines.slice(), weight, seed: seed.filter(s => SOC.idx.has(s) && socAboard(SOC.crew[SOC.idx.get(s)])), born, kind, event, life };
   NEWS.push(it); SHIP.knows[id] = new Set(it.seed);
+  while (NEWS.length > NEWS_MAX) { let k = 0; for (let i = 1; i < NEWS.length; i++) if (NEWS[i].born < NEWS[k].born || (NEWS[i].born === NEWS[k].born && NEWS[i].id < NEWS[k].id)) k = i; delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // a hard cap: the oldest goes
   return it;
 }
 function newsKnownBy(p, t = shipNow()) {
@@ -26469,9 +26480,10 @@ function newsKnownBy(p, t = shipNow()) {
   return NEWS.filter(x => x.born <= t && SHIP.knows[x.id] && SHIP.knows[x.id].has(id))
     .sort((a, b) => (b.weight - (t - b.born) / 1440 * .2) - (a.weight - (t - a.born) / 1440 * .2) || (a.id < b.id ? -1 : 1));
 }
+const heardIt = n => SHIP.heard.some(h => h.id === n.id && h.at >= n.born);   // you've heard this one (not just an older item of the same id)
 function playerHeard(newsId, from, overheard) {        // overheard: in passing (chatter), so no nudge for the teller
   socInit(); const it = NEWS.find(x => x.id === newsId);
-  if (!it || SHIP.heard.some(x => x.id === newsId)) return false;
+  if (!it || SHIP.heard.some(x => x.id === newsId && x.at >= it.born)) return false;   // heard since this one was born (a pair's second friendship is news again)
   SHIP.heard.push({ id: newsId, from: from || null, at: Math.floor(shipNow()), line: it.lines[0] });
   if (SHIP.heard.length > 60) SHIP.heard.splice(0, SHIP.heard.length - 60);
   if (from && !overheard && SOC.idx.has(from)) relAdd(from, 'news', REL_PTS.news);
@@ -26541,8 +26553,8 @@ function socialHour(h) {
       if (!clash && v < 90 && u < .7 && (v >= 60 || (FR[i] < CAP[i] && FR[j] < CAP[j]))) v++; else if (clash && v > RIVAL_FLOOR && u < RIVAL_COOL) v--;
       aff[x] = v;
       const key = i + '-' + j, P = SHIP.social.pairs;
-      if (v0 < 60 && v >= 60 && P[key] !== 'f') { P[key] = 'f'; socPairNews(i, j, true, t); }
-      if (v0 > -40 && v <= -40 && P[key] !== 'r') { P[key] = 'r'; socPairNews(i, j, false, t); }
+      if (v0 < 60 && v >= 60 && P[key] !== 'f') { delete P[key]; P[key] = 'f'; socPairNews(i, j, true, t); }
+      if (v0 > -40 && v <= -40 && P[key] !== 'r') { delete P[key]; P[key] = 'r'; socPairNews(i, j, false, t); }
     }
   }
   // news passes on between people who spent time together (decided against the hour's start, so it never runs
@@ -26621,7 +26633,7 @@ function feudTalk(p) {                                   // you chatted with som
   if (!o.f.talked.includes(p.id)) o.f.talked.push(p.id);
   if (o.f.talked.length < 2) return null;
   const [a, b] = o.k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(b), t = Math.floor(shipNow());
-  delete SHIP.social.feuds[o.k]; SHIP.aff[pairIdx(i, j)] = -10; SHIP.social.pairs[Math.min(i, j) + '-' + Math.max(i, j)] = 'm';
+  delete SHIP.social.feuds[o.k]; SHIP.aff[pairIdx(i, j)] = -10; { const k = Math.min(i, j) + '-' + Math.max(i, j); delete SHIP.social.pairs[k]; SHIP.social.pairs[k] = 'm'; }
   const na = shortName(SOC.crew[i]), nb = shortName(SOC.crew[j]);
   newsAdd({ id: 'madeup:' + o.k + ':' + t, about: a + ',' + b, kind: 'madeup', weight: .5, life: 3, born: t, seed: [a, b],
     lines: [na + ' and ' + nb + ' have made up.', 'Saw ' + na + ' and ' + nb + ' having dinner together. About time.', 'Looks like ' + na + ' and ' + nb + ' are talking again.'] });
@@ -26660,7 +26672,7 @@ function socialChatter(m) {
     .sort((a, b) => schedU(a.p.seed, m, 636) - schedU(b.p.seed, m, 636));
   for (const a of near) {
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
-    const n = newsKnownBy(a.p, t).find(x => !heard.has(x.id) && !(x.about === a.p.id && x.kind !== 'fault'));
+    const n = newsKnownBy(a.p, t).find(x => !heardIt(x) && !(x.about === a.p.id && x.kind !== 'fault'));
     let text = n ? n.lines[Math.floor(schedU(a.p.seed, m, 637) * n.lines.length)] : null;
     if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null;
       const l = k && socLine(a.p, 'smalltalk', { t, act: w.act, talk: k, bubble: true }); if (l) text = l.text; else if (k) text = CHATTER_IDLE[k][Math.floor(schedU(a.p.seed, m, 639) * CHATTER_IDLE[k].length)]; }
@@ -26949,7 +26961,7 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
   const inv = inviteFor(p, Math.floor(t / 1440) + 1); if (inv) return { text: inviteLine(p, inv), kind: 'invite', invite: inv, say: true };
   if ((SHIP.mem[p.id] || []).some(m => !m[3]) && U(645) < .6) { const l = eng('callback'); if (l) return l; }   // a memory of you, said once
   const heard = new Set(SHIP.heard.map(x => x.id));
-  const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault') && x.about !== 'you');
+  const news = newsKnownBy(p, t).find(x => !heardIt(x) && !(x.about === p.id && x.kind !== 'fault') && x.about !== 'you');
   if (news && U(611) < .8) return { text: pick(news.lines, 612), kind: 'news', news: news.id, say: true };
   if (SHIP.social.cues.length && U(646) < .5) { const l = eng('cue'); if (l) return l; }   // what happened on the ship
   const f = crewFeeling(p, t); if (f && !/birthday/.test(f) && U(613) < .7) return { text: f, kind: 'feel', say: false };
@@ -27095,7 +27107,7 @@ function chatDo(id) {
   else if (id === 'ask-intro') { C.ask = 'intro'; chatSay(pick(['Who did you have in mind?', 'Go on, who?', 'Introduce me to someone? All right.'], 665)); }
   else if (id.startsWith('intro:')) { const l = typeof introDo === 'function' ? introDo(p, id.slice(6)) : null; C.ask = true; chatSay(l || 'Maybe another time.'); }
   else if (id === 'ask-news') {
-    const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault') && x.about !== 'you');
+    const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heardIt(x) && !(x.about === p.id && x.kind !== 'fault') && x.about !== 'you');
     if (n) { playerHeard(n.id, p.id); chatSay(pick(n.lines, 620)); } else chatSay(pick(['Nothing new, really.', 'Quiet week. I\'ll let you know.', 'Not that I\'ve heard.'], 621));
     if (!r.known.includes('news')) r.known.push('news');
   } else if (id === 'ask-work' || id === 'ask-home') {
