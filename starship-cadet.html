@@ -15693,6 +15693,23 @@ function momentShow(id) {
     onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); } };
   return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t });
 }
+// favours that matter (0.39.6, B4): a moment's practical reply with `favour: <id>` starts one of these on section 20's
+// favour types (the lead's ruling: no new jobs), accepted at once (you offered), in your Jobs, handed back on their
+// card ("Done: here you go"). Any other favour id, or one done in the scene itself (holt.invite), is just a flag.
+// STORY_FAVOURS[id](p) -> the favourPost argument, or null
+const storyPlace = (type, deck) => { const S = schedData(); for (const pl of S.byId.values()) if (pl.type === type && (deck === undefined || pl.deck === deck)) return pl; return null; };
+const STORY_FAVOURS = {
+  brennanSage: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Sage from the garden for ' + shortName(p) + ' (Deck 3)', bring: 'a bunch of sage', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'pickup' }] }; },
+  pellPractice: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Help ' + shortName(p) + ' practise for his certification (Deck ' + pl.deck + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'pickup' }] }; },
+  liftBrakes: p => p.work && p.work.place ? { from: p.id, title: 'Check the lift brakes with ' + shortName(p), kind: 'lamp', where: p.work.place, deck: p.work.deck, parts: ['lamp'] } : null,
+};
+function storyFavour(p, id) {
+  const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
+  let post = null; try { post = mk(p); } catch (e) { post = null; } if (!post) return false;
+  const fid = favourPost(post); if (!fid) return false;
+  if (typeof favourAccept === 'function') favourAccept(fid);
+  return true;
+}
 function momentDone(p, d, c) {                           // the reply was picked: the moment counts
   const t = Math.floor(shipNow()), day = Math.floor(t / 1440) + 1, st = storyM(p.id), S = SHIP.social.stories, v = voiceOf(p.id), r = relGet(p.id);
   if (d.tone === 'goodbye') return goodbyeDone(p, d, c);
@@ -15704,6 +15721,7 @@ function momentDone(p, d, c) {                           // the reply was picked
   const word = c.c && c.c.mem || d.mem;                 // the writers' memory word (moment.<arc>.<word>), else one made from the beat
   memAdd(p.id, 'moment.' + th + '.' + (word || d.beat + '.' + flavour), d.tone === 'resolution' ? { cls: 'core' } : {});
   if (typeof flagSet === 'function') for (const f of [d.flag, c.c && c.c.flag, c.c && c.c.favour]) if (f) flagSet(f);   // the beat's flag, the reply's, and a favour done in the scene itself, for later beats
+  if (c.c && c.c.favour) storyFavour(p, c.c.favour);   // a favour that matters, in your Jobs
   if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
   if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
