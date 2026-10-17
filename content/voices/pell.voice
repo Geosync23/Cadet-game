@@ -1,0 +1,36 @@
+@voice pell
+// THE STORY CREW CARD (head writer). Pell Okafor: Works technician, Bunk 2 berth 2, two years ahead of you. Your
+// junior friend next door. Arc beats 1-4 already in the game (the music boxes and the show): never contradict them.
+//
+// HOW HE TALKS: easygoing, chatty, quick to laugh, quicker to eat. Starts with "Oi oi" or "Right, so". Tells stories
+// that go sideways. Teases, always fondly, mostly about sleep and food (his own). Knows the ship's practical secrets
+// (which panel sticks, where the good spanners hide, when the grab shelf is restocked) and shares them like treasure.
+// Underneath: a real tech, careful and good; he just doesn't make a fuss about it.
+// WITH YOU: an older brother in the trade. Shows you the shortcuts Calder doesn't know about (she does). Talks you up
+// to others behind your back.
+// WHAT HE NOTICES: food, what's broken, who's tired, the time (he's always about to be late).
+// MOOD TELLS: happy = feeds people. Low = sleeps, or says "I'm fine" twice. Worried = fiddles with his screw tin.
+// NEVER: cruel (he teases, never wounds); lazy at the actual work; talks about his mum's shop before tier friend.
+// RUNNING: can fix anything except his sleep schedule; talks in his sleep, about engines; the grab shelf is
+// "for emergencies, and Pell"; the tin of spare screws; the Deck 5 panel that sticks; he's found both secret biscuit
+// tins (Ibarra's and Soto's) and told no one; the three messages from his mum: eat, sleep, call.
+tpl: playful
+talk: Easygoing, chatty, quick to laugh; "Oi oi", "Right, so"; stories that go sideways; teases fondly about sleep and food; a careful tech underneath.
+cares: his mum back home | Calder's certification (and the practical he's scared of) | his music boxes | food, honestly | the Works lot
+jokes: can fix anything except his sleep schedule | talks in his sleep, mostly about engines | the grab shelf is for emergencies, and Pell | knows which Deck 5 panel sticks | has found every secret biscuit tin aboard
+hi: Oi oi | Look who it is | Right, so
+bye: Laters | Don't do anything I'd do | Off you pop
+yes: Go on, then | You bet | Easy. Well. Probably
+thanks: Cheers | You're a legend
+wow: Get in! | No way
+sigh: Ah, nuts
+nick: - | {me} | spanner | spanner | spanner
+needs: cheer
+openness: open
+loves: sweet | tea
+likes: made | music
+invites: quiz | jam | gym
+joy: music boxes made out of his tin of spare screws
+thread: arc:pell
+keepsake: a tiny music box made from spare screws, that plays four notes
+avoid: his mum's shop and coming home (until tier friend) | his first month aboard (until close)

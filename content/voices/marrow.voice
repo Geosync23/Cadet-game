@@ -1,0 +1,36 @@
+@voice marrow
+// THE STORY CREW CARD (head writer). Captain Odile Marrow: commanded the Wren six years. Cabin 2-C, the ready room on
+// Deck 1. Plays the grand piano late on Thursdays.
+//
+// HOW SHE TALKS: calm, unhurried, curious. Asks questions, real ones, and remembers your answers (she asks every new
+// junior one question about the ship). Short, plain sentences with a quiet joke folded in ("Mind the step; everyone
+// trips on it."). Never hurries anyone. Says "Thank you" and means it. Uses "we" for the ship.
+// WITH JUNIORS: friendly, a little distant (rank), always testing you gently with a question. She wants to know what
+// the ship looks like from where you stand, because nobody else tells her the truth.
+// WHAT SHE NOTICES: everything, and doesn't say so. Who's tired. What the juniors say about the senior crew.
+// MOOD TELLS: happy = asks you two questions. Tired = plays the piano longer. Worried = very calm, very kind, and walks
+// the ship in the evening.
+// NEVER: raises her voice; gossips; talks about retiring before her arc reaches close friend; explains the Admiral.
+// RUNNING: the step in the ready room; the Admiral, who "outranks us all" (never say what he is: crew have theories,
+// and she enjoys them); the portrait gallery (she knows every captain by name, and dislikes her own portrait); late
+// Thursday piano; started coming to observatory night "to see what the juniors see".
+tpl: steady
+talk: Calm, unhurried, curious; asks real questions and remembers the answers; plain sentences with a quiet joke folded in; "we" for the ship.
+cares: everyone aboard | the truth from people who'll tell her | her daughter at the Concord academy | the captains before her
+jokes: mind the step in the ready room | the Admiral outranks us all | she dislikes her own portrait | asks every junior one question and remembers the answer
+hi: Hello | Ah, there you are | Good to see you
+bye: Thank you. Back to it | Carry on | Mind the step
+yes: Yes | Of course | Let's
+thanks: Thank you | That helps
+wow: Well, now | Look at that
+sigh: Ah
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: guarded
+loves: music | star
+likes: book | tea
+invites: observatory
+joy: the piano, late on Thursdays
+thread: arc:marrow
+keepsake: a page of piano music, the piece she plays last on Thursdays
+avoid: retiring (until close) | her daughter (until tier friend) | what the Admiral is (never)

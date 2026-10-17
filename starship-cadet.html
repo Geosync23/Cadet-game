@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.0
+   STARSHIP CADET: CSV Wren                           build 0.48.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.0';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12956,21 +12956,149 @@ const VOICE_TEMPLATES = {
   },
 };
 const VOICE = {
-  "torres-zeke": {
-    "avoid": ["his father (until his arc opens)"],
-    "cares": ["the drive coils", "knitting scarves", "being ready for more responsibility"],
+  "brennan": {
+    "avoid": ["the fire (until beat brennan.3)", "criticising another cook", "anyone going hungry, ever"],
+    "cares": ["everyone being fed", "her galley's order", "the cold store staying cold", "her book of favourite dishes", "the juniors"],
+    "invites": ["tasting", "roast"],
+    "jokes": ["furious whenever the cold store runs warm", "called the Captain \"love\" once, and will never live it down", "the book of everyone's favourite dish", "Nandakumar's chillies"],
+    "joy": "the moment a pan tells her it's done",
+    "keepsake": "a page from her book of favourite dishes, with yours on it",
+    "likes": ["tea", "card"],
+    "loves": ["plant", "garden"],
+    "needs": "share",
+    "openness": "open",
+    "talk": "Warm, quick and in charge; \"love\"; asks if you've eaten first; fierce short orders in her kitchen, soft and nosy out of it; talks about pans as if they talk back.",
+    "thread": "arc:brennan",
+    "tpl": "warm",
+    "words": {"hi": ["Hello, love", "There you are", "Hiya"], "bye": ["Off you go, love", "Eat something", "Take care"], "yes": ["Course, love", "Happily", "Leave it with me"], "thanks": ["Bless you", "Thank you, love"], "wow": ["Oh, lovely", "Look at that"], "sigh": ["Oh, love"], "nick": ["love", "love", "{me}", "love", "love"]},
+  },
+  "calder": {
+    "avoid": ["her first chief (until beat calder.3)", "praising anyone in front of others", "other people's birthdays (she genuinely doesn't know them)"],
+    "cares": ["the invisible ship (air, water, heat)", "finishing what you start", "honesty about mistakes", "the techs she's certified"],
+    "invites": ["works-tea"],
+    "jokes": ["\"It's a mug.\"", "knows every serial number and nobody's birthday", "the toolbox she never uses and never lends", "there's always one more job on the board"],
+    "joy": "a machine running so well nobody notices it",
+    "keepsake": "a spare key to the toolbox, on a loop of Works orange wire",
+    "likes": ["tea"],
+    "loves": ["made", "book"],
+    "needs": "practical",
+    "openness": "guarded",
+    "talk": "Few words, all exact; numbers not adjectives; statements; quieter when annoyed; humour so dry it lands a beat late; praise rare and plain.",
+    "thread": "arc:calder",
+    "tpl": "brisk",
+    "words": {"hi": ["Cadet", "Good", "Right"], "bye": ["Back to it", "Carry on", "Board's there"], "yes": ["Fine", "Do it", "Agreed"], "thanks": ["Noted. Thank you", "Good work"], "wow": ["Hm. Not bad"], "sigh": ["Right"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+  },
+  "holt": {
+    "avoid": ["the bad day with the Veyli (until beat holt.3)", "apologising plainly", "anything against the Captain"],
+    "cares": ["everyone aboard being safe", "the Watch and its juniors", "doors, airlocks, procedure", "the Envoy (closely)"],
+    "invites": ["patrol"],
+    "jokes": ["walks every deck before breakfast, the long way", "only Mensah can make him laugh", "\"Adequate.\" is high praise", "the gym after shift, which he won't discuss"],
+    "joy": "a quiet deck at five in the morning, every door where it should be",
+    "keepsake": "his old border-patrol whistle, which he says you'll never need",
+    "likes": ["tea"],
+    "loves": ["book", "sweet"],
+    "needs": "practical",
+    "openness": "guarded",
+    "talk": "Gruff, few words, statements that sound like orders; \"Hm.\"; tests you with questions; dry by accident; formal when uncomfortable.",
+    "thread": "arc:holt",
+    "tpl": "gruff",
+    "words": {"hi": ["Hm. You", "Cadet", "There you are"], "bye": ["Off with you", "Right", "As you were"], "yes": ["Fine", "If I must", "Hm. Yes"], "thanks": ["Hm. Thanks", "Adequate"], "wow": ["Huh"], "sigh": ["Typical"], "nick": [null, null, null, "{me}", "kid"]},
+  },
+  "kovac-zainab": {
+    "avoid": ["the lift (until beat kovac.2)", "being made a fuss of in public"],
+    "cares": ["doing a job exactly right", "her knitting", "the garden", "not being noticed (and being noticed, a little)"],
+    "invites": ["garden"],
+    "jokes": ["ten minutes flat for a scrubber (it's nine and a half)", "her scarves are perfect, Torres's are not", "\"I'll take the ladder. Exercise.\"", "re-sorts the spanner wall when nobody's looking"],
+    "joy": "a scrubber put back together so neatly it hums",
+    "keepsake": "a scarf, perfect, in Works orange and garden green",
+    "likes": ["tea", "garden"],
+    "loves": ["plant", "made"],
+    "needs": "listen",
+    "openness": "guarded",
+    "talk": "Shy, careful, exact; short sentences, a word then a pause; says sorry for nothing; fluent and even bossy about scrubbers; quietly funny once she trusts you.",
+    "thread": "arc:kovac",
+    "tpl": "shy",
+    "words": {"hi": ["Oh. Hi", "Um, hello", "Hi"], "bye": ["Bye, then", "See you", "Mind the seals"], "yes": ["Okay", "If you like", "Yes. Yes, fine"], "thanks": ["Thanks. Really", "Oh. Thank you"], "wow": ["Oh, wow", "That's very tidy"], "sigh": ["Oh"], "nick": [null, "{me}", "{me}", "{me}", "{me}"]},
+  },
+  "marrow": {
+    "avoid": ["retiring (until close)", "her daughter (until tier friend)", "what the Admiral is (never)"],
+    "cares": ["everyone aboard", "the truth from people who'll tell her", "her daughter at the Concord academy", "the captains before her"],
     "invites": ["observatory"],
-    "jokes": ["the coils have moods, and coil three sulks", "he knits a scarf for anyone who stands still long enough"],
-    "joy": "knitting scarves",
-    "keepsake": "a half-knitted scarf in Works orange",
-    "likes": ["tea", "engines"],
-    "loves": ["knitting", "music"],
+    "jokes": ["mind the step in the ready room", "the Admiral outranks us all", "she dislikes her own portrait", "asks every junior one question and remembers the answer"],
+    "joy": "the piano, late on Thursdays",
+    "keepsake": "a page of piano music, the piece she plays last on Thursdays",
+    "likes": ["book", "tea"],
+    "loves": ["music", "star"],
+    "needs": "share",
+    "openness": "guarded",
+    "talk": "Calm, unhurried, curious; asks real questions and remembers the answers; plain sentences with a quiet joke folded in; \"we\" for the ship.",
+    "thread": "arc:marrow",
+    "tpl": "steady",
+    "words": {"hi": ["Hello", "Ah, there you are", "Good to see you"], "bye": ["Thank you. Back to it", "Carry on", "Mind the step"], "yes": ["Yes", "Of course", "Let's"], "thanks": ["Thank you", "That helps"], "wow": ["Well, now", "Look at that"], "sigh": ["Ah"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+  },
+  "pell": {
+    "avoid": ["his mum's shop and coming home (until tier friend)", "his first month aboard (until close)"],
+    "cares": ["his mum back home", "Calder's certification (and the practical he's scared of)", "his music boxes", "food, honestly", "the Works lot"],
+    "invites": ["quiz", "jam", "gym"],
+    "jokes": ["can fix anything except his sleep schedule", "talks in his sleep, mostly about engines", "the grab shelf is for emergencies, and Pell", "knows which Deck 5 panel sticks", "has found every secret biscuit tin aboard"],
+    "joy": "music boxes made out of his tin of spare screws",
+    "keepsake": "a tiny music box made from spare screws, that plays four notes",
+    "likes": ["made", "music"],
+    "loves": ["sweet", "tea"],
+    "needs": "cheer",
+    "openness": "open",
+    "talk": "Easygoing, chatty, quick to laugh; \"Oi oi\", \"Right, so\"; stories that go sideways; teases fondly about sleep and food; a careful tech underneath.",
+    "thread": "arc:pell",
+    "tpl": "playful",
+    "words": {"hi": ["Oi oi", "Look who it is", "Right, so"], "bye": ["Laters", "Don't do anything I'd do", "Off you pop"], "yes": ["Go on, then", "You bet", "Easy. Well. Probably"], "thanks": ["Cheers", "You're a legend"], "wow": ["Get in!", "No way"], "sigh": ["Ah, nuts"], "nick": [null, "{me}", "spanner", "spanner", "spanner"]},
+  },
+  "rina": {
+    "avoid": ["the qualifying exam (until beat rina.5)", "her hard year at home (until close)", "saying she's scared, straight out"],
+    "cares": ["her gran", "the infirmary running right", "Tiles, and the count", "being a ship's doctor one day", "her sister (though she'll argue)"],
+    "invites": ["tiles", "observatory"],
+    "jokes": ["undefeated at Tiles, and keeps count", "her gran cheats at Tiles, shamelessly", "journals as a pillow", "\"Drink some water. That's not a suggestion.\""],
+    "joy": "Tiles, and winning at it",
+    "keepsake": "a Tiles piece, the one her gran always cheated with",
+    "likes": ["tea", "book"],
+    "loves": ["game", "sweet"],
+    "needs": "cheer",
+    "openness": "guarded",
+    "talk": "Dry, quick, deadpan; short sentences; teases the people she likes; never says how she feels straight out; gives health advice as orders; keeps count.",
+    "thread": "arc:rina",
+    "tpl": "dry",
+    "words": {"hi": ["Oh, it's you", "Hey", "You again"], "bye": ["Off you go", "Don't break anything", "Drink some water"], "yes": ["Fine", "Go on then", "If you insist"], "thanks": ["Ta", "You're all right, you"], "wow": ["Well, look at that"], "sigh": ["Honestly"], "nick": [null, "{me}", "{me}", "trouble", "trouble"]},
+  },
+  "tomas": {
+    "avoid": ["his failed Watch exam (until tier friend)", "why he really left home (until close)"],
+    "cares": ["his little brother back home", "the stars, and somewhere new", "finding his place aboard", "not letting Holt down", "you settling in"],
+    "invites": ["observatory", "film", "running"],
+    "jokes": ["takes the long way round Deck 2", "the Watch office has the best view of the lift, and so of everyone", "Vance talked him onto the treadmill", "gives directions like a veteran, a week ahead of you, slightly wrong"],
+    "joy": "the stars from the observatory, and naming the ones he's never been to",
+    "keepsake": "a corner of his star map, with home marked in pencil",
+    "likes": ["sweet", "book"],
+    "loves": ["star", "card"],
     "needs": "listen",
     "openness": "open",
-    "talk": "Quick and warm; talks about the drive coils as if they were moody pets; asks questions back; a little too keen to prove himself.",
-    "thread": "ready",
+    "talk": "Earnest, curious, a little lost and honest about it; lots of questions, some to himself; \"I think\", \"sort of\"; delighted by the stars; thanks people too much.",
+    "thread": "arc:tomas",
     "tpl": "earnest",
-    "words": {"hi": ["Hey", "Hello there", "Oh, hi"], "bye": ["Mind the coils", "Off you go, then", "See you below decks"], "yes": ["Course", "Happy to", "Leave it with me"], "thanks": ["Cheers", "You're a star"], "wow": ["Look at that", "Now that's tidy"], "sigh": ["Well, there it is"], "nick": [null, null, "{me}", "spanner", "spanner"]},
+    "words": {"hi": ["Oh, hi!", "Hey, you", "Hello"], "bye": ["See you back at the bunk", "Don't get lost", "Good luck out there"], "yes": ["Yes! I mean, yes", "Definitely", "Course"], "thanks": ["Thanks, really", "You're brilliant"], "wow": ["Oh, wow", "Look at that"], "sigh": ["Oh, no"], "nick": ["{me}", "{me}", "{me}", "{me}", "bunkmate"]},
+  },
+  "torres-zeke": {
+    "avoid": ["his father (until beat torres.4)", "being passed over (until beat torres.2)", "mocking anyone's work"],
+    "cares": ["the drive coils doing their best", "doing a job properly", "people who ask questions", "the scarf he's knitting you", "being ready for more"],
+    "invites": ["jam", "observatory"],
+    "jokes": ["coil three sulks, and Reyes says it's just shy", "your scarf grows every week", "he knows every song in the record cabinet (so do four other people, all wrongly)", "breakfast is for people without coils"],
+    "joy": "knitting scarves, badly, with great love",
+    "keepsake": "the finished scarf in Works orange, far too long",
+    "likes": ["tea", "sweet"],
+    "loves": ["music", "made"],
+    "needs": "listen",
+    "openness": "open",
+    "talk": "Quick, warm, tumbling when excited; explains machines like moody people; asks questions back; \"Right, onward\"; never talks down.",
+    "thread": "arc:torres",
+    "tpl": "earnest",
+    "words": {"hi": ["Hey", "There you are", "Oh, hello"], "bye": ["Right, onward", "Mind the coils", "Off you go, then"], "yes": ["Course", "Happy to", "Leave it with me"], "thanks": ["Cheers", "You're a star"], "wow": ["Look at that", "Now that's tidy"], "sigh": ["Well, there it is"], "nick": ["{me}", "{me}", "{me}", "shipmate", "shipmate"]},
     "lines": {
       "feel": [
         {"text": "Long one. Coil three sulked all shift.", "id": "wl0wxz", "mood": "low"},
@@ -12990,6 +13118,22 @@ const VOICE = {
         {"text": "Breakfast? Never. I'd rather have ten more minutes with the coils.", "id": "kyv4id", "tier": [1, 4]},
       ],
     },
+  },
+  "vance": {
+    "avoid": ["the two messages from home (until beat vance.3)", "the poems being his (until close)", "anything late"],
+    "cares": ["the ship run correctly", "the juniors he's recommended", "the leaderboard", "the Captain's trust"],
+    "invites": ["running"],
+    "jokes": ["the rowing leaderboard he taped up himself, and now the treadmill one", "keeps the waiting list for the good records", "leaves the bridge on time now, and hates it", "\"Gull\", the newsletter's worst poet, is a mystery to everyone"],
+    "joy": "a clean leaderboard with his name at the top",
+    "keepsake": "his academy rowing pin, which he says he's \"lending\" you",
+    "likes": ["music", "tea"],
+    "loves": ["book", "sweet"],
+    "needs": "practical",
+    "openness": "guarded",
+    "talk": "Precise and complete; lists in threes; cites regulations by number; formal, then a flash of dry humour he pretends didn't happen; \"Carry on.\"",
+    "thread": "arc:vance",
+    "tpl": "brisk",
+    "words": {"hi": ["Cadet", "Good", "As you were"], "bye": ["Carry on", "Dismissed. Kindly", "As you were"], "yes": ["Agreed", "Correct", "Very well"], "thanks": ["Noted. Thank you", "Well done"], "wow": ["Impressive", "Hm. Correct"], "sigh": ["Regrettable"], "nick": ["Cadet", "Cadet", "Cadet {me}", "{me}", "{me}"]},
   },
 };
 const LINES = {
@@ -13127,6 +13271,8 @@ const CONVOS = [
 // ---- END LINES ----
 // ---- BEGIN MEETINGS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
 const MEETINGS_BAKED = {
+  "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your locker, and handed you your device.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. Home. Top bunk at the back is yours.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Your locker's under it. Bag in there. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "torres-zeke", "text": "Tomas will show you the washroom in the morning. Won't you, Tomas."}, {"who": "tomas", "text": "Yes! It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours too. Your device. Mail, your schedule, maps, the lot.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "It'll want to say hello. They always do. Let it."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
+  "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to eight in the Works bay. Your first job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to eight, the Works bay. Not eight. Ten to."}, {"who": "calder", "text": "Tuesday, your first job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
 };
 // ---- END MEETINGS ----
 // ---- BEGIN TRADITIONS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----

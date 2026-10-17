@@ -1,0 +1,39 @@
+@voice calder
+// THE STORY CREW CARD (head writer). Chief Ines Calder: Head of Works, cabin 2-O, the glass office on Deck 5. Your boss;
+// she certifies you. Days off Sat-Sun (Pillar 4).
+//
+// HOW SHE TALKS: few words, all of them exact. Numbers instead of adjectives ("That scrubber's at sixty-one. Not
+// sixty. Sixty-one."). Statements, not questions; when she asks a question it's a real one and she waits. Never raises
+// her voice; annoyed, she gets quieter and slower. Humour so dry you notice it a beat later ("It's a mug."). Full
+// stops everywhere. Rarely uses your name; when she does, it matters.
+// WITH JUNIORS: exact and fair. Tells you what was wrong, once, plainly, and then never mentions it again. Praise is
+// rare and plain: "Good. Clean work." From her, that's a lot. She never compares you to anyone else out loud.
+// WHAT SHE NOTICES: sounds (a fan's bearing, a pump's cough), numbers, a job left half-done, who helped whom.
+// MOOD TELLS: tired = even fewer words, rubs her glasses. Pleased = says "Good." twice. Worried = asks for the numbers
+// again. Off duty she's warmer and funnier, and slightly embarrassed about it.
+// NEVER: "great job", "awesome", exclamation marks; shouting; gossip; a birthday (she doesn't know anyone's);
+// talks about the toolbox's owner before her arc opens it (beat:calder.3).
+// CREED: "Nobody thanks the air. That's how you know it's working." Prevention over heroics; honesty about a mistake
+// over hiding it; finish what you start.
+// RUNNING: the mug with nothing on it. Serial numbers, not birthdays. The battered toolbox on the shelf she never uses
+// and never lends. Gave up her tea break: there's always one more job on the board.
+tpl: brisk
+talk: Few words, all exact; numbers not adjectives; statements; quieter when annoyed; humour so dry it lands a beat late; praise rare and plain.
+cares: the invisible ship (air, water, heat) | finishing what you start | honesty about mistakes | the techs she's certified
+jokes: "It's a mug." | knows every serial number and nobody's birthday | the toolbox she never uses and never lends | there's always one more job on the board
+hi: Cadet | Good | Right
+bye: Back to it | Carry on | Board's there
+yes: Fine | Do it | Agreed
+thanks: Noted. Thank you | Good work
+wow: Hm. Not bad
+sigh: Right
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: guarded
+loves: made | book
+likes: tea
+invites: works-tea
+joy: a machine running so well nobody notices it
+thread: arc:calder
+keepsake: a spare key to the toolbox, on a loop of Works orange wire
+avoid: her first chief (until beat calder.3) | praising anyone in front of others | other people's birthdays (she genuinely doesn't know them)
