@@ -9,6 +9,19 @@ Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by sessio
   - 0.34.37: `tradOn(id, t)` for social B's calls home.
   - 0.34.38: reviewer 2's LOW notes: TALLY_MEMO cleared on a flag change; guestStay guarded.
   - 0.34.39 (b13bf54): merged ship-integration f28e48e (0.60.1); the one-week-aboard tea moved to 17:15 (Zeke works until 17:00); `evEvening` (an evening's tradition starts from 17:00 and runs past 18:00); events_check allows a host 5 minutes early (section 14's rule). Waiting: the seasons designer to take the .trad change. 0.34.40: Tiles night's tally dropped (weekly c19adf9; results are section 23's).
+  - 0.34.40-0.34.41: weekly c19adf9 (no Tiles tally) and seasons 976a8d4 collected.
+  - 0.34.42 (0c40589): upcomingTraditions gives `deck` and `room` (device engineer 3, session_01SskqNx45iEGyQq2W9Fjg5Y, schedule heads-ups).
+  - 0.34.43 (234a454): crew rotation traditions (farewell supper, crew welcome tea): `when.rotation`, `evRotation`, the words friends/dept/bunk-of-honoree, events_check 9d. All the seasons designer's traditions are now baked (23).
+  - 0.34.44-0.34.46 (latest 0.34.46): an occasion gives no toast when the device is in (it lists SHIP.occasions itself; apptAdd exists nowhere). A cake at the crew welcome tea. The seasons designer's 0e757b1 and 92bb1c9 (plural names, longTables at the farewell supper, a cake line).
+  - 0.34.47-0.34.48 (latest 4631a97, reviewer 2 passed up to 774eeb7): {first} per speaker with several honorees; the long-table seats (`where: 3 pool @long-table`, the deck architect's a71ac47) at the Sunday table, harvest supper and farewell supper.
+  - 0.34.49 (3d06bcb): the long-table seats are overflow: where: lines go mess, then `3 room Mess hall: @long-table`, then `3 room Promenade: @long-table`. The lead accepted it; it's with reviewer 2b.
+- **Reviewer now:** reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP (reviewer 2 is closed).
+- **Designers:** the weekly (session_01Wr9Jcc4nRUHHWdfJDUwb3X) and seasons designers are inactive. Their branches lack my later edits to their files: sunday-table, one-week-aboard, farewell-supper, crew-welcome-tea and harvest-supper. A successor merges claude/ship-events first.
+- **Superseded below:** the seasons designer and the galley are answered. Night-shift honorees are fixed in sim engineer 4's (session_01EJUGywZv9BpcUezjXES9AC) 0.26.31, not yet combined: re-run events_check 9d after the next combine. Still waiting: the deck architect on extra long-table seats (with sim 4) and on longTables for rotation Saturdays.
+- **Waiting (0.34.43):**
+  - The seasons designer: merge 234a454; the farewell Mail's "{names} leaves" with 2-3 leavers; decor; the jam dropped on welcome-tea Fridays.
+  - The galley: the supper's favourite dish.
+  - The lead: successors for the sim engineer (night-shift honorees get no gatherings) and the dialogue engineer (heads-up only); both sessions are inactive.
 - **People:** social B2 = session_014A3w2gK8FBNWs66YC3LfME (owns the calls home; offered tradOn plus start/end hooks, waiting for their shape). Head writer 2 = session_01HNrh3xCtczeZM5NVFrE6pa (told about the invite).
 - **Open:**
   - EV_MAILBOX's cap is 40, not 20 as its comment says. events_check part 3 passes with it (days 2-8). Fix the comment in the next build; raise the cap if part 3 ever says "no Mail for".

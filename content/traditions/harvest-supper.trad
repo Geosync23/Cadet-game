@@ -12,6 +12,8 @@ min: 30
 prio: 1
 jitter: 15
 where: 3 room Mess hall: mess-seat
+where: 3 room Mess hall: @long-table
+where: 3 room Promenade: @long-table
 where: 3 pool mess-seat
 hold: none
 who: cruz-tove always, brennan always, garden always, gardener 95%, garden-lover 90%, everyone 70%
