@@ -38,3 +38,15 @@
 == joy
 ? tier>=acquaintance
 - The face people make at a warm scone. That's why I bake. Well, that and the scone.
+
+// ---- Day 5, Friday: the new hand's mug at Works tea (week 1; facts.md section 9). Halloran gives it. After that,
+// flag:mug (onboarding sets it) means your mug hangs on the tea corner rack.
+== week1
+? week1:true weekday:thu
+- Works tea tomorrow at half ten. Don't be late. There's a reason. I can't say.   #funny
+? week1:true weekday:fri
+- Here. Your mug. Your name on it and everything. Welcome to Works, properly.   #warm
+- Every new hand gets a mug on their first Friday. It's the law. Well, it's me.   #funny
+- Hook's the one on the end of the rack. Yours from now on. Nobody else touches it.
+? flag:mug
+- Your mug's still on the rack. I gave it a rinse. Don't tell anyone I'm soft.   #funny

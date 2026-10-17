@@ -187,3 +187,33 @@
 - This way! Over here.
 - Over here, {me}. She's bigger than she looks.
 - I'll wait. No rush. Well, a bit of rush.   #funny
+
+// ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
+// claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
+// The job is a real Tier 1 fault, so it stays generic: "the housing", "the part".
+== week1
+// step: take (you take the job at the board)
+? flag:walk.job.take
+- That one's ours. It's on your device now, under Jobs.
+- Follow the arrow. I'm right behind you. Promise.
+// step: fetch (main storage)
+? flag:walk.job.fetch
+- Storage. Find the part number on the card, then the shelf.
+- Check the number twice. Shelves lie. Cards don't.   #funny
+// step: make (the machine shop)
+? flag:walk.job.make
+- We make this bit. Slow and steady. Mind your fingers.
+- Let the machine do the work. You just keep it honest.
+// step: panel (at the machine: inspect and repair)
+? flag:walk.job.panel
+- Panel off. Have a look first. What's she telling you?
+- Old part out, new one in. Hold it till it clicks.
+- Hear that click? That's the sound of doing it properly.
+// step: done (the repair is finished)
+? flag:walk.job.done
+- Listen. Nothing. That's the sound of it working.
+- Not done till it's turned in, though. Back to the board.
+// step: turnin (at the board)
+? flag:walk.job.turnin
+- Turned in. Your first one in the Record. Right, onward.
+- Lunch, then you lead the next one. I'll just follow.   #warm
