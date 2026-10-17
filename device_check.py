@@ -207,8 +207,9 @@ def run(path):
             pl = g.ev("""(() => { const own = typeof mailPlay === 'function' && typeof homeFolks === 'function', got = [], ev0 = __ev.slice(), wasOpen = DEV.open;
               const done = new Set(); if (!own) { window.homeFolks = () => ['Gran', 'Mum']; window.mailPlayable = m => m.from === 'Gran' && m.subject === 'A recorded message' && !done.has(m.id);
                 window.mailPlay = m => { got.push(m.id); if (got.length > 1) return false; done.add(m.id); return true; }; }
+              const data = own && homeFolks().includes('Gran'), H0 = own && SHIP.social.stories && SHIP.social.stories.home ? JSON.stringify(SHIP.social.stories.home) : null;
+              if (data) homeC('gran').msg = { day: SHIP.time.day, i: 0, done: false };   // with 20c's real mailPlayable: a real recorded message from Gran waiting (social B2)
               const btns = () => [...document.querySelectorAll('#devBody button')].map(b => b.textContent);
-              let gmsg; if (own && typeof homeC === 'function' && homeMailOf({ from: 'Gran', subject: 'A recorded message' })) { const gc = homeC(homeMailOf({ from: 'Gran', subject: 'A recorded message' })); gmsg = [gc, gc.msg]; gc.msg = { day: SHIP.time.day, i: 0, done: false }; }   // the real home code: Gran has a recorded message waiting (0.60.3)
               mailSend({ from: 'Gran', subject: 'A recorded message', body: 'Hello, love.', quiet: true }); const m = SHIP.mail[0];
               mailSend({ from: 'Galley', subject: 'Plain', body: 'No play.', quiet: true }); const p = SHIP.mail[0];
               deviceShow('mail'); const t = document.getElementById('devBody').textContent; const out = { order: t.indexOf('From home') >= 0 && t.indexOf('From home') < t.indexOf('A recorded message') && t.indexOf('A recorded message') < t.indexOf('Ship mail') && t.indexOf('Ship mail') < t.indexOf('Plain') };
@@ -218,9 +219,10 @@ def run(path):
                 deviceShow('mail'); out.gone = !btns().includes('Play');
                 done.clear(); deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.stays = DEV.open; out.got = got.slice();
                 for (const n of ['homeFolks', 'mailPlayable', 'mailPlay']) delete window[n]; deviceRefresh(); const t2 = document.getElementById('devBody').textContent; out.none = !btns().includes('Play') && !t2.includes('From home'); }
-              deviceDo({ app: 'mail', do: 'read', arg: m.id }); SHIP.mail = SHIP.mail.filter(x => x !== m && x !== p); if (gmsg) gmsg[0].msg = gmsg[1]; if (!wasOpen) deviceClose();
-              __ev.length = 0; __ev.push(...ev0); out.own = own; return out; })()   // the open / close count is checked later""")
-            check(all(pl.get(k) for k in ['order', 'plain', 'play']) and (pl['own'] or (all(pl.get(k) for k in ['closed', 'gone', 'stays', 'none']) and len(pl.get('got', [])) == 2)), f'Mail: From home, Play on a recorded message: {pl}')
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); SHIP.mail = SHIP.mail.filter(x => x !== m && x !== p); if (!wasOpen) deviceClose();
+              if (own) { if (H0) SHIP.social.stories.home = JSON.parse(H0); else if (SHIP.social.stories) delete SHIP.social.stories.home; }   // the home state as it was
+              __ev.length = 0; __ev.push(...ev0); out.own = own; out.data = data; return out; })()   // the open / close count is checked later""")
+            check((pl['plain'] if pl['own'] and not pl['data'] else all(pl.get(k) for k in ['order', 'plain', 'play'])) and (pl['own'] or (all(pl.get(k) for k in ['closed', 'gone', 'stays', 'none']) and len(pl.get('got', [])) == 2)), f'Mail: From home, Play on a recorded message: {pl}')
             # the servery queue line says no made-up wait (0.35.27, the user: no invented numbers)
             check('In the queue for the servery: about' not in open(sys.argv[1]).read(), 'the servery queue line has no guessed wait')
             # tips: once each, saved, off in Settings; the card closes on a tap
