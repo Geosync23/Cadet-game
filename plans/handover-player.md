@@ -2,6 +2,16 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
+## Update: builds 0.28.29 to 0.28.32 (player engineer 3's last; written 2026-10-17)
+
+Read this first. Lead: session_01KPJMYjXAPkNUcrQ8VRkhLE. Next build **0.28.33**. Chain of command: the user -> the lead -> everyone; never contact the user.
+- **0.28.29, lie down** (the user's "I can't lay down in bed"): tap your own bunk -> `bunkLie` (activity `lie`, the 'lie' pose at the bed place's height); rest: no energy drain + `LIE_GAIN` 0.05/min; from 20:00 `bunkSleep` calls section 13's `offerSleep` once lying (fade, 06:00) and the SIM_ADVANCE hook keeps a `lie` going, so you wake in the bunk. `bunkTap` no longer needs section 20.
+- **0.28.30:** no queue count/countdown (`actProgress` null for 'queue'; toast "You join the queue."); social B2's `homeBooth()` hook at the end of `actBegin` for 'call'; Mail's optional `play` field (device engineer 3 asked; social B2 then said not needed; kept, inert).
+- **0.28.31, the food line part 1:** served -> `SHIP.player.tray` (dish, not saved), control back, `player.holding` 'tray'; `actStart` turns 'eat'/'sit' at a mess-seat into eating the tray; while queueing a tap/drag shows `queueAsk` ("Leave the queue?" Leave/Stay; `queueLeave` calls `lineLeave('player')` if present). **Open: part 2, moving with the real line** (sim engineer 3, session_01517opwS4UAxYZKNwJytaEK, builds section 10's line; I proposed `lineJoin('player')` -> {x,z,face}, `lineSpot('player')` each frame -> {x,z,face,front}, `lineLeave('player')`; no reply yet). The 'queue' activity's stand-in should glide to `lineSpot` (walking pose) and end when `front` (or galleyTurn); the lead agreed the shape.
+- **0.28.32, the needs strip:** see the DEV_NOTES row. Device engineer 3 (session_01SskqNx45iEGyQq2W9Fjg5Y) matches the Needs page using `NEED_COL`, `NEED_AMBER`, `NEED_ICON`; offered them a short effects form (`needEffects(n).short`) if they want one.
+- **Also:** 0.28.28's dinner seat clash (Calder heads for 3-mess-10) waits on the sim engineer.
+- **Gotchas:** cadet_test exits 0 even with DIFFERENCES: grep its log for ALL IDENTICAL. `node --check` on the extracted main script catches a duplicate `const` in seconds (a page that never loads shows only as a 60 s wait_for_function timeout). Needs screenshots: `needs_shots2.py`-style (load ?nosave, step frames by `window.__step`).
+
 ## Update: builds 0.28.26 to 0.28.27 (player engineer 3; written 2026-10-17 at 59df90b)
 
 Read this first. **Lead is now session_01KPJMYjXAPkNUcrQ8VRkhLE** (since ~04:35; before it session_01PJtmxWgAPLebXSZKP6ZRpG, then session_01PxXKwc5mkC7tV5MPi3p7PP). **0.28.28** (3713f20): you sit at the arrival dinner (`dinnerTick`, `playerSitNear`; section 21's `introSeat('you')` = 3-mess-10 when free, else the nearest seat). Open: Calder's plan heads for 3-mess-10 on a merge with arrival 7abf466 (the sim engineer's seats). Next build **0.28.29**. Chain of command: the user -> the lead -> everyone; helpers never contact the user. Next build **0.28.28**.

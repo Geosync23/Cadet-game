@@ -9897,7 +9897,7 @@ function deviceLockLook() {
 // clock in floatsTick, like the notes (0.28.23).
 const RISE_SECS = 2.2;                                   // NEED_LOW (25) is the needs' own line, above
 const cssCol = h => '#' + col(h).convertLinearToSRGB().getHexString();
-const NEED_COL = { hunger: cssCol('#e8a25c'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc') };
+const NEED_COL = { hunger: cssCol('#f07f6e'), energy: cssCol('#e9d36b'), hygiene: cssCol('#6cc4e4'), fitness: cssCol('#79d08a'), social: cssCol('#c69be6'), bathroom: cssCol('#9bb7cc') };
 const NEED_AMBER = cssCol('#ff9a3c');
 const NEED_ICON = {                                       // 24-unit stroke icons: fork and knife, bolt, droplet, dumbbell, two people, door
   hunger: 'M7 3v7M5 3v4a2 2 0 0 0 4 0V3M7 10v11M17 3c-2 1-3 4-3 8h3v10', energy: 'M13 2 5 13h6l-1 9 8-12h-6z',
@@ -9917,7 +9917,7 @@ function needStrip() {
     + '#needStrip span,#needStrip u{display:none;text-decoration:none}'
     + '#needStrip.open{flex-direction:column;gap:5px}#needStrip.open .ns{flex-direction:row;width:auto;gap:7px}'
     + '#needStrip.open i{width:70px;margin:0}#needStrip.open span{display:block;width:62px;font-size:12px;color:var(--ink)}'
-    + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:auto;right:-6px;top:-1px}';
+    + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:100%;margin-left:6px;top:0}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'needStrip'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Your needs: tap for names and numbers');
   el.innerHTML = NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('');
