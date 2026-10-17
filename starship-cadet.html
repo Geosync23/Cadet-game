@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.42
+   STARSHIP CADET: CSV Wren                           build 0.36.43
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.42';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.43';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13970,7 +13970,7 @@ SAVE_EXTRA.push(s => { s.social = socSave(); });
 const relTierOf = pts => { let t = 0; while (t < 4 && pts >= REL_TIERS[t + 1]) t++; return t; };
 function relGet(id) {                                   // made on first meeting; strangers start a little warmer where your name is known (reputation)
   socInit(); if (SHIP.rel[id]) return SHIP.rel[id];
-  const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)], warm = p && REP_DEPTS_ALL.includes(p.dept) ? REP_WARM[repBand(p.dept)] : 0;
+  const p = SOC.idx.has(id) && SOC.crew[SOC.idx.get(id)], warm = p && SHIP.rep && REP_DEPTS_ALL.includes(p.dept) ? REP_WARM[repBand(p.dept)] : 0;   // only a standing you've earned
   return SHIP.rel[id] = { pts: warm, tier: 0, met: null, lastTalk: null, known: [] };
 }
 const relTier = id => (socInit(), SHIP.rel[id] ? SHIP.rel[id].tier : 0);
@@ -14025,7 +14025,8 @@ function affinityPlan(a, b, d) {
 //   socialFill(p, name, ctx) -> the words for a social placeholder ({me}, {nick}, {partner}, {friend}, {best}, {rival},
 //                        {mentor}, {mentee}, {boss}, {thing}, {trad}), or null when it can't be filled (skip the line)
 SHIP.mem = {}; SHIP.rep = null;
-const REP_START = { works: 20 }, REP_DEPTS = ['command', 'helm', 'comms', 'works', 'watch', 'survey', 'infirmary', 'galley', 'store'];
+const REP_START = {},                   // a new arrival has no reputation anywhere, your own Works included (the lead's call, 0.36.43)
+      REP_DEPTS = ['command', 'helm', 'comms', 'works', 'watch', 'survey', 'infirmary', 'galley', 'store'];
 const REP_BANDS = [[70, 'theirs'], [40, 'well'], [20, 'known'], [0, 'new']];
 const socId = x => x && x.id || x;
 function mem(id, key) {
@@ -14338,7 +14339,7 @@ function socCrewGift(h) {                                // once a ship day at 1
 // SHIP.rep = { dept: { <dept>: 0-100 }, ship: { work, kindness, spirit }: 0-100, cnt: { known-for counters }, wk: { <dept>: the
 // week its tradition last counted }, day: { <what>: the day it last counted }, streak (favours declined in a row),
 // bands: { <dept>: the band last seen }, notes: [{ day, from, text }] (the Record's), thanks: [<dept>] } (saved).
-// Each department starts at 10 (Works 20) and never drops below its floor: 5 for each close friend there (at most 25);
+// Each department starts at 10 (the lowest band, 'new'; Works too) and never drops below its floor: 5 for each close friend there (at most 25);
 // below that it climbs 1 a week. The ship standings start at 50 and each Sunday pull 10% back toward 50, so they follow
 // the last few weeks. Sources (repAdd): your repairs (the machine's department, repDeptOf: +3, +5 if it was failing;
 // Work +2 or +3), favours (+2 their department, Kindness +3), traditions you join (+1 a week to the host's department,
