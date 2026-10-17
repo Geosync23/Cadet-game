@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.46.5
+   STARSHIP CADET: CSV Wren                           build 0.46.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.46.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.46.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16709,15 +16709,24 @@ function tilesTalk(kind) {
 const tlName = (t, mine) => (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)];
 function tilesSay(text) { const G = TL_GAME; if (!G || !text) return; G.log.push(text); if (G.log.length > 3) G.log.shift(); }
 // start a game: opponentId (a crew id), where (a place id or null), mode 'full' | 'quick'
+// the opponent stays in their seat while you play (0.46.6): section 10's crewHold(p, placeId) (sim engineer 3) keeps a
+// walker at its place until the release it returns is called: when you press Done, walk off, start again or a new game
+function tilesUnhold(G) { if (G && G.hold) { const f = G.hold; G.hold = null; try { f(); } catch (e) { /* the walker's gone */ } } }
+function tilesHold(G, p) {
+  if (typeof crewHold !== 'function' || typeof DECK_CREW === 'undefined') return;
+  const a = DECK_CREW.find(x => x.p && x.p.id === p.id); if (a && a.goalId) G.hold = crewHold(p, a.goalId);
+}
 function tilesPlay(opponentId, where, mode) {
   if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer);
+  tilesUnhold(TL_GAME);
   const T = SHIP.tiles, p = (typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === opponentId)) || { id: opponentId || 'tomas', name: 'Tomas Lind', seed: 7 };
   const teach = !T.played, style = teach ? Object.assign({}, tilesStyle(p), { level: 'easy' }) : tilesStyle(p);
   const seed = Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 800) * 4294967296);
   const rng = tilesRng(seed), first = teach ? 0 : (T.first[p.id] | 0);   // you go first in your first game, then turn about with each opponent (saved)
   const talk = tilesRng(Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 807) * 4294967296));   // its own stream: lines never shift the moves
   TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, talk, where: where || null,
-              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false };
+              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false, hold: null };
+  tilesHold(TL_GAME, p);
   tilesSay(TL_GAME.name + ': ' + (tilesTalk('start') || 'Your move.'));
   if (first) tilesCrewSoon();
   deviceShow('tiles');
@@ -16887,7 +16896,7 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
 }
 function tilesEnd(k) {
   const G = TL_GAME; if (!G) return;
-  if (k === 'done') { TL_GAME = null; deviceRefresh(); return; }
+  if (k === 'done') { tilesUnhold(G); TL_GAME = null; deviceRefresh(); return; }
   tilesPlay(G.opp, G.where, k);
 }
 deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
@@ -16918,7 +16927,7 @@ const tilesSeated = () => !!(TL_GAME && (!TL_GAME.where || (ACT && ACT.kind === 
 function tilesLeft() {   // you walked away mid-game: the game is left as it was, not counted
   const G = TL_GAME; if (!G || tilesSeated()) return false;
   if (G.timer) clearTimeout(G.timer);
-  TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
+  tilesUnhold(G); TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
   return true;
 }
 // the Tiles station is always open; tables and boards are for Tiles night (the lead, 0.46.4), and are plain seats otherwise
@@ -16977,7 +16986,7 @@ function tilesLoad(s) {   // save.tiles, read defensively
 }
 SHIP.tiles = tilesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.tiles = JSON.parse(JSON.stringify(SHIP.tiles)); });
-onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); TL_GAME = null; });
+onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); tilesUnhold(TL_GAME); TL_GAME = null; });
 // ---- Tiles night on paper (0.46.3): when the tradition ends (section 18's simNote('tradition'), id tilesNight), the
 // crew who came are paired (seeded by the day, key 801) and each pairing is settled by a seeded roll (key 802) from
 // their levels: the same level is even, Hard beats Medium 68%, Medium beats Easy 70%, Hard beats Easy 83% (tiles_check's
