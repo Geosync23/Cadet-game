@@ -1,0 +1,24 @@
+@meeting careerSendoff
+// Head writer 4: being let go, the day you leave. The Deck 5 shuttle bay, the Tern's ramp down: where you came in.
+// Torres (your escort on Day 0), Pell (Works, a bunk along), Calder ("checking the ramp seals"). Friends who come too
+// say a career.seeoff line each before this. "Window seat. Every time." calls back to introDinner.
+title: The shuttle bay
+from: Zeke Torres
+gist: The Tern's ramp is down. Your friends came to see you off.
+== lines
+torres-zeke: Right where we started. Ramp down, Tern ticking over.   [gesture]
+torres-zeke > you: I walked you up from here. Feels wrong walking you back.
+pell > you: Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.
+calder: The Tern's on time. It always is.   [nod]
+torres-zeke: She came. She never comes to these.
+calder: I came to check the ramp seals.
+calder > you: Look after yourself, {me}.
+? choice
+* I'll miss this ship.   flavour:share
+  torres-zeke: She'll miss you. Coil three most of all. She won't say so.
+* Thank you. All of you.
+  pell: Don't. You'll set me off.   [laugh]
+* (Wave)
+  torres-zeke: That'll do. That says it.   [nod]
+torres-zeke: Go on, then. Get a window seat. Every time.
+pell: And write. I'll actually read it.

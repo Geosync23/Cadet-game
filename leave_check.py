@@ -73,6 +73,8 @@ PAPER = r"""(({ plan, days, friends }) => {
   if (last) { SCHED_DATA = null; if (typeof SHIP_DAYS !== 'undefined') SHIP_DAYS.clear(); SHIP.career.end = false; out.sendOff = careerSendOff(last);
     out.planned = careerSendOff(last).filter(id => { const p = schedPeople().find(q => q.id === id); return p && planDay(p, last).some(s => s.tag === 'farewell'); });
     SHIP.career.end = true; }
+  out.occ = SHIP.occasions.filter(r => /^career/.test(r.id)).map(r => ({ id: r.id, day: Math.floor(r.at / 1440) + 1, end: r.at + r.len }));
+  out.letAt = C.go != null ? (C.go - 1) * 1440 : null;
   out.round = round; stop.forEach(f => f());
   return out;
 })"""
@@ -138,6 +140,12 @@ with sync_playwright() as pw:
     check(r['sendOff'] and set(r['sendOff']) >= set(friends), 'your friends are not at your send-off')
     check(r.get('planned'), 'nobody at your send-off has it in their plans')
     check(r['career']['end'], 'the save is not marked ended')
+    occ = {o['id']: o for o in r['occ']}
+    print(f"  occasions: {[(o['id'], o['day']) for o in r['occ']]}")
+    check(all(k in occ for k in ('careerChief', 'careerCaptain', 'careerLetGo', 'careerSendoff')), 'not every talk was booked')
+    if all(k in occ for k in ('careerChief', 'careerCaptain')) and r['letAt'] is not None:
+        check(occ['careerChief']['end'] <= occ['careerCaptain']['end'] - 20 and occ['careerCaptain']['end'] <= r['letAt'], 'let go before both talks were held, or the Captain before the Chief')
+    if 'careerSendoff' in occ: check(occ['careerSendoff']['day'] == r['letGo'], 'the send-off is not on the last day')
 
     print('(d) Recovery re-arms each step:')
     for plan, step in (('skipUntilChief', 'chief'), ('skipUntilCaptain', 'captain')):

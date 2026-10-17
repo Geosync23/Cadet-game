@@ -1,0 +1,29 @@
+@template dry
+
+== career.missed
+? tier>=colleague
+- The board noticed you weren't there. So did I. I'm quieter about it.
+
+== worried.chief
+? tier>=friend
+- A talk with the Chief. I've had one. You live. Then you turn up at eight.
+
+== worried.captain
+? tier>=friend
+- The ready room. Mind the step. And then mind your shifts. I'm serious.   #serious
+
+== worried.last
+? tier>=friend
+- I'd rather not lose you to paperwork. Go to work tomorrow. Humour me.   #serious
+
+== career.up
+? tier>=friend
+- On shift again. Look at you. Practically furniture.   #funny
+
+== farewell.eve
+? tier>=friend
+- Tomorrow, then. I had a joke ready. It's not funny. I'm sorry, {nick}.   #serious
+
+== farewell.day
+? tier>=friend
+- Go on. I'll pretend I'm fine. I'm very good at it.   #warm

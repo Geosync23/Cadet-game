@@ -1,19 +1,26 @@
 @meeting careerChief
-// PLACEHOLDER (the career engineer, 0.61.0): head writer 4 writes the real one. The Chief's talking-to: your work
-// standing has fallen low (missed shifts without leave). An appointment in the Chief's office, Deck 5, the next
-// workday morning. Plays when you're in the room; missed, the gist comes by Mail.
+// Head writer 4 (career system, design-doc "Leave, missed shifts and being let go"): the step at "low". Calder calls
+// you to her glass office on Deck 5. Exact but fair, worried rather than angry, clear about what has to change. No
+// wrong answer; she says it once and won't bring it up again if you fix it.
 title: A word with the Chief
 from: Chief Ines Calder
-gist: You didn't come to the Chief's office. Calder says the talk will keep, and so will the record.
+gist: You didn't come to my office. Missed shifts. Be in the bay at ten to eight, every workday. Need a day? Book leave.
 == lines
-calder > you: Shut the door. Sit.   [gesture]
-calder: You've missed shifts. No leave booked, no word to anyone. The board noticed before I did.
-calder: Everyone has bad weeks. If you need a day, book it on your device. That's what leave is for.
+calder: Door. Thank you. Sit.   [gesture]
+calder > you: I'll be plain. You've missed shifts. Not one. Several.
+calder: The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs.
+calder: I'm not angry. I'm worried. Those are different, and I'd like you to know which.
+calder > you: So. What's going on, {me}? Take your time.   [listen]
 ? choice
-* It won't happen again, Chief.   rel:calder+1
-  calder: Good. Eight o'clock, Works bay. I'll see you there.
-* I've been struggling a bit.   rel:calder+2
-  calder: Then say so. Talk to Rina, or to me. But turn up.   [nod]
-* (Say nothing)
-  calder: Silence I can work with. Absence I can't.
-calder: Turn up, do the jobs, and this goes away. That's all.
+* It's been hard. I've been tired.   rel:calder+1 flavour:share mem:career.chief.tired
+  calder: Tired I can work with. If you're ill, the infirmary. Time there never counts against you.
+* I don't have a good reason.   rel:calder+1 mem:career.chief.honest
+  calder: Honest. Good. I can work with honest.   [nod]
+* It won't happen again.   mem:career.chief.promise
+  calder: Don't promise me. Show the board.
+calder: Here's what changes. You're in the bay at ten to eight. Every workday.
+calder: You take a job. You finish it. You turn it in at the board. Do that, and this goes away.
+calder: Need a day? Book leave on your device. An empty slot on paper beats a surprise.
+calder: If nothing changes, the Captain will want to see you. Neither of us wants that.
+calder > you: Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.
+calder: That's all. I won't say it twice. Board's there.   [nod]

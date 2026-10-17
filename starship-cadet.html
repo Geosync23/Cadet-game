@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.0
+   STARSHIP CADET: CSV Wren                           build 0.61.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.0';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.1';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14461,50 +14461,280 @@ const VOICE_TEMPLATES = {
     "needs": "practical",
     "talk": "Efficient, clipped, practical; statements over questions.",
     "words": {"hi": ["Morning", "Right then"], "bye": ["Carry on", "Right. Back to it"], "yes": ["Agreed", "Very well"], "thanks": ["Noted. Thank you", "Good work"], "wow": ["Impressive"], "sigh": ["Hm"], "nick": [null, "cadet", null, null, null]},
+    "lines": {
+      "career.missed": [
+        {"text": "You weren't on shift. Problem? Tell me. Then fix it.", "id": "1nn50e8", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "Saw your name on the board. Turned in. Good.", "id": "10k7kf5", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Go well, {nick}. Do it right next time. You can.", "id": "1hqa0q7", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "Tomorrow. Right. I'm not good at this. I'm sorry. Truly.", "id": "91odfi", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "Ready room. That's serious. Eight o'clock tomorrow. No excuses.", "id": "cwzzi7", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "Chief's had her word. Good. Now: eight sharp. Every day.", "id": "ncgau6", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "Listen. One shift. Tomorrow. That's all it takes to stop this.", "id": "srs4nn", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "chatty": {
     "needs": "share",
     "talk": "Talks fast and a lot, happy to gossip kindly, exclamation marks.",
     "words": {"hi": ["Hey hey", "Oh, hi"], "bye": ["Catch you later", "Right, I'll let you go"], "yes": ["Yes! Totally", "Oh, go on"], "thanks": ["You're a star", "Thanks a million"], "wow": ["No way"], "sigh": ["Ugh"], "nick": [null, null, null, "pal", "pal"]},
+    "lines": {
+      "career.missed": [
+        {"text": "There you are! Everyone was asking where you'd got to. You all right? Honestly?", "id": "1ngotqj", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "You were on shift! I told everyone. Well, three people. It's a start.", "id": "b4tv0u", "tone": "funny", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Write. Every week. Long ones. I'll write back longer. You know I will.", "id": "1afbjq", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "I don't even know what to say, and I always know what to say. I'm so sorry.", "id": "13vwhmn", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "The ready room! Look, whatever's going on, talk to me. I'm a good listener. Sometimes.", "id": "xw9vwp", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "You saw Calder? Oh, {nick}. Tell me everything. Then I'll knock for you every morning.", "id": "zpawv4", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'm worried, {nick}. Properly. I'll knock for you in the morning. Every morning.", "id": "sj99d5", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "dreamy": {
     "needs": "share",
     "talk": "Wandering, soft, notices odd lovely things; loses the thread.",
     "words": {"hi": ["Oh, hello there", "Hi"], "bye": ["Mind the stars", "See you around"], "yes": ["Mm, why not", "I suppose so"], "thanks": ["That's kind"], "wow": ["Oh, how lovely"], "sigh": ["Ah, well"], "nick": [null, null, null, "friend", "friend"]},
+    "lines": {
+      "career.missed": [
+        {"text": "Your spot in the bay was empty today. Odd, how you notice a gap.", "id": "mgzfiq", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "You look lighter. Like a window's been opened.", "id": "i4rlit", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Somewhere out there's a ship that needs you. Go and find it.", "id": "1fbyw3a", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "Tomorrow you'll be stars away. I'll look out of the window and wave anyway.", "id": "1hrb7fh", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "I keep thinking the ship would be smaller without you. Please go tomorrow.", "id": "1vk91gj", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "Is it heavy at the moment? Things get heavy. You can put some down with me.", "id": "13fgdvo", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "Go to your shift, {nick}. Just the next one. Don't look further than that.", "id": "pynv7c", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "dry": {
     "needs": "cheer",
     "talk": "Deadpan, quick, understated; teases the people they like.",
     "words": {"hi": ["Oh, it's you", "Hey"], "bye": ["Off you go", "Don't break anything"], "yes": ["Fine", "Go on then"], "thanks": ["Ta", "You're all right, you"], "wow": ["Well, look at that"], "sigh": ["Honestly"], "nick": [null, null, null, "trouble", "trouble"]},
+    "lines": {
+      "career.missed": [
+        {"text": "The board noticed you weren't there. So did I. I'm quieter about it.", "id": "1t3qys", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "On shift again. Look at you. Practically furniture.", "id": "yygy9w", "tone": "funny", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Go on. I'll pretend I'm fine. I'm very good at it.", "id": "1l1ux93", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "Tomorrow, then. I had a joke ready. It's not funny. I'm sorry, {nick}.", "id": "yetawx", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "The ready room. Mind the step. And then mind your shifts. I'm serious.", "id": "i7uc8s", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "A talk with the Chief. I've had one. You live. Then you turn up at eight.", "id": "vi2rfs", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'd rather not lose you to paperwork. Go to work tomorrow. Humour me.", "id": "7gvpuf", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "earnest": {
     "talk": "Sincere, eager, a bit formal when nervous.",
     "words": {"hi": ["Hello", "Hi there"], "bye": ["See you", "Take care"], "yes": ["Of course", "Yes, definitely"], "thanks": ["Thank you", "Thanks, really"], "wow": ["Wow", "Oh, brilliant"], "sigh": ["Oh dear"], "nick": [null, null, "{me}", "{me}", "{me}"]},
+    "lines": {
+      "career.missed": [
+        {"text": "You missed your shift. Is everything all right? I don't mean to pry.", "id": "15rhrv5", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "You're turning up again. I'm so glad. I really am.", "id": "104c4f7", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "You were a good friend to me. Remember that, wherever you go.", "id": "8emiw8", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "I wish I'd done more. I'm sorry. I'll miss you so much.", "id": "8wyu7v", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "Please don't give up. Tell me what's wrong, and we'll work it out together.", "id": "1f4b5ki", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "I know it's hard. But you can do this. I really think you can.", "id": "lzvykx", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'll set two alarms. One for me, one for you. Please, {nick}. One shift.", "id": "u2n7ra", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "gruff": {
     "needs": "practical",
     "talk": "Few words, sounds cross, isn't; shows care by doing.",
     "words": {"hi": ["Hm. You", "There you are"], "bye": ["Off with you", "Right"], "yes": ["Fine", "If I must"], "thanks": ["Hm. Thanks"], "wow": ["Huh"], "sigh": ["Typical"], "nick": [null, "cadet", "cadet", "kid", "kid"]},
+    "lines": {
+      "career.missed": [
+        {"text": "Missed shift. Hm. Don't make it two.", "id": "dz29be", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "On time today. Hm. Good.", "id": "mh00ci", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Off you go, then. Stand up straight. You'll do.", "id": "7n5kvd", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "Tomorrow. Hm. Shame. Real shame.", "id": "1gpj1t4", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "Captain, now. Listen, {nick}. I've seen good people go this way. Not you.", "id": "1kjkap3", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "Calder's had her say. She's fair. Now do it.", "id": "1gg28hv", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "Morning. Bay. Eight. I'll be checking.", "id": "j6wgm2", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "playful": {
     "needs": "cheer",
     "talk": "Jokey, bouncy, competitive in fun; nicknames everything.",
     "words": {"hi": ["Oi oi", "Look who it is"], "bye": ["Don't be a stranger", "Laters"], "yes": ["Go on, then", "You bet"], "thanks": ["Cheers"], "wow": ["Get in"], "sigh": ["Ah, nuts"], "nick": [null, null, null, "champ", "champ"]},
+    "lines": {
+      "career.missed": [
+        {"text": "Skiving, were we? Kidding. Mostly. You all right?", "id": "1ktua5w", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "Look who's on the board again! Gold star. I'll make you one.", "id": "psrs8x", "tone": "funny", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Go on, then. Find a ship that deserves you. Then tell me all about it.", "id": "r82zej", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "I keep thinking of jokes and none of them are funny. I'm sorry.", "id": "cbpe1s", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "No jokes this time, {nick}. The Captain's serious. So am I.", "id": "94mynq", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "Survived the Chief, then? Have a biscuit. Then a shift. In that order.", "id": "18lv426", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'm not losing my favourite pest. Shift tomorrow. I'll drag you if I have to.", "id": "jmjuzf", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "shy": {
     "needs": "listen",
     "talk": "Quiet, short sentences, a word then a pause; warms up slowly.",
     "words": {"hi": ["Oh! Hi", "Um, hello"], "bye": ["See you", "Bye, then"], "yes": ["Okay", "If you like"], "thanks": ["Thanks. Really"], "wow": ["Oh, wow"], "sigh": ["Oh"], "nick": [null, null, null, null, null]},
+    "lines": {
+      "career.missed": [
+        {"text": "Um. You weren't on shift. Are you... all right?", "id": "1vbo22e", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "You were on shift. I saw. I'm... really glad.", "id": "1cjbmuq", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Bye, {nick}. Thank you for talking to me. Most people don't.", "id": "yb6dxk", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "I'll come to the shuttle bay tomorrow. To wave. I'm not good at goodbyes.", "id": "5lb93o", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "I don't want you to go. Sorry. That's all. I just don't.", "id": "1lc855n", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "I heard about the Chief. I... I could walk down with you. Mornings. If you want.", "id": "18bmy7l", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'll be at breakfast early. Come with me? Then the shift. Please.", "id": "1h60jzf", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "steady": {
     "needs": "practical",
     "talk": "Calm, plain, reliable; says what they mean.",
     "words": {"hi": ["Hello", "All right"], "bye": ["See you", "Take it easy"], "yes": ["Sure", "Sounds good"], "thanks": ["Thanks"], "wow": ["Not bad at all"], "sigh": ["Well"], "nick": [null, null, null, null, null]},
+    "lines": {
+      "career.missed": [
+        {"text": "You missed a shift. It happens. Make tomorrow a good one.", "id": "1nz6h7n", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "That's better. Steady does it.", "id": "vdqorm", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Go steady. You'll find your place. I believe that.", "id": "1yiun9p", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "I'm sorry it came to this. You're still the same person to me.", "id": "w1zk92", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "Hard week? Sit a minute. Then let's work out how you get to your shift.", "id": "1gmqf8f", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "The Chief told you what needs to change. It isn't much. You can do it.", "id": "1b29kwb", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "One day at a time, {nick}. Tomorrow's the only one that matters.", "id": "756mt7", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
   "warm": {
     "needs": "share",
     "talk": "Kind, motherly or fatherly, generous with praise; asks after you.",
     "words": {"hi": ["Hello, love", "Hiya"], "bye": ["Take care", "Look after yourself"], "yes": ["Of course", "Happily"], "thanks": ["Thank you, really", "Bless you"], "wow": ["Oh, lovely"], "sigh": ["Oh dear"], "nick": [null, null, null, "love", "love"]},
+    "lines": {
+      "career.missed": [
+        {"text": "Oh, {nick}, you missed your shift. Are you eating? Sleeping? Tell me.", "id": "1734s52", "tier": [2, 4]},
+      ],
+      "career.up": [
+        {"text": "There. Look at you. I knew you would.", "id": "1695bwl", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.day": [
+        {"text": "Look after yourself. Eat properly. And write, or I'll worry.", "id": "1v6wogu", "tone": "warm", "tier": [3, 4]},
+      ],
+      "farewell.eve": [
+        {"text": "Tomorrow. Oh dear. I'm going to cry, and you're not to mind.", "id": "1obmcxr", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.captain": [
+        {"text": "Oh, love. The ready room. Sit with me a minute. Then early to bed, yes?", "id": "jk8l80", "tone": "serious", "tier": [3, 4]},
+      ],
+      "worried.chief": [
+        {"text": "Come here. The Chief was fair, wasn't she? And I'm on your side. Always.", "id": "8fiszs", "tone": "warm", "tier": [3, 4]},
+      ],
+      "worried.last": [
+        {"text": "I'm worried sick. Go tomorrow. Please. For me, if not for you.", "id": "91dfi4", "tone": "serious", "tier": [3, 4]},
+      ],
+    },
   },
 };
 const VOICE = JSON.parse([
@@ -14911,6 +15141,14 @@ const VOICE = JSON.parse([
   '{"text":"Your birthday cake. Did I get it right? I\'ll get it righter next year.","id":"1ffc4sn","tone":"warm","tier":[1,4],"told":"bday"},',
   '{"text":"My oven still purrs. Every time I light it, I think: that was a good fix.","id":"1objjhr","tier":[1,4],"told":"fixed.oven"},',
   '{"text":"Observatory night. I sent a flask up with you. Did you share it? Good.","id":"1se8r5u","tone":"warm","tier":[1,4],"told":"came.observatory"}]',
+  ',"career.back":[',
+  '{"text":"Back! Sit down. You\'ve a day\'s eating to catch up on.","id":"152vmkg"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Day off tomorrow? Come for a late breakfast. I\'ll keep you a plate.","id":"6ndbxv"}]',
+  ',"career.missed":[',
+  '{"text":"Missed your shift and your breakfast? Sit. Eat. Then tell me.","id":"o0ttv6","tier":[1,4]}]',
+  ',"career.up":[',
+  '{"text":"There\'s my good eater. Back on shift? Have seconds.","id":"mns5fy","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"My mother posts me recipes. \\"Until it sounds right,\\" she writes. That\'s the whole method.","id":"5qy8a6","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Sunday bread tomorrow. The juniors knead. I talk. The dough listens to both of us.","id":"goa65h","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -14948,6 +15186,11 @@ const VOICE = JSON.parse([
   '{"text":"Can\'t, love. Seventy-five dinners won\'t cook themselves. Another night?","id":"wagsls"},',
   '{"text":"Not tonight, love. It\'s early to bed for me. Ask me again?","id":"150nzgh"},',
   '{"text":"Oh, love, I can\'t. The cold store\'s playing up. I\'ve to be very polite to it.","id":"hi3b8","tone":"funny"}]',
+  ',"farewell.day":[',
+  '{"text":"Packed you something for the Tern. Biscuits. Don\'t eat them all at once.","id":"1ytkmzg","tone":"warm","tier":[1,4]},',
+  '{"text":"You\'re still in my book, love. Favourite dish and all. That doesn\'t come out.","id":"jybztw","tone":"warm","tier":[1,4]}]',
+  ',"farewell.eve":[',
+  '{"text":"Tomorrow? I\'m making your favourite tonight. Don\'t argue.","id":"1w32rq","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
   '{"text":"Good day, love. The pans sang all through lunch. Not one of them caught.","id":"12eq3tx","mood":"high"},',
   '{"text":"Cold store ran warm again. Two degrees. I\'ve been very polite to it all day.","id":"nb3fv7","tone":"funny","mood":"low"},',
@@ -15098,6 +15341,13 @@ const VOICE = JSON.parse([
   '{"text":"Miss dinner? Covered plates on the grab shelf.","id":"8r4suh","flag":"beat.d1-dinner.3"},',
   '{"text":"The grab shelf\'s for emergencies. And Pell.","id":"13ni1oc","tone":"funny","flag":"beat.d1-dinner.4"},',
   '{"text":"Eat properly, love. I\'ll know if you don\'t.","id":"1vtwcfl","flag":"beat.d1-dinner.5"}]',
+  ',"worried.captain":[',
+  '{"text":"The Captain? Oh, love. She\'s kind, but she meant it. Eat something, then bed.","id":"1qz3mvl","tone":"serious","tier":[3,4]},',
+  '{"text":"I left a place once, after the fire. I don\'t want you leaving like that. Eat, then go.","id":"1d94dh4","tone":"serious","beat":"brennan.3","tier":[3,4]}]',
+  ',"worried.chief":[',
+  '{"text":"Calder\'s not cruel, love. She\'s like me with a pan. She wants it right.","id":"w65uyw","tier":[2,4]}]',
+  ',"worried.last":[',
+  '{"text":"Breakfast at seven, here, with me. Then your shift. I\'ll be watching the door.","id":"mrli7t","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"calder":{"avoid":["her first chief (until beat calder.3)","praising anyone in front of others","other people\'s birthdays (she genuinely doesn\'t know them)"],"cares":["the invisible ship (air, water, heat)","finishing what you start","honesty about mistakes","the techs she\'s certified"],"invites":["works-tea"],"jokes":["\\"It\'s a mug.\\"","knows every serial number and nobody\'s birthday","the toolbox she never uses and never lends","there\'s always one more job on the board"],"joy":"a machine running so well nobody notices it","keepsake":"a spare key to the toolbox, on a loop of Works orange wire","likes":["tea"],"loves":["made","book"],"needs":"practical","openness":"guarded","talk":"Few words, all exact; numbers not adjectives; statements; quieter when annoyed; humour so dry it lands a beat late; praise rare and plain.","thread":"arc:calder","tpl":"brisk","words":{"hi":["Cadet","Good","Right"],"bye":["Back to it","Carry on","Board\'s there"],"yes":["Fine","Do it","Agreed"],"thanks":["Noted. Thank you","Good work"],"wow":["Hm. Not bad"],"sigh":["Right"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -15143,6 +15393,13 @@ const VOICE = JSON.parse([
   '{"text":"Music night. You stayed past the second song. So did I. Neither of us mentions it.","id":"1yrxldk","tone":"funny","tier":[1,4],"told":"came.jam"},',
   '{"text":"Someone told me your birthday. I wrote it down. It\'s on the list. With the pumps.","id":"xnpqzv","tone":"funny","tier":[1,4],"told":"bday"},',
   '{"text":"Observatory night. You found the array from the window. Most can\'t. Good eyes.","id":"gf3rvh","tier":[1,4],"told":"came.observatory"}]',
+  ',"career.back":[',
+  '{"text":"Back. Good. Board\'s there.","id":"1ln2ziv"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Leave\'s booked. Noted. Better on paper than a surprise.","id":"3ob70o"}]',
+  ',"career.up":[',
+  '{"text":"On time again. Good.","id":"d3fkyk","tier":[1,4]},',
+  '{"text":"On the board this morning. Ten to eight. Good. Good.","id":"1knfay6","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"I read on my days off. Shipyard histories. Engines, mostly. Some people. Fewer people.","id":"btlpzx","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Torres asked what I do for fun. I said \\"listen to fans\\". He laughed. I wasn\'t joking.","id":"1rkcjt2","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -15174,6 +15431,9 @@ const VOICE = JSON.parse([
   '{"text":"Not tonight. Board\'s at fourteen.","id":"7s61l2"},',
   '{"text":"Can\'t. Ask me next week. I\'ll mean it.","id":"4mr78a"},',
   '{"text":"It\'s my day off. I\'m going to listen to a fan for an hour. Alone.","id":"5kt43q","tone":"funny","weekday":"sat|sun"}]',
+  ',"farewell.day":[',
+  '{"text":"The Tern won\'t wait. Don\'t be late for that one.","id":"p86op5"},',
+  '{"text":"I came to check the ramp seals.","id":"1va5y6d"}]',
   ',"feel":[',
   '{"text":"The air\'s nominal on every deck. Nobody\'s noticed. Good.","id":"jhrl7r","mood":"high"},',
   '{"text":"Nineteen jobs today. Eighteen done. It\'s the nineteenth I\'m thinking about.","id":"pb3ifz","mood":"low"},',
@@ -16470,6 +16730,8 @@ const VOICE = JSON.parse([
   '{"text":"Saw your name on a job sheet. {thing}. Done properly. Noted.","id":"712zyk","tier":[1,4],"told":"fixed."},',
   '{"text":"Your birthday. Mensah reminded me. I\'d remembered. Hm. Mostly.","id":"15pt14f","tone":"funny","tier":[2,4],"told":"bday"},',
   '{"text":"Observatory night. You stood by the door. Good habit. Look up, too, though.","id":"7wjli6","tone":"funny","tier":[1,4],"told":"came.observatory"}]',
+  ',"career.missed":[',
+  '{"text":"Walked past the Works bay at eight. You weren\'t in it. Fix that.","id":"9htu7b","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"Questions? Ask now. In an emergency, there isn\'t time.","id":"jr5sfd","tier":[0,0]},',
   '{"text":"Where\'s the nearest suit locker from your bunk? Good. Now from the mess? Hm. Learn it.","id":"1u9cpvn","tier":[1,4]},',
@@ -16502,6 +16764,8 @@ const VOICE = JSON.parse([
   '{"text":"Can\'t. Rounds. Another day.","id":"eu9w0i","tier":[1,4]},',
   '{"text":"No. Not that one. But ask again. I mean that.","id":"16524wp","tier":[1,4]},',
   '{"text":"Rest day. I\'ll walk the decks anyway. Slower. Monday?","id":"1cfqgex","tone":"funny","weekday":"sat|sun"}]',
+  ',"farewell.day":[',
+  '{"text":"Leaving. Hm. Do better on the next one. You\'ve got it in you.","id":"1vaqk5t","tier":[1,4]}]',
   ',"feel":[',
   '{"text":"Quiet decks, doors shut, nobody where they shouldn\'t be. Good day.","id":"r67rg","mood":"high"},',
   '{"text":"Long shift. Mensah tried a joke on me. It nearly worked.","id":"xcwmf2","tone":"funny","mood":"low"},',
@@ -16631,6 +16895,8 @@ const VOICE = JSON.parse([
   '{"text":"Hm. Lights. Good.","id":"5zf1k3","trad":"hull-lights"}]',
   ',"visit":[',
   '{"text":"Rounds. Your door\'s on them. Everything all right in here? Hm. Good.","id":"1ixbf8z","tier":[3,4]}]',
+  ',"worried.last":[',
+  '{"text":"I\'ve seen people let go. Don\'t be one. Tomorrow, eight. I\'ll check.","id":"1guorcj","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"ibarra-rafael":{"avoid":["where he put things"],"cares":["the next sensor sweep","his secret tin of good biscuits","Tiles, win or lose"],"invites":["tiles"],"jokes":["he keeps a tin of good biscuits and tells no one, so everyone knows","he loses at Tiles gracefully, and often"],"joy":"a clean sensor sweep","keepsake":"a biscuit from the secret tin (the good kind)","likes":["tea","star"],"loves":["sweet","game"],"needs":"cheer","openness":"open","talk":"Quick and sarcastic, but the joke is usually on himself. Loses his train of thought, then finds a better one.","tpl":"playful","words":{"hi":["Oh, hey","Hello, you","Hi"],"bye":["Right, where was I","See you","Off you go"],"yes":["Sure","Why not","Go on, then"],"thanks":["Cheers","You\'re a gem"],"wow":["Ooh, nice"],"sigh":["Typical"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -17741,6 +18007,8 @@ const VOICE = JSON.parse([
   '{"text":"Your birthday. I hope the galley did as I asked. They usually do.","id":"19kbtcz","tone":"warm","tier":[1,4],"told":"bday"},',
   '{"text":"Calder mentioned your work on {thing}. She said \\"fine\\". Twice. That\'s a lot.","id":"1jk6yv4","tone":"funny","tier":[1,4],"told":"fixed."},',
   '{"text":"You arrived on the last evening of Lanterns. A good evening to arrive. The lights were up.","id":"6hto4b","tone":"warm","tier":[1,4],"told":"intro.arrival","not":{"week1":"true"}}]',
+  ',"career.up":[',
+  '{"text":"The Chief tells me things are better. I\'m glad. I don\'t forget.","id":"ljdkqs","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"My question: what would you change aboard, if you could? Think. I\'ll ask again.","id":"igq45i","tier":[0,0]},',
   '{"text":"What are the juniors saying about the senior crew? Kindly, please. Or honestly. Both.","id":"16ytne9","tone":"funny","tier":[1,4]},',
@@ -17772,6 +18040,8 @@ const VOICE = JSON.parse([
   '{"text":"Not today, I\'m afraid. The ship has me. Ask again?","id":"d11p7t","tier":[1,4]},',
   '{"text":"I can\'t. Not tonight. But thank you. It means more than you\'d think.","id":"15243t","tier":[1,4]},',
   '{"text":"My rest day. Scales, and not thinking about the ship. Monday?","id":"1f0ifwy","weekday":"sat|sun"}]',
+  ',"farewell.day":[',
+  '{"text":"I asked you a question once. I still remember your answer. Go well, {me}.","id":"llhkb8","tone":"warm","tier":[1,4]}]',
   ',"feel":[',
   '{"text":"A good day. Everyone where they should be, and two people told me the truth.","id":"1scr9y5","mood":"high"},',
   '{"text":"A long day up top. The Admiral was no help at all.","id":"1ueeoj3","tone":"funny","mood":"low"},',
@@ -18629,6 +18899,14 @@ const VOICE = JSON.parse([
   '{"text":"Works tea! You took the last biscuit. I let you. I\'ll remember that forever.","id":"xkj5rx","tone":"funny","told":"came.works-tea","not":{"week1":"true"}},',
   '{"text":"That game you gave me? Rina\'s beaten me at it already. Twice. Cheers, really.","id":"eefhqs","tone":"funny","told":"gift.game"},',
   '{"text":"You fixed the oven? That\'s pudding saved. That\'s lives saved, basically. Legend.","id":"h8enxe","tone":"warm","told":"fixed.oven"}]',
+  ',"career.back":[',
+  '{"text":"You\'re back! I did your rounds. The Deck 5 panel still sticks. Some things never change.","id":"1ezsq93"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Leave? Nice. Sleep all day. That\'s what I\'d do. That\'s what I do anyway.","id":"t6c25o","tone":"funny"}]',
+  ',"career.missed":[',
+  '{"text":"Took your scrubber job this morning. No bother. Just... you all right, {nick}?","id":"143klhd","tier":[1,4]}]',
+  ',"career.up":[',
+  '{"text":"Back on the board! The bay sounds right again.","id":"1g6gcps","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"Rina says I snore in tune. I\'m taking that as praise.","id":"xwwvae","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Swap meet\'s the best day aboard. I traded a bolt for a better bolt. Very proud.","id":"1gnikcb","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -18668,6 +18946,11 @@ const VOICE = JSON.parse([
   ',"decline":[',
   '{"text":"Ah, nuts. Can\'t. Calder\'s got me on a pump. Another time? Promise?","id":"1iu43a1"},',
   '{"text":"Not tonight. I\'m asleep. Well, I will be. Planning ahead.","id":"1ei1gqo","tone":"funny"}]',
+  ',"farewell.day":[',
+  '{"text":"Today, eh. I\'ll be at the Tern. Bringing you something. Don\'t guess.","id":"di4fdo","tone":"warm","tier":[1,4]},',
+  '{"text":"Every ship I\'ve fixed is in my tin. You\'re in there now too.","id":"cec3g4","tone":"warm","tier":[1,4]}]',
+  ',"farewell.eve":[',
+  '{"text":"Tomorrow? Oh, {nick}. I didn\'t think. I really didn\'t think it\'d go this far.","id":"1543hn0","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
   '{"text":"Good day. Fixed a pump, ate twice, and nobody caught me napping.","id":"3v7qk2","mood":"high"},',
   '{"text":"I\'m fine. I\'m fine. Just tired. Ask me again after a nap.","id":"13a3wfk","mood":"low"},',
@@ -18854,6 +19137,12 @@ const VOICE = JSON.parse([
   '{"text":"There\'s no food round. There should be.","id":"1crmk7j","tone":"funny","flag":"beat.d4-quiz.3"},',
   '{"text":"Grab a seat. Snacks are mine. Mostly.","id":"1vptfbw","tone":"funny","flag":"beat.d4-quiz.4"},',
   '{"text":"Win or lose, there\'s biscuits after. I made sure.","id":"71goqp","flag":"beat.d4-quiz.5"}]',
+  ',"worried.captain":[',
+  '{"text":"I nearly left too, my first month. Glad every day I didn\'t. Don\'t you go either.","id":"yknnh","tone":"serious","tier":[3,4]}]',
+  ',"worried.chief":[',
+  '{"text":"Had the Chief\'s talk? Me too, my first month. Felt like the floor went. It didn\'t.","id":"mezayr","tone":"warm","tier":[2,4]}]',
+  ',"worried.last":[',
+  '{"text":"I\'ll sleep at night for once. Swear. Then I\'ll wake you. Shift, tomorrow. Yeah?","id":"1h6crih","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"petrie":{"avoid":["the derelict\'s last days"],"cares":["the stars from any window","knowing what day it is","the cards"],"invites":["observatory","tiles"],"jokes":["keeps asking what day it is","good at cards, better at losing on purpose"],"joy":"watching the stars from a window","keepsake":"a playing card, the one they always lose with","likes":["tea","book"],"loves":["star","game"],"needs":"listen","openness":"normal","talk":"Quiet and slow, a little lost in time; asks what day it is; kind, with a sly smile.","tpl":"dreamy","words":{"hi":["Oh, hello","Hello"],"bye":["Goodnight","See you"],"yes":["All right","Yes"],"thanks":["Thank you","That\'s kind"],"wow":["Oh, look"],"sigh":["Ah"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -19198,6 +19487,16 @@ const VOICE = JSON.parse([
   '{"text":"Harvest. You wore gloves. Only one who did. Noted, dated, signed.","id":"1mfp1qz","tone":"funny","told":"came.harvest"},',
   '{"text":"You fixed the corridor lights. Fewer people walking into doors. Fewer bruises. Ta.","id":"hq9a5z","told":"fixed.lights"},',
   '{"text":"That tea you gave me. I make it after late shifts. It\'s good. Don\'t gloat.","id":"1d1wie0","tone":"warm","told":"gift.tea"}]',
+  ',"career.back":[',
+  '{"text":"Rested? Let me look. Hm. Better. You\'ll live.","id":"fb3so1","tone":"funny"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Taking leave? Good. Rest is medicine. The cheap kind.","id":"1axhc37"}]',
+  ',"career.missed":[',
+  '{"text":"You missed a shift. Ill? Come to the infirmary. If you\'re ill, it doesn\'t count.","id":"7ukpth","tier":[1,4]}]',
+  ',"career.onleave":[',
+  '{"text":"Ill isn\'t leave, by the way. If you\'re ill, come and see me.","id":"hknuge"}]',
+  ',"career.up":[',
+  '{"text":"Colour\'s back in your face. Keep it there.","id":"je0fd4","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"I read in the washroom queue. It\'s long enough for a chapter. Most nights two.","id":"jjsrei","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Sweets? The sour ones. Don\'t bring me the soft ones. I\'ll know.","id":"170jh1g","tier":[1,4],"not":{"week1":"true"}},',
@@ -19227,6 +19526,11 @@ const VOICE = JSON.parse([
   ',"decline":[',
   '{"text":"Can\'t. Late shift. Rain check. We don\'t have rain. Tiles check.","id":"gwy63e"},',
   '{"text":"Not tonight. I\'m studying. Ask me again. I\'ll say yes. Probably.","id":"1h5e3nc"}]',
+  ',"farewell.day":[',
+  '{"text":"Look after yourself. Sleep. Eat. That\'s not advice, that\'s an order.","id":"tk75ue","tone":"warm","tier":[1,4]},',
+  '{"text":"I\'m only here to check you\'re fit to fly. You are. Go on.","id":"30f1k3","tone":"warm","tier":[1,4]}]',
+  ',"farewell.eve":[',
+  '{"text":"Tomorrow. Right. I\'ll lose at Tiles once, as a send-off. Don\'t tell anyone.","id":"2k50po","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
   '{"text":"Good day. Won at Tiles. Twice. Not that I\'m counting. I\'m counting.","id":"mekul9","tone":"funny","mood":"high"},',
   '{"text":"Long shift. Don\'t ask. Actually, ask me about anything else.","id":"1powitr","mood":"low"},',
@@ -19410,6 +19714,12 @@ const VOICE = JSON.parse([
   ',"week1":[',
   '{"text":"You\'re my two o\'clock. Sit. Arm out. How much water have you drunk today? Wrong answer.","id":"1b0q4wq","tone":"funny","place":"infirmary","week1":"true","weekday":"tue"},',
   '{"text":"Health check at two. Infirmary, Deck 3. Don\'t be late. Don\'t be early either.","id":"1fs5um1","week1":"true","weekday":"tue"}]',
+  ',"worried.captain":[',
+  '{"text":"I\'m keeping count, {nick}. Not at Tiles. Of you. Go to work.","id":"149aby0","tone":"serious","tier":[3,4]}]',
+  ',"worried.chief":[',
+  '{"text":"Saw Calder, did you? Sleep, eat, turn up. Medical advice. Free of charge.","id":"1ezdffi","tier":[2,4]}]',
+  ',"worried.last":[',
+  '{"text":"I had a hard year once. Routine helped more than anything. Try it. For me.","id":"1xvh220","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"rossi-femi":{"avoid":["the certification result before it comes","ever mocking the Veyli"],"cares":["being first on the board","the telescope from home","learning Veyli","the certification exam"],"invites":["observatory","quiz"],"jokes":["a Veyli word a day, usually not the one he meant","everything is a race, even tea","his telescope is the smallest and the best"],"joy":"his telescope, and the first star of an evening","keepsake":"a page of the Veyli phrasebook, with his notes in the margin","likes":["tea","book"],"loves":["star","game"],"needs":"cheer","openness":"open","talk":"Bright and keen; turns small things into friendly races; tries a Veyli word in most chats.","tpl":"earnest","words":{"hi":["Hello","Hi, hi","Oh, hello"],"bye":["See you","Race you back","Bye for now"],"yes":["Yes","Definitely","On it"],"thanks":["Thanks","Brilliant, thanks"],"wow":["Brilliant","Oh, wow"],"sigh":["Oh, bother","Next time, then"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -20284,6 +20594,14 @@ const VOICE = JSON.parse([
   '{"text":"Was it you who fixed the lights? The corridor\'s brighter. I nearly didn\'t get lost.","id":"18nmqkz","tone":"funny","told":"fixed.lights"},',
   '{"text":"Your first night, you found the common room in an hour. It took me three days.","id":"qxed9z","tone":"funny","told":"intro.arrival","not":{"week1":"true"}},',
   '{"text":"Observatory night\'s better with the bunk there. You, Chloe, Zofia. Even Lukas, once.","id":"poo172","tone":"warm","mem":"came.observatory-night","tier":[3,4]}]',
+  ',"career.back":[',
+  '{"text":"Welcome back, bunkmate. I kept your side tidy. Mostly.","id":"18lq3xf"}]',
+  ',"career.leave.booked":[',
+  '{"text":"A day off tomorrow? We could do the long way round Deck 2. If you like.","id":"1kdy02u"}]',
+  ',"career.missed":[',
+  '{"text":"You were still in your bunk when I left. Are you ill? Should I fetch someone?","id":"rebadm","tier":[1,4]}]',
+  ',"career.up":[',
+  '{"text":"You were up before me today! First time ever. I\'m telling my brother.","id":"j09e9j","tone":"funny","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"My brother asked what we eat. I said \\"Brennan\'s food\\". He says that\'s not an answer.","id":"nopk86","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"The toast here is better than home. Don\'t tell home.","id":"1kyezvm","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -20312,6 +20630,11 @@ const VOICE = JSON.parse([
   ',"decline":[',
   '{"text":"I can\'t, sorry. Patrol. But ask me again? I\'d really like you to ask me again.","id":"xlfk6x"},',
   '{"text":"Not tonight. I promised my brother a long letter. Another time?","id":"6rbf18"}]',
+  ',"farewell.day":[',
+  '{"text":"Somewhere new, then. That\'s brave. You\'re braver than me.","id":"1xf1s92","tone":"warm","tier":[1,4]},',
+  '{"text":"Look out of the window. Wave at the farm moon for me.","id":"1n3lym5","tone":"warm","tier":[1,4]}]',
+  ',"farewell.eve":[',
+  '{"text":"Your bunk will be empty tomorrow. I\'ll look up at the star map and think of you.","id":"1022o9o","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
   '{"text":"Good day! Holt nodded at me. Just once. I think it was a nod.","id":"17xmwsu","tone":"funny","mood":"high"},',
   '{"text":"Bit quiet today. Sort of grey inside. It usually lifts by dinner.","id":"4v031d","mood":"low"},',
@@ -20511,6 +20834,12 @@ const VOICE = JSON.parse([
   '{"text":"Your day off. My lunch break. Holt said ten minutes.","id":"lsukgw","tone":"funny","flag":"beat.d6-sowing.3"},',
   '{"text":"It\'ll grow all year. So will you, I think.","id":"1jamgua","tone":"warm","flag":"beat.d6-sowing.4"},',
   '{"text":"Film night later! You\'re coming. I\'ve decided.","id":"16idzcf","tone":"funny","flag":"beat.d6-sowing.5"}]',
+  ',"worried.captain":[',
+  '{"text":"I write to my brother every week. I don\'t want to write that my bunkmate went.","id":"9bpwqo","tone":"serious","tier":[3,4]}]',
+  ',"worried.chief":[',
+  '{"text":"You saw the Chief? I\'d have been terrified. You\'ll be all right. I can wake you.","id":"12wq4mf","tier":[2,4]}]',
+  ',"worried.last":[',
+  '{"text":"I\'ll wake you. I\'m up at six anyway. Please let me, {nick}.","id":"1go8g6c","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"torres-zeke":{"avoid":["his father (until beat torres.4)","being passed over (until beat torres.2)","mocking anyone\'s work"],"cares":["the drive coils doing their best","doing a job properly","people who ask questions","the scarf he\'s knitting you","being ready for more"],"invites":["jam","observatory"],"jokes":["coil three sulks, and Reyes says it\'s just shy","your scarf grows every week","he knows every song in the record cabinet (so do four other people, all wrongly)","breakfast is for people without coils"],"joy":"knitting scarves, badly, with great love","keepsake":"the finished scarf in Works orange, far too long","likes":["tea","sweet"],"loves":["music","made"],"needs":"listen","openness":"open","talk":"Quick, warm, tumbling when excited; explains machines like moody people; asks questions back; \\"Right, onward\\"; never talks down.","thread":"arc:torres","tpl":"earnest","words":{"hi":["Hey","There you are","Oh, hello"],"bye":["Right, onward","Mind the coils","Off you go, then"],"yes":["Course","Happy to","Leave it with me"],"thanks":["Cheers","You\'re a star"],"wow":["Look at that","Now that\'s tidy"],"sigh":["Well, there it is"],"nick":["{me}","{me}","{me}","shipmate","shipmate"]},"lines":{',
@@ -20542,6 +20871,14 @@ const VOICE = JSON.parse([
   '{"text":"First dinner, you said fixing things. You\'re good at it. Told you you\'d fit.","id":"158rbej","tone":"warm","tier":[3,4],"told":"intro.dinner.fixing"},',
   '{"text":"First night you said you weren\'t sure why you came. Any closer? No rush.","id":"sjsbir","tier":[1,4],"told":"intro.dinner.unsure","not":{"week1":"true"}},',
   '{"text":"You said you weren\'t sure, that first dinner. You look sure now. A bit. I\'m glad.","id":"1xdaj11","tone":"warm","tier":[3,4],"told":"intro.dinner.unsure"}]',
+  ',"career.back":[',
+  '{"text":"Back! Coil three behaved while you were off. Suspicious, honestly.","id":"193g44a","tone":"funny"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Leave tomorrow? Good. Don\'t come near the bay. I mean it.","id":"13138dx"}]',
+  ',"career.missed":[',
+  '{"text":"Your board slot was empty this morning. Coil three noticed. So did I. You all right?","id":"nntw3a","tier":[1,4]}]',
+  ',"career.up":[',
+  '{"text":"That\'s my trainee. Board, job, turn in. Like I showed you.","id":"1533zru","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"Achterberg says the second verse is about a boat. It\'s a lighthouse. I\'d bet my tea.","id":"ghl3sp","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Farouk and I had the lyric argument again. We both lost. Takahashi won. As always.","id":"yj3dlh","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -20566,6 +20903,12 @@ const VOICE = JSON.parse([
   '{"text":"Ah, I can\'t tonight. Coil three needs a sit with. Ask me again? Please do.","id":"1xv47ld"},',
   '{"text":"Not tonight. I\'m on call for the coils. Next time, promise.","id":"1auxm1a"},',
   '{"text":"It\'s my day off and I\'m going to sit still for once. Tomorrow? Ask me tomorrow.","id":"1cz7p54","tone":"funny","weekday":"thu|fri"}]',
+  ',"farewell.day":[',
+  '{"text":"Today, then. I\'ll walk you down. Least I can do.","id":"6o9tgd","tone":"warm","tier":[1,4]},',
+  '{"text":"Window seat. Every time. You remember.","id":"o37o4z","tone":"warm","tier":[1,4]}]',
+  ',"farewell.eve":[',
+  '{"text":"Tomorrow, then. I\'ll be at the Tern. Same spot as when you came.","id":"1vm6jq5","tone":"warm","tier":[1,4]},',
+  '{"text":"I keep going over it. What I\'d have said. Doesn\'t matter now. I\'m sorry, shipmate.","id":"spgkso","tone":"serious","tier":[3,4]}]',
   ',"feel":[',
   '{"text":"All three coils humming in tune today. You can hear it from the overlook.","id":"10isjuj","mood":"high"},',
   '{"text":"Quiet one. Coil three\'s tired. Or I am. One of us is.","id":"qdzg4d","mood":"low"},',
@@ -20800,6 +21143,12 @@ const VOICE = JSON.parse([
   '{"text":"Stuck? Tap my name on the Roster. I\'ll come up.","id":"722uon","flag":"beat.d3-pick.4"},',
   '{"text":"Right, onward. You\'ve got this.","id":"1wqashy","flag":"beat.d3-pick.5"},',
   '{"text":"On your own today | My day off. The board\'s yours. You\'re ready. Don\'t break anything big.","id":"171xfna","flag":"mail.d4-mail"}]',
+  ',"worried.captain":[',
+  '{"text":"Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.","id":"1v9hfzh","tone":"serious","tier":[3,4]}]',
+  ',"worried.chief":[',
+  '{"text":"Calder had a word? She won\'t say it twice. That\'s your chance. Take it.","id":"tvdwh4","tier":[2,4]}]',
+  ',"worried.last":[',
+  '{"text":"I\'ll knock at ten to eight. Not eight. Ten to. We walk down together.","id":"1u6zypp","tone":"serious","tier":[3,4]}]',
   '}',
   '}',
   ',"tran-chloe":{"avoid":["gossip that isn\'t kind"],"cares":["Bunk 1 getting its sleep","the rest-day bake passing Brennan\'s inspection","the lost-property box","the messages going out on time"],"invites":["film"],"jokes":["\\"Lights out.\\" at ten sharp","Brennan inspects every bake","disapproves of Zofia\'s gossip, then asks how it ends"],"joy":"a rest-day bake that passes Brennan\'s inspection","keepsake":"the recipe for the bake that passed, Brennan\'s tick on it","likes":["tea","book"],"loves":["sweet"],"needs":"practical","openness":"normal","talk":"Dry, reliable, unhurried; the voice of reason in Bunk 1 with a deadpan edge; \\"lights out\\" at ten; disapproves of gossip, then asks for the rest.","tpl":"dry","words":{"hi":["Oh, hi","Hey","You\'re back"],"bye":["Lights out at ten","Night, when it comes","See you"],"yes":["Fine","Sure","If I must"],"thanks":["Ta","Thanks, you"],"wow":["Huh. Not bad","Oh, nice"],"sigh":["Honestly"],"nick":[null,null,"{me}","{me}","{me}"]},"lines":{',
@@ -21599,6 +21948,12 @@ const VOICE = JSON.parse([
   '{"text":"Your repair. {thing}. Done correctly, on time and tidily. Three for three.","id":"1v8rdca","tier":[1,4],"told":"fixed."},',
   '{"text":"I logged your arrival, the Sunday you came. On time. The Tern wasn\'t. You were.","id":"nt8sh3","tone":"funny","tier":[1,4],"told":"intro.arrival","not":{"week1":"true"}},',
   '{"text":"Observatory night. You were early. So was I. We waited correctly.","id":"1p9p0pg","tone":"funny","tier":[1,4],"told":"came.observatory"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Leave booked properly, the evening before. Exactly right. Rare, too.","id":"1hj2avv"}]',
+  ',"career.missed":[',
+  '{"text":"There\'s a regulation about reporting for duty. It\'s very short. Read it twice.","id":"109sls0","tier":[1,4]}]',
+  ',"career.up":[',
+  '{"text":"Good. Back on time. Regulations work best when people turn up for them.","id":"1a0h7d","tier":[1,4]}]',
   ',"chat":[',
   '{"text":"Questions, cadet? Ask them. Unasked questions cause most of the trouble aboard.","id":"mgs0c7","tier":[0,0]},',
   '{"text":"Have you read the regulations yet? Not all. The first ten. They\'re the good ones.","id":"8bc67g","tone":"funny","tier":[1,4]},',
@@ -22366,28 +22721,49 @@ const LINES = JSON.parse([
   '{"text":"{bye}. See you on the board.","id":"izpit0","dept":"works"},',
   '{"text":"{bye}. Back to it. That filter won\'t change itself.","id":"gngqdu","act":"work","dept":"works"},',
   '{"text":"{bye}. Don\'t let the board follow you to bed.","id":"13xbs8u","tone":"funny","dept":"works","time":"evening"}]',
+  ',"career.back":[',
+  '{"text":"{hi}. Back from leave? You look rested.","id":"1186734","tier":[1,4]},',
+  '{"text":"Welcome back. The board missed you. Well, someone had to say it.","id":"1epolhb","tone":"funny","tier":[1,4]}]',
   ',"career.card":[',
-  '{"text":"Your time on the Wren is over | The shuttle pulls away. The Wren grows small behind you. Someone else opens the Works bay at 08:00.","id":"b455mb"}]',
+  '{"text":"The Wren sails on | Your time on the Wren is over, {me}. Thank you for it.","id":"x4clql"},',
+  '{"text":"The Wren sails on | A scrubber hums. Nobody thanks the air. Thank you, {me}.","id":"jetko4"}]',
+  ',"career.leave.booked":[',
+  '{"text":"Day off tomorrow? Good for you. Sleep in.","id":"bgeio7","tier":[1,4]},',
+  '{"text":"Leave tomorrow! Anything planned, or just nothing at all?","id":"lzokjj","tier":[1,4]}]',
   ',"career.mail.captain":[',
-  '{"text":"The Captain wants to see you | The Captain will see you in her ready room on Deck 1 at the time on your device. Be there.","id":"14f4q3u"}]',
+  '{"text":"Ready room | The Captain will see you in her ready room, Deck 1. Please be prompt.","id":"14396qx"}]',
   ',"career.mail.chief":[',
-  '{"text":"My office | Come to my office on Deck 5 at the time on your device. We need to talk about your shifts. Calder","id":"lxp2x8"}]',
+  '{"text":"My office | Come to my office, Deck 5, today. Missed shifts. We\'ll talk it through.","id":"rlvtkz"}]',
   ',"career.mail.notice":[',
-  '{"text":"Your posting | I\'m sorry it\'s come to this. You\'re being sent home. Your shuttle leaves tomorrow at 15:00. Calder","id":"1gpim7s"}]',
+  '{"text":"Your last day | The Wren is letting you go. The Tern leaves tomorrow. I\'m sorry.","id":"vigj7s"}]',
+  ',"career.missed":[',
+  '{"text":"{hi}. Didn\'t see you on shift today. All right?","id":"1cvt9io","tier":[1,4]},',
+  '{"text":"Missed shift, I heard. Happens once. Just don\'t make it a habit.","id":"1rp327r","tier":[1,4]},',
+  '{"text":"If something\'s keeping you from shift, say. Someone here can help.","id":"8wj6sy","tone":"warm","tier":[2,4]}]',
+  ',"career.onleave":[',
+  '{"text":"Aren\'t you on leave? Go and do something nice.","id":"7qlac","tier":[1,4]},',
+  '{"text":"On leave and you\'re still here? Fair. Where else would you go?","id":"rsp0a0","tone":"funny","tier":[1,4]}]',
   ',"career.tip.bottom":[',
-  '{"text":"Your work standing is at the bottom. Three days like this and you\'ll be let go. One good shift turns it round.","id":"baezes"}]',
+  '{"text":"At the very bottom. A few days like this and you\'re let go. One good shift turns it round.","id":"lblokj"}]',
   ',"career.tip.captain":[',
-  '{"text":"The Captain has sent for you. Your standing is very low: one step from being sent home. Every shift you work helps.","id":"18eh1a8"}]',
+  '{"text":"The Captain has sent for you. One more step down and you\'re sent home. It\'s not too late.","id":"uls9to"}]',
   ',"career.tip.chief":[',
-  '{"text":"The Chief has sent for you: your work standing is low. Go to the meeting, then turn up for shifts and do jobs to recover.","id":"sjlu63"}]',
+  '{"text":"Chief Calder has sent for you. To climb back: be on shift by 08:00 and turn in jobs.","id":"uf8e29"}]',
   ',"career.tip.late":[',
-  '{"text":"You were late for your shift. A small dip in how Works sees you. Be in the Works bay by 08:00.","id":"1q712uo"}]',
+  '{"text":"Late for your shift. A little late is only a small dip. Be in the Works bay by 08:00.","id":"irxo4j"}]',
   ',"career.tip.leave":[',
-  '{"text":"Leave: book a workday off here, by 07:30 on the day. You start with 3 days and earn 1 more every four weeks, up to 5.","id":"4h5nht"}]',
+  '{"text":"Need a day? Book leave in Schedule on your device, by 07:30 that day at the latest.","id":"qfwj7r"},',
+  '{"text":"You get a few leave days, and one more every few weeks. Cancel a booking to get it back.","id":"182gcxh"},',
+  '{"text":"Time in the infirmary when you\'re ill never uses up leave or counts as missed.","id":"12b73ng"}]',
   ',"career.tip.missed":[',
-  '{"text":"You missed your shift with no leave booked. That\'s a big hit to your work standing. Need a day? Book leave on your device.","id":"176g54z"}]',
+  '{"text":"You missed a shift without leave: a big hit to your work standing. Book leave instead.","id":"5cfcxl"}]',
   ',"career.tip.notice":[',
-  '{"text":"You\'ve been let go. Tomorrow is your last day on the Wren. Your friends will want to say goodbye.","id":"qzkic6"}]',
+  '{"text":"You\'ve been let go. Tomorrow is your last day aboard. Friends will want to say goodbye.","id":"dh8zz6"}]',
+  ',"career.tip.up":[',
+  '{"text":"Your work standing is climbing. Keep turning up. People have noticed.","id":"143vv0p"}]',
+  ',"career.up":[',
+  '{"text":"Saw you on shift this morning. Good. Keep that up.","id":"dul8m6","tier":[2,4]},',
+  '{"text":"Things looking up? You look more like yourself.","id":"zew7q","tier":[2,4]}]',
   ',"chat":[',
   '{"text":"What\'s it like, living out here? Properly, I mean. Not the brochure.","id":"1riop94","dept":"guest"},',
   '{"text":"I\'m off again soon. Tell me one thing I shouldn\'t miss before I go.","id":"e8586c","dept":"guest"},',
@@ -22698,11 +23074,16 @@ const LINES = JSON.parse([
   '{"text":"Your tomatoes are in the soup. Well, the garden\'s. You picked them.","id":"1oy22km","cue":["tradition","tradition.harvest.you"],"dept":"galley"},',
   '{"text":"Mm. You came to the harvest. Good hands. Gentle with the roots.","id":"on5hvb","tone":"warm","cue":["tradition","tradition.harvest.you"],"dept":"garden"}]',
   ',"farewell.day":[',
-  '{"text":"Write to me, {me}. Every week. Promise.","id":"d5381e","tone":"warm"},',
-  '{"text":"The Wren won\'t be the same. Look after yourself out there.","id":"105sazu","tone":"warm"}]',
+  '{"text":"{bye}, {nick}. Safe trip on the Tern.","id":"1rz0hru","tier":[1,4]},',
+  '{"text":"Off today, then. Good luck out there. I mean it.","id":"1etbqx6","tier":[1,4]},',
+  '{"text":"Go well. Turn up wherever you land. The rest comes.","id":"nt2rd8","tone":"warm","tier":[2,4]},',
+  '{"text":"Came to see you off. Couldn\'t not.","id":"1wca0dh","tone":"warm","tier":[3,4]},',
+  '{"text":"Window seat. Promise me.","id":"13kmyqa","tone":"warm","tier":[3,4]},',
+  '{"text":"Write when you land. Proper Mail.","id":"1phxnb2","tone":"warm","tier":[3,4]}]',
   ',"farewell.eve":[',
-  '{"text":"I heard. Tomorrow? I can\'t believe it. I\'m going to miss you, {me}.","id":"8zvin9"},',
-  '{"text":"It\'s not fair. Well, it is. But I\'ll miss you anyway.","id":"3q85lm"}]',
+  '{"text":"I heard you\'re leaving tomorrow. I\'m sorry. Look after yourself.","id":"hgc7nh","tier":[1,4]},',
+  '{"text":"Tomorrow, is it? The Wren won\'t be the same. Safe trip.","id":"1prs6ih","tier":[1,4]},',
+  '{"text":"Leaving tomorrow. I\'m sorry it went this way. You were good company.","id":"12zbznb","tone":"warm","tier":[2,4]}]',
   ',"feel":[',
   '{"text":"Lovely ship. Everyone says hello. Even the Chief of the Watch, nearly.","id":"1ibgymf","tone":"funny","dept":"guest","mood":"high"},',
   '{"text":"Long way from home, and a long way to go. The tea helps.","id":"f902ce","dept":"guest","mood":"low"},',
@@ -23211,14 +23592,12 @@ const LINES = JSON.parse([
   '{"text":"Oh. I won? Sorry. It was close.","id":"o5k6wy","trait":"shy"},',
   '{"text":"That was lovely. Again? Let\'s go again.","id":"1wnajqh","trait":"cheerful"}]',
   ',"worried.captain":[',
-  '{"text":"The Captain sent for you. That\'s serious, {nick}. What\'s going on?","id":"yewtor"},',
-  '{"text":"People are talking about the ready room. I\'m worried about you.","id":"19n56ze"}]',
+  '{"text":"Up to the ready room? {sigh}. The Captain\'s kind. Still, go to your shift.","id":"12wxjes","tone":"warm","tier":[2,4]}]',
   ',"worried.chief":[',
-  '{"text":"Calder had you in the office, didn\'t she? You all right, {nick}?","id":"1060ivp"},',
-  '{"text":"Heard you had a word with the Chief. If something\'s wrong, tell me.","id":"63ika3"}]',
+  '{"text":"Heard the Chief had a word. She\'s fair. Do what she said and it\'s done.","id":"1od5ffx","tier":[2,4]},',
+  '{"text":"Calder only says it once, plainly. That\'s a kindness, believe it or not.","id":"1vau7o1","tier":[2,4]}]',
   ',"worried.last":[',
-  '{"text":"They\'ll send you home if this goes on. Please turn up tomorrow.","id":"riudve"},',
-  '{"text":"One good shift, {nick}. That\'s all it takes to start. Please.","id":"1q3aghm"}]',
+  '{"text":"People are saying they\'ll send you home if this goes on. Please don\'t let them.","id":"q4k9qw","tone":"warm","tier":[2,4]}]',
   '}',
 ].join(''));
 const CONVOS = [
@@ -23766,8 +24145,10 @@ const HOME_CHAT = {
 // ---- BEGIN MEETINGS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
 const MEETINGS_BAKED = {
   "bridgeInvite": {"title": "An invitation", "from": "Commander Teo Vance", "gist": "Commander Vance: the Captain invites you to bridge hour, tomorrow after the day shift, on Deck 1.", "lines": [{"who": "vance", "text": "Cadet. A moment. You may finish chewing.", "pose": "nod", "to": "you"}, {"who": "vance", "text": "The Captain's compliments. You're invited to bridge hour. Tomorrow, after the day shift, Deck 1."}, {"who": "vance", "text": "Juniors visit the bridge once every four weeks. No regulation requires it. I approve of it anyway."}, {"who": "vance", "text": "Three things. Clean boots. Hands behind your back at the helm. Nothing red is to be touched."}, {"choice": [{"text": "I'll be there.", "flag": "bridge.invited", "rel": {"vance": 1}, "reply": {"who": "vance", "text": "Good. Five minutes early is on time."}}, {"text": "What's up there, exactly?", "flag": "bridge.invited", "rel": {"vance": 2}, "reply": {"who": "vance", "text": "The helm, the chart table, the Captain's chair. And the best view on the ship. Don't tell Amadi I said so."}}, {"text": "(Say nothing)", "flag": "bridge.invited", "reply": {"who": "vance", "text": "I'll take that as a yes. Most people do."}}]}, {"who": "vance", "text": "The Captain will say hello. She'll know your name. Don't let that unsettle you. It unsettles everyone."}, {"who": "vance", "text": "That's all. As you were.", "pose": "nod"}]},
-  "careerCaptain": {"title": "The Captain's ready room", "from": "Commander Teo Vance", "gist": "The Captain sent for you and you didn't come. Commander Vance says she has noted it.", "lines": [{"who": "marrow", "text": "Stand there, please. This isn't a social call.", "to": "you"}, {"who": "marrow", "text": "Chief Calder spoke to you. Since then you've missed more shifts. Every one of them lands on someone else."}, {"who": "marrow", "text": "I don't send people home lightly. But I will, if this goes on."}, {"choice": [{"text": "I understand, Captain.", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "I hope so. Show me, not Calder. The board will tell me."}}, {"text": "I'll put it right.", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "Then start tomorrow at eight.", "pose": "nod"}}, {"text": "(Say nothing)", "reply": {"who": "marrow", "text": "Very well. Dismissed."}}]}]},
-  "careerChief": {"title": "A word with the Chief", "from": "Chief Ines Calder", "gist": "You didn't come to the Chief's office. Calder says the talk will keep, and so will the record.", "lines": [{"who": "calder", "text": "Shut the door. Sit.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "You've missed shifts. No leave booked, no word to anyone. The board noticed before I did."}, {"who": "calder", "text": "Everyone has bad weeks. If you need a day, book it on your device. That's what leave is for."}, {"choice": [{"text": "It won't happen again, Chief.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good. Eight o'clock, Works bay. I'll see you there."}}, {"text": "I've been struggling a bit.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "Then say so. Talk to Rina, or to me. But turn up.", "pose": "nod"}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Silence I can work with. Absence I can't."}}]}, {"who": "calder", "text": "Turn up, do the jobs, and this goes away. That's all."}]},
+  "careerCaptain": {"title": "The ready room", "from": "Captain Odile Marrow", "gist": "You were expected in the ready room. A reprimand is on your record. One good shift turns it round. Then another.", "lines": [{"who": "marrow", "text": "Come in. Mind the step. Everyone trips on it.", "pose": "gesture"}, {"who": "marrow", "text": "Sit, please, {me}. This is a formal reprimand, and I'd like you to hear all of it.", "to": "you"}, {"who": "marrow", "text": "The Chief has spoken to you. The shifts are still being missed. It goes on your record today."}, {"who": "marrow", "text": "I don't say that to frighten you. I say it because it's true, and you deserve the truth."}, {"who": "marrow", "text": "A ship runs on people turning up. Every one of us. Me included."}, {"who": "marrow", "text": "I ask everyone one question. Here's yours today. What would help you turn up?", "pose": "listen", "to": "you"}, {"choice": [{"text": "Knowing someone noticed.", "rel": {"marrow": 1}, "flavour": "share", "mem": "career.captain.noticed", "reply": {"who": "marrow", "text": "Then know it. I noticed. The Chief noticed. So did your friends."}}, {"text": "More sleep, honestly.", "rel": {"marrow": 1}, "mem": "career.captain.sleep", "reply": {"who": "marrow", "text": "Then sleep. Regulation nine is rest. Commander Vance will be thrilled someone asked.", "pose": "laugh"}}, {"text": "I don't know yet.", "mem": "career.captain.unsure", "reply": {"who": "marrow", "text": "An honest answer. Find out, then. Come back and tell me."}}]}, {"who": "marrow", "text": "Here is where we stand. If your work falls any further and stays there, the Wren will let you go."}, {"who": "marrow", "text": "Not as a punishment. A ship has to be able to count on its crew."}, {"who": "marrow", "text": "It isn't there yet. One good shift turns it round. Then another. Then it's behind you."}, {"who": "marrow", "text": "I'd much rather remember you for something else. Give me the chance.", "to": "you"}, {"who": "marrow", "text": "The Admiral agrees. He outranks us all.", "pose": "nod"}, {"who": "marrow", "text": "That's all. Thank you for coming up."}]},
+  "careerChief": {"title": "A word with the Chief", "from": "Chief Ines Calder", "gist": "You didn't come to my office. Missed shifts. Be in the bay at ten to eight, every workday. Need a day? Book leave.", "lines": [{"who": "calder", "text": "Door. Thank you. Sit.", "pose": "gesture"}, {"who": "calder", "text": "I'll be plain. You've missed shifts. Not one. Several.", "to": "you"}, {"who": "calder", "text": "The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs."}, {"who": "calder", "text": "I'm not angry. I'm worried. Those are different, and I'd like you to know which."}, {"who": "calder", "text": "So. What's going on, {me}? Take your time.", "pose": "listen", "to": "you"}, {"choice": [{"text": "It's been hard. I've been tired.", "rel": {"calder": 1}, "flavour": "share", "mem": "career.chief.tired", "reply": {"who": "calder", "text": "Tired I can work with. If you're ill, the infirmary. Time there never counts against you."}}, {"text": "I don't have a good reason.", "rel": {"calder": 1}, "mem": "career.chief.honest", "reply": {"who": "calder", "text": "Honest. Good. I can work with honest.", "pose": "nod"}}, {"text": "It won't happen again.", "mem": "career.chief.promise", "reply": {"who": "calder", "text": "Don't promise me. Show the board."}}]}, {"who": "calder", "text": "Here's what changes. You're in the bay at ten to eight. Every workday."}, {"who": "calder", "text": "You take a job. You finish it. You turn it in at the board. Do that, and this goes away."}, {"who": "calder", "text": "Need a day? Book leave on your device. An empty slot on paper beats a surprise."}, {"who": "calder", "text": "If nothing changes, the Captain will want to see you. Neither of us wants that."}, {"who": "calder", "text": "Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.", "to": "you"}, {"who": "calder", "text": "That's all. I won't say it twice. Board's there.", "pose": "nod"}]},
+  "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
+  "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day. One job, end to end, with your own hands.", "lines": [{"who": "calder", "text": "Ten to eight. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea's at half ten. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your locker, and handed you your device.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. Home. Top bunk at the back is yours.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Your locker's under it. Bag in there. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours too. Your device. Mail, your schedule, maps, the lot.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "It'll want to say hello. They always do. Let it."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
@@ -26626,35 +27007,41 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // is a big hit to Works and ship-wide work (repAdd: softened near the bottom, pulled to the middle each Sunday); being
 // late stays section 20's small dip. Started: in a Works room on Deck 5 (shiftTick's test), or a repair of yours. Your
 // first week aboard is a grace (days up to CAREER.grace never count as missed).
-// The ladder, on SHIP.rep.ship.work: under CAREER.chief, the Chief's talk (an occasion: appointment, Mail and meeting
-// in the Chief's office, the next day Calder is on shift); under CAREER.captain, the Captain's reprimand (the ready
-// room). Each comes once until you recover (CAREER.rearm). After each step a tip (a warning: shown even with tips off)
-// and up to CAREER.worried friends (tier 2+) come and find you, worried. Under CAREER.bottom at the end of a workday,
-// once the Captain has sent for you, is a day at the bottom (days off and leave neither count nor reset); CAREER.days
-// in a row and you're let go: the next morning's notice (Mail and tip; friends come to say goodbye), then your last
-// day (no shift; friends find you again and stand with you in the shuttle bay 14:30-15:00, section 14's farewell),
-// and at 15:00 the closing card. The save is marked ended (a reload shows the card), with New game the only way on.
+// The ladder, on SHIP.rep.ship.work: under CAREER.chief, the Chief's talk; under CAREER.captain, the Captain's
+// reprimand. Each is an occasion (appointment, Mail, meeting), booked at 07:00 on a day its person is on shift (or
+// after CAREER.wait days anyway), the Captain's only once the Chief's has been held, so the Mail can say "today". Each
+// comes once until you recover (CAREER.rearm). When it's booked, a tip (a warning: shown even with tips off) and up to
+// CAREER.worried friends (tier 2+) come and find you, worried. Under CAREER.bottom at the end of a workday, once the
+// Captain's reprimand has been held (kept or missed), is a day at the bottom (days off and leave neither count nor
+// reset); CAREER.days in a row and you're let go, so it always comes after both talks: the notice day (Mail and tip,
+// Calder's last words in her office, friends come to say goodbye), then your last day (no shift; friends find you
+// again; they, Torres, Pell and Calder stand with you in the shuttle bay 14:30-15:00, section 14's farewell, where
+// the send-off plays), and at 15:00 (or when the send-off ends) the closing card. The save is marked ended (a reload
+// shows the card), with New game the only way on.
 //   SHIP.career (saved) = { l: leave held, w: grants so far, b: [booked days], s: [sick days], st: 0 | 1 Chief | 2
 //   Captain, n: bottom days in a row, on: the last day you started your shift, e: the last day checked for a miss,
-//   z: the last day whose end is counted, k: once-only warnings (1 late, 2 missed), fl: the goodbye's steps done (1 the
-//   notice, 2 the last morning), go: the notice day, f: [friends at the send-off], end }
-// The words are head writer 4's (content/meetings/careerChief.meet, careerCaptain.meet, content/banks/career.lines).
+//   z: the last day whose end is counted, k: once-only warnings (1 late, 2 missed), q: a step waiting to be booked (1,
+//   2), qd: the day it fell due, fl: the goodbye's steps done (1 the notice, 2 the last morning), go: the notice day,
+//   f: [who stands with you at the send-off], end }
+// The words are head writer 4's (content/meetings/careerChief|careerCaptain|careerLetGo|careerSendoff.meet, the bank
+// content/banks/career.lines and each voice's content/career/*.lines).
 // Nothing here calls R().
 const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
-  chief: 25, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, chiefAt: 570, captainAt: 660 };
+  chief: 25, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
 SHIP.career = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
 function careerClean(s) {
   const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
   return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
-    k: int(s.k, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+    k: int(s.k, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
 }
 SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
 onSim('newGame', () => { SHIP.career = null; careerCard(false); });
 function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on: 0, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on: 0, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -26674,8 +27061,9 @@ function careerBook(d, now = shipNow()) {                // the Schedule's butto
   simNote('leave', { day: d, booked: can === 'book' });
   return true;
 }
-function careerText(kind) {                              // a text from content (tips, Mail, the card), or null
-  const L = typeof LINES !== 'undefined' && LINES[kind]; return Array.isArray(L) && L.length && typeof L[0].text === 'string' ? L[0].text : null;
+function careerText(kind, k = 0) {                       // a text from content (tips, Mail, the card; variant k), {me} filled, or null
+  const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null;
+  return e && typeof e.text === 'string' ? e.text.replace(/\{me\}/g, () => chatName()) : null;
 }
 const careerSplit = (kind, from) => { const t = careerText(kind) || '', i = t.indexOf(' | '); return i < 0 ? null : { from, subject: t.slice(0, i), body: t.slice(i + 3) }; };
 function careerTip(key) {                                // a warning: shown even with tips off (like the low-need ones), each time it's due
@@ -26692,13 +27080,20 @@ function careerSeekLine(p, why) {                        // the chip's line when
   const kind = k[1] === 'eve' || k[1] === 'day' ? 'farewell.' + k[1] : 'worried.' + k[1], l = socLine(p, kind, { t: shipNow(), tier: relTier(p.id) });
   return l ? { text: l.text, kind, say: true } : null;
 }
-function careerSummon(id, by, at, now) {                 // the next day they're on shift (or tomorrow), as an occasion
-  const d = Math.floor(now / 1440) + 1; let k = d + 1; while (k < d + 8 && !occOnShift(by, k)) k++; if (k >= d + 8) k = d + 1;
-  OCCASIONS[id].mail = careerSplit(id === 'careerChief' ? 'career.mail.chief' : 'career.mail.captain', id === 'careerChief' ? 'Chief Ines Calder' : 'Commander Teo Vance');
-  return occasionAdd(id, (k - 1) * 1440 + at);
+const careerHeld = (id, now) => { const r = SHIP.occasions.filter(x => x.id === id).pop(); return !!r && now >= r.at + r.len; };   // its latest one is over (kept or missed)
+function careerDue(now) {                                // a step waiting: booked at 07:00 on a day its person is on shift, the Captain's after the Chief's
+  const c = SHIP.career, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (!c.q || c.go != null) return;
+  const step = c.q === 1 ? 'chief' : 'captain', id = c.q === 1 ? 'careerChief' : 'careerCaptain', o = OCCASIONS[id];
+  if (m < 420 || m > o.at - 30 || (!occOnShift(o.by, d) && d < c.qd + CAREER.wait) || (c.q === 2 && !careerHeld('careerChief', now))) return;
+  o.mail = careerSplit('career.mail.' + step, c.q === 1 ? 'Chief Ines Calder' : 'Commander Teo Vance');
+  occasionAdd(id, (d - 1) * 1440 + o.at); c.q = 0;
+  careerTip(step); careerSeek(step, now + 60, now + 1440, CAREER.worried);
+  simNote('careerStep', { step });
 }
 OCCASIONS.careerChief = { title: 'A word with the Chief', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.chiefAt, len: 20, script: 'careerChief', due: () => false, mail: null };
 OCCASIONS.careerCaptain = { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', deck: 1, room: 'R', at: CAREER.captainAt, len: 20, script: 'careerCaptain', due: () => false, mail: null };
+OCCASIONS.careerLetGo = { title: 'The Chief\'s office', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.letGoAt, len: 20, script: 'careerLetGo', due: () => false, mail: null };
+OCCASIONS.careerSendoff = { title: 'Your send-off', kind: 'meeting', by: 'torres-zeke', deck: 5, room: 'S', at: CAREER.sendOffAt, len: 30, script: 'careerSendoff', due: () => false, mail: null };
 function careerStarted(t) {                              // you started your shift (from 07:00 until it counts as missed)
   const c = careerInit(), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; if (m >= 420 && m < CAREER.missBy) c.on = d;
 }
@@ -26715,22 +27110,22 @@ function careerMissed(d) {
 }
 function careerDayEnd(d, now) {                          // a workday ends: at the bottom (after the Captain) or not
   const c = careerInit(); if (c.go != null || !careerRota(d) || careerOff(d)) return;
-  c.n = c.st >= 2 && careerWork() < CAREER.bottom ? c.n + 1 : 0;
+  c.n = c.st >= 2 && !c.q && careerHeld('careerCaptain', now) && careerWork() < CAREER.bottom ? c.n + 1 : 0;   // only once the reprimand has been held
   if (c.n === 1) { careerTip('bottom'); careerSeek('last', now, now + 1440, CAREER.worried); }
   if (c.n >= CAREER.days) careerLetGo(d + 1, now);
 }
 function careerLadder(now) {
   const c = careerInit(), w = careerWork();
-  if (c.st >= 1 && w >= CAREER.rearm.chief) c.st = 0; else if (c.st >= 2 && w >= CAREER.rearm.captain) c.st = 1;   // recovered: the steps come again
+  const st = c.st; if (c.st >= 1 && w >= CAREER.rearm.chief) c.st = 0; else if (c.st >= 2 && w >= CAREER.rearm.captain) c.st = 1;   // recovered: the steps come again
+  if (c.st < st) { if (c.q > c.st) c.q = 0; careerTip('up'); }
   if (c.go != null) return;
-  const step = c.st === 0 && w < CAREER.chief ? 'chief' : c.st === 1 && w < CAREER.captain ? 'captain' : null; if (!step) return;
-  c.st++; careerSummon(step === 'chief' ? 'careerChief' : 'careerCaptain', step === 'chief' ? 'calder' : 'marrow', step === 'chief' ? CAREER.chiefAt : CAREER.captainAt, now);
-  careerTip(step); careerSeek(step, now + 60, now + 1440, CAREER.worried);
-  simNote('careerStep', { step });
+  if (c.st === 0 && w < CAREER.chief || c.st === 1 && w < CAREER.captain) { c.st++; c.q = c.st; c.qd = Math.floor(now / 1440) + 1; }   // booked by careerDue
 }
 function careerLetGo(d, now) {                           // notice on day d, the last day d + 1
-  const c = careerInit(); c.go = d; c.f = careerFriends(CAREER.sendOff).map(p => p.id);
-  c.b = []; c.n = 0;                                      // booked leave is moot now
+  const c = careerInit(), see = CAREER.seeOff.filter(id => { const p = socP(id); return p && socAboard(p, d + 1); });
+  c.go = d; c.f = [...new Set(careerFriends(CAREER.sendOff).map(p => p.id).concat(see))];
+  c.b = []; c.n = 0; c.q = 0;                             // booked leave is moot now
+  occasionAdd('careerLetGo', (d - 1) * 1440 + CAREER.letGoAt); occasionAdd('careerSendoff', d * 1440 + CAREER.sendOffAt);   // Calder's last words; the shuttle bay
   if (typeof SHIP_DAYS !== 'undefined') { SCHED_DATA = null; SHIP_DAYS.clear(); }   // the last day's plans pick up the send-off (as section 18's eventOneOff does)
   simNote('letGo', { day: d + 1 });
 }
@@ -26741,10 +27136,12 @@ function careerGoTick(now) {                             // the notice, the last
   if (d >= c.go && m >= 420 && !(c.fl & 1)) { c.fl |= 1;  // 07:00 on notice day: Mail, the warning, friends come to say goodbye
     const ml = careerSplit('career.mail.notice', 'Chief Ines Calder'); if (ml && typeof mailSend === 'function') mailSend({ at: Math.min(now, (c.go - 1) * 1440 + 420), ...ml });
     careerTip('notice'); careerSeek('eve', now, (c.go - 1) * 1440 + 1320, CAREER.sendOff);
-    if (typeof apptAdd === 'function') apptAdd({ id: 'career-shuttle@' + L, with: [], at: (L - 1) * 1440 + 870, len: 30, where: '5|S', kind: 'social', status: 'yes', title: 'Your shuttle home' });
   }
   if (d >= L && m >= 420 && !(c.fl & 2)) { c.fl |= 2; careerSeek('day', now, (L - 1) * 1440 + 870, CAREER.sendOff); }
-  if (now >= (L - 1) * 1440 + ROTA_OFF) { c.end = true; simNote('careerEnd', { day: L }); saveGame(); careerCard(true); }
+  const off = (L - 1) * 1440 + ROTA_OFF, saying = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === 'careerSendoff';
+  if (now >= off && (!saying || now >= off + 30)) {     // the shuttle leaves at 15:00, once the send-off is said
+    c.end = true; simNote('careerEnd', { day: L }); saveGame(); careerCard(true);
+  }
 }
 // once a ship minute (section 13's tickShip) and after a skip: leave earned, today's start, the misses and day ends
 // passed, the ladder and the goodbye
@@ -26758,7 +27155,7 @@ function careerTick(now = shipNow()) {
     careerLadder(now);
     if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
   }
-  careerGoTick(now);
+  careerDue(now); careerGoTick(now);
 }
 SIM_ADVANCE.push((from, to) => careerTick(to));
 // the closing card: your time on the Wren is over. New game is the only way on (as the HUD's button: arrive or skip)
@@ -26770,7 +27167,7 @@ function careerCard(on) {
     el.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,10,14,.94);color:#e6f0f1;text-align:center';
     document.body.appendChild(el);
   }
-  const t = careerText('career.card') || 'Your time on the Wren is over | ', i = t.indexOf(' | ');
+  const t = careerText('career.card', SHIP.career ? SHIP.career.go || 0 : 0) || 'Your time on the Wren is over | ', i = t.indexOf(' | ');
   el.innerHTML = '<div style="max-width:420px"><h2 style="margin:0 0 12px;font-weight:600"></h2><p style="margin:0 0 20px;line-height:1.5"></p><button type="button" style="display:block;margin:0 auto;font:inherit;padding:10px 22px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1">New game</button></div>';
   el.querySelector('h2').textContent = i < 0 ? t : t.slice(0, i); el.querySelector('p').textContent = i < 0 ? '' : t.slice(i + 3);
   el.querySelector('button').onclick = () => { el.hidden = true;

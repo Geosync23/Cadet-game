@@ -1,0 +1,10 @@
+@crew marrow
+// Head writer 4: career lines. The Captain doesn't come to find you; these are if you meet her.
+
+== career.up
+? tier>=acquaintance
+- The Chief tells me things are better. I'm glad. I don't forget.
+
+== farewell.day
+? tier>=acquaintance
+- I asked you a question once. I still remember your answer. Go well, {me}.   #warm
