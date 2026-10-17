@@ -2,6 +2,16 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
+## Update: builds 0.28.22 to 0.28.25 (Pillar 4 on-call rows; written 2026-10-17 at c44df18)
+
+Read this first. Lead: session_01PxXKwc5mkC7tV5MPi3p7PP (build master session_012K7RZ3oSX2vpBb1rR66MBh). Branch sits on ship-integration 0.41.10 (6d91ee1) + systems 0.33.36 (22fb801). Next build **0.28.26**. Pillar 4 plan: `plans/pillar4-plan.md` ("On call": player engineer = kit bag, device lock, gift tags on carried items).
+- **0.28.22:** `simAct(act, o)` -> `simNote('act', ...)` (typeof-guarded; section 13's bus not merged yet): wash (shower), eat (`with`: company; grab 0), call, buy (`item`), laundry (a washer run). `SHIP.player.name` + `playerNameSet(v)` (trim, 24 max, saved as save.player.name; onboarding's introBegin calls it, SHIP.intro has no name).
+- **0.28.23:** +N notes and the device button's glow fade by `performance.now()` in `floatsTick()` (no CSS animation / setTimeout), so tests are deterministic. cadet_test also hides `#needFx` and `#devBtn` box-shadow (2806e6d).
+- **0.28.24:** reserved jobs' `j.make` ('bracket'): never fetched (`shelfNeeds`), made first in the machine shop (`makeMins(j)`: j.makeMins or 60), `jobStopMark(j, 'fetch'|'make')` -> section 17's `jobStepDone` (only for jobs with j.make). Systems engineer confirmed.
+- **0.28.25:** gifts (social A's section 20, inert until merged): STORE lines' 4th element = gift name -> `giftAdd` on paying (hands full: bought as before); machine shop with no job makes `GIFT_MAKES` in turn (activity `craft`); `bunkTap` shows `bunkNote()` first; `gardenGift()` (minute tick) gives herbs/tomato from your garden run's lot after pickup on `gardenHarvestDay`; `giftHeld()` words hands-full toasts. Social A confirmed.
+- **Checks:** 0.28.22 green; 0.28.23 deck/day green, cadet self-identical; 0.28.24 cadet identical vs 5f62c05, deck/day OK, player running at writing; 0.28.25 untested at writing (see DEV_NOTES rows' "Checks").
+- **Gotchas:** the store test pays for `{ ...storePick(k), gift: null }` (gift lines go to hands). Stand-ins via `window.x` work only while the real function is absent from the build. Comparing against ship-systems alone shows huge diffs (it lacks 0.41.10's decks): compare against your own previous commit.
+
 ## Update: builds 0.28.19 to 0.28.21 (the user's bathroom need and "You can see it working"; written 2026-10-16 at 15d0209)
 
 Read this first. The lead is now session_01PxXKwc5mkC7tV5MPi3p7PP. Branch `claude/player-needs` sits on ship-integration d89a3f5 (0.41.7); next build number **0.28.22**. All checks green at 15d0209 (cadet_test identical except the debug Day skip's "+69 Energy" note in f_noshadow, which is expected).
