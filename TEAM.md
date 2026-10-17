@@ -8,6 +8,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
+**Ship integration 0.60.1** (f28e48e, 2026-10-17 ~04:33): the arrival evening playable (New game), days off, crew coming and going, social A to 0.36.51, social B 0.39.0-0.39.3 (moments), device to 0.35.25, decks to 0.38.13, traditions to 0.34.28 + the birthday fix, sim to 0.26.27. All checks pass. Published: https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG version 2.
+
 **Ship integration 0.60.0 "the writers' kit"** (e3ee66b, 2026-10-17 ~02:53): Pillar 4 wave 1a: sim bus + flags + Day 0, device 0.35.20, systems 0.33.37, social A to 0.36.43, social B 0.39.0, traditions to 0.34.24 (loader, seasons, Sowing morning), dialogue 0.43.0 (the writers' kit; Torres baked), arrival 0.42.6. All checks pass; cadet_test identical to 0.41.10. Published to a NEW link (the user's choice, 03:02): https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG version 1. Next: 0.60.1; wave 1b hired.
 
 **Ship integration 0.41.10** (6d91ee1, 2026-10-16 ~23:45): draw calls packed with the same picture (crowd-render 0.27.20-0.27.24; end-of-test calls 358 -> 217), the garden you can see growing (all 15 beds), root beds and a second bean trellis (decks 0.38.7). All checks pass. Published: link version 18. Next: Pillar 3 check-in 1.
