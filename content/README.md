@@ -295,7 +295,7 @@ them: Was I any good, as your trainer?   [sigh]
 | `keepsake:` | what they give you to keep (resolution beats) |
 | `learn:` | one line for the Crew app's "What you know" (their story) |
 | `mail:` | a Mail from them afterwards: `<minutes later> \| <subject> \| <body>` |
-| `needs:` | themes only: the roster details a beat uses (`needs: home, kin`): `home`, `since`, `kin`, `lost`, `hobbyNoun`; people without them skip it |
+| `needs:` | themes only: the roster details a beat uses (`needs: home, kin`): `home`, `since`, `kin`, `lost`, `hobbyNoun`; people without them skip it. Every one of these a beat's lines use must be listed (lines_check says so); in story arcs, `{lost}` needs `needs: lost` |
 
 - **The script** follows: `them: text [pose]` (`them` is the arc's person; a crew id or `you` also work;
   `them > you: ...` for a line said to you). Poses: `sigh`, `laugh`, `listen`, `nod`, `gesture`.
