@@ -728,6 +728,7 @@ Done so far:
 - **Pillar 6 (the user, 2026-10-17):** ship-wide events **and more traditions**, with **traditions rotating weekly** so the weeks feel different.
 - **Pillar 7 (the user, 2026-10-17): the story.** Lots of **narrative moments** that add up to a larger thread through the game: not cutscenes, a through line you live. And **big arcs for the crew members**, with more detail.
 - **An audio pass (the user, 2026-10-17):** sound comes later, after a few more pillars, as its own pass.
+- **A possible port, much later (the user, 2026-10-17, just an idea):** if the game is ever ported (e.g. to Godot) with a new art style, it would target **PC, not phones**. Helpers could make models through a Blender connector. Not planned; nothing changes now.
 
 
 ## Open questions
