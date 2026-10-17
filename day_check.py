@@ -96,6 +96,12 @@ with sync_playwright() as pw:
     nd = g.ev(f"""(() => {{ const out = []; for (const hm of [390, 720, 1140, 1380]) {{ const all = schedPeople().filter(p => aboardAllDay(p, {DAY})).map(p => crewNeeds(p, ({DAY} - 1) * 1440 + hm));
       out.push(hhmm(hm) + '  ' + NEEDS.map(k => {{ const v = all.map(n => n[k]).sort((a, b) => a - b); return k + ' ' + v[0] + '/' + v[v.length >> 1]; }}).join('  ')); }} return out; }})()""")
     print('Crew needs (lowest/middle):'); [print('  ' + l) for l in nd]
+    # a crew-change day: where each leaver waits in the shuttle bay from 14:30. The spot is one of Deck 5's
+    # shuttle-bay crowd places, picked by the leaver's id (bay[strSeed(id) % count]), so it moves whenever the bay's
+    # crowd places change (the walkable Tern, decks 0.38.19: 120 -> 108 places). A plan difference here alone is expected
+    lv = g.ev(f"""(() => schedPeople().filter(p => !p.guest && crewLeaving(p) === {DAY}).map(p => {{ const w = planWhere(p, ({DAY} - 1) * 1440 + 885);
+      return p.id + ' ' + (w && w.placeId || '-'); }}).join(', '))()""")
+    if lv: print('Leavers waiting in the shuttle bay at 14:45 (the spot follows the bay\'s crowd places):', lv)
 
     # 2. the same start gives the same plans
     a = g.ev(f"(() => {{ SHIP_DAYS.clear(); return JSON.stringify(schedPeople().map(p => planDay(p, {DAY}))); }})()")
