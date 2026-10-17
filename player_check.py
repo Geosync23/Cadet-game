@@ -1033,6 +1033,19 @@ with sync_playwright() as pw:
                 check(not none['shown'], f'{kind}: no Repair button without the part')
                 check(work['act'] and work['act'][0] == want and not work['shown'], f'{kind}: clicking Repair starts the work ({work["act"]}) and the button goes')
                 g.ev("actEnd(true)")
+            # 0.28.55 (the lead): never over Put down (player engineer 8's #putDown, under it, lifts above a toast on phones) nor a toast:
+            # a phone screen, at the lamp's stop with the lamp, at rest and with a long toast up
+            RECTS = r"""(() => { const r = id => { const e = document.getElementById(id); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom].map(Math.round); };
+              return { repair: r('repairBtn'), put: r('putDown'), toast: document.getElementById('toast').classList.contains('show') ? r('toast') : null }; })()"""
+            over = lambda a, b: bool(a and b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3])
+            vp = g.page.viewport_size; g.page.set_viewport_size({'width': 390, 'height': 844})
+            g.ev("goToDeck(4)"); g.step(3); pid = g.ev(f"({HJ})('lamp')"); g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5)
+            for label, js in [('at rest', ''), ('with a toast', "toast('Main storage', 'You take a lamp. Now replace a lamp: lift lobby. A long line, so it wraps on a phone, and wraps again.')")]:
+                if js: g.ev(js)
+                for k in range(8): g.step(8); g.page.wait_for_timeout(120)   # real time: the toast's transition, Put down's lift
+                rc = g.ev(RECTS); print(f'  phone, {label}:', rc)
+                check(rc['repair'] and not over(rc['repair'], rc['put']) and not over(rc['repair'], rc['toast']) and rc['repair'][3] <= 844, f'phone, {label}: Repair shown, clear of Put down and the toast ({rc})')
+            g.page.set_viewport_size(vp); g.step(3)
             g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('pcrb-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++; handTick(true)")
     else:
         print('The job loop: this build has no section 17 jobs (myJob, finishJob): skipped')

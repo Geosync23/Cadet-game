@@ -226,7 +226,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.52
+   STARSHIP CADET: CSV Wren                           build 0.28.55
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.52';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.55';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10961,14 +10961,14 @@ function playerTap(it, at, point) {
   if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
-  if (!/job board|ship health/i.test(it.t) && jobSpotTap(point)) return true;   // anything near your job's stop: the lamp in a lobby (0.28.52)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
-  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || machineTap(it, at);
+  const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
+  const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
   const [, types, kind] = rule;
   const near = [...PLACE_OF.values()].filter(pl => types.includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)))
     .map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s && Math.hypot(s.x - at.x, s.z - at.z) < ACT_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
-  if (!near.length) return false;
+  if (!near.length) return chore(false);
   if (kind === 'pay') {                                  // the counter: pay for what you've picked out, standing at it
     if (!basket) return false;
     if (SHIP.player.credits < basket.price) { toast(it.t, basket.name[0].toUpperCase() + basket.name.slice(1) + ' is ' + basket.price + ' credits, and you have ' + SHIP.player.credits + '. Finish a job or two first.'); basket = null; return true; }
@@ -11026,7 +11026,6 @@ const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'r
 function playerFloorTap(point) {
   if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
-  if (jobSpotTap(point)) return true;                    // the floor at your job's stop (0.28.52, the user's lamp)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -11036,6 +11035,8 @@ function playerFloorTap(point) {
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
     if (best < FLOOR_NEAR) hits.push([best, pl, sp, use]);
   }
+  const job = jobHere(point, true);                      // the floor at your job's stop (0.28.52, the user's lamp), unless a usable place is nearer the tap
+  if (job && (!hits.length || job.by <= hits.reduce((m, h) => Math.min(m, h[0]), Infinity))) return !!job.go();
   if (!hits.length) return false;
   const [, pl, sp, use] = hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
   if (use === 'sit') return sitTap({ t: 'Seat', x: '' }, at, at);
@@ -11756,7 +11757,13 @@ function jobTap(it, at) {
   const m = machineById(mw.j.machine), pid = m && m.deck === deckDef.num && typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   const spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; if (!spot) return false;
   const mc = cellPos(...(m.at || PLACE_OF.get(pid).at));
-  if (Math.hypot(spot.x - at.x, spot.z - at.z) > ACT_NEAR + .6 && Math.hypot(mc.x - at.x, mc.z - at.z) > 1.6) return false;
+  // the machine itself (0.28.55, reviewer 1f and the lead: anything within 3 m of its panel took over a washer next to it,
+  // the welding bench, the Works station): the thing tapped is in its room, within MACHINE_NEAR of it or .8 m of its panel
+  // (Deck 4's light relays), and no other machine in the room is nearer. The floor at its panel and glass-backed things
+  // past it still start the work (jobSpotTap), as does Repair
+  const dm = Math.hypot(mc.x - at.x, mc.z - at.z), dp = Math.hypot(spot.x - at.x, spot.z - at.z), mine = Math.min(dm, dp);
+  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== m.room
+    || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) return false;
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
 }
@@ -11773,24 +11780,26 @@ function jobRayDist(s) {                                 // the tap's ray from t
 }
 function jobHere(p, viaRay) {
   if (!jobsOn() || typeof deckDef === 'undefined' || !p) return null;
-  const near = pid => { const s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; return s && (Math.hypot(s.x - p.x, s.z - p.z) < JOB_REACH || viaRay && jobRayDist(s) < JOB_RAY) ? s : null; };
+  let by = Infinity;                                     // how near the tap passes the spot (the floor tap's tie-break, 0.28.55)
+  const near = pid => { const s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; if (!s) return null; const d = Math.hypot(s.x - p.x, s.z - p.z), r = viaRay ? jobRayDist(s) : Infinity; by = Math.min(d, r);
+    return d < JOB_REACH || r < JOB_RAY ? s : null; };
   const P = SHIP.player, j = typeof ixChore === 'function' ? ixChore() : null;
   if (j && !j.workDone) {
     const nx = ixNextStop(j), s = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? near(nx.s.places[0]) : null;
-    if (s) return { parts: !!j.parts.length && !jobNeeds(j, { fitted: [] }, P.carry).length, go: () => ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) };
+    if (s) return { by, parts: !!j.parts.length && !jobNeeds(j, { fitted: [] }, P.carry).length, go: () => ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) };
   }
   const mj = myJob(), m = mj && mj.machine && !mj.workDone ? machineById(mj.machine) : null, s = m && m.deck === deckDef.num ? near(panelPlace(m.id)) : null;
   const w = P.work && P.work.job === (mj && mj.id) ? P.work : { fitted: [] };   // not myWork(): it makes P.work, and this runs every few frames
-  if (s) return { parts: !jobNeeds(mj, w, P.carry).length, go: () => jobTap({ t: machineName(m)[0].toUpperCase() + machineName(m).slice(1), x: '', front: 0, depth: 0 }, new THREE.Vector3(s.x, 0, s.z)) };
+  if (s) return { by, parts: !jobNeeds(mj, w, P.carry).length, go: () => jobTap({ t: machineName(m)[0].toUpperCase() + machineName(m).slice(1), x: '', front: 0, depth: 0 }, new THREE.Vector3(s.x, 0, s.z)) };
   return null;
 }
-// a locked room your job's next stop is in opens for you (0.28.52: section 18's veyliLamp is a lamp in the Captain's
-// quarters, which you could never get into; section 14's doorOpenFor asks). Chores only; it closes once the stops are done
+// a locked room any stop of your job is in opens for you until you turn the job in (0.28.52: section 18's veyliLamp is a
+// lamp in the Captain's quarters, which you could never get into; section 14's doorOpenFor asks). Chores only. And a locked
+// room you're standing in always lets you out (0.28.55: it used to shut behind you once the lamp was in)
 function jobDoorOpen(deck, room) {
-  const j = typeof myJob === 'function' ? myJob() : null; if (!j || j.workDone || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
-  const k = j.parts.length ? 1 : 0, done = j.stepsDone || [];   // jobStops puts the fetch first when there are parts
-  for (let i = 0; i < j.stops.length; i++) if (!done.includes(i + k)) { const pl = j.stops[i].placeId && placeById(j.stops[i].placeId); return !!pl && pl.deck === deck && pl.room === room; }
-  return false;
+  if (typeof deckDef !== 'undefined' && deckDef.num === deck && roomAt(...player.here()) === room) return true;   // never shut on you inside (0.28.55, reviewer 1f's softlock)
+  const j = typeof myJob === 'function' ? myJob() : null; if (!j || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
+  return j.stops.some(x => { const pl = x.placeId && placeById(x.placeId); return !!pl && pl.deck === deck && pl.room === room; });   // any stop of the job you hold, until it's turned in
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
 // the Repair button (0.28.52, the user's design, "Repair" step): small and thumb-sized at the bottom right, in the slot
@@ -11821,7 +11830,14 @@ function handRepair() {
 function handTick(now) {
   const t = performance.now(); if (!now && t - HAND.at < 250) return; HAND.at = t;
   const el = handEl(), r = document.getElementById('repairBtn'), h = handRepair();
-  HAND.repair = !!h; if (r.hidden === !h) return; r.hidden = !h;
+  HAND.repair = !!h; if (r.hidden !== !h) r.hidden = !h;
+  if (!h) return;
+  // never over Put down (player engineer 8's #putDown, below us, lifts above a toast on phones) or a toast (0.28.55)
+  const tops = [innerHeight - 76], pd = document.getElementById('putDown'), tt = document.getElementById('toast');
+  if (pd && !pd.hidden) tops.push(pd.getBoundingClientRect().top - 10);
+  if (tt && tt.classList.contains('show') && innerWidth <= 720) tops.push(tt.getBoundingClientRect().top - 10 - (pd && !pd.hidden ? 58 : 0));
+  const b = Math.round(innerHeight - Math.min(...tops)), key = b + 'px';
+  if (HAND.bottom !== key) { HAND.bottom = key; el.style.bottom = b > 76 ? b + 'px' : ''; }   // measured: the safe area is already in it
 }
 // at the panel (actBegin): fit the parts you carry, then repair if they're all in, else look it over the first time
 function jobBegin(A) {
@@ -12061,6 +12077,13 @@ const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepD
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
 function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
+// 0.28.55 (the lead): at a chore's stop a thing you can use does its own thing. Section 15's playerTap asks ixChoreLast
+// last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
+// machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
+function ixChoreLast(it, at, own) {
+  const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
+  return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
+}
 function ixChoreTap(it, at) {
   const j = ixChore(); if (!j || j.workDone) return false;
   const nx = ixNextStop(j); if (!nx) return false;
@@ -12119,7 +12142,6 @@ function ixStopDone(A) {
 function ixTap(it, at, point) {
   if (/job board/i.test(it.t) && typeof jobsBoard === 'function') { approach(at.clone(), it.front, it.depth, () => ixBoard.open(it)); return true; }
   if (/^ship health$/i.test(it.t) && typeof shipHealthRows === 'function') { approach(at.clone(), it.front, it.depth, () => ixHealth.open()); return true; }
-  if (ixChoreTap(it, at)) return true;                   // a stop of the chore you hold
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
   const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
