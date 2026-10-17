@@ -7,9 +7,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.11** (Head writer 2, b1e454b):
-2,502 lines, 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.12.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.13** (Head writer 2, 027c0da):
+2,502 lines, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.14.
 
 ## What you own
 
@@ -62,7 +62,8 @@
 | writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
 | **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batch 1 and 1b merged in 0.48.11; on batch 2 (command, Watch, Survey people to ~30 each) |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
-| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | handed over (`plans/handover-writer-commons.md`, 9eb51fa), idle: ask the lead to retire it and hire a fresh writer-commons when needed |
+| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
+| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | hired 2026-10-17 ~04:16; order: story-crew callbacks + visit/note, newlyweds and who: overheard, rep/knownFor, story crew to ~120 |
 
 Writer 2 is on batch 1 (Works 1-8 and Kovac to ~30, Torres's job-2/job-3 bubbles under `flag:walk.job2.<step>` and
 `flag:walk.job3.tea|turnin`, telling onboarding when they're in). Newcomer replies are on hold (they wait for the guide
@@ -79,6 +80,15 @@ overheard can now be written.
 2. Torres's job-2 and job-3 bubbles (onboarding's INTRO_JOB_LINES); newcomer reply sets (a `.meet`?).
 3. Goodbyes, letters (crew who move on), `about`, `rep`, `knownFor`, `visit`, `note`, `gift` lines.
 4. Tone checks for the tradition designers' `.trad` texts when asked.
+
+## In flight (Head writer 2)
+
+- **Call home / Letters evening:** agreed proposal with social B sent to the lead (0.48.13 time): Mum, Gran, Jo, Sam;
+  `content/home/<contact>.arc`; shapes HOME_CONTACTS / HOME_MOMENTS (via reply|live) / HOME_SEND / HOME_REPLY; social B's B8.
+  Waiting on the lead's OK and the user's answers (fixed cast? named home?). Then: head writer writes Mum as the model.
+- **Bridge invite:** `meetings/bridgeInvite.meet` (Vance, day 22, `flag:bridge.invited`); trigger not wired yet.
+- **Holt beat 1** `where: meal` (social B's suggestion): waiting on social B for the exact where: word.
+- Dialogue engineer: session_01UmrVVpV7eBqEsa4sBucASP (claude/dialogue; tool requests go direct).
 
 ## Open questions with others
 
