@@ -17808,6 +17808,8 @@ function lineCond(k, v, p, ctx) {
     case 'deck': return any(v, x => String(ctx.deck) === x);
     case 'event': return any(v, x => { const [ev, ph] = x.split('.'), n = lineQ('eventNow', t); return !!n && n.id === ev && (!ph || n.phase === ph); });
     case 'trad': return any(v, x => ctx.trad === x || (x === 'today' && !!ctx.trad));
+    case 'who': return any(v, x => id === x);   // the speaker is this crew member (overheard: speaker A)
+    case 'with': { const o = ctx.other && (ctx.other.id || ctx.other); return !!o && any(v, x => o === x); }   // the other person in the scene
     case 'dept': return any(v, x => p.dept === x);
     case 'rank': return any(v, x => p.rank === x);
     case 'trait': return any(v, x => (p.traits || []).includes(x));
@@ -17819,7 +17821,7 @@ function lineCond(k, v, p, ctx) {
   }
   return false;
 }
-// pair:x+y (x for speaker A, y for B: a department, a rank, or 'any') or pair:same|bunk|friend|rival|senior|couple
+// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple
 function linePair(v, a, b) {
   if (!b) return false;
   return String(v).split('|').some(x => {
@@ -17828,7 +17830,7 @@ function linePair(v, a, b) {
     if (x === 'friend' || x === 'rival') return lineQ('affBand', a.id, b.id) === x;
     if (x === 'couple') return lineQ('bondOf', a.id, 'couple') === b.id;   // a couple living quietly in the background
     if (x === 'senior') return LINE_RANKS.indexOf(a.rank) > LINE_RANKS.indexOf(b.rank);
-    const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w;
+    const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w || q.id === w;   // a department, a rank or a crew id
     return side(a, s) && side(b, o);
   });
 }

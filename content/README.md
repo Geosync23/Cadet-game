@@ -121,6 +121,8 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
+| `who:` | the speaker is one of these crew (overheard: speaker A) | `who:torres-zeke\|dahl-mira\|kovac-zainab` |
+| `with:` | the other crew member in the scene is one of these (overheard: speaker B) | `with:kovac-zainab` |
 | `pair:` `topic:` | overheard only (below) | |
 
 **Not conditions:** `w:2` makes a line twice as likely as its neighbours; `odds:0.3` lets it come up only 30% of
@@ -194,7 +196,9 @@ A: No promises.
 ```
 
 - `A:`, `B:` (and `C:`) are the speakers; a blank line or `---` ends a conversation. Two to four lines.
-- `pair:x+y`: speaker A is x and B is y, each a department, a rank or `any` (`pair:junior+chief`, `pair:galley+any`);
+- `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
+  `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
+  separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
   (A outranks B), `couple` (one of the established crew couples).
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
