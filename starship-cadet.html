@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.16
+   STARSHIP CADET: CSV Wren                           build 0.39.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.16';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.17';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27193,7 +27193,7 @@ function voiceOf(id) {
     openness: pickV('openness', has(VOICE_GUARDED) ? 'guarded' : has(VOICE_OPEN) ? 'open' : 'normal'),
     loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
     invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
-    thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),
+    thread: /^arc:/.test(W.thread || '') ? W.thread : p && p.thread ? p.thread : arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null),   // the writers' VOICE decides story arcs only; the roster decides themes (the lead, 0.39.17)
     keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {},
     opennessSet: W.openness !== undefined || !!(p && p.openness !== undefined) };   // written, not guessed: only then does it change points
   if (!OPENNESS[card.openness]) card.openness = 'normal';
