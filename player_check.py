@@ -372,6 +372,18 @@ with sync_playwright() as pw:
         lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; delete window.galleyLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
         check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and (lv[1] == 1 or lv[2]), f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
+    elif g.ev("typeof servLine === 'function' && typeof galleyLeave === 'function'"):   # a combined build: the real line (0.28.36, reviewer 1c)
+        far = g.ev("""(() => { actEnd(true); SHIP.player.tray = null; SHIP.player.needs.hunger = 30; const w = cellPos(19, 10), c = nearestOpen(w.x, w.z, player);
+          player.obj.position.copy(cellPos(...c)); player.path.length = 0; const it = ITEMS.find(i => i.t === 'Servery'); it.hit.getWorldPosition(_wp);
+          return [c, +Math.hypot(_wp.x - player.obj.position.x, _wp.z - player.obj.position.z).toFixed(1)]; })()""")
+        g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})"); walk_in, do_in, phases = set(), set(), []
+        for j in range(400):
+            g.step(10); r = g.ev("[ACT && ACT.kind, ACT && ACT.phase, servLine().includes('player'), SHIP.player.tray]")
+            if r[0] == 'queue': (walk_in if r[1] == 'walk' else do_in).add(r[2]); phases.append(r[1]) if not phases or phases[-1] != r[1] else None
+            if not r[0] and j > 0: break
+        print('  the real line from', far, 'tiles/m away: in the line while walking', walk_in, '| while queueing', do_in, '| phases', phases, '| tray', r[3])
+        check(far[1] >= 10 and walk_in == {False} and True in do_in and isinstance(r[3], str), f'from across the room you join the real line only on reaching it, then are served: {far} {walk_in} {do_in} {phases} {r}')
+        g.ev("SHIP.player.tray = null")
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
