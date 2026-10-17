@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.21
+   STARSHIP CADET: CSV Wren                           build 0.42.21b
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.21';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.21b';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14982,7 +14982,16 @@ function introBegin(name) {
 // intro's side of the fresh start, called after section 13 has cleared the flags and set the clock
 // (a function declaration reading the key directly: section 13 asks this at load, before this section has run)
 function introWanted() { try { return !NOSAVE && !localStorage.getItem('starship-cadet-arrived'); } catch (e) { return false; } }
-function introNewGame(arriving) { if (arriving) introBegin(); else SHIP.intro = introBlank(); }
+function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriving) introBegin(); else SHIP.intro = introBlank(); }
+// what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
+// the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
+function introUiReset() {
+  const U = INTRO_UI; (U.said || []).forEach(clearTimeout); if (U.pilot) clearTimeout(U.pilot);
+  const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === 'Your bunk' || IX_GOAL.label === 'Zeke Torres');
+  if (own && typeof clearGoal === 'function') clearGoal();
+  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0 });
+  if ('pilot' in U) Object.assign(U, { pilot: 0, ternOpened: false, ternShut: false });
+}
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
 const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
 
@@ -15079,6 +15088,7 @@ function escortPlan(p, t) {
   // he's yours until he lets you go (the 'free' step): he waits where he's to meet you or show you something, and leads
   // you everywhere else, including to the table where the Chief stops by (her step, not his)
   if (introEscorting(st) && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at dinner: he walks to his seat and sits (section 10, sim 0.26.26)
+  if (introEscorting(st) && st.mode === 'lead' && INTRO_UI.pause) return { mode: 'wait', to: INTRO_UI.pause };   // pausing for the tour's core lines (introTourTick)
   if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
   if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until 19:00
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
@@ -15135,7 +15145,7 @@ INTRO_STUB_SCRIPTS.introSoloJob = { title: 'Your first solo job', from: 'I. Cald
   { who: 'calder', text: 'Every job goes in your Record. I read the Record, not the talk.' },
   { who: 'calder', text: 'Progress talks: any time. Book it. Now go and fix my lamp.' }] };
 for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
-const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], lines: [], next: 0, still: 0, stillAt: null, more: 0, bed: false };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null };
 INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torres', lines: [
   { who: INTRO_ESCORT, text: 'Engines, me. Deck 6. The drive coils, mostly. Coil three\'s my favourite. Don\'t tell the others.' },
   { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea at half ten. Works never misses tea.' },
@@ -15144,31 +15154,70 @@ INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torr
     { text: 'What\'s a normal day?', reply: { who: INTRO_ESCORT, text: 'Board at eight, jobs, tea, jobs, dinner. Then the ship\'s yours till ten.' } }] },
   { who: INTRO_ESCORT, text: 'Ah. Here\'s the Chief. Sit up straight.' }] };
 if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_SCRIPTS.introDinner, gist: INTRO_MEETINGS.introDinner.gist };
-// Torres's tour (0.42.20, the user: "a proper introduction to the ship and to himself, the whole way"): places along
-// the walk, in order; reaching one (within r tiles, on its deck) starts its lines, one bubble at a time 3.6 s apart,
-// never over a meeting; reaching the next drops what's left of the last (the walk takes about a minute; standing still
-// hears a place out). The writers' lines are walk.<id>.1, .2 ... (content/lines/torres-zeke.lines,
-// kind week1); else the stand-ins. Standing still near him on a walking step gives the next walk.more.<n> line.
+// Torres's tour (0.42.20, the user: "a proper introduction to the ship and to himself, the whole way"; paced in 0.42.21b,
+// the user's pacing A after reviewer 1c found a follower heard 19 of 61 lines): places along the walk, reached strictly
+// in order (within r tiles, on its deck; one a tick; a place you never reach is passed once the walk is two steps
+// beyond its `step`). Each place's lines go into one queue, one bubble at a time 3.6 s apart, never over a meeting,
+// and a place starts only when the last one's core lines are done: its `core` first lines (or the writers' entries
+// marked core) always play, and Torres pauses where he is while they do (escortPlan; you within 5 tiles, at most as long
+// as they take); the rest are extras, heard while you linger at the place (or tap him there), dropped once you've
+// moved on or the next place is waiting. The tour ends at the table: anything left is dropped. The writers' lines are
+// walk.<id>.1, .2 ... (content/lines/torres-zeke.lines, kind week1); else the stand-ins. Standing still near him on
+// a walking step with the tour quiet gives the next walk.more.<n> line.
 const INTRO_TOUR_GAP = 3600;                              // real ms between his tour lines (a 60-character bubble reads in about 3 s)
 const INTRO_TOUR = [
-  { id: 'shuttle', deck: 5, at: [8, 8], r: 3, stub: 'hello' }, { id: 'bay', deck: 5, at: [9, 7], r: 2 },
-  { id: 'haulway', deck: 5, at: [12, 8], r: 2, stub: 'haulway' }, { id: 'stores', deck: 5, at: [14, 8], r: 2 },
-  { id: 'works', deck: 5, at: [16, 6], r: 2, stub: 'works' }, { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift' },
-  { id: 'officers', deck: 4, at: [21, 5], r: 3 }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing' },
-  { id: 'deck3', deck: 3, at: [22, 7], r: 3, stub: 'toMess' }, { id: 'servery', deck: 3, at: [33, 3], r: 2, stub: 'servery' },
+  { id: 'shuttle', deck: 5, at: [8, 8], r: 3, stub: 'hello', step: 'hello', core: 3 }, { id: 'bay', deck: 5, at: [9, 7], r: 2, step: 'haulway', core: 2 },
+  { id: 'haulway', deck: 5, at: [12, 8], r: 2, stub: 'haulway', step: 'haulway', core: 3 }, { id: 'stores', deck: 5, at: [14, 8], r: 2, step: 'works', core: 2 },
+  { id: 'works', deck: 5, at: [16, 6], r: 2, stub: 'works', step: 'works', core: 4 }, { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift', step: 'lift', core: 3 },
+  { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3 }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
+  { id: 'deck3', deck: 3, at: [22, 7], r: 3, stub: 'toMess', step: 'toMess', core: 2 }, { id: 'servery', deck: 3, at: [33, 3], r: 2, stub: 'servery', step: 'servery', core: 3 },
 ];
+// a place's lines split into { core, extra }: the writers' entries marked core if any are, else its first `core` lines
+// (head writer 3, content 0.48.49: walk.<place>.1..N are core, N as below)
+function introTourSplit(t) {
+  const all = introTourLines(t.id, t.stub), L = (typeof VOICE !== 'undefined' && VOICE[SHIP.intro.escort] && VOICE[SHIP.intro.escort].lines && VOICE[SHIP.intro.escort].lines.week1) || [];
+  const marked = all.map((x, i) => { const e = L.find(y => y.flag === 'walk.' + t.id + '.' + (i + 1)); return !!(e && e.core); });
+  if (marked.some(Boolean)) return { core: all.filter((x, i) => marked[i]), extra: all.filter((x, i) => !marked[i]) };
+  return { core: all.slice(0, t.core || 2), extra: all.slice(t.core || 2) };
+}
+const introAtTour = (t, here) => deckDef.num === t.deck && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1])) <= t.r + 1;
 function introTourLines(id, stub) {
   const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('walk.' + id + '.' + n); if (!l) break; out.push(l[0]); }
   return out.length ? out : (stub && INTRO_LINES[stub]) || [];
 }
 function introTourTick() {
-  const I = SHIP.intro, st = introStep(); if (!introEscorting(st) || typeof player === 'undefined') return;
-  const here = player.here(), now = performance.now(), a = introWalker();
-  for (const t of INTRO_TOUR) if (I.done['tour:' + t.id] === undefined && deckDef.num === t.deck && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1])) <= t.r) {
-    I.done['tour:' + t.id] = Math.floor(shipNow()); INTRO_UI.lines = introTourLines(t.id, t.stub).slice();   // a new place: what's left of the last one is dropped (stop and listen to hear it all)
+  const I = SHIP.intro, st = introStep(), fin = st && st.id === 'free' && INTRO_UI.tour.length;   // (the last core lines may run on past dinner's steps)
+  if ((!introEscorting(st) && !fin) || typeof player === 'undefined') return;
+  const here = player.here(), now = performance.now(), a = introWalker(), Q = INTRO_UI.tour;
+  const t = INTRO_TOUR.find(x => I.done['tour:' + x.id] === undefined);   // only the next place can be reached
+  if (t && deckDef.num === t.deck && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1])) <= t.r) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
+    I.done['tour:' + t.id] = Math.floor(shipNow()); { const L = introTourSplit(t); Q.push({ t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }); }
+  } else if (t && INTRO_STEPS.indexOf(st) >= INTRO_STEPS.findIndex(x => x.id === t.step) + 2) I.done['tour:' + t.id] = -1;   // passed it without coming near
+  if (st.id === 'table' || st.id === 'chief' || st.id === 'free') {   // the tour hands over to dinner: extras and places not yet reached are dropped; the core
+    Q.forEach(q => { q.extra.length = 0; }); INTRO_UI.pause = null;   // lines left finish first (the dinner chat waits for them, introTick)
+    for (const x of INTRO_TOUR) if (I.done['tour:' + x.id] === undefined) I.done['tour:' + x.id] = -1;
+    while (Q.length && !Q[0].core.length) Q.shift();
+    if (Q.length && !DIALOGUE && a && typeof bubbleSay === 'function' && now >= INTRO_UI.next) { bubbleSay(a.h, Q[0].core.shift(), 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+    return;
   }
+  // a place whose core lines are done goes once the next is waiting or you've left it (its extras dropped); one on a
+  // deck you've left goes whole (you went on without him: Deck 5's lines never play on Deck 4)
+  while (Q.length && (Q[0].t.deck !== deckDef.num || (!Q[0].core.length && (Q.length > 1 || !Q[0].extra.length || !introAtTour(Q[0].t, here))))) Q.shift();
+  const head = Q[0], near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 5;
+  // he pauses where he is while core lines are waiting and you're with him, never longer in all than a place's lines take
+  // (only the time he's actually held counts: not meetings, not the lift)
+  const hold = head && head.core.length && near && !DIALOGUE && head.held < head.cap;
+  if (hold) head.held += Math.min(250, now - (INTRO_UI.tickAt || now));
+  INTRO_UI.tickAt = now;
+  if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
   if (DIALOGUE || !a || typeof bubbleSay !== 'function') return;
-  if (INTRO_UI.lines.length) { if (now >= INTRO_UI.next) { bubbleSay(a.h, INTRO_UI.lines.shift(), 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; INTRO_UI.still = now; } return; }
+  if (head) {
+    if (now >= INTRO_UI.next) {
+      const text = head.core.length ? head.core.shift() : head.extra.shift();
+      if (!head.at) head.at = now; bubbleSay(a.h, text, 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; INTRO_UI.still = now;
+    }
+    return;
+  }
   // standing still near him with nothing else to say: a line about himself
   const key = here.join(','); if (key !== INTRO_UI.stillAt) { INTRO_UI.stillAt = key; INTRO_UI.still = now; return; }
   if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
@@ -15182,11 +15231,13 @@ function introBedTick() {
   const I = SHIP.intro; if (I.done.bed !== undefined || typeof setGoal !== 'function') return;
   const now = Math.floor(shipNow()), on = (now >= introAbs(0, 19 * 60) && now < introAbs(1, 0) && I.done.free !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
   const bed = typeof playerBed === 'function' ? playerBed() : '4-B1-4', pl = (DECKS[4].places || []).find(q => q.id === bed), me = player.here();
+  // (reviewer 1: only when you have no arrow of your own, and it never clears one it didn't set)
+  const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === 'Your bunk';
   if ((typeof sleeping !== 'undefined' && sleeping) || (pl && deckDef.num === 4 && Math.hypot(me[0] - pl.at[0], me[1] - pl.at[1]) <= 1.5)) {
-    I.done.bed = now; if (INTRO_UI.bed) { INTRO_UI.bed = false; clearGoal(); } return;
+    I.done.bed = now; if (INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); } return;
   }
-  if (on && !INTRO_UI.goal && !INTRO_UI.bed) { setGoal({ deck: 4, place: bed, label: 'Your bunk' }); INTRO_UI.bed = true; }
-  else if (!on && INTRO_UI.bed) { INTRO_UI.bed = false; clearGoal(); }
+  if (on && !INTRO_UI.goal && !INTRO_UI.bed && !(typeof IX_GOAL !== 'undefined' && IX_GOAL)) { setGoal({ deck: 4, place: bed, label: 'Your bunk' }); INTRO_UI.bed = true; }
+  else if (!on && INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); }
 }
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
 // his walking lines: the writers' (content/lines/torres-zeke.lines, kind week1, gated flag:walk.<step>, through the
@@ -15289,7 +15340,7 @@ function introTick() {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
       const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); continue; }
-      if (DIALOGUE) break;
+      if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
     }
   }
@@ -15309,8 +15360,8 @@ function introTick() {
     const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
     const key = g.deck + ':' + g.at, mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === g.label;   // only when he moves, or someone else's arrow took over
     if ((key !== INTRO_UI.goalKey || !mine) && typeof setGoal === 'function') { setGoal(g); INTRO_UI.goalKey = key; } INTRO_UI.goal = true;
-    if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && typeof bubbleSay === 'function') {
-      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5);
+    if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && performance.now() >= INTRO_UI.next && typeof bubbleSay === 'function') {
+      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5); INTRO_UI.next = performance.now() + INTRO_TOUR_GAP;   // never over a tour line
     }
   } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
