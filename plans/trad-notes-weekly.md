@@ -51,7 +51,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 ### The deck architect (decor at most 6 draw calls, only on its deck, only during its window)
 - **`tilesNight`** (already built by the deck architect; Tiles night, Deck 3 bow lounge, Tuesday 20:00-21:30): a board on every lounge table, one instanced mesh, at most 3 draw calls (Part 5). The always-there Tiles station is separate dressing.
 - **`long-tables`** (Sunday long table, Deck 3 mess, Sunday 18:00-19:00): a table runner and a few jugs along the joined tables; at most 2 draw calls (one instanced runner, one instanced jug). The tables themselves don't move.
-- **`postbox`** (Letters evening, Deck 3 call-home booths, Sunday 19:15-20:15): the postbox is permanent dressing already in the deck architect's brief; during the window, a small stack of envelopes and a lamp on the waiting-room table (1-2 draw calls).
+- **Letters evening: no decor.** The postbox (place `3-postbox-1`, event `letters`) is permanent scenery; the tradition's id is `letters` so that place is used first (Reyes posting his paper letters). **The user's ruling (via the lead, 2026-10-17):** all the player's mail, sending and receiving, goes through the device's Mail app; the player never posts or collects letters at the postbox.
 - **Event tags, if you like:** the piano bench (`4-music-1`) as `event: 'late-piano'` so the Captain always gets it; the servery end of the mess for the tasting table.
 
 ## Each tradition in a line
@@ -64,7 +64,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 | `late-piano` (438) | Thu 21:45-22:30, music room | the Captain always (plays), music listeners, musicians, night owls; invite 10% | none |
 | `long-breakfast` (439) | Sat 08:00-09:30, Mess hall, hold none | late sleepers, lingerers, juniors, everyone 40% | galley breakfast, pancakes, until 10:00 |
 | `sunday-table` (440) | Sun 18:00-19:00, Mess hall, hold none | Brennan always, lingerers, everyone 60% | galley seating=friends side=tasting, decor `long-tables` |
-| `letters-evening` (441) | Sun 19:15-20:15, call-home booths then the bow lounge | Alejandro Reyes always (host), calls-home 75%, quiet-corner 30% | decor `postbox` |
+| `letters` (441) | Sun 19:15-20:15, call-home booths then the bow lounge | Alejandro Reyes always (host), calls-home 75%, quiet-corner 30% | none (the postbox is scenery) |
 
 ## Tone
 
