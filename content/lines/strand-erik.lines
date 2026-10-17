@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} runs with me. Can't keep up. Doesn't care. Best kind of friend.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Up and running! Literally. Five laps already. Morning!   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Watch forty-five. Nearly fifty. Fifty's a nice round number.
+? tier>=colleague warmth:cold
+- There you are! I ran past your bunk twice. Not on purpose. Mostly not.   #funny
+
+== bye
+? tier>=acquaintance
+- Onward! See you!
+? tier>=friend
+- Thanks, {me}. You slow me down. In a good way. I needed slowing down.   #warm
+
+== feel
+? mood:ok
+- Good! Fine! Bit restless. Always a bit restless.
+
+== near
+? act:leisure deck:3
+- Quiet corner. Notebook. Nothing. Just writing nothing. In a notebook.   #funny
+? deck:1
+- The bridge. Isn't it brilliant? One day. One day I'll be on it for real.
+
+== life
+? tier>=colleague
+- Raman's teaching me the helm. He's very patient. I'm very not. We balance out.   #funny
+? tier>=friend
+- I can't sit still. Even when I want to. Especially when I want to.
+
+== invite
+? trad:running tier>=acquaintance
+- Running club tonight! Come on. Last one round buys tea. That'll be you. I'll buy anyway.   #funny
+
+== accept
+- Yes! Great! I'll be there! Early! Sorry, I'm always early.
+== decline
+- Can't, I'm on watch. Next time? Definitely next time.
+== missed
+- You didn't come! I ran an extra lap for you. It was hard. You owe me.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I'm going to run one lap for every year. That's a lot of laps.   #funny
+? birthday:you
+- Happy birthday! I made you a card. There's a ship on it. A very fast ship.   #warm
+== hint
+- Got a minute? I'll sit still. I promise. For a minute.

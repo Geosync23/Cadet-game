@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} laughs at my jokes. Even the bad ones. They're all bad ones.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh, good morning. Well, good night, for me. Breakfast is my supper. Isn't that strange?
+? tier>=acquaintance time:night
+- Hello. You're up late. Is everything all right? Not as a doctor. Just asking.
+? tier>=colleague warmth:cold
+- Oh, there you are. I'd noticed you hadn't been by. Not in a doctor way. In a nice way.
+
+== bye
+? tier>=acquaintance
+- Take care. Sleep well, whenever you do.
+? tier>=friend
+- Thank you for the company. The nights are long. That helped.   #warm
+
+== feel
+? mood:ok
+- All right, thank you. Quiet night. A cup of tea, and all's well.
+
+== near
+? act:leisure deck:3
+- The lounge before bed. My bed's at nine in the morning. It's very confusing.   #funny
+? act:work time:night
+- Shh. Someone's sleeping in bed two. Nothing serious. Just tired. Like all of us.
+
+== life
+? tier>=colleague
+- I'm nervous with people. Not with patients. Patients I understand. People, less so.
+? tier>=friend
+- I worry I miss things. On nights, alone. I check twice. Then three times. Then I'm fine.
+
+== invite
+? trad:quiz tier>=acquaintance
+- Quiz night? Before my shift? I'd like that. I'm terrible at the sport questions.
+
+== accept
+- Oh, yes. I'd like that. Thank you for asking.
+== decline
+- I'm sorry, I'm on nights. Can we do a morning? My evening? You know what I mean.
+== missed
+- I waited. It's all right. I'm used to waiting. It's half the job.
+== birthday
+? birthday:me
+- It's my birthday. I've told one terrible joke for every year. Nobody laughed. Perfect.   #funny
+? birthday:you
+- Happy birthday. Here's a joke as a present. No, wait, here's a biscuit instead. Better.   #funny
+== hint
+- Could you sit with me a moment? No hurry.

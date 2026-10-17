@@ -36,3 +36,53 @@
 == about
 ? bond:friends
 - {friend}'s in my comics a lot. Always the hero. Don't tell them.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}. I've been up since five. It's evening. I'm basically a ghost.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Shift's done. Sun's not up. There's no sun. Still feels like a win.
+? tier>=colleague warmth:cold
+- Oh, hey. You've been missing from the comics. I had to draw someone else. Pell.   #funny
+
+== bye
+? tier>=acquaintance
+- See you. Early night for me. Earlier than you'd think.
+? tier>=friend
+- Thanks for this. I'll draw you something. Kindly. I always draw you kindly.   #warm
+
+== feel
+? mood:ok
+- Fine. Tired. Gardener tired, which is the good kind.
+
+== near
+? deck:4 act:leisure
+- Comics wall. New one's up. You're in it. Don't worry. You're the clever one.   #funny
+? act:meal
+- I eat lunch at eleven. That's my dinner. Gardeners keep strange hours.
+
+== life
+? tier>=colleague
+- My mum says I'm the most stubborn person she knows. She's met herself, though.   #funny
+? tier>=friend
+- I came aboard to start again. Long story. Another time. It's a good one, in the end.
+
+== invite
+? tier>=colleague time:morning
+- Come and water at first light with me? It's the best the garden ever looks.
+
+== accept
+- Yeah, all right. I'll be there.
+== decline
+- Can't. I'll be asleep. I'm always asleep. Morning person, against my will.   #funny
+== missed
+- You didn't come. Fine. I drew a comic about it. You come off quite well.   #funny
+== birthday
+? birthday:me
+- It's my birthday. I'm drawing myself a cake. It's the only kind I can make.   #funny
+? birthday:you
+- Happy birthday. Here, a comic. It's you, winning at something. Don't ask what.   #warm
+== hint
+- Got a minute? Sit down. I'll stop drawing.

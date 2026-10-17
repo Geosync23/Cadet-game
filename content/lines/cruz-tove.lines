@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} helps with the watering. Doesn't talk much. The plants like that. So do I.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Oh. Morning. The beans were up before me. They always are. Show-offs.   #funny
+? tier>=acquaintance time:evening
+- Hello. I'm staying late. The tomatoes need talking to.
+? tier>=colleague warmth:cold
+- Oh. You. Hello. I'd wondered. The basil wondered too.   #funny
+
+== bye
+? tier>=acquaintance
+- Bye, then. Mind the hoses.
+? tier>=friend
+- Thanks. You're easy to talk to. Like a plant. That's a compliment. Honestly.   #funny
+
+== feel
+? mood:ok
+- Mm. All right. Muddy. Normal.
+
+== near
+? act:meal
+- I eat slowly. My hands smell of tomato leaves. It makes everything taste of garden.
+? deck:3 act:leisure
+- Still here. Off shift. I like it in here more than anywhere. Don't tell my cabin.   #funny
+
+== life
+? tier>=colleague
+- Every Gerald came from one cutting. The first Gerald. He's still going. Very old now.
+? tier>=friend
+- People are harder than plants. Plants tell you what they need. People make you guess.
+
+== invite
+? tier>=colleague time:afternoon
+- Help me with the seedlings? You don't have to talk. Just hold the tray.
+
+== accept
+- Oh. Yes. All right. Good.
+== decline
+- I can't. Watering. Sorry. Another day?
+== missed
+- You didn't come. That's fine. The plants kept me company.
+== birthday
+? birthday:me
+- It's my birthday. I didn't tell anyone. The tomatoes know. They're very discreet.   #funny
+? birthday:you
+- Happy birthday. Here. A seedling. Week one. It'll grow up with you.   #warm
+== hint
+- Mm. Could we talk? In the garden. It's easier in here.
