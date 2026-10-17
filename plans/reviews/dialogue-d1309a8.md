@@ -72,3 +72,11 @@ Test matrix (12 lines): all the "must fail" lines fail except one, and ordinary 
    reference): rumour "Those two are in love, everyone knows." and about "Okafor and Lin are in love." are now errors,
    because 0.43.6 put about/rumour/smalltalk back under the full ban. That followed my earlier suggestion, which the
    lead's ruling overrode. Restore the relaxation for those kinds, keeping the player-reference rule.
+
+## Addendum: 93db9f8 (0.43.6): PASS, writers unblocked
+12-line matrix plus two new lines: every "must fail" case fails, including "Are you seeing anyone, {me}?" and an
+overheard "Is {nick} seeing anyone?". Every ordinary line passes. about/rumour/smalltalk are under the full ban, which
+the lead accepted. content_gen is up to date and lines_check passes clean.
+Follow-up (not blocking): greet "Fancy a date sometime?" passes, since only "on a date", "date night" and "date me" are
+listed. Add `\b(fancy|want|like) a date\b` and `\bask(ed)? (you|me) out\b`. A word list will always have holes like this,
+which is why the head writer's read of every player-facing line for this rule (now in the README) is the real gate.
