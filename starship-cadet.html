@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.41.10
+   STARSHIP CADET: CSV Wren                           build 0.34.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.19';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12722,6 +12722,11 @@ jobWhere.on = true;                                      // crew go to their job
 // =====================================================================
 const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year: 52 weeks of 7 days, Day 1 a Monday
 // when: { weekday } (0 = Monday) | { every, on } (days with d % every === on) | { yearDay } | { birthday: true }
+// Pillar 4's rhythms (evDue): { every: 'week' | '2weeks' | '4weeks', weekday, week? } (week 1 = the cycle's first, counted
+// from Day 1), { every: 'quarter', week, weekday } or { every: 'quarter', quarterDay }, { every: 'year', dayOfYear } or
+// { every: 'year', week, weekday }, { after: 'arrival', days } (days after you came aboard; 0 = that day) or { after:
+// 'arrival', weekday, nth? } (the nth such weekday after it; 1 = the first). Any of them may add season: 'sowing' | [..],
+// from: day, until: day. Quarters and years start on Day 1 (a Monday), so nothing by quarter or year falls before it.
 // at: [from, to] in minutes from midnight. where: [{ deck, pool } | { deck, room, types, ids? }, ...], best first;
 // `room` is a regexp on the room's name, `types` the place types taken from it, `ids` an optional regexp on place ids,
 // `who: 'officer'` keeps a pool to officers and up (Deck 1). Places tagged event: '<id>' come first, when there are any.
@@ -12801,6 +12806,34 @@ const SHIP_TRADITIONS = [
 const evHas = (p, d, h) => (typeof habitsOn === 'function' ? habitsOn(p, d) || [] : p.habits || []).includes(h);   // habits change over time (section 14)
 const bedRoom = p => String(p.bed).replace(/-\d+$/, '');   // '4-B1-2' -> '4-B1': bunkmates
 const evText = (x, c) => typeof x === 'function' ? x(c) : x;
+// the ship's year has four seasons of 13 weeks, named for the garden (Pillar 4): season(d) -> 'sowing' | 'greening' |
+// 'harvest' | 'lanterns'; seasonOf(d) -> { id, name, day (1-91), week (1-13) }. Day 0 (your arrival) is Lanterns' last
+const SEASONS = [{ id: 'sowing', name: 'Sowing' }, { id: 'greening', name: 'Greening' }, { id: 'harvest', name: 'Harvest' }, { id: 'lanterns', name: 'Lanterns' }];
+const evYearDay = d => ((d - 1) % 364 + 364) % 364 + 1;   // like shipYearDay, and right for day 0 too
+function seasonOf(d) { const yd = evYearDay(d), q = Math.floor((yd - 1) / 91), qd = yd - q * 91; return { ...SEASONS[q], day: qd, week: Math.floor((qd - 1) / 7) + 1 }; }
+const season = d => SEASONS[Math.floor((evYearDay(d) - 1) / 91)].id;
+// the day you came aboard: section 21's when it's in (Pillar 4), else day 0 (a new game starts the evening before Day 1)
+const evArrival = () => typeof introArrival === 'function' ? introArrival() : 0;
+const EV_CYCLE = { week: 1, '2weeks': 2, '4weeks': 4 };
+function evDue(w, d) {
+  if (w.from != null && d < w.from || w.until != null && d > w.until) return false;
+  if (w.season && ![].concat(w.season).includes(season(d))) return false;
+  const wd = weekday(d), yd = shipYearDay(d);
+  if (w.after) {                                         // personal: counted from the day you arrived
+    const a = w.after === 'arrival' ? evArrival() : null; if (a == null || d < a) return false;
+    if (w.days != null) return d === a + w.days;
+    return d > a && wd === w.weekday && Math.ceil((d - a) / 7) === (w.nth || 1);
+  }
+  if (typeof w.every === 'string') {
+    const wk = Math.floor((d - 1) / 7), n = EV_CYCLE[w.every];
+    if (n) return wd === w.weekday && (wk % n + n) % n + 1 === (w.week || 1);
+    if (d < 1) return false;
+    if (w.every === 'quarter') { const qd = (yd - 1) % 91 + 1; return w.quarterDay != null ? qd === w.quarterDay : wd === w.weekday && Math.floor((qd - 1) / 7) + 1 === (w.week || 1); }
+    if (w.every === 'year') return w.dayOfYear != null ? yd === w.dayOfYear : wd === w.weekday && Math.floor((yd - 1) / 7) + 1 === (w.week || 1);
+    return false;
+  }
+  return w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd;
+}
 // birthdays: ROSTER[i].birthday (a day of the year, 1-364, section 9) when it's there; until then a stand-in, spread
 // so about one falls each week, in id order
 let EV_BDAYS = null;
@@ -12832,13 +12865,13 @@ const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 const EV_DAYS = new Map();
 function eventsOn(d) {
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
-  const out = [], wd = weekday(d), yd = shipYearDay(d);
+  const out = [], yd = shipYearDay(d);
   for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
-    else if (!(w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) continue;
+    else if (!evDue(w, d)) continue;
     if (!w.ship && typeof eventPauses === 'function' && eventPauses(ev, d)) continue;   // a ship-wide event's quiet days
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
@@ -12847,6 +12880,10 @@ function eventsOn(d) {
   for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
   return out;
 }
+// ties (Pillar 4): what a tradition asks of other sections, kept as data on it: ties = { galley: { dish, batch, meal },
+// garden: 'sow' | 'tend' | 'harvest', decor: '<id>', tally: { kind, choices } }. Each owner reads only its own kind:
+// tradTies(kind, d) -> [{ id, name, from, to, tie }] for that day (pure; [] on most days)
+const tradTies = (kind, d) => eventsOn(d).filter(e => e.ev.ties && e.ev.ties[kind] != null).map(e => ({ id: e.id, name: e.name, from: e.from, to: e.to, tie: e.ev.ties[kind] }));
 // the pools: for each `where` with a room, the shared places of those types in that room (not in a locked room; with
 // `free`, not anyone's work station), as 'deck|ev:<id>:<n>'; places tagged event: '<id>' as 'deck|ev:<id>'
 function eventPools(shared, desks) {
