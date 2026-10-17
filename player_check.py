@@ -384,6 +384,18 @@ with sync_playwright() as pw:
         print('  the real line from', far, 'tiles/m away: in the line while walking', walk_in, '| while queueing', do_in, '| phases', phases, '| tray', r[3])
         check(far[1] >= 10 and walk_in == {False} and True in do_in and isinstance(r[3], str), f'from across the room you join the real line only on reaching it, then are served: {far} {walk_in} {do_in} {phases} {r}')
         g.ev("SHIP.player.tray = null")
+    # someone on the tile you need (sim 0.26.36's crewMakeWay; a stand-in when it's missing): they step aside, you go, and they go back when you're done (0.28.40)
+    mw0 = g.ev("""(() => { actEnd(true); window.__pg = playerGo; let n = 0; playerGo = (c, cb) => n++ ? window.__pg(c, cb) : false;   // the first try refused, as with a cook on the tile
+      window.__rel = 0; window.__mwStub = typeof crewMakeWay !== 'function'; if (window.__mwStub) window.crewMakeWay = () => () => { window.__rel++; };
+      const q = [...PLACE_OF.values()].find(q => q.type === 'mess-seat' && !heldBy(q.id)); actStart('sit', q.id, { title: 'Mess table' }); return [q.id, ACT && ACT.phase]; })()""")
+    mws = []
+    for j in range(80):
+        g.step(5); ph = g.ev("ACT && ACT.phase")
+        if not mws or mws[-1] != ph: mws.append(ph)
+        if ph == 'do': break
+    mw = g.ev("(() => { const r0 = window.__rel; actEnd(true); playerGo = window.__pg; const r = [window.__mwStub, r0, window.__rel]; if (window.__mwStub) delete window.crewMakeWay; return r; })()")
+    print('  someone in the way:', mw0, '->', mws, '| stand-in, released before/after getting up:', mw)
+    check(mw0[1] == 'wait' and 'walk' in mws and mws[-1] == 'do' and (not mw[0] or mw[1:] == [0, 1]), f'someone in the way steps aside, you get there, and they go back after: {mw0} {mws} {mw}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.39
+   STARSHIP CADET: CSV Wren                           build 0.28.40
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.39';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.40';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9672,7 +9672,10 @@ function actStart(kind, placeId, o = {}) {
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
   if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
-  if (!playerGo(spot.walk, ACT.cb)) { ACT = null; toast(o.title || PLAYER_ACTS[kind].title, 'You can\'t get there just now: someone\'s in the way.'); }
+  if (!playerGo(spot.walk, ACT.cb)) {
+    if (typeof crewMakeWay === 'function') { ACT.release = crewMakeWay(spot.walk); ACT.phase = 'wait'; ACT.waitT = 0; ACT.tried = 0; return; }   // someone on that tile (a cook at a range's panel): they step aside (sim 0.26.36; 0.28.40)
+    ACT = null; toast(o.title || PLAYER_ACTS[kind].title, 'You can\'t get there just now: someone\'s in the way.');
+  }
 }
 function actBegin() {
   const A = ACT; if (!A) return;
@@ -9706,6 +9709,7 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
+  if (A.release) try { A.release(); } catch (e) { /* theirs */ }   // whoever stepped aside for you goes back (crewMakeWay, 0.28.40)
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
@@ -9812,7 +9816,14 @@ function trayOnTable(A) {
 function actUpdate(dt, t) {
   const A = ACT;
   if (A.deck !== deckDef) { actEnd(true); return; }
-  if (A.phase === 'walk') { if (player.onArrive !== A.cb) ACT = null; return; }   // you went somewhere else
+  if (A.phase === 'wait') {                              // waiting for them to step aside: try the walk every half second, for 8 at most
+    if (player.path.length || player.steer) { actEnd(true); return; }
+    A.waitT += dt; if (A.waitT - A.tried < .5) return; A.tried = A.waitT;
+    if (playerGo(A.spot.walk, A.cb)) A.phase = 'walk';
+    else if (A.waitT > 8) { actEnd(true); toast(A.o.title || A.def.title, 'You can\'t get there just now: someone\'s in the way.'); }
+    return;
+  }
+  if (A.phase === 'walk') { if (player.onArrive !== A.cb) { if (A.release) A.release(); ACT = null; } return; }   // you went somewhere else
   if ((player.path.length || player.steer) && A.kind === 'queue' && A.phase !== 'out') { player.stop(); if (typeof endSteer === 'function') endSteer(); queueAsk(); }   // the line holds you (0.28.31)
   else if (player.path.length || player.steer) { actEnd(true); return; }          // walked away: stop
   const go = (x, z) => {                                 // glide toward x, z; true when there
