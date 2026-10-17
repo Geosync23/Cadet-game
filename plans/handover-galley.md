@@ -141,3 +141,16 @@ Also run cadet_test (Deck 4 must stay identical), deck_check, day_check (Deck 3 
 - **A job for the player:** should the player be able to help in the galley (wash up, carry a crate), or is the galley crew-only?
 - **Queues:** should queues happen more often? A slow oven or a big event (Envoy Saruth's formal dinner) would make the galley visibly busy.
 - **The grab shelf:** should it empty overnight (stale food binned), so the morning bake matters?
+
+## Pillar 4: the traditions' meals (builds 0.29.26–0.29.28, on 0.60.0)
+
+Full detail in the DEV_NOTES build table, rows 0.29.26 to 0.29.28. All inert until the traditions engineer's ties (claude/ship-events 0.34.29+) are combined; food_check stands in with `GALLEY_TEST.tradTies`.
+
+- **`galleyTies(d)`** folds section 18's `tradTies('galley', d)` by meal: `{ breakfast?, dinner? }`, each `{ ids, dish, until, side, extra, batch, honorees, taste }`.
+- **Long breakfast:** `until: '10:00'` -> `galleyServeEnd(d, meal)` and `galleyClose(d, meal)` replace the fixed 08:00/08:30; `galleyPlan(role, d)` keeps the chef and early hand on. Pancakes on Saturday (Tuesday got the spiced beans).
+- **Suppers:** first fruits on the tables; the harvest supper all from the garden, with a pie (`galleyCake(d).pie`); a farewell supper serves the first honoree's favourite. A cake whose tradition has decor `cake` (four weeks aboard) isn't the galley's.
+- **Tasting table:** `galleyTasting(d)` (the week's two dishes, the tasters from the plans' `ev-<id>` segments, seeded votes), `galleyVote(choice)` (your token, saved in `SHIP.galley.votes`), 20 tastes, two each; Sunday's `side: 'tasting'` gets the winner. Two small plates on the tray slide.
+- **Late meals:** `simNote('lateMeal', { who, meal, late, how, deck: 3 })`, live only, once per person and meal a day (`galleyLate`, `galleyLateBy`, `LATE_WAIT`).
+- **Waiting on:** the sim engineer (do meal-tradition segments keep act 'dinner'/'breakfast'? if so the galley feeds them unchanged), the traditions engineer (does the galley own the tasting tally?), the dialogue engineer (the lateMeal payload). The head writer's session was inactive when I sent the cue key; the lead was asked to pass it on.
+- **Trial merges** with claude/ship-events conflict only on the header build line and `GAME_BUILD`.
+- **Tests:** needs `pip install playwright`, three r128 in /tmp/cadet-work/three (see cadet_test.py's header), and `CADET_CHROME=/opt/pw-browsers/chromium`.
