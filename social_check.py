@@ -8,11 +8,16 @@
 #   spread, and your tiers with Tomas (a friend after two weeks) and Pell (an acquaintance)
 # Setup and environment as for cadet_test.py.
 # Run:  python3 social_check.py BUILD.html [DAYS]     (DAYS defaults to 14)
+#       python3 social_check.py BUILD.html --long   (long play: 140 ship days with a steady stand-in player; the social save
+#       must stay within SAVE_MAX, and the biggest parts are printed. Measure it on a build with social B 0.39.18+)
 import sys, json
 exec(open(__file__.replace('social_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
+LONG = '--long' in sys.argv                # long play: only the save after LONG_DAYS days (about 15 minutes)
+if LONG: sys.argv.remove('--long')
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
+LONG_DAYS = 140
 SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
@@ -55,8 +60,38 @@ def fail(msg):
     ok = False
     print('  FAIL', msg)
 
+# long play: a steady stand-in player (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
+# lunch with Tomas, quiz and Tiles night each week) for LONG_DAYS days on paper, story Mail delivered as the game would
+LONG_RUN = r"""((days) => {
+  const h0 = 6; setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();
+  socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;
+  const crew = SOC.crew.filter(p => !p.reserve), pal = ['tomas', 'pell', 'rina'], weeks = [];
+  const parts = () => { const s = socSave(); return { size: JSON.stringify(s).length, parts: Object.entries(s).map(([k, v]) => [k, JSON.stringify(v).length]).sort((a, b) => b[1] - a[1]).slice(0, 8) }; };
+  for (let h = h0 + 1; h <= h0 + days * 24; h++) {
+    setShipNow(h * 60); socialTo(h * 60); SHIP.social.mail = SHIP.social.mail.filter(x => x.at > h * 60);   // delivered (socialMail, which the test stops)
+    const hr = h % 24, d = Math.floor(h / 24) + 1, u = schedU(d, h, 9001);
+    if (hr === 8) repNote('shiftStart', { late: u < .1 ? 25 : 0 });
+    if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
+      const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat'); }
+    if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
+    if (hr === 10 && typeof machineList === 'function' && u < .7) { const ms = machineList(); repNote('repair', { who: 'you', machine: ms[Math.floor(schedU(d, h, 9004) * ms.length)].id }); }
+    if (hr === 20 && (d % 7 === 2 || d % 7 === 5)) repNote('tradition', { id: d % 7 === 2 ? 'quiz' : 'tiles-night', you: true });
+    if (hr === 23 && d % 28 === 0) { let r = 0; for (const v of SHIP.aff) if (v <= -40) r++; weeks.push({ day: d, ...parts(), rivals: r }); }
+  }
+  return weeks;
+})"""
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
+    if LONG:
+        g.ev("window.__realTick = tickShip; tickShip = () => {}; socialTick = () => {}")
+        lw = g.ev(LONG_RUN + f"({LONG_DAYS})")
+        for x in lw: print(f"Day {x['day']}: social save {x['size']} bytes, rivals {x['rivals']}, biggest parts {x['parts']}")
+        if not lw or lw[-1]['size'] > SAVE_MAX: fail(f'the social save is over {SAVE_MAX} bytes after {LONG_DAYS} days')
+        print('errors', g.errors[:5])
+        if g.errors: ok = False
+        print('SOCIAL LONG CHECK OK' if ok else 'SOCIAL LONG CHECK FAILED')
+        sys.exit(0 if ok else 1)
     g.ev("window.__realTick = tickShip; tickShip = () => {}; socialTick = () => {}")   # we drive the clock ourselves
     print(f"{g.ev('socInit().n')} crew, {DAYS} days on paper")
     run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, k])
