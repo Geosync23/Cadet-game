@@ -3896,7 +3896,7 @@ DECKS[4] = {
     { id: '4-common-10', type: 'common-room', at: [2, 7], face: 90, pose: 'sit', room: 'j', xy: [2.5, 7.1], y: 0.49 },
     { id: '4-common-11', type: 'common-room', at: [4, 7], face: 270, pose: 'sit', room: 'j', xy: [3.8, 7.1], y: 0.49 },
     { id: '4-common-kettle', type: 'common-room', at: [7, 7], face: 'n', pose: 'stand', room: 'j' },
-    { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n', xy: [44.87, 5.35], y: 0.55 },   // the piano bench
+    { id: '4-music-1', type: 'music', anim: 'play', at: [44, 5], face: 'e', pose: 'sit', room: 'n', xy: [44.87, 5.35], y: 0.55, event: 'late-piano' },   // the piano bench (late piano, 0.38.14: the Captain's)
     { id: '4-music-2', type: 'music', at: [45, 7], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
     { id: '4-music-3', type: 'music', at: [45, 8], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
     { id: '4-music-4', type: 'music', at: [45, 11], face: 'e', pose: 'sit', room: 'n', y: 0.42 },
@@ -6931,13 +6931,22 @@ DECKS[3].places.push(
   { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },   // the station's stools
   { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },
 );
-// 0.38.11: the postbox's place (Letters evening: posting a letter) and twelve lantern places on the promenade's two
+// 0.38.11: the postbox's place (Letters evening: Reyes posting his paper letters) and twelve lantern places on the promenade's two
 // outer lanes (Lantern walk: crew stand under the lanterns, facing the middle), all event-tagged like the rest.
 DECKS[3].places.push(
   { id: '3-postbox-1', type: 'event', event: 'letters', at: [37, 17], xy: [37.15, 17.5], face: 'w', pose: 'stand', anim: 'pay', room: 'B' },   // at the postbox's slot
   ...[26, 28, 30, 32, 34, 36, 38].map(c => [c, 9]).concat([28, 30, 34, 36, 38].map(c => [c, 12])).map(([c, r], k) =>
-    ({ id: '3-lantern-' + (k + 1), type: 'event', event: 'lanterns', at: [c, r], xy: [c + .5, r === 9 ? 9.45 : 12.55], face: r === 9 ? 's' : 'n', pose: 'stand', anim: 'talk', room: '=' })),
+    ({ id: '3-lantern-' + (k + 1), type: 'event', event: 'lantern-walk', at: [c, r], xy: [c + .5, r === 9 ? 9.45 : 12.55], face: r === 9 ? 's' : 'n', pose: 'stand', anim: 'talk', room: '=' })),
 );
+// 0.38.14: places for the monthly traditions, tagged with their ids: open lab (Deck 2's Survey lab, round the island and
+// at the benches) and bridge hour (Deck 1, behind the stations, facing the viewscreen). Standing, type 'event'. (Rummage
+// day's were taken out in 0.38.16: the user cut it.)
+{
+  const at = (deck, ev, room, list, fx, fz) => list.forEach(([c, r, f], k) => DECKS[deck].places.push({ id: `${deck}-${ev}-${k + 1}`, type: 'event', event: ev, at: [c, r], xy: [c + .5, r + .5],
+    face: f !== undefined ? f : Math.round(Math.atan2(fx - c - .5, fz - r - .5) * 180 / Math.PI), pose: 'stand', anim: 'talk', room }));
+  at(2, 'open-lab', 'L', [[36, 3], [36, 5], [34, 3], [34, 5], [33, 4], [38, 5], [34, 1, 'n'], [38, 2, 'n']], 36, 4.5);
+  at(1, 'bridge-hour', 'B', [[15, 2], [16, 2], [17, 2], [18, 2], [15, 9], [16, 9], [17, 9], [18, 9], [17, 3], [17, 8]], 21.5, 6);
+}
 DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
 DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
   boards: [[42.25, .765, 14.52, 0, .26, [16, 14, 15, 13]], [42.25, .765, 16.52, 0, .26, [20, 18, 19, 17]], [42.25, .765, 18.52, 0, .26, [24, 22, 23, 21]],
@@ -7000,6 +7009,7 @@ function dressSheet(s, o, z, y) {
   dressBox(s, .03, .03, .02, '#c45a3f', 0, y + .18, z + .016);       // the pin, through the paper
 }
 const dressNames = (dept, n) => typeof ROSTER === 'undefined' ? [] : ROSTER.filter(p => !p.player && (!dept || p.dept === dept)).slice(0, n).map(p => p.name.split(' ').slice(-1)[0]);
+const MESS_LONG = [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]];   // the mess hall's long tables (room-local), their tops at .77
 const DECK_DRESS = {
   signupMess: { deck: 3, what: 'a sign-up sheet beside the mess menu board', make(g, o) {
     dressSheet(dressAt(g, 'M', 'e', 2.55), o, .016, 1.75);
@@ -7077,6 +7087,91 @@ const DECK_DRESS = {
     const [cx, cy, cz] = B[5];                           // the tap: the coffee table's board
     return { t: 'Tiles night', x: 'A Tiles board on every table tonight, and a game going on most of them. Rina is defending her title, and saying so.', floor: ['L', cx - r.i0, cz - r.j0], y: cy + .05, w: .3, h: .1, d: .3 };
   } },
+  // 0.38.14. mugYours: a lasting trace from your new hand's tea ({ id: 'mugYours', day } in SHIP.traces): your own mug on
+  // the free hook of the Works tea corner's rack (DECKS[5].mugRack). On the rack's wall, so it lowers with it. 1 draw call.
+  mugYours: { deck: 5, what: 'your own mug on the Works tea corner\'s rack', make(g) {
+    const s = dressAt(g, 't', 's', 1.1), m = dressMat('#3d6fa8'), x = .3;   // the sixth hook, as in the mugRack kit
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(.036, .032, .08, 12), m); c.position.set(x, 1.44, .075); s.add(c);
+    const h = new THREE.Mesh(new THREE.BoxGeometry(.012, .04, .02), m); h.position.set(x + .042, 1.44, .075); s.add(h);
+    return { t: 'Your mug', x: 'Blue, on the sixth hook, with your name on the bottom in Chief Calder\'s handwriting. Nobody else uses it. Nobody would dare.', wall: ['t', 's', 1.1], y: 1.44, w: .2, h: .2 };
+  } },
+  // 0.38.15: the tradition designers' decor on Deck 3 (each during its tradition's window; ids agreed with the traditions
+  // engineer). longTables: the Sunday table (a runner and two jugs on each long table, 2 draw calls); harvestTables: the
+  // harvest supper (burlap runners and baskets of tomatoes and squash, 3); cupBoard: the department cup in the gym (a chalk
+  // scoreboard on an easel, o.lines = the teams' scores, and the cup on a plinth, 3); talentStage: talent night (a low
+  // riser on the lounge's open floor, a mic stand and a string of bulbs, 3); yearsEnd: Year's end (the Captain's lectern
+  // and small lights along the bow windows, 2).
+  longTables: { deck: 3, what: 'the Sunday table: runners and jugs down the mess\'s long tables', make(g) {
+    const s = dressAt(g, 'M', 'floor', 0, 0);
+    for (const [x, z] of MESS_LONG) {
+      dressBox(s, 3.3, .004, .32, '#c45a3f', x, .772, z);
+      for (const dx of [-.4, .4]) { const j = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, .17, 12), dressMat('#e9e1d0')); j.position.set(x + dx, .855, z + .06); s.add(j); dressBox(s, .015, .1, .05, '#e9e1d0', x + dx + .065, .87, z + .06); }
+    }
+    return { t: 'The Sunday table', x: 'Runners down every long table and jugs of water at each one. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+  } },
+  harvestTables: { deck: 3, what: 'the harvest supper: burlap runners and baskets from the garden on the long tables', make(g) {
+    const s = dressAt(g, 'M', 'floor', 0, 0), C = ['#d8412f', '#f0952e'];
+    MESS_LONG.forEach(([x, z], t) => {
+      dressBox(s, 3.3, .004, .36, '#a8875a', x, .772, z);
+      [-.45, .45].forEach((dx, b) => {
+        const k = new THREE.Mesh(new THREE.CylinderGeometry(.14, .11, .1, 12), dressMat('#a8875a')); k.position.set(x + dx, .82, z + .05); s.add(k);
+        for (let i = 0; i < 5; i++) { const a = i * 1.26 + t, r = i ? .065 : 0, f = new THREE.Mesh(new THREE.SphereGeometry(i ? .038 : .045, 8, 6), dressMat(C[(i + b + t) % 2])); f.position.set(x + dx + Math.cos(a) * r, .885 + (i ? 0 : .02), z + .05 + Math.sin(a) * r); s.add(f); }
+      });
+    });
+    return { t: 'Harvest supper', x: 'Burlap down the long tables and baskets from the garden on every one: tomatoes, squash, whatever the beds gave. Everything on the plates tonight was grown on this deck.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+  } },
+  cupBoard: { deck: 3, what: 'the department cup: a chalk scoreboard on an easel and the cup on its plinth, in the gym', make(g, o) {
+    const s = dressAt(g, 'F', 'floor', 0, 0), x = .5, z = 6.0;   // by the west wall, past the rowers, facing into the room
+    for (const dz of [-.3, .3]) { const l = dressBox(s, .04, 1.5, .04, '#5a3b26', x - .05, .75, z + dz); l.rotation.z = .1; }
+    dressBox(s, .03, .03, .7, '#5a3b26', x + .04, .62, z);       // the chalk ledge
+    const t = tex(256, 200, (c, w, h) => {
+      c.fillStyle = '#1f2b26'; c.fillRect(0, 0, w, h); c.fillStyle = '#efe9dc'; c.font = '700 22px system-ui,sans-serif'; c.fillText('DEPARTMENT CUP', 16, 32);
+      c.font = '500 17px system-ui,sans-serif'; (o.lines || ['Works', 'Watch', 'Survey', 'Bridge', 'Commons']).slice(0, 6).forEach((l, k) => c.fillText(l, 22, 64 + k * 24));
+    });
+    const b = new THREE.Mesh(new THREE.PlaneGeometry(.66, .52), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); b.position.set(x + .03, .93, z); b.rotation.set(0, Math.PI / 2, -.1); s.add(b);
+    dressBox(s, .3, .7, .3, '#5a3b26', x, .35, z - .85);            // the plinth, and the cup on it
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.09, .04, .14, 14), dressMat('#e8c06a')); cup.position.set(x, .84, z - .85); s.add(cup);
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(.06, .07, .07, 14), dressMat('#e8c06a')); st.position.set(x, .735, z - .85); s.add(st);
+    for (const sd of [-1, 1]) dressBox(s, .02, .07, .012, '#e8c06a', x, .85, z - .85 + sd * .1);   // the handles
+    return { t: 'The department cup', x: 'A rowing relay, one department against another, and Vance keeping score in chalk. The cup is a mug glued to a stand. Nobody has ever wanted anything more.', floor: ['F', x, z], y: .95, w: .3, h: .7, d: .8 };
+  } },
+  talentStage: { deck: 3, what: 'talent night: a low stage, a mic stand and a string of bulbs on the bow lounge\'s open floor', make(g) {
+    const s = dressAt(g, 'L', 'floor', 0, 0), x = 4.2, z = 10.5;   // facing the bar, between the two planted screens
+    dressBox(s, 1.2, .18, 1.8, '#5a3b26', x, .09, z);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .02, 12), dressMat('#2b2b2b')); disc.position.set(x - .25, .19, z); s.add(disc);
+    dressBox(s, .016, 1.35, .016, '#2b2b2b', x - .25, .87, z); dressBox(s, .02, .02, .14, '#2b2b2b', x - .29, 1.5, z).rotation.y = Math.PI / 2;   // the stand and its boom
+    const mic = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), dressMat('#2b2b2b')); mic.position.set(x - .37, 1.52, z); s.add(mic);
+    for (const dz of [-.88, .88]) dressBox(s, .03, 2.2, .03, '#2b2b2b', x + .55, 1.1, z + dz);   // two poles at the back, and the bulbs strung between
+    dressBox(s, .008, .008, 1.76, '#2b2b2b', x + .55, 2.18, z);
+    const bm = new THREE.MeshBasicMaterial({ color: col('#ffd27a'), toneMapped: false });
+    for (let k = 0; k < 7; k++) { const f = (k + .5) / 7, b = new THREE.Mesh(new THREE.SphereGeometry(.035, 8, 6), bm); b.position.set(x + .55, 2.1 - .12 * 4 * f * (1 - f), z - .88 + 1.76 * f); s.add(b); }
+    return { t: 'Talent night', x: 'A low stage, one mic and a string of bulbs. Musicians first, then anyone brave. The applause is guaranteed. The quality is not.', floor: ['L', x, z], y: .4, w: 1.2, h: .5, d: 1.8 };
+  } },
+  yearsEnd: { deck: 3, what: 'Year\'s end: the Captain\'s lectern and small lights along the bow windows', make(g) {
+    const s = dressAt(g, 'L', 'floor', 0, 0), r = ROOM_BOX.L, x = 45.05 - r.i0, z = 10.5 - r.j0;   // just in front of the lounge's lead spot, facing her
+    dressBox(s, .36, .04, .3, '#5a3b26', x, .02, z); dressBox(s, .12, 1.0, .12, '#5a3b26', x, .52, z);
+    const top = dressBox(s, .42, .04, .5, '#5a3b26', x - .02, 1.08, z); top.rotation.z = .3;   // sloped toward her
+    const bm = new THREE.MeshBasicMaterial({ color: col('#fff1c9'), toneMapped: false });
+    const M3 = DECKS[3].map, inL = (x, z) => (M3[Math.floor(z)] || '')[Math.floor(x)] === 'L';
+    for (let k = 0; k <= 30; k++) {                      // along the bow windows: out from the lounge's middle until the floor ends, then back 30 cm
+      const a = (-60 + k * 4) * Math.PI / 180; let rr = 4; while (rr < 14 && inL(41 + (rr + .05) * Math.cos(a), 10.5 + (rr + .05) * Math.sin(a))) rr += .05;
+      const b = new THREE.Mesh(new THREE.SphereGeometry(.025, 6, 5), bm); b.position.set(41 + (rr - .3) * Math.cos(a) - r.i0, 1.3 + .06 * Math.abs(Math.sin(k * 1.3)), 10.5 + (rr - .3) * Math.sin(a) - r.j0); s.add(b);
+    }
+    return { t: 'Year\'s end', x: 'A lectern for the Captain and little lights all along the bow windows. She reads from the year\'s log, the good days and the hard ones, and then the letters from Midtour come back.', floor: ['L', x, z], y: .8, w: .5, h: 1.2, d: .5 };
+  } },
+  // 0.38.16. openLab: open lab on Deck 2: two trays of samples on the Survey lab's island and a tent card, OPEN LAB, in the
+  // middle of it (the island's top at .91). 3 draw calls.
+  openLab: { deck: 2, what: 'open lab: trays of samples and an OPEN LAB card on the Survey lab\'s island', make(g) {
+    const s = dressAt(g, 'L', 'floor', 3.0, 4.5);        // the island's centre
+    [[-1.25, .22], [1.15, -.22]].forEach(([x, z], k) => {
+      dressBox(s, .34, .02, .22, '#eef1ef', x, .921, z);
+      for (let i = 0; i < 6; i++) { const d = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .018, 10), dressMat(i % 2 ? '#5fd6c6' : '#7a9a5a')); d.position.set(x - .1 + (i % 3) * .1, .94, z + (i < 3 ? -.05 : .05)); s.add(d); }
+    });
+    const t = tex(256, 96, (c, w, h) => { c.fillStyle = '#f4efe2'; c.fillRect(0, 0, w, h); c.fillStyle = '#1f3c6e'; c.font = '800 40px system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('OPEN LAB', w / 2, 52); c.font = '500 17px system-ui,sans-serif'; c.fillText('ask us anything', w / 2, 80); });
+    const cm = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
+    for (const sd of [1, -1]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(.32, .12), cm); p.position.set(0, .97, sd * .03); p.rotation.set(-sd * .45, sd > 0 ? 0 : Math.PI, 0); s.add(p); }   // a tent card, readable from both sides
+    return { t: 'Open lab', x: 'Dr. Sato\'s open lab: trays of samples from the last survey, a card saying OPEN LAB, and the Survey team pretending they are not delighted to be asked about rocks.', floor: ['L', 3.0, 4.5], y: 1.0, w: .6, h: .3, d: .4 };
+  } },
   // 0.38.11. tastingTable: Brennan's tasting table on Wednesday's dinner (o.title: the dish; o.lines: up to five lines in
   // chalk, the votes so far): the chalkboard by the mess door and a tray of tasting cups and a bowl of vote tokens on the
   // end of a long table. 5 draw calls.
@@ -7097,15 +7192,18 @@ const DECK_DRESS = {
     return { t: 'Tasting table', x: 'Brennan\'s tasting table. ' + String(dish).replace(/\n/g, ' ') + '. Take a cup, then drop a token in the bowl: gold if it should go on the menu.', wall: ['M', 'w', 2.9], y: 1.5 };
   } },
   // lanternWalk: the Lantern walk at dusk: paper lanterns on strings down both sides of the promenade, one InstancedMesh of
-  // lanterns (unlit, so they glow) and the strings merged: 2 draw calls, no shadows.
+  // lanterns (unlit, so they glow), the strings merged, and a basket of spares at the lift plaza: 3 draw calls, no shadows.
   lanternWalk: { deck: 3, what: 'paper lanterns strung down both sides of the promenade', make(g) {
     const r = ROOM_BOX['='], s = dressAt(g, '=', 'floor', 0, 0), pts = [], C = ['#ffb35c', '#ff8a5c', '#ffd27a', '#f2c94c'];
     for (const [x0, x1] of [[12.5, 16.6], [23.5, 39.7]]) for (const z of [9.35, 12.65]) {
       dressBox(s, x1 - x0 + .4, .01, .01, '#3a3a3a', (x0 + x1) / 2 - r.i0, 2.34, z - r.j0);   // the string
       for (let x = x0; x <= x1; x += 1.15) { const y = 2.12 + .06 * Math.sin(x * 2.1); pts.push([x - r.i0, y, z - r.j0]); dressBox(s, .006, 2.34 - y - .16, .006, '#3a3a3a', x - r.i0, (2.34 + y + .16) / 2, z - r.j0); }
     }
-    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ toneMapped: false }), pts.length), m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(.13, .17, .13);
-    pts.forEach(([x, y, z], k) => { im.setMatrixAt(k, m.compose(new THREE.Vector3(x, y, z), q, sc)); im.setColorAt(k, col(C[k % 4])); });
+    const hung = pts.length, bx = 22.9 - r.i0, bz = 12.6 - r.j0;    // 0.38.16: and a basket of spares where the promenade meets the lift plaza
+    const bk = new THREE.Mesh(new THREE.CylinderGeometry(.3, .24, .32, 14), dressMat('#a8875a')); bk.position.set(bx, .16, bz); s.add(bk);
+    [[0, 0], [.13, .08], [-.12, .07], [.05, -.13], [-.08, -.1]].forEach(([dx, dz], k) => pts.push([bx + dx, .38 + (k ? 0 : .06), bz + dz]));
+    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ toneMapped: false }), pts.length), m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(.13, .17, .13), sb = new THREE.Vector3(.11, .13, .11);
+    pts.forEach(([x, y, z], k) => { im.setMatrixAt(k, m.compose(new THREE.Vector3(x, y, z), q, k < hung ? sc : sb)); im.setColorAt(k, col(C[k % 4])); });
     im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
     return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
   } },
