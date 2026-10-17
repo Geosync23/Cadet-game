@@ -17,7 +17,8 @@
 **Open loose ends:**
 - The arrival fixes went to onboarding engineer 2 (session_0163dcLt17oTCdR8po9HRo2p). Reviewer 1b also reviews arrival (4f6d0b2..54d7911); they've had my note.
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
-- **To do:** once sim 0.26.36 (`crewMakeWay`, the cook steps aside) and galley 0.29.34 (the Sunday-table burst) are final, rerun player_check's job loop and food_check on galley + sim + player 9c18045. The lead asked for it. The earlier discrepancy is settled: player engineer 4 had run the checks on their branch alone.
+- **Combine check for 0.60.3** (combine-0603-jobloop-food.md, merge: galley 7282327 + sim 236810f + f16a110 cherry-picked + player 9c18045): the job loop and food_check's old 4 are fixed. Two new: player_check's "squeeze past" (sim 0.26.36 unblocks shared tiles always, so you walk through the chef; sent to sim engineer 4), and food_check's "galleyJoin / galleyTurn" (a test assumption since sim 0.26.34; sent to galley engineer 3). Recheck both when fixed.
+- **Next:** take over reviewer 1b's queue (sim, galley, social A/B, arrival) when they say plans/handover-reviewer-1.md on claude/reviews is final.
 
 ## How I test (fresh container)
 - `pip install playwright`; three r128 unpacked at /tmp/cadet-work/three (DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
