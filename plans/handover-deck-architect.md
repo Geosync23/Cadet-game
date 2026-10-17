@@ -28,6 +28,7 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 | 0.38.10 | Sowing morning, Tiles | kit `seedlingStand` (garden NE corner), `DECKS[3].seedlings`, place `3-seedlings-1` (`sowing`), trace `seedlingYours`; kit `tilesTable` (bow lounge), places `3-tiles-1/2` (`tiles`), `TILES_KIT`/`tilesBoardGeo()`, `DECKS[3].tiles`, `tilesSeats(k)`, dress `tilesNight` (one InstancedMesh) |
 | 0.38.11 | Letters, tasting, lanterns, calm | kit `postbox` + `3-postbox-1` (`letters`); dress `tastingTable` (title, lines), `lanternWalk`; `3-lantern-1..12` (`lanterns`); calm false on 3-wbench-1/2, true on 2-obsnight-1/6/7 and the Tiles stools |
 | 0.38.12 | Review fixes | `TILES` renamed `TILES_KIT` (section 23 owns `TILES`); every Tiles-night board names at least two seats (sixth field) |
+| 0.38.14-16 | Traditions' asks | places `2-open-lab-*`, `1-bridge-hour-*`, `4-music-1` (`late-piano`), lantern places `lantern-walk`; traces `mugYours`; dress `longTables`, `harvestTables`, `cupBoard`, `talentStage`, `yearsEnd` (Deck 3), `openLab` (Deck 2). Mending day, rummage day and the crossover supper were cut by the user. |
 | 0.38.9 | Arrival evening | `keepsakeShelf` above berth 4's bunk + `DECKS[4].keepsakes` (slots, place `4-B1-4-keepsake`); `mugRack` in the Works tea corner + `DECKS[5].mugRack.yours`; `CALM_TYPES` / `placeCalm(p)` |
 
 ## Loose ends
