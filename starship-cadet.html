@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.25
+   STARSHIP CADET: CSV Wren                           build 0.28.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.26';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9820,9 +9820,22 @@ function floatsTick() {
     n.style.opacity = (f < .15 ? f / .15 : f > .7 ? (1 - f) / .3 : 1).toFixed(3);
     n.style.marginTop = still ? '0px' : (6 - 40 * (1 - (1 - f) * (1 - f))).toFixed(1) + 'px';   // ease-out, 6 px down to 34 up
   }
+  deviceLockLook();
   const b = document.getElementById('devBtn'), g = (now - PULSE_AT) / (PULSE_SECS_BTN * 1000);
-  if (b && (g < 1 || b.style.boxShadow)) b.style.boxShadow = g < 1 && !still ? '0 0 0 ' + (12 * g).toFixed(1) + 'px rgba(76,195,181,' + (.7 * (1 - g)).toFixed(3) + ')' : '';
+  if (b && (g < 1 || b.style.boxShadow)) b.style.boxShadow = g < 1 && !still && !DEV_LOCK_SHOWN ? '0 0 0 ' + (12 * g).toFixed(1) + 'px rgba(76,195,181,' + (.7 * (1 - g)).toFixed(3) + ')' : '';
 }
+// the device lock (0.28.26, Pillar 4): until it's handed over in your bunk (section 21's flag 'intro.device'), the button
+// reads "No device yet", is dimmed and doesn't open: a capture listener here stops section 19's onclick and says why.
+// Section 19 may ask deviceLocked() too, for the other ways in (its screen is theirs).
+const deviceLocked = () => typeof introOn === 'function' && introOn() && typeof introFlag === 'function' && !introFlag('intro.device');
+const deviceLockedTap = () => toast('No device yet', 'Torres hands you your device at your bunk, Bunk 1 on Deck 4.');
+let DEV_LOCK_SHOWN = false;
+function deviceLockLook() {
+  const b = document.getElementById('devBtn'), on = deviceLocked(); if (!b || on === DEV_LOCK_SHOWN) return;
+  DEV_LOCK_SHOWN = on; const s = b.querySelector('span'); if (s) s.textContent = on ? 'No device yet' : 'Device';
+  b.style.opacity = on ? '.6' : ''; b.setAttribute('aria-label', on ? 'No device yet' : 'Your device: the time and your needs');
+}
+{ const b = document.getElementById('devBtn'); if (b) b.addEventListener('click', e => { if (deviceLocked()) { e.stopImmediatePropagation(); deviceLockedTap(); } }, true); }
 function needsSeen() {                                   // once a frame: what rose since the last frame
   const n = SHIP.player.needs, now = performance.now();
   if (!NEED_SEEN) { NEED_SEEN = { ...n }; return; }
@@ -9902,6 +9915,7 @@ function playerUpdate(dt, t) {
     }
   }
   if (PLAYER_V0 === undefined) PLAYER_V0 = player.maxV;
+  bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
     : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
@@ -10033,6 +10047,26 @@ function jobStopMark(j, step) {                          // tell section 17 a st
   const k = jobStops(j).findIndex(x => x.step === step); if (k >= 0) try { jobStepDone(j.id, k); } catch (e) { /* not ours to mend */ }
 }
 const giftHeld = () => typeof giftInHands === 'function' && !!giftInHands();   // a gift among the things in your hands (section 20, 0.28.25)
+// the kit bag (0.28.26, Pillar 4: section 21's arrival): from the top of the Tern's ramp you hold your kit bag in one of
+// your two hands (P.carry, saved with it). Section 21 calls bagGive() at step A1. It goes in your locker by itself once
+// the bunk step is done (a toast) or missed (quiet: Torres's mail says it's there), or when the intro is off. Never a
+// part: main storage doesn't take it back. handsFix(what): what to do about full hands, for the toasts.
+const KIT_BAG = 'kit bag';
+const bagHeld = () => SHIP.player.carry.includes(KIT_BAG);
+function bagGive() { const P = SHIP.player; if (bagHeld() || P.carry.length >= CARRY_MAX) return false; P.carry.unshift(KIT_BAG); return true; }
+function bagStow(quiet) {
+  const P = SHIP.player, i = P.carry.indexOf(KIT_BAG); if (i < 0) return false;
+  P.carry.splice(i, 1); if (!P.locker.includes(KIT_BAG) && P.locker.length < LOCKER_MAX) P.locker.push(KIT_BAG);
+  if (!quiet) toast('Bunk 1', 'You put your kit bag in your locker. Your hands are free.');
+  return true;
+}
+function bagTick() {
+  if (!bagHeld()) return;
+  const I = typeof introOn === 'function' && introOn() ? SHIP.intro : null;
+  if (I && (I.done || {}).bunk === undefined) return;
+  bagStow(!I || (I.missed || []).includes('bunk'));
+}
+const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftHeld() ? 'Give the gift away first' : what;
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
@@ -10041,14 +10075,14 @@ function jobTap(it, at) {
   const P = SHIP.player, mw = myWork(), c = cellAt(at.x, at.z);
   if (deckDef.num === 5 && roomAt(...c) === 'r' && !/tarp/i.test(it.t)) {      // main storage, Deck 5: a shelf or the counter
     if (!mw) {
-      if (!P.carry.length || typeof returnPart !== 'function') return false;
+      if (!P.carry.some(p => p !== KIT_BAG) || typeof returnPart !== 'function') return false;
       approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
       return true;
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
     if (!need.length && jobNeeds(mw.j, mw.w, P.carry).length) { toast(it.t, 'The ' + mw.j.make + ' isn\'t kept on the shelves: you make it yourself in the machine shop next door.'); return true; }   // 0.28.24
     if (!need.length) { toast(it.t, 'You have what the job needs: ' + partList(P.carry) + '. It\'s at the ' + machineName(machineById(mw.j.machine)) + ' on Deck ' + mw.j.deck + '.'); return true; }
-    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + (giftHeld() ? 'Give the gift away first' : 'Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
+    if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + ', then come back for ' + partList(need) + '.'); return true; }
     const o = { title: it.t, flavour: it.x, after: 'You look for ' + partList(need) + '.' }, pl = jobPlaceNear('storage', 'r', at);
     if (pl) actStart('fetch', pl.id, { ...o, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('fetch', null, o));
     return true;
@@ -10068,7 +10102,7 @@ function jobTap(it, at) {
     const make = (P.work.make && P.work.make.part) || (want.includes(madeHere(mw.j)) ? mw.j.make : want.find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))));
     const pl = make && jobPlaceNear('storage', 'f', at);
     if (make && pl) {
-      if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + (giftHeld() ? 'Give the gift away first.' : 'Fit those first.')); return true; }
+      if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + '.'); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
       const left = Math.max(1, makeMins(mw.j) - P.work.make.done);
       actStart('make', pl.id, { title: it.t, flavour: it.x, part: make, after: (P.work.make.done ? 'Back to the ' : 'You start on a new ') + make + ': about ' + taskMins(left) + ' minutes. Walk away to pause.' });
@@ -10108,7 +10142,7 @@ function jobBegin(A) {
 function jobEnd(A) {
   const P = SHIP.player, mw = myWork();
   if (A.kind === 'stow') {
-    const back = []; for (const p of P.carry.slice()) if (returnPart(p)) { back.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
+    const back = []; for (const p of P.carry.slice()) if (p !== KIT_BAG && returnPart(p)) { back.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
     toast('Main storage', back.length ? 'You put back ' + partList(back) + '.' : 'Nothing to put back.');
   } else if (A.kind === 'make' && mw && P.work.make) {
     const part = P.work.make.part; P.work.make = null;
@@ -10160,7 +10194,7 @@ function cartTap(it, at) {
   if (!j || j.kind !== 'restock') return false;
   if (!c) {
     if (!dockTap) return false;
-    if (P.carry.length) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). Put them back in main storage first.'); return true; }
+    if (P.carry.length) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Put them back in main storage first') + '.'); return true; }
     const out = typeof cartsOut === 'function' ? cartsOut(shipNow()) : new Set();
     if (out.has(+dockId.split('-').pop())) { toast(it.t, 'That cart\'s out on a run. Try the other dock.'); return true; }
     actStart('cartTake', PLACE_OF.has(dockId) ? dockId : null, { title: it.t, dock: dockId, after: 'You unplug the cart and float it out of the dock.' });
