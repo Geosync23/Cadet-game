@@ -87,3 +87,181 @@
 - The ladder club met again. Cruz, Keane, me. Nobody said a word. We just climbed.   #funny
 ? beat:kovac.4
 - Four, please. I said it in the lift today. Out loud. Just the once.   #warm
+
+// ---- Writer 2, batch 4: Kovac toward ~100. The lift is "exercise" until beat:kovac.2; "Four, please" only from
+// beat:kovac.4. Rest days Tue, Wed (rota.offDays).
+== greet
+? tier=stranger
+- Um. Hello. Kovac. Works. Scrubbers, mostly. The seal kits are in order. Mind them.
+- Oh. Sorry. I'm in the way. No? Oh. Hi. You're new.
+? tier>=acquaintance time:afternoon
+- Hi. Two scrubbers done. Nine and a half, both. Sorry. I keep count.
+? tier>=acquaintance time:evening
+- Oh. Evening. I'm off to the garden. The beans like the quiet bit.
+? tier>=acquaintance place:worksbay
+- Oh. Hi. The spanner wall's in order. Sorry. I did it again.   #funny
+? tier>=colleague season:sowing
+- Sowing. The garden smells of soil again. Sorry. I love it.
+? tier>=colleague season:greening
+- Greening. Everything's growing. Even Torres's scarf. Especially Torres's scarf.   #funny
+? tier>=colleague season:harvest
+- Harvest. The beans are in. I counted them. Don't ask how many.   #funny
+? tier>=colleague season:lanterns
+- Lanterns. I knitted a cover for the tea urn. It's very neat. Nobody's noticed.   #funny
+? rep:well
+- Um. People in Works say you're good. I agree. Sorry. That was a lot.   #warm
+? you:reliable
+- You always finish the job. I like that. Sorry. I'll go.
+? tier>=friend time:morning
+- Morning, {me}. I skipped breakfast. I brought you a tea instead. That counts.   #warm
+? tier>=close
+- {me}. Oh, good. Sit. I've a scrubber story. It's very short. Nine and a half minutes.   #warm
+
+== bye
+? tier>=colleague
+- Bye. Mind the seals on the way out. They're new. I counted them.
+- Oh. You're going. Okay. See you at the board.
+
+== feel
+? mood:high tier>=colleague
+- Good day. The spanner wall stayed in order all shift. Nobody touched it.   #funny
+? mood:low tier>=colleague
+- Sorry. Bit flat. I've knitted three rows and undone two.
+
+== near
+? act:work tier>=acquaintance
+- Panel off. Filter out. Seal. Click. That's the bit I like. The click.
+? act:leisure
+- I'm just looking at the store. Not buying. Well. Wool. Maybe wool.   #funny
+? place:teacorner tier>=colleague
+- Dahl's here. Torres is coming. It's knitting circle. Sit, if you like.
+? act:breakfast
+- Just tea. I don't really do breakfast. Sorry. I know. Halloran's told me.   #funny
+? !beat:kovac.2 tier>=acquaintance
+- I'll take the ladder down. Exercise. Very good for the legs. Yes.   #funny
+? beat:kovac.2 !beat:kovac.4 tier>=acquaintance
+- Ladder again. Not exercise. Well. Also exercise. You know.   #funny
+? beat:kovac.4
+- Lift's here. Four, please. Sorry. I like saying it now.   #warm
+
+== life
+? tier>=acquaintance
+- Ten minutes flat, a scrubber. Well. Nine and a half. Ten sounds less like bragging.   #funny
+? tier>=colleague
+- Torres asked me to look at his scarf. I said it was perfect. It's very long. It's lovely.   #funny
+- I browse the store after shift. Wool, mostly. I don't need wool. I have so much wool.   #funny
+? tier>=friend
+- I like being the quiet one. Mostly. Sometimes I'd like someone to ask. You asked. Thanks.
+? tier>=friend beat:kovac.3
+- A hundred and twelve bolts. I don't count them any more. Well. Less.
+
+== joy
+? tier>=colleague
+- The garden after shift. The beans, the pumps. Nobody needs anything from me there.
+? mem:moment.kovac.fourplease
+- Two colours, one scarf. I've only done it once. You know which one.   #warm
+
+== invite
+? tier>=acquaintance
+- Um. The garden's nice after shift. If you're going. I'm going. Anyway.
+? trad:today tier>=colleague
+- {trad} tonight. I'm going. It's less scary with people I know. Come?
+
+== accept
+- Oh. Um. Yes. Okay. Yes.
+? tier>=friend
+- Yes. I'd like that. I'll bring biscuits. Soto's. She won't mind. She'll mind.   #funny
+
+== decline
+? weekday:tue|wed
+- It's my rest day. I'm knitting. All day. Sorry. Thursday?
+?
+- Oh. Sorry. I promised Dahl a pattern. Another night? Please ask again.
+
+== missed
+? tier>=friend
+- You didn't come. That's okay. I worried a bit. Sorry. Are you all right?
+?
+- I waited. Twenty-two minutes. Sorry. I count things.   #funny
+
+== birthday
+? birthday:you tier>=friend
+- Happy birthday. I knitted you a hat. Sorry. It's small. Hats are small.   #funny
+? birthday:me tier>=friend
+- My birthday. Torres made the whole bay sing. I hid behind a scrubber.   #funny
+
+== callback
+? told:moment.kovac.verygood
+- The ladder. Very good exercise. You said so. You were very kind about it.   #funny
+? told:moment.kovac.askedlift !beat:kovac.2
+- You asked about the lift. I didn't answer. I will. Not yet. Soon, maybe.
+? told:moment.kovac.keptsecret
+- You didn't tell anyone. I didn't check. I just know.   #warm
+? told:moment.kovac.badges
+- I knitted the badges. Three. Ladder-shaped. Cruz wears theirs. Keane lost his.   #funny
+? told:moment.kovac.listened
+- Telling you made it smaller. It's stayed smaller. I wanted you to know.   #warm
+? told:moment.kovac.shared
+- The reactor door. I walked past it today. It's just a door. So's the lift. Nearly.
+? told:moment.kovac.proud
+- You said you were proud. I wrote it down. Sorry. I write things down.   #warm
+? told:moment.kovac.tellclub
+- We told Cruz and Keane. Cruz went very quiet. Keane said "exercise" out of habit.   #funny
+? told:moment.kovac.again
+- Deck 5 and back. I did it. On my own. Twice. Don't make a fuss.   #warm
+? told:fixed.
+- Your repair's in the log. I read it. Twice. It's very tidy.
+? told:fav.
+- You did the thing I asked. Thank you. I'd have been too shy to ask twice.   #warm
+? told:came.
+- You came. Thank you. It's easier when someone I know is there.
+? told:bday
+- You knew it was my birthday. Nobody knows. How did you know? Don't tell me.   #warm
+
+== gift
+? gift:loved
+- Oh. Oh. That's. Thank you. Really. I'm keeping it forever. Sorry. That's a lot.   #warm
+? gift:liked
+- Oh, thank you. That's kind. Really.
+? gift:polite
+- Oh. Thank you. That's. Yes. Thank you.
+? gift:plant
+- A plant. Oh. I'll put it by the beans. They'll get on.   #warm
+? gift:made
+- You made this? It's very neat. I checked the joins. Sorry. I always do.   #warm
+
+== cue
+? cue:event.ionStorm.onset
+- Storm. Um. I'll do the scrubbers. Scrubbers are calm. I'm calm. Mostly.
+? cue:event.ionStorm.afterglow
+- It's over. Every scrubber held. I checked them all. Twice.
+? cue:repair.lift.you !beat:kovac.4
+- You fixed the lift? Oh. Good. I'll. Um. Take the ladder anyway. Exercise.   #funny
+? cue:repair.lift.you beat:kovac.4
+- You fixed the lift. Thank you. Four, please. I'll go now.   #warm
+? cue:tradition.harvest
+- Harvest. The beans did well. I'm very proud of the beans.   #funny
+
+== visit
+? tier>=friend
+- Um. Hi. I'm knitting you something. It's not finished. I only came to check the length.   #funny
+- I was in the junior wing anyway. I wasn't. I brought tea. Sorry.
+? tier>=friend !beat:kovac.4
+- Oh. Hi. I took the ladder up. Exercise. Can I sit a minute?
+
+== note
+? tier>=friend
+- I sorted your spanners. Sorry. They were nearly in order. Now they're in order.   #funny
+- Garden after shift? The beans are up. I'll be there. If you want. K.
+- Left you a tea. It's cold now. Sorry. It was hot when I left it.   #funny
+
+== smalltalk
+- Nine and a half minutes.   #funny
+- Sorry. Was that me?
+? act:work
+- Seal's good. Click. There.
+- Spanners. In order. Sorry.   #funny
+
+== rumour
+- Um. I heard something. Sorry. It's probably nothing.
+- Don't tell anyone I told you. I don't tell anyone anything.   #funny
