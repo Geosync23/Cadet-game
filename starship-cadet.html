@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.5 
+   STARSHIP CADET: CSV Wren                           build 0.39.6 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.5';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.6';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15635,6 +15635,11 @@ function momentNextId(p) {                               // the next beat's id t
   for (let b = n + 1; b <= n + 6; b++) if (momentDef(p.id + ':' + b)) return p.id + ':' + b;
   return null;
 }
+const ARC_CREW = new Map();
+function arcCrew(arcId) {                                 // whose story an arc is: the crew member whose thread is 'arc:<arcId>' (Torres's is 'torres', his id 'torres-zeke'), else the id itself
+  if (!ARC_CREW.size || (VOICE_SRC && ARC_CREW.src !== VOICE_SRC)) { ARC_CREW.clear(); ARC_CREW.src = VOICE_SRC; socInit(); for (const p of SOC.crew) { const th = voiceOf(p.id).thread || ''; if (th.startsWith('arc:') && !ARC_CREW.has(th.slice(4))) ARC_CREW.set(th.slice(4), p.id); } }
+  return ARC_CREW.get(arcId) || arcId;
+}
 const momentOwnsBeat = (id, n) => n >= 1 && (voiceOf(id).thread || '').startsWith('arc:') && !!momentDef(id + ':' + (n + 1));   // section 20's arcBeat leaves it to a moment
 const momentHint = id => { const d = momentDef(id); return d && d.hint ? voiceFill(d.who, d.hint) : null; };
 const MOMENT_SERIOUS = new Set(['heartfelt', 'serious', 'resolution']);
@@ -15646,9 +15651,10 @@ function momentCalm(p, t, duty) {                        // off duty (or on, for
   const pl = w.placeId && schedData().byId.get(w.placeId);
   return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type) || (duty && w.act === 'work'));
 }
-function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', 'any' (played in place, wherever you meet), or a room's name
+function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', 'meal' (at a mess table at breakfast or dinner), 'any' (played in place), or a room's name
   return (Array.isArray(d.where) ? d.where : [d.where || 'calm']).some(x => {
     if (x === 'any') return true;
+    if (x === 'meal') { const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && !w.moving && w.placeId && schedData().byId.get(w.placeId); return !!pl && (w.act === 'breakfast' || w.act === 'dinner') && pl.type === 'mess-seat'; }   // sitting with them at a meal
     if (x === 'calm') return momentCalm(p, t, d.duty);
     if (x === 'visit') return momentVisit(p);
     if (x === 'appt') return momentAppt(p, t);
