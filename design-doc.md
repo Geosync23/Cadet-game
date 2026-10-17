@@ -702,6 +702,7 @@ Done so far:
    - **Tiles (the user, 2026-10-17):** a simple playable tile game, designed by us later. A small tiles station with boards in the lounge; on tiles night, every lounge table has a board.
      **Voices (the user, 2026-10-17 ~03:37):** the Voices sampler (the ten story crew's voice cards, names for you, sample lines, the arrival evening scenes) is approved as written.
      **Direction (the user, 2026-10-17 ~02:50):** a two-player mix of checkers and block matching: quick and fun, visually appealing, original, balanced, tight, easy to get into, accessible, quick and different. Hired now (ahead of wave 3): the Tiles engineer designs it first on `plans/tiles-plan.html` for the user to approve before it's built.
+     **Decided (the user, 2026-10-17 ~03:39, Tiles survey):** the rules as designed (6×6 board, step / jump / launch, 3+ same-mark tiles touching dock for points, first to 7); also a quick game to 5; Rina's Tiles-night streak is a story rule that only the player can break; no two-human pass-the-phone mode (crew opponents only); the prize is friendship, chatter and a Record line, plus a small trophy on your bunk shelf after beating Rina; the name stays "Tiles".
 
 **After that:** progression to tier 2 (certification, promotion to Officer and your own cabin, the Deck 5 machine rooms and connected-system faults) and the spine's crawlways and pipe galleries. (The shuttle arrival is now part of Pillar 4.)
 
