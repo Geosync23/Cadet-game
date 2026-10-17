@@ -16,8 +16,9 @@ are an optional extra (the device engineer retired; the Mail `play:` field is op
 a call since the last beat, one home beat a day. Head writer 2 writes content/home/mum.arc as the model.
 **Baked shapes (the dialogue engineer, 0.43.11, from content/home/mum.call on claude/content 5a07b86):**
 HOME_CONTACTS[contact] = { id: 'home:mum', arc: 'home.mum', name, pron? }; HOME_MOMENTS['mum:<n>'] (MOMENTS shape +
-`via: 'reply'|'live'`; who 'home:mum', thread 'arc:home.mum'); HOME_SEND[contact] = [{ text, id, flavour, flag?,
-...conditions, reply: { who, text, pose? } }]; HOME_CHAT[contact] = [{ when?, lines: [{ who, text, pose? } |
+`via: 'reply'|'live'`; who 'home:mum', thread 'arc:home.mum'); HOME_SEND[contact] = [{ text, id, flavour, sets? (a flag
+to set when chosen), memo? (a memory word), ...conditions, reply: { who, text, pose? } }] (shipped as claude/dialogue
+e69936d, 0.43.11; ctx also takes tradId and friendId); HOME_CHAT[contact] = [{ when?, lines: [{ who, text, pose? } |
 { send: true }] }] (`send: true` = where the player's message choices go). Check send lines with
 `linesOk(entry, homePerson, ctx)` and fill with `linesFill(text, homePerson, ctx)`, homePerson = HOME_CONTACTS'
 { id, name }; pass ctx.trad (the latest tradition you joined, last ~3 days) and ctx.friend (your closest crew
