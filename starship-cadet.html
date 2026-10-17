@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.15
+   STARSHIP CADET: CSV Wren                           build 0.61.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7577,7 +7577,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.15';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.16';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8525,7 +8525,7 @@ function schedBuild(p, d, occ, S) {
   // or bench on the work deck, and a toilet break most days
   const shiftWithBreaks = to => {
     const br = [], clocks = p.dept === 'works' && wd === 5 && p.shift !== 'night' && (S.shared.get('5|timeclock') || []).length > 0;   // the Works crew clock in and out (the career engineer, 0.61.13)
-    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 10, min: 1, tag: 'clock' });   // a short queue at the clock
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // a short queue at the clock
     if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
     if (F.double) br.push([1050 + Math.round(30 * U(36)), 'staff']);   // a double shift (C7): dinner at the station
@@ -8543,8 +8543,8 @@ function schedBuild(p, d, occ, S) {
       }
       else toilet(34);
     }
-    if (clocks && to - t > 12) { work(to - 3 - Math.floor(8 * U(161))); if (take('work', [[5, 'timeclock']], 1, { wait: 3, min: 1, by: to, tag: 'clock' })) return; }   // out in the last ten minutes or so
     work(to);
+    if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // out as the shift ends (a short queue after 17:00)
   };
   // showers in the evening: the habit, or about one day in three for anyone else
   const eveShower = H.has('evening-shower') || U(90) < .3;
