@@ -1,0 +1,27 @@
+@overheard survey
+// Writer (command), batch 3c. Survey: lab pairs, the chart room, the sweep, Sato's tea.
+
+== overheard
+? pair:survey+survey deck:2 act:work
+A: Who labelled this?
+B: You did.
+A: Then why's it labelled twice?
+B: Habit.   #funny
+
+? pair:survey+survey deck:2
+A: Dr. Sato offered me her tea.
+B: Did you drink it?
+A: I'm a scientist. I had to know.
+B: And?
+A: Now I know.   #funny
+
+? pair:survey+survey time:night
+A: Sweep's clean.
+B: All of it?
+A: Every sensor. Listen to it hum.   #warm
+
+? pair:survey+any time:evening
+A: If you named a star, what would you call it?
+B: Something cheerful.
+A: Not Gerald.
+B: Why not Gerald?   #funny
