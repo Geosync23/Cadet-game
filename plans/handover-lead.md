@@ -309,3 +309,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~16:52 user idea: rare random sickness -> wake card -> infirmary exam -> medicine -> back to day (excused). Career engineer after leave system; target 0.60.6.
 - ~16:55 user: sickness worsens to doubled-over; heal by medicine or bed; sick never uses leave (explained). Pillar 5 designer hired (session_01FDy4na3u2FS8L8vEjR6gAR): keep plan, add deductive repair puzzles (+30-50% progression), design only.
 - ~17:12 user approved Pillar 5 Q8 (deduction puzzles as the diagnosing step); design-doc updated. Plan published: https://claude.ai/artifact/TaTsLLuT96H3zpGHqy6RKH (6ef7588). Other Qs 1-7, 9-16 open; Pillar 5 still on hold.
+- ~17:20 USER RULES: (1) strings of questions -> interactive survey page; (2) design decisions are the user's again; lead keeps making the overnight level of calls. Pillar 5 survey: https://claude.ai/artifact/5uM6bSnQ8LQyVWJDEj97v5 (db doc survey/pillar5).
