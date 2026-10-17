@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.28
+   STARSHIP CADET: CSV Wren                           build 0.43.29
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.28';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.29';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13703,7 +13703,7 @@ function lineCond(k, v, p, ctx) {
   }
   return false;
 }
-// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple|best|mentor
+// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple|best|mentor|mentee
 function linePair(v, a, b) {
   if (!b) return false;
   return String(v).split('|').some(x => {
@@ -13712,7 +13712,8 @@ function linePair(v, a, b) {
     if (x === 'friend' || x === 'rival') return lineQ('affBand', a.id, b.id) === x;
     if (x === 'couple') return lineQ('bondOf', a.id, 'couple') === b.id;   // a couple living quietly in the background
     if (x === 'best') return lineQ('bondOf', a.id, 'best') === b.id;       // best friends (0.43.27, social B2's goodbyes)
-    if (x === 'mentor') return lineQ('bondOf', a.id, 'mentee') === b.id || lineQ('bondOf', a.id, 'mentor') === b.id;   // one mentors the other, either way
+    if (x === 'mentor') return lineQ('bondOf', a.id, 'mentor') === b.id;   // B is A's mentor (0.43.29: one way, as the writers' goodbyes read)
+    if (x === 'mentee') return lineQ('bondOf', a.id, 'mentee') === b.id;   // B is A's mentee
     if (x === 'senior') return LINE_RANKS.indexOf(a.rank) > LINE_RANKS.indexOf(b.rank);
     const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w || q.id === w;   // a department, a rank or a crew id
     return side(a, s) && side(b, o);
@@ -13909,7 +13910,7 @@ function linesTick() {
     const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
     for (const y of around) {
       if (y === x || x.w.act === 'callhome' || y.w.act === 'callhome' || Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) > OVH_PAIR || bye[linesPairKey(x.a.p, y.a.p)]) continue;
-      tries.push({ x, y, bye: true, ctx: { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, keep: e => !!e.leaving } });
+      tries.push({ x, y, bye: true, ctx: { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, keep: e => !!e.leaving, skip: linesRing(day), noSerious: Lb.serious === day } });
     }
   }
   if (react) tries.push(...near.map(x => ({ x, react: true })));
@@ -13937,8 +13938,7 @@ function linesScan() {
     if (q.react) { if (linesReact([q.x], S.t, S.day)) { OVH_SCAN = null; return; } continue; }
     const lines = overheardFor(q.x.a.p, q.y && q.y.a.p, q.ctx); if (!lines) continue;
     OVH_SCAN = null; linesHeard(lines.id, S.day, lines.tone);
-    if (q.bye) { const L = linesState(); (L.bye || (L.bye = {}))[linesPairKey(q.x.a.p, q.y.a.p)] = S.day; }
-    OVH = { a: q.x.a, b: q.y && q.y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
+    OVH = { a: q.x.a, b: q.y && q.y.a, lines, i: 0, next: 0, bub: [], bye: q.bye ? linesPairKey(q.x.a.p, q.y.a.p) : null, day: S.day }; linesTalk(); return;
   }
   if (S.i >= S.tries.length) OVH_SCAN = null;
 }
@@ -13948,7 +13948,10 @@ function linesTalk() {
   const gone = s => !DECK_CREW.includes(s) || !s.h, apart = !!o.b && Math.hypot(o.a.x - o.b.x, o.a.z - o.b.z) > OVH_PAIR + 1.5;
   if (linesHush() || gone(o.a) || (o.b && gone(o.b)) || apart) { for (const b of o.bub) { b.el.remove(); const k = bubbles.list.indexOf(b); if (k >= 0) bubbles.list.splice(k, 1); } OVH = null; OVH_AT = now; return; }
   if (now < o.next) return;
-  if (o.i >= o.lines.length) { OVH = null; OVH_AT = now; return; }
+  if (o.i >= o.lines.length) {                            // said to the end: a goodbye is marked only now (0.43.29), so one cut short can come again
+    if (o.bye) { const L = linesState(); if (L) (L.bye || (L.bye = {}))[o.bye] = o.day; }
+    OVH = null; OVH_AT = now; return;
+  }
   const l = o.lines[o.i++], s = o.b && l.who === o.b.p.id ? o.b : o.a;
   const b = bubbleSay(s.h, l.text, OVH_STEP + .8); if (b) o.bub.push(b);
   o.next = now + OVH_STEP * 1000;

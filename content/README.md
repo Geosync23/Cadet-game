@@ -212,10 +212,10 @@ A: No promises.
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
-  (A outranks B), `couple` (one of the established crew couples), `best` (best friends), `mentor` (one mentors the
-  other, either way). lines_check knows these words.
+  (A outranks B), `couple` (one of the established crew couples), `best` (best friends), `mentor` (B is A's
+  mentor), `mentee` (B is A's mentee). lines_check knows these words.
 - **Goodbyes** (0.43.27): a conversation with `leaving:soon` is someone's goodbye before they leave the ship. When the
-  person leaving is near you with someone close by, their goodbye plays first, whatever the usual odds, once per pair.
+  person leaving is near you with someone close by, their goodbye plays first, whatever the usual odds, once per pair (a goodbye cut short can come again).
   Give it a pair (`? leaving:soon pair:best|mentor|friend|couple`) so it's said to the right person.
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
 - In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
