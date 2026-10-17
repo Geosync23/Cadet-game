@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.27
+   STARSHIP CADET: CSV Wren                           build 0.27.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7410,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.27';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.28';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -28702,30 +28702,48 @@ class CrowdChunk {
     p.chunk = null; p.slot = -1;
   }
   rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
+    // 0.27.28: the arrays and GPU buffers are kept and reused (half as big again when they grow), the skin weights
+    // written once, and only the slots from the first one that changed are written and uploaded (from the lowest change
+    // since the mesh was last drawn: pv, pi, reset by onBeforeRender, which comes after the upload). Same triangles, same order.
     this.dirty = false;
-    const old = this.mesh.geometry; let nv = 0, ni = 0;
     const packs = p => [p.packOf(p.lod), ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
-    for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
-    if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
-    const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
-    const SI = new Uint16Array(nv * 4), SW = new Uint8Array(nv * 4), I = nv > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
-    let o = 0, oi = 0;
-    this.slots.forEach((p, s) => {
-      if (!p) return;
+    const lay = this.slots.map(p => p ? packs(p) : null); let nv = 0, ni = 0;
+    for (const qs of lay) if (qs) for (const q of qs) { nv += q.nv; ni += q.ni; }
+    this.nv = nv; this.ni = ni;
+    if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (this.geo) this.geo.dispose(); this.geo = this.buf = this.lay = null; return; }
+    let A = this.buf;
+    if (!A || nv > A.cv || ni > A.ci) {
+      const cv = Math.ceil(nv * 1.5), ci = Math.ceil(ni * 1.5);
+      A = this.buf = { cv, ci, P: new Float32Array(cv * 3), N: new Float32Array(cv * 3), C: new Float32Array(cv * 3),
+        SI: new Uint16Array(cv * 4), SW: new Uint8Array(cv * 4), I: cv > 65535 ? new Uint32Array(ci) : new Uint16Array(ci) };
+      for (let i = 0; i < cv; i++) A.SW[i * 4] = 255;
+      if (this.geo) this.geo.dispose();
+      const geo = this.geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(A.P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(A.N, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(A.C, 3));
+      geo.setAttribute('skinIndex', new THREE.BufferAttribute(A.SI, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(A.SW, 4, true));
+      geo.setIndex(new THREE.BufferAttribute(A.I, 1)); geo.boundingSphere = this.sphere;
+      this.lay = null; this.mesh.onBeforeRender = () => { this.pv = this.pi = Infinity; };
+    }
+    const old = this.lay, same = (x, y) => x === y || !!x && !!y && x.length === y.length && x.every((q, k) => q === y[k]);
+    let s0 = 0, o = 0, oi = 0;
+    if (old) for (; s0 < lay.length && same(old[s0], lay[s0]); s0++) if (lay[s0]) for (const q of lay[s0]) { o += q.nv; oi += q.ni; }
+    const o0 = o, oi0 = oi;
+    for (let s = s0; s < lay.length; s++) {
+      if (!lay[s]) continue;
       const b0 = s * CROWD_BONES;
-      for (const q of packs(p)) {
-        P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
-        for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
-        for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
+      for (const q of lay[s]) {
+        A.P.set(q.P, o * 3); A.N.set(q.N, o * 3); A.C.set(q.C, o * 3);
+        for (let i = 0; i < q.nv; i++) A.SI[(o + i) * 4] = b0 + q.B[i];
+        for (let i = 0; i < q.ni; i++) A.I[oi++] = q.I[i] + o;
         o += q.nv;
       }
-    });
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(C, 3));
-    geo.setAttribute('skinIndex', new THREE.BufferAttribute(SI, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(SW, 4, true));
-    geo.setIndex(new THREE.BufferAttribute(I, 1)); geo.boundingSphere = this.sphere;
-    this.mesh.geometry = geo; if (old !== CROWD_EMPTY) old.dispose();
+    }
+    this.lay = lay; const pv = this.pv = Math.min(this.pv === undefined ? Infinity : this.pv, o0), pi = this.pi = Math.min(this.pi === undefined ? Infinity : this.pi, oi0);
+    const at = this.geo.attributes;
+    for (const [x, n] of [[at.position, 3], [at.normal, 3], [at.color, 3], [at.skinIndex, 4]]) { x.updateRange.offset = pv * n; x.updateRange.count = (nv - pv) * n; x.needsUpdate = true; }
+    const ix = this.geo.index; ix.updateRange.offset = pi; ix.updateRange.count = ni - pi; ix.needsUpdate = true;
+    this.geo.setDrawRange(0, ni); this.mesh.geometry = this.geo;
   }
 }
 const crowd = {
@@ -28793,7 +28811,7 @@ const crowd = {
   },
   stats() {
     let verts = 0, tris = 0;
-    for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.mesh.geometry.attributes.position.count; tris += c.mesh.geometry.index.count / 3; }
+    for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.nv; tris += c.ni / 3; }
     return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length, coarse: this.people.filter(p => p.lod === 2).length };
   },
 };
