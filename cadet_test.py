@@ -108,6 +108,9 @@ def run(path, tag):
     shots = []
     with sync_playwright() as pw:
         g = Game(pw, path)
+        # tips off (0.28.48): a tip card closes on a real-time timer, so whether one is up (and holds back a need warning)
+        # depended on how fast the machine ran; builds without the setting ignore this. Only here: the other checks keep tips
+        g.page.evaluate("s => { try { window.__sc(s); } catch (e) {} }", "SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
         res['state'] = g.ev(STATE)
         res['paths'] = g.ev(PATHS)
         res['collide'] = g.ev(COLLIDE)

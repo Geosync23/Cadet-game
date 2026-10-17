@@ -193,6 +193,7 @@ body.dlgon .devhu{display:none}
   <div class="clock" id="clock">Day 1, Monday 06:00</div>
 </div>
 <div class="controls">
+  <button id="pauseBtn" aria-pressed="false" aria-label="Pause the game"><svg viewBox="0 0 24 24"><path d="M9 5v14"/><path d="M15 5v14"/></svg><span>Pause</span></button>
   <button id="rot" aria-label="Rotate view"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>Rotate</button>
   <button id="shad" aria-pressed="true" aria-label="Turn shadows off"><svg viewBox="0 0 24 24"><circle cx="9" cy="10" r="5"/><path d="M13 19c3 0 7-1 8-3"/></svg><span>Shadows</span></button>
   <button id="walls" aria-label="Walls: auto. Tap for all walls down"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-6h5v6"/><path d="M14 20V8h5v12"/></svg><span>Walls</span></button>
@@ -223,7 +224,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.47
+   STARSHIP CADET: CSV Wren                           build 0.28.48
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7561,7 +7562,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.47';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.48';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10490,12 +10491,13 @@ function needsLine() {
 // when an ordinary toast / a tip card or dialogue was last on screen, or a heads-up came up (performance.now(), so virtual in tests).
 // The need warnings and the teaching tips (below) wait for a quiet moment; nothing here changes what's shown.
 const POP = { at: -1e9, panels: false, busy: false, toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 };
+let TOAST_AT = -1e9;                                     // when toast() last showed one (section 12 stamps it; performance.now(), so virtual in tests; 0.28.48)
 const POP_PANELS = ['lift', 'sleepAsk', 'qAsk', 'ixBoard', 'ixHealth', 'chat', 'devAddr', 'seek'];
 const popOn = id => { const e = document.getElementById(id); return !!(e && !e.hidden); };
 function popupWatch(now) {
   if (now - POP.at >= 250) { POP.at = now; const fe = document.getElementById('fade'); POP.panels = POP_PANELS.some(popOn) || !!(fe && +fe.style.opacity > 0); }
-  const dlg = document.body.classList.contains('dlgon') || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE), te = document.getElementById('toast');
-  if (te && te.classList.contains('show')) POP.toast = now;
+  const dlg = document.body.classList.contains('dlgon') || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE);
+  if (now - TOAST_AT < 5600) POP.toast = now;            // a toast is up for 5.6 s: read from its stamp, not the page (whose timer is real time)
   if (dlg || TIP_Q.length || DEV.hu && DEV.hu !== POP.hu || DEV.choose) POP.card = now;   // a heads-up counts as it comes (it can stay up a while, at the side)
   POP.hu = DEV.hu;
   POP.busy = POP.panels || dlg || !!DEV.choose || TIP_Q.length > 0 || sleeping || !!ride;
@@ -10577,6 +10579,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout every few days keeps you fit and quick on your feet.'],
   ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to Mum, Gran, Jo or Sam.'],
   ['t:bonus', c => c.now - c.S.start > 600000 && Object.values(needEffects(c.n).marks).some(m => m[0] === 'up'), 'Needs kept high give bonuses: well rested, you work faster. The Needs app shows what\'s helping and what isn\'t.'],
+  ['t:pause', c => c.now - c.S.start > 900000, 'Need a break? Pause, at the top, stops the ship\'s clock and everyone in it. Tap anywhere to carry on.'],
   ['t:view', c => c.now - c.S.start > 300000, 'Rotate turns the view. Walls lowers them so you can see into rooms. Pinch or scroll to zoom.'],
 ];
 const teachTry = f => { try { return !!f(); } catch (e) { return false; } };
@@ -10711,6 +10714,39 @@ function newsTick(now) {                                 // once a ship minute (
   }
   newsRows(now);
 }
+// pause (0.28.48, the user's "Need a pause button"): PAUSE.on stops the ship. The main loop (section 12) skips ship time
+// and every sim step while it's set (input, you, the crew, the galley, the Works, events, social, the intro) and only
+// draws. pauseSet(on): a calm overlay with Resume (a tap anywhere resumes), saved on pausing; a hidden tab pauses too and
+// stays paused. Resuming moves the real-time stamps that pace things (the warnings' and tips' gaps, a dialogue's
+// auto-advance) on by the pause, so nothing jumps; toasts and the ghost-tap guard keep their own real time. Paused time
+// simply doesn't pass: determinism is untouched.
+const PAUSE = { on: false, since: 0 };
+function pauseSet(on) {
+  on = !!on; if (on === PAUSE.on) return PAUSE.on;
+  const now = performance.now(), btn = document.getElementById('pauseBtn');
+  let el = document.getElementById('pauseCard');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'pauseCard'; el.hidden = true; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Paused');
+    el.style.cssText = 'position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(6,14,18,.55)';
+    el.innerHTML = '<div style="padding:20px 26px;border-radius:14px;background:rgba(8,20,26,.94);border:1px solid #6fa8b0;color:#e6f0f1;text-align:center;font:inherit">'
+      + '<div style="font-size:20px;font-weight:600;margin-bottom:6px">Paused</div><div style="opacity:.8;margin-bottom:14px">The ship waits for you.</div>'
+      + '<button type="button" style="font:inherit;min-height:44px;padding:8px 22px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1">Resume</button></div>';
+    el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); pauseSet(false); });
+    document.body.appendChild(el);
+  }
+  if (on) {
+    PAUSE.on = true; PAUSE.since = now; try { saveGame(); } catch (e) { /* the save's own problem */ }
+  } else {
+    const d = Math.max(0, now - PAUSE.since); PAUSE.on = false;
+    for (const k of ['at', 'toast', 'card', 'warn', 'tip']) POP[k] += d; TOAST_AT += d;
+    TEACH_CK += d; if (typeof DIALOGUE !== 'undefined' && DIALOGUE && isFinite(DIALOGUE.at)) DIALOGUE.at += d;
+  }
+  el.hidden = !on; el.style.display = on ? 'flex' : 'none';   // the inline display would beat [hidden]
+  if (btn) { btn.setAttribute('aria-pressed', String(on)); btn.setAttribute('aria-label', on ? 'Resume the game' : 'Pause the game'); const sp = btn.querySelector('span'); if (sp) sp.textContent = on ? 'Resume' : 'Pause'; }
+  return PAUSE.on;
+}
+{ const b = document.getElementById('pauseBtn'); if (b) b.onclick = e => { e.stopPropagation(); pauseSet(!PAUSE.on); }; }
+document.addEventListener('visibilitychange', () => { if (document.hidden) pauseSet(true); });
 
 // ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
 // left out). SHIP.mail holds the newest MAIL_MAX, newest first: { id, at, from, subject, body, read }. Saved in
@@ -32851,6 +32887,7 @@ refreshPickables();
 
 const toastEl = document.getElementById('toast'); let toastTimer;
 function toast(t, x) {
+  TOAST_AT = performance.now();                          // section 15's quiet moments (0.28.48)
   document.getElementById('tt').textContent = t; document.getElementById('tx').textContent = x;
   toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600);
 }
@@ -33110,12 +33147,15 @@ const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the w
 const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  const run = !PAUSE.on;                                 // section 15's pause (0.28.48): paused, nothing moves and ship time stands still; the view still draws
+  if (run) {
   updateSteer();
   // 0.27.32: the per-frame loops here count through their arrays (a for...of here made an iterator result every step, about 600 a frame)
   for (let k = 0; k < walkers.length; k++) if (walkers[k].active) walkers[k].update(dt, t);
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
+  }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
 
   // camera follows you
@@ -33160,7 +33200,7 @@ function loop() {
     v.s += ((wallsLow || (wallsMode === 'auto' && near > .25) ? .12 : 1) - v.s) * k7; v.m.scale.y = v.s;
   }
 
-  if (ride) updateRide(dt);
+  if (run && ride) updateRide(dt);
   // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
   for (let k = 0; k < DOOR_OBJS.length; k++) {
     const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
@@ -33198,12 +33238,14 @@ function loop() {
   for (let q = 0; q < STEAM.length; q++) { const s = STEAM[q], k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
+  if (run) {
   tickShip(dt);                                          // section 13: the ship's clock
   galleyTick();                                          // section 16: the galley, on paper and on Deck 3
   worksTick();                                           // section 17: the Works bay job board
   eventsTick();                                          // section 18: the ship's events (Mail, decor, joining in)
   socialTick();                                          // section 20: the crew's social life, on paper
   if (typeof introTick === 'function') introTick();      // section 21: the arrival evening (nothing with the intro off)
+  }
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
