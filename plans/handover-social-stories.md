@@ -95,6 +95,8 @@ Build it in 20c on the moments engine; ask the player engineer (booth -> `homeCa
   shift changes and transfers); the forced test (a pair kept apart 3 weeks drifts on day 19) is the check.
 
 ## Gotchas
+- **Merging social A: check every conflict hunk by hand.** At 0.36.71 A's new section 13 bus/flag store sat in the same
+  hunk as GAME_BUILD; keeping "mine" for that hunk dropped it (restored in 10e904f). Keep my build lines, take the rest of theirs.
 - 20c sits after section 20 but before ROSTER (section 9): everything lazy; `socInit()` first.
 - Never declare `MOMENTS`, `MOMENT_THEMES`, `VOICE`, `VOICE_TEMPLATES`: section 22's generated block does. Read them
   through `momentBaked()` / `voiceData()` (try/catch for not-yet-declared consts).

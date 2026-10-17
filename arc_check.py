@@ -25,7 +25,7 @@ JS = r"""
   const last = {}; for (const p of ppl) { let n = 0; for (const k in MO || {}) if (MO[k].who === p.id) n = Math.max(n, MO[k].beat); n = Math.max(n, (STORY_ARCS[p.id] || []).length); last[p.id] = n; }
   const out0 = { appts: 0, visits: 0, partial: {} };
   const TH = momentBaked()[1] || {};                    // the struggle themes: the first crew member with each theme whose beats all apply to them
-  if (MODE === 'themes') for (const th of Object.keys(TH).sort()) { const ok = q => !ppl.includes(q) && voiceOf(q.id).thread === th && [1, 2, 3].some(b => momentDef(q.id + ':' + b)), all = q => [1, 2, 3].every(b => momentDef(q.id + ':' + b));
+  if (MODE === 'themes') for (const th of Object.keys(TH).sort()) { const ok = q => !ppl.includes(q) && socAboard(q, 1) && (leaveDay(q) == null || leaveDay(q) > DAYS) && voiceOf(q.id).thread === th && [1, 2, 3].some(b => momentDef(q.id + ':' + b)), all = q => [1, 2, 3].every(b => momentDef(q.id + ':' + b));
     const p = SOC.crew.find(q => ok(q) && all(q)) || SOC.crew.find(ok);   // all three beats if anyone has them, else whoever has some
     if (p) { ppl.push(p); last[p.id] = 3; out0.partial[th] = [1, 2, 3].filter(b => !momentDef(p.id + ':' + b)); } }
   const told = {}, log = [];
