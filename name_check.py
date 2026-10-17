@@ -80,7 +80,11 @@ def branches(base, refs):
         print(f'  {ref}: {len(added)} new names')
         src = script_of(show(ref))                      # a name the branch deleted but still uses: a ReferenceError at run time
         for k in b:
-            if k not in n and re.search(r'(?<![\w$.])' + re.escape(k) + r'(?![\w$])', src): ok = False; print(f'  {ref}: DELETED BUT STILL USED: {k}')
+            if k in n: continue
+            code = re.sub(r'//[^\n]*', '', src)            # comments don't count (rough: enough for names)
+            if not re.search(r'(?<![\w$.])' + re.escape(k) + r'(?![\w$])', code): continue
+            if re.search(r'(?:const|let|var|function)\s+' + re.escape(k) + r'(?![\w$])', code): continue   # still declared, locally
+            ok = False; print(f'  {ref}: DELETED BUT STILL USED: {k}')
         for k in added: seen.setdefault(k, []).append(ref)
         for k, v in n.items():
             if len(v) > 1 and len(b.get(k, [])) < 2: ok = False; print(f'  {ref}: DECLARED TWICE inside the branch: {k} at {v}')
