@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.16
+   STARSHIP CADET: CSV Wren                           build 0.42.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.17';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14899,7 +14899,11 @@ const INTRO_JOB_LINES = {
 // their introStep notes are the core memories social keeps (intro.shadowShift)
 function introJobNote(n) {
   if (!introOn() || !n) return;
-  const say = INTRO_JOB_LINES[n.reserved] && INTRO_JOB_LINES[n.reserved][n.step === 'stop' ? 'stop.' + n.tag : n.step];
+  const key = n.step === 'stop' ? 'stop.' + n.tag : n.step;
+  let say = INTRO_JOB_LINES[n.reserved] && INTRO_JOB_LINES[n.reserved][key];
+  if (say && n.reserved === 1 && typeof lineFor === 'function') try {   // the writers' (kind week1, flag walk.job.<take|fetch|make|panel|done|turnin>)
+    const l = lineFor(SHIP.intro.escort, 'week1', { flags: { ['walk.job.' + ({ 'stop.job': 'panel' }[key] || key.replace('stop.', ''))]: true }, peek: false }); if (l && l.text) say = [l.text];
+  } catch (e) { /* the stand-ins */ }
   if (say && typeof introSay === 'function') introSay(say);
   if (n.reserved === 1 && n.step === 'take' && SHIP.device && SHIP.device.tipsSeen) for (const k of ['board', 'machine', 'turnin']) SHIP.device.tipsSeen[k] = true;   // Torres teaches these
   if (n.step !== 'turnin' || !(n.reserved === 1 || n.reserved === 2)) return;
@@ -15051,7 +15055,8 @@ function escortPlan(p, t) {
   const st = introStepById(I.step);
   // he's yours until he lets you go (the 'free' step): he waits where he's to meet you or show you something, and leads
   // you everywhere else, including to the table where the Chief stops by (her step, not his)
-  if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: introSeat(p.id) || { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
+  if (introEscorting(st) && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at dinner: he walks to his seat and sits (section 10, sim 0.26.26)
+  if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
   if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until 19:00
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
   return null;
@@ -15109,6 +15114,12 @@ INTRO_STUB_SCRIPTS.introSoloJob = { title: 'Your first solo job', from: 'I. Cald
 for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
 const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [] };
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
+// his walking lines: the writers' (content/lines/torres-zeke.lines, kind week1, gated flag:walk.<step>, through the
+// dialogue engineer's lineFor), else the stand-ins above
+function introLines(step) {
+  try { if (typeof lineFor === 'function') { const l = lineFor(SHIP.intro.escort, 'week1', { flags: { ['walk.' + step]: true }, peek: false }); if (l && l.text) return [l.text]; } } catch (e) { /* the stand-ins */ }
+  return step === 'call' ? [INTRO_CALL[((Math.floor(shipNow()) >> 1) % INTRO_CALL.length + INTRO_CALL.length) % INTRO_CALL.length]] : INTRO_LINES[step];
+}
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
   (lines || []).forEach((text, i) => INTRO_UI.said.push(setTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
@@ -15140,6 +15151,15 @@ function introManifest() {
 // the week's meetings (Monday's briefing, Tuesday's first solo job): while one is on, being in its room plays it; if
 // you never came, its gist comes by Mail when it ends. Tuesday's job is yours either way: Calder hands it over in
 // person, or it's simply in your Jobs (section 17's reserved slot 3, claimed for you).
+// a meeting's script as it can be played here: the lines of anyone cast who isn't in the room are left out (Tomas may
+// be elsewhere on Sunday evening); a choice and its replies stay. The trimmed copy is MEETING_SCRIPTS['<id>~here'].
+function introScriptHere(id, m, keep) {   // keep: the step's own speaker, never left out
+  const sc = MEETING_SCRIPTS[id]; if (!sc || typeof DECK_CREW === 'undefined') return id;
+  const here = new Set(DECK_CREW.filter(a => { const r = roomAt(...cellAt(a.x, a.z)); return r && ROOMS[r] && m.where.room.test(ROOMS[r].name || ''); }).map(a => a.p.id));
+  const away = (m.who || []).filter(w => w !== keep && !here.has(w)); if (!away.length) return id;
+  MEETING_SCRIPTS[id + '~here'] = { ...sc, lines: sc.lines.filter(l => !l.who || !away.includes(l.who)) };
+  return id + '~here';
+}
 function introWeekMeetings(now) {
   const I = SHIP.intro;
   for (const b of INTRO_WEEK) {
@@ -15147,7 +15167,7 @@ function introWeekMeetings(now) {
     const at = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < at) continue;
     const room = new RegExp('^' + b.where.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
     const m = { id: 'intro-' + b.id, who: INTRO_MEETINGS[b.meeting].cast.filter(w => !/:/.test(w)), where: { deck: b.where.deck, room }, at };
-    if (now < until && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(b.meeting, m); }
+    if (now < until && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(introScriptHere(b.meeting, m, b.who), m); }
     else if (now >= until) { I.done[b.id + ':met'] = -1; if (typeof meetingGist === 'function') meetingGist(b.meeting); }
     else continue;
     if (b.id === 'd2-solo' && typeof jobReserved === 'function' && typeof claimJob === 'function') { const id = jobReserved(3); if (id) claimJob(id); }
@@ -15171,13 +15191,17 @@ function introTick() {
       const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); continue; }
       if (DIALOGUE) break;
-      INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(st.meeting, m);
+      INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
     }
   }
   if (now === INTRO_UI.min) introWeekMeetings(now);
+  // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
+  if ((I.step === 'chief' || I.step === 'free') && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
+    INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, 19 * 60) });
+  }
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
-  if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
+  if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; introSay(introLines(I.step)); }
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
   if (lead) {
@@ -15186,7 +15210,7 @@ function introTick() {
     const key = g.deck + ':' + g.at, mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === g.label;   // only when he moves, or someone else's arrow took over
     if ((key !== INTRO_UI.goalKey || !mine) && typeof setGoal === 'function') { setGoal(g); INTRO_UI.goalKey = key; } INTRO_UI.goal = true;
     if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && typeof bubbleSay === 'function') {
-      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[((now >> 1) % INTRO_CALL.length + INTRO_CALL.length) % INTRO_CALL.length], 3.5);
+      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, (introLines('call') || [])[0], 3.5);
     }
   } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
