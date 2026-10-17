@@ -308,12 +308,14 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
 
 - **Length:** a chat card line 90 characters at most; a bubble (`smalltalk`, `rumour`, overheard) 60 (90 is an error);
   arc beats, moments, notes and meeting lines 140. A placeholder counts as about 9 characters.
-- **No romance or flirting** with anyone, **no swearing** beyond "blast", **no real-world brands or politics**, and
+- **No romance or flirting** with anyone (the checker catches the obvious words; the head writer also reads every
+  moment and arc beat for the no-romance-with-the-player rule, which no word list can fully catch), **no swearing** beyond "blast", **no real-world brands or politics**, and
   nothing the game doesn't have (no photos, cameras, phones, weapons).
 - **`#serious` lines are earned:** only behind `tier>=friend`, a `beat:`, `mem:moment...` or `leaving:soon`.
 - **Names:** only roster crew, guests and canon names (every capitalised word in `content/facts.md` counts). A name it
   doesn't know is a warning.
 - **British spelling** (colour, favourite, mum, biscuit).
+- **Moments and meetings:** at most three replies in a choice; poses only `sigh`, `laugh`, `listen`, `nod`, `gesture`, `play`.
 - **Easy to read:** short words, short sentences. A file under 60 on the reading-ease score is a warning.
 - **Habits:** a `habit:` condition in someone's own file must be a habit they have.
 - The baked blocks must be up to date (the head writer re-runs `content_gen.py`).

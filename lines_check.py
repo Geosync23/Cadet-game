@@ -44,6 +44,8 @@ BANNED = [
     # romance and flirting with anyone (the user: no romance with the player; couples live quietly in the background)
     r'\bkiss\w*', r'\bflirt\w*', r'\bdarling\b', r'\bsweetheart\b', r'\bbabe\b', r'\bsexy\b', r'\bgorgeous\b', r'\bcrush\b',
     r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
+    r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmy heart\b', r'\bsoulmate\w*',
+    r'\bbe mine\b', r'\bsweet on\b', r'\bhold my hand\b',
     # swearing (the ship's "blast" is fine)
     r'\bdamn\w*', r'\bhell\b', r'\bbloody\b', r'\bcrap\w*', r'\bshit\w*', r'\bfuck\w*', r'\bbastard\w*', r'\bpiss\w*',
     r'\barse\w*', r'\bass\b', r'\bbollocks\b', r'\bgod\b', r'\bjesus\b', r'\bchrist\b',
@@ -68,6 +70,8 @@ Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh M
 New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook'''.split())
 
 
+POSES = {'sigh', 'laugh', 'listen', 'nod', 'gesture', 'play'}   # the talk poses (section 8b) a meeting or moment line may ask for
+MAX_REPLIES = 3
 COMMON = set('''scanner patrol relay sweep telescope treadmill coffee ship odd somebody whose fridays mondays tuesdays wednesdays
 thursdays saturdays sundays someone anybody everybody nobody nothing everything morning tonight tomorrow yesterday today
 lunch dinner breakfast tea supper week weekend station deck dock'''.split())   # ordinary words a line may start with
@@ -162,6 +166,15 @@ def main(argv):
                 if x.get('who') and x['who'] not in people and x['who'] not in ('you', 'them'):
                     errors.append(f'{where}: speaker "{x["who"]}" is not a crew member, guest, them or you')
                 allx.append((where, 'moment', {'text': x['text'], 'id': where}, None, 'moment'))
+    # poses and the number of replies, in moments and meetings
+    scripts = [(w, b['lines']) for w, b, _ in moment_beats()] + [(f'meeting {k}', v['lines']) for k, v in out['MEETINGS_BAKED'].items()]
+    for where, ls in scripts:
+        for l in ls:
+            if 'choice' in l and len(l['choice']) > MAX_REPLIES:
+                errors.append(f'{where}: {len(l["choice"])} replies in one choice (at most {MAX_REPLIES})')
+            for x in ([l] if 'text' in l else [c[r] for c in l.get('choice', []) for r in ('reply', 'warm') if r in c]):
+                if x.get('pose') and x['pose'] not in POSES:
+                    errors.append(f'{where}: pose [{x["pose"]}] is not one of {", ".join(sorted(POSES))}')
     for mid, sc in out['MEETINGS_BAKED'].items():
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
