@@ -96,8 +96,8 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `beat:<arc>.<n>` | at least n beats of that story arc have been told | `beat:tomas.3` |
 | `beat=<arc>.<n>` | exactly n beats told (a line that belongs between two beats) | `beat=tomas.2` |
 | `news:<id>` | they know that piece of news | `news:storm` |
-| `rep:` | your standing with their department: `new`, `known`, `well`, `theirs` | `rep:well` |
-| `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you: `low`, `ok`, `high` | `ship.kindness:high` |
+| `rep:` | your standing with their department is at least this: `new` < `known` < `well` < `theirs` (`!rep:well`: below well) | `rep:well` |
+| `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you is at least this: `low` < `ok` < `high` | `ship.kindness:high` |
 | `you:<tag>` | you're known for it | `you:reliable` |
 | `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it; `@me`: and it was about the speaker, e.g. their gift or favour; `@dept`: a repair in the speaker's department) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:gift.you@me`, `cue:repair.you@dept` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
@@ -115,7 +115,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `weekday:` | the day | `mon` `tue` `wed` `thu` `fri` `sat` `sun` |
 | `season:` | the ship's season | `sowing` `greening` `harvest` `lanterns` |
 | `place:` | where they are: a room's name with `_` for spaces (`place:junior_common_room`), a short alias (`mess`, `commons`, `lounge`, `booths`, `overlook`, `teacorner`, `worksbay`, `chartroom`, `musicroom`), or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
-| `deck:` | the deck | `deck:3` |
+| `deck:` | the deck where it happens (where you are) | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |

@@ -1,15 +1,15 @@
 @arc marrow
 who: marrow
 // Writer (command), from outlines.md section 8, "The ready room". Close friend for the heartfelt and resolution beats
-// (social B: no Officer rank in Pillar 4). Her card's needs: share, so the share replies get the warmer answer.
+// (social B: no Officer rank in Pillar 4). Beat 1 no longer needs mem:readyroom (social B, 0.48.13: met the Captain
+// before the ready room meant the arc never began); it's "when we first met", which covers the ready room too. Her card's needs: share, so the share replies get the warmer answer.
 
 == beat 1
 tone: light
-when: mem:readyroom
 hint: Walk with me a minute? I've a question. You know I always have one.
 mem: answer
-learn: The Captain wrote down the answer you gave her in the ready room, and still thinks about it.
-them: You gave me an answer, in the ready room. I wrote it down. I write them all down.   [gesture]
+learn: The Captain wrote down the answer you gave to her one question when you first met, and still thinks about it.
+them: I asked you one question when we first met. You gave me an answer. I wrote it down. I write them all down.   [gesture]
 them: I've read yours a few times since. Do you still think so?
 ? choice
 * I do. More than before.   flavour:practical mem:stillthink

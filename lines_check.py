@@ -222,6 +222,8 @@ def main(argv):
                             band = alt.rsplit(':', 1)
                             if band[-1] not in {'rival', 'neutral', 'friend'} or (len(band) == 2 and band[0] not in people):
                                 errors.append(f'{tag}: aff is aff:rival|neutral|friend or aff:<crewId>:<band>')
+                if scope is e and (k, v) in (('rep', 'new'), ('ship.work', 'low'), ('ship.kindness', 'low'), ('ship.spirit', 'low')):
+                    warns.append(f'{tag}: {k}:{v} is always true ("at least {v}"); for "only {v}" write !{k}:{"known" if k == "rep" else "ok"}')
                 if k == 'cue':
                     for x in (v if isinstance(v, list) else [v]):
                         for alt in str(x).split('|'):
