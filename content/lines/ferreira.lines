@@ -25,3 +25,61 @@
 == joy
 ? tier>=colleague
 - I practise Veyli on the Envoy. The Envoy is very patient. I'm very bad.   #funny
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! The overnight messages are in. Yours too, maybe. I didn't look.
+? tier>=acquaintance warmth:cold
+- {me}! I've been asking after you. Everyone says "busy". Good busy, I hope?
+? tier>=colleague
+- {me}, have you met Lindqvist properly yet? You must. He's shy. You'll get on.
+
+== near
+? place:lounge
+- The lounge. My favourite room. Somebody's always about to laugh.
+? place:booths
+- The booth queue's long. I'm just keeping people company. It's a comms thing.
+
+== invite
+- Quiz night in the lounge! Join my team. I know four languages and nothing else.   #funny
+
+== accept
+- Wonderful! I'll save you a seat. I'll save everyone a seat.   #funny
+- Yes, please. I'll bring someone you haven't met yet.
+
+== decline
+- Oh, I can't. The relay's playing up. I'll be with it all evening. Next time?
+? weekday:wed|thu
+- Rest day! I'm calling home and then talking to no one. Ask me Friday.
+
+== missed
+- I missed you tonight! Your seat stayed empty. Next time, yes?
+
+== birthday
+? birthday:you
+- Happy birthday! I know four ways to say it. Five, with the Veyli. Ready?   #funny
+? birthday:me
+- My birthday. Home sent a message. The one message aboard I'm allowed to read.   #funny
+
+== cue
+? cue:event.diplomatic.onset
+- The delegation's here. I've practised my Veyli for weeks. Wish me luck.
+
+== hint
+- {me}, have you a minute later? I'd like to talk. About me, for once.
+
+== about
+? aff:rossi-femi:friend
+- Rossi and I practise Veyli together. He's very loud. He's getting very good.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}! Say hello to someone new today. That's homework.   #funny
+== greet
+? tier>=acquaintance time:evening
+- {me}! Lounge tonight? Everyone's going. Well, I'm going. That's a start.
+== life
+? tier>=friend
+- I learnt my first language from my gran and my fourth from a cook. The cook was better.   #funny
+- People tell me things. I never pass them on. It's the best part of the job.

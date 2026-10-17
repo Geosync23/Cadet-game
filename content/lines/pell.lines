@@ -211,9 +211,9 @@
 ? told:grubby
 - You were grubbier than me yesterday. Never thought I'd see the day. Respect.   #funny
 ? told:heard.moment.rina
-- Rina likes you. She won't say. She's stopped counting your losses out loud. Huge.   #funny
+- Rina rates you. She won't say. She's stopped counting your losses out loud. Huge.   #funny
 ? told:heard.moment.tomas
-- Tomas reckons you're the best thing on the Wren. After the stars. Close second.   #warm
+- Tomas reckons you're the best bunkmate on the Wren. After the star map. Close second.   #warm
 
 == visit
 - Oi oi. Brought snacks. Don't ask from where. Shove up.   #funny
@@ -227,7 +227,7 @@
 - Found a good spanner. It's on your pillow. Don't tell Calder where I found it.   #funny
 - Grab shelf's just been restocked. Act natural. You didn't hear it from me.
 - Knocked, nobody home. Tea corner tomorrow? I'll bring the nice biscuits.
-- Fell asleep on your bunk waiting for you. Sorry about the dent.   #funny
+- Waited ages. Fell asleep in the doorway. Tomas stepped over me. Sorry.   #funny
 
 // Writer 3, batch 3: towards 120. Seasons, places, bubbles, cues. Rest days Tue, Wed (the game's roster); rest-day
 // lines use act:off. His mum only from tier friend.
@@ -250,7 +250,7 @@
 ? tier>=acquaintance time:evening
 - Off to dinner. Second dinner. First dinner was a test run.   #funny
 ? tier>=close
-- Laters, {nick}. Best part of my day, this. Don't tell the grab shelf.   #warm
+- Laters, {nick}. You're a good one. Don't tell the grab shelf.   #warm
 
 == feel
 ? mood:low tier>=colleague

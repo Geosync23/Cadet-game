@@ -25,3 +25,60 @@
 == joy
 ? tier>=colleague
 - A coffee machine that works. Sounds small. At six in the morning, it's everything.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning. Wait. Coffee first. There. Morning.   #funny
+? tier>=acquaintance warmth:cold
+- Oh. You. Haven't seen you. The coffee machine's missed you. Probably.   #funny
+
+== near
+? habit:music
+- Music room. I sit at the back. Nobody talks to me. It's ideal.
+? place:mess
+- The coffee machine's fine. Don't look at it. It's shy.   #funny
+
+== invite
+- Friday jam? I won't play. I'll sit near the coffee. Come and sit too.
+
+== accept
+- Okay. Yes. I'll come.
+- Yes. I'll make the coffee. It'll be good. It always is.   #funny
+
+== decline
+- Not tonight. Early bed. Patrol at eight. Another time.
+? weekday:fri|sat
+- Rest day. I'm in the store looking at valves. Don't ask. Sunday?   #funny
+
+== missed
+- You didn't come. That's fine. I fixed the coffee machine. It needed me more.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. First coffee's yours. I've told the machine.   #warm
+? birthday:me
+- My birthday. Volkov fixed the coffee machine before I got there. Rude. Kind, but rude.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. First thing to break is always the coffee machine. I'll be ready.   #funny
+
+== hint
+- {me}. Got a minute later? There's something I'd like to say.
+
+== about
+? aff:volkov-maeve:friend
+- Volkov says she's best at the coffee machine. She's second. We're friends anyway.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Bye. Mind the coffee. It's hot. I made it.
+- See you. Early bed. As always.
+== greet
+? tier>=acquaintance time:evening
+- Evening. Coffee machine's asleep. So am I, nearly.   #funny
+== life
+? tier>=friend
+- I fix the coffee and let others say they did. It's easier than being thanked.
+- The machine's older than me. It was here when my parent was. It still works. Mostly.

@@ -217,7 +217,7 @@
 - Can I sit? I wrote my brother a whole page about you. Nice things. Mostly.   #warm
 - I found biscuits. Brennan's. Don't ask where. Want one? Want two?
 ? time:night
-- Can't sleep. The star map's too interesting. Want to look at it with me for a bit?
+- Can't sleep. I've been counting the stars on my map. Forty-one. Night, then.
 
 == note
 - Came to find you. You were out. You're always out! Saving the ship, probably. See you at the bunk.
@@ -248,7 +248,7 @@
 ? tier>=acquaintance time:morning
 - Off on patrol. If you see Holt, tell him I'm already there. Early. Obviously.   #funny
 ? tier>=close
-- See you later, {nick}. Same bunk, same stars. Best bit of the day.   #warm
+- See you later, {nick}. Back at the bunk. Mind the star map.   #warm
 
 == feel
 ? mood:high tier>=friend
@@ -280,7 +280,7 @@
 ? tier>=colleague
 - The Wren's passed more stars than I'll ever count. I'm trying to catch up.
 ? tier>=friend
-- Best bit of my week? Observatory night. Second best? This. Talking.   #warm
+- Best bit of my week? Observatory night. Second best? Film night with the bunk.   #warm
 
 == invite
 ? tier>=colleague time:evening

@@ -7,6 +7,7 @@ who: holt
 == beat 1
 tone: light
 when: time:morning
+where: meal
 hint: Cadet. You're up. Walk with me. The long way.
 mem: walk
 learn: Chief Holt walks every deck before breakfast, the long way round, and sometimes takes you with him.

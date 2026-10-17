@@ -25,3 +25,64 @@
 == joy
 ? tier>=colleague
 - An old paper novel, a quiet bridge and the stars going past. That's the job, at its best.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, for you. Bedtime, for me. Same book. Next chapter.
+? tier>=acquaintance warmth:cold
+- {me}. Not seen you on the night side lately. The kettle noticed.
+? tier>=colleague time:night
+- Up past midnight, {me}? She's at her best now. Then go to bed. That's an order.   #funny
+
+== bye
+- {bye}. Lights low on Deck 4, please. Some of us sleep in the day.
+
+== near
+? deck:1
+- Night bridge. Three people, one kettle and a lot of very quiet stars.
+? place:calm time:night
+- Night's the best part. Fewer questions. More stars.
+
+== life
+? tier>=colleague
+- Paper novels, on a ship. Heavy, slow and worth it. Like most good things aboard.
+
+== invite
+- Observatory night? I'll bring a novel, in case the stars are dull. They aren't.
+
+== accept
+- {yes}. I'll be the one at the back with a book.
+- Fine. I'll come. I'll even put the book down. For a bit.   #funny
+
+== decline
+- Not tonight. I'm on the bridge. Someone has to watch the stars not move.   #funny
+? weekday:wed|thu
+- Rest day. One novel, one pot of tea, no alarms. Ask me Friday.
+
+== missed
+- You didn't come. That's all right. I read the last chapter. It ended well.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'd lend you a novel, but I've spoilt every ending.   #funny
+? birthday:me
+- My birthday. The night bridge made me a card. Three names and a star.   #warm
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. I'll be on the bridge till it passes. Stay where you're put.
+
+== hint
+- {me}. When you've a moment later, find me. There's something I'd like to say.
+
+== about
+? aff:vance:friend
+- Vance leaves me his notes, colour-coded. I leave him a bookmark. It works.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. If you can't sleep, the night bridge has a kettle. Knock first.
+== life
+? tier>=friend
+- I read endings first because I like knowing it's all right. There. Now you know.   #warm
