@@ -6,7 +6,7 @@ Written at build 0.38.9 (`claude/decks-p3` 3b28718) by session_014PT5L2QxXYoVhqF
 
 - **Role:** the one architect for every deck's data: `DECKS[n]` (places, machines, rooms, dress), deck kit, gathering venues, event dressing and visit rooms. It replaced the bridge (Decks 1, 3), command (Deck 2) and Deck 6 (Decks 4-6) architects.
 - **Branch:** `claude/decks-p3`. **Builds:** 0.38.x; the last is 0.38.9. Bump both the header line (`build 0.38.x`) and `GAME_BUILD`, and add a DEV_NOTES row each turn.
-- **Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; before that session_01PxXKwc5mkC7tV5MPi3p7PP). Chain of command: the user → the lead → everyone; helpers never contact the user.
+- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (from 2026-10-17 ~04:35; before that session_01PJtmxWgAPLebXSZKP6ZRpG and session_01PxXKwc5mkC7tV5MPi3p7PP). Chain of command: the user → the lead → everyone; helpers never contact the user.
 - **Holder since 0.38.10:** session_01ToE6RJFCw9deB3HcJRLKxS. Report after every push with send_message: commit, what, checks, judgement calls.
 - **Merging:** before a job, merge the latest `claude/ship-integration` (or the branch the lead names). The conflicts are always the two build lines (keep yours) and DEV_NOTES rows (keep both; watch for duplicate rows the lead already copied).
 
@@ -40,7 +40,7 @@ All in one block just after `DECKS[1]` (search `Big gatherings (Pillar 3`), plus
 
 ## Part 6, seat 8: status
 
-All of seat 8's places are built (0.38.9-0.38.12). Still to do: decor for each new tradition when the tradition designers ask (DECK_DRESS, at most 6 draw calls, its own deck only). The traditions engineer (session_018WZccmSvEfz2LC7DCfxdii) lists a tradition's `ties: decor <id>` to dressShow from 30 minutes before to 15 after, and Sowing morning's `trace: seedlingYours` pushes `{ id, day }` to SHIP.traces. The Tiles engineer (session_01DG3in6CvFFta6NrLpoVCJV, section 23) may change the board's look once the user approves the design; keep the station and boards simple until then. When the Tiles game is built, its station places can become `lounge-seat` (this changes crew plans, to be explained then).
+All of seat 8's places are built (0.38.9-0.38.12). Still to do: decor for each new tradition when the tradition designers ask (DECK_DRESS, at most 6 draw calls, its own deck only). The traditions engineer (now Traditions engineer 2, see TEAM.md; the first, session_018WZccmSvEfz2LC7DCfxdii, has handed over) lists a tradition's `ties: decor <id>` to dressShow from 30 minutes before to 15 after, and Sowing morning's `trace: seedlingYours` pushes `{ id, day }` to SHIP.traces. The Tiles engineer (session_01DG3in6CvFFta6NrLpoVCJV, section 23) may change the board's look once the user approves the design; keep the station and boards simple until then. When the Tiles game is built, its station places can become `lounge-seat` (this changes crew plans, to be explained then).
 
 ## Gotchas (learned the hard way)
 
