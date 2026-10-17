@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.29
+   STARSHIP CADET: CSV Wren                           build 0.42.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.29';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.30';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14916,13 +14916,22 @@ function introWriterLine(flagKey, id = SHIP.intro.escort) {   // id: whose line 
     return text ? [text] : null;
   } catch (e) { return null; }
 }
+// every line under one flag key, in the file's order (a job step's talk-through: head writer 5, 0.48.78's turn-in), or null
+function introWriterLines(flagKey, id = SHIP.intro.escort) {
+  try {
+    if (typeof VOICE === 'undefined' || typeof linesFill !== 'function') { const l = introWriterLine(flagKey, id); return l; }
+    const v = VOICE[id], who = typeof linesWho === 'function' ? linesWho(id) : null;
+    const out = ((v && v.lines && v.lines.week1) || []).filter(x => x.flag === flagKey).map(e => who ? linesFill(e.text, who, { t: shipNow(), flags: { [flagKey]: true } }) : e.text).filter(Boolean);
+    return out.length ? out : null;
+  } catch (e) { return null; }
+}
 function introJobNote(n) {
   if (!introOn() || !n) return;
   const key = n.step === 'stop' ? 'stop.' + n.tag : n.step;
   // the writers' first (kind week1, flag walk.job.<step> for slot 1, walk.job2.<step> and walk.job3.<step> for the
   // others; step: take, fetch, make, panel, done, turnin), else the stand-ins, else nothing
   let say = null;
-  if (n.reserved >= 1 && n.reserved <= 3) say = introWriterLine('walk.job' + (n.reserved === 1 ? '' : n.reserved) + '.' + ({ 'stop.job': 'panel' }[key] || key.replace('stop.', '')));
+  if (n.reserved >= 1 && n.reserved <= 3) say = introWriterLines('walk.job' + (n.reserved === 1 ? '' : n.reserved) + '.' + ({ 'stop.job': 'panel' }[key] || key.replace('stop.', '')));
   if (!say) say = INTRO_JOB_LINES[n.reserved] && INTRO_JOB_LINES[n.reserved][key];
   if (say && typeof introSay === 'function') introSay(say);
   if (n.reserved === 1 && n.step === 'take' && SHIP.device && SHIP.device.tipsSeen) for (const k of ['board', 'machine', 'turnin']) { if (typeof tipSeen === 'function') tipSeen(k); else SHIP.device.tipsSeen[k] = true; }   // Torres teaches these (section 19's tipSeen when it's there)
@@ -15094,7 +15103,8 @@ function escortPlan(p, t) {
   if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile },
     pace: st.mode === 'lead' && st.checkpoint.deck === 5 && I.done['tour:lift'] === undefined ? INTRO_STROLL : 1 };   // strolling to the lift (section 10 reads pace)
   if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until his goodnight
-  for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
+  const scene = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && /^intro-/.test(DIALOGUE.m.id || '');   // (the lead, 0.42.30: Calder's briefing plays in full first)
+  for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until) && !scene) return { mode: b.escort, to: b.where };
   return null;
 }
 // what section 14's introPlan needs: one person's intro beats on day d ({ id, at, until, where, also }), or []

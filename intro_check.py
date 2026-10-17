@@ -519,10 +519,21 @@ with sync_playwright() as pw:
         print('  its speakers:', who)
         if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
         elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 480)'): fail('Calder speaks the briefing from ' + str(who['cal']))
-        g.ev('(() => { for (let k = 0; DIALOGUE && k < 60; k++) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(0); else dialogueNext(); } })()')
+        # the lead (0.42.30): the briefing plays in full at a reader's pace (a tap every ~3 s) before the shadow shift starts
+        bf = { 'start': g.ev('clockText()'), 'n': g.ev('DIALOGUE ? DIALOGUE.queue.length : 0'), 'taps': 0, 'cut': None, 'follow': None }
+        while g.ev('!!DIALOGUE') and bf['taps'] < 60:
+            if bf['follow'] is None and g.ev("(e => !!e && e.mode === 'follow')(escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()))"): bf['follow'] = g.ev('clockText()')
+            g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(0); else dialogueNext(); })()'); bf['taps'] += 1
+            if not g.ev('!!DIALOGUE'): break                # our tap on its last line ended it
+            g.step(100)                                     # (about 3 s: reading the next line)
+            if not g.ev('!!DIALOGUE'): bf['cut'] = g.ev('clockText()')   # it went away by itself
+        bf['end'] = g.ev('clockText()'); bf['met'] = g.ev("SHIP.intro.done['d1-briefing:met']")
+        print(f"  the briefing at a reader's pace: {bf['n']} lines, {bf['taps']} taps, {bf['start'].split()[-1]} to {bf['end'].split()[-1]}; Torres on the shadow shift from {bf['follow'] or 'after it'}")
+        if bf['cut']: fail(f"the briefing closed before its last line: {bf}")
+        if bf['follow']: fail(f"the shadow shift began during the briefing ({bf['follow']}): {bf}")
         for i in range(40):
             g.step(30)
-            if g.ev('shipNow() >= introAbs(1, 486)'): break
+            if g.ev("shipNow() >= introAbs(1, INTRO_WEEK.find(b => b.id === 'd1-shadow').at + 1)"): break
         took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
         g.step(60)
         esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
