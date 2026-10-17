@@ -75,7 +75,7 @@ Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ens
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
 Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
 Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh Marra Station Ostrander Tevan Port Halloran
-New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook Midtour Year Lantern'''.split())
+New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook Midtour Year Lantern Jo Sam'''.split())   # Jo, Sam: your people back home
 
 
 POSES = {'sigh', 'laugh', 'listen', 'nod', 'gesture', 'play'}   # the talk poses (section 8b) a meeting or moment line may ask for
@@ -158,24 +158,44 @@ def main(argv):
         for th, bs in out['MOMENT_THEMES'].items():
             for b in bs:
                 yield f'theme {th} beat {b["beat"]}', b, 'them'
+        for mid, b in out['HOME_MOMENTS'].items():
+            yield f'call {b["thread"][4:]} beat {b["beat"]}', b, b['who']
+    home_ids = {c['id'] for c in out['HOME_CONTACTS'].values()}   # the player's people back home: home:mum, ...
+    known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
-        if who not in people and who != 'them':
+        src = 'home' if where.startswith('call ') else 'moment'
+        if who not in people and who != 'them' and who not in home_ids:
             errors.append(f'{where}: who "{who}" is not a crew member or guest')
-        allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, 'moment')) if b.get('hint') else None
+        allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, src)) if b.get('hint') else None
         for k in ('keepsake', 'learn'):
             if b.get(k):
-                allx.append((where, 'moment', {'text': b[k], 'id': where}, None, 'moment'))
+                allx.append((where, 'moment', {'text': b[k], 'id': where}, None, src))
         if b.get('after', {}).get('mail'):
-            allx.append((where, 'letter', {'text': b['after']['mail']['body'], 'id': where}, None, 'moment'))
+            allx.append((where, 'letter', {'text': b['after']['mail']['body'], 'id': where}, None, src))
         if b.get('when'):
-            allx.append((where, 'moment', dict(b['when'], text='', id=where), None, 'moment'))
+            allx.append((where, 'moment', dict(b['when'], text='', id=where), None, src))
         for l in b['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c[r] for c in l['choice'] for r in ('reply', 'warm') if r in c]):
-                if x.get('who') and x['who'] not in people and x['who'] not in ('you', 'them'):
+                if x.get('who') and x['who'] not in people and x['who'] not in ('you', 'them') and x['who'] not in home_ids:
                     errors.append(f'{where}: speaker "{x["who"]}" is not a crew member, guest, them or you')
-                allx.append((where, 'moment', {'text': x['text'], 'id': where}, None, 'moment'))
+                allx.append((where, 'moment', {'text': x['text'], 'id': where}, None, src))
+    for cid, es in out['HOME_SEND'].items():                # what you can tell them, and their reactions
+        for e in es:
+            allx.append((f'call home.{cid} send', 'moment', e, None, 'home'))
+            if e.get('reply'):
+                allx.append((f'call home.{cid} send', 'moment', {'text': e['reply']['text'], 'id': e['id']}, None, 'home'))
+    for cid, cs in out['HOME_CHAT'].items():                # everyday calls
+        for n, c in enumerate(cs, 1):
+            if c.get('when'):
+                allx.append((f'call home.{cid} chat {n}', 'moment', dict(c['when'], text='', id=f'{cid}.chat{n}'), None, 'home'))
+            if not any(x.get('send') for x in c['lines']):
+                warns.append(f'call home.{cid} chat {n}: no "? send" (you never get to tell them anything)')
+            for x in c['lines']:
+                if 'text' in x:
+                    allx.append((f'call home.{cid} chat {n}', 'moment', {'text': x['text'], 'id': f'{cid}.chat{n}'}, None, 'home'))
     # poses and the number of replies, in moments and meetings
-    scripts = [(w, b['lines']) for w, b, _ in moment_beats()] + [(f'meeting {k}', v['lines']) for k, v in out['MEETINGS_BAKED'].items()]
+    scripts = [(w, b['lines']) for w, b, _ in moment_beats()] + [(f'meeting {k}', v['lines']) for k, v in out['MEETINGS_BAKED'].items()] \
+        + [(f'call home.{k} chat', [x for c in cs for x in c['lines'] if 'text' in x]) for k, cs in out['HOME_CHAT'].items()]
     for where, ls in scripts:
         for l in ls:
             if 'choice' in l and len(l['choice']) > MAX_REPLIES:
@@ -201,7 +221,7 @@ def main(argv):
     seen = {}
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
-        if not t and src != 'moment':
+        if not t and src not in ('moment', 'home'):
             continue
         for tok in re.findall(r'\{([^}]*)\}', t):
             if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
@@ -246,7 +266,7 @@ def main(argv):
                             errors.append(f'{tag}: moved:{x} is not a crew id')
                 if k in ('beat', 'beatIs'):
                     for x in (v if isinstance(v, list) else [v]):
-                        if not re.fullmatch(r'[\w-]+\.\d+', x):
+                        if not re.fullmatch(r'[\w.-]+\.\d+', x):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
@@ -264,8 +284,8 @@ def main(argv):
         couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
         at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadets?\b|\bnewcomer\b|\byou(?:r|rs|rself)?\b", low)
         about_crew = couple and not at_you
-        romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
-        for b in BANNED + romance:
+        romance = [] if e.get('id') in allowed or src == 'home' else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in (BANNED if src != 'home' else [x for x in BANNED if x != r'\blove you\b']) + romance:   # family warmth from home
             m = re.search(b, low)
             if m:
                 errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))
@@ -292,7 +312,7 @@ def main(argv):
                                                                        'His', 'Her', 'Their', 'Our', 'Your', 'My', 'One', 'Each', 'Now', 'Then', 'So', 'Yes', 'No', 'Yesterday'):
                 warns.append(f'{tag}: "{m.group(1)}" looks like a name that isn\'t crew or a guest')
         key = (kind, t)
-        if key in seen and src not in ('convo', 'moment') and t:
+        if key in seen and src not in ('convo', 'moment', 'home') and t:
             warns.append(f'{tag}: the same line is also in {seen[key]}')
         seen.setdefault(key, where)
 
