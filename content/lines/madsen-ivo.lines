@@ -1,0 +1,146 @@
+@crew madsen-ivo
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! You're new. I'm Ivo. Galley. I carry trays. Six at once. Ask anyone.
+? tier>=acquaintance
+- {hi}, {me}! Right, listen. Brennan and me had a disagreement about bowls.
+- {hi}! Seven trays tomorrow. I can feel it. Possibly six.   #funny
+? tier>=friend
+- {nick}! Sit, sit. I'll bring yours over. On a tray. Just the one, for you.   #warm
+
+== feel
+? mood:high
+- Six trays, no wobble, all the way to table four. A personal best.   #funny
+? mood:low
+- Quiet today. I know. Me, quiet. Don't make a thing of it.
+
+== near
+? act:work
+- Bowls go rim up. Brennan says rim down. Brennan is wrong. I'm doing it her way.   #funny
+? habit:garden-lover act:leisure
+- The flowers by the misters are out. Don't tell Cruz I've been looking. Looking's allowed.
+
+== life
+? tier>=acquaintance
+- I press flowers from the garden. In a big book. The book's about engines. Sorry, engines.   #funny
+? tier>=colleague
+- One day I'd like to run the pass. Call the orders. Just once. Brennan says "one day".
+
+== joy
+? tier>=acquaintance
+- Want to see my flower book? Every page a different week. That one's from your first week.
+
+== about
+? bond:friends
+- {friend}'s great. Lets me tell the whole story. From the start. Every time.   #funny
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Morning! Did I wake you? In the washroom? Sorry. Not sorry. It was a good song.   #funny
+? tier>=acquaintance time:evening
+- {hi}, {me}! Dinner! Sit anywhere. I'll find you. With a tray. Or six.
+? tier>=colleague warmth:cold
+- There you are! I thought you'd gone to another ship. I was going to write a song about it.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}! I'll tell you the rest of the story later. There's a lot of rest.
+? tier>=friend
+- Cheers, {nick}. You're a good listener. You have to be, with me.   #warm
+
+== feel
+? mood:ok
+- All right! Busy. Talking. The usual.
+
+== near
+? act:dinner
+- Mind your back, six trays coming through! Seven! No, six.   #funny
+? deck:3 act:leisure
+- The store's got new pressing paper in. Don't tell Esposito I was excited.
+
+== life
+? tier>=colleague
+- Brennan says I can run the pass one day. "One day." I've asked which day. No answer.   #funny
+? tier>=friend
+- Same trays, same tables, three years. I love it. I want a bit more. Is that greedy?
+
+== invite
+? tier>=acquaintance time:afternoon
+- Come to the garden with me. I'm looking for the purple ones. Don't tell Cruz.
+
+== accept
+- Yes! Brilliant! I'll bring things to say.   #funny
+== decline
+- Ah, I can't. Late team. Tell me everything after. Every bit.
+== missed
+- You weren't there! I had so much to tell you. I've saved it. All of it.   #funny
+== birthday
+? birthday:me
+- It's my birthday! I've told everyone. Some of them twice. Some of them three times.   #funny
+? birthday:you
+- Happy birthday! I pressed you a flower. It's from the week you arrived.   #warm
+== hint
+- Right, listen. Not a story this time. Well. A different kind.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Right, listen. Six trays. Watch.
+- Bowls. It should be bowls.   #funny
+- Seven trays one day. One day.
+- Who's singing? Oh. Me.   #funny
+? act:work
+- Mind your backs! Trays coming through!
+
+== rumour
+- Right, listen, you'll love this one.
+- Heard it from start to finish. Twice.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- Right, listen. You fetched it, and I want you to know, from the start, cheers.   #funny
+? told:fav.job
+- You did my job! I'll tell everyone. I've told three people. Four.   #funny
+? told:fixed.galleyplant
+- Galley plant's purring again. Was that you? Course it was. Legend.
+? told:came.harvest
+- You came to the harvest! Did you see me carry six baskets? Five. It was five.   #funny
+? told:gift.garden
+- That from the garden? For me? I've told the whole galley. Twice.   #warm
+? told:bday
+- You remembered my birthday, {nick}! Right, listen, I'm telling everyone.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Right, listen, the whole galley's talking about you. Good things. I started it.   #funny
+? rep:theirs
+- You're one of us now, {nick}. Galley. You get the warm tray. Don't tell.   #warm
+? you:chatty
+- They say you talk to everyone. Finally, competition. Right, listen.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Right, listen, this is the best present I've had all tour. I'm telling everyone. Now.   #warm
+? gift:liked
+- Cheers, {nick}! Lovely. Right, listen, I'm going to tell you where I'll put it.   #funny
+? gift:polite
+- Oh! For me? Thanks. That's... yes. Thanks. I'll think of something to say later.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Right, listen, your Jo built a boat. A real one. I've told the galley. Twice.   #funny
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- How's your gran? The hip? Tell her a galley hand from Bunk 2 says get well soon. Loudly.

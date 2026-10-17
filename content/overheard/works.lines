@@ -1,0 +1,63 @@
+@overheard works
+// The Works writer, batch 2. Works crew talking as you pass: the board, the tea corner, the coils at handover,
+// Calder's office. Bubbles: 60 characters at most. A blank line ends a conversation.
+
+== overheard
+? pair:works+works act:work
+A: Board's light today.
+B: Then it'll be heavy tomorrow. It always is.
+
+? pair:works+works act:work
+A: Who took the long spanner?
+B: Nobody. It's in the lost-property box.
+A: How is a spanner lost property?   #funny
+
+? pair:works+works time:morning
+A: Ten to eight. Calder's watching the clock.
+B: Calder is the clock.   #funny
+
+? pair:junior+works act:work
+A: Is it all right to ask the Chief a question?
+B: Ask it. She'll answer once. Write it down.
+
+? pair:works+works place:teacorner
+A: Kettle's on.
+B: Is it half ten?
+A: It's half ten somewhere.   #funny
+
+? pair:works+works
+A: Whose turn is it to wash the mugs?
+B: Not mine. I did it on Tuesday.
+A: Tuesday was a month ago.   #funny
+
+? pair:same time:afternoon
+A: Did you hear the scrubber on Deck 4?
+B: Rattling? I heard it. Calder heard it first.
+
+? pair:senior act:work
+A: Good job on that pump.
+B: Thanks. I checked the seal three times.
+A: Make it four.
+
+? pair:works+works time:evening
+A: Coil notes for the night?
+B: Coil three's quiet. Coil two's thinking.
+A: And coil one?
+B: Coil one never says anything.   #funny
+
+? pair:works+works
+A: She looked at my weld today.
+B: And?
+A: She said "Fine."
+B: That's practically a medal.   #funny
+
+? pair:works+any
+A: Is your fan supposed to sound like that?
+B: Like what?
+A: Like that.
+B: I'll put it on the board.   #funny
+
+? pair:friend act:work
+A: Biscuit?
+B: Where did you get a biscuit?
+A: Don't ask. Take one.   #warm

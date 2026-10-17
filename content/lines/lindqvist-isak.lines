@@ -1,0 +1,81 @@
+@crew lindqvist-isak
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hey. Lindqvist, helm. She's pulling left today. Don't worry, I've got her.
+? tier>=acquaintance
+- Hey, {me}. Rowing later? I'm chasing the Commander's time.
+- Oh, hey, {me}. My turn with the guitar book. It's always my turn.   #funny
+? tier>=friend
+- {hi}, {me}. Sit still for once. You and me both.   #warm
+== feel
+? mood:high
+- Felt a drift before the console did. Corrected it. Nobody even noticed. Perfect.
+? mood:low
+- Restless day. I rowed. Then I rowed again.
+== near
+? act:gym
+- The Commander's moved to the treadmill. Scared of me, I reckon.   #funny
+? habit:music
+- Music room. Don't listen too closely. The guitar and I are still arguing.   #funny
+== life
+? tier>=acquaintance
+- I can feel a drift in our course before the console shows it. Like a tilt in your tea.
+== joy
+? tier>=colleague
+- A smooth turn. The whole ship leans, just a hair, and nobody spills a drop.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! Rowed before breakfast. Still not top. Yet.
+? tier>=acquaintance warmth:cold
+- {me}! Where've you been? Never mind. Rowing later? You owe me a race.
+
+== bye
+- {bye}. Walk fast. Life's short and the corridor's long.   #funny
+
+== near
+? habit:window-seat
+- Window seat. I can feel us drift. The window just proves it.
+? deck:1
+- She's steady today. Barely a hair off. I've got her.
+
+== invite
+- Rowing after shift? Five hundred metres. Loser buys the tea.
+? tier>=acquaintance
+- Friday jam? I'll play. Badly. Park's worse. Come and decide.   #funny
+
+== accept
+- Yes! Good. Don't be late. I'll be early. And restless.   #funny
+- Course. I'm in.
+
+== decline
+- Can't. Rowing. Moreau's two seconds ahead. Not having it.
+? weekday:sun|mon
+- Rest day. I'm going to try sitting still. Tuesday? If I survive.   #funny
+
+== missed
+- You didn't come. I rowed anyway. Faster, actually. Thanks?   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! You can have the guitar book for a whole day. Huge.   #funny
+? birthday:me
+- My birthday. Park let me keep the guitar book all day. Best present. Still bad, though.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. She'll buck a bit. I've got her. Hold on to something.
+
+== hint
+- Hey, {me}. Got a minute later? I've something to say. I'll even sit still.
+
+== about
+? aff:park-noor:friend
+- Park and I share the guitar book. We're both bad. Best hour of my week.   #warm
+
+== life
+? tier>=friend
+- I've never sat still. On the helm I don't have to. She moves, I move. Perfect.

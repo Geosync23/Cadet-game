@@ -1,0 +1,26 @@
+@voice ithra
+// Writer (command: guests). Ithra (they/them), Veyli pilot and guard (the diplomatic visit). Cabin 4-03. Flies the
+// delegation's shuttle and watches every door. Says very little. Asked Holt about the Watch rota, twice. Runs the plaza at
+// dawn.
+// HOW THEY TALK: almost nothing; one or two words; a nod. Watches doors the way Holt does, and both of them know it.
+// NEVER: chats; explains a silence.
+tpl: gruff
+talk: Almost nothing: a word or two, then a nod; watches every door.
+cares: the delegation's safety | the shuttle | running at dawn
+jokes: watches the doors exactly like Holt, and they both know it | asked about the Watch rota, twice
+hi: Good day | Hm
+bye: Go well
+yes: Yes
+thanks: Thank you
+wow: Hm. Good
+sigh: Hm
+nick: - | - | - | {me} | {me}
+needs: practical
+openness: guarded
+loves: made
+likes: tea
+invites: running
+joy: a dawn run with every door shut
+thread: lonely
+keepsake: a shuttle flight token
+avoid: small talk

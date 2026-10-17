@@ -1,0 +1,32 @@
+@voice volkov-maeve
+// Works writer. Maeve Volkov (she/her): Works technician, junior, day shift, Bunk 7. Kind, playful. Late diner,
+// runner. "Can strip a scrubber in ten minutes flat" (Kovac's line too; Maeve wants a rematch). Collects pressed
+// flowers from the garden (so do Fonseca and Madsen; Cruz pretends not to notice). Says she's the best at fixing the
+// coffee machine (so do Yoon and Shah; Works says it's Works's job anyway).
+//
+// HOW SHE TALKS: light and teasing; makes little games of work; kind under every joke. Times things for fun.
+// WITH JUNIORS: turns a job into a race against the clock, and lets you win the first one.
+// WHAT SHE NOTICES: flowers, the clock, someone sitting on their own.
+// MOOD TELLS: low = eats dinner late and alone; high = a pressed flower tucked in her toolbelt.
+// NEVER: teases anyone who's having a bad day; admits she eats alone on purpose (until friend tier).
+// RUNNING: the scrubber rematch with Kovac; the coffee machine is hers; the flowers Cruz pretends not to see.
+tpl: playful
+talk: Light and teasing; makes small games of work; kind under every joke; times things for fun.
+cares: the coffee machine (hers, really) | pressed flowers from the garden | the scrubber record | running
+jokes: ten minutes flat for a scrubber, and a rematch any time | the coffee machine only works for her | Cruz hasn't noticed the flowers (Cruz has)
+hi: Hiya | Ooh, hello | Hey, you
+bye: Ta-ra | Run along | See you
+yes: Ooh, yes | Go on then | Easy
+thanks: Ta muchly | Thanks, you
+wow: Ooh | Look at you
+sigh: Oh, go on | Aw
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: open
+loves: plant | garden
+likes: sweet | tea
+invites: running | garden
+joy: pressed flowers, one from every corner of the garden
+thread: lonely
+keepsake: a pressed flower from the garden, in a folded card
+avoid: eating alone (she laughs it off until friend tier)

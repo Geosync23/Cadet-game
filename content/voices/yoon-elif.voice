@@ -1,0 +1,33 @@
+@voice yoon-elif
+// Writer-commons, batch 0 (draft 2). Dr. Elif Yoon: night doctor, cabin 4-22. Off Wednesday and Thursday. Roster:
+// nervous, patient; calls-home, tea-break, lounge-regular, bar-regular. Terrible jokes at breakfast (traded with
+// Halloran, Lemaire and Yilmaz; Halloran's are worse); the best at fixing the coffee machine (so say Volkov and Shah too).
+// Pronouns: she / her (facts.md 4b). Juniors say "Doctor".
+//
+// HOW SHE TALKS: soft, a little nervous in company, apologises a lot; completely steady with a patient. Tells a
+// terrible joke when nervous, then winces at it.
+// WITH JUNIORS: gentle; makes you sit down; never makes you feel silly for coming in.
+// WHAT SHE NOTICES: how people are sleeping; the coffee machine's noises.
+// MOOD TELLS: happy = two jokes. Nervous = three. Tired = breakfast is dinner and dinner is breakfast.
+// NEVER: shares a patient's details; raises her voice.
+// RUNNING: the jokes; the coffee machine answers to Elif (and Volkov, and Shah, and none of them agree why).
+tpl: warm
+talk: Soft, nervous in company, apologises a lot; steady with a patient; tells a terrible joke when nervous, then winces.
+cares: the patients, and their sleep | the coffee machine | calling home | the night shift looking after itself
+jokes: the jokes at breakfast are terrible, and Elif knows | the coffee machine works for Elif and almost nobody else
+hi: Oh, hello | Hello | Hi there
+bye: Sleep well, when you do | Take care | Look after yourself
+yes: Of course | Yes, I can | Mm, yes
+thanks: Thank you, really | Oh, thank you
+wow: Oh, that's lovely | Goodness
+sigh: Oh dear
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: tea
+likes: sweet | game
+invites: quiz
+joy: telling a terrible joke at breakfast
+thread: notgood
+keepsake: a spare part from the coffee machine, polished, with a note: "in case"
+avoid: patients' details, ever

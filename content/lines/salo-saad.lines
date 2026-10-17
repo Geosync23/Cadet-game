@@ -1,0 +1,89 @@
+@crew salo-saad
+// Saad Salo (he/him), engine technician, days. The Works writer, batch 2. Cheerful, patient; his twin's news as a serial.
+
+== greet
+? tier=stranger
+- Hello, hello. New? Take your time. Nobody's hurried down here. The coils don't like it.
+- Hi there. Engine room's Deck 6. Ask me anything. Twice, if you like. No rush.
+? tier>=acquaintance time:morning
+- Hello, {me}. Skipped breakfast again. I'll eat at tea. Tea's a meal if you try.   #funny
+? tier>=acquaintance
+- Oh, hello. Last time on the Halcyon: my twin lost a boot. More news Friday.   #funny
+? tier>=colleague
+- {me}. Good. Sit a minute. You're walking like you're late. You're not late.
+? tier>=friend
+- Oh, hello, friend. I was telling Keane about you. Good things. Only good things.   #warm
+
+== bye
+- Night, then. Well, it's not night. It's night for me soon. Ten o'clock.   #funny
+- Take your time. See you.
+
+== feel
+? mood:low
+- No letter from the Halcyon this week. It'll come. Relays are slow.
+? mood:high
+- Letter from my twin. Good news. I'll read it out at tea. All four pages.
+
+== near
+? act:work
+- Let me show you that again. Slowly. There. Once more? Happy to.
+? act:leisure
+- One tea, one chapter, then bed. Ten sharp. You can set the ship's clock by me.
+
+== life
+? tier>=acquaintance
+- My twin's on the Halcyon. So are Navarro's and Nakamura's. They find it hilarious.   #funny
+? tier>=colleague
+- The Tevan belt has storms you can hear coming. Rain on a tin roof. I miss the noise.
+
+== joy
+? tier>=acquaintance
+- My twin's letters come in episodes. I read one a week. Saves the good bits.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Evening. One tea, one chapter, then bed. You're welcome to the chapter.
+? tier>=acquaintance warmth:cold
+- Oh, hello. It's been a while. Sit. Tell me everything. Slowly.
+
+== near
+? habit:gardener
+- I help in the garden now. Nobody hurries a seed. It's my kind of job.
+? place:teacorner
+- Tea's a meal if you try. Biscuit, tea, biscuit. Lunch.   #funny
+
+== invite
+? tier>=acquaintance
+- Tiles in the common room? I'm slow. Very slow. You'll have time to think.
+- Film night? I'll stay till ten. Then I'll go to bed. Mid-film. Every time.   #funny
+
+== accept
+- Yes, lovely. Not past ten, mind.
+- Happy to. Take your time getting there. I'll save a seat.
+
+== decline
+- Not tonight. It's nearly ten. You know me. Tomorrow?
+? weekday:thu|fri
+- Rest day. I'm writing to the Halcyon. Next episode's due. Another time?
+
+== missed
+- You didn't come. That's all right. I read a chapter. I'll tell you the good bit.
+
+== birthday
+? birthday:you
+- Happy birthday. I'll tell my twin. They'll tell the Halcyon. You're famous now.   #funny
+? birthday:me
+- My birthday. My twin's letter came early. They timed it. Took them three tries.   #warm
+
+== cue
+? cue:repair.you@dept
+- That was yours? Nicely done. You took your time. That's how it should be.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- Sit with me before ten? There's something I'd like to say. No rush.
+
+== about
+? aff:amadi-asha:friend
+- Amadi always finds the best window. I find it second. It's a good system.   #funny

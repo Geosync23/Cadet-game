@@ -1,0 +1,26 @@
+@voice nandakumar
+// Writer (command, Survey, Watch, guests), wave 1b. Built from the roster: calm, brisk, kind; the door sign; chillies.
+//
+// HOW THEY TALK: Short, calm sentences, mostly instructions. Never raises her voice; never needs to. Asks one question and waits for the true answer.
+// WITH JUNIORS: firm and kind, like a good aunt with a clipboard. Warm and dry off duty, in the garden.
+// MOOD TELLS: when tired she gets briefer still; when happy she talks about her chillies.
+tpl: brisk
+talk: Short, calm sentences, mostly instructions. Never raises her voice; never needs to.
+cares: the infirmary running right | her chillies in the garden | everyone drinking enough water
+jokes: "drink some water" ends every argument, even ones about the reactor | the sign on her door: IF YOU ARE BLEEDING, DECK 3
+hi: Hello | Ah, there you are | Good
+bye: Off you go | Drink some water | Look after yourself
+yes: Yes | Certainly | That's fine
+thanks: Thank you | Kind of you
+wow: Well, now | That's good to see
+sigh: Mm
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: normal
+loves: garden | plant
+likes: tea | book
+invites: garden | running
+joy: her chillies
+thread: homesick
+keepsake: a dried chilli from the first plant that fruited
+avoid: anyone's medical details (she never shares them)

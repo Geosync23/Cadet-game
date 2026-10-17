@@ -1,0 +1,146 @@
+@crew walsh-esme
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Walsh, galley. Trays are on the left. Mind the wet patch.
+? tier>=acquaintance
+- {hi}, {me}. Your collar's folded. Other side.
+- {hi}. Soup's at ninety degrees. Give it two minutes.
+? tier>=friend
+- {hi}, {me}. I kept you a bread roll. The good end.   #warm
+
+== feel
+? mood:high
+- Good shift. Every carrot the same size. Nobody noticed. I noticed.   #funny
+? mood:low
+- Long one. Cleaned the clean pans twice. Brennan saw. Said nothing.
+
+== near
+? act:work
+- Hold the knife like this. Thumb back. There. Now it does the work.
+? act:gym
+- Promenade, then the treadmill. Same pace as yesterday. To the second.
+
+== life
+? tier>=acquaintance
+- My fish are back home on Port Halloran. My brother feeds them. Badly, I expect.
+? tier>=colleague
+- Gerald's on my windowsill. Every cactus aboard is Gerald. Mine's the tidiest one.   #funny
+
+== joy
+? tier>=acquaintance
+- Laps of the promenade before shift. Eight of them. Nobody talks to you on lap six.
+
+== about
+? bond:best
+- {best} runs with me. Same pace, no talking. Perfect.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. You're early. Good. Early's the only time worth being anywhere.
+? tier>=acquaintance time:evening
+- {hi}. Late team's on. Dinner's ninety degrees and falling. Go now.
+? tier>=colleague warmth:cold
+- You're back. You've missed four soups. I counted.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Mind your elbows in the queue.
+? tier>=friend
+- Thanks. That was a good talk. I don't say that much.   #warm
+
+== feel
+? mood:ok
+- Fine. Steady. Everything where it should be.
+
+== near
+? act:dinner
+- Tray straight, please. It's not a rule. It should be.
+? deck:3 time:morning
+- Lap six. Don't talk to me on lap six. Lap seven's fine.   #funny
+
+== life
+? tier>=colleague
+- Brennan says I'm the only one who can dice like she does. I wrote it down.
+? tier>=friend
+- I stay late too often. I know. Someone has to finish the clean-down. Someone always is me.
+
+== invite
+? trad:running tier>=acquaintance
+- Running club. Come along. I don't talk while I run. You'll like it.
+
+== accept
+- Yes. I'll be there. On time.
+== decline
+- No. Sorry. Clean-down. Another time.
+== missed
+- You didn't come. I waited eight minutes. Then I left. That's my rule.
+== birthday
+? birthday:me
+- My birthday. I've told nobody. Now I've told you. Don't make it a thing.   #funny
+? birthday:you
+- Happy birthday. I made you something small. It's perfectly square.   #warm
+== hint
+- Got a minute? A quiet one.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Forty grams. Not forty-two.
+- Someone chopped these big. Ivo.   #funny
+- Hm. Soup's two minutes off.
+- Same pace as yesterday. To the second.
+? act:work
+- Lids on. Labels out.
+
+== rumour
+- I don't repeat things. This once.
+- Heard it at the pass. Usually true.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You brought it. On time. Correct weight. Thank you.   #warm
+? told:fav.job
+- You did my job. Properly. I checked. It was proper.   #warm
+? told:fixed.range
+- The range holds its heat now. Steady. Was that you? Good.
+? told:fixed.extractor
+- Extractor's pulling clean. Steam goes where it should. Thank you.
+? told:came.running
+- You ran with us. Your pace was even. That's rare.   #warm
+? told:gift.book
+- I read your book. In order. Twice. It was good. That's all.   #warm
+? told:bday
+- You noticed my birthday. Hm. Thank you. That was nice.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Galley thinks you're tidy. I agree. That's two.
+? rep:theirs
+- You're on the galley list now. The good list. Short list.   #warm
+? you:reliable
+- You're known for turning up on time. So am I. Good company.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- That's exactly right. Thank you. I'll keep it on the shelf. Square to the edge.   #warm
+? gift:liked
+- Thank you. Useful. I like useful.
+? gift:polite
+- Hm. Thank you. I'll find the right place for it.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.won tier>=colleague
+- A prize marrow. What did it weigh? Your gran will know to the gram. Ask her.

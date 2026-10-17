@@ -1,0 +1,81 @@
+@crew zielinski-oona
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, it's you. The new one. Zielinski, operations. Before coffee, nod only.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Status board's mostly honest today. Mostly.
+- {me}. You look like someone who'd pay full price. Don't. Haggle.   #funny
+? tier>=friend
+- {hi}, {me}. Sit down. You're the only one who laughs at my jokes on purpose.   #warm
+== feel
+? mood:high
+- Every light on the board told the truth today. I nearly cried.   #funny
+? mood:low
+- Long shift. One light lied to me for six hours. I took it personally.
+== near
+? deck:3 act:free
+- The crew store's soap is overpriced. I've told the till. The till doesn't care.   #funny
+? act:breakfast
+- Don't talk to me yet. I'm not here. I'm a coat on a chair.   #funny
+== life
+? tier>=acquaintance
+- I ran a market stall on Marra Station. You learn to spot a fib. Status lights fib.
+== joy
+? tier>=colleague
+- A good bargain. Two biscuits for one, at the store. I'll be smug all week.
+
+// ---- Writer 2, batch 3: to ~30 (greet by time and warmth, bye, near, invite, accept, decline, missed, birthday, cue, hint, about, life)
+== greet
+? tier>=acquaintance time:morning
+- Morning? Says who. Coffee first. Then we can talk terms.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}, {me}. Two lights lied to me before lunch. I've had words.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. Long time. Prices went up while you were gone. Not really. Habit.   #funny
+
+== bye
+- {bye}. Don't pay full price for anything. Ever.
+
+== near
+? deck:1
+- Status board. Forty lights. Thirty-nine honest. I'm watching the fortieth.   #funny
+? place:mess
+- Lunch, slowly. The bridge can lie to someone else for an hour.   #funny
+
+== invite
+- Swap table tonight. Bring something. I'll teach you to haggle. Gently.
+
+== accept
+- Deal. Shake on it? No, a nod's fine. The Commander would approve.   #funny
+- Yes. Fair terms. I'll be there.
+
+== decline
+- Not tonight. The board's running a check. It needs supervising. Another night?
+? weekday:thu|fri
+- Rest day. I'm sleeping in. I've earned it at full price. Saturday?   #funny
+
+== missed
+- You didn't come. I've marked it down. Not up. Down. Next time.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. Here. Swap table, two for one. You get the one.   #funny
+? birthday:me
+- My birthday. The crew store gave me a discount. First time ever. I nearly fainted.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Every light on the board's lying now. All of them. Lovely.   #funny
+
+== hint
+- {me}. Got a minute later? I've something to say. No sales pitch.
+
+== about
+? aff:esposito-yara:friend
+- Esposito runs the store in the mornings. We haggle every day. Neither of us has won.   #funny
+
+== life
+? tier>=friend
+- Marra Station taught me to talk. The bridge taught me to check. I like having both.

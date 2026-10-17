@@ -1,0 +1,12 @@
+@template steady
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/steady.lines) come in wave 2.
+talk: Calm, plain, reliable; says what they mean.
+hi: Hello | All right
+bye: See you | Take it easy
+yes: Sure | Sounds good
+thanks: Thanks
+wow: Not bad at all
+sigh: Well
+nick: - | - | - | - | -
+needs: practical

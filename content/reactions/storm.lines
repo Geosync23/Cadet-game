@@ -1,0 +1,65 @@
+@reactions event.ionStorm
+// Writer-commons, reactions batch 2. The ion storm (SHIP_EVENTS.ionStorm), phase by phase: warning, onset,
+// escalation, resolution, afterglow. Worried is fine; frightened isn't. Everyone's good at their job.
+
+? cue:event.ionStorm.warning
+- Storm on the way, they say. I've tied down everything that wobbles.
+- Ion storm coming. Calder's been very calm about it, which isn't calming.   #funny
+- First storm? You'll be fine. Stay off Deck 6 unless they ask for you.
+- I've moved my mug to the low shelf. That's my whole plan.   #funny
+? cue:event.ionStorm.warning dept:galley
+- Storm coming. We're doing stew. Stew keeps. Stew always keeps.
+? cue:event.ionStorm.warning dept:infirmary
+- Storm tomorrow. We've made up every bed. Just in case. Probably won't need them.
+? cue:event.ionStorm.warning dept:store
+- Everyone's bought torches. I didn't know we had that many torches.   #funny
+? cue:event.ionStorm.warning dept:garden
+- A storm's coming. The plants don't know. I'm not going to tell them.   #funny
+? cue:event.ionStorm.warning tier>=friend
+- A storm's coming. Stick near me tomorrow, if you like. I'll stick near you.   #warm
+
+? cue:event.ionStorm.onset
+- Did the lights just flicker, or was that me?
+- Here it comes. Hold on to your tea.
+- The hum's changed. Can you hear it? Lower.
+- No calls home till it clears. Mum will assume the worst. She always does.   #funny
+- Everyone's walking a bit faster today.
+? cue:event.ionStorm.onset dept:galley
+- Lights keep dipping. The ovens don't care. Dinner's on time.
+? cue:event.ionStorm.onset time:night
+- Strange night. The stars look smeared. Don't stare at them too long.
+? cue:event.ionStorm.onset dept:infirmary
+- Quiet so far. Bumped elbows and one bumped head. Mind the door frames.
+
+? cue:event.ionStorm.escalation
+- Worst of it today, they say. Then it's downhill.
+- Another blackout on Deck 4. I found my bunk by feel. Mostly.   #funny
+- Everyone's tired. Be kind at the servery.
+- Works haven't slept. Bring them tea if you're passing.
+- If you've got a job on the board, now's the day. Every hand helps.
+? cue:event.ionStorm.escalation dept:galley
+- We're sending trays down to Works. They won't come up, so we go to them.
+? cue:event.ionStorm.escalation dept:store
+- I've given out more biscuits today than all last month. Nobody's paying. That's fine.   #warm
+? cue:event.ionStorm.escalation tier>=friend
+- You look done in. Sit for a minute. The storm can wait a minute.   #warm
+
+? cue:event.ionStorm.resolution
+- Is it quieter? It's quieter.
+- Lights have stopped flickering. I keep waiting for them to start again.
+- They say it's passing. I'll believe it when I've had a hot shower.   #funny
+- Calls home are back. The booth queue's down the corridor already.
+? cue:event.ionStorm.resolution dept:galley
+- The storm's passing. Proper dinner tonight. No more stew.   #funny
+? cue:event.ionStorm.resolution tier>=acquaintance
+- We got through it. All of us. Not bad for a first storm, {nick}.   #warm
+
+? cue:event.ionStorm.afterglow
+- First quiet night in days. I'm going to sleep for a week.
+- The lounge is full. Everyone wants to be near everyone tonight.   #warm
+- Did you see the stars after? Like someone polished them.
+- The whole ship sounds different. Lighter, somehow.
+? cue:event.ionStorm.afterglow dept:galley
+- Brennan's made a cake for Works. Don't tell them. Well, tell them.   #funny
+? cue:event.ionStorm.afterglow tier>=friend
+- Glad you were here for that one. Wouldn't have wanted anyone else.   #warm

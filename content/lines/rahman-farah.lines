@@ -1,0 +1,89 @@
+@crew rahman-farah
+// Farah Rahman (they/them), Works technician, days. The Works writer, batch 2. Short, stubborn; the boat.
+
+== greet
+? tier=stranger
+- Hey. New? Main storage is on Deck 5, past the board. You'll live in there.
+- You. New hand. Spare filters are on the bottom shelf. Everyone looks on the top one first.
+? tier>=acquaintance time:morning
+- Hey. Up since four. Don't ask. I'm fine.   #funny
+? tier>=acquaintance time:night
+- Still up? Me too. Always. Stars are better after midnight.
+? tier>=colleague
+- {me}. Settle something. Quick way or right way? Quick way. Thank you.   #funny
+? tier>=friend
+- Oh good, you. Sit. I need someone who won't argue. Then argue with me.   #warm
+
+== bye
+- Right. Off with you.
+- Later. Mind the top shelf. It's a trap.   #funny
+
+== feel
+? mood:low
+- Did the boat sums again. Still short. It'll come.
+? mood:high
+- New thing for the boat. A little stove. Don't laugh. It's a very good stove.
+
+== near
+? act:work
+- There's a quicker way. I'll show you. Then do it the right way. Calder's watching.   #funny
+? act:leisure
+- One drink, then the observatory. Then bed. Maybe bed.
+
+== life
+? tier>=acquaintance
+- I'm saving for a boat on Hesper Dock. Small. Blue. No name yet. Every name's wrong.
+? tier>=colleague
+- I log every star I've seen. Takahashi and Esposito think their journals are longer. Wrong.   #funny
+
+== joy
+? tier>=acquaintance
+- Picture it: the boat, Hesper Dock, morning, rain on the deck. Just me and a kettle.
+
+// ---- Writer 2, batch 1: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue)
+== greet
+? tier>=acquaintance time:evening
+- Hey. Bar, then stars, then maybe bed. Don't hold me to the bed.
+? tier>=acquaintance warmth:cold
+- There you are. Thought you'd gone off to buy a boat. Mine, I mean. Don't.   #funny
+
+== near
+? place:lounge
+- One drink. I'm pricing sails in my head. Don't look at me like that.
+? place:mess
+- Toast, standing up. It's faster. It's also better. Argue with me.   #funny
+
+== invite
+- Observatory? I need a witness. I'm about to log my four hundredth star.
+? tier>=colleague
+- Quiz night. I'll argue every answer. You tell me when I'm right.   #funny
+
+== accept
+- Yes. Fine. Good. I was going anyway. Now it's better.
+- Done. I'll be there. I'll be awake. I'm always awake.   #funny
+
+== decline
+- Not tonight. Extra shift. The boat won't buy itself. Ask me again.
+? weekday:wed|thu
+- Rest day. I'm sleeping. Don't tell anyone. Another time.   #funny
+
+== missed
+- You didn't come. I argued with myself instead. I won. Next time?   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I'd name the boat after you, but no. Every name's wrong. Have a tea.   #funny
+? birthday:me
+- My birthday. I've put a day's credits in the boat jar. That's my present.
+
+== cue
+? cue:repair.you@dept
+- Saw your job. You did it the right way. I'd have done the quick way. Fair enough.
+
+// ---- Writer 2, batch 1b: a hint (a moment is ready) and an about line for a named friend
+== hint
+- You busy later? I need to say something out loud. To someone who'll argue back.
+
+== about
+? aff:takahashi-wen:friend
+- Takahashi's star journal is longer than mine. For now. We count at the observatory.

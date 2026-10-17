@@ -1,0 +1,138 @@
+@crew janssen-hugo
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Janssen, helm, nights. Steady at three in the morning? That's me and my tea.
+? tier>=acquaintance
+- {hi}, {me}. Tea? I've always got tea. It's the one thing I always have.
+- {hi}. Gerald says hello. Gerald's my cactus. He's a good listener.   #funny
+? tier>=friend
+- {hi}, {me}. Sit a minute. It's nice to talk to someone who's awake.   #warm
+
+== feel
+? mood:high
+- Steady night. Not a wobble. Gerald and I are very pleased with ourselves.   #funny
+? mood:low
+- Long watch. I'll call home after breakfast. That always sets me right.
+
+== near
+? act:work
+- Steady as she goes. One hand on the helm, one on the tea. Don't tell the Commander.   #funny
+? act:gym
+- I run before bed. Which is your breakfast. The gym's lovely and empty.
+
+== life
+? tier>=acquaintance
+- I grow herbs for the galley. Brennan comes round with a little basket. Very formal.
+? tier>=colleague
+- Gerald's seen more stars than most captains. I've done the sums. Roughly.   #funny
+
+== joy
+? tier>=acquaintance
+- What do you like out there? The stars? I like the dark between them. Restful.
+
+== about
+? bond:friends
+- {friend} brings me tea at three in the morning. That's friendship, out here.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Good morning. I'm off to bed. Gerald's keeping watch. He's very reliable.   #funny
+? tier>=acquaintance time:night
+- Ah, hello. Up late? Tea? There's always tea at the helm. Not that you can come up. Well.
+? tier>=colleague warmth:cold
+- There you are. I asked Gerald where you'd gone. He didn't know either.   #funny
+
+== bye
+? tier>=acquaintance
+- Steady as she goes. Off you go, then.
+? tier>=friend
+- Thank you for the chat. Nights are better with a good one in your head.   #warm
+
+== feel
+? mood:ok
+- Steady. Like the ship. Like my tea, mostly.
+
+== near
+? act:gym
+- Treadmill, then bed. My morning's your evening. We pass in the corridor, you and I.
+? deck:3 act:leisure
+- The lounge window. I like watching the stars when I'm not steering past them.
+
+== life
+? tier>=colleague
+- I call home twice a week. My mother asks if I'm eating. I'm always eating. Tea counts.   #funny
+? tier>=friend
+- Nights at the helm can be lonely. I talk to Gerald. I talk to the stars. I talk to my tea.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up before my watch. I'll tell you which stars we've passed.
+
+== accept
+- Happy to. I'll bring the tea.
+== decline
+- Can't, I'm afraid. On watch. Another time, steady.
+== missed
+- Missed you. No matter. Another night.
+== birthday
+? birthday:me
+- It's my birthday. Gerald's given me nothing. He never does. He's a cactus.   #funny
+? birthday:you
+- Happy birthday. A cutting of Gerald. Look after it. It'll outlive us all.   #warm
+== hint
+- Have you a minute? Sit with me. Bring your tea.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Steady as she goes.
+- Gerald's seen more stars than me.   #funny
+- Tea in one hand. Helm in the other.
+- Ah, well. Long night. Good night.
+? act:work
+- Course holding. Nice and steady.
+
+== rumour
+- Heard something on the night watch.
+- Gerald heard it first. Gerald knows.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Steady work. Thank you.   #warm
+? told:fav.lamp
+- Lamp's working. Gerald can see now. He's very grateful. So am I.   #funny
+? told:came.observatory-night
+- You came up to the observatory. What did you think? Truly. I'm curious.
+? told:gift.plant
+- Your plant's next to Gerald. They're getting on. Slowly. Like plants do.   #funny
+? told:gift.tea
+- Your tea's my helm tea now. One hand on the cup. You know how it is.   #funny
+? told:bday
+- You remembered my birthday. Steady and kind. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The night crew rates you. Steady, they say. That's my favourite word.   #warm
+? you:reliable
+- Reliable, they say about you. Like a good heading. Steady.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- A plant. Gerald's going to have a neighbour. Thank you. Steady and kind.   #warm
+? gift:loved
+- Thank you. That's just right. Truly.   #warm
+? gift:liked
+- Thank you. That's kind. It'll ride the night watch with me.
+? gift:polite
+- Ah, well. Thank you. I'm curious what it's for. I'll find out.

@@ -1,0 +1,83 @@
+@crew chen-carmen
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Chen, Watch. Sorry, I was miles away. Literally. About forty light years.   #funny
+? tier>=acquaintance
+- Hey, {me}. I was just telling my grandmother about you. Only good things.
+- Hello, {me}. Is it Tuesday? It feels like a Tuesday.
+? tier>=friend
+- {hi}, {me}. You're on my list of good things aboard. Near the top.   #warm
+== feel
+? mood:high
+- Lovely day. Sang all the way through patrol. In my head. Mostly.
+? mood:low
+- Restless. I've walked Deck 4 three times. It hasn't changed.
+== near
+? deck:3 act:free
+- This bench is mine. Well, I sit on it. That's how benches work.   #funny
+? weekday:sat|sun act:free
+- Recording a message for my grandmother on Lisk. Say hello? She'll love it.
+== life
+? tier>=acquaintance
+- I send voice messages to my grandmother on Lisk. They're long. She says too short.
+== joy
+? tier>=colleague
+- My bench in the garden. Leaves above, pumps humming. I can think there.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. Was that me singing in the washroom? It might have been me.   #funny
+? tier>=acquaintance warmth:cold
+- Oh, {me}! I was miles away. Lisk, mostly. Hello.
+
+== near
+? place:booths
+- Recording for my grandmother. It's long. Say hello? She'll play it twice.
+? act:work
+- Patrol. I walk it twice. Once for the job, once for thinking.
+
+== invite
+- Garden after shift? Cruz is showing people the new beds. Come along.
+
+== accept
+- Oh, yes. Lovely. I'll be thinking about it all day.
+- Yes! Sorry. Yes. I drifted off. Yes.   #funny
+
+== decline
+- Not tonight. I'm recording a message home. It'll take hours. Sorry.   #funny
+? weekday:sat|sun
+- Rest day. I'm half-planning a trip to the observatory. Half. Monday?
+
+== missed
+- You missed it? That's fine. I drifted off myself, halfway through.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday! I'll sing it to you. Not in the washroom. Promise.   #funny
+? birthday:me
+- My birthday. My grandmother sent a message. Forty minutes. I've heard all of it.   #warm
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. I'm pacing. Patrol pacing, the useful sort. Stay inside.
+
+== hint
+- {me}. Have you a minute later? I've been thinking. I'd like to tell someone.
+
+== about
+? aff:amadi-asha:friend
+- Amadi and I lead the washroom's dawn chorus. She takes the high bits. I do the rest.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Bye! Sorry, I'm off. Somewhere. I'll know when I get there.   #funny
+- See you, {me}. I'll say hello to Lisk for you.
+== greet
+? tier>=acquaintance time:afternoon
+- Hi, {me}. Afternoon already? I was just at breakfast. In my head.   #funny
+== life
+? tier>=friend
+- My grandmother says I can't sit still. She's right. Out here I've stopped minding.

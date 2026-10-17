@@ -1,0 +1,83 @@
+@crew vasquez-uma
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hi hi! Vasquez, Watch. You're new! I was new once. Last Sowing. It gets better.
+? tier>=acquaintance
+- Hello, {me}! Chief Holt did the lecture on hatches today. Twice. I loved it.   #funny
+- Oh, hey, {me}! Any news? I've got none. My fish have news. Big news. Bubbles.   #funny
+? tier>=friend
+- {me}! You made my day by turning up. That's not nothing. That's a lot.   #warm
+== feel
+? mood:high
+- Good day! Message from home. The orange fish is fine. Bigger, even.
+? mood:low
+- Bit of a flat day. But the lift worked first time! Little wins.
+== near
+? habit:window-seat
+- I like the windows. Somewhere out there is home. Left a bit. Further.
+? habit:bar-regular
+- Just the one, then bed. The Chief says a tired Watch is a careless Watch.
+== life
+? tier>=acquaintance
+- I keep fish back home on the Ostrander colonies. Mum feeds them. She tells me their moods.
+== joy
+? tier>=colleague
+- News of my fish. Every message home, first question. They're doing great, by the way.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}! The Chief's lecture today is on airlocks. Front row for me.
+? tier>=acquaintance warmth:cold
+- {me}! You're back. I saved up three things to tell you. All about fish.   #funny
+
+== near
+? habit:stargazer
+- I'm on the observatory list now. I can't see the Ostrander colonies. I wave anyway.
+? place:calm
+- "A good Watch sees everything and says little." The Chief. I say a lot, though.   #funny
+
+== invite
+- Observatory night! Come and help me wave at home.   #warm
+
+== accept
+- Yes! Oh, good. I'll be there first.
+- Yes, please. I'll bring news of my fish.   #funny
+
+== decline
+- I can't, I'm on patrol. The Chief says no swaps without a form. Next time?
+? weekday:thu|fri
+- Rest day. I'm writing home. A long one. Mostly fish questions. Saturday?
+
+== missed
+- You missed it! That's all right. I'll tell you everything. Twice.
+
+== birthday
+? birthday:you
+- Happy birthday! I'd write you a poem, but nobody sees those. Have a very big hello.   #warm
+? birthday:me
+- My birthday! Mum says the fish know. The orange one swam in a circle.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on! The Chief's lecture on storms is finally useful. I knew it would be.
+
+== hint
+- {me}, have you a minute later? I've something to tell you. Not about fish.
+
+== about
+? aff:holt:friend
+- The Chief says I quote him too much. He quotes himself more. I've counted.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Bye! The Chief says never run on a wet deck. So walk. Fast.   #funny
+- See you! I'll tell the fish about you.
+== greet
+? tier>=acquaintance time:afternoon
+- Hi, {me}! Afternoon patrol. Deck 3 smells of bread. Best patrol.
+== life
+? tier>=friend
+- When I'm homesick I list good things. You're on the list. Third. Fish are first.   #warm

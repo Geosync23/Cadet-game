@@ -1,0 +1,209 @@
+@crew santos-zofia
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Santos, Comms. The bunk under yours. Tell you what: you don't snore, I won't.
+? tier>=acquaintance
+- {hi}, {me}. Tell you what. Tea for the gossip. The public stuff. Deal?
+- {hi}, upstairs. You kicked in your sleep. I'm adding it to your bill.   #funny
+? tier>=friend
+- {hi}, {nick}. Saved you the good chair. Normally that costs.   #warm
+
+== feel
+? mood:high
+- Up two places on the rowing board. Vance's name is in sight. He knows. He's scared.   #funny
+? mood:low
+- Rowing it off. Don't ask. Ask me later. Bring tea.
+
+== near
+? act:work
+- Messages sorted, stamped, sent. The private stuff stays private. That's the rule.
+? act:gym
+- Five hundred metres. Faster than yesterday. Vance moved to the treadmill. Coincidence?   #funny
+
+== life
+? tier>=acquaintance
+- I ran a market stall on Hesper Dock before this. Two for one, best in the row.
+? tier>=colleague
+- Five years, I'll be an officer. Ten, I'll be running Comms. Write it down.
+
+== joy
+? tier>=acquaintance
+- The rowing board. Every morning I'm a bit nearer the top. Every morning.
+
+== about
+? aff:tran-chloe:friend
+- Chloe says she doesn't like gossip. Then asks how it ends. Best bunkmate going.   #warm
+
+// Writer-commons, batch 5: towards 60 (a bunkmate: the bunk below yours). Off Sat, Sun; skips breakfast, runs, rows.
+// Gossip only the public kind; never anything private from the messages.
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- Morning, upstairs. You turned over eleven times last night. I counted. I'll stop.   #funny
+? tier>=acquaintance time:morning
+- {hi}. Breakfast? Never touch it. Rowing first. Then I'll eat a whole tray.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Busy day in the post room. Everyone's mum wrote at once.
+? tier>=acquaintance time:night
+- Shh. Tran's asleep. If she wakes, it was you.   #funny
+? tier>=colleague warmth:cold
+- Look who it is. Thought you'd been traded. I'd have got a good price.   #funny
+? tier>=colleague act:work
+- {hi}. Sorting. Don't read over my shoulder. I'm joking. Don't, though.
+? tier>=close
+- {nick}! Tell you what: you, me, tea, half an hour. My shout. Rarest deal I do.   #warm
+
+== bye
+? tier>=acquaintance
+- Laters. Mind the ladder. You always miss the bottom rung.   #funny
+- {bye}. Got to row. The board doesn't climb itself.
+? tier>=colleague time:night
+- Night, upstairs. Don't kick.   #funny
+? tier>=friend
+- Cheers for that. Good chat. Better than the gossip, and that's saying something.   #warm
+
+== feel
+? mood:ok
+- Fine. Steady. Like a good market day. Nothing sold, nothing stolen.
+? mood:high tier>=colleague
+- Up three on the rowing board! Vance can feel me coming. I know it.   #funny
+? mood:low tier>=friend
+- Bit low. Rowed it out. Didn't work. Sit with me? That usually works.
+
+== near
+? act:gym
+- Row, row, row. Five hundred metres. Faster than yesterday. Faster than Lindqvist. Shh.   #funny
+? act:work
+- Messages in, messages out. The private ones stay sealed. That's the rule. I like it.
+? act:dinner
+- I skip breakfast, so dinner's my big meal. Don't stand between me and the servery.   #funny
+? deck:4 act:leisure
+- Bunk 1's the best bunk. Don't tell Bunk 2. They think it's them.
+
+== life
+? tier>=acquaintance
+- I ran a market stall on Hesper Dock. Two for one. You learn to talk fast.
+? tier>=colleague
+- My old stall's still there. My cousin runs it now. Badly. I miss it a bit.
+? tier>=colleague
+- Vance moved to the treadmill when we got close on the rowing board. Very suspicious.   #funny
+? tier>=friend
+- Five years, officer. Ten, I run Comms. I've written it down. On the inside of my locker.   #warm
+
+== joy
+? tier>=colleague
+- The rowing board. Every morning I look, and every morning I'm a bit higher. Lovely.
+
+== invite
+? trad:running tier>=acquaintance
+- Running club tonight. Come on. I'll pace you. Then I'll leave you behind. Fond memories.   #funny
+? trad:quiz tier>=colleague
+- Quiz tonight? I know all the gossip questions. Not from the post. From the bar.
+? tier>=colleague time:morning
+- Gym with me before shift? You row, I'll shout. It's a good system.
+
+== accept
+- Deal. I'll be there.
+- Easy. Done. Tell you what, I'll even be on time.   #funny
+
+== decline
+- Can't. Rowing. I know. I'm obsessed. It's healthy. Mostly.
+- Not tonight. Tran's baking. I'm on tasting duty. Very important.   #funny
+
+== missed
+- You missed it! That's a debt. I collect in tea.   #funny
+- Didn't see you earlier. Next time, eh? I'll save you a spot.
+
+== birthday
+? birthday:me
+- It's my birthday. I've told the whole post room. I know it's not official business.   #funny
+? birthday:you
+- Happy birthday, upstairs! Got you something. Two for one. One's for me.   #warm
+
+== hint
+- Tell you what. Got a minute? Not for gossip. A real minute.
+
+== week1
+? week1:true tier<=acquaintance deck:4
+- You're the one above me! Brilliant. I'm Zofia. Comms. I don't snore. Tran does.   #funny
+
+== greet
+? tier>=acquaintance weekday:sat|sun
+- {hi}. Day off. Rowing, then a nap, then rowing. Busy day.   #funny
+? tier>=friend time:evening
+- There you are. Tell you what: you tell me your day, I'll tell you the gossip. Fair trade.
+
+== near
+? act:leisure
+- Swap meet on Sunday. I still haggle. Can't help it. Old habits.
+? deck:3 time:morning
+- Up before breakfast, as usual. The promenade's empty. Perfect for thinking big.
+
+== life
+? tier>=acquaintance
+- Tran pretends she doesn't want the gossip. She always wants the gossip.   #funny
+? tier>=colleague
+- Lindqvist, Moreau and me, all chasing Vance's name on the board. Healthy rivalry. Mostly.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Two for one. Today only.   #funny
+- Vance is scared of the rowing board.   #funny
+- Five-year plan. Year one. Going well.
+- Ah, well. Better deal tomorrow.
+? act:work
+- Messages sorted. Gossip set aside.
+
+== rumour
+- Fresh today. Not the private stuff.
+- Heard it first. Telling it best.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Free of charge. I'll owe you one. Two for one, if you like.   #funny
+? told:fav.job
+- You did my job. Deal's a deal. I'll do one of yours. When you're not looking.   #funny
+? told:fixed.databus
+- Comms board's quick again. Was that you? I'll put in a good word. Several.
+? told:came.running
+- You came to running club! Vance looked worried. That was us. Good work.   #funny
+? told:gift.game
+- That game you gave me? I've won it eleven times. Rina's asked for a go. No.   #funny
+? told:bday
+- You remembered my birthday, {nick}. Best deal I've had all year.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Comms rates you, {nick}. I've been talking you up. No charge.   #funny
+? rep:theirs
+- You're one of Comms now. Best deal on the ship. Lifetime membership.   #warm
+? you:chatty
+- They say you're chatty. Takes one to know one. I'm the one.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:game
+- A game! I'll win at it by Friday. Then I'll sell lessons. Thanks, {nick}.   #funny
+? gift:loved
+- Best deal I've ever had. Free, and perfect. Thank you.   #warm
+? gift:liked
+- Nice one. Thanks. I'd have paid for that.
+? gift:polite
+- Ah, well. Thanks. I'll find it a buyer. No, I won't. Thanks.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Your Jo launched a boat? Hesper Dock would've bought it on the spot. Tell them that.   #funny
+? flag:home.gran.won tier>=colleague
+- First prize for a marrow? Your gran's a born trader. I'd sell those seeds by the packet.   #funny

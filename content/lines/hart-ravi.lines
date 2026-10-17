@@ -1,0 +1,137 @@
+@crew hart-ravi
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Hart, garden, early team. Up since five. Don't ask how I feel about it.
+? tier>=acquaintance time:morning
+- {hi}, {me}. First light's the only bad thing about the best job.   #funny
+? tier>=acquaintance
+- {hi}. You're in the new comic on the wall. Kindly. You'll like it.
+? tier>=friend
+- {hi}, {me}. Drew you a little one. Just for you. Not for the wall.   #warm
+
+== feel
+? mood:high
+- Good morning, for once. Everything watered before six. The garden glowed.
+? mood:low
+- Tired. I drew the fish from home all evening. That's how you know.
+
+== near
+? act:work
+- Watering at first light. The plants like it before the misters. So do I. Quietly.
+? act:leisure
+- Comics wall needs a new one. Something happened at breakfast. I'm drawing it.
+
+== life
+? tier>=acquaintance
+- I keep fish back home on Valo. My nan sends drawings of them. Hers are better.
+? tier>=colleague
+- Once I've decided, I've decided. My mum says it's my best and worst thing.
+
+== joy
+? tier>=acquaintance
+- The comics wall in the common room. Teague, Abara and me. Have a look. You might be in it.
+
+== about
+? bond:friends
+- {friend}'s in my comics a lot. Always the hero. Don't tell them.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}. I've been up since five. It's evening. I'm basically a ghost.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Shift's done. Sun's not up. There's no sun. Still feels like a win.
+? tier>=colleague warmth:cold
+- Oh, hey. You've been missing from the comics. I had to draw someone else. Pell.   #funny
+
+== bye
+? tier>=acquaintance
+- See you. Early night for me. Earlier than you'd think.
+? tier>=friend
+- Thanks for this. I'll draw you something. Kindly. I always draw you kindly.   #warm
+
+== feel
+? mood:ok
+- Fine. Tired. Gardener tired, which is the good kind.
+
+== near
+? deck:4 act:leisure
+- Comics wall. New one's up. You're in it. Don't worry. You're the clever one.   #funny
+? act:meal
+- I eat lunch at eleven. That's my dinner. Gardeners keep strange hours.
+
+== life
+? tier>=colleague
+- My mum says I'm the most stubborn person she knows. She's met herself, though.   #funny
+? tier>=friend
+- I came aboard to start again. Long story. Another time. It's a good one, in the end.
+
+== invite
+? tier>=colleague time:morning
+- Come and water at first light with me? It's the best the garden ever looks.
+
+== accept
+- Yeah, all right. I'll be there.
+== decline
+- Can't. I'll be asleep. I'm always asleep. Morning person, against my will.   #funny
+== missed
+- You didn't come. Fine. I drew a comic about it. You come off quite well.   #funny
+== birthday
+? birthday:me
+- It's my birthday. I'm drawing myself a cake. It's the only kind I can make.   #funny
+? birthday:you
+- Happy birthday. Here, a comic. It's you, winning at something. Don't ask what.   #warm
+== hint
+- Got a minute? Sit down. I'll stop drawing.
+
+// Writer 3, batch 4: bubbles (smalltalk and rumour, 60 characters, said to no one in particular).
+
+== smalltalk
+- Mornings. Honestly.
+- New comic's up. You're in it.   #funny
+- Ah, well. Fine. Up, then.
+- That's decided. Not moving.
+? act:work
+- Gently. Roots don't like a fuss.
+
+== rumour
+- Heard something. Thought about it.
+- It's on the comics wall by tonight.
+
+// Writer 3, batch 5: callbacks (told: said once).
+
+== callback
+? told:fav.fetch
+- You fetched it. Early, too. Mornings. Honestly. Thanks.   #warm
+? told:fav.job
+- You did my job. I'm drawing you in this week's comic. As a hero. Small one.   #funny
+? told:fixed.irrigation
+- Water's back in the beds. The roots stopped sulking. Thanks.
+? told:came.harvest
+- You came to the harvest. Good. You're in the comic now. Holding a marrow.   #funny
+? told:gift.card
+- Your card's on the comics wall. Pride of place. Nobody's allowed to cover it.   #warm
+? told:bday
+- My birthday. You remembered. That's decided: you're a good one.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Garden thinks you're all right. That's decided. Not moving on it.
+? you:reliable
+- They say you're reliable. Good. Mornings need reliable people. I'm not one.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- That's decided. Best present of the tour. Not moving on it.   #warm
+? gift:liked
+- Thanks. Good one. Going in the comic.
+? gift:polite
+- Ah, well. Thanks. Kind of you. Really.

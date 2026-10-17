@@ -1,0 +1,26 @@
+@voice achterberg-lars
+// Writer (Watch), wave 1b. Watch officer, nights; reliable, dry humour; calm in a crisis, fussy about paperwork; mysteries.
+//
+// HOW THEY TALK: Flat, calm, very dry. Says the alarming thing and the boring thing in the same voice. Fussy about forms, and admits it. Narrates life like a mystery novel.
+// WITH JUNIORS: calm, makes them fill in the form properly, then buys them tea.
+// MOOD TELLS: when low he stops guessing endings; when happy he hums the record cabinet.
+tpl: dry
+talk: Flat, calm, very dry. Says the alarming thing and the boring thing in the same voice.
+cares: forms filled in properly | mystery novels | calling home
+jokes: he guesses the ending of every mystery by chapter two | he knows the lyrics to every song in the record cabinet
+hi: Evening | Hello | Ah, hello
+bye: Carry on | Mind the paperwork | As you were
+yes: Very well | Yes | I'll note it
+thanks: Thank you | Noted, thanks
+wow: Well, well
+sigh: Hm
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: book
+likes: music | tea
+invites: tiles | jam
+joy: guessing the ending of a mystery
+thread: family
+keepsake: a mystery novel with the ending folded over
+avoid: rushing anything
