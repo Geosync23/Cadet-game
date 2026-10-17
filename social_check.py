@@ -207,6 +207,32 @@ with sync_playwright() as pw:
     if w['week1'] != 'week1' or w['done'] != [False, True, True] or not w['saved']: fail('week-1 lines or the end of week 1 wrong')
     if not w.get('invite') or not w['invite']['ok'] or w['invite']['again'] is not None or w['invite']['none'] is not None: fail(f"socialInvite wrong: {w.get('invite')}")
 
+    # 9. gifts (0.36.24): Give from your hands, how it lands by taste, once a week each, double on a birthday; crew gifts; keepsakes
+    gf = g.ev(r"""(() => {
+      const o = {}, P = SHIP.player, carry = P.carry.slice(); SHIP.mem = {};
+      const p = SOC.crew.find(q => giftTaste(q).loves.includes('tea')) || SOC.crew[0], t = giftTaste(p);
+      const pts0 = relGet(p.id).pts; P.carry = []; o.add = [giftAdd('tin of tea'), giftAdd('a spanner'), giftAdd('herbs'), giftAdd('biscuits')];
+      o.hands = giftInHands();
+      const a = giftGive(p, 'tin of tea'); o.first = a && a.how; o.pts = Math.round((relGet(p.id).pts - pts0) * 100) / 100; o.mem = mem(p.id, 'gift.tea') && Math.round(mem(p.id, 'gift.tea').w);
+      o.again = giftGive(p, 'herbs'); o.carry = P.carry.slice();
+      const q = SOC.crew.find(x => x !== p && !giftTaste(x).loves.includes('made') && !giftTaste(x).likes.includes('made')); P.carry = ['keyring']; const b = giftGive(q, 'keyring'); o.polite = b && b.how;
+      o.known = relGet(p.id).known.some(k => /^Loves /.test(k));
+      o.keep = [giftKeepsake(p, 'a test keepsake'), giftKeepsake(p), keepsakes().length, !!mem(p.id, 'keepsake')];
+      // a crew gift: make Tomas a warm friend, run a few evenings
+      relAdd('tomas', 'chat', 70); memAdd('tomas', 'chat'); SHIP.social.given = []; const m0 = SHIP.social.mail.length;
+      for (let h = SHIP.social.hour - SHIP.social.hour % 24 + 19, k = 0; k < 28; k++, h += 24) socCrewGift(h);
+      o.given = SHIP.social.given.length; o.mail = SHIP.social.mail.length - m0;
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      P.carry = carry; SHIP.social.given = []; SHIP.social.keepsakes = []; SHIP.social.mail.length = m0; SHIP.mem = {};
+      o.who = p.id; o.taste = t; return o;
+    })()""")
+    print('Gifts:', json.dumps(gf))
+    if gf['add'] != [True, False, True, False] or gf['hands'] != 'tin of tea': fail('giftAdd / giftInHands wrong')
+    if gf['first'] != 'loved' or gf['pts'] < 10 or gf['mem'] != 90 or gf['again'] is not None or gf['carry'] != ['herbs']: fail('a loved gift lands wrong, or a second gift the same week went through')
+    if gf['polite'] != 'polite' or not gf['known']: fail('a polite gift, or "Loves ..." in what you know, wrong')
+    if gf['keep'] != [True, False, 1, True]: fail(f"keepsakes wrong: {gf['keep']}")
+    if not (1 <= gf['given'] <= 4) or gf['mail'] != gf['given'] or not gf['saved']: fail(f"crew gifts wrong: {gf['given']} in 4 weeks, mail {gf['mail']}")
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
