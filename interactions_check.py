@@ -94,6 +94,12 @@ with sync_playwright() as pw:
     g.ev("actEnd(true)"); tap('Folding table'); g.step(40); check(st()['act'], f'at the folding table ({st()["toast"][:80]})')
     g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s = st()
     check(not s['act'] and s['visible'], 'walking away stops it')
+    if g.ev("typeof actProgress === 'function'"):          # 0.37.8: the goal marker steps aside while section 15's progress bar shows
+        g.ev(f"({TAP})({{title: 'Folding table'}})"); g.ev("(() => { setGoal({ deck: 4, at: player.here(), label: 'Laundry' }); })()"); g.step(60); s = st()
+        check(s['act'] and not s['goal'] and g.ev("!!actProgress()"), f'the goal marker hides while the progress bar shows ({s["act"]}, {s["goal"]})')
+        g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s = st()
+        check(not s['act'] and s['goal'] == 'Laundry', f'and comes back when it ends ({s["goal"]})')
+        g.ev("clearGoal()")
 
     print('== the job board and the goal pointer')
     # the first tips (C13): a stand-in tipShow records which fire, when the build has none of its own (the device's, 19)
@@ -204,6 +210,21 @@ with sync_playwright() as pw:
             check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
             check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
             g.ev("ixBoard.close()")
+    # the ship health board (0.37.6): tapping it opens a panel with every system, the ship's health, faults and jobs
+    if g.ev("typeof shipHealthRows === 'function'"):
+        print('== ship health')
+        g.ev("goToDeck(5)"); g.step(3)
+        r = tap('Ship health'); g.step(150)
+        hp = g.ev("""(() => { const el = document.getElementById('ixHealth'), b = el.getBoundingClientRect();
+          return { open: !el.hidden, names: [...el.querySelectorAll('.ixbar span')].map(x => x.textContent), want: shipHealthRows().map(r => r.name),
+            inside: b.left >= 0 && b.top >= 0 && b.right <= innerWidth && b.bottom <= innerHeight }; })()""")
+        print('   rows:', hp['names'])
+        check(r is True and hp['open'], 'tapping the ship health board opens its panel')
+        check(hp['names'] == hp['want'] and len(hp['names']) >= 11, f'every system listed, the ship first ({len(hp["names"])})')
+        check(hp['inside'], 'the panel is fully on screen')
+        g.page.mouse.click(5, g.page.viewport_size['height'] - 5); g.step(3)
+        check(g.ev("document.getElementById('ixHealth').hidden"), 'a tap outside closes it')
+        g.step(200); check(g.ev("document.getElementById('ixHealth').hidden"), 'it never opens by itself')
     # real machines: their taps are section 15's machineTap (machineUse), never one of ours
     over = []
     for n in g.ev("Object.keys(DECKS).map(Number)"):
@@ -222,6 +243,22 @@ with sync_playwright() as pw:
     check(peak < BUDGET, f'draw calls under {BUDGET} ({peak})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
+
+# a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
+# could take on the board (section 17's openJobs), the way a new player finds it
+if '--quick' not in sys.argv:
+    with sync_playwright() as pw:
+        g = Game(pw, sys.argv[1])
+        print('== a fresh game: jobs for you on the board, Day 1')
+        hours = []
+        for h in range(6, 17):                             # from the moment a new game starts (06:00) to the end of the day shift
+            g.ev(f"skipTo({h * 60})"); g.step(3)
+            hours.append((h, g.ev("typeof openJobs === 'function' ? openJobs('you').length : jobsBoard().filter(j => !j.claimedBy).length")))
+        print('   open to you by hour:', ' '.join(f'{h:02d}:00 {n}' for h, n in hours))
+        empty = [h for h, n in hours if n < 1]
+        check(not empty, f'a fresh game has a job for you on the board every hour of the day shift (empty at {empty})')   # strict from 0.37.7 (section 17's 0.33.32)
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+        g.close()
 
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

@@ -1,11 +1,11 @@
 # Handover: performance engineer (crowd rendering and activity poses)
 
-Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.17 (claude/crowd-render 5add99d, on 0.41.4). Plain notes for whoever picks this area up.
+Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render, on ship-integration 7dd0aa4 / 0.41.8). Plain notes for whoever picks this area up.
 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.17). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.24; next is 0.27.25). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
 - **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`. Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
 - **Test scripts:** I don't own any. I use `cadet_test.py`, `deck_check.py`, `day_check.py` and `player_check.py`.
@@ -49,11 +49,34 @@ All in sections 8 and 8b unless named. The DEV_NOTES rows have the detail.
 - **Chatter bubbles (C5):** `bubbleSay(who, text, secs)`, `bubbleClear()` and `bubbles.hidden`. DOM only, at most 2 on screen, 120 to 220 px wide, kept on screen. The social engineer drives them from section 20.
 - **Plain clothes for guests:** `dept: 'civilian'` with `outfit` draws a top in that colour, no badge, no pips.
 - **Gym:** `punch` and `stretch` activities.
+- **The widest zoom (0.27.18, sections 6 and 5):** `ZOOM_MIN` is 0.55, or 0.7 on a tall screen (`fitZoomMin`, also on resize). `placeCam` moves the camera's near and far planes out with the view's reach; at the old 0.45 they sliced the deck on tall phones. `placeSun` grows the shadow square with the view (`SHADOW_K`); it's 1 at the usual zooms. Before and after shots are in plans/shots/zoom-*.png.
 
-## Waiting for me (at 0.27.17)
-- **shipFeel(kinds, len)** for the events engineer (section 18). The kinds are 'jolt', 'lightsDip' and 'flicker' on the current deck; their stand-in, `eventFeelFrame`, shows the baseline and steps aside once shipFeel exists. Also the occasional flicker while `eventMod('effect', 'flicker')`, then emergency lighting, 'look up' at a jolt, and the address pose. The lead calls this when the storm switches on.
+## Added in 0.27.19 to 0.27.22 (the second performance engineer)
+- **The storm's look and feel (0.27.19, 8b):** `shipFeel(kinds, len)` (section 18's `eventFeel` calls it; its stand-in steps aside) and `shipFeelFrame(t, dt)` (main loop, the machineFx line after applyLight). `FEEL_MOODS.<event id> = { phases: { <phase>: 0-1 }, a, b, light, bg }`: add an entry for the nebula drift and so on. The sky shader has `uWash`, `uT`, `uA`, `uB` (off at 0, so normal play is unchanged). Emergency lighting reads section 17's `blackoutAt(shipNow())`. `feelLook(t0)`: crew look up at a jolt (in `CrowdPerson.update`, via `lookOff`). `FEEL_S.gather`: an event's gathering on this deck, now; with more than `CROWD_GATHER` (40) on the deck the coarse crowd starts at `CROWD_GATHER2` (12). Reduced motion (`FEEL_CALM`): no shake, soft dips instead of flickers.
+- **Draw calls, the same picture (0.27.20-0.27.22, section 4c, at the lead's request for the zoomed-out job):** `packGroups(geo, mats)` (neighbouring faces with one material become one group: door leaves, walls, headers, sills, void blocks); each hull piece merged (`mergeMeshes(p.g)`); `DOOR_LEAVES` (one InstancedMesh per leaf material, `doorLeavesSync()` each frame; the leaves are invisible boxes for taps); `tallCombine()` / `tallSync()` (tall furniture drawn per material for the whole deck; a fading room shows its own meshes and is skipped by the deck-wide one).
+- **Numbers now:** desktop 1280×760, widest 0.55: D2 325, D3 356, D4 470, D5 299; zoom 1.0: 179-241. Phone portrait 390×844: D4 383 at the widest 0.7 (871 at 0.27.18), 210 at 1.5. day_check day 1 peaks about 170-250.
+- **Gotchas found:** `renderer.info.render.calls` (the budget's number) counts the main pass only, not the shadow pass. The window glass is merged into the hull decor bucket and so casts a faint shadow although its `castShadow` is false; marking it noMerge changes the picture, so it's left alone. Big `push(...array)` spreads overflow the stack on Deck 5: use loops. My `until pgrep -f` wait loops matched their own command line and never ended: wait on a background command instead.
+
+## Waiting (at 0.27.22)
+- Desktop widest Deck 4 is 470, a little over 450; everything else, and every phone view, is under. The next cuts, if wanted: hide the smallest wall pieces (light switches, small plates) below about zoom 0.65, or merge wall decor that never drops. Wall decor batching per wall run was tried and saved only 7 calls (most pieces are alone on their wall stretch).
+- The user may want the zoom-out limit (0.55 desktop, 0.7 tall screens) widened now that it's cheaper; the near/far planes and shadows already follow the zoom.
+- The garden view is done (0.27.23): `gardenView` (8b) draws `GARDEN_PLOTS` (recorded by `raisedBed`/`trellis` with `o.live`) as instances scaled by `SHIP.galley.garden.beds`. Root vegetables and the third bean bed have no place in the garden yet. The user kept 0.27.18's zoom limit (2026-10-16).
+
+## Waiting for me (at 0.27.17; shipFeel done in 0.27.19)
+- ~~**shipFeel(kinds, len)**~~ (done) for the events engineer (section 18). The kinds are 'jolt', 'lightsDip' and 'flicker' on the current deck; their stand-in, `eventFeelFrame`, shows the baseline and steps aside once shipFeel exists. Also the occasional flicker while `eventMod('effect', 'flicker')`, then emergency lighting, 'look up' at a jolt, and the address pose. The lead calls this when the storm switches on.
 - **Review the device engineer's CRT skin for phone cost** when they send their branch (claude/device).
 - **The 450 budget at gatherings:** the festival waits for a real-phone sign-off from this role (plan, "Gatherings").
+
+## Draw calls when zoomed out (measured at 0.27.18, by the lift, desktop 1280×760)
+The 450 budget holds at the usual zoom, but zoomed out a whole deck is in view and every object is drawn. The shadow square adds about 25 draw calls of that.
+
+| Zoom | Deck 2 | Deck 3 | Deck 4 | Deck 5 |
+| --- | --- | --- | --- | --- |
+| 0.55 (new widest) | 712 | 648 | 1008 | 628 |
+| 0.85 | 464 | 443 | 558 | 474 |
+| 1.0 | 366 | 404 | 424 | 402 |
+
+On a phone in portrait (390×844), Deck 4 is 871 at 0.7 and 468 at its usual 1.5; the 468 was the same before 0.27.18. Options, for the user: accept the higher cost while zoomed out (it's brief); raise ZOOM_MIN to about 0.85 (desktop) or 1.2 (portrait) to stay near budget; or thin the decor at low zoom (hide small items, merge per room). That last is the real fix, and the next performance job.
 
 ## Gotchas found since 0.40.8
 - cadet_test sometimes shows `i_tap1` with 78 pixels one level off along a hull edge, even for DOM-only changes. It's run-to-run renderer noise, and the test labels it so.

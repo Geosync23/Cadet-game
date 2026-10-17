@@ -1,6 +1,6 @@
 # Handover: the sim engineer
 
-Written at build 0.40.8 and brought up to date at 0.26.14 (Pillar 3, 16 October), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
+Written at build 0.40.8 and brought up to date at 0.26.18 (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
 ## Role, branch, builds
 
@@ -12,6 +12,7 @@ Written at build 0.40.8 and brought up to date at 0.26.14 (Pillar 3, 16 October)
   - 0.26.1 to 0.26.7: Pillar 2 A1, "every room in use";
   - 0.26.8 to 0.26.12: the answers pass (time, feelings, habits, window seats, held things, Deck 1 routines, event hooks, event seats held);
   - 0.26.13 and 0.26.14: Pillar 3 appointments, doors and guests.
+  - 0.26.15 to 0.26.18 (the second sim engineer): guests from the real data, the storm routines (C7), joined up with section 18, seating by friendship.
   - Combined builds come from the lead on `claude/ship-integration`.
 - **Sections I own in `starship-cadet.html`:**
   - **13. SHIP TIME & SAVE.** It sits after section 5, not at the end, because the clock drives the light and the save is read before the first deck is built.
@@ -238,3 +239,13 @@ My answer to them:
     - First, seats within about 2 tiles of an already-planned person with affinity ≥ 30.
     - Skip seats next to anyone at ≤ −30.
     - `occ` must then store who holds a place: `[from, to, personId]`. `isFree` reads only the first two fields, so that's compatible.
+
+## Update at 0.26.18 (the second sim engineer)
+
+The "Loose ends with guests", "Still to do: event routines (C7)" and "Seating by friendship" items above are **done**. Details in DEV_NOTES: "Pillar 3: guests", "Pillar 3: event routines" and "Seating by friendship"; build rows 0.26.15–0.26.18.
+
+- **Guests (0.26.15, 0.26.17):** `guestStay(p, d)` (days of the year; event guests via section 18's `eventGuestDays`); `GUEST_TEMPLATES` drive free time and hours; survivors use the ward's `patient-bed` places (deck architect 0.38.4) when present.
+- **Event routines (0.26.16, 0.26.17):** `evDay(d)` slots from `eventRoutines(t)` and `eventMod('needs', …)`; doubleShift (day to 20:30, night to 07:15: shared desks), patrol, closed (room keys like '3|L'), stayIn, rush (`callOwed`). The party comes only through section 18's `eventPlan` (one path, the lead's decision); section 14 fills `gather` pools from the front and plans an event's host first. `doorOpenFor` also honours `occasionDoorOpen`.
+- **Seating (0.26.18):** `seatMates` / `seatNear` with `affinityPlan`; `occ` entries `[from, to, personId]`, `occ.who`.
+- **Testing tips:** a storm starts on its own in a new game on day 10 (party day 13), so day_check 12 and 13 are the storm days. Give each concurrently running check its own copy of the build (the checks copy to `_run_<name>.html`; same names collide). Never `pkill -f` a pattern that appears in your own command line, and `cd` inside backgrounded chains applies only to that chain.
+- **Next likely work (lead):** the diplomatic visit (event guests arrive through `eventGuestDays`; delegates' `formal` dinners via `eventPlan`), and tuning after the user plays the check-in build.
