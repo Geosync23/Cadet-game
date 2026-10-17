@@ -118,6 +118,11 @@ html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="gree
 @keyframes devpulse{50%{opacity:.4}}
 @media (prefers-reduced-motion:reduce){.device.fx .need.pulse b{animation:none}}
 .device .need span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.device .need.ic{grid-template-columns:22px 7em 1fr 2.5em}
+.device .need svg{width:22px;height:22px;fill:none;stroke:var(--nc,var(--crt-ink));stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.device .need.tint b{background:var(--nc);box-shadow:0 0 6px var(--nc)}
+.device .need.tint.low b{background:repeating-linear-gradient(90deg,var(--nc) 0 6px,transparent 6px 9px)}
+.device .need.tint.pulse b{background:var(--nc);box-shadow:0 0 12px var(--nc)}
 .device .need em{font-style:normal;font-size:15px;margin-left:6px;color:var(--crt-hot)}
 .device .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:14px}
 .device .app{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:76px;padding:8px 4px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
@@ -195,7 +200,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.27
+   STARSHIP CADET: CSV Wren                           build 0.35.28
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7229,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.27';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.28';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8978,8 +8983,11 @@ const DEVICE_SKIN = (() => {
     bars(b) {
       const box = mk('div', 'bars');
       for (const it of b.items || []) {
-        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '') + (it.pulse ? ' pulse' : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
+        const row = mk('div', 'need' + (it.level ? ' ' + it.level : '') + (it.pulse ? ' pulse' : '') + (it.icon ? ' ic' : '') + (it.color ? ' tint' : '')), lab = mk('span', '', it.label), bar = mk('i'), fill = mk('b'), v = Math.max(0, Math.min(100, +it.value || 0));
         fill.style.width = v.toFixed(1) + '%';
+        if (it.color) row.style.setProperty('--nc', it.color);   // 0.35.28: a need's own colour (section 15's NEED_COL), as on the strip
+        if (it.icon) { const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'), path = document.createElementNS(NS, 'path');
+          svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); path.setAttribute('d', it.icon); svg.appendChild(path); row.appendChild(svg); }
         if (it.mark) { const em = mk('em', it.mark, it.mark === 'up' ? '▲' : '▼'); if (it.note) em.title = it.note; em.setAttribute('aria-label', it.mark === 'up' ? 'bonus' : 'penalty'); lab.appendChild(em); }
         row.setAttribute('role', 'meter'); row.setAttribute('aria-label', it.label); row.setAttribute('aria-valuenow', Math.round(v));
         row.setAttribute('aria-valuemin', 0); row.setAttribute('aria-valuemax', 100);
@@ -9700,12 +9708,34 @@ function devPulseStep() {
   if (!DEV.open || DEV.app !== 'needs' || typeof needPulse !== 'function' || typeof NEED_KEYS === 'undefined') { devPulseKey = ''; return; }
   const k = NEED_KEYS.map(devPulse).join(); if (k !== devPulseKey) { devPulseKey = k; deviceRefresh(); }
 }
-// Needs: five bars with their bonus or penalty marks, the reasons, and your walking speed
+// Needs (0.35.28, the user's needs-display redesign): the six needs with section 15's icons and colours (NEED_ICON,
+// NEED_COL; amber, NEED_AMBER, under NEED_LOW, as on the HUD strip), then short effect lines ("Hungry: tasks −15%")
+// built from section 15's NEED_FX numbers, and your walking speed. Without the icons and colours: the plain bars.
+const DEV_FX_WORD = { energy: ['Well rested', 'Tired'], fitness: ['Fit', 'Out of shape'], hunger: ['Well fed', 'Hungry'], hygiene: ['Fresh', 'Unwashed'],
+  social: ['Good spirits', 'Lonely'], bathroom: ['Comfortable', 'Need the toilet'] };
+const DEV_FX_WHAT = { task: 'tasks', walk: 'walking', drain: 'tiring', socialGain: 'chats' };
+const devPct = m => { const p = Math.round((m - 1) * 100); return (p > 0 ? '+' : '−') + Math.abs(p) + '%'; };
+function devFxLine(k, side) {                            // 'Hungry: tasks −15%'; null when section 15 has no such effect
+  let fx = null; try { fx = typeof NEED_FX !== 'undefined' && NEED_FX[k] && NEED_FX[k][side === 'up' ? 'hi' : 'lo']; } catch (e) { fx = null; }
+  if (!fx || !fx[0]) return null;
+  const parts = Object.keys(DEV_FX_WHAT).filter(f => typeof fx[0][f] === 'number' && fx[0][f] !== 1).map(f => DEV_FX_WHAT[f] + ' ' + devPct(fx[0][f]));
+  const w = DEV_FX_WORD[k] ? DEV_FX_WORD[k][side === 'up' ? 0 : 1] : String(fx[1] || '').split(':')[0];
+  return parts.length ? w + ': ' + parts.join(', ') : null;
+}
+function devNeedLook(k, v) {                             // { icon, color } from section 15, or {} without them
+  try {
+    const low = v < (typeof NEED_LOW !== 'undefined' ? NEED_LOW : SLOW_BELOW);
+    return { icon: typeof NEED_ICON !== 'undefined' && NEED_ICON[k] || null,
+      color: typeof NEED_COL !== 'undefined' && NEED_COL[k] ? (low && typeof NEED_AMBER !== 'undefined' ? NEED_AMBER : NEED_COL[k]) : null };
+  } catch (e) { return {}; }
+}
 deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
   const n = SHIP.player.needs, fx = needEffects(n), B = [];
   B.push({ kind: 'bars', items: NEED_KEYS.map(k => ({ label: NEED_LABEL[k], value: n[k], level: n[k] < SLOW_BELOW ? 'low' : n[k] < 50 ? 'mid' : '', pulse: devPulse(k),
-    mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null })) });
-  for (const k of NEED_KEYS) if (fx.marks[k]) B.push({ kind: 'text', text: (fx.marks[k][0] === 'up' ? '▲ ' : '▼ ') + fx.marks[k][1], mark: fx.marks[k][0] });
+    mark: fx.marks[k] ? fx.marks[k][0] : null, note: fx.marks[k] ? fx.marks[k][1] : null, ...devNeedLook(k, n[k]) })) });
+  const up = [], down = [];
+  for (const k of NEED_KEYS) if (fx.marks[k]) { const side = fx.marks[k][0], t = devFxLine(k, side) || fx.marks[k][1]; (side === 'up' ? up : down).push({ kind: 'text', text: (side === 'up' ? '▲ ' : '▼ ') + t, mark: side }); }
+  B.push(...down, ...up);                                // what's holding you back first
   const sp = playerSpeed();
   if (sp !== 1) B.push({ kind: 'text', text: 'Walking at ' + Math.round(sp * 100) + '% speed.' });
   return { title: 'Needs', blocks: B };

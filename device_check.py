@@ -6,7 +6,7 @@
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
-#   Play on a message from home (0.35.27)
+#   Play on a message from home (0.35.27); the Needs page's icons, colours and short effect lines (0.35.28)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
@@ -254,6 +254,19 @@ def run(path):
             p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
             g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")   # (0.35.20: works with the real needPulse too)
             check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
+            # the needs-display redesign (0.35.28): section 15's icons and colours (amber under NEED_LOW) when it has them,
+            # short effect lines from NEED_FX's numbers, what holds you back first; nothing wider than the screen
+            nd = g.ev("""(() => { const N = SHIP.player.needs, keep = { ...N }; Object.assign(N, { hunger: 10, energy: 90, fitness: 90, hygiene: 60, social: 60, bathroom: 60 });
+              deviceShow('needs'); const body = document.getElementById('devBody'), T = [...body.querySelectorAll('p, div')].map(e => e.textContent);
+              const has = t => T.some(x => x === t), rows = [...body.querySelectorAll('.need')], own = typeof NEED_COL !== 'undefined' && typeof NEED_ICON !== 'undefined';
+              const out = { hungry: has('▼ Hungry: tasks −15%'), rested: has('▲ Well rested: tasks +15%'), fit: has('▲ Fit: walking +5%, tiring −6%'),
+                order: T.findIndex(x => x.startsWith('▼ Hungry')) < T.findIndex(x => x.startsWith('▲ ')), wide: body.scrollWidth <= body.clientWidth + 1, own };
+              if (own) { const nc = k => rows[NEED_KEYS.indexOf(k)].style.getPropertyValue('--nc');
+                out.icons = body.querySelectorAll('.need svg path').length === NEED_KEYS.length; out.amber = nc('hunger') === NEED_AMBER && nc('energy') === NEED_COL.energy; }
+              else out.plain = !body.querySelector('.need svg') && !rows.some(r => r.style.getPropertyValue('--nc'));
+              Object.assign(N, keep); deviceShow('home'); return out; })()""")
+            print('  needs page:', nd)
+            check(all(nd.get(k) for k in ['hungry', 'rested', 'fit', 'order', 'wide']) and (nd['icons'] and nd['amber'] if nd['own'] else nd['plain']), f'Needs: icons and colours, short effect lines: {nd}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
             # event's tag, the drill, the bunk tidy) within its first half hour, on its deck
