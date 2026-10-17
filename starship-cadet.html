@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.20
+   STARSHIP CADET: CSV Wren                           build 0.35.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.20';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.21';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -8315,7 +8315,7 @@ function deviceLoad(s) {
     .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
-  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
+  return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
@@ -8389,6 +8389,7 @@ const DEV_REMINDED = new Set();                          // id@day keys already 
 let devTickMin = -1, devMorning = SHIP.time.day;
 function deviceTick() {
   if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
+  if (devLocked()) { SHIP.device.booted = false; if (DEV.open) deviceClose(); }
   const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
   if (typeof sleeping !== 'undefined' && sleeping) return;
   const R = SHIP.device.calendarRemind;
@@ -8447,8 +8448,15 @@ function deviceView(id) {                      // the app's VIEW, or a stand-in 
   try { const v = a.view({ t: shipNow(), wide: DEVICE_SKIN.wide() }) || {}; return { title: v.title || a.title, blocks: v.blocks || [] }; }
   catch (e) { DEV.errors.push(id + ': ' + String(e && e.message || e)); return { title: a.title, blocks: [{ kind: 'text', text: '(this app failed to draw)' }] }; }
 }
-function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home').sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home' && !(a.hidden && devTry(a.hidden))).sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+// the device before it's yours (0.35.21, Pillar 4): section 15's deviceLocked() (true on the arrival evening until Torres
+// hands it over, section 21's flag 'intro.device'); while locked nothing opens it, and deviceLockedTap() says why.
+// The first open after that is the first switch-on (the 'boot' screen, once; SHIP.device.booted, saved)
+const devTry = f => { try { return !!f(); } catch (e) { return false; } };
+const devLocked = () => { try { return typeof deviceLocked === 'function' && !!deviceLocked(); } catch (e) { return false; } };
 function deviceShow(id) {
+  if (!DEV.open && devLocked()) { try { if (typeof deviceLockedTap === 'function') deviceLockedTap(); } catch (e) { /* section 15's */ } return; }
+  if (!DEV.open && !SHIP.device.booted && devTry(() => SHIP.intro && SHIP.intro.on && !SHIP.intro.skipped)) { SHIP.device.booted = true; id = 'boot'; }
   if (!DEVICE_APPS.has(id)) id = 'home';
   DEV.app = id; delete DEV.notes[id];
   if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
@@ -8614,6 +8622,7 @@ const DEVICE_SKIN = (() => {
       let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
       btn.classList.toggle('low', low);
       let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
+      if (devLocked()) un = 0;                          // no mail badge on a device you haven't got yet
       if (badge) { badge.hidden = !un; badge.textContent = un; }
       led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
@@ -8729,6 +8738,47 @@ const device = {
 };
 
 // ---- the apps. Home: the time and what you're doing (the old Now section), then the grid. ----
+// the first switch-on (0.35.21): shown once, the first time it opens after Torres hands it over; not on the home grid
+deviceApp({ id: 'boot', title: 'Crew device', order: -1, hidden: () => true, view: () => {
+  const name = (SHIP.player && SHIP.player.name) || 'Cadet';
+  return { title: 'Crew device', blocks: [{ kind: 'text', text: 'CSV WREN CREW DEVICE', mark: 'big' }, { kind: 'text', text: 'Assigned to: ' + name + '.', mark: 'hot' },
+    { kind: 'text', text: 'Works department, Bunk 1, Deck 4.' }, { kind: 'text', text: 'Your day, your mail, the ship and its people, in one place. Settling in lists what to learn this week.' },
+    { kind: 'buttons', items: [{ label: 'Start', action: { app: 'home', do: 'open' } }] }] };
+} });
+// Settling in (0.35.21, Pillar 4): section 21's SETTLE list, each item ticked when you've done it (SHIP.intro.settle[id],
+// a ship minute), naming who can teach it; Go there points the arrow at its place, or at the teacher (where the Roster
+// says they are). "I know my way around" ends the welcome (introEnd, after a second tap). Hidden without section 21,
+// before any intro and once the list is all done (SHIP.intro.settle.all)
+let settleSure = false;
+const settleList = () => { try { return typeof SETTLE !== 'undefined' && Array.isArray(SETTLE) ? SETTLE : null; } catch (e) { return null; } };
+const settleDone = id => !!(SHIP.intro && SHIP.intro.settle && SHIP.intro.settle[id] !== undefined);
+function settleGoal(it) {                                // { deck, room, label } for an item, or null
+  if (it.place && it.place.deck && it.place.room) return { deck: it.place.deck, room: it.place.room, label: it.title + ': ' + it.place.room };
+  const p = it.teacher && apptPerson(it.teacher), w = p && rosterWhere(p);
+  return w && w.room ? { deck: w.deck, room: w.room, label: it.title + ': ' + p.name.split(' ')[0] } : null;
+}
+deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record', order: 5,
+  hidden: () => !settleList() || !SHIP.intro || !(SHIP.intro.on || SHIP.intro.skipped) || !!(SHIP.intro.settle && SHIP.intro.settle.all),
+  badge: () => null,
+  act(verb, arg) {
+    if (verb === 'go' && typeof setGoal === 'function') {
+      const it = (settleList() || []).find(x => x.id === arg), g = it && settleGoal(it); if (!g) return;
+      SHIP.player.track = null; setGoal(g); deviceNotify({ app: 'settle', text: 'Follow the marker: ' + g.label + '.', urgent: true }); delete DEV.notes.settle;
+    }
+    else if (verb === 'end') { if (!settleSure) settleSure = true; else { settleSure = false; if (typeof introEnd === 'function') introEnd(false); } }
+  },
+  view: () => {
+    const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
+    B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
+    const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', Deck ' + it.place.deck : ''),
+        mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
+    B.push({ kind: 'list', rows });
+    if (devTry(() => typeof introOn === 'function' && introOn()))
+      B.push({ kind: 'buttons', items: [{ label: settleSure ? 'Tap again to end the welcome' : 'I know my way around', action: { app: 'settle', do: 'end' } }] });
+    return { title: 'Settling in', blocks: B };
+  } });
+
 deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const B = [{ kind: 'text', text: clockText(), mark: 'big' }];
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
@@ -8741,6 +8791,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  const sl = settleList(), sa = DEVICE_APPS.get('settle');
+  if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');
   const pin = SHIP.device.memos.find(x => x.pinned);
   if (pin) say('▪ ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
   return { title: 'Home', blocks: B };

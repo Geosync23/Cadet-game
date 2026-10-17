@@ -10,6 +10,7 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
+#   the arrival (0.35.21): locked until handed over, the first switch-on, Settling in with Go there and the end button
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
 #   and a drag up from the bottom edge leave it shut; only the Device button opens it
@@ -302,6 +303,39 @@ def run(path):
             check(m1 == m2, f'opening again adds nothing (no leak): {m1} -> {m2}')
             ev = g.ev("__ev")
             check(ev == ['open', 'close', 'open', 'close', 'open', 'close', 'open', 'close'], f'deviceOn fires once per open and close: {ev}')
+            # the arrival (0.35.21): locked until it's handed over (section 15's deviceLocked, section 21's flag), the first
+            # switch-on once, Settling in (section 21's SETTLE) with Go there and "I know my way around" (introEnd).
+            # Stand-ins when the build has no sections 15/21 for this; with them, their real state is set and put back
+            g.ev("deviceClose()"); g.step(1)
+            ar = g.ev("""(() => { const out = {}, real = typeof SETTLE !== 'undefined' && typeof introOn === 'function' && typeof deviceLocked === 'function';
+              const keepIntro = SHIP.intro ? JSON.parse(JSON.stringify(SHIP.intro)) : undefined, keepBoot = SHIP.device.booted;
+              const lock = on => { if (real) { SHIP.intro.on = true; SHIP.intro.ended = false; if (typeof introFlagSet === 'function') introFlagSet('intro.device', on ? null : true); } else window.deviceLocked = () => on; };
+              if (!real) { SHIP.intro = { on: true, skipped: false, ended: false, settle: {} }; window.introOn = () => true; window.introEnd = () => { window.__ended = true; };
+                window.SETTLE = [{ id: 'washed', title: 'Washed and fed', teacher: 'tomas', place: { deck: 4, room: 'Port washroom' } }, { id: 'eat', title: 'Eat with the crew', teacher: 'brennan', place: { deck: 3, room: 'Mess hall' } }, { id: 'friend', title: 'Make a friend', teacher: 'pell', place: null }]; }
+              else { window.__ended = false; SHIP.intro.settle = {}; }
+              lock(true); mailSend({ from: 'Stores', subject: 'Locked test', body: '.' }); deviceRefresh();
+              document.getElementById('devBtn').click(); out.locked = [DEV.open, document.getElementById('devMail') ? document.getElementById('devMail').hidden : true];
+              devTickMin = -1; deviceTick(); out.bootReset = SHIP.device.booted === false;
+              lock(false); document.getElementById('devBtn').click(); out.boot = [DEV.open, DEV.app, document.getElementById('devBody').textContent.includes('Assigned to')];
+              deviceClose(); document.getElementById('devBtn').click(); out.second = DEV.app;
+              const L = SETTLE; SHIP.intro.settle = { [L[0].id]: 100 };
+              out.listed = deviceApps().some(a => a.id === 'settle'); deviceShow('settle'); const t = document.getElementById('devBody').textContent;
+              out.count = t.includes('1 of ' + L.length); out.done = t.includes('✓ ' + L[0].title);
+              const go = [...document.querySelectorAll('#devBody .row button')].find(b => b.textContent === 'Go there'); out.go = !!go; if (go) { go.click(); out.goal = !!IX_GOAL; clearGoal(); }
+              deviceShow('home'); out.home = document.getElementById('devBody').textContent.includes('Settling in: 1 of ' + L.length);
+              if (real) { const endF = introEnd; window.__endCalls = 0; }
+              deviceShow('settle'); const endB = () => [...document.querySelectorAll('#devBody .btns .act')].find(b => /way around|end the welcome/.test(b.textContent));
+              endB().click(); out.firstTap = /end the welcome/.test(endB().textContent); endB().click();
+              out.ended = real ? !!SHIP.intro.ended : !!window.__ended;
+              SHIP.intro.settle = { all: 1 }; out.hiddenWhenAll = !deviceApps().some(a => a.id === 'settle');
+              deviceShow('home');
+              if (real) { SHIP.intro = keepIntro; } else { SHIP.intro = keepIntro; for (const k of ['deviceLocked', 'introOn', 'introEnd', 'SETTLE', '__ended']) delete window[k]; }
+              SHIP.device.booted = keepBoot; SHIP.mail = SHIP.mail.filter(m => m.subject !== 'Locked test'); settleSure = false; return out; })()""")
+            print('  arrival:', ar)
+            check(ar.get('locked') == [False, True] and ar.get('bootReset') and ar.get('boot') == [True, 'boot', True] and ar.get('second') == 'home'
+                  and ar.get('listed') and ar.get('count') and ar.get('done') and ar.get('go') and ar.get('goal') and ar.get('home')
+                  and ar.get('firstTap') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
+            g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)
             g.ev("deviceClose()"); g.step(2)
