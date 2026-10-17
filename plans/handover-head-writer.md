@@ -29,6 +29,11 @@ claude/arrival) owns the tour code. 0.48.59 times follow design-doc (shift 08:00
 feed bank content/banks/news.lines (335 posts, kinds news.<source>, subject crew = speaker); player engineer 5
 (session_01SyRmwPxQEVKab6re9UgyrD, claude/player-needs) builds the feed and had my tips/warnings text by message. Writer 5
 archived; reviewers 2b gone, 1c (session_01YcSJkhhJ2MnCjsJs7QV8ud) checks key/token changes. Send hashes to the lead and build master 2.
+**PENDING at hand-over (16:35):** the user played 0.60.4 and prefers its Zeke tour lines. Restore
+content/lines/torres-zeke.lines to caecb7d, but swap its `// step: free` block for the walk.goodnight.1-2 block in HEAD
+(then bake, bump the build, DEV_NOTES row, lines_check, intro_check). Keep introBunk's "Bunk 1. This is you. This is where
+you sleep.", the shift-hours fixes (f6fb0c5) and the news bank (5417aeb). Head writer 3 was blocked by a permission
+check on the overwrite. Agree details with sim engineer 5, who is reordering the tour: bunk, the Chief, then dinner.
 **Rule: the writing follows the game** (no crew takes the ladder; nobody skips breakfast; days off from the roster).
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
