@@ -11501,7 +11501,7 @@ function galleyPlan(role, d) {
   const end = head[head.length - 1][1];
   return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 600 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
 }
-// Brennan's tasting table (a dinner tie with extra: 'tasting', Wednesdays 18:15): `batch` tastes (20) of two small
+// Brennan's tasting table (a dinner tie with extra: 'tasting', Wednesdays 18:15): two tastes for each taster coming (at least the tie's `batch`, 20) of two small
 // dishes, cooked from an hour before (the garden's produce first) and set out at the servery's end while it runs. The
 // vote is section 18's tally (one vote engine): tallyOf(id, d) says which two dishes and how the votes stand, and your
 // token is its tallyVote. Without it, the next two of the tie's tally choices (two a week) and no vote.
@@ -11517,7 +11517,7 @@ function galleyTasting(d) {
       const s = planDay(p, d).find(s => s.tag && (s.tag === tag || s.tag.startsWith(tag + '-')));
       if (s) voters.push({ id: p.id, at: Math.floor(s.from) });
     }
-    o = { id: tt.id, from: tt.from, to: tt.to, tastes: Math.round(galleyEvNum(T.batch, 20)), voters };
+    o = { id: tt.id, from: tt.from, to: tt.to, tastes: Math.max(Math.round(galleyEvNum(T.batch, 20)), 2 * voters.length), voters };   // two each for everyone coming (the lead's call), at least the tie's batch
     GALLEY_TASTE.set(d, o); for (const k of GALLEY_TASTE.keys()) if (k < d - 10 || k > d + 10) GALLEY_TASTE.delete(k);
   }
   const r = typeof tallyOf === 'function' ? tallyOf(o.id, d) : null, label = c => String(c).replace(/-/g, ' ');

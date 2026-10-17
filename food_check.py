@@ -385,7 +385,7 @@ with sync_playwright() as pw:
     print(f"   18:20: {ts['text'][-110:]} | plates {ts['plates']}, left {ts['left']} | 19:40 gone {ts['gone']}, plates {ts['plates3']}")
     r = ts['rep']
     if ts['choices'] != [c.replace('-', ' ') for c in ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'][(2 * ((ts['wed'] - 1) // 7)) % 8:][:2]]: fail(f"tasting choices: {ts['choices']}")
-    if r['tastes'] != 20 or r['tasted'] != min(20, 2 * ts['voters']) or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
+    if r['tastes'] != max(20, 2 * ts['voters']) or r['tasted'] != 2 * ts['voters'] or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
     if 'tasting table' not in ts['note'] or ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or ts['winner0'] is not None: fail(f"tasting table: {ts}")
     R = ts.get('real')
     if R:
