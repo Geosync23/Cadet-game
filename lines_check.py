@@ -60,6 +60,10 @@ BANNED = [
 BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmarried\b', r'\bmy heart\b',
                  r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
                  r'\bwedding\b', r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al)\b']
+# aimed at you: banned even in lines about crew couples
+BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
+                 r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
+CREW_ABOUT_CREW = ('about', 'rumour', 'smalltalk', 'news')    # line kinds about other crew, where a couple may be mentioned
 US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': 'centre', 'realize': 'realise',
       'organize': 'organise', 'gray': 'grey', 'mom': 'mum', 'honor': 'honour', 'neighbor': 'neighbour', 'theater': 'theatre',
       'apologize': 'apologise', 'recognize': 'recognise', 'traveled': 'travelled', 'cozy': 'cosy', 'defense': 'defence',
@@ -183,6 +187,13 @@ def main(argv):
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
                 allx.append((f'meeting {mid}', 'moment', {'text': x['text'], 'id': mid}, None, 'meet'))
 
+    allowed = set()                                    # line ids the head writer has approved past the romance check
+    al = os.path.join(cg.CONTENT, 'allow.list')
+    if os.path.exists(al):
+        for l in open(al, encoding='utf-8'):
+            l = l.split('#')[0].strip()
+            if l:
+                allowed.add(l.split()[0])
     vocab = set()
     for x in allx:
         vocab.update(re.findall(r"\b[a-z][a-z']+\b", x[2]['text']))
@@ -227,10 +238,13 @@ def main(argv):
             elif n > lim:
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
-        for b in BANNED + (BANNED_PLAYER if src != 'convo' else []):
+        bonds = ' '.join(str(x) for x in (e.get('bond') if isinstance(e.get('bond'), list) else [e.get('bond', '')]))
+        about_crew = src == 'convo' or kind in CREW_ABOUT_CREW or 'couple' in bonds or 'partner' in bonds
+        romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in BANNED + romance:
             m = re.search(b, low)
             if m:
-                errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player)' if b in BANNED_PLAYER else ''))
+                errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))
         for us, uk in US.items():
             if re.search(r'\b' + us + r's?\b', low):
                 warns.append(f'{tag}: American spelling "{us}" (British: "{uk}")')
