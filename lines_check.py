@@ -131,7 +131,13 @@ def main(argv):
     m = re.search(r'^const REP_TAGS = \[(.*?)\];', html, re.M | re.S)
     VALUES['you'] = {t.replace(' ', '_') for t in re.findall(r"\['([^']+)'", m.group(1))} if m else None
     VALUES['trait'] = {t.replace(' ', '_') for p in people.values() for t in p.get('traits', [])} or None
-    for k in ('you', 'trait'):
+    # trad: and came: values: section 18's traditions (SHIP_TRADITIONS) and the baked ones, plus today / any
+    m = re.search(r'^const SHIP_TRADITIONS = \[\n(.*?)^\];', html, re.M | re.S)
+    trads = set(re.findall(r"^  \{ id: '([^']+)'", m.group(1), re.M)) if m else set()
+    trads |= {t['id'] for t in out['TRADITIONS'] if t.get('id')}
+    VALUES['trad'] = (trads | {'today'}) if trads else None
+    VALUES['came'] = (trads | {'any'}) if trads else None
+    for k in ('you', 'trait', 'trad', 'came'):
         if not VALUES[k]:
             del VALUES[k]                                  # an older build without them: not checked
     names = set()
