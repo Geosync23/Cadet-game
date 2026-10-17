@@ -247,7 +247,11 @@ with sync_playwright() as pw:
     tp, b, seen, e, pk = run_activity(g, 'Grab and go'); peak = max(peak, pk); body_check('grab', 'hunger', 25, b, e, seen, None)
     tp, b, seen, e, pk = run_activity(g, 'Treadmills'); peak = max(peak, pk); body_check('treadmill', 'fitness', 30, b, e, seen, 'run')
     tp, b, seen, e, pk = run_activity(g, 'Weights'); peak = max(peak, pk); body_check('weights', 'fitness', 30, b, e, seen, 'lift')
+    hb = g.ev("(() => { if (typeof homeBooth === 'function') return false; window.__hb = 0; window.homeBooth = () => { window.__hb++; return true; }; return true; })()")   # social B2's call picker (0.28.30)
     tp, b, seen, e, pk = run_activity(g, 'Booth 1'); peak = max(peak, pk); body_check('booth', 'social', 40, b, e, seen, ('call', 'sit:call'))
+    if hb:
+        hbn = g.ev("window.__hb"); g.ev("delete window.homeBooth"); print('  homeBooth calls at the booth:', hbn)
+        check(hbn == 1, f'sitting at a booth should open the call picker once: {hbn}')
     check(seen and seen[0][1].startswith('3-callhome'), 'booth: should use a callhome place')
     g.ev("SHIP.player.needs.bathroom = 30")              # a public toilet on Deck 3 (0.28.19)
     tp, b, seen, e, pk = run_activity(g, 'Toilet', near=[20, 20]); peak = max(peak, pk)
@@ -303,6 +307,8 @@ with sync_playwright() as pw:
     check(waited >= (1 if real[1] else 3), f'queue: should wait at the back of the line for the turn ({waited} checks)')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'queue: then sit at a mess seat to eat')
     body_check('queue and eat', 'hunger', 55, b, e, seen, None)
+    qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
+    check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
         joined = g.ev("GALLEY_JOINED.has('player')"); print('  still in the galley\'s line after eating:', joined)
         check(joined is False, 'queue: takePortion should clear the join')
