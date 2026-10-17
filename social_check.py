@@ -571,7 +571,7 @@ with sync_playwright() as pw:
       o.pairs = Object.keys(SHIP.social.pairs); o.pairsWant = [(n - 1) + '-' + n];
       socLoad(JSON.parse(keep)); return o; })()""")
     print("Reviewer 1's save notes:", rv1)
-    if rv1['known'] != [p for p in rv1['known'] if p != 'An edited line.'] or len(rv1['known']) != 2 or rv1['cap'] != [20, True, False] or rv1['again'] != [True, False] or rv1['pairs'] != rv1['pairsWant']: fail(f'known by hash, the news cap, re-born news or the pairs remap wrong: {rv1}')
+    if rv1['known'] != [p for p in rv1['known'] if p != 'An edited line.'] or len(rv1['known']) != 2 or rv1['cap'] != [16, True, False] or rv1['again'] != [True, False] or rv1['pairs'] != rv1['pairsWant']: fail(f'known by hash, the news cap, re-born news or the pairs remap wrong: {rv1}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False

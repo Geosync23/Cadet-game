@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.79
+   STARSHIP CADET: CSV Wren                           build 0.36.80
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.79';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.80';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -26465,7 +26465,7 @@ function repView() {                                     // the Record's Reputat
 }
 
 // ---- news ----
-const NEWS_MAX = 20;                                   // news going round at most (0.36.78: a bound for the save)
+const NEWS_MAX = 16;                                   // news going round at most (0.36.78: a bound for the save)
 function newsAdd({ id, about = null, lines, weight = .6, seed = [], born = Math.floor(shipNow()), kind = 'gossip', event = null, life = 4 }) {
   socInit(); if (!id || !Array.isArray(lines) || !lines.length || NEWS.some(x => x.id === id)) return null;
   // seed: crew ids, or 'dept:<dept>' and 'all' (the events engineer's tokens)
