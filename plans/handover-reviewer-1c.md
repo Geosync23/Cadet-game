@@ -14,9 +14,10 @@
 | Roster 1348dfd (0.16.21) | roster-1348dfd.md | PASS: Kovac's two lines reworded |
 | Player 9c18045 (0.28.38-0.28.40) | player-9c18045.md | PASS: lows fixed, the real-line and someone-in-the-way cases pass |
 | Social A a033f17..752d964 (0.36.79-0.36.81) + c345a96 (0.36.82) | social-752d964.md | PASS: the truncated-aff low fixed in 0.36.82 |
+| Arrival claude/arrival-0603 046a019 (0.42.21b, for 0.60.3) | arrival-0603-046a019.md | PASS: 27/27 core tour lines in order; reviewer 1's three fixes. Test on arrival-0603 + sim + content 910e88e baked with content_gen (archive content/ + content_gen.py, run it on the merged html) |
 
 **Open loose ends:**
-- The arrival fixes went to onboarding engineer 2 (session_0163dcLt17oTCdR8po9HRo2p). Reviewer 1b also reviews arrival (4f6d0b2..54d7911); they've had my note.
+- Arrival is mine now (the lead's split); onboarding engineer 2 is session_0163dcLt17oTCdR8po9HRo2p. Reviewer 1's remaining arrival lows (health kind, missed health check, seek-ask Mail fallback, standing at Dinner with Torres, double health booking) will come later on claude/arrival (0.42.23+).
 - **Galley 40166d6 + sim bfcd864 fail player_check's job loop (5) and food_check (4) together**, with or without the player branch; each alone is OK. Reported to the lead, the build master, galley engineer 3 and sim engineer 4.
 - **Combine check for 0.60.3** (combine-0603-jobloop-food.md, merge: galley 7282327 + sim 236810f + f16a110 cherry-picked + player 9c18045): the job loop and food_check's old 4 are fixed. Two new: player_check's "squeeze past" (sim 0.26.36 unblocks shared tiles always, so you walk through the chef; sent to sim engineer 4), and food_check's "galleyJoin / galleyTurn" (a test assumption since sim 0.26.34; sent to galley engineer 3). **Rechecked with sim 0.26.37 (e4d6ace):** player_check OK (squeeze past back). food_check's galleyJoin case passes with a0e5b2f's check; that check needs galley 0.29.35 (7464b97) code, so the two go together in 0.60.3.
 - **Next:** take over reviewer 1b's queue (sim, galley, social A/B, arrival) when they say plans/handover-reviewer-1.md on claude/reviews is final.
