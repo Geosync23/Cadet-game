@@ -14620,9 +14620,11 @@ const VOICE_HABIT = { stargazer: ['star', 'the observatory at night'], music: ['
   'calls-home': ['card', 'calls home'], shopper: ['made', 'browsing the crew store'], runner: ['sweet', 'a morning run'], 'gym-regular': ['sweet', 'the gym'], 'window-seat': ['star', 'a seat by the window'] };
 // struggle themes for generated crew (social-deep-plan Part 1), guessed from traits and habits until the generator
 // writes `thread`; story crew with an arc keep their own id
-const VOICE_THEME_BY = [['homesick', 'homesick'], ['calls-home', 'homesick'], ['nervous', 'exams'], ['meticulous', 'notEnough'], ['exacting', 'notEnough'], ['restless', 'stuck'],
-  ['workaholic', 'burnout'], ['shy', 'lonely'], ['quiet', 'lonely'], ['musician', 'talent'], ['competitive', 'rivalry'], ['private', 'starting'], ['stubborn', 'rivalry']];
-const VOICE_THEMES = ['homesick', 'exams', 'family', 'stuck', 'notEnough', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry', 'starting'];
+// Frozen spellings (with the crew designer's generator, 0.16.12): the twelve themes below, and 'arc:<arcId>' for story
+// crew. The writers' theme files are named after them (content/themes/<theme>.arc)
+const VOICE_THEME_BY = [['homesick', 'homesick'], ['calls-home', 'homesick'], ['nervous', 'exams'], ['meticulous', 'notgood'], ['exacting', 'notgood'], ['restless', 'stuck'],
+  ['workaholic', 'burnout'], ['shy', 'lonely'], ['quiet', 'lonely'], ['musician', 'talent'], ['competitive', 'rivalry'], ['private', 'startover'], ['stubborn', 'rivalry']];
+const VOICE_THEMES = ['homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry', 'startover'];
 const OPENNESS = { guarded: { pts: .8, moment: 1.5 }, normal: { pts: 1, moment: 1 }, open: { pts: 1.2, moment: .75 } };
 const VOICE_CARD = new Map();
 let VOICE_SRC = null;                                     // the writers' data the cached cards were made from
@@ -14639,7 +14641,7 @@ function voiceOf(id) {
   const words = {}; for (const k of VOICE_TOKENS.concat('nick')) words[k] = (W.words && W.words[k]) || (base.words && base.words[k]) || fb.words[k];
   const tags = habits.map(h => VOICE_HABIT[h]).filter(Boolean);
   const pickV = (k, guess) => W[k] !== undefined ? W[k] : p && p[k] !== undefined ? p[k] : guess;
-  const arc = (typeof STORY_ARCS !== 'undefined' && STORY_ARCS[id]) || (p && p.story) ? id : null,   // story crew: their own arc (written or to come)
+  const arc = (typeof STORY_ARCS !== 'undefined' && STORY_ARCS[id]) || (p && p.story) ? 'arc:' + id : null,   // story crew: their own arc (written or to come)
     theme = (VOICE_THEME_BY.find(([x]) => traits.includes(x) || habits.includes(x)) || [])[1];
   const card = { id, tpl, words,
     needs: pickV('needs', base.needs || fb.needs),
