@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.32
+   STARSHIP CADET: CSV Wren                           build 0.28.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.32';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.33';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9904,6 +9904,13 @@ const NEED_ICON = {                                       // 24-unit stroke icon
   hygiene: 'M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z', fitness: 'M3 10v4M6.5 7v10M17.5 7v10M21 10v4M6.5 12h11',
   social: 'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M16 5.5a2.5 2.5 0 0 1 0 5M17 15c2.5.3 4 2.2 4 5', bathroom: 'M6 21V3h12v18M4 21h16M14 12h1' };
 const RISES = {};                                         // need -> { v, at }: the "+N" showing beside its icon
+// folding it away (0.28.33, the user's "you should be able to collapse the needs window"): the little chevron at its end
+// folds the strip (and its names panel) to one heart icon, amber while any need is low; a tap on that opens it again.
+// Saved as save.player.stripFold.
+const STRIP_HEART = 'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z';
+SHIP.player.stripFold = !!(SAVED && SAVED.player && SAVED.player.stripFold === true);
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).stripFold = !!SHIP.player.stripFold; });
+function stripFold(on) { SHIP.player.stripFold = !!on; const el = needStrip(); el.classList.toggle('fold', !!on); if (on) el.classList.remove('open'); el.setAttribute('aria-label', on ? 'Your needs (folded): tap to show' : 'Your needs: tap for names and numbers'); STRIP_SIG = ''; }
 let STRIP_SIG = '';
 function needStrip() {
   let el = document.getElementById('needStrip'); if (el) return el;
@@ -9917,12 +9924,18 @@ function needStrip() {
     + '#needStrip span,#needStrip u{display:none;text-decoration:none}'
     + '#needStrip.open{flex-direction:column;gap:5px}#needStrip.open .ns{flex-direction:row;width:auto;gap:7px}'
     + '#needStrip.open i{width:70px;margin:0}#needStrip.open span{display:block;width:62px;font-size:12px;color:var(--ink)}'
-    + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:100%;margin-left:6px;top:0}';
+    + '#needStrip.open u{display:block;width:22px;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}#needStrip.open em{left:100%;margin-left:6px;top:0}'
+    + '#needStrip .nsFold,#needStrip .nsMini{display:flex;align-items:center;justify-content:center;width:18px;color:var(--muted)}#needStrip .nsMini{display:none;width:22px}'
+    + '#needStrip .nsFold{appearance:none;border:0;background:none;padding:0;min-height:0;font-size:15px;line-height:1;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none}'
+    + '#needStrip.open .nsFold{align-self:flex-end}#needStrip.fold{padding:6px 8px}#needStrip.fold .ns,#needStrip.fold .nsFold{display:none}#needStrip.fold .nsMini{display:flex}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'needStrip'; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Your needs: tap for names and numbers');
-  el.innerHTML = NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('');
-  el.onclick = e => { e.stopPropagation(); el.classList.toggle('open'); STRIP_SIG = ''; };
+  el.innerHTML = NEED_KEYS.map(k => '<div class="ns" data-k="' + k + '" style="color:' + NEED_COL[k] + '"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON[k] + '"/></svg><span>' + NEED_LABEL[k] + '</span><i><b></b></i><u></u><em></em></div>').join('')
+    + '<button class="nsFold" aria-label="Fold your needs away">‹</button><div class="nsMini"><svg viewBox="0 0 24 24"><path d="' + STRIP_HEART + '"/></svg></div>';
+  el.onclick = e => { e.stopPropagation(); if (SHIP.player.stripFold) stripFold(false); else { el.classList.toggle('open'); STRIP_SIG = ''; } };
+  el.querySelector('.nsFold').onclick = e => { e.stopPropagation(); stripFold(true); };
   document.body.appendChild(el);
+  if (SHIP.player.stripFold) el.classList.add('fold');
   return el;
 }
 function stripRise(k, v) {                               // a rise beside its icon; a new one while it shows adds to it
@@ -9935,7 +9948,9 @@ function stripTick(now, still) {
   const sig = NEED_KEYS.map(k => Math.round(n[k])).join(',') + '|' + (low.length ? g.toFixed(2) : '');
   if (sig !== STRIP_SIG) {
     STRIP_SIG = sig;
+    const mini = el.querySelector('.nsMini'); mini.style.color = low.length ? NEED_AMBER : 'var(--teal)'; mini.style.opacity = low.length ? g.toFixed(2) : '';
     for (const d of el.children) {
+      if (!d.dataset.k) continue;
       const k = d.dataset.k, v = Math.max(0, Math.min(100, n[k])), lo = v < NEED_LOW;
       d.style.color = lo ? NEED_AMBER : NEED_COL[k]; d.style.opacity = lo ? g.toFixed(2) : '';
       d.children[2].children[0].style.transform = 'scaleX(' + (v / 100).toFixed(3) + ')'; d.children[3].textContent = Math.round(v);
@@ -9943,6 +9958,7 @@ function stripTick(now, still) {
     }
   }
   for (const d of el.children) {
+    if (!d.dataset.k) continue;
     const k = d.dataset.k, r = RISES[k], em = d.children[4];
     if (!r) { if (em.style.opacity !== '0' && em.style.opacity) em.style.opacity = '0'; continue; }
     const f = (now - r.at) / (RISE_SECS * 1000);
