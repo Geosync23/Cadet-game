@@ -8755,6 +8755,16 @@ function shipDay(d) {
     for (const e of Array.isArray(add) ? add : []) if (e && e.placeId && !e.alts && e.to > e.from) {
       if (!occ.res.has(e.placeId)) occ.res.set(e.placeId, []);
       occ.res.get(e.placeId).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
+      // the arrival dinner (section 21's chief step, seats: you, the escort, the Chief): with the Chief's seat, yours and the
+      // escort's are held too, from the table step (Torres sits you down first) to the Chief's end, so nobody else plans to
+      // sit there ('intro:player' is nobody's) and introLay sits the escort in his (0.26.39, build master 2's day-0 find)
+      const st = e.tag === 'intro-chief' && typeof introStepById === 'function' ? introStepById('chief') : null, tb = st && introStepById('table');
+      if (st && st.seats) for (const [who, id] of Object.entries(st.seats)) if (id !== e.placeId && S.byId.has(id)) {
+        const owner = who === 'you' ? 'player' : typeof INTRO_ESCORT !== 'undefined' && who === INTRO_ESCORT ? (SHIP.intro && SHIP.intro.escort) || who : who;
+        const a = Math.max(0, Math.min(e.from, tb && tb.at != null ? tb.at - INTRO_EARLY : e.from));
+        if (!occ.res.has(id)) occ.res.set(id, []);
+        occ.res.get(id).push([(d - 1) * 1440 + a, (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + owner]);
+      }
     }
   }
   // a meal tradition's diners are planned next (after any hosts), and then its held seats are let go (their own bookings
@@ -8805,14 +8815,22 @@ function introPlan(p, d) {
 function introLay(p, d, occ, segs) {
   let add = null;
   try { add = typeof introPlan === 'function' ? introPlan(p, d) : null; } catch (e) { add = null; }
-  if (!Array.isArray(add) || !add.length) return segs;
   const B = (d - 1) * 1440, byId = schedData().byId;
+  // a seat shipDay held for you that none of your beats sits you in (the escort's at the arrival dinner): sit there for
+  // the whole hold, and a beat of yours that overlaps it takes that seat, not a stand-in (0.26.39)
+  const mine = [];
+  if (occ.res) for (const [id, rs] of occ.res) for (const [x, y, ev] of rs) if (ev === 'intro:' + p.id && y > B && x < B + 1440) mine.push([id, x, y]);
+  const named = Array.isArray(add) ? add : (add = []);
+  for (const [id, x, y] of mine) if (!named.some(e => e && e.placeId === id && !e.alts)) { const pl = byId.get(id); if (pl) named.unshift({ from: x - B, to: y - B, deck: pl.deck, placeId: id, alts: null, tag: 'intro-seat' }); }
+  if (!add.length) return segs;
   let out = segs.slice();
   for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
     const a = B + Math.max(0, e.from), b = B + Math.min(1440, e.to), cut = [];
     const free = id => !(occ.get(id) || []).some(([x, y]) => x < b && a < y)   // never a place someone already has then (Calder and Torres at Monday's briefing),
       && !(occ.res && (occ.res.get(id) || []).some(([x, y, ev]) => x < b && a < y && ev !== 'intro:' + p.id));   // nor one held for someone else (Calder's named seat) or an event (reviewer 1, 0.26.37)
-    const pid = e.alts && e.alts.length ? e.alts.find(free) || null : e.placeId, pl = pid ? byId.get(pid) : null;   // none free: there, standing
+    const near = (u, v) => { const q = byId.get(u), r = byId.get(v); return !!q && !!r && q.deck === r.deck && Math.hypot(q.at[0] - r.at[0], q.at[1] - r.at[1]) <= 2.5; };
+    const held = e.alts && e.alts.length && mine.find(([id, x, y]) => x < b && a < y && near(e.alts[0], id));   // your held seat, if it's then and where this beat sits you anyway (0.26.39)
+    const pid = held ? held[0] : e.alts && e.alts.length ? e.alts.find(free) || null : e.placeId, pl = pid ? byId.get(pid) : null;   // none free: there, standing
     for (const x of out) {
       if (x.to <= a || x.from >= b) { cut.push(x); continue; }
       if (x.from < a) cut.push({ ...x, to: a });
@@ -8830,7 +8848,7 @@ function introLay(p, d, occ, segs) {
       next.from = b + SCHED_COMMUTE; cut.push({ from: b, to: b + SCHED_COMMUTE, act: 'commute', deck: next.deck, type: 'lift', placeId: null, fromDeck: seg.deck });
     }
     cut.push(seg); cut.sort((x, y) => x.from - y.from); out = cut;
-    if (pl) { if (!occ.has(pl.id)) occ.set(pl.id, []); occ.get(pl.id).push([a, b, p.id]); if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([a, b, pl.id]); }
+    if (pl && e.tag !== 'intro-seat') { if (!occ.has(pl.id)) occ.set(pl.id, []); occ.get(pl.id).push([a, b, p.id]); if (occ.who) (occ.who.get(p.id) || occ.who.set(p.id, []).get(p.id)).push([a, b, pl.id]); }
   }
   return out;
 }
@@ -30838,7 +30856,11 @@ function seatsBeside(placeId, n = 2, types = ['mess-seat', 'lounge-seat', 'bench
   const at = placeId && PLACE_OF.get(placeId); if (!at) return [];
   const xy = q => q.xy || [q.at[0] + .5, q.at[1] + .5], [x, z] = xy(at);
   const busy = new Set([placeId, PLAYER_PLACE].concat(DECK_CREW.map(a => a.spot && a.spot.id)));
-  return (deckDef.places || []).filter(q => types.includes(q.type) && !busy.has(q.id) && !BUSY.has(q.id))
+  // nor a seat shipDay holds for the arrival dinner now ('intro:<id>': yours, Torres's, the Chief's), even while it's empty
+  // because Torres is still showing you round (reviewer 1c's paced tour, 0.26.39)
+  const now = shipNow(), res = typeof shipDay === 'function' ? shipDay(Math.floor(now / 1440) + 1).occ.res : null;
+  const held = id => !!res && (res.get(id) || []).some(([x, y, ev]) => String(ev).startsWith('intro:') && x <= now && now < y);
+  return (deckDef.places || []).filter(q => types.includes(q.type) && !busy.has(q.id) && !BUSY.has(q.id) && !held(q.id))
     .map(q => [q.id, Math.hypot(xy(q)[0] - x, xy(q)[1] - z)]).sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : 1)).slice(0, n).map(e => e[0]);
 }
 // where the escort heads, as a tile on this deck: `to` is a place id, a [c, r] tile, { deck, tile } or { deck, room }
