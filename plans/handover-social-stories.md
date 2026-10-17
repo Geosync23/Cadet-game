@@ -4,19 +4,18 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
-**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 08:25 UTC at 0.39.16 (05dd4a1). Built since the B8
-calls home (0.39.7-0.39.11, passed by reviewer 1b): 0.39.12 arc_check.py + momentCtx (a beat's when sees the tradition
-on now and the person's deck) + momentWantsVisit; 0.39.13 theme needs via socialFill; 0.39.14 bonds with someone not
-aboard frozen as `gone`, bondOf(id,'missed'); 0.39.15 rivalry sparring partners, arc_check modes (arcs | themes: both OK
-in 70 days on a dialogue+content merge); 0.39.16 farewellCrew(leaver, d). Reviewer 1b has 0.39.12-0.39.16 queued.
-Waiting on: social A (session_012pK2XVi5UhqEd28fakYk68) for the visit-picker line (momentWantsVisit) and the rivals
-tuning (118 rival bonds by day 140 on the combined build, theirs); sim engineer 3 (session_01517opwS4UAxYZKNwJytaEK) to
-plan farewellCrew to the shuttle bay 14:30-15:00 on leave days; dialogue engineer 2 (session_01S26bs4oMahyGJkuVaCKQGT)
-for pair:best/mentor, goodbye conversations preferred when near you, {missed}; head writer 3
-(session_01FopKMT2ZKxuWcNDcmF7565) for the goodbye conversations and Tomas 7 (where: calm, content 0.48.42: rerun
-arc_check then). The split-couple thread waits until a couple can leave (the lead). Lead session_01KPJMYjXAPkNUcrQ8VRkhLE.
-Test scaffolding: a scratch merge of this branch + claude/dialogue + claude/content (content_gen.py) for arc_check; the
-combined build (claude/ship-integration) with this 20c swapped in for rotation days. Refresh before handing over.**
+**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 09:50 UTC at 0.39.20 (0d02c21). Reviewer 1b has passed
+everything to 0.39.20 (all fixes done). Built: B8 calls home (0.39.7-0.39.11); arc_check.py + momentCtx/momentWantsVisit
+(0.39.12); theme needs via socialFill (0.39.13); bonds with someone not aboard frozen as `gone`, bondOf 'missed'
+(0.39.14); rivalry sparring partners, arc_check modes arcs|themes (0.39.15); farewellCrew (0.39.16); threads: VOICE only
+for arc:, the roster for themes (0.39.17, the lead); affWeek ceiling (0.39.18, 600 since 0.39.20: never binds, peak 585
+pairs by day 140); read-only moment queries via storyPeek (0.39.19). arc_check on dialogue+content+roster 0.16.16: arcs
+OK (10 story incl. Kovac, 4 home), themes OK (all 12). Hooks in elsewhere: momentWantsVisit (social A 0.36.68),
+pair:best/mentor + goodbye preference + {missed} (dialogue 0.43.27), goodbye conversations and missed lines (writer 5,
+claude/writer-commons, merged into content by head writer 3). Waiting on: sim engineer 4 (session_01EJUGywZv9BpcUezjXES9AC)
+to plan farewellCrew to the shuttle bay 14:30-15:00 on leave days (then check it against social A's Sunday farewells).
+Budget: the social save is ~27.9 KB at day 140 with a player (30 KB budget): watch anything that grows. Lead
+session_01KPJMYjXAPkNUcrQ8VRkhLE; reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx. Refresh before handing over.**
 
 ## Next job: B8, calls home (approved by the lead, 2026-10-17)
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
