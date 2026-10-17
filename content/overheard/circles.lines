@@ -2,7 +2,7 @@
 // Writer 3, batch 2. The ship's little circles (facts.md 5), by speaker: who: is A, with: is B (dialogue 0.43.8).
 // The knitting circle, the ladder club, the Halcyon twins, the fish keepers, the rainy-places club, the four
 // lost-property boxes, the coffee machine fixers, the star journals, the herb growers, the headphones, the Kesh
-// grandmothers, the Valo post bag, the playlists, the mystery swappers, the old Wren families, the telescopes, the
+// grandmothers, the Valo post bag (the ladder club keeps to "exercise"; the lift line waits for beat:kovac.2), the playlists, the mystery swappers, the old Wren families, the telescopes, the
 // tiny portraits, the breakfast jokers and the rest-day bakers. quirks.lines keeps the habit-based ones.
 
 == overheard
@@ -30,7 +30,7 @@ A: Oh. You're on the ladder too.
 B: For the exercise.
 A: Yes. The exercise. Me too.   #funny
 
-? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi
+? pair:any+any who:kovac-zainab|cruz-tove|keane-davi with:kovac-zainab|cruz-tove|keane-davi beat:kovac.2
 A: The lift's working again, you know.
 B: I know.
 A: After you, then.
