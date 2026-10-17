@@ -13,7 +13,7 @@
 - {hi}, {nick}. Board's busy this morning. Grab one before they're gone.
 - {hi}, {nick}. Kettle's on in the tea corner, if you're quick.
 ? tier>=acquaintance time:afternoon
-- {hi}, {nick}. Nearly half four. Finish what you started, then we're done.
+- {hi}, {nick}. Nearly five. Finish what you started, then we're done.
 ? tier>=acquaintance time:evening
 - {hi}, {nick}. Shift's over. Go and eat something.
 ? tier>=acquaintance act:work
