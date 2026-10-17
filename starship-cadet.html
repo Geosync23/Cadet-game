@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.24
+   STARSHIP CADET: CSV Wren                           build 0.34.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.24';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.25';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13248,7 +13248,7 @@ const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
-  title: 'Ion storm', days: 6, earliest: 8, need: ['calder'],    // switched on (0.34.12): it starts in play, day 10 in a new game   // need: on shift on the warning day (Calder's briefing)
+  title: 'Ion storm', days: 6, earliest: 10, spread: 1, need: ['calder'],    // switched on (0.34.12): day 10 in a new game (a Wednesday), whoever's days off move   // need: on shift on the warning day (Calder's briefing)
   phases: [{ id: 'warning', at: [0, 360] }, { id: 'onset', at: [1, 840] }, { id: 'escalation', at: [2, 360] },
     { id: 'resolution', at: [3, 600], clears: true }, { id: 'afterglow', at: [3, 1320], clears: true }],
   scores: { resolution: { calls: e => stormCallBacklog(e) } },   // threads section 18 scores itself, as that phase begins
@@ -13574,7 +13574,7 @@ function eventDueDay() {
   if (!id) return null;
   const def = SHIP_EVENTS[id], last = SHIP.eventLog[SHIP.eventLog.length - 1];
   const from = Math.max(def.earliest || 1, last ? last.endDay + (def.gap || 7) : 1);
-  let day = from + Math.floor(3 * schedU(4242, from, EVENT_ORDER.indexOf(id)));
+  let day = from + Math.floor((def.spread != null ? def.spread : 3) * schedU(4242, from, EVENT_ORDER.indexOf(id)));   // spread: how many days it may wander (default 3)
   const need = (def.need || []).map(n => ROSTER.find(p => p.id === n)).filter(Boolean);   // on shift on the warning day
   for (let k = 0; k < 7 && !need.every(p => isWorkDay(p, day)); k++) day++;
   return { id, day };

@@ -218,7 +218,7 @@ OCC = r"""(() => {
   while (DIALOGUE && n++ < 20) { const v = dialogueView(); seen.push(v.choices ? '[choice]' : v.who + ': ' + v.text); dialogueStep(v.choices ? 2 : undefined); }
   R.lines = seen; tick(16 * 1440 + 662, 16 * 1440 + 690);
   R.after = SHIP.occasions.map(r => r.key + ' ' + r.status);
-  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); R.askOff = !!occasionAsk('progressTalk', 21 * 1440 + 840);   // day 22 is a Monday: Calder's off
+  R.ask = !!occasionAsk('progressTalk', 17 * 1440 + 840); const cOff = [19, 20, 21, 22, 23, 24, 25].find(d => !isWorkDay(schedPeople().find(p => p.id === 'calder'), d)); R.askOff = !!occasionAsk('progressTalk', (cOff - 1) * 1440 + 840);   // on a day Calder's off (the roster's days off)
   skipTo(18 * 1440 + 900); R.table = SHIP.occasions.map(r => r.key + ' ' + hhmm(r.at % 1440) + ' ' + r.status);
   R.batch = eventMod('galley', 'batch', 19 * 1440 + 900); R.noBatch = eventMod('galley', 'batch', 18 * 1440 + 900);
   skipTo(20 * 1440 + 60); R.end = SHIP.occasions.map(r => r.key + ' ' + r.status); R.mails = mails; R.traces = SHIP.traces.slice();
