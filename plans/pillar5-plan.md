@@ -6,7 +6,7 @@ Read with `design-doc.md` ("The clockwork", "The player", "Works progression", "
 
 A plain-language version for the user is `plans/pillar5-plan.html`.
 
-**Added 2026-10-17 (the Pillar 5 designer): Part 6, deductive repair puzzles ("head-scratchers").** The user: keep the whole plan and add about 30-50% more progression with deduction puzzles tied to some repairs. Part 6 adds a track beside the ladder; nothing in Parts 1-5 is removed or shrunk.
+**Added 2026-10-17 (the Pillar 5 designer): Part 6, deductive repair puzzles ("head-scratchers").** The user: keep the whole plan, and add deduction puzzles to some repairs, **starting about 30-50% of the way into the progression** (the early job has none). They begin about a third of the way in (Day 13 of the Day 1 to about Day 42 arc) and grow from there. Part 6 adds a track beside the ladder, inside the same arc; nothing in Parts 1-5 is removed or shrunk.
 
 ---
 
@@ -31,7 +31,7 @@ Today the Works job is one verb: **fetch a part and replace it** (or hold to wor
 | 9 | **Tracing connected faults** (Tier 2) | follow a symptom back along pipes and ducts | Calder | after promotion |
 | 10 | **The workshop** | crew order small things; you make them | the machine shop tech | after promotion |
 
-**Added (Part 6):** beside the ladder, a **puzzle track**: some real faults become **head-scratchers** you solve by deduction from clues gathered around the ship (nine types, Day 13 to about Day 56, fault-finder grades, two new tools, crew asking you for help).
+**Added (Part 6):** beside the ladder, a **puzzle track**: some real faults become **head-scratchers** you solve by deduction from clues gathered around the ship (nine types; the first about a third of the way in, at Day 13, after hauling; then growing to the end of Pillar 5 at about Day 42, with fault-finder grades, two new tools and crew asking you for help).
 
 Around the ladder: **more real faults reach you**; **repairs get quicker with practice** (in words); **tools arrive one at a time, each with training**; **off-shift tinkering, cabin touches and star logging**; **the device's work pages** (your training record, work log, tools). Still Works only.
 
@@ -405,7 +405,7 @@ X2's watch list: two seats designing the same thing (as when two seats both buil
 
 ## Part 6: Added: deductive repair puzzles ("head-scratchers")
 
-**Added 2026-10-17 by the Pillar 5 designer, from the user's ask:** "I love our plan and want to keep it all. But we also need to add about 30-50% into the progression: deductive reasoning puzzles tied to repair. This is only some repairs, not all. And these go alongside all other stuff." **Everything in Parts 1-5 stays exactly as it is.** This part adds a second track beside the ladder. Mock-up screens: `plans/pillar5-puzzles-mockup.html` and `plans/shots/p5-puzzle-*.png`.
+**Added 2026-10-17 by the Pillar 5 designer, from the user's ask:** "I love our plan and want to keep it all. But we also need to add about 30-50% into the progression: deductive reasoning puzzles tied to repair. This is only some repairs, not all. And these go alongside all other stuff." **Everything in Parts 1-5 stays exactly as it is.** **What "30-50% into" means (the user's correction, 2026-10-17, through the lead):** the puzzles **start** about a third to a half of the way into the job's progression; the arc is not made longer. This part adds a second track beside the ladder, inside the existing arc. Mock-up screens: `plans/pillar5-puzzles-mockup.html` and `plans/shots/p5-puzzle-*.png`.
 
 ### 6.1 The idea in one paragraph
 
@@ -443,7 +443,7 @@ Only **real faults** (Part 1's "more real faults") can be head-scratchers, and o
 | Days 13-19 (first types taught) | about 1 in 8 (one every other shift day) | 1 open at a time, 1 new a day |
 | Day 19 to promotion | about 1 in 6 | 1 open, 1 new a day |
 | Tier 2, weeks 4-5 | about 1 in 5 (Tier 2 machines 1 in 3) | 2 open, 1 new a day |
-| Tier 2, week 6 on (fault-finder grades) | about 1 in 4 (Tier 2 machines 1 in 3) | 2 open, 2 new a day |
+| Tier 2, week 6 on (the last week of the arc, and after) | about 1 in 4 (Tier 2 machines 1 in 3) | 2 open, 2 new a day |
 
 None are posted on days off or event days (Pillar 6); crew favour cases (6.6) can come off shift. If a case isn't taken by the end of your shift, the crew solve it the slow way (the long way, over a day) so the ship never waits on you. A Settings line, **Head-scratchers: fewer · normal · more**, scales the share (open question 10).
 
@@ -506,33 +506,44 @@ Every type has the same frame: **symptom → suspects (3-6) → clues at places 
 - **What a wrong call costs:** the walk to storage and back, and the fitting time; the part you took goes back on the shelf unused (Tier 1). At Tier 2, a used seal or cartridge is spent (stock falls, restocked as usual). After two wrong calls on one case, Torres or Calder comes by to talk it through (hint 3, offered). Never a fail, never a remark worse than "Tricky one, that."
 - **Teaching:** each type's first case is a training moment (Part 1's `train` slot): the teacher reads the first clue with you and thinks aloud, you finish it; the second you do while they watch. Opening rules as the ladder: never two openings on one day (a puzzle type counts as an opening), and each type waits until the one before has been solved about twice.
 
-### 6.6 Progression: about 40% more
+### 6.6 Where puzzles start, and how they grow
 
-Today's plan opens new things from Day 8 to about Day 42 (five ship weeks). Head-scratchers add **nine taught types, three fault-finder grades, two new tools, the cold-case board and crew favour cases**, stretching Pillar 5's progression to about **Day 56** and thickening the weeks before it: about **40% more**.
+**The first head-scratcher comes about a third of the way into Pillar 5's progression.** The whole arc runs from Day 1 (Pillar 4's first week) to about Day 42 (the end of the after-promotion mechanics, week 6). The first puzzle is at about **Day 13: 13 of 42 days, about 31% of the way in by time**. Counted by milestones instead, it comes after **5 of the arc's 12 ladder steps** (fetch and replace, rounds, laundry, the drill and inspection, hauling; then tuning, incidents, the scanner, certification, team jobs, tracing, the workshop): **about 42% of the way in**. Either way it sits inside the user's 30-50%, and nothing is added to the arc's length.
 
-**The puzzle track, beside the ladder** (fitted into the free days; never two openings a day):
+| Share of the arc | Day | Where you are |
+| --- | --- | --- |
+| 0-17% | Days 1-7 | Pillar 4's first week: fetch and replace only. **No puzzles.** |
+| 19-29% | Days 8-12 | The first ladder steps: rounds, laundry, the drill and inspection, hauling. **No puzzles.** |
+| **31%** | **Day 13** | **The first head-scratcher** (P3 What's been tried?), taught by Torres, Tier 1 |
+| 33-48% | Days 14-20 | Three more Tier 1 types and the certification job's puzzle step |
+| 50-100% | Days 21-42 | Tier 2: five more types, the grades, the extras |
 
-| Around | Opens | Taught by | Next to the ladder's |
-| --- | --- | --- | --- |
-| Day 13 | **P3 What's been tried?** and the Fault notes page, the Chief's notes | Torres | after hauling (Day 12) |
-| Day 14 | **P1 When does it happen?** | Torres | before tuning (Day 15) |
-| Day 17 | **P2 Who saw what?** (the Ask button) | Calder, Tomas | after incidents (Day 16) |
-| Day 19 | **P4 Which gauge is lying?** | Torres | the day after the scanner (Day 18) |
-| Day 20 | the certification job gains one easy head-scratcher step | Calder | certification |
-| Week 4 | **P5 Follow the line** (M9's harder stages) | Calder | with M9 |
-| Week 5 | **P8 Swap testing** and **the test rig** | the machine shop tech | after the workshop (M10) |
-| Week 6 | **P6 Does it add up?**; **Fault-finder** (grade 1) | Calder | |
-| Week 7 | **P7 Faded labels**; **P9 The clash**; **Trusted fault-finder** (grade 2) | Calder | |
-| Week 8 | **the cold-case board**; crew favour cases; **the ship's fault-finder** (grade 3) | Calder, the crew | |
+**What triggers it:** not the date. The first head-scratcher opens like any ladder step (Part 1's rules): **once hauling (M4, the fourth step after your first week) has been used about 3 times**, on a day with no other opening, while you're still Tier 1. For a steady player that's about Day 13; a slower player gets it later, but always at the same point in the arc: after hauling, before tuning. It arrives as a training moment: Torres finds you at the board with a job the last shift couldn't crack.
+
+**How the share grows after that** (6.3 has the details): about 1 in 8 of your real faults from the first one, 1 in 6 after the scanner, 1 in 5 at Tier 2, and 1 in 4 in week 6 (1 in 3 on Tier 2 machines). Only some repairs, never all.
+
+**The puzzle track, beside the ladder** (fitted into the free days of the same arc; never two openings a day):
+
+| Around | Share of arc | Opens | Taught by | Next to the ladder's |
+| --- | --- | --- | --- | --- |
+| Day 13 | 31% | **P3 What's been tried?** and the Fault notes page, the Chief's notes | Torres | after hauling (Day 12) |
+| Day 14 | 33% | **P1 When does it happen?** | Torres | before tuning (Day 15) |
+| Day 17 | 40% | **P2 Who saw what?** (the Ask button) | Calder, Tomas | after incidents (Day 16) |
+| Day 19 | 45% | **P4 Which gauge is lying?** | Torres | the day after the scanner (Day 18) |
+| Day 20 | 48% | the certification job gains one easy head-scratcher step | Calder | certification |
+| Week 4 (Days 22-28) | 52-67% | **P5 Follow the line** (M9's harder stages); **the logger** | Calder | with M9 |
+| Week 5 (Days 29-35) | 69-83% | **P8 Swap testing** and **the test rig**; **P6 Does it add up?**; **Fault-finder** (grade 1) | the machine shop tech; Calder | after the workshop (M10) |
+| Week 6 (Days 36-42) | 86-100% | **P7 Faded labels**; **P9 The clash**; **Trusted fault-finder** (grade 2); favour cases | Calder, the crew | the end of Pillar 5 |
+| After Pillar 5 | — | **the ship's fault-finder** (grade 3) and **the cold-case board** | Calder | they keep the puzzles going into Pillar 7 |
 
 **What's new to earn:**
-- **Fault-finder grades** (words, a small pin on your uniform): Calder sets a **ticket case** for each, a harder case on a Tier 2 machine, supervised like certification and, like it, **only ever delayed**. Fault-finder → Trusted fault-finder → the ship's fault-finder. They sit inside Tier 2; they're not a promotion (Pillar 7's career story can build on them).
+- **Fault-finder grades** (words, a small pin on your uniform): Calder sets a **ticket case** for each, a harder case on a Tier 2 machine, supervised like certification and, like it, **only ever delayed**. Fault-finder (week 5) → Trusted fault-finder (week 6) → the ship's fault-finder (after Pillar 5's arc, its ticket case ready when you are). They sit inside Tier 2; they're not a promotion (Pillar 7's career story can build on them).
 - **Tools that open new clue types** (each with its training, on the Tools page): the scanner (exists, M7: part readings, sensor tables), **the logger** (new, week 4: a day's trace for P1 T2+), the pipe kit (exists, M9: gauges along a line; stage 2: sums at junctions for P6), **the test rig** (new, a fixed bench in the machine shop: P8).
 - **A name for clever fixes:** "right first time" (no wrong call) and "a clever fix" (right first time, no talk-it-through, few walks) go in the work log, lift Work reputation a little (`simNote('cleverFix')`, which Pillar 4's lines can react to: "Heard you sorted the mess door. The sensor! Who knew?"), and count toward experience (+1, like a found-by-you job).
 - **Crew asking you for help:**
-  - **Favour cases** (after Trusted fault-finder): crew bring you their own little mysteries off shift, as favours (the existing favours system): "My lamp flickers only when Pell plays guitar next door" (a shared circuit). Solved in their cabin; a friendship moment.
+  - **Favour cases** (week 6, after Trusted fault-finder): crew bring you their own little mysteries off shift, as favours (the existing favours system): "My lamp flickers only when Pell plays guitar next door" (a shared circuit). Solved in their cabin; a friendship moment.
   - **Juniors stuck on a case** ask you at the board: you tell them which clue they're missing (pick one of three). The first taste of mentoring, which design-doc's Tier 2 "a junior tech to mentor" points to.
-- **The cold-case board** (week 8): a board in Calder's office of old faults the crew never got to the bottom of, generated from the ship's own past weeks. Optional, for keen players; one at a time; solving one is a line in the Record.
+- **The cold-case board** (the last day of week 6, so it opens as Pillar 5 ends; it keeps puzzles coming afterwards): a board in Calder's office of old faults the crew never got to the bottom of, generated from the ship's own past weeks. Optional, for keen players; one at a time; solving one is a line in the Record.
 
 **How it sits beside every Pillar 5 mechanic** (nothing in them changes; these are extra links):
 
@@ -623,7 +634,7 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 - **Step 3** (hauling and tuning): M-F builds the case engine inert, then P3 and P1 (Days 13-14 sit between hauling and tuning). **Check-in 3** includes a first head-scratcher.
 - **Step 4** (incidents, scanner, promotion): M-F adds P2 and P4 and the certification step. **Check-in 4** includes the mess door and the lying chiller.
 - **Step 5** (after promotion): M-G joins; P5 with M-E's M9, P8 with M-C's workshop, P6.
-- **New Step 6:** P7, P9, the grades, favour cases, the cold-case board. **Check-in 6:** play weeks 6-8 from a save. Then Pillar 5 final and the pull request.
+- **New Step 6:** P7, P9, the grades, favour cases, the cold-case board. **Check-in 6:** play weeks 5-6 from a save. (This is an extra build step, not extra ship days: the puzzles fit inside the existing arc.) Then Pillar 5 final and the pull request.
 - **Head count:** +1 now (the designer), +1 from Step 3, +1 from Step 5: about 18-21 Pillar 5 sessions at the busiest instead of 16-19. Lean still works: M-F alone covers P1-P4.
 - **Hash keys:** 880-894 from Pillar 5's 850-899. **Save:** `save.career.cases` (open cases, solved count by type, grades, relabelled panels, cold cases done), read defensively; `SAVE_V` stays 2.
 - **Section:** 24k and 24l, one owner each; removing them turns every head-scratcher back into a plain fault.
@@ -668,11 +679,11 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 **Added with Part 6 (head-scratchers):**
 
 8. **The ground rule:** may design-doc.md's "No mini-games standing in for the job" gain a line: "Deduction puzzles are the Diagnose step done for real: clues gathered in the world, the fix physical, no timers or scores"? *Default:* yes.
-9. **The share:** about 1 in 8 of your real faults from Day 13, rising to about 1 in 4 at Tier 2 (1 in 3 on Tier 2 machines)? *Default:* yes.
+9. **The start and the share:** the first head-scratcher after hauling has been used about 3 times (about Day 13, about a third of the way into the arc), then about 1 in 8 of your real faults, rising to about 1 in 4 at Tier 2 (1 in 3 on Tier 2 machines)? *Default:* yes.
 10. **A setting** for fewer / normal / more head-scratchers? *Default:* yes, normal by default.
 11. **The nine types:** keep all nine, or drop any (P8 swap testing and P7 faded labels are the most "puzzle-like")? *Default:* keep all nine.
 12. **Fault-finder grades** (three, in words, with a uniform pin, only delayed): yes? *Default:* yes.
 13. **Wrong calls at Tier 2 spend a consumable part** (a seal, a cartridge), while Tier 1 wrong calls only cost time? *Default:* yes.
-14. **Crew favour cases and the cold-case board** (optional, for keen players)? *Default:* yes, from week 8.
+14. **Crew favour cases and the cold-case board** (optional, for keen players)? *Default:* yes: favours from week 6, the board as Pillar 5 ends.
 15. **The name:** "head-scratchers" (the crew's word), "Fault notes" (the device page), "the Chief's notes" (the hint binder)? *Default:* yes.
 16. **The P9 fix moves a crew member's routine** (the laundry wash to 08:00): fine for a Tier 2 case, or keep moving routines for Tier 3 (Pillar 7)? *Default:* allowed, one small move per case.
