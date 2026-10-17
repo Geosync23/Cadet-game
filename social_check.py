@@ -92,6 +92,34 @@ with sync_playwright() as pw:
     print('Two days in one jump the same as hour by hour:', c['key'] == d['key'])
     if c['key'] != d['key']: fail('a time jump gives a different social life')
 
+    # 5. the query API (0.36.20): what the dialogue engine's line conditions read; pure, and right on a known state
+    q = g.ev(r"""(() => {
+      const out = {}, works = SOC.crew.find(p => p.dept === 'works' && p.rank !== 'chief'), tomas = SOC.crew[SOC.idx.get('tomas')];
+      const before = JSON.stringify(socSave());
+      out.missing = ['mem', 'warmth', 'affBand', 'bondOf', 'moodOf', 'beatOf', 'knowsNews', 'repBand', 'repShip', 'knownFor', 'cue', 'socialFill', 'memTold'].filter(f => { try { return typeof eval(f) !== 'function'; } catch (e) { return true; } });
+      out.band = [affBand('tomas', 'pell'), affinity('tomas', 'pell')];
+      out.bandsOk = SOC.crew.slice(0, 20).every(p => SOC.crew.slice(0, 20).every(q => { const v = affinity(p, q), b = affBand(p, q); return b === (v <= -40 ? 'rival' : v >= 60 ? 'friend' : 'neutral'); }));
+      out.mood = ['low', 'ok', 'high'].includes(moodOf(tomas)) && moodOf('nobody') === 'ok';
+      out.rep = [repBand('works'), repBand('galley'), repShip('work'), knownFor().length];
+      out.warm = warmth('tomas');
+      const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
+      out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
+      out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
+      out.pure = JSON.stringify(socSave()) === before;
+      socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
+      out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); out.cueSaved = s === JSON.stringify(socSave()) && !!cue('repair.oven.you');
+      setShipNow(shipNow() + 3 * 1440); out.cueGone = cue('repair.oven') === null; setShipNow(shipNow() - 3 * 1440);
+      return out;
+    })()""")
+    print('Query API:', json.dumps(q))
+    if q['missing']: fail(f"query functions missing: {q['missing']}")
+    if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
+    if q['rep'][:3] != ['known', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
+    if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
+    if q['fill']['boss'] is None or q['fill']['none'] is not None or q['fill']['thing'] is None: fail(f"socialFill wrong: {q['fill']}")
+    if q['cue'] != [True, True, True, False, True, True] or not q['cueSaved'] or not q['cueGone']: fail(f"cues wrong: {q['cue']} saved {q['cueSaved']} gone {q['cueGone']}")
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')
