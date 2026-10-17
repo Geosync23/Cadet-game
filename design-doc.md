@@ -431,7 +431,7 @@ You work the day shift as a Works maintenance tech, with **two days off a week**
 
 **Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1.
 
-**The arrival and first week (the user, 2026-10-16; built in Pillar 4).** You land on a **Sunday evening**, so Monday is your first shift. Waiting at the ramp is your **escort: a Works crew member one rank above you who becomes a future friend (Zeke Torres or Pell; the user, 2026-10-17)**, who walks you (you stay in control, following them) through the haulway, past the Works bay, up to your bunk, where they hand you your device, then to **dinner in the mess**, where **Chief Calder** stops by the table to welcome you. Your first full day is a **shadow shift**: your escort trains you on one real job end to end, and your **first solo job comes soon after, before Wednesday** (the user, 2026-10-17: rotas are aligned to make that work). Your character gets a **name you type on the shuttle** that the crew use (no choice of look for now). Your first weekend: **Sowing morning**, planting your own seedling, and **film night with Tomas**. Then you're let loose a little at a time over the first week, each new thing taught by someone aboard (an optional "Settling in" list on the device tracks it); your first weekend brings an invitation to a tradition. A skip-intro option is offered on later new games.
+**The arrival and first week (the user, 2026-10-16; built in Pillar 4).** You land on a **Sunday evening**, so Monday is your first shift. Waiting at the ramp is your **escort: a Works crew member one rank above you who becomes a future friend (the user, 2026-10-17): Zeke Torres**, a Works engine officer (Pell, the junior in Bunk 2, joins you at dinner; see plans/pillar4-plan.md), who walks you (you stay in control, following them) through the haulway, past the Works bay, up to your bunk, where they hand you your device, then to **dinner in the mess**, where **Chief Calder** stops by the table to welcome you. Your first full day is a **shadow shift**: your escort trains you on one real job end to end, and your **first solo job comes soon after, before Wednesday** (the user, 2026-10-17: rotas are aligned to make that work). Your character gets a **name you type on the shuttle** that the crew use (no choice of look for now). Your first weekend: **Sowing morning**, planting your own seedling, and **film night with Tomas**. Then you're let loose a little at a time over the first week, each new thing taught by someone aboard (an optional "Settling in" list on the device tracks it); your first weekend brings an invitation to a tradition. A skip-intro option is offered on later new games.
 
 **The job loop.** Every job follows the same physical steps:
 
@@ -472,7 +472,7 @@ What makes it interesting:
 **Your personal device** is the game's main screen (agreed 2026-10-15; designed 2026-10-16, built in Pillar 3). It's a small handheld computer every crew member carries, holding your day, your messages, your notes and the ship's news. It's the only menu in the game. It opens instantly from the Device button (the user's choice, 2026-10-16: the button only, no pull tab; it must never open by itself), and it never pauses time: the ship keeps running, and you keep walking, while it's open. Until it's built, the game uses a plain placeholder with the need marks, your credits and a simple Mail tab.
 
 - **Two layers.** The apps describe what to show (plain lists, bars, text and buttons); one skin draws it. So the look can change later without touching the apps.
-- **The look: an old-school screen.** Opening the device feels like looking at a real old display in a sturdy bezel: interlaced scan lines, a soft phosphor glow on the text, a curved, darkened edge and chunky monospace type. A faint flicker and a slow rolling band are optional, and off when the phone asks for reduced motion. The phosphor colour is the Wren's cyan. Meetings' dialogue uses the same screen style. The screen colour is the Wren's cyan (chosen by the user, 2026-10-16); amber and green stay as options in Settings.
+- **The look: an old-school screen.** Opening the device feels like looking at a real old display in a sturdy bezel: interlaced scan lines, a soft phosphor glow on the text, a curved, darkened edge and chunky monospace type. A faint flicker and a slow rolling band are optional, and off when the phone asks for reduced motion. The phosphor colour is the Wren's cyan (chosen by the user, 2026-10-16); amber and green stay as options in Settings. Meetings' dialogue uses the same screen style.
 - **You see yourself use it** (agreed 2026-10-16). Opening the device, your character raises a small glowing handheld (tinted in the screen's colour) and looks at it; walking while it's open, they read as they go; closing it, they put it away. On a phone the camera eases gently to keep you in view above the device, and back when it closes.
 - **First tips** (agreed 2026-10-16, a first step toward Pillar 4's onboarding). Short pop-ups in the device's style, each shown once and remembered in the save, never pausing time, with a switch to turn them off. They cover the job loop: the first time at the job board, your first job, arriving at the job's machine, finishing the work (turn it in at the board), and the first time you open the device.
 - **On a phone** it slides up over about two thirds of the screen, so the ship stays visible. On the TriFold unfolded it docks as a side panel and can stay open while you walk. A home screen shows the time, your next item, any event in one line and the apps with badges. Urgent things (your job's machine broke, an appointment in 10 minutes, the Captain's address) show as a toast; everything else is a quiet badge, and a "Quiet off shift" setting turns work notices into badges after 17:00.
@@ -549,6 +549,14 @@ Story arrives without stopping daily life, like a TNG episode where a phenomenon
 4. **Meetings with dialogue:** a gathering where people talk to each other and to you: a briefing, a summons, a greeting, a formal dinner. When you're there, a panel in the device's screen style plays their lines one by one, with each speaker's name and face, and the speakers turn to each other with small gestures. Sometimes you get two or three replies to choose from; they nudge a relationship or a thread a little, and there's never a right answer, a pass or a fail. The ship keeps running, the camera stays with you, and you can walk away at any time; the gist then arrives in Mail. It is never a full cutscene.
 
 Whatever you saw or missed, the crew retell it in chatter for a day or two, with the details that really happened.
+
+**Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
+
+- **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
+- **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
+- **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
+- Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
 **Pacing:** roughly one main event every 1–2 ship weeks (about 4½–9½ real hours), with small incidents most days. Small incidents include crew moments the simulation can trigger: a friendship scene, an argument that needs smoothing over, a birthday cake in the mess.
 
@@ -685,7 +693,7 @@ Done so far:
    - the event framework (phases, threads and bands, traces, the Captain's address, gatherings and meetings with dialogue), then the ion storm end to end;
    - the progression hooks: the ready room, the conference table, officers' cabins, the Captain's table and progress talks;
    - extra gym kit, and a small sound pass in or right after this pillar.
-   - Two check-ins with the user: one after the device and social basics (where the phosphor colour is chosen), one after a full ion storm.
+   - Two check-ins with the user: one after the device and social basics, one after a full ion storm.
    - Combined builds are 0.50.x. Two new helpers join: the device engineer (builds 0.35.x) and the social engineer (0.36.x); the events engineer carries on.
 4. **More events, onboarding and tutorials:** after the ion storm, the rest of the event list in order (see "Ship-wide events"), each reviewed by the user as decks were; the festival once the real-phone test allows it. Also full onboarding and tutorials, growing from Pillar 3's first tips.
    - **Pillar 4 scope (the user, 2026-10-16): a massive pass, "full bore".** The full arrival and first week (above); far more dialogue (a voice for every crew member, overheard conversations, reactions to what happens aboard, story arcs); a much deeper social system, where getting to know someone unlocks moments where you really get to know them, sometimes their struggles; many more traditions. Tone: mostly light, with serious and heartfelt moments as you grow close. Staffing: a Pillar 4 planner and a social system designer plan it together first; then engineers, a head writer with a few writers, and tradition designers (about 15 helpers).
@@ -693,7 +701,7 @@ Done so far:
    - **Crew come and go (the user, 2026-10-17):** not often, crew are transferred off and new crew arrive, including new cadets like you. Someone leaving says goodbye a day or two before (talking about your friendship) and again on the day. At some point you're assigned to guide a newcomer the way you were guided.
    - **Tiles (the user, 2026-10-17):** a simple playable tile game, designed by us later. A small tiles station with boards in the lounge; on tiles night, every lounge table has a board.
 
-**After that:** progression to tier 2 (certification, promotion to Officer and your own cabin, the Deck 5 machine rooms and connected-system faults); the spine's crawlways and pipe galleries; and the shuttle arrival, if not built earlier.
+**After that:** progression to tier 2 (certification, promotion to Officer and your own cabin, the Deck 5 machine rooms and connected-system faults) and the spine's crawlways and pipe galleries. (The shuttle arrival is now part of Pillar 4.)
 
 
 ## Open questions
@@ -704,7 +712,7 @@ Done so far:
 - Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Can the player be passed over for certification, or only delayed?
-- Should the player customise or shape their character at the start?
+- Beyond the name you type on the shuttle, should the player ever choose their look? (No choice of look for now, the user, 2026-10-16.)
 - Does the diplomacy-and-story starship game become its own future project?
 
 **The decks:**
@@ -713,6 +721,8 @@ Done so far:
 
 **Answered:**
 
+- Who meets you off the shuttle, and which milestone builds the arrival: Zeke Torres, a Works engine officer, built in Pillar 4 (the user, 2026-10-16/17). See "The player".
+- The device's phosphor colour is the Wren's cyan, with amber and green as options in Settings (the user, 2026-10-16).
 - The personal device (agreed 2026-10-16): two layers (apps describe, a skin draws), an old-school screen look built now, never pausing time, and the apps Schedule, Appointments, Maps, Memos, Mail, Calendar, Needs, Jobs, Crew, Ship, Record and Wallet (Music later, with sound). No Camera. See "The player".
 - The event after the ion storm is the diplomatic visit; all seven main events are kept in a fixed order with six short ones between them (agreed 2026-10-16). See "Ship-wide events".
 - Events are ambient, with four kinds of moment including meetings with dialogue, never a full cutscene (agreed 2026-10-16). See "Ship-wide events".
