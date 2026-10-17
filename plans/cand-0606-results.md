@@ -19,3 +19,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - c707b5f = + poses 0.27.47 (day-35 tray fix, DA3-tested on 0d8072c: cadet_test identical, tray fail gone)
 - d571db4 (+ player-needs 0.28.50, Put down 0.28.60): smoke OK · newgame OK · device OK · NAMES OK · content_gen up to date · cadet_test vs c707b5f: data/taps/walks identical, every shot ~15k px only in the top control bar (the Pause button, 0.28.48/50)
 - d571db4 day_check (R2): day 0 FAIL only shift short 2 (clock fix pending), tray line gone; day 1 OK; peaks D3 277; servery 125/125, 128/128. R3: player cart-run fail repeats on 0d8072c (player_check alone); debug run on d571db4 in flight.
+- faa2562 (+ clock-fix 83beaf6): events_check OK (no shift short, no film overrun)
