@@ -9,7 +9,7 @@ This file replaces DEV_NOTES_2. The repo holds it with design-doc.md, the build,
 The nine small updates once listed here for the design doc (Chef Brennan, Deck 3's rooms and layout, two meals a day, no freight lift and the Cart bay, the one-floor lounge, the music room, the walk-in lift car, the spine behind glass, Pell on Deck 5) are now in design-doc.md.
 
 
-## Current build: 0.43.9 (about 17,250 lines)
+## Current build: 0.43.10 (about 17,250 lines)
 
 Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (Operations) is built and dressed: the Works complex, storage, machine shop, shuttle bay with the shuttle Tern, the door gear and the fan. Pell works there.
 
@@ -359,6 +359,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.43.7 | `cue:` conditions take `@me` (the newest matching cue is about the speaker: `cue.who === p.id`, e.g. `cue:gift.you@me` for the receiver's thanks) and `@dept` (`cue.dept === p.dept`, a repair in their department), reading the `who`/`dept` fields social A added to cue records (0.36.53). Writers' guide updated. cadet_test ALL IDENTICAL. |
 | 0.43.8 | For overheard conversations about particular people (the head writer's ask): new conditions `who:<id>|...` (the speaker, overheard speaker A) and `with:<id>|...` (`ctx.other`, speaker B), and `pair:x+y` sides may be crew ids. lines_check checks the ids. cadet_test ALL IDENTICAL. |
 | 0.43.9 | Social B's questions on the arcs: `rep:` and `ship.*:` now mean "this band or better" (`LINE_REP` new < known < well < theirs, `LINE_SHIP` low < ok < high; `!rep:well` = below well), so Calder's arc opens and stays open as your Works standing rises; `deck:` is the scene's deck (`ctx.deck`, else the deck you're on), not the speaker's. cadet_test ALL IDENTICAL. |
+| 0.43.10 | `gift:` condition (head writer 2's ask): the gift being thanked, `ctx.how` (loved, liked, polite, as social A's socLine passes it) or `ctx.tag`; with `cue:gift.you@me gift:loved` the receiver thanks you for a gift they love. cadet_test ALL IDENTICAL. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
