@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.4
+   STARSHIP CADET: CSV Wren                           build 0.42.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.4';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.5';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14837,6 +14837,97 @@ function introBeats(id, d) {
   return out;
 }
 
+// ---- the arrival evening in play (wave 2, 0.42.5): introTick() once a frame from the main loop (section 12). With the
+// intro off (every test URL, every game before Pillar 4) it returns at once. Everything below only shows things: the
+// steps themselves move on in introAdvance, once a ship minute, from where you are.
+// The escort's lines as he walks (stand-ins from the plan, until the writers' content replaces them): said in his
+// speech bubble (section 8b's bubbleSay) as each step becomes yours, a few seconds apart.
+const INTRO_LINES = {
+  hello: ['You must be the new hand. Zeke Torres, Works. Welcome to the Wren.', 'Right, onward. Stay close.'],
+  haulway: ['Cargo hold on the left, Cart bay on the right.', 'Mind the carts. They don\'t mind you.'],
+  works: ['That\'s us. The board, the tea corner, the Chief\'s glass office.', 'Tomorrow, ten to eight. Right here.'],
+  lift: ['Four, please. Panel\'s all yours.'],
+  wing: ['Washrooms. Hot water till ten, then it\'s character-building.', 'Laundry, common room. Nearly there.'],
+  toMess: ['Dinner. Mess is on Three.'],
+  servery: ['Grab a tray. Brennan doesn\'t bite. Much.'],
+  free: ['You\'re free. Bunk\'s yours any time from eight.', 'I\'m on Four if you need me. Fourteen, the one with the music.'],
+};
+const INTRO_CALL = ['This way!', 'Over here, new hand.', 'Keep up. The ship\'s bigger than it looks.'];
+// stand-in meeting scripts, used only while the writers' MEETING_SCRIPTS of the same id aren't there
+const INTRO_STUB_SCRIPTS = {
+  introBunk: { title: 'Your bunk', from: 'Zeke Torres', lines: [
+    { who: INTRO_ESCORT, text: 'Bunk 1. Bottom one\'s yours. Bag in the locker, there.' },
+    { who: INTRO_ESCORT, text: 'And this is yours too: your device. Schedule, maps, Mail, the lot. Don\'t lose it.' },
+    { who: INTRO_ESCORT, text: 'Right. Dinner. Come on.' }] },
+  introChief: { title: 'The Chief stops by', from: 'I. Calder', lines: [
+    { who: 'calder', text: 'I\'m not here. Day off. Welcome aboard.' },
+    { who: 'calder', text: 'Torres has you tomorrow. Ten to eight, the Works bay. Tuesday, your first job is mine.' },
+    { choice: [
+      { text: 'Looking forward to it.', rel: { calder: 1 }, reply: { who: 'calder', text: 'Good.' } },
+      { text: 'What should I read up on?', rel: { calder: 2 }, reply: { who: 'calder', text: 'The scrubber manual. Chapter three. Nobody reads chapter three.' } },
+      { text: '(Say nothing.)', reply: { who: 'calder', text: 'Quiet. Good. The ship\'s loud enough.' } }] },
+    { who: 'calder', text: 'Eat something. That\'s an order, and I\'m not even here.' }] },
+};
+for (const id in INTRO_STUB_SCRIPTS) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, manifest: null };
+const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
+function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
+  INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
+  (lines || []).forEach((text, i) => INTRO_UI.said.push(setTimeout(() => { const a = introWalker(); if (a && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); }, i * 4800)));
+}
+// A0: the shuttle's manifest, before the fade-in. The ship's clock holds at 17:40 until you've typed your name.
+function introManifest() {
+  if (INTRO_UI.manifest) return;
+  const el = INTRO_UI.manifest = document.createElement('div');
+  el.style.cssText = 'position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:#05080a;color:#d8efe6;font:16px/1.45 system-ui,sans-serif;padding:16px';
+  el.innerHTML = '<form style="max-width:340px;width:100%;border:1px solid #2f4a44;border-radius:12px;padding:18px 18px 16px;background:#0c1416">'
+    + '<div style="font-size:12px;letter-spacing:.12em;color:#7fb8a8">SHUTTLE TERN · PASSENGER MANIFEST</div>'
+    + '<div style="margin:10px 0 4px">Destination: CSV Wren, Works department.<br>Arriving Sunday, 17:40.</div>'
+    + '<label style="display:block;margin-top:12px;font-size:13px;color:#9fc9bc">Your name</label>'
+    + '<input maxlength="24" autocomplete="off" style="width:100%;box-sizing:border-box;margin-top:4px;padding:10px;border-radius:8px;border:1px solid #3d5a52;background:#132022;color:#e8f4ef;font:inherit">'
+    + '<button style="width:100%;margin-top:12px;padding:10px;border-radius:8px;border:0;background:#2f6f5f;color:#fff;font:inherit">Sign and go aboard</button></form>';
+  const input = el.querySelector('input');
+  el.querySelector('form').onsubmit = e => {
+    e.preventDefault();
+    const name = input.value.trim(); if (!name) { input.focus(); return; }
+    if (typeof playerNameSet === 'function') playerNameSet(name); else SHIP.player.name = name.slice(0, 24);
+    el.remove(); INTRO_UI.manifest = null;
+    introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
+    if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
+    if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
+    saveGame();
+  };
+  document.body.appendChild(el); setTimeout(() => input.focus(), 50);
+}
+function introTick() {
+  if (!introOn() || typeof player === 'undefined') return;
+  const I = SHIP.intro;
+  if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; introManifest(); return; }
+  const now = Math.floor(shipNow());
+  if (now !== INTRO_UI.min) {
+    INTRO_UI.min = now;
+    const done = Object.keys(I.done).length;
+    introAdvance(now, { deck: deckDef.num, tile: player.here() });
+    // a meeting step you've just reached plays its script (walking out of the room closes it; its gist comes by Mail)
+    for (const id of Object.keys(I.done).slice(done)) {
+      const st = introStepById(id); if (!st || !st.meeting || I.missed.includes(id) || typeof dialogueShow !== 'function' || DIALOGUE) continue;
+      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
+      dialogueShow(st.meeting, { id: 'intro-' + id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now });
+    }
+  }
+  if (I.step !== INTRO_UI.step) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
+  // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
+  const st = introStep(), lead = !DIALOGUE && st && st.who === I.escort && st.checkpoint && st.mode !== 'free';   // not over a meeting
+  if (lead) {
+    const a = introWalker(), d = st.checkpoint.deck;
+    const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
+    if (typeof setGoal === 'function') setGoal(g); INTRO_UI.goal = true;
+    if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && typeof bubbleSay === 'function') {
+      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[(now >> 1) % INTRO_CALL.length], 3.5);
+    }
+  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; if (typeof clearGoal === 'function') clearGoal(); }
+}
+
 // =====================================================================
 // 6. CAMERA
 // =====================================================================
@@ -17162,6 +17253,7 @@ function loop() {
   worksTick();                                           // section 17: the Works bay job board
   eventsTick();                                          // section 18: the ship's events (Mail, decor, joining in)
   socialTick();                                          // section 20: the crew's social life, on paper
+  if (typeof introTick === 'function') introTick();      // section 21: the arrival evening (nothing with the intro off)
   const r = roomAt(...player.here()); if (r && r !== lastRoom) { lastRoom = r; roomEl.textContent = ROOMS[r].name; }
 
   renderer.render(scene, camera);
