@@ -75,7 +75,7 @@ Uniforms follow the classic three-colour split: red for command, gold for operat
 | Survey (science) | Blue-green | Circle | Sensors, labs, samples, charting |
 | Infirmary (medical) | Blue-green | Cross | Crew health and rest |
 
-Ranks: Junior Officer, Officer, Department Chief, Executive Officer, Captain. The player starts as a Junior Officer in Works and can rise to Officer and senior technician, but not beyond.
+Ranks: Junior Officer, Officer, Department Chief, Executive Officer, Captain. The player starts as a Junior Officer in Works and can rise to Officer (Tier 2) and then Senior Officer (Tiers 3 and 4), but never into command (the user, 2026-10-17 career survey).
 
 
 ## The ship: six decks
@@ -223,7 +223,7 @@ The smallest deck, at the very top of the hull. 22 × 12 tiles. Step out of the 
 
 - **The senior quarters**, aft of the lift: one carpeted corridor in a loop, with fifteen bedrooms opening off it, each with its own door; every officer's door plate shows their name and rank. Twelve are for the senior crew and three for visitors.
   - **The Captain's quarters** fill the stern, with windows all along it: the biggest bedroom aboard, with a dining table where the Captain hosts the senior crew and the Envoy, a study and a sleeping alcove.
-  - **Hull cabins with windows** for Commander Vance, the Works Chief, the Infirmary Chief, Dr. Sato, Chief Holt (next door to the Envoy), the visitors' suite and three of the senior officers.
+  - **Hull cabins with windows** for Commander Vance, the Works Chief, the Infirmary Chief, Dr. Sato, Chief Holt (next door to the Envoy), the visitors' suite (which becomes the player's cabin at the second promotion, Senior Officer; visitors then use the second visitors' cabin and Deck 4's guest cabins; the user, 2026-10-17) and three of the senior officers.
   - **Envoy Saruth's guest cabin**, on a stern corner: a low table for Veyli tea rituals, cushions instead of chairs, and a knot of cord on the door handle meaning visitors by invitation.
   - **Inner cabins** inside the loop for the other three senior officers and a second visitors' cabin. It stays a cabin rather than a lounge, because ship-wide events bring visitors (agreed 2026-10-16).
 - **Science**, forward of the lift along a wide science corridor: the Watch office (glass onto the lobby, so the Watch sees who rides the lift), the chart room, the Survey lab, the sample lab, the comms room (where every recorded call home goes out), an observatory with bow windows (where off-duty crew gather for observatory night, one evening a week), the specimen store and the probe bay.
@@ -503,8 +503,8 @@ You progress by earning clearance to work on deeper, more connected systems, and
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Junior Technician | Junior Officer | Bunk, junior wing | Galley oven, lights, doors, washroom fixtures, laundry washers, cabin fixtures | One machine, one fault. Learn the loop: diagnose, fetch, repair, service | Works bay, storage, machine shop, utility closets |
 | 2 | Technician | Officer (first promotion) | Own cabin, officers' corridor | Air scrubbers, water recycler, heating, air plant, fan | Connected systems. Ducts and pipes run between rooms and decks, so a fault can start upstream. Trace it from the manifold room and junctions | Air plant, fan hall, manifold room, pipe galleries, Deck 4 scrubbers and heating, Deck 3 recycler |
-| 3 | Senior Technician | Officer | Own cabin | Power conduits, relays, batteries, sensor array | Planning around the crew. Some repairs need a shutdown. Pick a quiet hour, warn affected crew, and decide which systems get power during a fault | Battery room, power junctions, crawlspaces, bridge sub-floor |
-| 4 | Engine Specialist | Officer | Own cabin | Reactor, drive coils, engine controls | Team jobs. Big repairs need several techs. You plan the job, call in crew and coordinate, often timed with the bridge | Deck 6: engine room repairs and the reactor |
+| 3 | Senior Technician | Senior Officer (second promotion) | Deck 2's visitors' suite, refitted as yours | Power conduits, relays, batteries, sensor array | Planning around the crew. Some repairs need a shutdown. Pick a quiet hour, warn affected crew, and decide which systems get power during a fault | Battery room, power junctions, crawlspaces, bridge sub-floor |
+| 4 | Engine Specialist | Senior Officer | your Deck 2 cabin | Reactor, drive coils, engine controls | Team jobs. Big repairs need several techs. You plan the job, call in crew and coordinate, often timed with the bridge | Deck 6: engine room repairs and the reactor |
 
 How you earn a tier:
 
@@ -720,7 +720,8 @@ Done so far:
 - **Pillar 5 answers (the user, 2026-10-17 ~17:15, survey):** keep the whole plan; deductive repair puzzles ("head-scratchers") as the diagnosing step of some repairs, starting about a third of the way in (about day 13), 8 kinds in Pillar 5 ("the clash" waits for Tier 3), no setting for how many, three fault-finder grades with pins, a Tier 2 wrong call uses a seal or cartridge, crew favour mysteries and an old-mysteries board, new tools the logger and the test rig; laundry duty about every two weeks; all seven extra mechanics (tool upkeep, logbook, leak hunting, irrigation, rewiring, coolant rounds, the lift roof) on the ladder after promotion; cabin 4-23. **Pillar 5 is built on its own after Pillar 4 is finished,** by one small team (at most about 6 helpers at once). Plan: `plans/pillar5-plan.md` on claude/pillar5-plan.
 - **Pillar 5's timing (the user, 2026-10-17 ~04:20; replaced ~17:15 by "built on its own after Pillar 4"):** the middle path. Nothing starts until the user approves the plan. Then only clash-free work: a spec page per new mechanic (approved before it's built) and Pillar 5's shared foundation in its own new section. Full building, with a second build master and the rest of the structure mirrored at Pillar 5's scale plus cross-pillar coordinators, starts when Pillar 4 enters its mostly-writing stage.
 - **Pillar 6: ship-wide events** (the comet viewing, the diplomatic visit, power surge, illness, late supply shuttle, the garden creature, nebula, salvage; recurring variations after the list; event parts by rank). Out of Pillar 5.
-- **Pillar 7: career progression, story and milestones.** Including being **assigned to the night shift for a while** (no opt-in night on-call duty). Out of Pillar 5.
+- **Career progression moves into Pillar 5, all of it (the user, 2026-10-17 ~20:06, career survey):** how ranking up works (Works reputation in words, a "What's next" line, bands deciding which jobs are left for you, never demoted); the first promotion to Officer as a full sequence (an urgent summons to Calder's office the next work day, Calder comes to find you if you don't come; the badge and collar pip; the crew react; Calder walks you to 4-23 that evening at about 17:00 with Tomas and Pell carrying your box; the officer ceremony with the Captain the next afternoon in Deck 1's observation room; your uniform shows your rank); **and** Tier 3 and the second promotion to Senior Officer, switched on in Pillar 5, with **Deck 2's visitors' suite (hull, with a window) refitted as your cabin**. The user also chose to bring the rest of the old Pillar 7 into Pillar 5 now ("this is the absolute bulk of the game"), and asked that **every job is mapped to rank, with some jobs reserved for certain ranks**. Pillar 5 becomes much bigger; its plan is being restructured.
+- **Pillar 7:** whatever is left after Pillar 5's restructure (to be confirmed with the user).
 
 
 ## Open questions
