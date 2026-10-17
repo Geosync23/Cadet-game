@@ -106,7 +106,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01LGbDXmiNuSmR6dPGjRj8mX | Device engineer 2 (hired 2026-10-16 ~15:48): Ship news, people on Maps, Calendar appointments and group meetings, Quiet off shift, phone review (section 19) | `claude/device` | 0.35.8+ | Active | — |
 | session_01DzZ669spGpdSdVMYzUog2N | Social engineer (Pillar 3, new): relationships, affinity, news, chat cards, favours, crew seeking you out (section 20, C4/C5) | `claude/social` | 0.36.x | Working (wave 1) | — |
 | session_01GW9QtevJxaMQzzCGPBHaxb | Events engineer 2 (Pillar 3): ship-wide events, the ion storm, meetings with dialogue (section 18) | `claude/ship-events` | 0.34.8+ | Archived 2026-10-16 ~22:30 (done; events paused by the user) | `plans/handover-events.md` |
-| session_014PT5L2QxXYoVhqFP7qhj3y | Deck architect (Pillar 3, all six decks; replaces the bridge, command and Deck 6 architects): gather places, event dressing and traces, ready room, gym kit (C9) | `claude/decks-p3` | 0.38.x | Standby (0.38.3 done) | the three architect handovers |
+| session_014PT5L2QxXYoVhqFP7qhj3y | Deck architect (Pillar 3, all six decks; replaces the bridge, command and Deck 6 architects): gather places, event dressing and traces, ready room, gym kit (C9) | `claude/decks-p3` | 0.38.0-0.38.9 | Retired 2026-10-17 ~01:40 (~55%; handover e8eb838; archived) | the three architect handovers |
 | session_01KLFXcNJztCSVLXunD8Jt7R | Pillar 4 planner (hired 2026-10-16 ~23:00): drafts plans/pillar4-plan.md + .html (arrival and first week, dialogue at scale, traditions, staffing); no game code | `claude/pillar4-plan` | — | Active | — |
 | session_01SMfS1WKqzQ93X6zyZ7NFpJ | Social system designer (hired 2026-10-16 ~23:00): designs the deep social system, plans/social-deep-plan.md, with the Pillar 4 planner; no game code yet | `claude/social-design` | — | Active | — |
 | session_01KaHzfqSqF8B4bkNFrH1tsx | P4 seat 1, Onboarding engineer: arrival and first week, section 21, intro_check.py | `claude/arrival` | 0.42.x | Active (wave 1a) | — |
@@ -118,6 +118,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01HK4m33sUiLuVim8VWaCPMs | Adversarial reviewer 1: sim, onboarding, social A/B, crew designer; writes plans/review-checklist.md | `claude/reviews` (notes only) | — | Active | — |
 | session_0142TQw4ke8caPSyAC93VT98 | Adversarial reviewer 2: dialogue, traditions, device, decks, tiles, content | `claude/reviews-2` (notes only) | — | Active | — |
 | session_016EJg9DempByUCWwpszyWmV | Player engineer 3 (Pillar 4 on-call: kit bag, device lock, gift tags; section 15) | `claude/player-needs` | 0.28.26+ | Active | `plans/handover-player.md` |
+| session_01ToE6RJFCw9deB3HcJRLKxS | P4 seat 8, Deck architect 2: seedling pots, Tiles station + boards, postbox, tasting board, lanterns, calm tags, tradition decor | `claude/decks-p3` | 0.38.10+ | Active | `plans/handover-deck-architect.md` |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
 **Hiring for a retired role:** start a fresh session on `claude/ship-integration`, have it read its predecessor's handover note first, and give it a new branch and build range (the old branch can be reused if the new session is created with it).
