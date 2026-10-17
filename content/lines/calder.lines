@@ -401,3 +401,35 @@
 - The board here is longer than ours. I've started on it. Tell Torres to be patient. He won't be.   #funny
 ? tier>=friend
 - Nobody thanks the air. I've been thinking about the Wren's, though. Still working, I expect. That's you lot. Carry on.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== near
+? trad:works-tea
+- Friday tea. Ten minutes. Then the board. It's always the board.
+? trad:quiz
+- Quiz. I do the numbers round. Nobody argues with me in the numbers round.   #funny
+? trad:market
+- Swap meet. I'm after a particular spanner. They never have it. I keep looking.
+? trad:running
+- Running club. I don't run. I walk the bay. It's further than you'd think.   #funny
+? trad:film
+- Film night. I came once. I spent it listening to the screen's cooling fan.   #funny
+? trad:observatory-night
+- Observatory. Torres says look up. I check the dome seals. Then I look up. Briefly.   #funny
+? trad:harvest
+- Harvest morning. The irrigation pumps are on full. I can hear them from here. Good.
+? trad:hull-lights
+- Hull lights tonight. Every lamp working. I checked them myself. Then I'll look.
+? trad:founding
+- Founding Day. Cake. The Captain speaks. I stand at the back, near the door.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I stand at the bay window. I don't say who for. That's the point.
+
+== smalltalk
+? trad:today
+- Something on tonight. The board can wait. An hour.   #funny
+? trad:works-tea
+- Ten minutes. Then back to it.

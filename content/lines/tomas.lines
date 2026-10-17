@@ -537,3 +537,27 @@
 - My brother says my letters are more about the Wren than the new ship. He's right. How's the bunk? Is Lukas still up at five? Does Chloe still do lights out like a weather report?
 ? mem:came.observatory-night
 - Saw a star tonight that I'm sure is the one I named. It's wobbly. Still mine. Hope observatory night's still on up there. Hello from out here.
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Tomas's rest days are Fri-Sat, so film and observatory nights are his.
+
+== greet
+? trad:today tier>=acquaintance !week1:true
+- {hi}! There's something on tonight. I've checked twice. I'm going.
+
+== near
+? trad:harvest
+- Harvest morning! I picked my first tomato. I said thank you to it. Out loud.   #funny
+? trad:hull-lights
+- Hull lights! From outside we must look like a star. I'm telling my brother we're a star.   #funny
+? trad:founding
+- Founding Day! It's the Wren's birthday. I made her a card. Is that strange?   #funny
+? trad:quiet-watch
+- The quiet watch. I'll be at the stern window. Thinking of home, and my brother. Quietly.   #warm
+
+== smalltalk
+? trad:today
+- Something's on tonight! Is it tonight? It's tonight.   #funny
+? trad:hull-lights
+- We're glowing. The whole ship. Look!

@@ -394,3 +394,35 @@
 - I found their garden. It's small. I've planted beans. Tell Cruz they're coming up. Mind the seals.
 ? tier>=friend beat:kovac.2
 - The lift here is very quiet. I still take the ladder. Mostly. Some days I don't. I thought you'd like to know.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. The ladder stays "exercise"; nothing of the lift before beat:kovac.2.
+
+== near
+? trad:works-tea
+- Friday tea. I sit by the spanner wall. I like hearing everyone. I don't have to talk.
+? trad:quiz
+- Quiz night. I know all the scrubber questions. There's never a scrubber question.   #funny
+? trad:jam
+- The jam. I don't play. I knit at the back. It's nice. Loud, but nice.
+? trad:film
+- Film night. I sit at the end of a row. Easy to slip out. I never do.
+? trad:observatory-night
+- Observatory night. It's very quiet up there. I like quiet. And the stars. Mostly quiet.   #funny
+? trad:running
+- Running club. I don't run. I take the ladder. All of it. That's plenty.   #funny
+? trad:harvest
+- Harvest morning! My beans are ready. I'm... I'm very proud of the beans.   #warm
+? trad:hull-lights
+- Hull lights. I watch from the shuttle bay window. Amadi says it's the best one.
+? trad:founding
+- Founding Day. So many people. I'll stand near the cake. People talk to you near cake.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. I like it. Everyone's quiet at once. Nobody minds that I am.   #warm
+
+== smalltalk
+? trad:works-tea
+- Tea. Biscuit. Sit. Good.
+? trad:harvest
+- The beans. Look at the beans.

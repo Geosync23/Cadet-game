@@ -546,3 +546,31 @@
 - The bay here hums in a different key. I'm getting used to it. Tell Calder their job board's longer than ours. She'll pretend she doesn't care.
 ? tier>=friend
 - Built a music box out of this ship's spares. Three notes. Wound it up and thought of the Wren. Eat something. Sleep. Write back.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:greening tier>=acquaintance
+- {hi}. Greening. Everything's growing. Including my appetite. Mostly my appetite.   #funny
+
+== near
+? trad:works-tea
+- Friday tea! Real biscuits. Halloran's not allowed to choose this week.   #funny
+? trad:observatory-night
+- Observatory. I'll look at the stars. Then I'll have a little nap under them.   #funny
+? trad:harvest
+- Harvest morning! I'm on tasting. Nobody gave me that job. I took it.   #funny
+? trad:hull-lights
+- Hull lights. I wired some of those. Every one's on. Get in.
+? trad:founding
+- Founding Day cake! I told Brennan I'd help. She told me I wouldn't.   #funny
+? trad:quiet-watch tier>=friend
+- Quiet watch. I'll think of Mum's shop. Kettle on, radio going. Don't mind me.   #warm
+
+== smalltalk
+? trad:today
+- Something's on. Will there be snacks?   #funny
+? trad:works-tea
+- Friday tea! Biscuits!

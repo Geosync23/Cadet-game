@@ -545,3 +545,45 @@
 - Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.   #funny
 ? tier>=friend mem:moment.torres.scarf
 - Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said "Fine" to you yet? She will.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:sowing tier>=acquaintance !week1:true
+- {hi}! Sowing! New year, new seedlings. Coil three's not impressed. It never is.   #funny
+? season:greening tier>=acquaintance
+- {hi}. Greening! The garden's bursting. I keep finding leaves in my toolbag.   #funny
+? season:harvest tier>=acquaintance
+- Harvest! Brennan wants hands for the crates. I've volunteered both of mine.
+? season:lanterns tier>=acquaintance
+- {hi}! Lanterns. I've knitted a cover for every lantern in the bay. Well, three.   #funny
+
+== near
+? trad:works-tea
+- Friday tea! Halloran's got the biscuits. Grab your mug off the hook before Pell does.   #funny
+? trad:quiz
+- Quiz night. The music round's mine. Takahashi says it's theirs. We'll see.   #funny
+? trad:running
+- Running club! I run like I talk. Fast, then out of breath, then fast again.   #funny
+? trad:film
+- Film night! I knit right through it. I've never seen the end of anything.   #funny
+? trad:market
+- Swap meet! I'm trading a scarf for wool. Then I'll knit the wool into a scarf.   #funny
+? trad:harvest
+- Harvest morning! Garden's full. Mind the bean trellis. I didn't. Twice.   #funny
+? trad:hull-lights
+- Hull lights tonight. Find a window. The whole Wren glows. Best sight in the Service.   #warm
+? trad:founding
+- Founding Day! Cake, and the Captain says a few words. I always well up. Every year.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. Find a window. Think of someone far off. That's all. It's enough.   #warm
+
+== smalltalk
+? trad:today
+- Something on tonight! I love a something.   #funny
+? season:lanterns
+- Lanterns! Every corridor's a story.
+? trad:works-tea
+- Tea! Mugs off the hook, everyone!
