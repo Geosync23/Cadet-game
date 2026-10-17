@@ -215,6 +215,16 @@ taken from what's already written about them; **for everyone else, use their nam
 | Envoy Saruth | they / them | the head writer's call: the Veyli are not described in human terms; "the Envoy" is always safe |
 | You (the player) | never gendered | the crew say "you", your name, "cadet", "the new hand" |
 
+### 4a. Works crew (writer-works, batch 1)
+
+Chosen by the Works writer on the head writer's ruling (a natural mix); Halloran and Rahman were already set.
+
+| Who | Pronouns |
+| --- | --- |
+| Mateo Navarro, Emeka Halloran, Alejandro Reyes, Theo Teague, Femi Rossi, Davi Keane, Saad Salo | he / him |
+| Bea Silva, Leila Eklund, Signe Moreau, Marta Soto, Maeve Volkov, Petra Jovanovic, Asha Amadi | she / her |
+| Farah Rahman, Ilse Quist | they / them |
+
 ## 5. Shared quirks: details the roster gives to several people
 
 The roster's generator gave some life details to more than one person. They are all canon, so they're **ship things**,

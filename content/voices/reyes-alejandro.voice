@@ -1,26 +1,34 @@
 @voice reyes-alejandro
-// Works writer, wave 1b draft. Engine officer, night shift. Roster: restless, nervous; lingers at meals, night owl,
-// musician. A cat back home on Port Halloran (talks about it a lot); writes letters home to Lisk every rest day, on paper.
-// Shares the coils with Torres (day) and Keane, Jovanovic (night): friendly rivals over whose shift the coils prefer.
-// With juniors: over-explains when nervous, then apologises for over-explaining. Mood tells: low, taps a rhythm on
-// any surface; high, plays at the music room after shift.
+// Works writer. Alejandro Reyes (he/him): engine officer, night shift, cabin 4-16. Restless, nervous. Knows the drive
+// coils' moods (Torres on days, Reyes on nights: notes at shift change; Torres says coil three sulks, Reyes says it's
+// just shy). Lingers at meals, night owl, musician. A cat back home on Port Halloran (talks about it a lot). Writes
+// letters home to Lisk every rest day, on paper.
+//
+// HOW HE TALKS: fast and in loops, nerves first, then warmth. Jumps from the coils to the cat and back again. Ends
+// with "anyway". Apologises for talking too much, then keeps talking.
+// WITH JUNIORS: over-explains when nervous, then says sorry for over-explaining. Always gives you the long version.
+// WHAT HE NOTICES: tiny changes in the coils' sound; the time; whether his letter's ready for the post bag.
+// MOOD TELLS: low = taps a rhythm on any surface; high = plays in the music room after his shift.
+// NEVER: snaps at anyone; says the coils are "his"; talks about a bad night on the coils before friend tier.
+// RUNNING: coil three is shy, not sulky (the notes with Torres); the cat, who is "furious" about the tour; the
+// letters to Lisk.
 tpl: chatty
-talk: Talks fast and in loops, nerves first, then warmth; jumps from the coils to the cat and back; finishes with "anyway".
-cares: the drive coils on the night watch | the cat back home | writing letters home on paper | music after shift
-jokes: the cat back home, who is "furious" about the tour | the coils behave for Torres in the day and sulk for Alejandro at night
+talk: Fast and looping; nerves first, then warmth; jumps from the coils to the cat and back; ends with "anyway".
+cares: the drive coils on the night watch | the cat back home | his letters home to Lisk | music after shift
+jokes: coil three is shy, not sulky, whatever Torres says | the cat back home is furious about the tour | his letters are always one page too long
 hi: Oh! Hi | Hey, hey | Hello, hi
 bye: Right, anyway | Off I go | Catch you later
-yes: Yes! Sure | Course, course | Sure thing
+yes: Yes, sure | Course, course | Sure thing
 thanks: Oh, thanks | Thanks, really | You're kind
 wow: Oh, wow | Ha, look at that
 sigh: Ah, anyway | Oh well
 nick: - | - | {me} | {me} | {me}
 needs: cheer
 openness: open
-loves: music | cats
-likes: tea | letters
-invites: music room | film
+loves: music | card
+likes: tea | book
+invites: jam | film
 joy: the cat back home, and the letters that come about it
 thread: notgood
-keepsake: a sheet of music Alejandro wrote on the night watch
-avoid: the coils going wrong on the night watch (until friend tier)
+keepsake: a sheet of music he wrote on the night watch
+avoid: a bad night on the coils (until friend tier)

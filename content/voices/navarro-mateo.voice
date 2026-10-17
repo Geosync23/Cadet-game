@@ -1,12 +1,21 @@
 @voice navarro-mateo
-// Works writer, wave 1b draft. Works systems officer, night shift. Roster: reliable, sharp-eyed; gym, calls home,
-// early riser (for a night-shifter: up by early afternoon), runner. Keeper of the lost-property box; a twin on another survey ship.
-// With juniors: patient, shows rather than tells, never makes you feel slow. Mood tells: low, Mateo reorganises the
-// lost-property box; high, Mateo hums while doing the board. Handover: leaves neat night notes for the day team.
+// Works writer. Mateo Navarro (he/him): Works systems officer, night shift, cabin 4-15. Reliable, sharp-eyed. Runs
+// the board overnight; keeps one of the ship's four lost-property boxes (each keeper thinks they're the only one).
+// A twin on the Halcyon (one of the Halcyon's three Wren twins). Gym regular, runner; up by early afternoon.
+//
+// HOW HE TALKS: calm, exact, unhurried. Short sentences, no fuss. Says "It'll turn up" about almost anything, and
+// it usually does. Mentions small things kindly ("Your collar's folded. There.").
+// WITH JUNIORS: patient; shows rather than tells; never makes you feel slow. Leaves the day team neat handover
+// notes with headings.
+// WHAT HE NOTICES: what's out of place, and whose it is. A spanner on the wrong hook. A missing glove.
+// MOOD TELLS: low = reorganises the lost-property box; high = hums while he tidies the board.
+// NEVER: hurries; gossips about whose things turn up where; talks about his twin before friend tier.
+// RUNNING: the lost-property box ("Third glove this week. Same hand."); the other three boxes he hasn't heard of;
+// the handover notes, with a summary at the top.
 tpl: steady
-talk: Calm, exact and unhurried; short sentences; notices small things and mentions them kindly; says "It'll turn up" about almost anything.
-cares: the job board being tidy | the lost-property box | the night handover notes | a twin on another survey ship
-jokes: everything lost on the Wren ends up in the box, and Mateo knows whose it is | Mateo's handover notes have headings and a summary
+talk: Calm, exact, unhurried; short sentences; notices small things and mentions them kindly; "It'll turn up."
+cares: the board tidy for the day shift | the lost-property box | handover notes done properly | his twin on the Halcyon
+jokes: everything lost on the Wren ends up in his box, and he knows whose it is | there are three other boxes he doesn't know about | his handover notes have headings and a summary
 hi: Hello | Evening | There you are
 bye: Mind how you go | Take care, then | See you at handover
 yes: Can do | Noted | Leave it with me
@@ -17,9 +26,9 @@ nick: - | - | {me} | {me} | {me}
 needs: listen
 openness: normal
 loves: book | tea
-likes: running | puzzles
+likes: card | game
 invites: running | observatory
-joy: the lost-property box, and reuniting things with owners
+joy: the lost-property box, and putting things back in the right hands
 thread: lonely
 keepsake: a single odd glove from the box, "for when its twin turns up"
-avoid: the twin's ship, until friend tier
+avoid: his twin, until friend tier | whose things he's found

@@ -1,13 +1,19 @@
 @voice eklund-leila
-// Works writer, wave 1b draft. Works technician, junior, day. Roster: dry humour, meticulous; calls home, lounge
-// regular. Collects old maps of Hesper Dock; sends voice messages to a grandmother on Kesh. Shows you the call-home
-// booths on your first Tuesday (plan Part 1). Davi Keane's grandmother is on Kesh too: they compare notes.
-// With juniors: deadpan, then quietly helpful; corrects your toolbelt. Mood tells: low, the grandmother hasn't
-// answered; high, a new old map.
+// Works writer. Leila Eklund (she/her): Works technician, junior, day shift, Bunk 5. Dry humour, meticulous. Calls
+// home; lounge regular. Collects old maps of Hesper Dock. Sends voice messages to a grandmother on Kesh (so does
+// Davi Keane: different grandmothers, possibly). Shows you the call-home booths on your first Tuesday.
+//
+// HOW SHE TALKS: deadpan and precise. Says less than she means and means all of it; the joke lands a second late.
+// Almost never an exclamation mark.
+// WITH JUNIORS: deadpan, then quietly helpful. Will fix your toolbelt without asking.
+// WHAT SHE NOTICES: order; the booth queue (she can time it to the minute); a map that's out of date.
+// MOOD TELLS: low = her grandmother hasn't answered; high = a new old map.
+// NEVER: gushes; talks about her grandmother's health before friend tier.
+// RUNNING: her maps of Hesper Dock are all out of date, and that's the point; the booth queue; the toolbelt.
 tpl: dry
-talk: Deadpan and precise; says less than is meant and means all of it; the joke lands a second after the line.
-cares: the grandmother on Kesh | old maps of Hesper Dock | a tidy toolbelt | the call-home booth queue
-jokes: Leila's maps of Hesper Dock are all out of date, and that's the point | the booth queue, which Leila can time to the minute
+talk: Deadpan and precise; says less than she means; the joke lands a second after the line.
+cares: her grandmother on Kesh | old maps of Hesper Dock | a tidy toolbelt | the call-home booth queue
+jokes: her maps are all out of date, and that's the point | she can time the booth queue to the minute | she and Keane may or may not have the same grandmother
 hi: Oh. Hello | Hi | You again
 bye: Off you go | Don't get lost | Bye, then
 yes: Fine | If I must | Yes
@@ -17,10 +23,10 @@ sigh: Of course | Naturally
 nick: - | - | {me} | {me} | {me}
 needs: share
 openness: guarded
-loves: maps | tea
-likes: book | quiet
-invites: lounge | tiles
+loves: book | card
+likes: tea | game
+invites: tiles | swap
 joy: old maps of Hesper Dock, the older the better
 thread: family
-keepsake: an old map of Hesper Dock with a street marked "you are here"
-avoid: the grandmother's health (until friend tier)
+keepsake: an old map of Hesper Dock, with "you are here" in her writing
+avoid: her grandmother's health (until friend tier)

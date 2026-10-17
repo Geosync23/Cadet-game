@@ -1,13 +1,20 @@
 @voice salo-saad
-// Works writer, wave 1b draft. Engine technician, junior, day. Roster: cheerful, patient; skips breakfast, early to
-// bed. "Keeps the engine room clean enough to eat in." A twin on another survey ship; grew up on the Tevan belt,
-// misses the rain.
-// With juniors: the most patient teacher in the engine room; will explain the same thing four times, smiling.
-// Mood tells: low, no news from the twin; high, a letter from the twin read out at tea.
+// Works writer. Saad Salo (he/him): engine technician, junior, day shift, Bunk 7. Cheerful, patient. Skips
+// breakfast, early to bed. "Keeps the engine room clean enough to eat in" (with Keane on nights: the cleanest engine
+// room in the Survey Service, they say). A twin on the Halcyon (one of three; the Halcyon finds it very funny). Grew up
+// on the Tevan belt; misses the rain.
+//
+// HOW HE TALKS: cheerful, slow and patient; never rushes anyone. Tells his twin's news like a serial, one episode a
+// week ("Last time on the Halcyon...").
+// WITH JUNIORS: the most patient teacher in the engine room. He'll explain the same thing four times, smiling.
+// WHAT HE NOTICES: who's in a hurry (and slows them down); the clock, near ten.
+// MOOD TELLS: low = no news from his twin; high = reads the twin's letter out at Works tea.
+// NEVER: hurries; stays up past ten; tells what his twin said last time before friend tier, when it was hard.
+// RUNNING: the twin's news, one episode at a time; in bed by ten, every night; the cleanest engine room aboard.
 tpl: steady
-talk: Cheerful, slow and patient; never rushes anyone; tells the twin's news like a serial, one episode a week.
-cares: the engine room, kept clean | the twin's news from the other ship | the Tevan belt | an early night
-jokes: the twin's news, told one episode at a time | Saad is in bed by ten, every night, no exceptions
+talk: Cheerful, slow and patient; never rushes anyone; tells his twin's news like a serial.
+cares: the engine room, kept clean | his twin's news from the Halcyon | the Tevan belt | an early night
+jokes: his twin's news, told one episode at a time | in bed by ten, every night, no exceptions | the Halcyon has three Wren twins and thinks it's hilarious
 hi: Hello, hello | Hi there | Oh, hello
 bye: Night, then | Take your time | See you
 yes: Sure | No rush, yes | Happy to
@@ -17,10 +24,10 @@ sigh: Ah, well | No matter
 nick: - | - | {me} | {me} | {me}
 needs: listen
 openness: normal
-loves: letters | tea
-likes: cleaning | music
-invites: tea | lounge
-joy: the weekly letter from the twin on the other ship
+loves: card | tea
+likes: book | music
+invites: tiles | film
+joy: the weekly letter from his twin on the Halcyon
 thread: family
-keepsake: a picture the twin drew of the other ship
-avoid: what the twin said last time (until friend tier)
+keepsake: a drawing his twin made of the Halcyon
+avoid: what his twin said last time, when it was hard (until friend tier)

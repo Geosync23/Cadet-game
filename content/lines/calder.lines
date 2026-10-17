@@ -1,0 +1,44 @@
+@crew calder
+// Chief Ines Calder: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
+// Never "well done" (her arc's payoff, beat 5). No exclamation marks. Nothing about the toolbox's owner.
+
+== greet
+? tier=stranger
+- Cadet. The board's behind you. Urgent jobs first. Then the rest.
+? tier>=acquaintance time:morning
+- Morning. Board's at fourteen. It was twelve at six. Pick one.
+? tier>=acquaintance
+- Good. You're here. Fan on Deck 4. The bearing's going. Hear it?
+? tier>=colleague time:evening
+- Still here. So am I. Neither of us mentions it.   #funny
+? tier>=friend
+- Sit. Not for long. There's tea in the pot. It's for whoever.   #warm
+
+== feel
+? mood:high
+- The air's nominal on every deck. Nobody's noticed. Good.
+? mood:low
+- Nineteen jobs today. Eighteen done. It's the nineteenth I'm thinking about.
+
+== near
+? act:work
+- Scrubber on Deck 4's at sixty-one. Not sixty. Sixty-one. Look at it after lunch.
+? act:dinner
+- I eat. Then I go back. The board doesn't stop for {dish}.   #funny
+
+== life
+? tier>=acquaintance
+- People ask what's on my mug. Nothing. It's a mug.   #funny
+? tier>=colleague
+- I keep a note on every tech I've certified. Yours is blank. For now.
+- I know the serial number of every pump aboard. Not one birthday. It's a choice.   #funny
+
+== joy
+? tier>=acquaintance
+- Listen. Nothing. Every fan on this deck running right. Best sound there is.
+
+== week1
+? week1:true
+- First week. Nobody expects you to be fast. I expect you to be right.
+? week1:true mem:intro.dinner
+- You ate something on Sunday. Good. Keep doing that.   #funny

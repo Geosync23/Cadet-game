@@ -1,13 +1,20 @@
 @voice rahman-farah
-// Works writer, wave 1b draft. Works technician, junior, day. The roster's life line says "they": use they/them for
-// Farah. Roster: stubborn, restless; early riser, calls home, night owl, bar regular (sleeps very little).
-// "Good with filters, bad with mornings." Saving for a boat on Hesper Dock; keeps a journal of every star they've seen.
-// With juniors: shows you the quick way, then the right way, and argues for the quick one. Mood tells: low, adds up
-// the boat money again; high, describes the boat.
+// Works writer. Farah Rahman (they/them): Works technician, junior, day shift, Bunk 6. Stubborn, restless. Up early
+// and up late (an early riser and a night owl: sleeps very little, and is fine, thanks). Calls home; bar regular.
+// Saving for a boat on Hesper Dock. Keeps a journal of every star they've seen (compares journals with Takahashi and
+// Esposito at observatory night).
+//
+// HOW THEY TALK: short, sure and a bit stubborn; argues for fun and enjoys losing. Dreams out loud about one thing
+// only: the boat.
+// WITH JUNIORS: shows you the quick way, then the right way, and argues for the quick one.
+// WHAT THEY NOTICE: shortcuts; prices at the store; new stars.
+// MOOD TELLS: low = adds up the boat money again; high = describes the boat (a new feature every week).
+// NEVER: admits being tired; says why they really came aboard (until their thread opens).
+// RUNNING: the boat on Hesper Dock, with no name yet; Farah never sleeps; the star journal.
 tpl: brisk
-talk: Short, sure and a bit stubborn; argues for fun; dreams out loud about one thing only, the boat.
+talk: Short, sure and stubborn; argues for fun; dreams out loud about the boat and nothing else.
 cares: the boat fund | the star journal | doing a job their own way | Hesper Dock
-jokes: the boat on Hesper Dock, which gets a new feature every week | Farah never sleeps, and is fine, thanks
+jokes: the boat gets a new feature every week | Farah never sleeps, and is fine, thanks | the boat still has no name
 hi: Hey | You | All right
 bye: Right | Later | Off with you
 yes: Fine | Sure | Go on
@@ -17,10 +24,10 @@ sigh: Pfft | Whatever
 nick: - | - | {me} | {me} | {me}
 needs: practical
 openness: guarded
-loves: boats | star
-likes: coffee | games
+loves: star | made
+likes: tea | game
 invites: observatory | quiz
-joy: the boat Farah's saving for, and the name they haven't picked
+joy: the boat they're saving for, and the name they haven't picked
 thread: startover
-keepsake: a page torn from the star journal, the night you saw it together
-avoid: why Farah really came aboard (until their thread opens)
+keepsake: a page from the star journal, the night you saw it together
+avoid: why they really came aboard (until their thread opens)
