@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.62.3
+   STARSHIP CADET: CSV Wren                           build 0.62.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7560,7 +7560,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.62.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.62.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -28044,7 +28044,7 @@ function homeCallable(t = shipNow()) {
   const [HC, HM] = homeBaked(); if (!HC || homeCalledToday(t)) return [];
   let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return [];   // the relay's down while a ship-wide event starts
   const ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
-  return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).map(k => {
+  return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homeNext(k, t) || homeChatPick(k, t)).map(k => {   // only someone with something to play (reviewer 1c)
     const n = homeNext(k, t), d = n && HM[n];
     return { contact: k, name: HC[k].name, due: !!d, first: homePeekC(k).b === 0, hint: d && d.hint ? homeFill(d.hint, homeP(HC[k]), homeCtx(t)) || d.hint : null };
   });
@@ -28054,7 +28054,7 @@ function homeCallable(t = shipNow()) {
 // reaction first (a scene whose when: uses cue:, came:, friend: or flag:intro.*: each plays once, c.news), else a scene
 // whose when: holds and that's not among the last HOME_HEARD you heard from them (c.h), ones about another person's
 // story first (their window is short), then ones with a when: (the arc stage, the day), else the one heard longest ago. Old scenes' `send` markers are left out.
-const HOME_HEARD = 16;
+const HOME_HEARD = 16, HOME_NEWS_MAX = 8;               // scenes remembered per person: the last 16 heard, the 8 newest news reactions
 const homeTag = e => socHash(JSON.stringify(e.lines)).toString(36);
 const homeIsNews = e => !!e.when && Object.keys(e.when).some(k => k === 'cue' || k === 'came' || k === 'friend' || (k === 'flag' && [].concat(e.when.flag).some(v => /^intro\./.test(String(v)))));
 function homeChatPick(k, t, msg) {                       // the ordinary scene a call (or a recorded message: msg, no news) plays now, or null
@@ -28080,7 +28080,7 @@ function homeScript(k, t) {                              // the call as a script
   if (!homeCallable(t).some(x => x.contact === k)) return null;
   const L = homeLines(k, t); if (!L) return null;
   const c = homeC(k); c.day = homeState().call = Math.floor(t / 1440) + 1; if (!L.d) c.chat = Math.floor(t);   // they picked up: your one call home today
-  if (L.e) { const g = homeTag(L.e); if (homeIsNews(L.e)) { c.news = c.news || []; if (!c.news.includes(g)) c.news.push(g); }   // heard: news once, the rest not again soon
+  if (L.e) { const g = homeTag(L.e); if (homeIsNews(L.e)) { c.news = c.news || []; if (!c.news.includes(g)) c.news = c.news.concat(g).slice(-HOME_NEWS_MAX); }   // heard: news once, the rest not again soon
     else c.h = (c.h || []).filter(x => x !== g).concat(g).slice(-HOME_HEARD); }
   if (c.msg && !c.msg.done) c.msg.done = true;            // a call answers their recorded message
   return { title: L.title, lines: L.lines, onEnd: f => { delete MEETING_SCRIPTS['home:' + k]; homeDone(k, L, f, t); } };
