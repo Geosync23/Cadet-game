@@ -21,7 +21,7 @@
 #   food runs in live play (0.33.21): the crew take every food run soon after its wait (5f)
 #   the board through a week (0.33.32): jobs for you on every weekday shift, none held on your days off (5i)
 #   the garden (0.33.34): grow lights, gardenAt, the crate run and carryWaiting (5j)
-#   reserved jobs and job notes (Pillar 4): jobReserve, jobRelease, simNote('job') (5k)
+#   reserved jobs and job notes (Pillar 4): jobReserve, jobRelease, simNote('job', 'repair', 'jobAbandoned', 'jobUnclaimed') (5k)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
@@ -105,11 +105,11 @@ RUN = r"""(({ days, mode, crew, perHour, events }) => {
   // nobody on two jobs at once; every job inside its person's work block (whereIs says work all through)
   const byWho = {}; out.overlap = []; out.offShift = [];
   for (const j of J) if (j.segs && j.claimedBy !== 'you') {
-    (byWho[j.claimedBy] = byWho[j.claimedBy] || []).push([j.start, j.end]);
+    (byWho[j.claimedBy] = byWho[j.claimedBy] || []).push([j.start, j.end, j.id, j.done, j.status]);
     const p = ppl.get(j.claimedBy);
     for (let m = j.start; m < j.end; m += 5) { const w = planWhere(p, m); if (w.act !== 'work') { out.offShift.push(j.id + ' ' + p.id + ' ' + w.act); break; } }
   }
-  for (const who in byWho) { const v = byWho[who].sort((a, b) => a[0] - b[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) out.overlap.push(who); }
+  for (const who in byWho) { const v = byWho[who].sort((a, b) => a[0] - b[0]); for (let i = 1; i < v.length; i++) if (v[i][0] < v[i - 1][1]) out.overlap.push(who + " " + JSON.stringify([v[i - 1], v[i]])); }
   // the overlay: someone mid-job is where the job says
   out.endJobs = JSON.stringify([SHIP.jobs, SHIP.stores, SHIP.hold]);
   JOBS_ON = true;
@@ -657,7 +657,13 @@ with sync_playwright() as pw:
       out.notes = mine.join(' ');
       // an ordinary job left for 12 hours lapses, with a note
       const o = openJobs('you').find(x => !x.asked); out.lapse = null;
-      if (o) { claimJob(o.id); setShipNow(shipNow() + 13 * 60); machinesNow(); out.lapse = notes.some(([k, d]) => k === 'job' && d.id === o.id && d.step === 'lapse'); }
+      if (o) { claimJob(o.id); setShipNow(shipNow() + 13 * 60); machinesNow(); out.lapse = notes.some(([k, d]) => k === 'job' && d.id === o.id && d.step === 'lapse') && notes.some(([k, d]) => k === 'jobAbandoned' && d.id === o.id); }
+      // for the social side: repairs (yours, with the state it was in, and the crew's), a job you drop, jobs left for you that went to the crew
+      const o2 = openJobs('you')[0]; out.dropAb = o2 ? claimJob(o2.id) && dropJob(o2.id) && notes.some(([k, d]) => k === 'jobAbandoned' && d.id === o2.id) : null;
+      const rep = notes.filter(([k]) => k === 'repair').map(([k, d]) => d);
+      out.repairYou = rep.filter(d => d.who === 'you').map(d => d.machine + ':' + d.state).join(); out.repairCrew = rep.filter(d => d.who !== 'you').length;
+      out.unclaimed = notes.filter(([k]) => k === 'jobUnclaimed').length; out.unclaimedOnce = new Set(notes.filter(([k]) => k === 'jobUnclaimed').map(([k, d]) => d.id)).size === out.unclaimed;
+      out.badShape = notes.filter(([k, d]) => (k === 'repair' && !(d.who && d.machine && d.state)) || ((k === 'jobAbandoned' || k === 'jobUnclaimed') && !('machine' in d && 'dept' in d))).length;
       window.__sc("simNote = window.__sn0"); if (!window.__sn0) window.__sc("simNote = undefined");
       SHIP.jobs = SHIP.jobs.filter(j => !j.reserved); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
       setShipNow(t0);
@@ -666,10 +672,11 @@ with sync_playwright() as pw:
     print(f"Reserved jobs: {rs['ids']} on {rs['machines']} (tiers {rs['tiers']}, panels {rs['panels']}, make minutes {rs['makeMins']}); asking again {rs['again']}, looked up {rs['looked']}")
     print(f"  slot 1: early {rs['early']}, on the board {rs['onBoard']} asked {rs['asked']}, machine {rs['faulty']}, crew see it {rs['crewSee']}, took {rs['took']}, stops '{rs['stops']}', "
           f"kept past 14 h {rs['kept']}, turned in {rs['turned']}; notes '{rs['notes']}'")
-    print(f"  slot 2 untaken: crew before 17:00 {rs['crewBefore']}, crew took it {rs['crewAfter']}; slot 3 released {rs['released']}; an ordinary job's lapse noted {rs['lapse']}")
+    print(f"  slot 2 untaken: crew before 17:00 {rs['crewBefore']}, crew took it {rs['crewAfter']}; slot 3 released {rs['released']}; an ordinary job's lapse noted (job and jobAbandoned) {rs['lapse']}")
+    print(f"  social notes: your repairs {rs['repairYou']}, the crew's {rs['repairCrew']}, a dropped job abandoned {rs['dropAb']}, jobUnclaimed {rs['unclaimed']} (once each {rs['unclaimedOnce']}), bad shape {rs['badShape']}")
     if (len(set(rs['ids'])) != 3 or not rs['again'] or not rs['looked'] or not rs['panels'] or max(rs['tiers']) > 1 or rs['machines'][0] == rs['machines'][1]
         or rs['early'] or not rs['onBoard'] or not rs['asked'] or rs['faulty'] not in ('faulty', 'failing') or rs['crewSee'] or not rs['took']
-        or rs['stops'] != 'fetch make job' or rs['makeMins'] != [30, 30, 30] or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False
+        or rs['stops'] != 'fetch make job' or rs['makeMins'] != [30, 30, 30] or not rs['kept'] or not rs['turned'] or rs['crewBefore'] or not rs['crewAfter'] or not rs['released'] or rs['lapse'] is False or rs['dropAb'] is False or not rs['repairYou'].endswith(':faulty') or rs['repairCrew'] < 1 or rs['unclaimed'] < 1 or not rs['unclaimedOnce'] or rs['badShape']
         or not all(x in rs['notes'].split() for x in ['take/1', 'stop:fetch/1', 'stop:make/1', 'stop:job/1', 'done/1', 'turnin/1'])):
         fail('reserved jobs and job notes')
 

@@ -3703,6 +3703,11 @@ DECKS[4] = {
     { id: '4-pump-2', kind: 'heatpump', at: [19, 19], room: 't', face: 'e', panel: [20, 19], look: { lamp: [0, 0.45, 0.33], drip: [0, 0.42, 0.38] } },
     { id: '4-junction-1', kind: 'lights', at: [18, 19], room: 'k', face: 'n', panel: [18, 18], look: { lamp: [0, 1.2, 0.13], drip: [0, 0.9, 0.18] } },
     { id: '4-junction-2', kind: 'lights', at: [42, 19], room: 'y', face: 'n', panel: [42, 18], look: { lamp: [0, 1.2, 0.13], drip: [0, 0.9, 0.18] } },
+    // the laundry's four washers (C9, 0.38.8): real machines in place of section 17's stand-ins (same ids), Washer 1 by the door end
+    { id: '4-washer-1', kind: 'washer', at: [14, 19], room: 'l', face: 'n', panel: [14, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-2', kind: 'washer', at: [13, 19], room: 'l', face: 'n', panel: [13, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-3', kind: 'washer', at: [12, 19], room: 'l', face: 'n', panel: [12, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
+    { id: '4-washer-4', kind: 'washer', at: [11, 19], room: 'l', face: 'n', panel: [11, 18], look: { lamp: [0, .75, .34], drip: [0, .12, .37], light: [0, .95, .34] } },
   ],
   hull: { sternX: 2, stern: 1.5, bowFrom: 40, bowLen: 9.6, byFace: true },   // stern line, stern corner radius, where the bow curve starts, how far it reaches; one hull piece per facing (0.30.11)
   // 0.17.1: the bunk rooms grew, so the floor painter draws a different count of random numbers west of column 21. At column 21
@@ -3864,6 +3869,10 @@ DECKS[4] = {
     { id: '4-pump-2-svc', machine: '4-pump-2', type: 'work:works', at: [20, 19], face: 'w', pose: 'work', room: 't' },
     { id: '4-junction-1-svc', machine: '4-junction-1', type: 'work:works', at: [18, 18], face: 's', pose: 'work', room: 'k' },
     { id: '4-junction-2-svc', machine: '4-junction-2', type: 'work:works', at: [42, 18], face: 's', pose: 'work', room: 'y' },
+    { id: '4-washer-1-svc', machine: '4-washer-1', type: 'work:works', at: [14, 18], xy: [14.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-2-svc', machine: '4-washer-2', type: 'work:works', at: [13, 18], xy: [13.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-3-svc', machine: '4-washer-3', type: 'work:works', at: [12, 18], xy: [12.5, 18.75], face: 's', pose: 'work', room: 'l' },
+    { id: '4-washer-4-svc', machine: '4-washer-4', type: 'work:works', at: [11, 18], xy: [11.5, 18.75], face: 's', pose: 'work', room: 'l' },
   ],
   // the officer whose bed is in cabin num ('4-06'), from ROSTER (0.30.12); none for guest and spare cabins
   officer(num) { return /^4-\d\d$/.test(num) && typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.bed === num) || null : null; },
@@ -11921,7 +11930,11 @@ function eventWear(key, h) {
 // ---- the machines' state: SHIP.machines[id] = { cond, state, lastService }, brought up to date hour by hour ----
 SHIP.machines = {};
 const CART_RUNS = new Map(), CART_PENDING = [];         // food runs set by cartClaim (by hour), and those not yet on the job list
-const JOB_NOTE_Q = [];                                   // your jobs that lapsed inside jobsHour: noted once the hours have run (jobNote)
+// ship notes from section 17 (simNote, section 13's bus) wait here and go out once the hours have run or your action is
+// done (simFlush), never from inside jobsHour: a listener may read the jobs or the schedules
+const SIM_Q = [];
+const simLater = (kind, d) => { if (typeof simNote === 'function') SIM_Q.push([kind, d]); };
+function simFlush() { while (SIM_Q.length) { const [k, d] = SIM_Q.shift(); simNote(k, d); } }
 let MACH_HOUR = null, MACH_SEEN = -1, MACH_REV = 0;     // the first ship hour not yet run; the last time asked; a counter of changes
 const machFresh = m => Math.round((70 + 30 * schedU(m.seed, 0, 1)) * 10) / 10;   // a new game: 70-100, a few already worn
 function machinesReset(hour) {
@@ -11953,7 +11966,7 @@ function machinesNow() {
     for (const k in MACH_EXTRA) delete MACH_EXTRA[k];
   }
   if (CART_PENDING.length) cartPost();
-  while (JOB_NOTE_Q.length) jobNote(JOB_NOTE_Q.shift(), 'lapse');
+  simFlush();
   return SHIP.machines;
 }
 // put a machine right: condition back to `to` (100: as new), serviced now
@@ -12439,8 +12452,9 @@ function jobEffect(j, t, by) {
   if (j.chore === 'garden' && by === 'you' && j.dropAt === undefined && typeof galleyCarryLand === 'function') galleyCarryLand(j.id);   // finished without ticking off the drop: they land now
   if (j.kind === 'chore' || j.kind === 'favour') { choreDone(j, t); return; }
   if (j.machine) {
-    const s = SHIP.machines[j.machine];
+    const s = SHIP.machines[j.machine], was = s && s.state;
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
+    if (s && by) simLater('repair', { who: by, machine: j.machine, state: was, kind: j.kind, deck: j.deck, id: j.id });   // the state it was in
   } else if (j.cargo === 'meals') {
     // the meals left the hold when the run was set (cartClaim) and the galley lands them (section 16): at arriveAt
     // for the crew's runs, and when you unload for yours (0.33.19: cartWaiting held them till now)
@@ -12455,7 +12469,7 @@ function jobsHour(h) {
   // 1. finished jobs (the crew's; yours finish when you finish them, or go back on the board after YOU_KEEP)
   for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you' && j.done <= t) jobFinish(j, j.done, j.claimedBy);
   for (const j of jobs) if (j.kind === 'favour' && j.status !== 'done' && j.expires && t >= j.expires && !j.workDone) { j.status = 'done'; j.doneAt = t; j.doneBy = null; j.lapsed = true; }
-  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour' && !j.workDone && !heldForYou(j) && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; JOB_NOTE_Q.push(j); }
+  for (const j of jobs) if (j.claimedBy === 'you' && j.status === 'claimed' && j.kind !== 'favour' && !j.workDone && !heldForYou(j) && t - Math.max(j.start, j.touched || 0) >= YOU_KEEP) { j.claimedBy = null; j.status = 'open'; delete j.start; delete j.touched; jobNote(j, 'lapse'); abandonNote(j); }
   reservedHour(t, jobs);
   // 2. the weekly delivery: storage topped up to STOCK, and a week of meals once the galley keeps a cold store
   if (weekday(d) === DELIVERY.day + deliveryLate(d) && h % 24 === DELIVERY.hour) {
@@ -12485,7 +12499,8 @@ function jobsHour(h) {
   for (const j of jobs) if ((j.cargo === 'meals' || j.chore === 'garden') && j.status === 'open' && t >= j.found + CART_GONE) { j.status = 'done'; j.doneAt = t; j.doneBy = null; }
   // 4. the crew on shift claim jobs: the most urgent first; each goes to the free crew member with the lowest
   // tier that may do it. Easy routine jobs wait CREW_LEAVE for you first.
-  const busy = new Map(); for (const j of jobs) if (j.status === 'claimed' && j.claimedBy !== 'you') busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
+  // busy till their last job's route ends, the walk back included: a job done at j.done still has them walking to j.end (0.33.38)
+  const busy = new Map(); for (const j of jobs) if (j.claimedBy && j.claimedBy !== 'you' && j.end > t) busy.set(j.claimedBy, Math.max(busy.get(j.claimedBy) || 0, j.end));
   const crew = schedPeople().filter(jobCrew).sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
   // at most HOLD_MAX small jobs held for you: past that, the oldest go to the crew now (0.33.32)
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && j.cargo !== 'meals' && j.found <= t && t < leaveEnd(j))
@@ -12493,6 +12508,7 @@ function jobsHour(h) {
   for (const j of held.slice(HOLD_MAX)) j.released = true;
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
+  for (const j of todo) if (j.machine && !j.unclaimed && !j.released && forYou(j) && leaveEnd(j) > j.found) { j.unclaimed = true; simLater('jobUnclaimed', { machine: j.machine, dept: null, id: j.id }); }
   for (const j of todo) {
     const missing = [], have = { ...SHIP.stores };
     for (const p of j.parts) { if (have[p] > 0) have[p]--; else missing.push(p); }
@@ -12675,15 +12691,20 @@ function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filt
 // step, reserved, ... }) when you take one ('take'), tick off a stop ('stop', with k and its tag), finish its work ('done'),
 // turn it in ('turnin'), give it up ('drop') or leave it till it lapses ('lapse', sent once the hour has run). reserved:
 // jobReserve's slot, or 0. Inert until section 13's simNote is in
-function jobNote(j, step, o) { if (typeof simNote === 'function' && j.kind !== 'favour') simNote('job', { id: j.id, step, reserved: j.reserved || 0, kind: j.chore || j.kind, machine: j.machine || null, ...o }); }
+function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.id, step, reserved: j.reserved || 0, kind: j.chore || j.kind, machine: j.machine || null, ...o }); }
+// for the social side's reputation and memories (social A): a job of yours you gave up or let lapse unfinished
+// (jobAbandoned), and a machine's job left for you that went to the crew because you didn't take it (jobUnclaimed,
+// once a job, only for a job that was really held for you on your shift). dept: null, the social side works it out
+// from the machine (repDeptOf). A repair done (simNote('repair')) is sent by jobEffect
+const abandonNote = j => { if (j.kind !== 'favour' && !j.workDone) simLater('jobAbandoned', { machine: j.machine || null, dept: null, id: j.id }); };
 function claimJob(id) {
   const j = jobsBoard().find(x => x.id === id);
   if (!j || j.claimedBy || SHIP.jobs.some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour') || PLAYER_TIER < jobTier(j) || (j.machine && ENGINE_KINDS.has(machineById(j.machine).kind))) return false;
-  j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); return true;   // no crew route left on it
+  j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); delete j.segs; delete j.done; delete j.end; MACH_REV++; jobNote(j, 'take'); simFlush(); return true;   // no crew route left on it
 }
 function dropJob(id) {
   const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed');
-  if (!j) return false; j.claimedBy = null; j.status = 'open'; delete j.start; MACH_REV++; jobNote(j, 'drop'); return true;
+  if (!j) return false; j.claimedBy = null; j.status = 'open'; delete j.start; MACH_REV++; jobNote(j, 'drop'); abandonNote(j); simFlush(); return true;
 }
 // take a part off the storage shelf (you carry it; carrying is the player engineer's), or put one back
 function takePart(part) { machinesNow(); if (!(SHIP.stores[part] > 0)) return false; SHIP.stores[part]--; MACH_REV++; return true; }
@@ -12697,7 +12718,7 @@ function finishJob(id) {
   if (TURN_IN) { if (!j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); } }   // done, awaiting turn-in
   else jobFinish(j, shipNow(), 'you');
   machRecord(MACH_HOUR - 1); MACH_REV++;
-  if (!was) jobNote(j, 'done'); if (!TURN_IN) jobNote(j, 'turnin'); return true;
+  if (!was) jobNote(j, 'done'); if (!TURN_IN) jobNote(j, 'turnin'); simFlush(); return true;
 }
 // turning jobs in at the board (0.33.23, for the interactions engineer and plans/pillar3-plan.md "Jobs: take and turn in
 // at the board"). Your job's stops are ticked off with jobStepDone; after the last one (or finishJob) its work is done:
@@ -12720,13 +12741,13 @@ function jobStepDone(id, k) {
   const left = n - j.stepsDone.length - (j.kind === 'favour' && !j.stepsDone.includes(n - 1) ? 1 : 0);   // a favour's last step is handing it back
   const fresh = !j.workDone;
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
-  MACH_REV++; jobNote(j, 'stop', { k, tag: jobStops(j)[k].step }); if (fresh && j.workDone) jobNote(j, 'done');
+  MACH_REV++; jobNote(j, 'stop', { k, tag: jobStops(j)[k].step }); if (fresh && j.workDone) jobNote(j, 'done'); simFlush();
   return { ok: true, left, done: !!j.workDone };
 }
 // turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
 function turnInJob(id) {
   machinesNow(); const j = SHIP.jobs.find(x => x.id === id && x.claimedBy === 'you' && x.status === 'claimed' && x.workDone && x.kind !== 'favour');
-  if (!j) return false; jobFinish(j, shipNow(), 'you'); MACH_REV++; jobNote(j, 'turnin'); return true;
+  if (!j) return false; jobFinish(j, shipNow(), 'you'); MACH_REV++; jobNote(j, 'turnin'); simFlush(); return true;
 }
 
 // ---- event jobs (Pillar 3, C7): a ship-wide event's `jobs` data, posted on the job board for its phase ----
