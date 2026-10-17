@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.32
+   STARSHIP CADET: CSV Wren                           build 0.35.33
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7239,7 +7239,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.32';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.33';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8796,7 +8796,7 @@ function devDay(d) {
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
-    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: g.a.title || 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where, aid: g.a.grp || g.a.id });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
@@ -8838,7 +8838,7 @@ function deviceTick() {
 // own items (devDay), never two at once, never over a meeting, a question, a tip, the Captain's address, a chat card or
 // sleep (they wait; stale ones drop), never while the device is locked, each once (R.heard, saved). Tap: the Schedule;
 // Go there: the goal arrow. Traditions keep their rules: Don't (R.per) skips them, and on shift they're a quiet Calendar
-// badge unless you chose Remind me. Meals and your shift can be switched off (R.everyday); all of it with R.on. ----
+// badge unless you chose Remind me. Meals and your shift can be switched off (R.everyday); all but your appointments with R.on (0.35.33). ----
 const HU_Q = [];                                         // waiting heads-ups, oldest first; HU_Q[0] is on screen when DEV.hu
 const devHeard = k => SHIP.device.calendarRemind.heard.includes(k);
 function devHear(k) { const h = SHIP.device.calendarRemind.heard; h.push(k); if (h.length > 80) h.splice(0, h.length - 80); }
@@ -8862,10 +8862,12 @@ function devHuBusy() {
 }
 function devHeadsTick(t) {
   const R = SHIP.device.calendarRemind;
-  if (!R.on || devLocked()) { HU_Q.length = 0; if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } return; }
+  if (devLocked()) { HU_Q.length = 0; if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } return; }
+  if (DEV.hu && devHuBusy()) devHeadsBack();             // 0.35.33: something that takes the screen (a chat card...) sends a showing strip back to wait
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
-    const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + x.title;
+    const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
     if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
+    if (!R.on && x.kind !== 'appt') continue;            // 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift') && !R.everyday) continue;
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
@@ -9904,7 +9906,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
-      { kind: 'text', text: 'Heads-ups before things on your Schedule start' }, { kind: 'buttons', items: on(R.on, 'heads') },
+      { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
       { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
       { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }] };
   } });

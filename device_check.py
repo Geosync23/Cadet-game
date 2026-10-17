@@ -106,7 +106,7 @@ def run(path):
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
             # heads-ups (0.35.29, built on the calendar reminders): R.ahead (15) ship minutes before a tradition, the strip off
             # shift and a quiet Calendar badge on shift; nothing earlier; none for Don't; Remind me shows even on shift
-            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15;
+            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15; R.on = true;
               const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
               const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min }, hu = () => document.getElementById('devHu');
               const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; devHeadsReset(); delete DEV.notes.calendar;
@@ -145,14 +145,28 @@ def run(path):
               document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
               const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height > 0 && r.height <= 120;
               el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
-              R.on = false; out.off = go(T - 15); R.on = true;
+              R.on = false; out.off = go(T - 15); D.appts = []; out.offMeal = go(bf - 15); R.on = true;
               D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
             print('  heads-ups:', hu)
             check(hu['soon'].startswith('With ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
             check(hu['start'].startswith('With ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
             check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
             check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
-            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'] == '', f'heads-up: on screen, a tap opens the Schedule, off with the switch: {hu}')
+            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'].startswith('With ') and hu['offMeal'] == '', f'heads-up: on screen, a tap opens the Schedule; switched off, only appointments: {hu}')
+            # 0.35.33 (reviewer 2): a showing strip steps back when a chat card opens (it waits); a group that gains a person
+            # isn't announced again
+            cb = g.ev("""(() => { const D = SHIP.device, keepA = D.appts, save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 2, T = (d - 1) * 1440 + 1290;
+              const pl = apptPlaces()[0], ps = apptPeople().slice(0, 2).map(p => p.id), el = document.getElementById('devHu');
+              D.appts = [{ id: 911, grp: 911, with: [ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
+              SHIP.time.day = d; SHIP.time.min = 1290 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const out = { shown: !el.hidden };
+              let c = document.getElementById('chat'), made = false; if (!c) { c = document.createElement('div'); c.id = 'chat'; document.body.appendChild(c); made = true; }
+              const was = [c.hidden, c.className]; c.hidden = false; c.className = 'devchat'; SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.back = el.hidden && HU_Q.length === 1;
+              c.hidden = was[0]; c.className = was[1]; if (made) c.remove(); SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.again = !el.hidden;
+              devHeadsDo('done'); D.appts.push({ id: 912, grp: 911, with: [ps[1] || ps[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' });
+              SHIP.time.min += 1; devTickMin = -1; deviceTick(); out.grown = el.hidden && HU_Q.length === 0;
+              D.appts = keepA; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            print('  heads-up vs chat card, group:', cb)
+            check(cb == {'shown': True, 'back': True, 'again': True, 'grown': True}, f'heads-up: waits while a chat card is open; a grown group is not new: {cb}')
             # section 18's occasions in the Schedule and heads-ups (0.35.30): a booked Captain's table is listed and gets a heads-up
             # with Go there; a chance one (the bridge invite, a surprise) never shows; one already kept doesn't either
             oc = g.ev("""(() => { if (typeof OCCASIONS === 'undefined' || !Array.isArray(SHIP.occasions)) return { own: false };
