@@ -71,3 +71,11 @@ In the probe, 4 of the 25 tradition posts read like this:
 - `newsLoad` copies `s.newsRows` without checking the values. Only a hand-edited save could put junk there, and it only affects the comparison.
 - The `crew` glyph is now unused in `GLYPH` (Relationships uses `people`). Harmless.
 - '+go' looks right in the engineer's screenshot (hands clasped low, knees in). No new meshes, as player_check confirms.
+
+## Addendum: 0.28.47 (48f66e8), a skim
+
+- **The merge of ship-integration 0.60.5:** the sickness fix `sickToday` needs `sd > 0` (the same as leave 0.61.12 and 0.60.5a). Without it, a New game read day 0 as a sick day, which was the slow arrival.
+- **`NEWS_MAX` → `FEED_MAX`:** renamed in all five places in the feed. Section 20's own `NEWS_MAX = 16` is left alone. No top-level name is declared twice in the file.
+- **The save keys don't clash:** section 20 saves its news inside `s.social` (`socSave`), and the feed uses top-level `s.news`.
+- **The lead's question (for the merge with perf 3's trays):** `tableTrays` only walks `DECK_CREW`, and the player is never in it. The player's own tray on the table (`TRAY_ON`) shows only while eating a served tray (player_check: `TRAY_ON.visible` false when sitting without one).
+- I didn't rerun device_check's heads-up failures. The engineer reports the same 9 on released 0.60.5, so they aren't this branch's.
