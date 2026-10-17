@@ -28,8 +28,8 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
   **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
   grey). Pell's home town and the others not listed are unnamed until a writer needs one: ask.
-- **Time:** a ship day is 18 waking hours of play; 06:00 breakfast, 08:00 shift, dinner from 18:00. The day shift runs
-  08:00-16:30; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
+- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-08:00, 08:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+  08:00-17:00; the night shift is its own world (Bunk 8, the inner cabins). Tea break at 10:30 in Works.
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
   of Lanterns. Founding Day is day 100; the quiet watch (a quiet while at the windows for the people you miss) is day 300.
@@ -527,3 +527,4 @@ introduces them), unless noted.
 | Kovac grew up on Marra Station (her roster `home`, roster 0.16.17+); where she's from is no secret, the lift night is (beat 3) | Kovac | head writer 3, with crew designer 3 |
 | **The writing follows the game** (the lead, 0.48.51): never claim what the player will see contradicted. Everyone rides the lift (no crew takes the ladder) and everyone eats breakfast ("skips-breakfast" crew bolt it, eat it standing, or turn up late; they don't miss it) | everyone | head writer 3 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |
+| Career lines (0.48.61): Calder keeps a note on every tech she's trained (her certified list's sibling); Pell gives a let-go friend a screw from the Wren "for your tin"; at the send-off Calder "came to check the ramp seals"; Vance's regulation nine is rest (Marrow jokes about it) | Calder, Pell, Marrow | head writer 4 |

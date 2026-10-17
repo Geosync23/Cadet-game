@@ -115,7 +115,7 @@
 
 == week1
 ? week1:true weekday:mon act:dinner
-- Dinner's six till eight, love. Tray, then the servery, then sit with someone. Anyone.
+- Dinner's five till half eight, love. Tray, servery, then sit with someone. Anyone.
 ? week1:true weekday:mon act:dinner tier<=acquaintance
 - See that shelf? The grab shelf. For emergencies. And Pell.   #funny
 

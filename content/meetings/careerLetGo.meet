@@ -1,0 +1,22 @@
+@meeting careerLetGo
+// Head writer 4: being let go, the day before you leave. Calder in her office: the Chief's last words. Straight,
+// sorry, not cold. "Your note isn't finished" is her list of every junior/tech, with a note on each (canon).
+title: The Chief's office
+from: Chief Ines Calder
+gist: Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.
+== lines
+calder: Sit. Please.
+calder > you: I'll say it straight, because you'd want that. The Wren is letting you go.
+calder: The Tern leaves tomorrow. You'll be on it.
+calder: This isn't about who you are. It's the shifts. Only the shifts.
+calder: I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind.
+calder > you: Anything you want to say?   [listen]
+? choice
+* I'm sorry.   rel:calder+1
+  calder: I know. So am I.
+* Thank you for trying.   rel:calder+1
+  calder: You're welcome. I'd try again.
+* (Say nothing)
+  calder: Fine. Quiet's fine.
+calder: Wherever you go next, turn up. That's most of it. The rest you can learn.
+calder: Go and say your goodbyes. People will want to.   [nod]

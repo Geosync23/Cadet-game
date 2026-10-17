@@ -150,11 +150,13 @@
 ? flag:walk.toMess
 - Dinner. Mess is on Deck 3. You know the lift now.
 - Brennan's cooking. Trust me, you want to be early.
-// step: free
-? flag:walk.free
-- That's it. You're free. The bunk's yours any time from eight.
-- I'm on Deck 4 if you need me. 14, the one with the music.
-- Good first night. Properly good. Sleep well.   #warm
+// step: goodnight (0.48.57, the user's note): his goodnight when he lets you go after the arrival dinner (the
+// 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
+// ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
+? flag:walk.goodnight.1
+- Right, that's me. Evening's yours. Have a wander, explore.
+? flag:walk.goodnight.2
+- Early start, though. Ten to eight. Get some sleep soon.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -269,7 +271,7 @@
 - Pell naps in there sometimes. You didn't hear it from me.   #funny
 // point: works
 ? flag:walk.works.1
-- And this is us. Works. Home from eight till half four.
+- And this is us. Works. Home from eight till five.
 ? flag:walk.works.2
 - That's the job board. Every fault on the ship lands there.
 ? flag:walk.works.3

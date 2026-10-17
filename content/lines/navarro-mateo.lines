@@ -3,7 +3,7 @@
 
 == greet
 ? tier=stranger
-- {hi}. Night board's mine. If a job comes in after half four, it comes to me.
+- {hi}. Night board's mine. If a job comes in after five, it comes to me.
 - {hi}. Lost something? Lost property's on Deck 5, by the board. Ask for Navarro.
 ? tier>=acquaintance time:evening
 - {hi}, {me}. Board's handed over. Twelve jobs, all labelled. Sleep well tonight.

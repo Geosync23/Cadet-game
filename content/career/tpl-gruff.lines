@@ -1,0 +1,29 @@
+@template gruff
+
+== career.missed
+? tier>=colleague
+- Missed shift. Hm. Don't make it two.
+
+== worried.chief
+? tier>=friend
+- Calder's had her say. She's fair. Now do it.
+
+== worried.captain
+? tier>=friend
+- Captain, now. Listen, {nick}. I've seen good people go this way. Not you.   #serious
+
+== worried.last
+? tier>=friend
+- Morning. Bay. Eight. I'll be checking.   #serious
+
+== career.up
+? tier>=friend
+- On time today. Hm. Good.
+
+== farewell.eve
+? tier>=friend
+- Tomorrow. Hm. Shame. Real shame.   #serious
+
+== farewell.day
+? tier>=friend
+- Off you go, then. Stand up straight. You'll do.   #warm

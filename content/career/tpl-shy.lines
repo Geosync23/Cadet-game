@@ -1,0 +1,29 @@
+@template shy
+
+== career.missed
+? tier>=colleague
+- Um. You weren't on shift. Are you... all right?
+
+== worried.chief
+? tier>=friend
+- I heard about the Chief. I... I could walk down with you. Mornings. If you want.   #warm
+
+== worried.captain
+? tier>=friend
+- I don't want you to go. Sorry. That's all. I just don't.   #serious
+
+== worried.last
+? tier>=friend
+- I'll be at breakfast early. Come with me? Then the shift. Please.   #serious
+
+== career.up
+? tier>=friend
+- You were on shift. I saw. I'm... really glad.   #warm
+
+== farewell.eve
+? tier>=friend
+- I'll come to the shuttle bay tomorrow. To wave. I'm not good at goodbyes.   #serious
+
+== farewell.day
+? tier>=friend
+- Bye, {nick}. Thank you for talking to me. Most people don't.   #warm

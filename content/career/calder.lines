@@ -1,0 +1,20 @@
+@crew calder
+// Head writer 4: career lines. Exact, fair; worried shows as asking for the numbers again. Never a lecture twice.
+
+== career.up
+? tier>=acquaintance
+- On time again. Good.
+- On the board this morning. Ten to eight. Good. Good.
+
+== farewell.day
+?
+- The Tern won't wait. Don't be late for that one.
+- I came to check the ramp seals.
+
+== career.leave.booked
+?
+- Leave's booked. Noted. Better on paper than a surprise.
+
+== career.back
+?
+- Back. Good. Board's there.
