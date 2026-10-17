@@ -1,11 +1,11 @@
 # Handover: the crew designer
 
-Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.18), so a fresh session can take over the crew.
+Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.19), so a fresh session can take over the crew.
 
 ## The role
 
 - **Branch:** `claude/deck-plans-1-2-6`.
-- **Builds:** 0.16.x (0.16.1 to 0.16.18 so far; the next is 0.16.19). The lead merges them onto `claude/ship-integration`.
+- **Builds:** 0.16.x (0.16.1 to 0.16.19 so far; the next is 0.16.20). The lead merges them onto `claude/ship-integration`.
 - **What I own:**
   - section 9 of `starship-cadet.html` (`// 9. CREW DATA`): the generated ROSTER block and the two lines after it;
   - `plans/crew-roster-gen.py`;
@@ -57,7 +57,7 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - Section 16 also still accepts an older `galley: chef|cook|hand` field, but nothing sets it now.
 - **The story crew** (Marrow, Vance, Sato, Holt, Pell, Rina, Brennan, Tomas) have looks and bios copied exactly from `CREW` and must stay identical. Section 14 and the crowd rely on their ids.
 
-### Added since (0.16.6 to 0.16.18)
+### Added since (0.16.6 to 0.16.19)
 
 DEV_NOTES' crew roster section has every detail; in short:
 - **Birthdays and door plates (0.16.6):** `birthday` (a ship day of the year, 1–364) on everyone; `plate: { rank, name }` on everyone with a cabin.
@@ -77,7 +77,7 @@ DEV_NOTES' crew roster section has every detail; in short:
 - **Kin, lost and hobbyNoun (0.16.15,** a HIGH from reviewer 2's dialogue review: the theme .arc lines said "the day we lost parents, who run a repair shop"):
   - `kin`: one living relative with "my" ("my gran"), never a partner or anyone dead; "" for Sato, Holt, Calder, Brennan, Oduya, Saruth.
   - `lost`: only where existing text has a death (lead's ruling: no new deaths): Oduya "my wife"; loss-theme crew (secret "Lost someone close") get "my grandad"/"my best friend"/"my uncle", never their kin. "" for the rest.
-  - `hobbyNoun`: a bare activity noun ("knitting", "piano", "Tiles") for "a bit of X" / "teaching X"; `hobby` stays the -ing phrase.
+  - `hobbyNoun`: a bare activity noun ("knitting", "piano", "Tiles") for "a bit of X" / "teaching X" (test a new one in both frames: bare "collecting" failed, 0.16.19); `hobby` stays the -ing phrase.
   - Added last by `kin_lost`, no random draws. A new hobby phrase needs a `HOBBY_NOUN` entry, a new family phrase a `KIN_OF` entry (the generator fails otherwise).
   - Readers: head writer 3 switches family/loss/talent .arc to {kin}/{lost}/{hobbyNoun} and adds `needs: lost`; social A exposes them in socialFill ("" = missing).
 - **Threads (0.16.16):** the roster's `thread` wins for themes, the writers' voice files only for `arc:` threads (agreed with head writer 3 and social B2). Sato is `notgood` (facts 11); Kovac is `arc:kovac` with all seven about details from canon (head writer 3's wording, 0.16.17; the 112 bolts stay out, they're beat 3's reveal; her home is Marra Station via `ARC_FIELDS`, 0.16.18), set last by `arc_fixes`/`ARC_OVERRIDE`. A new writer-owned arc goes in `ARC_OVERRIDE`, not in the draws.
