@@ -399,7 +399,7 @@ with sync_playwright() as pw:
     if not (mu['ran'] and mu['running'] and .25 < mu['extra'] < .35 and mu['crewSame'] and not mu['broken'] and not mu['plainUse'] and not mu['none']): fail('machineUse')
     if not mu['shapeOk'] or mu['twice'] or (mu['late'] and mu['lateLanded'] is False) or mu['mails'] > 28: fail("Stores' Mail")
     tt = mu['tiers']
-    if tt and (tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')
+    if tt and (not tt['you'] or not tt['youTier1'] or tt['junior'] or tt['senior'] is False): fail('tier locks')   # 0.27.35: the player passes every tier
 
     # 5e. chores (0.33.19): many kinds of job, every stop a real place, tier-1 ones only in rooms you can enter;
     # openJobs gives what you may take, in the shared shape; you can take a chore and finish it, and it does its work
