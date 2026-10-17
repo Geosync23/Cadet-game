@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.40
+   STARSHIP CADET: CSV Wren                           build 0.27.41
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1842,7 +1842,7 @@ const KIT = {
   },
   gymMats(g) {                                           // three mats, a ball and a roller in the stretching corner
     for (let k = 0; k < 3; k++) { const m = box(.6, .015, 1.7, GYM.mat[k], (k - 1) * .75, .008, 0, g); m.castShadow = false; }
-    soft(GYM.mat[1], 1.25, .32, .5, .32, .32, .32, g); cyl(.07, .07, .4, GYM.mat[2], 1.2, .07, -.4, g, 10).rotation.z = Math.PI / 2;
+    soft(GYM.mat[1], 1.75, .32, .5, .32, .32, .32, g); cyl(.07, .07, .4, GYM.mat[2], 1.6, .07, -.4, g, 10).rotation.z = Math.PI / 2;   // 0.27.41: the ball and roller clear of the end mat (edge 1.05) and of a lifter's feet there
     return { w: 2.6, d: 1.8, noBlock: true };
   },
   // ---- the crew store ----
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.40';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.41';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
