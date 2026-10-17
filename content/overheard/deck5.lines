@@ -1,6 +1,6 @@
 @overheard deck5
 // Writer 5, batch 7. Deck 5 off duty: the tea corner at half ten, the Works bay after shift, main storage, the
-// shuttle bay window, the ladder. At most one in five about work. Lines naming a crew member keep that person out.
+// shuttle bay window, the lift club. At most one in five about work. Lines naming a crew member keep that person out.
 
 == overheard
 ? pair:works+works place:teacorner time:morning

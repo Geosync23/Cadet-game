@@ -157,7 +157,7 @@
 ? aff:rina:friend
 - Rina? Two years of insults. Best friend I've got. Don't tell her. She knows.   #warm
 ? bond:friends
-- {friend}'s all right. Fed me when I forgot to eat. Twice. In one day.   #funny
+- {friend}'s all right. Saved me pudding when I was late. Twice. In one day.   #funny
 
 // Writer 3, batch 1: callbacks, visits and notes (the game adds his name to a note). Moment memories are
 // moment.pell.<word> from beats 5-8. The handover's loose end: if you timed him (mem:moment.pell.timed), he says so

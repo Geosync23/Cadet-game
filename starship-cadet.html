@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.51
+   STARSHIP CADET: CSV Wren                           build 0.48.52
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.51';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.52';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14152,7 +14152,7 @@ const VOICE = {
     "avoid": ["the lift (Tove changes the subject)"],
     "cares": ["every plant in the garden, by week", "the Geralds", "the misting timer", "the galley getting what it needs"],
     "invites": ["garden"],
-    "jokes": ["every cactus aboard came from Tove, and is called Gerald", "takes the ladder \"for the exercise\"", "never sees who picks the flowers"],
+    "jokes": ["every cactus aboard came from Tove, and is called Gerald", "holds the lift rail and says \"Lovely lift\"", "never sees who picks the flowers"],
     "joy": "handing out Gerald cuttings",
     "keepsake": "a seed packet labelled in smudged pencil with the week you came aboard",
     "likes": ["garden", "sweet"],
@@ -16428,7 +16428,7 @@ const VOICE = {
       "near": [
         {"text": "Engine room's clean enough to eat in. I have. Don't tell Brennan.", "id": "5n4wvn", "tone": "funny", "act": "work"},
         {"text": "Morning run's done. Well, my morning. It's your evening. Same run.", "id": "fjouo1", "act": "gym"},
-        {"text": "Lift? Course. Lovely lift. I'll just hold this rail. Leg day.", "id": "100gtn7", "tone": "funny", "tier": [1, 4], "not": {"beat": "kovac.1"}},
+        {"text": "Lift? Course. Lovely lift. I'll just hold this rail. Steady.", "id": "1gi3ekt", "tone": "funny", "tier": [1, 4], "not": {"beat": "kovac.1"}},
         {"text": "Saw you in the lift. Lovely lift, isn't it? Lovely. Same.", "id": "1nph76a", "tone": "funny", "beat": "kovac.1"},
         {"text": "Kovac and Cruz were in the lift again. We all held the rail. Very calm, the three of us.", "id": "e17ou4", "tone": "funny", "beat": "kovac.2", "not": {"beat": "kovac.4"}},
         {"text": "Bow lounge before shift. Curved windows, cup of tea. Then down to the floor.", "id": "1b9sseo", "habit": "lounge-regular"},
@@ -16575,7 +16575,7 @@ const VOICE = {
     "avoid": ["the lift (until beat kovac.2)", "being made a fuss of in public"],
     "cares": ["doing a job exactly right", "her knitting", "the garden", "not being noticed (and being noticed, a little)"],
     "invites": ["garden"],
-    "jokes": ["ten minutes flat for a scrubber (it's nine and a half)", "her scarves are perfect, Torres's are not", "\"I'll take the ladder. Exercise.\"", "re-sorts the spanner wall when nobody's looking"],
+    "jokes": ["ten minutes flat for a scrubber (it's nine and a half)", "her scarves are perfect, Torres's are not", "\"Lovely lift.\" (both hands on the rail)", "re-sorts the spanner wall when nobody's looking"],
     "joy": "a scrubber put back together so neatly it hums",
     "keepsake": "a scarf, perfect, in Works orange and garden green",
     "likes": ["tea", "garden"],
@@ -16911,7 +16911,7 @@ const VOICE = {
     "avoid": ["patients' details"],
     "cares": ["the boat on the Ostrander colonies", "the guitar", "everyone drinking enough water", "the infirmary running smoothly"],
     "invites": ["jam"],
-    "jokes": ["the boat has a name already, and the name changes every week", "guitar practice with Tamsin makes it worse", "skips breakfast while telling everyone not to"],
+    "jokes": ["the boat has a name already, and the name changes every week", "guitar practice with Tamsin makes it worse", "eats breakfast standing up while telling everyone not to"],
     "joy": "counting up the boat fund",
     "keepsake": "a sketch of the boat, with every name crossed out but one",
     "likes": ["sweet", "book"],
@@ -18659,7 +18659,7 @@ const VOICE = {
     "lines": {
       "about": [
         {"text": "Rina? Two years of insults. Best friend I've got. Don't tell her. She knows.", "id": "15hg6jh", "tone": "warm", "aff": "rina:friend"},
-        {"text": "{friend}'s all right. Fed me when I forgot to eat. Twice. In one day.", "id": "3pc0vk", "tone": "funny", "bond": "friends"},
+        {"text": "{friend}'s all right. Saved me pudding when I was late. Twice. In one day.", "id": "1topv6m", "tone": "funny", "bond": "friends"},
         {"text": "Brennan's the best. She feeds me. That's not why. Well. It's a bit why.", "id": "1b4ju0t", "tone": "funny", "aff": "brennan:friend"},
         {"text": "Calder? Toughest chief on the Wren. Fairest, too. I'd fix anything she asked.", "id": "1dsxnhn", "tone": "warm", "aff": "calder:friend"},
       ],

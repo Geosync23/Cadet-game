@@ -1,6 +1,6 @@
 @crew keane-davi
 // Davi Keane (he/him), engine technician, nights. The Works writer, batch 2. Cheerful; spotless floors; never the lift.
-// Before beat kovac.2: the ladder is only ever "exercise".
+// Before beat kovac.2: the lift is only ever "Lovely lift" (he rides it like everyone, gripping the rail).
 
 == greet
 ? tier=stranger
@@ -41,11 +41,11 @@
 ? tier>=acquaintance
 - Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.
 
-// ---- the ladder club (Kovac's arc, content/arcs/kovac.arc): before beat 1 he only avoids the lift; after it,
-// "exercise" is the whole cover story; after beat 4 he's in the lift club. He never says "afraid" himself.
+// ---- the lift club (Kovac's arc, content/arcs/kovac.arc): he rides the lift like everyone, gripping the rail;
+// "Lovely lift" is the whole cover story; after beat 4 he's in the lift club. He never says "afraid" himself.
 == near
 ? !beat:kovac.1 tier>=acquaintance
-- Lift? Course. Lovely lift. I'll just hold this rail. Leg day.   #funny
+- Lift? Course. Lovely lift. I'll just hold this rail. Steady.   #funny
 ? beat:kovac.1
 - Saw you in the lift. Lovely lift, isn't it? Lovely. Same.   #funny
 ? beat:kovac.2 !beat:kovac.4

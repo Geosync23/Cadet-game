@@ -200,5 +200,5 @@ A moment is 4 to 10 lines in the dialogue panel with one or two reply choices (t
 - Day 0 walking lines are gated by `flag:walk.<step>`, so they're never ordinary chat.
 - Rooms with spaces: `place:junior_common_room`, or the aliases (`mess`, `commons`, `lounge`, `booths`, `overlook`,
   `teacorner`, `worksbay`, `chartroom`, `musicroom`).
-- The ladder club's secret is the ladder: anyone who avoids the lift "takes the ladder", never "the stairs" (there
-  are no stairs between decks).
+- **The writing follows the game.** Everyone rides the lift (the lift club hold the rail and say "Lovely lift"; nobody
+  takes the ladder or the stairs) and everyone eats breakfast ("skips-breakfast" crew bolt it or come in last).

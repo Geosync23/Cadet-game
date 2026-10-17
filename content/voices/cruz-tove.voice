@@ -1,7 +1,7 @@
 @voice cruz-tove
 // Writer-commons, batch 0 (draft 2). Tove Cruz: senior gardener, cabin 4-18. Off Saturday and Sunday; early hours Mon
 // and Tue, late hours Wed and Thu. Roster: messy, shy; night-owl, lingers-at-meals, gardener. Knows every plant by the
-// week it was sown. Secretly afraid of the lift (the ladder club, with Kovac and Keane); a Gerald, and the source of
+// week it was sown. Secretly afraid of the lift (the lift club, with Kovac and Keane: everyone rides the lift; they hold the rail); a Gerald, and the source of
 // every Gerald aboard (grows the cuttings, gives them out). In Brennan's arc: the blue sage (from beat brennan.2 only).
 // Pronouns: they / them (facts.md 4b).
 //
@@ -9,13 +9,13 @@
 // Lovely age."). Trails off. Soil on everything, including the words.
 // WITH JUNIORS: shy at first, then hands you a watering can and that's friendship.
 // WHAT THEY NOTICE: leaves, roots, the misting timer; who's picking flowers (Ivo, Maeve, Arjun: Cruz pretends not to).
-// MOOD TELLS: happy = names a seedling after you. Low = repots things that don't need it. Nervous = the ladder.
+// MOOD TELLS: happy = names a seedling after you. Low = repots things that don't need it. Nervous = both hands on the lift rail: "Lovely lift."
 // NEVER: takes the lift if anyone's watching; tidies up.
-// RUNNING: every Gerald came from Cruz; "for the exercise" (the ladder); the flower-pickers Cruz doesn't see.
+// RUNNING: every Gerald came from Cruz; "Lovely lift" (the lift club); the flower-pickers Cruz doesn't see.
 tpl: shy
 talk: Mumbles to people, chats to plants; dates everything by its sowing week; trails off; soil on everything.
 cares: every plant in the garden, by week | the Geralds | the misting timer | the galley getting what it needs
-jokes: every cactus aboard came from Tove, and is called Gerald | takes the ladder "for the exercise" | never sees who picks the flowers
+jokes: every cactus aboard came from Tove, and is called Gerald | holds the lift rail and says "Lovely lift" | never sees who picks the flowers
 hi: Oh. Hello | Hi | Mm, hello
 bye: Mind the hoses | Bye, then | Go on
 yes: Mm, yes | All right | Yes, fine

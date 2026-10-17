@@ -1,6 +1,6 @@
 @crew kovac-zainab
 // Zainab Kovac: the Works writer, batch 1 (for the Voices sampler). From the head writer's card.
-// Never admits the lift before beat 2 ("The ladder club"); the ladder is "exercise".
+// Never admits the lift before beat 2 ("The lift club"); before it, only "Lovely lift" and both hands on the rail.
 
 == greet
 ? tier=stranger
@@ -268,7 +268,7 @@
 
 // Writer 4, batch 16: Kovac's ordinary weeks, after week one. Mostly not work: knitting (perfect), the garden and
 // her beans, tea that counts as breakfast, browsing the store for wool, the circle with Torres and Dahl, counting.
-// Gates kept: the lift only as "exercise" or the ladder; nothing of Marra Station or the bolts before her beats.
+// Gates kept: the lift only as "Lovely lift" and the rail; nothing of Marra Station or the bolts before her beats.
 
 == greet
 ? tier>=acquaintance !week1:true
@@ -372,7 +372,7 @@
 - I saw you come in, your first night. I didn't say hi. I wanted to. Sorry. Hi.   #funny
 
 // Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
-// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: the ladder stays "exercise" unless beat:kovac.2; no Marra lift, no two-colour knit.
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of her arc: the lift stays "Lovely lift" unless beat:kovac.2; no Marra lift, no two-colour knit.
 
 == feel
 ? leaving:soon
@@ -397,7 +397,7 @@
 
 // Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
 // observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
-// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. The ladder stays "exercise"; nothing of the lift before beat:kovac.2.
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. The lift stays "Lovely lift"; nothing of the lift before beat:kovac.2.
 
 == near
 ? trad:works-tea
