@@ -72,8 +72,8 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
     <span class="verb">STEP</span> move one of your tiles one square diagonally forward, onto an empty square (just like checkers).<br>
     <span class="verb">JUMP</span> hop diagonally over an opponent's tile right next to yours, forwards or backwards, into the empty square behind it. You take that tile into your <b>hold</b>: it's yours now, keeping its mark.<br>
     <span class="verb">LAUNCH</span> put a tile from your hold onto any empty square in your two home rows.</li>
-  <li><span class="verb dock">DOCK</span> If the tile you just placed touches two or more of <b>your</b> tiles with the <b>same mark</b>, edge to edge, in any shape (a line, an L, a block), the whole group docks: it lifts off the board and scores <b>1 point per tile</b>. Three touching scores 3; four scores 4.</li>
-  <li><b>Winning:</b> the first to <b>7 points</b> wins. If neither does in 14 turns each, the higher score wins. A tie goes to whoever docked last (and if nobody docked at all, to whoever has more tiles). If you can't move, the game ends there.</li>
+  <li><span class="verb dock">DOCK</span> After every step, jump or launch: if the tile you just moved, landed or launched touches two or more of <b>your</b> tiles with the <b>same mark</b>, edge to edge, in any shape (a line, an L, a block), the whole group docks: it lifts off the board and scores <b>1 point per tile</b>. Three touching scores 3; four scores 4.</li>
+  <li><b>Winning:</b> the first to <b>7 points</b> wins. If neither does in 14 turns each, the higher score wins. A tie goes to whoever docked last (and if nobody docked at all, to whoever has more tiles). If the player whose turn it is can't move, the game ends there and is scored the same way (higher score, then whoever docked last).</li>
 </ol>
 <p class="note">That's all of it. You move like checkers, you score like a matching game, and taking your opponent's tiles is how you get the marks you need.</p>
 </section>
@@ -506,7 +506,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 <g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
 <g><rect x="179" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
 <g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
-</svg><figcaption><b>4. You score 3.</b> But your side is thinner now: fewer tiles to fight with, and their Planet on e4 is eyeing your Ship on e2. Every dock is a choice between points and strength on the board.</figcaption></figure>
+</svg><figcaption><b>4. You score 3.</b> But your side is thinner now: fewer tiles to fight with, and your Ship on e6 has reached the far row, so from now on it can only move by jumping. Every dock is a choice between points and strength on the board.</figcaption></figure>
 </div>
 </section>
 
@@ -531,15 +531,17 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 <tr><td class="note">Random moves (not a real player)</td><td class="n">3,000</td><td class="n">44.2%</td><td class="n">4.3%</td><td class="n">27.4</td><td class="n">23%</td></tr>
 </table></div>
 <ul>
-  <li><b>First-player advantage:</b> none worth fixing: 49–51% at every real skill level. Moving first means you reach the middle first, which also means you're the first to be jumped, and that evens it out. The mirrored deal means neither side gets better marks. If real play shows a lean, the lever is ready (below), and the tie rule ("whoever docked last") favours nobody by seat.</li>
+  <li><b>First-player advantage:</b> none worth fixing: 49–51% at every real skill level. Moving first means you reach the middle first, which also means you're the first to be jumped, and that evens it out. The mirrored deal means neither side gets better marks. If real play shows a lean, the lever is ready (below).</li>
+  <li><b>The tie rule matters more than it looks:</b> level scores, settled by "whoever docked last", decide 10–24% of games, and the second player wins more of them (Medium: 177 to 107 in 2,000 games), because the 14-turn cap ends on the second player's turn. The first player makes up for it by winning more of the decided games, so the totals stay at 49–51%. <code>tiles_check.py</code> will report tie-break wins by seat so we can watch it.</li>
   <li><b>No runaway leader:</b> docking removes your own tiles, so the leader gets weaker on the board. The player behind at the halfway mark still wins 37–40% of the time.</li>
   <li><b>Comeback route:</b> a jump both takes a tile from the leader and gives you a mark to launch; a 4-tile dock scores 4 in one go.</li>
   <li><b>Draws are rare:</b> 0–0.1% between real players.</li>
   <li><b>Short:</b> about 9–11 turns each. At around 8 seconds a turn for you and 2 for the crew member, that's <b>about 2–3 real minutes</b>; in ship time we set it to <b>about 10 ship minutes</b>. 14 turns each is the hard cap (about 4 real minutes), and about half of strong games end on 7 points before that.</li>
   <li><b>Skill matters, but not too much:</b> Hard beats Medium 68% of the time, Medium beats Easy 70%, Hard beats Easy 83%. A new player can beat a good one now and then.</li>
+  <li><b>No stronger "champion" level:</b> I tried one that looks a move further ahead. It was no better than Hard (50% against Hard, 55% against Medium), so Rina plays at Hard. A Medium-strength player beats her about <b>32%</b> of the time, so a decent player beats her about one game in three.</li>
   <li><b>All three verbs get used:</b> a typical game has 3–4 docks, 2–4 jumps and 1–3 launches.</li>
 </ul>
-<p class="note">The simulator was a throwaway; when the game is built, <code>tiles_check.py</code> plays the same few thousand games against the real code and checks these numbers stay in range (first player 48–52%, draws under 1%, average game under 24 turns).</p>
+<p class="note">The simulator was a throwaway; when the game is built, <code>tiles_check.py</code> plays the same few thousand games against the real code and checks these numbers stay in range (first player 48–52%, draws under 1%, average game under 24 turns) and reports how many games the tie rule decided, by seat. The simulator is kept next to this page as <code>plans/tiles-sim.py</code>.</p>
 </section>
 
 <section id="teach">
@@ -556,7 +558,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 <h2>Accessibility</h2>
 <div class="grid">
 <div class="card"><b>Colour-blind safe</b><span>Every mark is a shape (circle, triangle, star) and a colour. Whose tile it is shows as solid light versus hollow dark with a dashed edge, a brightness difference, not a colour. It still reads on the one-colour phosphor screen.</span></div>
-<div class="card"><b>Big tap targets</b><span>On a phone the board fills the screen width: each square is about 56 points wide (the usual minimum is 44). Tap a tile, then tap where it goes. No dragging. Tap the tile again to cancel.</span></div>
+<div class="card"><b>Big tap targets</b><span>On a phone the board fills the screen width: each square is about 56 points wide, and never under 44 (the usual minimum) even on the smallest 320-point phones. Tap a tile, then tap where it goes. No dragging. Tap the tile again to cancel.</span></div>
 <div class="card"><b>No timers, no reflexes</b><span>Take as long as you like. The ship keeps running around you, but the board waits. Your needs keep ticking slowly, as they do when you sit anywhere.</span></div>
 <div class="card"><b>One-handed</b><span>The board sits low on the screen, in thumb reach, with your hold in a row just under it. Everything is a single tap.</span></div>
 <div class="card"><b>Calm motion</b><span>Effects are short and follow the device's existing "reduced motion" setting: with it on, tiles simply appear in place.</span></div>
@@ -597,7 +599,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
   <li><b>Crew play each other on paper.</b> At the start of the night, the crew who come are paired (seeded by the day, so the same save always gives the same night). Each pairing is decided by a seeded roll using the strengths above (Hard beats Medium about 68% of the time, and so on), so no real games are played in the background and it costs nothing on a phone.</li>
   <li><b>You can join:</b> sit at any free board and someone sits down to play you; or challenge Rina at the station.</li>
   <li><b>Results become news</b> the next morning: "Rina won again (her ninth Tuesday running)", "Tomas finally beat Okafor", "The new hand took two games".</li>
-  <li><b>Rina's streak</b> is part of her arc. My suggestion: crew can't break it on paper (she's the champion level, one notch above Hard), only you can. See the questions below.</li>
+  <li><b>Rina's streak</b> is part of her arc. On the board she plays at Hard; on paper the rolls would break her streak about one Tuesday in three. My suggestion: her Tiles-night results are a story rule, not a roll (she wins her crew games until you beat her, or until her arc says otherwise). See the questions below.</li>
 </ul>
 </section>
 
@@ -616,7 +618,7 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 <h2>Questions for you</h2>
 <ol class="q">
   <li><b>Do these rules feel right?</b> If yes, I build it as written. If anything feels fiddly (launching, the tie rule), say which and I'll simplify and re-test.</li>
-  <li><b>Rina's streak:</b> should only you be able to break it (my suggestion), or can crew beat her on paper now and then?</li>
+  <li><b>Rina's streak:</b> should only you be able to break it (my suggestion: a story rule, since her real strength is Hard and the dice would break it about one Tuesday in three), or can crew beat her on paper now and then?</li>
   <li><b>Two people on one phone:</b> the brief says "with 2 people". In the ship it's you against crew. Would you also like a pass-the-phone mode at the station for two real people?</li>
   <li><b>The prize:</b> social, chatter and a Record line, as above, or something you can keep (a small trophy on your bunk shelf after beating Rina)?</li>
   <li><b>Length:</b> first to 7 points (about 2–3 real minutes). Or would you like a shorter "quick game" to 5 as well?</li>
