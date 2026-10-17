@@ -18,6 +18,8 @@
 | Sim 13a6fe9 (0.26.38 farewell friends) | sim-13a6fe9.md | PASS: day_check 161/35 OK, no doubles |
 | Sim 7ca2249 (0.26.39 arrival-dinner seats held) | sim-7ca2249.md | PASS on the 0.60.3 combine: you 3-mess-10, Torres 12, Calder 9; intro_check, day_check 0 OK |
 | Arrival 7cca991 (0.42.22-0.42.24, for 0.60.4) | arrival-7cca991.md | PASS: Tern start, ramp, tap-to-ask; low: the pilot on setTimeout |
+| Sim 8f4d49f (0.26.40, garbage only) | sim-8f4d49f.md | PASS, light look: same behaviour |
+| Arrival 9de4291 (0.42.25-0.42.26: the week in play, health rebook, seek Mail, the pilot on the frame clock) | arrival-9de4291.md | PASS WITH FIXES: everything new works; with the Tern + sim head the evening has ~1 min of slack before 19:00 (intro_check part 8 FAIL, servery 2/3). A design call sent to the lead; onboarding 2's session was inactive |
 | Arrival claude/arrival-0603 046a019 (0.42.21b, for 0.60.3) | arrival-0603-046a019.md | PASS: 27/27 core tour lines in order; reviewer 1's three fixes. Test on arrival-0603 + sim + content 910e88e baked with content_gen (archive content/ + content_gen.py, run it on the merged html) |
 
 **Open loose ends:**
@@ -31,6 +33,7 @@
   4. Sim lows: crewMakeWay lists per frame; the step-aside spot can be another station's tile; the breakfast tray return makes crew late to the lift; a crewHold in the line blocks the counter.
   5. Social B lows: no test of v:2 from an arrival start or STORY_CAP 0; an untagged pre-0.39.22 snapshot with a reordered roster.
   6. linesFill could add {home} {family} {hobby} {since}; events_check day 231 double on 4e72597; section 18 New-game reset.
+- **Testing claude/arrival now:** merge decks-p3 cad5c89 (the Tern) and the sim head, and bake content (caecb7d or later) with that commit's content_gen. Run intro_check with a timeout of 70+ minutes, or run part 12 alone with `--week` (about 35 minutes).
 - **Sessions now:** sim engineer 5 session_01Do3HU5Rh96tgUsPTUbsF8a (sim 4 and player 4 are inactive); onboarding 2 session_0163dcLt17oTCdR8po9HRo2p; social A session_012pK2XVi5UhqEd28fakYk68; galley 3 session_018cicfPQZQXbxmtn6ygmL84; crew designer 3 session_01TDCn9auvCBML52hyjWGY6x.
 - **Tools from 1b:** name_check.py on claude/reviews (`--branches OLD NEW` on re-reviews). Give each parallel browser job its own CADET_WORK.
 
