@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'text')
 
 
 class TradError(Exception):
@@ -61,7 +61,8 @@ def parse_when(v, where):
     low = [x.lower() for x in t]
     w, i = {}, 0
     if low[:1] == ['weekly'] and len(t) >= 2:
-        w, i = {'weekday': _wd(t[1], where)}, 2
+        days = [_wd(x, where) for x in t[1].split(',') if x]   # weekly wednesday,thursday: two evenings a week
+        w, i = {'weekday': days[0] if len(days) == 1 else days}, 2
     elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '4'):
         w, i = {'every': t[1] + 'weeks', 'weekday': _wd(t[3], where)}, 4
         if low[4:5] == ['week']:
@@ -192,6 +193,10 @@ def parse_field(tr, key, v, where):
         tr['who'] = parse_rules(v, where, _pct)
     elif key == 'anim':
         tr['anim'] = v.lower() if ' ' not in v else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
+    elif key == 'flag':
+        if not re.fullmatch(r'[a-zA-Z0-9_.:-]+', v):
+            raise TradError(f'{where}: flag is one flag name, e.g. bridge.invited')
+        tr['flag'] = v
     elif key in ('host', 'from', 'decor', 'trace'):
         tr[key] = v
     elif key == 'meal':
