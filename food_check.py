@@ -380,6 +380,29 @@ with sync_playwright() as pw:
     if 'tasting table' not in ts['note'] or ts['early'] or not ts['vote'] or ts['again'] or ts['you'] != 1 or ts['votes1'][1] != ts['votes0'][1] + 1 or ts['after'] != max(0, ts['left'] - 2): fail(f"tasting vote: {ts}")
     if ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or 'won' not in ts['result'] or "Wednesday's winner: " + ts['winner1'] not in ts['sun']['note'] or ts['sun']['side'] != ts['winner1']: fail(f"tasting table: {ts}")
 
+    # 4o. late meals (0.29.28): simNote('lateMeal', { who, meal, late, how, deck }) live, once per person and meal; heard
+    # here with onSim. You: from the grab shelf after dinner's serving ended, and after a 15-minute queue. Crew: an
+    # empty cold store makes them give up ('missed'). The report counts what would be posted on ordinary days
+    if g.ev("typeof onSim === 'function' && typeof simNote === 'function'"):
+        lm = g.ev(f"""(() => {{ const heard = []; window.__late = heard; onSim('lateMeal', x => window.__late.push(x)); const d = {DAY} + 70, B = (d - 1) * 1440, out = {{}};
+          SHIP.galley = null; setShipNow(B + 20 * 60 + 45); galleyAdvance(shipNow()); SHIP.galley.grab.items = 5; SHIP.galley.servery.portions = 0; heard.length = 0;
+          out.ate = takePortion('player'); out.again = takePortion('player'); out.grabNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 1440 + 17 * 60 + 5); galleyAdvance(shipNow()); heard.length = 0; galleyJoin('player'); setShipNow(B + 1440 + 17 * 60 + 20); galleyAdvance(shipNow()); heard.length = 0; SHIP.galley.servery.portions = Math.max(1, SHIP.galley.servery.portions);
+          out.queued = takePortion('player'); out.queueNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 2880 + 17 * 60 + 25); galleyAdvance(shipNow()); heard.length = 0; out.onTime = takePortion('player'); out.onTimeNotes = heard.splice(0);
+          SHIP.galley = null; setShipNow(B + 4 * 60); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.carts = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; heard.length = 0;
+          const keepClaim = typeof cartClaim === 'function'; FOOD.restock = 'none'; setShipNow(B + 9 * 60 + 30); galleyAdvance(shipNow()); FOOD.restock = 'carts';
+          out.crew = heard.splice(0); out.kinds = [...new Set(out.crew.map(x => x.how + ' ' + x.meal))];
+          window.__late = []; SHIP.galley = null; return out; }})()""")
+        print(f"Late meals: you at 20:45 from the shelf {lm['grabNotes']} (a second time: {len(lm['grabNotes']) == 1 and lm['again']}) | after a 15-minute queue {lm['queueNotes']} | on time {lm['onTimeNotes']}")
+        print(f"   crew with an empty galley: {len(lm['crew'])} notes, {lm['kinds']}, e.g. {lm['crew'][:2]}")
+        gn, qn = lm['grabNotes'], lm['queueNotes']
+        if len(gn) != 1 or {k: gn[0].get(k) for k in ('who', 'meal', 'late', 'how', 'deck')} != {'who': 'you', 'meal': 'dinner', 'late': 15, 'how': 'grab', 'deck': 3}: fail(f"late meal from the shelf: {gn}")
+        if len(qn) != 1 or qn[0]['who'] != 'you' or qn[0]['late'] != 15 or qn[0]['how'] != 'servery' or lm['onTimeNotes']: fail(f"late meal after a queue: {qn} / on time {lm['onTimeNotes']}")
+        if not lm['crew'] or any(x['how'] != 'missed' or x['meal'] != 'breakfast' or x['who'] == 'you' for x in lm['crew']) or len({x['who'] for x in lm['crew']}) != len(lm['crew']): fail(f"crew late meals: {lm['crew'][:5]}")
+    else: print('Late meals: no simNote/onSim (section 13) in this build; skipped')
+    print('Late meals the report would post, by day:', [st['late'] for st in rep])
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
