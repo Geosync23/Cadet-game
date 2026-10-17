@@ -13,7 +13,7 @@ exec(open(__file__.replace('social_check.py', 'cadet_test.py')).read().split("a,
 from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
-SAVE_MAX = 20000               # bytes of the save's social part
+SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
 RUN = r"""(({ days, player, jump }) => {
@@ -92,7 +92,7 @@ with sync_playwright() as pw:
 
     if a.get('bonds') is not None:          # 20c's bonds (social B), once storyHour is in
         bk = a['bonds']; print('Bonds after the run:', json.dumps(bk))
-        if not (15 <= bk.get('friends', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
+        if not (15 <= bk.get('friends', 0) + bk.get('best', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
     rp = a['rep']
     print('Reputation after the run:', json.dumps(rp and {'dept': rp['dept'], 'ship': rp['ship'], 'knownFor': rp['view']['knownFor']}))
     if not rp or rp['dept']['galley'] < 20 or max(v for k, v in rp['dept'].items() if k not in ('galley', 'works')) >= 20: fail('a stand-in who fixes galley ovens should be known in the galley, and only there')
@@ -156,7 +156,7 @@ with sync_playwright() as pw:
     if q['bonds'] != ['Pell', 'pell', 'tomas', 'Chief Calder', 'tomas', None]: fail(f"bonds and their placeholders wrong: {q['bonds']}")
     if q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
-    if q['rep'][:3] != ['known', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
+    if q['rep'][:3] != ['new', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if q['fill']['boss'] is None or q['fill']['none'] is not None or q['fill']['thing'] is None: fail(f"socialFill wrong: {q['fill']}")
     if q['cue'] != [True, True, True, False, True, True] or not q['cueSaved'] or not q['cueGone']: fail(f"cues wrong: {q['cue']} saved {q['cueSaved']} gone {q['cueGone']}")
@@ -210,7 +210,7 @@ with sync_playwright() as pw:
     w = g.ev(r"""(() => {
       const o = {}, F = new Set(), had = typeof flag === 'function' ? flag : null; SHIP.mem = {};
       o.open = ['d2', 'd3', 'd5', 'done'].every(socGate);
-      SHIP.intro = { step: 'arrival', escort: 'torres-zeke' }; window.flag = k => F.has(k);
+      const introWas = SHIP.intro; SHIP.intro = { on: true, step: 'arrival', escort: 'torres-zeke', done: {} }; window.flag = k => F.has(k);
       o.shut = ['d2', 'd3', 'd5', 'done'].map(socGate); F.add('week1.d2'); F.add('week1.d3'); o.tue = ['d2', 'd3', 'd5', 'done'].map(socGate);
       socIntroNote({ step: 'arrival', who: ['torres-zeke'] }); socIntroNote({ step: 'dinner', who: [] }); socIntroNote({ step: 'look', who: ['pell'] }); socIntroNote({ step: 'bunk', who: ['rina'], missed: true });
       o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro') || !!mem('rina', 'intro')];
@@ -218,7 +218,7 @@ with sync_playwright() as pw:
       window.lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
       o.week1 = chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind;
       F.add('week1.done'); o.done = [socIntroOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
-      delete window.lineFor; SHIP.intro = null; if (had) window.flag = had; else delete window.flag;
+      delete window.lineFor; SHIP.intro = introWas; if (had) window.flag = had; else delete window.flag;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.social.mentor === 'torres-zeke';
       SHIP.social.mentor = null; SHIP.mem = {};
       // an invitation to a tradition someone is going to
@@ -288,7 +288,7 @@ with sync_playwright() as pw:
       socLoad(JSON.parse(keepRel)); return o;
     })()""")
     print('Reputation:', json.dumps(rq))
-    if rq['start'] != ['works']: fail(f"only Works should know you at the start: {rq['start']}")
+    if rq['start'] != []: fail(f"nobody should know you at the start: {rq['start']}")
     if rq['ovenDept'] != 'galley' or rq['afterFix'] != 13 or rq['notMine'] != 13 or rq['floor0'] != 0: fail('repairs and dips wrong')
     if rq['floorFriend'] != [5, 5] or rq['recover'] != 3: fail(f"floors and recovery wrong: {rq['floorFriend']} {rq['recover']}")
     if rq['band'] not in ('well', 'theirs') or not rq['asked'] or rq['warmStart'] != 8: fail('bands and their consequences wrong')

@@ -396,7 +396,7 @@ What higher tiers unlock:
 
 **Favours and crew seeking you out.** Favours grow from crew lives and the ship: "My cabin lamp flickers", "Could you bring a tray up to Tomas, he's ill". Each is a personal job in your Jobs app, done the same way as every other job. Friends on your deck come and find you in their free time; a chat is offered as a small prompt at the screen's edge, never a pop-up you must answer.
 
-**Reputation.** Crew remember who keeps their corner of the ship running. Good work raises friendship and trust.
+**Reputation.** Crew remember who keeps their corner of the ship running. Good work raises friendship and trust. A new arrival has no reputation yet: every department, your own Works included, starts at "New face" and only rises from what you actually do (decided 2026-10-17).
 
 **Gossip is a hint system.** Crew news comes partly from the ship simulation: "The scrubbers on 4 have been rattling all week." "Brennan's furious, the cold store's warm again." The social system quietly tells the player what the ship needs. News is built from sentence templates filled in with what's actually happening; no AI writing is needed.
 
