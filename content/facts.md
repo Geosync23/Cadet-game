@@ -244,6 +244,7 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 | Hamid Larsen (infirmary aide) | he / him |
 | Dr. Elif Yoon (night doctor) | she / her |
 | Sol Bakshi (helm rating, night) | they / them |
+| Hugo Janssen (helm officer, night) | he / him |
 | Tove Cruz (senior gardener) | they / them |
 | Imani O'Neill (gardener) | she / her |
 | Ravi Hart (gardener) | he / him |
