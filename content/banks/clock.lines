@@ -1,0 +1,37 @@
+@bank dept:works
+// PLACEHOLDERS (the career engineer, 0.61.13): the new head writer replaces these. Works crew at the time clock, said as
+// a bubble as you clock in or out (about one time in two). Bubbles: 60 characters is the aim. clock.back is your first
+// clock-in after leave or a sick day; clock.late when you clock in 20+ minutes late; clock.auto and career.tip.clock
+// are texts (read as data, no voice tokens).
+
+== clock.in
+- {hi}. Board's busy today. Tea first?
+- Morning shift. Let's see what broke overnight.
+- Kettle's on in the tea corner, {nick}.
+
+== clock.out
+- That's me done. Mind how you go.
+- Another day, another filter.
+- Off you go, {nick}. Good shift.
+
+== clock.monday
+- Good weekend? Mine went too fast.
+- Monday again. How was your weekend?
+
+== clock.friday
+- Weekend! Doing anything nice?
+- Two days off. I'm going to sleep for one of them.
+
+== clock.back
+- Look who's back! We missed you on the board.
+- Back at it? Good. The filters missed you.
+
+== clock.late
+- Afternoon, {nick}. Only joking. Mostly.
+- The board noticed you were late. I didn't.
+
+== clock.auto
+- You forgot to clock out. The clock signed you out at 17:00.
+
+== career.tip.clock
+- Clock in at the time clock in the Works bay, past the tool wall, when your shift starts, and out when it ends.

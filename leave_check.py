@@ -219,6 +219,28 @@ with sync_playwright() as pw:
     else: print('  (no sick.getwell / sick.better lines baked yet)')
     check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
 
+    print('The time clock (0.61.13): in and out, the shift, leave, the auto clock-out, the crew:')
+    r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
+      SHIP.career = null; SHIP.rep = null; careerTick(at(10, 0)); const c = SHIP.career; c.e = c.z = 9; c.sd = 99999; const out = {};
+      careerTick(at(10, 420)); out.in = careerClock(at(10, 485)); out.started = c.on === 10; careerTick(at(10, 760)); out.noMiss = c.ms === 0 && c.md !== 10;
+      out.again = careerClock(at(10, 600)) === 'out'; out.done = careerClock(at(10, 1000)); out.hours = [c.ci % 1440, c.co % 1440];
+      careerTick(at(11, 0)); careerClock(at(11, 480)); careerTick(at(11, 1070)); out.notYet = !(c.co > c.ci); careerTick(at(11, 1090)); out.auto = c.co % 1440;
+      careerTick(at(12, 0)); careerTick(at(12, 760)); out.missedNoClock = c.md === 12;
+      out.sat = careerClock(at(13, 600));
+      c.b.push(16); careerTick(at(16, 500)); out.leave = careerClock(at(16, 500));
+      careerTick(at(17, 0)); out.back = careerBack(17);
+      const S = schedData(), pl = S.byId.get('5-timeclock-1'), w = SOC.crew.filter(p => p.dept === 'works' && p.shift !== 'night' && isWorkDay(p, 10) && socAboard(p, 10) && planDay(p, 10).some(x => x.act === 'work' && /^5-/.test(x.placeId || '')));   // aboard, stationed on Deck 5
+      out.crew = w.map(p => planDay(p, 10).filter(x => x.tag === 'clock').length); out.place = !!pl;
+      return out; })()""")
+    print('  ', r)
+    check(r['in'] == 'in' and r['started'] and r['noMiss'], 'clocking in did not start the shift')
+    check(r['again'] and r['done'] is None, 'clocking out, or clocking out twice, went wrong')
+    check(r['notYet'] and r['auto'] == 1020, f"the auto clock-out: {r['auto']} (17:00 wanted)")
+    check(r['missedNoClock'], 'a workday after the first week with no clock-in was not missed')
+    check(r['sat'] is None and r['leave'] is None, 'the clock let you clock in on a day off or on leave')
+    check(r['back'], 'the first clock-in after leave is not "back"')
+    check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
+
     print('A new game on day 0 is not sick (player engineer 5\'s bug in 0.60.5):')
     r = ev("""(() => { const el0 = document.getElementById('sickCard'); if (el0) el0.hidden = true;   // left open by the sickness case
       SHIP.career = null; SHIP.time.day = 0; SHIP.time.min = 1060; careerTick(); const c = SHIP.career;
