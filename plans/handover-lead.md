@@ -313,3 +313,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~17:12 social-fixes d651ad6 PASS (1c) -> into 0.60.5 (+0.62.3). Reviewer 1d hired for claude/leave; 1c does the arrival re-check then hands over.
 - ~17:16 user answered Pillar 5 survey (all Qs): laundry every 2 weeks; all 7 'more ideas' on the ladder; no puzzle-amount setting; clash for later tiers; Q7 note: Pillar 5 built ON ITS OWN after Pillar 4, restructure labor plan. Sent to Pillar 5 designer. NOTE: helper sessions show seven_day rate limit 'allowed_warning'.
 - ~17:20 cost baseline written (plans/cost-tracking.md); re-snapshot at 0.60.5 release for a per-build figure.
+- ~17:25 user approved speech bubbles (perf 3 -> dialogue 0.43.30). New note: many seated diners without trays (perf 3 investigating, sim 5 if sim cause). USER ASK: ping the user when 0.60.6 reaches its last point to take notes (before combining).
