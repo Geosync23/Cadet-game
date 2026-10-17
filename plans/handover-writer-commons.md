@@ -96,7 +96,9 @@ Head writer 3's edits and rulings this seat: story crew never leave, so their go
 (kept anyway, harmless); **the scarf exists only after Torres's beat 1**: any scarf line needs `mem:moment.torres.scarf`;
 `trad:observatory` never fired (the id is `observatory-night`; head writer fixed 11 lines; `came.observatory` is fine
 as a prefix); Tomas's jam invite trimmed to 90; on a `tomas.lines` merge conflict, keep claude/content's copy (but check
-it still holds your unmerged sections: `git checkout --theirs` once wiped my batch 4 Tomas lines).
+it still holds your unmerged sections: `git checkout --theirs` once wiped my batch 4 Tomas lines); week 1 (0.48.47):
+hot water runs out at ten **at night** (a dawn line can't say it), and the player is Works, not engines (Pell's quiz
+line now "We need a sensible one").
 
 Tradition ids and times (the game's TRADITIONS): running Mon 19:15, quiz Thu 20:00, works-tea Fri 18:45, jam Fri
 19:45, film Sat 20:00, observatory-night Sat 21:15, market = the Sunday swap meet 10:30, harvest = harvest morning
@@ -136,7 +138,8 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 - **On hold:** ~15 "missing them" lines (`bond:missed`, `{missed}`) for social B2 (session_014A3w2gK8FBNWs66YC3LfME):
   wait for dialogue engineer 2 (session_01S26bs4oMahyGJkuVaCKQGT) to add `{missed}`, `bond:missed` and `pair:best|mentor`
   to lines_check/content_gen in claude/content; social B2 or head writer 3 will say. Warm, a little wistful, light.
-- Standing by for head writer 3's next job. Candidates: newcomer lines (wait on onboarding's wave 4), more overheard
+- **Stood down** 2026-10-17 ~08:20 (all batches merged to 0.48.47). Head writer 3 messages this session when
+  DE2's `bond:missed`/`{missed}` lands or the newcomer format exists. Candidates: newcomer lines (wait on onboarding's wave 4), more overheard
   for other quiet places (the cart bay, machine shop, Deck 1 observation room), about/invite for the 19.
 - Theme fill-in `{since}` still not live (lines using it are skipped).
 - Favour jobs `pellPractice`, `brennanSage` depend on others.
