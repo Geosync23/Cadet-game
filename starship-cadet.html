@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.60
+   STARSHIP CADET: CSV Wren                           build 0.36.61
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.60';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.61';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14106,7 +14106,7 @@ function socNote(kind, d) {
   const m = kind === 'repair' && typeof machineById === 'function' && d.machine ? machineById(d.machine) : null;   // who it's about (the dialogue engineer's cue:...@me)
   const who = kind === 'gift' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || (m && m.deck) || null, who, dept: m ? repDeptOf(m) : null, room: m ? m.room || null : null });
-  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).slice(-30);
+  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)).slice(-30);   // in time order, whatever order they came in
 }
 // notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
 // big time jump and the same hours played one by one come out the same (0.36.49)
@@ -14115,7 +14115,7 @@ const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floo
 const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
 function socHear(kind, d) {
   socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
-  if (t < SHIP.social.hour * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
+  if (t < (SOC_IN != null ? SOC_IN : SHIP.social.hour) * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
   Q.push([t, kind, JSON.parse(JSON.stringify(d))]);
 }
 function socApply(kind, d, t) {
@@ -14721,8 +14721,9 @@ function socBorn(h, rooms) {
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
+let SOC_IN = null;                                      // the hour socialHour is running (SHIP.social.hour is already the next one)
 function socialHour(h) {
-  socNotesTo((h + 1) * 60);                               // the bus notes of this hour, at their own times
+  SOC_IN = h;
   const { crew, n } = SOC, t = h * 60 + 30, S = schedData(), rooms = new Map(), aff = SHIP.aff;
   if (typeof machinesNow === 'function' && typeof MACH_HIST !== 'undefined' && !MACH_HIST.has(h) && t <= shipNow()) machinesNow();
   for (let i = 0; i < n; i++) {
@@ -14773,6 +14774,8 @@ function socialHour(h) {
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
   for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
+  socNotesTo((h + 1) * 60);                               // the bus notes of this hour, at their own times, once the hour has run
+  SOC_IN = null;
 }
 // the diplomatic visit's 'discourtesy' thread (0.36.16, for section 18; lower is better). guestWarmth(p, t): how kindly
 // someone feels toward the guests, from their mood, less for prickly traits (suspicious 30, gruff, blunt, sarcastic
@@ -15323,7 +15326,7 @@ function chatDo(id) {
     if (!f) chatSay(pick(['I\'m all right for now, thanks.', 'Nothing I need, but thanks for asking.', 'Kind of you. Nothing right now.'], 623));
     else if (f.idea || f.status === 'offered') { C.offer = true; chatSay(f.idea ? f.ask : 'Still could use a hand: ' + f.title.toLowerCase() + '.'); }
     else if (f.workDone || !f.stops.length) {          // handing it back, face to face
-      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); const fk = f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job'; memAdd(p.id, 'fav.' + fk); repAdd(p.dept, 2, { kindness: 3 }, 'kind');
+      if (favourTurnIn(f.id)) { relAdd(p.id, 'favour', REL_PTS.favour); const fk = f.chore === 'lamp' || f.kind === 'lamp' ? 'lamp' : f.bring ? 'fetch' : 'job';   // section 17 keeps the favour's own kind in chore memAdd(p.id, 'fav.' + fk); repAdd(p.dept, 2, { kindness: 3 }, 'kind');
         if (typeof simNote === 'function') simNote('favour', { who: 'you', from: p.id, for: p.id, fav: fk, id: f.id });   // a favour you did for them
         C.fav = null; chatSay(pick(['You\'re a star. Thank you!', 'Oh, brilliant. I owe you one.', 'Perfect. Thanks, ' + chatName() + '.', 'You didn\'t have to, but thank you.'], 629)); }
       else chatSay('Hmm, not quite done yet, is it?');
