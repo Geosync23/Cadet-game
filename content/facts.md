@@ -265,6 +265,21 @@ Mori, Ferreira, Sato and Nandakumar were already set from the roster's own words
 | Guests: Dr. Soraya Lindgren, Mara Quill | she / her |
 | Guests: Speaker Teshavi, Kesrin, Moleth, Ithra, Taavek (the Veyli, like Saruth), Jonah Petrie | they / them |
 
+## 4d. The player's people back home (calls home; the user's ruling, 2026-10-17)
+
+A **fixed cast**, the same in every game; character creation stays name-only. Home stays **unnamed** ("home"). The
+player has **no partner** back home, and nothing in a call genders the player. Files: `content/home/<contact>.call`.
+
+| Contact | Relation to the player | Pronouns | Calls you | Canon (approved) |
+| --- | --- | --- | --- | --- |
+| **Mum** (`mum`) | your mother | she / her | {me}, "pet" | drives the number nine bus; takes up pottery; turns your old room into her pottery room (your shelf stays); posts you a lopsided mug |
+| **Gran** (`gran`) | Mum's mum; lives with Mum | she / her | {me}, "petal" | records into "the box" ("Is the light on?"); the allotment was **Grandad**'s plot first (he died years ago; gentle, never a scene); her rival **Number Fourteen** (only ever the house number; no name, no pronoun); the village show; a marrow named **the Captain**; a fall by the water butt and a new hip; she recovers and wins first prize |
+| **Jo** (`jo`) | your older sibling | they / them | "kid" | checks forms at the freight office; a stapler called **Steve**; Saturdays at the boatyard by the water with the old boatwright **Wick** (they / them); an apprenticeship; their first boat, **the Little Wren** |
+| **Sam** (`sam`) | your best friend since school (you met at seven, on the bench by the school gate); **plainly platonic**: an old friend, never a partner, no romantic "I miss you" | they / them | {me}, "you absolute idiot" (fondly) | reshelves at the library (the trolley with the wonky wheel); the café quiz on Thursdays (your old team, **the Bench**); **Mrs Abbot** at the café; the Sunday story swap |
+
+No romance wording in any `.call` line ("in love", "my love", "darling" are errors there); family warmth ("love you",
+"I'm proud of you") is fine.
+
 ## 5. Shared quirks: details the roster gives to several people
 
 The roster's generator gave some life details to more than one person. They are all canon, so they're **ship things**,

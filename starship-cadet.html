@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.16
+   STARSHIP CADET: CSV Wren                           build 0.48.17
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.16';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.17';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13348,6 +13348,11 @@ const VOICE = {
         {"text": "Bit grey today. I painted rain. Didn't help. Nice painting, though.", "id": "v7w1ed", "mood": "low"},
         {"text": "All right. Drifty. Nice drifty.", "id": "sa1ajb", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "Oh, lovely. I'll paint it. Tiny. Then I'll paint you holding it. Hold still.", "id": "1li1j4h", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That's nice. Where was I? Oh, yes. Thank you.", "id": "dwx66t", "gift": "liked"},
+        {"text": "Ah, well. Thank you. I'll keep it near the charts. It'll find its course.", "id": "h2124z", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}. Bakshi. Helm, nights. Hold still a second. No reason. Well, a small reason.", "id": "19s18o7", "tier": [0, 0]},
         {"text": "{hi}, {me}. Turn left at that last star and we'd be somewhere warm by now.", "id": "z6xq4v", "tier": [1, 4]},
@@ -13481,6 +13486,12 @@ const VOICE = {
         {"text": "Good day, love. The bread rose, the soup sang, and the cold store behaved. All three!", "id": "qzwds8", "mood": "high", "tier": [2, 4]},
         {"text": "Good day, love. Not one plate came back with anything on it.", "id": "e1q941", "mood": "high", "tier": [2, 4]},
         {"text": "Bit low, love. Thinking of my mother's kitchen. I'll stir something. It helps.", "id": "132esqk", "mood": "low", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "Oh, love. Look at it. It's going on my windowsill. I'll talk to it every morning.", "id": "oj4ngz", "tone": "warm", "gift": "plant"},
+        {"text": "Oh, love. You shouldn't have. You should have. Come here, there's cake for this.", "id": "1a860gl", "tone": "warm", "gift": "loved"},
+        {"text": "Bless you, love. That's very kind. Sit down, I'll find you a biscuit to say thanks.", "id": "1t48ncu", "gift": "liked"},
+        {"text": "Thank you, love. It's the thinking that counts. You think lovely things.", "id": "1quqdb9", "tone": "warm", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. You're new. Have you eaten? Mess is through there. Trays on the left.", "id": "1d8v1kd", "tier": [0, 0]},
@@ -13807,6 +13818,12 @@ const VOICE = {
         {"text": "Bit low. I've repotted everything. Twice. The plants don't mind. I mind a bit.", "id": "jubjn1", "mood": "low"},
         {"text": "Mm. All right. Muddy. Normal.", "id": "6ncmms", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "Oh. A little one. I'll give it a sowing week. And a good sill. Thank you.", "id": "16bh8d", "tone": "warm", "gift": "plant"},
+        {"text": "Oh, bother, that's lovely. Thank you. Sorry about the soil on my hands.", "id": "154ltp8", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That's kind. Very kind.", "id": "10u266z", "gift": "liked"},
+        {"text": "Oh. Thank you. I'll... thank you. Yes.", "id": "e0jj5z", "gift": "polite"},
+      ],
       "greet": [
         {"text": "Oh. Hello. Cruz. Garden. Mind the hoses. And the seedlings. And, um. Hello.", "id": "1mnj7jy", "tier": [0, 0]},
         {"text": "Hello, {me}. That's a week-nine lettuce. Lovely age, week nine.", "id": "19jc4d7", "tier": [1, 4]},
@@ -13984,6 +14001,12 @@ const VOICE = {
         {"text": "Fine. Number's going down. Can't complain. Do anyway.", "id": "z46g90", "tone": "funny", "mood": "ok"},
         {"text": "Good day. Brennan's off, galley ran, nobody noticed. That's the job.", "id": "1twyhce", "mood": "high", "tier": [2, 4]},
         {"text": "Bit flat. Raining back home, they said. I'd give a lot to be cold and wet.", "id": "15r4l6a", "mood": "low", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "From the garden. Smells green. Thanks, {nick}. That's a good one.", "id": "3m0a3n", "tone": "warm", "gift": "garden"},
+        {"text": "That's a good one. Really good. Thanks. I mean it.", "id": "18sshiw", "tone": "warm", "gift": "loved"},
+        {"text": "Thanks. Nice. Kind.", "id": "1r1828r", "gift": "liked"},
+        {"text": "Huh. Thanks. Typical you. Kind about it.", "id": "vfk2pa", "gift": "polite"},
       ],
       "greet": [
         {"text": "Hm. Dlamini. Galley. Bottom bunk by the wall. I'm up at five. Sorry in advance.", "id": "37vd65", "tier": [0, 0]},
@@ -14179,6 +14202,12 @@ const VOICE = {
         {"text": "Good morning. Shelves full by eight. Guessed six orders right. Personal best.", "id": "eby2u1", "mood": "high"},
         {"text": "Slow morning. Restocked the full shelves. Don't look at me like that.", "id": "1l0iv1b", "mood": "low"},
         {"text": "Fine. Shelves full, till balanced, kettle on. A good morning.", "id": "1ixfixm", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "For my star journal. You knew. Course you knew. You've got the look.", "id": "1t14tz4", "tone": "warm", "gift": "star"},
+        {"text": "I'd never have sold you that. I'd have kept it. Thank you.", "id": "zzegxy", "tone": "warm", "gift": "loved"},
+        {"text": "Nice choice. I'd have guessed you'd pick that. Thank you.", "id": "tuh3wv", "tone": "funny", "gift": "liked"},
+        {"text": "Ah, well. Thank you. It's the thought. I'll know where it's from.", "id": "17k1rwe", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. Esposito, crew store. Eight till half two. You'll need soap. Everyone does.", "id": "wg8tui", "tier": [0, 0]},
@@ -14574,6 +14603,12 @@ const VOICE = {
         {"text": "Long shift. I worried all morning. Then I fixed it. Then I worried I hadn't.", "id": "10iewu5", "mood": "low"},
         {"text": "Fine. All right. Nothing went wrong. Something might have. It didn't.", "id": "1uk4kg4", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "A book. Thank you. I'll read it carefully. Every page. Twice, probably.", "id": "7ge8k1", "tone": "warm", "gift": "book"},
+        {"text": "Oh, no. I'm going to cry. In a good way. Thank you. Sorry.", "id": "1ck0ry9", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That was thoughtful. I'll look after it.", "id": "lioofy", "gift": "liked"},
+        {"text": "Thank you. I'm not sure what it is. I'm sure it's lovely. I'll find out.", "id": "njs9td", "gift": "polite"},
+      ],
       "greet": [
         {"text": "Hello. Grieve, infirmary. If you're bleeding, it's Deck 3. If not, sit down anyway.", "id": "134ve1b", "tier": [0, 0]},
         {"text": "Hello, {me}. Have you lost anything? Only, I've a box. Of found things.", "id": "1adh9vp", "tier": [1, 4]},
@@ -14669,6 +14704,11 @@ const VOICE = {
         {"text": "I got the chord! Once. By accident. But I got it!", "id": "1bdqet9", "tone": "funny", "mood": "high"},
         {"text": "Bit of a flat day. Don't worry. I'm fine. I'm mostly fine.", "id": "p4f3yk", "mood": "low"},
         {"text": "I'm fine! Really. Fine-fine. Not \"fine\". Fine.", "id": "1nibqa8", "tone": "funny", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "For me? Oh! Oh, I love it. Sorry. I'm going to sing. I'm not. I am, a bit.", "id": "nl765v", "tone": "warm", "gift": "loved"},
+        {"text": "Oh, thank you! That's lovely. It'll be fine. It's better than fine.", "id": "15bf23j", "gift": "liked"},
+        {"text": "Oh, thank you! Sorry. I mean, thank you. It's lovely of you to think of me.", "id": "18dm12u", "tone": "funny", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}! You're new! I'm Tamsin, galley. It's a nice ship. You'll be fine. You will.", "id": "vbo0x4", "tier": [0, 0]},
@@ -14849,6 +14889,11 @@ const VOICE = {
         {"text": "Good morning, for once. Everything watered before six. The garden glowed.", "id": "k0xoid", "mood": "high"},
         {"text": "Tired. I drew the fish from home all evening. That's how you know.", "id": "1gptimb", "mood": "low"},
         {"text": "Fine. Tired. Gardener tired, which is the good kind.", "id": "1xg19h9", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "That's decided. Best present of the tour. Not moving on it.", "id": "1mpllad", "tone": "warm", "gift": "loved"},
+        {"text": "Thanks. Good one. Going in the comic.", "id": "1lq8wev", "gift": "liked"},
+        {"text": "Ah, well. Thanks. Kind of you. Really.", "id": "93wdkl", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. Hart, garden, early team. Up since five. Don't ask how I feel about it.", "id": "1aup7gp", "tier": [0, 0]},
@@ -15126,6 +15171,11 @@ const VOICE = {
         {"text": "Quiet evening. Everyone's at dinner. I've counted the till twice.", "id": "3tcxft", "mood": "low"},
         {"text": "All right, thank you. The till's tidy. The ledger's tidy. I'm tidy.", "id": "1fqg7a3", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "Oh. Oh, that's beautiful. I'll put it by the window, where the stars are.", "id": "9jhg0b", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That's very kind. I'll remember it.", "id": "1cc7uno", "gift": "liked"},
+        {"text": "Oh dear, you didn't have to. Thank you. Really.", "id": "r1jnlj", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}. Ishikawa, the store. I'm here till nine. Take your time choosing.", "id": "17xvvgg", "tier": [0, 0]},
         {"text": "{hi}, {me}. How was the tea you bought? Was it the right one?", "id": "1k9251", "tier": [1, 4]},
@@ -15253,6 +15303,12 @@ const VOICE = {
         {"text": "Steady night. Not a wobble. Gerald and I are very pleased with ourselves.", "id": "1u267i4", "tone": "funny", "mood": "high"},
         {"text": "Long watch. I'll call home after breakfast. That always sets me right.", "id": "1o3iozi", "mood": "low"},
         {"text": "Steady. Like the ship. Like my tea, mostly.", "id": "oy8cyn", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "A plant. Gerald's going to have a neighbour. Thank you. Steady and kind.", "id": "jzto44", "tone": "warm", "gift": "plant"},
+        {"text": "Thank you. That's just right. Truly.", "id": "bkx0k4", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That's kind. It'll ride the night watch with me.", "id": "irxx8g", "gift": "liked"},
+        {"text": "Ah, well. Thank you. I'm curious what it's for. I'll find out.", "id": "16ijffy", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. Janssen, helm, nights. Steady at three in the morning? That's me and my tea.", "id": "1xxe9zv", "tier": [0, 0]},
@@ -15763,6 +15819,11 @@ const VOICE = {
         {"text": "Long day. I'll play the guitar tonight. Quietly. For everyone's sake.", "id": "qiev7q", "mood": "low"},
         {"text": "Fine! Good, actually. Did you know people blink fifteen times a minute? I'm fine.", "id": "18g1f8k", "tone": "funny", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "Brilliant! Oh, that's brilliant. I'm naming the boat after this. This week.", "id": "1bb50yc", "tone": "funny", "gift": "loved"},
+        {"text": "Thanks! Good for morale, presents. Proven. Very good for morale.", "id": "1phyd5d", "gift": "liked"},
+        {"text": "Oh! Thanks. Very kind. I'll find a use for it. I've a plan for everything.", "id": "19ib1g4", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}! Larsen, infirmary. Drink some water. That's my whole introduction.", "id": "1rhodrb", "tier": [0, 0]},
         {"text": "{hi}, {me}! Did you know most people aboard drink too little water? Most people!", "id": "1wovj6j", "tier": [1, 4]},
@@ -16039,6 +16100,11 @@ const VOICE = {
         {"text": "Six trays, no wobble, all the way to table four. A personal best.", "id": "1a3xne5", "tone": "funny", "mood": "high"},
         {"text": "Quiet today. I know. Me, quiet. Don't make a thing of it.", "id": "1y25n8l", "mood": "low"},
         {"text": "All right! Busy. Talking. The usual.", "id": "yhth4x", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "Right, listen, this is the best present I've had all tour. I'm telling everyone. Now.", "id": "1j2ffm", "tone": "warm", "gift": "loved"},
+        {"text": "Cheers, {nick}! Lovely. Right, listen, I'm going to tell you where I'll put it.", "id": "1gy7alm", "tone": "funny", "gift": "liked"},
+        {"text": "Oh! For me? Thanks. That's... yes. Thanks. I'll think of something to say later.", "id": "1fz9zaq", "tone": "funny", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}! You're new. I'm Ivo. Galley. I carry trays. Six at once. Ask anyone.", "id": "16pc3z8", "tier": [0, 0]},
@@ -16885,6 +16951,12 @@ const VOICE = {
         {"text": "Same song on repeat today. Don't read into it. Do, a bit.", "id": "mhmnpq", "mood": "low"},
         {"text": "Fine. Week twenty-nine. Middling week. Good songs, though.", "id": "om7gd8", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "Music. Track one of next week's playlist. Teague won't know what hit him.", "id": "cz86gk", "tone": "funny", "gift": "music"},
+        {"text": "Good news: I love it. Delivered flat, but I mean it. I really do.", "id": "1kh16l4", "tone": "warm", "gift": "loved"},
+        {"text": "Nice. Thanks. That's a good-week song, this.", "id": "1s489ux", "gift": "liked"},
+        {"text": "Oh, well. Thank you. It's going on a playlist somewhere. A quiet one.", "id": "1lm1i1l", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}. O'Neill, garden, late shift. I pick tomorrow's herbs. You're welcome.", "id": "2wbof", "tier": [0, 0]},
         {"text": "{hi}, {me}. This is a week-thirty song. You'll see why.", "id": "1mj2d34", "tier": [1, 4]},
@@ -17093,6 +17165,12 @@ const VOICE = {
         {"text": "Good day! Fixed a fan, found a biscuit, had a nap. In that order. Perfect.", "id": "1dhqfpf", "mood": "high", "tier": [2, 4]},
         {"text": "I'm fine. I'm fine. Bit tired. Bit hungry. Same as ever, really.", "id": "1322u49", "mood": "low", "tier": [2, 4]},
         {"text": "Calder said \"Hm\" at my work. A good \"Hm\". You can tell by the eyebrows.", "id": "11dn697", "tone": "funny", "mood": "high", "tier": [1, 4]},
+      ],
+      "gift": [
+        {"text": "Is this for me? All of it? Don't answer. I've started. You're a legend, {nick}.", "id": "1x7wqup", "tone": "funny", "gift": "sweet"},
+        {"text": "Get in! This is brilliant. You know me too well. Worryingly well.", "id": "x1bjgy", "tone": "warm", "gift": "loved"},
+        {"text": "Cheers, {nick}! Very kind. It's going next to the screw tin. Pride of place. Nearly.", "id": "1yc4m3", "gift": "liked"},
+        {"text": "Oh! Cheers. I'll find a use for it. I find a use for everything. Eventually.", "id": "1s8rc6d", "tone": "funny", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. New hand? Pell, Works. If it's broken, I've probably fixed it once.", "id": "1giw7zr", "tier": [0, 0]},
@@ -17661,6 +17739,12 @@ const VOICE = {
         {"text": "Tired. Don't. I know. I'll drink some water. Happy?", "id": "flq4aw", "mood": "low", "tier": [2, 4]},
         {"text": "Good day. My sister admitted I was right. In writing. I've saved it.", "id": "jykful", "tone": "funny", "mood": "high", "tier": [3, 4]},
       ],
+      "gift": [
+        {"text": "A game. For me. You realise I'll beat you at it. You've armed the enemy.", "id": "rr1pb6", "tone": "funny", "gift": "game"},
+        {"text": "Oh. Well, look at that. That's... very good. Ta. Don't make it a thing.", "id": "11tc12x", "tone": "warm", "gift": "loved"},
+        {"text": "Ta. That's nice of you. I'll use it. I'll tell you if I did.", "id": "8yvhlo", "gift": "liked"},
+        {"text": "Thanks. Honestly. It's the thought. The thought was good.", "id": "bb7wsy", "tone": "funny", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}. Infirmary's on Deck 3, if you need it. Try not to need it.", "id": "e9gb29", "tier": [0, 0]},
         {"text": "Morning. Breakfast closes at eight. I'm saying so, so you can't say nobody did.", "id": "xhnyew", "tier": [1, 4], "time": "morning"},
@@ -17968,6 +18052,12 @@ const VOICE = {
         {"text": "Fine. Steady. Like a good market day. Nothing sold, nothing stolen.", "id": "14qp7cq", "mood": "ok"},
         {"text": "Up three on the rowing board! Vance can feel me coming. I know it.", "id": "1rhhc0z", "tone": "funny", "mood": "high", "tier": [2, 4]},
         {"text": "Bit low. Rowed it out. Didn't work. Sit with me? That usually works.", "id": "jxgak3", "mood": "low", "tier": [3, 4]},
+      ],
+      "gift": [
+        {"text": "A game! I'll win at it by Friday. Then I'll sell lessons. Thanks, {nick}.", "id": "1pd949c", "tone": "funny", "gift": "game"},
+        {"text": "Best deal I've ever had. Free, and perfect. Thank you.", "id": "1p6d371", "tone": "warm", "gift": "loved"},
+        {"text": "Nice one. Thanks. I'd have paid for that.", "id": "mhdzk8", "gift": "liked"},
+        {"text": "Ah, well. Thanks. I'll find it a buyer. No, I won't. Thanks.", "id": "vrw04", "tone": "funny", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. Santos, Comms. The bunk under yours. Tell you what: you don't snore, I won't.", "id": "1xftjng", "tier": [0, 0]},
@@ -18451,6 +18541,12 @@ const VOICE = {
         {"text": "Sitting still today. Don't worry. Just thinking. It happens sometimes.", "id": "ojys4o", "mood": "low"},
         {"text": "Good! Fine! Bit restless. Always a bit restless.", "id": "24iozh", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "A book! I'll read it on the way to somewhere. Thanks! Can't stop!", "id": "13ptxtz", "tone": "funny", "gift": "book"},
+        {"text": "This is brilliant. Thanks! It's going in the notebook. A good entry.", "id": "uuq6ab", "tone": "warm", "gift": "loved"},
+        {"text": "Thanks! Nice one. Back in a minute.", "id": "9nc4m2", "gift": "liked"},
+        {"text": "Ah, nuts, you didn't have to. Thanks! Really.", "id": "1o5u2xu", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}! Strand, helm. Learning, really. One watch at a time. Race you to the lift.", "id": "p84pu3", "tier": [0, 0]},
         {"text": "{hi}, {me}! Watch forty-two today. Nearly a pilot. Not really. A bit.", "id": "w5qg9s", "tier": [1, 4]},
@@ -18578,6 +18674,11 @@ const VOICE = {
         {"text": "Clean signal all night. Not a crackle. That's a good night.", "id": "fzuhvj", "mood": "high"},
         {"text": "Static. All night. I'm tired of static.", "id": "bxgw7w", "mood": "low"},
         {"text": "Fine. Quiet relay. Good.", "id": "1daj8wd", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "Good signal. Thanks. Really.", "id": "1ds3x60", "tone": "warm", "gift": "loved"},
+        {"text": "Thanks. Useful.", "id": "mc2nsq", "gift": "liked"},
+        {"text": "Thanks. Bit of static. Kind of you, though.", "id": "47lfsp", "gift": "polite"},
       ],
       "greet": [
         {"text": "Takahashi. Comms. Nights. If a message is late, it isn't me.", "id": "1cgmd5f", "tier": [0, 0]},
@@ -18818,6 +18919,12 @@ const VOICE = {
         {"text": "Good day! I found the laundry on the first try. That's a first. I'm a new man.", "id": "u9b114", "tone": "funny", "mood": "high", "tier": [2, 4]},
         {"text": "Brilliant day. My brother wrote. Two pages. About the weather. It was grey.", "id": "1ff4ee1", "tone": "funny", "mood": "high", "tier": [3, 4]},
         {"text": "Quiet day. I'm writing to my brother. Saying things on paper helps.", "id": "p60ki1", "mood": "low", "tier": [2, 4]},
+      ],
+      "gift": [
+        {"text": "Oh, wow. For me? This is going right by the star map. Right by it. Thank you, really.", "id": "1tcmisq", "tone": "warm", "gift": "star"},
+        {"text": "Oh, wow. This is perfect. How did you know? Did someone tell you? Nobody knew.", "id": "1td8ap", "tone": "warm", "gift": "loved"},
+        {"text": "For me? Thanks, really. I'll put it somewhere I can see it. Somewhere safe-ish.", "id": "1am7i8n", "gift": "liked"},
+        {"text": "Oh! Thank you. I don't know what it is. I'll find out. That's half the fun, isn't it?", "id": "1ggf2he", "tone": "funny", "gift": "polite"},
       ],
       "greet": [
         {"text": "{hi}. You're new too, aren't you? I'm Tomas. Watch. I'm sort of new as well.", "id": "1jp46pw", "tier": [0, 0]},
@@ -19135,6 +19242,12 @@ const VOICE = {
         {"text": "Brennan ate a whole slice of my bake. A whole one. That's never happened.", "id": "e6115j", "mood": "high", "tier": [2, 4]},
         {"text": "Early night for me. Earlier than early. Don't worry. I'm just tired.", "id": "12t7xw3", "mood": "low", "tier": [3, 4]},
       ],
+      "gift": [
+        {"text": "Sweets. Honestly. They'll be gone by lights out. Thank you.", "id": "10fjb56", "tone": "funny", "gift": "sweet"},
+        {"text": "Oh. That's lovely. Honestly. Thank you.", "id": "1conjtf", "tone": "warm", "gift": "loved"},
+        {"text": "Thanks. That's kind. Reliable choice.", "id": "1t9z73o", "gift": "liked"},
+        {"text": "Thank you. It's the thought. The thought was nice.", "id": "sictk3", "gift": "polite"},
+      ],
       "greet": [
         {"text": "{hi}. Tran, Comms. Bunk 1. Lights out at ten. I mean it. Welcome, though.", "id": "h7kkrj", "tier": [0, 0]},
         {"text": "Lights out. I know it's five to. Lights out in five, then.", "id": "169or7e", "tone": "funny", "tier": [1, 4], "time": "night"},
@@ -19436,6 +19549,12 @@ const VOICE = {
         {"text": "A slow day. I'll write a long letter tonight. It sorts my head out.", "id": "v1lphk", "mood": "low"},
         {"text": "Well enough. A good morning's work. A long letter waiting.", "id": "1888flg", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "A card. Thank you. It will go beside the letters from Valo. In good company.", "id": "1haqteb", "tone": "warm", "gift": "card"},
+        {"text": "I'm very touched. Truly. I'll write about it in my next letter home.", "id": "1aqf4i8", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That is kind of you. I'm grateful.", "id": "1dk7h02", "gift": "liked"},
+        {"text": "Thank you. Ah, well. I shall find it a home. I'm sure I shall.", "id": "183joon", "gift": "polite"},
+      ],
       "greet": [
         {"text": "Hello. Varga, galley, the early team. Breakfast is my fault, if it's good.", "id": "a16ko6", "tier": [0, 0]},
         {"text": "Hello, {me}. I hope this finds you well. It does find you. You're right here.", "id": "1ptpptd", "tone": "funny", "tier": [1, 4]},
@@ -19684,6 +19803,11 @@ const VOICE = {
         {"text": "Long one. Cleaned the clean pans twice. Brennan saw. Said nothing.", "id": "10cxyun", "mood": "low"},
         {"text": "Fine. Steady. Everything where it should be.", "id": "bhwdwd", "mood": "ok"},
       ],
+      "gift": [
+        {"text": "That's exactly right. Thank you. I'll keep it on the shelf. Square to the edge.", "id": "1npwdzu", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. Useful. I like useful.", "id": "1ut645d", "gift": "liked"},
+        {"text": "Hm. Thank you. I'll find the right place for it.", "id": "1pnrvcz", "gift": "polite"},
+      ],
       "greet": [
         {"text": "Hello. Walsh, galley. Trays are on the left. Mind the wet patch.", "id": "11h97w9", "tier": [0, 0]},
         {"text": "{hi}, {me}. Your collar's folded. Other side.", "id": "1wxoix", "tier": [1, 4]},
@@ -19851,6 +19975,12 @@ const VOICE = {
         {"text": "A quiet night. Everyone slept. That's my favourite kind of night.", "id": "wfjjgf", "mood": "high"},
         {"text": "Long night. I'm all right. A cup of tea, and I'll be all right.", "id": "84ont1", "mood": "low"},
         {"text": "All right, thank you. Quiet night. A cup of tea, and all's well.", "id": "byqf3u", "mood": "ok"},
+      ],
+      "gift": [
+        {"text": "Tea. Oh, thank you. Two in the morning won't know what's hit it.", "id": "145rhcq", "tone": "warm", "gift": "tea"},
+        {"text": "Oh. Oh, thank you. That's so kind. Sorry. I mean, thank you.", "id": "1vdgicc", "tone": "warm", "gift": "loved"},
+        {"text": "Thank you. That's lovely. Really.", "id": "1cd40bw", "gift": "liked"},
+        {"text": "Oh dear. Thank you. You shouldn't have. I mean that nicely.", "id": "11vdt40", "gift": "polite"},
       ],
       "greet": [
         {"text": "Oh, hello. Dr. Yoon. Nights. If you come in at three, I'll be the one awake.", "id": "pikg7d", "tier": [0, 0]},
@@ -20618,21 +20748,48 @@ const MOMENT_THEMES = {
   "talent": [{"beat": 1, "tone": "light", "hint": "Oh! I didn't see you there. That? That's nothing. Just a bit of {hobby}.", "mem": "caught", "needs": ["hobby"], "lines": [{"who": "them", "text": "Oh! You caught me. I do a bit of {hobby}. When nobody's looking. Mostly when nobody's looking.", "pose": "laugh"}, {"who": "them", "text": "It's nothing. It's just for me."}, {"choice": [{"text": "Can I see?", "flavour": "listen", "mem": "asked", "reply": {"who": "them", "text": "Not yet. Maybe. One day. Ask me again."}}, {"text": "Everyone needs a thing that's just for them.", "flavour": "share", "reply": {"who": "them", "text": "That's it exactly. A thing that's just mine."}}]}, {"who": "them", "text": "Don't tell anyone. Not because it's a secret. It's just mine."}]}, {"beat": 2, "tone": "heartfelt", "hint": "You asked to see. All right. Only you. Don't say anything till I'm ready.", "mem": "shown", "needs": ["hobby"], "lines": [{"who": "them", "text": "All right. Here. This is what I've been doing. Don't laugh. Laugh if it's funny."}, {"who": "them", "text": "I've done {hobby} since I was small. Nobody aboard's ever seen it. You're the first.", "pose": "nod"}, {"who": "them", "text": "I'm always scared it isn't any good. Then I do it anyway."}, {"choice": [{"text": "It's really good. I mean it.", "flavour": "cheer", "mem": "good", "reply": {"who": "them", "text": "Is it? You'd say so if it wasn't? You would. You're honest. Oh."}, "warm": {"who": "them", "text": "You mean it. I can tell. Oh. All right. I'm going to be pleased about that for a week."}}, {"text": "You should show people.", "flavour": "practical", "mem": "show", "reply": {"who": "them", "text": "Show people? All of them? With their eyes? Let me think about it.", "pose": "laugh"}}]}, {"who": "them", "text": "Thank you for looking. Properly looking. That's rare."}]}, {"beat": 3, "tone": "resolution", "hint": "I did it. I showed people. Come and see. No. Come and see now.", "mem": "show", "needs": ["hobby"], "lines": [{"who": "them", "text": "I showed them. A little show in the common room. People came. People stayed!", "pose": "laugh"}, {"who": "them", "text": "Someone asked to learn. Me, teaching {hobby}. Imagine."}, {"who": "them", "text": "And this one's for you. I made it for you. Don't make a fuss. Make a small fuss."}, {"choice": [{"text": "I'll keep it forever.", "flavour": "listen", "mem": "keep", "reply": {"who": "them", "text": "Good. That's what it's for."}, "warm": {"who": "them", "text": "Good. Then it's in good hands. That's the nicest place for it."}}, {"text": "Told you they'd love it.", "flavour": "cheer", "reply": {"who": "them", "text": "You did. You were right. Don't let it go to your head.", "pose": "laugh"}}]}, {"who": "them", "text": "Who knew. All that time, just for me. Now it's for everyone. Bit of both."}]}],
 };
 const HOME_CONTACTS = {
+  "gran": {"id": "home:gran", "arc": "home.gran", "name": "Gran"},
+  "jo": {"id": "home:jo", "arc": "home.jo", "name": "Jo", "pron": "they"},
   "mum": {"id": "home:mum", "arc": "home.mum", "name": "Mum"},
+  "sam": {"id": "home:sam", "arc": "home.sam", "name": "Sam", "pron": "they"},
 };
 const HOME_MOMENTS = {
+  "gran:1": {"who": "home:gran", "thread": "arc:home.gran", "beat": 1, "tone": "light", "mem": "firstcall", "flag": "home.gran.called", "via": "reply", "lines": [{"who": "home:gran", "text": "Is the light on? Your mum says the light's on. Light. Are you on? Hello? It's Gran.", "pose": "laugh"}, {"who": "home:gran", "text": "I'm recording. Into a box. Like a newsreader. Your mum showed me twice and I still don't trust it."}, {"who": "home:gran", "text": "So. Are they feeding you up there? Is it up? Out? Wherever it is."}, {"choice": [{"text": "It's out, Gran. And yes, they feed me loads.", "flavour": "cheer", "mem": "out", "reply": {"who": "home:gran", "text": "Out. Right. I'll say out. Good. Loads is the right amount. Loads and a pudding."}}, {"text": "You did it! You recorded a message.", "flavour": "cheer", "mem": "didit", "reply": {"who": "home:gran", "text": "I did, didn't I. Nobody tell your mum. She'll make me do the washing machine next."}}, {"text": "I miss you, Gran.", "flavour": "share", "mem": "missed", "reply": {"who": "home:gran", "text": "Course you do. I'm very missable. I'll record another one, then. Tomorrow. If the light comes on."}}]}, {"who": "home:gran", "text": "Right. How do I stop it? Which one stops it? Is this one stop? Petal, I've no idea. Bye!"}]},
+  "gran:2": {"who": "home:gran", "thread": "arc:home.gran", "beat": 2, "tone": "light", "when": {"flag": "home.gran.called"}, "mem": "fourteen", "flag": "home.gran.fourteen", "via": "reply", "lines": [{"who": "home:gran", "text": "Light's on. I'm getting good at this. Listen. Number Fourteen's put a fence up. Round the allotment."}, {"who": "home:gran", "text": "A fence! Round runner beans! Who's going to steal runner beans? Me, that's who. If they're any good.", "pose": "laugh"}, {"who": "home:gran", "text": "Theirs came up first. I'm not saying it was the fence. I'm saying the fence didn't help me."}, {"choice": [{"text": "Beat them at the show, Gran.", "flavour": "cheer", "mem": "beatthem", "reply": {"who": "home:gran", "text": "That's my petal. I've been thinking the very same thing since Tuesday."}}, {"text": "Who's Number Fourteen?", "flavour": "listen", "mem": "who", "reply": {"who": "home:gran", "text": "Next door but two. I've known them forty years. I've never once called them by their name. I'm not starting now."}, "warm": {"who": "home:gran", "text": "Next door but two. Forty years of beans. We'd be friends if they weren't wrong about everything.", "pose": "laugh"}}]}, {"who": "home:gran", "text": "Your mum says stop shouting into the box. I'm not shouting. This is my voice."}]},
+  "gran:3": {"who": "home:gran", "thread": "arc:home.gran", "beat": 3, "tone": "heartfelt", "when": {"beat": "home.gran.2"}, "hint": "The relay's clear tonight. Gran's on the line, live.", "mem": "grandad", "flag": "home.gran.grandad", "via": "live", "lines": [{"who": "home:gran", "text": "Is this live? It's live. Your mum says it's live. So you can hear every word. Good."}, {"who": "home:gran", "text": "I was up the allotment today. Your grandad's plot. It was his first, you know. Before it was mine.", "pose": "sigh"}, {"who": "home:gran", "text": "He'd have hated that fence. He'd have hated the beans more. I keep it going because it's still a bit of him."}, {"who": "home:gran", "text": "Don't go soft on me. It's a nice thing, not a sad one. Mostly a nice thing."}, {"choice": [{"text": "Tell me about him?", "flavour": "listen", "mem": "tellme", "reply": {"who": "home:gran", "text": "Big hands. Terrible whistler. Grew a marrow once the size of the cat. We never had a cat. That's how big.", "pose": "laugh"}, "warm": {"who": "home:gran", "text": "Big hands, terrible whistler, grew marrows the size of a cat. He'd have liked you. He liked anyone who asked."}}, {"text": "He'd be proud of the plot.", "flavour": "cheer", "mem": "proud", "reply": {"who": "home:gran", "text": "He would. He'd say so, too. Then he'd move all my canes."}}, {"text": "I keep things too. To remember.", "flavour": "share", "mem": "keep", "reply": {"who": "home:gran", "text": "Course you do. You're my petal. We're keepers, us lot."}}]}, {"who": "home:gran", "text": "Right. Enough. That's my live minute. Tell me what you had for tea."}]},
+  "gran:4": {"who": "home:gran", "thread": "arc:home.gran", "beat": 4, "tone": "light", "when": {"beat": "home.gran.3"}, "mem": "captain", "flag": "home.gran.captain", "via": "reply", "lines": [{"who": "home:gran", "text": "Light's on. Big news. I've a marrow. A proper one. Coming on lovely. I've given it a name."}, {"who": "home:gran", "text": "It's called the Captain. After your captain. I don't know her. I've decided she's very good.", "pose": "laugh"}, {"who": "home:gran", "text": "Number Fourteen came to look. Said nothing. Nothing! That's how you know it's a good marrow."}, {"choice": [{"text": "I'll tell the Captain she's got a marrow named after her.", "flavour": "cheer", "mem": "tellcaptain", "reply": {"who": "home:gran", "text": "You will not! Well. You can if she's in a good mood. Is she ever in a good mood? Find out."}}, {"text": "What does the Captain need?", "flavour": "practical", "mem": "needs", "reply": {"who": "home:gran", "text": "Water, sun, and nobody from Number Fourteen breathing on it."}}]}, {"who": "home:gran", "text": "I talk to it every morning. Your mum says that's daft. Your mum talks to clay."}]},
+  "gran:5": {"who": "home:gran", "thread": "arc:home.gran", "beat": 5, "tone": "serious", "when": {"beat": "home.gran.4"}, "hint": "Clear line tonight. It's Gran, and she's calling from her bed.", "mem": "hip", "flag": "home.gran.hip", "via": "live", "lines": [{"who": "home:gran", "text": "Now don't panic. I had a fall. At the allotment, by the water butt. I'm all right. I'm saying it first.", "pose": "sigh"}, {"who": "home:gran", "text": "I've a new hip. A whole new one. The doctors say I did well. I said I always do well."}, {"who": "home:gran", "text": "It hurts. I'll not pretend it doesn't. And I can't get up the allotment. That's the worst bit, if you want to know."}, {"who": "home:gran", "text": "Your mum's been marvellous. Jo's been round every night. Don't tell them I said marvellous."}, {"choice": [{"text": "I'm so glad you're all right, Gran.", "flavour": "listen", "mem": "glad", "reply": {"who": "home:gran", "text": "So am I, petal. I've a lot left to do. And a marrow to see to."}}, {"text": "Who's watering the Captain?", "flavour": "practical", "mem": "water", "reply": {"who": "home:gran", "text": "That's the thing. That's exactly the thing. Jo, I think. I'll make them a list.", "pose": "laugh"}, "warm": {"who": "home:gran", "text": "Jo. I've given them a list. Two pages. Underlined. That marrow is going to the show if I go in a barrow."}}, {"text": "Can I do anything from here?", "flavour": "practical", "mem": "help", "reply": {"who": "home:gran", "text": "Call me. That's it. That's the doing. Call me and tell me nonsense."}}]}, {"who": "home:gran", "text": "Right. The nurse is giving me a look. I'll get better. I've said so, so it's decided."}]},
+  "gran:6": {"who": "home:gran", "thread": "arc:home.gran", "beat": 6, "tone": "resolution", "when": {"beat": "home.gran.5"}, "mem": "show", "flag": "home.gran.won", "keepsake": "a packet of seeds from the Captain", "learn": "Gran fell and had a new hip. She's back on the allotment, and her marrow, the Captain, won the village show.", "via": "live", "after": {"mail": {"after": 2880, "subject": "From Gran", "body": "A packet in the post bag, Gran's writing on it in thick pencil: \"Seeds from the Captain. Grow one up there. Beat somebody. Gran.\""}}, "lines": [{"who": "home:gran", "text": "Is it on? It's on. Guess. No, I'll tell you. First prize. The Captain. First prize!", "pose": "laugh"}, {"who": "home:gran", "text": "I walked up the allotment on my new hip to see it weighed. With a stick. I'll not use the stick. I used the stick."}, {"who": "home:gran", "text": "Number Fourteen came second. They shook my hand. I said thank you. I meant it. A bit."}, {"who": "home:gran", "text": "I've saved you seeds. From the Captain. They're coming up in the post. Grow one. Out there. Wherever it is."}, {"choice": [{"text": "I'll grow one and name it after you.", "flavour": "cheer", "mem": "nameit", "reply": {"who": "home:gran", "text": "You'll do no such thing. Name it after Number Fourteen. Then beat it.", "pose": "laugh"}}, {"text": "I'm so proud of you, Gran.", "flavour": "share", "mem": "proud", "reply": {"who": "home:gran", "text": "Course you are. So am I. Of you. I tell everyone at the shop. They've heard it."}, "warm": {"who": "home:gran", "text": "Petal. I tell the shop about you every week. Now I've got a rosette too, they'll never get away."}}]}, {"who": "home:gran", "text": "Right. Stop button. Which one? I know which one. Bye, petal. Light's going off now."}]},
+  "jo:1": {"who": "home:jo", "thread": "arc:home.jo", "beat": 1, "tone": "light", "mem": "firstcall", "flag": "home.jo.called", "via": "reply", "lines": [{"who": "home:jo", "text": "Kid. It's Jo. Mum says you're on a spaceship. I said I'll believe it when it rings me.", "pose": "laugh"}, {"who": "home:jo", "text": "So. How is it? Is it all buttons? I bet it's all buttons. Don't touch the red ones."}, {"who": "home:jo", "text": "Seriously, though. You did it. You actually went. I told everyone at work. Nobody at work cares. I told them anyway."}, {"choice": [{"text": "It's mostly corridors. And a lot of tea.", "flavour": "cheer", "mem": "corridors", "reply": {"who": "home:jo", "text": "Corridors and tea. Great. You've run away to a big kitchen."}}, {"text": "I nearly didn't go.", "flavour": "share", "mem": "nearly", "reply": {"who": "home:jo", "text": "I know. I watched you nearly not. Glad you went, kid. Someone in this family had to."}}, {"text": "How's work?", "flavour": "listen", "mem": "work", "reply": {"who": "home:jo", "text": "Work is forms. Then more forms. Then lunch. Then forms about lunch. Ask me something else."}}]}, {"who": "home:jo", "text": "Right. Mum's waving at me to give her the receiver. She's not even on this call. Bye, kid."}]},
+  "jo:2": {"who": "home:jo", "thread": "arc:home.jo", "beat": 2, "tone": "light", "when": {"flag": "home.jo.called"}, "mem": "office", "flag": "home.jo.office", "via": "reply", "lines": [{"who": "home:jo", "text": "Kid. Day four hundred and something at the office. I've named my stapler. It's called Steve. Steve's my best mate.", "pose": "laugh"}, {"who": "home:jo", "text": "In my lunch hour I walk down to the water and watch them at the boatyard. They're building a boat. By hand."}, {"who": "home:jo", "text": "I've been carving a little one. On my desk. With a letter opener. Don't tell the office."}, {"choice": [{"text": "Send it to me when it's done.", "flavour": "cheer", "mem": "sendit", "reply": {"who": "home:jo", "text": "It's terrible. It's lopsided. It's very, very small. Fine. I'll send it."}}, {"text": "You've always liked making things.", "flavour": "listen", "mem": "making", "reply": {"who": "home:jo", "text": "Have I? I suppose. Shelves. That treehouse. The go-kart Mum still won't talk about."}, "warm": {"who": "home:jo", "text": "Yeah. I did, didn't I. The treehouse. The go-kart. Then I got a desk and stopped. Funny how that happens."}}]}, {"who": "home:jo", "text": "Lunch is over. Back to Steve. Steve needs me."}]},
+  "jo:3": {"who": "home:jo", "thread": "arc:home.jo", "beat": 3, "tone": "heartfelt", "when": {"beat": "home.jo.2"}, "hint": "The relay's clear tonight. Jo's on the line, and it's late there.", "mem": "envy", "flag": "home.jo.envy", "via": "live", "lines": [{"who": "home:jo", "text": "Can't sleep. Thought I'd ring. Live, look at me. Clear line. You sound like you're next door."}, {"who": "home:jo", "text": "Can I say something stupid? I'm proud of you. And I'm a bit jealous. Both. At the same time.", "pose": "sigh"}, {"who": "home:jo", "text": "Not of you. Of the going. You got on a shuttle. I got on the number nine to the office. Every day."}, {"who": "home:jo", "text": "It's not your fault. It's not anyone's. I just needed to say it to someone who wouldn't make it a thing."}, {"choice": [{"text": "You could still go somewhere. Do something.", "flavour": "practical", "mem": "couldgo", "reply": {"who": "home:jo", "text": "Could I? At my age? Hm. Don't answer that. I'm going to think about it all night now. Thanks, kid."}}, {"text": "Thanks for telling me. I'm glad you did.", "flavour": "listen", "mem": "glad", "reply": {"who": "home:jo", "text": "Yeah. Me too. That's a weight off. A small weight. A stapler-sized weight.", "pose": "laugh"}, "warm": {"who": "home:jo", "text": "Yeah. Funny. I feel better already. You were always good at that. Even when you were tiny and annoying."}}, {"text": "I was scared to go. I still am, some days.", "flavour": "share", "mem": "scared", "reply": {"who": "home:jo", "text": "Were you? Huh. You hid it well. Maybe that's what brave is. Going anyway."}}]}, {"who": "home:jo", "text": "Right. Bed. Forms tomorrow. Night, kid. Don't tell Mum I rang this late."}]},
+  "jo:4": {"who": "home:jo", "thread": "arc:home.jo", "beat": 4, "tone": "light", "when": {"beat": "home.jo.3"}, "mem": "sawdust", "flag": "home.jo.weekends", "via": "reply", "lines": [{"who": "home:jo", "text": "Kid. I went in. To the boatyard. I asked if I could help on Saturdays. For nothing. Just to learn.", "pose": "laugh"}, {"who": "home:jo", "text": "The old boatwright's called Wick. Wick looked at my hands and said \"Those'll do.\" Best review I've ever had."}, {"who": "home:jo", "text": "I've sawdust in places I didn't know I had. Mum made me shake out on the step. Gran laughed for an hour."}, {"choice": [{"text": "That's brilliant, Jo.", "flavour": "cheer", "mem": "brilliant", "reply": {"who": "home:jo", "text": "It is, isn't it? I sanded a plank for six hours. Best six hours of my life."}}, {"text": "What's Wick building?", "flavour": "listen", "mem": "wick", "reply": {"who": "home:jo", "text": "A rowing boat. Clinker-built. That means the planks overlap. I know words now. Boat words."}}]}, {"who": "home:jo", "text": "Monday tomorrow. Steve and I are not on speaking terms. I've moved on."}]},
+  "jo:5": {"who": "home:jo", "thread": "arc:home.jo", "beat": 5, "tone": "serious", "when": {"beat": "home.jo.4"}, "hint": "Clear line tonight. Jo's on, and they sound like they've been pacing.", "mem": "quit", "flag": "home.jo.quit", "via": "live", "lines": [{"who": "home:jo", "text": "Wick's offered me an apprenticeship. A proper one. Four years. The money's half what the office pays.", "pose": "sigh"}, {"who": "home:jo", "text": "I'd have to quit. Actually quit. With a letter. I've written the letter. It's in my pocket. It's been there a week."}, {"who": "home:jo", "text": "Mum says do what makes me happy. Mum says that about everything. Gran says \"about time\". I need someone who'll be honest."}, {"who": "home:jo", "text": "What if I'm too old? What if I'm no good at it? What if I quit and it's just... a different desk?"}, {"choice": [{"text": "You said \"best six hours of my life\". About sanding.", "flavour": "cheer", "mem": "sixhours", "reply": {"who": "home:jo", "text": "I did, didn't I. Sanding. Who says that about sanding? Someone who should quit, that's who.", "pose": "laugh"}}, {"text": "What would you tell me, if it was me?", "flavour": "listen", "mem": "ifme", "reply": {"who": "home:jo", "text": "Go. I'd tell you go. I did tell you go. Oh, that's not fair, kid. That's not fair at all."}, "warm": {"who": "home:jo", "text": "I'd say go. I did say go. I said it when you got the letter for the Wren. Right. Right. I hear it."}}, {"text": "Half the money's still money. Can you live on it?", "flavour": "practical", "mem": "money", "reply": {"who": "home:jo", "text": "Just. If I stop buying lunch. I'll bring sandwiches. Like a proper apprentice."}}]}, {"who": "home:jo", "text": "Right. I'm going to hand it in tomorrow. Before I lose my nerve. Ring me Thursday and check I did?"}]},
+  "jo:6": {"who": "home:jo", "thread": "arc:home.jo", "beat": 6, "tone": "resolution", "when": {"beat": "home.jo.5"}, "mem": "launch", "flag": "home.jo.launched", "keepsake": "a curl of wood from Jo's first boat", "learn": "Jo left the freight office to apprentice at the boatyard at home. Their first boat is called the Little Wren.", "via": "live", "after": {"mail": {"after": 2880, "subject": "From Jo", "body": "A small envelope in the post bag. Inside, one curl of pale wood and a note: \"From the Little Wren. First plank. Don't lose it, kid. Jo.\""}}, "lines": [{"who": "home:jo", "text": "Kid. She floats. My first boat. In the water this morning. Wick let me push her off. She floats!", "pose": "laugh"}, {"who": "home:jo", "text": "Mum cried. Gran banged her stick on the jetty and shouted \"Go on!\" at a rowing boat. Everyone stared."}, {"who": "home:jo", "text": "I named her. Don't laugh. The Little Wren. After your ship. Because you went first, and I followed. Sort of. Slowly."}, {"choice": [{"text": "The Little Wren. I love that.", "flavour": "cheer", "mem": "littlewren", "reply": {"who": "home:jo", "text": "Good. Because it's painted on now. In gold. Slightly wonky gold."}}, {"text": "I'm so proud of you, Jo.", "flavour": "share", "mem": "proud", "reply": {"who": "home:jo", "text": "Stop it. Don't. Fine. Thank you, kid. That's the whole of it. Thank you."}, "warm": {"who": "home:jo", "text": "Don't. You'll set Mum off again and she's only just stopped. Thanks, kid. Really. It means more from you."}}]}, {"who": "home:jo", "text": "I've sent you a curl of wood. From her first plank. Keep it somewhere. Right, Wick's shouting. Boats to build."}]},
   "mum:1": {"who": "home:mum", "thread": "arc:home.mum", "beat": 1, "tone": "light", "mem": "firstcall", "flag": "home.mum.called", "via": "reply", "lines": [{"who": "home:mum", "text": "Is that you? {me}? There's a delay. Is that the delay? Hello!", "pose": "laugh"}, {"who": "home:mum", "text": "Are you eating? Is there food? Proper food, I mean, not just biscuits."}, {"who": "home:mum", "text": "Gran says hello. She says it louder than that. She's in the kitchen."}, {"choice": [{"text": "The food's good, Mum. The chef's brilliant.", "flavour": "cheer", "mem": "food", "reply": {"who": "home:mum", "text": "Oh, thank goodness. Tell the chef thank you from me. No, I mean it. Tell them."}}, {"text": "It's a lot. But I like it here.", "flavour": "share", "mem": "likeit", "reply": {"who": "home:mum", "text": "A lot's all right. A lot's how it should be at the start. I'm glad you like it, pet."}, "warm": {"who": "home:mum", "text": "Then that's all I need to hear. Well. Nearly all. Are you sleeping?", "pose": "listen"}}, {"text": "How are you, Mum?", "flavour": "listen", "mem": "asked", "reply": {"who": "home:mum", "text": "Me? Oh, fine. Same route, same bus. The number nine misses you. It told me."}}]}, {"who": "home:mum", "text": "Right. I'll let you go. You've got a ship to run. Call again? Call again."}]},
   "mum:2": {"who": "home:mum", "thread": "arc:home.mum", "beat": 2, "tone": "light", "when": {"flag": "home.mum.called"}, "mem": "pottery", "flag": "home.mum.pottery", "via": "reply", "lines": [{"who": "home:mum", "text": "Guess what I've done. No, don't guess. I've signed up for pottery. Tuesday nights, at the hall."}, {"who": "home:mum", "text": "I made a bowl. It isn't a bowl. Gran says it's a hat. Gran's wearing it.", "pose": "laugh"}, {"choice": [{"text": "Send me a picture! Wait. Describe it.", "flavour": "cheer", "mem": "describe", "reply": {"who": "home:mum", "text": "It's sort of brown. And sort of leaning. Like the number nine on a windy day."}}, {"text": "You've always wanted to try that.", "flavour": "listen", "mem": "always", "reply": {"who": "home:mum", "text": "Have I? I suppose I have. Nobody ever asked. You've gone and asked."}, "warm": {"who": "home:mum", "text": "I have. For years. I just never went. Then the house went quiet, and I thought, well. Go.", "pose": "nod"}}]}, {"who": "home:mum", "text": "Next week, a cup. A proper one. With a handle. Probably."}]},
   "mum:3": {"who": "home:mum", "thread": "arc:home.mum", "beat": 3, "tone": "heartfelt", "when": {"beat": "home.mum.2"}, "hint": "The relay's clear tonight. Mum's on the line.", "mem": "room", "flag": "home.mum.room", "via": "live", "lines": [{"who": "home:mum", "text": "Clear line tonight! No delay at all. I can hear your kettle. Is that your kettle?", "pose": "laugh"}, {"who": "home:mum", "text": "Listen. I've been sitting in your room. Just sitting. The house is quiet without you."}, {"who": "home:mum", "text": "I'd like to put the wheel in there. For the pottery. Only if you say yes. It's still your room."}, {"choice": [{"text": "Yes. Of course. Fill it with pots.", "flavour": "practical", "mem": "yes", "reply": {"who": "home:mum", "text": "Oh, pet. All right. I'll keep the window clear. You liked the window."}}, {"text": "Keep my shelf? The rest is yours.", "flavour": "practical", "mem": "shelf", "reply": {"who": "home:mum", "text": "Your shelf stays. Every last thing on it. I'll dust round it. Carefully."}}, {"text": "I miss it too. My room. Home.", "flavour": "share", "mem": "misshome", "reply": {"who": "home:mum", "text": "Course you do. That's allowed. Missing it means it was a good room. Put the kettle on, wherever you are."}, "warm": {"who": "home:mum", "text": "Course you do. I'll tell you what. I'll leave your shelf exactly as it is, and the rest can get muddy. Deal?", "pose": "listen"}}]}, {"who": "home:mum", "text": "Thank you. Gran says she's having the chair. Gran's always having the chair."}]},
   "mum:4": {"who": "home:mum", "thread": "arc:home.mum", "beat": 4, "tone": "light", "when": {"beat": "home.mum.3"}, "mem": "wheel", "via": "reply", "lines": [{"who": "home:mum", "text": "The wheel's in! It spins. Mostly. I've had clay in my hair since Sunday.", "pose": "laugh"}, {"who": "home:mum", "text": "Gran sits in your chair and tells me I'm doing it wrong. She's never touched clay in her life."}, {"who": "home:mum", "text": "And Jo came round and made a little pot. Better than mine. Don't tell them I said."}, {"choice": [{"text": "Tell Jo I said so.", "flavour": "cheer", "mem": "teasejo", "reply": {"who": "home:mum", "text": "I will not! I've got my pride. Well. What's left of it after the hat."}}, {"text": "I'm proud of you, Mum.", "flavour": "share", "mem": "proud", "reply": {"who": "home:mum", "text": "Oh. Now look. You've set me off. It's only clay, pet. Thank you."}}]}, {"who": "home:mum", "text": "The bus is late tomorrow, they say. I'll be on the wheel instead. Living dangerously."}]},
   "mum:5": {"who": "home:mum", "thread": "arc:home.mum", "beat": 5, "tone": "serious", "when": {"beat": "home.mum.4"}, "hint": "Clear line tonight. Mum sounds like she's got something to say.", "mem": "nearly", "flag": "home.mum.told", "via": "live", "lines": [{"who": "home:mum", "text": "Can I tell you something? I've been carrying it about. Like a pot that's too hot.", "pose": "sigh"}, {"who": "home:mum", "text": "When you got the letter for the Wren, I nearly asked you not to go. I had the words ready."}, {"who": "home:mum", "text": "I didn't, because you'd have stayed. For me. And then you'd have been here, wishing."}, {"choice": [{"text": "I'm glad you didn't. And glad you told me.", "flavour": "listen", "mem": "glad", "reply": {"who": "home:mum", "text": "So am I. Both of those. There. It's out. I feel lighter. Lighter than the hat, anyway."}}, {"text": "I'd have stayed, you know.", "flavour": "share", "mem": "stayed", "reply": {"who": "home:mum", "text": "I know. That's exactly why I kept quiet. Don't you dare come home early on my account."}, "warm": {"who": "home:mum", "text": "I know you would. That's why I didn't ask. You're out there because you're meant to be. I can hear it in your voice.", "pose": "listen"}}]}, {"who": "home:mum", "text": "Right. Enough of that. Tell me something happy. Tell me what you had for dinner."}]},
   "mum:6": {"who": "home:mum", "thread": "arc:home.mum", "beat": 6, "tone": "resolution", "when": {"beat": "home.mum.5"}, "mem": "mug", "flag": "home.mum.mug", "keepsake": "Mum's mug", "learn": "Mum made you a mug on her wheel, in the room that used to be yours. It leans. It holds tea.", "via": "live", "after": {"mail": {"after": 2880, "subject": "From home", "body": "A parcel came up in the post bag: one mug, wrapped in a scarf, a little lopsided. A note inside: \"It holds tea. Mostly. Love, Mum.\""}}, "lines": [{"who": "home:mum", "text": "Has it come yet? The parcel? No, it won't have. The post's slow. It's on its way.", "pose": "laugh"}, {"who": "home:mum", "text": "I made you a mug. On the wheel, in your room. Our room. It leans a bit. Like the bus."}, {"who": "home:mum", "text": "It holds tea. Mostly. Every time you drink from it, that's me saying \"Are you eating?\""}, {"choice": [{"text": "I'll use it every day.", "flavour": "cheer", "mem": "everyday", "reply": {"who": "home:mum", "text": "You'd better. I'll know. Mothers know. It's a whole thing."}}, {"text": "Thank you, Mum. For all of it.", "flavour": "share", "mem": "thanks", "reply": {"who": "home:mum", "text": "Oh, pet. Thank you for calling. Every week. You don't know what it does."}, "warm": {"who": "home:mum", "text": "Thank you for ringing, every time. The house isn't quiet any more. It's got clay in it. And you, on the line.", "pose": "listen"}}]}, {"who": "home:mum", "text": "Off you go. Ship to run. I love you. Gran says she does too. Louder than that."}]},
+  "sam:1": {"who": "home:sam", "thread": "arc:home.sam", "beat": 1, "tone": "light", "mem": "firstcall", "flag": "home.sam.called", "via": "reply", "lines": [{"who": "home:sam", "text": "You absolute idiot, you actually went! Into space! I said you wouldn't. I owe the whole quiz team a cake.", "pose": "laugh"}, {"who": "home:sam", "text": "Tell me everything. Is there a window? Is there a bed? Do you float? Tell me you float a little."}, {"who": "home:sam", "text": "The Bench lost at quiz on Thursday. Third from last. Without you we knew nothing about anything. We guessed \"a goat\" twice."}, {"choice": [{"text": "No floating. Lots of corridors. A very good chef.", "flavour": "cheer", "mem": "nofloat", "reply": {"who": "home:sam", "text": "Disappointing. The chef's good, though? Fine. You're allowed to be happy. Just a bit."}}, {"text": "Tell me about home first.", "flavour": "listen", "mem": "homefirst", "reply": {"who": "home:sam", "text": "Home? Same as when you left. Four days ago. The bench is still there. It's boring without you on it."}}, {"text": "It's big. I'm a bit lost.", "flavour": "share", "mem": "lost", "reply": {"who": "home:sam", "text": "You were lost in the school car park for two years. You'll be fine in a spaceship. Give it a week."}}]}, {"who": "home:sam", "text": "Right. Long message. Sorry. Not sorry. Write back properly. Pages. I want pages."}]},
+  "sam:2": {"who": "home:sam", "thread": "arc:home.sam", "beat": 2, "tone": "light", "when": {"flag": "home.sam.called"}, "mem": "library", "flag": "home.sam.library", "via": "reply", "lines": [{"who": "home:sam", "text": "Busy week. Library's mad. Someone returned a book eleven years late and wanted a medal.", "pose": "laugh"}, {"who": "home:sam", "text": "The trolley's still got the wonky wheel. I've named it. It doesn't come when it's called."}, {"who": "home:sam", "text": "Quiz was fine. We came fourth. Anyway. How's space? Still big?"}, {"choice": [{"text": "Fourth! That's nearly a medal.", "flavour": "cheer", "mem": "fourth", "reply": {"who": "home:sam", "text": "That's what I said! Nobody listened. You'd have listened."}}, {"text": "Your message was shorter this time.", "flavour": "listen", "mem": "shorter", "reply": {"who": "home:sam", "text": "Was it? Busy week. I'll do a long one next time. Promise."}}]}, {"who": "home:sam", "text": "Write back. Tell me something weird about the ship. One weird thing."}]},
+  "sam:3": {"who": "home:sam", "thread": "arc:home.sam", "beat": 3, "tone": "heartfelt", "when": {"beat": "home.sam.2"}, "hint": "The relay's clear tonight. Sam's on the line, live.", "mem": "bench", "flag": "home.sam.bench", "via": "live", "lines": [{"who": "home:sam", "text": "Live! You're actually there. There's a hum on the line. Is that your ship? Hello, ship."}, {"who": "home:sam", "text": "I sat on the bench today. By the school gate. Where we met. We were seven and you had a plaster on your knee."}, {"who": "home:sam", "text": "It's daft. Everything here feels too small to tell you. Library, quiz, bench. You've got stars. I've got a trolley.", "pose": "sigh"}, {"choice": [{"text": "Tell me the small things. I want the small things.", "flavour": "listen", "mem": "smallthings", "reply": {"who": "home:sam", "text": "Really? All right. The café's changed its biscuits. It's a disaster. Everyone's furious.", "pose": "laugh"}, "warm": {"who": "home:sam", "text": "Really? Then here's one. The café's changed its biscuits and the whole quiz team has gone on strike. Small enough?"}}, {"text": "Stars are mostly just stars. Your trolley's got a name.", "flavour": "cheer", "mem": "trolley", "reply": {"who": "home:sam", "text": "It does have a name. It's got more personality than most people. Fine. Point taken."}}, {"text": "It's strange for me too, being this far.", "flavour": "share", "mem": "strange", "reply": {"who": "home:sam", "text": "Is it? Good. I mean, not good. Good that it's not just me."}}]}, {"who": "home:sam", "text": "I've got to go. The relay's beeping. Same bench next week. I'll be on it, anyway."}]},
+  "sam:4": {"who": "home:sam", "thread": "arc:home.sam", "beat": 4, "tone": "light", "when": {"beat": "home.sam.3"}, "mem": "short", "via": "reply", "lines": [{"who": "home:sam", "text": "Hi. Busy. Quiz Thursday. Lost. Wheel still wonky. You?", "pose": "laugh"}, {"who": "home:sam", "text": "That's the whole message. I'm sorry. I wrote a long one and deleted it. It sounded like a weather report."}, {"who": "home:sam", "text": "Tell me one thing. One. I'll tell you one back. Deal?"}, {"choice": [{"text": "Deal. Here's one: I learnt to fold a blanket properly.", "flavour": "share", "mem": "blanket", "reply": {"who": "home:sam", "text": "You? Properly? I'm framing this message. Here's mine: Mrs Abbot from the café says hello. She never says hello."}}, {"text": "Deal. You first.", "flavour": "listen", "mem": "youfirst", "reply": {"who": "home:sam", "text": "Fine. I found a postcard in a returned book. Someone's holiday, years ago. I've stuck it on the trolley."}}]}, {"who": "home:sam", "text": "See? One thing each. That wasn't so hard. Let's do it again."}]},
+  "sam:5": {"who": "home:sam", "thread": "arc:home.sam", "beat": 5, "tone": "serious", "when": {"beat": "home.sam.4"}, "hint": "Clear line tonight. Sam's on, and they're quiet.", "mem": "drifting", "flag": "home.sam.admitted", "via": "live", "lines": [{"who": "home:sam", "text": "Can I say it? We're getting shorter. The messages. Yours and mine. I've been counting words. That's how bad it is.", "pose": "sigh"}, {"who": "home:sam", "text": "I know it's the distance. It's nobody's fault. But we've been friends since the bench. I don't want us to fade out."}, {"who": "home:sam", "text": "I'm scared we'll end up as two people who used to be friends. Who send a card once a year. I'd hate that."}, {"choice": [{"text": "I've noticed too. I didn't know how to say it.", "flavour": "listen", "mem": "noticed", "reply": {"who": "home:sam", "text": "Oh, thank goodness. I thought it was just me, being dramatic. I am dramatic. But not about this."}}, {"text": "You're my oldest friend. That doesn't stop because I'm far away.", "flavour": "share", "mem": "oldest", "reply": {"who": "home:sam", "text": "Yeah. Yeah, it doesn't, does it. Since we were seven. That's a long time to just stop."}, "warm": {"who": "home:sam", "text": "Since we were seven. Plasters and the bench and everything. Right. Then we fix it. Friends fix things."}}, {"text": "Let's make a rule. Something we always send.", "flavour": "practical", "mem": "rule", "reply": {"who": "home:sam", "text": "A rule. Yes. You were always the one with rules. Go on. What rule?"}}]}, {"who": "home:sam", "text": "Here's an idea. Every Sunday, one story each. Any story. Even a boring one. Especially a boring one. Deal?"}]},
+  "sam:6": {"who": "home:sam", "thread": "arc:home.sam", "beat": 6, "tone": "resolution", "when": {"beat": "home.sam.5"}, "mem": "sunday", "flag": "home.sam.sundays", "keepsake": "Sam's first Sunday story, written on the back of a library card", "learn": "Sam, your oldest friend, felt you drifting apart. Now you swap one story every Sunday, however small.", "via": "live", "after": {"mail": {"after": 2880, "subject": "From Sam", "body": "In the post bag: an old library card, written on the back in tiny letters. \"Sunday story number one. The wonky wheel came off. I carried it home. It's on my windowsill now. Your turn. Sam\""}}, "lines": [{"who": "home:sam", "text": "It's Sunday! Story time. I've got a good one. The trolley wheel came off, and I carried it home on the bus.", "pose": "laugh"}, {"who": "home:sam", "text": "It's on my windowsill now. Like a trophy. A small, squeaky trophy. That's my story. That's the whole of it."}, {"who": "home:sam", "text": "This is working, isn't it? I look forward to Sundays now. I've written the first one down. On a library card. It's in the post."}, {"choice": [{"text": "Best Sunday story yet.", "flavour": "cheer", "mem": "best", "reply": {"who": "home:sam", "text": "It's the only Sunday story yet. But I'll take it. Best friend, best story."}}, {"text": "Here's mine. I'll tell it slowly.", "flavour": "share", "mem": "mine", "reply": {"who": "home:sam", "text": "Go on. Slowly. I've got all evening and a kettle."}, "warm": {"who": "home:sam", "text": "Go on. I've got a kettle, a biscuit, and the wheel watching. Slowly. Every bit of it."}}]}, {"who": "home:sam", "text": "Same time next Sunday. Every Sunday. Even when there's nothing. Especially then."}]},
 };
 const HOME_SEND = {
+  "gran": [{"text": "I did my first job on my own.", "id": "1wyby3n", "flag": "intro.soloJob", "flavour": "share", "reply": {"who": "home:gran", "text": "On your own! Good. Did you do it right? Course you did."}}, {"text": "We had a harvest in the ship's garden.", "id": "119ra7h", "cue": "harvest", "flavour": "share", "reply": {"who": "home:gran", "text": "A garden! Up there! What's the biggest thing? Bigger than the Captain? I doubt it."}}, {"text": "We had a {trad} on the ship. I went.", "id": "qr5j", "came": "any", "flavour": "share", "reply": {"who": "home:gran", "text": "Good. Go to everything. You can sit down when you're my age."}}, {"text": "Are you behaving, Gran?", "id": "1kkzgh3", "flavour": "cheer", "reply": {"who": "home:gran", "text": "Never. Ask your mum. No, don't ask your mum."}}, {"text": "Tell me about the allotment.", "id": "14wg3xq", "flavour": "listen", "reply": {"who": "home:gran", "text": "Beans up, slugs down, Number Fourteen sulking. A good week."}}],
+  "jo": [{"text": "I did my first job on my own.", "id": "9l540u", "flag": "intro.soloJob", "flavour": "share", "reply": {"who": "home:jo", "text": "On your own? Show-off. Well done, kid. Really."}}, {"text": "We had an ion storm. Everyone was fine.", "id": "ye164z", "cue": "event.ionStorm.afterglow", "flavour": "share", "reply": {"who": "home:jo", "text": "Of course you did. Don't tell Mum. I'll tell Mum. Gently."}}, {"text": "How's the boatyard?", "id": "1h3hv18", "flag": "home.jo.weekends", "flavour": "listen", "reply": {"who": "home:jo", "text": "Sawdust. Splinters. Wick says I'm improving. Wick says that to the boats too."}}, {"text": "Say hello to Steve for me.", "id": "128y9qw", "flavour": "cheer", "reply": {"who": "home:jo", "text": "Steve sends his regards. Steve's a stapler. You know that, right?"}}, {"text": "Tell me something from home.", "id": "l7z9je", "flavour": "listen", "reply": {"who": "home:jo", "text": "The tide's out, the chip shop's shut, and Mum made another hat. Nothing changes."}}],
   "mum": [{"text": "I did my first job on my own. Start to finish.", "id": "190c0ks", "flag": "intro.soloJob", "flavour": "share", "reply": {"who": "home:mum", "text": "On your own! Oh, pet. I'm telling the whole bus."}}, {"text": "We had an ion storm. Everyone was fine. It was loud.", "id": "1e1pzs7", "cue": "event.ionStorm.afterglow", "flavour": "share", "reply": {"who": "home:mum", "text": "A storm? In space? Is that allowed? You're fine? Good. Wear a jumper."}}, {"text": "We had a {trad} on the ship. I went.", "id": "2s5w1w", "came": "any", "flavour": "share", "reply": {"who": "home:mum", "text": "You went! Good. Did you talk to anyone? Course you did."}}, {"text": "I've made a friend. {friend}. You'd like them.", "id": "n9tqm4", "friend": "any", "flavour": "share", "reply": {"who": "home:mum", "text": "{friend}. Say hello from me. Feed them a biscuit. Is that allowed?"}}, {"text": "I'm eating. I promise.", "id": "1r4g5n1", "flavour": "cheer", "reply": {"who": "home:mum", "text": "Promise properly. Vegetables count. Biscuits don't."}}, {"text": "Tell me about home.", "id": "1a76p5h", "flavour": "listen", "reply": {"who": "home:mum", "text": "Nothing's changed. Everything's changed. The number nine's got a new driver on Sundays. Scandal."}}],
+  "sam": [{"text": "I did my first job on my own.", "id": "1odic18", "flag": "intro.soloJob", "flavour": "share", "reply": {"who": "home:sam", "text": "Look at you! A proper job! The Bench is very proud. I've told them."}}, {"text": "We had a {trad} on the ship. I went.", "id": "si31bm", "came": "any", "flavour": "share", "reply": {"who": "home:sam", "text": "A {trad}? In space? Was there a quiz? Tell me there was a quiz."}}, {"text": "I've made a friend. {friend}.", "id": "1c6ltb3", "friend": "any", "flavour": "share", "reply": {"who": "home:sam", "text": "Good. Tell {friend} hello from the Bench. And ask if they know anything about engines."}}, {"text": "Tell me one thing from home.", "id": "1don30s", "flavour": "listen", "reply": {"who": "home:sam", "text": "The café's got the old biscuits back. Peace has returned to the town."}}, {"text": "How did the Bench do at quiz?", "id": "16b30og", "flavour": "cheer", "reply": {"who": "home:sam", "text": "Don't. Just don't. There was a question about engines. We needed you."}}],
 };
 const HOME_CHAT = {
+  "gran": [{"lines": [{"who": "home:gran", "text": "Is the light on? It's on. Hello, petal. I've nothing to say. I just like the box now.", "pose": "laugh"}, {"send": true}, {"who": "home:gran", "text": "Right. Off. Stop button. Bye!"}]}, {"when": {"flag": "home.gran.fourteen"}, "lines": [{"who": "home:gran", "text": "Quick one. Number Fourteen's got slugs. I'm not saying I'm pleased. I'm saying I'm not sad.", "pose": "laugh"}, {"send": true}, {"who": "home:gran", "text": "Bye, petal. Eat a vegetable. For me."}]}, {"lines": [{"who": "home:gran", "text": "Your mum's on the wheel. I'm in your chair. Wearing the hat. We're all very artistic here."}, {"send": true}, {"who": "home:gran", "text": "That's my lot. Love you. Light off."}]}, {"when": {"flag": "home.gran.hip"}, "lines": [{"who": "home:gran", "text": "I did the stairs today. Both of them. Well, all of them. Don't tell the nurse I counted."}, {"send": true}, {"who": "home:gran", "text": "Right. Off you go. I've a marrow to talk to."}]}],
+  "jo": [{"lines": [{"who": "home:jo", "text": "Kid. It's me. Nothing to report. I just wanted to hear something that wasn't forms."}, {"send": true}, {"who": "home:jo", "text": "Right. Off. Don't touch the red buttons."}]}, {"when": {"flag": "home.jo.weekends"}, "lines": [{"who": "home:jo", "text": "Quick one. Covered in varnish. Don't ask. Tell me something good.", "pose": "laugh"}, {"send": true}, {"who": "home:jo", "text": "Cheers, kid. Back to the boats."}]}, {"when": {"flag": "home.gran.hip"}, "lines": [{"who": "home:jo", "text": "Been round Mum's. Gran's bossing everyone from her chair. Your chair. I watered the Captain. Two pages of instructions."}, {"send": true}, {"who": "home:jo", "text": "Right. Bye, kid. Gran says call her."}]}],
   "mum": [{"lines": [{"who": "home:mum", "text": "Hello! Is it you? It's you. The kettle's on. Not that you can have any.", "pose": "laugh"}, {"send": true}, {"who": "home:mum", "text": "Love to you. Gran says love. Jo says nothing, Jo's asleep. Bye, pet."}]}, {"lines": [{"who": "home:mum", "text": "{me}! I was just thinking about ringing you. Well, you can't ring me. But I was thinking it."}, {"send": true}, {"who": "home:mum", "text": "Right. Off you go. Sleep. Eat. Don't touch anything that sparks."}]}, {"when": {"flag": "home.mum.pottery"}, "lines": [{"who": "home:mum", "text": "Quick one. I've clay on the receiver. Gran's watching. Say hello to Gran."}, {"send": true}, {"who": "home:mum", "text": "Must go. My cup's collapsing. It does that. Bye!", "pose": "laugh"}]}, {"when": {"weekday": "tue"}, "lines": [{"who": "home:mum", "text": "Can't stop, it's pottery night. Five minutes. Tell me one thing."}, {"send": true}, {"who": "home:mum", "text": "Lovely. Right. Off to make another hat. I mean bowl."}]}],
+  "sam": [{"lines": [{"who": "home:sam", "text": "Hello, you absolute idiot. Nothing happened today. I'm telling you anyway."}, {"send": true}, {"who": "home:sam", "text": "Right. Off. The trolley needs me."}]}, {"when": {"flag": "home.sam.sundays", "weekday": "sun"}, "lines": [{"who": "home:sam", "text": "It's Sunday! You know what that means. You first this time.", "pose": "laugh"}, {"send": true}, {"who": "home:sam", "text": "Brilliant. Same time next week."}]}, {"when": {"flag": "home.sam.library"}, "lines": [{"who": "home:sam", "text": "Quick one from the library. I'm hiding in the atlas section. There's a map of the stars. You're not on it. Rude."}, {"send": true}, {"who": "home:sam", "text": "Shush, someone's coming. Bye!"}]}],
 };
 // ---- END LINES ----
 // ---- BEGIN MEETINGS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
