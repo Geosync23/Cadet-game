@@ -75,7 +75,7 @@ Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ens
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
 Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
 Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh Marra Station Ostrander Tevan Port Halloran
-New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook'''.split())
+New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook Midtour Year Lantern'''.split())
 
 
 POSES = {'sigh', 'laugh', 'listen', 'nod', 'gesture', 'play'}   # the talk poses (section 8b) a meeting or moment line may ask for
