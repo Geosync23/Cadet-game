@@ -5,7 +5,11 @@
 #       one file (a combined build): names declared twice at the top level, and a syntax check with node if it's installed
 #   python3 name_check.py --branches BASE REF [REF ...]
 #       git refs (e.g. origin/claude/ship-integration origin/claude/social origin/claude/arrival): the names each branch
-#       adds over BASE, and any name two branches both add (they will clash when combined)
+#       adds over BASE, any name two branches both add (they will clash when combined), and any top-level name a
+#       branch deletes but still uses (a ReferenceError at run time; node --check can't see it)
+#   python3 name_check.py --branches LAST_REVIEWED NEW
+#       re-reviewing one branch: the same, against its own last reviewed commit. Catches a helper deleting a name that
+#       only ever existed on its branch (social f05d7db deleted socP and still called it)
 # Top level means a declaration at the start of a line, which is how the game file is written (the code inside the one
 # IIFE isn't indented). No browser needed; a second or two.
 import re, subprocess, sys, tempfile, os
@@ -71,6 +75,9 @@ def branches(base, refs):
             print(f'  {ref}: already in {base}, skipped'); continue
         added = [k for k in n if k not in b]
         print(f'  {ref}: {len(added)} new names')
+        src = script_of(show(ref))                      # a name the branch deleted but still uses: a ReferenceError at run time
+        for k in b:
+            if k not in n and re.search(r'(?<![\w$.])' + re.escape(k) + r'(?![\w$])', src): ok = False; print(f'  {ref}: DELETED BUT STILL USED: {k}')
         for k in added: seen.setdefault(k, []).append(ref)
         for k, v in n.items():
             if len(v) > 1 and len(b.get(k, [])) < 2: ok = False; print(f'  {ref}: DECLARED TWICE inside the branch: {k} at {v}')
