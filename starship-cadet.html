@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.26
+   STARSHIP CADET: CSV Wren                           build 0.48.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.27';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -20156,6 +20156,42 @@ const VOICE = {
         {"text": "{bye}. Ask me anything, any time. I mean it.", "id": "1djte8"},
         {"text": "Off you go, then. Coil three's calling. Well, sulking. Same thing.", "id": "qjpbuo", "tone": "funny", "act": "work"},
         {"text": "{bye}. Hot water till ten, remember. After that it's character-building.", "id": "1seilrc", "tone": "funny", "time": "evening"},
+        {"text": "Right, onward. Come to the jam on Friday. I'll keep you a seat.", "id": "d1ur4o", "not": {"week1": "true"}},
+        {"text": "{bye}. Drink some tea. Do one nice thing. Properly.", "id": "zzsb3k", "tone": "warm", "not": {"week1": "true"}},
+        {"text": "Off you go, then. I'm off to argue about lyrics. Wish me luck.", "id": "17ngl8g", "tone": "funny", "not": {"week1": "true"}},
+      ],
+      "callback": [
+        {"text": "Remember the Tern landing? You held on to your bag like it was going to run off.", "id": "k8y83w", "tone": "funny", "tier": [1, 4], "told": "intro.arrival", "not": {"week1": "true"}},
+        {"text": "Funny. Feels like years since I met you off the Tern. It's not been long at all.", "id": "vl3e3r", "tone": "warm", "tier": [3, 4], "told": "intro.arrival"},
+        {"text": "Your shadow shift. You asked why three times. Best questions I'd had all month.", "id": "1yrb4tl", "tone": "warm", "tier": [1, 4], "told": "intro.shadowShift", "not": {"week1": "true"}},
+        {"text": "Day one, you held the spanner upside down. Then you didn't. I noticed.", "id": "1g7h5fb", "tone": "warm", "tier": [2, 4], "told": "intro.shadowShift"},
+        {"text": "You came for the stars, you said. Have you had your window seat yet? Properly?", "id": "1m2a369", "tone": "warm", "tier": [1, 4], "told": "intro.dinner.stars", "not": {"week1": "true"}},
+        {"text": "Observatory night's coming. You said stars, that first dinner. I remembered.", "id": "zialyk", "tone": "warm", "tier": [3, 4], "told": "intro.dinner.stars"},
+        {"text": "You said you liked fixing things. Still true? Is the bay being kind to you?", "id": "pqyff2", "tier": [1, 4], "told": "intro.dinner.fixing", "not": {"week1": "true"}},
+        {"text": "First dinner, you said fixing things. You're good at it. Told you you'd fit.", "id": "158rbej", "tone": "warm", "tier": [3, 4], "told": "intro.dinner.fixing"},
+        {"text": "First night you said you weren't sure why you came. Any closer? No rush.", "id": "sjsbir", "tier": [1, 4], "told": "intro.dinner.unsure", "not": {"week1": "true"}},
+        {"text": "You said you weren't sure, that first dinner. You look sure now. A bit. I'm glad.", "id": "1xdaj11", "tone": "warm", "tier": [3, 4], "told": "intro.dinner.unsure"},
+      ],
+      "chat": [
+        {"text": "Achterberg says the second verse is about a boat. It's a lighthouse. I'd bet my tea.", "id": "ghl3sp", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Farouk and I had the lyric argument again. We both lost. Takahashi won. As always.", "id": "yj3dlh", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Haddad hums the right tune with the wrong words. It's lovely. Don't tell her I said wrong.", "id": "1svfzbz", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I've started the gym after shift. Ten minutes. Then twelve. Don't laugh. Well, a bit.", "id": "1hxyeli", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Holt's at the gym after shift too. He nods at me. I nod back. It's a whole friendship.", "id": "f7c0nv", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "What are you reading? I'm on a book about lighthouses. Long story. Good story.", "id": "1dkhn96", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Did you try Brennan's pudding last night? I went back. Twice. She saw.", "id": "241e2x", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Kovac says my knitting has \"personality\". Dahl says it has holes. They're both right.", "id": "nwppxh", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Knitting circle tonight. Kovac does it perfectly. Dahl does it sensibly. I do it loudly.", "id": "rpecr2", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I put a record on and the whole corridor sang along. Badly. All of us. Best night.", "id": "1s9eqq3", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I left Reyes a note with a doodle of coil three in a hat. He drew a scarf on it.", "id": "a4dzrq", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "What do you do on your days off? Properly off, I mean. I'm collecting ideas.", "id": "nkqyh2", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Observatory later. Rossi lets me use the tiny telescope. Tiny stars. Lovely.", "id": "1gthhi1", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Favourite song in the record cabinet? Go on. Then tell me the words. Then we'll argue.", "id": "cl0k2i", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "You always ask the next question. Most people stop at one. Keep doing that.", "id": "y61rgg", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I used to think a good day was the coils behaving. Now it's tea with people. Bit of both.", "id": "1guynnz", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Sometimes I sit at the overlook with tea and just listen. Is that odd? It's not odd.", "id": "e650md", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Glad you came out here, you know. To the Wren. The bay's better for it.", "id": "1q4w9p", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
+        {"text": "If I ever get serious, tell me to put a record on. It works. Every time.", "id": "1oaac30", "tone": "funny", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "decline": [
         {"text": "Ah, I can't tonight. Coil three needs a sit with. Ask me again? Please do.", "id": "1xv47ld"},
@@ -20167,6 +20203,9 @@ const VOICE = {
         {"text": "Quiet one. Coil three's tired. Or I am. One of us is.", "id": "qdzg4d", "mood": "low"},
         {"text": "Middling. Coil two's thinking too hard. So am I. We'll both get there.", "id": "57jgxy", "mood": "ok"},
         {"text": "I'm in a singing mood. You've been warned. Something about a lighthouse.", "id": "17zgzfc", "tone": "funny", "mood": "high", "tier": [2, 4]},
+        {"text": "Good mood. Singing mood. Knitting-fast mood. You've been warned.", "id": "ozch25", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine. Steady. A cup of tea and I'll be better than fine.", "id": "dgsx1k", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Bit quiet today. Checked a valve three times. Fine all three. That's how I know.", "id": "2p2n6z", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "greet": [
         {"text": "{hi}. You'll be the new hand. Zeke Torres, engines. Ask me anything.", "id": "ux824s", "tier": [0, 0]},
@@ -20180,6 +20219,15 @@ const VOICE = {
         {"text": "Morning! Skipped breakfast. Don't tell Brennan. She'll send a tray down.", "id": "8z699n", "tone": "funny", "tier": [2, 4], "time": "morning"},
         {"text": "{hi}, {nick}. Come down to Deck 6 one day. I'll introduce you to the coils.", "id": "tutrhy", "tier": [2, 4]},
         {"text": "{nick}. Good. Sit. Tell me one thing that went right today. Then I'll tell you mine.", "id": "1462npn", "tone": "warm", "tier": [4, 4]},
+        {"text": "{hi}, {nick}! How's the week treating you? Properly, I mean.", "id": "7hikb3", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{hi}, {nick}. Song stuck in my head since breakfast. Well, since not-breakfast.", "id": "1s4y12", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Monday! Fresh week. Fresh tea. What are you up to this week?", "id": "14wlpyr", "tier": [1, 4], "weekday": "mon", "not": {"week1": "true"}},
+        {"text": "{hi}, {nick}. Friday. Music night. You've no excuse, you know.", "id": "9goygv", "tone": "funny", "tier": [1, 4], "weekday": "fri", "not": {"week1": "true"}},
+        {"text": "{nick}! Perfect timing. I was just about to open the biscuits.", "id": "j53nzi", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{hi}, {nick}. Sit a minute? Tell me something that isn't about work.", "id": "1s0tj97", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good. I've got tea and nothing to fix. Stay?", "id": "1pa56hl", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There's my shipmate. What's new? Anything? Tell me anyway.", "id": "txzvwt", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{nick}. Good. Kettle's just boiled. Sit, tell me your week.", "id": "1gbh3y4", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Got a minute? Properly, I mean. Not a coil minute. A real one.", "id": "1cquqy9"},
@@ -20193,6 +20241,9 @@ const VOICE = {
       ],
       "joy": [
         {"text": "Kovac's teaching me to knit. Properly, she says. I'm on my third go at properly.", "id": "1mxs9x5", "tier": [1, 4]},
+        {"text": "A whole corridor singing the wrong words together. Nothing better. Honestly.", "id": "1mrqurg", "tone": "warm", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "First cup of tea after shift. The one where you sit down. That one.", "id": "17i2ehe", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Finishing a row without dropping a stitch. Happens once a week. I cheer every time.", "id": "wugii9", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "I know the words to every song in the record cabinet. So do four other people. Wrongly.", "id": "p17gpr", "tone": "funny", "tier": [1, 4]},
@@ -20201,6 +20252,11 @@ const VOICE = {
         {"text": "Reyes and I swap notes at shift change. Half coils, half arguments about coil three.", "id": "zcdtcq", "tone": "funny", "tier": [2, 4]},
         {"text": "Calder trusts my hands. Not my patience. She's right on both.", "id": "jpqhhx", "tier": [2, 4]},
         {"text": "Every new hand asks where the lift is. Then where the tea is. You'll fit right in.", "id": "hsdx8t", "tone": "warm", "tier": [3, 4]},
+        {"text": "There's a stack of records on my cabin floor. I'll shelve them. They like the floor.", "id": "szoa04", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I make tea in a pot. Properly. Warm the pot first. It takes ages. Worth it.", "id": "ieqvq9", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I write the lyrics down after every jam. Then I lose the paper. Then we argue again.", "id": "fkbcmc", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Reyes and I are never awake at the same time. I'd know his handwriting anywhere.", "id": "1xlupt4", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Kovac taught me to cast on. Dahl taught me to fix it. Nobody can teach me to stop.", "id": "1dde28j", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "Missed you earlier. No harm done. The coils kept me company. Next time?", "id": "1rjmonq"},
@@ -20214,6 +20270,14 @@ const VOICE = {
         {"text": "I don't really do the gym. I do the stairs to the overlook, very fast, twice.", "id": "114vf7g", "act": "gym"},
         {"text": "Music room's free. I'm going to sing something badly. You're welcome to join.", "id": "ngkq8e", "tone": "funny", "act": "leisure"},
         {"text": "Look down there. All three coils. People think engines are noise. They're a choir.", "id": "1e6iq4t", "place": "overlook"},
+        {"text": "Tea. Just tea. Toast is for people with time. I'll be hungry by ten.", "id": "1baeidj", "tone": "funny", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "New habit! Gym after shift. I'm on the bike. The bike's winning.", "id": "23b0qr", "tone": "funny", "act": "gym", "not": {"week1": "true"}},
+        {"text": "Pudding first, then I'll think about dinner. Don't tell Brennan the order.", "id": "1oxgfkm", "tone": "funny", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Off to the music room. There's a record I've not argued about yet.", "id": "kivxpx", "tone": "funny", "act": "leisure", "not": {"week1": "true"}},
+        {"text": "Side two, track one. I know every word. I'll prove it. Don't check.", "id": "18k5v3b", "tone": "funny", "place": "musicroom"},
+        {"text": "Tea corner's the best room on Deck 5. Kettle, biscuits, and nobody in a hurry.", "id": "1pqo3ke", "place": "teacorner", "not": {"week1": "true"}},
+        {"text": "Lounge window. Tea. Somebody playing Tiles badly. That's me. I'm playing badly.", "id": "1eao8y0", "tone": "funny", "place": "lounge", "not": {"week1": "true"}},
+        {"text": "Observatory night! Tea flask, two biscuits, and a lot of looking up.", "id": "1ikvvbp", "trad": "observatory"},
       ],
       "rumour": [
         {"text": "Right. You'll want to hear this.", "id": "c4cwzy"},
