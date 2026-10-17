@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | claude/leave 492364d (0.61.0-0.61.2) | leave-492364d.md (+ two probes) | PASS WITH FIXES: MEDIUM, an old save loaded mid-morning gets a false miss; MEDIUM, a summons can be booked on your leave day; lows: Pell absent from the send-off, late-every-day reaches the Chief (design call), leave_check's late notes never score, a latent q overwrite, leave lost at the cap |
 
-**Done:** the fixes, 8f1f88a (0.61.3), PASS (leave-8f1f88a.md). **Pending:** **rare sickness** (for 0.60.6) by the same engineer; check `careerSick` against a day already marked missed, and sick on a booked leave day.
+**Done:** the fixes, 8f1f88a (0.61.3), PASS (leave-8f1f88a.md); the user's chiefRun rule, 90272ef (0.61.4), PASS (leave-90272ef.md). **Pending:** **rare sickness** (for 0.60.6) by the same engineer; check `careerSick` against a day already marked missed, and sick on a booked leave day.
 
 ## How I test
 - `pip install playwright`; three r128 in /tmp/cadet-work/three (DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
