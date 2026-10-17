@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.46
+   STARSHIP CADET: CSV Wren                           build 0.34.47
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.46';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.47';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14034,11 +14034,13 @@ function tradIs(cond, p, d, c, host) {
 }
 const tradRule = (rules, p, d, c, host, none) => { for (const [cond, v] of rules) if (tradIs(cond, p, d, c, host)) return v; return none; };
 const evFirst = name => name.split(' ').slice(-2)[0];   // 'Chef Auda Brennan' -> 'Auda'
-function tradFill(text, t, c) {
+function tradFill(text, t, c, p) {
   let ok = true;
+  const hs = c && c.honorees && p ? c.honorees.filter(h => h !== p) : [];   // {first}: with several honorees, each speaker names one of them (by hash)
+  const first = hs.length && c.honorees.length > 1 ? evFirst(hs[Math.floor(schedU(p.seed + 104729, c.day, t.k) * hs.length)].name) : c && c.first;
   const out = text.replace(/\{(\w+)\}/g, (all, k) => {
     const h = t.host && schedPeople().find(p => p.id === t.host);
-    const v = k === 'trad' ? t.name : k === 'host' ? h && evFirst(h.name) : k === 'names' ? c && c.names : k === 'first' ? c && c.first
+    const v = k === 'trad' ? t.name : k === 'host' ? h && evFirst(h.name) : k === 'names' ? c && c.names : k === 'first' ? first
       : k === 'season' ? c && seasonOf(c.day).name : k === 'weekday' ? c && WEEKDAYS[weekday(c.day)] : k === 'time' ? c && hhmm(c.from) : null;
     if (!v) ok = false; return v || '';
   });
@@ -14046,7 +14048,7 @@ function tradFill(text, t, c) {
 }
 function tradText(t, kind, c, p) {
   const self = p ? p.name.split(' ').slice(-2).map(w => new RegExp('\\b' + w + '\\b')) : [];   // nobody talks about themselves by name
-  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.text || x.t || '', t, c)).filter(x => x && !self.some(r => r.test(x)));
+  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.text || x.t || '', t, c, p)).filter(x => x && !self.some(r => r.test(x)));
   return l.length ? l[Math.floor(schedU((p ? p.seed : 0) + 7919, c ? c.day : 0, t.k) * l.length)] : null;   // per person and day
 }
 function tradLoad(t) {
