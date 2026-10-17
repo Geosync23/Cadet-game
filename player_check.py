@@ -251,6 +251,49 @@ with sync_playwright() as pw:
     check(wl == [1, 'Hungry'], f'the warning shows in the running game: {wl}')
     g.ev("WARN_SAID = {}; Object.assign(SHIP.player.needs, NEEDS_FRESH)")
 
+    print('Teaching tips (0.28.42):')
+    tt = json.loads(g.ev(r"""(() => { const D = SHIP.device, keep = { ...D.tipsSeen }, tipsOn = D.settings.tips, intro = SHIP.intro && { ...SHIP.intro }, out = {};
+      const ids = TEACH.map(x => x[0]); out.list = [ids.length, new Set(ids).size, Math.max(...ids.map(x => x.length)), Math.max(...TEACH.map(x => x[2].length))];
+      let t = performance.now() + 5e6;
+      const clear = () => { TIP_Q.length = 0; DEVICE_SKIN.tip(null); };
+      const quiet = () => { clear(); Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9, busy: false, panels: false }); document.getElementById('toast').classList.remove('show'); };
+      const tick = () => { t += 1000; POP.busy = false; return teachTick(t); };
+      if (SHIP.intro) SHIP.intro.ended = true; deviceClose(); D.settings.tips = true;
+      for (const id of ids) delete D.tipsSeen[id];
+      Object.assign(SHIP.player.needs, { hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
+      quiet(); const a = tick(); out.first = [a, !!D.tipsSeen[a], TIP_Q.length && TIP_Q[0].id, document.getElementById('devTip') && !document.getElementById('devTip').hidden];
+      quiet(); POP.tip = t; out.gap = [tick()];                              // 3 minutes between tips
+      clear(); POP.card = POP.tip = t - 181000; POP.card = t - 30000; out.gap.push(tick());   // a card 30 s ago: not yet
+      POP.card = t - 61000; const b = tick(); out.gap.push(b, b && b !== a);  // 61 s: the next one
+      quiet(); POP.toast = t - 3000; out.gap.push(tick());                   // a toast 3 s ago
+      const seen0 = ids.filter(k => D.tipsSeen[k]).length; quiet(); D.settings.tips = false; out.off = [tick(), ids.filter(k => D.tipsSeen[k]).length - seen0]; D.settings.tips = true;
+      if (SHIP.intro) { SHIP.intro.on = true; SHIP.intro.ended = false; SHIP.intro.step = 'chief'; quiet(); out.intro = tick(); SHIP.intro.step = null; SHIP.intro.ended = true; }
+      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:rep']; quiet(); POP.tip = t; TEACH_ST.turnin = false; const m0 = SHIP.time.min, d0 = SHIP.time.day; SHIP.time.day = 1; SHIP.time.min = 600;
+      out.rep = [SHIP.time.day, tick()]; TEACH_ST.turnin = true; out.rep.push(tick()); delete D.tipsSeen['t:rep']; TEACH_ST.turnin = false; SHIP.time.min = 1030; quiet(); POP.tip = t; out.rep.push(tick()); SHIP.time.min = m0; SHIP.time.day = d0;
+      for (const id of ids) delete D.tipsSeen[id];
+      quiet(); DEV.open = true; DEV.app = 'home'; out.dev = [tick()]; DEV.app = 'needs'; quiet(); out.dev.push(tick()); DEV.open = false; DEV.app = 'home';
+      for (const id of ids) D.tipsSeen[id] = true; delete D.tipsSeen['t:queue']; delete D.tipsSeen['t:needs'];
+      const was = ACT; ACT = { kind: 'queue', o: {}, def: {} }; quiet(); out.prio = [tick()]; ACT = was; quiet(); out.prio.push(tick());
+      out.size = JSON.stringify(D.tipsSeen).length;
+      for (const id of ids) delete D.tipsSeen[id]; Object.assign(D.tipsSeen, keep); D.settings.tips = tipsOn; if (intro) Object.assign(SHIP.intro, intro);
+      clear(); Object.assign(SHIP.player.needs, NEEDS_FRESH); return JSON.stringify(out); })()"""))
+    for k in tt: print('   ', k, tt[k])
+    check(tt['list'][0] >= 25 and tt['list'][0] == tt['list'][1] and tt['list'][2] < 12 and tt['list'][3] <= 200, f'25+ tips, unique short ids, short texts: {tt["list"]}')
+    check(str(tt['first'][0]).startswith('t:') and tt['first'][1] is True and tt['first'][2] == tt['first'][0] and tt['first'][3] is True, f'a due tip shows on the card and is marked seen: {tt["first"]}')
+    check(tt['gap'][0] is None and tt['gap'][1] is None and tt['gap'][3] is True and tt['gap'][4] is None, f'pacing: 3 minutes apart, 60 s after a card, not just after a toast: {tt["gap"]}')
+    check(tt['off'] == [None, 0], f'Tips off: none shown, none marked seen: {tt["off"]}')
+    check(tt.get('intro') is None, f'none during the arrival: {tt.get("intro")}')
+    check(tt['rep'] == [1, None, 't:rep', 't:rep'], f'the reputation tip on Monday: after your first job is turned in, or at 17:00, whatever the pacing: {tt["rep"]}')
+    check(tt['dev'] == [None, 't:a-needs'], f'over the device only the open app\'s tip: {tt["dev"]}')
+    check(tt['prio'] == ['t:queue', 't:needs'], f'the first due tip in priority order: {tt["prio"]}')
+    check(tt['size'] < 800, f'all the tips seen fit in a small save: {tt["size"]} bytes')
+    # in the running game: with the screen quiet (heads-ups paused), a due tip comes up on its own
+    g.ev("for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]; SHIP.device.calendarRemind.on = false; TEACH_CK = -1e9; Object.assign(POP, { toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 }); document.getElementById('toast').classList.remove('show'); TIP_Q.length = 0; DEVICE_SKIN.tip(null); deviceClose()")
+    g.step(90)
+    tg = json.loads(g.ev("JSON.stringify([TIP_Q.map(x => x.id), !document.getElementById('devTip').hidden])")); print('  in the game:', tg)
+    check(len(tg[0]) == 1 and tg[0][0].startswith('t:') and tg[1], f'a due tip shows by itself in the running game: {tg}')
+    g.ev("TIP_Q.length = 0; DEVICE_SKIN.tip(null); SHIP.device.calendarRemind.on = true; for (const x of TEACH) delete SHIP.device.tipsSeen[x[0]]")
+
     print('Sleep and time skips:')
     sl = g.ev(r"""(() => { const n = SHIP.player.needs; Object.assign(n, NEEDS_FRESH); setShipNow(22 * 60); needsT = null; playerUpdate(0, 0);
       n.energy = 40; sleeping = true; sleepUntil(WAKE_AT); sleeping = false; const slept = n.energy;

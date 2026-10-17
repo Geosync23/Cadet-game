@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.41
+   STARSHIP CADET: CSV Wren                           build 0.28.42
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.41';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.42';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10314,19 +10314,19 @@ function popupWatch(now) {
 // dialogue or sleep, nor with the device open, and WARN_GAP after anything else; the lowest need goes first. Not the
 // Tips setting's (they're about you, not teaching). At 0 nothing more happens (no fail state) except bathroom's '+go'.
 const WARN_AT = [NEED_LOW, 10], WARN_REARM = 40, WARN_GAP = 8000;
-const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10]
-  hunger: [['Hungry', 'You\'re getting hungry, and tasks go slower. The mess on Deck 3 serves breakfast 06:00-08:00 and dinner 17:00-20:30; grab-and-go there is always open.'],
-    ['Very hungry', 'You\'re running on empty: tasks go 15% slower. Get something at the mess on Deck 3; grab-and-go is always open.']],
-  energy: [['Tired', 'You\'re tired, so you walk slower. Sleep in your bunk (Bunk 1, Deck 4) from 20:00; by day, lying down or sitting rests you.'],
-    ['Exhausted', 'You\'re dead on your feet. Get to your bunk in Bunk 1, Deck 4, and sleep it off.']],
-  hygiene: [['Could do with a wash', 'People enjoy your company less: chatting does half the good. The showers are in the washrooms at either end of the junior wing, Deck 4.'],
-    ['Really need a shower', 'It\'s been a while. The washrooms are at either end of the junior wing on Deck 4.']],
-  fitness: [['Out of shape', 'You walk slower and tire sooner. A session on a treadmill or the weights in the gym on Deck 3 will help.'],
-    ['Badly out of shape', 'Even one workout in the gym on Deck 3 makes a difference.']],
-  social: [['A bit lonely', 'You tire a little sooner. Chat with someone, eat with company, or call home from the booths on Deck 3.'],
-    ['Missing people', 'Call home from the booths on Deck 3, or find a friendly face and say hello.']],
-  bathroom: [['Need the toilet', 'It\'s hard to concentrate: tasks go slower. The public washrooms are on Deck 4 (the junior wing) and Deck 3.'],
-    ['Bursting', 'You really need the toilet, now! Washrooms on Deck 4 (the junior wing) and Deck 3. Let it get to nothing and you\'ll be hopping.']],
+const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] (text: head writer 3)
+  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 06:00-08:00, dinner 17:00-20:30. The grab shelf never closes.'],
+    ['Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.']],
+  energy: [['Tired', 'You\'re tired, so you\'re walking slower. Your bunk\'s in Bunk 1, Deck 4, from 20:00. By day, sit down a while.'],
+    ['Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.']],
+  hygiene: [['Could do with a wash', 'Time for a wash: people enjoy your company less. Showers are in the junior wing washrooms, Deck 4.'],
+    ['Really need a shower', 'You really need a shower. Chats do half the good till you\'ve had one. Junior wing, Deck 4.']],
+  fitness: [['Out of shape', 'Out of shape: you walk slower and tire sooner. A treadmill or weights session in the Deck 3 gym will help.'],
+    ['Badly out of shape', 'Badly out of shape. Get to the gym on Deck 3. Even one workout makes a difference.']],
+  social: [['A bit lonely', 'A bit lonely, and tiring sooner for it. Chat with someone, eat with company, or call home from the Deck 3 booths.'],
+    ['Missing people', 'Really missing people. Find a friendly face, or call home from the booths on Deck 3.']],
+  bathroom: [['Need the toilet', 'You need the toilet. Public washrooms are in the junior wing on Deck 4, and on Deck 3.'],
+    ['Bursting', 'You really need the toilet, now! Deck 4 or Deck 3. Hold on, or you\'ll be hopping.']],
 };
 let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
 function needWarnTick(now) {
@@ -10339,6 +10339,85 @@ function needWarnTick(now) {
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
   toast(w[0], w[1]); return pick;
+}
+// teaching tips (0.28.42, the user's "a lot more tips and tutorial bubbles appearing, teaching you. But not too many and
+// not too often"): TEACH lists them in priority order, [id, test(c), text]. teachTick (from playerUpdate, once a second)
+// shows the first one not seen whose test passes, through the device's tipShow (its card, its saved tipsSeen, its Tips
+// setting). Pacing: one every TEACH_GAP at most; none within TEACH_QUIET of another tip card, need warning, heads-up or
+// dialogue, nor TEACH_TOAST of a toast; none during the arrival (teachHeld) or while anything's up (POP.busy). App tips ('t:a-...')
+// show only over that app on the device; the rest never over the device. A tip whose moment passes waits for the next.
+// TEACH_ST: what teachWatch has seen happen (not saved: a reload starts it again, the tips themselves are saved).
+const TEACH_GAP = 180000, TEACH_QUIET = 60000, TEACH_TOAST = 6000;
+let TEACH_CK = -1e9, TEACH_ST = null;
+const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
+const teachMeal = m => m >= 360 && m < 480 || m >= 1020 && m < 1230;   // breakfast and dinner at the servery
+const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
+  ['t:rep', c => c.d >= 1 && (c.S.turnin || c.min >= 1020 || c.d >= 2), 'Your reputation grows with good work, kindness and joining in. Each department, and the ship as a whole, has its own view of you. The Record app shows where you stand.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end
+  ['t:a-sched', c => c.app === 'schedule', 'Your day at a glance: meals, your shift, anything booked. Tap an entry and the marker shows the way.'],
+  ['t:a-cal', c => c.app === 'calendar', 'The weeks ahead: days off, traditions, birthdays and appointments.'],
+  ['t:a-maps', c => c.app === 'maps', 'Every deck, room by room. Tap a room to put the marker on it.'],
+  ['t:a-jobs', c => c.app === 'jobs', 'Your job and its steps. The board in the Works bay has the rest.'],
+  ['t:a-crew', c => c.app === 'crew', 'Everyone you\'ve met, and how well you know them.'],
+  ['t:a-needs', c => c.app === 'needs', 'What each need is doing for you right now: ▲ helping, ▼ holding you back.'],
+  ['t:queue', c => ACT && ACT.kind === 'queue', 'The line moves on its own. You\'ll get a tray at the front. Tap anywhere to leave the queue.'],
+  ['t:tray', c => !!SHIP.player.tray && !(ACT && ACT.kind === 'eat'), 'Take your tray to any free seat and tap it to eat. Company at the table lifts your spirits too.'],
+  ['t:lift', c => teachRecent(c.S.arrived, c), 'Six decks, one lift. Maps on your device shows where you are and what\'s on every deck.'],
+  ['t:deck3', c => c.deck === 3, 'Deck 3 is the Commons: the mess, the gym, the crew store, the call-home booths and the promenade.'],
+  ['t:deck5', c => c.deck === 5, 'Deck 5 is Operations: the Works bay and its job board, main storage and the machine shop. You work here.'],
+  ['t:shift', c => c.work && c.min >= 450 && c.min < 480, 'Your shift is 08:00 to 17:00 in the Works bay, Deck 5. Take a job from the board when you get in.'],
+  ['t:dayoff', c => c.work === false && c.min >= 420 && c.min < 1200, 'Day off! No shift today. The garden, a game of Tiles, a long call home, or nothing at all. Your choice.'],
+  ['t:fault', c => c.fault, 'A blinking light means a machine is struggling. Faults become jobs on the Works board. The Ship app shows how she\'s holding up.'],
+  ['t:pay', c => c.S.paid, 'Credits! Spend them at the crew store on Deck 3: snacks and small comforts. Some make good gifts.'],
+  ['t:gift', c => giftHeld(), 'You\'re carrying a gift. Tap a crewmate to give it. Everyone has their favourites.'],
+  ['t:carry', c => SHIP.player.carry.length > 0 && !giftHeld() && !bagHeld(), 'Parts in hand. Fit them at the job\'s machine. Spares go back to main storage.'],
+  ['t:chat', c => Object.keys(SHIP.player.chats).length > 0, 'Chatting lifts your Social. The first chat with someone each day counts most. It\'s how strangers become friends.'],
+  ['t:tier', c => c.S.tierUp > 0, 'You\'re getting to know someone. Chats, meals and favours move you along: stranger, acquaintance, colleague, friend, close friend.'],
+  ['t:friend', c => c.S.tierUp >= 3, 'A friend! Friends save you a seat, ask you along to things, and sometimes leave a note on your bunk.'],
+  ['t:mail', c => mailUnread() > 0, 'New mail. Read it in Mail on your device. Ship traditions are announced the evening before.'],
+  ['t:trad', c => c.trad, 'There\'s a ship tradition today. Turn up and join in. It\'s how the crew makes a long voyage feel like home.'],
+  ['t:hu', c => c.S.hu, 'Heads-ups tell you what\'s coming. Set how early, or turn them off, in your device\'s Settings.'],
+  ['t:sleep', c => c.S.woke, 'Slept well? Your bunk takes you from 20:00 through to 06:00. By day, lie on it to rest.'],
+  ['t:late', c => c.min >= 1320, 'Getting late. Your bunk\'s in Bunk 1, Deck 4. Stay up if you like. You\'ll feel it tomorrow.'],
+  ['t:needs', c => NEED_KEYS.some(k => c.n[k] < 50), 'Your needs sit in the strip at the top. Keep them up and the day goes well. Let them drop and you slow down.'],
+  ['t:loo', c => c.n.bathroom < 50, 'Public washrooms are in the junior wing on Deck 4, and on Deck 3. Cabin bathrooms are private.'],
+  ['t:food', c => c.n.hunger < 50 && !teachMeal(c.min), 'Missed a meal? The grab shelf in the mess, Deck 3, is always open.'],
+  ['t:sit', c => c.n.energy < 50, 'Tired? Sit down anywhere for a bit; it slows the tiredness. Lying on your bunk rests you properly.'],
+  ['t:gym', c => c.n.fitness < 50, 'The gym on Deck 3 has treadmills and weights. A workout every few days keeps you fit and quick on your feet.'],
+  ['t:call', c => c.n.social < 50, 'Missing home? The call-home booths on Deck 3 put you through to family.'],
+  ['t:bonus', c => c.now - c.S.start > 600000 && Object.values(needEffects(c.n).marks).some(m => m[0] === 'up'), 'Needs kept high give bonuses: well rested, you work faster. The Needs app shows what\'s helping and what isn\'t.'],
+  ['t:view', c => c.now - c.S.start > 300000, 'Rotate turns the view. Walls lowers them so you can see into rooms. Pinch or scroll to zoom.'],
+];
+const teachTry = f => { try { return !!f(); } catch (e) { return false; } };
+function teachWatch(now) {                               // what's happened, for the tests that need more than a look
+  const S = TEACH_ST || (TEACH_ST = { start: now, deck: deckDef.num, cr: SHIP.player.credits, tierUp: 0, slept: false });
+  if (deckDef.num !== S.deck && !ride) { S.deck = deckDef.num; S.arrived = now; }
+  if (SHIP.player.credits > S.cr) S.paid = true; S.cr = SHIP.player.credits;
+  if (sleeping) S.slept = true; else if (S.slept) S.woke = true;
+  if (DEV.hu) S.huOn = true; else if (S.huOn) S.hu = true;
+  return S;
+}
+if (typeof onSim === 'function') {
+  onSim('tierUp', x => { if (TEACH_ST && x && x.tier > TEACH_ST.tierUp) TEACH_ST.tierUp = x.tier; });
+  onSim('job', x => { if (TEACH_ST && x && x.step === 'turnin') TEACH_ST.turnin = true; });
+}
+// the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
+// day 8) with tips, which is when they're most use.
+const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1);
+function teachTick(now) {
+  if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
+  const S = teachWatch(now), D = SHIP.device;
+  if (!D || !D.settings.tips || teachHeld() || devLocked() || POP.busy || POP.toast > now - TEACH_TOAST) return null;
+  const paced = now - POP.tip >= TEACH_GAP && Math.max(POP.card, POP.warn) <= now - TEACH_QUIET;
+  const d = SHIP.time.day, min = SHIP.time.min, deck = deckDef.num;
+  const c = { now, S, n: SHIP.player.needs, d, min, deck, app: DEV.open ? DEV.app : null,
+    work: teachTry(() => typeof playerShiftOn === 'function') ? !!playerShiftOn(d) : null,
+    fault: teachTry(() => typeof machineList === 'function' && machineList().some(m => m.deck === deck && machineLook(m.id).blink)),
+    trad: teachTry(() => typeof eventsOn === 'function' && eventsOn(d).some(e => min >= e.from - 60 && min < e.to)) };
+  for (const [id, test, text, o] of TEACH) {
+    if (D.tipsSeen[id] || !paced && !(o && o.sure) || id.startsWith('t:a-') !== !!DEV.open || !teachTry(() => test(c))) continue;
+    if (tipShow(id, text)) { POP.tip = POP.card = now; return id; }
+  }
+  return null;
 }
 
 // ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
@@ -11046,7 +11125,7 @@ function playerUpdate(dt, t) {
   if (crouch || player.crouch) player.crouch = crouch;
   const go = n.bathroom <= 0;                            // bursting (0.28.41): the '+go' pose while it's at 0 (hands full keep their hold)
   if (go || player.needGo) player.needGo = go;
-  const pn = performance.now(); popupWatch(pn); needWarnTick(pn);   // a need getting low says so (0.28.41; it replaced the two slow-walk toasts)
+  const pn = performance.now(); popupWatch(pn); needWarnTick(pn); teachTick(pn);   // a need getting low says so (0.28.41; it replaced the two slow-walk toasts), and the teaching tips (0.28.42)
   if (ACT) actUpdate(dt, t);
   needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
@@ -11096,7 +11175,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {}; WARN_SAID = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9;
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
