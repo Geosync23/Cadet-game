@@ -7,9 +7,10 @@ Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by sessio
   - 0.34.35: the bridge invite. `OCCASIONS.bridgeInvite` is a `chance` occasion (no appointment, notice or Mail first). Its `slot(d)` is Vance's mess breakfast (`occMealSlot`), and it's due on the day before a bridge hour (`occBridgeEve`). The occasion's `flag` is set when it closes (kept or missed). Meeting replies now set their `flag:`. The .meet file is copied unchanged from claude/content.
   - 0.34.36: weekly e9a88ff and monthly a93bf36 collected.
   - 0.34.37: `tradOn(id, t)` for social B's calls home.
+  - 0.34.38: reviewer 2's LOW notes: TALLY_MEMO cleared on a flag change; guestStay guarded.
+- **People:** social B2 = session_014A3w2gK8FBNWs66YC3LfME (owns the calls home; offered tradOn plus start/end hooks, waiting for their shape). Head writer 2 = session_01HNrh3xCtczeZM5NVFrE6pa (told about the invite).
 - **Open:**
-  - social B (session_019aEJaAGyZir9oq47CBRfA3) and the head writer (session_016i7YYgZd6puKxfBSkLggRF) are inactive: I asked the lead for their successors. Offer social B start/end hooks for letters evening if wanted.
-  - The weekly designer flagged that EV_MAILBOX's cap of 20 hides tiles-night@2's Mail from the check's view.
+  - EV_MAILBOX's cap is 40, not 20 as its comment says. events_check part 3 passes with it (days 2-8). Fix the comment in the next build; raise the cap if part 3 ever says "no Mail for".
   - The cut decor (mendingTable, rummageCrates) appears nowhere here.
 - **Gotcha:** events_check's later parts leave the clock past day 30, so a part that needs an earlier day must set the clock (`setShipNow` + `eventsTick`), not `skipTo` backwards.
 
