@@ -18,7 +18,7 @@ Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`
 
 ## Open items to follow up
 1. **The first-launch arrival, crossing fixes.** Arrival 0.42.12 reads section 13's `ARRIVING` (`if (typeof ARRIVING !== 'undefined' && ARRIVING && !SAVED) introBegin();`). The sim's coming 0.26.25 removes `ARRIVING` and expects section 21 to call `newGameStart(true)`. Combined as they stand, the typeof guard hides the gap: a first launch starts on Monday again. Both seats and the lead are told. Check intro_check part 9 on their merge.
-2. **Social save size:** 27.8 kB with the reserve, mostly social B's `affWeek` snapshots. **Decided (the lead):** option (a), snapshots keep only pairs with |aff| ≥ 40, and the social budget is now 30 kB. Check social B's next push does it, and that social_check's limit says 30000.
+2. **Social save size:** 27.8 kB with the reserve, mostly social B's `affWeek` snapshots. **Decided (the lead):** option (a), snapshots keep only pairs with |aff| ≥ 30 (section 14 seats on ±30; the lead changed it from 40), budget 30 kB. Check social B 0.39.3 keeps ≥ 30 pairs, that seating on paper is unchanged by it, and that social_check.s limit is 30000.
 3. **Sim 0.26.25 review:** on rotation days (35, 77, ...) the leaver and the newcomer are both "aboard" by day and share one bed. Run day_check on day 35, and check that `ROSTER_ROTATIONS.out` (now a list of ids) is read right.
 4. **Social B 0.39.3** (moments engine) once it's marked final.
 
