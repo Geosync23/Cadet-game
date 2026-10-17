@@ -106,3 +106,19 @@
 == rumour
 - Something turned up today. News, I mean.
 - Noted. Well, noted in my head.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. I've found three things that weren't mine. They'll turn up with their owners.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. Keep an eye on the lost-property box for me.
+? leaving:you tier>=friend
+- You noticed the small things here. I did too. Good to have company in that.   #warm
+
+== letter
+- The Halcyon, at last. My twin met me at the hatch. We're very confusing. The set is complete.
+? tier>=friend
+- Found a lost-property box on the Halcyon. Nobody's in charge of it. I am now. Hello from here.

@@ -114,3 +114,19 @@
 == rumour
 - Lovely bit of news, this.
 - Heard it over a scone. Very reliable.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Lovely. Have you eaten? I've eaten. Mostly biscuits.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon! Have you eaten? Go and eat. That's my goodbye.
+? leaving:you tier>=friend
+- Your first mug, Friday tea. I still think about that. Lovely day. Keep the hook.   #warm
+
+== letter
+- Why did the engineer leave the ship? To see if it would miss him. It's a work in progress. Have you eaten?
+? tier>=friend
+- Baked for the new crew. They didn't have an inspection. I inspected it myself, in Brennan's voice. It passed. Just.

@@ -103,3 +103,19 @@
 == rumour
 - Last time, on the Halcyon...   #funny
 - Slowly now. This bit's good.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Slowly. No rush. There's never a rush.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. No rush, though. Take your time saying goodbye.
+? leaving:you tier>=friend
+- You never rushed me. I noticed. Thank you. That's rarer than you'd think.   #warm
+
+== letter
+- The Halcyon! My twin and I are on the same shift. The crew think it's very funny. The set, they call us. Still.
+? tier>=friend
+- Episode forty of my twin's news: we're both here now. It's less of a serial. More of a sitcom. Hello.

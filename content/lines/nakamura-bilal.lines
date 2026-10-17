@@ -97,3 +97,19 @@
 == rumour
 - Patiently: here's what happened.
 - My twin heard this first. Of course.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Patiently. The herbs go in a box with holes.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. As Holt says: do it properly. Goodbye, properly.
+? leaving:you tier>=friend
+- You learnt the Wren the patient way. I noticed. I'm proud of that. Of you, a bit.   #warm
+
+== letter
+- The Halcyon. My twin's here. The crew call us the set. My herbs are on a new windowsill.
+? tier>=friend
+- Grew the first parsley on the Halcyon. Sent some to the galley. Brennan would've inspected it. Hello.

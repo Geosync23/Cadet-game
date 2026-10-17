@@ -97,3 +97,19 @@
 == rumour
 - Useful news first. Then the rest.
 - Better question: did you hear?
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. What's the most useful thing to take? Tea. Then wool.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. What will you do with my seat at the knitting circle? Fill it.
+? leaving:you tier>=friend
+- You asked good questions. I liked answering them with better ones. Thank you for that.   #warm
+
+== letter
+- New ship. Started a knitting circle. Two people so far. Practical scarves only. Kovac would approve.
+? tier>=friend
+- Looked at a portrait gallery today. Not ours. Still looked for a familiar face. Habit. Hello.

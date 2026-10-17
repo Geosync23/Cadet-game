@@ -105,3 +105,19 @@
 == rumour
 - Oh, did you hear? Sorry. Anyway. So.
 - Torres's note says this. Well, sort of.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Sorry, packing. The notes for the coils go in first. Anyway.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh! I'm leaving. Soon. Sorry. Look after coil three. Anyway.
+? leaving:you tier>=friend
+- You never minded me talking. About the cat. Or the coils. Thank you. Anyway. Thank you.   #warm
+
+== letter
+- New ship. New coils. One of them's shy. Obviously. My neighbour says the cat's well. Anyway, hello.
+? tier>=friend
+- I still leave notes at shift change. Nobody here writes back yet. Tell Zeke coil three was always shy. Anyway.

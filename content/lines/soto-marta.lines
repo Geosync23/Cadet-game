@@ -103,3 +103,19 @@
 == rumour
 - Hm. Don't spread this.
 - Not gossip. Facts. Grumbled facts.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Huh. More biscuits than socks.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Huh. Off soon. Don't touch my tin. It's coming with me.
+? leaving:you tier>=friend
+- Hm. You were all right. More than all right. Have a biscuit. The good ones.   #warm
+
+== letter
+- New ship. Count's higher. Tin's full. Nobody's found it. Yet. Huh.
+? tier>=friend
+- Thought about Pell finding my tin. Left a biscuit out for nobody. Old habit. Hm. Hello.

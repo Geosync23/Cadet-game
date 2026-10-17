@@ -95,3 +95,19 @@
 == rumour
 - Oh, news. Good news, I think.
 - The Chief would say don't spread it.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Holt says pack the heavy things first. Holt's right.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon! Holt says say goodbye properly. So: goodbye. Properly.
+? leaving:you tier>=friend
+- You made the Wren feel less far from home. That's a lot. Thank you.   #warm
+
+== letter
+- New ship! Mum says the fish are cheerful. Even the orange one. I'm cheerful too. Mostly.
+? tier>=friend
+- Wrote a poem about the Wren. Nobody's seeing it. Holt's in it. Don't tell him. Hello.

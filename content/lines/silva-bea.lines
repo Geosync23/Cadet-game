@@ -104,3 +104,19 @@
 == rumour
 - Mm. I heard something. Let me find it.
 - Don't quote me. I was half asleep.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Slowly. Second tea first. Then packing.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hello. I'm off soon. Mind the weather in the corridors.
+? leaving:you tier>=friend
+- Mm. You were good company in the mornings. Even before the second tea.   #warm
+
+== letter
+- The new ship sounds like drizzle. I like it. The count's higher. Still counting. Mm. Hello.
+? tier>=friend
+- Rained on the window today. Properly. Thought of the Wren, and the misting hour. Mm. Write.
