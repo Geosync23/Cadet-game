@@ -31,3 +31,13 @@ The page says 49.2% / 22.4 turns (Easy) and 49.6% / 18.6 (Medium). Only the firs
    (iPhone SE). Let squares shrink to 44 pt minimum there.
 8. **Name clash (for the code, not the page):** claude/decks-p3 already declares `const TILES` and `tilesSeats`.
    Don't declare those names in section 23 until the rename is confirmed.
+
+## Addendum: f9eb6a3: PASS
+- The DOCK wording now says "the tile you just moved, landed or launched"; can't-move scoring is given; worked turn
+  step 4 is fixed; the tie-break lean by seat is stated (177 to 107, totals still 49-51%); the champion level was tested
+  (no stronger than Hard), so Rina plays at Hard and her streak becomes a story rule for the user to decide.
+- LOW: plans/tiles-sim.py has no `__main__` and its defaults aren't the page's rules: `steps='fwd3'` (three
+  forward directions) and `jumps='orth4'` (orthogonal jumps), where the page has diagonal steps and diagonal jumps.
+  As committed, running it doesn't reproduce the page. Add a main that runs the page's rules (`steps='diag'`,
+  `jumps='diag4'`, shuffled mirrored marks) and prints the table, so tiles_check and readers can rerun it. (My
+  independent sim, which does use the page's rules, matches the page.)
