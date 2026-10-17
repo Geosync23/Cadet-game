@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.20
+   STARSHIP CADET: CSV Wren                           build 0.34.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.20';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.21';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12834,16 +12834,17 @@ function evDue(w, d) {
   }
   return w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd;
 }
-// ---- BEGIN TRADITIONS (generated from content/traditions/*.trad: never edit by hand; plans/trad-format.md) ----
-const TRADITIONS = [
-  {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, 11:45, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
-];
-// ---- END TRADITIONS ----
+// ---- the stand-in (plans/trad_parse.py --standin): until content_gen.py's TRADITIONS block is merged; then delete it
+var TRAD_STANDIN = {
+  "sowing": {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"text": "A new season starts in the garden: Sowing morning tomorrow, 11:45, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard."}], "ask": [{"text": "Sowing morning today. Bring clean hands."}, {"text": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"text": "Two seeds a pot. One for luck."}, {"text": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"text": "You press a seedling into its pot and write your name on the tag. {season} has begun."}], "chatter": [{"text": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
+};
 // The loader (Pillar 4): each baked tradition becomes a SHIP_TRADITIONS entry (one with the same id is replaced), so the
-// tradition designers' .trad files (content/traditions, baked by content_gen.py) need no code. Rules are data:
+// tradition designers' .trad files (content/traditions) need no code. content_gen.py (the dialogue engineer's) bakes
+// them into TRADITIONS { id: tradition } in section 22's generated block, each field through plans/trad_parse.py's
+// parse_field (the grammar: plans/trad-format.md); until that block is in the build, TRAD_STANDIN above. Rules are data:
 // who: [[cond, chance], ...] and anim: 'act' | [[cond, act], ...], the first cond that holds wins (who: else 0). A cond
 // is words joined by '+' (all must hold): everyone, host, honoree, juniors, officers, friends-of-host, a crew id, a
-// department, a habit, or id:/dept:/habit:/rank:<x>. Texts: text.<kind> = [{ t, tone }] (mail, ask, here, thanks,
+// department, a habit, or id:/dept:/habit:/rank:<x>. Texts: text.<kind> = [{ text, tone? }] (mail, ask, here, thanks,
 // chatter), one picked per person and day; placeholders {trad} {host} {names} {first} {season} {weekday} {time}; a
 // line whose placeholder can't be filled is skipped. TRAD_ERRORS lists what didn't load or resolve (events_check reads it)
 const TRAD_ERRORS = [];
@@ -12883,7 +12884,7 @@ function tradFill(text, t, c) {
   return ok ? out : null;
 }
 function tradText(t, kind, c, p) {
-  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.t, t, c)).filter(Boolean);
+  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.text || x.t || '', t, c)).filter(Boolean);
   return l.length ? l[Math.floor(schedU((p ? p.seed : 0) + 7919, c ? c.day : 0, t.k) * l.length)] : null;   // per person and day
 }
 function tradLoad(t) {
@@ -12903,7 +12904,9 @@ function tradLoad(t) {
     chatter: (c, p) => tradText(t, 'chatter', c, p),
   };
 }
-for (const t of TRADITIONS) {
+const TRAD_SRC = (() => { try { if (typeof TRADITIONS !== 'undefined') return TRADITIONS; } catch (e) { /* not baked yet */ } return TRAD_STANDIN; })();
+const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sort().map(id => ({ id, ...TRAD_SRC[id] }));
+for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
   const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
   if (i >= 0) SHIP_TRADITIONS[i] = ev; else SHIP_TRADITIONS.push(ev);
@@ -12950,9 +12953,27 @@ function eventsOn(d) {
     const names = honorees.map(p => p.name).join(' and ');
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
+  const drop = evBudget(out); if (drop.length) { EV_DROPPED.set(d, drop.map(e => e.id)); for (const e of drop) out.splice(out.indexOf(e), 1); }
   EV_DAYS.set(d, out);
   for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
   return out;
+}
+// the voice budget for traditions (Pillar 4): at most two on an evening (from 17:00), and never two at once on the same
+// deck (any deck in their `where`). The higher prio wins, then the rarer rhythm (yearly over seasonal over every few
+// weeks over weekly), then the table's order. Birthdays are never moved and don't count; nor do a ship-wide event's
+// gatherings and one-offs (the event already quiets the traditions it must). EV_DROPPED: day -> the ids left out
+const EV_DROPPED = new Map();
+const evRare = w => w.after ? 5 : w.yearDay || w.every === 'year' ? 4 : w.every === 'quarter' ? 3 : w.every === '4weeks' || w.every >= 28 ? 2 : w.every === '2weeks' || w.every >= 14 ? 1 : 0;
+const evDecks = ev => ev.where.map(w => w.deck);
+function evBudget(list) {
+  const rank = e => SHIP_TRADITIONS.indexOf(e.ev), t = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday);
+  t.sort((a, b) => (b.ev.prio || 0) - (a.ev.prio || 0) || evRare(b.ev.when) - evRare(a.ev.when) || rank(a) - rank(b));
+  const keep = [], drop = [];
+  for (const e of t) {
+    const clash = keep.some(k => k.from < e.to && e.from < k.to && evDecks(k.ev).some(n => evDecks(e.ev).includes(n)));
+    if (clash || e.from >= 1020 && keep.filter(k => k.from >= 1020).length >= 2) drop.push(e); else keep.push(e);
+  }
+  return drop;
 }
 // ties (Pillar 4): what a tradition asks of other sections, kept as data on it: ties = { galley: { dish, batch, meal },
 // garden: 'sow' | 'tend' | 'harvest', decor: '<id>', tally: { kind, choices } }. Each owner reads only its own kind:
@@ -13058,9 +13079,9 @@ function eventLine(p, t) {
 SHIP.events = (() => {
   const s = SAVED && SAVED.ship && SAVED.ship.events, ok = a => Array.isArray(a) && a.every(x => typeof x === 'string');
   const oo = s && Array.isArray(s.oneOffs) ? s.oneOffs.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Array.isArray(r.at) && Array.isArray(r.where)) : [];
-  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [], oneOffs: oo };
+  return { sent: s && ok(s.sent) ? s.sent.slice(-60) : [], joined: s && ok(s.joined) ? s.joined.slice(-60) : [], oneOffs: oo, noted: s && ok(s.noted) ? s.noted.slice(-60) : [] };
 })();
-SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60), oneOffs: SHIP.events.oneOffs.slice(-20).map(({ def, ...r }) => r) }; });
+SAVE_EXTRA.push(s => { s.ship.events = { sent: SHIP.events.sent.slice(-60), joined: SHIP.events.joined.slice(-60), oneOffs: SHIP.events.oneOffs.slice(-20).map(({ def, ...r }) => r), noted: SHIP.events.noted.slice(-60) }; });
 // a one-off gathering (section 20's story beats, e.g. Pell's music boxes): eventOneOff({ id, name, day, at: [from, to],
 // where: [{ deck, pool } | { deck, room: 'regexp source' | RegExp, types, ids? }], host?, chance? (base, 0-1; friends of
 // the host more), anim?, hostAnim?, venue?, from?, mail? (text: the evening-before Mail), ask?, here?, thanks? }).
@@ -13088,7 +13109,22 @@ function eventsMail(from, to, quiet) {   // quiet: no toast (after a sleep or sk
     if (typeof mailSend === 'function') mailSend({ at: m.at, from: m.from, subject: m.subject, body: m.body, quiet: !!quiet || to < 390 });
   }
 }
-SIM_ADVANCE.push((from, to) => { eventsMail(from, to, true); EV_LAST = to; });
+// after each one (Pillar 4): simNote('tradition', { id, day, at, came: [crew ids whose plan took them there], you (you
+// joined), host, src: 'tradition' | 'shipwide' | 'oneoff' }) once its window has ended, in play or on a skip (at most
+// two days back); section 20 makes memories and cues of it. Once each (SHIP.events.noted, saved)
+const evTagId = tag => { const m = /^ev-(.+?)(?:-(?:talk|drink|play|water|wash|read))?$/.exec(tag || ''); return m && m[1]; };   // 'ev-quiz-drink' -> 'quiz'
+function eventsNoted(from, to) {
+  if (typeof simNote !== 'function') return;
+  from = Math.max(from, to - 2 * 1440);
+  for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++) for (const e of eventsOn(d)) {
+    const at = (d - 1) * 1440 + e.to, key = e.id + '@' + d;
+    if (at <= from || at > to || SHIP.events.noted.includes(key)) continue;
+    SHIP.events.noted.push(key); if (SHIP.events.noted.length > 60) SHIP.events.noted.shift();
+    const came = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
+    simNote('tradition', { id: e.id, day: d, at, came, you: SHIP.events.joined.includes(key), host: e.ev.host || null, src: SHIP_TRADITIONS.includes(e.ev) ? 'tradition' : e.ev.when.ship ? 'shipwide' : 'oneoff' });
+  }
+}
+SIM_ADVANCE.push((from, to) => { eventsMail(from, to, true); eventsNoted(from, to); EV_LAST = to; });
 // the player joins by being in one of the event's rooms for 5 ship minutes while it's on: a little social, a toast,
 // and a thank-you in the Mail
 let EV_IN = { key: null, since: 0 };
@@ -13155,7 +13191,7 @@ function eventsTick() {
   if (m === EV_MIN) return;
   const prev = EV_MIN;
   EV_MIN = m; eventTags();
-  if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
+  if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now);
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play

@@ -2,15 +2,15 @@
 
 Owner: the traditions engineer (seat 5, `claude/ship-events`). For the three tradition designers (who write the files) and the dialogue engineer (whose `content_gen.py` bakes them into the game). First written at build 0.34.20.
 
-**How it flows:** a designer writes `content/traditions/<id>.trad` → `content_gen.py` (or the reference parser `plans/trad_parse.py`) bakes every `.trad` file into the game's `TRADITIONS` block, between `// ---- BEGIN TRADITIONS` and `// ---- END TRADITIONS ----` in section 18 → at load, section 18's loader turns each one into a ship tradition (`SHIP_TRADITIONS`), exactly like the twelve hand-written ones. No code needed for a normal tradition. A tradition with the same id as an existing one replaces it.
+**How it flows:** a designer writes `content/traditions/<id>.trad` → the dialogue engineer's `content_gen.py` bakes every content file; for a `.trad` file it reads the frame (the `@tradition` header, `//` comments, `==` sections, `?` conditions and `- ` lines, exactly as in `.lines` files: `content/README.md`) and hands each `key: value` field to `parse_field()` in `plans/trad_parse.py` (this page's grammar, the traditions engineer's) → the result lands in the game's `TRADITIONS` block (section 22's generated blocks) → at load, section 18's loader turns each one into a ship tradition (`SHIP_TRADITIONS`), exactly like the twelve hand-written ones. No code needed for a normal tradition. A tradition with the same id as an existing one replaces it.
 
-**Check before you push:** `python3 plans/trad_parse.py` prints the baked block or the first error (file and line). Then tell the traditions engineer, who merges your files, runs `events_check.py` (a whole ship year on paper) and builds anything that needs code.
+**Check before you push:** `python3 plans/trad_parse.py` (checks every `.trad` file and prints them, or the first error with file and line), then `python3 content_gen.py --check` and `python3 lines_check.py` when they're in your branch. Then tell the traditions engineer, who merges your files, runs `events_check.py` (a whole ship year on paper) and builds anything that needs code.
 
 ## A whole example
 
 ```
-# lines starting with # are notes, ignored
 @tradition sowing
+// lines starting with // are notes, ignored. The @tradition line comes first.
 k: 434
 title: Sowing morning
 when: quarter week 1 saturday
@@ -41,7 +41,7 @@ ties: garden sow
 - Whose seedling is that, already leaning towards the lamps?   #funny
 ```
 
-One file may hold several traditions (each starts with `@tradition <id>`), but one per file is easier to review.
+One tradition per file, the file named after its id.
 
 ## The keys
 
@@ -119,7 +119,7 @@ Each is read by its owner with `tradTies(kind, day)`; ask the traditions enginee
 
 ## Texts
 
-Short ones can go on one line (`mail: ...`); several variants go in a section, one per line starting with `- `:
+Texts go in sections, one variant per line starting with `- ` (a line may have `? conditions` above it, as in `.lines` files, for the dialogue engine; the tradition's own Mail and tap lines use the plain ones):
 
 | Section | When it's used | Notes |
 | --- | --- | --- |
@@ -135,4 +135,4 @@ Short ones can go on one line (`mail: ...`); several variants go in a section, o
 
 ## The baked shape (for content_gen.py)
 
-One JSON object per tradition, keys in this order: `id, k, name, when, at, min, prio, jitter, early, where, hold, who, anim, host, from, cake, decor, ties, invite, text`. `at` in minutes from midnight; `when` as section 18's objects (`{ every: 'quarter', week, weekday }`, weekdays 0 = Monday); room names as anchored regexp source (`"^Bow lounge$"`); `hold` 0-based; `who` as `[[cond, chance], ...]`; `anim` a string or `[[cond, act or null], ...]`; texts as `text: { kind: [{ t, tone }] }`. The block is `const TRADITIONS = [ ... ];` between the markers; `plans/trad_parse.py` produces it byte for byte.
+`TRADITIONS = { <id>: { ... } }`, one object per tradition, fields as `parse_field()` builds them and `finish()` orders them: `id, k, name, when, at, min, prio, jitter, early, where, hold, who, anim, host, from, cake, decor, ties, invite, text`. `at` in minutes from midnight; `when` as section 18's objects (`{ every: 'quarter', week, weekday }`, weekdays 0 = Monday); room names as anchored regexp source (`"^Bow lounge$"`); `hold` 0-based; `who` as `[[cond, chance], ...]`; `anim` a string or `[[cond, act or null], ...]`; texts as `text: { <section>: [ line entries ] }` (content_gen.py's `{ text, id, tone?, ...conditions }`). In content_gen.py's `parse_tradition`: call `trad_parse.parse_field(tr, key, value, where)` for each field line, and `tr = trad_parse.finish(tr, id, path)` at the end; `trad_parse.check_all(list)` across all traditions (ids and `k` once each). Until that block is in the build, section 18 has a stand-in, `TRAD_STANDIN`, made by `python3 plans/trad_parse.py --standin`.

@@ -6,7 +6,8 @@
 #   the same day planned twice gives the same events;
 #   on the deck, minute by minute through each event (the CrewAgents, no drawing): attendees reach their places,
 #   nobody is stuck for more than 10 ship minutes, nobody shares a place; draw calls at the event under BUDGET;
-#   the Mail the evening before (18:00), once each; decor on the deck while it's on, and gone after;
+#   the Mail the evening before (18:00), once each; the ship note after each tradition (simNote, once, who came);
+#   the voice budget (at most two traditions an evening, never two at once on a deck) every day of a year; decor on the deck while it's on, and gone after;
 #   the player joining by being in the room (a little social, once); the tap line before it;
 #   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
 #   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
@@ -44,7 +45,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d);   // a ship-wide event's quiet days
+      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -323,13 +324,22 @@ with sync_playwright() as pw:
       for (const ev of SHIP_TRADITIONS.filter(e => isNew(e.when))) {
         const due = dueNew(ev.when, 0, 364), on = new Set();
         for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === ev.id)) on.add(d);
-        for (const d of due) if (!on.has(d) && !eventPauses(ev, d)) out.bad.push(ev.id + ' due on day ' + d + ' but not on');
+        for (const d of due) if (!on.has(d) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id)) out.bad.push(ev.id + ' due on day ' + d + ' but not on');
         for (const d of on) if (!due.has(d)) out.bad.push(ev.id + ' on day ' + d + ' but not due');
         out.count[ev.id] = [...on].sort((a, b) => a - b);
       }
+      // the voice budget, every day of the year: at most two traditions an evening (from 17:00), never two at once on a
+      // deck (birthdays aside), and what it left out
+      out.dropped = [];
+      for (let d = 0; d <= 364; d++) {
+        const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
+        if (t.filter(e => e.from >= 1020).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
+        for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && a.ev.where.some(w => b.ev.where.some(x => x.deck === w.deck))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once on one deck');
+        if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
+      }
       for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
       const ks = SHIP_TRADITIONS.map(e => e.k); if (new Set(ks).size !== ks.length) out.bad.push('two traditions share a hash key k');
-      for (const t of TRADITIONS) {
+      for (const t of TRAD_LIST) {
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         const d = [...(out.count[t.id] || [])].find(x => x >= 1) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
         for (const k of ['mail', 'ask', 'here']) if ((t.text || {})[k] && !evText(ev[k], e, schedPeople()[0])) out.bad.push(t.id + ': no ' + k + ' line could be filled');
@@ -350,6 +360,7 @@ with sync_playwright() as pw:
     })()""")
     print('A year on paper:', '; '.join(f"{k} {len(v)}x (days {', '.join(map(str, v[:6]))}{'...' if len(v) > 6 else ''})" for k, v in yr['count'].items()))
     print('Seasons (day:season:week):', ' '.join(yr['seasons']))
+    print('The voice budget left out (day:ids):', ' '.join(yr['dropped']) or 'nothing')
     exp = ['0:lanterns:13', '1:sowing:1', '91:sowing:13', '92:greening:1', '182:greening:13', '183:harvest:1', '273:harvest:13', '274:lanterns:1', '364:lanterns:13', '365:sowing:1']
     if yr['seasons'] != exp: fail(f"seasons {yr['seasons']}")
     for b in yr['baked']: print(f"  baked {b['id']}: from {b['from']}; ties {b['ties']}; Mail: {b['mail']}")
@@ -383,9 +394,21 @@ with sync_playwright() as pw:
         print(f"Decor ({k}): {on} meshes during {i}, {off} after")
         if not on or off: fail(f"{k} decor: {on} during, {off} after")
 
-    # 3. the Mail the evening before: a week of skips from Day 1
+    # 3. the Mail the evening before: a week of skips from Day 1 (and the ship note after each tradition, Pillar 4:
+    # the sim engineer's bus when it's in, else a stand-in simNote that only records)
     g.ev("setShipNow(360); EV_LAST = null; EV_MIN = -1; eventsTick(); SHIP.events.sent.length = 0; EV_MAILBOX.length = 0")
+    g.ev("window.__notes = []; SHIP.events.noted.length = 0; if (typeof onSim === 'function') onSim('tradition', n => __notes.push(n)); else window.simNote = (kind, data) => __notes.push({ ...data, kind })")
     g.ev("for (let t = 360 + 600; t <= 7 * 1440; t += 600) skipTo(t)")
+    nt = g.ev("""(() => {
+      const want = [1, 2, 3, 4, 5, 6].flatMap(d => eventsOn(d).filter(e => (d - 1) * 1440 + e.to > 360).map(e => ({ key: e.id + '@' + d, n: schedPeople().filter(p => planDay(p, d).some(s => s.tag && /^ev-/.test(s.tag) && evTagId(s.tag) === e.id)).length })));
+      return { want, got: __notes.map(n => ({ key: n.id + '@' + n.day, n: n.came.length, kind: n.kind, src: n.src, at: n.at })) };
+    })()""")
+    gk = [x['key'] for x in nt['got']]
+    print(f"Ship notes after each tradition (days 1-6): {len(gk)}, e.g. {nt['got'][:3]}")
+    for w in nt['want']:
+        x = [n for n in nt['got'] if n['key'] == w['key']]
+        if len(x) != 1: fail(f"tradition note for {w['key']}: {len(x)} sent")
+        elif x[0]['n'] != w['n'] or x[0]['kind'] != 'tradition': fail(f"tradition note for {w['key']}: came {x[0]['n']}, planned {w['n']}")
     m = g.ev("EV_MAILBOX.map(x => [x.event, x.at, x.subject])")
     due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).map(e => e.id + '@' + d))")
     got = [x[0] for x in m]

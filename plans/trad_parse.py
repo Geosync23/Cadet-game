@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Reference parser for .trad files (the traditions engineer's; the grammar is plans/trad-format.md).
 
-content_gen.py (the dialogue engineer's) bakes content/traditions/*.trad into the game's TRADITIONS block. This file
-is the reference for that step: content_gen.py may import parse_trad() and bake_traditions(), or copy them.
+content_gen.py (the dialogue engineer's) bakes content/traditions/*.trad into the game's TRADITIONS block. It reads
+the file's frame itself (the @tradition header, // comments, == sections, ? conditions and - lines, as for .lines
+files) and hands each "key: value" field line to parse_field() here, then calls finish() once per file. So the field
+grammar lives in one place, this file, owned by the traditions engineer.
 
-    python3 plans/trad_parse.py [content/traditions]      prints the baked block (stdout), or the errors (exit 1)
+    python3 plans/trad_parse.py [content/traditions]           checks the files; prints the traditions as JSON
+    python3 plans/trad_parse.py --standin [content/traditions]  prints section 18's stand-in block (TRAD_STANDIN)
 
 Output is byte-identical on re-runs: files are read in name order and keys are written in a fixed order.
 """
@@ -159,114 +162,136 @@ def parse_invite(v, where):
     return o
 
 
-def _line(raw, where):
-    tone, text = 'light', raw.strip()
-    m = re.search(r'\s#(\w+)\s*$', text)
-    if m:
-        tone, text = m.group(1).lower(), text[:m.start()].rstrip()
-        if tone not in TONES:
-            raise TradError(f'{where}: unknown tone #{tone} ({", ".join(TONES)})')
-    if not text:
-        raise TradError(f'{where}: an empty line')
-    return {'t': text, 'tone': tone}
+def parse_field(tr, key, v, where):
+    """One "key: value" line of a .trad file into tr (a dict being built), in the baked shape. Raises TradError."""
+    key, v = key.strip().lower(), v.strip()
+    if key == 'title':
+        tr['name'] = v
+    elif key in ('k', 'min', 'prio', 'jitter', 'early'):
+        if not v.isdigit():
+            raise TradError(f'{where}: {key} is a whole number')
+        tr[key] = int(v)
+    elif key == 'when':
+        tr['when'] = parse_when(v, where)
+    elif key == 'at':
+        a, _, b = v.partition('-')
+        tr['at'] = [_hhmm(a, where), _hhmm(b, where)]
+        if tr['at'][1] <= tr['at'][0]:
+            raise TradError(f'{where}: ends before it starts')
+    elif key == 'where':
+        tr.setdefault('where', []).append(parse_where(v, where))
+    elif key == 'hold':
+        tr['hold'] = [] if v.lower() == 'none' else [int(x) - 1 for x in v.split(',')]
+    elif key == 'who':
+        tr['who'] = parse_rules(v, where, _pct)
+    elif key == 'anim':
+        tr['anim'] = v.lower() if ' ' not in v else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
+    elif key in ('host', 'from', 'decor'):
+        tr[key] = v
+    elif key == 'cake':
+        tr['cake'] = v.lower() in ('yes', 'true')
+    elif key == 'ties':
+        parse_ties(v, where, tr.setdefault('ties', {}))
+    elif key == 'invite':
+        tr['invite'] = parse_invite(v, where)
+    elif key in TEXT_KINDS:
+        raise TradError(f'{where}: texts go in a section: "== {key}" and then "- ..." lines')
+    else:
+        raise TradError(f'{where}: unknown field "{key}" (see plans/trad-format.md)')
+
+
+def finish(tr, tid, where):
+    """After the last line of a tradition: the checks, and the keys in their fixed order (tr['text'] as built by the
+    generator: { section: [ line entries ] })."""
+    for need in ('k', 'name', 'when', 'at', 'where', 'who'):
+        if need not in tr:
+            raise TradError(f'{where}: tradition {tid} has no {need}' + (' (ask the traditions engineer for one)' if need == 'k' else ''))
+    if not 434 <= tr['k'] <= 499:
+        raise TradError(f'{where}: k {tr["k"]} is outside 434-499')
+    bad = [x for x in tr.get('text', {}) if x not in TEXT_KINDS]
+    if bad:
+        raise TradError(f'{where}: unknown section(s) {bad} ({", ".join(TEXT_KINDS)})')
+    out = {'id': tid}
+    out.update({k: tr[k] for k in KEY_ORDER if k in tr and k != 'id'})
+    return out
+
+
+def check_all(trads):
+    """Across every tradition: ids and hash keys used once."""
+    ids, ks = set(), set()
+    for t in trads:
+        if t['id'] in ids:
+            raise TradError(f'tradition id {t["id"]} used twice')
+        if t['k'] in ks:
+            raise TradError(f'tradition {t["id"]}: k {t["k"]} is taken')
+        ids.add(t['id'])
+        ks.add(t['k'])
 
 
 def parse_trad(src, name='?'):
-    """One .trad file's text -> a list of traditions (dicts in the baked shape)."""
-    out, cur, sect = [], None, None
+    """Stand-alone reading of one .trad file (one tradition), for the checks and section 18's stand-in. Conditions on
+    lines (? ...) are content_gen.py's business: here they are only skipped."""
+    tr, tid, sect = {}, None, None
     for n, raw in enumerate(src.splitlines(), 1):
         where = f'{name}:{n}'
-        line = raw.rstrip()
-        if not line.strip() or line.lstrip().startswith('#'):
+        line = raw.strip()
+        if not line or line.startswith('//') or line.startswith('?'):
             continue
-        if line.startswith('@tradition'):
+        if tid is None:
             bits = line.split()
-            if len(bits) != 2 or not re.fullmatch(r'[a-z][a-zA-Z0-9-]*', bits[1]):
-                raise TradError(f'{where}: "@tradition <id>" (lower-case letters, digits, dashes)')
-            cur, sect = {'id': bits[1], 'where': [], 'text': {}}, None
-            out.append(cur)
+            if bits[0] != '@tradition' or len(bits) != 2 or not re.fullmatch(r'[a-z][a-z0-9-]*', bits[1]):
+                raise TradError(f'{where}: a .trad file starts with "@tradition <id>" (lower-case letters, digits, dashes)')
+            tid = bits[1]
             continue
-        if cur is None:
-            raise TradError(f'{where}: text before "@tradition <id>"')
         if line.startswith('=='):
-            sect = line[2:].strip().lower()
-            if sect not in TEXT_KINDS:
-                raise TradError(f'{where}: unknown section "== {sect}" ({", ".join(TEXT_KINDS)})')
+            sect = line[2:].strip()
+            tr.setdefault('text', {}).setdefault(sect, [])
             continue
-        if sect:
-            if not line.lstrip().startswith('- '):
+        if sect is not None:
+            if not line.startswith('- '):
                 raise TradError(f'{where}: lines under "== {sect}" start with "- "')
-            cur['text'].setdefault(sect, []).append(_line(line.lstrip()[2:], where))
+            tone, text = 'light', line[2:].strip()
+            m = re.search(r'\s#(\w+)\s*$', text)
+            if m:
+                tone, text = m.group(1), text[:m.start()].rstrip()
+                if tone not in TONES:
+                    raise TradError(f'{where}: unknown tone #{tone}')
+            e = {'text': text}
+            if tone != 'light':
+                e['tone'] = tone
+            tr['text'][sect].append(e)
             continue
         if ':' not in line:
-            raise TradError(f'{where}: expected "key: value"')
-        key, v = line.split(':', 1)
-        key, v = key.strip().lower(), v.strip()
-        if key == 'title':
-            cur['name'] = v
-        elif key in ('k', 'min', 'prio', 'jitter', 'early'):
-            if not v.isdigit():
-                raise TradError(f'{where}: {key} is a whole number')
-            cur[key] = int(v)
-        elif key == 'when':
-            cur['when'] = parse_when(v, where)
-        elif key == 'at':
-            a, _, b = v.partition('-')
-            cur['at'] = [_hhmm(a, where), _hhmm(b, where)]
-            if cur['at'][1] <= cur['at'][0]:
-                raise TradError(f'{where}: ends before it starts')
-        elif key == 'where':
-            cur['where'].append(parse_where(v, where))
-        elif key == 'hold':
-            cur['hold'] = [] if v.lower() == 'none' else [int(x) - 1 for x in v.split(',')]
-        elif key == 'who':
-            cur['who'] = parse_rules(v, where, _pct)
-        elif key == 'anim':
-            cur['anim'] = v.lower() if ' ' not in v.strip() else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
-        elif key in ('host', 'from', 'decor'):
-            cur[key] = v
-        elif key == 'cake':
-            cur['cake'] = v.lower() in ('yes', 'true')
-        elif key == 'ties':
-            parse_ties(v, where, cur.setdefault('ties', {}))
-        elif key == 'invite':
-            cur['invite'] = parse_invite(v, where)
-        elif key in TEXT_KINDS:
-            cur['text'].setdefault(key, []).append(_line(v, where))
-        else:
-            raise TradError(f'{where}: unknown key "{key}"')
-    for t in out:
-        for need in ('k', 'name', 'when', 'at'):
-            if need not in t:
-                raise TradError(f'{name}: tradition {t["id"]} has no {need}')
-        if not t['where']:
-            raise TradError(f'{name}: tradition {t["id"]} has no where')
-        if 'who' not in t:
-            raise TradError(f'{name}: tradition {t["id"]} has no who')
-    return [{k: t[k] for k in KEY_ORDER if k in t} for t in out]
+            raise TradError(f'{where}: tradition fields are "key: value"')
+        k, v = line.split(':', 1)
+        parse_field(tr, k, v, where)
+    if tid is None:
+        raise TradError(f'{name}: empty file')
+    return finish(tr, tid, name)
 
 
-def bake_traditions(folder):
-    """Every .trad file in the folder (name order) -> the text of the baked block, markers included."""
-    trads, ids, ks = [], set(), set()
-    for f in sorted(os.listdir(folder)):
-        if f.endswith('.trad'):
-            for t in parse_trad(open(os.path.join(folder, f), encoding='utf-8').read(), f):
-                if t['id'] in ids:
-                    raise TradError(f'{f}: id {t["id"]} used twice')
-                if t['k'] in ks or not 434 <= t['k'] <= 499:
-                    raise TradError(f'{f}: k {t["k"]} is taken or outside 434-499')
-                ids.add(t['id'])
-                ks.add(t['k'])
-                trads.append(t)
-    body = ',\n'.join('  ' + json.dumps(t, ensure_ascii=False, separators=(', ', ': ')) for t in trads)
-    return ('// ---- BEGIN TRADITIONS (generated from content/traditions/*.trad: never edit by hand; plans/trad-format.md) ----\n'
-            'const TRADITIONS = [\n' + body + (',\n' if body else '') + '];\n// ---- END TRADITIONS ----\n')
+def read_all(folder):
+    trads = [parse_trad(open(os.path.join(folder, f), encoding='utf-8').read(), f) for f in sorted(os.listdir(folder)) if f.endswith('.trad')]
+    check_all(trads)
+    return trads
+
+
+def standin(trads):
+    body = ''.join(f'  {json.dumps(t["id"])}: {json.dumps(t, ensure_ascii=False, separators=(", ", ": "))},\n' for t in sorted(trads, key=lambda t: t['id']))
+    return ('// ---- the stand-in (plans/trad_parse.py --standin): until content_gen.py\'s TRADITIONS block is merged; then delete it\n'
+            'var TRAD_STANDIN = {\n' + body + '};\n')
 
 
 if __name__ == '__main__':
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
     try:
-        sys.stdout.write(bake_traditions(sys.argv[1] if len(sys.argv) > 1 else 'content/traditions'))
+        trads = read_all(args[0] if args else 'content/traditions')
     except TradError as e:
         print('TRAD ERROR', e, file=sys.stderr)
         sys.exit(1)
+    if '--standin' in sys.argv:
+        sys.stdout.write(standin(trads))
+    else:
+        for t in trads:
+            print(json.dumps(t, ensure_ascii=False))
+        print(f'{len(trads)} tradition(s) OK', file=sys.stderr)
