@@ -1456,6 +1456,8 @@ Extrude geometry:
 
 ## Testing
 
+**cadet_test.py hides the player's +N need notes** (`#needFx`) and the device button's glow (`#devBtn` box-shadow) in screenshots, like toasts (the lead's ask, 2026-10-17: before 0.28.23 they faded on real-time timers, so a note like the debug Day skip's "+69 Energy" was in g_nocrew on some runs and not others). Three runs of the same build: identical apart from i_tap1's known 1-level renderer noise.
+
 **cadet_test.py** now clicks Walls until it's back to Auto after the walls shot, so it works with builds before and after 0.5.8. It compares two builds on Deck 4 (deck data, paths, collisions, crew, taps, screenshots).
 
 - **Setup in a fresh container:**
