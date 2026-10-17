@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.12
+   STARSHIP CADET: CSV Wren                           build 0.39.13
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.12';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.13';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15712,7 +15712,8 @@ function momentDef(id) {                                 // '<crewId>:<beat>' ->
   let d = MO && MO[id] || MOMENTS_BUILTIN[id] || null;
   if (!d && !thread.startsWith('arc:') && TH && Array.isArray(TH[thread])) d = TH[thread].find(x => x && x.beat === beat) || null;
   if (!d || !Array.isArray(d.lines)) return null;
-  const p = socP(who); if (Array.isArray(d.needs) && (!p || d.needs.some(f => p[f] == null || p[f] === ''))) return null;   // a theme beat needs roster details they have
+  const p = socP(who), has = f => { if (p[f] != null && p[f] !== '') return true; try { return typeof socialFill === 'function' && socialFill(p, f, {}) != null; } catch (e) { return false; } };
+  if (Array.isArray(d.needs) && (!p || !d.needs.every(has))) return null;   // a theme beat needs details they have: the roster's, or what section 20's socialFill can say ({hobby} from their habits, {since} from their arrival)
   return Object.assign({ who, beat, thread, tone: thread.startsWith('arc:') ? 'heartfelt' : MOMENT_TONE[beat - 1] || 'heartfelt' }, d, { who, beat });
 }
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
