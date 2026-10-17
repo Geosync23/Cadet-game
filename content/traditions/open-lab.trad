@@ -1,0 +1,40 @@
+@tradition open-lab
+// Open lab: every fourth Tuesday (week 2 of the cycle: days 9, 37, 65...), after the day shift, Deck 2. Dr. Sato and
+// the Survey team show what they've collected. Tuesday is one of Sato's days off, so she's free to host. The deck
+// architect's places in the Survey lab (event: 'open-lab') come first; until then, the chart room and the corridor.
+k: 460
+title: Open lab
+when: every 4 weeks tuesday week 2
+at: 17:30-18:30
+min: 20
+jitter: 15
+where: 2 room Chart room: lounge-seat, common-room
+where: 2 room Science corridor: bench
+where: 2 room Observatory: common-room
+who: sato always, survey 50%, stargazer 55%, everyone 15%
+anim: talk
+host: sato
+from: sato
+ties: decor open-lab
+invite: host=sato odds=25% line="Open lab this evening. I have a rock that hums. Come and listen."
+
+== mail
+- Open lab tomorrow, {time}, Deck 2. The Survey team will show you what we've collected: rocks, ice, dust, and one sample that hums. Ask anything. Touch only what we hand you.
+
+== ask
+- Open lab after shift. There's a rock that hums.
+- I'm going to look at space dust at open lab. Is that sad?   #funny
+- Survey's open lab is tonight. I always learn something.
+
+== here
+- Hold it up to the light. See the stripes?
+- This one's older than the sun. Probably.   #funny
+- Gently. It's been waiting a long time.   #warm
+
+== thanks
+- Dr. Sato hands you a sliver of comet ice under glass. It's older than anything you've ever held.   #warm
+
+== chatter
+- Did you hear the humming rock at open lab? Nobody knows why it hums.
+- Survey let me hold a sample at open lab. With gloves on.
+- I asked so many questions at open lab, Sato gave me a reading list.   #funny

@@ -1,0 +1,40 @@
+@tradition crossover-supper
+// The crossover supper: every fourth Tuesday (week 3 of the cycle: days 16, 44, 72...), 18:30 in the mess. The plan's
+// "crossover breakfast" (06:00) turned round: at 06:00 the night shift goes to bed and nobody can go (events_check:
+// nobody went), but at 18:30 the night shift is up (since about 14:00, on at 21:00) and the day shift is off, so the
+// day shift's dinner is the night shift's breakfast, at the long tables: the one time they properly meet.
+// A meal tradition: ties galley meal=dinner is the `meal` field (the sim engineer eats there instead of at the
+// servery). Brennan cooks it and signs the Mail; she's in the galley at that hour, so there's no host.
+// No invite either: an invite needs a host (events_check).
+// Tuesday week 3 has only Tiles night (Deck 3, 20:00) besides: two that evening, not at once.
+k: 457
+title: Crossover supper
+when: every 4 weeks tuesday week 3
+at: 18:30-19:30
+min: 20
+where: 3 room Mess hall: mess-seat, ids ^3-mess-([1-9]|1[0-6])$
+where: 3 pool mess-seat
+who: night-owl 60%, lingers-at-meals 60%, everyone 30%
+from: brennan
+ties: galley meal=dinner dish=crossover-pancakes
+
+== mail
+- Crossover supper tomorrow, {time} in the mess. The day shift's dinner is the night shift's breakfast, so there's dinner and pancakes, side by side. Come and meet the people who keep the lights on.
+
+== ask
+- Crossover supper tonight. Dinner and pancakes on the same table.   #funny
+- Supper with the night shift tonight. I never see them otherwise.
+- The crossover's tonight. Best meal of the month.
+
+== here
+- Morning! Or evening, for some of us.   #funny
+- Pass the syrup, night shift.
+- Sit down, there's room at the end.   #warm
+
+== thanks
+- You squeeze onto the long table between the two shifts. One lot is having dinner, the other is having breakfast.   #warm
+
+== chatter
+- I met half the night shift at the crossover supper. Sleepy, but lovely.   #warm
+- At the crossover, the night shift puts syrup on everything. Nobody minds.   #funny
+- The crossover's the only time I see my bunkmate awake.   #funny

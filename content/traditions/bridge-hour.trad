@@ -1,0 +1,38 @@
+@tradition bridge-hour
+// Bridge hour: every fourth Tuesday (week 4 of the cycle: days 23, 51, 79...), just after the day shift, Deck 1.
+// Juniors visit the bridge for a while; the Captain comes up to say hello (Tuesday is one of her days off). Juniors only.
+// The deck architect's places on the bridge (event: 'bridge-hour', standing along the rail) come first; until then,
+// the bridge lobby and the observation room.
+k: 461
+title: Bridge hour
+when: every 4 weeks tuesday week 4
+at: 17:15-18:00
+min: 20
+where: 1 room Bridge lobby: event
+where: 1 room Observation room: common-room, lounge-seat
+who: marrow always, juniors 40%
+anim: talk
+host: marrow
+from: marrow
+invite: host=marrow odds=15% line="Bridge hour after shift. Come up and see where we steer from."
+
+== mail
+- Bridge hour tomorrow, {time}. Juniors are welcome on Deck 1 for a while: the helm, the charts and the view. I'll be there to say hello. Please don't touch anything red.
+
+== ask
+- Bridge hour later! I'm going to ask about the big chair.   #funny
+- Juniors get to visit the bridge after shift. I've ironed my collar.   #funny
+- The Captain says hello to everyone at bridge hour. Everyone.
+
+== here
+- That's the helm. Don't lean on it.   #funny
+- You can see the whole bow from up here.
+- The Captain knows everyone's name. How?
+
+== thanks
+- You stand on the bridge with the other juniors. The Captain shakes your hand and asks how you're finding the Wren.   #warm
+
+== chatter
+- At bridge hour the Captain asked about my bunk. My bunk!   #funny
+- I touched the chart table at bridge hour. It was very ordinary. I loved it.   #warm
+- One day I'll work up on the bridge. You watch.

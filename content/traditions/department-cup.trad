@@ -1,0 +1,38 @@
+@tradition department-cup
+// The department cup: every fourth Monday (week 4 of the cycle: days 22, 50, 78...), the gym on Deck 3, after running
+// club. A rowing relay between departments; Commander Vance keeps the board (he tops the gym's rowing leaderboard).
+// Five teams, so the small departments row together: Bridge (command, helm, comms) and Commons (galley, garden, store,
+// infirmary). The tally keeps the week's winner for chatter and the board.
+k: 456
+title: Department cup
+when: every 4 weeks monday week 4
+at: 20:15-21:15
+min: 25
+where: 3 pool gym
+who: vance always, gym-regular 80%, runner 65%, everyone 20%
+host: vance
+from: vance
+ties: tally cup choices=works|watch|survey|bridge|commons
+ties: decor cup-board
+invite: host=vance odds=25% line="Department cup in the gym tonight. Works is a rower short."
+
+== mail
+- The department cup is tomorrow, {time} in the gym: a rowing relay, one team for each department. I keep the board. The board does not lie.
+
+== ask
+- Department cup tonight. Come and cheer for your lot.
+- Rowing relay tonight. My arms already hurt, and we haven't started.   #funny
+- Vance has polished the cup again. It's a mug on a stand.   #funny
+
+== here
+- Pull! Pull! Pull!
+- Change over, quick!
+- The board does not lie.   #funny
+
+== thanks
+- You cheer your department through the relay. Vance chalks every time on the board, very neatly.
+
+== chatter
+- The department cup is just a mug. We'd still fight for it.   #funny
+- Vance timed my row to a tenth of a second. I didn't ask him to.   #funny
+- Whoever wins the cup won't stop talking about it for a month.   #funny
