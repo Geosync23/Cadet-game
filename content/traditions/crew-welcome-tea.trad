@@ -11,6 +11,7 @@ at: 18:40-19:30
 min: 20
 prio: 2
 early: 5
+cake: yes
 where: 3 room Mess hall: mess-seat
 hold: 1
 who: honoree always, dept-of-honoree 80%, bunk-of-honoree 60%, everyone 10%
