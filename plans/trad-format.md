@@ -66,6 +66,7 @@ One tradition per file, the file named after its id.
 | `decor:` | no | props on the deck while it's on (an id the traditions engineer or deck architect builds) | `decor: stalls` |
 | `ties:` | no, one per kind | what it asks of other parts of the ship (below) | `ties: garden harvest` |
 | `invite:` | no | crew may invite you (social reads it) | `invite: host=rina odds=40% line="Tiles tonight. I need a victim."` |
+| `trace:` | no | a lasting mark the first time you join it (the deck architect's DECK_DRESS id), saved with the day: Sowing morning's `seedlingYours` plants your seedling | `trace: seedlingYours` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).
 
@@ -114,7 +115,7 @@ Each is read by its owner with `tradTies(kind, day)`; ask the traditions enginee
 | --- | --- | --- |
 | `ties: galley dish=<dishId> meal=dinner batch=10` | the galley engineer | a dish or a special meal that day |
 | `ties: garden sow` / `tend` / `harvest` | the galley engineer (the garden) | the garden's part |
-| `ties: decor <id>` | the deck architect | props on its deck for the window (at most 6 draw calls) |
+| `ties: decor <id>` | the deck architect | props on its deck (a DECK_DRESS id, e.g. `tilesNight`), shown from 30 minutes before to 15 after; at most 6 draw calls |
 | `ties: tally <kind> choices=a\|b\|c` | the traditions engineer | a simple vote or score kept for a week |
 
 ## Texts

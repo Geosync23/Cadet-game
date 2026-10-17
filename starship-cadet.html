@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.25
+   STARSHIP CADET: CSV Wren                           build 0.34.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.26';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12844,7 +12844,7 @@ function evDue(w, d) {
 }
 // ---- the stand-in (plans/trad_parse.py --standin): until content_gen.py's TRADITIONS block is merged; then delete it
 var TRAD_STANDIN = {
-  "sowing": {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["tomas", 1], ["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, {time}, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
+  "sowing": {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["tomas", 1], ["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "trace": "seedlingYours", "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, {time}, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
 };
 // The loader (Pillar 4): each baked tradition becomes a SHIP_TRADITIONS entry (one with the same id is replaced), so the
 // tradition designers' .trad files (content/traditions) need no code. content_gen.py (the dialogue engineer's) bakes
@@ -12905,7 +12905,7 @@ function tradLoad(t) {
   const words = () => { if (checked) return; checked = true; for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const w of c.split('+')) if (!/^(everyone|host|honoree|juniors|officers|friends-of-host)$/.test(w)) tradWord(w); };
   return {
     id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
-    hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, text: t.text || {}, baked: true,
+    hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, trace: t.trace || null, text: t.text || {}, baked: true,
     where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
     who: (p, d, c) => { words(); return tradRule(t.who, p, d, c, t.host, 0); },
     anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
@@ -13153,6 +13153,7 @@ function eventsPlayer(now) {
   if (key !== EV_IN.key) EV_IN = { key, since: now };
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key)) return;
   SHIP.events.joined.push(key);
+  if (e.ev.trace) traceAdd(e.ev.trace, d);              // e.g. Sowing morning plants your seedling (the deck architect's seedlingYours)
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + 12);
   toast(e.name, evText(e.ev.thanks, e));
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
@@ -13213,11 +13214,16 @@ function eventsTick() {
 }
 // the deck architect's dressShow (0.38.1): the running event's dressing for its phase, plus every saved trace. It does
 // nothing when nothing changed and puts them back after a deck change
+// a tradition's props (ties.decor: the deck architect's DECK_DRESS id, e.g. tilesNight) from 30 minutes before to 15 after
+function tradDecor(now) {
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  return eventsOn(d).filter(e => e.ev.ties && e.ev.ties.decor && m >= e.from - 30 && m < e.to + 15).map(e => ({ id: e.ev.ties.decor }));
+}
 function eventsDress(now) {
   if (typeof dressShow !== 'function') return;
   const n = eventNow(now), e = SHIP.event, def = n && SHIP_EVENTS[n.id], c = e ? evCtx(e) : { band: 'smooth', mine: {}, you: 'Cadet' };
   const list = (def && def.dressing && def.dressing[n.phase] || []).map(x => ({ ...x, lines: x.lines ? evText(x.lines, c) : undefined }));
-  dressShow(list.concat(SHIP.traces));
+  dressShow(list.concat(tradDecor(now), SHIP.traces));
 }
 // ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
 // The format (plans/pillar3-plan.md, "How an event is put together" and "Shared formats"):
@@ -13461,7 +13467,7 @@ SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
   const s = SAVED && SAVED.ship, e = s && s.event;
   if (e && typeof e === 'object' && SHIP_EVENTS[e.id] && Number.isInteger(e.startDay)) SHIP.event = { id: e.id, startDay: e.startDay, phase: e.phase || null, threads: { ...(e.threads || {}) }, mine: { ...(e.mine || {}) } };
   if (s && Array.isArray(s.eventLog)) SHIP.eventLog = s.eventLog.filter(x => x && typeof x.id === 'string');
-  if (s && Array.isArray(s.traces)) SHIP.traces = s.traces.filter(x => typeof x === 'string');
+  if (s && Array.isArray(s.traces)) SHIP.traces = s.traces.filter(x => typeof x === 'string' || (x && typeof x.id === 'string' && Number.isInteger(x.day)));   // an id, or { id, day } (a trace that grows: your seedling)
 })();
 SAVE_EXTRA.push(s => { s.ship.event = SHIP.event; s.ship.eventLog = SHIP.eventLog; s.ship.traces = SHIP.traces; });
 // where a running event is at minute t: its day (0 = the warning's) and the last phase begun
@@ -13617,7 +13623,9 @@ function eventAdvance(t = shipNow(), quiet) {
   }
   return out;
 }
-const traceOn = id => SHIP.traces.includes(id);         // for the architects' trace props: a scorch mark, a plaque, a pet
+const traceOn = id => SHIP.traces.some(x => (x.id || x) === id);   // for the architects' trace props: a scorch mark, a plaque, a pet
+// a lasting trace from a tradition you joined (`trace` on it): { id, day } once, for dressShow (your seedling grows by day)
+function traceAdd(id, day) { if (id && !traceOn(id)) SHIP.traces.push({ id, day }); }
 SIM_ADVANCE.push((from, to) => { eventAdvance(to, true); });
 
 // ---- the Captain's ship-wide address: a banner across the top on every deck for about 20 seconds, copied to Mail.

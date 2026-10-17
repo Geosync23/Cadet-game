@@ -449,6 +449,24 @@ with sync_playwright() as pw:
     print(f"Player in room {j['room']} during the quiz: joined {j['joined']}, social {j['n0']} -> {j['social']}")
     if j['joined'] != ['quiz@4'] or j['social'] <= j['n0']: fail('the player did not join the quiz')
 
+    # 4b. Pillar 4: joining Sowing morning (day 6) leaves your seedling (trace seedlingYours with its day); a tradition's
+    # ties.decor goes to dressShow only in its window
+    sw = g.ev("""(() => {
+      goToDeck(3); const at = (DECKS[3].places.find(p => p.id === '3-garden-5') || {}).at; if (!at) return { err: 'no 3-garden-5' };
+      player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player)));
+      const t0 = SHIP.traces.slice(); SHIP.events.joined.length = 0;
+      const e = eventsOn(6).find(x => x.id === 'sowing'); if (!e) return { err: 'sowing not on day 6' };
+      for (const m of [e.from + 1, e.from + 4, e.from + 7, e.from + 10]) { setShipNow(5 * 1440 + m); EV_MIN = -1; eventsTick(); }
+      const tr = SHIP.traces.filter(x => x.id === 'seedlingYours'); SHIP.traces.length = 0; SHIP.traces.push(...t0);
+      const ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
+      const dec = [e.from - 40, e.from - 20, e.to + 10, e.to + 20].map(m => tradDecor(5 * 1440 + m).map(x => x.id).join());
+      e.ev.ties = ties;
+      return { room: roomAt(...player.here()), joined: SHIP.events.joined.slice(), tr, dec };
+    })()""")
+    print('Sowing morning joined:', sw)
+    if sw.get('err') or sw['joined'] != ['sowing@6'] or len(sw['tr']) != 1 or sw['tr'][0].get('day') != 6: fail(f"joining Sowing morning should plant your seedling once: {sw}")
+    if sw.get('dec') != ['', 'testDecor', 'testDecor', '']: fail(f"a tradition's decor window: {sw.get('dec')}")
+
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
     st = g.ev(STORM); a = st['a']

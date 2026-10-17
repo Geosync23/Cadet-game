@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'text')
 
 
 class TradError(Exception):
@@ -192,7 +192,7 @@ def parse_field(tr, key, v, where):
         tr['who'] = parse_rules(v, where, _pct)
     elif key == 'anim':
         tr['anim'] = v.lower() if ' ' not in v else parse_rules(v, where, lambda s, w: None if s.lower() == 'none' else s.lower())
-    elif key in ('host', 'from', 'decor'):
+    elif key in ('host', 'from', 'decor', 'trace'):
         tr[key] = v
     elif key == 'cake':
         tr['cake'] = v.lower() in ('yes', 'true')
