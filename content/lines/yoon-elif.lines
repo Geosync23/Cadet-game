@@ -164,3 +164,19 @@
 == rumour
 - Oh, I heard something. Is it all right to say?
 - Sorry. Have you heard? It's good, I promise.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Sorry, I'm packing. Sorry. It's very real now.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, I'm leaving soon. Sorry. It was lovely. Sorry. Bye.
+? leaving:you tier>=friend
+- You laughed at my jokes. Even the bad ones. They were all bad ones. Thank you.   #warm
+
+== letter
+- Why did the doctor change ships? For a change of pace. Sorry. The night shift here is quiet. I miss ours.
+? tier>=friend
+- The coffee machine here doesn't like me. I'm working on it. Tell the Wren's machine I said hello. And you.

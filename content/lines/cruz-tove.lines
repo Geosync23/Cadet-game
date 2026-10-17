@@ -170,3 +170,19 @@
 == rumour
 - Mm. Heard it from the tomatoes. No. From Imani.   #funny
 - Something... mm. It's nice. I'll tell you.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Mm. Packing. Mostly cuttings. Some socks.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Mm. I'm leaving. Look after every Gerald. They know you.
+? leaving:you tier>=friend
+- Mm. You never minded the soil. Or the mumbling. Thank you. Water the beans for me?   #warm
+
+== letter
+- Mm. New garden. Week three. They grow lettuce sideways here. I'm fixing it. Slowly. Hello.
+? tier>=friend
+- Gave a Gerald to someone new today. Thought of the Wren. Of the very first Gerald, still going. Mm. Write.

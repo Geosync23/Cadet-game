@@ -174,3 +174,19 @@
 == rumour
 - Ivo told me. So it was long. Short version: yes.   #funny
 - I heard one thing. I'll say it once.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Forty minutes. Labelled boxes. Obviously.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off to a new ship. Keep the carrots even for me.
+? leaving:you tier>=friend
+- I don't say much. So: you were good company. Thank you. That's the useful part.   #warm
+
+== letter
+- New galley. They cut the onions too big. I've said nothing. Yet. The fish are well, my brother says.
+? tier>=friend
+- Ran my laps this morning and counted the Wren's corridors in my head. Forty. Still the right number. Hello to you.
