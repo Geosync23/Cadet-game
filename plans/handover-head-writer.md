@@ -1,6 +1,8 @@
 # Handover: head writer (Pillar 4, seat 11)
 
-**Now held by Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa, from 0.48.11).
+**Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) held the seat 0.48.11-0.48.21 and handed over at ~70% memory
+(2026-10-17 ~05:05). A fresh head writer reads this note first, then CLAUDE.md, content/voice-bible.md, content/facts.md,
+content/README.md, content/briefs.md, TEAM.md. **First job: Zeke's arrival tour** (In flight, below).
 
 **Role:** head writer for Starship Cadet's Pillar 4. Report ONLY to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE, from ~04:35; was session_01PJtmxWgAPLebXSZKP6ZRpG) with
 `send_message`; never contact the user. Writers report to you; you are the only one who merges their work. Reviewer 2
@@ -36,6 +38,12 @@
 6. Commit (message ends with the Co-Authored-By line), push, report to the lead (commit, what's in, checks, memory).
 
 ## Known state and gotchas
+
+- **Checking cadet_test's bubble shots:** crop the two shots and threshold the difference above 2 levels; the boxes must
+  be only the bubble (i_tap1 ~(18,385)-(208,421), b_wander10s ~(290,553)-(518,612) at 0.48.21). A small python+PIL
+  snippet does it (`ImageChops.difference(...).convert('L').point(lambda v:255 if v>2 else 0).getbbox()`).
+- **My review scripts** (rest-day `weekday:` vs ROSTER offDays; a diff-to-'kind | cond | text' lister) lived in my
+  scratchpad; they're a few lines each: rebuild them from the descriptions here.
 
 - **cadet_test** since 0.48.7 differs from 0.60.0 in two shots (`b_wander10s`, `i_tap1`), only a chatter bubble's words:
   Deck 4 crew have their own lines, which changes `lineFor`'s recently-said penalty, so a different stock small-talk line
