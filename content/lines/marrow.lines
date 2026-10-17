@@ -32,3 +32,124 @@
 == joy
 ? tier>=colleague
 - The piano, late on a Thursday, with the ship asleep around us. Best hour of the week.   #warm
+
+// ---- batch 3: greet by time, bye, invite, accept, decline, missed, birthday, hint, near by place ----
+
+== greet
+? tier=stranger time:morning
+- Good morning, cadet. Early start? Good. The ship's nicest before the rush.
+? tier=stranger time:evening
+- Evening, cadet. Off shift? Then you're off. Go and find the lounge.
+? tier=stranger deck:1
+- You found the bridge. Most new cadets take a week. Well done.
+? tier>=acquaintance time:morning
+- Morning, {me}. Did you sleep? Honest answer, please. It's a habit of mine.
+- {hi}, {me}. Breakfast first. Questions after. I've got one for you.
+? tier>=acquaintance time:afternoon
+- {hi}, {me}. Afternoon. The quiet hour on the bridge. I'm stretching my legs.
+? tier>=acquaintance time:evening
+- Evening, {me}. What did the ship teach you today?
+? tier>=acquaintance time:night
+- You're up late, {me}. So am I. Let's not tell the counsellor.   #funny
+? tier>=colleague
+- {me}. I asked Calder how you were getting on. She said "fine". That's high praise.   #funny
+? tier>=acquaintance warmth:cold
+- There you are, {me}. I wondered where you'd got to. The ship's big, but not that big.
+? tier>=friend time:evening
+- Ah, {me}. Walk with me a little? I like the corridors at this hour.   #warm
+
+== bye
+? tier=stranger
+- Thank you, cadet. Back to it.
+- Carry on. And mind the step, if you ever come up.
+? tier>=acquaintance
+- Thank you, {me}. That helped. It usually does.
+- Off you go. I'll have another question for you next time.
+? tier>=friend
+- Thank you for the honest answer. Rare, up top.   #warm
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night tonight. I'll be there, to see what the juniors see. Come?
+? weekday:thu tier>=colleague
+- I play late on Thursdays. Come and listen, if you like. Sit at the back. I won't look.
+? trad:today tier>=colleague
+- {trad} today. I'll look in. It'd be nice to see a familiar face there.
+
+== accept
+? tier>=acquaintance
+- Yes. I'd like that. Thank you for asking.
+- Of course. I'll make the time. It's the one thing I can always find.
+
+== decline
+? tier>=acquaintance
+- Not today, I'm afraid. The ship has me. Ask again?
+- I can't. Not tonight. But thank you. It means more than you'd think.
+
+== missed
+? tier>=acquaintance
+- I missed you yesterday. No harm done. The ship pulls us all about.
+? tier>=friend
+- You didn't come. That's all right. I'll save you a question for next time.
+
+== birthday
+? birthday:you tier>=acquaintance
+- Happy birthday, {me}. I asked the galley for something. Captain's privilege.   #warm
+? birthday:you tier=stranger
+- I'm told it's your birthday, cadet. Happy birthday. We're glad you're aboard.
+? birthday:me tier>=acquaintance
+- Yes, it's my birthday. No, I'm not saying which one. Thank you.   #funny
+
+== hint
+? tier>=friend
+- Have you a minute, {me}? Not an order. Just a minute.
+
+== near
+? deck:1 tier>=acquaintance
+- The bridge at shift change. Everyone pretending not to watch me. I pretend too.   #funny
+? deck:1
+- Mind the step in the ready room. Everyone trips on it. The Admiral finds it funny.   #funny
+? deck:4 time:evening|night
+- The music room. The piano's out of tune again. So am I, a little.   #funny
+? deck:3 act:meal
+- I eat in the mess when I can. You hear more here in ten minutes than in a week of reports.
+? place:calm tier>=colleague
+- Sit, sit. I'm not on duty for five minutes. I've checked.   #funny
+
+== feel
+? mood:high tier>=acquaintance
+- Two juniors asked me a question today. Normally I ask. It was lovely.   #warm
+? mood:ok
+- An ordinary day. On a ship, that's the best kind.
+
+== life
+? tier>=colleague
+- Every new junior gets one question from me. I remember every answer. Yours too.
+- I dislike my own portrait. They made me look patient. I was very cross that day.   #funny
+
+== joy
+? tier>=acquaintance
+- The ship at night. Seventy-five people asleep, and every one of them safe. Lovely.
+
+== chat
+? tier=stranger
+- My question: what would you change aboard, if you could? Think. I'll ask again.
+? tier>=acquaintance
+- What are the juniors saying about the senior crew? Kindly, please. Or honestly. Both.   #funny
+- Tell me something good from today. One thing. It doesn't have to be big.
+? tier>=colleague
+- I've a theory you'll be good at this. I'm usually right about theories. Not always.
+
+== smalltalk
+- The ship sounds well today.
+- Mind the step, everyone.   #funny
+- Thursday soon. The piano waits.
+
+== rumour
+- I hear things up top. Not everything. Most things.
+
+== near
+? deck:2 tier>=colleague
+- Captain Varga started the gallery. Varga would have hated my portrait too.   #funny
+? deck:3 place:calm
+- The lounge windows. Six years, and the view still stops me.
