@@ -399,7 +399,7 @@
 == greet
 ? tier>=acquaintance !week1:true
 - {hi}, {nick}. Have you eaten? I have. Twice. Just checking on you.   #funny
-- {hi}. I'm on my way to a nap. Walk with me. Halfway.   #funny
+- {hi}. I'm on my way to a nap. Walk me halfway. Keep me awake.   #funny
 ? tier>=acquaintance !week1:true time:morning
 - Morning. I'm here in body. The rest of me's still in bed.   #funny
 ? tier>=colleague !week1:true act:off weekday:tue
