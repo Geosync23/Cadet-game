@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.18
+   STARSHIP CADET: CSV Wren                           build 0.48.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.18';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.19';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13517,6 +13517,8 @@ const VOICE = {
         {"text": "You're galley family now, love. That means you eat first and argue never.", "id": "1jvz4f9", "tone": "warm", "rep": "theirs"},
         {"text": "Everyone says you're a kind one, love. I could've told them. I watch who clears plates.", "id": "9lk7ms", "tone": "warm", "you": "kind"},
         {"text": "You talk to everyone in my mess, love. Good. Nobody should eat alone.", "id": "ovcwar", "tone": "warm", "you": "chatty"},
+        {"text": "A marrow called the Captain, first prize! Tell your gran I want the recipe. And the seeds.", "id": "8c8ybz", "tone": "funny", "flag": "home.gran.won", "tier": [1, 4]},
+        {"text": "Your mum made you a mug, love? Bring it to breakfast. I'll fill it first. Every time.", "id": "vq30vj", "tone": "warm", "flag": "home.mum.mug", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Stay a minute, love. Sit. I've got something to ask you.", "id": "hlfwlv"},
@@ -14094,6 +14096,8 @@ const VOICE = {
         {"text": "Galley rates you. Brennan, Walsh, me. Three votes. That's all of them that count.", "id": "1ca6g6l", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You're galley. Officially. Don't let it go to your head. Let it go to your stomach.", "id": "ix3z42", "tone": "funny", "rep": "theirs"},
         {"text": "Reliable. That's the word about you. Good word. Rare word.", "id": "uj27cp", "you": "reliable"},
+        {"text": "Your gran. The hip. Getting better? Good. Grans are tough.", "id": "1w1c0bv", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
+        {"text": "Sunday story. Good idea. Mine get a number. Yours get a story. Better.", "id": "15pqt30", "flag": "home.sam.sundays", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Got a minute? Not here. Garden.", "id": "8vktmk"},
@@ -16274,6 +16278,8 @@ const VOICE = {
         {"text": "Right, listen, the whole galley's talking about you. Good things. I started it.", "id": "4ljj7g", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You're one of us now, {nick}. Galley. You get the warm tray. Don't tell.", "id": "1pyt8df", "tone": "warm", "rep": "theirs"},
         {"text": "They say you talk to everyone. Finally, competition. Right, listen.", "id": "1eht7nd", "tone": "funny", "you": "chatty"},
+        {"text": "Right, listen, your Jo built a boat. A real one. I've told the galley. Twice.", "id": "1qldw5s", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
+        {"text": "How's your gran? The hip? Tell her a galley hand from Bunk 2 says get well soon. Loudly.", "id": "1hcm62h", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
       ],
       "hint": [
         {"text": "Right, listen. Not a story this time. Well. A different kind.", "id": "1vmr71h"},
@@ -17352,6 +17358,8 @@ const VOICE = {
         {"text": "You're Works now, {nick}. Properly. The tea corner's got your mug on the good hook.", "id": "uqdhex", "tone": "warm", "rep": "theirs"},
         {"text": "Word in the bay is you finish what you start. Rarest thing aboard. After biscuits.", "id": "1xnnpe1", "tone": "funny", "you": "reliable"},
         {"text": "Everyone knows you. You chat more than me. I'm impressed. Bit worried, but impressed.", "id": "1kk1d68", "tone": "funny", "you": "chatty"},
+        {"text": "Your mum's mug. Bring it to Works tea. It leans? Good. So does the hook.", "id": "1ld7up0", "tone": "warm", "flag": "home.mum.mug", "tier": [2, 4]},
+        {"text": "Your Jo built a whole boat? By hand? Respect. Tell them I want a go. I'll fix the oars.", "id": "t4rtn2", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Got a minute? A proper one. Not a Pell minute. Those are long.", "id": "1orua8l"},
@@ -17926,6 +17934,8 @@ const VOICE = {
         {"text": "The infirmary's decided you're one of ours. Don't get hurt to celebrate.", "id": "6l2fav", "tone": "warm", "rep": "theirs"},
         {"text": "Half the ship says you're kind. The other half hasn't met you yet.", "id": "flqdk2", "you": "kind"},
         {"text": "You turn up when you say. You'd be surprised how rare that is. I wouldn't be.", "id": "136aks9", "tone": "funny", "you": "reliable"},
+        {"text": "Your gran. New hip. Walking yet? Good. Tell her to drink water. From me.", "id": "8gdty0", "tone": "warm", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
+        {"text": "A marrow called the Captain won? Mine would've cheated. Your gran didn't need to.", "id": "1aq3s71", "tone": "funny", "flag": "home.gran.won", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Make yourself useful. Sit down a minute.", "id": "6qi3sv"},
@@ -18233,6 +18243,8 @@ const VOICE = {
         {"text": "Comms rates you, {nick}. I've been talking you up. No charge.", "id": "m34gzx", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You're one of Comms now. Best deal on the ship. Lifetime membership.", "id": "1iauyvj", "tone": "warm", "rep": "theirs"},
         {"text": "They say you're chatty. Takes one to know one. I'm the one.", "id": "g8ogtm", "tone": "funny", "you": "chatty"},
+        {"text": "Your Jo launched a boat? Hesper Dock would've bought it on the spot. Tell them that.", "id": "8rrgkm", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
+        {"text": "First prize for a marrow? Your gran's a born trader. I'd sell those seeds by the packet.", "id": "1gtls70", "tone": "funny", "flag": "home.gran.won", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Tell you what. Got a minute? Not for gossip. A real minute.", "id": "strijf"},
@@ -18714,6 +18726,7 @@ const VOICE = {
         {"text": "There you are! I ran past your bunk twice. Not on purpose. Mostly not.", "id": "1825ic1", "tone": "funny", "tier": [2, 4], "warmth": "cold"},
         {"text": "The helm crew knows your name! I told them. Twice. Can't stop. Bye!", "id": "qcnqba", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "They say you're reliable. Like a good watch. I count those. You'd count.", "id": "8408dn", "you": "reliable"},
+        {"text": "Your Jo's boat! The Little Wren! Can't stop. Tell them it's a great name. Bye!", "id": "2mhyoj", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Got a minute? I'll sit still. I promise. For a minute.", "id": "1u1hlsb"},
@@ -19106,6 +19119,9 @@ const VOICE = {
         {"text": "The whole Watch office knows you now. You're on our side of the lift.", "id": "snipwl", "tone": "warm", "rep": "theirs"},
         {"text": "People keep saying you're kind. I knew first. I'm just saying. I knew first.", "id": "qf3qb5", "tone": "funny", "you": "kind"},
         {"text": "Everyone says you talk to everyone. Good. Someone has to. I get nervous.", "id": "1v8wup6", "tone": "funny", "you": "chatty"},
+        {"text": "How's your gran's hip? I asked my brother to think good thoughts at it. He's thinking.", "id": "uq53g", "tone": "warm", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
+        {"text": "The Little Wren! I told my brother your Jo built a boat. Now he wants to build boats.", "id": "12y2l64", "tone": "funny", "flag": "home.jo.launched", "tier": [2, 4]},
+        {"text": "Sunday story day? I've started one with my brother. I copied you. Is that all right?", "id": "k79tvq", "tone": "warm", "flag": "home.sam.sundays", "tier": [3, 4]},
       ],
       "hint": [
         {"text": "Got a minute? Not a big thing. A medium thing.", "id": "i0qvrz"},
@@ -19421,6 +19437,8 @@ const VOICE = {
         {"text": "There you are. Dinner's better with company. Even the stew.", "id": "14wxr4k", "tier": [3, 4], "time": "evening"},
         {"text": "Comms speaks well of you. I checked. Reliable source. Me.", "id": "gqzq33", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You're known for being reliable. Good. Bunk 1 needs at least two of us.", "id": "1t7dau0", "tone": "funny", "you": "reliable"},
+        {"text": "Your Sunday story. Read it to Bunk 1 sometime. Before lights out. Not after.", "id": "1jbrnjl", "tone": "funny", "flag": "home.sam.sundays", "tier": [2, 4]},
+        {"text": "A mug from your mum. That's the good kind of present. The kind that leans a bit.", "id": "uwkmc2", "tone": "warm", "flag": "home.mum.mug", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Got a minute? Before ten, ideally.", "id": "13tt6ze", "tone": "funny"},
@@ -19723,6 +19741,8 @@ const VOICE = {
         {"text": "The galley speaks well of you. I wrote it in my letter. Valo will know in six weeks.", "id": "1gez1od", "tone": "funny", "rep": "well", "tier": [1, 4]},
         {"text": "You are counted as galley now. That is not a small thing. I hope you know.", "id": "jz36is", "tone": "warm", "rep": "theirs"},
         {"text": "They say you are reliable. I had already decided so. I'm pleased to be agreed with.", "id": "1k83pc7", "you": "reliable"},
+        {"text": "A story every Sunday, to an old friend. That's a letter, in a way. I approve. Very much.", "id": "8xy1ae", "tone": "warm", "flag": "home.sam.sundays", "tier": [2, 4]},
+        {"text": "I hope this finds your gran well. I mean it properly. How is her hip?", "id": "7vstib", "flag": "home.gran.hip", "tier": [2, 4], "not": {"flag": "home.gran.won"}},
       ],
       "hint": [
         {"text": "Have you a minute? I'd like to say something. Properly.", "id": "957dpv"},
@@ -19976,6 +19996,7 @@ const VOICE = {
         {"text": "Galley thinks you're tidy. I agree. That's two.", "id": "r2fhxx", "rep": "well", "tier": [1, 4]},
         {"text": "You're on the galley list now. The good list. Short list.", "id": "ffgi0i", "tone": "warm", "rep": "theirs"},
         {"text": "You're known for turning up on time. So am I. Good company.", "id": "d8k6r3", "you": "reliable"},
+        {"text": "A prize marrow. What did it weigh? Your gran will know to the gram. Ask her.", "id": "sbc7nu", "flag": "home.gran.won", "tier": [2, 4]},
       ],
       "hint": [
         {"text": "Got a minute? A quiet one.", "id": "etanto"},
