@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.7
+   STARSHIP CADET: CSV Wren                           build 0.42.8
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.7';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.8';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14910,6 +14910,7 @@ function introManifest() {
     el.remove(); INTRO_UI.manifest = null;
     introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
     if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
+    if (typeof bagGive === 'function') bagGive();          // section 15: your kit bag, in one hand until your locker
     if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
     saveGame();
   };
