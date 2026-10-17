@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.26
+   STARSHIP CADET: CSV Wren                           build 0.43.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.26';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.27';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13703,7 +13703,7 @@ function lineCond(k, v, p, ctx) {
   }
   return false;
 }
-// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple
+// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple|best|mentor
 function linePair(v, a, b) {
   if (!b) return false;
   return String(v).split('|').some(x => {
@@ -13711,6 +13711,8 @@ function linePair(v, a, b) {
     if (x === 'bunk') return !!a.bed && !!b.bed && a.bed.split('-').slice(0, 2).join('-') === b.bed.split('-').slice(0, 2).join('-');
     if (x === 'friend' || x === 'rival') return lineQ('affBand', a.id, b.id) === x;
     if (x === 'couple') return lineQ('bondOf', a.id, 'couple') === b.id;   // a couple living quietly in the background
+    if (x === 'best') return lineQ('bondOf', a.id, 'best') === b.id;       // best friends (0.43.27, social B2's goodbyes)
+    if (x === 'mentor') return lineQ('bondOf', a.id, 'mentee') === b.id || lineQ('bondOf', a.id, 'mentor') === b.id;   // one mentors the other, either way
     if (x === 'senior') return LINE_RANKS.indexOf(a.rank) > LINE_RANKS.indexOf(b.rank);
     const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w || q.id === w;   // a department, a rank or a crew id
     return side(a, s) && side(b, o);
@@ -13768,6 +13770,7 @@ function linesFill(text, p, ctx = {}) {
       case 'first': { const w = p.name.split(' '); return /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(w[0]) && w.length > 2 ? w[1] : w[0]; }
       case 'friend': case 'best': case 'rival': case 'partner': case 'mentor': case 'mentee': return bond(k === 'partner' ? 'couple' : k);
       case 'boss': { const c = chief(); return c ? linesName(c) : null; }
+      case 'missed': return bond('missed');                // the close friend, partner or mentor who moved on (section 20c's bondOf, 0.39.14)
       case 'other': return ctx.other ? linesName(linesWho(ctx.other)) : null;
       case 'weekday': return WEEKDAYS[weekday(Math.floor(t / 1440) + 1)];
       case 'home': case 'family': case 'hobby': case 'since': return p[k] ? String(p[k]) : null;
@@ -13821,7 +13824,7 @@ function overheardFor(a, b, ctx = {}) {
   a = linesWho(a); if (b) { b = linesWho(b); if (!b) return null; } if (!a || typeof CONVOS === 'undefined') return null;   // no b: one speaker's lines (only A:, a call home)
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60), ca = { ...ctx, t, other: b }, cb = { ...ctx, t, other: a };
   const skip = new Set(ctx.skip || []);
-  const pool = CONVOS.filter(e => !skip.has(e.id) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && lineQuick(e, a, ca) && linesOk(e, a, ca))
+  const pool = CONVOS.filter(e => !skip.has(e.id) && (!ctx.keep || ctx.keep(e)) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && lineQuick(e, a, ca) && linesOk(e, a, ca))
     .map(e => ({ e, sc: lineSpec(e) })).sort((x, y) => y.sc - x.sc);   // stable: file order within a score
   let best = [];
   for (let i = 0; i < pool.length && !best.length;) {     // fill only the most specific ones, the next score down if none of them fill
@@ -13853,7 +13856,9 @@ function linesState() {                                   // SHIP.lines = { ring
   if (!SHIP.lines) {
     const s = typeof SAVED !== 'undefined' && SAVED && SAVED.lines;
     const ok = s && Array.isArray(s.ring) && s.ring.every(r => Array.isArray(r) && typeof r[0] === 'string' && Number.isInteger(r[1]));
-    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0, reacted: {} };
+    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0, reacted: {}, bye: {} };
+    const by = ok && s.bye && typeof s.bye === 'object' ? s.bye : {};   // { 'a:b': day }: goodbyes said
+    for (const k in by) if (Number.isInteger(by[k])) SHIP.lines.bye[k] = by[k];
     const r = ok && s.reacted && typeof s.reacted === 'object' ? s.reacted : {};   // { crewId: { day, kinds: [...] } }
     for (const id in r) if (r[id] && Number.isInteger(r[id].day) && Array.isArray(r[id].kinds)) SHIP.lines.reacted[id] = { day: r[id].day, kinds: r[id].kinds.filter(k => typeof k === 'string') };
   }
@@ -13863,9 +13868,9 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
   const L = SHIP.lines; if (!L) return;
   const day = Math.floor(shipNow() / 1440) + 1, reacted = {};
   for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
-  s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted };
+  s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted, bye: L.bye || {} };
 });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {}, bye: {} }; OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -13886,13 +13891,26 @@ function linesTick() {
   const t = shipNow(), ovh = typeof CONVOS !== 'undefined' && CONVOS.length > 0 && schedU(m, 0, 752) < OVH_ODDS;
   const react = typeof LINES !== 'undefined' && !!LINES.cue && LINES.cue.length > 0 && (t - REACT_AT < REACT_FRESH || schedU(m, 0, 754) < REACT_ODDS);
   const now = performance.now(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
-  if (!(ovh || react) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
+  const byes = typeof CONVOS !== 'undefined' && CONVOS.some(e => e.leaving);   // goodbye conversations exist (leaving:soon)
+  if (!(ovh || react || byes) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
   const day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
   const onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // as section 20's chatter
-  const near = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
+  const around = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
     .map(a => ({ a, w: whereIs(a.p, t) })).filter(x => x.w && !x.w.moving && x.w.act !== 'sleep' && x.w.act !== 'wash')
-    .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753)).slice(0, OVH_NEAR);
-  const tries = react ? near.map(x => ({ x, react: true })) : [];
+    .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753));
+  const near = around.slice(0, OVH_NEAR);                 // the first OVH_NEAR in the seeded order; goodbyes look at everyone around
+  // goodbyes first (0.43.27, social B2): someone leaving soon (section 20's leavingSoon) with someone close by gets their
+  // goodbye conversation (one with leaving:), whatever the odds, once per pair (SHIP.lines.bye, saved)
+  const tries = [], Lb = linesState(), bye = Lb && (Lb.bye || (Lb.bye = {}));
+  if (byes && bye) for (const x of around) {
+    if (lineQ('leavingSoon', x.a.p.id) == null) continue;
+    const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
+    for (const y of around) {
+      if (y === x || x.w.act === 'callhome' || y.w.act === 'callhome' || Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) > OVH_PAIR || bye[linesPairKey(x.a.p, y.a.p)]) continue;
+      tries.push({ x, y, bye: true, ctx: { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, keep: e => !!e.leaving } });
+    }
+  }
+  if (react) tries.push(...near.map(x => ({ x, react: true })));
   if (ovh) {
     const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day, call = w => w.act === 'callhome';   // someone on a call home talks to home, not to the next booth
     let n = OVH_TRIES;
@@ -13908,6 +13926,7 @@ function linesTick() {
   }
   if (tries.length) { OVH_SCAN = { t, day, tries, i: 0 }; linesScan(); }
 }
+const linesPairKey = (a, b) => [a.id, b.id].sort().join(':');   // one goodbye a pair, whoever starts it
 function linesScan() {
   const S = OVH_SCAN;
   if (linesHush() || bubbles.list.length) { OVH_SCAN = null; return; }   // the budget says no (someone else spoke meanwhile)
@@ -13916,6 +13935,7 @@ function linesScan() {
     if (q.react) { if (linesReact([q.x], S.t, S.day)) { OVH_SCAN = null; return; } continue; }
     const lines = overheardFor(q.x.a.p, q.y && q.y.a.p, q.ctx); if (!lines) continue;
     OVH_SCAN = null; linesHeard(lines.id, S.day, lines.tone);
+    if (q.bye) { const L = linesState(); (L.bye || (L.bye = {}))[linesPairKey(q.x.a.p, q.y.a.p)] = S.day; }
     OVH = { a: q.x.a, b: q.y && q.y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
   }
   if (S.i >= S.tries.length) OVH_SCAN = null;
