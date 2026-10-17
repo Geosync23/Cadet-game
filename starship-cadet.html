@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.19
+   STARSHIP CADET: CSV Wren                           build 0.39.20
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.19';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.20';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27366,7 +27366,7 @@ function socMissed(id) {                                   // their closest frie
 // week before any day that might be planned ahead. A pair not in it reads 0 (between the lines). No snapshot for
 // that week (a new game's first two, a save from before, a crew list of another size) gives undefined, so
 // affinityPlan keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
-const AFF_SNAP = 30, AFF_SNAP_MAX = 300;                 // pairs at |affinity| 30+, the strongest 300 at most (0.39.18: a fixed ceiling for the save, about 2.4 KB for both weeks)
+const AFF_SNAP = 30, AFF_SNAP_MAX = 600;                 // pairs at |affinity| 30+ (the rule); the strongest 600 only as a safety net for the save (0.39.20, the lead: about 4.8 KB for both weeks; with 86 crew it never binds before day 140)
 const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots: week -> Map(pairIdx -> v)
 function affWeeks() {
   const s = SHIP.social.affWeek || null;
