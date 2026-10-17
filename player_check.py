@@ -352,7 +352,7 @@ with sync_playwright() as pw:
         for j in range(60):
             g.step(10)
             if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
-        z0 = g.ev("ACT && ACT.z"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
+        z0 = g.ev("ACT && ACT.z"); g.ev("window.__left = 0"); g.ev("window.__ls = { ...window.__ls, z: window.__ls.z + 1, at: [window.__ls.at[0], window.__ls.at[1] + 1] }")
         for j in range(20): g.step(5)
         mv = g.ev("ACT ? [ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)] : [null]")
         g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
