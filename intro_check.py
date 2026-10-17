@@ -275,7 +275,29 @@ with sync_playwright() as pw:
     else:
         g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), SHIP.intro.step, text]); return old.apply(this, arguments); }; return true; })()")   # reviewer 1c's probe: what's actually said
         g.ev('newGameStart(true)'); g.step(5)
+        tern = g.ev("typeof ternRamp === 'function' && !!DECKS[5].tern")
+        if tern:   # the walk-in Tern (deck architect 0.38.18): you start in its aisle with the ramp shut
+            t0 = g.ev("({ me: player.here(), start: SHIP_START_ARRIVAL.tile, open: ternRampOpen() })")
+            print(f"  the Tern: you start at {t0['me']} (start {t0['start']}, INTRO_START {g.ev('INTRO_START.tile')}), ramp {t0['open']}")
+            if t0['me'] != g.ev('INTRO_START.tile'): fail(f"a new arriving game starts you at {t0['me']}, not INTRO_START's tile (section 13's SHIP_START_ARRIVAL is {t0['start']})")
+            if t0['open'] != 0: fail('the Tern\'s ramp is open while you sign the manifest')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        if tern:   # about 2 s after signing, the pilot's line and the ramp opens (2.5 s)
+            r0 = g.ev('ternRampOpen()'); g.page.wait_for_timeout(2400); g.step(100)
+            r1 = g.ev("({ open: ternRampOpen(), toast: (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
+            src = "the writers' line" if r1['pilot'] else 'the stand-in'
+            print(f"  the ramp right after signing {r0}, 2.4 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
+            if r0 != 0: fail('the ramp opened before the pilot spoke')
+            if r1['open'] != 1: fail('the ramp did not open after the pilot\'s line')
+            if 'Raman' not in r1['toast']: fail('no pilot\'s line when the ramp opened')
+        shut, reopened = None, None
+        tap = g.ev("typeof introTap === 'function' && typeof MEETING_SCRIPTS !== 'undefined' && !!MEETING_SCRIPTS.introAsk && typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")
+        if tap:   # tap-to-ask: tapping Torres while he's showing you round opens the writers' introAsk (the walk answers it)
+            t1 = g.ev("(() => { const ok = introTap(ROSTER.find(p => p.id === INTRO_ESCORT)); return { ok, dlg: DIALOGUE && DIALOGUE.id, other: introTap(ROSTER.find(p => p.id === 'calder')) }; })()")
+            print(f"  tapping Torres on the ramp: {t1['dlg']} (tapping someone else: {t1['other']})")
+            if not t1['ok'] or t1['dlg'] != 'introAsk': fail('tapping Torres during the evening did not open introAsk')
+            if t1['other']: fail('introTap answered for someone who is not the escort')
+        else: print('  not yet: tap-to-ask (needs introTap, the writers\' introAsk and sim 0.26.31\'s hook in tapCrew)')
         tl2 = g.ev("(() => { const L = (typeof VOICE !== 'undefined' && VOICE['torres-zeke'] && VOICE['torres-zeke'].lines && VOICE['torres-zeke'].lines.week1) || []; return INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, L.filter(e => (e.flag || '').startsWith('walk.' + x.id + '.')).length]); })()")
         wrong = [i for i, n, w in tl2 if w and n != w]
         print('  tour lines with the week under way (place, played, written):', tl2)
@@ -288,6 +310,8 @@ with sync_playwright() as pw:
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
             if r['esc'] and r['esc'][2] == 'escort': led += 1
+            if tern and shut is None and g.ev('INTRO_UI.ternShut'): shut = (r['t'], r['step'], r['me']); print(f"  {r['t']}  the ramp closes behind you (you at {r['me']}, ramp {g.ev('ternRampOpen().toFixed(2)')})")
+            if tern and shut and reopened is None and not g.ev('INTRO_UI.ternShut'): reopened = (r['t'], r['step'])
             if not order or order[-1] != r['step']: order.append(r['step']); print(f"  {r['t']}  {r['step']}  (you: Deck {r['deck']} {r['me']}; Torres {r['esc'][0] if r['esc'] else 'not here'}{'; his seat ' + r['seat'] if r['seat'] else ''})")
             if r['step'] == 'table' and dinner is None:   # the lead's condition for the longer tour: dinner still hot, seats and crew there
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
@@ -325,6 +349,11 @@ with sync_playwright() as pw:
         # the last place's core lines may finish at the table (the dinner chat waits for them); extras there, or anything at the Chief's, may not
         late = [x for x in g.ev('window.__said') if (x[1] == 'chief' and any(x[2] in L['core'] + L['extra'] for i, L in sp)) or (x[1] == 'table' and any(x[2] in L['extra'] for i, L in sp))]
         if late: fail(f'tour lines play over dinner: {late[:3]}')
+        if tern:
+            print(f'  the ramp: closed behind you at {shut}, open again at {reopened} (target {g.ev("TERN.target")})')
+            if not shut: fail('the Tern\'s ramp never closed behind you')
+            elif shut[1] not in ('ramp', 'hello', 'haulway', 'works'): fail(f'the ramp closed late, at step {shut[1]}')
+            if not reopened or g.ev('TERN.target') != 1: fail('the Tern\'s ramp was left shut after Torres let you go')
     print('9. A first launch arrives (no save, never arrived, not a test URL), and its Day 0 save loads at the same step')
     if not g.ev("typeof newGameStart === 'function'"):
         fail('no newGameStart (section 13): a first launch cannot arrive')

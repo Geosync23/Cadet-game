@@ -1,13 +1,14 @@
 # Handover: the onboarding engineer (Pillar 4, seat 1)
 
-Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx, after wave 2, before wave 3. A fresh session taking over this role reads this first, then CLAUDE.md, DEV_NOTES.md ("The arrival (section 21)" and "Hook register"), plans/pillar4-plan.md Part 1 and Part 5, and plans/social-deep-plan.md Part 7.
+Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx; **refreshed at handover, ~08:30 UTC, at about 68% memory** (latest: 0.42.21, 54d7911; screenshots 0ea5048). A fresh session taking over this role reads this first, then CLAUDE.md, DEV_NOTES.md ("The arrival (section 21)" and "Hook register"), plans/pillar4-plan.md Part 1 and Part 5, and plans/social-deep-plan.md Part 7.
 
 ## Role, branch and builds
 
 - **Seat 1, the onboarding engineer:** the arrival and the first week (plan Part 1), then newcomers and your assignment to guide one (Part 5, wave 4).
 - **Branch:** `claude/arrival` (push only there). **Builds:** 0.42.x. The last one at writing: **0.42.21** (see git log).
 - **Owns:** section `// 21. ARRIVAL` in `starship-cadet.html` (after section 20, before section 6), the one hook line in section 12's main loop (`introTick()` after `socialTick()`), `intro_check.py`, `plans/shots/arrival-*.jpg`, this note.
-- **Report to:** the lead, session_01PJtmxWgAPLebXSZKP6ZRpG (took over from session_01PxXKwc5mkC7tV5MPi3p7PP). Tell the build master (session_012K7RZ3oSX2vpBb1rR66MBh) each commit. Reviewer 1 (session_01HK4m33sUiLuVim8VWaCPMs) reviews this seat. **Only the lead talks to the user** (the user's rule).
+- **Report to:** the lead, session_01KPJMYjXAPkNUcrQ8VRkhLE. Tell build master 2 (session_01F8ph7FKqViF3heRn94YgBr) each commit. Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews this seat (0.42.18-0.42.21 under review at handover). **Only the lead talks to the user** (the user's rule). Refresh this note right before you hand over (the user's rule).
+- **People you'll work with:** sim engineer 4 session_01EJUGywZv9BpcUezjXES9AC (sections 10/13/14/17 now), deck architect session_01ToE6RJFCw9deB3HcJRLKxS (claude/decks-p3, the Tern), head writer 3 session_01FopKMT2ZKxuWcNDcmF7565 and Writer 5 session_01HW7UxnuNvRXoEjn8tK4sQq (claude/content), social A session_012pK2XVi5UhqEd28fakYk68, player engineer 3 session_016EJg9DempByUCWwpszyWmV, device engineer 3 session_01SskqNx45iEGyQq2W9Fjg5Y, dialogue engineer session_01UmrVVpV7eBqEsa4sBucASP.
 
 ## What's built
 
@@ -44,3 +45,23 @@ Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx, after wave 2, before wav
 ## Open questions for the user (through the lead)
 
 - None open. Wave 2's check-in A is the lead's to run.
+
+## In flight at handover (do these next, in the lead's order)
+
+1. **The shuttle start** (the user: "you start inside the shuttle, the ramp opens, you walk out"; the lead approved the defaults). The deck architect's walk-in Tern is in claude/decks-p3 eb0e776 (0.38.18): places 5-tern-aisle-1 [5,7] (start, face 0 = south), 5-tern-seat-1 [4,8], 5-tern-ramp-top [5,9], 5-tern-ramp-foot [5,11] (Torres); `DECKS[5].tern = { aisle, well [5,8], ramp [[5,9],[5,10]], foot [5,11], start }`; calls `ternRamp(open, secs = 2.5)`, `ternRampOpen()` 0..1, `ternClear()`, `ternInside()`; open by default; the well is blocked until the ramp is fully open. To do in section 21:
+   - `INTRO_START = { day: 0, min: 1060, deck: 5, tile: [5, 7], face: 0 }` (sim engineer 4 moves SHIP_START_ARRIVAL to exactly this in the same combine).
+   - On a new arriving game close the ramp at once (`ternRamp(false, 0)`); about 2 s after the manifest is signed, the pilot's line (Dev Raman, `raman` kind week1, flag `pilot.ramp`, content 0.48.40: "Down gently. Ramp's opening. Welcome to the Wren.") and `ternRamp(true, 2.5)`; once you're off the ramp (`ternClear()` and you're on the bay floor), `ternRamp(false, 3)`.
+   - Move the 'ramp'/'hello' checkpoints to the ramp foot [5,11] (room 'Shuttle bay'?: check the room name at [5,11]); move the tour's 'shuttle' point to [5,10]-[5,11] and check 'bay' [9,7] is still sensible; intro_check's data check validates rooms.
+   - intro_check on a merge with decks-p3 + sim (the walk starts inside the Tern now; part 8's walker steps toward Torres, fine once the ramp is open).
+2. **Tap-to-ask** is ready to wire: sim 0.26.31 (bfcd864) calls `introTap(p)` first in tapCrew. Add `function introTap(p)`: when `introOn()`, the step is before 'free' and p.id is the escort, `dialogueShow('introAsk', { id: 'intro-ask', who: [escort], where: { deck: deckDef.num, room: /./ }, at: shipNow() })` (the writers' introAsk.meet, 3 questions) and return true; else false.
+3. **Jobs can be reserved at the arrival again**: sim engineer 3 fixed the wipe (newGameStart calls machinesNew() before introNewGame). You may move the `d1-jobs` reserve back into introBegin, or keep 05:00 (works either way).
+4. **The week Tue-Sun walked in the real game**: the writers' week-1 lines are being written (I sent head writer 3 / Writer 5 the list): lines kind week1 on each teacher with keys `beat.<beatId>.<n>` (said as bubbles when you're in the beat's room during its window: add a `says`-like path for INTRO_WEEK beats that take `beat.<id>.<n>` in order, like the tour), a meeting `introHealth` (Rina, Tue 14:00, infirmary: play it when you keep the health appointment), Mail texts `mail.<beatId>` (d4-mail, d7-calder, d5-mug, settled), each ONE line "Subject | body" (split on the first " | "), unsigned: the game adds the sender (head writer 3, 08:15). Writer 5 is writing all of it; introBriefing and introSoloJob already exist on claude/content. Then intro_check part 12: Tue-Sun in the real game (the health check, Pell/Zainab via social A's socialSeekAsk 0.36.60+, Sowing with Tomas at 11:45 Day 6, traditions' build).
+5. **Wave 4, newcomers** (the user: guiding one only after a promotion, which doesn't exist yet): social A 0.36.65 has A10 behind `flag('promoted')`: on assignment `simNote('guideAssigned', { id, day })`; on the arrival day social calls `socialGuide(id)`, which calls your `introGuide(id)`; Calder's hand-back calls `socialGuideEnd('handed')`, which calls your `introGuideEnd(id)`. Build both in section 21 with a separate state (`SHIP.intro.guide`), never touching `SHIP.intro.on` (social reads introOn() as YOUR intro); the same steps reversed (you lead the newcomer from the Tern to their bunk and to dinner; their escort mode is follow); introStep notes with `who` = the newcomer. Test with the flag set in intro_check only. Plain crew rotation arrivals (crew escorted by crew) reuse escortPlan with the escort as a parameter.
+
+## Gotchas learned (read before editing)
+
+- `lineFor` is not safe for "give me the line with this flag": once `week1` is set it prefers other week-1 lines, and past the last numbered key it returns a general one. Use `introWriterLine(flag)` (exact entry from `VOICE[id].lines.week1`, filled with `linesFill`). For other speakers (Raman, the week's teachers) generalise it with a `who` argument.
+- intro_check on a merge with claude/content is slow (25+ minutes). Run it in the background with timeout 2700, and close meetings in tests by answering choices (writers' scripts have them).
+- Never `pkill -f <pattern>` from a shell whose own command contains the pattern: it kills your shell. List PIDs with `ps -eo pid,args | grep "[i]ntro_check"` and kill by number.
+- The intro is off at every test URL (`?nosave`), so cadet_test is identical; the real-game parts of intro_check use `newGameStart(true)` or a plain `?debug` URL with storage cleared.
+- Scratch merges: make a fresh `git worktree add --detach <scratch>/wN HEAD`, merge the other branches, keep HEAD's side of build-line conflicts only, and stop on any other conflict.
