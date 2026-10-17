@@ -1,0 +1,38 @@
+@tradition late-piano
+// Late piano (weekly, seat 15). The Captain plays the music-room piano on Thursday nights (her musician habit already);
+// a few listen. Starts at 21:45, after the quiz on Deck 3 ends, so it's on another deck and never at the same time.
+// Small and quiet on purpose: few go. Design note: plans/trad-notes-weekly.md.
+k: 438
+title: Late piano
+when: weekly thursday
+at: 21:45-22:30
+min: 20
+jitter: 10
+where: 4 pool music
+hold: 1
+who: marrow always, music 55%, musician 40%, night-owl 25%, everyone 4%
+anim: marrow play, everyone none
+host: marrow
+from: The music room
+invite: host=marrow odds=10% line="I'll be at the piano later. Come and listen, if you like. I take requests. Sometimes."
+
+== mail
+- Late piano tomorrow, {time} in the music room, Deck 4. The Captain plays; anyone may listen. Quiet voices, please.
+
+== ask
+- The Captain's playing tonight, late. I'll be in the music room.
+- Late piano tonight. I always mean to go to bed early. I never do.   #funny
+- Going to hear the Captain play later. It's the calmest hour of the week.   #warm
+
+== here
+- Shh. This is the slow one.
+- Listen to that. Who knew?   #warm
+- I don't know what it's called. I just like it.
+
+== thanks
+- You slip into the music room and sit with the listeners. The Captain plays something slow and doesn't look up.   #warm
+
+== chatter
+- The Captain played something new last night. Nobody asked what it was.   #warm
+- I didn't know the Captain could play until my first Thursday aboard.
+- Late piano is the only time the Captain looks off duty.

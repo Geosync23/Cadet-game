@@ -1,0 +1,42 @@
+@tradition sunday-table
+// The Sunday long table (weekly, seat 15). The plan's "Sunday roast", renamed: Sunday dinner is already the dish the
+// crew voted for (section 17's menu), which isn't always a roast. The mess tables are pushed into long tables and
+// friends sit together; Wednesday's tasting winner comes back as a side. A meal tradition:
+// meal: dinner    (the sim engineer's field, still to be added to the grammar: going counts as your dinner)
+// Design note: plans/trad-notes-weekly.md.
+k: 440
+title: Sunday long table
+when: weekly sunday
+at: 18:00-19:00
+min: 30
+jitter: 10
+where: 3 room Mess hall: mess-seat
+hold: none
+who: brennan always, lingers-at-meals 85%, everyone 60%
+anim: talk
+host: brennan
+from: brennan
+ties: galley meal=dinner seating=friends side=tasting
+ties: decor long-tables
+
+== mail
+- Sunday long table tomorrow at {time}: the tables pushed together, the dish you voted for, and Wednesday's tasting winner on the side. Sit with your people.   #warm
+
+== ask
+- Long table tonight. Save me a seat?   #warm
+- Sunday dinner at six. I voted for the curry. Again.   #funny
+- Long table at six. Come and sit with us.   #warm
+
+== here
+- Pass that down, would you?
+- Who voted for this? Whoever it was, thank you.   #funny
+- Budge up, there's room for one more.   #warm
+
+== thanks
+- You squeeze in at the long table. A plate comes down the line to you without anyone asking.   #warm
+- You sit down at the Sunday long table. Somebody tells a story you've heard before, and it's funnier this time.   #funny
+
+== chatter
+- Sunday long table is the one meal I never eat on my own.   #warm
+- Someone always ends up at the wrong end of the long table from the gravy.   #funny
+- Best seat at the long table is the middle. You hear everything.
