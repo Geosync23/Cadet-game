@@ -64,7 +64,7 @@
 
 == decline
 - Not tonight. Gran's sent a message. It's long. She talks slower than the relay.   #funny
-? weekday:thu|fri
+? weekday:wed|thu
 - Rest day. One window, one map, no people. Nothing personal. Another time.
 
 == missed
@@ -119,3 +119,18 @@
 - New ship. Nobody here knows Hesper Dock. I've put up a map. Gran says hello. She doesn't know you. Still.
 ? tier>=friend
 - Sent Gran a message today. Told her about the Wren. She said it sounded nice. It was. Hello.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d2-booths: Tuesday 18:00, the call-home booths
+? flag:beat.d2-booths.1
+- Call-home booths. Sit, tap, wait. There's a lag.
+? flag:beat.d2-booths.2
+- Queue's long after a storm. Tonight it's short. Lucky.
+? flag:beat.d2-booths.3
+- Calls drop sometimes. It isn't you. It's space.   #funny
+? flag:beat.d2-booths.4
+- Mail's slower. It always gets there, though.

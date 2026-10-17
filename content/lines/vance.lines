@@ -195,8 +195,8 @@
 - The first five minutes of a shift. Everyone in place. Then it gets interesting.
 
 == decline
-? weekday:tue|wed
-- Rest day. I'm resting. Correctly. It's harder than it looks. Thursday?   #funny
+? weekday:wed|thu
+- Rest day. I'm resting. Correctly. It's harder than it looks. Friday?   #funny
 
 == callback
 ? told:moment.vance.suspect !beat:vance.5
@@ -283,7 +283,7 @@
 ? tier>=acquaintance !week1:true
 - Cadet. Fed, rested and dressed. Two out of three would do. Three is better.
 - Cadet. You're early. I'm earlier. We're both correct.   #funny
-? tier>=acquaintance !week1:true weekday:tue|wed
+? tier>=acquaintance !week1:true weekday:wed|thu
 - Cadet. My rest day. I'm not on duty. I'm merely observing.   #funny
 ? tier>=colleague !week1:true
 - {nick}. Good. I've a record playing in my head and nobody to tell. Sit.   #funny

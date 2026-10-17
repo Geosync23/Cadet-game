@@ -1,0 +1,88 @@
+@overheard goodbyes
+// Writer 5, for social B2: crew-to-crew goodbyes on rotation days. Speaker A is the one leaving (leaving:soon, a day
+// or two before); B is their friend, best friend, mentor or partner. Warm, a little wistful, light. Couple talk only
+// under pair:couple. Named ones are for the current leavers and their canon closest.
+
+== overheard
+? pair:friend leaving:soon
+A: Ten days went fast.
+B: They always do when it's the last ten.
+A: Save me a seat anyway.   #warm
+
+? pair:friend leaving:soon
+A: You'll write?
+B: Every week. Badly.
+A: Badly's fine. Just write.   #warm
+
+? pair:friend leaving:soon time:evening
+A: Last dinner in the mess, nearly.
+B: Have pudding twice. It's the law.   #funny
+
+? pair:best leaving:soon
+A: Who's going to steal my toast?
+B: I'll post you some. Cold.
+A: Perfect. Just how I like it.   #funny
+
+? pair:best leaving:soon
+A: You've been the best bit of this ship.
+B: Don't. I'll cry at breakfast.
+A: Cry at lunch. Breakfast's busy.   #warm
+
+? pair:mentor leaving:soon
+A: Anything I should know, out there?
+B: Ask. Listen. Write it down.
+A: That's what you said on day one.
+B: Still true.   #warm
+
+? pair:mentor leaving:soon
+A: Thank you. For all of it.
+B: You did the work. I just watched.   #warm
+
+? pair:couple leaving:soon
+A: Two ships. That's all it is.
+B: Two ships and a lot of letters.
+A: I'll number them.   #warm
+
+? pair:couple leaving:soon
+A: I've packed your jumper by mistake.
+B: Keep it. It's a good mistake.   #warm
+
+? pair:any+any who:teague-theo with:hart-ravi leaving:soon
+A: One last comic. You're the duck.
+B: I'm always the duck.
+A: You're a very good duck.   #funny
+
+? pair:any+any who:moreau-signe with:achterberg-lars leaving:soon
+A: Send me the last pages. All of them.
+B: Every book? Even the good ones?
+A: Especially those.   #funny
+
+? pair:any+any who:santos-zofia with:tran-chloe leaving:soon
+A: Who'll read the gossip with you?
+B: Nobody reads it like you do.
+A: Write me the best bits. Daily.   #warm
+
+? pair:any+any who:keane-davi with:kovac-zainab|cruz-tove leaving:soon
+A: Last climb up the ladder.
+B: For the exercise.
+A: Yes. For the exercise.   #warm
+
+? pair:any+any who:alvarez-luca with:kim-yusuf|mbeki-bo leaving:soon
+A: Gerald's coming with me.
+B: Does Gerald want to go?
+A: Gerald goes where I go.   #funny
+
+? pair:any+any who:lindqvist-isak with:park-noor|larsen-hamid|haddad-tamsin leaving:soon
+A: You keep the guitar book.
+B: You haven't finished it.
+A: I'll never finish it. You might.   #funny
+
+? pair:any+any who:ueda-vera with:varga-tariq leaving:soon
+A: Six weeks for a letter from Valo.
+B: Seven, from where you're going.
+A: Then start writing now.   #warm
+
+? pair:any+any who:zamora-quinn with:mbeki-bo|rossi-femi leaving:soon time:night place:observatory
+A: Last night up here.
+B: The stars won't move.
+A: No. I will. Look up for me.   #warm

@@ -574,3 +574,20 @@
 - Something's on. Will there be snacks?   #funny
 ? trad:works-tea
 - Friday tea! Biscuits!
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// beat d4-quiz: Thursday 20:00, the bow lounge
+? flag:beat.d4-quiz.1
+- Oi oi! Quiz night. You're on my team. No arguments.
+? flag:beat.d4-quiz.2
+- Teams of four. We need a sensible one. That's you.   #funny
+? flag:beat.d4-quiz.3
+- There's no food round. There should be.   #funny
+? flag:beat.d4-quiz.4
+- Grab a seat. Snacks are mine. Mostly.   #funny
+? flag:beat.d4-quiz.5
+- Win or lose, there's biscuits after. I made sure.

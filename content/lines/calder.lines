@@ -433,3 +433,15 @@
 - Something on tonight. The board can wait. An hour.   #funny
 ? trad:works-tea
 - Ten minutes. Then back to it.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// mail d7-calder: Sunday 18:00
+? flag:mail.d7-calder
+- One week | One week. You'll do. The board's there on Monday.
+// mail settled: everything on your week-1 list done
+? flag:mail.settled
+- Settled | Everything on your list, done. Good. Carry on.

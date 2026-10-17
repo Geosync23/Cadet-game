@@ -130,3 +130,12 @@
 - Why did the engineer leave the ship? To see if it would miss him. It's a work in progress. Have you eaten?
 ? tier>=friend
 - Baked for the new crew. They didn't have an inspection. I inspected it myself, in Brennan's voice. It passed. Just.
+
+// Writer 5, batch 9: week-1 beats for the onboarding hook (onboarding seat 1's list, 2026-10-17). One flag key per
+// line, beat.<beatId>.<n>, said in order as bubbles while you are in the beat's room in its window; best first
+// (onboarding drops the rest when you leave). Mail texts: mail.<beatId>, one line "Subject | body", unsigned.
+
+== week1
+// mail d5-mug: Friday, if you missed Works tea
+? flag:mail.d5-mug
+- Your mug | Missed you at tea. Your mug's on the end hook. It's the law. Well, it's me.

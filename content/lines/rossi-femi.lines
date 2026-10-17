@@ -64,7 +64,7 @@
 
 == decline
 - I can't, early bed. I'm up for the first star. Tomorrow?
-? weekday:tue|wed
+? weekday:mon|tue
 - It's my rest day. I'm calling home. They'll ask if I'm winning. Another time?
 
 == missed
