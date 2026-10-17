@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.39
+   STARSHIP CADET: CSV Wren                           build 0.26.40
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,7 +7053,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.39';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.40';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7780,6 +7780,13 @@ function gatherings(p, d, F) {
 // 07:15, so the bridge is never empty and the two never meet at a shared desk), patrol (the Watch walks the decks in turn), closed (take() passes those places by), stayIn (that
 // share of free time in their own quarters), rush (a call owed: a booth at the first chance in `at`). Inert with no event.
 const EV_DAY = new Map(); let EV_SIG = '';
+// evSig's parts, compared without building its string (shipDay asks on every whereIs: the garbage count, 0.26.40)
+const EV_K = [null, null, -1, null];
+function evChanged() {
+  const e = SHIP.event, a = e ? e.id : '', b = e ? e.startDay : '', c = SHIP.eventLog ? SHIP.eventLog.length : 0, i = typeof introSig === 'function' ? introSig() : '';
+  if (a === EV_K[0] && b === EV_K[1] && c === EV_K[2] && i === EV_K[3]) return false;
+  EV_K[0] = a; EV_K[1] = b; EV_K[2] = c; EV_K[3] = i; return true;
+}
 const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0)
   + (typeof introSig === 'function' ? '/' + introSig() : '');   // section 21: the intro's state (on, skipped, ended) changes who's busy
 function evDay(d) {
@@ -8328,7 +8335,7 @@ function jobVisits() {
 // ---- the whole ship's day, planned once and kept (the last few days) ----
 const SHIP_DAYS = new Map();
 function shipDay(d) {
-  if (EV_SIG !== evSig()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
+  if (evChanged()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
   if (SHIP_DAYS.has(d)) return SHIP_DAYS.get(d);
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
@@ -12602,8 +12609,9 @@ function jobWhere(person, t) {
     JOB_IDX = new Map(); JOB_IDX_REV = MACH_REV;
     for (const j of SHIP.jobs) if (j.segs && j.claimedBy !== 'you') { if (!JOB_IDX.has(j.claimedBy)) JOB_IDX.set(j.claimedBy, []); JOB_IDX.get(j.claimedBy).push(j); }
   }
-  for (const j of JOB_IDX.get(person.id) || []) for (const s of j.segs) if (s.from <= t && t < s.to)
-    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold };
+  const js = JOB_IDX.get(person.id); if (!js) return null;   // most people: no job, and no empty list made for them (0.26.40)
+  for (let i = 0; i < js.length; i++) { const j = js[i]; for (let k = 0; k < j.segs.length; k++) { const s = j.segs[k]; if (s.from <= t && t < s.to)
+    return { deck: s.deck, act: s.act, type: s.type, placeId: s.placeId, moving: s.act === 'commute', fromDeck: s.fromDeck, from: s.from, until: s.to, tag: s.tag, job: j.id, hold: s.hold }; } }
   return null;
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
@@ -18909,8 +18917,8 @@ function updateDeckCrew(dt) {
   const now = shipNow(), N = deckDef.num;
   lineTick(dt, now);
   for (let i = DECK_CREW.length - 1; i >= 0; i--) if (!DECK_CREW[i].update(dt, now, N)) { DECK_CREW[i].remove(); DECK_CREW.splice(i, 1); }
-  for (const a of DECK_CREW) if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; }
-  BUSY.clear(); for (const a of DECK_CREW) if (a.settled && a.spot) BUSY.add(a.spot.id);
+  for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; } }   // indexed: no iterator a frame (0.26.40)
+  BUSY.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.settled && a.spot) BUSY.add(a.spot.id); }
   PLAYER_PLACE = typeof playerHolds === 'function' ? playerHolds() : null;
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
@@ -18922,12 +18930,17 @@ function updateDeckCrew(dt) {
 function crewNearDoor(d) {
   const r = 1.15 + (d.span - SEG) / 2;
   if (!d.rooms) d.rooms = edgeTiles(d.e.key).map(c => roomAt(...c));
-  for (const a of DECK_CREW) {
+  // every door, every frame: plain loops, no closures (the performance engineer's garbage count, 0.26.40)
+  const R = d.rooms;
+  for (let i = 0; i < DECK_CREW.length; i++) {
+    const a = DECK_CREW[i];
     if (a.settled || Math.abs(a.x - d.cx) > r || Math.abs(a.z - d.cz) > r || Math.hypot(a.x - d.cx, a.z - d.cz) > r) continue;
-    if (d.passable || d.rooms.some(rm => a.rooms.has(rm))) return true;
+    if (d.passable) return true;
+    for (let k = 0; k < R.length; k++) if (a.rooms.has(R[k])) return true;
   }
-  if (d.e.type === 'closed' && d.rooms.some(rm => doorOpenFor(rm, 'player'))) {   // an invitation or summons: the door opens for you
-    const p = player.obj.position; if (Math.hypot(p.x - d.cx, p.z - d.cz) < r) return true;
+  if (d.e.type === 'closed') {                           // an invitation or summons: the door opens for you (you near it first: the cheap test)
+    const p = player.obj.position;
+    if (Math.hypot(p.x - d.cx, p.z - d.cz) < r) for (let k = 0; k < R.length; k++) if (doorOpenFor(R[k], 'player')) return true;
   }
   return false;
 }
