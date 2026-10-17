@@ -1,0 +1,23 @@
+@template gruff
+
+== clock.in
+- Morning. Tea's made. Didn't make it for you. Have some anyway.   #warm
+- Hm. Eight. Board's there.
+- Up, then. Good. Gloves.
+
+== clock.out
+- Done. Go on. Eat something.
+- Clocked out. Hang your gloves up properly.
+- Hm. Fair shift. Don't let it go to your head.   #funny
+
+== clock.monday
+- Monday. Weekend all right? Hm. Good.
+- Back. You rested? Looks like it. Good.
+
+== clock.friday
+- Friday. Two days. Sleep.
+- Weekend. Don't come down here. I mean it.   #warm
+
+== clock.back
+- Back. Hm. Good. Sit down if you need to.   #warm
+- You're back. Saved you the easy job. Don't mention it.   #warm
