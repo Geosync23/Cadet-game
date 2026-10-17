@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.78
+   STARSHIP CADET: CSV Wren                           build 0.36.79
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.78';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.79';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25617,7 +25617,7 @@ function socLoad(s) {
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
-      bonds: bondsUnpack(s.bonds, typeof s.idl === 'string' ? s.idl.split(',') : SOC.crew.map(p => p.id)), affWeek: typeof s.affWeek === 'string' ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
+      bonds: bondsUnpack(s.bonds, typeof s.idl === 'string' ? s.idl.split(',') : SOC.crew.map(p => p.id)), affWeek: typeof s.affWeek === 'string' && (typeof s.idl !== 'string' || s.idl === SOC.ids) ? s.affWeek : null, stories: s.stories && typeof s.stories === 'object' ? JSON.parse(JSON.stringify(s.stories)) : {},
       seekAsks: Array.isArray(s.seekAsks) ? s.seekAsks.filter(x => x && typeof x.id === 'string' && isFinite(x.from)).map(x => ({ ...x })) : [],
       guide: s.guide && typeof s.guide.id === 'string' && isFinite(s.guide.day) ? { ...s.guide } : null,
       noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
