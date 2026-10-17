@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.44
+   STARSHIP CADET: CSV Wren                           build 0.28.45
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.44';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.45';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10704,7 +10704,7 @@ function playerTap(it, at, point) {
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
   }
-  if ((kind === 'tray' || kind === 'eat' && !SHIP.player.tray) && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if (kind === 'tray' && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }   // a table with no tray just sits you (0.28.45)
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player'), ln = j.line && typeof lineSpot === 'function' ? lineAt(lineSpot('player')) : null;   // the back of section 10's line for now (the galley joins you to it), else the galley's spot
     if (j.line && typeof galleyLeave === 'function') galleyLeave('player');   // in the line only once you reach it (0.28.36; actBegin joins again): from across the room you'd hold it up
@@ -10802,6 +10802,9 @@ function actStart(kind, placeId, o = {}) {
   if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && (PLACE_OF.get(placeId) || {}).type === 'mess-seat') {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
   }
+  if (kind === 'eat' && !o.fed) {                        // no tray, no meal (0.28.45, the user's: "no auto tray: you must get it from the line"): you just sit
+    kind = 'sit'; o = { ...o, after: [o.flavour, 'You sit down. To eat, queue at the servery for a tray, then bring it to a seat.'].filter(Boolean).join(' ') };
+  }
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
@@ -10823,7 +10826,7 @@ function actBegin() {
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
     ACT = null; toast(A.o.title, 'In use: ' + who.p.name + ' got there first.'); return;
   }
-  if (A.kind === 'tray' || A.kind === 'eat' && !A.o.fed || A.kind === 'grab') {   // take the food now
+  if (A.kind === 'tray' || A.kind === 'grab') {          // take the food now (an 'eat' is always a served tray since 0.28.45)
     const f = foodFrom(A.kind === 'grab' ? 'grab' : 'servery');
     if (!f.ok) { ACT = null; toast(A.o.title, f.why); return; }
     A.o.dish = f.dish;

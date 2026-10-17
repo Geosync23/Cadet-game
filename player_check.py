@@ -222,6 +222,24 @@ with sync_playwright() as pw:
     check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
     check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
 
+    print('No tray, no meal (0.28.45, the user\'s):')
+    def table_go(tray):
+        g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 3) goToDeck(3); setShipNow(Math.floor(shipNow() / 1440) * 1440 + 18 * 60 + 5); needsT = null;
+          SHIP.player.tray = {json.dumps(tray)}; Object.assign(SHIP.player.needs, {{ hunger: 40, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 }});
+          const it = ITEMS.find(i => /^Long table$/.test(i.t)), q = new THREE.Vector3(); it.hit.getWorldPosition(q); return playerTap(it, q, q); }})()""")
+        for k in range(200):
+            g.step(10)
+            if g.ev("!ACT || ACT.phase === 'do'"): break
+        h0 = g.ev("SHIP.player.needs.hunger"); r0 = g.ev("JSON.stringify([ACT && ACT.kind, ACT && !!ACT.o.fed, TRAY_ON.visible, SHIP.player.tray])")
+        g.step(150)
+        h1 = g.ev("SHIP.player.needs.hunger"); r = json.loads(r0) + [round(h1 - h0, 1), g.ev("TRAY_ON.visible")]
+        g.ev("actEnd(true); SHIP.player.tray = null"); return r
+    nt = table_go(None); wt = table_go('Test soup')
+    print('  a table, no tray: [activity, fed, tray on the table, tray in hand, food change, tray later]', nt)
+    print('  a table with a served tray:', wt)
+    check(nt[0] == 'sit' and nt[1] is False and nt[2] is False and nt[4] <= 0 and nt[5] is False, f'sitting at a mess table without a meal: just sitting, no tray, no food: {nt}')
+    check(wt[0] == 'eat' and wt[1] is True and wt[2] is True and wt[3] is None and wt[4] > 1, f'with a tray from the servery: it goes on the table and food rises as you eat: {wt}')
+
     print('Need warnings (0.28.41):')
     wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
       let t = performance.now() + 1e6;
