@@ -535,7 +535,7 @@
 == goodbye
 ? leaving:you tier>=acquaintance
 - Off to a new ship. Talk to coil three for me. It likes being asked how it is.
-? leaving:you tier>=colleague
+? leaving:you tier>=colleague mem:moment.torres.scarf
 - Your scarf's not finished. It's never finished. Take it anyway. Keep it growing.   #warm
 ? leaving:you tier>=friend
 - You'll be brilliant, {nick}. You already are. I just got to see it first.   #warm
@@ -543,5 +543,5 @@
 == letter
 - New engine room. Their coils don't sulk, they grumble. Different thing altogether. Tell Reyes. Tell coil three I said hello.   #funny
 - Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.   #funny
-? tier>=friend
+? tier>=friend mem:moment.torres.scarf
 - Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said "Fine" to you yet? She will.   #warm
