@@ -1,15 +1,17 @@
 # Handover: head writer (Pillar 4, seat 11)
 
-**Now held by Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa, from 0.48.11).
+**Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) held the seat 0.48.11-0.48.21 and handed over at ~70% memory
+(2026-10-17 ~05:05). A fresh head writer reads this note first, then CLAUDE.md, content/voice-bible.md, content/facts.md,
+content/README.md, content/briefs.md, TEAM.md. **First job: Zeke's arrival tour** (In flight, below).
 
 **Role:** head writer for Starship Cadet's Pillar 4. Report ONLY to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE, from ~04:35; was session_01PJtmxWgAPLebXSZKP6ZRpG) with
 `send_message`; never contact the user. Writers report to you; you are the only one who merges their work. Reviewer 2
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.19** (Head writer 2, fedb64e):
-3,856 lines, 4 home contacts (Mum, Gran, Jo, Sam; facts 4d), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.20.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.21** (Head writer 2)
+4,060 lines (story crew 106-141 own lines each), 4 home contacts (Mum, Gran, Jo, Sam; facts 4d), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.22.
 
 ## What you own
 
@@ -37,6 +39,12 @@
 
 ## Known state and gotchas
 
+- **Checking cadet_test's bubble shots:** crop the two shots and threshold the difference above 2 levels; the boxes must
+  be only the bubble (i_tap1 ~(18,385)-(208,421), b_wander10s ~(290,553)-(518,612) at 0.48.21). A small python+PIL
+  snippet does it (`ImageChops.difference(...).convert('L').point(lambda v:255 if v>2 else 0).getbbox()`).
+- **My review scripts** (rest-day `weekday:` vs ROSTER offDays; a diff-to-'kind | cond | text' lister) lived in my
+  scratchpad; they're a few lines each: rebuild them from the descriptions here.
+
 - **cadet_test** since 0.48.7 differs from 0.60.0 in two shots (`b_wander10s`, `i_tap1`), only a chatter bubble's words:
   Deck 4 crew have their own lines, which changes `lineFor`'s recently-said penalty, so a different stock small-talk line
   wins. Proven: the new code with 0.48.6's content is ALL IDENTICAL. If any *other* shot differs, find out why. Since
@@ -60,31 +68,22 @@
   near the player. False alarms: reword, or add the line id to `content/allow.list` (yours to approve).
 - `lines_check` reads every capitalised word in `facts.md` as a known name: keep facts.md current.
 
-## Writers (2026-10-17)
+## Writers (2026-10-17, ~05:00)
 
 | Writer | Session | Branch | State |
 | --- | --- | --- | --- |
-| writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
-| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); batches 1-3 merged (everyone in their area at ~30); batch 4 merged (Calder 116, Kovac 106); on batch 5 (Vance, Marrow, Holt toward ~100), then overheard pairs, visitor cards last |
-| writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
-| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
-| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-8 merged (to 0.48.17: story four ~130-140, the 19 at ~40+, gran/jo/sam.call, gift thanks); batch 9 merged (0.48.19); on batch 10 (~60 everyday non-work bubbles in the banks), then retires (handover note current). rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
-
-Writer 2 is on batch 1 (Works 1-8 and Kovac to ~30, Torres's job-2/job-3 bubbles under `flag:walk.job2.<step>` and
-`flag:walk.job3.tea|turnin`, telling onboarding when they're in). Newcomer replies are on hold (they wait for the guide
-script's format). `who:` / `with:` speaker conditions are in (dialogue 0.43.8): the newlyweds' and the knitting circle's
-overheard can now be written.
+| **Writer 2** (Works + command, Watch, Survey) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1-5 merged (to 0.48.20): everyone in their area ~30+, Calder 116, Kovac 106, Vance 110, Marrow 108, Holt 109. On batch 6: everyday smalltalk/rumour for their ~45 people (at most 1 in 5 about work); then 7: Works/Watch/Survey overheard pairs with who:/with: and place:; visitor cards last. ~half memory at 0.48.20 |
+| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-9 merged (to 0.48.19): story four ~135, their 19 at ~40+ with bubbles, callbacks, rep/you greets, gift thanks; gran/jo/sam.call; crew asking after your people. batch 10 merged (0.48.21: banks/everyday.lines); RETIRED (`plans/handover-writer-commons.md` current). For a fresh writer-commons send the lead a two-line brief (booth overheard once DE2 sets the format; more everyday chatter) |
+| writer-works, writer-command, writer-commons (first) | | | retired; handover notes in `plans/` |
 
 ## Open work (in rough order)
 
-0. Hire a fresh writer-commons (from `plans/handover-writer-commons.md`). Its suggested next batches: callbacks
-   (`mem:`/`told:`), visits and notes, `rep` and `knownFor`, rumour and smalltalk for their people, the story crew toward
-   about 120 lines each, the newlyweds' overheard with `who:`, Pell's `mem:moment.pell.timed` callback.
-
-1. Works crew to ~30 own lines each (now ~15); Kovac, command, Watch and Survey crew the same; visitor cards.
-2. Torres's job-2 and job-3 bubbles (onboarding's INTRO_JOB_LINES); newcomer reply sets (a `.meet`?).
-3. Goodbyes, letters (crew who move on), `about`, `rep`, `knownFor`, `visit`, `note`, `gift` lines.
-4. Tone checks for the tradition designers' `.trad` texts when asked.
+1. **Zeke's arrival tour** (the user's priority; see In flight).
+2. Everyday chatter variety (Writer 2 batch 6, Writer 3 batch 10), then overheard pairs with `place:`.
+3. Visitor cards (guests), newcomer reply sets (wait for the guide script's format), goodbyes and letters (crew who
+   move on), the one-sided booth overheard (DE2's format).
+4. Torres's own lines are at 111 but are mostly walk/week-1; his everyday banks could use the same pass as Calder's.
+5. Tone checks for the tradition designers' `.trad` texts when asked.
 
 ## In flight (Head writer 2)
 
@@ -97,9 +96,9 @@ overheard can now be written.
 
 - **Call home:** APPROVED (fixed cast Mum, Gran, Jo, Sam; home unnamed; live calls any day, once per person per day;
   Letters evening = the clear-line window where `via: live` beats land). Model: `content/home/mum.call`, baked since 0.48.16
-  (dialogue 0.43.11: README "Calls home (.call)"; send conditions came:any, friend:any, flag:intro.soloJob). Writer 3
-  writes Gran, Jo, Sam from it. The calls themselves wait on social B's successor (B8) and the booth hook.
-- **Bridge invite:** `meetings/bridgeInvite.meet` (Vance, day 22, `flag:bridge.invited`); trigger not wired yet.
+  (dialogue 0.43.11: README "Calls home (.call)"; send conditions came:any, friend:any, flag:intro.soloJob). All four .call files are
+  written and baked (facts 4d has the cast). The calls themselves wait on social B's successor (B8) and the booth hook.
+- **Bridge invite:** plays from traditions engineer 2's 0.34.35 (session_01WEEoe5DyRegEqVMZgKRHWB; day 22 breakfast, Mail if missed). They keep a copy of the file: tell them if you change it.
 - **Holt beat 1** has `where: meal` (social B's 0.39.6 word; plays once their engine is in the integration build).
 - Dialogue engineer 2: session_01S26bs4oMahyGJkuVaCKQGT (claude/dialogue, took over from DE1). Asked: `you:` with `_`,
   knownFor tag list, the stricter .call romance check, the one-sided booth overheard format (for a later batch).
