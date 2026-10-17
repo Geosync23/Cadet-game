@@ -7,7 +7,7 @@ class R3:
     def __init__(s,**k):
         s.N=6; s.rows=2; s.steps='fwd3'; s.jumps='orth4'; s.drop='home'; s.target=7; s.rounds=14
         s.minc=3; s.layout='fixed'; s.tie='hand'; s.hand0=(0,0); s.dropmatch=True; s.shape='cluster'
-        s.bankscore='each'; s.marks=3
+        s.bankscore='each'; s.marks=3; s.finish=False
         s.__dict__.update(k)
 def setup(R,rng):
     N=R.N
@@ -103,7 +103,16 @@ def game(R,kinds,rng):
         m=pick(kinds[p],st,R,p,rng,sc)
         if m is None: endby='stuck'; break
         st,g,ev=apply(st,R,p,m); sc[p]+=g; evs+=ev; pl+=1; last = p if g else last; hist.append(tuple(sc)); p=1-p
-        if R.target and max(sc)>=R.target: endby='target'; break
+        if R.target and max(sc)>=R.target:
+            # finish: if the first player reached the target, the second gets one last turn (equal turns)
+            if R.finish and p==1 and sc[0]>=R.target:
+                m=pick(kinds[1],st,R,1,rng,sc)
+                if m is not None:
+                    st,g,ev=apply(st,R,1,m); sc[1]+=g; evs+=ev; pl+=1; last = 1 if g else last; hist.append(tuple(sc))
+                if R.finish=='strict': last=0  # a tie after the last turn goes to whoever reached the target first
+                if R.finish=='tiles' and sc[0]==sc[1]:
+                    a_,c_=cnt(st,0),cnt(st,1); last = 1 if c_>a_ else 0  # a tie goes to more tiles left, then to whoever reached first
+            endby='target'; break
     if sc[0]!=sc[1]: w=0 if sc[0]>sc[1] else 1
     elif R.tie=='hand':
         a,c=cnt(st,0),cnt(st,1); w=-1 if a==c else (0 if a>c else 1)
