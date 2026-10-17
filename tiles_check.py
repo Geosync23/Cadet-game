@@ -12,6 +12,9 @@
 #   390px one, no text under 15px, no sideways scroll; tap a tile and its squares glow, tap one to move; the crew
 #   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
 #   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
+#   sitting down (0.46.2): tapping the Tiles table with nobody about gives a tip and sits you as before (15b); with a crew member at it, you walk to a
+#   free seat and sit (the 'tiles' activity, sit:play) and the game opens against them; Done stands you up; walking
+#   away leaves a game uncounted; a win adds friendship and a memory; beating Rina is news, once; save.tiles round-trips
 # Setup and environment as for cadet_test.py.
 # Run:  python3 tiles_check.py BUILD.html [GAMES]   (GAMES per level and mode, default 4000; Hard plays half as many)
 import sys, json, re
@@ -155,6 +158,63 @@ def board(g, path):
         check(not gg.errors and not gg.ev("DEV.errors.length"), f'{name}: no errors: {gg.errors[:3]} {gg.ev("DEV.errors.slice(0, 3)")}')
         gg.close()
 
+SEAT = r"""((stage) => {
+  const its = ITEMS.filter(i => /^Tiles table$/.test(i.t)); if (!its.length) return { none: true };
+  const it = its[0]; it.hit.getWorldPosition(_wp); const at = _wp.clone();
+  const g = nearestOpen(at.x, at.z, player); player.obj.position.copy(cellPos(...g)); player.stop();
+  if (stage) {   // a crew member settled on one of the stools (stand-in for the evening crowd)
+    const a = DECK_CREW.find(x => x.p && x.p.id === stage) || DECK_CREW.find(x => x.p && x.p.id);
+    window.__opp = a.p.id; window.__oppA = a; a.goalId = '4-common-8'; a.settled = true;
+  }
+  const r = playerTap(it, at.clone(), at.clone());
+  return { tapped: r, act: ACT && [ACT.kind, ACT.placeId, ACT.o.opp], toast: document.getElementById('tx').textContent };
+})"""
+
+def seat(pw, path):
+    gg = Game(pw, path, 900, 760); gg.step(3)
+    r = gg.ev(SEAT + "(null)")
+    if r.get('none'): check(False, 'the Deck 4 Tiles table is there'); gg.close(); return
+    gg.ev("for (const a of DECK_CREW) { a.settled = false; }")
+    r = gg.ev(SEAT + "(null)")
+    check(r['act'] and r['act'][0] != 'tiles' and gg.ev("SHIP.device.tipsSeen['tiles-nobody'] === true"), f'nobody about: a tip, and the stools are a plain seat as before: {r}')
+    gg.ev("actEnd(true)")
+    r = gg.ev(SEAT + "('rina')")
+    check(r['act'] and r['act'][0] == 'tiles' and r['act'][2] == gg.ev("window.__opp"), f'a crew member at the table: you go to sit and play them: {r}')
+    for k in range(40):
+        gg.step(10)
+        if gg.ev("!!(ACT && ACT.phase === 'do' && TL_GAME)"): break
+    st = gg.ev("[ACT && ACT.phase, ACT && ACT.pose, !!TL_GAME, TL_GAME && TL_GAME.where, ACT && ACT.placeId, DEV.open, DEV.app]")
+    check(st[0] == 'do' and st[1] == 'sit:play' and st[2] and st[3] == st[4] and st[5] and st[6] == 'tiles', f'seated: sit:play, the game opens on the device: {st}')
+    # win the game for the check: play Hard for you against the opponent's own level, the crew answering at once
+    gg.ev("""(() => { const G = TL_GAME; G.style = Object.assign({}, G.style, { level: 'easy' }); let n = 0;
+      while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else tilesCrewMove(); }
+      if (G.timer) { clearTimeout(G.timer); G.timer = 0; } })()""")
+    res = gg.ev("[TL_GAME.s.win, SHIP.tiles.played, SHIP.tiles.won, SHIP.tiles.firstWin !== null, (SHIP.rel[window.__opp] || {}).pts || 0, (SHIP.mem[window.__opp] || []).map(m => m[0])]")
+    print(f'  seated game against {gg.ev("window.__opp")}: win {res[0]}, tally {res[1:4]}, friendship {res[4]}, memories {res[5]}')
+    check(res[1] == 1 and (res[0] != 0 or (res[2] == 1 and res[3])), f'the tally counts the game: {res}')
+    check(res[4] > 0 and 'came.tiles' in res[5], f'a game adds friendship and a memory: {res}')
+    gg.page.click('#devBody .tl-end button[data-end="done"]'); gg.step(30)
+    st = gg.ev("[!!TL_GAME, ACT && ACT.kind]")
+    check(not st[0] and st[1] != 'tiles', f'Done stands you up: {st}')
+    # walk away mid-game: the game is left, uncounted
+    gg.ev(SEAT + "('rina')")
+    for k in range(40):
+        gg.step(10)
+        if gg.ev("!!(ACT && ACT.phase === 'do' && TL_GAME)"): break
+    gg.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } actEnd(true); deviceRefresh()")
+    st = gg.ev("[!!TL_GAME, SHIP.tiles.played]")
+    check(not st[0] and st[1] == 1, f'walking away leaves the game uncounted: {st}')
+    # beating Rina: news once, her memory, the day kept
+    gg.ev("tilesPlay('rina', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } TL_GAME.s.sc = [6, 0]; TL_GAME.s.p = 0")
+    gg.ev("""(() => { const G = TL_GAME; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()""")
+    b = gg.ev("[TL_GAME.s.win, SHIP.tiles.beatRina !== null, NEWS.filter(n => n.id === 'tiles-rina-beaten').length, (SHIP.mem.rina || []).some(m => m[0] === 'moment.tiles')]")
+    check(b == [0, True, 1, True], f'beating Rina: news once, her memory, the day kept: {b}')
+    sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x' } }))]; })()")
+    check(sv[0], f'save.tiles round-trips: {sv}')
+    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"firstWin":null,"beatRina":null}', f'a bad save.tiles reads safely: {sv[1]}')
+    check(not gg.errors and not gg.ev("DEV.errors.length"), f'seating: no errors: {gg.errors[:3]}')
+    gg.close()
+
 def run(path, games):
     src = open(path).read(); sec = section23(src)
     check(len(sec) > 1000, 'section 23 is there')
@@ -197,6 +257,7 @@ def run(path, games):
         check(not g.errors, f'no page errors: {g.errors[:3]}')
         g.close()
         board(pw, path)
+        seat(pw, path)
 
 if __name__ == '__main__':
     run(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 4000)
