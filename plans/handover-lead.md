@@ -267,3 +267,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - **The user's open asks (all routed):** start inside the shuttle (deck architect plan approved; onboarding), ship health healthy on Days 0/1 (sim 3), collapsible needs strip (done 0.28.33), schedule notifications (device 3), optimization (perf 2: items 3,1,2 + dialogue's JSON.parse; texture cache deferred; phone shadow-map size = the user's call), guiding a newcomer gated on a promotion flag (onboarding + social A).
 - **Seats now:** see TEAM.md roster (new tonight: build master 2, dialogue 2, social B2, sim 3, device 3, head writer 3, writer 5, player 4).
 - 06:35 Hourly check-in. Lead memory ~56%: plan to release 0.60.3 then hand over (~65%).
+- 06:40 The user's rule: a handover note written in advance is always refreshed right before the actual handover. Added to TEAM.md (handover rule); told all helpers.
