@@ -11553,7 +11553,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -12049,7 +12049,7 @@ PLAYER_TAPS.push(ixTap);
 // while your hands hold a part, a tray or a delivery's crate. One tap puts all of them down: parts go back on the main
 // storage shelf (returnPart; a part your job makes waits finished at the machine shop's lathe instead, P.work.make), and
 // a chore's fetch stop opens again so you fetch them later; a tray goes to the tray return; the crate is set down where
-// you stand (SHIP.player.crate: { job, deck, x, z, at }, saved) and a tap on it picks it up again. Left overnight, or
+// you stand (SHIP.player.crate: { job, deck, x, z, at }, saved) and a tap on it picks it up again. Left till 05:00, or
 // once the job isn't yours, the crew take it back to the pickup (its pickup stop opens again). A gift and the kit bag
 // aren't put down: they have their own ways (give it to someone; your locker in Bunk 1). Hidden while you're busy. ----
 const PUT_NEAR = .6;                                     // a tap this close to the set-down crate picks it up (m)
@@ -12073,7 +12073,7 @@ function stepUndo(j, step) {                             // open a stop of your 
   j.stepsDone = j.stepsDone.filter(x => x !== k); if (typeof MACH_REV !== 'undefined') MACH_REV++;
 }
 function putDown() {
-  if (!putWhat()) return false;
+  if (typeof ride !== 'undefined' && ride || !putWhat()) return false;   // never mid lift ride (reviewer 1g)
   const P = SHIP.player, said = [];
   if (ACT) { actEnd(true); player.stop(); }              // whatever you were walking to, with it in your hands, is off
   const parts = putParts();
@@ -12123,23 +12123,25 @@ function putCrateLook() {                                // a small crate on the
   box(.22, .06, .02, KM.label, 0, .18, .205, g);
   g.visible = false; scene.add(g); return g;
 }
+// the night tidy (the lead's call): a crate set down goes back at the first 05:00 after it was set down
+const PUT_TIDY = 5 * 60, putTidyAt = at => (Math.floor((at - PUT_TIDY) / 1440) + 1) * 1440 + PUT_TIDY;
 let putShown = null, putLast = '';
 function putFrame() {
   requestAnimationFrame(putFrame);
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') return;
   const P = SHIP.player, c = P.crate;
   if (c) {                                               // the crew take it back: the job isn't yours any more, or overnight
-    const d = putDelivery(), gone = !d || !crateDown(d.j), night = Math.floor(shipNow() / 1440) > Math.floor(c.at / 1440);
+    const d = putDelivery(), gone = !d || !crateDown(d.j), night = shipNow() >= putTidyAt(c.at);
     if (gone || night) {
       P.crate = null; if (typeof ixGoalAt !== 'undefined') ixGoalAt = -1;
-      if (!gone) { stepUndo(d.j, 'pickup'); toast('Your job', 'The crew took the crate you left back to the pickup overnight. Pick it up there again: ' + d.j.title.charAt(0).toLowerCase() + d.j.title.slice(1) + '.'); }
+      if (!gone) { stepUndo(d.j, 'pickup'); toast('Your job', 'The crew took the crate you left back to the pickup in the night tidy. Pick it up there again: ' + d.j.title.charAt(0).toLowerCase() + d.j.title.slice(1) + '.'); }
     }
   }
   const here = !!(P.crate && P.crate.deck === deckDef.num);
   if (here && !PUT_CRATE) PUT_CRATE = putCrateLook();
   if (PUT_CRATE) { PUT_CRATE.visible = here; if (here) PUT_CRATE.position.set(P.crate.x, 0, P.crate.z); }
   const b = document.getElementById('putDown'); if (!b) return;
-  const busy = ACT && ACT.phase !== 'walk' || P.cart || (typeof PAUSE !== 'undefined' && PAUSE.on) || (typeof DEV !== 'undefined' && DEV.open)
+  const busy = ACT && ACT.phase !== 'walk' || P.cart || (typeof ride !== 'undefined' && ride) || (typeof PAUSE !== 'undefined' && PAUSE.on) || (typeof DEV !== 'undefined' && DEV.open)
     || document.body.classList.contains('dlgon') || !document.getElementById('lift').hidden;
   const show = !busy && putWhat();
   if (show !== putShown) { putShown = show; b.hidden = !show; }
