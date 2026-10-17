@@ -314,3 +314,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~17:16 user answered Pillar 5 survey (all Qs): laundry every 2 weeks; all 7 'more ideas' on the ladder; no puzzle-amount setting; clash for later tiers; Q7 note: Pillar 5 built ON ITS OWN after Pillar 4, restructure labor plan. Sent to Pillar 5 designer. NOTE: helper sessions show seven_day rate limit 'allowed_warning'.
 - ~17:20 cost baseline written (plans/cost-tracking.md); re-snapshot at 0.60.5 release for a per-build figure.
 - ~17:25 user approved speech bubbles (perf 3 -> dialogue 0.43.30). New note: many seated diners without trays (perf 3 investigating, sim 5 if sim cause). USER ASK: ping the user when 0.60.6 reaches its last point to take notes (before combining).
+- ~17:30 user: Chief's talk after 3 missed shifts in a row (career eng); player's auto tray at mess seat with no food -> must queue, then eat (PE5).
