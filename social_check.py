@@ -244,7 +244,8 @@ with sync_playwright() as pw:
     # 9. gifts (0.36.24): Give from your hands, how it lands by taste, once a week each, double on a birthday; crew gifts; keepsakes
     gf = g.ev(r"""(() => {
       const o = {}, P = SHIP.player, carry = P.carry.slice(); SHIP.mem = {};
-      const p = SOC.crew.find(q => giftTaste(q).loves.includes('tea')) || SOC.crew[0], t = giftTaste(p);
+      const open = q => { const v = typeof voiceOf === 'function' ? voiceOf(q.id) : typeof VOICE !== 'undefined' ? VOICE[q.id] : null; return !v || v.openness !== 'guarded'; };   // guarded people gain 20% slower (20c)
+      const p = SOC.crew.find(q => giftTaste(q).loves.includes('tea') && open(q)) || SOC.crew.find(q => giftTaste(q).loves.includes('tea')) || SOC.crew[0], t = giftTaste(p);
       const pts0 = relGet(p.id).pts; P.carry = []; o.add = [giftAdd('tin of tea'), giftAdd('a spanner'), giftAdd('herbs'), giftAdd('biscuits')];
       o.hands = giftInHands();
       const a = giftGive(p, 'tin of tea'); o.first = a && a.how; o.pts = Math.round((relGet(p.id).pts - pts0) * 100) / 100; o.mem = mem(p.id, 'gift.tea') && Math.round(mem(p.id, 'gift.tea').w);
