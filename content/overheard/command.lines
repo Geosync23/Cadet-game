@@ -56,7 +56,7 @@ A: Six years. You've never grabbed the rail.
 B: I've wanted to.
 A: That's not the same thing.   #funny
 
-? pair:any+any who:ferreira with:lindqvist-isak place:lounge
+? pair:any+any who:ferreira with:lindqvist-isak place:lounge week1:true
 A: Have you met the new cadet yet?
 B: Briefly. Quick on the board.
 A: Good. You'll get on.

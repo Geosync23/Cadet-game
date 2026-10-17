@@ -140,7 +140,7 @@ B: I don't take a break.
 A: It's not a break. It's a mug.
 B: Fine.   #funny
 
-? pair:any+any who:calder with:torres-zeke place:worksbay act:work
+? pair:any+any who:calder with:torres-zeke place:worksbay act:work week1:true
 A: Your trainee's good.
 B: I know!
 A: Don't tell them. Yet.
