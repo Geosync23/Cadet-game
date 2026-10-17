@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.74
+   STARSHIP CADET: CSV Wren                           build 0.48.75
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.74';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.75';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12969,6 +12969,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "Tomorrow. Right. I'm not good at this. I'm sorry. Truly.", "id": "91odfi", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "Back. Good. Easy job first. Then normal.", "id": "j0zy54", "tone": "warm"},
+        {"text": "Welcome back. We managed. Barely.", "id": "8dayyw", "tone": "funny"},
+      ],
+      "work.clock.friday": [
+        {"text": "Week done. Rest properly. Monday, eight.", "id": "qz3tvr"},
+        {"text": "Weekend. Plans? Make some. Then rest.", "id": "16u9y74"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning. Board's up. Take the top one.", "id": "1nkeggx"},
+        {"text": "Eight sharp. Good. Scrubbers first.", "id": "sces1k"},
+        {"text": "On time. Keep it that way.", "id": "25fv5x"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday. Good weekend? Short answer. Jobs waiting.", "id": "q1fxn4"},
+        {"text": "Rested? Good. Week starts now.", "id": "18o5kvg"},
+      ],
+      "work.clock.out": [
+        {"text": "Done. Good shift. Go eat.", "id": "1e0n54r"},
+        {"text": "Clocked out. Rest. Back at eight.", "id": "pfzc4g"},
+        {"text": "Board's shorter than this morning. That's the job.", "id": "15pfw9x"},
+      ],
       "worried.captain": [
         {"text": "Ready room. That's serious. Eight o'clock tomorrow. No excuses.", "id": "cwzzi7", "tone": "serious", "tier": [3, 4]},
       ],
@@ -12996,6 +13018,28 @@ const VOICE_TEMPLATES = {
       ],
       "farewell.eve": [
         {"text": "I don't even know what to say, and I always know what to say. I'm so sorry.", "id": "13vwhmn", "tone": "serious", "tier": [3, 4]},
+      ],
+      "work.clock.back": [
+        {"text": "You're back! Oh, it's been so quiet. Well. Quieter. I talked to the racks.", "id": "6z8ddx", "tone": "warm"},
+        {"text": "Welcome back! Are you all right? Really? Sit with me at tea.", "id": "1fbizen", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday! What are you doing with your weekend? Tell me so I can be jealous.", "id": "1tvsng2"},
+        {"text": "Two whole days off! Do something you can tell me about Monday.", "id": "1i39gnt"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning! Guess who was in the mess at six. Tea first, then I'll tell you.", "id": "1npc7q", "tone": "funny"},
+        {"text": "{hi}! Big board today. We'll get through it. Probably. Mostly!", "id": "ggufm7"},
+        {"text": "There you are! I've been up an hour and talked to nobody. Well, the kettle.", "id": "vvdfp6", "tone": "funny"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday! Right. Weekend. Everything. Go.", "id": "cvnaiz", "tone": "funny"},
+        {"text": "How was your weekend? Did you go anywhere? Anywhere on the ship, I mean!", "id": "1hvn6l2"},
+      ],
+      "work.clock.out": [
+        {"text": "That's us! What are you doing tonight? I'm doing nothing. Loudly.", "id": "pupb5g", "tone": "funny"},
+        {"text": "Five already! Where does a day go? Into filters, that's where.", "id": "1wfinqy"},
+        {"text": "Off you go! Tell me tomorrow if anything good happens at dinner.", "id": "1mf4383"},
       ],
       "worried.captain": [
         {"text": "The ready room! Look, whatever's going on, talk to me. I'm a good listener. Sometimes.", "id": "xw9vwp", "tone": "serious", "tier": [3, 4]},
@@ -13025,6 +13069,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "Tomorrow you'll be stars away. I'll look out of the window and wave anyway.", "id": "1hrb7fh", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "You're back. The bay sounded wrong without you. Now it's right.", "id": "1ln9c64", "tone": "warm"},
+        {"text": "Welcome back. I kept thinking I saw you by the racks.", "id": "1ddl02h", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday. Two days. Go somewhere with a window.", "id": "7b0c00"},
+        {"text": "Off for the weekend? I hope it's slow. The good kind of slow.", "id": "1exv604"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning. The lift was all humming on the way down. Like it was waking up too.", "id": "1994rat"},
+        {"text": "I saw a star out of the shuttle bay window. Just one. Seemed like a good sign.", "id": "q1k4s3"},
+        {"text": "Is it eight already? The kettle hasn't even thought about it yet.", "id": "1ha537j", "tone": "funny"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday. Did your weekend feel long or short? Mine never knows.", "id": "40yxn1"},
+        {"text": "How was the weekend? Did you find anything nice? People always find something.", "id": "af7z6z"},
+      ],
+      "work.clock.out": [
+        {"text": "Five o'clock. The bay goes so quiet when we leave. I like to listen for a bit.", "id": "1bhphz6"},
+        {"text": "Done. I might go and sit by the windows. Watch nothing for a while.", "id": "1vp286w"},
+        {"text": "Good day, I think. It felt soft round the edges.", "id": "5eetd4"},
+      ],
       "worried.captain": [
         {"text": "I keep thinking the ship would be smaller without you. Please go tomorrow.", "id": "1vk91gj", "tone": "serious", "tier": [3, 4]},
       ],
@@ -13053,6 +13119,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "Tomorrow, then. I had a joke ready. It's not funny. I'm sorry, {nick}.", "id": "yetawx", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "Oh, you're back. Good. Nobody else laughs at my jokes.", "id": "s46ovw", "tone": "warm"},
+        {"text": "Welcome back. The filters didn't change themselves. I checked.", "id": "8oonla", "tone": "funny"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday. Two days off. Try not to fix anything for free.", "id": "jn9xif", "tone": "funny"},
+        {"text": "Weekend. Go. Before someone finds you a job.", "id": "19rfwdk"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning. The board's long. Someone's been breaking things on purpose.", "id": "16m3dvd", "tone": "funny"},
+        {"text": "Eight o'clock. My favourite time. That's a lie.", "id": "rj498c", "tone": "funny"},
+        {"text": "{hi}. Tea at half ten. I'm counting.", "id": "1vh536h"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday. Good weekend? Lie if it wasn't. I won't check.", "id": "1biry4j", "tone": "funny"},
+        {"text": "Back. Did you rest, or just change which ceiling you looked at?", "id": "yea9t3", "tone": "funny"},
+      ],
+      "work.clock.out": [
+        {"text": "Clocked out. Another day the ship didn't fall apart. You're welcome.", "id": "7t3iep", "tone": "funny"},
+        {"text": "Done. I'm going to go and be extremely still.", "id": "15uengr", "tone": "funny"},
+        {"text": "Not bad. Nothing exploded. High bar, but we cleared it.", "id": "3khky9", "tone": "funny"},
+      ],
       "worried.captain": [
         {"text": "The ready room. Mind the step. And then mind your shifts. I'm serious.", "id": "i7uc8s", "tone": "serious", "tier": [3, 4]},
       ],
@@ -13079,6 +13167,28 @@ const VOICE_TEMPLATES = {
       ],
       "farewell.eve": [
         {"text": "I wish I'd done more. I'm sorry. I'll miss you so much.", "id": "8wyu7v", "tone": "serious", "tier": [3, 4]},
+      ],
+      "work.clock.back": [
+        {"text": "You're back! I'm so glad. We all wondered how you were.", "id": "w1rlgb", "tone": "warm"},
+        {"text": "Welcome back. If you need a hand today, I'm right here.", "id": "1kenwgv", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Have a lovely weekend, {nick}. You've earned it this week.", "id": "1s4o86d"},
+        {"text": "Any plans for your days off? Something nice, I hope.", "id": "hk08ah"},
+      ],
+      "work.clock.in": [
+        {"text": "Good morning! I've read the board twice. Want to hear the plan?", "id": "1grznru"},
+        {"text": "Morning, {nick}. I think today's a good one. I've got a feeling.", "id": "1w0k3an"},
+        {"text": "Clocked in! Right, onward. Which job are you taking?", "id": "1him1zm"},
+      ],
+      "work.clock.monday": [
+        {"text": "Good morning! How was your weekend? I'd really like to know.", "id": "bwpj9j"},
+        {"text": "Monday! I hope your weekend was restful. Was it?", "id": "1x9ak2"},
+      ],
+      "work.clock.out": [
+        {"text": "Thank you for today. Honestly, that went really well.", "id": "9xucom"},
+        {"text": "Five o'clock already. I'm going to write down what I learned. Is that odd?", "id": "dz6wvf"},
+        {"text": "Good shift. Same time tomorrow? I'll be early. I'm always early.", "id": "hky4zo"},
       ],
       "worried.captain": [
         {"text": "Please don't give up. Tell me what's wrong, and we'll work it out together.", "id": "1f4b5ki", "tone": "serious", "tier": [3, 4]},
@@ -13108,6 +13218,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "Tomorrow. Hm. Shame. Real shame.", "id": "1gpj1t4", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "Back. Hm. Good. Sit down if you need to.", "id": "t35aty", "tone": "warm"},
+        {"text": "You're back. Saved you the easy job. Don't mention it.", "id": "iv6dcl", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday. Two days. Sleep.", "id": "lu7qvt"},
+        {"text": "Weekend. Don't come down here. I mean it.", "id": "vnf0vc", "tone": "warm"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning. Tea's made. Didn't make it for you. Have some anyway.", "id": "12gy549", "tone": "warm"},
+        {"text": "Hm. Eight. Board's there.", "id": "1fdalnw"},
+        {"text": "Up, then. Good. Gloves.", "id": "p2oyq9"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday. Weekend all right? Hm. Good.", "id": "16dihcs"},
+        {"text": "Back. You rested? Looks like it. Good.", "id": "rclfem"},
+      ],
+      "work.clock.out": [
+        {"text": "Done. Go on. Eat something.", "id": "1urqfcy"},
+        {"text": "Clocked out. Hang your gloves up properly.", "id": "1l5tbox"},
+        {"text": "Hm. Fair shift. Don't let it go to your head.", "id": "o43qnk", "tone": "funny"},
+      ],
       "worried.captain": [
         {"text": "Captain, now. Listen, {nick}. I've seen good people go this way. Not you.", "id": "1kjkap3", "tone": "serious", "tier": [3, 4]},
       ],
@@ -13135,6 +13267,28 @@ const VOICE_TEMPLATES = {
       ],
       "farewell.eve": [
         {"text": "I keep thinking of jokes and none of them are funny. I'm sorry.", "id": "cbpe1s", "tone": "serious", "tier": [3, 4]},
+      ],
+      "work.clock.back": [
+        {"text": "They're back! The bay's fun again. Officially.", "id": "gfyd9t", "tone": "warm"},
+        {"text": "You're back! I kept your spot. I may have put a sign on it.", "id": "1lgpzav", "tone": "funny"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday! Weekend plans? Points for anything that isn't sleeping.", "id": "90oke", "tone": "funny"},
+        {"text": "Two days off! Go have fun. Report back Monday. Full report.", "id": "194s34p", "tone": "funny"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning, {nick}! First to the board gets the good job. Too late. I'm first.", "id": "11a36eq", "tone": "funny"},
+        {"text": "Clocked in! Points for being on time. You're winning. Slightly.", "id": "1q6hszq", "tone": "funny"},
+        {"text": "Eight o'clock! Who invented eight o'clock? I'd like a word.", "id": "1d8oaic", "tone": "funny"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday! Weekend score out of ten? Go.", "id": "h8cpy1", "tone": "funny"},
+        {"text": "Back! What did you get up to? Anything I should've been at?", "id": "1hxna67"},
+      ],
+      "work.clock.out": [
+        {"text": "Five! That's the bell. Race you to the mess.", "id": "968elk", "tone": "funny"},
+        {"text": "Clocked out. I fixed four things today. You? Don't answer if it's five.", "id": "1ln6p6q", "tone": "funny"},
+        {"text": "Done! Off to do absolutely nothing at top speed.", "id": "snunkk", "tone": "funny"},
       ],
       "worried.captain": [
         {"text": "No jokes this time, {nick}. The Captain's serious. So am I.", "id": "94mynq", "tone": "serious", "tier": [3, 4]},
@@ -13164,6 +13318,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "I'll come to the shuttle bay tomorrow. To wave. I'm not good at goodbyes.", "id": "5lb93o", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "Oh. You're back. That's... good. Really good.", "id": "19mz4vv", "tone": "warm"},
+        {"text": "Welcome back. I left you a clean pair of gloves.", "id": "1qx4zpf", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Have a good weekend. Um. Rest.", "id": "cpdj49"},
+        {"text": "Two days off. That's nice. For you, I mean.", "id": "41dzac"},
+      ],
+      "work.clock.in": [
+        {"text": "Oh. Morning. I... put the kettle on. If you want.", "id": "55u8sk"},
+        {"text": "Hi. The board's long. Sorry. Not my fault. Still.", "id": "1wmc2rk"},
+        {"text": "Morning. I like it quiet like this. Before everyone.", "id": "1xhgrzu"},
+      ],
+      "work.clock.monday": [
+        {"text": "Morning. Was your weekend... nice?", "id": "1x2f4q2"},
+        {"text": "Hi. Good weekend? You don't have to tell me. Unless you want.", "id": "1jupj9p"},
+      ],
+      "work.clock.out": [
+        {"text": "Good shift. I think. Yes.", "id": "qndme8"},
+        {"text": "Five. That's... us. See you tomorrow.", "id": "1jb9km3"},
+        {"text": "Oh. Clocked out already? Today went fast.", "id": "w8yywt"},
+      ],
       "worried.captain": [
         {"text": "I don't want you to go. Sorry. That's all. I just don't.", "id": "1lc855n", "tone": "serious", "tier": [3, 4]},
       ],
@@ -13192,6 +13368,28 @@ const VOICE_TEMPLATES = {
       "farewell.eve": [
         {"text": "I'm sorry it came to this. You're still the same person to me.", "id": "w1zk92", "tone": "serious", "tier": [3, 4]},
       ],
+      "work.clock.back": [
+        {"text": "Welcome back. Take it steady today.", "id": "b011zs", "tone": "warm"},
+        {"text": "Good to have you back. No rush. Start small.", "id": "1xuvwra", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Have a good weekend. Rest properly.", "id": "1j4uz9u"},
+        {"text": "Week's done. Go and enjoy your days off.", "id": "1c3ax8r"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning. Fair board today. Nothing we can't do.", "id": "1t08ors"},
+        {"text": "{hi}, {nick}. Tea at half ten. Pace yourself.", "id": "qe3jfd"},
+        {"text": "On time. Good. Let's get started.", "id": "jiut2n"},
+      ],
+      "work.clock.monday": [
+        {"text": "Morning. Good weekend? Rested?", "id": "k1tucm"},
+        {"text": "Monday. Fresh week. How were your days off?", "id": "rdjff6"},
+      ],
+      "work.clock.out": [
+        {"text": "That's the day. Good work.", "id": "98jl7j"},
+        {"text": "Clocked out. Eat well, sleep well. Same again tomorrow.", "id": "5accw4"},
+        {"text": "Done. The board's shorter. That's a good day.", "id": "lhdyfm"},
+      ],
       "worried.captain": [
         {"text": "Hard week? Sit a minute. Then let's work out how you get to your shift.", "id": "1gmqf8f", "tone": "serious", "tier": [3, 4]},
       ],
@@ -13219,6 +13417,28 @@ const VOICE_TEMPLATES = {
       ],
       "farewell.eve": [
         {"text": "Tomorrow. Oh dear. I'm going to cry, and you're not to mind.", "id": "1obmcxr", "tone": "serious", "tier": [3, 4]},
+      ],
+      "work.clock.back": [
+        {"text": "You're back! Oh, come here. How are you feeling?", "id": "q6kpc7", "tone": "warm"},
+        {"text": "Welcome back, {nick}. Easy does it today. I'll keep an eye.", "id": "bg00rn", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Have a lovely weekend. Sleep in. Eat well.", "id": "1qqb42k", "tone": "warm"},
+        {"text": "Two days off. Go and be looked after. You deserve it.", "id": "xads63", "tone": "warm"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning, {nick}. Did you eat? Tell me you ate.", "id": "rvie2h", "tone": "warm"},
+        {"text": "{hi}, {nick}. Kettle's on. Have a cup before you start.", "id": "1bheu7q", "tone": "warm"},
+        {"text": "Morning! Early starts are hard. You're doing grand.", "id": "qbu2dr", "tone": "warm"},
+      ],
+      "work.clock.monday": [
+        {"text": "Morning! How was your weekend? Did you rest? Did you call home?", "id": "yezaiw", "tone": "warm"},
+        {"text": "Monday. Come and tell me about your weekend at tea.", "id": "5o8khe", "tone": "warm"},
+      ],
+      "work.clock.out": [
+        {"text": "Well done today. Go and have a proper dinner.", "id": "chdmrr", "tone": "warm"},
+        {"text": "That's us. You worked hard. I saw.", "id": "nyo519", "tone": "warm"},
+        {"text": "Off you go, {nick}. Do something nice this evening.", "id": "t6oimt"},
       ],
       "worried.captain": [
         {"text": "Oh, love. The ready room. Sit with me a minute. Then early to bed, yes?", "id": "jk8l80", "tone": "serious", "tier": [3, 4]},
@@ -14332,6 +14552,36 @@ const VOICE = {
         {"text": "Works tea at half ten. Bring your hands. There's a mug for you.", "id": "1wmhu", "week1": "true", "weekday": "fri"},
         {"text": "One week | One week. You'll do. The board's there on Monday.", "id": "cakggb", "flag": "mail.d7-calder"},
         {"text": "Settled | Everything on your list, done. Good. Carry on.", "id": "dgahh3", "flag": "mail.settled"},
+      ],
+      "work.clock.back": [
+        {"text": "Back. Good. Light jobs today. Then normal.", "id": "xkcwcb", "tone": "warm"},
+        {"text": "Welcome back. The board missed you. So did I. That's all.", "id": "elon2m", "tone": "warm"},
+        {"text": "You're back. Don't overdo it. That's also an order.", "id": "pcahbl", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Friday. Rest. Properly. That's an order.", "id": "1as4gss"},
+        {"text": "Two days off. Use them. I'll know if you don't.", "id": "1dc8jak", "tone": "funny"},
+        {"text": "Weekend. Monday, 08:00. Not 08:01.", "id": "iogfx"},
+      ],
+      "work.clock.in": [
+        {"text": "07:59. Good.", "id": "hrbeo0"},
+        {"text": "Morning. Fan on Five, bay two. You'll hear it. Then fix it.", "id": "1efeaa0"},
+        {"text": "Board's long. Start at the top.", "id": "m6xvb1"},
+        {"text": "Clocked in. Tea's at half ten. For you. Not me.", "id": "1tvf2pa"},
+        {"text": "Morning. Gloves.", "id": "16a14j8"},
+        {"text": "Seven jobs on the board. By five, fewer.", "id": "w1ufyb"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday. Weekend? Brief, please.", "id": "kp3uh9", "tone": "funny"},
+        {"text": "My weekend? I read a manual. It was a good manual.", "id": "1ndcj11", "tone": "funny"},
+        {"text": "Rested? Good. The ship wasn't.", "id": "1tec0hf"},
+      ],
+      "work.clock.out": [
+        {"text": "17:00. Off you go.", "id": "lg5e3r"},
+        {"text": "Done. Board's shorter. That's the measure.", "id": "1lacmlu"},
+        {"text": "Clocked out. Rest. I want you sharp tomorrow.", "id": "1mm2xp5"},
+        {"text": "Fair day's work. Go.", "id": "75pmmi"},
+        {"text": "That job today. Done right. Don't make me say it twice.", "id": "5e2t0", "tone": "warm", "cue": "repair.you@dept"},
       ],
     },
   },
@@ -15785,6 +16035,27 @@ const VOICE = {
         {"text": "Your mug's still on the rack. I gave it a rinse. Don't tell anyone I'm soft.", "id": "13zhvsi", "tone": "funny", "flag": "mug"},
         {"text": "Your mug | Missed you at tea. Your mug's on the end hook. It's the law. Well, it's me.", "id": "og9bw6", "flag": "mail.d5-mug"},
       ],
+      "work.clock.back": [
+        {"text": "You're back! I saved you a scone. It's a bit old. So's the joke.", "id": "1lyqtyr", "tone": "funny"},
+        {"text": "Welcome back, {nick}. Good to see you up and about.", "id": "kk9wzf", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Weekend! I'm baking Saturday, if Brennan allows. Come and taste it.", "id": "1yilgu0"},
+        {"text": "Have a good weekend. I'll have a new joke by Monday. Brace yourself.", "id": "d2rdk", "tone": "funny"},
+      ],
+      "work.clock.in": [
+        {"text": "Morning! Why did the fan quit? It was a big fan of quitting. I'll work on it.", "id": "15bunf7", "tone": "funny"},
+        {"text": "{hi}, {nick}. Board's busy. We'll do it together.", "id": "31g4ga"},
+        {"text": "Morning. Kettle's on. That's the most important job, and it's done.", "id": "x6f2ce"},
+      ],
+      "work.clock.monday": [
+        {"text": "Morning! I baked on Sunday. Brennan allowed one oven. Scones in the tea corner.", "id": "1fgmuwv", "tone": "warm"},
+        {"text": "Good weekend? Mine was flour, mostly. Brennan inspected. I passed. Just.", "id": "1rkz22q", "tone": "funny"},
+      ],
+      "work.clock.out": [
+        {"text": "That's us. Good work today, {nick}.", "id": "rfq24y", "tone": "warm"},
+        {"text": "Clocked out! Dinner. Then I'll think of a better joke for tomorrow.", "id": "1uif7gx", "tone": "funny"},
+      ],
     },
   },
   "hart-ravi": {
@@ -17099,6 +17370,30 @@ const VOICE = {
       ],
       "week1": [
         {"text": "Um. If you get stuck, I'm on the board most days. Just. You know. Ask.", "id": "18wu0l", "week1": "true"},
+      ],
+      "work.clock.back": [
+        {"text": "Oh. You're back. Good. I kept your bench tidy.", "id": "co7lvf", "tone": "warm"},
+        {"text": "Welcome back. Are you... all right now? Good. Good.", "id": "jex7vd", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Have a good weekend. I'll be here. Keeping things neat.", "id": "fi9e1z"},
+        {"text": "Two days off. Go to the garden. The tomatoes are nearly ready.", "id": "i7fqid"},
+      ],
+      "work.clock.in": [
+        {"text": "Oh. Morning. I re-sorted the spanner wall. Sorry. It needed it.", "id": "auz11y"},
+        {"text": "Hi. Scrubber on the board. I can do it in ten minutes. Nine and a half.", "id": "1og01dh"},
+        {"text": "Morning. It's quiet. I like it before everyone comes.", "id": "kskfpk"},
+        {"text": "Hi. I put the kettle on. For... everyone. And you.", "id": "zpbffn", "tone": "warm"},
+      ],
+      "work.clock.monday": [
+        {"text": "Morning. Good weekend? I was here. It was nice. Quiet.", "id": "14kq0ho"},
+        {"text": "Hi. Did you... rest? You should. Rest, I mean.", "id": "13b199a"},
+      ],
+      "work.clock.out": [
+        {"text": "Good shift. Yes. I think so.", "id": "ncy8rb"},
+        {"text": "Five. I'm going to the garden. Just to sit.", "id": "1vstoal"},
+        {"text": "See you tomorrow. I'll... be here early. I always am.", "id": "1pa091h"},
+        {"text": "That repair. You did the seals right. Most people don't.", "id": "1dbxtg5", "tone": "warm", "cue": "repair.you@dept"},
       ],
     },
   },
@@ -19279,6 +19574,34 @@ const VOICE = {
         {"text": "There's no food round. There should be.", "id": "1crmk7j", "tone": "funny", "flag": "beat.d4-quiz.3"},
         {"text": "Grab a seat. Snacks are mine. Mostly.", "id": "1vptfbw", "tone": "funny", "flag": "beat.d4-quiz.4"},
         {"text": "Win or lose, there's biscuits after. I made sure.", "id": "71goqp", "flag": "beat.d4-quiz.5"},
+      ],
+      "work.clock.back": [
+        {"text": "Spanner! You're back! The bay was so boring.", "id": "1f74hga", "tone": "warm"},
+        {"text": "Welcome back. I did your jobs. Badly. You'll see.", "id": "306py1", "tone": "funny"},
+        {"text": "Oi oi. Feeling better? Good. Tea's on me. Well, on the kettle.", "id": "72k0b0", "tone": "warm"},
+      ],
+      "work.clock.friday": [
+        {"text": "Off for the weekend? I'm on. Bay's all mine. Mwah ha.", "id": "iq9xl3", "tone": "funny"},
+        {"text": "Friday! Enjoy it, {nick}. I'll keep the scrubbers in line.", "id": "klmxp5"},
+        {"text": "Two days off for you. Sleep in for me, yeah? Someone should.", "id": "1l9wcy8", "tone": "funny"},
+      ],
+      "work.clock.in": [
+        {"text": "Oi oi. I'm awake. Technically. Ask again after tea.", "id": "1gi5rlp", "tone": "funny"},
+        {"text": "Right, so. Board's full and I've already had two breakfasts.", "id": "n9ev4w", "tone": "funny"},
+        {"text": "{hi}, {nick}. That panel on Five's sticking again. It knows me.", "id": "ucjnop"},
+        {"text": "Morning! Slept like a log. For an hour. Then I didn't.", "id": "1a8q75l", "tone": "funny"},
+        {"text": "There's a scrubber on the board calling your name. I'm taking the fan.", "id": "1syumou"},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday! How was your weekend? I was down here. Bay's ace on a Sunday.", "id": "1rrxoab"},
+        {"text": "Good weekend? Tell me. I worked mine. I found a biscuit tin.", "id": "36ht1v", "tone": "funny"},
+        {"text": "Oi oi. Rested? You look rested. Rude.", "id": "1oth74y", "tone": "funny"},
+      ],
+      "work.clock.out": [
+        {"text": "Five! Mess. Now. Before the stew goes.", "id": "zzybuj", "tone": "funny"},
+        {"text": "Good shift, {nick}. You were quicker than me. Don't tell anyone.", "id": "1slwkdv"},
+        {"text": "Off you go. I'm having a nap. At five. Then I won't sleep. Classic.", "id": "1qw09ja", "tone": "funny"},
+        {"text": "Clocked out. Grab shelf if you miss dinner. It's for emergencies. And me.", "id": "1upfxbi", "tone": "funny"},
       ],
       "worried.captain": [
         {"text": "I nearly left too, my first month. Glad every day I didn't. Don't you go either.", "id": "yknnh", "tone": "serious", "tier": [3, 4]},
@@ -21991,6 +22314,31 @@ const VOICE = {
         {"text": "Stuck? Tap my name on the Roster. I'll come up.", "id": "722uon", "flag": "beat.d3-pick.4"},
         {"text": "Right, onward. You've got this.", "id": "1wqashy", "flag": "beat.d3-pick.5"},
         {"text": "On your own today | My day off. The board's yours. You're ready. Don't break anything big.", "id": "171xfna", "flag": "mail.d4-mail"},
+      ],
+      "work.clock.back": [
+        {"text": "You're back! The bay's been all wrong. Even coil three noticed.", "id": "crdldb", "tone": "warm"},
+        {"text": "Welcome back, {nick}. Easy jobs today. I've already picked some.", "id": "40ocd6", "tone": "warm"},
+        {"text": "There you are. Feeling all right? Good. Right, onward. Gently.", "id": "mzbere", "tone": "warm"},
+      ],
+      "work.clock.in": [
+        {"text": "There you are! Coil three's sulking. Don't take it personally.", "id": "1g13v7v", "tone": "funny"},
+        {"text": "Morning, {nick}. Reyes left me a note: \"coils fine, three shy\". Shy!", "id": "mugh2g", "tone": "funny"},
+        {"text": "{hi}! Ten more minutes with the coils and I'm all yours. Right, onward.", "id": "ptwkxu"},
+        {"text": "Board's lovely today. Look at it. Proper variety.", "id": "17h0hdr"},
+        {"text": "Morning! I skipped breakfast for the coils. Don't tell Brennan.", "id": "lvyq74", "tone": "funny"},
+        {"text": "Your scarf grew another row last night. Can't show you yet.", "id": "shvqkj", "tone": "warm", "tier": [3, 4]},
+      ],
+      "work.clock.monday": [
+        {"text": "Monday! Good weekend? The coils and I had a quiet one.", "id": "1kr5s5g", "tone": "funny"},
+        {"text": "How were your days off? I was down here. The coils were good company.", "id": "1e4nku0"},
+        {"text": "Morning! Tell me one thing you did at the weekend. Just one.", "id": "1l53xy8"},
+      ],
+      "work.clock.out": [
+        {"text": "That's the day! You did well. I mean it.", "id": "fl3dx5", "tone": "warm"},
+        {"text": "Five already? I'll just say goodnight to coil three. Then dinner.", "id": "t0i8rn"},
+        {"text": "Good shift, {nick}. Same again tomorrow?", "id": "1cdxa83"},
+        {"text": "Off you go. I'll be in the music room later, if you fancy a song.", "id": "16rwprl"},
+        {"text": "You fixed it today. Properly. I watched. Lovely work.", "id": "1mgiju2", "tone": "warm", "cue": "repair.you@dept"},
       ],
       "worried.captain": [
         {"text": "Up top to the Captain. {sigh}. I trained you, shipmate. I know what you can do.", "id": "1v9hfzh", "tone": "serious", "tier": [3, 4]},
@@ -25560,6 +25908,90 @@ const LINES = {
     {"text": "I won! I never win! Well, sometimes. Today!", "id": "szqsei", "tone": "funny", "trait": "chatty"},
     {"text": "Oh. I won? Sorry. It was close.", "id": "o5k6wy", "trait": "shy"},
     {"text": "That was lovely. Again? Let's go again.", "id": "1wnajqh", "trait": "cheerful"},
+  ],
+  "work.clock.back": [
+    {"text": "You're back! Good to see you, {nick}.", "id": "xate0s", "tone": "warm", "dept": "works"},
+    {"text": "Welcome back. Bay wasn't the same.", "id": "137xj4y", "tone": "warm", "dept": "works"},
+    {"text": "{hi}. Feeling better? Take it easy today.", "id": "1ufah83", "tone": "warm", "dept": "works"},
+    {"text": "Look who's back. The board's been asking after you.", "id": "1a4ijw9", "tone": "funny", "dept": "works"},
+    {"text": "There you are. Kettle's on. Ease in.", "id": "1vxl9yg", "tone": "warm", "dept": "works"},
+    {"text": "Back with us! Your gloves are where you left them.", "id": "1jvqqee", "dept": "works"},
+    {"text": "Good to have you back. Pick an easy one to start.", "id": "stjop9", "dept": "works"},
+    {"text": "Welcome back, {nick}. You were missed. Properly.", "id": "1myklda", "tone": "warm", "dept": "works"},
+    {"text": "Oh, you're back. I've saved up all the gossip.", "id": "3o3pfx", "tone": "warm", "dept": "works", "tier": [3, 4]},
+    {"text": "Missed you on the bay. Don't do that again. Well, do, if you need to.", "id": "1209lwc", "tone": "warm", "dept": "works", "tier": [3, 4]},
+  ],
+  "work.clock.friday": [
+    {"text": "Friday! Two days off for you. Any plans?", "id": "rr0v1", "dept": "works"},
+    {"text": "That's the week. {bye}, {nick}. Enjoy the weekend.", "id": "l8o1rw", "dept": "works"},
+    {"text": "Off for two days? Rest. Properly. No fixing anything.", "id": "h354qb", "dept": "works"},
+    {"text": "Weekend plans? Bunk counts as a plan.", "id": "2wxudm", "tone": "funny", "dept": "works"},
+    {"text": "Friday. Music jam tonight, if you fancy it.", "id": "k1w95r", "dept": "works"},
+    {"text": "Have a good weekend. Don't let anyone hand you a spanner.", "id": "pgih0a", "tone": "funny", "dept": "works"},
+    {"text": "The week's done. Go and do something that isn't filters.", "id": "1nhuh3c", "dept": "works"},
+    {"text": "Enjoy your days off. The bay will still be here Monday.", "id": "18fzn9w", "dept": "works"},
+    {"text": "Going to the garden at the weekend? It's lovely on a rest day.", "id": "7ungd3", "dept": "works"},
+    {"text": "Two days off. Sleep in. Hot water's yours before the rush.", "id": "am8ej6", "dept": "works"},
+    {"text": "Have a good one, {nick}. Tell me all about it Monday.", "id": "yxqo73", "tone": "warm", "dept": "works", "tier": [3, 4]},
+  ],
+  "work.clock.in": [
+    {"text": "{hi}, {nick}. Board's full this morning. Pick a good one.", "id": "1aqwx4c", "dept": "works"},
+    {"text": "Morning. Kettle's on in the tea corner, if you're quick.", "id": "jmus0u", "dept": "works"},
+    {"text": "Eight o'clock. Somebody should do something about eight o'clock.", "id": "1t1j5i5", "tone": "funny", "dept": "works"},
+    {"text": "There's a scrubber on the board with your name on it. Not literally.", "id": "16bkgta", "dept": "works"},
+    {"text": "{hi}. Tea's at half ten. Hold on till then.", "id": "1pq9eri", "dept": "works"},
+    {"text": "Clocked in? Good. The fans on Five are humming again.", "id": "py0mfx", "dept": "works"},
+    {"text": "Another day, another filter. {hi}, {nick}.", "id": "1mtwjsc", "dept": "works"},
+    {"text": "You look awake. How? Tell me how.", "id": "ukoi1n", "tone": "funny", "dept": "works"},
+    {"text": "Quiet night, the night lot say. Let's keep it that way.", "id": "v1zmjg", "dept": "works"},
+    {"text": "{hi}. Grab a job before the Chief gives you one.", "id": "1dxxfmt", "dept": "works"},
+    {"text": "Morning, {nick}. Bay smells of oil and toast. Someone's had breakfast in here.", "id": "bts9kj", "tone": "funny", "dept": "works"},
+    {"text": "Mind the panel by the racks. It sticks. It always sticks.", "id": "8w506a", "dept": "works"},
+    {"text": "First job's always the hardest. After that it's just the day.", "id": "svxln9", "dept": "works"},
+    {"text": "Saw the stars on the way down. Nice start, that.", "id": "1asudje", "dept": "works"},
+    {"text": "{hi}. Night shift left us a note. Mostly crossed out.", "id": "1o32o2e", "tone": "funny", "dept": "works"},
+    {"text": "I'm here. My eyes aren't yet. Give them an hour.", "id": "1an25rg", "tone": "funny", "dept": "works"},
+    {"text": "Board's light today. Don't tell it I said so.", "id": "18nlb49", "dept": "works"},
+    {"text": "Morning. Gloves are back on the hook. Somebody tidied.", "id": "v55zl", "dept": "works"},
+    {"text": "Oh good, it's you. The day just got easier.", "id": "69sq3i", "tone": "warm", "dept": "works", "tier": [3, 4]},
+    {"text": "Saved you the good spanner. Don't say I never do anything.", "id": "1a74rzc", "tone": "warm", "dept": "works", "tier": [3, 4]},
+    {"text": "Afternoon start? Lucky. You missed the morning rush.", "id": "1cwt47i", "dept": "works", "time": "afternoon"},
+  ],
+  "work.clock.monday": [
+    {"text": "Monday. {hi}. Good weekend?", "id": "1g3wein", "dept": "works"},
+    {"text": "Back again! Did you get any rest, or did the ship keep you busy?", "id": "1kg8eje", "dept": "works"},
+    {"text": "{hi}, {nick}. Do anything nice at the weekend?", "id": "1w3a0wj", "dept": "works"},
+    {"text": "Weekend go all right? You look like you slept.", "id": "ehpxr6", "dept": "works"},
+    {"text": "Monday morning. Tell me something good from the weekend.", "id": "1qfzvp9", "dept": "works"},
+    {"text": "How was the weekend? Garden, gym, or bunk?", "id": "1k86crv", "tone": "funny", "dept": "works"},
+    {"text": "Monday. The board missed you. Well, it's longer, anyway.", "id": "1t7tukl", "tone": "funny", "dept": "works"},
+    {"text": "Good to see you. Weekend's always too short, isn't it?", "id": "pn013o", "dept": "works"},
+    {"text": "{hi}. Did you call home at the weekend? All well?", "id": "14va88v", "dept": "works"},
+    {"text": "Back to it. Was the mess busy on Sunday? Bread day.", "id": "1kzpex1", "dept": "works"},
+    {"text": "There you are. Quiet bay without you, Monday or not.", "id": "pg60jx", "tone": "warm", "dept": "works", "tier": [3, 4]},
+    {"text": "I want the whole weekend. Every bit. At tea, mind.", "id": "iswf9e", "tone": "warm", "dept": "works", "tier": [3, 4]},
+  ],
+  "work.clock.out": [
+    {"text": "Five o'clock. That's us. {bye}.", "id": "hfps52", "dept": "works"},
+    {"text": "Good day, that. Nothing caught fire. Nothing even smoked.", "id": "sncy28", "tone": "funny", "dept": "works"},
+    {"text": "Off you go, {nick}. Dinner's on till half eight.", "id": "s7g8qw", "dept": "works"},
+    {"text": "Clocked out. The board can wait till morning.", "id": "mtoj2j", "dept": "works"},
+    {"text": "That's the day done. My feet have opinions.", "id": "1jre06w", "tone": "funny", "dept": "works"},
+    {"text": "Nice work today. The bay sounds right.", "id": "uc7jr1", "dept": "works"},
+    {"text": "Off to the mess. If there's stew, I'm having two.", "id": "1iys6rc", "dept": "works"},
+    {"text": "Done. Shower before the hot water goes, that's my plan.", "id": "ox1kw5", "dept": "works"},
+    {"text": "{bye}, {nick}. Leave the scrubbers to dream.", "id": "1fe6jnv", "dept": "works"},
+    {"text": "Long one. Good one, though.", "id": "1110su3", "dept": "works"},
+    {"text": "Hang your gloves up or the Chief will notice. She notices.", "id": "1e3dup7", "dept": "works"},
+    {"text": "Evening, then. Anything on tonight?", "id": "ry8yut", "dept": "works"},
+    {"text": "Off you go. Tomorrow's jobs aren't going anywhere.", "id": "1iq9hfu", "dept": "works"},
+    {"text": "I'm going to sit down and not fix anything for hours.", "id": "1m551te", "tone": "funny", "dept": "works"},
+    {"text": "Same time tomorrow. Bring your good mood back.", "id": "1pyz5rd", "dept": "works"},
+    {"text": "Today was a tea-break day. Some days the tea is the high point.", "id": "1t5oeqp", "tone": "funny", "dept": "works"},
+    {"text": "Good shift with you, {nick}. Same again tomorrow?", "id": "1n9t95u", "tone": "warm", "dept": "works", "tier": [3, 4]},
+    {"text": "Save me a seat at dinner if you get there first.", "id": "14n4s7r", "dept": "works", "tier": [3, 4]},
+    {"text": "Rough one. Tomorrow's a fresh board.", "id": "1nb6j50", "dept": "works", "mood": "low"},
+    {"text": "You fixed it today. I heard it start up. Lovely sound.", "id": "13z2i03", "tone": "warm", "cue": "repair.you@dept", "dept": "works"},
   ],
   "worried.captain": [
     {"text": "Up to the ready room? {sigh}. The Captain's kind. Still, go to your shift.", "id": "12wxjes", "tone": "warm", "tier": [2, 4]},

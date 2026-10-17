@@ -1,0 +1,23 @@
+@template warm
+
+== work.clock.in
+- Morning, {nick}. Did you eat? Tell me you ate.   #warm
+- {hi}, {nick}. Kettle's on. Have a cup before you start.   #warm
+- Morning! Early starts are hard. You're doing grand.   #warm
+
+== work.clock.out
+- Well done today. Go and have a proper dinner.   #warm
+- That's us. You worked hard. I saw.   #warm
+- Off you go, {nick}. Do something nice this evening.
+
+== work.clock.monday
+- Morning! How was your weekend? Did you rest? Did you call home?   #warm
+- Monday. Come and tell me about your weekend at tea.   #warm
+
+== work.clock.friday
+- Have a lovely weekend. Sleep in. Eat well.   #warm
+- Two days off. Go and be looked after. You deserve it.   #warm
+
+== work.clock.back
+- You're back! Oh, come here. How are you feeling?   #warm
+- Welcome back, {nick}. Easy does it today. I'll keep an eye.   #warm

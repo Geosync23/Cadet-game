@@ -1,0 +1,23 @@
+@crew halloran-emeka
+// Head writer 5: clock-in remarks. Halloran is off Sat and Sun; terrible jokes, bakes on rest days if Brennan allows.
+
+== work.clock.in
+- Morning! Why did the fan quit? It was a big fan of quitting. I'll work on it.   #funny
+- {hi}, {nick}. Board's busy. We'll do it together.
+- Morning. Kettle's on. That's the most important job, and it's done.
+
+== work.clock.out
+- That's us. Good work today, {nick}.   #warm
+- Clocked out! Dinner. Then I'll think of a better joke for tomorrow.   #funny
+
+== work.clock.monday
+- Morning! I baked on Sunday. Brennan allowed one oven. Scones in the tea corner.   #warm
+- Good weekend? Mine was flour, mostly. Brennan inspected. I passed. Just.   #funny
+
+== work.clock.friday
+- Weekend! I'm baking Saturday, if Brennan allows. Come and taste it.
+- Have a good weekend. I'll have a new joke by Monday. Brace yourself.   #funny
+
+== work.clock.back
+- You're back! I saved you a scone. It's a bit old. So's the joke.   #funny
+- Welcome back, {nick}. Good to see you up and about.   #warm

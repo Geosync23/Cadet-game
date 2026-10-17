@@ -1,0 +1,99 @@
+@bank dept:works
+// Head writer 5: clock-in remarks, for the Career engineer's clock-in/out panel on the Works bay wall (claude/leave).
+// Co-workers in the bay say one as you clock in or out. Keys (provisional until the engine names them):
+// work.clock.in (start of day), work.clock.out (end of day), work.clock.monday (clocking in on a Monday: your weekend),
+// work.clock.friday (clocking out on a Friday: weekend plans), work.clock.back (first shift back from leave or sick).
+// Shift 08:00-17:00, tea at 10:30, your days off are Sat-Sun. Not everyone in Works is off at the weekend, so shared
+// lines ask about YOUR weekend and never claim the speaker's. One short line each, readable on a phone.
+
+== work.clock.in
+- {hi}, {nick}. Board's full this morning. Pick a good one.
+- Morning. Kettle's on in the tea corner, if you're quick.
+- Eight o'clock. Somebody should do something about eight o'clock.   #funny
+- There's a scrubber on the board with your name on it. Not literally.
+- {hi}. Tea's at half ten. Hold on till then.
+- Clocked in? Good. The fans on Five are humming again.
+- Another day, another filter. {hi}, {nick}.
+- You look awake. How? Tell me how.   #funny
+- Quiet night, the night lot say. Let's keep it that way.
+- {hi}. Grab a job before the Chief gives you one.
+- Morning, {nick}. Bay smells of oil and toast. Someone's had breakfast in here.   #funny
+- Mind the panel by the racks. It sticks. It always sticks.
+- First job's always the hardest. After that it's just the day.
+- Saw the stars on the way down. Nice start, that.
+- {hi}. Night shift left us a note. Mostly crossed out.   #funny
+- I'm here. My eyes aren't yet. Give them an hour.   #funny
+- Board's light today. Don't tell it I said so.
+- Morning. Gloves are back on the hook. Somebody tidied.
+? tier>=friend
+- Oh good, it's you. The day just got easier.   #warm
+- Saved you the good spanner. Don't say I never do anything.   #warm
+? time:afternoon
+- Afternoon start? Lucky. You missed the morning rush.
+
+== work.clock.out
+- Five o'clock. That's us. {bye}.
+- Good day, that. Nothing caught fire. Nothing even smoked.   #funny
+- Off you go, {nick}. Dinner's on till half eight.
+- Clocked out. The board can wait till morning.
+- That's the day done. My feet have opinions.   #funny
+- Nice work today. The bay sounds right.
+- Off to the mess. If there's stew, I'm having two.
+- Done. Shower before the hot water goes, that's my plan.
+- {bye}, {nick}. Leave the scrubbers to dream.
+- Long one. Good one, though.
+- Hang your gloves up or the Chief will notice. She notices.
+- Evening, then. Anything on tonight?
+- Off you go. Tomorrow's jobs aren't going anywhere.
+- I'm going to sit down and not fix anything for hours.   #funny
+- Same time tomorrow. Bring your good mood back.
+- Today was a tea-break day. Some days the tea is the high point.   #funny
+? tier>=friend
+- Good shift with you, {nick}. Same again tomorrow?   #warm
+- Save me a seat at dinner if you get there first.
+? mood:low
+- Rough one. Tomorrow's a fresh board.
+? cue:repair.you@dept
+- You fixed it today. I heard it start up. Lovely sound.   #warm
+
+== work.clock.monday
+- Monday. {hi}. Good weekend?
+- Back again! Did you get any rest, or did the ship keep you busy?
+- {hi}, {nick}. Do anything nice at the weekend?
+- Weekend go all right? You look like you slept.
+- Monday morning. Tell me something good from the weekend.
+- How was the weekend? Garden, gym, or bunk?   #funny
+- Monday. The board missed you. Well, it's longer, anyway.   #funny
+- Good to see you. Weekend's always too short, isn't it?
+- {hi}. Did you call home at the weekend? All well?
+- Back to it. Was the mess busy on Sunday? Bread day.
+? tier>=friend
+- There you are. Quiet bay without you, Monday or not.   #warm
+- I want the whole weekend. Every bit. At tea, mind.   #warm
+
+== work.clock.friday
+- Friday! Two days off for you. Any plans?
+- That's the week. {bye}, {nick}. Enjoy the weekend.
+- Off for two days? Rest. Properly. No fixing anything.
+- Weekend plans? Bunk counts as a plan.   #funny
+- Friday. Music jam tonight, if you fancy it.
+- Have a good weekend. Don't let anyone hand you a spanner.   #funny
+- The week's done. Go and do something that isn't filters.
+- Enjoy your days off. The bay will still be here Monday.
+- Going to the garden at the weekend? It's lovely on a rest day.
+- Two days off. Sleep in. Hot water's yours before the rush.
+? tier>=friend
+- Have a good one, {nick}. Tell me all about it Monday.   #warm
+
+== work.clock.back
+- You're back! Good to see you, {nick}.   #warm
+- Welcome back. Bay wasn't the same.   #warm
+- {hi}. Feeling better? Take it easy today.   #warm
+- Look who's back. The board's been asking after you.   #funny
+- There you are. Kettle's on. Ease in.   #warm
+- Back with us! Your gloves are where you left them.
+- Good to have you back. Pick an easy one to start.
+- Welcome back, {nick}. You were missed. Properly.   #warm
+? tier>=friend
+- Oh, you're back. I've saved up all the gossip.   #warm
+- Missed you on the bay. Don't do that again. Well, do, if you need to.   #warm

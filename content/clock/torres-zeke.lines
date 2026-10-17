@@ -1,0 +1,29 @@
+@crew torres-zeke
+// Head writer 5: clock-in remarks. Torres is off Thu and Fri, so no Friday lines; he works the weekend.
+
+== work.clock.in
+- There you are! Coil three's sulking. Don't take it personally.   #funny
+- Morning, {nick}. Reyes left me a note: "coils fine, three shy". Shy!   #funny
+- {hi}! Ten more minutes with the coils and I'm all yours. Right, onward.
+- Board's lovely today. Look at it. Proper variety.
+- Morning! I skipped breakfast for the coils. Don't tell Brennan.   #funny
+? tier>=friend
+- Your scarf grew another row last night. Can't show you yet.   #warm
+
+== work.clock.out
+- That's the day! You did well. I mean it.   #warm
+- Five already? I'll just say goodnight to coil three. Then dinner.
+- Good shift, {nick}. Same again tomorrow?
+- Off you go. I'll be in the music room later, if you fancy a song.
+? cue:repair.you@dept
+- You fixed it today. Properly. I watched. Lovely work.   #warm
+
+== work.clock.monday
+- Monday! Good weekend? The coils and I had a quiet one.   #funny
+- How were your days off? I was down here. The coils were good company.
+- Morning! Tell me one thing you did at the weekend. Just one.
+
+== work.clock.back
+- You're back! The bay's been all wrong. Even coil three noticed.   #warm
+- Welcome back, {nick}. Easy jobs today. I've already picked some.   #warm
+- There you are. Feeling all right? Good. Right, onward. Gently.   #warm

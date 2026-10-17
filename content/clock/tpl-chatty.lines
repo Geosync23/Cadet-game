@@ -1,0 +1,23 @@
+@template chatty
+
+== work.clock.in
+- Morning! Guess who was in the mess at six. Tea first, then I'll tell you.   #funny
+- {hi}! Big board today. We'll get through it. Probably. Mostly!
+- There you are! I've been up an hour and talked to nobody. Well, the kettle.   #funny
+
+== work.clock.out
+- That's us! What are you doing tonight? I'm doing nothing. Loudly.   #funny
+- Five already! Where does a day go? Into filters, that's where.
+- Off you go! Tell me tomorrow if anything good happens at dinner.
+
+== work.clock.monday
+- Monday! Right. Weekend. Everything. Go.   #funny
+- How was your weekend? Did you go anywhere? Anywhere on the ship, I mean!
+
+== work.clock.friday
+- Friday! What are you doing with your weekend? Tell me so I can be jealous.
+- Two whole days off! Do something you can tell me about Monday.
+
+== work.clock.back
+- You're back! Oh, it's been so quiet. Well. Quieter. I talked to the racks.   #warm
+- Welcome back! Are you all right? Really? Sit with me at tea.   #warm

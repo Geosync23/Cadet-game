@@ -1,0 +1,27 @@
+@crew kovac-zainab
+// Head writer 5: clock-in remarks. Kovac is off Tue and Wed, so she works the weekend. No lift talk (her arc).
+
+== work.clock.in
+- Oh. Morning. I re-sorted the spanner wall. Sorry. It needed it.
+- Hi. Scrubber on the board. I can do it in ten minutes. Nine and a half.
+- Morning. It's quiet. I like it before everyone comes.
+- Hi. I put the kettle on. For... everyone. And you.   #warm
+
+== work.clock.out
+- Good shift. Yes. I think so.
+- Five. I'm going to the garden. Just to sit.
+- See you tomorrow. I'll... be here early. I always am.
+? cue:repair.you@dept
+- That repair. You did the seals right. Most people don't.   #warm
+
+== work.clock.monday
+- Morning. Good weekend? I was here. It was nice. Quiet.
+- Hi. Did you... rest? You should. Rest, I mean.
+
+== work.clock.friday
+- Have a good weekend. I'll be here. Keeping things neat.
+- Two days off. Go to the garden. The tomatoes are nearly ready.
+
+== work.clock.back
+- Oh. You're back. Good. I kept your bench tidy.   #warm
+- Welcome back. Are you... all right now? Good. Good.   #warm

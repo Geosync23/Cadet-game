@@ -1,0 +1,23 @@
+@template steady
+
+== work.clock.in
+- Morning. Fair board today. Nothing we can't do.
+- {hi}, {nick}. Tea at half ten. Pace yourself.
+- On time. Good. Let's get started.
+
+== work.clock.out
+- That's the day. Good work.
+- Clocked out. Eat well, sleep well. Same again tomorrow.
+- Done. The board's shorter. That's a good day.
+
+== work.clock.monday
+- Morning. Good weekend? Rested?
+- Monday. Fresh week. How were your days off?
+
+== work.clock.friday
+- Have a good weekend. Rest properly.
+- Week's done. Go and enjoy your days off.
+
+== work.clock.back
+- Welcome back. Take it steady today.   #warm
+- Good to have you back. No rush. Start small.   #warm

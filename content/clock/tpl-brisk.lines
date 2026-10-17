@@ -1,0 +1,24 @@
+@template brisk
+// Head writer 5: clock-in remarks (see banks/clock.lines for the keys).
+
+== work.clock.in
+- Morning. Board's up. Take the top one.
+- Eight sharp. Good. Scrubbers first.
+- On time. Keep it that way.
+
+== work.clock.out
+- Done. Good shift. Go eat.
+- Clocked out. Rest. Back at eight.
+- Board's shorter than this morning. That's the job.
+
+== work.clock.monday
+- Monday. Good weekend? Short answer. Jobs waiting.
+- Rested? Good. Week starts now.
+
+== work.clock.friday
+- Week done. Rest properly. Monday, eight.
+- Weekend. Plans? Make some. Then rest.
+
+== work.clock.back
+- Back. Good. Easy job first. Then normal.   #warm
+- Welcome back. We managed. Barely.   #funny
