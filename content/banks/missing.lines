@@ -1,0 +1,42 @@
+@bank all
+// Writer 5, for social B2: missing someone who moved on. {missed} is their close friend, partner or mentor who has
+// left the Wren; the line is skipped for anyone who misses nobody. Light and a little wistful, no #serious. {missed}
+// has no known pronouns: name only. Partners only plainly ("I miss {missed}."); nothing that swaps them for you.
+
+== smalltalk
+- {missed} would've laughed at that.   #funny
+- Still save a seat for {missed}. Habit.
+- Letter from {missed} today. Two pages.   #warm
+- {missed} always had the last biscuit. Now I do.   #funny
+- Wonder what {missed} is having for dinner.
+? trad:quiz
+- {missed} knew every answer in this round.   #funny
+? time:evening
+- {missed} would be telling a story about now.
+
+== near
+? act:breakfast
+- {missed}'s seat's empty. I keep looking at it. Then I eat the toast.
+? deck:4 time:night
+- {missed}'s old bunk's still made up. Nobody's moved in yet. Odd.
+? place:musicroom
+- {missed} used to play that one. Badly. I miss it anyway.   #funny
+? act:meal
+- This was {missed}'s favourite. Still is, probably.
+
+== feel
+- I'm all right. Bit quiet without {missed}. You get used to it. Slowly.
+- Wrote to {missed} last night. Three pages. Mostly about the food.   #funny
+- {missed} says the new ship's fine. Bigger. Colder. Nobody makes tea like Brennan.   #funny
+? mood:high
+- Good day! {missed} wrote back. Settling in fine, apparently.   #warm
+? tier>=friend
+- I miss {missed}. Silly, isn't it. It's only one ship over.   #warm
+? tier>=friend mood:low
+- Missing {missed} today. That's all. Sit a minute? That helps.   #warm
+
+== chat
+? tier>=colleague
+- {missed} left me a mug. I use it every morning. Don't tell anyone.   #warm
+? tier>=friend
+- I still save things up to tell {missed}. Then I write them all down. Long letters.
