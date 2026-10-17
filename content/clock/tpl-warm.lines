@@ -21,3 +21,7 @@
 == clock.back
 - You're back! Oh, come here. How are you feeling?   #warm
 - Welcome back, {nick}. Easy does it today. I'll keep an eye.   #warm
+
+== clock.early
+- Off early? You look after yourself, {nick}.   #warm
+- Go on, go and rest. Everything all right?   #warm

@@ -109,3 +109,15 @@
 - The kettle waited for you. It's that kind of kettle.   #funny
 ? tier>=friend
 - Saved you a job. Not a good one. You were late.   #funny
+
+== clock.early
+// Clocking out well before the end of the shift (before 15:00). Gentle, never a telling-off.
+- Off already? Hope all's well.
+- Short day? Fair enough.
+- Heading off? Look after yourself.
+- Early one. The board will keep. Go on.
+- Off you go. We'll hold the fort.
+- All right? Shout if you need anything.   #warm
+- Early finish. Rest up, if that's what it is.
+? tier>=friend
+- Off early? Find me at dinner if you want company.   #warm
