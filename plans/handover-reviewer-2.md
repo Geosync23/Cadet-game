@@ -44,6 +44,7 @@ Combined builds: 0.60.2 released (142b503); build master 2 is combining 0.60.3 o
 - My independent Tiles simulator: plans/reviews/tiles-5aa442c-sim.py.
 
 ## Loose ends / next
+- Coming for review: the theme fill-in fix (reviews/dialogue-b8cf2d9.md). Crew designer 3 (session_01TDCn9auvCBML52hyjWGY6x) adds kin / lost / pastime roster fields; head writer 3 switches family.arc, loss.arc and talent.arc (loss gets needs: lost, no new deaths); dialogue 2 adds the tokens and a lines_check guard. Check: no "lost" for anyone whose about/life lines show them alive, every {kin} reads "my ...", and pastime reads after "a bit of" and "teaching".
 - Review the head writer's and the writers' content batches (wave 1b) when the lead sends them: tone, romance, names
   not aboard, serious lines too early (week 1), self-naming, lines_check PASS, byte-stable bakes.
 - Re-check the meal-tradition turnout once the sim's `meal` hook lands.
