@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.24
+   STARSHIP CADET: CSV Wren                           build 0.42.25
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.24';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.25';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14876,7 +14876,7 @@ const SETTLE = [
   { id: 'lead', title: 'Lead a job', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'turnin' && d.reserved === 2 },
   { id: 'eat', title: 'Eat with the crew', teacher: 'brennan', place: { deck: 3, room: 'Mess hall' }, done: (k, d) => k === 'act' && d.act === 'eat' && d.with > 0 },
   { id: 'solo', title: 'Your first solo job', teacher: 'calder', place: { deck: 5, room: 'Works Chief\'s office' }, done: (k, d) => k === 'job' && d.step === 'turnin' && (d.reserved === 3 || !d.reserved) },
-  { id: 'health', title: 'Health check', teacher: 'rina', place: { deck: 3, room: 'Infirmary' }, done: (k, d) => k === 'apptKept' && (d.id === 'intro-health' || (SHIP.intro && d.id === SHIP.intro.done['d2-health:appt'])) },
+  { id: 'health', title: 'Health check', teacher: 'rina', place: { deck: 3, room: 'Infirmary' }, done: (k, d) => k === 'apptKept' && (d.id === 'intro-health' || (SHIP.intro && d.id === SHIP.intro.done['d2-health:appt']) || (Array.isArray(d.with) && d.with.includes('rina'))) },   // any check-up with Rina (a skipped arrival books none)
   { id: 'call', title: 'Call home', teacher: 'eklund-leila', place: { deck: 3, room: 'Call-home booths' }, done: (k, d) => k === 'act' && d.act === 'call' },
   { id: 'take', title: 'Take a job yourself', teacher: INTRO_ESCORT, place: { deck: 5, room: 'Works bay' }, done: (k, d) => k === 'job' && d.step === 'take' && !d.reserved },
   { id: 'buy', title: 'Buy something', teacher: 'ishikawa-orla', place: { deck: 3, room: 'Crew store' }, done: (k, d) => k === 'act' && d.act === 'buy' },
@@ -14888,7 +14888,7 @@ const SETTLE = [
 ];
 // the list listens on section 13's bus once it's there (onSim(kind, fn), fn called with the note's data)
 let INTRO_HEARD = false;
-if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); }
+if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); onSim('apptMissed', introHealthMissed); }
 // what Torres says as you work (stand-ins until the writers' lines): slot 1, the shadow shift, step by step; slot 2,
 // the one you lead, only at the end
 const INTRO_JOB_LINES = {
@@ -15324,13 +15324,42 @@ function introScriptHere(id, m, keep) {   // keep: the step's own speaker, never
 // section 19; kept or missed by section 14's apptTick, which sends apptKept { id }: "Health check" ticks on it)
 function introBookHealth() {
   const D = SHIP.device; if (!D || !Array.isArray(D.appts) || SHIP.intro.done['d2-health:appt'] !== undefined) return;
-  const pl = typeof apptPlaces === 'function' && apptPlaces().find(x => x.deck === 3 && /infirmary/i.test(x.name)); if (!pl) return;
+  introHealthAppt(introAbs(2, 14 * 60));
+}
+// the booking itself (kind 'checkup', the infirmary's, section 14's apptKind): any earlier game's one still to come is
+// dropped first (reviewer 1: two New games in a page booked it twice); a missed one is booked again once, a day later
+const INTRO_HEALTH_TITLE = 'New-crew health check';
+function introHealthAppt(at) {
+  const D = SHIP.device, pl = typeof apptPlaces === 'function' && apptPlaces().find(x => x.deck === 3 && /infirmary/i.test(x.name)); if (!pl) return null;
+  D.appts = D.appts.filter(x => !(x.by === 'rina' && x.title === INTRO_HEALTH_TITLE && x.status === 'yes' && x.at > shipNow()));
   const id = D.appts.reduce((m, x) => Math.max(m, x.id), 0) + 1;
-  D.appts.push({ id, with: ['rina'], at: introAbs(2, 14 * 60), len: 30, where: pl.id, kind: 'health', status: 'yes', by: 'rina', title: 'New-crew health check' });
-  SHIP.intro.done['d2-health:appt'] = id;
+  D.appts.push({ id, with: ['rina'], at, len: 30, where: pl.id, kind: 'checkup', status: 'yes', by: 'rina', title: INTRO_HEALTH_TITLE });
+  SHIP.intro.done['d2-health:appt'] = id; return id;
+}
+function introHealthMissed(n) {
+  const I = SHIP.intro; if (!introOn() || !n || n.id !== I.done['d2-health:appt'] || I.done['d2-health:again'] !== undefined) return;
+  const at = (Math.floor(shipNow() / 1440) + 1) * 1440 + 14 * 60;   // tomorrow, 14:00
+  if (introHealthAppt(at)) { I.done['d2-health:again'] = Math.floor(shipNow()); introMail({ from: 'Rina Deshi', subject: 'Health check, again', body: 'Missed you today. No harm done: same time tomorrow, the infirmary. Ten minutes, I promise.' }, shipNow()); }
 }
 // the Works team's mug at Friday tea (a moment, no meeting): in the tea corner during it, they hand it over; else it's
 // on the rack when you look, and a note says so
+// someone who was to come and find you this week (section 20's socialSeekAsk) and never did: when the window ends, a
+// Mail from them instead (reviewer 1): the writers' mail.<beatId> ("Subject | body", kind week1), else a stand-in
+const INTRO_SEEK_MAIL = {
+  'd3-pell': { subject: 'Quiz tomorrow', body: 'Looked for you tonight! Quiz night tomorrow, the bow lounge at eight. You\'re on my team.' },
+  'd4-favour': { subject: 'A small favour', body: 'Could you look at the tea-corner kettle on Five when you pass? It clicks and sulks. Thank you!' },
+};
+function introSeekMail(now) {
+  const I = SHIP.intro;
+  for (const b of INTRO_WEEK) {
+    if (!b.seek || I.done[b.id + ':seek'] !== undefined || now < introAbs(b.day, b.until)) continue;
+    const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === b.who && a.from === introAbs(b.day, b.at));
+    I.done[b.id + ':seek'] = ask && ask.done ? 1 : -1; if (ask && ask.done) continue;
+    const w = introWriterLine('mail.' + b.id, b.who), k = w && w[0].indexOf(' | '), p = typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === b.who);
+    const m = w && k > 0 ? { subject: w[0].slice(0, k), body: w[0].slice(k + 3) } : INTRO_SEEK_MAIL[b.id];
+    if (m) introMail({ from: (p && p.name) || b.who, ...m }, now);
+  }
+}
 function introMoments(now) {
   const I = SHIP.intro;
   for (const b of INTRO_WEEK) {
@@ -15377,7 +15406,7 @@ function introTick() {
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
     }
   }
-  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); }
+  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
   if ((I.step === 'chief' || I.step === 'free') && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
     INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, 19 * 60) });

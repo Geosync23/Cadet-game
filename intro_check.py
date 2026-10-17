@@ -317,8 +317,8 @@ with sync_playwright() as pw:
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
-                g.step(60)
-                seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you)], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
+                for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
+                seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
                 print(f"  the dinner seats at {seats['t']}: yours {seats['you']}, Torres {seats['torres']}, Calder {seats['calder']}")
             if r['goal'] == 'Your bunk' and bunkAt is None: bunkAt = r['t']; print(f"  {r['t']}  the arrow points to your bunk")
             if r['step'] is None: break
@@ -326,7 +326,7 @@ with sync_playwright() as pw:
         if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
         elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
         if not bunkAt: fail('the first-night arrow never pointed to your bunk before 20:00')
-        if simnow and (not seats or seats['you'][1] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
+        if simnow and (not seats or seats['you'][1] or seats['you'][2] != seats['you'][0] or seats['torres'][1] != INTRO_ESC_ID or seats['calder'][1] != 'calder'): fail(f'the dinner seats are wrong (place, held by): {seats}')
         w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
         print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
         if w['missed']: fail('the real walk missed ' + ', '.join(w['missed']))
@@ -427,6 +427,18 @@ with sync_playwright() as pw:
         if not took: fail('could not take the shadow job at 08:06')
         if esc['mode'] != 'follow' or esc['d'] is None or esc['d'] > 4: fail(f'Torres is not with you on the shadow shift: {esc}')
         if not (fin['t'] and fin['shadow'] and fin['mem']): fail(f'the shadow job did not complete the intro\'s side: {fin}')
+        # reviewer 1's lows (0.42.25): the health check booked once as a 'checkup', rebooked once when missed; a Mail
+        # from Pell when she never found you on Wednesday evening
+        if g.ev("typeof introHealthAppt === 'function' && typeof apptPlaces === 'function' && !!SHIP.device && Array.isArray(SHIP.device.appts)"):
+            g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)
+            g.ev('skipTo(introAbs(2, 15 * 60))'); g.step(60)
+            h = g.ev("(() => { const A = SHIP.device.appts.filter(a => a.title === INTRO_HEALTH_TITLE); return { appts: A.map(a => [hhmm(a.at % 1440), Math.floor(a.at / 1440), a.status, a.kind]), again: SHIP.intro.done['d2-health:again'] !== undefined, mail: SHIP.mail.some(m => /Health check, again/.test(m.subject)) }; })()")
+            print(f"  the health check missed on Tuesday: {h}")
+            if not h['again'] or len([x for x in h['appts'] if x[2] == 'yes']) != 1 or any(x[3] != 'checkup' for x in h['appts']) or not h['mail']: fail(f'a missed health check is not booked again once: {h}')
+            g.ev('skipTo(introAbs(3, 20 * 60 + 5))'); g.step(60)
+            pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
+            print(f"  Pell's Wednesday ask (you were away): {pm}")
+            if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
     print('Not yet: Tuesday to Sunday walked in the real game (with social A, traditions and the writers combined)')
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()

@@ -60,6 +60,10 @@ Written 2026-10-17 by session_01KaHzfqSqF8B4bkNFrH1tsx (onboarding 1); **taken o
 - Job 4, the week Tue-Sun walked: the writers' lines are on claude/content 5e2605e+ (beat.<id>.<n>, mail.<id> "Subject | body", introHealth.meet); Tomas's days off are Mon/Tue (check the rota in code, never assume); d6-sowing: bring Tomas to the garden ~10 minutes with a short hold/appointment, then back to watch (reviewer 2 via the lead).
 - Job 5, wave 4 guiding, behind flag('promoted') (social A's introGuide/introGuideEnd).
 
+## For other seats
+
+- **Player engineer 5 (section 15):** reviewer 1's low 7 (arrival-54d7911). You stand through "Dinner with Torres": `dinnerTick` sits you only from the Chief's step, but the evening now has a 'table' step (the introDinner chat) before it. `introSeat('you')` already returns your seat from 'table' on (null outside table/chief/free), so dinnerTick can simply sit you whenever it's non-null. (The player seat was vacant when this was found; the lead asked for it here.)
+
 ## In flight at handover (onboarding 1's list; 1-3 done by onboarding 2)
 
 1. **The shuttle start** (the user: "you start inside the shuttle, the ramp opens, you walk out"; the lead approved the defaults). The deck architect's walk-in Tern is in claude/decks-p3 eb0e776 (0.38.18): places 5-tern-aisle-1 [5,7] (start, face 0 = south), 5-tern-seat-1 [4,8], 5-tern-ramp-top [5,9], 5-tern-ramp-foot [5,11] (Torres); `DECKS[5].tern = { aisle, well [5,8], ramp [[5,9],[5,10]], foot [5,11], start }`; calls `ternRamp(open, secs = 2.5)`, `ternRampOpen()` 0..1, `ternClear()`, `ternInside()`; open by default; the well is blocked until the ramp is fully open. To do in section 21:
