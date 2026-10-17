@@ -74,8 +74,35 @@ Head writer 3's later edits, for the next writer: a line that pre-empts a beat's
 ("on your first week" dropped); mentor warmth points outward ("The bay's better for it"), never private ("I say it to
 myself"); keep age and year counts vague unless canon ("thirty years").
 
-Still open: everyday passes for Tomas, Pell and Rina (they have ~135 lines each already; ask the head writer); story crew goodbyes/letters; a dry-humour
-Tiles variant waits on `_` support in `trait:`.
+Still open after Writer 4: done by Writer 5 (below), except the dry-humour Tiles variant (waits on `_` in `trait:`).
+
+## Writer 5 (session_01HW7UxnuNvRXoEjn8tK4sQq): batches 1-7, reviewed by head writer 3
+
+Reports to **head writer 3** (session_01FopKMT2ZKxuWcNDcmF7565). All merged or being merged by head writer 3 (to
+0.48.41). Last head on `claude/writer-commons`: 4721c26 + this note. **Standing by** (2026-10-17 ~07:40): the planned
+content list is done; head writer 3 is asking the lead what's next (newcomer replies wait on onboarding's wave 4).
+
+| Batch | What | Files | Hash |
+| --- | --- | --- | --- |
+| 1-3 | everyday passes, ~55 lines + 8-9 callbacks each, `!week1:true`, arc gates kept | `lines/tomas`, `pell`, `rina` | 3b96127, 0282f69, e1100b1 (+707f1f1) |
+| 4-5 | goodbyes (`leaving:you`), packing (`feel leaving:soon`), letters for all ten story crew | the ten story crew's `lines/` | 91ded9b, 41424a7, 838136b, acf14ef; six in e81ea03 |
+| 6 | seasons and traditions gaps for the ten (exact trad ids) + `trad:today` | the ten | cd488f8, 78d55a4, 7335bee, be0bd77 |
+| 7 | 39 overheard conversations, off duty in work places | `overheard/deck2`, `deck5`, `deck6.lines` | 4721c26 |
+
+Head writer 3's edits and rulings this seat: story crew never leave, so their goodbyes only play if that ever changes
+(kept anyway, harmless); **the scarf exists only after Torres's beat 1**: any scarf line needs `mem:moment.torres.scarf`;
+`trad:observatory` never fired (the id is `observatory-night`; head writer fixed 11 lines; `came.observatory` is fine
+as a prefix); Tomas's jam invite trimmed to 90; on a `tomas.lines` merge conflict, keep claude/content's copy (but check
+it still holds your unmerged sections: `git checkout --theirs` once wiped my batch 4 Tomas lines).
+
+Tradition ids and times (the game's TRADITIONS): running Mon 19:15, quiz Thu 20:00, works-tea Fri 18:45, jam Fri
+19:45, film Sat 20:00, observatory-night Sat 21:15, market = the Sunday swap meet 10:30, harvest = harvest morning
+(every other Saturday 09:30), hull-lights every 28 days 21:00, founding day 100, quiet-watch day 300 21:30; seasons
+sowing, greening, harvest, lanterns. Rest days (rota.offDays, 0 = Mon): Tomas Fri-Sat, Pell Tue-Wed, Rina Sun-Mon,
+Brennan Fri-Sat, Torres Sat-Sun, Calder Mon-Tue, Vance Tue-Wed, Marrow Mon-Tue, Holt Thu-Fri, Kovac Tue-Wed.
+Room names for `place:` (lowercase, `_` for spaces): senior_corridor, observatory, chartroom, watch_office,
+teacorner, worksbay, main_storage, shuttle_bay, cart_bay, machine_shop, overlook, engine_watch_room.
+Habit: run a PASS-gated check script before every commit (an edit after the last check once pushed a 92-char line).
 
 ## Formats and hooks that bite
 
@@ -103,15 +130,15 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 
 ## Loose ends / next
 
-- Batch 10 awaiting notes. After it the seat is handed over: head writer 2 asks the lead to retire it and hire
-  fresh when needed. A fresh writer starts from this note.
+- Standing by for head writer 3's next job. Candidates: newcomer lines (wait on onboarding's wave 4), more overheard
+  for other quiet places (the cart bay, machine shop, Deck 1 observation room), about/invite for the 19.
 - Theme fill-in `{since}` still not live (lines using it are skipped).
 - Favour jobs `pellPractice`, `brennanSage` depend on others.
-- Candidates: goodbyes and letters for my people, newcomer lines, more about/invite for my 19.
+- Dry-humour Tiles variant waits on `_` in `trait:`.
 
 ## How to test
 
 ```
 S=<scratchpad>; cp starship-cadet.html $S/game.html
-python3 content_gen.py $S/game.html && python3 lines_check.py $S/game.html   # must say PASS
+python3 content_gen.py $S/game.html && python3 content_gen.py $S/game.html --check && python3 lines_check.py $S/game.html   # must say PASS
 ```
