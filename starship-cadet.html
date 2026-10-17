@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.21
+   STARSHIP CADET: CSV Wren                           build 0.38.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7185,13 +7185,13 @@ const DECK_DRESS = {
   // scoreboard on an easel, o.lines = the teams' scores, and the cup on a plinth, 3); talentStage: talent night (a low
   // riser on the lounge's open floor, a mic stand and a string of bulbs, 3); yearsEnd: Year's end (the Captain's lectern
   // and small lights along the bow windows, 2).
-  longTables: { deck: 3, what: 'the Sunday table: runners and jugs down the mess\'s long tables, and extra seats', make(g) {
+  longTables: { deck: 3, what: 'the long table (the Sunday table, the farewell supper): runners and jugs down the mess\'s long tables, and extra seats', make(g) {
     const s = dressAt(g, 'M', 'floor', 0, 0); messExtra(s);
     for (const [x, z] of MESS_LONG) {
       dressBox(s, 3.3, .004, .32, '#c45a3f', x, .772, z);
       for (const dx of [-.4, .4]) { const j = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, .17, 12), dressMat('#e9e1d0')); j.position.set(x + dx, .855, z + .06); s.add(j); dressBox(s, .015, .1, .05, '#e9e1d0', x + dx + .065, .87, z + .06); }
     }
-    return { t: 'The Sunday table', x: 'Runners down every long table and jugs of water at each one. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+    return { t: 'The long table', x: 'Runners down every long table, jugs of water at each one and extra seats at the ends and out on the promenade. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
   } },
   harvestTables: { deck: 3, what: 'the harvest supper: burlap runners and baskets from the garden on the long tables', make(g) {
     const s = dressAt(g, 'M', 'floor', 0, 0), C = ['#d8412f', '#f0952e']; messExtra(s);
@@ -7421,7 +7421,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.21';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.22';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
