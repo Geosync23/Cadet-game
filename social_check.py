@@ -153,6 +153,27 @@ with sync_playwright() as pw:
     if 'chat' in th or 'grubby' in th or not near(th.get('moment.x'), 71) or not near(th.get('fixed.oven'), 30) or th.get('intro.arrival') != 100: fail(f"fading after three weeks wrong: {th}")
     if not r['saved']: fail('memories save and load differ')
 
+    # 7. lines through the dialogue engine (0.36.22): without lineFor, or with one that finds nothing, every card line is
+    # as before; with one, chatLine asks it by kind, the new kinds (callback, cue) included
+    e = g.ev(r"""(() => {
+      const o = {}, crew = SOC.crew.slice(0, 30), t0 = Math.floor(shipNow() / 60) * 60;
+      for (const id of ['tomas', 'pell', 'rina']) relAdd(id, 'chat', 30);
+      const all = () => JSON.stringify(crew.flatMap(p => [0, 1, 2, 3, 4, 5].map(k => chatLine(p, t0 + 60 * k))));
+      const base = all(); window.lineFor = () => null; o.nullSame = all() === base;
+      const asked = {}; window.lineFor = (p, kind, ctx) => { asked[kind] = (asked[kind] || 0) + 1; return { text: kind + ':' + p.id, id: kind, kind }; };
+      memAdd('tomas', 'fav.lamp'); socNote('repair', { who: 'you', kind: 'oven' });
+      const kinds = {}; for (const p of SOC.crew) for (let k = 0; k < 6; k++) { const l = chatLine(p, t0 + 60 * k); kinds[l.kind] = (kinds[l.kind] || 0) + 1; }
+      o.kinds = kinds; o.asked = asked;
+      o.tomas = [0, 1, 2, 3, 4, 5, 6, 7].map(k => chatLine(SOC.crew[SOC.idx.get('tomas')], t0 + 60 * k).kind);
+      delete window.lineFor; o.back = all() === base;
+      SHIP.mem = {}; SHIP.social.cues = []; return o;
+    })()""")
+    print('Lines by kind:', json.dumps(e))
+    if not e['nullSame'] or not e['back']: fail('card lines change when the dialogue engine finds nothing')
+    for k in ('greet', 'near', 'cue'):
+        if not e['kinds'].get(k): fail(f'no {k} lines asked of the engine')
+    if 'callback' not in e['tomas']: fail("Tomas never calls back the lamp")
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('SOCIAL CHECK OK' if ok else 'SOCIAL CHECK FAILED')

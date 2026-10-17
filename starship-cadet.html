@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.21
+   STARSHIP CADET: CSV Wren                           build 0.36.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.21';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.22';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14356,7 +14356,8 @@ function socialChatter(m) {
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
     const n = newsKnownBy(a.p, t).find(x => !heard.has(x.id) && !(x.about === a.p.id && x.kind !== 'fault'));
     let text = n ? n.lines[Math.floor(schedU(a.p.seed, m, 637) * n.lines.length)] : null;
-    if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null; if (k) text = CHATTER_IDLE[k][Math.floor(schedU(a.p.seed, m, 639) * CHATTER_IDLE[k].length)]; }
+    if (!text && schedU(a.p.seed, m, 638) < .3) { const k = w.act === 'breakfast' || w.act === 'dinner' ? 'meal' : w.act === 'work' ? 'work' : w.act === 'leisure' || w.act === 'off' ? 'free' : null;
+      const l = k && socLine(a.p, 'smalltalk', { t, act: w.act, talk: k, bubble: true }); if (l) text = l.text; else if (k) text = CHATTER_IDLE[k][Math.floor(schedU(a.p.seed, m, 639) * CHATTER_IDLE[k].length)]; }
     if (!text || CHATTER_LAST.includes(text)) continue;
     if (bubbleSay(a.h, text)) { CHATTER_AT = performance.now(); CHATTER_LAST.push(text); if (CHATTER_LAST.length > 8) CHATTER_LAST.shift(); if (n) playerHeard(n.id, a.p.id, true); }
     return;
@@ -14472,6 +14473,17 @@ SIM_ADVANCE.push((from, to) => { socialTo(to); });
 // SHIP.rel[id].known for the Crew app), Help? (favourOf: a favour to accept in person, or "Done: here you go" to hand
 // one back) and Meet up (Appointments with them picked, once the device has it). The look is a plain panel for now;
 // the device engineer's skin (section 19) takes it over through CHAT_SKIN.
+// lines through the dialogue engine (0.36.22, A3): section 20 picks which kind of line matters most (chatLine's order),
+// section 22's lineFor(p, kind, ctx) -> { text, id, kind } | null finds the words (the person's own lines, their voice
+// template's, the shared bank; plans/social-deep-plan.md Part 6). Null, or no engine yet: chatLine goes on down its
+// order, and the lists below are the fallback, so without section 22 every line is as before. ctx: { t, tier, peek,
+// act, room, placeId, warmth, talk, bubble }; peek means only looking ahead, so the engine should note nothing
+// (recently said, memTold) for it. New kinds in the order: hint (a moment ready, 20c's momentReady), callback (a memory,
+// 60%), cue (a ship note, 50%), joy and about (a bonded crewmate), and near, life, greet and smalltalk ahead of the lists
+function socLine(p, kind, ctx = {}) {
+  if (typeof lineFor !== 'function') return null;
+  try { const l = lineFor(p, kind, ctx); return l && typeof l.text === 'string' && l.text ? l : null; } catch (e) { return null; }
+}
 const CHAT_GREET = [
   ['Oh, hello.', 'Hi.', 'Can I help you?', 'Morning. Or is it evening? I lose track.', 'You\'re the new Works cadet, aren\'t you?', 'Hello there.', 'Mm? Oh, hi.', 'Don\'t think we\'ve met.', 'Afternoon.', 'All right?'],
   ['Hey, {me}.', 'Oh, hi again.', 'Hello, cadet.', 'Good to see you.', 'How\'s Works treating you?', 'Hi! Settling in?', 'You again! Hi.', 'Hey. Busy day?', 'Hello, hello.', 'Nice to see a familiar face.'],
@@ -14582,35 +14594,45 @@ function socialMail(now) {                               // story Mail that's du
   SHIP.social.mail = SHIP.social.mail.filter(x => x.at > now);
   for (const x of due) mailSend(x);
 }
-function chatLine(p, t = shipNow()) {
+function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahead (Chat's next thing), so the dialogue engine notes nothing
   socInit();
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
+  const ctx = { t, tier, peek }, eng = (kind, x) => { const l = socLine(p, kind, x ? { ...ctx, ...x } : ctx); return l ? { text: l.text, kind, say: true, line: l } : null; };
   const fill = s => s.replace('{me}', chatName());
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
   if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
     return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
+  const mo = typeof momentReady === 'function' ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
+  if (mo) { const hint = typeof MOMENTS !== 'undefined' && MOMENTS[mo] && MOMENTS[mo].hint, l = hint ? null : eng('hint');
+    return { text: hint || (l ? l.text : 'Got a minute? Properly, I mean.'), kind: 'hint', moment: mo, say: true, line: l ? l.line : undefined }; }
   const beat = arcBeat(p, t); if (beat) return { text: typeof beat.say === 'function' ? beat.say(p) : beat.say, kind: 'story', say: true };
   const fd = feudOf(p.id, t); if (fd && !fd.f.talked.includes(p.id)) { const o = shortName(SOC.crew[SOC.idx.get(fd.other)]);
     return { text: ['Don\'t get me started on ' + o + '.', o + ' and I had words. I\'d rather not talk about it.', 'If you see ' + o + ', tell them... no, never mind.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 640) * 3)], kind: 'feud', say: true }; }
   if (isBirthday(p, t)) return { text: pick(['It\'s my birthday today!', 'Guess whose birthday it is?', 'Another year older today. Don\'t tell anyone.'], 610), kind: 'birthday', say: true };
+  if ((SHIP.mem[p.id] || []).some(m => !m[3]) && U(645) < .6) { const l = eng('callback'); if (l) return l; }   // a memory of you, said once
   const heard = new Set(SHIP.heard.map(x => x.id));
   const news = newsKnownBy(p, t).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
   if (news && U(611) < .8) return { text: pick(news.lines, 612), kind: 'news', news: news.id, say: true };
+  if (SHIP.social.cues.length && U(646) < .5) { const l = eng('cue'); if (l) return l; }   // what happened on the ship
   const f = crewFeeling(p, t); if (f && !/birthday/.test(f) && U(613) < .7) return { text: f, kind: 'feel', say: false };
   const w = typeof whereIs === 'function' ? whereIs(p, t) : null;
   if (w && U(614) < .45) {
     const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && DECKS[pl.deck].rooms && DECKS[pl.deck].rooms[pl.room];
+    const l = eng('near', { act: w.act, room: rm ? rm.name : null, placeId: w.placeId || null }); if (l) return l;
     const lines = CHAT_NEAR.find(([test]) => test(w))[1].filter(s => rm || !/\{room\}/.test(s));
     if (lines.length) return { text: pick(lines, 615).replace('{room}', rm ? rm.name.toLowerCase() : ''), kind: 'near', say: true };
   }
   if (tier >= 1 && U(616) < .6) {
+    const e = eng('life'); if (e) return e;
     const hs = (typeof habitsOn === 'function' ? habitsOn(p, Math.floor(t / 1440) + 1) : p.habits || []).filter(x => CHAT_LIFE[x]);
     const l = hs.length && U(617) < .75 ? CHAT_LIFE[pick(hs, 618)] : CHAT_DEPT[p.dept];
     if (l) return { text: l, kind: 'life', say: true };
   }
-  return chatGreet(p, t);
+  if (tier >= 1 && U(647) < .3) { const l = eng('joy') || (['best', 'friend', 'partner', 'mentor', 'mentee'].some(k => socialFill(p, k)) ? eng('about') : null); if (l) return l; }   // their joy, or a crewmate they're close to
+  return chatGreet(p, t, peek);
 }
-const chatGreet = (p, t = shipNow()) => { const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
+const chatGreet = (p, t = shipNow(), peek = false) => { const l = socLine(p, 'greet', { t, tier: relTier(p.id), warmth: warmth(p.id), peek }); if (l) return { text: l.text, kind: 'greet', say: true, line: l };
+  const a = CHAT_GREET[relTier(p.id)]; return { text: a[Math.floor(schedU(p.seed, Math.floor(t / 60), 619) * a.length)].replace('{me}', chatName()), kind: 'greet', say: true }; };
 // favours (0.36.2 fills this in): the favour that person has for you, or null
 // favours (0.36.3) on the systems engineer's job list (section 17: favourPost / favourAccept / favourDecline /
 // favourTurnIn / favoursOf / favourById; inert until it's there). favourOf(p) -> their open favour (offered or
@@ -14670,6 +14692,7 @@ function chatShow() {
     : C.offer ? [{ id: 'fav-yes', label: 'I\'ll do it' }, { id: 'fav-no', label: 'Not now' }]
     : [{ id: 'chat', label: r.chatDay === today ? 'Chatted today' : 'Chat', off: r.chatDay === today }, { id: 'ask', label: 'Ask about…' },
        { id: 'help', label: ready ? 'Done: here you go' : 'Help?' }, { id: 'meet', label: 'Meet up' }];
+  if (!C.ask && !C.offer && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const v = { who: p.name, role: p.role, tier: REL_NAMES[relTier(p.id)], line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -14705,12 +14728,14 @@ function chatDo(id) {
     let l = null;                                       // the next thing on their mind: something they say, not the same again
     if (made) l = { text: made, say: false };
     else if (fd) l = { text: ['Maybe I was a bit hard on ', 'I suppose I should talk to ', 'It\'s silly, really. I miss chatting with '][Math.floor(schedU(p.seed, SHIP.time.day, 641) * 3)] + shortName(SOC.crew[SOC.idx.get(fd.other)]) + '.', say: true };
-    for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) l = chatLine(p, shipNow() + 60 * k);
+    let kk = 0; for (let k = 1; k <= 6 && (!l || l.say === false || l.text === C.line.text) && !fd; k++) { l = chatLine(p, shipNow() + 60 * k, true); kk = k; }
+    if (kk && l.line) l = chatLine(p, shipNow() + 60 * kk);   // the dialogue engine's line that's said: now it may note it
     if (l.news) playerHeard(l.news, p.id);
     if (l.kind === 'story') arcTold(p);
     if (l.kind === 'missed') { const a = apptMissedBy(p); if (a) a.socSaid = true; }
     chatSay((l.say === false ? 'You chat for a while. ' + l.text : l.text) + (grubby ? ' ' + shortName(p) + ' wrinkles their nose a little.' : '') + (after > before ? ' (You\'re ' + REL_NAMES[after] + 's now.)' : ''), l.say !== false && !grubby && after <= before);
   } else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
   else if (id === 'ask-news') {
     const heard = new Set(SHIP.heard.map(x => x.id)), n = newsKnownBy(p).find(x => !heard.has(x.id) && !(x.about === p.id && x.kind !== 'fault'));
