@@ -406,3 +406,31 @@
 - They keep the doors wrong here. I've said. Politely. Hm. Hello to the Wren. Eat something.
 ? tier>=friend
 - Still check under my bunk. Old habit. Then I think of the Wren and sleep fine. Hm. Write, if you like.
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Nothing of the bad day, Rook or the six hours.
+
+== near
+? trad:jam
+- The jam. I stand at the back. I tapped a foot. Once. Mensah saw.   #funny
+? trad:film
+- Film night. I sit by the door. I watch the film. Mostly I watch the door.   #funny
+? trad:market
+- Swap meet. I check the stalls. Habit. Then I buy mints. Also habit.   #funny
+? trad:observatory-night
+- Observatory night. Hm. Lot of sky. Doors are fine. Sky's fine. Good.   #funny
+? trad:harvest
+- Harvest morning. Garden's crowded. I count heads. Everyone's there. Good.
+? trad:hull-lights
+- Hull lights. I walk the decks while they're on. Best rounds of the month.
+? trad:founding
+- Founding Day. I listen to every word the Captain says. Then cake. Adequate cake.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. I'll be at a window. Don't ask who for. Hm. Ask after.
+
+== smalltalk
+? trad:today
+- Something on. Doors open. Watch posted.
+? trad:hull-lights
+- Hm. Lights. Good.
