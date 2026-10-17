@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.8 
+   STARSHIP CADET: CSV Wren                           build 0.39.9 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.8';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.9';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15310,7 +15310,7 @@ function chatTick() {
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B8)
 // Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
-// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.8). Lazy like the rest
+// (0.39.3), goodbyes (0.39.4), couples and the story arcs (0.39.5-0.39.6), calls home (0.39.7-0.39.9). Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -15971,7 +15971,8 @@ function homeDone(k, L, x, t) {                          // the call ended: a be
 // HOME_MSG.every days, half the time. It comes in Mail with `play: 'home:<contact>'`; the device's Play (section 19 asks
 // mailPlay(m)) plays it and asks what to record back (the same send lines as a call); their answer comes by Mail the
 // next day. A call to them answers it too. State: c.msg = { day, i (the HOME_CHAT call), done }, home.msgDay.
-//   mailPlay(m) -> plays a Mail's `play`: 'home:<contact>' (their recorded message), else a moment id (momentShow)
+//   mailPlay(m) -> plays a recorded message from home (by its sender and subject, or `play: 'home:<contact>'`), else a
+//     Mail's `play` moment id (momentShow); mailPlayable(m) -> whether there's anything to play; homeFolks() -> their names
 const HOME_MSG = { quiet: 3, every: 5, hour: 12, odds: .5, back: 1440 };
 function homeMsgHour(h) {                                // storyHour, every ship hour
   if (h % 24 !== HOME_MSG.hour) return;
@@ -15985,15 +15986,22 @@ function homeMsgHour(h) {                                // storyHour, every shi
     const ctx = homeCtx(t), pool = (HCH[k] || []).map((e, i) => [e, i]).filter(([e]) => e && Array.isArray(e.lines) && homeOk(e.when, hp, ctx)); if (!pool.length) continue;
     const [e, i] = pool[Math.floor(schedU(hp.seed, day, 686) * pool.length)], first = e.lines.find(l => !l.send);
     c.msg = { day, i, done: false }; H.msgDay = day;
-    SHIP.social.mail.push({ at: t, from: HC[k].name, subject: 'A recorded message', play: 'home:' + k,
+    SHIP.social.mail.push({ at: t, from: HC[k].name, subject: HOME_MSG_SUBJECT, play: 'home:' + k,
       body: (first ? '"' + (homeFill(first.text, hp, ctx) ?? first.text) + '" ' : '') + '(Recorded at home. Play it to hear the rest and record a reply.)' });
     return;
   }
 }
+const HOME_MSG_SUBJECT = 'A recorded message';
+const homeFolks = () => { const HC = homeBaked()[0]; return HC ? Object.values(HC).map(x => x.name) : []; };   // for section 19's "From home" heading
+function homeMailOf(m) {                                 // the contact whose recorded message a Mail is (Mail keeps no extra fields: by sender and subject), else null
+  if (!m) return null; const HC = homeBaked()[0]; if (!HC) return null;
+  if (m.play) { const hm = /^home:(.+)$/.exec(String(m.play)); return hm && HC[hm[1]] ? hm[1] : null; }
+  return m.subject === HOME_MSG_SUBJECT ? Object.keys(HC).find(k => HC[k].name === m.from) || null : null;
+}
+const mailPlayable = m => { const k = homeMailOf(m), c = k && homeC(k); return !!(c && c.msg && !c.msg.done) || !!(m && m.play && !homeMailOf(m)); };   // section 19 shows Play while it's true
 function mailPlay(m) {
-  const id = m && m.play; if (!id) return false;
-  const hm = /^home:(.+)$/.exec(String(id)); if (hm) return homeMessage(hm[1]);
-  return typeof momentShow === 'function' ? momentShow(id) : false;
+  const k = homeMailOf(m); if (k) return homeMessage(k);
+  return m && m.play && typeof momentShow === 'function' ? momentShow(m.play) : false;
 }
 function homeMessage(k, t = shipNow()) {                 // their message, then your reply (no answer in the scene: it comes by Mail)
   if (typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function' || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
