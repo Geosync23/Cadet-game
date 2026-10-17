@@ -120,7 +120,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
-| `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
+| `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either), `call` (on a call home) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
 | `came:` | calls home: you went to a tradition lately (`any`, or its id); the call passes it, and `{trad}` fills from it | `came:any` |
 | `friend:` | calls home: you have a friend aboard (`any`); `{friend}` fills from it | `friend:any` |
@@ -203,7 +203,8 @@ A: No promises.
 - **One speaker** (0.43.13): a conversation with only `A:` lines is one person talking with nobody else in it, such as
   someone on a call home (`@overheard booths` with `? place:booths`), one to four lines. It plays when that person has
   no conversation with someone close by; people on a call home only ever say these. No `pair:`, `with:` or `{other}`
-  in it (lines_check says so).
+  in it, and it needs a `place:` or an `act:` (`act:call` for a call home), so it isn't said just anywhere (lines_check
+  says so).
 - `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
