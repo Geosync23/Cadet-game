@@ -64,6 +64,7 @@ def run(path):
         for name, w, h in SIZES:
             print(f'{name} ({w} x {h}):')
             g = Game(pw, path, w, h)
+            g.page.add_style_tag(content='#devHu:not([hidden]){display:flex!important}')   # cadet_test's Game hides the heads-up strip; this check needs it
             g.step(3)
             apps = g.ev("deviceApps().map(a => a.id)")
             print('  apps:', apps)
@@ -142,7 +143,7 @@ def run(path):
               go(T - 10); out.queue = [HU_Q.length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
               devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.length];
               document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
-              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height <= 120;
+              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height > 0 && r.height <= 120;
               el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
               R.on = false; out.off = go(T - 15); R.on = true;
               D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
@@ -164,6 +165,16 @@ def run(path):
               SHIP.time.day = d; SHIP.time.min = 1170 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const h = document.getElementById('devHu');
               out.hu = h && !h.hidden ? h.textContent : ''; out.go = DEV.hu && DEV.hu.goal ? [DEV.hu.goal.deck, DEV.hu.goal.room] : null;
               SHIP.occasions.length = 0; SHIP.occasions.push(...keep); SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            # the heads-up never covers section 15's needs strip or activity bar (0.35.31): on a phone it moves below them
+            # (stand-ins with those ids when this build has none); on a wide screen they're apart and it stays at the top
+            ov = g.ev("""(() => { const made = []; for (const [id, top] of [['needStrip', 124], ['actBar', 166]]) if (!document.getElementById(id)) {
+                const e = document.createElement('div'); e.id = id; e.style.cssText = 'position:fixed;left:14px;top:' + top + 'px;width:212px;height:36px'; document.body.appendChild(e); made.push(e); }
+              DEVICE_SKIN.heads({ text: 'Dinner starts in 15 min', where: 'the mess, Deck 3', go: true });
+              const r = id => document.getElementById(id).getBoundingClientRect(), h = r('devHu'), hit = ['needStrip', 'actBar'].filter(id => { const b = r(id); return b.width && b.right > h.left && b.left < h.right && b.bottom > h.top && b.top < h.bottom; });
+              const out = { hit, top: Math.round(h.top), bottom: Math.round(h.bottom), inside: h.bottom <= innerHeight };
+              DEVICE_SKIN.heads(null); made.forEach(e => e.remove()); return out; })()""")
+            print('  heads-up vs needs strip:', ov)
+            check(ov['hit'] == [] and ov['inside'] and ov['bottom'] > ov['top'], f'heads-up: never over the needs strip or activity bar: {ov}')
             print('  occasions:', oc)
             check(not oc['own'] or (oc['listed'] and oc['chance'] and oc['kept'] and oc['hu'].startswith("The Captain's table starts in 15 min") and oc['go'] == [2, 'C']), f'occasions: in the Schedule with a heads-up and Go there; no surprises, none kept: {oc}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
