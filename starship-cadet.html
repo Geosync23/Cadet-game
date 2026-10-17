@@ -27272,6 +27272,10 @@ function knowBlocks(id) {                                // for the Crew app (se
 // bus: simNote('bond', { a, b, kind, was })
 const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 15, driftOff: 20, mentor: 40, mentorOff: 25 };
 const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'], COUPLE_AFF = 90;
+// hard bounds by design (0.39.21, the lead's long-play rule): at most BOND_MAX bonds a person aboard (a new one waits while
+// either is full; 9 is the most anyone had in 280 days) and BOND_GONE_MAX frozen with people who moved on (the oldest let go
+// first), so SHIP.social.bonds is at most n * (BOND_MAX + BOND_GONE_MAX) / 2 bonds. STORY_CAP counts when they bind (not saved)
+const BOND_MAX = 10, BOND_GONE_MAX = 4, STORY_CAP = { full: 0, gone: 0, firstFull: null, firstGone: null };
 const STORY_BONDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'];   // section 20's frozen BOND_KINDS
 // how many friends (60+) someone makes room for: section 20's hourly drift stops new friendships climbing past 60
 // once either of the pair has this many (the designer's numbers)
@@ -27279,9 +27283,12 @@ const FRIEND_CAP_OPEN = ['chatty', 'sociable', 'warm', 'cheerful'], FRIEND_CAP_S
 const friendCap = p => { const t = p && p.traits || []; return t.some(x => FRIEND_CAP_OPEN.includes(x)) ? 5 : t.some(x => FRIEND_CAP_SHY.includes(x)) ? 3 : 4; };
 function storyHour(h, pairs) {
   const { crew, n } = SOC, t = h * 60 + 30, aff = SHIP.aff, B = SHIP.social.bonds || (SHIP.social.bonds = {}), rank = p => RANK_ORDER.indexOf(p.rank);
-  const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return; B[k] = Object.assign({ kind, since: t }, extra);
+  const cnt = new Map(), cntAdd = (k, d) => { for (const x of k.split(':')) cnt.set(x, (cnt.get(x) || 0) + d); };
+  const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return;
+    if (!b && k.split(':').some(x => (cnt.get(x) || 0) >= BOND_MAX)) { STORY_CAP.full++; if (STORY_CAP.firstFull === null) STORY_CAP.firstFull = Math.floor(h / 24) + 1; return; }   // full: a new bond waits
+    if (!b) cntAdd(k, 1); B[k] = Object.assign({ kind, since: t }, extra);
     if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind, was }); } };
-  const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
+  const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (!b.gone) cntAdd(k, -1); if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
   affWeekTake(h);
   homeMsgHour(h);
   for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
@@ -27291,6 +27298,11 @@ function storyHour(h, pairs) {
   const day = Math.floor(h / 24) + 1, on = crew.map(p => socAboard(p, day)), both = (i, j) => on[i] && on[j];
   for (const k in B) { const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
     if (!both(i, j)) { if (!B[k].gone) B[k].gone = day; } else if (B[k].gone) delete B[k].gone; }
+  const goneOf = new Map();
+  for (const k in B) { if (!B[k].gone) { cntAdd(k, 1); continue; } for (const x of k.split(':')) { const i = SOC.idx.get(x); if (i !== undefined && on[i]) (goneOf.get(x) || goneOf.set(x, []).get(x)).push(k); } }
+  for (const [, ks] of goneOf) if (ks.length > BOND_GONE_MAX) {   // the oldest frozen bonds of someone still aboard are let go
+    ks.sort((a, b) => B[a].gone - B[b].gone || (a < b ? -1 : 1));
+    for (const k of ks.slice(0, ks.length - BOND_GONE_MAX)) if (B[k]) { delete B[k]; STORY_CAP.gone++; if (STORY_CAP.firstGone === null) STORY_CAP.firstGone = day; } }
   // couples (B6): the roster's partners are a couple from the start and stay one, at COUPLE_AFF or more; no story of
   // their own, never involving you. Their bond outranks the others, so they're never best friends, rivals or mentor
   for (let i = 0; i < n; i++) { const q = crew[i].partner, j = q !== undefined ? SOC.idx.get(q) : undefined; if (j === undefined || j <= i || !both(i, j)) continue;
@@ -27343,7 +27355,7 @@ function storyHour(h, pairs) {
         if (!on[i] || p.dept !== q.dept || p.rank === 'guest' || rank(p) < 0 || rank(q) - rank(p) < 1 || (count.get(p.id) || 0) >= BOND_MENTEES || !voiceOf(p.id).mentors) continue;
         const v = aff[pairIdx(i, j)], sk = (i < j ? p.id + ':' + q.id : q.id + ':' + p.id), sb = B[sk];
         if (v > pv && !(sb && (sb.kind === 'best' || sb.kind === 'rivals' || sb.kind === 'couple'))) { pick = [p, sk]; pv = v; } }
-      if (pick) { delete B[pick[1]]; set(pick[0].id + ':' + q.id, 'mentor', { seen: h }); has.add(q.id); count.set(pick[0].id, (count.get(pick[0].id) || 0) + 1); }
+      if (pick) { if (B[pick[1]] && !B[pick[1]].gone) cntAdd(pick[1], -1); delete B[pick[1]]; set(pick[0].id + ':' + q.id, 'mentor', { seen: h }); has.add(q.id); count.set(pick[0].id, (count.get(pick[0].id) || 0) + 1); }
     }
   }
 }
