@@ -63,14 +63,15 @@ US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': '
 SHIP_WORDS = set('''I I'm I'll I've I'd OK Wren CSV Works Watch Survey Comms Helm Command Galley Infirmary Store Garden Deck Decks
 Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ensign Veyli Tiles Hesper Dock Mail Monday Tuesday
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
-Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well'''.split())
+Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
+Admiral Moro Brenner Gull Bunk Engine Specialist Reactor'''.split())
 
 
 def roster(game):
     with open(game, encoding='utf-8') as f:
         html = f.read()
     people = {}
-    for name in ('ROSTER', 'ROSTER_GUESTS'):
+    for name in ('ROSTER', 'ROSTER_GUESTS', 'GUESTS'):     # crew, guests living aboard, and event guests and visitors
         m = re.search(r'^const ' + name + r' = \[\n(.*?)^\];', html, re.M | re.S)
         for l in (m.group(1).split('\n') if m else []):
             l = l.strip().rstrip(',')
@@ -129,6 +130,29 @@ def main(argv):
     for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
         for sec, es in tr.get('text', {}).items():
             allx += [(f'tradition {tr["id"]}', 'trad.' + sec, {'text': e.get('text', e.get('t')), 'tone': e.get('tone', 'light'), 'id': tr['id']}, None, 'trad') for e in es]
+    # moments (story arcs and themes): every script line, the hint, keepsake, learn and Mail; when: values like a line's
+    def moment_beats():
+        for mid, b in out['MOMENTS'].items():
+            yield f'arc {b["thread"][4:]} beat {b["beat"]}', b, b['who']
+        for th, bs in out['MOMENT_THEMES'].items():
+            for b in bs:
+                yield f'theme {th} beat {b["beat"]}', b, 'them'
+    for where, b, who in moment_beats():
+        if who not in people and who != 'them':
+            errors.append(f'{where}: who "{who}" is not a crew member or guest')
+        allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, 'moment')) if b.get('hint') else None
+        for k in ('keepsake', 'learn'):
+            if b.get(k):
+                allx.append((where, 'moment', {'text': b[k], 'id': where}, None, 'moment'))
+        if b.get('after', {}).get('mail'):
+            allx.append((where, 'letter', {'text': b['after']['mail']['body'], 'id': where}, None, 'moment'))
+        if b.get('when'):
+            allx.append((where, 'moment', dict(b['when'], text='', id=where), None, 'moment'))
+        for l in b['lines']:
+            for x in ([l] if 'text' in l else [c for c in l['choice']] + [c[r] for c in l['choice'] for r in ('reply', 'warm') if r in c]):
+                if x.get('who') and x['who'] not in people and x['who'] not in ('you', 'them'):
+                    errors.append(f'{where}: speaker "{x["who"]}" is not a crew member, guest, them or you')
+                allx.append((where, 'moment', {'text': x['text'], 'id': where}, None, 'moment'))
     for mid, sc in out['MEETINGS_BAKED'].items():
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
@@ -137,6 +161,8 @@ def main(argv):
     seen = {}
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
+        if not t and src != 'moment':
+            continue
         for tok in re.findall(r'\{([^}]*)\}', t):
             if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')
@@ -200,7 +226,7 @@ def main(argv):
                                                                        'His', 'Her', 'Their', 'Our', 'Your', 'My', 'One', 'Each', 'Now', 'Then', 'So', 'Yes', 'No', 'Yesterday'):
                 warns.append(f'{tag}: "{m.group(1)}" looks like a name that isn\'t crew or a guest')
         key = (kind, t)
-        if key in seen and src != 'convo':
+        if key in seen and src not in ('convo', 'moment') and t:
             warns.append(f'{tag}: the same line is also in {seen[key]}')
         seen.setdefault(key, where)
 
@@ -259,7 +285,7 @@ def main(argv):
 
     print(f'lines_check: {len(allx)} lines in {len(byfile)} places; {len(out["VOICE"])} voice cards '
           f'({with_card} with words) for {len(crew)} crew; {len(out["CONVOS"])} conversations; '
-          f'{len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions')
+          f'{len(out["MOMENTS"])} moments; {len(out["MOMENT_THEMES"])} themes; {len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions')
     if not quiet:
         print('coverage (own lines / target), people with any:')
         for c in cov:
