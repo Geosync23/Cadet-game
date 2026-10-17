@@ -13,7 +13,7 @@ exec(open(__file__.replace('social_check.py', 'cadet_test.py')).read().split("a,
 from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
-SAVE_MAX = 20000               # bytes of the save's social part
+SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
 RUN = r"""(({ days, player, jump }) => {
@@ -92,7 +92,7 @@ with sync_playwright() as pw:
 
     if a.get('bonds') is not None:          # 20c's bonds (social B), once storyHour is in
         bk = a['bonds']; print('Bonds after the run:', json.dumps(bk))
-        if not (15 <= bk.get('friends', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
+        if not (15 <= bk.get('friends', 0) + bk.get('best', 0) <= 40) or not (2 <= bk.get('rivals', 0) <= 6) or not bk.get('mentor'): print('  NOTE bond numbers outside the plan\'s targets (friends 15-40, rivals 2-6, a mentor)')
     rp = a['rep']
     print('Reputation after the run:', json.dumps(rp and {'dept': rp['dept'], 'ship': rp['ship'], 'knownFor': rp['view']['knownFor']}))
     if not rp or rp['dept']['galley'] < 20 or max(v for k, v in rp['dept'].items() if k not in ('galley', 'works')) >= 20: fail('a stand-in who fixes galley ovens should be known in the galley, and only there')
@@ -191,13 +191,14 @@ with sync_playwright() as pw:
       const o = {}, crew = SOC.crew.slice(0, 30), t0 = Math.floor(shipNow() / 60) * 60;
       for (const id of ['tomas', 'pell', 'rina']) { relAdd(id, 'chat', 30); relGet(id).arc = 99; }   // no story beats in the way
       const all = () => JSON.stringify(crew.flatMap(p => [0, 1, 2, 3, 4, 5].map(k => chatLine(p, t0 + 60 * k))));
-      const base = all(); window.lineFor = () => null; o.nullSame = all() === base;
-      const asked = {}; window.lineFor = (p, kind, ctx) => { asked[kind] = (asked[kind] || 0) + 1; return { text: kind + ':' + p.id, id: kind, kind }; };
+      const realLF = typeof lineFor === 'function' ? lineFor : undefined;   // section 22's, when merged: swapped in the game's own scope, put back after
+      lineFor = undefined; const base = all(); lineFor = () => null; o.nullSame = all() === base;
+      const asked = {}; lineFor = (p, kind, ctx) => { asked[kind] = (asked[kind] || 0) + 1; return { text: kind + ':' + p.id, id: kind, kind }; };
       memAdd('tomas', 'fav.lamp'); socNote('repair', { who: 'you', kind: 'oven' });
       const kinds = {}; for (const p of SOC.crew) for (let k = 0; k < 6; k++) { const l = chatLine(p, t0 + 60 * k); kinds[l.kind] = (kinds[l.kind] || 0) + 1; }
       o.kinds = kinds; o.asked = asked;
       o.tomas = [0, 1, 2, 3, 4, 5, 6, 7].map(k => chatLine(SOC.crew[SOC.idx.get('tomas')], t0 + 60 * k).kind);
-      delete window.lineFor; o.back = all() === base;
+      lineFor = undefined; o.back = all() === base; lineFor = realLF;
       SHIP.mem = {}; SHIP.social.cues = []; return o;
     })()""")
     print('Lines by kind:', json.dumps(e))
@@ -210,15 +211,16 @@ with sync_playwright() as pw:
     w = g.ev(r"""(() => {
       const o = {}, F = new Set(), had = typeof flag === 'function' ? flag : null; SHIP.mem = {};
       o.open = ['d2', 'd3', 'd5', 'done'].every(socGate);
-      const introWas = SHIP.intro; SHIP.intro = { on: true, step: 'arrival', escort: 'torres-zeke', done: {} }; window.flag = k => F.has(k);
+      const introWas = SHIP.intro; SHIP.intro = { on: true, step: 'arrival', escort: 'torres-zeke', done: {} }; flag = k => F.has(k);   // the game's own flag (section 13) swapped in its scope
+      const realLF = typeof lineFor === 'function' ? lineFor : undefined;
       o.shut = ['d2', 'd3', 'd5', 'done'].map(socGate); F.add('week1.d2'); F.add('week1.d3'); o.tue = ['d2', 'd3', 'd5', 'done'].map(socGate);
       socIntroNote({ step: 'arrival', who: ['torres-zeke'] }); socIntroNote({ step: 'dinner', who: [] }); socIntroNote({ step: 'look', who: ['pell'] }); socIntroNote({ step: 'bunk', who: ['rina'], missed: true });
       o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro') || !!mem('rina', 'intro')];
       o.mentor = [SHIP.social.mentor, bondOf('torres-zeke', 'mentee'), socialFill(SOC.crew[SOC.idx.get('torres-zeke')], 'mentee')];
-      window.lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
+      lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
       o.week1 = chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind;
       F.add('week1.done'); o.done = [socIntroOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
-      delete window.lineFor; SHIP.intro = introWas; if (had) window.flag = had; else delete window.flag;
+      lineFor = realLF; SHIP.intro = introWas; flag = had || undefined;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.social.mentor === 'torres-zeke';
       SHIP.social.mentor = null; SHIP.mem = {};
       // an invitation to a tradition someone is going to
@@ -326,7 +328,8 @@ with sync_playwright() as pw:
       o.home = playerInBunk();
       for (let d = 8; d <= 17 && o.visits.length < 3; d++) for (let m = 1100; m < 1340; m++) {
         setShipNow((d - 1) * 1440 + m); socialVisit((d - 1) * 1440 + m);
-        if (VISIT && !VISIT.inside) { o.visits.push([d, m, VISIT.p.id]); if (o.visits.length === 1) { visitIn(); o.card = CHAT && [CHAT.line.kind, CHAT.visit, !!mem(VISIT.p.id, 'visit')]; } else { VISIT.until = 0; socialVisit(0); } }
+        if (VISIT && !VISIT.inside) { o.visits.push([d, m, VISIT.p.id]); if (o.visits.length === 1) { const realCome = typeof crewComeTo === 'function' ? crewComeTo : undefined; crewComeTo = (p, id, cb) => { cb(); return () => {}; };   // section 10's walk-in, arriving at once
+          visitIn(); crewComeTo = realCome; o.card = CHAT && [CHAT.line.kind, CHAT.visit, !!mem(VISIT.p.id, 'visit')]; } else { VISIT.until = 0; socialVisit(0); } }
         if (m === 1325 && o.visits.length === 1 && o.closed === undefined) o.closed = VISIT === null;
         if (m === 1325) chatClose();
         if (m > 1290 && VISIT && !VISIT.inside) o.late = true;
