@@ -333,3 +333,19 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - 19:08 0.60.5a HOTFIX released (sickToday sd>0): ship-integration -> 348b1d8, published version 4. player_check + intro_check (incl part 12) still running at BM2.
 - ~19:20 head writer 4 archived (content 51bda1c = tour pre-lift final; handover 29ed058). No writer active; hire fresh only if needed. User notes since 0.60.5a: Zeke warps on lift (onb 3), gym lying hover + seat clipping (perf 3, 0.27.39), pause button (PE5 0.28.48), bunk-arrow wording (onb 3).
 - ~19:28 user: remove the postbox (social eng); Tiles: time stops while playing, opponent walks over or 'nobody free', Tiles tutorial; + pause button -> player engineer 6 (new). PE5 near 70%.
+
+## STATE AT 19:35 (lead at ~64% memory; handing over after 0.60.5b)
+- Live: 0.60.5a = ship-integration 348b1d8 (link version 4). Pending 0.60.5b hotfix: call-home/booth/moments closing after ~1 s (social-fixes 0.62.5 on 348b1d8, + postbox removal maybe); build master 2 applies on cand-0605 and sends hash -> lead republishes same scratchpad path to SmL8Na1iTB2JQZDP4dYdou.
+- Open question with build master 2: device_check heads-up strip empty on 0.60.5 (real or test-copy?). If real, schedule heads-ups are broken in the release -> fix in 0.60.6 (device owner archived; player engineer 6 or fresh).
+- 0.60.6 queue (user still sending notes; do NOT combine until user says "notes are in"):
+  - player-needs 48f66e8 (0.28.41-47: +go pose, warnings, tips, social by bond, news feed, Relationships, player tray fix, day-0 sick fix, FEED_MAX) -> reviewer 1e reviewing. Player engineer 5 at ~70%, idle (handover-player.md).
+  - player engineer 6 (session_01AWgP6kgzpprnpA5pMAAiqq): pause button; Tiles stops time, opponent walks over / "nobody free"; Tiles tutorial (0.28.48+).
+  - poses (perf 3, session_01S8FWAPFnpaAAUN1wpDQbbo, ~60%): 0.27.36-40 (seated hands, busy work, diner trays, fork, gym mats, seat clipping) + pending 0.27.41 (gym ball off mat, Deck 4 washroom toilets; may need a deck architect if perf 3 hands over).
+  - dialogue 33b13669 (bubbles, PASS).
+  - leave 0af21bf (0.61.0-12 incl. sickness + day-0 fix) -> 1e skim of 0.61.12.
+  - sim-engineer fc869df5 (0.26.41-42 feast queues) + plans/events_check-0.26.41.patch (PASS).
+  - arrival: onboarding engineer 3 (session_016TRcnsFqFB1q5zZp6vjGBn): pre-lift tour (shuttle stop with 0.60.5 lines, then walk-and-talk walk.up + Works-bay lines), Zeke must ride the lift with you (no warp), bunk-arrow label "Head to your bunk when you're done looking around". Content: claude/content 51bda1c (head writer 4 final; archived).
+  - social-fixes 0.62.5+ (booth fix, postbox removal).
+  - content: 5417aeb news.lines + later through 51bda1c.
+- Pillar 4 is DONE when the user approves 0.60.6. Then (the user's calls): PR to main, Pillar 5 start (plan approved answers; built on its own; lean team).
+- Rules: surveys for question lists + push notification on every question; design decisions are the user's; cost tracking plans/cost-tracking.md; user is on the weekly-usage warning.
