@@ -95,3 +95,19 @@
 == rumour
 - Got a bargain for you. News.   #funny
 - Full-price news, this. Listen.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Haggled the shuttle crew down to one bag each.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, it's you. I'm leaving. Tell the store I'll miss the haggling. Just the haggling.
+? leaving:you tier>=friend
+- You were good to argue with. Never mean about it. Rare. Thank you.   #warm
+
+== letter
+- New ship. The storekeeper doesn't haggle. I'm working on it. Day four.
+? tier>=friend
+- Found an old Wren crew list. My parent's name was on it. So was the coffee machine's. Hello.

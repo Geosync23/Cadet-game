@@ -97,3 +97,19 @@
 == rumour
 - Nothing private. Just nice news.
 - I hear things. Only the happy ones go further.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Slowly. The sweets bowl goes last. Have one.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Hello, hello. I'm retiring. It's time. Come and have a sweet before I go.
+? leaving:you tier>=friend
+- Thank you for every conversation. You let the quiet do some of the talking. Rare.   #warm
+
+== letter
+- My retirement is a garden and a lot of tea. I still know everyone's birthday. Yours is coming.
+? tier>=friend
+- Sat in the garden today and thought about the Wren's. Gentle place. Gentle people. Hello from here.

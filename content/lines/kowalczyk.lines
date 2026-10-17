@@ -102,3 +102,19 @@
 == rumour
 - I read the ending first. Here it is.   #funny
 - Risk management: you'll want to know this.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Slowly. The novels first.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ah. I'm leaving. A posting elsewhere. The night watch is yours to keep quiet.
+? leaving:you tier>=friend
+- Quiet nights are better with good company. You were. Thank you.   #warm
+
+== letter
+- New posting. Quiet nights. Good. Finished a paper novel on the first watch. Hello.
+? tier>=friend
+- Read an old book about a ship like the Wren. It ended well. I thought that was right.

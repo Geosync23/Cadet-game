@@ -91,3 +91,19 @@
 == rumour
 - Wait, I had news. Yes. This.   #funny
 - Don't quote me. I'll forget I said it.   #funny
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Found my biscuit tin. Pell's card's still in it. Of course.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Oh, hey. I'm leaving. I've forgotten what I was going to say. Bye. That was it.   #funny
+? leaving:you tier>=friend
+- You were good company. And good at Tiles. I lost gracefully. Mostly to you. Thanks.   #warm
+
+== letter
+- New ship. Hid the tin. Nobody's found it. I miss Pell finding it. Odd thing to miss.
+? tier>=friend
+- Lost at Tiles to a stranger today. Gracefully. Thought of the Wren. Where was I? Hello.

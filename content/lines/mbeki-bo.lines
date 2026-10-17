@@ -93,3 +93,19 @@
 == rumour
 - Checked this twice. It's true.
 - Exactly what I heard. Exactly.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the telescope. Checked the case twice. Spotless.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Look after the observatory. Polish the lenses.
+? leaving:you tier>=friend
+- You were careful with my telescope. I noticed. Thank you.   #warm
+
+== letter
+- New ship. Spotless telescope, spotless window. Sister sent a recipe from Kesh. Checked it twice.
+? tier>=friend
+- Saw a comet last night. Counted its tail twice. Thought the Wren would like it.

@@ -94,3 +94,19 @@
 == rumour
 - Calmly: here's the news.
 - No names. Never names. But.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. The chillies are going in a box with holes. Drink some water.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving. A station hospital. Look after yourself. Drink some water.
+? leaving:you tier>=friend
+- You looked after people. I noticed. That's the job, really. Thank you.   #warm
+
+== letter
+- The station hospital is large and calm. I've grown chillies on the windowsill. My mother's seeds. Drink water.
+? tier>=friend
+- Put my sign on the new door. IF YOU ARE BLEEDING. They laughed. Then they listened. Hello.
