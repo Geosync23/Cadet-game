@@ -4,21 +4,23 @@
 **Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; before that session_01PxXKwc5mkC7tV5MPi3p7PP). **Build master:** session_012K7RZ3oSX2vpBb1rR66MBh. Reviewer 2 covers dialogue, traditions, device, decks, tiles, content.
 **Chain of command (the user's rule):** the user → the lead → everyone. Never contact the user; report to the lead (and the helper).
 
-## My seats (session ids) — refreshed 2026-10-17 ~10:20 by reviewer 1 (session 2)
-Lead: **session_01KPJMYjXAPkNUcrQ8VRkhLE**. Build master 2: **session_01F8ph7FKqViF3heRn94YgBr**. Reviewer 1c (notes on claude/reviews-3): **session_01YcSJkhhJ2MnCjsJs7QV8ud**; owns player (from 5e61e12), arrival 0.42.20+ and the roster. Reviewer 2b has galley 0.29.33+.
+## My seats (session ids) — refreshed 2026-10-17 ~10:35 by reviewer 1 (session 2)
+Lead: **session_01KPJMYjXAPkNUcrQ8VRkhLE**. Build master 2: **session_01F8ph7FKqViF3heRn94YgBr**. Reviewer 1c (notes on claude/reviews-3): **session_01YcSJkhhJ2MnCjsJs7QV8ud**; owns player, arrival 0.42.20+ and the roster. Reviewer 2b has galley 0.29.33+.
 | Seat | Branch | Session | Last reviewed | Verdict / open |
 | --- | --- | --- | --- | --- |
-| Sim engineer 4 (10/13/14/17) | `claude/sim-engineer` | session_01EJUGywZv9BpcUezjXES9AC | 6e87e6b (0.26.33) | PASS WITH FIXES. MUST (0.60.3): Calder's 3-mess-9 shared with Torres (introLay free() ignores occ.res). food_check fails on full merge + ship-events Sunday day 7 (being traced). 236810f (0.26.34) addendum in progress. Deferred should: breakfast tray return lateness |
-| Galley (16) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 6abd36b PASS WITH FIXES; final 40166d6 (0.29.32) in progress, gates 0.60.3 | galley owns the player's line membership |
-| Social A (20) | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | 2cfbc63 (0.36.76) PASS WITH FIXES | news uncapped; --long samples every 28 days (peaks missed); knownPack keyed by roster position |
-| Social B2 (20c) | `claude/social-stories` | session_014A3w2gK8FBNWs66YC3LfME | 3947822 (0.39.21) PASS WITH FIXES | arrival start never packs bonds (negative since) |
-| Onboarding 2 (21) | `claude/arrival` | ? (ask the lead) | partial 54d7911 (b7ad3e9) | 1c owns arrival now |
+| Sim engineer 4 (10/13/14/17) | `claude/sim-engineer` | session_01EJUGywZv9BpcUezjXES9AC | 236810f (0.26.34) PASS WITH FIXES; 7c1feea (0.26.35) read only | **0.60.3 waits on this:** 0.26.36 (crewMakeWay) + 0.26.37 (Calder's 3-mess-9 shared with Torres: introLay free() must refuse occ.res holds; no fallback to e.placeId). Verify day_check part 5 on days 0/7/35 on the full merge, with and without ship-events. Also open: a 2-day jump sends 4 extra notes at its last hour (jobUnclaimed x3, repair x1, t=2460); 7c1feea's start tile needs the deck architect's walkable Tern |
+| Galley (16) | `claude/galley-food` | session_018cicfPQZQXbxmtn6ygmL84 | 40166d6 (0.29.32) PASS WITH FIXES | clear for 0.60.3 with 0.29.34 (food_check OK; Friday's 6-min wait is inside the busy window, limit 25). Low: day caches miss one-offs/tradition flags |
+| Social A (20) | `claude/social` | session_012pK2XVi5UhqEd28fakYk68 | a033f17 (0.36.78) PASS | day 138 is 300 B under 30 KB; news worst ~8.3 KB (asked: NEWS_MAX 16 or document) |
+| Social B2 (20c) | `claude/social-stories` | session_014A3w2gK8FBNWs66YC3LfME | 7d8be10 (0.39.22) PASS | lows: tests for v:2 from arrival, STORY_CAP |
+| Player engineer 4 (15) | `claude/player-needs` | session_01XPwaJeT8eATK5At45zEJ5w | 5e61e12 (mine); later builds 1c's | owns the whole-save budget (250 KB to day 280, the lead's ruling) |
+| Onboarding 2 (21) | `claude/arrival` | ask the lead | partial 54d7911 (b7ad3e9) | 1c owns arrival |
 | Device engineer 3 (19) | `claude/device` | session_01SskqNx45iEGyQq2W9Fjg5Y | partial ee3fcdd | off my queue |
 
 Every review note is in `plans/reviews/<branch>-<commit>.md` on `claude/reviews`.
 
 ## Open items to follow up
-1. The lead's long-play save rule: every saved social part has a hard bound by design with its worst case in DEV_NOTES; social save <= 30 KB at day 140 and < 40 KB at any length; --long to day 280. My advice (sent): measure EVERY day from the real day-0 arrival start, not every 28 days from day 1 (peaks: 31.4 KB day 115/130, 35.6-35.7 KB day 242).
+1. The lead's long-play save rule (social): every saved social part has a hard bound; <= 30 KB on every day to 140 and < 40 KB to 280, measured daily from the real arrival (social_check 8c9b52f --long does this). Whole save: 250 KB to day 280 (player seat).
+1a. Old wording: every saved social part has a hard bound by design with its worst case in DEV_NOTES; social save <= 30 KB at day 140 and < 40 KB at any length; --long to day 280. My advice (sent): measure EVERY day from the real day-0 arrival start, not every 28 days from day 1 (peaks: 31.4 KB day 115/130, 35.6-35.7 KB day 242).
 2. The jump test on the newest full merge differed in social A's cues, rep and noteq (seen by the social B 0.39.21 review; not attributed).
 3. For the dialogue engineer: section 22's linesFill can add {home} {family} {hobby} {since} to SOCIAL_FILL.
 4. For ship-events: events_check fails on ship-events 4e72597 alone at day 231 (3-store-1 double).
