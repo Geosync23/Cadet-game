@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.20
+   STARSHIP CADET: CSV Wren                           build 0.42.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.20';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.21';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14848,7 +14848,7 @@ const INTRO_WEEK = [
   { id: 'd3-store', day: 3, at: 16 * 60 + 30, until: 17 * 60 + 30, who: 'ishikawa-orla', where: { deck: 3, room: 'Crew store' }, settle: 'buy' },
   { id: 'd3-pell', day: 3, at: 18 * 60 + 30, until: 20 * 60, who: 'pell', where: 'seek', seek: true, settle: 'friend' },
   { id: 'd4-mail', day: 4, at: 7 * 60, who: null, mail: { from: 'Zeke Torres', subject: 'On your own', body: 'Day off for me. Don\'t break anything big. — Z.' } },
-  { id: 'd4-favour', day: 4, at: 16 * 60 + 30, until: 18 * 60, who: 'kovac-zainab', where: 'seek', seek: true, settle: 'favour' },
+  { id: 'd4-favour', day: 4, at: 16 * 60, until: 19 * 60 + 30, who: 'kovac-zainab', where: 'seek', seek: true, settle: 'favour' },
   { id: 'd4-quiz', day: 4, at: 20 * 60, until: 21 * 60 + 30, who: 'pell', where: { deck: 3, room: 'Bow lounge' }, settle: 'tradition' },
   { id: 'd5-mug', day: 5, at: 10 * 60 + 30, until: 11 * 60, who: 'halloran-emeka', where: { deck: 5, room: 'Tea corner' }, flags: ['mug'],
     moment: { title: 'Friday tea', here: 'Halloran hands you a mug with your name on it. "New hand\'s mug. It lives on the rack now. So do you."',
@@ -14904,9 +14904,17 @@ const INTRO_JOB_LINES = {
 // the shadow shift and the job you lead on Monday end when you turn in reserved slots 1 and 2 (section 17's job notes):
 // their introStep notes are the core memories social keeps (intro.shadowShift)
 // one of Torres's lines from the writers by its flag (content/lines/torres-zeke.lines, kind week1), or null
+// (0.42.21) exactly the line gated by that flag: past a place's last line, and even before it once the week is under
+// way, lineFor hands back one of his general week-1 lines (week1 is set all week)
 function introWriterLine(flagKey) {
-  try { if (typeof lineFor === 'function') { const l = lineFor(SHIP.intro.escort, 'week1', { flags: { [flagKey]: true }, peek: false }); if (l && l.text) return [l.text]; } } catch (e) { /* none */ }
-  return null;
+  try {
+    if (typeof lineFor !== 'function' || typeof VOICE === 'undefined') return null;
+    const v = VOICE[SHIP.intro.escort], e = ((v && v.lines && v.lines.week1) || []).find(x => x.flag === flagKey); if (!e) return null;
+    // that exact line, filled as lineFor fills one ({me}, voice tokens); lineFor itself may prefer another week-1 line
+    const who = typeof linesWho === 'function' ? linesWho(SHIP.intro.escort) : null;
+    const text = who && typeof linesFill === 'function' ? linesFill(e.text, who, { t: shipNow(), flags: { [flagKey]: true } }) : e.text;
+    return text ? [text] : null;
+  } catch (e) { return null; }
 }
 function introJobNote(n) {
   if (!introOn() || !n) return;

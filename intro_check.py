@@ -274,6 +274,10 @@ with sync_playwright() as pw:
     else:
         g.ev('newGameStart(true)'); g.step(5)
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        tl2 = g.ev("(() => { const L = (typeof VOICE !== 'undefined' && VOICE['torres-zeke'] && VOICE['torres-zeke'].lines && VOICE['torres-zeke'].lines.week1) || []; return INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, L.filter(e => (e.flag || '').startsWith('walk.' + x.id + '.')).length]); })()")
+        wrong = [i for i, n, w in tl2 if w and n != w]
+        print('  tour lines with the week under way (place, played, written):', tl2)
+        if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
         for k in range(420):
             g.step(20)
