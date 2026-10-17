@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.28
+   STARSHIP CADET: CSV Wren                           build 0.42.29
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.28';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.29';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14985,9 +14985,10 @@ function introWanted() { try { return !NOSAVE && !localStorage.getItem('starship
 function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriving) introBegin(); else SHIP.intro = introBlank(); }
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
+const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
   const U = INTRO_UI; (U.said || []).forEach(clearTimeout); U.night = null; U.chiefD = null;
-  const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === 'Your bunk' || IX_GOAL.label === 'Zeke Torres');
+  const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
   Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
@@ -15090,7 +15091,8 @@ function escortPlan(p, t) {
   // you everywhere else, including to the table where the Chief stops by (her step, not his)
   if (introEscorting(st) && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at dinner: he walks to his seat and sits (section 10, sim 0.26.26)
   if (introEscorting(st) && st.mode === 'lead' && INTRO_UI.pause) return { mode: 'wait', to: INTRO_UI.pause };   // pausing for the tour's core lines (introTourTick)
-  if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile } };
+  if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile },
+    pace: st.mode === 'lead' && st.checkpoint.deck === 5 && I.done['tour:lift'] === undefined ? INTRO_STROLL : 1 };   // strolling to the lift (section 10 reads pace)
   if (st && st.id === 'free' && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at the table until his goodnight
   for (const b of INTRO_WEEK) if (b.escort && b.who === p.id && t >= introAbs(b.day, b.at) && t < introAbs(b.day, b.until)) return { mode: b.escort, to: b.where };
   return null;
@@ -15165,11 +15167,15 @@ if (!MEETING_SCRIPTS.introDinner) MEETING_SCRIPTS.introDinner = { ...INTRO_STUB_
 // moved on or the next place is waiting. The tour ends at the table: anything left is dropped. The writers' lines are
 // walk.<id>.1, .2 ... (content/lines/torres-zeke.lines, kind week1); else the stand-ins. Standing still near him on
 // a walking step with the tour quiet gives the next walk.more.<n> line.
+const INTRO_STROLL = 0.5;                                 // his pace on the walk to the lift (x CREW_SPEED): time for the welcome talk
 const INTRO_TOUR_GAP = 3600;                              // real ms between his tour lines (a 60-character bubble reads in about 3 s)
 const INTRO_TOUR = [
-  { id: 'shuttle', deck: 5, at: [5, 10], r: 2, stub: 'hello', step: 'hello', core: 3 }, { id: 'bay', deck: 5, at: [9, 7], r: 2, step: 'haulway', core: 2 },
-  { id: 'haulway', deck: 5, at: [12, 8], r: 2, stub: 'haulway', step: 'haulway', core: 3 }, { id: 'stores', deck: 5, at: [14, 8], r: 2, step: 'works', core: 2 },
-  { id: 'works', deck: 5, at: [16, 6], r: 2, stub: 'works', step: 'works', core: 4 }, { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift', step: 'lift', core: 3 },
+  // before the lift (the user on 0.60.5): one stop at the ramp to welcome you, then walk-and-talk (`walk`: he never
+  // pauses, strolling at INTRO_STROLL): walk.up in order from 3 tiles off the ramp (`leave`), walk.works as you pass the
+  // Works bay (`must`: next, and heard even if that's at the lift); walk.up lines unsaid at the lift are skipped (head writer 4)
+  { id: 'shuttle', deck: 5, at: [5, 10], r: 2, stub: 'hello', step: 'hello', core: 3 }, { id: 'up', deck: 5, at: [5, 10], leave: 3, stub: 'haulway', step: 'haulway', core: 12, walk: true },
+  { id: 'works', deck: 5, at: [16, 6], r: 2, stub: 'works', step: 'works', core: 2, walk: true, must: true },
+  { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift', step: 'lift', core: 3 },
   { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3 }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
   { id: 'deck3', deck: 3, at: [22, 7], r: 3, stub: 'toMess', step: 'toMess', core: 2 }, { id: 'servery', deck: 3, at: [33, 3], r: 2, stub: 'servery', step: 'servery', core: 3 },
 ];
@@ -15191,8 +15197,11 @@ function introTourTick() {
   if ((!introEscorting(st) && !fin) || typeof player === 'undefined') return;
   const here = player.here(), now = performance.now(), a = introWalker(), Q = INTRO_UI.tour;
   const t = INTRO_TOUR.find(x => I.done['tour:' + x.id] === undefined);   // only the next place can be reached
-  if (t && deckDef.num === t.deck && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1])) <= t.r) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
-    I.done['tour:' + t.id] = Math.floor(shipNow()); { const L = introTourSplit(t); Q.push({ t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }); }
+  const td = t && Math.max(Math.abs(here[0] - t.at[0]), Math.abs(here[1] - t.at[1]));
+  if (t && deckDef.num === t.deck && (t.leave ? td > t.leave : td <= t.r)) {   // (before the dinner hand-over: its step may move on in the very frame you arrive)
+    I.done['tour:' + t.id] = Math.floor(shipNow());
+    { const L = introTourSplit(t), q = { t, ...L, at: 0, held: 0, cap: (L.core.length + 1) * INTRO_TOUR_GAP }, k = Q.findIndex(x => x.t.walk && !x.t.must); if (t.must && k >= 0) Q.splice(k, 0, q); else Q.push(q); }   // (a must place goes before the walk's lines)
+    if (!t.walk) for (let i = Q.length - 1; i >= 0; i--) if (Q[i].t.walk && !Q[i].t.must) Q.splice(i, 1);   // at the lift, the walk's lines left unsaid are skipped
   } else if (t && INTRO_STEPS.indexOf(st) >= INTRO_STEPS.findIndex(x => x.id === t.step) + 2) I.done['tour:' + t.id] = -1;   // passed it without coming near
   if (st.id === 'table' || st.id === 'chief' || st.id === 'free') {   // the tour hands over to dinner: extras and places not yet reached are dropped; the core
     Q.forEach(q => { q.extra.length = 0; }); INTRO_UI.pause = null;   // lines left finish first (the dinner chat waits for them, introTick)
@@ -15205,9 +15214,9 @@ function introTourTick() {
   // deck you've left goes whole (you went on without him: Deck 5's lines never play on Deck 4)
   while (Q.length && (Q[0].t.deck !== deckDef.num || (!Q[0].core.length && (Q.length > 1 || !Q[0].extra.length || !introAtTour(Q[0].t, here))))) Q.shift();
   const head = Q[0], near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 5;
-  // he pauses where he is while core lines are waiting and you're with him, never longer in all than a place's lines take
+  // he pauses where he is while core lines are waiting and you're with him (at the ramp and from the lift on: never on the walk between, the `walk` places), never longer in all than a place's lines take
   // (only the time he's actually held counts: not meetings, not the lift)
-  const hold = head && head.core.length && near && !DIALOGUE && head.held < head.cap;
+  const hold = head && head.core.length && Q.some(q => !q.t.walk) && near && !DIALOGUE && head.held < head.cap;
   if (hold) head.held += Math.min(250, now - (INTRO_UI.tickAt || now));
   INTRO_UI.tickAt = now;
   if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
@@ -15256,11 +15265,11 @@ function introBedTick() {
   const now = Math.floor(shipNow()), on = (now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
   const bed = typeof playerBed === 'function' ? playerBed() : '4-B1-4', pl = (DECKS[4].places || []).find(q => q.id === bed), me = player.here();
   // (reviewer 1: only when you have no arrow of your own, and it never clears one it didn't set)
-  const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === 'Your bunk';
+  const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === INTRO_BED_GOAL;
   if ((typeof sleeping !== 'undefined' && sleeping) || (pl && deckDef.num === 4 && Math.hypot(me[0] - pl.at[0], me[1] - pl.at[1]) <= 1.5)) {
     I.done.bed = now; if (INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); } return;
   }
-  if (on && !INTRO_UI.goal && !INTRO_UI.bed && !(typeof IX_GOAL !== 'undefined' && IX_GOAL)) { setGoal({ deck: 4, place: bed, label: 'Your bunk' }); INTRO_UI.bed = true; }
+  if (on && !INTRO_UI.goal && !INTRO_UI.bed && !(typeof IX_GOAL !== 'undefined' && IX_GOAL)) { setGoal({ deck: 4, place: bed, label: INTRO_BED_GOAL }); INTRO_UI.bed = true; }
   else if (!on && INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); }
 }
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
@@ -17398,7 +17407,7 @@ class CrewAgent {
     else if (dist > ESC_WAIT) this.escHeld = true;
     const near = e.mode === 'follow' && dist <= ESC_NEAR;
     if (this.path.length && !this.escHeld && !near) {
-      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * (e.pace || 1) * dt;   // pace: section 21's stroll
       if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
       this.pose = 'walk';
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you

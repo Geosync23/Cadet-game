@@ -67,7 +67,14 @@ WALK_TICK = r"""((mode) => {
   else if (mode === 'follow' && st && st.checkpoint) {
     const cp = st.checkpoint;
     if (cp.deck !== deckDef.num) {                      // ride the lift to the checkpoint's deck
-      if (!a || Math.hypot(a.x - pp.x, a.z - pp.z) < 3 || !a) { goToDeck(cp.deck); act = 'lift ' + cp.deck; }
+      if (typeof ride !== 'undefined' && ride) act = 'riding';   // 0.42.29: the real ride (doors, fade, the new deck built), as a player takes it
+      else if (!a || Math.hypot(a.x - pp.x, a.z - pp.z) < 3 || !a) {
+        if (typeof startRide === 'function') {
+          if (!inLift()) { const c = liftTiles().sort((x, y) => Math.hypot(x[0] - here[0], x[1] - here[1]) - Math.hypot(y[0] - here[0], y[1] - here[1]))[0]; if (c) player.obj.position.copy(cellPos(...c)); }   // step into the car
+          startRide(cp.deck);
+        } else goToDeck(cp.deck);
+        act = 'lift ' + cp.deck;
+      }
       else { const c = cellAt(a.x, a.z), n = nearestOpen(cellPos(...c).x, cellPos(...c).z, player); if (n) player.obj.position.copy(cellPos(...n)); act = 'to him'; }
     } else {
       // keep 2 tiles behind him; once he's near the checkpoint, step onto it
@@ -80,7 +87,8 @@ WALK_TICK = r"""((mode) => {
     }
   }
   return { t: clockText(), step: I.step, deck: deckDef.num, me: cellAt(player.obj.position.x, player.obj.position.z),
-           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, dlg: DIALOGUE && DIALOGUE.id };
+           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, dlg: DIALOGUE && DIALOGUE.id,
+           ex: a ? [+a.x.toFixed(2), +a.z.toFixed(2)] : null, pause: !!(typeof INTRO_UI !== 'undefined' && INTRO_UI.pause), pre: I.done['tour:up'] !== undefined && I.done['tour:lift'] === undefined, sm: shipNow() };
 })"""
 
 DATA = r"""(() => {
@@ -361,13 +369,23 @@ with sync_playwright() as pw:
         print('  tour lines with the week under way (place, played, written):', tl2)
         if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
+        rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
+        pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
         dinner, bunkAt, seats = None, None, None
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
+        BED_GOAL = g.ev("typeof INTRO_BED_GOAL !== 'undefined' ? INTRO_BED_GOAL : 'Your bunk'")
         for k in range(420):
             g.step(20)
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
             if r['esc'] and r['esc'][2] == 'escort': led += 1
+            if r['act'] == 'riding' or (r['act'] or '').startswith('lift'): rideFrom = rideFrom or r['deck']
+            elif rideFrom is not None and r['deck'] != rideFrom:
+                d = max(abs(r['me'][0] - r['esc'][0][0]), abs(r['me'][1] - r['esc'][0][1])) if r['esc'] else None
+                rides.append([rideFrom, r['deck'], r['t'], r['me'], r['esc'][0] if r['esc'] else None, d]); rideFrom = None
+            if r.get('pre') and r['deck'] == 5 and not r['dlg']:
+                pre['n'] += 1; pre['pause'] += r['pause']; pre['sm'].append(r['sm']); mv = r['ex'] != pre['last']; pre['last'] = r['ex']
+                pre['run'] = 0 if mv else pre['run'] + 1; pre['still'] = max(pre['still'], pre['run'])
             if tern and shut is None and g.ev('INTRO_UI.ternShut'): shut = (r['t'], r['step'], r['me']); print(f"  {r['t']}  the ramp closes behind you (you at {r['me']}, ramp {g.ev('ternRampOpen().toFixed(2)')})")
             if tern and shut and reopened is None and not g.ev('INTRO_UI.ternShut'): reopened = (r['t'], r['step'])
             if not order or order[-1] != r['step']: order.append(r['step']); print(f"  {r['t']}  {r['step']}  (you: Deck {r['deck']} {r['me']}; Torres {r['esc'][0] if r['esc'] else 'not here'}{'; his seat ' + r['seat'] if r['seat'] else ''})")
@@ -380,7 +398,7 @@ with sync_playwright() as pw:
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
                 print(f"  the dinner seats at {seats['t']}: yours {seats['you']}, Torres {seats['torres']}, Calder {seats['calder']}")
-            if r['goal'] == 'Your bunk' and bunkAt is None: bunkAt = r['t']; print(f"  {r['t']}  the arrow points to your bunk")
+            if r['goal'] in ('Your bunk', BED_GOAL) and bunkAt is None: bunkAt = r['t']; print(f"  {r['t']}  the arrow points to your bunk")
             if r['step'] is None: break
         simnow = g.ev("typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")   # the sim's dinner seating and evening cooking (0.26.26-0.26.31)
         if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
@@ -408,12 +426,25 @@ with sync_playwright() as pw:
         # the tour as heard by a follower (pacing A): every place's core lines, in place order; extras only if you linger
         said = [x[2] for x in g.ev('window.__said')]
         sp = g.ev("INTRO_TOUR.map(t => [t.id, introTourSplit(t)])")
+        walkp = set(g.ev("INTRO_TOUR.filter(t => t.walk && !t.must).map(t => t.id)"))   # before the lift: heard as you walk, the rest skipped at the lift (a must place is always heard)
+        ps = (pre['sm'][-1] - pre['sm'][0]) / g.ev('SHIP_RATE') / max(1, pre['n'] - 1) if pre['n'] > 1 else 0   # real seconds a look
+        print('  after each ride (from, to, time, you, Torres, tiles apart):', rides)
+        for x in rides[:2]:
+            if x[5] is None or x[5] > 3: fail(f'after the lift ride Deck {x[0]} -> {x[1]} Torres is not beside you: {x}')
+        if len(rides) < 2: fail(f'expected two lift rides on the evening (Deck 5 -> 4 -> 3): {rides}')
+        print(f"  the walk to the lift: {pre['n'] * ps:.0f} s with him on Deck 5 ({pre['n']} looks), paused {pre['pause'] * ps:.1f} s, longest standing still {pre['still'] * ps:.1f} s")
+        if pre['pause']: fail('Torres paused for his lines before the lift (the user on 0.60.5: walk-and-talk until the lift)')
+        wl = [i for i, x in enumerate(said) if any(x in L['core'] + L['extra'] for p, L in sp if p in walkp)]
+        later = [p for p, L in sp][[p for p, L in sp].index('lift'):] if any(p == 'lift' for p, L in sp) else []
+        ll = [i for i, x in enumerate(said) if any(x in L['core'] + L['extra'] for p, L in sp if p in later)]
+        print('  said up to the lift:', [x[0].split()[-1] + ' ' + x[2][:28] for x in g.ev('window.__said')[:(min(ll) if ll else 0) + 1]])
+        if wl and ll and max(wl) > min(ll): fail('a line from the walk to the lift was said after the lift\'s')
         pos = {}
         for i, x in enumerate(said): pos.setdefault(x, i)
-        heard_core = sum(1 for i, L in sp for l in L['core'] if l in pos); all_core = sum(len(L['core']) for i, L in sp)
+        heard_core = sum(1 for i, L in sp for l in L['core'] if l in pos and i not in walkp); all_core = sum(len(L['core']) for i, L in sp if i not in walkp)
         heard_all = sum(1 for i, L in sp for l in L['core'] + L['extra'] if l in pos); all_lines = sum(len(L['core']) + len(L['extra']) for i, L in sp)
         print(f'  the tour, following: core lines heard {heard_core}/{all_core}, all lines {heard_all}/{all_lines}; per place ' + ', '.join(f"{i} {sum(1 for l in L['core'] if l in pos)}/{len(L['core'])}+{sum(1 for l in L['extra'] if l in pos)}" for i, L in sp))
-        if heard_core < all_core: fail('following Torres, some core tour lines are never heard: ' + ', '.join(i for i, L in sp if any(l not in pos for l in L['core'])))
+        if heard_core < all_core: fail('following Torres, some core tour lines are never heard: ' + ', '.join(i for i, L in sp if i not in walkp and any(l not in pos for l in L['core'])))
         seq = [pos[l] for i, L in sp for l in L['core'] if l in pos]
         if seq != sorted(seq): fail('the tour\'s core lines are heard out of place order')
         # the last place's core lines may finish at the table (the dinner chat waits for them); extras there, or anything at the Chief's, may not
