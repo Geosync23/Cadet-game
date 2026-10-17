@@ -465,9 +465,9 @@
 ? tier>=colleague !week1:true act:off
 - Rest day walk? The long way round Deck 2. I'll show you the good windows.
 ? trad:market tier>=acquaintance
-- Market's on! Come and look at things we can't afford? It's my favourite.   #funny
+- Swap meet's on! Come and look at everything? I never trade. I just look.   #funny
 ? trad:jam tier>=colleague
-- Music jam tonight. I can't play anything. I clap. Come and clap with me?   #funny
+- Music jam tonight. I can't play anything. I clap. Come and clap too? We can be the audience.
 
 == bye
 ? tier>=acquaintance !week1:true
@@ -497,7 +497,7 @@
 ? told:came.jam
 - You came to the jam! You clapped in time. I didn't. We balanced out.   #funny
 ? told:came.market
-- The market! We looked at everything and bought nothing. Good afternoon, that.   #warm
+- The swap meet! We looked at everything and traded nothing. Proper Sunday, that.   #warm
 ? told:came.harvest
 - Harvest! You carried more than me. I'm telling everyone I carried more.   #funny
 ? told:gift.book

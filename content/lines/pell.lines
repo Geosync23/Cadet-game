@@ -390,3 +390,134 @@
 - You're getting better than me. Don't tell anyone. Don't tell Rina.   #funny
 ? cue:repair.you mood:low
 - Nice fix. Honestly. Glad someone's on form today. It's not me.
+
+// Writer 5, batch 2: Pell's ordinary weeks, after week one. Mostly not work: food, naps, rest days Tue-Wed, the
+// swap meet, music boxes, the gym (his idea, every time), laundry, Bunk 2 (Rina's count, Tariq and Lukas's onions,
+// Erik's races), Tomas next door. Gates kept: his mum's shop only from tier friend; nothing of the practical, the
+// fourth message, her hands or his first month (beats 5-8, close).
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}, {nick}. Have you eaten? I have. Twice. Just checking on you.   #funny
+- {hi}. I'm on my way to a nap. Walk me halfway. Keep me awake.   #funny
+? tier>=acquaintance !week1:true time:morning
+- Morning. I'm here in body. The rest of me's still in bed.   #funny
+? tier>=colleague !week1:true act:off weekday:tue
+- Day off! Tuesday. Everyone's at work but me. Best feeling there is.   #funny
+? tier>=colleague !week1:true
+- {hi}, {nick}. Tell me something good. Food counts.
+? tier>=friend !week1:true
+- {nick}! Just the person. I need a second opinion on a sandwich.   #funny
+- There you are. Sit. I've got crumbs and news. Mostly crumbs.   #funny
+? tier>=close !week1:true
+- {nick}! Sit. Tell me everything. Skip the boring bits. Keep the food bits.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Rina says I snore in tune. I'm taking that as praise.   #funny
+- Swap meet's the best day aboard. I traded a bolt for a better bolt. Very proud.   #funny
+- Ivo's carried trays for three years. Never dropped one. I drop spoons just watching.   #funny
+- Brennan's sponge pudding. I plan my week round it. Badly, but round it.   #funny
+- The gym's my idea every time. Every time I'm wrong. I keep going anyway.   #funny
+- Tomas next door counts windows. I count biscuits. We both lose count.   #funny
+? tier>=colleague !week1:true
+- Rest days I sleep till ten, eat, nap, eat. It's a system. It works.   #funny
+- I'm building a music box that plays the mess bell. Brennan's asked me not to.   #funny
+- Tariq and Lukas race at chopping onions. I'm the judge. I'm paid in onions. Bad deal.   #funny
+- Laundry day, I wear the shirt with the fewest holes. It's a short list.   #funny
+- Quiz night I do the engines round. And the pudding round. There's no pudding round. Yet.   #funny
+- Tomas asked how I sleep anywhere. I said practice. He's been practising. Badly.   #funny
+- Erik says he's the fastest in Bunk 2. Tariq says otherwise. I stay out of it. With snacks.   #funny
+- Rina and me: two years of insults. She's ahead. She keeps count. Course she does.   #funny
+? tier>=friend !week1:true
+- Mum taught me to darn a sock. I darn everything now. Even things that aren't socks.   #funny
+- The shop had a radio that only got one station. Mum liked it that way. So did I.
+- Every ship, I find the warmest spot in my first week. Here it's the tea corner.
+- Some evenings I wind all the music boxes at once. Sounds like rain on the shop roof.
+? tier>=close !week1:true
+- Know what I like here? Nobody minds a nap. Well, Calder. But quietly.   #funny
+
+== near
+? act:breakfast !week1:true
+- Toast, tea, toast. I'm awake by the second toast. Mostly.   #funny
+? act:off !week1:true
+- Rest day. Nap's booked for eleven. Lunch at twelve. Nap at one. Busy.   #funny
+? act:gym
+- Weights. Three. Then a sit-down. The sit-down's the important bit.   #funny
+? place:laundry
+- Laundry's warm. If I'm not back in an hour, I'm asleep on the dryer.   #funny
+? place:junior_common_room !week1:true
+- Rina's at the Tiles table. Don't sit opposite her. Learn from my mistakes.   #funny
+? place:hydroponics_garden
+- Cruz lets me sit by the big tree if I don't touch anything. I touch nothing.
+? trad:market
+- Swap meet! I've brought three bolts. Very good bolts. Nearly round.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Slept, ate, wound a music box. It played every note in order. Get in.
+? mood:ok !week1:true
+- Fine, ta. Bit full. Bit sleepy. Classic.
+? mood:low tier>=friend !week1:true
+- I'm fine. I'm fine. Bit homesick for the smell of solder and Mum's tea.
+
+== life
+? tier>=acquaintance !week1:true
+- I've got one good jumper and one bad jumper. The bad one's warmer.   #funny
+? tier>=colleague !week1:true
+- I can cook one thing: beans on toast. I've perfected it. Brennan disagrees.   #funny
+? tier>=friend !week1:true
+- A dog lived in the scrapyard behind Mum's shop. Not ours. It came for the sandwiches.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- Winding a new music box for the first time. You never know what it'll play.
+? tier>=colleague !week1:true
+- A hot plate from the grab shelf at midnight. That's joy, that is.   #funny
+
+== invite
+? tier>=acquaintance !week1:true act:off
+- Day off? Come to the mess. Second breakfast. It's a real thing. I've made it real.   #funny
+? trad:running tier>=colleague
+- Running club? I'll come. I'll walk most of it. Moral support.   #funny
+? trad:market tier>=acquaintance
+- Swap meet! Bring something. Anything. I'll trade you a screw for it.   #funny
+
+== bye
+? tier>=acquaintance !week1:true
+- Right, so. Lunch. Then the thing after lunch. Also lunch.   #funny
+? tier>=friend !week1:true
+- {bye}, {nick}. Eat something. Mum says it to me, so I'm saying it to you.   #warm
+
+== smalltalk
+? !week1:true
+- Biscuit o'clock. It's always biscuit o'clock.   #funny
+- Is it lunch yet? It's nearly lunch.
+- I could sleep right here. I might.   #funny
+? act:off
+- Day off. Nap first. Then a bigger nap.   #funny
+? place:laundry
+- Warm towels. Best thing aboard.
+
+== rumour
+? !week1:true
+- Grab shelf gossip. Very fresh. Still warm.   #funny
+- Heard it in the laundry. The dryers know everything.   #funny
+
+== callback
+? told:intro.dinner !week1:true
+- Your first night, I sat at your table without asking. Got a pudding and a mate. Good move.   #warm
+? told:came.market
+- You came to the swap meet! You traded better than me. I got a bolt. You got a story.   #funny
+? told:came.harvest
+- Harvest! You carried crates. I carried one thing. A plate. A very full plate.   #funny
+? told:came.film
+- Film night! You stayed awake for the ending. I didn't. How did it end?   #funny
+? told:came.running
+- You went to running club. I watched from a bench. Very supportive bench.   #funny
+? told:came.works-tea !week1:true
+- Works tea! You took the last biscuit. I let you. I'll remember that forever.   #funny
+? told:gift.game
+- That game you gave me? Rina's beaten me at it already. Twice. Cheers, really.   #funny
+? told:fixed.oven
+- You fixed the oven? That's pudding saved. That's lives saved, basically. Legend.   #warm

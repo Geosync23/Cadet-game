@@ -376,3 +376,134 @@
 - I'm writing this down. In pencil. For now.   #funny
 - Fine. Well played. Again. Now.   #funny
 - Don't tell Pell. Don't tell anyone. Again.   #funny
+
+// Writer 5, batch 3: Rina's ordinary weeks, after week one. Mostly not work: sour sweets, the washroom queue, rest
+// days Sun-Mon (the Sunday swap meet, booth calls to her sister), Bunk 2 (Pell asleep on things, Esme learning Tiles,
+// Ivo's tea), the laundry's sock tax, reading that isn't studying. Gates kept: gran from beat:rina.1 and her
+// messages from beat:rina.4; nothing of the qualifying exam (beat 5) or the hard year (beat 7); no new Tiles count.
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}. You look like you skipped breakfast. Did you? Thought so.
+- Oh, it's you. Good. I needed someone to be right at.   #funny
+? tier>=acquaintance !week1:true act:off weekday:sun time:morning
+- Sunday. Day off. Up anyway. Swap meet. Someone has to haggle properly.   #funny
+? tier>=colleague !week1:true
+- {hi}, {me}. Sit. You're blocking my light. I'm reading.   #funny
+- {hi}. My sister's written. Four pages. Three of them are wrong.   #funny
+? tier>=friend !week1:true
+- {nick}. Good timing. I've got tea and an opinion. You get both.   #funny
+- There you are. Pell's asleep in the doorway again. Step over him. Carefully.   #funny
+? tier>=close !week1:true
+- {nick}. Sit. Not for anything. Just sit. Fine, there's a biscuit.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- I read in the washroom queue. It's long enough for a chapter. Most nights two.   #funny
+- Sweets? The sour ones. Don't bring me the soft ones. I'll know.
+- Pell talks in his sleep. Last night it was a pump. He was very firm with it.   #funny
+- Hot water till ten. I'm in by nine. That's not luck. That's planning.   #funny
+- Got a book at the swap meet. Two pages missing. I've guessed them. Probably right.   #funny
+- Tomas thanked the lift today. Out loud. It didn't answer. He seemed fine about it.   #funny
+? tier>=colleague !week1:true
+- My sister says the station has better tea. She's never had Brennan's. She's wrong.   #funny
+- Rest days I sleep in till seven. Then I feel guilty and read till nine.   #funny
+- The laundry ate a sock. One. It always takes one. I've stopped arguing with it.   #funny
+- I'm not competitive. I just win a lot. There's a difference. It's small.   #funny
+- Booth calls on Sunday mornings. Short queue. My sister's always up first. Annoying.   #funny
+- Esme asked me to teach her Tiles. I said yes. I didn't say I'd go easy.   #funny
+- Tariq and Erik still argue about that race. I timed it. I'm not telling either of them.   #funny
+- Ivo brings me tea after a long shift. Never asked him to. That's the good kind.   #warm
+? tier>=friend !week1:true
+- I write the Tiles count in pen now. Pencil was for when I was new.   #funny
+- My sister and I argued about soup for a week. By message. I won. She'd say she did.   #funny
+- Some evenings I sit in the common room and don't study. Don't spread that about.
+- Can't sleep? Read the boring journals. Kidneys. Works every time.   #funny
+? tier>=friend beat:rina.4 !week1:true
+- Gran sent a message. Two lines. One was "drink some water". She got that from me.   #funny
+? tier>=close !week1:true
+- The ordinary days here are the good ones. Don't quote me on that.   #warm
+
+== near
+? act:breakfast !week1:true
+- Porridge. Every day. It's not boring. It's reliable. Sit.
+? act:dinner !week1:true
+- {dish}. Fine. Eat the green bit. I'm watching.   #funny
+? act:off !week1:true
+- Day off. No journals. One journal. A short one.   #funny
+? place:booths
+- Waiting on a line to my sister. She's late. She's never late. She's doing it on purpose.   #funny
+? place:junior_common_room !week1:true
+- My table. My chair. Yours is that one, opposite. Where the losing happens.   #funny
+? place:laundry
+- Fold it now or iron it later. I don't iron. So, fold.
+? trad:market
+- Swap meet. Don't offer first. Look bored. They'll come to you.
+
+== feel
+? mood:high !week1:true
+- Good day. Three wins, hot water and nobody fainted. Rare set.
+? mood:ok !week1:true
+- Fine. Busy, then not. That's a good day, really.
+? mood:low tier>=friend !week1:true
+- Tired. Not ill. Tired. Tea would help. You could make it. Just saying.
+
+== life
+? tier>=acquaintance !week1:true
+- My one good jumper is my sister's. She thinks it's lost. It's not lost.   #funny
+? tier>=colleague beat:rina.1 !week1:true
+- As kids, my sister and I played under the table so Gran couldn't see. Gran still won.   #funny
+? tier>=friend !week1:true
+- I keep all my sister's messages. For evidence. Mostly for evidence.   #warm
+
+== joy
+? tier>=acquaintance !week1:true
+- A new journal, spine not even creased. Lovely. Don't tell anyone I said lovely.   #funny
+? tier>=colleague !week1:true
+- Someone new at the Tiles table. A fresh opponent. Best feeling there is.   #funny
+
+== invite
+? tier>=colleague !week1:true act:off weekday:sun
+- Day off? Swap meet, then Tiles. I'll trade you a biscuit for a rematch.   #funny
+? trad:film tier>=acquaintance
+- Film night. I sit at the back and say what happens next. Come and be told.   #funny
+? trad:jam tier>=colleague
+- Music jam. I don't play. I judge. Come along. Bring an opinion.   #funny
+
+== bye
+? tier>=acquaintance !week1:true
+- Right. Go. Water. You know the rest.
+- {bye}. And sleep. Not lie there thinking. Sleep.   #funny
+
+== smalltalk
+? !week1:true
+- Sour sweets. The only kind.
+- Pell's asleep again. On a chair.   #funny
+- Someone's in my seat. Bold.   #funny
+? act:off
+- Day off. Reading. Not studying. Reading.   #funny
+? place:junior_common_room
+- Board's set. Anyone? No? Fine. I'll wait.
+
+== rumour
+? !week1:true
+- Don't spread this. I'm only telling you.
+- My sister heard it first. On a station. Somehow.   #funny
+
+== callback
+? told:came.sowing !week1:true
+- Your seedling. You're overwatering it. I can tell from here. Less. Trust me.   #funny
+? told:came.market
+- Swap meet. You looked bored and traded well. I taught you that.   #funny
+? told:came.film
+- Film night. I told you the ending. You stayed anyway. Respect.   #funny
+? told:came.jam
+- The jam. You clapped on the beat. Most people don't. Noted.
+? told:came.running
+- Running club. You took the water. Good. Both cups.   #funny
+? told:came.harvest
+- Harvest. You wore gloves. Only one who did. Noted, dated, signed.   #funny
+? told:fixed.lights
+- You fixed the corridor lights. Fewer people walking into doors. Fewer bruises. Ta.
+? told:gift.tea
+- That tea you gave me. I make it after late shifts. It's good. Don't gloat.   #warm
