@@ -727,6 +727,7 @@ Done so far:
 - **Pillar 5 plan APPROVED (the user, 2026-10-17 ~21:20):** the final plan (claude/pillar5-plan e3b96c5, plans/pillar5-plan.md): about 33 ship days (~12-13 hours), Officer day 16, Senior Officer day 23, Engine Specialist day 30, puzzles from day 17, the night shift on two weekend nights (days 26-27, the plan's suggestion), mentoring one day, side jobs optional, jobs mapped to rank. **Not started:** no hiring and no building until the user says so.
 - **Pillar 6 (the user, 2026-10-17):** ship-wide events **and more traditions**, with **traditions rotating weekly** so the weeks feel different.
 - **Pillar 7 (the user, 2026-10-17): the story.** Lots of **narrative moments** that add up to a larger thread through the game: not cutscenes, a through line you live. And **big arcs for the crew members**, with more detail.
+- **An audio pass (the user, 2026-10-17):** sound comes later, after a few more pillars, as its own pass.
 
 
 ## Open questions
