@@ -16,14 +16,20 @@ DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
 SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
-RUN = r"""(({ days, player, jump }) => {
+RUN = r"""(({ days, player, jump, notes }) => {
   const h0 = 6, h1 = h0 + days * 24, stats = { born: {}, spread: [] };
   setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();   // an earlier clock: machines afresh
   socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;   // invitations become appointments
   const watch = () => { for (const x of NEWS) stats.born[x.id] = x.kind; };
-  if (jump) { setShipNow(h1 * 60); socialTo(h1 * 60); watch(); }
+  // stand-in bus notes (a repair by you and by a crew member, a tradition you came to), each with the time it happened:
+  // hour by hour they arrive as they happen; in a jump they all arrive at once, as section 13's bus sends them after a skip
+  const oven = typeof machineList === 'function' && machineList().find(x => x.kind === 'oven'), N = notes && oven ? [[h0 * 60 + 200, 'repair', { who: 'you', machine: oven.id, state: 'failing' }],
+    [h0 * 60 + 900, 'repair', { who: 'pell', machine: oven.id }], [h0 * 60 + 1500, 'tradition', { id: 'quiz', came: ['tomas', 'pell'], you: true }], [h0 * 60 + 2300, 'repair', { who: 'you', machine: oven.id }]] : [];
+  const hear = (a, b) => { for (const [t, k, d] of N) if (t >= a && t < b) socHear(k, { ...d, t }); };
+  if (notes) relAdd('tomas', 'chat', 1);
+  if (jump) { setShipNow(h1 * 60); hear(-1e9, h1 * 60); socialTo(h1 * 60); watch(); }
   else for (let h = h0 + 1; h <= h1; h++) {
-    setShipNow(h * 60); socialTo(h * 60); watch();
+    setShipNow(h * 60); hear((h - 1) * 60, h * 60); socialTo(h * 60); watch();
     for (const x of NEWS) if (h * 60 - x.born >= 720 && h * 60 - x.born < 780) stats.spread.push([x.kind, x.seed.length, SHIP.knows[x.id].size]);
     if (player && h === h0 + 3 * 24 + 6) { memAdd('rina', 'moment.test.1'); memAdd('pell', 'missed.test'); memAdd('pell', 'intro.arrival'); }
     if (player && h % 24 === 12) { relAdd('tomas', 'chat', REL_PTS.chat); memAdd('tomas', 'chat'); if ((h / 24 | 0) % 2) relAdd('pell', 'chat', REL_PTS.chat); for (const x of newsKnownBy('rina')) playerHeard(x.id, 'rina'); }
@@ -121,10 +127,20 @@ with sync_playwright() as pw:
     if not rt: fail('save and load differ')
 
     # 4. one jump over two days against the same two days hour by hour (no player)
-    c = run(days=2, player=False, jump=False)
-    d = run(days=2, player=False, jump=True)
-    print('Two days in one jump the same as hour by hour:', c['key'] == d['key'])
+    c = run(days=2, player=False, jump=False, notes=True)
+    d = run(days=2, player=False, jump=True, notes=True)
+    print('Two days in one jump the same as hour by hour (with bus notes):', c['key'] == d['key'])
     if c['key'] != d['key']: fail('a time jump gives a different social life')
+    if 'fixed.oven' not in c['key'] or 'came.quiz' not in c['key']: fail('the stand-in bus notes left no memories')
+    # the same through section 13's real bus, when it's there: the note's shape (its kind and t) as the bus sends it
+    bus = g.ev(r"""(() => { if (typeof simNote !== 'function') return null;
+      const oven = machineList().find(x => x.kind === 'oven'), keep = JSON.stringify(socSave()), t = Math.floor(shipNow());
+      SHIP.mem = {}; SHIP.social.cues = []; relAdd('tomas', 'chat', 1);
+      simNote('repair', { who: 'you', machine: oven.id, state: 'failing', kind: 'oven', t }); socialTo(t + 120);
+      const o = { cue: !!cue('repair.oven.you'), wrong: !!cue('repair.repair'), mem: Object.values(SHIP.mem).some(l => l.some(m => m[0] === 'fixed.oven')), queued: (SHIP.social.noteq || []).length };
+      socLoad(JSON.parse(keep)); return o; })()""")
+    print('Through the real bus:', bus)
+    if bus is not None and (not bus['cue'] or bus['wrong'] or not bus['mem'] or bus['queued']): fail(f'a repair sent through the bus is read wrongly: {bus}')
 
     # 5. the query API (0.36.20): what the dialogue engine's line conditions read; pure, and right on a known state
     q = g.ev(r"""(() => {
@@ -139,10 +155,10 @@ with sync_playwright() as pw:
       out.warm = warmth('tomas');
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
       out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
-      out.calm = memThing('fixed.oven') === 'the oven' && memThing('nothing') === null;
+      out.calm = memThing('fixed.oven') === 'the oven' && memThing('nothing') === null && memThing('came.quiz') === 'the quiz night' && memThing('show.pell-show') === 'the music boxes';
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
-      SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
-      out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = {};
+      const B0 = SHIP.social.bonds; SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
+      out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = B0;
       out.pure = JSON.stringify(socSave()) === before;
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
@@ -244,7 +260,8 @@ with sync_playwright() as pw:
     # 9. gifts (0.36.24): Give from your hands, how it lands by taste, once a week each, double on a birthday; crew gifts; keepsakes
     gf = g.ev(r"""(() => {
       const o = {}, P = SHIP.player, carry = P.carry.slice(); SHIP.mem = {};
-      const p = SOC.crew.find(q => giftTaste(q).loves.includes('tea')) || SOC.crew[0], t = giftTaste(p);
+      const open = q => { const v = typeof voiceOf === 'function' ? voiceOf(q.id) : typeof VOICE !== 'undefined' ? VOICE[q.id] : null; return !v || v.openness !== 'guarded'; };   // guarded people gain 20% slower (20c)
+      const p = SOC.crew.find(q => giftTaste(q).loves.includes('tea') && open(q)) || SOC.crew.find(q => giftTaste(q).loves.includes('tea')) || SOC.crew[0], t = giftTaste(p);
       const pts0 = relGet(p.id).pts; P.carry = []; o.add = [giftAdd('tin of tea'), giftAdd('a spanner'), giftAdd('herbs'), giftAdd('biscuits')];
       o.hands = giftInHands();
       const a = giftGive(p, 'tin of tea'); o.first = a && a.how; o.pts = Math.round((relGet(p.id).pts - pts0) * 100) / 100; o.mem = mem(p.id, 'gift.tea') && Math.round(mem(p.id, 'gift.tea').w);
