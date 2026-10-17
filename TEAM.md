@@ -148,6 +148,7 @@ Pillar 2, all started 2026-10-15 (see `plans/pillar2-plan.md` for the workstream
 | session_01Wr9Jcc4nRUHHWdfJDUwb3X | P4 seat 15, Tradition designer: weekly (reports to the traditions engineer; keys 435-454) | `claude/trad-weekly` | — | Active | — |
 | session_015dAEQhLUgkxejuzQF5CsV9 | P4 seat 16, Tradition designer: every few weeks + Sunday Mail (reports to the traditions engineer; keys 455-474) | `claude/trad-monthly` | — | Active | — |
 | session_01GnWSW6a2D1XdABqpCpVjaY | P4 seat 17, Tradition designer: seasons, year, life moments (reports to the traditions engineer; keys 475-499) | `claude/trad-seasons` | — | Active | — |
+| session_01VTbXtWeydYbfNw8fKLpkz8 | Pillar 5 planner (hired 2026-10-17 ~03:36 at the user's OK): expanded core gameplay + ship-wide events, each standing alone, overlapping Pillar 4 in steps; plans/pillar5-notes.md (questions) then pillar5-plan.md/.html; no game code | `claude/pillar5-plan` | — | Active | — |
 | session_01PGFJbAfDYddQRGYQJktgXj, session_012zFHAS6jkPUhCrpBn2zW9Q, session_01USkJjdw16L4K2tuK8otcc6, session_01V5ghkKLy1XQkZkKS9yKUkr, session_01PPVXqo8s4NvK8JkBWt3WoH, session_01L5Bg1nrCfowojNxeVZJHoi | Standing check runners R1-R6 (2026-10-17 ~02:36, the user's ask): R1 cadet_test, R2 day_check, R3 player+interactions, R4 events+intro, R5 food+machine+deck, R6 social+device+lines+content_gen; report to the build master; no pushes | — | — | Active (Full level) | — |
 | session_011Gh8MbJgkYYWwWk2s3oA4y | Deck 3 builder | `claude/deck-building-workflow-iayt67` | — | Archived | — |
 
