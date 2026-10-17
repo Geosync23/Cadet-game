@@ -17,6 +17,9 @@ once onboarding's wave-4 format exists. 0.48.43 themes use {kin}/{lost}/{hobbyNo
 and roster 0.16.15+); 0.48.44 crew goodbyes (pair:best|mentor need DE2's engine change); 0.48.45 no .trad here; 0.48.46
 voice `thread:` only arc:<id> (roster 0.16.16 matches); 0.48.47 week-1 scripts for onboarding (beat.<id>.<n>, mail.<id>
 "Subject | body", introHealth). Onboarding is handing over: their successor wires week 1 from plans/handover-onboarding.md.
+**Build master 2:** session_01F8ph7FKqViF3heRn94YgBr: send them each content hash directly (and the lead the MERGE line). Latest
+for the combine: 5e2605e (0.48.48: days off follow roster 0.16.17; facts column regenerated). Crew designer 3:
+session_01TDCn9auvCBML52hyjWGY6x (roster 0.16.19, claude/deck-plans-1-2-6). Social B2: session_014A3w2gK8FBNWs66YC3LfME.
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
 tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (lines_check.py + README at dialogue 0.43.22: checks trad:/came: ids too).
