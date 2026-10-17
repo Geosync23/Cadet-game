@@ -1,0 +1,14 @@
+# Overnight decisions (2026-10-17, from ~06:20 UTC)
+
+The user's instruction before bed: finish Pillar 4, add schedule notifications, do a serious optimization pass at the end of Pillar 4, and make calls on their behalf unless a call is truly big (then find a way to wait). Every call that would normally have gone to the user is listed here: **the question**, **what was done**, and **why**. Leads append to this file; it is the basis of the morning report.
+
+Big calls deliberately left for the user: the pull request to `main` (the user's OK is required), Pillar 5 (on hold), and anything that changes the game's direction.
+
+| Time (UTC) | The question you'd normally have been asked | What was done | Why |
+|---|---|---|---|
+| ~05:10 | Calls home: one big Letters-evening beat per evening for the whole family, or one per contact? | One per contact | Otherwise the four arcs take 16+ weeks and run one after another; one per contact finishes them in ~7 weeks, side by side. |
+| ~05:10 | Build the optional recorded messages from home in Mail? | Yes | You'd approved them as an extra in the call-home design. |
+| ~06:15 | Crew who "come and find you" (Tomas, Pell, Zainab) only waved if you were already close. Walk them to you, or give each beat a place? | They walk to you (and retry later if you're busy) | Matches "come and find you" literally and works wherever you are. |
+| ~06:30 | The shuttle is too small to walk inside. Approve a bigger, walkable Tern (Deck 5 change) for the "start inside the shuttle" scene? | Approved the deck architect's plan (plans/shuttle-plan.md on claude/decks-p3); defaults: you start standing in the aisle, the ramp lowers itself after a short beat, closes after you, side ramp kept | It's what you asked for; small (+~2 draw calls); keeps the greeting layout. Easy to change any default. |
+| ~06:10 | The account neared its 5-hour usage limit. Keep everyone running or pause some? | Paused the writers and the dialogue engineer until the 07:30 reset; the critical path kept running | A hard stop would freeze everyone for ~1.5 h; writing is the safest to pause. |
+| ~06:35 | Schedule notifications: how early, how shown? | 15 ship minutes before (a small toast at the screen edge, tap to open the Schedule or point the arrow) plus a gentle one at start; never stacked, never over a card or sleep; can be turned off in the device | Helpful without nagging; phones first. |
