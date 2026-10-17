@@ -353,7 +353,7 @@ with sync_playwright() as pw:
         if not took: fail('could not take the shadow job at 08:06')
         if esc['mode'] != 'follow' or esc['d'] is None or esc['d'] > 4: fail(f'Torres is not with you on the shadow shift: {esc}')
         if not (fin['t'] and fin['shadow'] and fin['mem']): fail(f'the shadow job did not complete the intro\'s side: {fin}')
-    print('Not yet: Tuesday and the rest of the week in play, reload mid-walk in the real game')
+    print('Not yet: Tuesday to Sunday walked in the real game (with social A, traditions and the writers combined)')
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 
