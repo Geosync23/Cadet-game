@@ -196,7 +196,7 @@ with sync_playwright() as pw:
       out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
       at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
-      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; careerTick(at(30, 800)); out.missTo = Math.round(careerWork()); out.missTip = !!(K.k & 2);
+      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; K.sd = 99999; careerTick(at(30, 800)); out.missTo = Math.round(careerWork()); out.missTip = !!(K.k & 2);
       careerSick(30); out.refund = Math.round(careerWork());
       const dueOf = gs => { SHIP.career.sd = 0; SHIP.career.gs = gs; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
       out.namesDiffer = dueOf(1) !== dueOf(2); out.seeded = typeof careerClean(JSON.parse(JSON.stringify(SHIP.career))).gs === 'number';
