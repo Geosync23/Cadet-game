@@ -1,12 +1,7 @@
 @tradition farewell-supper
-// DRAFT (not baked: the file ends .trad-draft, so trad_parse and content_gen skip it). Rename to .trad once the
-// traditions engineer adds what it needs (plans/trad-notes-seasons.md, "Farewell supper"):
-//   - when: rotation -1   the day before each crew rotation day (rotation days are Sundays, so a Saturday)
-//   - honorees = the crew leaving on that rotation, so {names} and {first} fill with them, as for birthdays
-//   - the word friends-of-honoree (affinity 40 or more with any leaver), like friends-of-host
-// A supper the evening before crew leave, for their friends: a long table in the mess, their favourite dish if the
-// galley knows it, a few words. The goodbye moment (a day or two before) and the farewell at the shuttle bay (on the
-// day) are social B's; this is only the supper. Gentle, a bit bittersweet, never sad for long.
+// Farewell supper (seasons designer, k 483; baked since 0.34.43). The day before each crew rotation (rotation days are
+// Sundays, so a Saturday): when: rotation -1; its honorees are that rotation's leavers ({names}, {first}); the word
+// friends-of-honoree is affinity 40 or more with any leaver. Design note: plans/trad-notes-seasons.md.
 k: 483
 title: Farewell supper
 when: rotation -1

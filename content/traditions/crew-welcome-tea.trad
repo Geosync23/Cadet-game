@@ -1,9 +1,7 @@
 @tradition crew-welcome-tea
-// DRAFT (not baked). New hand's tea for the crew who arrive on a rotation shuttle: the first Friday after they come
-// aboard. Needs (plans/trad-notes-seasons.md, "New hand's tea"): when: rotation friday (the first Friday after a
-// rotation day), honorees = that shuttle's arrivals ({names}, {first}), and the words dept-of-honoree and
-// bunk-of-honoree, like the birthday's department and bunkmates. Works arrivals get their mug in the Works tea corner
-// (and replace that Friday's works-tea); everyone else has a cup in the mess after dinner, an hour before the jam.
+// New hand's tea for new crew (seasons designer, k 484; baked since 0.34.43): the first Friday after a crew rotation
+// (when: rotation friday); its honorees are that shuttle's arrivals ({names}, {first}), with dept-of-honoree and
+// bunk-of-honoree. Design note: plans/trad-notes-seasons.md.
 k: 484
 title: New hand's tea
 when: rotation friday
