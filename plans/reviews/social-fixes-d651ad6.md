@@ -27,3 +27,8 @@ Reviewer 1c, 2026-10-17. Diff: `git diff d449914 d651ad6` (section 3's deck data
 
 ## 0.62.3 (3960b06), skimmed (content only)
 - Only `content/home/*.call` and their baked lines in the game changed, plus the build line. No code changes. The engineer reports arc_check (calls and arcs) OK and lines_check PASS. **PASS.** The longer scenes may also make low 1 (a contact with nothing to say) rarer, but the guard is still worth having.
+
+## Re-check: 0.62.4 (afbb5c9), both lows fixed
+- `homeCallable` now lists only contacts for whom `homeNext` or `homeChatPick` has something. Both are read-only, so listing them changes nothing.
+- `c.news` is capped at `HOME_NEWS_MAX` = 8, and the Save bounds worst case is now ~2.5 KB for stories.home.
+- **Note (low):** dropping the oldest news tag means that news could play again if its condition still holds. `flag:intro.soloJob` stays true for good, and `came:any` / `friend:any` may too. Each contact has 4 news scenes today, under 8, so nothing is dropped. Have arc_check fail if a contact ever has more than `HOME_NEWS_MAX` news scenes. **PASS.**
