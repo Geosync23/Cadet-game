@@ -20,3 +20,15 @@ Fine:
    a wider radius, or dropping those boards.
 3. NOTE for the lead: 0.38.8's real washers bring a new machine_check FAIL ("two jobs at once: kovac-zainab"), which
    the helper reported to the systems engineer. Combine it with that fix, or expect the red check.
+
+## Addendum: 0f46885 + 8a390a3 (0.38.11-0.38.12): PASS
+- `TILES` is renamed `TILES_KIT` everywhere (no `TILES` left), and tilesSeats now reads explicit seat lists.
+  Browser probe: every listed id exists and is a lounge-seat; seats per board are [4,4,4,2,2,3,2,2].
+- LOW: the coffee table's (board 5) first two seats, 3-lounge-28 and 29, are 1.84 m and 2.05 m from its board, and
+  3-lounge-26 is 1.39 m. The two who "play first" sit about 2 m from the board they play on. Put 26 first, or move the
+  board towards them.
+- LOW: lanternWalk's MeshBasicMaterial has no map, so dressHide (which disposes a material only when it has a map)
+  leaves it behind each Lantern walk. That's small (one material a night), but a `material.dispose()` for map-less
+  materials in dressHide would cover the tasting table's and future props too.
+- Fine: the postbox (kit, no R()), tasting table (canvas texture disposed via its map, 5 calls), lanterns
+  (InstancedMesh + col(), 2 calls), lantern and postbox places event-tagged, `calm` tags only.
