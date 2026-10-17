@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.29
+   STARSHIP CADET: CSV Wren                           build 0.35.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7239,7 +7239,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.29';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.30';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -8775,6 +8775,18 @@ function devTraditions(a, b) {
   }
   return out.sort((x, y) => x.at - y.at);
 }
+// section 18's booked occasions (0.35.30: the ready room, the Captain's table, a progress talk), read only: SHIP.occasions
+// still 'asked', not a chance one (a surprise), between two ship minutes. Section 18 calls apptAdd for them, which no
+// section has, so until then the Schedule lists them from here
+function devOccasions(a, b) {
+  try {
+    if (!Array.isArray(SHIP.occasions) || typeof OCCASIONS === 'undefined') return [];
+    return SHIP.occasions.filter(r => r && r.status === 'asked' && r.at >= a && r.at <= b && OCCASIONS[r.id] && !OCCASIONS[r.id].chance).map(r => {
+      const rm = DECKS[r.deck] && DECKS[r.deck].rooms && DECKS[r.deck].rooms[r.room];
+      return { at: r.at, len: r.len || 30, title: OCCASIONS[r.id].title, deck: r.deck, room: rm ? r.room : null, where: (rm ? rm.name + ', ' : '') + 'Deck ' + r.deck };
+    });
+  } catch (e) { return []; }
+}
 // one day's items, in time order: [{ from, to, title, where, kind }] in minutes of that day
 function devDay(d) {
   const B = (d - 1) * 1440, out = [
@@ -8786,6 +8798,7 @@ function devDay(d) {
     out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
+  for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
   return out.sort((x, y) => x.from - y.from);
 }
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
@@ -8833,7 +8846,7 @@ function devItemGoal(x) {
   if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
   if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
-  if (x.kind === 'tradition' && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;

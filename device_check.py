@@ -152,6 +152,20 @@ def run(path):
             check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
             check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
             check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'] == '', f'heads-up: on screen, a tap opens the Schedule, off with the switch: {hu}')
+            # section 18's occasions in the Schedule and heads-ups (0.35.30): a booked Captain's table is listed and gets a heads-up
+            # with Go there; a chance one (the bridge invite, a surprise) never shows; one already kept doesn't either
+            oc = g.ev("""(() => { if (typeof OCCASIONS === 'undefined' || !Array.isArray(SHIP.occasions)) return { own: false };
+              const keep = SHIP.occasions.slice(), save = { day: SHIP.time.day, min: SHIP.time.min }, d = SHIP.time.day + 3, T = (d - 1) * 1440 + 1170, ct = OCCASIONS.captainsTable;
+              const ch = Object.keys(OCCASIONS).find(k => OCCASIONS[k].chance);
+              SHIP.occasions.push({ id: 'captainsTable', key: 'captainsTable@' + d, at: T, len: 90, deck: ct.deck, room: ct.room, status: 'asked', kind: 'invite' });
+              if (ch) SHIP.occasions.push({ id: ch, key: ch + '@' + d, at: T - 600, len: 30, deck: OCCASIONS[ch].deck, room: OCCASIONS[ch].room, status: 'asked', kind: 'meeting' });
+              SHIP.occasions.push({ id: 'readyRoom', key: 'readyRoom@' + d, at: T - 400, len: 25, deck: 1, room: 'R', status: 'kept', kind: 'summons' });
+              const titles = devDay(d).map(x => x.title), out = { own: true, listed: titles.includes(ct.title), chance: !ch || !titles.includes(OCCASIONS[ch].title), kept: !titles.includes(OCCASIONS.readyRoom.title) };
+              SHIP.time.day = d; SHIP.time.min = 1170 - 15; devHeadsReset(); devTickMin = -1; deviceTick(); const h = document.getElementById('devHu');
+              out.hu = h && !h.hidden ? h.textContent : ''; out.go = DEV.hu && DEV.hu.goal ? [DEV.hu.goal.deck, DEV.hu.goal.room] : null;
+              SHIP.occasions.length = 0; SHIP.occasions.push(...keep); SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            print('  occasions:', oc)
+            check(not oc['own'] or (oc['listed'] and oc['chance'] and oc['kept'] and oc['hu'].startswith("The Captain's table starts in 15 min") and oc['go'] == [2, 'C']), f'occasions: in the Schedule with a heads-up and Go there; no surprises, none kept: {oc}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
             jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
