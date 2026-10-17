@@ -44,8 +44,6 @@ BANNED = [
     # romance and flirting with anyone (the user: no romance with the player; couples live quietly in the background)
     r'\bkiss\w*', r'\bflirt\w*', r'\bdarling\b', r'\bsweetheart\b', r'\bbabe\b', r'\bsexy\b', r'\bgorgeous\b', r'\bcrush\b',
     r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
-    r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmy heart\b', r'\bsoulmate\w*',
-    r'\bbe mine\b', r'\bsweet on\b', r'\bhold my hand\b',
     # swearing (the ship's "blast" is fine)
     r'\bdamn\w*', r'\bhell\b', r'\bbloody\b', r'\bcrap\w*', r'\bshit\w*', r'\bfuck\w*', r'\bbastard\w*', r'\bpiss\w*',
     r'\barse\w*', r'\bass\b', r'\bbollocks\b', r'\bgod\b', r'\bjesus\b', r'\bchrist\b',
@@ -57,6 +55,11 @@ BANNED = [
     r'\bphotos?\b', r'\bphotograph\w*', r'\bcamera\b', r'\bselfie\w*', r'\bguns?\b', r'\bweapons?\b', r'\bblaster\w*',
     r'\bphone\b', r'\binternet\b',
 ]
+# romance said to you (the user: none with the player). Crew couples may speak of each other in overheard conversations,
+# so these are errors in every player-facing line (chat, moments, replies, meetings, Mail) but not in overheard banks
+BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry\b', r'\bmarried\b', r'\bmy heart\b',
+                 r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
+                 r'\bwedding\b', r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al)\b']
 US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': 'centre', 'realize': 'realise',
       'organize': 'organise', 'gray': 'grey', 'mom': 'mum', 'honor': 'honour', 'neighbor': 'neighbour', 'theater': 'theatre',
       'apologize': 'apologise', 'recognize': 'recognise', 'traveled': 'travelled', 'cozy': 'cosy', 'defense': 'defence',
@@ -224,10 +227,10 @@ def main(argv):
             elif n > lim:
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
-        for b in BANNED:
+        for b in BANNED + (BANNED_PLAYER if src != 'convo' else []):
             m = re.search(b, low)
             if m:
-                errors.append(f'{tag}: "{m.group(0)}" is on the banned list')
+                errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player)' if b in BANNED_PLAYER else ''))
         for us, uk in US.items():
             if re.search(r'\b' + us + r's?\b', low):
                 warns.append(f'{tag}: American spelling "{us}" (British: "{uk}")')

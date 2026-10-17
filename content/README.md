@@ -308,7 +308,8 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
 
 - **Length:** a chat card line 90 characters at most; a bubble (`smalltalk`, `rumour`, overheard) 60 (90 is an error);
   arc beats, moments, notes and meeting lines 140. A placeholder counts as about 9 characters.
-- **No romance or flirting** with anyone (the checker catches the obvious words; the head writer also reads every
+- **No romance or flirting** with the player (the checker catches the obvious words in every line said to you; crew
+  couples may mention each other in overheard conversations; the head writer also reads every
   moment and arc beat for the no-romance-with-the-player rule, which no word list can fully catch), **no swearing** beyond "blast", **no real-world brands or politics**, and
   nothing the game doesn't have (no photos, cameras, phones, weapons).
 - **`#serious` lines are earned:** only behind `tier>=friend`, a `beat:`, `mem:moment...` or `leaving:soon`.
