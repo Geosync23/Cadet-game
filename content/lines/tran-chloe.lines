@@ -198,3 +198,11 @@
 - Thanks. That's kind. Reliable choice.
 ? gift:polite
 - Thank you. It's the thought. The thought was nice.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.sam.sundays tier>=colleague
+- Your Sunday story. Read it to Bunk 1 sometime. Before lights out. Not after.   #funny
+? flag:home.mum.mug tier>=colleague
+- A mug from your mum. That's the good kind of present. The kind that leans a bit.   #warm

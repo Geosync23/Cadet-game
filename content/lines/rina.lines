@@ -340,3 +340,11 @@
 - Ta. That's nice of you. I'll use it. I'll tell you if I did.
 ? gift:polite
 - Thanks. Honestly. It's the thought. The thought was good.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- Your gran. New hip. Walking yet? Good. Tell her to drink water. From me.   #warm
+? flag:home.gran.won tier>=colleague
+- A marrow called the Captain won? Mine would've cheated. Your gran didn't need to.   #funny

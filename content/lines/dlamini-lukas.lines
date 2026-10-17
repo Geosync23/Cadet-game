@@ -205,3 +205,11 @@
 - Thanks. Nice. Kind.
 ? gift:polite
 - Huh. Thanks. Typical you. Kind about it.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- Your gran. The hip. Getting better? Good. Grans are tough.
+? flag:home.sam.sundays tier>=colleague
+- Sunday story. Good idea. Mine get a number. Yours get a story. Better.

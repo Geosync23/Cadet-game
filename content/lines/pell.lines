@@ -344,3 +344,11 @@
 - Cheers, {nick}! Very kind. It's going next to the screw tin. Pride of place. Nearly.
 ? gift:polite
 - Oh! Cheers. I'll find a use for it. I find a use for everything. Eventually.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.mum.mug tier>=colleague
+- Your mum's mug. Bring it to Works tea. It leans? Good. So does the hook.   #warm
+? flag:home.jo.launched tier>=colleague
+- Your Jo built a whole boat? By hand? Respect. Tell them I want a go. I'll fix the oars.   #funny

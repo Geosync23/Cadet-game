@@ -1,94 +1,77 @@
-# Handover: writer-commons (seat 14, Pillar 4)
+# Handover: writer-commons (Writer 3, Commons and juniors, Pillar 4)
 
-**Role:** Writer for the Commons and juniors. Reports ONLY to the head writer (session_016i7YYgZd6puKxfBSkLggRF) with
-`send_message` after each batch, never to the lead or the user. The head writer reviews, merges into `claude/content`,
-and sets the next batch. Retiring session: session_01DfadYjSP8skcVF72f6JxBw (handed over at about 65-70% memory,
-2026-10-17).
+**Role:** writer for the Commons and juniors. Reports ONLY to **head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) with
+`send_message` after each batch; never the lead or the user. The head writer reviews, merges into `claude/content`
+and sets the next batch. Project lead (for reference only): session_01KPJMYjXAPkNUcrQ8VRkhLE.
+Writer 3 is session_01AS3Tzju3TuFbM9XAEYdvPX (took the seat from session_01DfadYjSP8skcVF72f6JxBw, 2026-10-17).
 
-**Branch:** `claude/writer-commons` (push only there). Writers have no build numbers; work reaches the game through the
-head writer's 0.48.x builds. Last commit at handover: see `git log -1 origin/claude/writer-commons` (batch 6b, aae127f,
-plus this note).
+**Branch:** `claude/writer-commons` (push only there). Merge `claude/content` into it before every push. Writers have
+no build numbers. Commit messages end with the Co-Authored-By line the lead gave; no model names anywhere else.
 
 ## Read first
 
-CLAUDE.md; `content/README.md` (formats, the frozen condition words); `content/voice-bible.md` (tone, tiers, the
-checklist, section 12's batch notes); `content/facts.md` (canon: section 4b is our pronoun table, section 5 the shared
-quirks, sections 9-11 the story so far and approved inventions); `content/briefs.md`; `content/arcs/outlines.md`.
+CLAUDE.md; `content/README.md` (formats, conditions, "Calls home (.call)"); `content/voice-bible.md` (tone, tiers,
+the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contacts, 5 shared quirks, 9-11 canon);
+`content/briefs.md`; `content/arcs/outlines.md`.
 
-## What I own (content/ files only; never the game file, content_gen.py or lines_check.py)
+## What I own (content/ files only; never the game file, content_gen.py, lines_check.py or Writer 2's files)
 
 | Area | Files |
 | --- | --- |
-| Story crew lines (cards are the head writer's) | `lines/tomas, pell, rina, brennan .lines` (about 58-62 each) |
-| Story arcs | `arcs/tomas.arc` (beats 5-7), `pell.arc` (5-8), `rina.arc` (5-7), `brennan.arc` (1-5) |
-| My 19 people: cards + own lines | `voices/` and `lines/` for walsh-esme, madsen-ivo, varga-tariq, haddad-tamsin, dlamini-lukas (galley); esposito-yara, ishikawa-orla (store); grieve-thea, larsen-hamid (infirmary); yoon-elif, janssen-hugo, takahashi-wen, bakshi-sol (night shift); cruz-tove, oneill-imani, hart-ravi (garden); strand-erik, santos-zofia, tran-chloe (helm and comms juniors). Bunkmates Lukas, Zofia, Chloe about 55-60 lines; the other 16 about 29-30 |
-| Shared banks | `overheard/` (mess, bunk, home, quirks, night, commons, bunkpairs, garden, galley: 72 conversations, plus other writers' files), `reactions/` (storm, repairs, traditions, guests, favours, gifts, latemeal) |
-| Struggle themes | `themes/*.arc`, all twelve (3 beats each) |
-| facts.md | section 4b only (my pronoun rows) |
+| Story crew lines (cards are the head writer's) | `lines/tomas, pell, rina, brennan .lines` (~130-140 each) |
+| Story arcs | `arcs/tomas.arc` (5-7), `pell.arc` (5-8), `rina.arc` (5-7), `brennan.arc` (1-5) |
+| My 19: cards + own lines | galley (walsh-esme, madsen-ivo, varga-tariq, haddad-tamsin, dlamini-lukas), store (esposito-yara, ishikawa-orla), infirmary (grieve-thea, larsen-hamid), night shift (yoon-elif, janssen-hugo, takahashi-wen, bakshi-sol), garden (cruz-tove, oneill-imani, hart-ravi), helm/comms juniors (strand-erik, santos-zofia, tran-chloe) |
+| Shared banks | `overheard/` (incl. my `newlyweds.lines`, `circles.lines`), `reactions/` |
+| Themes | `themes/*.arc` (all twelve) |
+| Call home | `home/gran.call`, `jo.call`, `sam.call` (`mum.call` is the head writer's model) |
 
-Writer-works and writer-command have handed over; at handover I was the only writer on.
+## Done this seat (all MERGED by head writer 2 up to batch 8, 0.48.17; batch 9 pushed b007f02, awaiting review)
 
-## Shared formats and hooks (the things that bite)
+1. Story four: callbacks (`told:` on moment.<arc>.<word>, came.<trad>, fav.*, gift.*, fixed.<kind>, bday, grubby,
+   heard.moment.<friend>; Pell's `told:moment.pell.timed beat:pell.7`), visits, notes.
+2. Overheard: newlyweds (Silva/Soto/Jovanovic count up, Lukas counts down) and 30 "circles" convos by `who:`/`with:`.
+3. Story four toward 120: seasons, places, act:off rest days, smalltalk, rumour, cues, about, invites.
+4. Smalltalk + rumour bubbles for my 19.
+5. Callbacks for my 19.
+6. rep / knownFor as greet lines (`rep:well`, `rep:theirs`; `you:reliable|kind|chatty`).
+7. Call-home contacts Gran, Jo, Sam (6 beats, send, chat each).
+8. Gift thanks (`== gift`, `gift:loved|liked|polite` or the loved tag) for the four and my 19.
+9. Crew asking after your people (greet lines gated on home flags) for the four and the bunkmates.
 
-- **Card words carry no end punctuation** (`hi: Hi`, not `Hi!`): the line supplies it.
-- **Lengths:** card lines 90, bubbles (overheard, smalltalk, rumour) 60, moment lines 140, hints 90.
-- **place:** matches a place type or a one-word room name only (no spaces in a condition value): `place:infirmary`,
-  `place:galley`, `place:calm`. Mess hall / junior common room aliases were asked of the dialogue engineer.
-- **week1 lines:** `week1:true weekday:X`; avoid Sunday (day 0 and day 7 are both Sundays). Day 0 only:
-  `week1:true weekday:sun time:evening !flag:week1.d2`.
-- **Cues** (social's keys): `repair.<machine kind>` (MACHINE_KINDS), `tradition.<id>` (SHIP_TRADITIONS),
-  `event.ionStorm.<phase>`, `event.diplomatic.<phase>`, `favour.lamp|fetch|job` (always `.you`), `gift.<tag>`,
-  `harvest`, `lateMeal`. Dialogue 0.43.7 adds `@me` (about the speaker: `cue:gift.you@me`) and `@dept`.
-  A file `@reactions <prefix>` adds that prefix as a base cue to every line.
-- **Theme fill-ins (agreed shapes):** `{home}` a place ("Lisk", used as "on {home}"), `{family}` with the possessive
-  ("my gran", then "they"), `{hobby}` an -ing activity, `{since}` a duration. Every beat using one lists it in `needs:`.
-  The roster doesn't have these fields yet (the lead is finding an owner), so those beats don't play yet.
-- **Arc gates I used:** Tomas exam from `beat:tomas.5`; Pell's mum's shop from tier friend, the practical from
-  `beat:pell.5`; Rina's gran from `beat:rina.1`, the exam drawer from `beat:rina.5`, "a hard year" from `beat:rina.7`;
-  Brennan's blue sage from `beat:brennan.2`, Port Halloran and the fire from `beat:brennan.3`. Brennan is off Fri and
-  Sat (Lukas covers).
-- **No-romance read** (the lead's standing rule): every friend- or close-tier line, every moment. Watch for "our day",
-  "a bit of me with you", "I was thinking about you", "it's yours" (songs), "I'd be lost without them", poems. Never
-  tease about bodies ("you're thin").
+## Formats and hooks that bite
+
+- Card words no end punctuation. Lengths: card lines 90, bubbles 60, moments/calls 140, choices 90, hints 90.
+- `rep:` means "this band or better" (`!rep:known` = new only; `rep:new` warns).
+- `you:` matches knownFor() tags exactly and can't hold spaces: only `reliable`, `kind`, `chatty` work until the
+  dialogue engineer accepts `_` (asked by the head writer).
+- `gift:` (how or tag) only in `== gift`; the game appends " On my birthday, too." itself.
+- Notes: the game appends the sender's name, so don't sign them. Visits only happen at tier friend+.
+- Callback kind fires only when some memory is untold; only `told:` marks memories told.
+- Rest days: read the game ROSTER's `rota.offDays` (0 = Monday), or use `act:off`. Story four: Tomas Fri-Sat, Pell
+  Tue-Wed, Rina Sun-Mon, Brennan Fri-Sat.
+- `place:` aliases: mess, commons, lounge, booths, overlook, teacorner, worksbay, chartroom, musicroom; garden is
+  `place:hydroponics_garden`.
+- `.call` files: `? ` conditions last until the next `?`; put a bare `?` before open send choices. `pron: they`.
+- Ladder club: keep the lift fear as "exercise" unless gated `beat:kovac.2`.
+
+## No-romance read (the head writer's rules of thumb, from their rewords)
+
+Nobody in or on your bed; no "with me" at night; no "likes you"; no jealousy even as a joke; no dedications you
+missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no looking for you in the stars; no
+"hear me breathing". Sam is plainly an old friend. Hints never set a scene for two.
+
+## Loose ends / next
+
+- Batch 9 awaiting notes.
+- Head writer is asking the dialogue engineer for a one-sided booth overheard format (crew on calls home): likely
+  a later batch.
+- Theme fill-in `{since}` still not live (lines using it are skipped).
+- Favour jobs `pellPractice`, `brennanSage` depend on others.
+- Candidates: goodbyes and letters for my people, newcomer lines, more about/invite for my 19.
 
 ## How to test
 
-`content_gen.py` refuses to bake into the real game file for writers (the head writer bakes), so bake into a scratch
-copy:
-
 ```
-S=<your scratchpad>; cp starship-cadet.html $S/game.html
-python3 content_gen.py $S/game.html && python3 lines_check.py $S/game.html
+S=<scratchpad>; cp starship-cadet.html $S/game.html
+python3 content_gen.py $S/game.html && python3 lines_check.py $S/game.html   # must say PASS
 ```
-
-If the head writer's branch is behind the dialogue engineer's (new conditions like `@me`), check against
-`claude/dialogue`'s tools: copy its `content_gen.py`, `lines_check.py` and `starship-cadet.html` into a scratch folder
-with `plans/trad_parse.py` and a `content` symlink to ours, then run them there. Must say PASS (0 errors).
-
-**Known lines_check bug (reported):** a `habit:` condition in a person's own file crashes the habit check
-(`KeyError: 'add'`) if their roster entry has a `habitShifts` item with only `drop`. Avoid `habit:` for those people
-(Hamid Larsen hit it) until the dialogue engineer fixes it.
-
-## Loose ends
-
-1. **Newlyweds' day counts** in overheard: needs a speaker-identity condition (asked for `who:` or a `life:married`
-   tag). Until then the counts live in Lukas's own lines.
-2. **Pell beat 7 callback:** "if you helped him practise, he says so" can't be done inside an arc; write a
-   `mem:moment.pell.timed` callback line in pell.lines later.
-3. **Favour jobs** `pellPractice` and `brennanSage` (practical replies in the arcs) need the lead to have them built.
-4. **Theme fill-ins** wait on the roster fields (above).
-5. `reactions/repairs.lines` and `favours.lines` wait on `simNote('repair')` / `simNote('favour')` being posted
-   (the head writer asked the lead).
-
-## Next (as the head writer last set it)
-
-The batches the head writer listed are done: reactions rework (favours by `@me`, gifts, lateMeal), overheard batch 2
-and `about` lines, and my 19 to about 30 (bunkmates about 55-60). Report batch 6b and ask the head writer for the next
-batch. Likely candidates: callbacks (`mem:`/`told:`), visits and notes at your bunk, `rep`, `knownFor`, `rumour` and
-`smalltalk` for my people, goodbyes and letters, and the story crew towards about 120 each.
-
-## Open questions for the head writer (none for the user)
-
-- Who owns `{home}`, `{family}`, `{hobby}`, `{since}` now the crew designer has retired.
-- A speaker-identity condition for overheard (the newlyweds).
-- Whether `lateMeal` means what I guessed (a meal after the window, a kept plate).

@@ -138,3 +138,9 @@
 - Thank you. Useful. I like useful.
 ? gift:polite
 - Hm. Thank you. I'll find the right place for it.
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.won tier>=colleague
+- A prize marrow. What did it weigh? Your gran will know to the gram. Ask her.

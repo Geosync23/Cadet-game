@@ -136,3 +136,11 @@
 - Cheers, {nick}! Lovely. Right, listen, I'm going to tell you where I'll put it.   #funny
 ? gift:polite
 - Oh! For me? Thanks. That's... yes. Thanks. I'll think of something to say later.   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.jo.launched tier>=colleague
+- Right, listen, your Jo built a boat. A real one. I've told the galley. Twice.   #funny
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- How's your gran? The hip? Tell her a galley hand from Bunk 2 says get well soon. Loudly.

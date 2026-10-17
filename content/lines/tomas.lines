@@ -340,3 +340,13 @@
 - For me? Thanks, really. I'll put it somewhere I can see it. Somewhere safe-ish.
 ? gift:polite
 - Oh! Thank you. I don't know what it is. I'll find out. That's half the fun, isn't it?   #funny
+
+// Writer 3, batch 9: asking after your people back home (the home flags; only the big news you'd have told them).
+
+== greet
+? flag:home.gran.hip !flag:home.gran.won tier>=colleague
+- How's your gran's hip? I asked my brother to think good thoughts at it. He's thinking.   #warm
+? flag:home.jo.launched tier>=colleague
+- The Little Wren! I told my brother your Jo built a boat. Now he wants to build boats.   #funny
+? flag:home.sam.sundays tier>=friend
+- Sunday story day? I've started one with my brother. I copied you. Is that all right?   #warm
