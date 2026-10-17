@@ -219,3 +219,4 @@ Supersedes the 04:03 summary where they differ.
 
 ## Lead log (session_01KPJMYjXAPkNUcrQ8VRkhLE, from 2026-10-17 04:35 UTC)
 - 04:35 took over. Old check-in trig_018pRJUMKQr75nKGDHN7ovUp deleted; mine is trig_01JouW3XuKjT3nkZaqjXJjZZ (hourly, fires :33). All active helpers told who the new lead is. Asked the user to answer the Pillar 5 approval in chat (I can't read survey/pillar5approval). Waiting: build master's idle line (then archive + hire a fresh one for 0.60.2), social B's handover (then hire fresh, first job B8). 0.60.2 goes on a NEW link.
+- 04:37 Dialogue engineer handed over early (2b4d96d; 0.43.11 e69936d calls home awaiting reviewer 2). Dialogue engineer 2 hired: session_01S26bs4oMahyGJkuVaCKQGT (claude/dialogue, 0.43.12+, wave 2). Archive the first once settled. Merge note for 0.60.2: run content_gen.py (+ --check) after combining.
