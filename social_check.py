@@ -8,11 +8,16 @@
 #   spread, and your tiers with Tomas (a friend after two weeks) and Pell (an acquaintance)
 # Setup and environment as for cadet_test.py.
 # Run:  python3 social_check.py BUILD.html [DAYS]     (DAYS defaults to 14)
+#       python3 social_check.py BUILD.html --long   (long play: 140 ship days with a steady stand-in player; the social save
+#       must stay within SAVE_MAX, and the biggest parts are printed. Measure it on a build with social B 0.39.18+)
 import sys, json
 exec(open(__file__.replace('social_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
+LONG = '--long' in sys.argv                # long play: only the save after LONG_DAYS days (about 15 minutes)
+if LONG: sys.argv.remove('--long')
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
+LONG_DAYS = 140
 SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
@@ -55,8 +60,39 @@ def fail(msg):
     ok = False
     print('  FAIL', msg)
 
+# long play: a steady stand-in player who hears all the news going round each evening (on time 9 days in 10, a repair most days, chats to Tomas, Pell, Rina and one more,
+# lunch with Tomas, quiz and Tiles night each week) for LONG_DAYS days on paper, story Mail delivered as the game would
+LONG_RUN = r"""((days) => {
+  const h0 = 6; setShipNow(h0 * 60); SHIP_DAYS.clear(); if (typeof machinesNow === 'function') machinesNow();
+  socInit(); socReset(h0); if (SHIP.device && Array.isArray(SHIP.device.appts)) SHIP.device.appts.length = 0;
+  const crew = SOC.crew.filter(p => !p.reserve), pal = ['tomas', 'pell', 'rina'], weeks = [];
+  const parts = () => { const s = socSave(); return { size: JSON.stringify(s).length, parts: Object.entries(s).map(([k, v]) => [k, JSON.stringify(v).length]).sort((a, b) => b[1] - a[1]).slice(0, 8) }; };
+  for (let h = h0 + 1; h <= h0 + days * 24; h++) {
+    setShipNow(h * 60); socialTo(h * 60); SHIP.social.mail = SHIP.social.mail.filter(x => x.at > h * 60);   // delivered (socialMail, which the test stops)
+    const hr = h % 24, d = Math.floor(h / 24) + 1, u = schedU(d, h, 9001);
+    if (hr === 8) repNote('shiftStart', { late: u < .1 ? 25 : 0 });
+    if (hr === 12) { for (const id of pal) if (schedU(d, socHash(id), 9002) < .6) { relAdd(id, 'chat', REL_PTS.chat); memAdd(id, 'chat'); }
+      const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat'); }
+    if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
+    if (hr === 18) for (const x of NEWS.slice()) if (x.born <= h * 60 && x.seed.length) playerHeard(x.id, x.seed[0]);   // a heavy listener: hears everything going round each evening
+    if (hr === 10 && typeof machineList === 'function' && u < .7) { const ms = machineList(); repNote('repair', { who: 'you', machine: ms[Math.floor(schedU(d, h, 9004) * ms.length)].id }); }
+    if (hr === 20 && (d % 7 === 2 || d % 7 === 5)) repNote('tradition', { id: d % 7 === 2 ? 'quiz' : 'tiles-night', you: true });
+    if (hr === 23 && d % 28 === 0) { let r = 0; for (const v of SHIP.aff) if (v <= -40) r++; weeks.push({ day: d, ...parts(), rivals: r }); }
+  }
+  return weeks;
+})"""
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
+    if LONG:
+        g.ev("window.__realTick = tickShip; tickShip = () => {}; socialTick = () => {}")
+        lw = g.ev(LONG_RUN + f"({LONG_DAYS})")
+        for x in lw: print(f"Day {x['day']}: social save {x['size']} bytes, rivals {x['rivals']}, biggest parts {x['parts']}")
+        if not lw or lw[-1]['size'] > SAVE_MAX: fail(f'the social save is over {SAVE_MAX} bytes after {LONG_DAYS} days')
+        print('errors', g.errors[:5])
+        if g.errors: ok = False
+        print('SOCIAL LONG CHECK OK' if ok else 'SOCIAL LONG CHECK FAILED')
+        sys.exit(0 if ok else 1)
     g.ev("window.__realTick = tickShip; tickShip = () => {}; socialTick = () => {}")   # we drive the clock ourselves
     print(f"{g.ev('socInit().n')} crew, {DAYS} days on paper")
     run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, k])
@@ -107,6 +143,11 @@ with sync_playwright() as pw:
     print(f"Save: social part {a['size']} bytes (limit {SAVE_MAX})")
     if a['size'] > SAVE_MAX: fail('the save is too big')
     rt = g.ev("(() => { const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); return s === JSON.stringify(socSave()); })()")
+    mm = g.ev(r"""(() => { for (const x of NEWS) if (x.seed.length) playerHeard(x.id, x.seed[0]); socNote('repair', { who: 'you', kind: 'oven', deck: 3 });   // in memory the same after a save (0.36.75)
+      const live = new Set(NEWS.map(x => x.id)), m = () => JSON.stringify([SHIP.social.cues, SHIP.social.pairs, SHIP.heard.filter(h => live.has(h.id))]), a = m(); socLoad(JSON.parse(JSON.stringify(socSave())));
+      return [a === m(), SHIP.heard.filter(h => live.has(h.id)).length, SHIP.social.cues.length, Object.keys(SHIP.social.pairs).length]; })()""")
+    print('In memory the same after a save (cues, pair news, heard):', mm)
+    if not mm[0]: fail('a save and load changes cues, pair news or what you heard')
     print('Save and load give back the same:', rt)
     xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});
       const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R && JSON.stringify(SHIP.social.bonds) === Bd;
@@ -162,6 +203,7 @@ with sync_playwright() as pw:
       const B0 = SHIP.social.bonds; SHIP.social.bonds = { 'tomas:pell': { kind: 'friends', since: 1 }, 'calder:tomas': { kind: 'mentor', since: 1 } };
       out.bonds = [socialFill(tomas, 'friend'), bondOf('tomas', 'friend'), bondOf('pell', 'friends'), socialFill(tomas, 'mentor'), bondOf('calder', 'mentee'), socialFill(tomas, 'best')]; SHIP.social.bonds = B0;
       out.pure = JSON.stringify(socSave()) === before;
+      if (!out.pure) { const a = JSON.parse(before), b = socSave(); out.impure = Object.keys({ ...a, ...b }).filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])).map(k => k + ': ' + JSON.stringify(a[k]).slice(0, 80) + ' -> ' + JSON.stringify(b[k]).slice(0, 80)); }   // which part changed
       socNote('repair', { who: 'you', kind: 'oven', deck: 3 }); socNote('repair', { who: 'pell', kind: 'fan', deck: 5 });
       out.cue = [!!cue('repair.oven'), !!cue('repair.oven.you'), !!cue('repair.fan'), !!cue('repair.fan.you'), !!cue('repair'), cue('repair.lift') === null];
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); out.cueSaved = s === JSON.stringify(socSave()) && !!cue('repair.oven.you');
@@ -174,7 +216,7 @@ with sync_playwright() as pw:
     if not q.get('beatMap'): fail('beatOf does not map an arc id to its crew member')
     if q['bonds'] != ['Pell', 'pell', 'tomas', 'Chief Calder', 'tomas', None]: fail(f"bonds and their placeholders wrong: {q['bonds']}")
     if q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
-    if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
+    if not q['bandsOk'] or not q['mood'] or not q['pure']: fail(f"affBand, moodOf or purity wrong (changed: {q.get('impure')})")
     if q['rep'][:3] != ['new', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
     if q['fill'].get('fam') != 'a brother in the Concord navy' or q['fill'].get('grow') != q['fill'].get('growWant') or q['fill'].get('hob') != 'gardening' or q['fill'].get('since') is not None: fail(f"theme fill-ins wrong: {q['fill']}")
@@ -482,9 +524,13 @@ with sync_playwright() as pw:
       const keep = JSON.stringify(socSave()), t0 = shipNow(); SHIP.rep = null; const g0 = repInit().dept.galley;   // unclaimed jobs: one dip a department a week (0.36.71)
       setShipNow(7 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); setShipNow(9 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g1 = repInit().dept.galley;
       setShipNow(15 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g2 = repInit().dept.galley; setShipNow(t0); socLoad(JSON.parse(keep));
-      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2]; })()""")
+      const q = seekSpot(), kp = PLAYER_PLACE; let mine = true; if (q) { PLAYER_PLACE = q.id; const q2 = seekSpot(); mine = !q2 || q2.id !== q.id; PLAYER_PLACE = kp; }   // never your own seat (0.36.72)
+      const D = SHIP.device, n0 = D && D.appts ? D.appts.length : 0; let occ = true;   // occasions' appointments (section 19's apptAdd, a.occ): no points, no remark (0.36.74)
+      if (D && D.appts) { const r0 = relGet('holt').pts; D.appts.push({ id: 9901, with: ['holt'], at: shipNow() - 60, len: 30, where: 'x', kind: 'summons', status: 'kept', occ: 'readyroom' }, { id: 9902, with: ['holt'], at: shipNow() - 30, len: 30, where: 'x', kind: 'summons', status: 'missed', occ: 'readyroom' });
+        socialAppts(); occ = relGet('holt').pts === r0 && !apptMissedBy(SOC.crew[SOC.idx.get('holt')]); D.appts.length = n0; }
+      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2, socDuration(600), socDuration(650), mine, occ]; })()""")
     print('Small seams:', sm)
-    if sm != ['my gran', None, 'chess', 19, 7, 1, 2]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
+    if sm != ['my gran', None, 'chess', 19, 7, 1, 2, 'twenty months', 'nearly two years', True, True]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
