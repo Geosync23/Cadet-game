@@ -2,6 +2,35 @@
 
 Written 2026-10-16 at combined build 0.40.8 (`claude/ship-integration` 980e6a9), for a fresh session taking over this area. Read it with `DEV_NOTES.md` ("Player needs and the device"), `plans/pillar2-plan.md` and `design-doc.md` ("The player").
 
+## Update: builds 0.28.26 to 0.28.27 (player engineer 3; written 2026-10-17 at 59df90b)
+
+Read this first. **Lead is now session_01PJtmxWgAPLebXSZKP6ZRpG** (took over from session_01PxXKwc5mkC7tV5MPi3p7PP; 59df90b queued for combined 0.60.1). Chain of command: the user -> the lead -> everyone; helpers never contact the user. Next build **0.28.28**.
+- **0.28.26, kit bag** (onboarding engineer's spec, they confirmed): `KIT_BAG = 'kitbag'` in `P.carry`. `bagTick()` (each frame, playerUpdate) gives it while `introOn()` && `SHIP.intro.step === 'ramp'`; stows it (toast) when `SHIP.intro.done.bunk` is set and 'bunk' isn't in `SHIP.intro.missed`; quietly when the intro is off. Missed bunk: held until a tap anywhere in Bunk 1, Deck 4 (`bagLockerTap`, first line of `playerFloorTap`; bunk lockers have no description). `bagGive/bagStow(quiet)/bagHeld`; `handsFix(what)` words hands-full toasts; main storage's stow skips the bag. Section 21 has no hook (0.42.9 dropped its bagGive call).
+- **0.28.26, device lock:** `deviceLocked()` (introOn() && !introFlag('intro.device')), `deviceLockedTap()`, `deviceLockLook()` in floatsTick (label "No device yet", opacity .6, no need glow), capture click listener on #devBtn. Device engineer's 0.35.21 calls deviceLocked/deviceLockedTap in deviceShow: **keep these names**.
+- **0.28.27:** STORE gift names per social A 0.36.39: bar of chocolate, paper novel, + music chip, pocket puzzle, spare tiles set (ten store gifts).
+- **Test-only:** washer tap accepts a real 4-washer-N (machineTap's nearest, verified on a scratch merge with decks 77d7c44 + systems ae58e43); a junk saved name loads as null. The manifest name has been saved since 0.28.22: reviewer 1's "lost on reload" was on builds without 0.28.22.
+- **Checks:** all six green on 0.28.27 (cadet ALL IDENTICAL vs 0.28.25).
+- **Gotchas:** in player_check's Saving section frames only move with `window.__step(n, dt)` (virtual rAF), not by waiting. Never `pkill -f player_check.py` from a shell whose own command line contains that text (it kills itself); match with `pgrep -af "[c]adet-game/..."`. Fresh container: `pip install playwright` + `npm pack three@0.128.0` into /tmp/cadet-work/three (DEV_NOTES Testing).
+
+## Update: builds 0.28.22 to 0.28.25 (Pillar 4 on-call rows; written 2026-10-17 at c44df18)
+
+Read this first. Lead: session_01PxXKwc5mkC7tV5MPi3p7PP (build master session_012K7RZ3oSX2vpBb1rR66MBh). Branch sits on ship-integration 0.41.10 (6d91ee1) + systems 0.33.36 (22fb801). Next build **0.28.26**. Pillar 4 plan: `plans/pillar4-plan.md` ("On call": player engineer = kit bag, device lock, gift tags on carried items).
+- **0.28.22:** `simAct(act, o)` -> `simNote('act', ...)` (typeof-guarded; section 13's bus not merged yet): wash (shower), eat (`with`: company; grab 0), call, buy (`item`), laundry (a washer run). `SHIP.player.name` + `playerNameSet(v)` (trim, 24 max, saved as save.player.name; onboarding's introBegin calls it, SHIP.intro has no name).
+- **0.28.23:** +N notes and the device button's glow fade by `performance.now()` in `floatsTick()` (no CSS animation / setTimeout), so tests are deterministic. cadet_test also hides `#needFx` and `#devBtn` box-shadow (2806e6d).
+- **0.28.24:** reserved jobs' `j.make` ('bracket'): never fetched (`shelfNeeds`), made first in the machine shop (`makeMins(j)`: j.makeMins or 60), `jobStopMark(j, 'fetch'|'make')` -> section 17's `jobStepDone` (only for jobs with j.make). Systems engineer confirmed.
+- **0.28.25:** gifts (social A's section 20, inert until merged): STORE lines' 4th element = gift name -> `giftAdd` on paying (hands full: bought as before); machine shop with no job makes `GIFT_MAKES` in turn (activity `craft`); `bunkTap` shows `bunkNote()` first; `gardenGift()` (minute tick) gives herbs/tomato from your garden run's lot after pickup on `gardenHarvestDay`; `giftHeld()` words hands-full toasts. Social A confirmed.
+- **Checks:** 0.28.22 green; 0.28.23 deck/day green, cadet self-identical; 0.28.24 cadet identical vs 5f62c05, deck/day OK, player running at writing; 0.28.25 untested at writing (see DEV_NOTES rows' "Checks").
+- **Names others rely on:** keep `NEED_PULSE` (the device's device_check sets `NEED_PULSE[k]` directly, 0.35.20), `needPulse`, `actProgress`, `playerNameSet`, `FLOAT_LOG`.
+- **Gotchas:** the store test pays for `{ ...storePick(k), gift: null }` (gift lines go to hands). Stand-ins via `window.x` work only while the real function is absent from the build. Comparing against ship-systems alone shows huge diffs (it lacks 0.41.10's decks): compare against your own previous commit.
+
+## Update: builds 0.28.19 to 0.28.21 (the user's bathroom need and "You can see it working"; written 2026-10-16 at 15d0209)
+
+Read this first. The lead is now session_01PxXKwc5mkC7tV5MPi3p7PP. Branch `claude/player-needs` sits on ship-integration d89a3f5 (0.41.7); next build number **0.28.22**. All checks green at 15d0209 (cadet_test identical except the debug Day skip's "+69 Energy" note in f_noshadow, which is expected).
+- **0.28.19, bathroom:** sixth need `bathroom` on the end of `NEED_KEYS` (label Bathroom), drains 12/h awake, 3/h asleep; `NEED_FX.bathroom` high tasks x1.05, low x0.9 (keep the key and the NEED_FX row together: the device's Needs app breaks without the row). `PLAYER_ACTS.toilet` (+100 in 3 min, sit); `ACT_TAP` `/^toilet$/`, `FLOOR_ACTS.toilet`; `PRIVATE_TYPES` (shower, toilet) never offers someone else's (privatePlace). New game 60, a save without it 80.
+- **0.28.20, notes:** `needsSeen()` (end of playerUpdate) diffs the needs each frame and floats "+N Need" (`needFloat`, `#needFx`) when a rise stops (0.6 s) or every 5 s while it goes on; pulses `#devBtn`; `needPulse(k)` (the device engineer's Needs bars use it, device 0.35.19); `FLOAT_LOG` for tests. Times are `performance.now()` (virtual in tests) but the fade/removal is real time, so tests read `FLOAT_LOG`, not the DOM.
+- **0.28.21, progress:** `actBar()` / `actProgress(A)`: one bar over the stand-in for any ACT with a fixed `def.mins` and no `until` (incl. 15b's), the queue's wait to `turnAt`. 15b hides its goal marker while `actProgress()` is non-null (their 0.37.x).
+- **Gotchas:** any player_check test that times an activity must pin `bathroom: 50` (its task effect); section 17's `shipEffects` doesn't list bathroom (counts 1). Python output is buffered when redirected: use `python3 -u` for live logs.
+
 ## Update: builds 0.28.9 to 0.28.17 (the answers pass and after; written 2026-10-16 at b6e8d7e)
 
 Read this first; the older sections below still hold except where this says otherwise. DEV_NOTES "Player needs and the device" has the full detail and the build rows.
