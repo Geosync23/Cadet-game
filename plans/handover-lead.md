@@ -380,3 +380,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~20:35 user: with 0.27.40 the sinking is fixed but knees don't reach the seat front edge, so shins clip; wants shallower seats -> deck architect 3 (seat geometry, not poses).
 - ~20:15 DA3: Deck 4 toilets done, poses 0.27.42 b44f1b60 (WC signs on every stall Decks 2-5; Deck 4 p/q washrooms 1 shower + 2 toilets). Trade-off asked of the user: 6 juniors/day wash at a basin instead of showering; or revert wc:2 and keep signs. DA3 now on shallower seats (0.27.43).
 - ~20:16 1e: poses 0.27.38/39/41 PASS; 0.27.40 PASS WITH FIXES (MEDIUM +40 MB heap from the ray cache; LOW +0.6 ms Sunday dinner) -> perf 3, on top of 0.27.42; hold 0.27.40 out of a combine until the heap is ~150 MB. 1e is idle at ~40%.
+- ~20:16 social & traditions eng: 0.62.6 bd8d79e (recorded message plays through room-less tiles and the lift; 1e's LOW). Handover written; idle -> can be archived after 0.60.6.
