@@ -96,32 +96,32 @@ B: Couldn't say.
 A: It had my running shoes.
 B: Lovely shoes. Whoever painted them.   #funny
 
-// ---- the junior common room ----
-? place:commons who:rina with:pell
+// ---- more of Deck 3 (moved from the common room: Deck 4 is batch 3's) ----
+? place:lounge who:rina with:pell
 A: Tiles?
-B: You'll win.
-A: Obviously. Sit down.
+B: On the warped board?
+A: I win on any board. Sit down.
 B: Fine. But I'm having the good chair.   #funny
 
-? place:commons who:hart-ravi with:teague-theo|abara-rosa
+? place:mess who:hart-ravi with:teague-theo|abara-rosa
 A: Who drew me with a moustache?
 B: Not me.
 A: It's in your pen.
 B: It's a very good moustache, though.   #funny
 
-? place:commons who:esposito-yara|bakshi-sol with:rina
+? place:lounge who:esposito-yara|bakshi-sol with:rina
 A: Best of three?
 B: Best of one. I don't need three.
 A: Fair.
 B: Your move. Honestly, take your time.   #funny
 
-? place:commons who:tran-chloe with:dlamini-lukas time:evening
+? place:lounge who:tran-chloe with:dlamini-lukas time:evening
 A: Nearly ten.
 B: Hm.
 A: Lights out at ten.
 B: I know. Two hundred and five times I know.   #funny
 
-? place:commons who:grieve-thea with:tran-chloe|fonseca-arjun
+? place:infirmary who:grieve-thea with:tran-chloe|fonseca-arjun
 A: There's a hat in the lost-property box.
 B: There's a hat in mine too.
 A: Your box?
@@ -165,16 +165,16 @@ B: Calling my twin. Same thing, this week.
 A: Tell the set I said hello.
 B: You're the set. We're the set.   #funny
 
-// ---- the laundry ----
-? place:laundry who:haddad-tamsin with:larsen-hamid
-A: Practise after this? The chord?
+// ---- the store, and the mess again ----
+? place:mess who:haddad-tamsin with:larsen-hamid
+A: Practise after dinner? The chord?
 B: The chord.
 A: It's coming. Isn't it?
 B: Something's coming. I'll bring the book.   #funny
 
-? place:laundry who:madsen-ivo with:esposito-yara
-A: Have you seen a sock? Blue? A flower on it?
-B: Bought last Tuesday. With a matching one.
+? place:crew_store who:madsen-ivo with:esposito-yara
+A: I've lost a sock. Blue. A flower on it.
+B: Bought here last Tuesday. With a matching one.
 A: How do you remember that?
 B: I always remember. I never tell.   #funny
 
