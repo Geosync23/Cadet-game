@@ -196,7 +196,11 @@ with sync_playwright() as pw:
       out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
       at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
-      out.save = JSON.stringify(SHIP.career).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
+      SHIP.career = null; SHIP.rep = null; careerTick(at(30, 0)); repInit().ship.work = 30; const K = SHIP.career; K.e = K.z = 29; careerTick(at(30, 800)); out.missTo = Math.round(careerWork());
+      careerSick(30); out.refund = Math.round(careerWork());
+      const name = SHIP.player.name, dueOf = nm => { SHIP.player.name = nm; SHIP.career = null; const L = []; for (let d = 8; d <= 200; d++) if (sickDue(d)) L.push(d); return L.join(','); };
+      out.namesDiffer = dueOf('Ada') !== dueOf('Bo'); SHIP.player.name = name;
+      out.save = JSON.stringify(SHIP.career || {}).length; out.lines = !!(LINES['sick.getwell'] && LINES['sick.better']); return out; })()""")
     gaps = [b - a for a, b in zip(r['days'], r['days'][1:])]
     print(f"  sick days in 60 weeks: {r['days']} (gaps {gaps})")
     print(f"  on a sick day: {dict((k, v) for k, v in r.items() if k != 'days')}")
@@ -208,6 +212,8 @@ with sync_playwright() as pw:
     check(all(a > b for a, b in zip(sp, sp[1:])) and r['speeds'][-1][1] and not r['speeds'][0][1], f"untreated it doesn't get worse through the day to doubled over: {r['speeds']}")
     check(r['cure'] and r['after'][0] >= 0.99 and not r['after'][1] and not r['after'][2], 'the medicine did not cure it')
     check(r['nap'], 'sleeping it off did not cure it')
+    check(r['refund'] == 30 and r['missTo'] < 30, f"a sick note gave back {r['refund'] - r['missTo']} for a miss that took {30 - r['missTo']}")
+    check(r['namesDiffer'], 'every game is sick on the same days')
     if r['lines']: check(r['getwell'] == 'sick.getwell' and r['better'] == 'sick.better', 'crew have no get-well or glad-you-are-better line')
     else: print('  (no sick.getwell / sick.better lines baked yet)')
     check(r['save'] < SAVE_MAX, f"the save with sickness is {r['save']} bytes")
