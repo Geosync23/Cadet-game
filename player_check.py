@@ -96,8 +96,20 @@ def servery_seat(g, label):
     print('  served, tray in hand, control back:', tray)
     if g.ev("typeof galleyJoin === 'function'") and any(a[0] == 'queue' for a in seen):
         check(isinstance(tray[0], str) and tray[1] == 'tray' and tray[2] is False, f'served: your tray in hand and control back ({tray})')
-        tp2, b2, seen2, e, pk2 = run_activity(g, 'Mess table', label=label)
-        check(tp2 is True and g.ev("SHIP.player.tray") is None, f'a tap on a mess table with your tray: sit and eat ({tp2})')
+        # mess tables have no description of their own: you tap a seat, and playerFloorTap's line of sight finds it
+        tp2 = g.ev("""(() => { const p = player.obj.position;
+          const sp = [...PLACE_OF.values()].filter(q => q.type === 'mess-seat' && !heldBy(q.id)).map(q => placeSpot(q.id)).filter(Boolean)
+            .sort((m, n) => Math.hypot(m.x - p.x, m.z - p.z) - Math.hypot(n.x - p.x, n.z - p.z))[0];
+          const v = new THREE.Vector3(sp.x, .45, sp.z).project(camera); ray.setFromCamera(new THREE.Vector2(v.x, v.y), camera);
+          return playerFloorTap(new THREE.Vector3(sp.x, 0, sp.z)); })()""")
+        seen2, pk2 = [], 0
+        for k in range(4000 // 30):
+            g.step(30); st = state(g); pk2 = max(pk2, st['calls'])
+            if st['act']: seen2.append(st['act'])
+            if not st['act'] and k > 0: break
+        g.step(30); e = state(g)
+        print(f"  {label + ' (the seat)':22s} tapped={tp2!s:5s} {e['time']} needs {e['needs']}")
+        check(tp2 is True and g.ev("SHIP.player.tray") is None and any(a[0] == 'eat' for a in seen2), f'a tap on a mess seat with your tray: sit and eat ({tp2})')
         seen, pk = seen + seen2, max(pk, pk2)
     return tp, b, seen, e, pk
 
