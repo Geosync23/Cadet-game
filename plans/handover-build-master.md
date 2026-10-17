@@ -2,7 +2,7 @@
 
 **Role.** Merge the helpers' named commits into combined builds 0.60.x, run every check (with the six check-runner sessions), explain every difference, keep DEV_NOTES' 0.60.x rows and hook register current, and send the lead a green hash. The lead pushes `claude/ship-integration` and publishes; the build master never does. Reports go to the lead only (chain of command: the user → the lead → everyone; TEAM.md "Chain of command" on `claude/lead-pillar1`).
 
-**Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40). **Previous build master:** session started 2026-10-17 ~01:00 (this note).
+**Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; handing over to a fresh lead after 0.60.1: check TEAM.md). **Reviewers:** reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx (took over from reviewer 1, session_01HK4m33sUiLuVim8VWaCPMs); reviewer 2 via the lead. **This note:** the first build master, 2026-10-17 ~01:00-04:40.
 
 ## Branches and builds
 
@@ -44,6 +44,19 @@ R1 session_01PGFJbAfDYddQRGYQJktgXj cadet_test · R2 session_012zFHAS6jkPUhCrpBn
 - "Crew count changed" reports: get the exact scene (flags, day, minute, frames) before chasing.
 - Never pkill by a pattern that matches your own shell; kill by PID.
 
-## Status at handover
+## Status at handover (2026-10-17 ~04:40)
 
-(filled in when written)
+- **0.60.0** released (e3ee66b).
+- **0.60.1** = `claude/cand-0601` (final candidate 1bc4488 + this note). Contents, fixes and every cadet_test difference: DEV_NOTES' 0.60.1 row. Results on 1bc4488: name, content_gen --check, lines, smoke, newgame (first launch → Day 0) OK; social, device (R6), food incl. the event cake, machine, deck (R5), events, intro (R4) OK; cadet_test vs 0.60.0 = the explained differences, vs 062db7b ALL IDENTICAL (R1). Day 0/1/6/7/35 (R2) and player/interactions (R3) were green on the previous candidates and running on 1bc4488 at handover: check their reports.
+- **0.60.2 queue** (named by the lead; take only reviewed commits; re-check each branch's head):
+  - dialogue e532f89 (0.43.7) or later.
+  - traditions 5fa104f (0.34.33: 24 baked traditions, Sunday Mail, tallies, the birthday fix again). Expect one events_check FAIL already in the base: day 231's double booking at 3-store-1 at 14:30 (the sim engineer has it). Re-run content_gen.py.
+  - sim: the `job` payload rename (section 17 notes), 0.26.26+, and the leaver-walks-to-bay polish; anything for section 17 comes from claude/sim-engineer.
+  - galley: `galleyBirthdays` through schedPeople + aboard (galley engineer 3).
+  - arrival b4f0ac4 (0.42.18 + intro_check part 11; not a86d052). Needs sim 0.26.26 + player 0.28.28.
+  - player 0.28.28.
+  - social A 0a7ceb8+ (0.36.52+); social B 0.39.4+ (goodbyes, couples).
+  - crew designer 4613d43 (0.16.14, data only) after reviewer 1b.
+  - the head writer's content (claude/content: 574 lines + 74 voice cards); merge content last, then content_gen.py.
+- **Known, not blocking:** the device's `isFinite` → `Number.isFinite` nit (2 places, "Day null"; the device engineer has retired).
+- **Pillar 5 planner** (session_01VTbXtWeydYbfNw8fKLpkz8) was told: keys 850-899 free; events 352-399 clash via `k + 100` with the traditions block 434-499 (suggest 950-999); builds 0.44, 0.45, 0.47, 0.49 and 0.51-0.54 free.
