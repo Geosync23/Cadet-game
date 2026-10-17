@@ -403,3 +403,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~21:20 USER APPROVED the final Pillar 5 plan (e3b96c5). Night shift: taken as the plan's suggestion (weekend) unless the user says otherwise. DO NOT hire or start Pillar 5 production until the user says so.
 - ~21:17 plan republished as APPROVED (06814f8, v6). Archived idle helpers: Pillar 5 designer (~$15.93) and social & traditions eng (~$17.68); handovers on their branches.
 - ~21:20 BM2: cand-0606 c20e8cd (candidate 1, all PASSed branches); full run started; ETA green ~22:50 if no fails; late pieces merge as 1f passes (+30-40 min each after ~22:20).
+- ~21:25 USER: 0.60.6 is the LAST Pillar 4 build; wait for everything (no cutoff, nothing to 0.60.7). BM2 and PE6 told.
