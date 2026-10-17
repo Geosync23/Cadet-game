@@ -13,7 +13,7 @@ The user's three asks after playing 0.60.3. All in section 15 (plus one no-prop 
 - **Gentle** when a need first drops below 25 (the low line the device already shows in amber, where the penalties start). **Firmer** below 10.
 - Each says what it means and what to do (draft text below). **Re-arms** only once the need is back to 40 or more.
 - Shown as the normal toast, titled with the need ("Hungry", "Tired" ...). One at a time; never while a toast, tip card, dialogue, a panel (device, lift, job board, health board, chat, sleep prompt, queue prompt) is up, or while asleep or riding the lift. If two are due, the lowest need goes first, the other waits for the next quiet moment (8 s after the screen clears).
-- They replace the two old "you walk slower" toasts for energy and fitness. Not switched off by the Tips setting (they're about you, not teaching), but the intro holds them until it's over.
+- They replace the two old "you walk slower" toasts for energy and fitness. Not switched off by the Tips setting (they're about you, not teaching), and they do show during the intro (the bathroom need can get low on arrival day), only in its quiet moments.
 - **What happens at 0 today:** there's no fail state. Below 25 the penalty applies and stays the same down to 0. Food: tasks 15% slower. Energy: walk at 80%. Hygiene: chatting does half the good. Fitness: walk at 80% and tire sooner. Social: tire a little sooner. Bathroom: tasks 10% slower, and now at 0 the pose and 70% walking.
 
 | Need | Below 25 | Below 10 |

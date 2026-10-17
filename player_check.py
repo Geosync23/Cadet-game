@@ -204,18 +204,57 @@ with sync_playwright() as pw:
     sp = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
       const walk = () => { Object.assign(player.obj.position, cellPos(...nearestOpen(LIFT_AT[0], LIFT_AT[1], player))); player.steer = { x: 0, z: 1, k: 1 }; player.vel = 0;
         for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
-      for (const [f, e] of [[80, 80], [20, 80], [80, 20], [20, 20], [25, 25]]) { Object.assign(n, { fitness: f, energy: e }); playerUpdate(0, 0);
+      for (const [f, e] of [[80, 80], [20, 80], [80, 20], [20, 20], [25, 25]]) { Object.assign(n, { fitness: f, energy: e, bathroom: 50 }); playerUpdate(0, 0);
         out[f + '/' + e] = [Math.round(playerSpeed() * 1000) / 1000, Math.round(player.maxV / PLAYER_V0 * 1000) / 1000, Math.round(walk() / PLAYER_V0 * 1000) / 1000]; }
       Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return out; })()""")
     print('  fitness/energy: [speed, top speed ratio, walking speed reached after 1 s, as a ratio]', sp)
     for key, want in [('80/80', 1.05), ('20/80', .8), ('80/20', .84), ('20/20', .64), ('25/25', 1)]:   # fit (75+): 105% (0.28.9)
         check(abs(sp[key][0] - want) < 1e-9 and abs(sp[key][1] - want) < 1e-3, f'speed {key}: {sp[key]} want {want}')
     for key in sp: check(abs(sp[key][2] - sp[key][0]) < .01, f'speed {key}: walking at {sp[key][2]}, want {sp[key][0]}')
+    # bursting for the toilet (0.28.41, the user's): at bathroom 0 the '+go' pose (no prop: no new meshes) and 70% walking; above 0, gone
+    bg = g.ev(r"""(() => { const n = SHIP.player.needs, out = [];
+      const walk = () => { Object.assign(player.obj.position, cellPos(...nearestOpen(LIFT_AT[0], LIFT_AT[1], player))); player.steer = { x: 0, z: 1, k: 1 }; player.vel = 0;
+        for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
+      for (const b of [0, .5]) { Object.assign(n, { fitness: 50, energy: 50, hunger: 50, bathroom: b }); const v = walk() / PLAYER_V0;
+        out.push([Math.round(playerSpeed() * 1000) / 1000, Math.round(v * 100) / 100, !!player.needGo, Math.round((player.k && player.k['+go'] || 0) * 100) / 100, (player.propMeshes || []).length, needEffects().marks.bathroom[1].slice(0, 8)]); }
+      Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return JSON.stringify(out); })()""")
+    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note]', bg)
+    check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
+    check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
+
+    print('Need warnings (0.28.41):')
+    wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
+      let t = performance.now() + 1e6;
+      const quiet = () => { POP.toast = POP.card = POP.warn = -1e9; POP.busy = false; te.classList.remove('show'); };
+      const tick = (gap = true) => { if (gap) quiet(); t += 1000; const k = needWarnTick(t); return k ? [k, document.getElementById('tt').textContent] : null; };
+      deviceClose(); WARN_SAID = {}; Object.assign(n, { hunger: 60, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 });
+      out.push(tick());                                      // 0 nothing low
+      n.hunger = 24; out.push(tick(), tick(false), tick());  // 1 the gentle one, 2 not again at once, 3 nor later
+      n.hunger = 9; out.push(tick());                        // 4 the firm one
+      n.hunger = 30; tick(); n.hunger = 20; out.push(tick()); // 5 not re-armed at 30
+      n.hunger = 45; tick(); n.hunger = 20; out.push(tick()); // 6 re-armed at 40+
+      n.hunger = 20; n.bathroom = 5; n.social = 22; out.push(tick(), tick(false), tick(), tick());   // 7-10 lowest first, one at a time (food already said)
+      n.energy = 20; DEV.open = true; out.push(tick()); DEV.open = false;   // 11 not with the device open
+      quiet(); POP.busy = true; t += 1000; out.push(needWarnTick(t)); // 12 not while busy
+      sleeping = true; POP.at = -1e9; popupWatch(t); out.push(POP.busy); sleeping = false; POP.at = -1e9; popupWatch(t + 1); out.push(POP.busy);   // 13, 14
+      out.push(tick());                                      // 15 energy now
+      WARN_SAID = {}; Object.assign(n, NEEDS_FRESH); return JSON.stringify(out); })()"""))
+    for i, x in enumerate(wn): print('   ', i, x)
+    check(wn[0] is None and wn[1] == ['hunger', 'Hungry'] and wn[2] is None and wn[3] is None, f'a gentle warning once when food drops under 25: {wn[:4]}')
+    check(wn[4] == ['hunger', 'Very hungry'] and wn[5] is None and wn[6] == ['hunger', 'Hungry'], f'a firmer one under 10; re-armed only at 40+: {wn[4:7]}')
+    check(wn[7] == ['bathroom', 'Bursting'] and wn[8] is None and wn[9] == ['social', 'A bit lonely'] and wn[10] is None, f'the lowest need first, one at a time, after a gap: {wn[7:11]}')
+    check(wn[11] is None and wn[12] is None and wn[13] is True and wn[14] is False and wn[15] == ['energy', 'Tired'], f'never with the device open, while busy or asleep: {wn[11:]}')
+    # and in the running game: food under 25 says so within a few seconds once the screen is quiet
+    g.ev("WARN_SAID = {}; POP.toast = POP.card = POP.warn = -1e9; document.getElementById('toast').classList.remove('show'); deviceClose(); TIP_Q.length = 0; DEVICE_SKIN.tip(null); Object.assign(SHIP.player.needs, { hunger: 20, energy: 60, hygiene: 60, fitness: 60, social: 60, bathroom: 60 })")
+    g.step(30)
+    wl = json.loads(g.ev("JSON.stringify([WARN_SAID.hunger || 0, document.getElementById('tt').textContent])")); print('  in the game:', wl)
+    check(wl == [1, 'Hungry'], f'the warning shows in the running game: {wl}')
+    g.ev("WARN_SAID = {}; Object.assign(SHIP.player.needs, NEEDS_FRESH)")
 
     print('Sleep and time skips:')
     sl = g.ev(r"""(() => { const n = SHIP.player.needs; Object.assign(n, NEEDS_FRESH); setShipNow(22 * 60); needsT = null; playerUpdate(0, 0);
       n.energy = 40; sleeping = true; sleepUntil(WAKE_AT); sleeping = false; const slept = n.energy;
-      skipTo(shipNow() + 21 * 60); const awake = n.energy; playerUpdate(0, 0);
+      skipTo(shipNow() + 21 * 60); const awake = n.energy; n.bathroom = 50; playerUpdate(0, 0);   // bursting would slow you too (0.28.41)
       return { slept: Math.round(slept), awake21h: Math.round(awake), speed: playerSpeed(), at: clockText() }; })()""")
     print(' ', sl)
     check(sl['slept'] == 100, 'sleep should refill energy')

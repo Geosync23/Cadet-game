@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.3
+   STARSHIP CADET: CSV Wren                           build 0.28.41
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7452,7 +7452,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.41';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10206,6 +10206,7 @@ const needClamp = v => Math.max(0, Math.min(100, v));
 // activities: 1.15 = 15% faster); drain: how fast energy drains while awake; socialGain: social from chatting with
 // crew and eating in company. Each comes with the device's one-line reason. The machines' walk is never in it.
 const NEED_HIGH = 75, NEED_LOW = SLOW_BELOW;
+const GO_SPEED = .7, GO_SAY = 'Bursting for the toilet: you walk slower, and tasks go 10% slower.';   // bathroom at 0 (0.28.41)
 const NEED_FX = {   // need: { hi: [effects, reason], lo: [effects, reason] }
   energy:  { hi: [{ task: 1.15 }, 'Well rested: tasks go 15% faster.'], lo: [{ walk: SLOW_SPEED }, 'Tired: you walk slower.'] },
   fitness: { hi: [{ drain: .94, walk: 1.05 }, 'Fit: a spring in your step, and you tire more slowly.'], lo: [{ walk: SLOW_SPEED, drain: 1.06 }, 'Out of shape: you walk slower and tire sooner.'] },
@@ -10220,6 +10221,9 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
     const side = n[k] >= NEED_HIGH ? 'hi' : n[k] < NEED_LOW ? 'lo' : null, fx = side && NEED_FX[k][side]; if (!fx) continue;
     for (const f in fx[0]) e[f] *= fx[0][f];
     e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
+  }
+  if (n.bathroom <= 0) {                                 // bursting (0.28.41, the user's): you hold yourself and walk slower ('+go')
+    e.walk *= GO_SPEED; e.marks.bathroom = ['down', GO_SAY]; e.notes[e.notes.indexOf(NEED_FX.bathroom.lo[1])] = GO_SAY;
   }
   return e;
 }
@@ -10288,6 +10292,53 @@ const NEED_SAY = {
 function needsLine() {
   const n = SHIP.player.needs, k = NEED_KEYS.slice().sort((a, b) => n[a] - n[b])[0];
   return n[k] < SLOW_BELOW ? NEED_SAY[k][0] : n[k] < 50 ? NEED_SAY[k][1] : 'You feel fine.';
+}
+// quiet moments (0.28.41): what's on screen. popupBusy: a panel, a card, a dialogue, sleep, the lift or a fade is up,
+// so nothing new should pop up (the panels are looked at four times a second, the rest every frame). POP.toast / POP.card:
+// when an ordinary toast / a tip card or dialogue was last on screen, or a heads-up came up (performance.now(), so virtual in tests).
+// The need warnings and the teaching tips (below) wait for a quiet moment; nothing here changes what's shown.
+const POP = { at: -1e9, panels: false, busy: false, toast: -1e9, card: -1e9, warn: -1e9, tip: -1e9 };
+const POP_PANELS = ['lift', 'sleepAsk', 'qAsk', 'ixBoard', 'ixHealth', 'chat', 'devAddr', 'seek'];
+const popOn = id => { const e = document.getElementById(id); return !!(e && !e.hidden); };
+function popupWatch(now) {
+  if (now - POP.at >= 250) { POP.at = now; const fe = document.getElementById('fade'); POP.panels = POP_PANELS.some(popOn) || !!(fe && +fe.style.opacity > 0); }
+  const dlg = document.body.classList.contains('dlgon') || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE), te = document.getElementById('toast');
+  if (te && te.classList.contains('show')) POP.toast = now;
+  if (dlg || TIP_Q.length || DEV.hu && DEV.hu !== POP.hu || DEV.choose) POP.card = now;   // a heads-up counts as it comes (it can stay up a while, at the side)
+  POP.hu = DEV.hu;
+  POP.busy = POP.panels || dlg || !!DEV.choose || TIP_Q.length > 0 || sleeping || !!ride;
+}
+// need warnings (0.28.41, the user's "as any need approaches the lower end a warning and an explanation needs to
+// appear"): a gentle toast the first time a need drops under WARN_AT[0] (the low line, where its penalty starts), a firmer
+// one under WARN_AT[1]; each need re-arms once it's back to WARN_REARM. One at a time, never over a panel, a card, a
+// dialogue or sleep, nor with the device open, and WARN_GAP after anything else; the lowest need goes first. Not the
+// Tips setting's (they're about you, not teaching). At 0 nothing more happens (no fail state) except bathroom's '+go'.
+const WARN_AT = [NEED_LOW, 10], WARN_REARM = 40, WARN_GAP = 8000;
+const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10]
+  hunger: [['Hungry', 'You\'re getting hungry, and tasks go slower. The mess on Deck 3 serves breakfast 06:00-08:00 and dinner 17:00-20:30; grab-and-go there is always open.'],
+    ['Very hungry', 'You\'re running on empty: tasks go 15% slower. Get something at the mess on Deck 3; grab-and-go is always open.']],
+  energy: [['Tired', 'You\'re tired, so you walk slower. Sleep in your bunk (Bunk 1, Deck 4) from 20:00; by day, lying down or sitting rests you.'],
+    ['Exhausted', 'You\'re dead on your feet. Get to your bunk in Bunk 1, Deck 4, and sleep it off.']],
+  hygiene: [['Could do with a wash', 'People enjoy your company less: chatting does half the good. The showers are in the washrooms at either end of the junior wing, Deck 4.'],
+    ['Really need a shower', 'It\'s been a while. The washrooms are at either end of the junior wing on Deck 4.']],
+  fitness: [['Out of shape', 'You walk slower and tire sooner. A session on a treadmill or the weights in the gym on Deck 3 will help.'],
+    ['Badly out of shape', 'Even one workout in the gym on Deck 3 makes a difference.']],
+  social: [['A bit lonely', 'You tire a little sooner. Chat with someone, eat with company, or call home from the booths on Deck 3.'],
+    ['Missing people', 'Call home from the booths on Deck 3, or find a friendly face and say hello.']],
+  bathroom: [['Need the toilet', 'It\'s hard to concentrate: tasks go slower. The public washrooms are on Deck 4 (the junior wing) and Deck 3.'],
+    ['Bursting', 'You really need the toilet, now! Washrooms on Deck 4 (the junior wing) and Deck 3. Let it get to nothing and you\'ll be hopping.']],
+};
+let WARN_SAID = {};                                      // need -> 0 armed, 1 the gentle one said, 2 the firm one said
+function needWarnTick(now) {
+  const n = SHIP.player.needs; let pick = null, lvl = 0;
+  for (const k of NEED_KEYS) {
+    if (n[k] >= WARN_REARM) { WARN_SAID[k] = 0; continue; }
+    const l = n[k] < WARN_AT[1] ? 2 : n[k] < WARN_AT[0] ? 1 : 0;
+    if (l > (WARN_SAID[k] || 0) && (!pick || n[k] < n[pick])) { pick = k; lvl = l; }
+  }
+  if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
+  const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
+  toast(w[0], w[1]); return pick;
 }
 
 // ---- mail (0.28.10): any section sends with mailSend({ at, from, subject, body }) (at: absolute ship minutes, now if
@@ -10993,11 +11044,9 @@ function playerUpdate(dt, t) {
   if (squeezeStep()) player.maxV *= SQUEEZE_SPEED;      // squeezing past someone (0.28.12)
   if (crouch && !player.crouch) toast('Crawlway', 'You duck down and crouch-walk through.');
   if (crouch || player.crouch) player.crouch = crouch;
-  for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
-    const slow = n[k] < SLOW_BELOW;
-    if (slow && slowWas[k] === false) toast('Your device', NEED_SAY[k][0]);
-    slowWas[k] = slow;
-  }
+  const go = n.bathroom <= 0;                            // bursting (0.28.41): the '+go' pose while it's at 0 (hands full keep their hold)
+  if (go || player.needGo) player.needGo = go;
+  const pn = performance.now(); popupWatch(pn); needWarnTick(pn);   // a need getting low says so (0.28.41; it replaced the two slow-walk toasts)
   if (ACT) actUpdate(dt, t);
   needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
@@ -11047,7 +11096,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {}; WARN_SAID = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
 }
@@ -29189,7 +29238,10 @@ const HOLDS = { cart: { prop: 'cart', sx: -.62, ex: -.62, sz: -.06, lean: .09 },
   toolbox: { prop: 'toolbox', bone: 'R', one: -1, sx: .03, ex: -.1, sz: .2, hx: 0 },
   datapad: { prop: 'datapad', bone: 'L', one: 1, sx: -.5, ex: -1.35, sz: .1, hx: .25, look: .28 },
   // 0.27.13 (Pillar 3, C11): your own device, held in both hands at the chest and read, head down, standing or walking
-  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 } };
+  device: { prop: 'device', bone: 'L', sx: -.55, ex: -1.4, sz: .1, hx: .3, look: .38 },
+  // 0.28.41 (the user's): bursting for the toilet. No prop: both hands clasped low in front, knees in, short quick
+  // steps, a little lean and a jiggle on the spot (knees: how far the thighs turn in)
+  go: { sx: -.24, ex: -.6, sz: -.34, hx: .6, lean: .14, look: .16, knees: .16 } };
 const ACT_OF_TYPE = { gym: 'lift', callhome: 'call', shop: 'browse', music: 'play', garden: 'water', laundry: 'fold', 'work:galley': 'cook' };
 const ACT_SEATED = new Set(['call', 'read', 'drink', 'talk', 'play', 'lift', 'row']);
 const BASES = new Set(['walk', 'stand', 'sit', 'lie', 'work', 'crouch']);   // crouch (0.27.7): a crouch-walk, for crawlways; it walks like walk
@@ -29491,8 +29543,14 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     for (const a of rig.arms) if (!H.one || a.side === H.one) armTo(a, w, H.sx, H.ex, H.sz, H.hx !== undefined ? H.hx : .35);
     if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
     if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
+    if (H.knees) for (const leg of rig.legs) {           // '+go': knees together, the stride shortened, a jiggle when still
+      leg.thigh.rotation.x *= 1 - .45 * s; leg.knee.rotation.x *= 1 - .3 * s;
+      leg.thigh.rotation.z = L(leg.thigh.rotation.z, -leg.side * H.knees, s);
+      leg.knee.rotation.z = L(leg.knee.rotation.z, leg.side * H.knees * 1.6, s);
+      leg.knee.rotation.x -= Math.max(0, Math.sin(t * 11 + leg.side * 1.6)) * .14 * s * (1 - sk);
+    }
   }
-  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
+  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && HOLDS[cart].prop && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
   const key = pk && hk ? pk + ' ' + hk : pk || hk;     // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
     o.propKey = key;
@@ -29988,7 +30046,7 @@ const POSE_DEMO = (() => {
   if (urlFlag('poses') === null) return null;
   const POSES = ['stand', 'walk', 'work', 'sit', 'lie', 'run', 'row', 'lift', 'lie:lift', 'call', 'sit:call', 'browse',
     'pay', 'play', 'sit:play', 'water', 'cook', 'wash', 'fold', 'drink', 'sit:drink', 'read', 'sit:read', 'talk',
-    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch'];
+    'walk+tray', 'walk+toolbox', 'walk+datapad', 'crouch', 'stand+device', 'walk+device', 'punch', 'stretch', 'stand+go', 'walk+go'];
   const NAMES = { 'lie:lift': 'lift (bench)', 'sit:call': 'call (seated)', 'sit:play': 'play (keys)', 'sit:drink': 'drink (seated)', 'sit:read': 'read (seated)', row: 'row' };
   let here = [], furn = null, labels = null, started = false;
   const v = new THREE.Vector3();
@@ -30488,7 +30546,7 @@ class Walker {
     g.p += moved / (CYCLE * this.h);
     if (!moved && g.w < .02) g.p = 0;
     g.w += ((moved > 0 ? 1 : 0) - g.w) * Math.min(1, dt * (moved > 0 ? 6 : 7));
-    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
+    if (this.holding !== undefined || this.crouch !== undefined || this.deviceOut !== undefined || this.needGo !== undefined) animateActivity(this, (this.crouch ? 'crouch' : 'stand') + (this.holding ? '+' + (this.holding === true ? 'carry' : this.holding) : this.deviceOut ? '+device' : this.needGo ? '+go' : ''), dt, t + g.t0, Math.min(1, this.vel / this.maxV));   // section 15: in hand (8b's '+carry', '+cart', '+cartfull'), crouching in a crawlway
     else animateRig(this.rig, g, dt, t + g.t0, Math.min(1, this.vel / this.maxV));
   }
   setActive(on) {
