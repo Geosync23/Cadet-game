@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.67
+   STARSHIP CADET: CSV Wren                           build 0.36.68
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.67';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.68';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25818,6 +25818,7 @@ function socialFill(p, name, ctx = {}) {
   if (name === 'home') return typeof p.home === 'string' && p.home ? p.home : null;
   if (name === 'family') return typeof p.family === 'string' && p.family.trim() ? p.family.trim() : null;   // as written (writers say "my {family}")
   if (name === 'hobby') { if (typeof p.hobby === 'string' && p.hobby) return p.hobby; const h = (p.habits || []).map(x => SOC_HOBBY[x]).find(Boolean); return h || null; }
+  if (name === 'kin' || name === 'lost' || name === 'hobbyNoun') { const v = p[name]; return typeof v === 'string' && v.trim() ? v.trim() : null; }   // the roster's short theme fields as written ("my gran", "my wife", "chess"); "" is none
   if (name === 'since') {                                // how long they've been aboard, growing with the game: from their arrival day, or the roster's since (at day 1) plus the days since
     const a = arriveDay(p), d = SHIP.time.day;
     if (a != null && a > 1) return d >= a ? socDuration(d - a) : null;
@@ -26225,7 +26226,7 @@ function socialVisit(m) {
   if (!socGate('done') || min < VISIT_FROM || min >= VISIT_TO || SHIP.social.visitDay === day || CHAT || SEEK || sleeping) return;
   const home = playerInBunk(); if (schedU(day, m, 658) >= (home ? VISIT_ODDS : NOTE_ODDS)) return;
   const t = shipNow(), who = SOC.crew.filter(p => { const r = SHIP.rel[p.id]; if (!r || r.tier < 3 || (r.visitDay || 0) > day - VISIT_GAP) return false; const w = whereIs(p, t); return w && !w.moving && (w.act === 'leisure' || w.act === 'off'); })
-    .sort((a, b) => (warmth(b.id) === 'warm') - (warmth(a.id) === 'warm') || schedU(a.seed, day, 659) - schedU(b.seed, day, 659));
+    .sort((a, b) => (typeof momentWantsVisit === 'function' ? momentWantsVisit(b, t) - momentWantsVisit(a, t) : 0) || (warmth(b.id) === 'warm') - (warmth(a.id) === 'warm') || schedU(a.seed, day, 659) - schedU(b.seed, day, 659));
   const p = who[0]; if (!p) return;
   SHIP.social.visitDay = day; relGet(p.id).visitDay = day;
   if (!home) {                                           // you're out: a note on your bunk
@@ -26456,7 +26457,7 @@ function playerHeard(newsId, from, overheard) {        // overheard: in passing 
 }
 // the day's gossip, born at its hour: birthdays and ship traditions at 07:00, habit changes at 09:00
 function socBorn(h, rooms) {
-  const d = Math.floor(h / 24) + 1, hr = h % 24, t = h * 60 + 30, crew = SOC.crew;
+  const d = Math.floor(h / 24) + 1, hr = socHr(h), t = h * 60 + 30, crew = SOC.crew;
   const near = p => crew.filter(q => q !== p && (socRoom(q) === socRoom(p) || q.dept === p.dept));   // who'd know first
   if (hr === 7 && typeof birthdaysOn === 'function') for (const p of birthdaysOn(d)) if (SOC.idx.has(p.id)) {
     const n = shortName(p);
@@ -26489,6 +26490,7 @@ function socBorn(h, rooms) {
   }
 }
 // ---- one ship hour on paper: who spent time together, affinity drifting, news passing on ----
+const socHr = h => ((h % 24) + 24) % 24;               // the hour of the day, also on Day 0 (negative ship hours)
 let SOC_IN = null;                                      // the hour socialHour is running (SHIP.social.hour is already the next one)
 function socialHour(h) {
   SOC_IN = h;
@@ -26535,11 +26537,11 @@ function socialHour(h) {
   socBorn(h, rooms);
   socCourtesy(h, rooms);
   if (typeof storyHour === 'function') storyHour(h, pairs);   // bonds between crew (20c)
-  if (h % 24 === 4) memFade();
-  if (h % 24 === 19) socCrewGift(h);
-  if (h % 24 === 7) { socTransfers(h); socInvites(h); socGuideDay(h); }
-  if (h % 24 === 15) socGuideMail(h);
-  if (h % 24 === 4 && (Math.floor(h / 24) + 1) % 7 === 0) repWeek(h);   // Sundays
+  if (socHr(h) === 4) memFade();
+  if (socHr(h) === 19) socCrewGift(h);
+  if (socHr(h) === 7) { socTransfers(h); socInvites(h); socGuideDay(h); }
+  if (socHr(h) === 15) socGuideMail(h);
+  if (socHr(h) === 4 && (Math.floor(h / 24) + 1) % 7 === 0) repWeek(h);   // Sundays
   for (let k = NEWS.length - 1; k >= 0; k--) if (t - NEWS[k].born > NEWS[k].life * 1440) { delete SHIP.knows[NEWS[k].id]; NEWS.splice(k, 1); }   // old news is dropped
   while (NEWS.length > 40) { delete SHIP.knows[NEWS[0].id]; NEWS.shift(); }
   for (const k in SHIP.social.feuds) if (SHIP.social.feuds[k].until <= t) delete SHIP.social.feuds[k];   // a feud nobody smoothed over just fades
@@ -26573,7 +26575,7 @@ function socCourtesy(h, rooms) {
       if (sour) { C.meet = d; eventScore('discourtesy', 1); break; }
     }
   }
-  if (h % 24 === 20 && C.holt !== d && SOC.idx.has('holt') && guestWarmth(SOC.crew[SOC.idx.get('holt')], t) < 45) { C.holt = d; eventScore('discourtesy', 1); }
+  if (socHr(h) === 20 && C.holt !== d && SOC.idx.has('holt') && guestWarmth(SOC.crew[SOC.idx.get('holt')], t) < 45) { C.holt = d; eventScore('discourtesy', 1); }
 }
 function socPairNews(i, j, friends, t) {
   const a = shortName(SOC.crew[i]), b = shortName(SOC.crew[j]);
