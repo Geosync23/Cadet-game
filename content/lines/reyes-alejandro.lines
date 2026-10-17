@@ -12,7 +12,7 @@
 ? tier>=colleague
 - {me}! Good. Sit. Tell me something that isn't about coils. Please.
 ? tier>=friend
-- Oh, it's you. Good. Everything's better when it's you. Anyway.   #warm
+- Oh, it's you. Good. You're the only one who lets me finish a story. Anyway.   #warm
 
 == bye
 - {bye}. Sorry, I talked a lot. I always talk a lot.
