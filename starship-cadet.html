@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.15
+   STARSHIP CADET: CSV Wren                           build 0.39.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.15';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.16';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15906,6 +15906,22 @@ function goodbyeDone(p, d, c) {
   memAdd(p.id, 'moment.bye.' + flavour, { cls: 'core' });
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':bye', who: p.id, beat: 'bye', flavour, tone: 'goodbye', fit: !!c.fit });
   if (relTier(p.id) >= 4 && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
+}
+// ---- farewells (0.39.16, the overnight plan; social-deep-plan Part 8b "On the day") ----
+// Who comes to the shuttle bay to see a leaver off on their last day (rotation days: crewLeaving), for section 14's
+// plans: their closest friends aboard by the weekly snapshot (affinityPlan, so a day planned twice agrees; never live
+// bonds), FAREWELL_AT or more, up to FAREWELL_MAX, closest first; each one's partner beside them and the leaver's own
+// partner (couples stand together). Not the player (you choose to come), nobody leaving that day themselves.
+//   farewellCrew(leaver, d) -> [crewId]
+const FAREWELL_AT = 60, FAREWELL_MAX = 4;
+function farewellCrew(leaver, d) {
+  socInit(); const p = socP(leaver); if (!p) return [];
+  const here = q => !!q && q !== p && q.rank !== 'guest' && socAboard(q, d) && leaveDay(q) !== d;
+  const near = SOC.crew.filter(here).map(q => [q, affinityPlan(p, q, d)]).filter(x => x[1] >= FAREWELL_AT)
+    .sort((a, b) => b[1] - a[1] || (a[0].id < b[0].id ? -1 : 1)).slice(0, FAREWELL_MAX).map(x => x[0]);
+  const out = new Set(near.map(q => q.id)), mate = q => q.partner && SOC.idx.has(q.partner) ? socP(q.partner) : null;
+  for (const q of [...near, p]) { const m = mate(q); if (here(m)) out.add(m.id); }
+  return [...out];
 }
 // ---- calls home (0.39.7, B8; the user's design, head writer 2's call files, the dialogue engineer's baked shapes) ----
 // Your people back home: Mum, Gran, Jo and Sam (HOME_CONTACTS, baked from content/home/<contact>.call; Jo and Sam are
