@@ -210,7 +210,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.60.3
+   STARSHIP CADET: CSV Wren                           build 0.60.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1521,32 +1521,44 @@ const KIT = {
     box(.16, .1, .02, KM.label, .18, .32, .255, g);
     return { w: .7, d: .5 };
   },
-  // the shuttle Tern: nose at +z, the side hatch and ramp on +x
-  shuttle(g) {
-    const prof = new THREE.Shape();                      // side profile (z along, y up), extruded across the width
-    [[-2.25, .5], [1.85, .5], [2.3, .82], [1.4, 1.78], [-1.75, 1.88], [-2.3, 1.62]].forEach(([z, y], k) => k ? prof.lineTo(z, y) : prof.moveTo(z, y));
-    prof.closePath();
-    const bg = new THREE.ExtrudeGeometry(prof, { depth: 1.7, bevelEnabled: true, bevelThickness: .06, bevelSize: .06, bevelSegments: 2 });
-    bg.rotateY(-Math.PI / 2); bg.translate(.85, 0, 0);
-    const body = new THREE.Mesh(bg, WM.hull); body.castShadow = body.receiveShadow = true; g.add(body);
-    const ws = box(1.5, .04, 1.08, WM.cockpit, 0, 1.33, 1.86, g); ws.rotation.x = .82;   // windscreen along the sloped nose
-    box(1.87, .14, 3.9, KM.teal, 0, 1.1, 0, g); box(1.87, .05, 3.9, KM.red, 0, .97, 0, g);   // livery stripes
-    for (const sx of [-.93, .93]) for (const z of [-.9, -.2, .5]) box(.03, .22, .34, WM.cockpit, sx, 1.42, z, g);   // the bevel puts the sides at ±.91
-    box(.03, 1.0, .9, WM.hullDark, .93, 1.0, -1.05, g);                                       // side hatch, open
-    const rp = box(.86, .05, 1.0, WM.steel, 1.3, .42, -1.05, g); rp.rotation.z = -.5;          // its ramp
-    for (const sx of [-.52, .52]) {
-      const e = cyl(.3, .26, .5, WM.hullDark, sx, 1.1, -2.42, g, 18); e.rotation.x = Math.PI / 2;
-      const f = cyl(.2, .2, .02, WM.engine, sx, 1.1, -2.68, g, 18); f.rotation.x = Math.PI / 2;
-    }
-    box(2.5, .07, .95, WM.hull, 0, .95, -1.0, g);                                            // stub wings
-    box(.06, .14, .14, WM.navRed, -1.25, .98, -1.0, g); box(.06, .14, .14, WM.navGreen, 1.25, .98, -1.0, g);
-    glow('#ff4a3a', .35, -1.3, 1.0, -1.0, g, .7); glow('#3af08a', .35, 1.3, 1.0, -1.0, g, .7);
-    box(.08, .72, .95, WM.hull, 0, 2.2, -1.7, g); box(.09, .16, .5, KM.teal, 0, 2.4, -1.75, g);   // tail fin
-    for (const [x, z] of [[-.6, -1.4], [.6, -1.4], [0, 1.45]]) { cyl(.05, .05, .5, WM.steel, x, .25, z, g, 8); cyl(.16, .18, .05, WM.paintDark, x, .025, z, g, 14); }
+  // the shuttle Tern, big enough to walk inside (0.38.18, plans/shuttle-plan.md): nose at +z, the side door and its ramp on
+  // +x. 2.9 x 6 m, the cabin floor flush with the deck, roof at 2.4 m: an aisle down the middle (pz -2..2), benches either
+  // side, the cockpit at the nose, lockers across the tail. The roof and the hull above 1 m are one group (o.roof gets it)
+  // that hides while you're inside; the ramp (o.ramp gets its hinge) is the door, upright when closed, lying almost flat
+  // when open. Both are merged on their own and kept out of the deck's merge. No R().
+  shuttle(g, o = {}) {
+    const side = (y, h, mat, gx, roofG) => {             // a hull side at x = gx, from y to y + h; the +x side has the door gap (pz -.97 to -.03)
+      const parts = gx > 0 ? [[-3, -.97], [-.03, 3]] : [[-3, 3]];
+      for (const [z0, z1] of parts) box(.12, h, z1 - z0, mat, gx, y + h / 2, (z0 + z1) / 2, roofG);
+    };
+    box(2.7, .02, 5.9, WM.steel, 0, .01, 0, g);                                               // the cabin floor
+    for (const gx of [-1.39, 1.39]) { side(0, 1.0, WM.hull, gx, g); side(.86, .08, KM.red, gx + Math.sign(gx) * .012, g); }   // lower hull, a red line at the top
+    box(2.9, 1.0, .12, WM.hull, 0, .5, -2.99, g); box(2.9, .9, .12, WM.hull, 0, .45, 2.99, g);   // tail and nose, lower
+    box(.5, .42, 4.0, WM.hullDark, -1.05, .21, 0, g); box(.46, .08, 3.9, KM.teal, -1.05, .46, 0, g); box(.08, .6, 4.0, WM.hullDark, -1.29, .76, 0, g);   // the north bench
+    for (const [z, l] of [[1.0, 2.0], [-1.5, 1.0]]) { box(.5, .42, l, WM.hullDark, 1.05, .21, z, g); box(.46, .08, l - .1, KM.teal, 1.05, .46, z, g); box(.08, .6, l, WM.hullDark, 1.29, .76, z, g); }   // the south benches, either side of the door
+    box(2.66, 1.9, .9, WM.hullDark, 0, .95, -2.5, g); for (const x of [-.66, 0, .66]) box(.6, .04, .02, WM.steel, x, 1.2, -2.04, g);   // the lockers across the tail, and their handles
+    box(2.0, .03, .03, WM.lightStrip, 0, 1.75, -2.04, g); box(2.0, .03, .03, WM.lightStrip, 0, .79, 2.48, g);   // cabin lights: over the lockers and along the console's edge (glow, no lamp)
+    box(2.4, .8, .45, WM.paintDark, 0, .4, 2.72, g); for (const x of [-.55, .55]) { box(.5, .02, .3, WM.screen, x, .81, 2.7, g); cyl(.2, .2, .1, KM.teal, x, .45, 2.3, g, 14); cyl(.05, .05, .4, WM.steel, x, .2, 2.3, g, 8); }   // the cockpit: console, screens, two seats
+    for (const sx of [-.7, .7]) { const e = cyl(.32, .28, .5, WM.hullDark, sx, 1.0, -3.25, g, 18); e.rotation.x = Math.PI / 2; const f = cyl(.22, .22, .02, WM.engine, sx, 1.0, -3.51, g, 18); f.rotation.x = Math.PI / 2; }   // engines
+    for (const sd of [-1, 1]) { box(.5, .07, 1.0, WM.hull, sd * 1.7, .75, -2.2, g); box(.06, .12, .12, sd < 0 ? WM.navRed : WM.navGreen, sd * 1.96, .75, -2.2, g); }   // stub wings, nav lights
+    // the roof group: the hull above 1 m, windows, livery, windscreen, roof and fin
+    const R = new THREE.Group(); g.add(R);
+    for (const gx of [-1.39, 1.39]) { side(1.0, 1.3, WM.hull, gx, R); side(1.08, .12, KM.teal, gx + Math.sign(gx) * .012, R); for (const z of [-1.5, -.5, .5, 1.5]) if (!(gx > 0 && z === -.5)) box(.03, .32, .5, WM.cockpit, gx + Math.sign(gx) * .065, 1.6, z, R); }
+    box(.12, .3, .94, WM.hull, 1.39, 2.15, -.5, R);                                             // over the door
+    box(2.9, 1.3, .12, WM.hull, 0, 1.65, -2.99, R);
+    for (const sx of [-1.25, 1.25]) box(.4, 1.5, .12, WM.hull, sx, 1.65, 2.99, R);              // the nose's pillars, and the windscreen between them
+    const ws = box(2.1, .04, 1.2, WM.cockpit, 0, 1.75, 2.75, R); ws.rotation.x = .9;
+    box(2.9, .1, 6.1, WM.hull, 0, 2.35, 0, R); box(1.6, .12, 4.0, WM.hull, 0, 2.46, -.4, R); box(.08, .5, 1.0, WM.hull, 0, 2.6, -2.5, R); box(.09, .14, .5, KM.teal, 0, 2.7, -2.55, R);
     const name = tex(256, 64, (c, w, h) => { c.fillStyle = '#1c3d44'; c.font = '700 40px system-ui,sans-serif'; c.fillText('TERN', 8, 44); c.font = '600 18px system-ui,sans-serif'; c.fillText('CSV WREN · 1', 130, 42); });
     const nm = new THREE.Mesh(new THREE.PlaneGeometry(1.3, .32), new THREE.MeshBasicMaterial({ map: name, transparent: true, toneMapped: false }));
-    nm.position.set(.95, 1.55, .3); nm.rotation.y = Math.PI / 2; nm.userData.noShadow = true; g.add(nm);
-    return { w: 2.6, d: 4.6, tall: true };
+    nm.position.set(1.47, 1.95, 1.4); nm.rotation.y = Math.PI / 2; nm.userData.noShadow = true; R.add(nm);
+    mergeMeshes(R); for (const m of R.children) m.userData.noMerge = true;
+    // the ramp: hinged at the door's foot, upright (closed) or lying out over the bay floor (open)
+    const P = new THREE.Group(); P.position.set(1.42, .1, -.5); g.add(P);
+    box(.06, 1.88, .92, WM.steel, 0, .94, 0, P); for (let k = 0; k < 6; k++) box(.02, .03, .8, WM.paintDark, .04, .25 + k * .3, 0, P);   // ribs on the outer face
+    mergeMeshes(P); for (const m of P.children) m.userData.noMerge = true;
+    if (o.roof) o.roof(R); if (o.ramp) o.ramp(P);
+    return { w: 2.9, d: 6.1, tall: true };
   },
   // the bay doors: the flat stern hull, two heavy leaves in a hazard frame, a warning lamp over the seam
   bayDoors(g, o = {}) {
@@ -4434,7 +4446,8 @@ DECKS[5] = {
     place('f', 'shelving', 1.2, 5.55, 's', { it: IT('Bar stock', 'Rods, plate and tube for the lathe and the fabricator.') });
 
     // shuttle bay: the Tern on its pad, nose to the bay doors; floodlights along the hull; crates waiting for the cargo hold
-    place('S', 'shuttle', 4.0, 8.0, 'e', { hitH: 1.9, it: IT('Shuttle Tern', 'The Wren\'s little shuttle, ramp down. It brought you aboard, and one day it\'ll take you out on away jobs.') });
+    place('S', 'shuttle', 4.0, 7.5, 'e', { noBlock: true, block: DECKS[5].tern.block.map(([i, j]) => [i - 1, j]), roof: ternRoof, ramp: ternHinge });   // 0.38.18: the walk-in Tern (tiles x 2-7, rows 6-8)
+    place('S', 'tapSpot', 1.5, 7.5, 'e', { hitH: 2.3, it: IT('Shuttle Tern', 'The Wren\'s shuttle. It brought you aboard, and one day it\'ll take you out on away jobs. The benches still smell of the last crew\'s coffee.') });   // the tap, on the cockpit: a tap inside the cabin walks you there
     for (const x of [1.5, 4.5, 7.5]) placeWall('S', 'workLight', 'n', x);
     place('S', 'crate', 6.4, 13.55, 's'); place('S', 'crate', 5.55, 13.6, 's', { turn: -.15 }); place('S', 'crate', 6.4, 12.9, 's', { turn: .1 });
     // the booth, the door gear and the fan hall: locked, seen through glass
@@ -6966,9 +6979,9 @@ DECKS[3].gathers = {
     at: '44,9 43,10 45,10 44,11 43,9 45,9 43,11 45,11 44,8 42,10 46,10 44,12 45,8 42,9 46,9 42,11 46,11 43,12 45,12 42,12 46,12 44,13 47,9 43,13 45,13 47,8 47,12 44,14 48,9 43,14 47,7 47,13 42,6 46,6 48,8 48,12 48,13 47,14 44,15 45,5 42,5 49,8 46,15 41,5 49,7 49,13 44,4 50,10 44,16 45,4 50,9 50,11 43,16 45,16 42,4 50,12 48,5 49,6 49,14 47,4' },
 };
 DECKS[5].gathers = {
-  'shuttle-bay': { name: 'the shuttle bay', focus: [6.0, 10.6], rooms: 'S', seats: [], also: [],
-    lead: [[6.0, 11.3, 180], [5.0, 11.3, 180], [6.0, 10.15, 0]],   // the foot of the Tern's ramp: the Captain (lead 1) and Envoy Saruth, facing the Speaker or whoever arrives (lead 3)
-    at: '4,10 4,11 5,12 6,12 4,12 7,12 3,10 8,10 7,8 3,11 8,11 3,9 8,9 5,13 8,8 4,13 7,7 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 2,8 5,6 6,6 4,14 7,14 4,6 7,6 1,10 1,11 1,9 2,7 3,6 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 2,6 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
+  'shuttle-bay': { name: 'the shuttle bay', focus: [5.5, 11.9], rooms: 'S', seats: [], also: [],
+    lead: [[5.0, 12.4, 180], [6.0, 12.4, 180], [5.5, 11.35, 0]],   // the foot of the Tern's ramp (0.38.18: the walk-in Tern's): the Captain (lead 1) and Envoy Saruth, facing the Speaker or whoever arrives (lead 3)
+    at: '4,10 4,11 4,12 7,12 3,10 8,10 3,11 8,11 3,9 8,9 5,13 8,8 4,13 2,10 9,10 9,11 2,9 9,9 5,14 6,14 8,7 4,14 7,14 1,10 1,11 1,9 8,6 5,15 6,15 1,8 5,5 6,5 4,15 7,15 4,5 7,5 9,6 1,7 3,5 8,5 1,6 5,4 6,4 2,5 9,5 4,4 7,4 3,4 8,4 1,5 9,4 5,3 6,3 4,3 7,3 3,3 8,3 1,4 2,3 9,3 5,2 6,2 4,2 7,2 1,3 3,2 8,2 2,2 9,2 5,1 6,1 4,1 7,1 1,2 3,1 8,1 2,1 9,1 5,0 6,0 1,1 4,0 7,0 3,0 8,0 2,0 9,0 10,9 11,9 11,8 10,6 11,7 12,8 11,6 12,7 13,9 12,6 13,8 13,7 13,6 14,9 14,8 14,7 14,6 15,8 15,7 16,9 20,8' },
   'works-bay': { name: 'the Works bay', focus: [16.5, 1.6], rooms: 'w', seats: [], also: [],
     lead: [[16.6, 0.7, 0], [17.6, 1.0, -25], [14.4, 0.8, 25]],   // the Chief beside the job board (lead 1), two techs either side
     at: '16,1 16,2 17,2 15,0 17,0 16,3 14,1 18,1 17,3 18,0 16,4 15,4 17,4 13,2 13,0 19,0 14,4 18,4' },
@@ -7062,6 +7075,56 @@ DECKS[3].places.push(
   at(2, 'open-lab', 'L', [[36, 3], [36, 5], [34, 3], [34, 5], [33, 4], [38, 5], [34, 1, 'n'], [38, 2, 'n']], 36, 4.5);
   at(1, 'bridge-hour', 'B', [[15, 2], [16, 2], [17, 2], [18, 2], [15, 9], [16, 9], [17, 9], [18, 9], [17, 3], [17, 8]], 21.5, 6);
 }
+// 0.38.18: the walk-in Tern (plans/shuttle-plan.md). DECKS[5].tern: the tiles it blocks (`block`), its aisle and the
+// door's well (walkable inside), the ramp's tiles and its foot, and where a new game can start you (`start`: in the aisle,
+// facing the door). ternRamp(open, secs) opens (true) or closes (false) the ramp over secs seconds (default 2.5; it
+// snaps when you're on another deck). It won't close while anyone is on the ramp or in the well: it returns false, and
+// a close already moving waits. ternRampOpen() -> 0 (closed) to 1 (open); while it's less than half open the door's well
+// is blocked. The ramp isn't saved: every load starts it open, as the Tern always was. ternInside() -> true while you're
+// in the aisle or the well: then, or while the Tern fades because you're behind it (both only where you stand), its roof
+// and upper hull hide. ternClear() -> true when nobody stands in the well or on the ramp (for closing it behind you).
+DECKS[5].tern = { block: [[2, 6], [2, 7], [2, 8], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [7, 7], [3, 8], [4, 8], [6, 8], [7, 8]],
+  aisle: [[3, 7], [4, 7], [5, 7], [6, 7]], well: [5, 8], ramp: [[5, 9], [5, 10]], foot: [5, 11], start: { tile: [5, 7], face: 0 } };
+DECKS[5].places.push(
+  { id: '5-tern-seat-1', type: 'event', event: 'tern', at: [4, 8], xy: [4.5, 8.55], walk: [4, 7], face: 'n', pose: 'sit', y: .5, room: 'S' },   // the bench by the door
+  { id: '5-tern-aisle-1', type: 'event', event: 'tern', at: [5, 7], xy: [5.5, 7.5], face: 's', pose: 'stand', room: 'S' },               // inside, facing the door
+  { id: '5-tern-ramp-top', type: 'event', event: 'tern', at: [5, 9], xy: [5.5, 9.35], face: 's', pose: 'stand', room: 'S' },            // the top of the ramp (the bag step)
+  { id: '5-tern-ramp-foot', type: 'event', event: 'tern', at: [5, 11], xy: [5.5, 11.3], face: 'n', pose: 'stand', room: 'S' },          // where the escort waits
+);
+const TERN = { open: 1, target: 1, secs: 2.5, roof: null, hinge: null, root: null };
+function ternRamp(open, secs = 2.5) {                  // -> false (and nothing changes) when asked to close with someone on the ramp or in the door's well
+  if (!open && !ternClear()) return false;
+  TERN.target = open ? 1 : 0; TERN.secs = Math.max(.1, secs); if (!TERN.root || TERN.root !== deckRoot || !deckDef || deckDef.num !== 5) TERN.open = TERN.target;
+  return true;
+}
+const ternRampOpen = () => TERN.open;
+const ternAt = () => { if (typeof player === 'undefined' || !player || !player.obj) return null; const p = player.obj.position; return [Math.floor(p.x + OX), Math.floor(p.z + OZ)]; };
+function ternInside() { const t = DECKS[5].tern, c = ternAt(); return !!c && deckDef && deckDef.num === 5 && (t.aisle.concat([t.well])).some(([i, j]) => i === c[0] && j === c[1]); }
+function ternClear() {
+  const t = DECKS[5].tern, tiles = new Set([t.well].concat(t.ramp).map(c => c.join(',')));
+  const on = (x, z) => tiles.has(Math.floor(x + OX) + ',' + Math.floor(z + OZ));
+  if (typeof walkers !== 'undefined' && walkers.some(w => w && w.active && w.obj && on(w.obj.position.x, w.obj.position.z))) return false;   // you (and any old walker)
+  return !(typeof DECK_CREW !== 'undefined' && deckDef && deckDef.num === 5 && DECK_CREW.some(a => a && isFinite(a.x) && on(a.x, a.z)));   // the scheduled crew and the escort (0.38.21)
+}
+const ternRoof = R => { TERN.roof = R; };
+function ternHinge(P) {                                  // the kit hands over the ramp's hinge: snap to where it should be, then animate it once a frame
+  TERN.hinge = P; TERN.root = deckRoot; TERN.open = TERN.target;
+  const well = DECKS[5].tern.well.join(','), pose = () => { const k = TERN.open, e = k * k * (3 - 2 * k); P.rotation.z = -1.62 * e; if (k < .5) BLOCKED.add(well); else BLOCKED.delete(well); };   // the well shuts once it's half closed, so nobody gets caught in it
+  pose();
+  MOVERS.push({ place: null, tick(dt) {
+    if (TERN.open !== TERN.target && (TERN.target > TERN.open || ternClear())) { const d = dt / TERN.secs; TERN.open = TERN.target > TERN.open ? Math.min(1, TERN.open + d) : Math.max(0, TERN.open - d); pose(); }   // closing waits while anyone steps on it
+    const t = TALL_BY_ROOM.S; if (TERN.roof) TERN.roof.visible = !(ternInside() || (t && t.o < 1));
+  } });
+}
+// 0.38.20: extra seats for the Sunday table and the harvest supper (the mess seats 44; they want up to 50 and 57): a chair at
+// each end of the four long tables, and a trestle table with two benches on the promenade just outside the mess's west
+// doors (five a side; 0.38.23). 14 places `3-longtable-1..14`, type 'event' with event: 'long-table': they're there every day but nobody uses
+// them unless a tradition's where: names them; DECK_DRESS.longTables and .harvestTables draw the chairs and the trestle
+// while the tradition is on (MESS_EXTRA lists the furniture, room-local to the mess hall).
+const MESS_EXTRA = { heads: [[.42, 1.0, 1], [.42, 4.0, 1], [9.58, 1.0, -1], [9.58, 4.0, -1]], trestle: [3.5, 10.5, 3.0], block: [[25, 10], [26, 10], [27, 10]] };   // heads: [x, z, the way they face (+1 east)]; trestle: [x, z, length]; block: the trestle's tiles (deck tiles), blocked while it's out
+DECKS[3].places.push(...[[23.42, 1.0, 90], [23.42, 4.0, 90], [32.58, 1.0, -90], [32.58, 4.0, -90]].concat(
+  [25.3, 25.9, 26.5, 27.1, 27.7].flatMap(x => [[x, 9.95, 0], [x, 11.05, 180]])).map(([x, z, f], k) =>
+  ({ id: '3-longtable-' + (k + 1), type: 'event', event: 'long-table', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'sit', y: .47, room: z < 9 ? 'M' : '=' })));
 DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
 DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
   boards: [[42.25, .765, 14.52, 0, .26, [16, 14, 15, 13]], [42.25, .765, 16.52, 0, .26, [20, 18, 19, 17]], [42.25, .765, 18.52, 0, .26, [24, 22, 23, 21]],
@@ -7083,7 +7146,8 @@ function visitSpots(id) {
 // ---- Event dressing and traces (Pillar 3, C9, 0.38.1; plans/pillar3-plan.md "How outcomes are scored", "How you learn") ----
 // Props that appear only while an event asks for them: sign-up sheets on the mess and Works boards, the storm crew's
 // signed roster in the Works tea corner, a scorch mark and a taped panel in Deck 1's relay room, the bow lounge party.
-//   DECK_DRESS[id] = { deck, what, make(g, o) -> the tap item { t, x, at: [x, y, z], w, h, d, front } }
+//   DECK_DRESS[id] = { deck, what, make(g, o) -> the tap item { t, x, at: [x, y, z], w, h, d, front, more?, block? } }
+//                    (more: extra floor taps with the same text; block: [[i, j], ...] deck tiles blocked while it's out)
 //   dressShow(list)  section 18 calls it (once a ship minute is plenty, like eventsDecor): list = ids, or { id, title,
 //                    lines } to write on a sheet or banner. Only the current deck's are drawn; it does nothing when the
 //                    list hasn't changed, and puts them back after a deck change. Never called: nothing shows (inert).
@@ -7125,6 +7189,15 @@ function dressSheet(s, o, z, y) {
 }
 const dressNames = (dept, n) => typeof ROSTER === 'undefined' ? [] : ROSTER.filter(p => !p.player && (!dept || p.dept === dept)).slice(0, n).map(p => p.name.split(' ').slice(-1)[0]);
 const MESS_LONG = [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]];   // the mess hall's long tables (room-local), their tops at .77
+// the extra seats' furniture (0.38.20), one wood colour, so one more draw call: a chair at each long table's end and a
+// trestle table with two benches on the promenade outside the mess (drawn in the mess's room-local frame)
+function messExtra(s) {
+  const W = '#7a5a3e';
+  for (const [x, z, f] of MESS_EXTRA.heads) { dressBox(s, .42, .05, .42, W, x, .45, z); dressBox(s, .06, .5, .42, W, x - f * .19, .72, z); for (const dx of [-.17, .17]) for (const dz of [-.17, .17]) dressBox(s, .04, .43, .04, W, x + dx, .215, z + dz); }
+  const [tx, tz, tl] = MESS_EXTRA.trestle;
+  dressBox(s, tl, .05, .8, W, tx, .75, tz); for (const dx of [-tl / 2 + .25, tl / 2 - .25]) dressBox(s, .05, .74, .7, W, tx + dx, .37, tz);
+  for (const sd of [-1, 1]) { dressBox(s, tl, .05, .3, W, tx, .45, tz + sd * .55); for (const dx of [-tl / 2 + .2, tl / 2 - .2]) dressBox(s, .05, .43, .26, W, tx + dx, .215, tz + sd * .55); }
+}
 const DECK_DRESS = {
   signupMess: { deck: 3, what: 'a sign-up sheet beside the mess menu board', make(g, o) {
     dressSheet(dressAt(g, 'M', 'e', 2.55), o, .016, 1.75);
@@ -7216,16 +7289,16 @@ const DECK_DRESS = {
   // scoreboard on an easel, o.lines = the teams' scores, and the cup on a plinth, 3); talentStage: talent night (a low
   // riser on the lounge's open floor, a mic stand and a string of bulbs, 3); yearsEnd: Year's end (the Captain's lectern
   // and small lights along the bow windows, 2).
-  longTables: { deck: 3, what: 'the Sunday table: runners and jugs down the mess\'s long tables', make(g) {
-    const s = dressAt(g, 'M', 'floor', 0, 0);
+  longTables: { deck: 3, what: 'the long table (the Sunday table, the farewell supper): runners and jugs down the mess\'s long tables, and extra seats', make(g) {
+    const s = dressAt(g, 'M', 'floor', 0, 0); messExtra(s);
     for (const [x, z] of MESS_LONG) {
       dressBox(s, 3.3, .004, .32, '#c45a3f', x, .772, z);
       for (const dx of [-.4, .4]) { const j = new THREE.Mesh(new THREE.CylinderGeometry(.05, .06, .17, 12), dressMat('#e9e1d0')); j.position.set(x + dx, .855, z + .06); s.add(j); dressBox(s, .015, .1, .05, '#e9e1d0', x + dx + .065, .87, z + .06); }
     }
-    return { t: 'The Sunday table', x: 'Runners down every long table and jugs of water at each one. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+    return { block: MESS_EXTRA.block, t: 'The long table', x: 'Runners down every long table, jugs of water at each one and extra seats at the ends and out on the promenade. Chef Brennan seats people next to the people they like, and claims it is an accident.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
   } },
   harvestTables: { deck: 3, what: 'the harvest supper: burlap runners and baskets from the garden on the long tables', make(g) {
-    const s = dressAt(g, 'M', 'floor', 0, 0), C = ['#d8412f', '#f0952e'];
+    const s = dressAt(g, 'M', 'floor', 0, 0), C = ['#d8412f', '#f0952e']; messExtra(s);
     MESS_LONG.forEach(([x, z], t) => {
       dressBox(s, 3.3, .004, .36, '#a8875a', x, .772, z);
       [-.45, .45].forEach((dx, b) => {
@@ -7233,7 +7306,7 @@ const DECK_DRESS = {
         for (let i = 0; i < 5; i++) { const a = i * 1.26 + t, r = i ? .065 : 0, f = new THREE.Mesh(new THREE.SphereGeometry(i ? .038 : .045, 8, 6), dressMat(C[(i + b + t) % 2])); f.position.set(x + dx + Math.cos(a) * r, .885 + (i ? 0 : .02), z + .05 + Math.sin(a) * r); s.add(f); }
       });
     });
-    return { t: 'Harvest supper', x: 'Burlap down the long tables and baskets from the garden on every one: tomatoes, squash, whatever the beds gave. Everything on the plates tonight was grown on this deck.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
+    return { block: MESS_EXTRA.block, t: 'Harvest supper', x: 'Burlap down the long tables and baskets from the garden on every one: tomatoes, squash, whatever the beds gave. Everything on the plates tonight was grown on this deck.', floor: ['M', MESS_LONG[0][0], MESS_LONG[0][1]], y: .9, w: 1.2, h: .3, d: .5 };
   } },
   cupBoard: { deck: 3, what: 'the department cup: a chalk scoreboard on an easel and the cup on its plinth, in the gym', make(g, o) {
     const s = dressAt(g, 'F', 'floor', 0, 0), x = .5, z = 6.0;   // by the west wall, past the rowers, facing into the room
@@ -7359,6 +7432,7 @@ function dressHide(id) {
   const e = DRESS.on.get(id); if (!e) return;
   const shared = new Set(Object.values(DRESS_MATS).concat(HIT_MAT));   // the cached colours and the tap boxes' stay; a piece's own materials go (0.38.13)
   e.g.parent && e.g.parent.remove(e.g); e.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !shared.has(o.material)) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
+  for (const k of e.blocked || []) BLOCKED.delete(k);
   ITEMS = ITEMS.filter(it => !e.items.includes(it)); WALL_DECOR = WALL_DECOR.filter(d => !e.decor.includes(d));
   DRESS.on.delete(id);
 }
@@ -7387,7 +7461,8 @@ function dressShow(list) {
       h2.position.set(X0(r.i0) + m.floor[1], m.y || .05, Z0(r.j0) + m.floor[2]); g.add(h2);
       const i2 = { t: it.t, x: it.x, hit: h2, g, front: 0, depth: .6, wall: false }; h2.userData.item = i2; ITEMS.push(i2); items.push(i2);
     }
-    DRESS.on.set(id, { g, item, items, decor, o: JSON.stringify(o) });
+    const blocked = (it.block || []).map(([i, j]) => i + ',' + j).filter(k => !BLOCKED.has(k)); for (const k of blocked) BLOCKED.add(k);   // 0.38.23: tiles it stands on, blocked while it's out
+    DRESS.on.set(id, { g, item, items, decor, blocked, o: JSON.stringify(o) });
   }
   if (typeof refreshPickables === 'function') refreshPickables();
 }
@@ -7452,7 +7527,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.60.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.60.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
