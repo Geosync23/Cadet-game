@@ -1,0 +1,44 @@
+@tradition years-end
+// Year's end: day 364, the last evening of the year (a Sunday, Lanterns' last day). The Captain reads a little from the
+// year's log in the bow lounge, and the Midtour letters (day 182) come back; the player's comes by Mail. The year's big
+// one, so prio 3, like Founding Day. Day 0 (your arrival) is the evening after the year ends, not part of it.
+// Design note: plans/trad-notes-seasons.md.
+k: 479
+title: Year's end
+when: year day 364
+at: 20:00-21:15
+min: 30
+prio: 3
+jitter: 10
+where: 3 room Bow lounge: lounge-seat
+where: 3 room Promenade: bench
+where: 3 pool mess-seat
+hold: none
+who: marrow always, oduya always, everyone 80%
+anim: officers talk, everyone drink
+host: marrow
+from: marrow
+cake: yes
+ties: decor yearsEnd
+
+== mail
+- Tomorrow is the year's last evening. Bow lounge, {time}: I'll read a little from the log, and Matthias has your Midtour letters. Come as you are.
+
+== ask
+- Year's end tonight. The Captain reads from the log.
+- Last night of the year. I want to hear what the Captain reads.   #warm
+- Year's end at eight. I hope my letter isn't too silly.   #funny
+
+== here
+- Shh. This is the bit about the storm.
+- To the Wren, and to another year of her.   #warm
+- I'd forgotten half of this. What a year.
+- My letter says I'd learn the clarinet. I did not.   #funny
+
+== thanks
+- You find a spot in the bow lounge as the Captain reads from the year's log. Some of it is about you.   #warm
+
+== chatter
+- The Captain reads at every year's end. Practises for days, you know.   #warm
+- Year's end always makes me miss the people who've moved on.   #warm
+- I'm keeping my Midtour letter. It's going in the drawer with the others.

@@ -1,6 +1,9 @@
 @tradition sowing
-// Sowing morning: the sample tradition for wave 1a (the traditions engineer). The seasons designer owns it from here
-// and may change anything. Format: plans/trad-format.md.
+// Sowing morning: the first Saturday of each season (days 6, 97, 188, 279), late morning in the garden. Everyone plants
+// a seedling; yours (day 6, your first weekend) grows as long as you're aboard. The seasons designer's (seat 17) from
+// wave 1b; first written by the traditions engineer as the format's sample. On days 6 and 188 the harvest morning
+// (09:30-11:30, every other Saturday) comes first, so the texts never say "after the harvest": on days 97 and 279 there
+// isn't one. Design note: plans/trad-notes-seasons.md.
 k: 434
 title: Sowing morning
 when: quarter week 1 saturday
@@ -9,24 +12,33 @@ min: 20
 prio: 1
 where: 3 pool garden
 hold: none
-who: tomas always, gardener 90%, garden-lover 75%, everyone 30%
+who: tomas always, cruz-tove always, gardener 90%, garden-lover 75%, everyone 30%
 anim: water
+host: cruz-tove
 from: brennan
 ties: garden sow
+invite: host=tomas odds=50% line="Sowing morning at quarter to twelve. Come and plant one. I'll show you which end goes down."
 
 == mail
-- A new season starts in the garden: Sowing morning tomorrow, {time}, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.
+- A new season starts in the garden: Sowing morning tomorrow, {time}. Everyone plants a seedling. Yours grows as long as you're aboard.
 
 == ask
 - Sowing morning today. Bring clean hands.
 - I'm planting basil this time. Don't tell Brennan, she'll want it.   #funny
+- A new season in the garden. I always plant something new.
+- Sowing at quarter to twelve. Tove says there are enough pots for everyone.
 
 == here
 - Two seeds a pot. One for luck.
 - Gently. They're only small.   #warm
+- Write your name on the tag, or Tove will name it for you.   #funny
+- Mine from last season is the tall one at the end. Look at it go.
 
 == thanks
 - You press a seedling into its pot and write your name on the tag. {season} has begun.
+- You plant a seedling with the others and set it under the lamps. It's tiny, and it's yours.   #warm
 
 == chatter
 - Whose seedling is that, already leaning towards the lamps?   #funny
+- I've planted one every season since I came aboard. It's a little row of me now.   #warm
+- Sowing morning on Saturday. The garden smells of wet soil for days after.
