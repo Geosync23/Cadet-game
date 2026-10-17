@@ -12,6 +12,8 @@ Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by sessio
   - 0.34.40-0.34.41: weekly c19adf9 (no Tiles tally) and seasons 976a8d4 collected.
   - 0.34.42 (0c40589): upcomingTraditions gives `deck` and `room` (device engineer 3, session_01SskqNx45iEGyQq2W9Fjg5Y, schedule heads-ups).
   - 0.34.43 (234a454): crew rotation traditions (farewell supper, crew welcome tea): `when.rotation`, `evRotation`, the words friends/dept/bunk-of-honoree, events_check 9d. All the seasons designer's traditions are now baked (23).
+  - 0.34.44-0.34.46 (latest 0.34.46): an occasion gives no toast when the device is in (it lists SHIP.occasions itself; apptAdd exists nowhere). A cake at the crew welcome tea. The seasons designer's 0e757b1 and 92bb1c9 (plural names, longTables at the farewell supper, a cake line).
+- **Superseded below:** the seasons designer and the galley are answered. Night-shift honorees are fixed in sim engineer 4's (session_01EJUGywZv9BpcUezjXES9AC) 0.26.31, not yet combined: re-run events_check 9d after the next combine. Still waiting: the deck architect on extra long-table seats (with sim 4) and on longTables for rotation Saturdays.
 - **Waiting (0.34.43):**
   - The seasons designer: merge 234a454; the farewell Mail's "{names} leaves" with 2-3 leavers; decor; the jam dropped on welcome-tea Fridays.
   - The galley: the supper's favourite dish.
