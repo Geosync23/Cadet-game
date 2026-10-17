@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan for 0.60.7</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;background:var(--chip);color:#bdeee6;border:1px solid var(--line)}
+.tag.new{background:rgba(233,196,106,.16);color:#f1dca0}
+.tag.old{opacity:.75}
+.steps{list-style:none;padding:0;margin:8px 0;counter-reset:s}
+.steps li{position:relative;padding:8px 10px 8px 46px;border-left:2px solid rgba(76,195,181,.35);margin:0 0 0 14px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.steps time{display:block;font-size:12px;color:var(--gold)}
+.steps b{color:#e4f3f0;font-weight:600}
+.steps span{display:block;font-size:13.5px;color:#cfd9dc}
+.week{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.day{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.02)}
+.day h4{margin:0 0 4px;font-size:13.5px;color:var(--gold);font-weight:600}
+.day p{font-size:12.5px;margin:4px 0;color:#cfd9dc}
+.day .who{color:#bdeee6;font-weight:600}
+.lines{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#0b141c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:#9fe7dc;white-space:pre-wrap;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.flow .box{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;background:rgba(255,255,255,.03)}
+.flow .arrow{color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tablewrap{overflow-x:auto}
+.waves{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.wave{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.wave b{color:var(--gold);display:block}
+.wave .ci{display:block;margin-top:6px;font-size:12.5px;color:#f1dca0}
+ol.q{padding-left:22px;font-size:14px;color:#d6e0e3}
+ol.q li{margin:6px 0}
+ol.q em{color:var(--muted);font-style:normal;font-size:12.5px}
+svg text{font-family:inherit}
+.card span b{display:inline;font-size:inherit;margin:0;color:#e4f3f0}
+</style>
+</head>
+<body>
+<header>
+  <h1>0.60.7: one more pass <span class="draft">for your OK</span></h1>
+  <div class="sub">Your 17 play-test notes, turned into one build before Pillar 5. For each note: what you asked, what the game does today, what we'd build, and who builds it. Every number is a starting value you can change. Nothing is built until you approve. The questions at the bottom will come to you as a survey.</div>
+</header>
+<nav><div>
+  <a href="#big">In short</a><a href="#free">Free time</a><a href="#talk">Talking</a><a href="#trad">Traditions</a><a href="#clothes">Clothes</a><a href="#ship">Around the ship</a><a href="#team">Team and time</a><a href="#p5">Pillar 5</a><a href="#q">Questions</a>
+</div></nav>
+<main>
+
+<section id="big">
+  <h2>In short</h2>
+  <div class="grid">
+    <div class="card"><b>Free time</b><span>A new <b>leisure</b> need that drops slowly. <b>Hobbies</b> you can do on almost any seat: reading, writing, drawing, knitting, puzzles, stargazing. Tips and an "Ideas for tonight" card for your first evenings.</span></div>
+    <div class="card"><b>Talking</b><span>Chat becomes <b>Say hello</b>, with a small friendship bump. A new <b>Talk a while</b> fills a meter like eating, with a choice of replies, and builds much more friendship. People <b>stay put</b> while you talk. The Roster gets <b>Friends, Acquaintances, Met</b>.</span></div>
+    <div class="card"><b>Traditions</b><span><b>2-3 a day</b>, and they can overlap, so you pick. <b>Seven new ones</b> make the first week lively. <b>Gym club</b> (renamed) always has a machine for you. The <b>Calendar shows 7 days</b> and draws overlaps.</span></div>
+    <div class="card"><b>Clothes</b><span>Change every morning at your <b>wardrobe</b>. After 5 days, take the <b>hamper</b> to a washer and back. It first happens on <b>Day 2</b>, and Zeke warns you. <b>No laundry duty.</b></span></div>
+    <div class="card"><b>Around the ship</b><span>The <b>Works crew</b> do some repairs and deliveries where you can see them. A <b>bartender</b> in the lounge and a drink. The bathroom need fills <b>half as fast</b>, with a <b>toilet icon</b>. <b>No bench</b> in the Deck 3 washroom. <b>Showers only on Decks 2 and 4</b>. A <b>Tiles table</b> in the junior common room.</span></div>
+    <div class="card"><b>Team and time</b><span>Six builders, a build master and a reviewer. About <b>4 to 5 hours</b> from your go-ahead to a checked 0.60.7.</span></div>
+  </div>
+</section>
+
+<section id="free">
+  <h2>Free time</h2>
+
+  <h3>Leisure, the new need</h3>
+  <p><b>You asked:</b> hobbies and traditions fill a new need, leisure, which goes down very slowly.</p>
+  <p><b>Today:</b> you have six needs. There's no leisure yet.</p>
+  <p><b>We'd build:</b> a seventh icon on the needs strip. It drops <b>0.8 an hour</b> while you're awake (social drops 1), so it takes about <b>6 ship days</b> to fall from full to low. A new game starts it at 70.</p>
+  <div class="tablewrap"><table>
+    <tr><th>What fills it</th><th>Leisure</th></tr>
+    <tr><td>A hobby (30 ship minutes)</td><td>+25</td></tr>
+    <tr><td>Going to a tradition</td><td>+15</td></tr>
+    <tr><td>A game of Tiles</td><td>+10</td></tr>
+    <tr><td>A drink at the bar, a full Talk a while, calling home</td><td>+5 each</td></tr>
+    <tr><td>Reading seats, the music room, stargazing, the garden</td><td>+6 each</td></tr>
+  </table></div>
+  <p><b>What it does:</b> when it's high, "In good spirits", talking gives 25% more friendship. When it's low, "Restless", tasks are 10% slower. A gentle nudge appears at the low line: "You could do with some time to yourself."</p>
+  <p class="note">Built by the player engineer. Small job.</p>
+
+  <h3>Hobbies</h3>
+  <p><b>You asked:</b> a list of simple hobbies that are easy to animate and can be done in lots of places.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Hobby</th><th>Where</th><th>How you get it</th></tr>
+    <tr><td><b>Reading</b> (a book)</td><td>any seat or bench, your bunk</td><td>from the start</td></tr>
+    <tr><td><b>Writing</b> (a journal, letters home)</td><td>a seat at a table, your bunk</td><td>from the start</td></tr>
+    <tr><td><b>Drawing</b> (a sketchpad)</td><td>any seat; a nice view gets a line about what you drew</td><td>crew store, 15 credits</td></tr>
+    <tr><td><b>Knitting</b> (needles and wool)</td><td>any seat</td><td>Zeke offers to teach you (it's his hobby), or the store</td></tr>
+    <tr><td><b>Puzzles</b> (a puzzle book)</td><td>any seat</td><td>crew store, 10 credits</td></tr>
+    <tr><td><b>Stargazing</b></td><td>window seats, the lounge windows, the observatory</td><td>just sit at a big window</td></tr>
+  </table></div>
+  <p><b>How it works:</b> sit anywhere. A small <b>Hobby</b> button appears (like Repair and Put down). Pick one and your character gets out the book, pad or needles. A bar runs for 30 ship minutes, +25 leisure; stop whenever you like and keep what you got. The garden and the music room count as hobbies too.</p>
+  <p><b>With others:</b> sitting near someone who shares the hobby gives a little social and a line ("You knit too? Show me that stitch."), and it becomes something to talk about. Crew with these hobbies do them in their own free time, so you'll see people knitting in the common room.</p>
+  <p><b>What you keep:</b> the Record says it in words: "You read most evenings." No levels or points.</p>
+  <p class="note">Built by the player engineer, with the performance engineer for the five small props. Medium job.</p>
+
+  <h3>Tips for your first evenings</h3>
+  <p><b>You asked:</b> tips on how to spend free time early on: call home, traditions, social, hobbies.</p>
+  <ul>
+    <li>When your first shift ends: "Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or sit anywhere and try a hobby."</li>
+    <li>Then one more tip each evening for your first four days: Talk a while, hobbies, tonight's traditions ("three on tonight, you can't go to them all"), calling home.</li>
+    <li><b>Zeke says it at dinner on Day 1:</b> "Evenings are yours. Most of us have a thing. I knit, don't laugh. Pell reads. Find yours."</li>
+    <li>An <b>"Ideas for tonight"</b> card on the device's home screen after 17:00 for your first two weeks: the next tradition, someone you know who's nearby, your hobbies, a free booth.</li>
+    <li>The Settling-in list gets: change your clothes, try a hobby, talk a while.</li>
+  </ul>
+</section>
+
+<section id="talk">
+  <h2>Talking</h2>
+
+  <h3>People stay while you talk</h3>
+  <p><b>Today:</b> when you tap someone they stop for only 6 seconds, then walk back to their day, and the chat card closes when they're out of reach. That's why they walk away.</p>
+  <p><b>We'd build:</b> they stay as long as the card is open (up to a minute if you leave it sitting there). They only go for something they can't miss: their shift in 10 minutes, bedtime, a tradition they're running. Then they say so ("Shift in five. Catch me later?").</p>
+
+  <h3>Say hello and Talk a while</h3>
+  <div class="flow"><span class="box"><b>Say hello</b><br>once a day<br>+1 friendship, a little social</span><span class="arrow">or</span><span class="box"><b>Talk a while</b><br>once a day, a meter like eating<br>up to +3, plus up to +2 from your reply</span></div>
+  <ul>
+    <li><b>Say hello</b> is the old Chat, the quick nod in a corridor: <b>+1 friendship</b> (was +2) and a little social.</li>
+    <li><b>Talk a while</b> takes <b>15 ship minutes</b> (about 25 real seconds). You stand together, or sit down beside them if they're sitting. The bar fills social as you go (+30 for a full talk), and friendship goes up by 1 for every 5 minutes, <b>up to +3</b>. Lines from them come up every few seconds: their hobby, home, their day, ship news, a tradition coming up.</li>
+    <li><b>A choice partway through:</b> three replies, one curious, one about you, one light. <b>None is wrong</b>: the one that suits them gives +2, the others +1.</li>
+    <li>So a good talk is about <b>+5</b> against Say hello's <b>+1</b> (a meal together is +3, a job together +6, a favour +8).</li>
+    <li>Walk off or tap Stop and you keep what you got.</li>
+    <li>Nobody turns you down for being new. They only say no if they really have to be somewhere.</li>
+  </ul>
+  <p><b>New lines:</b> a first batch of about 500: hellos for each friendship level, ten topics to talk about with openers and three-way replies, lines while you talk, "got to go" lines, and lines for each hobby. More come in a later pillar, as you said.</p>
+  <p class="note">Built by a social engineer (new), lines by the head writer. The biggest job in this build; the story arcs are re-checked so they still reach their last beat.</p>
+
+  <h3>The Roster: Friends, Acquaintances, Met</h3>
+  <p><b>Today:</b> "People you know" (acquaintance and up) is first, then everyone by department. The game already remembers who you've met, but the Roster doesn't use it.</p>
+  <p><b>We'd build,</b> in this order: <b>Friends</b> (friend, close friend) · <b>Acquaintances</b> (acquaintance, colleague) · <b>Met</b> (people you've met who aren't acquaintances yet) · then everyone else by department. Each header shows a count, and empty ones hide. "Met" means you opened their card, were introduced, ate at their table, or worked a job together.</p>
+</section>
+
+<section id="trad">
+  <h2>Traditions</h2>
+  <p><b>You asked:</b> more interesting traditions in the first week; 2-3 a day; they can overlap.</p>
+  <p><b>Today:</b> the game allows at most two in an evening and never two at once on the same deck. So Monday and Tuesday of your first week have just one each, while Saturday has six.</p>
+  <p><b>We'd build:</b> <b>2-3 every day</b>, up to 4 at weekends. They can overlap as long as they're in different rooms, at most two at once. On a busy evening you choose.</p>
+
+  <h3>Seven new traditions</h3>
+  <div class="grid">
+    <div class="card"><b>Name on the beam</b><span>After your first full shift the Works crew gather under the Works bay's cross beam, and you paint your name beside everyone who's served there. Zeke hands you the pen. Every new hand gets one.</span><span class="meta">First Monday, 17:05 · Works bay, Deck 5 · Calder</span></div>
+    <div class="card"><b>Lap of the Wren</b><span>A slow walk round the promenade together, chatting. The easiest tradition to join.</span><span class="meta">Mondays 20:30 · Promenade, Deck 3</span></div>
+    <div class="card"><b>Spice shelf supper</b><span>Everyone brought one spice from home. Brennan cooks with three of them, and the jars line a shelf by the servery that grows over the weeks.</span><span class="meta">Tuesdays 18:15 · Mess · Brennan</span></div>
+    <div class="card"><b>Knit and natter</b><span>Zeke's circle: knitting, sketching, reading together, any hobby welcome. It's on at the same time as Tiles night, so you pick one.</span><span class="meta">Tuesdays 20:00 · Junior common room · Zeke</span></div>
+    <div class="card"><b>Open door</b><span>End-of-shift tea where the Chief sits with whoever's there.</span><span class="meta">Wednesdays 16:40 · Works tea corner · Calder</span></div>
+    <div class="card"><b>Postcard night</b><span>Write a card home (the writing hobby's tradition); it goes out with the next mail run.</span><span class="meta">Thursdays 18:45 · Booth row, Deck 3 · Eklund</span></div>
+    <div class="card"><b>Tap night</b><span>The bartender's Friday: a drink of the week and a busy bar. It's on at the same time as the music jam on Deck 4.</span><span class="meta">Fridays 20:00 · Bow lounge bar</span></div>
+  </div>
+
+  <h3>Your first week, then</h3>
+  <div class="week">
+    <div class="day"><h4>Mon (Day 1)</h4><p>Name on the beam · Gym club · Lap of the Wren</p></div>
+    <div class="day"><h4>Tue</h4><p>Spice shelf supper · Tiles night <span class="who">or</span> Knit and natter</p></div>
+    <div class="day"><h4>Wed</h4><p>Open door · Tasting table · Late piano</p></div>
+    <div class="day"><h4>Thu</h4><p>Postcard night · Quiz · Late piano</p></div>
+    <div class="day"><h4>Fri</h4><p>New hands' tea · Music jam <span class="who">or</span> Tap night</p></div>
+    <div class="day"><h4>Sat</h4><p>Long breakfast · Sowing · Film · Observatory night</p></div>
+    <div class="day"><h4>Sun (Day 7)</h4><p>Swap market · One week aboard · Sunday long table</p></div>
+  </div>
+  <p class="note">Saturday has six today; with the weekend cap of 4, garden hour moves to Sunday (question 7). Every later week keeps 2-3 a day.</p>
+
+  <h3>Gym club</h3>
+  <p><b>Today:</b> "Running club" books every machine in the gym (about 25 people can go, and there are 14 spots), so there's nothing left for you.</p>
+  <p><b>We'd build:</b> it's renamed <b>Gym club</b> and uses every kind of machine. <b>You count as a member</b>, so any machine you tap is yours and the person waiting picks another. The club never takes more than two fewer people than there are spots. We also add a <b>fourth treadmill and two exercise bikes</b> if they fit.</p>
+
+  <h3>The Calendar: 7 days, overlaps you can see</h3>
+  <p><b>Today:</b> it shows 14 days as plain lists.</p>
+  <p><b>We'd build:</b> <b>today and the next six days</b>. Each day has a thin time bar from 06:00 to midnight with a block for each tradition; <b>overlapping ones stack in a second row</b>, so you see the clash at a glance. The list below says "same time as Tiles night". The home screen says "3 traditions today", not just the first.</p>
+  <svg viewBox="0 0 340 74" width="100%" style="max-width:420px;display:block;margin:8px 0" role="img" aria-label="A day's time strip: Spice shelf supper at 18:15; Tiles night and Knit and natter both at 20:00, stacked in two rows">
+    <rect x="0" y="0" width="340" height="74" rx="8" fill="#0b141c" stroke="rgba(150,200,196,.22)"/>
+    <text x="10" y="15" font-size="10" fill="#9fe7dc">Tue · 3 traditions</text>
+    <line x1="10" y1="24" x2="330" y2="24" stroke="rgba(159,231,220,.25)"/>
+    <text x="10" y="68" font-size="8" fill="#93a6ae">06:00</text><text x="160" y="68" font-size="8" fill="#93a6ae">15:00</text><text x="304" y="68" font-size="8" fill="#93a6ae">24:00</text>
+    <rect x="228" y="28" width="13" height="12" rx="2" fill="#4cc3b5"/>
+    <rect x="259" y="28" width="27" height="12" rx="2" fill="#4cc3b5"/>
+    <rect x="259" y="44" width="27" height="12" rx="2" fill="#e9c46a"/>
+    <text x="180" y="37" font-size="8" fill="#cfd9dc">Spice</text>
+    <text x="290" y="37" font-size="8" fill="#cfd9dc">Tiles</text>
+    <text x="290" y="53" font-size="8" fill="#f1dca0">Knit</text>
+  </svg>
+</section>
+
+<section id="clothes">
+  <h2>Clothes and laundry</h2>
+  <p><b>You asked:</b> change clothes every day at a wardrobe; after 5 days it stops working until you do laundry; take the hamper to a washer and back; it must happen on Day 2, with Zeke warning you. No weekly laundry duty: you do your own until you move upstairs.</p>
+  <p><b>Today:</b> the Deck 4 laundry has four working washers and the bunk rooms have lockers, but there are no clothes to change and no laundry for you.</p>
+  <ol class="steps">
+    <li><time>Every morning</time><b>Change at your wardrobe</b><span>The locker by your bunk becomes your wardrobe, with 5 clean outfits. Tap it: "Change clothes", one minute. Skip it and by 10:00 you're "in yesterday's clothes": hygiene drops faster and people may remark on it. Nothing worse.</span></li>
+    <li><time>Out of clean clothes</time><b>Take the hamper</b><span>The wardrobe says "No clean clothes left" and gives you the hamper to carry (both hands; Put down works as usual).</span></li>
+    <li><time>Deck 4 laundry</time><b>Load a washer</b><span>Tap a free washer. It runs 30 ship minutes (under a minute of real time) and you can leave. Your device says when it's done. If all four are going, it tells you which one finishes first.</span></li>
+    <li><time>When it's done</time><b>Take it out</b><span>Carry the clean hamper (you can fold it at the folding table first for a little hygiene, as today).</span></li>
+    <li><time>Back at your bunk</time><b>Put it away</b><span>Tap the wardrobe: 5 clean outfits again.</span></li>
+  </ol>
+  <h3>Day 2, so you see it early</h3>
+  <ul>
+    <li>You arrive with <b>only one spare outfit</b> ("the rest of your kit comes up from stores"). You change into it on Day 1.</li>
+    <li><b>At dinner on Day 1, Zeke warns you:</b> "One change of clothes? The laundry's past the washrooms in the junior wing. Do it tomorrow after shift, or you'll be wearing that on Wednesday."</li>
+    <li><b>On Day 2</b> the wardrobe is empty and offers the hamper; a tip explains the steps and the arrow points to the laundry. Zeke suggests after your shift (17:00-18:00), but before shift works too. After the first wash your full kit has arrived: 5 outfits.</li>
+    <li><b>No laundry duty, ever,</b> while you live in the junior wing. When you <b>move upstairs</b> (we think that means your Deck 2 suite as a Senior Officer in Pillar 5: question 11), your laundry is collected and the wardrobe refills by itself.</li>
+  </ul>
+  <p class="note">Built by the onboarding engineer (it ties into Zeke's first week). Medium-large job; the trickiest parts are saving mid-wash and carrying the hamper in the lift.</p>
+</section>
+
+<section id="ship">
+  <h2>Around the ship</h2>
+
+  <h3>The Works crew at work</h3>
+  <p><b>You asked:</b> other Works crew doing the jobs you do early on, not a ton, but some repairing and delivering.</p>
+  <p><b>Today:</b> during your shift the game keeps up to six small jobs for you, so the crew only do the urgent or harder ones, often on other decks. Crew deliveries also happen "where they stand", so you never see anyone carry anything.</p>
+  <p><b>We'd build:</b> at most three small jobs kept for you; <b>every third new small job goes to the crew at once</b>, and the board says "Bea on it". Crew deliveries really walk: pick up a box, carry it, set it down. On <b>Days 1 and 2</b> two are placed where you'll see them: a junior fixing a vent in the junior wing in the morning, and a delivery through the Works bay after lunch. Zeke points one out: "That's Bea on the vent. You'll do those by Wednesday." If your board would drop under two jobs, the sharing pauses.</p>
+
+  <h3>A bartender and a drink</h3>
+  <p><b>Today:</b> the bow lounge has a bar and stools but nobody behind it; you "have a drink" just by sitting on a stool.</p>
+  <p><b>We'd build:</b> a galley hand on <b>bar duty every evening, 17:30 to 23:00</b> (two of them taking turns, so no new crew). Tap the bar: "What'll it be?" <b>Tea, juice, fizz or cocoa</b>, 2 credits. Take it to a stool or table and drink: a little food, social and leisure. Order the same thing three times and they start asking "The usual?". In the daytime the bar shows "Back at 17:30". Bar regulars order at the counter now, too.</p>
+
+  <h3>Washrooms</h3>
+  <ul>
+    <li><b>Bathroom need half as fast:</b> about two visits a day instead of three or four.</li>
+    <li><b>A toilet icon</b> for the bathroom need (it's a door today).</li>
+    <li><b>No bench in the Deck 3 washroom.</b> The benches stay in the Deck 4 and Deck 5 washrooms, where people change for showers.</li>
+    <li><b>Showers only on Deck 2 and Deck 4.</b> Today Deck 5's Works washroom has one shower: it becomes a second toilet. Deck 2's cabins and Deck 4's washrooms keep theirs. (Deck 3 and Deck 1 have toilets only already; if Deck 3's toilet stalls <i>look</i> like showers, they get the clearer toilet look Deck 4's washrooms just got.)</li>
+  </ul>
+
+  <h3>Tiles in the junior common room</h3>
+  <p><b>Today:</b> the common room's card table is called a "Tiles table" but only works on Tiles night.</p>
+  <p><b>We'd build:</b> it's a proper Tiles table you can play any time, against whichever junior is around.</p>
+</section>
+
+<section id="team">
+  <h2>Team and time</h2>
+  <p>A lean team: <b>six builders</b>, a <b>build master</b> and <b>one reviewer</b>. Four are already working on 0.60.6 and carry on; two are new.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Seat</th><th>What they build</th></tr>
+    <tr><td>Player engineer</td><td>leisure, hobbies, free-time tips, bathroom rate and icon, the bar order, Gym club's "you're a member", the Tiles table</td></tr>
+    <tr><td>Social engineer <span class="tag new">new</span></td><td>people stay while you talk, Say hello, Talk a while, the replies, the Roster</td></tr>
+    <tr><td>Traditions engineer <span class="tag new">new</span></td><td>2-3 a day, the seven new traditions, Gym club, the Calendar</td></tr>
+    <tr><td>Deck architect</td><td>the Deck 3 bench, Deck 5 shower, bar places, gym machines, the beam, the spice shelf, the postcard box, the Tiles table, wardrobes</td></tr>
+    <tr><td>Sim and systems engineer <span class="tag new">new</span></td><td>the Works crew at work, the bartender's rota, the shower queue</td></tr>
+    <tr><td>Onboarding engineer</td><td>clothes and laundry, Zeke's Day 1 and Day 2</td></tr>
+    <tr><td>Head writer</td><td>all the new lines (about 500)</td></tr>
+  </table></div>
+  <div class="waves">
+    <div class="wave"><b>1 · The hooks</b>45 minutes. The shared pieces everyone else plugs into: the leisure need, the new places, the line names.</div>
+    <div class="wave"><b>2 · Everyone at once</b>2 to 2.5 hours. Each seat builds its part; the reviewer checks each as it lands.</div>
+    <div class="wave"><b>3 · Put together and test</b>About 1.5 hours. The build master combines them in order and runs every check.</div>
+    <div class="wave"><b>4 · Your turn</b>The lead publishes 0.60.7 and you play your first week again.<span class="ci">About 4 to 5 hours after your go-ahead</span></div>
+  </div>
+  <p class="note">An even leaner option is five builders (the player engineer also does clothes); that adds about an hour.</p>
+</section>
+
+<section id="p5">
+  <h2>What this changes in Pillar 5</h2>
+  <ul>
+    <li><b>Laundry duty is gone.</b> No duty every two weeks, no junior laundry rota, no Day 9 duty, no laundry hand teaching you. Your own laundry is already built in 0.60.7, so Pillar 5's "uniform and laundry" shrinks to <b>your uniform getting grubby on oily jobs</b> and, later, <b>servicing the washers</b>.</li>
+    <li><b>Moving upstairs:</b> when you move to your Deck 2 suite as a Senior Officer, your laundry is collected from then on.</li>
+    <li><b>The Thursday inspection</b> and the officer ceremony check that you <b>changed that morning</b>.</li>
+    <li><b>The washer puzzles stay:</b> Tuesday becomes the crew's big wash day.</li>
+    <li><b>Leisure:</b> side jobs are work and don't fill it; tinkering in the workshop does, a little.</li>
+    <li><b>Hobbies:</b> tinkering in the workshop could become a seventh hobby when Pillar 5 builds it. Pillar 7's extra traditions can grow hobby circles out of Knit and natter.</li>
+  </ul>
+</section>
+
+<section id="q">
+  <h2>Questions for you</h2>
+  <p class="note">These will come as a survey. The suggested answer is in brackets.</p>
+  <ol class="q">
+    <li>How slowly should leisure drop, and what should it do? <em>(0.8 an hour, about 6 days full to low; high = more friendship from talking, low = tasks 10% slower)</em></li>
+    <li>The hobby list: reading, writing, drawing, knitting, puzzles, stargazing. Add or cut any? <em>(keep these six)</em></li>
+    <li>How you get hobbies. <em>(reading and writing from the start; the rest from the store, Zeke, or a big window)</em></li>
+    <li>Talk a while: 15 ship minutes, once a day per person, up to +5 friendship; Say hello +1. <em>(yes)</em></li>
+    <li>Can someone say no to Talk a while? <em>(only when they must be somewhere)</em></li>
+    <li>Roster sections: Friends, Acquaintances (including colleagues), Met, then departments. <em>(yes)</em></li>
+    <li>Traditions a day: 2-3, up to 4 at weekends, overlaps in different rooms. Saturday has six today: keep 4 or all 6? <em>(4; garden hour moves to Sunday)</em></li>
+    <li>The seven new traditions: keep all? Rename any? <em>(keep all)</em></li>
+    <li>"7 days ahead": today plus six, or today plus seven? <em>(today plus six)</em></li>
+    <li>Clothes: 5 outfits, "yesterday's clothes" after 10:00 is the only downside, one spare outfit on arrival so laundry lands on Day 2. <em>(yes)</em></li>
+    <li>"Until you move upstairs" means your Deck 2 suite as a Senior Officer, or your officer's cabin? <em>(Deck 2 suite)</em></li>
+    <li>The bar: a galley hand on bar duty, tea, juice, fizz and cocoa, no alcohol. Or a bartender character of their own? <em>(galley hand, no alcohol)</em></li>
+  </ol>
+</section>
+
+</main>
+</body>
+</html>
