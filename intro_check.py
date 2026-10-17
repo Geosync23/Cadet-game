@@ -161,10 +161,65 @@ def mins(t):
     d = t // 1440 + 1
     return f"Day {d} {t % 1440 // 60:02d}:{t % 60:02d}"
 
+# part 12, also on its own: python3 intro_check.py BUILD.html --week (a fast-forwarded week is slow; the lead's quick checks)
+def week(g):
+    print('12. The week in the real game: each beat\'s teacher says their lines in its room in its window (the writers\' beat.<id>.<n>); Tomas comes to Sowing')
+    if not g.ev("typeof introBeatTick === 'function' && typeof skipTo === 'function'"):
+        print('  not yet: no introBeatTick')
+    else:
+        g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), text]); return old.apply(this, arguments); }; return true; })()")
+        beats = g.ev("INTRO_WEEK.filter(b => b.who && introBeatLines(b).length).map(b => b.id)")
+        only = [x.split('=', 1)[1].split(',') for x in sys.argv if x.startswith('--beats=')]   # e.g. --week --beats=d4-quiz,d5-invite
+        if only: beats = [b for b in beats if b in only[0]]
+        if not beats: print('  not yet: the writers\' beat lines are not in this build')
+        for bid in beats:
+            go = g.ev("""((id) => { const b = INTRO_WEEK.find(x => x.id === id), from = introAbs(b.day, b.at);
+              if (shipNow() < from + 1) skipTo(from + 1);
+              const p = ROSTER.find(q => q.id === b.who), w = whereIs(p, shipNow());
+              const deck = b.where && b.where !== 'seek' ? b.where.deck : w && w.deck;
+              if (deck && deck !== deckDef.num) goToDeck(deck);
+              return { t: clockText(), deck, plan: w && [w.deck, w.act, w.placeId] }; })""" + f"('{bid}')")
+            g.step(30)
+            place = """((id) => { const b = INTRO_WEEK.find(x => x.id === id), a = DECK_CREW.find(x => x.p && x.p.id === b.who);
+              let tgt = null;
+              if (b.where && b.where !== 'seek') {
+                const L = Object.keys(ROOMS).find(k => ROOMS[k].name === b.where.room), T = [];
+                deckDef.map.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === L) T.push([c, r]); }));
+                const ref = a ? cellAt(a.x, a.z) : T[T.length >> 1]; T.sort((u, v) => Math.hypot(u[0] - ref[0], u[1] - ref[1]) - Math.hypot(v[0] - ref[0], v[1] - ref[1]));
+                tgt = T.find(c => free(...c) && !(a && c[0] === cellAt(a.x, a.z)[0] && c[1] === cellAt(a.x, a.z)[1]));
+              } else if (a) { const n = nearestOpen(a.x + 1, a.z + 1, player); tgt = n; }
+              if (tgt) player.obj.position.copy(cellPos(...tgt));
+              return { here: player.here(), them: a ? cellAt(a.x, a.z) : null }; })"""
+            g.page.evaluate('([s, id]) => window.__sc(s)(id)', [place, bid])
+            n0 = len(g.ev('window.__said'))
+            seen = False
+            for k in range(160):   # a teacher can reach the room late; then up to 12 lines at 3.6 s
+                g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])
+                st = g.ev(f"(() => {{ const b = INTRO_WEEK.find(x => x.id === '{bid}'); return {{ said: SHIP.intro.done['{bid}:said'] !== undefined, playing: !!INTRO_UI.beat, here: introBeatHere(b, DECK_CREW.find(x => x.p && x.p.id === b.who)) }}; }})()")
+                seen = seen or st['here']
+                if st['said'] and not st['playing']: break
+                if k % 10 == 9 and not st['here']: g.page.evaluate('([s, id]) => window.__sc(s)(id)', [place, bid])   # they moved: go to them again
+            lines = g.ev(f"introBeatLines(INTRO_WEEK.find(x => x.id === '{bid}'))")
+            said = [x[1] for x in g.ev('window.__said')[n0:]]
+            heard = sum(1 for l in lines if l in said)
+            print(f"  {bid} ({go['t']}, plan {go['plan']}): heard {heard}/{len(lines)}{'' if seen else ' -- the teacher was never there with you'}")
+            if heard < len(lines): fail(f'{bid}: you stayed, but heard {heard} of {len(lines)} of the teacher\'s lines; missing {[l for l in lines if l not in said]}; dialogue {g.ev("DIALOGUE && DIALOGUE.id")}; said meanwhile {said[:8]}')
+        if 'd6-sowing' in beats:
+            sow = g.ev("({ sow: !!INTRO_UI.sow, at: (DECK_CREW.find(x => x.p.id === 'tomas') || {}).goalId || null })")
+            print(f'  Sowing: Tomas brought to the garden {sow}')
+            if not sow['sow']: fail('Tomas was never brought to the garden for Sowing')
+
+WEEK_ONLY = '--week' in sys.argv
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
+    if WEEK_ONLY:
+        week(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
 
     print('0. Test URLs start with the intro off')
     st = g.ev("({ on: introOn(), s: SHIP.intro.on, day: SHIP.time.day, min: Math.floor(SHIP.time.min), esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), beats: introBeats(INTRO_ESCORT, 1).length })")
@@ -283,10 +338,10 @@ with sync_playwright() as pw:
             if t0['open'] != 0: fail('the Tern\'s ramp is open while you sign the manifest')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
         if tern:   # about 2 s after signing, the pilot's line and the ramp opens (2.5 s)
-            r0 = g.ev('ternRampOpen()'); g.page.wait_for_timeout(2400); g.step(100)
+            r0 = g.ev('ternRampOpen()'); g.step(150)   # 2 s to the pilot, 2.5 s of ramp (the frame clock)
             r1 = g.ev("({ open: ternRampOpen(), toast: (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
             src = "the writers' line" if r1['pilot'] else 'the stand-in'
-            print(f"  the ramp right after signing {r0}, 2.4 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
+            print(f"  the ramp right after signing {r0}, 5 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
             if r0 != 0: fail('the ramp opened before the pilot spoke')
             if r1['open'] != 1: fail('the ramp did not open after the pilot\'s line')
             if 'Raman' not in r1['toast']: fail('no pilot\'s line when the ramp opened')
@@ -439,7 +494,7 @@ with sync_playwright() as pw:
             pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
             print(f"  Pell's Wednesday ask (you were away): {pm}")
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
-    print('Not yet: Tuesday to Sunday walked in the real game (with social A, traditions and the writers combined)')
+    week(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.25
+   STARSHIP CADET: CSV Wren                           build 0.42.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.25';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.26';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14986,11 +14986,11 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 function introUiReset() {
-  const U = INTRO_UI; (U.said || []).forEach(clearTimeout); if (U.pilot) clearTimeout(U.pilot);
+  const U = INTRO_UI; (U.said || []).forEach(clearTimeout);
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === 'Your bunk' || IX_GOAL.label === 'Zeke Torres');
   if (own && typeof clearGoal === 'function') clearGoal();
-  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0 });
-  if ('pilot' in U) Object.assign(U, { pilot: 0, ternOpened: false, ternShut: false });
+  Object.assign(U, { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, calder: false, calls: 0, beat: null, sow: false });
+  if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
 const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
@@ -15146,7 +15146,7 @@ INTRO_STUB_SCRIPTS.introSoloJob = { title: 'Your first solo job', from: 'I. Cald
   { who: 'calder', text: 'Every job goes in your Record. I read the Record, not the talk.' },
   { who: 'calder', text: 'Progress talks: any time. Book it. Now go and fix my lamp.' }] };
 for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
-const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, pilot: 0, ternOpened: false, ternShut: false };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [], next: 0, still: 0, stillAt: null, more: 0, bed: false, tour: [], pause: null, pilotAt: 0, ternOpened: false, ternShut: false };
 INTRO_STUB_SCRIPTS.introDinner = { title: 'Dinner with Torres', from: 'Zeke Torres', lines: [
   { who: INTRO_ESCORT, text: 'Engines, me. Deck 6. The drive coils, mostly. Coil three\'s my favourite. Don\'t tell the others.' },
   { who: INTRO_ESCORT, text: 'Two years aboard. Day shift, tea at half ten. Works never misses tea.' },
@@ -15272,24 +15272,30 @@ function introManifest() {
     introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
     if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
     if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
-    INTRO_UI.pilot = setTimeout(introPilot, 2000);
+    INTRO_UI.pilotAt = performance.now() + 2000;   // introTernTick, on the frame clock (reviewer 1c: not a timer)
     saveGame();
   };
   document.body.appendChild(el); setTimeout(() => input.focus(), 50);
 }
 // the Tern's ramp (0.42.22; the deck architect's ternRamp, 0.38.18): shut while you sign the manifest; about 2 s after,
-// the pilot's line (Dev Raman over the speaker: the writers' raman week1 'pilot.ramp', else a stand-in) and it opens.
+// the pilot's line (on the frame clock, and once: done.pilot; Dev Raman over the speaker: the writers' raman week1 'pilot.ramp', else a stand-in) and it opens.
 // Once you're off it and nobody's in its well or on the ramp (ternClear), it closes behind you; it opens again once
 // Torres lets you go (on another deck it just snaps). After a reload the ramp is simply open, as the Tern always was.
 const INTRO_PILOT = 'Down gently. Ramp\'s opening. Welcome to the Wren.';
 function introPilot() {
-  INTRO_UI.pilot = 0; if (!introOn() || typeof ternRamp !== 'function') return;
+  INTRO_UI.pilotAt = 0; if (!introOn() || typeof ternRamp !== 'function') return;
+  SHIP.intro.done.pilot = Math.floor(shipNow());
   const text = (introWriterLine('pilot.ramp', 'raman') || [INTRO_PILOT])[0];
   toast('Dev Raman, the pilot', text); ternRamp(true, 2.5); INTRO_UI.ternOpened = true;
 }
 function introTernTick() {
   if (typeof ternRamp !== 'function' || !DECKS[5].tern) return;
   const I = SHIP.intro, k = INTRO_STEPS.findIndex(x => x.id === I.step), free = INTRO_STEPS.findIndex(x => x.id === 'free');
+  if (I.step === 'ramp' && I.done.pilot === undefined) {   // the pilot's line is due (after a reload too: shut it again, then he speaks)
+    if (!INTRO_UI.pilotAt) { INTRO_UI.pilotAt = performance.now() + 2000; ternRamp(false, 0); }
+    else if (performance.now() >= INTRO_UI.pilotAt) introPilot();
+    return;
+  }
   if (INTRO_UI.ternShut) { if (k < 0 || k >= free) { INTRO_UI.ternShut = false; ternRamp(true); } return; }
   if (!INTRO_UI.ternOpened || deckDef.num !== 5 || ternRampOpen() < 1 || k < 0 || k >= free) return;
   const t = DECKS[5].tern, at = player.here();
@@ -15343,6 +15349,45 @@ function introHealthMissed(n) {
 }
 // the Works team's mug at Friday tea (a moment, no meeting): in the tea corner during it, they hand it over; else it's
 // on the rack when you look, and a note says so
+// the week's beats said in play (0.42.26; the writers' week-1 lines beat.<id>.<n>, kind week1 on the beat's teacher):
+// in the beat's room during its window with them there too, their lines one bubble at a time (INTRO_TOUR_GAP), once;
+// they stop while they talk; leave and the rest is dropped. A beat with no room of its own (Friday's invite) plays when they're within
+// INTRO_BEAT_NEAR tiles of you in the four hours after it.
+const INTRO_BEAT_NEAR = 6;
+function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) break; out.push(l[0]); } return out; }
+function introBeatHere(b, a) {
+  if (!a || typeof player === 'undefined') return false;
+  const P = player.obj.position, room = c => (ROOMS[roomAt(...c)] || {}).name;
+  if (!b.where || b.where === 'seek') return Math.hypot(a.x - P.x, a.z - P.z) <= INTRO_BEAT_NEAR;
+  return deckDef.num === b.where.deck && room(player.here()) === b.where.room && room(cellAt(a.x, a.z)) === b.where.room;
+}
+function introBeatTick() {
+  if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return;
+  const I = SHIP.intro, U = INTRO_UI, now = shipNow(), t = performance.now(), crew = id => DECK_CREW.find(x => x.p && x.p.id === id);
+  if (U.beat) {
+    const a = crew(U.beat.b.who);
+    if (!introBeatHere(U.beat.b, a)) U.beat = null;   // you (or they) left: the rest is dropped
+    else if ((a.talking = Math.max(a.talking || 0, 1)) && !DIALOGUE && t >= U.next) { bubbleSay(a.h, U.beat.lines.shift(), 4.5); U.next = t + INTRO_TOUR_GAP; if (!U.beat.lines.length) U.beat = null; }   // they stop for it, facing you (section 10's tap pause)
+    return;
+  }
+  if (DIALOGUE) return;
+  for (const b of INTRO_WEEK) {
+    if (!b.who || I.done[b.id + ':said'] !== undefined) continue;
+    const from = introAbs(b.day, b.at), until = b.until !== undefined ? introAbs(b.day, b.until) : from + 240;
+    if (now < from || now >= until || !introBeatHere(b, crew(b.who))) continue;
+    I.done[b.id + ':said'] = Math.floor(now); const lines = introBeatLines(b); if (lines.length) { U.beat = { b, lines }; return; }
+  }
+}
+// Saturday's Sowing (d6-sowing, 11:45): Tomas is on watch then (the crew have no lunch in the sim), so while you're on
+// Deck 3 in its window he's walked to the garden for about ten minutes ("Holt said ten minutes"; section 10's
+// crewComeTo) and then goes back to his watch; his rota is unchanged
+const INTRO_SOW_MIN = 10, INTRO_SOW_SPOTS = ['3-tend-3', '3-tend-2', '3-tend-4', '3-tend-1'];
+function introSowTick(now) {
+  const b = INTRO_WEEK.find(x => x.id === 'd6-sowing'); if (!b || INTRO_UI.sow || typeof crewComeTo !== 'function' || deckDef.num !== b.where.deck) return;
+  const from = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < from || now >= until - 5) return;
+  const spot = INTRO_SOW_SPOTS.find(id => (typeof PLACE_OF === 'undefined' || PLACE_OF.has(id)) && !(typeof heldBy === 'function' && heldBy(id))); if (!spot) return;
+  INTRO_UI.sow = true; crewComeTo(b.who, spot, null, { until: Math.min(until, now + INTRO_SOW_MIN + 5) });   // (+5: the walk up from Deck 2)
+}
 // someone who was to come and find you this week (section 20's socialSeekAsk) and never did: when the window ends, a
 // Mail from them instead (reviewer 1): the writers' mail.<beatId> ("Subject | body", kind week1), else a stand-in
 const INTRO_SEEK_MAIL = {
@@ -15406,7 +15451,7 @@ function introTick() {
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(introScriptHere(st.meeting, m, st.who), m);
     }
   }
-  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); }
+  if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); introSowTick(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
   if ((I.step === 'chief' || I.step === 'free') && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
     INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, 19 * 60) });
@@ -15414,7 +15459,7 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; if (I.step === 'free') introSay(introLines(I.step)); }
-  introTourTick(); introBedTick(); introTernTick();
+  introTourTick(); introBedTick(); introTernTick(); introBeatTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st);   // while he's yours, not over a meeting
   if (lead) {
