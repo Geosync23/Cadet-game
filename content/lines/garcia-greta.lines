@@ -96,3 +96,19 @@
 == rumour
 - Shocking news. Not shocking.   #funny
 - Heard this at the airlock. Firmly.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Try not to break your headphones while I'm gone.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Who'll fix your headphones? Not my problem. Kidding. Mostly.
+? leaving:you tier>=friend
+- Look who it is. You. Every night shift worth having. Don't make it a thing. Thanks.   #warm
+
+== letter
+- New ship. Seven broken pairs of headphones by day three. I'm very popular. Tell Yusuf I'm winning.
+? tier>=friend
+- Played the musical card Yusuf made me. Still works. Annoyingly. Hello from the night side.

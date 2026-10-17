@@ -98,3 +98,19 @@
 == rumour
 - Slowly, then. Here's the news.
 - It'll be in my letter. You hear it first.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Letters first. Then the telescope. Then the rest.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. I'll write. On paper, slowly. As I always do.
+? leaving:you tier>=friend
+- You always waited for me to finish a sentence. That's a kind thing. Thank you for it.   #warm
+
+== letter
+- New ship. The post bag is slower here. I'm learning to like it. The telescope came safe.
+? tier>=friend
+- A paper letter, for once, by Mail. The Wren's out there somewhere, in my little telescope. Hello.

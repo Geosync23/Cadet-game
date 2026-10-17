@@ -1,0 +1,28 @@
+@crew v-dunmore-rhea
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hey! Rhea Dunmore. I play the lounges. Hum me something. Anything.
+- Morning! I'm only here three days. Hum quickly.   #funny
+? tier>=acquaintance
+- {hi}, {me}! I played your hum last night. Everyone clapped. Mostly for the tune.   #warm
+?
+
+== chat
+- One lounge at a time. I've played forty. Yours has the best curved window.
+- Up early to practise. I'm told the washroom choir is the competition.   #funny
+
+== near
+? place:lounge
+- Hum it. Go on. I'll play it tonight. Promise.
+? time:morning
+- Morning scales. Sorry, Deck 4. Lovely echo, though.   #funny
+?
+
+== bye
+- {bye}. Keep humming. I'll know it if I hear it.
+
+== smalltalk
+- La la. Lovely.
+- Hum it again?

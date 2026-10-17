@@ -98,3 +98,19 @@
 == rumour
 - I never repeat messages. This isn't one.   #funny
 - Oh, you'll want to hear this one.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Saying goodbye to everyone. In four languages. And some Veyli.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Hello, hello. I'm leaving soon. A new posting on a station. Write, won't you?
+? leaving:you tier>=friend
+- You always asked after everyone too. That's rarer than four languages. Thank you.   #warm
+
+== letter
+- The station's busy. A hundred languages. I'm learning a fifth. The headset's on my new door.
+? tier>=friend
+- Said a Veyli word for 'quiet' today. Someone understood. I wanted the Wren to know.

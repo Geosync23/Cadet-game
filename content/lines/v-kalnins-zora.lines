@@ -1,0 +1,28 @@
+@crew v-kalnins-zora
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Oh, hello. Zora Kalnins. I draw the charts. Have you seen a pencil? Two?
+- Mm, hi. Sorry. I was somewhere else. A nebula, mostly.
+? tier>=acquaintance
+- {hi}, {me}. I found both pencils. They were behind my ears.   #funny
+?
+
+== chat
+- I stay up late. The stars are easier to draw when everyone's asleep.
+- Every chart has a little drawing in the corner. Nobody asked me to. I just do.
+
+== near
+? time:night
+- Quiet ship. Clear window. Best time to draw.
+? deck:2
+- The observatory dome hums. Did you know? A low hum. Like a cat.
+?
+
+== bye
+- {bye}. If you see a star I've missed, tell me. I'll draw it for you.   #warm
+
+== smalltalk
+- Mm. Left pencil.
+- There it is. Oh, lovely.

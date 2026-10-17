@@ -163,9 +163,25 @@
 - Sowing. I planted mine in a hurry. It came up.
 ? place:hydroponics_garden
 - Light's lovely in here. Can't stay. Just a minute.
-? trad:observatory
+? trad:observatory-night
 - Stars! Nine new ones tonight. I'm counting.
 
 == rumour
 - Quick, did you hear? Can't stop. Here's the news.
 - Heard it on the way. Telling you on the way.   #funny
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Quick! Can't stop! Well. Can stop a bit.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon! Keep running for me. Well. A jog's fine.
+? leaving:you tier>=friend
+- I wrote the whole deck a goodbye poem. Nobody's seeing it. It says thanks.   #warm
+
+== letter
+- New ship! The garden's tiny but the running track's long. I'm counting watches again. Nearly there.
+? tier>=friend
+- Wrote a poem about the Wren. Nobody's seen it. One line's about Bunk 2. A good line. That's all you're getting.

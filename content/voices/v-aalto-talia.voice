@@ -1,0 +1,12 @@
+@voice v-aalto-talia
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: chatty
+talk: Quick and sociable; maps a ship by who lives where, not by doors; buys one souvenir at every store.
+hi: Hey | Hello there
+bye: Off I pop | See you around
+yes: Oh yes | Go on
+thanks: Ta | Thanks so much
+wow: Ooh
+sigh: Oh well
+likes: sweet | game | made
+nick: - | {me} | {me} | {me} | {me}

@@ -1,0 +1,28 @@
+@crew v-upton-iver
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Iver Upton. Thirty years on a freighter. Now I'm a passenger. Odd.
+- Ah. A junior. Good. Juniors keep a ship honest.
+? tier>=acquaintance
+- {hi}, {me}. I told your Captain how to run her ship. She thanked me. Kindly.   #funny
+?
+
+== chat
+- Thirty years of cargo. This is my first ship where somebody plays the piano.
+- Calling home tonight. They've kept my chair. My grandson's in it.   #funny
+
+== near
+? place:lounge
+- Best window on any ship I've known. And I've known a few.
+? place:booths
+- Calling home. Thirty years I made them wait. Not any more.   #warm
+?
+
+== bye
+- {bye}. Listen to your chiefs. Then make your own mind up.
+
+== smalltalk
+- Hm. Tidy ship.
+- Thirty years. Fancy.

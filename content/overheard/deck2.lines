@@ -1,0 +1,76 @@
+@overheard deck2
+// Writer 5, batch 7. Deck 2 off duty: the senior corridor and the portrait gallery, the observatory, the chart room,
+// the Watch office's view. Mostly not about work. Lines naming a crew member keep that person out (!who:/!with:).
+
+== overheard
+? pair:any+any place:senior_corridor
+A: Which one's Captain Moro?
+B: Third along. The one frowning.
+A: They're all frowning.
+B: Third along frowns most.   #funny
+
+? pair:any+any place:senior_corridor !who:marrow !with:marrow
+A: The Captain doesn't like her portrait.
+B: It's a good portrait.
+A: That's what everyone tells her.   #funny
+
+? pair:any+any place:senior_corridor time:night
+A: Do you come this way on purpose?
+B: It's quieter up here. Thicker carpet.
+A: It is, isn't it?
+
+? pair:any+any place:observatory time:evening
+A: That one's a planet.
+B: That's a smudge on the glass.
+A: A very bright smudge, then.   #funny
+
+? pair:any+any place:observatory time:night
+A: How far's that one?
+B: Further than home.
+A: Everything's further than home.
+B: Not the kettle.   #funny
+
+? pair:any+any place:observatory !who:marrow !with:marrow
+A: The Captain's been coming up here lately.
+B: On observatory night?
+A: Sits at the back. Asks good questions.
+
+? pair:any+any who:tomas place:observatory time:evening
+A: I've named that one.
+B: Officially?
+A: Not yet. It doesn't know.   #funny
+
+? pair:any+any who:alvarez-luca with:mbeki-bo place:observatory
+A: Gerald likes it up here.
+B: Gerald's a cactus.
+A: A cactus with taste.   #funny
+
+? pair:any+any who:lemaire-nils with:ibarra-rafael place:chartroom time:night
+A: There's a gap on this chart.
+B: Got a name ready?
+A: Three. I'm saving the best one.
+
+? pair:any+any who:kim-yusuf with:alvarez-luca place:chartroom
+A: Marra Station, before it was rebuilt.
+B: Which time?
+A: The first. It had a fountain.
+
+? pair:any+any deck:2 time:morning !who:holt !with:holt
+A: Holt's done his rounds already.
+B: It's six o'clock.
+A: He was done at half five.   #funny
+
+? pair:watch+watch place:watch_office !who:tomas !with:tomas
+A: Best view of the lift, this.
+B: Tomas says that.
+A: Tomas is right.
+
+? pair:any+any who:ferreira with:takahashi-wen deck:2 time:evening
+A: Veyli has nine words for quiet.
+B: You said seven last week.
+A: I've learnt two more.
+
+? pair:senior+any deck:2 !who:vance !with:vance
+A: The ready room step got the Commander today.
+B: Again?
+A: He says it moved.   #funny

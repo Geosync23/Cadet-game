@@ -154,7 +154,7 @@
 - Greening. My mint's gone wild. Brennan's pleased.
 ? season:lanterns
 - I hung my lantern in the window. Like at home.
-? trad:observatory
+? trad:observatory-night
 - Observatory night. I'll find the bright one again.
 ? place:lounge
 - The windows here are best. Don't tell the garden.
@@ -165,3 +165,19 @@
 == rumour
 - I wasn't listening. I just heard. Sorry.
 - Have you heard? I think it's true. It sounded true.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing the herbs. Carefully. They don't like moving.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. I'll think of the Wren's windows. Take care.
+? leaving:you tier>=friend
+- You always asked how things went. Nobody else did. Thank you for that.   #warm
+
+== letter
+- The view here is different. Fewer stars, more of a moon. The herbs made the trip. The basil sulked for a day.
+? tier>=friend
+- My ledger balanced again today. To the credit. I thought you'd like to know. Hello from my window seat.

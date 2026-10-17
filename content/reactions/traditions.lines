@@ -63,3 +63,16 @@
 - The hull lights looked lovely last night. The whole ship glowing.
 ? cue:tradition.founding
 - Founding Day. The Wren's older than all of us, and still flying.   #warm
+
+// Writer 4, batch 9: more harvest.
+? cue:tradition.harvest !cue:tradition.harvest.you
+- Harvest's in. The mess smells like a market.
+- Baskets everywhere. Somebody grew a very big marrow.   #funny
+? cue:tradition.harvest.you tier>=acquaintance
+- You picked beans yesterday? {thanks}. They're in tonight's stew.
+? cue:tradition.harvest.you tier>=friend
+- Saw you with a basket. Come back next year. Bring a friend.   #warm
+? cue:tradition.harvest.you dept:galley
+- Your tomatoes are in the soup. Well, the garden's. You picked them.
+? cue:tradition.harvest.you dept:garden
+- Mm. You came to the harvest. Good hands. Gentle with the roots.   #warm

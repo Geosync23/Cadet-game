@@ -153,7 +153,7 @@
 - Gym after shift. Then a sit. Then nothing.
 ? time:night
 - Three hundred and four. Wrote it down. Bed.
-? trad:observatory
+? trad:observatory-night
 - Observatory night. Bringing the journal. Obviously.
 ? season:harvest
 - Harvest. Everyone's buying jars. Jam season.
@@ -178,3 +178,19 @@
 - Good game. Same time tomorrow? I'll keep the board.
 == tiles.lose
 - Well played. I'll put it in the journal. Next to the stars.   #warm
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. I know exactly what I've got. I always do.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off to a new post. Somebody else will know what you need now.
+? leaving:you tier>=friend
+- I never tell what anyone bought. I'll tell you this: I'll miss the Tiles with you.   #warm
+
+== letter
+- New store. They've never heard of Gerald. I've fixed that. Star four hundred and something, last night.
+? tier>=friend
+- Bought a tin of good biscuits today and thought: someone on the Wren would have wanted these. You, probably. Hello.

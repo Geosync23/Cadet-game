@@ -102,3 +102,19 @@
 == rumour
 - Ooh, wait till you hear this.
 - Bet you didn't know this. Bet you.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing! Timing it. Eleven minutes so far. Personal best.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Ooh, I'm leaving soon. Race you to the coffee machine one last time?
+? leaving:you tier>=friend
+- You always played along. With the timing. And the games. Thanks for that. Really.   #warm
+
+== letter
+- New ship's coffee machine is a mystery. I've cracked it. Four minutes. Pressed a flower from their garden. Small one.
+? tier>=friend
+- Timed the walk from my bunk to the mess here. Two minutes longer than the Wren. I miss the shortcut. Hello.

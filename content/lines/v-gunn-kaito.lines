@@ -1,0 +1,28 @@
+@crew v-gunn-kaito
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Morning. Dr. Kaito Gunn, relief. Eleven ships. Your galley's top three already.
+- Hello. Covering the infirmary for a week. Drink some water, by the way.
+? tier>=acquaintance
+- {hi}, {me}. Brennan's soup today: nine. Don't tell the other ten ships.   #funny
+?
+
+== chat
+- I remember every galley I've worked near. Food's how you know a ship.
+- Up early, shopping early. I always bring something on for the next ship.
+
+== near
+? time:morning
+- Early start. Good toast. Eight and a half.   #funny
+? place:crew_store
+- Your store has good biscuits. Some are coming with me to ship twelve.
+?
+
+== bye
+- {bye}. Eat properly. Doctor's orders.
+
+== smalltalk
+- Soup. Nine.   #funny
+- Water. Drink it. Doctor says.

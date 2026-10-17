@@ -188,3 +188,19 @@
 - Good game. A clear win. By one dock. A clear dock.   #funny
 == tiles.lose
 - Well played. I'll write it in the tally. Honestly.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. My letters go in first. The socks can fend for themselves.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving, I'm afraid. I hope the Wren keeps finding you well.
+? leaving:you tier>=friend
+- I'll write. On paper. It will take six weeks. I'll mean every word of it.   #warm
+
+== letter
+- I hope this finds you well. It really does. The new mess is loud and the onions are fine. I am still winning, somewhere.
+? tier>=friend
+- I ran past a window this morning and thought of our corridor. Write back if you can. Slowly is fine. Slowly is how I like it.

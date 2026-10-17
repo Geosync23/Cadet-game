@@ -1,0 +1,12 @@
+@voice v-abbas-nyla
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: steady
+talk: A relief doctor giving Nandakumar a few days off; unhurried and warm; evenings in the garden, or the lounge with a book.
+hi: Hello | Evening
+bye: Take care | Mind yourself
+yes: Of course | Yes
+thanks: Thank you | Kind
+wow: Oh, how nice
+sigh: Ah, well
+likes: book | garden | tea
+nick: - | {me} | {me} | {me} | {me}

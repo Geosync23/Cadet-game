@@ -103,3 +103,19 @@
 == rumour
 - I spotted this first. Obviously.
 - Straight version, no fuss.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Quickly. I spotted the shuttle's late. It's late.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Keep my rowing time warm. I'll beat it from here.
+? leaving:you tier>=friend
+- You were a good rival on the board. And a better shipmate. Don't tell anyone I said that.   #warm
+
+== letter
+- New ship has a rowing board. I'm top. Took a week. Finished a mystery. Guessed it on page four.
+? tier>=friend
+- Lars sent me a book with the last page in. A first. Tell him I noticed. Music's not the same here.

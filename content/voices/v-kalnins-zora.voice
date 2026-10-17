@@ -1,0 +1,12 @@
+@voice v-kalnins-zora
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: dreamy
+talk: Slow and far away; a pencil behind each ear, always reaching for the wrong one; up late with the stars.
+hi: Oh, hello | Mm, hi
+bye: Back to the stars | Night, then
+yes: Mm, yes | All right
+thanks: Thank you | That's kind
+wow: Oh. Oh, look
+sigh: Mm
+likes: star | book | tea
+nick: - | {me} | {me} | {me} | {me}

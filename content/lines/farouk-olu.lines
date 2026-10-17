@@ -91,3 +91,19 @@
 == rumour
 - Quietly, then. I heard this.
 - Not from the channels. Never those.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Quietly. A fair trade: one ship for another.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm leaving soon. Goodbye. Goodbye, you said? Yes. Goodbye.
+? leaving:you tier>=friend
+- You listened. Every time. That's a fair trade for a lot of things. Thank you.   #warm
+
+== letter
+- New ship. They sing the second verse wrong too. I hum the right one. Quietly.
+? tier>=friend
+- A market here sells the same tea as Lisk. Bought two. Fair trade. Hello.

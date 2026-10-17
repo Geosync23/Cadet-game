@@ -404,3 +404,186 @@
 == rumour
 - Right. You'll want to hear this.
 - Don't tell Calder I told you. Well. Do.   #funny
+
+// Writer 4, batch 6: Zeke's ordinary weeks, after week one. Mostly not work: music and the record cabinet, the
+// lyric argument, knitting badly with Kovac and Dahl, tea, sweet things, skipping breakfast, the gym after shift
+// (new), the observatory, Reyes's notes. Card gates kept: no father, no Engine Specialist list; no scarf here.
+
+== greet
+? tier>=acquaintance !week1:true
+- {hi}, {nick}! How's the week treating you? Properly, I mean.
+- {hi}, {nick}. Song stuck in my head since breakfast. Well, since not-breakfast.   #funny
+? tier>=acquaintance !week1:true weekday:mon
+- Monday! Fresh week. Fresh tea. What are you up to this week?
+? tier>=acquaintance !week1:true weekday:fri
+- {hi}, {nick}. Friday. Music night. You've no excuse, you know.   #funny
+? tier>=colleague !week1:true
+- {nick}! Perfect timing. I was just about to open the biscuits.   #funny
+- {hi}, {nick}. Sit a minute? Tell me something that isn't about work.
+? tier>=friend !week1:true
+- {nick}. Good. I've got tea and nothing to fix. Stay?   #warm
+- There's my shipmate. What's new? Anything? Tell me anyway.   #warm
+? tier>=close !week1:true
+- {nick}. Good. Kettle's just boiled. Sit, tell me your week.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Achterberg says the second verse is about a boat. It's a lighthouse. I'd bet my tea.   #funny
+- Farouk and I had the lyric argument again. We both lost. Takahashi won. As always.   #funny
+- Haddad hums the right tune with the wrong words. It's lovely. Don't tell her I said wrong.   #funny
+- I've started the gym after shift. Ten minutes. Then twelve. Don't laugh. Well, a bit.   #funny
+- Holt's at the gym after shift too. He nods at me. I nod back. It's a whole friendship.   #funny
+- What are you reading? I'm on a book about lighthouses. Long story. Good story.
+- Did you try Brennan's pudding last night? I went back. Twice. She saw.   #funny
+? tier>=colleague !week1:true
+- Kovac says my knitting has "personality". Dahl says it has holes. They're both right.   #funny
+- Knitting circle tonight. Kovac does it perfectly. Dahl does it sensibly. I do it loudly.   #funny
+- I put a record on and the whole corridor sang along. Badly. All of us. Best night.   #warm
+- I left Reyes a note with a doodle of coil three in a hat. He drew a scarf on it.   #funny
+- What do you do on your days off? Properly off, I mean. I'm collecting ideas.
+- Observatory later. Rossi lets me use the tiny telescope. Tiny stars. Lovely.   #funny
+- Favourite song in the record cabinet? Go on. Then tell me the words. Then we'll argue.   #funny
+? tier>=friend !week1:true
+- You always ask the next question. Most people stop at one. Keep doing that.   #warm
+- I used to think a good day was the coils behaving. Now it's tea with people. Bit of both.   #warm
+- Sometimes I sit at the overlook with tea and just listen. Is that odd? It's not odd.
+? tier>=close !week1:true
+- Glad you came out here, you know. To the Wren. The bay's better for it.   #warm
+- If I ever get serious, tell me to put a record on. It works. Every time.   #funny
+
+== near
+? act:breakfast !week1:true
+- Tea. Just tea. Toast is for people with time. I'll be hungry by ten.   #funny
+? act:gym !week1:true
+- New habit! Gym after shift. I'm on the bike. The bike's winning.   #funny
+? act:dinner !week1:true
+- Pudding first, then I'll think about dinner. Don't tell Brennan the order.   #funny
+? act:leisure !week1:true
+- Off to the music room. There's a record I've not argued about yet.   #funny
+? place:musicroom
+- Side two, track one. I know every word. I'll prove it. Don't check.   #funny
+? place:teacorner !week1:true
+- Tea corner's the best room on Deck 5. Kettle, biscuits, and nobody in a hurry.
+? place:lounge !week1:true
+- Lounge window. Tea. Somebody playing Tiles badly. That's me. I'm playing badly.   #funny
+? trad:observatory-night
+- Observatory night! Tea flask, two biscuits, and a lot of looking up.
+
+== feel
+? mood:high !week1:true
+- Good mood. Singing mood. Knitting-fast mood. You've been warned.   #funny
+? mood:ok !week1:true
+- Fine. Steady. A cup of tea and I'll be better than fine.
+? mood:low tier>=friend !week1:true
+- Bit quiet today. Checked a valve three times. Fine all three. That's how I know.
+
+== life
+? tier>=acquaintance !week1:true
+- There's a stack of records on my cabin floor. I'll shelve them. They like the floor.   #funny
+- I make tea in a pot. Properly. Warm the pot first. It takes ages. Worth it.
+? tier>=colleague !week1:true
+- I write the lyrics down after every jam. Then I lose the paper. Then we argue again.   #funny
+- Reyes and I are never awake at the same time. I'd know his handwriting anywhere.
+? tier>=friend !week1:true
+- Kovac taught me to cast on. Dahl taught me to fix it. Nobody can teach me to stop.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- A whole corridor singing the wrong words together. Nothing better. Honestly.   #warm
+- First cup of tea after shift. The one where you sit down. That one.
+? tier>=colleague !week1:true
+- Finishing a row without dropping a stitch. Happens once a week. I cheer every time.   #funny
+
+== bye
+? !week1:true
+- Right, onward. Come to the jam on Friday. I'll keep you a seat.
+- {bye}. Drink some tea. Do one nice thing. Properly.   #warm
+- Off you go, then. I'm off to argue about lyrics. Wish me luck.   #funny
+
+== callback
+? told:intro.arrival tier>=acquaintance !week1:true
+- Remember the Tern landing? You held on to your bag like it was going to run off.   #funny
+? told:intro.arrival tier>=friend
+- Funny. Feels like years since I met you off the Tern. It's not been long at all.   #warm
+? told:intro.shadowShift tier>=acquaintance !week1:true
+- Your shadow shift. You asked why three times. Best questions I'd had all month.   #warm
+? told:intro.shadowShift tier>=colleague
+- Day one, you held the spanner upside down. Then you didn't. I noticed.   #warm
+? told:intro.dinner.stars tier>=acquaintance !week1:true
+- You came for the stars, you said. Have you had your window seat yet? Properly?   #warm
+? told:intro.dinner.stars tier>=friend
+- Observatory night's coming. You said stars, that first dinner. I remembered.   #warm
+? told:intro.dinner.fixing tier>=acquaintance !week1:true
+- You said you liked fixing things. Still true? Is the bay being kind to you?
+? told:intro.dinner.fixing tier>=friend
+- First dinner, you said fixing things. You're good at it. Told you you'd fit.   #warm
+? told:intro.dinner.unsure tier>=acquaintance !week1:true
+- First night you said you weren't sure why you came. Any closer? No rush.
+? told:intro.dinner.unsure tier>=friend
+- You said you weren't sure, that first dinner. You look sure now. A bit. I'm glad.   #warm
+
+// Writer 5, batch 5: if they are ever transferred (goodbye with leaving:you, also the "Sorry I missed you at the
+// shuttle" Mail; packing as feel with leaving:soon; letters after). Nothing of his arc: no Specialist list, no father.
+
+== feel
+? leaving:soon
+- Packing! Ten days. I said goodbye to coil three. It sulked. Course it did.   #funny
+- New ship, new coils. I'll have to learn all their moods. Right, onward. Sort of.
+? leaving:soon tier>=friend
+- Bit strange, going. I've knitted three rows and unpicked them. That's how you can tell.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off to a new ship. Talk to coil three for me. It likes being asked how it is.
+? leaving:you tier>=colleague mem:moment.torres.scarf
+- Your scarf's not finished. It's never finished. Take it anyway. Keep it growing.   #warm
+? leaving:you tier>=friend
+- You'll be brilliant, {nick}. You already are. I just got to see it first.   #warm
+
+== letter
+- New engine room. Their coils don't sulk, they grumble. Different thing altogether. Tell Reyes. Tell coil three I said hello.   #funny
+- Found a record cabinet here. I don't know a single song in it. Not one! I'm learning the words. Wrongly, Takahashi would say.   #funny
+? tier>=friend mem:moment.torres.scarf
+- Started a scarf for someone here. Nowhere near as long as yours. How's the bay? Has Calder said "Fine" to you yet? She will.   #warm
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept.
+
+== greet
+? season:sowing tier>=acquaintance !week1:true
+- {hi}! Sowing! New year, new seedlings. Coil three's not impressed. It never is.   #funny
+? season:greening tier>=acquaintance
+- {hi}. Greening! The garden's bursting. I keep finding leaves in my toolbag.   #funny
+? season:harvest tier>=acquaintance
+- Harvest! Brennan wants hands for the crates. I've volunteered both of mine.
+? season:lanterns tier>=acquaintance
+- {hi}! Lanterns. I've knitted a cover for every lantern in the bay. Well, three.   #funny
+
+== near
+? trad:works-tea
+- Friday tea! Halloran's got the biscuits. Grab your mug off the hook before Pell does.   #funny
+? trad:quiz
+- Quiz night. The music round's mine. Takahashi says it's theirs. We'll see.   #funny
+? trad:running
+- Running club! I run like I talk. Fast, then out of breath, then fast again.   #funny
+? trad:film
+- Film night! I knit right through it. I've never seen the end of anything.   #funny
+? trad:market
+- Swap meet! I'm trading a scarf for wool. Then I'll knit the wool into a scarf.   #funny
+? trad:harvest
+- Harvest morning! Garden's full. Mind the bean trellis. I didn't. Twice.   #funny
+? trad:hull-lights
+- Hull lights tonight. Find a window. The whole Wren glows. Best sight in the Service.   #warm
+? trad:founding
+- Founding Day! Cake, and the Captain says a few words. I always well up. Every year.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. Find a window. Think of someone far off. That's all. It's enough.   #warm
+
+== smalltalk
+? trad:today
+- Something on tonight! I love a something.   #funny
+? season:lanterns
+- Lanterns! Every corridor's a story.
+? trad:works-tea
+- Tea! Mugs off the hook, everyone!

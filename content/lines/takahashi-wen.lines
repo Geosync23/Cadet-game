@@ -156,7 +156,7 @@
 - Lanterns. Too many lights. Nice, though.
 ? place:musicroom
 - Side two, track three. The real words are mine.   #funny
-? trad:observatory
+? trad:observatory-night
 - Bring your journal. Don't bring opinions.   #funny
 ? act:breakfast
 - Breakfast. Then sleep. Don't talk to me.   #funny
@@ -164,3 +164,19 @@
 == rumour
 - Heard something. Not static. Real.
 - Short version. You want it?
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Records first. Then the rest.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Leaving. Short version: it was good.
+? leaving:you tier>=friend
+- No static: you were a good shipmate. I'll remember the words to that.   #warm
+
+== letter
+- New ship. Their record cabinet's half empty. Nobody knows any words. It's very quiet. I like it. Bit.
+? tier>=friend
+- Star nine hundred and something. Logged. Clear signal out here. Thought you'd want to know.

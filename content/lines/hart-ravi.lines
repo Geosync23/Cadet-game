@@ -164,3 +164,19 @@
 == rumour
 - Heard something. ...Yeah. It's true.
 - Slow news. Good news. Here.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Hate it. ...Nearly done.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Hate goodbyes. ...This one's all right, though.
+? leaving:you tier>=friend
+- Drew you a comic. Pinned it on the wall. You're in the good one. ...Thanks. For all of it.   #warm
+
+== letter
+- New ship. Early shift again. Hate it. The garden's small but it's fine. My nan's drawn the fish a new hat.
+? tier>=friend
+- Drew a comic of the Wren today. From memory. Got the garden right. Got you right, too, I think.

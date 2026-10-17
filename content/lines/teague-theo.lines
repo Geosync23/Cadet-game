@@ -102,3 +102,19 @@
 == rumour
 - Right. This'll be a comic by Friday.   #funny
 - Blunt version? Here's the blunt version.
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Comics first. They're the valuable bit.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Keep the comics wall going. Somebody has to.
+? leaving:you tier>=friend
+- You were in eleven of my comics. That's a record. It means you were good to draw. Cheers.   #warm
+
+== letter
+- New ship. No comics wall. I've started one. It's me and a cloud, so far. Tell Imani mine are better.
+? tier>=friend
+- Drew the Wren from memory today. The mess, the tea corner, Calder as a very tidy cloud. You're in it.

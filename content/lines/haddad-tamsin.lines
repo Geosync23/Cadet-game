@@ -176,3 +176,19 @@
 - I won? Sorry! It'll be your turn next. It will.
 == tiles.lose
 - Well done! You were lovely at that. Really.   #warm
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- I'm packing. It'll be fine. Won't it? It will. I'm sure.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. Sorry. It'll be fine, though. Won't it?
+? leaving:you tier>=friend
+- Thank you for being kind about the guitar. And everything. Sorry. I'm going to cry a bit.   #warm
+
+== letter
+- The new ship's lovely. Mostly. Nobody here knows the words to anything. I've started teaching them. Badly.
+? tier>=friend
+- I played the chord. The hard one. It came out right, all on its own, on a Tuesday. I wanted you to know first.

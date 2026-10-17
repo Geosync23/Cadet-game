@@ -1,0 +1,12 @@
+@voice v-rocha-dilan
+// Writer 4, batch 5: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: shy
+talk: Quiet and kind; sits at the window and draws what's outside; apologises for taking up space.
+hi: Oh, hi | Hello
+bye: Back to the window | Bye, then
+yes: Yes | Okay
+thanks: Thanks | Thank you
+wow: Oh
+sigh: Oh well
+likes: star | book | card
+nick: - | {me} | {me} | {me} | {me}

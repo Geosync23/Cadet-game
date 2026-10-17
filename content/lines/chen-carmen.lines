@@ -95,3 +95,19 @@
 == rumour
 - Oh. Where was I? Yes. News.
 - I drifted off, but I heard this bit.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Or planning to. I keep starting. Then I think of something better.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. Somewhere else. I always wanted somewhere else. Now I'm sad. Funny.
+? leaving:you tier>=friend
+- You never minded when I drifted off mid-sentence. You waited. Thank you.   #warm
+
+== letter
+- New ship. The washroom has an echo. I've been singing. Sent Grandma a message. She liked the echo.
+? tier>=friend
+- Was going to write a long letter. Then I thought of a better one. This is it: hello. The Wren was good.

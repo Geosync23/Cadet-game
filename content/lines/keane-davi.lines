@@ -117,3 +117,19 @@
 == rumour
 - Oh, you'll like this one.
 - Heard it at three in the morning. Still true.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing, mate! Cleanest bag in the whole Service.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon! Keep the engine room clean for me. Cleanest in the Service.
+? leaving:you tier>=friend
+- You were brilliant company on the late jobs. Honestly. Cheers, mate.   #warm
+
+== letter
+- New engine room. Not as clean. Yet. Give me a week. Sent Gran a message. She says I sound happy.
+? tier>=friend
+- Took the stairs today. For the exercise. Thought of the ladder. Don't tell anyone. Cheers, mate.

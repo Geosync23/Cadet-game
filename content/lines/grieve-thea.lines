@@ -156,7 +156,7 @@
 - I can't sleep. I'm going to look at the stars.
 ? season:sowing
 - Sowing. The garden's careful this time of year. So am I.
-? trad:observatory
+? trad:observatory-night
 - Observatory night. I'm taking a blanket. Two.
 ? place:lounge
 - I like the corner seat. You can see the door.
@@ -166,3 +166,19 @@
 == rumour
 - I don't like gossip. But this is nice. I think.
 - I'm not sure I should say. I'll say it carefully.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- I'm packing. I've made a list. Then another list.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm transferring soon. Please drink enough water. Please.
+? leaving:you tier>=friend
+- I worried about everything here. You made it less. I wanted you to know that.   #warm
+
+== letter
+- New infirmary. Very tidy. I found a lost-property box on my first day. Of course I did. One, Two and Three are well.
+? tier>=friend
+- I passed the exam. The one I worried about. I didn't tell anyone first. I'm telling you. Please write.

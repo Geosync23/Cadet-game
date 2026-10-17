@@ -103,3 +103,19 @@
 == rumour
 - Precisely what I heard. No more.
 - It's out of date, like my maps. Still.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Fine. I'm fine. Mostly maps.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Leaving. Don't make a fuss. ...Small fuss is fine.
+? leaving:you tier>=friend
+- I don't say this often. You were good to work with. That's it. That's the speech.   #warm
+
+== letter
+- New ship. Nobody here knows Hesper Dock. I've put up a map. Gran says hello. She doesn't know you. Still.
+? tier>=friend
+- Sent Gran a message today. Told her about the Wren. She said it sounded nice. It was. Hello.

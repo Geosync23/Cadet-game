@@ -166,3 +166,19 @@
 == rumour
 - Great news, said very flatly: it's great news.   #funny
 - Heard it. Got a song for it. Here's the news.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. To a playlist, obviously. It's mostly slow ones.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. Here's the news, said flatly: I'm sad. Bye.
+? leaving:you tier>=friend
+- Playlist number last-on-the-Wren is for you. Mostly slow. One fast one. You'll know.   #warm
+
+== letter
+- New ship. They have no playlist war. I've started one. It's going well. For me.
+? tier>=friend
+- Made a playlist for the Wren today. It's very long. Tell Teague I said his was fine. Fine.

@@ -247,3 +247,19 @@
 - Good game. Pudding's mine. Fair's fair.   #funny
 == tiles.lose
 - Well played. Pudding's yours. I'm good for it.
+
+// Writer 4, batch 7: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Best deal I've done: everything fits in two bags.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off. Keep the gossip public. Deal?
+? leaving:you tier>=friend
+- Five-year plan, page one: leave the Wren. Page two: miss it. I wrote that one tonight.   #warm
+
+== letter
+- New ship's rowing board is empty. My name's at the top already. Tell Vance. Tell everyone.
+? tier>=friend
+- My cousin says the stall's doing well. I don't believe it. I miss the bunk. And the gossip. Write me the public stuff.

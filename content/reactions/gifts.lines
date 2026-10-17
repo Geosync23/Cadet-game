@@ -29,3 +29,15 @@
 ? cue:gift.you !cue:gift.you@me tier>=acquaintance
 - I hear you've been giving presents. Very kind. Very suspicious.   #funny
 - Someone's walking round very pleased with a gift. I heard it was from you.
+
+// Writer 4, batch 9: more gifts (said by people who heard).
+? cue:gift.you !cue:gift.you@me
+- I hear you gave someone a present. That's lovely.   #warm
+- Heard about your gift. You've got a good eye.
+- Word is you gave someone something nice. Good.
+? cue:gift.you !cue:gift.you@me dept:store
+- I saw what you bought. I'll never tell who it was for.   #funny
+? cue:gift.you !cue:gift.you@me tier>=friend
+- A present! You're a soft one, really.   #warm
+? cue:gift.you !cue:gift.you@me rank:junior
+- Whole bunk heard about your present. In a good way.

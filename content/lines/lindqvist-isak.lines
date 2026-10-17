@@ -94,3 +94,19 @@
 == rumour
 - Quick, before I forget.
 - You'll want this. Quick version.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Fast. The guitar's coming. The book isn't. It's the Wren's.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Off soon. Bet you can't beat my rowing time while I'm gone.
+? leaving:you tier>=friend
+- You never let me win. Good. That's why it counted. Cheers.   #warm
+
+== letter
+- New ship. The helm pulls right, not left. Strange. The guitar's still bad. The rowing board's mine.
+? tier>=friend
+- Played a whole song today. Start to finish. Badly. Thought of the music room's book.

@@ -98,3 +98,19 @@
 == rumour
 - Calmly: this happened.
 - Spoiler. Sorry. Here it is.   #funny
+
+// Writer 4, batch 11: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Calmly. Nothing's on fire. That's a good sign.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- Leaving. Calmly. Here's an ending: it was a good posting.
+? leaving:you tier>=friend
+- You never spoiled a book for me. Not once. Rare. Thank you.   #warm
+
+== letter
+- New ship. Their record cabinet's wrong about every second verse. I'm fixing it. Dad read me an ending. Again.
+? tier>=friend
+- Left Signe a book. With the last page in. She'll be suspicious. Good. Hello from out here.

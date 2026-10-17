@@ -1,0 +1,28 @@
+@crew v-delacroix-teo
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hi! Teo Delacroix, charts office. How many doors are on Deck 4, would you say?
+- Hello. I'm mapping the Wren from memory. Is that the garden, or the gym?
+? tier>=acquaintance
+- {hi}, {me}! I've got Deck 3 right. I think. Will you check it?
+?
+
+== chat
+- The charts office sent me for a week. I've spent most of it lost. Happily.   #funny
+- The garden's the only place I don't map. I just sit there.
+
+== near
+? place:hydroponics_garden
+- No map in here. Just the pond and a bench. I'm on holiday for ten minutes.
+? deck:4
+- Nine doors. No, ten. The laundry counts.
+?
+
+== bye
+- {bye}. If I'm lost later, just point. I'll say thank you.   #funny
+
+== smalltalk
+- Nine doors. Ten. Ten, then.
+- Garden, gym, store. Got it.

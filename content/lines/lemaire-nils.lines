@@ -94,3 +94,19 @@
 == rumour
 - This isn't a joke. Rare, I know.   #funny
 - Heard it at breakfast. Between jokes.
+
+// Writer 4, batch 12: goodbyes (leaving:you), packing (leaving:soon) and letters after they've moved on.
+== feel
+? leaving:soon
+- Packing. Quietly. Then a terrible joke for the shuttle crew.
+
+== goodbye
+? leaving:you tier>=acquaintance
+- I'm off soon. Why did the star leave? It needed space. Sorry. Bye.   #funny
+? leaving:you tier>=friend
+- You laughed at my breakfast jokes. Even Karin didn't. Thank you.   #warm
+
+== letter
+- New ship. Nobody tells jokes at breakfast. I've started. They've started leaving. Hello.
+? tier>=friend
+- Named a gap on a chart today. Officially. It's after a Wren thing. I won't say which.

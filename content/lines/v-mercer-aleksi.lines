@@ -1,0 +1,28 @@
+@crew v-mercer-aleksi
+// Writer 4, batch 5: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello there. Aleksi Mercer. Retired. Going to see the grandchildren at last.
+- Evening. Don't mind me. I'm only a passenger. A very old one.   #funny
+? tier>=acquaintance
+- {hi}, {me}. I gave your Captain some advice. She nodded. Very politely.   #funny
+?
+
+== chat
+- Three grandchildren. I've a story for each. They'll have heard them all.   #funny
+- I never sleep much. Up early, up late. The ship's nice at both ends.
+
+== near
+? time:morning
+- Up with the early shift. Old habits. Good tea, though.
+? time:night
+- Night watch is the best watch. I always said so.
+?
+
+== bye
+- {bye}. Look after each other. That's the whole job, really.   #warm
+
+== smalltalk
+- My word. Lovely ship.
+- Where was I? Oh, yes.
