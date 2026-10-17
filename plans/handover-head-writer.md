@@ -55,11 +55,12 @@
 
 | Writer | Session | Branch | State |
 | --- | --- | --- | --- |
-| writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | handed over (`plans/handover-writer-works.md`), idle |
-| writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | handed over (`plans/handover-writer-command.md`), idle |
-| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | working: favour/gift reactions (@me), overheard and `about`, then their 19 crew |
+| writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
+| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | new (2026-10-17 ~03:58); briefed with the batch order in "Open work" below |
+| writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
+| writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | working (about 50%): their 19 crew toward 30 own lines (bunkmates toward 60) |
 
-Asked of the lead: one fresh writer to pick up works and command from the two handovers.
+Asked of the dialogue engineer: a `who:` speaker condition for overheard (the newlyweds, the knitting circle).
 
 ## Open work (in rough order)
 
@@ -72,6 +73,7 @@ Asked of the lead: one fresh writer to pick up works and command from the two ha
 
 - Roster fields `{home}`, `{family}`, `{hobby}`, `{since}` (who owns them now the crew designer has retired?). Theme
   beats needing them don't play until they exist.
+- Social A is wiring `{home}`, `{family}`, `{hobby}`, `{since}` (the lead asked, 2026-10-17).
 - Favour jobs: `liftBrakes`, `pellPractice` (sim engineer), `brennanSage` (galley engineer 3), `holt.invite` (social B,
   played in place).
 - readyRoomFirst's choices to carry `readyroom.lights|filters|month` (social A asked the traditions engineer via the lead).
