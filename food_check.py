@@ -401,7 +401,7 @@ with sync_playwright() as pw:
     # empty cold store makes them give up ('missed'). The report counts what would be posted on ordinary days
     if g.ev("typeof onSim === 'function' && typeof simNote === 'function'"):
         lm = g.ev(f"""(() => {{ const heard = []; window.__late = heard; onSim('lateMeal', x => window.__late.push(x)); const d = {DAY} + 70, B = (d - 1) * 1440, out = {{}};
-          SHIP.galley = null; setShipNow(B + 20 * 60 + 45); galleyAdvance(shipNow()); SHIP.galley.grab.items = 5; SHIP.galley.servery.portions = 0; heard.length = 0;
+          SHIP.galley = null; setShipNow(B + 20 * 60 + 45); galleyAdvance(shipNow()); SHIP.galley.grab.items = 5; SHIP.galley.servery.portions = 0; out.catchup = heard.length; heard.length = 0;
           out.ate = takePortion('player'); out.again = takePortion('player'); out.grabNotes = heard.splice(0);
           SHIP.galley = null; setShipNow(B + 1440 + 17 * 60 + 5); galleyAdvance(shipNow()); heard.length = 0; galleyJoin('player'); setShipNow(B + 1440 + 17 * 60 + 20); galleyAdvance(shipNow()); heard.length = 0; SHIP.galley.servery.portions = Math.max(1, SHIP.galley.servery.portions);
           out.queued = takePortion('player'); out.queueNotes = heard.splice(0);
@@ -413,6 +413,8 @@ with sync_playwright() as pw:
         print(f"Late meals: you at 20:45 from the shelf {lm['grabNotes']} (a second time: {len(lm['grabNotes']) == 1 and lm['again']}) | after a 15-minute queue {lm['queueNotes']} | on time {lm['onTimeNotes']}")
         print(f"   crew with an empty galley: {len(lm['crew'])} notes, {lm['kinds']}, e.g. {lm['crew'][:2]}")
         gn, qn = lm['grabNotes'], lm['queueNotes']
+        print(f"   a fresh galley's catch-up from midnight to 20:45 posted {lm['catchup']} (should be 0); your note's t {gn[0].get('t') if gn else None}")
+        if lm['catchup'] or (gn and gn[0].get('t') != (DAY + 69) * 1440 + 20 * 60 + 45): fail(f"late meals: catch-up {lm['catchup']}, t {gn[0].get('t') if gn else None}")
         if len(gn) != 1 or {k: gn[0].get(k) for k in ('who', 'meal', 'late', 'how', 'deck')} != {'who': 'you', 'meal': 'dinner', 'late': 15, 'how': 'grab', 'deck': 3} or gn[0].get('dish', 0) is not None: fail(f"late meal from the shelf: {gn}")
         if len(qn) != 1 or qn[0]['who'] != 'you' or qn[0]['late'] != 15 or qn[0]['how'] != 'servery' or not qn[0].get('dish') or lm['onTimeNotes']: fail(f"late meal after a queue: {qn} / on time {lm['onTimeNotes']}")
         if not lm['crew'] or any(x['how'] != 'missed' or x['meal'] != 'breakfast' or x['who'] == 'you' for x in lm['crew']) or len({x['who'] for x in lm['crew']}) != len(lm['crew']): fail(f"crew late meals: {lm['crew'][:5]}")

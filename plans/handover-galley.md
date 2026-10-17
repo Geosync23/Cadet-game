@@ -155,3 +155,10 @@ Full detail in the DEV_NOTES build table, rows 0.29.26 to 0.29.28. All inert unt
 - **Waiting on:** the sim engineer (do meal-tradition segments keep act 'dinner'/'breakfast'? if so the galley feeds them unchanged). The dialogue engineer agreed the lateMeal payload (+ dish); writers' cue keys `cue:lateMeal`, `cue:lateMeal.you`. Head writer 2 is session_01HNrh3xCtczeZM5NVFrE6pa.
 - **Trial merges** with claude/ship-events conflict only on the header build line and `GAME_BUILD`.
 - **Tests:** needs `pip install playwright`, three r128 in /tmp/cadet-work/three (see cadet_test.py's header), and `CADET_CHROME=/opt/pw-browsers/chromium`.
+
+## The food queue (builds 0.29.31-0.29.32, on 0.60.2)
+
+- **The user's report (0.60.1):** too slow, and a queue number that wasn't real. Fixed: "ahead" is the people really in the line; serving pace `GALLEY_SERVE` (0.6 ship min a person, a minute in a rush, yours a minute after the last ahead). No numbers on screen anywhere (sections 15 and 19 removed theirs).
+- **The live line is section 10's** (sim engineer 3, 0.26.30: `servLine`, `lineJoin`, `lineSpot`, `lineFront`, `lineLeave`); section 15 (player engineer 4, 0.28.34+) walks you up it. Section 16 gives `galleyServeMins(t)`, `galleyCanServe(t)`, `galleyLeave(who)`; `galleyJoin` / `galleyTurn` / `takePortion` use the line when it exists. Both section 15 and 16 call `lineJoin`/`lineLeave` for the player (idempotent); the reviewer asked the lead to name one owner.
+- **Open:** the tasting table has 25 tasters now and 20 tastes at two each (about 10 get one): ask whether it should be one each, or a bigger batch. The welcome tea for new crew (traditions engineer 2, 234a454) will get `cake: true`; next build: put a mess gathering's cake out at its start when that's before 19:30. galleyFresh misses one-off events and tradition flags (reviewer's low note).
+- **Latest:** see the DEV_NOTES build table's last galley row for the hash and tests.
