@@ -1,0 +1,30 @@
+@crew sato
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Ah. You. Cadet. Survey's on Deck 2. Don't touch the labels. Tea?
+- Hello. You're new. Good. New people ask the best questions.
+? tier>=acquaintance
+- {hi}, {me}. Tea? No? Nobody ever does. More for me.   #funny
+- No, the other comet. Sorry. {me}. Hello. I was in the middle of something.   #funny
+? tier>=friend
+- Oh, good, it's you. You're one of the few who argue with me. Keep it up.   #warm
+== feel
+? mood:high
+- A good day. The array caught something odd. Odd is my favourite word.
+? mood:low
+- Long day. I relabelled half the specimen store. In my own hand. It helped.
+== near
+? habit:tea-break
+- Tea break. Smoked leaf, dried kelp, a pinch of pepper. It's an acquired taste.   #funny
+? habit:quiet-corner
+- Shh. Thinking. It's like listening, but louder.
+== life
+? tier>=acquaintance
+- I named three comets. The third one doesn't count. Don't ask why. I'll tell you anyway.   #funny
+? tier>=colleague
+- I turned down a university post to stay out here. Best no I ever said.
+== joy
+? tier>=colleague
+- My tea. Let me explain it. Sit down. This takes a while.   #funny

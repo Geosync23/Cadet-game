@@ -1,0 +1,27 @@
+@crew raman
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Raman, helm. If the deck tips, it wasn't me.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Smooth night. Not a cup spilt on Deck 3.
+- {me}. Good to see you. Steady day?
+? tier>=friend
+- {hi}, {me}. I always fly a bit gentler when I know who's aboard.   #warm
+== feel
+? mood:high
+- Clean turn today. You'd not have felt it with a full mug in your hand.
+? mood:low
+- A bumpy patch. Nobody noticed. I noticed.
+== near
+? act:breakfast
+- Early breakfast. Best table by the window, before the rush. Twenty years of habit.
+? act:leisure
+- I dust the model ship more than my cabin. Don't tell anyone.   #funny
+== life
+? tier>=acquaintance
+- I've flown survey ships for twenty years. The Wren's the gentlest of them.
+== joy
+? tier>=colleague
+- My model of the Wren. Every hull plate. I'll show you the bridge one day. Gently.

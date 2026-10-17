@@ -1,0 +1,27 @@
+@crew chen-carmen
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hi. Chen, Watch. Sorry, I was miles away. Literally. About forty light years.   #funny
+? tier>=acquaintance
+- Hey, {me}. I was just telling my grandmother about you. Only good things.
+- Hello, {me}. Is it Tuesday? It feels like a Tuesday.
+? tier>=friend
+- {hi}, {me}. You're on my list of good things aboard. Near the top.   #warm
+== feel
+? mood:high
+- Lovely day. Sang all the way through patrol. In my head. Mostly.
+? mood:low
+- Restless. I've walked Deck 4 three times. It hasn't changed.
+== near
+? deck:3 act:free
+- This bench is mine. Well, I sit on it. That's how benches work.   #funny
+? weekday:sat|sun act:free
+- Recording a message for my grandmother on Lisk. Say hello? She'll love it.
+== life
+? tier>=acquaintance
+- I send voice messages to my grandmother on Lisk. They're long. She says too short.
+== joy
+? tier>=colleague
+- My bench in the garden. Leaves above, pumps humming. I can think there.

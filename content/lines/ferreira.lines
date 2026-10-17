@@ -1,0 +1,27 @@
+@crew ferreira
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet! Ferreira, comms. Every message home goes through me. I never read them.
+? tier>=acquaintance
+- {hi}, {me}! Have you met everyone yet? You will. I'll see to it.
+- {me}, there you are. Messages are slow today. Not you, the relay.   #funny
+? tier>=friend
+- {hi}, {me}. Sit with me a moment. I talk all day and nobody asks me anything.   #warm
+== feel
+? mood:high
+- Every message through, no drops. And I learnt a new Veyli word. Good day.
+? mood:low
+- Relay's sulking. Twelve messages waiting. Everyone asks me why. I don't know why!   #funny
+== near
+? deck:3 time:evening
+- The lounge is the friendliest room aboard. I like to keep it that way.
+? deck:2
+- The headset on my door is just in case. In case of what, I've never worked out.   #funny
+== life
+? tier>=acquaintance
+- Four languages and some Veyli. The Veyli is the hard part. So many words for "quiet".
+== joy
+? tier>=colleague
+- I practise Veyli on the Envoy. The Envoy is very patient. I'm very bad.   #funny

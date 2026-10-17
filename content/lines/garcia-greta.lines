@@ -1,0 +1,27 @@
+@crew garcia-greta
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hey. Garcia, night Watch. Friendly on patrol, firm at the airlock. That's the job.
+? tier>=acquaintance
+- {hi}, {me}. Headphones broken? Give them here.
+- {me}. Ship's weather today: dry. Again. Shocking.   #funny
+? tier>=friend
+- {hi}, {me}. Glad it's you. You're good weather.   #warm
+== feel
+? mood:high
+- Fixed four pairs of headphones and the garden pump. Proper useful night.
+? mood:low
+- Missing the rain. Don't laugh. It used to sing on the roof at home.
+== near
+? habit:gardener
+- I mist the herbs by hand. It's the nearest thing to rain aboard.
+? act:meal
+- Pass the salt? Ta. Hesper Dock food was saltier. Everything was. The sea.
+== life
+? tier>=acquaintance
+- I fix everyone's headphones. Mine haven't worked in a month.   #funny
+== joy
+? tier>=colleague
+- Taking something broken and handing it back working. Best feeling there is.

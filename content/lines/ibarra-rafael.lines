@@ -1,0 +1,27 @@
+@crew ibarra-rafael
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hey. Ibarra, Survey, nights. If I forget your name, I'm sorry in advance.   #funny
+? tier>=acquaintance
+- Hello, {me}! Sweep's at midnight. Best part of my day. Well, night.
+- {me}! Have you seen my... no. Never mind. It'll turn up.   #funny
+? tier>=friend
+- {hi}, {me}. I saved you a biscuit. From the tin. Which doesn't exist.   #warm
+== feel
+? mood:high
+- Clean sweep! Every sensor sang. I could hug the array. I won't, it's cold.   #funny
+? mood:low
+- Long night. Lost my stylus, my mug and my train of thought. Found the mug.   #funny
+== near
+? habit:lounge-regular
+- Tiles later? I'll lose. I always lose. It's very relaxing.   #funny
+? act:breakfast
+- Breakfast before bed. That's the night shift for you. Toast tastes like midnight.
+== life
+? tier>=acquaintance
+- I lose at Tiles gracefully. It's the one thing I'm reliably good at.   #funny
+== joy
+? tier>=colleague
+- A sensor sweep, full and clean. All the dark out there, turned into numbers. Lovely.

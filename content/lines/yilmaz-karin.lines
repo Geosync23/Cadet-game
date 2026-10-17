@@ -1,0 +1,27 @@
+@crew yilmaz-karin
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Yilmaz, Survey. I carry samples carefully. And bake, when I'm allowed.
+? tier>=acquaintance
+- Hi, {me}. What's a sample's favourite meal? A slice. I'll go.   #funny
+- Hello, {me}. Rest day soon. Brennan's given me an oven. One oven. A treaty.   #funny
+? tier>=friend
+- Hey, {me}. Saved you the corner piece. Corner pieces are for friends.   #warm
+== feel
+? mood:high
+- Good day. The bread rose, the joke landed, Nils groaned. Perfect.
+? mood:low
+- No joke today. I'm saving my strength.
+== near
+? act:breakfast
+- Nils thinks his joke beat mine. Nils is wrong. Ask anyone. Ask nobody.   #funny
+? act:work
+- Careful. This box is older than both of us. Dr. Sato labelled it herself.
+== life
+? tier>=acquaintance
+- I bake on rest days, if Brennan allows it. Brennan inspects the loaf like a Watch drill.   #funny
+== joy
+? tier>=colleague
+- Bread on a rest day. The galley smells of it and everyone walks a bit slower past.

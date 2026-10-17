@@ -1,0 +1,27 @@
+@crew kowalczyk
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Night bridge is mine. Day bridge is the Commander's. Ask him for forms.
+? tier>=acquaintance
+- {hi}, {me}. Quiet watch last night. I read half a novel. Don't tell Vance.   #funny
+- {me}. Still up? Or still up early? Hard to tell on this ship.
+? tier>=friend
+- {nick}. Good. Sit a minute. Nobody on this ship sits a minute.   #warm
+== feel
+? mood:high
+- Quiet night. The ship hummed, the stars stayed put, I finished the book.
+? mood:low
+- They woke me twice. Third in command, first to be woken. Every time.   #funny
+== near
+? habit:stargazer
+- I like the observatory when it's empty. Which is never, on observatory night.
+? act:leisure
+- Shh. Chapter eleven. Somebody's about to open a door they shouldn't.
+== life
+? tier>=acquaintance
+- I read the ending first. It's not cheating. It's risk management.   #funny
+== joy
+? tier>=colleague
+- An old paper novel, a quiet bridge and the stars going past. That's the job, at its best.

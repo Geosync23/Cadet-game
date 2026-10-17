@@ -1,0 +1,27 @@
+@crew dahl-mira
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Dahl, Watch. Stand still too long and I'll measure you for a scarf.   #funny
+? tier>=acquaintance
+- {hi}, {me}. Busy? Then I'll be quick. How's the bunk?
+- {me}. Three rows done on my break. Watch is quiet; my needles aren't.
+? tier>=friend
+- {hi}, {me}. I started something in your colours. Don't ask yet.   #warm
+== feel
+? mood:high
+- Good day. Patrol was easy, and I finished a mitten. The left one.
+? mood:low
+- Long shift. I knitted faster than I should. That's how you can tell.
+== near
+? deck:4 time:evening
+- Music room's free. I play badly and knit worse while I do it. Want to hear?   #funny
+? act:leisure
+- Knitting circle tonight. Kovac's are perfect, mine are useful, Torres's are long.   #funny
+== life
+? tier>=acquaintance
+- My parent served on the Wren, years back. I check the gallery sometimes. Just to look.
+== joy
+? tier>=colleague
+- A practical scarf. Warm, plain, done by Friday. There's no better feeling.

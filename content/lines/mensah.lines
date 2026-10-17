@@ -1,0 +1,27 @@
+@crew mensah
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}, cadet. Mensah, night Watch. If you're up past midnight, I'll see you.
+? tier>=acquaintance
+- {hi}, {me}! Up late? Me too. It's my job, though.   #funny
+- {me}. She's quiet tonight. I like her quiet.
+? tier>=friend
+- {hi}, {me}! Good. Walk a deck with me? I could use the company.   #warm
+== feel
+? mood:high
+- Made the Chief laugh twice today. Twice! I'm writing it down.   #funny
+? mood:low
+- Long night round. Every deck, every door. My feet have opinions.
+== near
+? time:night
+- Good night, Deck 4. That's the whole of my Deck 4 speech.   #funny
+? act:gym
+- Treadmill's mine at this hour. No leaderboard. No Commander. Bliss.
+== life
+? tier>=acquaintance
+- I walk the whole ship once a night, deck by deck. You learn her sounds.
+== joy
+? tier>=colleague
+- Getting a laugh out of Holt. It's like fishing. Patience, and the right line.
