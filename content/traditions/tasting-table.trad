@@ -15,6 +15,7 @@ anim: talk
 host: brennan
 from: brennan
 ties: galley meal=dinner extra=tasting batch=20
+ties: decor tastingTable
 ties: tally tasting choices=herb-flatbread|pickled-beans|tomato-jam-oatcakes|root-crisps|miso-greens|bean-fritters|carrot-ginger-soup|chilli-lime-corn per=2
 invite: host=brennan odds=25% line="Two new dishes at the end of the servery tonight. Taste both and vote. Honestly."
 

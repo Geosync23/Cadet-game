@@ -1,11 +1,12 @@
 @tradition garden-hour
-// Garden hour (weekly, seat 15). Moved from the plan's Wednesday 18:00 to Monday 17:30, so it never sits on Deck 3 at
-// the same time as Wednesday's tasting table, and Monday starts the week with the beds tended. Volunteers after the day
-// shift; the gardeners show them what to do. Design note: plans/trad-notes-weekly.md.
+// Garden hour (weekly, seat 15). Moved from the plan's Wednesday 18:00 (it would share Deck 3 with the tasting table),
+// then from Monday 17:30 (the monthly designer's Monday evenings made it a third with running club), to Saturday
+// afternoon: the garden is free after harvest morning (ends 11:30) and Sowing (12:40), and daytime doesn't count toward
+// the two-an-evening cap. Volunteers on their day off; the gardeners show them what to do. Notes: plans/trad-notes-weekly.md.
 k: 437
 title: Garden hour
-when: weekly monday
-at: 17:30-18:30
+when: weekly saturday
+at: 14:00-15:00
 min: 20
 jitter: 10
 where: 3 pool garden-tend
@@ -16,14 +17,14 @@ anim: water
 host: cruz-tove
 from: cruz-tove
 ties: garden tend
-invite: host=cruz-tove odds=25% line="Garden hour after shift. Spare hands for the beans? They've got ambitions."
+invite: host=cruz-tove odds=25% line="Garden hour this afternoon. Spare hands for the beans? They've got ambitions."
 
 == mail
 - Garden hour tomorrow, {time}, in the hydroponics garden: watering, tying in and a bit of weeding. No experience needed. The tomatoes won't judge.
 
 == ask
-- Garden hour after shift. Best way to start a week, honestly.   #warm
-- I'm off to the garden at half five. The beans need tying in again.
+- Garden hour this afternoon. Best way to spend a Saturday, honestly.   #warm
+- I'm off to the garden at two. The beans need tying in again.
 - Garden hour later. Nothing smells as good as the garden after watering.   #warm
 
 == here
