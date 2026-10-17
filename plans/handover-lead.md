@@ -331,3 +331,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~18:58 user testing 0.60.5: slow walk at game start (PE5 investigating); Zeke stops too much + lines should be welcoming/general, job stuff -> Monday (HW4 rewrite + sim 5 cut stops to bunk + mess). More notes coming.
 - ~19:00 sim 5 handed over (plans/handover-sim.md 596d9ab9, idle). Onboarding eng 3 hired for the pre-lift tour (user: everything from the lift on is great, keep it).
 - 19:08 0.60.5a HOTFIX released (sickToday sd>0): ship-integration -> 348b1d8, published version 4. player_check + intro_check (incl part 12) still running at BM2.
+- ~19:20 head writer 4 archived (content 51bda1c = tour pre-lift final; handover 29ed058). No writer active; hire fresh only if needed. User notes since 0.60.5a: Zeke warps on lift (onb 3), gym lying hover + seat clipping (perf 3, 0.27.39), pause button (PE5 0.28.48), bunk-arrow wording (onb 3).
