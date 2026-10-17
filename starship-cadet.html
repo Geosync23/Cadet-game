@@ -11784,6 +11784,7 @@ const FOOD = {
   batch: 10, cookT: 20,                   // a pot: 10 portions, 20 minutes of a cook's time
   bake: 8, bakeT: 15,                     // a tray for the grab shelf: 8 items, 15 minutes
   serveryCap: 50, grabCap: 16,            // what the hot line (5 pans of 10) and the shelf hold
+  tastes: 4,                              // tastes from one meal unit (the tasting table)
   feastCap: 40,                           // more held warm for a meal tradition, whose diners all sit down at once (the Sunday long table)
   coldCap: 300, deliverAt: 630,           // the cold store holds under two days' food; topped up daily at 10:30...
   restock: 'carts',                       // ...while this is 'rule'. 'carts': section 17's hover carts bring it (B3; the
@@ -12249,7 +12250,10 @@ function galleyStep(S, m, st) {
 // after the end
   const tt = galleyTies(d).dinner && galleyTies(d).dinner.taste;
   if (tt) {
-    if (md === tt.from - 60) { const n = galleyTasting(d).tastes, f = produceTake(S, n), k = Math.min(n - f, S.cold.meals); S.cold.meals -= k; S.tasting = { d, left: f + k, out: false, n: f + k }; if (st) { st.tastes += f + k; st.fresh += f; } }
+    if (md === tt.from - 60) {                           // a taste is a few bites: FOOD.tastes of them from a meal unit
+      const n = galleyTasting(d).tastes, u = Math.ceil(n / FOOD.tastes), f = produceTake(S, u), k = Math.min(u - f, S.cold.meals), got = Math.min(n, (f + k) * FOOD.tastes);
+      S.cold.meals -= k; S.tasting = { d, left: got, out: false, n: got }; if (st) { st.tastes += got; st.fresh += f; }
+    }
     if (S.tasting && S.tasting.d === d) {
       if (md === tt.from) S.tasting.out = true;
       if (S.tasting.out && md < tt.to + 15) for (const v of galleyTasting(d).voters) if ((v.at === m || (md === tt.from && v.at < m)) && S.tasting.left > 0) { const k = Math.min(2, S.tasting.left); S.tasting.left -= k; if (st) st.tasted += k; }   // one of each
