@@ -78,6 +78,7 @@ LONG_RUN = r"""((days) => {
       const o = crew[Math.floor(schedU(d, h, 9003) * crew.length)]; relAdd(o.id, 'chat', REL_PTS.chat); memAdd(o.id, 'chat');
       for (const q of [o, ...pal.map(id => SOC.crew[SOC.idx.get(id)])]) { const K = relGet(q.id).known, nx = (q.about || []).map(x => x.text).concat(q.life || []).find(x => x && !K.includes(x)); if (nx) K.push(nx); } }   // and asks them about themselves
     if (hr === 13) relAdd('tomas', 'meal', REL_PTS.meal);
+    if (typeof eventAdvance === 'function') { try { eventAdvance(h * 60, true); } catch (e) { } }   // the ship's events and their news (section 18; its tick is stopped here)
     if (hr === 18) for (const x of NEWS.slice()) if (x.born <= h * 60 && x.seed.length) playerHeard(x.id, x.seed[0]);   // a heavy listener: hears everything going round each evening
     if (hr === 10 && typeof machineList === 'function' && u < .7) { const ms = machineList(); repNote('repair', { who: 'you', machine: ms[Math.floor(schedU(d, h, 9004) * ms.length)].id }); }
     if (hr === 20 && (d % 7 === 2 || d % 7 === 5)) repNote('tradition', { id: d % 7 === 2 ? 'quiz' : 'tiles-night', you: true });
@@ -168,8 +169,18 @@ with sync_playwright() as pw:
     mm = g.ev(r"""(() => { for (const x of NEWS) if (x.seed.length) playerHeard(x.id, x.seed[0]); socNote('repair', { who: 'you', kind: 'oven', deck: 3 });   // in memory the same after a save (0.36.75)
       const tp = SOC.crew[SOC.idx.get('tomas')], K = relGet('tomas').known; for (const x of [(tp.about || [])[0] && tp.about[0].text, (tp.life || [])[0], 'news', 'Loves tea'].filter(Boolean)) if (!K.includes(x)) K.push(x);   // known, packed to '#xxxx' (0.36.78)
       const live = new Set(NEWS.map(x => x.id)), m = () => JSON.stringify([SHIP.social.cues, SHIP.social.pairs, SHIP.heard.filter(h => live.has(h.id)), SHIP.rel.tomas.known]), a = m(), sv = socSave(); socLoad(JSON.parse(JSON.stringify(sv)));
-      return [a === m() && sv.rel.tomas[3].some(k => /^#[0-9a-z]{4}$/.test(k)), SHIP.heard.filter(h => live.has(h.id)).length, SHIP.social.cues.length, Object.keys(SHIP.social.pairs).length]; })()""")
+      return [a === m() && sv.rel.find(x => x[0] === SOC.idx.get('tomas'))[4].some(k => /^#[0-9a-z]{4}$/.test(k)), SHIP.heard.filter(h => live.has(h.id)).length, SHIP.social.cues.length, Object.keys(SHIP.social.pairs).length]; })()""")
     print('In memory the same after a save (cues, pair news, heard, known):', mm)
+    pk = g.ev(r"""(() => { const A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), sv = JSON.parse(JSON.stringify(socSave()));   // 0.36.81: aff and rel packed; the older forms still load
+      const packed = typeof sv.aff === 'string' && sv.aff.startsWith('d:') && Array.isArray(sv.rel); socLoad(JSON.parse(JSON.stringify(sv))); const same = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R;
+      let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
+      const o = JSON.parse(JSON.stringify(sv)); o.aff = btoa(bin); o.rel = Object.fromEntries(sv.rel.map(([i, ...r]) => [SOC.crew[i].id, r])); socLoad(o);
+      const older = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R; socLoad(sv);
+      const N = () => JSON.stringify([NEWS.map(({ seed, ...x }) => x), NEWS.map(x => [...SHIP.knows[x.id]].sort()), SHIP.social.cues]), n0 = N(), s3 = JSON.parse(JSON.stringify(socSave())); socLoad(JSON.parse(JSON.stringify(s3)));   // news and cues as rows, and the older object forms
+      const rows = N() === n0 && Array.isArray(s3.news[0] || []) && Array.isArray(s3.cues[0] || []); const o3 = JSON.parse(JSON.stringify(s3)); o3.news = s3.news.map(r => newsRow(r)); o3.cues = s3.cues.map(r => cueObj(r)); socLoad(o3);
+      const oldRows = N() === n0; socLoad(sv); return [packed, same, older, sv.aff.length, bin.length * 4 / 3 | 0, rows, oldRows, NEWS.length]; })()""")
+    print('Affinity, relationships, news and cues packed (packed, same after load, older form loads, packed size, raw size, news/cue rows, older news/cues, news):', pk)
+    if pk[:3] != [True, True, True] or pk[5:7] != [True, True]: fail(f'the packed affinity, relationships, news or cues wrong: {pk}')
     if not mm[0]: fail('a save and load changes cues, pair news, what you heard or what you know')
     print('Save and load give back the same:', rt)
     xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});

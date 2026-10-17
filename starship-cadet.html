@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.80
+   STARSHIP CADET: CSV Wren                           build 0.36.81
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.80';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.81';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25584,6 +25584,13 @@ function heardKept() {
   const live = new Set(NEWS.map(x => x.id)), H = SHIP.heard.slice(-60), old = H.filter(h => !live.has(h.id)).slice(-HEARD_FEED);
   const keep = new Set(old); return H.filter(h => live.has(h.id) || keep.has(h)).map(h => live.has(h.id) ? [h.id, h.from, h.at] : [h.id, h.from, h.at, h.line]);   // [id, from, at(, line)]: a live item's line comes back from NEWS on load
 }
+// news items and cues as short rows for the save (0.36.81): the known fields by position, anything else in a trailing object
+const NEWS_F = ['id', 'about', 'lines', 'weight', 'born', 'kind', 'event', 'life'], CUE_F = ['key', 'at', 'until', 'you', 'deck', 'who', 'dept', 'room'];
+const rowOf = (x, F) => { const r = F.map(f => x[f] ?? null), rest = Object.fromEntries(Object.entries(x).filter(([f]) => !F.includes(f))); while (r.length && r[r.length - 1] === null) r.pop(); if (Object.keys(rest).length) { while (r.length < F.length) r.push(null); r.push(rest); } return r; };
+const newsSaved = ({ seed, ...x }) => rowOf({ ...x, k: bitsOf(SHIP.knows[x.id] || []) }, NEWS_F.concat('k'));   // who first knew it only matters when it's born
+const newsRow = r => { const o = { id: r[0], about: r[1] ?? null, lines: r[2], weight: r[3], seed: [], born: r[4], kind: r[5], event: r[6] ?? null, life: r[7], k: r[8] }; return r[9] && typeof r[9] === 'object' ? { ...o, ...r[9] } : o; };
+const cueRow = c => rowOf({ ...c, you: c.you ? 1 : null }, CUE_F);
+const cueObj = r => ({ key: r[0], at: r[1], until: r[2], you: !!r[3], deck: r[4] ?? null, who: r[5] ?? null, dept: r[6] ?? null, room: r[7] ?? null, ...(r[8] && typeof r[8] === 'object' ? r[8] : {}) });
 const cueSaved = c => Object.fromEntries(Object.entries(c).filter(([, v]) => v !== null && v !== false && v !== undefined));   // empty fields left off (socLoad puts them back)
 function pairsLoad(E, old) {                             // crew positions moved across by id when the save's crew list differs (none known: dropped)
   if (!old) return Object.fromEntries(E);
@@ -25591,12 +25598,41 @@ function pairsLoad(E, old) {                             // crew positions moved
   return P;
 }
 const pairsSaved = P => Object.entries(P).map(([k, v]) => k + v).join(',');   // '12-45f,3-9r': the pair news already told
+// crew affinity for the save (0.36.81): 'd:' + base64 of each pair's change from where it started (affStart, from the
+// roster alone), zigzag varints, a run of unchanged pairs as 0 then its length; most pairs never move far, so about a
+// third of the raw byte-a-pair form, which older saves have and still load
+function affStarts(P) { const n = P.length, v = new Int16Array(n * (n - 1) / 2); for (let i = 0, k = 0; i < n; i++) for (let j = i + 1; j < n; j++, k++) v[k] = P[i] && P[j] ? affStart(P[i], P[j]) : 0; return v; }
+let AFF_START = null;                                     // today's crew's starting values, made once ({ soc, v })
+function affPack() {
+  const a = SHIP.aff, st = AFF_START && AFF_START.soc === SOC ? AFF_START.v : (AFF_START = { soc: SOC, v: affStarts(SOC.crew) }).v, out = [];
+  const vi = x => { while (x > 127) { out.push(x & 127 | 128); x >>>= 7; } out.push(x); };
+  for (let k = 0; k < a.length;) {
+    const d = a[k] - st[k];
+    if (!d) { let r = 0; while (k < a.length && a[k] === st[k]) { r++; k++; } out.push(0); vi(r); }
+    else { vi(d > 0 ? 2 * d : -2 * d - 1); k++; }        // zigzag, never 0 (0 starts a run)
+  }
+  let bin = ''; for (const x of out) bin += String.fromCharCode(x); return 'd:' + btoa(bin);
+}
+function affVals(str, ids) {                              // the saved affinity as values in pair order for that crew list (NaN: unknown), or null
+  if (typeof str !== 'string') return null;
+  if (!str.startsWith('d:')) { const bin = atob(str), v = new Array(bin.length); for (let i = 0; i < bin.length; i++) v[i] = bin.charCodeAt(i) << 24 >> 24; return v; }   // the raw form (before 0.36.81)
+  if (!ids) return null;
+  const P = ids.map(id => SOC.idx.has(id) ? SOC.crew[SOC.idx.get(id)] : null), st = affStarts(P), bin = atob(str.slice(2)), v = new Array(st.length);
+  let p = 0; const vi = () => { let x = 0, sh = 0, b; do { b = bin.charCodeAt(p++); x |= (b & 127) << sh; sh += 7; } while (b & 128); return x; };
+  for (let k = 0; k < st.length && p < bin.length;) {
+    const z = vi();
+    if (!z) { const r = vi(); for (let q = 0; q < r && k < st.length; q++, k++) v[k] = st[k]; }
+    else { v[k] = st[k] + (z & 1 ? -(z + 1) / 2 : z / 2); k++; }
+  }
+  const gone = P.some(x => !x); for (let k = 0; k < v.length; k++) { if (v[k] === undefined) v[k] = NaN; else if (gone) { const i = pairOf(k, P.length); if (!P[i[0]] || !P[i[1]]) v[k] = NaN; } }
+  return v;
+}
+function pairOf(k, n) { let i = 0; while (k >= n - 1 - i) { k -= n - 1 - i; i++; } return [i, i + 1 + k]; }   // the k-th pair of n people, in pair order
 function socSave() {
   socInit();
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, knownPack(id, r.known), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0, r.hostDay || 0]; const x = rel[id]; while (x.length > 4 && !x[x.length - 1]) x.pop(); }   // trailing zeros left off (they load as 0)
-  let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
-  return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(({ seed, ...x }) => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
-           heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueSaved), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel, ...memSave() };
+  return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: affPack(), news: NEWS.map(newsSaved),
+           heard: heardKept(), fault: { ...SHIP.social.fault }, pairs: pairsSaved(SHIP.social.pairs), mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(cueRow), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: bondsPack(SHIP.social.bonds), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, stories: JSON.parse(JSON.stringify(SHIP.social.stories || {})), noteq: JSON.parse(JSON.stringify(SHIP.social.noteq || [])), seekAsks: (SHIP.social.seekAsks || []).map(x => ({ id: x.id, from: x.from, until: x.until, why: x.why, done: !!x.done })), guide: SHIP.social.guide ? { ...SHIP.social.guide } : null, rel: Object.entries(rel).map(([id, r]) => [SOC.idx.get(id), ...r]), ...memSave() }   // rel: [[crew index, pts, met, ...]] (0.36.81; an object by id before);
 }
 function socLoad(s) {
   try {
@@ -25604,15 +25640,15 @@ function socLoad(s) {
     // a save made with a different crew list (the reserve arriving, the roster changing): everything keyed by id is kept;
     // pair affinity and who knows what are moved across by id when the save has its id list (idl), else start afresh
     const same = s.ids === socHash(SOC.ids), old = !same && typeof s.idl === 'string' ? s.idl.split(',') : null;
-    const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2);
-    if (same) { if (bin.length !== a.length) return false; for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24; }
+    const vals = affVals(s.aff, same ? SOC.crew.map(p => p.id) : old), a = new Int8Array(SOC.n * (SOC.n - 1) / 2);
+    if (same) { if (!vals || vals.length !== a.length) return false; for (let i = 0; i < a.length; i++) a[i] = vals[i]; }
     else {
       for (let i = 0; i < SOC.n; i++) for (let j = i + 1; j < SOC.n; j++) a[pairIdx(i, j)] = affStart(SOC.crew[i], SOC.crew[j]);
-      if (old && bin.length === old.length * (old.length - 1) / 2) for (let i = 0, k = 0; i < old.length; i++) for (let j = i + 1; j < old.length; j++, k++) {
-        const x = SOC.idx.get(old[i]), y = SOC.idx.get(old[j]); if (x !== undefined && y !== undefined) a[pairIdx(x, y)] = bin.charCodeAt(k) << 24 >> 24;
+      if (old && vals && vals.length === old.length * (old.length - 1) / 2) for (let i = 0, k = 0; i < old.length; i++) for (let j = i + 1; j < old.length; j++, k++) {
+        const x = SOC.idx.get(old[i]), y = SOC.idx.get(old[j]); if (x !== undefined && y !== undefined && Number.isFinite(vals[k])) a[pairIdx(x, y)] = vals[k];
       }
     }
-    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: pairsLoad(typeof s.pairs === 'string' ? s.pairs.split(',').filter(Boolean).map(x => [x.slice(0, -1), x.slice(-1)]) : Object.entries(s.pairs || {}), same ? null : old || []), mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ key: x.key, at: x.at, until: x.until, you: x.you ?? false, deck: x.deck ?? null, who: x.who ?? null, dept: x.dept ?? null, room: x.room ?? null })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
+    SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: pairsLoad(typeof s.pairs === 'string' ? s.pairs.split(',').filter(Boolean).map(x => [x.slice(0, -1), x.slice(-1)]) : Object.entries(s.pairs || {}), same ? null : old || []), mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.map(x => Array.isArray(x) ? cueObj(x) : x).filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ key: x.key, at: x.at, until: x.until, you: x.you ?? false, deck: x.deck ?? null, who: x.who ?? null, dept: x.dept ?? null, room: x.room ?? null })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
       notes: Array.isArray(s.notes) ? s.notes.filter(x => x && typeof x.from === 'string' && typeof x.text === 'string').map(x => ({ ...x })) : [], visitDay: s.visitDay | 0,
@@ -25622,12 +25658,13 @@ function socLoad(s) {
       guide: s.guide && typeof s.guide.id === 'string' && isFinite(s.guide.day) ? { ...s.guide } : null,
       noteq: Array.isArray(s.noteq) ? s.noteq.filter(x => Array.isArray(x) && isFinite(x[0]) && typeof x[1] === 'string').map(x => JSON.parse(JSON.stringify(x))) : [] };   // 20c's bonds, weekly snapshot and moment state ride here
     NEWS.length = 0; SHIP.knows = {};
-    for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
+    for (const x0 of Array.isArray(s.news) ? s.news : []) { const x = Array.isArray(x0) ? newsRow(x0) : x0; if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
       const { k, ...it } = x; if (!Array.isArray(it.seed)) it.seed = []; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
-    }
+    } }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.map(h => Array.isArray(h) ? { id: h[0], from: h[1] ?? null, at: h[2], line: h.length > 3 ? h[3] : (NEWS.find(x => x.id === h[0]) || { lines: [null] }).lines[0] } : h).filter(h => h && typeof h.id === 'string').slice(-60) : [];   // arrays since 0.36.75, objects before
     SHIP.rel = {};
-    for (const id in s.rel || {}) { const r = s.rel[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? knownUnpack(id, r[3]) : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0 }; }
+    const relIn = Array.isArray(s.rel) ? Object.fromEntries(s.rel.filter(x => Array.isArray(x)).map(([i, ...r]) => [(same || !old ? SOC.crew.map(p => p.id) : old)[i], r]).filter(([id]) => id)) : s.rel || {};
+    for (const id in relIn) { const r = relIn[id]; if (SOC.idx.has(id) && Array.isArray(r) && isFinite(r[0])) SHIP.rel[id] = { pts: +r[0], tier: 0, met: r[1] ?? null, lastTalk: r[2] ?? null, known: Array.isArray(r[3]) ? knownUnpack(id, r[3]) : [], chatDay: r[4] | 0, mealDay: r[5] | 0, workDay: r[6] | 0, favDay: r[7] | 0, seekDay: r[8] | 0, arc: r[9] | 0, arcDay: r[10] | 0, showDay: r[11] | 0, giftWeek: r[12] | 0, inviteDay: r[13] | 0, visitDay: r[14] | 0, bye: r[15] | 0, hostDay: r[16] | 0 }; }
     for (const id in SHIP.rel) SHIP.rel[id].tier = relTierOf(SHIP.rel[id].pts);
     memLoad(s);
     SHIP.rep = s.rep && typeof s.rep === 'object' && s.rep.dept && s.rep.ship ? JSON.parse(JSON.stringify(s.rep)) : null;
