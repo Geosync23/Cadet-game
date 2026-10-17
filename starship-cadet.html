@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.29.30
+   STARSHIP CADET: CSV Wren                           build 0.29.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.29.30';                          // keep in step with the header's build line
+const GAME_BUILD = '0.29.31';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11917,13 +11917,26 @@ function takePortion(who = 'player') {
   return !!how;
 }
 // the player joins the servery queue: where to stand (the back of the line, by the tray return: a tile that's no
-// one's place) and when it's their turn: a minute, plus about 45 seconds for each crew member in the line or waiting.
-// galleyTurn(who) is true from then on while there's food; takePortion(who) serves them and ends it
+// one's place) and when it's their turn. Ahead of you is who's really in the line now (galleyAhead); the line serves
+// GALLEY_SERVE.each ship minutes a person (a minute in a rush, the galley's own rush rate), and you take yours
+// GALLEY_SERVE.you after the last of them. galleyTurn(who) is true from then on while there's food (empty pans: you
+// wait for the next pot); takePortion(who) serves them and ends it
 const GALLEY_JOIN = { at: [33, 2], xy: [33.55, 2.5], face: 's' }, GALLEY_JOINED = new Map();   // face: a letter, or degrees (0 south, 90 east)
+const GALLEY_SERVE = { each: .5, you: .5, near: .8 };   // ship minutes a serve; how close to a queue spot counts as standing in it (m)
+// the crew really in the line: on Deck 3, those standing at (or right by) the queue spots (section 10's DECK_CREW, the
+// bodies you see); elsewhere (a test, another deck) each person in a queue stop or waiting for food, once
+function galleyAhead(now) {
+  const Q = new Set(GALLEY_QUEUE);
+  if (typeof deckDef !== 'undefined' && deckDef && deckDef.num === 3 && typeof DECK_CREW !== 'undefined')
+    return DECK_CREW.filter(a => a.spot && Q.has(a.spot.id) && Math.hypot(a.x - a.spot.x, a.z - a.spot.z) < GALLEY_SERVE.near).length;
+  const ids = new Set(schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).map(p => p.id));
+  for (const w of (SHIP.galley && SHIP.galley.wait) || []) ids.add(w[0]);
+  return ids.size;
+}
 function galleyJoin(who = 'player') {
-  const now = shipNow(), S = galleyAdvance(now);
-  const ahead = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length + S.wait.length;
-  const j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + 1 + ahead * .75 };
+  const now = shipNow(), S = galleyAdvance(now), d = Math.floor(now / 1440) + 1, md = Math.floor(now) - (d - 1) * 1440;
+  const ahead = galleyAhead(now), rush = galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to);
+  const j = { at: GALLEY_JOIN.at.slice(), xy: GALLEY_JOIN.xy.slice(), face: GALLEY_JOIN.face, ahead, since: now, turnAt: now + GALLEY_SERVE.you + ahead * (rush ? 1 / FOOD.rushRate : GALLEY_SERVE.each) };
   GALLEY_JOINED.set(who, j); return j;
 }
 function galleyTurn(who = 'player') {

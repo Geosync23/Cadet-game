@@ -419,6 +419,38 @@ with sync_playwright() as pw:
     else: print('Late meals: no simNote/onSim (section 13) in this build; skipped')
     print('Late meals the report would post, by day:', [st['late'] for st in rep])
 
+    # 4p. your place in the queue (0.29.31, the user's report on 0.60.1): on Deck 3, "ahead of you" is the crew really
+    # standing at the queue spots (DECK_CREW), never people only planned to be there; your turn comes GALLEY_SERVE.you
+    # plus GALLEY_SERVE.each a person (a minute each in a rush). Played with frames: a normal dinner, then an empty
+    # galley where the waiters stand in the line
+    qq = []
+    g.ev("window.__sc('tickShip = window.__realTick')")   # ship time runs with the frames here
+    g.ev(f"setShipNow({B} + 17 * 60 + 8); SHIP.galley = null; goToDeck(3); (() => {{ const c = cellPos(32, 6); player.obj.position.copy(c); target.copy(c).setY(.7); }})(); deckCrewFill()")
+    probe = """(() => { const now = shipNow(), Q = new Set(GALLEY_QUEUE), d = Math.floor(now / 1440) + 1, md = Math.floor(now) - (d - 1) * 1440;
+      const standing = DECK_CREW.filter(a => a.spot && Q.has(a.spot.id) && Math.hypot(a.x - a.spot.x, a.z - a.spot.z) < GALLEY_SERVE.near).length;
+      const planned = schedPeople().filter(p => { const w = whereIs(p, now); return w.deck === 3 && w.tag === 'queue'; }).length;
+      const rush = galleyEvents(d).busy.some(b => b.kind === 'rush' && md >= b.from && md < b.to);
+      const j = galleyJoin('probe'); GALLEY_JOINED.delete('probe'); return [hhmm(md), standing, planned, j.ahead, +(j.turnAt - now).toFixed(2), rush, SHIP.galley.wait.length]; })()"""
+    for k in range(20):
+        g.step(30); qq.append(g.ev(probe))
+    g.ev(f"setShipNow({B} + 17 * 60 + 40); galleyAdvance(shipNow()); SHIP.galley.cold.meals = 0; SHIP.galley.cold.produce = []; SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; SHIP.galley.pots = []; SHIP.galley.carts = []; deckCrewFill()")
+    empty = []
+    for k in range(25):
+        g.step(30); empty.append(g.ev(probe))
+    # your own turn, played: join at 17:12 with frames running, until galleyTurn
+    g.ev(f"SHIP.galley = null; setShipNow({B} + 17 * 60 + 12); galleyAdvance(shipNow()); deckCrewFill(); window.__j = galleyJoin('player')")
+    n = 0
+    while n < 300 and not g.ev("galleyTurn('player')"): g.step(3); n += 3
+    mine = g.ev("[window.__j.ahead, +(shipNow() - window.__j.since).toFixed(2)]")
+    g.ev("GALLEY_JOINED.delete('player'); SHIP.galley = null; window.__sc('tickShip = () => {}')")
+    print('Queue at dinner (time, standing at the queue spots, planned in a queue stop, ahead shown, minutes to your turn, rush, galley waiting):', qq[::4])
+    print('  with an empty galley:', empty[::5])
+    print(f"  your turn, joining at 17:12: {mine[0]} ahead, served after {mine[1]} ship minutes ({mine[1] / 0.6:.1f} real seconds)")
+    for r in qq + empty:
+        if r[3] != r[1] or r[1] > 4 or abs(r[4] - (0.5 + r[3] * (1 if r[5] else 0.5))) > .01: fail(f"queue: {r}")
+    if not any(r[1] for r in empty): fail(f"queue: nobody stood in the line with an empty galley: {empty}")
+    if mine[1] > 0.5 + mine[0] * 1 + 0.2: fail(f"your turn: {mine}")
+
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
     yc = g.ev(f"""(() => {{ const real = typeof cartWaiting === 'function', keep = real ? cartWaiting : null, mine = new Set();
