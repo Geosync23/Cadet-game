@@ -66,6 +66,7 @@ them: That's all. That's the bad day. Off you go. And cadet. Thank you.
 == beat 4
 tone: heartfelt
 when: beat:holt.3 deck:2
+where: any
 hint: The Envoy's door. Hm. Stand with me a minute.
 mem: tea
 learn: Envoy Saruth invited Chief Holt to tea, through you. He went in, after standing at the door for some time.

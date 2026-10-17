@@ -223,7 +223,7 @@ and rare (she's the Captain; you see her on Thursdays, at observatory night, on 
 
 | Beat | Tier, gate | Where | Tone | What happens | Leaves |
 | --- | --- | --- | --- | --- | --- |
-| 1 "Your answer" | colleague | the observation room, her evening walk | light | She remembers the answer you gave her in the ready room (`mem:` from `readyRoomFirst`'s choice). Asks if you still think so. Takes notes, apparently. | `mem:moment.marrow.answer` |
+| 1 "Your answer" | colleague, `mem:readyroom` | the observation room, her evening walk | light | She remembers the answer you gave her in the ready room (social A's keys `readyroom.lights`, `.filters`, `.month`). Asks if you still think so. Takes notes, apparently. | `mem:moment.marrow.answer` |
 | 2 "The Admiral" | colleague | the music room, Thursday, before she plays | light | The crew's theories about the Admiral. She collects them. Yours? She won't confirm or deny anything. "He'd be pleased you asked." | `mem:moment.marrow.admiral` |
 | 3 "Thursday" | friend (or Officer) | the music room, late Thursday | heartfelt | You stay while she plays. She tells you about the portrait gallery: every captain before her, and the loneliness that comes with the chair. Everyone is kind to her; nobody is her friend. "That's the job. I chose it." | memory by reply |
 | 4 "Letters" | friend, 2+ days after 3 | the observatory, observatory night | heartfelt | Her daughter at the academy writes twice a quarter. Marrow writes every week. She asks you, as someone young and far from home, what you want from a letter from home. | memory by reply; a share reply fits her |

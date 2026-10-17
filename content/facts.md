@@ -487,3 +487,8 @@ introduces them), unless noted.
 | Zofia Santos has a five-year plan | Santos | writer-commons, batch 3 |
 | Tariq Varga leads Lukas Dlamini at onions, 41 to 38 | the galley | writer-commons, batch 3 |
 | The struggle themes use `{family}`, `{home}`, `{hobby}`, `{since}`, `{boss}`, `{rival}`; "an old loss" is always years ago | everyone | head writer |
+| Rina's Tiles count is 43, dated and signed in a notebook | Rina | writer-commons, batch 4 |
+| Brennan bakes bread on Sundays and lets juniors knead; her mother's phrase: "That's done, Auda. Take it off." | Brennan | writer-commons, batch 4 |
+| The person in the "loss" theme taught them to whistle, badly (generic for every theme user) | the loss theme | writer-commons, themes |
+| Halloran gives the new hand's mug at Works tea, Friday of week 1 ("It's the law. Well, it's me."); the hook on the end of the rack | Halloran | writer-works, batch 5 |
+| Torres's shadow-job bubbles are `week1` lines gated by `flag:walk.job.<step>` (take, fetch, make, panel, done, turnin) | Torres | writer-works, batch 5 (onboarding maps its keys) |

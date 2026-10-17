@@ -5,6 +5,7 @@ who: marrow
 
 == beat 1
 tone: light
+when: mem:readyroom
 hint: Walk with me a minute? I've a question. You know I always have one.
 mem: answer
 learn: The Captain wrote down the answer you gave her in the ready room, and still thinks about it.
