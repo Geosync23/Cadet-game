@@ -14071,7 +14071,7 @@ function eventsOn(d) {
   const out = [], yd = shipYearDay(d);
   for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
-    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd); if (!honorees.length) continue; }
+    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
     else if (!evDue(w, d)) continue;
