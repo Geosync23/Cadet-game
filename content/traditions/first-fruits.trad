@@ -21,6 +21,7 @@ ties: galley meal=dinner dish=first-fruits
 ties: garden harvest
 invite: host=oneill-imani odds=30% line="The first fruits are in. There's a bowl on every table at dinner. Come and try one?"
 
+meal: dinner
 == mail
 - The new beds have their first crop. First-fruit supper tomorrow at dinner, {time}: a bowl on every table in the mess. One each, please. The garden counted.
 

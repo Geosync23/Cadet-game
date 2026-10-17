@@ -302,6 +302,9 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     print(f"{g.ev('SHIP_TRADITIONS.length')} events: " + ', '.join(g.ev("SHIP_TRADITIONS.map(e => e.id)")))
     days = list(range(1, DAYS + 1)) + [100, 300]
+    # and each tradition's first day in the year, when it isn't among those (seasonal, yearly, life moments: Pillar 4)
+    first = g.ev("Object.fromEntries(SHIP_TRADITIONS.filter(e => !e.when.birthday).map(e => [e.id, [...Array(364).keys()].map(x => x + 1).find(x => eventsOn(x).some(o => o.id === e.id)) || null]))")
+    days += sorted({d for i, d in first.items() if d and not any(d == x for x in days) and not g.ev(f"{days}.some(x => eventsOn(x).some(o => o.id === '{i}'))")})
 
     # 1. on paper: due days, who goes, where, and the schedules
     r = g.ev(f"({PLANS})({days})")

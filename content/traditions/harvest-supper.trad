@@ -24,6 +24,7 @@ ties: tally harvest-best choices=tomatoes|beans|squash|herbs
 ties: decor harvestTables
 invite: host=brennan odds=35% line="Harvest supper tonight. Long tables, all from the garden. Sit by me and tell me what's best."
 
+meal: dinner
 == mail
 - Harvest supper tomorrow, {time}, in the mess: long tables and everything from the garden. Vote for the best of the harvest with your token. Pie after.
 

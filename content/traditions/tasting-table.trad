@@ -2,7 +2,6 @@
 // Brennan's tasting table (weekly, seat 15). Wednesday dinner is already a crew member's favourite (section 17's
 // menu); the tasting table sits beside it: two small new dishes on the servery end, everyone who tries them drops a
 // token in one of two jars, and the winner comes back as a side with Sunday's long table. A meal tradition:
-// meal: dinner    (the sim engineer's field, still to be added to the grammar: going counts as your dinner)
 // Design note: plans/trad-notes-weekly.md.
 k: 436
 title: Brennan's tasting table
@@ -19,6 +18,7 @@ ties: galley meal=dinner extra=tasting batch=20
 ties: tally tasting choices=herb-flatbread|pickled-beans|tomato-jam-oatcakes|root-crisps|miso-greens|bean-fritters|carrot-ginger-soup|chilli-lime-corn
 invite: host=brennan odds=25% line="Two new dishes at the end of the servery tonight. Taste both and vote. Honestly."
 
+meal: dinner
 == mail
 - Tasting table tomorrow at dinner, from {time}: two small new dishes by the servery. Try both, drop your token in a jar. The winner comes back on Sunday.
 
