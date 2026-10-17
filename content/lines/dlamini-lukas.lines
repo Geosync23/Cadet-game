@@ -37,3 +37,118 @@
 - Sol misses the rain too. We stand in the garden at misting hour. Don't say anything.   #warm
 ? bond:friends
 - {friend}. Good sort. Doesn't fuss. High praise from me.
+
+// Writer-commons, batch 5: towards 60 (a bunkmate). Up at five for the early team; off Tue, Wed; runs the galley
+// Fri, Sat. The countdown is a number said with no context.
+
+== greet
+? tier>=acquaintance time:morning deck:4
+- {hi}. Quiet. Tran's still asleep. She'll tell you lights out was too late.   #funny
+? tier>=acquaintance time:morning
+- Hm. Morning. Breakfast's on. I made it. Don't look at me like that.
+? tier>=acquaintance time:evening
+- {hi}. Bar or bunk. I haven't decided. Bar.
+? tier>=acquaintance time:night
+- Still up? Me too. Night owl in an early job. Bad combination.
+? tier>=colleague warmth:cold
+- You're back. Thought you'd moved bunks. Wouldn't have blamed you. Tomas hums.   #funny
+? tier>=colleague
+- {hi}. One hundred and eighty-four. Don't ask. You know.
+? tier>=close
+- {hi}, {nick}. Sit. I'll tell you the number. And why I like it getting smaller.   #warm
+
+== bye
+? tier>=acquaintance
+- Right. Go on.
+- {bye}. Don't wake me. Up at five.
+? tier>=colleague time:night
+- Night. Lights out. Tran's orders. I just enforce them.   #funny
+? tier>=friend
+- Glad you're in our bunk. Don't tell the others I said so.   #warm
+
+== feel
+? mood:ok
+- Fine. Number's going down. Can't complain. Do anyway.   #funny
+? mood:high tier>=colleague
+- Good day. Brennan's off, galley ran, nobody noticed. That's the job.
+? mood:low tier>=friend
+- Bit flat. Raining back home, they said. I'd give a lot to be cold and wet.
+
+== near
+? act:work
+- Galley at five. Quiet. The best hour. Don't tell anyone it's the best hour.
+? act:work weekday:fri|sat
+- Brennan's day off. Everything's fine. Everything is fine. Pass me that ladle.   #funny
+? act:leisure deck:3
+- The bar's quiet. That's how I like it. One drink, one chat, then bed. Maybe two chats.
+? deck:4 time:night
+- Can't sleep. Lying there counting. Not sheep. Days.
+? act:breakfast
+- I don't eat breakfast. I make it. That's enough breakfast for anyone.   #funny
+
+== life
+? tier>=acquaintance
+- I skip breakfast. Six hours of cooking it and I can't face it. Fair, really.
+? tier>=colleague
+- Married just before the tour. Best decision. Worst timing. Both true.
+? tier>=colleague
+- Silva, Soto, Jovanovic and me. We compare counts. I'm not winning. Nobody's winning.
+? tier>=friend
+- Port Halloran's grey and wet and loud. I didn't know I'd love it till I left.
+? tier>=friend
+- They write every week. Short letters. I read them twice. Then once more in the morning.   #warm
+
+== joy
+? tier>=colleague
+- Misting hour. Close your eyes. That's rain on Port Halloran. Near enough.
+
+== invite
+? tier>=colleague time:afternoon
+- Garden at misting hour? Five minutes. No talking. Best five minutes of the day.
+? tier>=friend time:evening
+- Bar later? I'll buy. One. Don't get used to it.   #funny
+
+== accept
+- Fine. I'll be there.
+- Go on then. I'll bring the number.   #funny
+
+== decline
+- Can't. Up at five. Ask me on a Tuesday.
+- Not tonight. Writing home. It's the long letter week.
+
+== missed
+- You didn't turn up. That's fine. I counted the days instead.   #funny
+- Missed you. No bother. There's always tomorrow. Well. Fewer tomorrows. Good ones.
+
+== birthday
+? birthday:me
+- It's my birthday. That's one more day closer. Best present there is.   #warm
+? birthday:you
+- Happy birthday. Saved you something from the galley. Don't ask what. Just eat it.   #warm
+
+== hint
+- Got a minute? Not here. Garden.
+
+== week1
+? week1:true weekday:mon time:morning tier<=acquaintance
+- You're the new one. Bottom bunk by the wall's me. I'm up at five. Sorry in advance.
+? week1:true time:night tier<=acquaintance
+- Settling in? The pipes knock at two. That's normal. Go back to sleep.
+
+== near
+? act:dinner
+- Eat. It's good tonight. I didn't make it. That's not why it's good. Probably.   #funny
+? deck:3 act:leisure time:evening
+- Same stool every night. Same drink. That's home, a bit.
+
+== greet
+? tier>=acquaintance weekday:tue|wed
+- {hi}. Day off. I'm going to do nothing, very slowly.
+? tier>=friend
+- There you are, {nick}. Saved you the good chair. Nobody fought me for it. Shame.   #funny
+
+== life
+? tier>=acquaintance
+- Brennan trusts me with her galley two days a week. I try not to let it go to my head.
+? tier>=colleague
+- Varga thinks we're racing at onions. We are. He's winning. Don't tell him I know.   #funny
