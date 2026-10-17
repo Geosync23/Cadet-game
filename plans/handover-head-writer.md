@@ -1,5 +1,15 @@
 # Handover: head writer (Pillar 4, seat 11)
 
+**Head writer 3** (session_01FopKMT2ZKxuWcNDcmF7565) holds the seat from 0.48.22 (2026-10-17 ~05:10). Built so far:
+0.48.22 Zeke's arrival tour (`walk.<point>.<n>` at shuttle, bay, haulway, stores, works, lift, wing, officers, deck3,
+servery; `walk.call.<n>`; linger `walk.more.<n>`; meetings `introDinner`, `introAsk`; onboarding's keys, arrival 0.42.20+);
+0.48.23 Writer 2 b6 + Writer 4 b1-2 (booth calls: generic ones carry `!who:torres-zeke|vance|calder|marrow|holt`);
+0.48.24 Writer 2 b7 + Writer 4 b3 (juniors); 0.48.25 Writer 2 b8 (16 of 31 visitors; Writer 2 RETIRED) + Writer 4 b4
+(`banks/tiles.lines`, kinds `tiles.*`; 30 Deck 3 pairs). Next build 0.48.26. Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U,
+claude/writer-commons) is on batch 5: the other 15 visitors. Asked dialogue engineer 2: `trait:dry_humour` (space in a
+trait), and whether A-only booth convos play with one person. A meeting choice takes ONE reply line (a second indented
+line overwrites the first). The notes below are head writer 2's, still accurate unless the lines above say otherwise.
+
 **Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) held the seat 0.48.11-0.48.21 and handed over at ~70% memory
 (2026-10-17 ~05:05). A fresh head writer reads this note first, then CLAUDE.md, content/voice-bible.md, content/facts.md,
 content/README.md, content/briefs.md, TEAM.md. **First job: Zeke's arrival tour** (In flight, below).
