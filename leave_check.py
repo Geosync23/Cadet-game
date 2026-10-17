@@ -58,9 +58,9 @@ PAPER = r"""(({ plan, days, friends }) => {
     const work0 = careerWork();
     careerTick(at(d, 420));
     if (playerShiftOn(d)) {
-      if (c === 'work' || c === 'late') { const late = c === 'late' ? 40 : 0; at(d, 480 + late); simNote('shiftStart', { late }); careerTick(at(d, 480 + late));
+      if (c === 'work' || c === 'late') { const late = c === 'late' ? 40 : 0; at(d, 480 + late); simNote('shiftStart', { late }); repNote('shiftStart', { late }); careerTick(at(d, 480 + late));
         for (let k = 0; k < (c === 'late' ? 2 : 3); k++) { at(d, 600 + 90 * k); repAdd('works', 3, { work: 2 }, 'jobs'); } }
-      else { at(d, 600); simNote('shiftStart', { late: 120, missed: true }); }
+      else { at(d, 600); simNote('shiftStart', { late: 120, missed: true }); repNote('shiftStart', { late: 120, missed: true }); }
     } else if (careerOn(d) || (SHIP.career.s || []).includes(d)) offLeave.push(d);
     careerTick(at(d, 750)); careerTick(at(d, 900)); careerTick(at(d, 1439));
     for (const a of SHIP.social.seekAsks || []) if (a.why) seen.add(a.why);
@@ -108,6 +108,17 @@ with sync_playwright() as pw:
     check(not r['tooLateCancel'], 'a leave day can be cancelled after 07:30 that day')
     check(r['heldEnd'] in (True, 'n/a'), 'a job found on a leave day is still held for you')
     check(r['grants'] == 5, f"leave after four 4-week grants: {r['grants']} (at most 5)")
+
+    print('Reviewer 1d\'s cases: an older save loaded after starting the shift; no summons on a leave day:')
+    r = ev("""(() => { const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
+      SHIP.career = null; SHIP.rep = null; SHIP.notes = []; SHIP.flags = {}; at(10, 480); simNote('shiftStart', { late: 0 }); flagSet('shiftSent', 10);
+      careerTick(at(10, 660)); careerTick(at(10, 760)); const w = careerWork();
+      SHIP.career = null; SHIP.rep = null; SHIP.occasions.length = 0; careerTick(at(15, 0)); const c = SHIP.career; c.st = 1; c.q = 1; c.qd = 15; c.b.push(16);
+      for (const m of [420, 600, 900]) careerTick(at(16, m)); const onLeave = SHIP.occasions.filter(o => o.id === 'careerChief').map(o => Math.floor(o.at / 1440) + 1);
+      return { w, onLeave }; })()""")
+    print('  ', r)
+    check(r['w'] == 50, f"an older save loaded mid-shift counted a miss (work {r['w']})")
+    check(16 not in r['onLeave'], 'a summons was booked on a leave day')
 
     print('(a) A diligent player, and a casual one, over 8 weeks:')
     for plan in ('diligent', 'casual'):

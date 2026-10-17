@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.2
+   STARSHIP CADET: CSV Wren                           build 0.61.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7564,7 +7564,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.2';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.3';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25930,7 +25930,7 @@ function occasionAdd(id, at, quiet, len) {
   if (!o || SHIP.occasions.some(x => x.key === key)) return null;
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
-  if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
+  if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
   if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: o.mail.body, quiet: !!quiet });
   return r;
 }
@@ -27040,7 +27040,8 @@ onSim('newGame', () => { SHIP.career = null; careerCard(false); });
 function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on: 0, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
@@ -27056,7 +27057,7 @@ function careerCanBook(d, now = shipNow()) {             // 'book', 'cancel' or 
 }
 function careerBook(d, now = shipNow()) {                // the Schedule's button: book a leave day, or cancel one
   const c = careerInit(), can = careerCanBook(d, now); if (!can) return false;
-  if (can === 'book') { c.l--; c.b.push(d); c.b = c.b.filter(x => x >= SHIP.time.day - 1); } else { c.b = c.b.filter(x => x !== d); c.l = Math.min(CAREER.max, c.l + 1); }
+  if (can === 'book') { c.l--; c.b.push(d); c.b = c.b.filter(x => x >= SHIP.time.day - 1); } else { c.b = c.b.filter(x => x !== d); c.l++; }   // back, even at the cap: it was earned
   simNote('leave', { day: d, booked: can === 'book' });
   return true;
 }
@@ -27083,7 +27084,7 @@ const careerHeld = (id, now) => { const r = SHIP.occasions.filter(x => x.id === 
 function careerDue(now) {                                // a step waiting: booked at 07:00 on a day its person is on shift, the Captain's after the Chief's
   const c = SHIP.career, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (!c.q || c.go != null) return;
   const step = c.q === 1 ? 'chief' : 'captain', id = c.q === 1 ? 'careerChief' : 'careerCaptain', o = OCCASIONS[id];
-  if (m < 420 || m > o.at - 30 || (!occOnShift(o.by, d) && d < c.qd + CAREER.wait) || (c.q === 2 && !careerHeld('careerChief', now))) return;
+  if (m < 420 || m > o.at - 30 || !playerShiftOn(d) || (!occOnShift(o.by, d) && d < c.qd + CAREER.wait) || (c.q === 2 && !careerHeld('careerChief', now))) return;   // only on your workdays (reviewer 1d)
   o.mail = careerSplit('career.mail.' + step, c.q === 1 ? 'Chief Ines Calder' : 'Commander Teo Vance');
   occasionAdd(id, (d - 1) * 1440 + o.at); c.q = 0;
   careerTip(step); careerSeek(step, now + 60, now + 1440, CAREER.worried);
@@ -27092,7 +27093,7 @@ function careerDue(now) {                                // a step waiting: book
 OCCASIONS.careerChief = { title: 'A word with the Chief', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.chiefAt, len: 20, script: 'careerChief', due: () => false, mail: null };
 OCCASIONS.careerCaptain = { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', deck: 1, room: 'R', at: CAREER.captainAt, len: 20, script: 'careerCaptain', due: () => false, mail: null };
 OCCASIONS.careerLetGo = { title: 'The Chief\'s office', kind: 'summons', by: 'calder', deck: 5, room: 'o', at: CAREER.letGoAt, len: 20, script: 'careerLetGo', due: () => false, mail: null };
-OCCASIONS.careerSendoff = { title: 'Your send-off', kind: 'meeting', by: 'torres-zeke', deck: 5, room: 'S', at: CAREER.sendOffAt, len: 30, script: 'careerSendoff', due: () => false, mail: null };
+OCCASIONS.careerSendoff = { title: 'Your send-off', kind: 'meeting', by: 'torres-zeke', with: ['pell', 'calder'], deck: 5, room: 'S', at: CAREER.sendOffAt, len: 30, script: 'careerSendoff', due: () => false, mail: null };
 function careerStarted(t) {                              // you started your shift (from 07:00 until it counts as missed)
   const c = careerInit(), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; if (m >= 420 && m < CAREER.missBy) c.on = d;
 }
@@ -27118,7 +27119,7 @@ function careerLadder(now) {
   const st = c.st; if (c.st >= 1 && w >= CAREER.rearm.chief) c.st = 0; else if (c.st >= 2 && w >= CAREER.rearm.captain) c.st = 1;   // recovered: the steps come again
   if (c.st < st) { if (c.q > c.st) c.q = 0; careerTip('up'); }
   if (c.go != null) return;
-  if (c.st === 0 && w < CAREER.chief || c.st === 1 && w < CAREER.captain) { c.st++; c.q = c.st; c.qd = Math.floor(now / 1440) + 1; }   // booked by careerDue
+  if (!c.q && (c.st === 0 && w < CAREER.chief || c.st === 1 && w < CAREER.captain)) { c.st++; c.q = c.st; c.qd = Math.floor(now / 1440) + 1; }   // booked by careerDue
 }
 function careerLetGo(d, now) {                           // notice on day d, the last day d + 1
   const c = careerInit(), see = CAREER.seeOff.filter(id => { const p = socP(id); return p && socAboard(p, d + 1); });
