@@ -192,7 +192,7 @@ with sync_playwright() as pw:
       const l0 = C.l, w0 = careerWork(); careerTick(at(d, 330)); out.sick = sickToday(d); out.excused = !playerShiftOn(d); out.leaveBack = C.l === l0 + 1 && !C.b.includes(d);
       out.speeds = [420, 600, 780, 930].map(m => { careerTick(at(d, m)); return [Math.round(needEffects().walk * 100) / 100, sickBent()]; });
       careerTick(at(d, 760)); out.noMiss = careerWork() >= w0 - 0.01 && C.ms === 0;
-      const p = SOC.crew.find(q => q.dept === 'works'); out.getwell = (sickChatLine(p, shipNow(), true) || {}).kind || null;
+      const p = SOC.crew.find(q => q.dept === 'works'); relGet(p.id).tier = 2; out.getwell = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       out.cure = sickCure(1); out.after = [Math.round(needEffects().walk * 100) / 100, sickBent(), sickNow()];
       at(d + 1, 600); out.better = (sickChatLine(p, shipNow(), true) || {}).kind || null;
       SHIP.career.sd = d + 1; SHIP.career.sh = 0; at(d + 1, 700); out.nap = sickCure(3) && !sickNow();
