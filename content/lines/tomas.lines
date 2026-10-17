@@ -48,3 +48,109 @@
 - Sleep whenever you like. Lights out is ten, Chloe says. Chloe means it.
 - I'm really glad you're here. I was the newest for a whole week. It was a long week.   #warm
 - Night, {me}. If you wake up and don't know where you are, that's normal. It's Deck 4.   #funny
+
+// Writer-commons, batch 4: up to about 60. Exam lines only from beat:tomas.5; the transfer list from beat:tomas.6.
+
+== greet
+? tier>=acquaintance time:evening
+- {hi}! Did you see the stars on the way past? Proper ones tonight.
+? tier>=acquaintance time:afternoon
+- {hi}. I went the long way round Deck 2 again. I found a new long way.   #funny
+? tier>=colleague warmth:cold
+- There you are! I thought the lift had eaten you. It does that. I think.   #funny
+? tier>=colleague deck:4
+- {hi}, {me}. Bunk's tidy. Well, my half is. Yours is... characterful.   #funny
+? tier>=close
+- {hi}, {nick}. I saved you the last biscuit. You've no idea how hard that was.   #warm
+
+== bye
+? tier>=acquaintance
+- See you back at the bunk. Don't get lost. Says me.
+- Right. Patrol. Wish me luck. I mean, it's a corridor. Wish me luck anyway.   #funny
+? tier>=colleague time:night
+- Night, {me}. If you see a shooting star, it's mine. I asked first.   #funny
+? tier>=friend
+- Thanks for this. Really. You always make me feel less lost.   #warm
+
+== feel
+? mood:ok
+- All right, I think. Sort of medium. Medium's fine, isn't it?
+? mood:low tier>=friend
+- Bit homesick. It comes and goes. It's going, now you're here.   #warm
+
+== near
+? act:leisure
+- The window seat's free! Quick. Before someone else notices it.
+? act:meal
+- Is this the stew? I think it's the stew. It's probably the stew.   #funny
+? deck:2
+- Deck 2 always feels like a museum. A nice one. You whisper without meaning to.
+
+== life
+? tier>=acquaintance
+- Vance talked me onto the treadmill. I don't know how. I was walking past.   #funny
+? tier>=colleague
+- I'm not sure I've found my place yet. I'm looking. That counts, doesn't it?
+? beat:tomas.5 tier>=friend
+- Still haven't told Holt about the exam. Don't remind me. Do remind me. Soon.
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night tonight! Come up? I'll show you the stars I've named.
+? trad:film tier>=acquaintance
+- Film night! I'll save you a seat. Not the one by the speaker. Trust me.
+? trad:running tier>=colleague
+- Running club? Vance will be there. Come and stand between us.   #funny
+
+== accept
+- {yes}! I'll be there. I'll probably be early. I'm always early. It's a nerves thing.
+- Yes! Thanks for asking. Nobody asks me things. Well, you do.   #warm
+
+== decline
+- I can't, sorry. Patrol. But ask me again? I'd really like you to ask me again.
+- Not tonight. I promised my brother a long letter. Another time?
+
+== missed
+- I waited for you. That's all right. Something came up, I expect. Next time?
+- You didn't come. Did I get the time wrong? I usually get the time wrong.
+
+== birthday
+? birthday:me
+- It's my birthday! I wasn't going to say. I've said. Is there cake? Is that rude?   #funny
+? birthday:you
+- Happy birthday! I made you a card. It's got a star on it. Well, a dot. A star-ish dot.   #warm
+
+== hint
+- Got a minute? Not a big thing. A medium thing.
+
+== week1
+? week1:true weekday:mon time:morning
+- Morning! Washroom, then breakfast. Breakfast's till eight. Left at the end. Probably.
+? week1:true weekday:thu
+- Inspection today. I've folded everything. I've folded my socks. Is that normal?   #funny
+? week1:true weekday:fri tier>=acquaintance
+- Sowing morning's tomorrow! You plant your own seedling. Come with me? Film night after.
+? week1:true weekday:sat time:morning
+- Ready? Garden. Seedling. Bring your hands. That's all you need. And maybe a towel.
+
+== greet
+? tier>=acquaintance act:work
+- {hi}! I'm on patrol. Very official. Watch out. I'm watching. That's the job.   #funny
+? tier>=acquaintance time:morning weekday:mon
+- Monday! Fresh start. I've got a list. I've lost the list. Fresh start.   #funny
+
+== near
+? deck:3
+- The promenade at this hour! You can see half the ship from here. Well, a corridor.
+? act:off
+- Rest day. I'm going to write to my brother and then look at the stars. Big plans.
+
+== life
+? tier>=acquaintance
+- Back home the sky was grey every day. Here I've got a whole star map. Under my bunk.
+? tier>=colleague
+- Holt terrifies me. In a good way. I think. Is there a good way? There must be.   #funny
+
+== feel
+? mood:high tier>=colleague
+- Good day! I found the laundry on the first try. That's a first. I'm a new man.   #funny
