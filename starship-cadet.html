@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.31
+   STARSHIP CADET: CSV Wren                           build 0.27.32
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7410,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.31';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.32';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -30266,7 +30266,8 @@ const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   updateSteer();
-  for (const w of walkers) if (w.active) w.update(dt, t);
+  // 0.27.32: the per-frame loops here count through their arrays (a for...of here made an iterator result every step, about 600 a frame)
+  for (let k = 0; k < walkers.length; k++) if (walkers[k].active) walkers[k].update(dt, t);
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
@@ -30283,29 +30284,31 @@ function loop() {
   const rx = Math.cos(az), rz = -Math.sin(az);
   const hides = e => (e.cx - pp.x) * cx + (e.cz - pp.z) * cz > .25 && Math.abs((e.cx - pp.x) * rx + (e.cz - pp.z) * rz) < 3.5;
   // the hull: pieces facing the camera (lower and right on screen) stay low, the far ones (upper and left) stay up
-  for (const r of RUNS) r.cut = r.face ? r.face[0] * cx + r.face[1] * cz > 0
-    : wallsMode === 'up' ? false : wallsLow || (r.out && r.out[0] * cx + r.out[1] * cz > .3) || r.edges.some(hides);
-  for (const e of edgeList) e.s += ((e.run.cut ? .12 : 1) - e.s) * k7;
-  for (const c of CURVES) if (c.run) { c.s += ((c.run.cut ? .12 : 1) - c.s) * k7; c.g.scale.y = c.s; }
-  for (const p of POSTS) { let m = -Infinity; for (let i = 0; i < p.touch.length; i++) m = Math.max(m, p.touch[i].s); p.s = m; }   // 0.27.31: no array each frame
+  for (let k = 0; k < RUNS.length; k++) { const r = RUNS[k]; r.cut = r.face ? r.face[0] * cx + r.face[1] * cz > 0
+    : wallsMode === 'up' ? false : wallsLow || (r.out && r.out[0] * cx + r.out[1] * cz > .3) || r.edges.some(hides); }
+  for (let k = 0; k < edgeList.length; k++) { const e = edgeList[k]; e.s += ((e.run.cut ? .12 : 1) - e.s) * k7; }
+  for (let k = 0; k < CURVES.length; k++) { const c = CURVES[k]; if (c.run) { c.s += ((c.run.cut ? .12 : 1) - c.s) * k7; c.g.scale.y = c.s; } }
+  for (let k = 0; k < POSTS.length; k++) { const p = POSTS[k]; let m = -Infinity; for (let i = 0; i < p.touch.length; i++) m = Math.max(m, p.touch[i].s); p.s = m; }   // 0.27.31: no array each frame
   writeWalls();
-  for (const hr of HULL_RUNS) { hr.s += ((hr.cut ? .12 : 1) - hr.s) * k7; hr.g.scale.y = hr.s; hr.decor.visible = hr.s > .9; }
+  for (let k = 0; k < HULL_RUNS.length; k++) { const hr = HULL_RUNS[k]; hr.s += ((hr.cut ? .12 : 1) - hr.s) * k7; hr.g.scale.y = hr.s; hr.decor.visible = hr.s > .9; }
   if (HRUN_EDGES.of !== EDGES || HRUN_EDGES.n !== EDGES.size) { HRUN_EDGES.of = EDGES; HRUN_EDGES.n = EDGES.size; HRUN_EDGES.list = [...EDGES.values()].filter(e => e.hrun); }
-  for (const e of HRUN_EDGES.list) e.s = e.hrun.s;       // 0.27.31: the edges that follow a hull run, listed once per deck (was a Map walk each frame)
-  for (const d of DOOR_OBJS) d.g.scale.y = d.e.s;
-  for (const t of TALL) {                              // tall furniture fades when it would hide you
-    const hides = t.pts.some(p => { const dep = (p.x - pp.x) * cx + (p.z - pp.z) * cz; return dep > .3 && dep < 4.5 && Math.abs((p.x - pp.x) * rx + (p.z - pp.z) * rz) < .5 + p.w / 2; });
+  for (let k = 0, L = HRUN_EDGES.list; k < L.length; k++) L[k].s = L[k].hrun.s;       // 0.27.31: the edges that follow a hull run, listed once per deck (was a Map walk each frame)
+  for (let k = 0; k < DOOR_OBJS.length; k++) DOOR_OBJS[k].g.scale.y = DOOR_OBJS[k].e.s;
+  for (let k = 0; k < TALL.length; k++) {               // tall furniture fades when it would hide you
+    const t = TALL[k]; let hides = false;
+    for (let j = 0; j < t.pts.length && !hides; j++) { const p = t.pts[j], dep = (p.x - pp.x) * cx + (p.z - pp.z) * cz; hides = dep > .3 && dep < 4.5 && Math.abs((p.x - pp.x) * rx + (p.z - pp.z) * rz) < .5 + p.w / 2; }
     const goal = !wallsLow && hides ? .22 : 1;
     if (Math.abs(t.o - goal) < .002) continue;
     t.o += (goal - t.o) * k7; if (Math.abs(t.o - goal) < .01) t.o = goal;
     const fade = t.o < .99;
-    for (const m of t.mats) {
-      m.opacity = m.userData.base.op * t.o; m.depthWrite = !fade;
+    for (let j = 0; j < t.mats.length; j++) {
+      const m = t.mats[j]; m.opacity = m.userData.base.op * t.o; m.depthWrite = !fade;
       const tr = fade || m.userData.base.tr; if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
     }
   }
-  for (const d of WALL_DECOR) d.g.visible = d.e ? d.e.s > .9 : true;
-  for (const v of VOID_BLOCKS) {
+  for (let k = 0; k < WALL_DECOR.length; k++) { const d = WALL_DECOR[k]; d.g.visible = d.e ? d.e.s > .9 : true; }
+  for (let k = 0; k < VOID_BLOCKS.length; k++) {
+    const v = VOID_BLOCKS[k];
     const b = v.m.geometry.boundingBox || (v.m.geometry.computeBoundingBox(), v.m.geometry.boundingBox);
     const dep = (x, z) => (v.cx + x - pp.x) * cx + (v.cz + z - pp.z) * cz, near = Math.max(dep(b.min.x, b.min.z), dep(b.max.x, b.min.z), dep(b.min.x, b.max.z), dep(b.max.x, b.max.z));
     v.s += ((wallsLow || (wallsMode === 'auto' && near > .25) ? .12 : 1) - v.s) * k7; v.m.scale.y = v.s;
@@ -30313,13 +30316,14 @@ function loop() {
 
   if (ride) updateRide(dt);
   // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
-  for (const d of DOOR_OBJS) {
-    const crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
+  for (let k = 0; k < DOOR_OBJS.length; k++) {
+    const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
     if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    const near = d.force !== undefined ? d.force > 0 : crewAt || (d.passable || d.svc) && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
+    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
+    const near = d.force !== undefined ? d.force > 0 : crewAt || walk;
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
-    if (d.e.type === 'lift') d.leaves.forEach(l => { l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; });   // lift doors sink into the floor
-    else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
+    if (d.e.type === 'lift') for (let j = 0; j < d.leaves.length; j++) { const l = d.leaves[j]; l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; }   // lift doors sink into the floor
+    else for (let j = 0; j < d.leaves.length; j++) d.leaves[j].position.x = (j ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92);
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
@@ -30342,10 +30346,10 @@ function loop() {
     for (let i = 0; i < D_.n; i++) { a[i * 3 + 1] += Math.sin(t * .3 + D_.seeds[i]) * .0015; a[i * 3] += Math.cos(t * .2 + D_.seeds[i]) * .001; }
     D_.geo.attributes.position.needsUpdate = true;
   }
-  for (const sp of SPINS) sp.o.rotation[sp.ax] += sp.w * dt;
-  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (const b of MOVERS) b.tick(dt, !!(pb && pb(b.place))); }   // section 10's placeBusy
+  for (let k = 0; k < SPINS.length; k++) { const sp = SPINS[k]; sp.o.rotation[sp.ax] += sp.w * dt; }
+  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (let k = 0; k < MOVERS.length; k++) MOVERS[k].tick(dt, !!(pb && pb(MOVERS[k].place))); }   // section 10's placeBusy
   for (const p of PULSES) p.m[p.key] = p.base + p.amp * (.5 + .5 * Math.sin(t * p.w + p.ph));
-  for (const s of STEAM) { const k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
+  for (let q = 0; q < STEAM.length; q++) { const s = STEAM[q], k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
   tickShip(dt);                                          // section 13: the ship's clock
