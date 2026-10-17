@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.43
+   STARSHIP CADET: CSV Wren                           build 0.48.44
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.43';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.44';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -24974,6 +24974,23 @@ const CONVOS = [
   {"id": "1d8uvzo", "tone": "funny", "pair": "garden+garden", "place": "hydroponics_garden", "time": "morning", "topic": "garden", "lines": [{"who": "A", "text": "Misters are on."}, {"who": "B", "text": "Smells like rain."}, {"who": "A", "text": "Don't tell Dlamini. He'll move in."}]},
   {"id": "1pwnvxl", "act": "leisure", "pair": "any+any", "place": "hydroponics_garden", "topic": "garden", "lines": [{"who": "A", "text": "I come in here when it's busy out there."}, {"who": "B", "text": "Me too. Plants don't ask questions."}, {"who": "A", "text": "They do listen, though."}]},
   {"id": "vydzoa", "tone": "funny", "pair": "garden+any", "place": "hydroponics_garden", "topic": "garden", "lines": [{"who": "A", "text": "Who left a cactus by the beans?"}, {"who": "B", "text": "That's Gerald. He's visiting."}]},
+  {"id": "n4fmm8", "tone": "warm", "leaving": "soon", "pair": "friend", "topic": "goodbyes", "lines": [{"who": "A", "text": "Ten days went fast."}, {"who": "B", "text": "They always do when it's the last ten."}, {"who": "A", "text": "Save me a seat anyway."}]},
+  {"id": "1s41ec5", "tone": "warm", "leaving": "soon", "pair": "friend", "topic": "goodbyes", "lines": [{"who": "A", "text": "You'll write?"}, {"who": "B", "text": "Every week. Badly."}, {"who": "A", "text": "Badly's fine. Just write."}]},
+  {"id": "p0vq9m", "tone": "funny", "leaving": "soon", "pair": "friend", "time": "evening", "topic": "goodbyes", "lines": [{"who": "A", "text": "Last dinner in the mess, nearly."}, {"who": "B", "text": "Have pudding twice. It's the law."}]},
+  {"id": "1dchwv8", "tone": "funny", "leaving": "soon", "pair": "best", "topic": "goodbyes", "lines": [{"who": "A", "text": "Who's going to steal my toast?"}, {"who": "B", "text": "I'll post you some. Cold."}, {"who": "A", "text": "Perfect. Just how I like it."}]},
+  {"id": "18hy4sc", "tone": "warm", "leaving": "soon", "pair": "best", "topic": "goodbyes", "lines": [{"who": "A", "text": "You've been the best bit of this ship."}, {"who": "B", "text": "Don't. I'll cry at breakfast."}, {"who": "A", "text": "Cry at lunch. Breakfast's busy."}]},
+  {"id": "rmw1gv", "tone": "warm", "leaving": "soon", "pair": "mentor", "topic": "goodbyes", "lines": [{"who": "A", "text": "Anything I should know, out there?"}, {"who": "B", "text": "Ask. Listen. Write it down."}, {"who": "A", "text": "That's what you said on day one."}, {"who": "B", "text": "Still true."}]},
+  {"id": "1aaiumu", "tone": "warm", "leaving": "soon", "pair": "mentor", "topic": "goodbyes", "lines": [{"who": "A", "text": "Thank you. For all of it."}, {"who": "B", "text": "You did the work. I just watched."}]},
+  {"id": "j6vgus", "tone": "warm", "leaving": "soon", "pair": "couple", "topic": "goodbyes", "lines": [{"who": "A", "text": "Two ships. That's all it is."}, {"who": "B", "text": "Two ships and a lot of letters."}, {"who": "A", "text": "I'll number them."}]},
+  {"id": "1lckmnj", "tone": "warm", "leaving": "soon", "pair": "couple", "topic": "goodbyes", "lines": [{"who": "A", "text": "I've packed your jumper by mistake."}, {"who": "B", "text": "Keep it. It's a good mistake."}]},
+  {"id": "1w16sfj", "tone": "funny", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "teague-theo", "with": "hart-ravi", "lines": [{"who": "A", "text": "One last comic. You're the duck."}, {"who": "B", "text": "I'm always the duck."}, {"who": "A", "text": "You're a very good duck."}]},
+  {"id": "ltcm03", "tone": "funny", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "moreau-signe", "with": "achterberg-lars", "lines": [{"who": "A", "text": "Send me the last pages. All of them."}, {"who": "B", "text": "Every book? Even the good ones?"}, {"who": "A", "text": "Especially those."}]},
+  {"id": "11ocxuf", "tone": "warm", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "santos-zofia", "with": "tran-chloe", "lines": [{"who": "A", "text": "Who'll read the gossip with you?"}, {"who": "B", "text": "Nobody reads it like you do."}, {"who": "A", "text": "Write me the best bits. Daily."}]},
+  {"id": "1rb648l", "tone": "warm", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "keane-davi", "with": "kovac-zainab|cruz-tove", "lines": [{"who": "A", "text": "Last climb up the ladder."}, {"who": "B", "text": "For the exercise."}, {"who": "A", "text": "Yes. For the exercise."}]},
+  {"id": "wo9ns", "tone": "funny", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "alvarez-luca", "with": "kim-yusuf|mbeki-bo", "lines": [{"who": "A", "text": "Gerald's coming with me."}, {"who": "B", "text": "Does Gerald want to go?"}, {"who": "A", "text": "Gerald goes where I go."}]},
+  {"id": "1ox9n7m", "tone": "funny", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "lindqvist-isak", "with": "park-noor|larsen-hamid|haddad-tamsin", "lines": [{"who": "A", "text": "You keep the guitar book."}, {"who": "B", "text": "You haven't finished it."}, {"who": "A", "text": "I'll never finish it. You might."}]},
+  {"id": "1ll8ljo", "tone": "warm", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "ueda-vera", "with": "varga-tariq", "lines": [{"who": "A", "text": "Six weeks for a letter from Valo."}, {"who": "B", "text": "Seven, from where you're going."}, {"who": "A", "text": "Then start writing now."}]},
+  {"id": "1ebxkdz", "tone": "warm", "leaving": "soon", "pair": "any+any", "place": "observatory", "time": "night", "topic": "goodbyes", "who": "zamora-quinn", "with": "mbeki-bo|rossi-femi", "lines": [{"who": "A", "text": "Last night up here."}, {"who": "B", "text": "The stars won't move."}, {"who": "A", "text": "No. I will. Look up for me."}]},
   {"id": "1iyqlt0", "tone": "warm", "habit": "calls-home", "pair": "any+any", "topic": "home", "lines": [{"who": "A", "text": "Did you get through?"}, {"who": "B", "text": "Second try. Relay lag."}, {"who": "A", "text": "How are they?"}, {"who": "B", "text": "Same as ever. Good."}]},
   {"id": "1v7jog9", "tone": "funny", "habit": "calls-home", "pair": "any+any", "place": "booths", "topic": "home", "weekday": "sun", "lines": [{"who": "A", "text": "Booth queue's long tonight."}, {"who": "B", "text": "Everyone's mum knows it's Sunday."}, {"who": "A", "text": "Mine thinks it's always Sunday."}]},
   {"id": "fybmlq", "pair": "friend", "topic": "home", "lines": [{"who": "A", "text": "What's it like at home right now?"}, {"who": "B", "text": "Raining, probably."}, {"who": "A", "text": "You miss it."}, {"who": "B", "text": "I miss being rained on."}]},
