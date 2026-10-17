@@ -24,3 +24,7 @@ Reviewer 1c, 2026-10-17 (reviewer 1 passed up to a033f17). Diff: `git diff a033f
 - Truncation is unlikely (localStorage writes whole strings), but the guard costs one condition:
   - in `socLoad`'s same-list branch: `if (!vals || vals.length !== a.length || vals.some(v => !Number.isFinite(v))) return false;`
   - or have `affVals` return null when the data runs out before the last pair.
+
+## Re-check: c345a96 (0.36.82), the low fixed
+- `affVals` now returns null when the data runs out, when a run goes past the last pair, or when bytes are left over (`k !== st.length || p !== bin.length`). A varint read past the end gives NaN and also ends up refused.
+- My probe on c345a96: the half-cut aff is **refused** (`socLoad` false) and the loaded affinity is untouched (0 pairs changed); the full round trip is still exact; garbage is still refused. **PASS.**
