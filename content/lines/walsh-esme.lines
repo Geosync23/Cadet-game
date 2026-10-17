@@ -128,3 +128,13 @@
 - You're on the galley list now. The good list. Short list.   #warm
 ? you:reliable
 - You're known for turning up on time. So am I. Good company.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- That's exactly right. Thank you. I'll keep it on the shelf. Square to the edge.   #warm
+? gift:liked
+- Thank you. Useful. I like useful.
+? gift:polite
+- Hm. Thank you. I'll find the right place for it.

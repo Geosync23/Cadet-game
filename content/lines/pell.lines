@@ -332,3 +332,15 @@
 - Word in the bay is you finish what you start. Rarest thing aboard. After biscuits.   #funny
 ? you:chatty
 - Everyone knows you. You chat more than me. I'm impressed. Bit worried, but impressed.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:sweet
+- Is this for me? All of it? Don't answer. I've started. You're a legend, {nick}.   #funny
+? gift:loved
+- Get in! This is brilliant. You know me too well. Worryingly well.   #warm
+? gift:liked
+- Cheers, {nick}! Very kind. It's going next to the screw tin. Pride of place. Nearly.
+? gift:polite
+- Oh! Cheers. I'll find a use for it. I find a use for everything. Eventually.   #funny

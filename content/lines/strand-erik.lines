@@ -122,3 +122,15 @@
 - The helm crew knows your name! I told them. Twice. Can't stop. Bye!   #funny
 ? you:reliable
 - They say you're reliable. Like a good watch. I count those. You'd count.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:book
+- A book! I'll read it on the way to somewhere. Thanks! Can't stop!   #funny
+? gift:loved
+- This is brilliant. Thanks! It's going in the notebook. A good entry.   #warm
+? gift:liked
+- Thanks! Nice one. Back in a minute.
+? gift:polite
+- Ah, nuts, you didn't have to. Thanks! Really.

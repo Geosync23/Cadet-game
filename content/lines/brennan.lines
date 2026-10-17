@@ -324,3 +324,15 @@
 - Everyone says you're a kind one, love. I could've told them. I watch who clears plates.   #warm
 ? you:chatty
 - You talk to everyone in my mess, love. Good. Nobody should eat alone.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- Oh, love. Look at it. It's going on my windowsill. I'll talk to it every morning.   #warm
+? gift:loved
+- Oh, love. You shouldn't have. You should have. Come here, there's cake for this.   #warm
+? gift:liked
+- Bless you, love. That's very kind. Sit down, I'll find you a biscuit to say thanks.
+? gift:polite
+- Thank you, love. It's the thinking that counts. You think lovely things.   #warm

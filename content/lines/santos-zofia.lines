@@ -187,3 +187,15 @@
 - You're one of Comms now. Best deal on the ship. Lifetime membership.   #warm
 ? you:chatty
 - They say you're chatty. Takes one to know one. I'm the one.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:game
+- A game! I'll win at it by Friday. Then I'll sell lessons. Thanks, {nick}.   #funny
+? gift:loved
+- Best deal I've ever had. Free, and perfect. Thank you.   #warm
+? gift:liked
+- Nice one. Thanks. I'd have paid for that.
+? gift:polite
+- Ah, well. Thanks. I'll find it a buyer. No, I won't. Thanks.   #funny

@@ -124,3 +124,13 @@
 - The store speaks well of you. It's in the ledger. Well, not the ledger. In me.   #warm
 ? you:reliable
 - They say you're reliable. I could have told them. The ledger agrees.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Oh. Oh, that's beautiful. I'll put it by the window, where the stars are.   #warm
+? gift:liked
+- Thank you. That's very kind. I'll remember it.
+? gift:polite
+- Oh dear, you didn't have to. Thank you. Really.

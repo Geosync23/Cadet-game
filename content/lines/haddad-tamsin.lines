@@ -128,3 +128,13 @@
 - You're galley now! It'll be fine. It's lovely, actually. No "won't it". It is.   #warm
 ? you:kind
 - Everyone says you're kind. Oh, good. I thought so too. I'd hoped so.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- For me? Oh! Oh, I love it. Sorry. I'm going to sing. I'm not. I am, a bit.   #warm
+? gift:liked
+- Oh, thank you! That's lovely. It'll be fine. It's better than fine.
+? gift:polite
+- Oh, thank you! Sorry. I mean, thank you. It's lovely of you to think of me.   #funny

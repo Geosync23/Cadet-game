@@ -124,3 +124,15 @@
 - The night crew rates you. Steady, they say. That's my favourite word.   #warm
 ? you:reliable
 - Reliable, they say about you. Like a good heading. Steady.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- A plant. Gerald's going to have a neighbour. Thank you. Steady and kind.   #warm
+? gift:loved
+- Thank you. That's just right. Truly.   #warm
+? gift:liked
+- Thank you. That's kind. It'll ride the night watch with me.
+? gift:polite
+- Ah, well. Thank you. I'm curious what it's for. I'll find out.

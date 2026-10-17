@@ -126,3 +126,13 @@
 - You're infirmary family now. That means we nag. Kindly. Mostly about water.   #funny
 ? you:chatty
 - They say you chat to everyone. Brilliant. Good for the heart, talking. Proven.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Brilliant! Oh, that's brilliant. I'm naming the boat after this. This week.   #funny
+? gift:liked
+- Thanks! Good for morale, presents. Proven. Very good for morale.
+? gift:polite
+- Oh! Thanks. Very kind. I'll find a use for it. I've a plan for everything.

@@ -125,3 +125,13 @@
 - Garden thinks you're all right. That's decided. Not moving on it.
 ? you:reliable
 - They say you're reliable. Good. Mornings need reliable people. I'm not one.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- That's decided. Best present of the tour. Not moving on it.   #warm
+? gift:liked
+- Thanks. Good one. Going in the comic.
+? gift:polite
+- Ah, well. Thanks. Kind of you. Really.

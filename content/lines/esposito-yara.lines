@@ -126,3 +126,15 @@
 - You're known for being kind. I can tell by what you buy. Mostly for other people.   #warm
 ? you:chatty
 - You chat to everyone at my counter. The queue's longer. I don't mind.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:star
+- For my star journal. You knew. Course you knew. You've got the look.   #warm
+? gift:loved
+- I'd never have sold you that. I'd have kept it. Thank you.   #warm
+? gift:liked
+- Nice choice. I'd have guessed you'd pick that. Thank you.   #funny
+? gift:polite
+- Ah, well. Thank you. It's the thought. I'll know where it's from.

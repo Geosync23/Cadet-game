@@ -124,3 +124,15 @@
 - Nights speak well of you. Quietly. Nights speak quietly about everything.
 ? you:kind
 - They say you're kind. Oh, good. I'd hoped. Sorry. I mean, good.   #warm
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:tea
+- Tea. Oh, thank you. Two in the morning won't know what's hit it.   #warm
+? gift:loved
+- Oh. Oh, thank you. That's so kind. Sorry. I mean, thank you.   #warm
+? gift:liked
+- Thank you. That's lovely. Really.
+? gift:polite
+- Oh dear. Thank you. You shouldn't have. I mean that nicely.

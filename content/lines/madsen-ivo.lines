@@ -126,3 +126,13 @@
 - You're one of us now, {nick}. Galley. You get the warm tray. Don't tell.   #warm
 ? you:chatty
 - They say you talk to everyone. Finally, competition. Right, listen.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Right, listen, this is the best present I've had all tour. I'm telling everyone. Now.   #warm
+? gift:liked
+- Cheers, {nick}! Lovely. Right, listen, I'm going to tell you where I'll put it.   #funny
+? gift:polite
+- Oh! For me? Thanks. That's... yes. Thanks. I'll think of something to say later.   #funny

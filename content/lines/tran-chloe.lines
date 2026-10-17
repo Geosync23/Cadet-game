@@ -186,3 +186,15 @@
 - Comms speaks well of you. I checked. Reliable source. Me.   #funny
 ? you:reliable
 - You're known for being reliable. Good. Bunk 1 needs at least two of us.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:sweet
+- Sweets. Honestly. They'll be gone by lights out. Thank you.   #funny
+? gift:loved
+- Oh. That's lovely. Honestly. Thank you.   #warm
+? gift:liked
+- Thanks. That's kind. Reliable choice.
+? gift:polite
+- Thank you. It's the thought. The thought was nice.
