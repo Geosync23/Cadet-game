@@ -1,12 +1,12 @@
 # Handover: dialogue engineer (Pillar 4, seat 2)
 
-Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer), while still working, so a fresh session can
-take over at any time. Read CLAUDE.md, DEV_NOTES.md ("Lines (section 22)" and the 0.43.x rows), plans/pillar4-plan.md
+Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept current by session_01S26bs4oMahyGJkuVaCKQGT
+(dialogue engineer 2, from 0.43.12), so a fresh session can take over at any time. Read CLAUDE.md, DEV_NOTES.md ("Lines (section 22)" and the 0.43.x rows), plans/pillar4-plan.md
 (Part 2 and seat 2 in Part 6), plans/social-deep-plan.md (Parts 6 and 9) and **content/README.md** (the writers' guide:
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.11**, e69936d), on ship integration 0.41.10.
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.14**, 6e090ea; 0.43.11-0.43.14 waiting on reviewer 2's re-check), on ship integration 0.41.10.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
 - Not mine: everything else under content/ (head writer 2, session_01HNrh3xCtczeZM5NVFrE6pa, branch claude/content,
@@ -35,10 +35,18 @@ it is the full spec of the file formats and the condition vocabulary) first.
   `HOME_SEND[c]` (`sets`/`memo` = what a choice sets), `HOME_CHAT[c]`; conditions `came:` (ctx.trad) and `friend:`
   (ctx.friend). Social B agreed the shapes (their successor builds B8; see plans/handover-social-stories.md).
 
+- 0.43.12 overheard played: `linesTick` (from section 20's socialTick) -> alternating bubbles under the voice budget;
+  the saved ring `SHIP.lines = { ring: [[id, day]], serious }` in save.lines via SAVE_EXTRA (no sim-engineer hook needed).
+- 0.43.13 one-speaker conversations (only `A:`), booth callers talk only to home.
+- 0.43.14 reviewer 2's fixes (calls home: family warmth only; contacts mum/gran/jo/sam; "my love"; `linesNew` on New game;
+  cheaper pair scan: OVH_NEAR 6, OVH_TRIES 8, overheardFor fills only its top group).
+
 ## Hooks outside section 22 (the hook register)
 - Section 20 (mine, approved by the lead): `const CHATTER_IDLE/CHAT_GREET/CHAT_NEAR/CHAT_LIFE/CHAT_DEPT = linesLegacy(...)`
   and the first statement of `chatGreet` (own lines via lineFor, peek when asked about another hour). Social A doesn't
   touch those lines; when they move chatLine to `lineFor` (socLine), the legacy reads can go.
+- Section 20 (0.43.12): `if (typeof linesTick === 'function') linesTick();` after `chatTick();` in socialTick; section 22
+  sets section 20's `CHATTER_AT` while a conversation plays. Section 13 (0.43.14): `linesNew()` in the New game handler.
 - Section 18 (traditions engineer's): `if (typeof linesMeetings === 'function') linesMeetings(MEETING_SCRIPTS);`.
 
 ## Gotchas
@@ -62,11 +70,8 @@ it is the full spec of the file formats and the condition vocabulary) first.
 - Browser checks one at a time; social/deck/day/player/events/interactions/food/machine all passed on 0.43.0.
 
 ## Loose ends / next (wave 2, waiting for the lead's go-ahead)
-- Play overheard conversations as alternating bubbles (section 8b's `bubbleSay`) under the voice budget (one on screen,
-  none while a card or meeting is open), with the saved ring (`SHIP.lines = { ring, serious }`, `save.lines`, no repeat
-  within 7 ship days) — needs a save hook in section 13 (sim engineer).
-- One-speaker overheard lines for the call booths (head writer 2's ask): allow a conversation with only `A:` lines,
-  e.g. `@overheard booths` with `? place:booths`.
+- (done: overheard played, the ring, booth one-speaker lines.) Test script for overheard in a browser: see
+  DEV_NOTES 0.43.12 (stand the player by a group on Deck 3 at dinner, step, log `bubbles.list` and `OVH`).
 - Reactions from `onSim` cues (sim engineer's bus: simNote/onSim/simNotes), once per person per kind per day; the
   galley's `lateMeal` note carries { who, meal, late, how, dish, deck }.
 - lines_check's simulated voice-budget day in a browser (now only a report of the rules and the supply).
