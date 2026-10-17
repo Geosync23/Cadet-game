@@ -419,7 +419,7 @@ Rule 3 says "physical, not a mini-game … no puzzles that stand in for the work
 - **No timers, no scores, no fail.** The ship keeps running (the device never pauses), but nothing counts down on a case.
 - **Words, not numbers** for you: "Right first time", "A clever fix", "Fault-finder". Machine readings on a gauge are numbers, as the scanner's already are; your own progress never is.
 
-*If the user approves, design-doc.md's "Work is physical" ground rule and the job loop's "Diagnose" step get a line each saying this (open question 8).*
+*The user approved this (question 8, 2026-10-17); the lead has added it to design-doc.md.*
 
 ### 6.3 Which repairs get a puzzle (only some)
 
@@ -678,7 +678,7 @@ cadet_test: with head-scratchers off, ALL IDENTICAL
 
 **Added with Part 6 (head-scratchers):**
 
-8. **The ground rule:** may design-doc.md's "No mini-games standing in for the job" gain a line: "Deduction puzzles are the Diagnose step done for real: clues gathered in the world, the fix physical, no timers or scores"? *Default:* yes.
+8. **The ground rule:** may design-doc.md's "No mini-games standing in for the job" gain a line: "Deduction puzzles are the Diagnose step done for real: clues gathered in the world, the fix physical, no timers or scores"? **Answered (the user, 2026-10-17): yes.** design-doc.md updated by the lead on `claude/lead-pillar1`.
 9. **The start and the share:** the first head-scratcher after hauling has been used about 3 times (about Day 13, about a third of the way into the arc), then about 1 in 8 of your real faults, rising to about 1 in 4 at Tier 2 (1 in 3 on Tier 2 machines)? *Default:* yes.
 10. **A setting** for fewer / normal / more head-scratchers? *Default:* yes, normal by default.
 11. **The nine types:** keep all nine, or drop any (P8 swap testing and P7 faded labels are the most "puzzle-like")? *Default:* keep all nine.
