@@ -2,28 +2,28 @@
 // Writer-commons, overheard batch 1. Bunkmates, in the junior wing or on the way to bed.
 
 == overheard
-? pair:bunk time:night
+? pair:bunk time:night deck:4
 A: Lights out.
 B: It's five to.
 A: Lights out in five, then.   #funny
 
-? pair:bunk time:morning
+? pair:bunk time:morning deck:4
 A: Were you talking in your sleep?
 B: Was I?
 A: About pumps. At length.   #funny
 
-? pair:bunk
+? pair:bunk deck:4
 A: Who left a sock on my bunk?
 B: Lost property's got your other one.
 A: There's a lost-property box?
 B: There are four.   #funny
 
-? pair:bunk time:evening
+? pair:bunk time:evening deck:4
 A: Hot water's nearly gone.
 B: Then it's character-building.
 A: I've got plenty of character.
 
-? pair:bunk time:night
+? pair:bunk time:night deck:4
 A: You awake?
 B: No.
 A: Me neither. Goodnight.   #warm

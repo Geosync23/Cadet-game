@@ -8,7 +8,7 @@ B: Second try. Relay lag.
 A: How are they?
 B: Same as ever. Good.   #warm
 
-? pair:any+any habit:calls-home weekday:sun
+? pair:any+any habit:calls-home weekday:sun place:booths
 A: Booth queue's long tonight.
 B: Everyone's mum knows it's Sunday.
 A: Mine thinks it's always Sunday.   #funny

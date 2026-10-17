@@ -2,7 +2,7 @@
 // Writer-commons, overheard batch 1. The garden, the store, the infirmary and the galley, by the people who work there.
 
 == overheard
-? pair:garden+any
+? pair:garden+any place:hydroponics_garden
 A: Who's been picking the flowers?
 B: Couldn't say.
 A: There's a gap in the row.
@@ -12,12 +12,12 @@ B: Must have been the misters.   #funny
 A: When are the tomatoes ready?
 B: Week twelve. Not a day sooner.
 
-? pair:store+any
+? pair:store+any place:crew_store
 A: You've run out of soap.
 B: How do you know that?
 A: I know everything.   #funny
 
-? pair:any+store
+? pair:any+store place:crew_store
 A: Do you have any of the good biscuits?
 B: Gone by nine. Every day.
 A: Who buys them all?
