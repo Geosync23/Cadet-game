@@ -67,4 +67,4 @@ Merges tested (only build-line, DEV_NOTES and design-doc conflicts resolved; pla
 - B: day_check 1 FAILED (part 5 only, see 3); PLAYER CHECK OK; FOOD CHECK OK.
 - B2: day_check 0, 7 and 35 FAILED (part 5 only); everything else OK (meals < 2: 0, shift short 0, double-booked 0, draw calls under budget).
 - M3: social_check jump test False (True with `t` removed).
-- intro_check on B2: see the report to the lead (it was still running when this note was written).
+- intro_check: not finished on B2 (stopped for the f9a145c work). On F (6e87e6b), intro_check is OK, parts 0-11.
