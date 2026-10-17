@@ -1,0 +1,26 @@
+@voice soto-marta
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: loyal, blunt; quiet corner, evening shower.
+// "Fixes lamps, ovens and washers, and grumbles about all three." Keeps a tin of good biscuits and tells no one;
+// married just before the tour and counts the days (quiet background).
+// With juniors: gruff, then the biscuit tin comes out; the most loyal person in Works once you're in. Mood tells: low,
+// grumbles about all three in one breath; high, grumbles with a grin.
+tpl: gruff
+talk: Gruff and blunt; grumbles as a kind of affection; short lines; a soft centre that shows only with biscuits.
+cares: lamps, ovens and washers (and grumbling about them) | the secret biscuit tin | the people in Works | a quiet corner
+jokes: Marta grumbles at every lamp, oven and washer, and every one works afterwards | the biscuit tin nobody knows about (everyone knows)
+hi: Huh. You | Hm. Hello | Oh, it's you
+bye: Go on, then | Off | Mind yourself
+yes: Fine | S'pose | Yeah, all right
+thanks: Ta | Hm. Thanks
+wow: Well, I never | Huh, not bad
+sigh: Typical | Here we go
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: guarded
+loves: biscuits | quiet
+likes: tea | tools
+invites: quiet corner | tea
+joy: the biscuit tin, opened only for the right people
+thread: loss
+keepsake: the good biscuit tin, empty, "for you to fill"
+avoid: the day Marta goes quiet every year (until the thread opens)

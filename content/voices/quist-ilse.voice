@@ -1,0 +1,26 @@
+@voice quist-ilse
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: dreamy, dry humour; garden lover, runner. "New
+// to Works, eager, and already covered in grease." Grows herbs for the galley; reads mystery novels and guesses the
+// ending too early (the book club of two with Signe Moreau).
+// With juniors: drifts off mid-job to look at something, then says something very dry about it. Mood tells: low,
+// the herbs are wilting; high, the galley used Ilse's herbs and Brennan said so.
+tpl: dreamy
+talk: Slow and dry; drifts, then lands a deadpan line; talks about herbs the way others talk about friends.
+cares: the herbs for the galley | this week's mystery | the garden on a quiet morning | whether Works is really for Ilse
+jokes: Ilse's herbs have names, and the basil is "a bit of a show-off" | Ilse versus Signe, the book club of two
+hi: Oh, hello | Hm? Hi | Hello, you
+bye: Bye, then | Mind the basil | See you
+yes: Mm, all right | Suppose so | Yes, fine
+thanks: Thanks | That's nice of you
+wow: Oh, that's good | Huh. Lovely
+sigh: Mm | Well, then
+nick: - | - | {me} | {me} | {me}
+needs: share
+openness: normal
+loves: garden | book
+likes: tea | running
+invites: garden | running
+joy: the herbs Ilse grows for the galley
+thread: stuck
+keepsake: a cutting from Ilse's basil, the show-off
+avoid: asking Calder for a trial shift in the garden (until the thread opens)

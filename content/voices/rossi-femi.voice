@@ -1,0 +1,25 @@
+@voice rossi-femi
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: optimistic, competitive; tea break, calls home,
+// early to bed. Brought a telescope from home; learning Veyli from a phrasebook (one word a day, often the wrong one).
+// With juniors: a friendly racer ("bet I finish my job first"); shares the win either way. Mood tells: low, no Veyli
+// word today; high, two words, used in a sentence.
+tpl: earnest
+talk: Bright and keen; turns small things into friendly races; tries a Veyli word in most chats and checks it after.
+cares: being first on the board | the telescope from home | learning Veyli | the certification exam
+jokes: a Veyli word a day, usually not the one Femi meant | everything is a race, even tea
+hi: Hello! | Hi, hi | Morning or whatever!
+bye: See you! | Race you back | Bye for now
+yes: Yes! | Definitely | On it
+thanks: Thanks! | Brilliant, thanks
+wow: Brilliant! | Oh, wow
+sigh: Oh, bother | Next time, then
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: open
+loves: star | game
+likes: tea | book
+invites: observatory | quiz
+joy: the telescope from home, and the first star of an evening
+thread: exams
+keepsake: a page from the Veyli phrasebook, with Femi's notes in the margin
+avoid: the certification result, before it comes

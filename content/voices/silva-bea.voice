@@ -1,0 +1,26 @@
+@voice silva-bea
+// Works writer, wave 1b draft. Works technician, junior, day. Roster: dreamy, reliable; early riser. "Good with
+// filters, bad with mornings": up early, not awake until the second tea. Grew up on Coriel, misses the rain. Married
+// just before the tour and counts the days (the other half is off the ship; quiet background, never romance with you).
+// With juniors: gentle, a bit vague, very good at filters. Mood tells: low, the day count comes up twice; high, Bea
+// talks about rain.
+tpl: dreamy
+talk: Soft and drifting; trails off mid-thought and comes back; describes the ship's sounds as weather.
+cares: filters, done properly | the rain on Coriel | the day count until the tour ends | the second tea of the morning
+jokes: Bea knows the day count to the end of the tour, always, without looking | Bea is awake by the second tea, not before
+hi: Oh, hello | Mm, hi | Hello there
+bye: Bye, then | See you around | Off I drift
+yes: Mm, yes | All right | I can do that
+thanks: Oh, thank you | That's kind
+wow: Oh, look | That's lovely
+sigh: Mm | Oh, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: tea | rain
+likes: garden | music
+invites: observatory | garden
+joy: the sound of the garden's sprinklers, "nearly rain"
+thread: homesick
+keepsake: a bottle of Coriel rainwater, kept for a bad day
+avoid: the day count, when it's a bad day (until friend tier)

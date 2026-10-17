@@ -1,0 +1,26 @@
+@voice halloran-emeka
+// Works writer, wave 1b draft. Works systems officer, day shift; swapped weekends with Torres for the arrival. Roster:
+// kind, loyal; tea break, garden lover, late sleeper. Terrible jokes at breakfast (arrives last minute, joke ready);
+// bakes on rest days if Brennan allows. Hands you the new hand's mug at Friday tea (plan Part 1).
+// With juniors: a big-brother sort; covers for small mistakes and then quietly shows you how. Mood tells: low, no joke
+// at breakfast (people notice); high, two jokes, both worse.
+tpl: warm
+talk: Warm, unhurried, laughs at his own jokes before the end; says "lovely" a lot; always asks if you've eaten.
+cares: the Works team being looked after | baking, when Brennan lets him near an oven | the Friday tea rota | the garden's tomatoes
+jokes: one terrible joke every breakfast, and nobody can stop him | Brennan's oven is a "kingdom" and Emeka needs a visa
+hi: Morning, morning | Hello, you | Ah, hello
+bye: Look after yourself | Off you pop | Mind the step
+yes: Course I will | Lovely, yes | Happy to
+thanks: Ah, lovely | You're a treasure | Thanks ever so
+wow: Ooh, look at that | Well, isn't that grand
+sigh: Oh, dear me | Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: practical
+openness: open
+loves: sweet | baking
+likes: tea | garden
+invites: garden | tea
+joy: baking, and the face people make at a warm scone
+thread: burnout
+keepsake: a scone tin with a dent in the lid
+avoid: saying no to anyone (it's his thread)
