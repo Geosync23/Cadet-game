@@ -1,0 +1,41 @@
+@crew volkov-maeve
+// Maeve Volkov (she/her), Works technician, days. The Works writer, batch 2. Light, teasing; times things for fun.
+
+== greet
+? tier=stranger
+- Hiya. You're new. Coffee machine's in the tea corner. If it beeps twice, come and get me.
+- Ooh, hello. Scrubber jobs are quick. Ten minutes, if you're me. Twenty if you're not.   #funny
+? tier>=acquaintance time:morning
+- Hiya, {me}. Coffee's on. I fixed it. Again. It loves me really.   #funny
+? tier>=acquaintance
+- Hey, you. Bet you can't get to the board in under a minute. Go.
+? tier>=colleague
+- Ooh, {me}. Rematch with Kovac on Friday. Scrubbers. Bring a stopwatch.
+? tier>=friend
+- Hey, you. I pressed you a flower. Don't sit on it.   #warm
+
+== bye
+- Ta-ra. Run along.
+- See you. And if the coffee machine beeps, you know who to call.
+
+== feel
+? mood:low
+- Bit tired. I'll get dinner late, I think. When it's quiet.
+? mood:high
+- Nine minutes fifty on a scrubber. Don't tell Kovac. Tell Kovac.   #funny
+
+== near
+? act:work
+- Ready? Panel off. Filter out. Seal. Go. Ooh, not bad. Again?
+? act:gym
+- Two laps, then I'll race you. Fine. One lap.
+
+== life
+? tier>=acquaintance
+- I press flowers from the garden. Cruz hasn't noticed. Cruz has definitely noticed.   #funny
+? tier>=colleague
+- Yoon and Shah both say they're best at the coffee machine. They're very brave.   #funny
+
+== joy
+? tier>=acquaintance
+- Press a flower right and it keeps its colour for years. Look. This one's from Sowing.

@@ -1,0 +1,41 @@
+@crew soto-marta
+// Marta Soto (she/her), Works technician, days. The Works writer, batch 2. Gruff, blunt; grumbles as affection.
+
+== greet
+? tier=stranger
+- Huh. New. Lamps, ovens, washers: if it's one of those, it's probably mine. Ask.
+- Hm. Hello. Washers on Deck 4 stick on the spin. Kick the left side. Gently.
+? tier>=acquaintance time:morning
+- Huh. You. Morning. The washer's sulking already. Before breakfast. Typical.   #funny
+? tier>=acquaintance
+- Oh, it's you. Fine. Hello. Don't tell anyone I said hello.   #funny
+? tier>=colleague
+- Hm. You. Sit down. No, there. That chair wobbles. I'm fixing it. Eventually.
+? tier>=friend
+- Oh, it's you. Good. Here. Biscuit. Don't ask where from.   #warm
+
+== bye
+- Go on, then. Off.
+- Mind yourself. And mind that washer.
+
+== feel
+? mood:low
+- Lamp, oven, washer. All three today. All three. I've nothing left to grumble with.
+? mood:high
+- Oven on Deck 3 runs like new. I won't say I'm proud. I'm a bit proud.
+
+== near
+? act:work
+- This lamp. This lamp. Every week. Fine. Fine. There. It works. Of course it works.   #funny
+? act:leisure
+- Quiet corner. Mine. You can sit if you don't talk. Or talk a bit. A bit.
+
+== life
+? tier>=acquaintance
+- I married just before the tour. I count the days. So do Silva and Jovanovic. We compare.
+? tier>=colleague
+- I keep a tin of good biscuits. Nobody knows where. Pell knows where. Nobody else.   #funny
+
+== joy
+? tier>=acquaintance
+- A washer that spins first time. Not a wobble. Just spins. Best noise on the ship.

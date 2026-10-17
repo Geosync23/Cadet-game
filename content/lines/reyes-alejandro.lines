@@ -1,0 +1,41 @@
+@crew reyes-alejandro
+// Alejandro Reyes (he/him), engine officer, nights. The Works writer, batch 2. Fast, looping; "anyway".
+
+== greet
+? tier=stranger
+- Oh! Hi. Reyes, nights, engines. If the coils hum funny after ten, that's me. Anyway.
+- Hello, hi. You're the new one. Engine room's on Deck 6. Don't touch the reactor door.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Torres left me a note. It's mostly about coil three.   #funny
+? tier>=acquaintance
+- {hi}! Did I tell you about the cat? I did. I'll tell you again. Anyway, hi.   #funny
+? tier>=colleague
+- {me}! Good. Sit. Tell me something that isn't about coils. Please.
+? tier>=friend
+- Oh, it's you. Good. Everything's better when it's you. Anyway.   #warm
+
+== bye
+- {bye}. Sorry, I talked a lot. I always talk a lot.
+- Right, anyway. Coils won't tend themselves. Well, they would, but badly.
+
+== feel
+? mood:low
+- Long watch. Coil three was shy all night. I sat with her. That's allowed.
+? mood:high
+- Coils sang all night. All three. I played along on the table. Sorry, Petra.   #funny
+
+== near
+? act:work
+- Listen. Coil three's quieter than coil two. Not sulking. Shy. Torres is wrong.   #funny
+? act:dinner
+- I'll stay a bit. I like it when the mess empties. You can hear the cups.
+
+== life
+? tier>=acquaintance
+- My cat back home is furious about the tour. My neighbour writes to tell me. Often.   #funny
+? tier>=colleague
+- I write home to Lisk every rest day. On paper. The letters are always a page too long.
+
+== joy
+? tier>=acquaintance
+- I play in the music room after shift. Nobody's awake to mind. Ideal.
