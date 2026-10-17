@@ -253,8 +253,8 @@ with sync_playwright() as pw:
     bed = g.ev("[SHIP.time.day, hhmm(SHIP.time.min), Math.round(SHIP.player.needs.energy), document.getElementById('tt').textContent, ACT && ACT.kind, ACT && ACT.phase]"); print('  at 21:00:', tp, bed, 'dialog shown:', asked)
     check(tp is True and not asked and bed[0] == day0 + 1 and bed[1] == '06:00' and bed[2] == 100 and bed[3] == 'Good morning' and bed[4:] == ['lie', 'do'], f'the bunk at 21:00 should lie you down and sleep you to 06:00, still in it: {bed}')
     g.ev("actEnd(true)")
-    # lay down by day and still there at 20:00 (reviewer 1, 0.28.37): you fall asleep, as if you'd lain down at night
-    g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 19 * 60 + 57); needsT = null"); g.step(3); day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
+    # lay down by day (19:40, a few minutes' walk from the bunk) and still there at 20:00 (reviewer 1, 0.28.37): you fall asleep, as if you'd lain down at night
+    g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 19 * 60 + 40); needsT = null"); g.step(3); day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
     for j in range(60):
         g.step(10)
         if g.ev("!!ACT && ACT.kind === 'lie' && ACT.phase === 'do'"): break
