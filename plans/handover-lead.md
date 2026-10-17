@@ -268,3 +268,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - **Seats now:** see TEAM.md roster (new tonight: build master 2, dialogue 2, social B2, sim 3, device 3, head writer 3, writer 5, player 4).
 - 06:35 Hourly check-in. Lead memory ~56%: plan to release 0.60.3 then hand over (~65%).
 - 06:40 The user's rule: a handover note written in advance is always refreshed right before the actual handover. Added to TEAM.md (handover rule); told all helpers.
+- 07:35 Session resumed after the usage reset. Content rule: claude/content stays on its base; build master takes content/ only (git checkout <hash> -- content/) + content_gen on the combine.
