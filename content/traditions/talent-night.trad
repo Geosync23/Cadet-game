@@ -1,10 +1,10 @@
 @tradition talent-night
-// Talent night: every fourth Monday (week 2 of the four-week cycle: days 8, 36, 64...), the bow lounge. Musicians and
-// anyone brave. Monday evenings only have running club (Deck 3 gym, 19:15-20:00), so this starts after it ends.
+// Talent night: once a year (the user, check-in A), day 152, a Friday in Greening, in the bow lounge; on the night it
+// takes the music jam's place (the voice budget: the rarer wins). Musicians and anyone brave.
 // The seat 16 designer's (claude/trad-monthly). Notes: plans/trad-notes-monthly.md. Format: plans/trad-format.md.
 k: 455
 title: Talent night
-when: every 4 weeks monday week 2
+when: year day 152
 at: 20:15-21:45
 min: 25
 jitter: 20
@@ -13,7 +13,7 @@ who: dahl-mira always, musician 85%, music 55%, lounge-regular 50%, bar-regular 
 anim: musician play, bar-regular drink, everyone talk
 host: dahl-mira
 from: dahl-mira
-ties: decor talent-stage
+ties: decor talentStage
 invite: host=dahl-mira odds=35% line="Talent night tonight. You don't have to get up. But you could."
 
 == mail

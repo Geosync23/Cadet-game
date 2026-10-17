@@ -67,6 +67,7 @@ One tradition per file, the file named after its id.
 | `ties:` | no, one per kind | what it asks of other parts of the ship (below) | `ties: garden harvest` |
 | `invite:` | no | crew may invite you (social reads it) | `invite: host=rina odds=40% line="Tiles tonight. I need a victim."` |
 | `trace:` | no | a lasting mark the first time you join it (the deck architect's DECK_DRESS id), saved with the day: Sowing morning's `seedlingYours` plants your seedling | `trace: seedlingYours` |
+| `flag:` | no | waits for a story beat: it happens only once that flag is set (`flag(name)`, section 13), e.g. bridge hour after your first invitation to the bridge | `flag: bridge.invited` |
 | `meal:` | no | `dinner` or `breakfast`: going to it IS that meal for those who go (the sim engineer plans them there instead of the servery); the galley's dish goes in `ties: galley ...` | `meal: dinner` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).
@@ -76,6 +77,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | Write | Means |
 | --- | --- |
 | `weekly tuesday` | every Tuesday |
+| `weekly wednesday,thursday` | two evenings a week |
 | `every 2 weeks tuesday` / `every 2 weeks tuesday week 2` | every other Tuesday (week 1 = days 1-7, the default; week 2 = days 8-14) |
 | `every 4 weeks saturday week 3` | the Saturday of every fourth week, starting with week 3 (days 20, 48, 76...) |
 | `quarter week 1 saturday` | the first Saturday of each season (days 6, 97, 188, 279) |

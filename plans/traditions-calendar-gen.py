@@ -19,7 +19,7 @@ def place(w):
     r = w.get('room'); r = r.strip('^$').replace('\\','') if r else {'garden':'the garden','garden-tend':'the garden beds','gym':'the gym','music':'the music room','common-room':'the junior common room'}.get(w.get('pool'), w.get('pool'))
     return f"{r}, Deck {w['deck']}"
 def when(w):
-    if 'weekday' in w and 'every' not in w and 'after' not in w: return 'Every ' + ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][w['weekday']]
+    if 'weekday' in w and 'every' not in w and 'after' not in w: return 'Every ' + ' and '.join(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][x] for x in (w['weekday'] if isinstance(w['weekday'], list) else [w['weekday']]))
     if w.get('every') == '2weeks': return f"Every other {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][w['weekday']]}" + (f" from day {w['from']}" if w.get('from') else '')
     if w.get('every') == '4weeks': return f"Every 4 weeks, {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][w['weekday']]} of week {w.get('week',1)}"
     if w.get('every') == 'quarter':
@@ -65,6 +65,7 @@ def card(t, new=True):
     if 'decor' in ti: needs.append(f"props: {ti['decor']}")
     if 'tally' in ti: needs.append('a vote (tally)')
     if t.get('trace'): needs.append(f"a keepsake: {t['trace']}")
+    if t.get('flag'): needs.append('a story beat first (flag ' + t['flag'] + ')')
     return (f'<div class="card"><b>{esc(t["name"])}</b><div class="when">{esc(when(t["when"]))}, {hm(t["at"][0])}-{hm(t["at"][1])}</div>'
             f'<div class="where">{esc(place(t))}{" · host " + esc(host) if host else ""}</div>'
             f'<p class="q">“{esc(line(t,"mail") or line(t,"ask"))}”</p>'
@@ -72,7 +73,8 @@ def card(t, new=True):
 # the week grid
 rows = {i: [] for i in range(7)}
 for n, wd, a, b, where, host in OLD: rows[wd].append((a, f'<li class="old"><span>{hm(a)}</span> {esc(n)} <i>{esc(where)}</i></li>'))
-for t in weekly: rows[t['when']['weekday']].append((t['at'][0], f'<li class="new"><span>{hm(t["at"][0])}</span> {esc(t["name"])} <i>{esc(place(t))}</i></li>'))
+for t in weekly:
+  for wdx in (t['when']['weekday'] if isinstance(t['when']['weekday'], list) else [t['when']['weekday']]): rows[wdx].append((t['at'][0], f'<li class="new"><span>{hm(t["at"][0])}</span> {esc(t["name"])} <i>{esc(place(t))}</i></li>'))
 week = ''.join(f'<div class="day"><h3>{WD[i]}</h3><ul>{"".join(x for _, x in sorted(rows[i]))}</ul></div>' for i in range(7))
 # the 4-week cycle
 cycrows = ''

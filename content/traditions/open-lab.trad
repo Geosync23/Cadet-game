@@ -15,7 +15,7 @@ who: sato always, survey 50%, stargazer 55%, everyone 15%
 anim: talk
 host: sato
 from: sato
-ties: decor open-lab
+ties: decor openLab
 invite: host=sato odds=25% line="Open lab this evening. I have a rock that hums. Come and listen."
 
 == mail

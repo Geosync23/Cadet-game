@@ -1,6 +1,7 @@
 @tradition one-week-aboard
 // One week aboard: day 7, your first Sunday. Calder's Mail the evening before, then a tea in the bow lounge with Zeke
-// Torres (your escort) and Pell in the afternoon, so it never counts towards an evening's two traditions.
+// Torres (your escort) in the afternoon, so it never counts towards an evening's two traditions. Pell and Tomas are on
+// shift at 15:30 on day 7 (reviewer 2), so it's Zeke's tea, with whoever's off.
 // Design note: plans/trad-notes-seasons.md.
 k: 481
 title: One week aboard
@@ -11,17 +12,17 @@ prio: 1
 where: 3 room Bow lounge: lounge-seat
 where: 3 room Mess hall: mess-seat
 hold: 1
-who: torres-zeke always, pell 90%, tomas 50%, works+juniors 25%
+who: torres-zeke always, works+juniors 25%
 anim: drink
 host: torres-zeke
 from: calder
-invite: host=pell odds=60% line="A week aboard! Zeke and I are buying you a tea in the bow lounge at half three. No arguing."
+invite: host=torres-zeke odds=60% line="A week aboard! Tea's on me, bow lounge, half three. No arguing."
 
 == mail
-- One week aboard tomorrow. Zeke tells me you haven't broken anything yet. Well done. He and Pell will buy you a tea in the bow lounge at {time}.
+- One week aboard tomorrow. Zeke tells me you haven't broken anything yet. Well done. He'll buy you a tea in the bow lounge at {time}.
 
 == ask
-- A whole week. Tea at half three, bow lounge. We're buying.
+- A whole week. Tea at half three, bow lounge. Zeke's buying.
 - One week down! You'll be telling us where things are soon.   #funny
 
 == here

@@ -26,7 +26,8 @@ STEP = 0.05                    # real seconds a step, as day_check
 DUE_NEW = r"""((w, lo, hi) => {
   const s = new Set(), wdOf = d => ((d - 1) % 7 + 7) % 7, seas = d => ['sowing', 'greening', 'harvest', 'lanterns'][Math.floor((((d - 1) % 364) + 364) % 364 / 91)];
   const add = d => { if (d >= lo && d <= hi && (!w.season || [].concat(w.season).includes(seas(d))) && (w.from == null || d >= w.from) && (w.until == null || d <= w.until)) s.add(d); };
-  const n = { week: 1, '2weeks': 2, '4weeks': 4 }[w.every];
+  const n = { week: 1, '2weeks': 2, '4weeks': 4 }[w.every || (w.weekday != null ? 'week' : '')];
+  if (Array.isArray(w.weekday)) { for (const x of w.weekday) dueNew({ ...w, weekday: x }, lo, hi).forEach(d => s.add(d)); return s; }
   if (w.after === 'arrival') { const a = typeof introArrival === 'function' ? introArrival() : 0;
     if (w.days != null) add(a + w.days); else add(a + 1 + (w.weekday - wdOf(a + 1) + 7) % 7 + 7 * ((w.nth || 1) - 1)); }
   else if (n) { const first = 1 + 7 * ((w.week || 1) - 1) + w.weekday; for (let d = first; d <= hi; d += 7 * n) add(d); for (let d = first - 7 * n; d >= lo; d -= 7 * n) add(d); }
@@ -34,10 +35,10 @@ DUE_NEW = r"""((w, lo, hi) => {
   else if (w.every === 'year') for (let y = 0; 364 * y + 1 <= hi; y++) add(364 * y + (w.dayOfYear != null ? w.dayOfYear : 1 + 7 * ((w.week || 1) - 1) + w.weekday));
   return s;
 })"""
-IS_NEW = "(w => typeof w.every === 'string' || !!w.after || w.season != null || w.from != null || w.until != null)"
+IS_NEW = "(w => typeof w.every === 'string' || !!w.after || w.season != null || w.from != null || w.until != null || Array.isArray(w.weekday))"
 
 PLANS = r"""(days => {
-  const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
+  const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.filter(e => !e.flag || (typeof flag === 'function' && flag(e.flag))).map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const isNew = """ + IS_NEW + r""", dueNew = """ + DUE_NEW + r""", lo = Math.min(...days), hi = Math.max(...days);
   const DUE = new Map(SHIP_TRADITIONS.filter(ev => isNew(ev.when)).map(ev => [ev.id, dueNew(ev.when, lo, hi)]));
   const tagId = tag => { const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read))?$/.exec(tag); return m && m[1]; };
@@ -45,7 +46,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -328,6 +329,7 @@ with sync_playwright() as pw:
       for (const ev of SHIP_TRADITIONS.filter(e => isNew(e.when))) {
         const due = dueNew(ev.when, 0, 364), on = new Set();
         for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === ev.id)) on.add(d);
+        if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) { if (on.size) out.bad.push(ev.id + ' on without its flag ' + ev.flag); out.count[ev.id] = []; continue; }
         for (const d of due) if (!on.has(d) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id)) out.bad.push(ev.id + ' due on day ' + d + ' but not on');
         for (const d of on) if (!due.has(d)) out.bad.push(ev.id + ' on day ' + d + ' but not due');
         out.count[ev.id] = [...on].sort((a, b) => a - b);
@@ -349,11 +351,18 @@ with sync_playwright() as pw:
       for (const t of TRAD_LIST) {
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
-        if (!n && !t.when.birthday) out.bad.push('baked ' + t.id + ' never happens in a whole year');
+        if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
         const d = [...(out.count[t.id] || [])].find(x => x >= 1) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
         for (const k of ['mail', 'ask', 'here']) if ((t.text || {})[k] && !evText(ev[k], e, schedPeople()[0])) out.bad.push(t.id + ': no ' + k + ' line could be filled');
         for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const p of schedPeople()) tradIs(c, p, d, e, t.host);   // every word resolves (TRAD_ERRORS)
         out.baked.push({ id: t.id, from: ev.from, mail: evText(ev.mail, e), ties: t.ties || null });
+      }
+      // a tradition that waits for a story flag (bridge hour: 'bridge.invited') comes on once it's set, and goes again
+      for (const ev of SHIP_TRADITIONS.filter(e => e.flag && typeof flagSet === 'function')) {
+        const was = flag(ev.flag), on = () => [...Array(56).keys()].filter(x => eventsOn(x + 1).some(e => e.id === ev.id)).length;
+        flagSet(ev.flag, null); const off = on(); flagSet(ev.flag, true); const yes = on(); flagSet(ev.flag, was === undefined ? null : was); eventsOn(1);
+        out.flags = (out.flags || []).concat(ev.id + ': ' + off + ' without, ' + yes + ' with ' + ev.flag);
+        if (off || !yes) out.bad.push(ev.id + ' and its flag ' + ev.flag + ': ' + off + ' days without, ' + yes + ' with');
       }
       // and each rhythm on its own, as a tradition designer might write it
       for (const w of [{ every: 'week', weekday: 6 }, { every: '2weeks', weekday: 1 }, { every: '2weeks', weekday: 1, week: 2 }, { every: '4weeks', weekday: 5, week: 3 },
@@ -371,6 +380,7 @@ with sync_playwright() as pw:
     print('Seasons (day:season:week):', ' '.join(yr['seasons']))
     print('The voice budget left out (day:ids):', ' '.join(yr['dropped']) or 'nothing')
     print('Invitations (tradition:host):', ' '.join(yr['invites']) or 'none')
+    print('Flagged traditions:', yr.get('flags') or 'none')
     exp = ['0:lanterns:13', '1:sowing:1', '91:sowing:13', '92:greening:1', '182:greening:13', '183:harvest:1', '273:harvest:13', '274:lanterns:1', '364:lanterns:13', '365:sowing:1']
     if yr['seasons'] != exp: fail(f"seasons {yr['seasons']}")
     for b in yr['baked']: print(f"  baked {b['id']}: from {b['from']}; ties {b['ties']}; Mail: {b['mail']}")
@@ -384,8 +394,8 @@ with sync_playwright() as pw:
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
-    ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk'}            # the deck architect, 0.38.10-0.38.11
-    ASKED = {'long-tables', 'cup-board', 'harvestTables', 'mending-table', 'mugRack', 'open-lab', 'rummage-crates', 'talent-stage', 'yearsEnd'}   # plans/trad-notes-*.md
+    ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk', 'mugYours', 'longTables', 'harvestTables', 'cupBoard', 'talentStage', 'yearsEnd', 'openLab'}   # the deck architect, 0.38.10-0.38.14 and their list
+    ASKED = set()                                         # asked for in plans/trad-notes-*.md, not yet named by the deck architect
     ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
     built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
     waiting = sorted({x for _, x in ids if x not in built})

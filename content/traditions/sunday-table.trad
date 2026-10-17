@@ -16,7 +16,7 @@ anim: talk
 host: brennan
 from: brennan
 ties: galley meal=dinner seating=friends side=tasting
-ties: decor long-tables
+ties: decor longTables
 
 meal: dinner
 == mail

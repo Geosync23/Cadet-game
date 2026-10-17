@@ -4,7 +4,7 @@
 // Small and quiet on purpose: few go. Design note: plans/trad-notes-weekly.md.
 k: 438
 title: Late piano
-when: weekly thursday
+when: weekly wednesday,thursday
 at: 21:45-22:30
 min: 20
 jitter: 10

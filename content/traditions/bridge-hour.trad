@@ -6,6 +6,7 @@
 k: 461
 title: Bridge hour
 when: every 4 weeks tuesday week 4
+flag: bridge.invited
 at: 17:15-18:00
 min: 20
 where: 1 room Bridge lobby: event
