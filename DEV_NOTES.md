@@ -360,6 +360,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.42.8 | Signing the manifest hands you your kit bag (player engineer 3's `bagGive`, typeof-guarded; not on skip). Section 15 stows it at the bunk and locks the device until `intro.device` (`deviceLocked`). intro_check OK. |
 | 0.42.9 | The kit bag is section 15's alone now (`bagTick` gives it on the ramp), so 0.42.8's `bagGive` call is gone; Torres's missed-bunk Mail asks you to drop your bag in your locker (it's still in your hands). intro_check OK. |
 | 0.42.10 | Reviewer 1's low notes on 0.42.5-0.42.9 (PASS): Torres's "This way!" picks a line correctly on Day 0's negative minutes; the goal arrow is set only when his tile changes (no new object each frame); a meeting step reached while another dialogue is open waits its turn (`INTRO_UI.meet`) and sends its gist by Mail if you've left the room. Smoke test and intro_check OK. |
+| 0.42.11 | Reviewer 1 (PASS on 0.42.10), a tiny note: Torres's goal arrow comes back at once if another section's arrow replaced it while he stood still. Smoke test and intro_check OK. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
