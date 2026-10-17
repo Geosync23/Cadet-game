@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.3 
+   STARSHIP CADET: CSV Wren                           build 0.39.4 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.4';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15247,7 +15247,7 @@ function chatTick() {
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
 // Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
-// (0.39.3); later goodbyes, couples and the story arcs. Lazy like the rest
+// (0.39.3), goodbyes (0.39.4); later couples and the story arcs. Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -15587,6 +15587,7 @@ const MOMENTS_BUILTIN = {
 };
 const momentBaked = () => { try { return [typeof MOMENTS !== 'undefined' && MOMENTS || null, typeof MOMENT_THEMES !== 'undefined' && MOMENT_THEMES || null]; } catch (e) { return [null, null]; } };   // section 22's baked blocks
 function momentDef(id) {                                 // '<crewId>:<beat>' -> { who, beat, thread, tone, ... , lines } | null
+  if (/:bye$/.test(String(id))) return goodbyeDef(String(id).slice(0, -4));   // a goodbye (B5)
   const m = /^(.+):(\d+)$/.exec(String(id)); if (!m) return null;
   const who = m[1], beat = +m[2], [MO, TH] = momentBaked(), thread = voiceOf(who).thread || '';
   let d = MO && MO[id] || MOMENTS_BUILTIN[id] || null;
@@ -15638,6 +15639,7 @@ function momentShow(id) {
 }
 function momentDone(p, d, c) {                           // the reply was picked: the moment counts
   const t = Math.floor(shipNow()), day = Math.floor(t / 1440) + 1, st = storyM(p.id), S = SHIP.social.stories, v = voiceOf(p.id), r = relGet(p.id);
+  if (d.tone === 'goodbye') return goodbyeDone(p, d, c);
   const th = (d.thread || '').replace(/^arc:/, ''), flavour = c.flavour || 'listen';
   st.at = t; if (MOMENT_SERIOUS.has(d.tone)) { S.serious = day; if (d.tone !== 'resolution') st.hf = t; }
   if (!(d.thread || '').startsWith('arc:')) st.b = Math.max(st.b, d.beat);
@@ -15653,6 +15655,52 @@ function momentDone(p, d, c) {                           // the reply was picked
     if (typeof arcTold === 'function') arcTold(p, arc[n]);
     if ((r.arc || 0) === n) { r.arc = n + 1; r.arcDay = SHIP.time.day; if (arc[n].mail) SHIP.social.mail.push({ at: t + arc[n].mail.after, from: p.name, subject: arc[n].mail.subject, body: arc[n].mail.body }); }   // an older arcTold that takes no beat
   }
+}
+// ---- goodbyes (0.39.4, B5; plans/social-deep-plan.md Part 8b "Goodbyes") ----
+// A day or two before someone is transferred off, section 20's card leads with their goodbye (anyone at acquaintance
+// or better) and asks goodbyeMoment(p, t) -> { id: '<crewId>:bye', hint } | null; "Sit with them" plays it on the
+// moments engine, anywhere (they came to find you; no gates, never counted as the day's serious moment). The scene
+// talks about your friendship: the writers' own MOMENTS['<crewId>:bye'] when there is one, else goodbyeDef builds it
+// from where they're going and when, their heaviest memories of you (section 20's memThing: "the oven, the quiz"), a
+// moment you shared, and how close you are; one choice of four flavours; a close friend gives you their keepsake.
+// After: relAdd 'moment' (GOODBYE_PTS, +MOMENT_FIT for the flavour they need), memAdd 'moment.bye.<flavour>' (core),
+// simNote('moment', { tone: 'goodbye' }), and storyM(id).bye = the day (said once)
+const GOODBYE_PTS = 3;
+const GOODBYE_WHEN = ['today', 'tomorrow', 'the day after tomorrow'];
+function goodbyeMoment(p, t = shipNow()) {
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyM(p.id).bye) return null;
+  const left = typeof leavingSoon === 'function' ? leavingSoon(p, Math.floor(t / 1440) + 1) : null; if (left === null || left > 2) return null;
+  const d = goodbyeDef(p.id); if (!d) return null;
+  return { id: p.id + ':bye', hint: voiceFill(p.id, d.hint, t) };
+}
+function goodbyeDef(id) {
+  const p = socP(id); if (!p) return null;
+  const [MO] = momentBaked(), own = MO && MO[id + ':bye'];
+  if (own && Array.isArray(own.lines)) return Object.assign({ who: id, beat: 'bye', thread: voiceOf(id).thread || '', hint: 'Got a minute? Before I go.' }, own, { who: id, beat: 'bye', tone: 'goodbye' });
+  const tier = relTier(id), left = typeof leavingSoon === 'function' ? leavingSoon(p) : null, when = GOODBYE_WHEN[left] || 'soon';
+  const to = p.transferTo ? 'the ' + String(p.transferTo).replace(/^the /i, '') : 'another ship';
+  const mem = (SHIP.mem[id] || []).slice().sort((a, b) => b[2] - a[2] || (a[0] < b[0] ? -1 : 1));
+  const things = [...new Set(mem.map(m => typeof memThing === 'function' ? memThing(m[0]) : null).filter(Boolean))].slice(0, 2);
+  const sat = mem.some(m => /^moment\./.test(m[0]) && !/\.bye\./.test(m[0]));
+  const lines = [{ who: id, text: (tier >= 3 ? 'I wanted to catch you properly. ' : '') + 'I\'m off to ' + to + ' ' + when + '. Transferred.' }];
+  if (things.length) lines.push({ who: id, text: 'I keep thinking about ' + things.join(', and ') + '. You were part of all that.' });
+  else lines.push({ who: id, text: tier >= 2 ? 'We didn\'t get as much time as I\'d have liked. You made the place friendlier, though.' : 'We only just got to know each other. Shame, that.' });
+  if (sat && tier >= 3) lines.push({ who: id, text: 'And that evening you sat with me. I won\'t forget it.', pose: 'sigh' });
+  lines.push({ choice: [
+    { text: 'I\'ll miss you. Tell me about where you\'re going.', flavour: 'listen', reply: 'A bigger ship. More people. I\'ll get lost for a week, I expect.' },
+    { text: 'Who\'s going to keep me in line now?', flavour: 'cheer', reply: 'Ha! You\'ll manage. Mostly.' },
+    { text: 'Write to me. I mean it.', flavour: 'practical', reply: 'Every couple of weeks. You\'d better write back.' },
+    { text: 'You made this place feel like home.', flavour: 'share', reply: 'So did you. Honestly.' }].filter((c, k) => tier >= 2 || k !== 3) });
+  lines.push({ who: id, text: tier >= 4 ? 'Here. I want you to have this. So you don\'t forget me.' : tier >= 3 ? '{bye}, {nick}. Look after yourself.' : '{bye}. Look after the old Wren.' });
+  return { who: id, beat: 'bye', thread: voiceOf(id).thread || '', tone: 'goodbye', hint: tier >= 3 ? 'Got a minute? There\'s something I need to tell you properly.' : 'Before I go, have you got a minute?', keepsake: tier >= 4 ? voiceOf(id).keepsake : null, lines };
+}
+function goodbyeDone(p, d, c) {
+  const v = voiceOf(p.id), flavour = c.flavour || 'listen';
+  storyM(p.id).bye = SHIP.time.day;
+  relAdd(p.id, 'moment', (GOODBYE_PTS + (c.fit ? MOMENT_FIT : 0)) * (v.opennessSet ? OPENNESS[v.openness].moment : 1));
+  memAdd(p.id, 'moment.bye.' + flavour, { cls: 'core' });
+  if (typeof simNote === 'function') simNote('moment', { id: p.id + ':bye', who: p.id, beat: 'bye', flavour, tone: 'goodbye', fit: !!c.fit });
+  if (relTier(p.id) >= 4 && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
 }
 // ---- end of 20c ----
 
