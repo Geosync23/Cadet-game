@@ -7,9 +7,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.17** (Head writer 2, 9b5bdd6):
-3,704 lines, 4 home contacts (Mum, Gran, Jo, Sam; facts 4d), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.18.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.18** (Head writer 2, b9a5482):
+3,835 lines, 4 home contacts (Mum, Gran, Jo, Sam; facts 4d), 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.19.
 
 ## What you own
 
@@ -47,6 +47,7 @@
 - **Rest-day lines:** `weekday:` must match the game ROSTER's `rota.offDays` (0 = Monday); writers have got it a day early. Torres's and Calder's day-off lines deliberately use the *planned* Pillar 4 days.
 - **No-romance read, recurring catches:** "thinking about you", "likes you", "just us", a place for two in hints, anyone in
   or on your bed, night "with me", "kept looking at the door", romantic idioms ("hung the stars"), pet-name-like words.
+- **Notes are never signed** (the game appends the name).
 - Card words (`hi`, `bye`...) carry no end punctuation; lines supply it.
 - Day 0 walking lines: `== week1` under `? flag:walk.<step>`; shadow job: `flag:walk.job.<step>` (onboarding maps
   its keys: take, stop.fetch, stop.make, stop.job=panel, done, turnin).
@@ -64,7 +65,7 @@
 | Writer | Session | Branch | State |
 | --- | --- | --- | --- |
 | writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
-| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); batches 1-3 merged (everyone in their area at ~30); on batch 4 (Calder, Kovac toward ~100), then 5 (Vance, Marrow, Holt), then overheard pairs, visitor cards last |
+| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); batches 1-3 merged (everyone in their area at ~30); batch 4 merged (Calder 116, Kovac 106); on batch 5 (Vance, Marrow, Holt toward ~100), then overheard pairs, visitor cards last |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
 | writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
 | **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-8 merged (to 0.48.17: story four ~130-140, the 19 at ~40+, gran/jo/sam.call, gift thanks); on batch 9 (crew asking after your people via flag:home.*), then their handover (~65%). rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
