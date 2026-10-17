@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.9
+   STARSHIP CADET: CSV Wren                           build 0.42.10
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.9';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.10';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14885,7 +14885,7 @@ const INTRO_STUB_SCRIPTS = {
     { who: 'calder', text: 'Eat something. That\'s an order, and I\'m not even here.' }] },
 };
 for (const id in INTRO_STUB_SCRIPTS) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
-const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, manifest: null };
+const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [] };
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
   INTRO_UI.said.forEach(clearTimeout); INTRO_UI.said = [];
@@ -14925,10 +14925,14 @@ function introTick() {
     const done = Object.keys(I.done).length;
     introAdvance(now, { deck: deckDef.num, tile: player.here() });
     // a meeting step you've just reached plays its script (walking out of the room closes it; its gist comes by Mail)
-    for (const id of Object.keys(I.done).slice(done)) {
-      const st = introStepById(id); if (!st || !st.meeting || I.missed.includes(id) || typeof dialogueShow !== 'function' || DIALOGUE) continue;
-      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
-      dialogueShow(st.meeting, { id: 'intro-' + id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now });
+    for (const id of Object.keys(I.done).slice(done)) { const st = introStepById(id); if (st && st.meeting && !I.missed.includes(id)) INTRO_UI.meet.push(st); }
+    // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
+    for (const st of INTRO_UI.meet.slice()) {
+      if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
+      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
+      if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); continue; }
+      if (DIALOGUE) break;
+      INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(st.meeting, m);
     }
   }
   if (I.step !== INTRO_UI.step) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
@@ -14937,11 +14941,11 @@ function introTick() {
   if (lead) {
     const a = introWalker(), d = st.checkpoint.deck;
     const g = a && deckDef.num === d ? { deck: d, at: cellAt(a.x, a.z), label: 'Zeke Torres' } : { deck: d, at: st.checkpoint.tile, label: 'Zeke Torres' };
-    if (typeof setGoal === 'function') setGoal(g); INTRO_UI.goal = true;
+    const key = g.deck + ':' + g.at; if (key !== INTRO_UI.goalKey && typeof setGoal === 'function') { setGoal(g); INTRO_UI.goalKey = key; } INTRO_UI.goal = true;   // only when it moves
     if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 6 && performance.now() - INTRO_UI.callAt > 15000 && typeof bubbleSay === 'function') {
-      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[(now >> 1) % INTRO_CALL.length], 3.5);
+      INTRO_UI.callAt = performance.now(); bubbleSay(a.h, INTRO_CALL[((now >> 1) % INTRO_CALL.length + INTRO_CALL.length) % INTRO_CALL.length], 3.5);
     }
-  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; if (typeof clearGoal === 'function') clearGoal(); }
+  } else if (INTRO_UI.goal) { INTRO_UI.goal = false; INTRO_UI.goalKey = ''; if (typeof clearGoal === 'function') clearGoal(); }
 }
 
 // =====================================================================
