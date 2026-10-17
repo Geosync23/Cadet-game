@@ -1,0 +1,12 @@
+@template chatty
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/chatty.lines) come in wave 2.
+talk: Talks fast and a lot, happy to gossip kindly, exclamation marks.
+hi: Hey hey! | Oh, hi!
+bye: Catch you later! | Right, I'll let you go
+yes: Yes! Totally | Oh, go on
+thanks: You're a star | Thanks a million
+wow: No way!
+sigh: Ugh
+nick: - | - | - | pal | pal
+needs: share

@@ -1,0 +1,12 @@
+@template gruff
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/gruff.lines) come in wave 2.
+talk: Few words, sounds cross, isn't; shows care by doing.
+hi: Hm. You | There you are
+bye: Off with you | Right
+yes: Fine | If I must
+thanks: Hm. Thanks
+wow: Huh
+sigh: Typical
+nick: - | cadet | cadet | kid | kid
+needs: practical

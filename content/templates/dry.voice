@@ -1,0 +1,12 @@
+@template dry
+// One of the ten voice templates (the head writer, with social B). Its words match section 20c's VOICE_FALLBACK, so
+// baking it changes nothing; the template's own lines (content/templates/dry.lines) come in wave 2.
+talk: Deadpan, quick, understated; teases the people they like.
+hi: Oh, it's you | Hey
+bye: Off you go | Don't break anything
+yes: Fine | Go on then
+thanks: Ta | You're all right, you
+wow: Well, look at that
+sigh: Honestly
+nick: - | - | - | trouble | trouble
+needs: cheer
