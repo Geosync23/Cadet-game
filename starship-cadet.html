@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.44
+   STARSHIP CADET: CSV Wren                           build 0.36.45
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.44';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.45';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14099,11 +14099,14 @@ function socNote(kind, d) {
   SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).slice(-30);
 }
 if (typeof onSim === 'function') for (const k in SOC_CUE_OF) onSim(k, d => socNote(k, d));
-const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', fixed: 'the repair', came: 'coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday' };
+const SOC_THING = { fav: 'the favour', 'fav.lamp': 'the lamp', 'fav.fetch': 'you fetching my things', fixed: 'the repair', came: 'you coming along', gift: 'the present', visit: 'the visit', bday: 'my birthday',
+  show: 'the show', 'show.pell-show': 'the music boxes', appt: 'our catch-ups', mended: 'you patching things up', helped: 'your help' };
 function memThing(key) {                                 // {thing}: a memory's object in words ('fixed.oven' -> 'the oven'), or null
   if (typeof key !== 'string' || !key) return null;
   const mk = /^fixed\.(.+)/.exec(key), kind = mk && typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[mk[1]];
   if (kind) return 'the ' + kind.name.toLowerCase();
+  const mc = /^came\.(.+)/.exec(key), tr = mc && typeof SHIP_TRADITIONS !== 'undefined' && SHIP_TRADITIONS.find(x => x.id === mc[1]);   // came.quiz -> 'the quiz night'
+  if (tr) return 'the ' + tr.name.toLowerCase();
   for (let s = key; s; s = s.includes('.') ? s.slice(0, s.lastIndexOf('.')) : '') if (SOC_THING[s]) return SOC_THING[s];
   return null;
 }
