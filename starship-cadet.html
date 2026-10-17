@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.21
+   STARSHIP CADET: CSV Wren                           build 0.34.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.21';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.22';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12737,27 +12737,33 @@ const shipYearDay = d => (d - 1) % 364 + 1;                  // the ship's year:
 // cake: true asks the galley (section 16) to bake that day; its cake replaces our decor 'cake' prop.
 // decor: props on the deck while it's on (eventDecor). mail: the evening before at 18:00 (text, from). ask: the tap
 // line before it; here: the tap line during it; thanks: the toast when the player joins.
+// invite (Pillar 4, for section 20's invitations): { host: crew id, odds: the chance that day that someone going asks
+// you (the host first, when they're going), line: what they say }. Data only; section 20 decides who and when.
 const SHIP_TRADITIONS = [
   { id: 'running', name: 'Running club', k: 320, when: { weekday: 0 }, at: [1155, 1200], min: 20,
     where: [{ deck: 3, pool: 'gym' }],
     who: (p, d) => evHas(p, d, 'runner') ? .9 : evHas(p, d, 'gym-regular') ? .55 : .06, anim: () => null,
     from: 'Rina Deshi', mail: 'Running club tomorrow, 19:15 in the gym. All paces welcome; the slowest lap gets the first cup of water.',
+    invite: { host: 'rina', odds: .3, line: 'Running club after dinner. Come and do a lap with us? Nobody gets left behind.' },
     ask: 'Running club after dinner. You coming?', here: 'Two more laps. Then water.', thanks: 'You run a few laps with the club. Good for the legs, better for the company.' },
   { id: 'observatory-night', name: 'Observatory night', k: 321, when: { weekday: 5 }, at: [1275, 1355], jitter: 30, min: 25,
     where: [{ deck: 2, room: /^Observatory$/, types: ['common-room', 'lounge-seat', 'bench'] }, { deck: 2, room: /^Chart room$/, types: ['common-room', 'lounge-seat'] },
       { deck: 2, room: /^Science corridor$/, types: ['bench'] }],
     who: (p, d) => evHas(p, d, 'stargazer') ? 1 : .3, anim: () => null,
     from: 'Dr. Imra Sato', mail: 'Observatory night tomorrow from 21:15, Deck 2. The scopes are open to everyone. Dress warm; the observatory never is.',
+    invite: { host: 'sato', odds: .2, line: 'Observatory night, after nine. The nebula is showing off. Come up to Deck 2.' },
     ask: 'Observatory night later. Sato says the nebula is showing off.', here: 'Look at that. Never gets old.', thanks: 'You join the stargazers in the dark. Someone points out a pulsar.' },
   { id: 'quiz', name: 'Quiz night', k: 322, when: { weekday: 3 }, at: [1200, 1290], min: 25,
     where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }],
     who: (p, d) => evHas(p, d, 'bar-regular') ? .8 : evHas(p, d, 'lounge-regular') ? .7 : .25, anim: (p, d) => evHas(p, d, 'bar-regular') ? 'drink' : 'talk',
     from: 'Tomas Lind', mail: 'Quiz night tomorrow, 20:00 in the bow lounge. Teams of four. Question master: me. No looking things up on the ship\'s library, Survey.',
+    invite: { host: 'tomas', odds: .5, line: 'Quiz tonight. We need someone who knows the engines. You in?' },
     ask: 'Coming to the quiz tonight? We need someone who knows the engines.', here: 'Shh, the next question is the tie-breaker.', thanks: 'You squeeze onto a quiz team. You get one right about the reactor, and the table cheers.' },
   { id: 'works-tea', name: 'Works Friday tea', k: 323, when: { weekday: 4 }, at: [1125, 1170], min: 20,
     where: [{ deck: 5, room: /^Tea corner$/, types: ['lounge-seat'] }, { deck: 5, room: /^(Works bay|Machine shop|Main storage)$/, types: ['work:works'], free: true }],
     who: (p, d) => p.dept === 'works' ? .8 : 0, anim: (p, d) => p.seed % 3 ? 'drink' : 'wash',
     from: 'Chief Ines Calder', mail: 'Friday tea in the Works bay after dinner: tools cleaned, the week\'s jobs off the board, and the good biscuits.',
+    invite: { host: 'calder', odds: .4, line: 'Friday tea in the Works bay after dinner. You\'re Works now; that means you.' },
     ask: 'Friday tea after dinner. Bring your spanners; they need a wipe.', here: 'Pass the rag. And a biscuit.', thanks: 'You wipe down tools with the Works crew over tea. Calder nods at the clean board.' },
   { id: 'jam', name: 'Music jam', k: 324, when: { weekday: 4 }, at: [1185, 1275], min: 25,
     where: [{ deck: 4, pool: 'music' }],
@@ -12768,6 +12774,7 @@ const SHIP_TRADITIONS = [
     where: [{ deck: 4, pool: 'common-room' }],
     who: (p, d) => p.rank !== 'junior' ? 0 : evHas(p, d, 'common-room') ? .8 : .3, anim: () => null,
     from: 'Pell Okafor', mail: 'Film night tomorrow, 20:00 in the junior common room. It\'s my turn to choose, so: the one with the space whales again.',
+    invite: { host: 'pell', odds: .4, line: 'Film night. Space whales, again. Save me from watching it alone?' },
     ask: 'Film night later. Pell picked the space whales one again.', here: 'Shh. This is the whale bit.', thanks: 'You find a spot for film night. The space whales are as good as Pell said.' },
   { id: 'market', name: 'Sunday swap meet', k: 326, when: { weekday: 6 }, at: [630, 750], min: 20,
     where: [{ deck: 3, room: /^Promenade$/, types: ['bench'] }, { deck: 3, room: /^Lift plaza$/, types: ['bench'] }],
@@ -12778,6 +12785,7 @@ const SHIP_TRADITIONS = [
     where: [{ deck: 3, pool: 'garden-tend' }, { deck: 3, pool: 'garden' }],
     who: (p, d) => evHas(p, d, 'gardener') ? .95 : evHas(p, d, 'garden-lover') ? .8 : .12, anim: () => 'water',
     from: 'Chef Auda Brennan', mail: 'Harvest morning in the hydroponics garden tomorrow, 09:30. Many hands, quick picking. Fresh salad with dinner.',
+    invite: { host: 'brennan', odds: .3, line: 'Harvest in the garden at half nine. Many hands, quick picking. Coming?' },
     ask: 'Harvest in the garden this morning. Fresh salad tonight.', here: 'These tomatoes are huge this time.', thanks: 'You help pick the harvest. Your hands smell of tomato leaves all morning.' },
   { id: 'birthday', name: 'Birthday', k: 328, when: { birthday: true }, at: [1215, 1270], jitter: 15, early: 5, min: 20, prio: 2,
     where: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'], ids: /^3-mess-([1-9]|1[0-6])$/ }, { deck: 3, pool: 'mess-seat' }, { deck: 3, pool: 'lounge-seat' }, { deck: 3, pool: 'bench' }],

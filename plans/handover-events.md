@@ -131,6 +131,7 @@ Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and pla
 - **0.34.19:** new rhythms in `when` (`evDue`), `season(d)` / `seasonOf(d)`, `tradTies(kind, d)`.
 - **0.34.20:** the TRADITIONS loader (`tradLoad`, `TRAD_ERRORS`), the `.trad` grammar (`plans/trad-format.md`), the reference parser (`plans/trad_parse.py`), the sample Sowing morning (`content/traditions/sowing.trad`, k 434). events_check: a whole year on paper.
 - **0.34.21:** `simNote('tradition')` after each (`eventsNoted`), the voice budget (`evBudget`, `EV_DROPPED`), the format agreed: content_gen.py (the dialogue engineer, session_01UmrVVpV7eBqEsa4sBucASP) owns the TRADITIONS block and calls my `plans/trad_parse.py` for field lines; `TRAD_STANDIN` until it's merged (delete then).
-- **Next:** `invite` fields on the existing twelve for social (A7: `invite: { host, odds, line }`; tradLoad already passes it through); the Sunday "This week aboard" Mail (with the monthly designer); then collecting the three designers' files.
+- **0.34.22:** `invite: { host, odds, line }` on six of the twelve (for social A7).
+- **Next:** the Sunday "This week aboard" Mail (with the monthly designer); then collecting the three designers' files.
 - **Gotcha:** cadet_test's g_nocrew shot can catch section 15's "+N Energy" need label (a real-time fade): a 1921 px difference that vanishes on a re-run.
 - **Hash keys I give out:** 434 sowing; next free 435.
