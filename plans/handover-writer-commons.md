@@ -44,16 +44,32 @@ the checklist, section 12); `content/facts.md` (4b our pronouns, 4d home contact
 10. `banks/everyday.lines` (`@bank all`): 60 non-work smalltalk/rumour bubbles (food, days off, letters, seasons,
     traditions, vents, hot water, Gerald), gated by act:/time:/season:/trad:/place:; lines naming Rina use `!who:rina`.
 
-## Writer 4 (pushed, awaiting review)
+## Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U): batches 1-12, reviewed by head writer 3
 
-1. Batch 1 (38b79e4): `overheard/booths.lines`, 101 one-sided calls home (303 lines). `? place:booths`, speaker A only
-   (A-only convos bake and play; no new format needed). Sections: anyone, seasons/ship days, story crew, the circles,
-   the Commons people (`who:`).
-2. Batch 2 (2a9353d): everyday non-work chatter for the Commons 19 (289 lines, ~15 smalltalk + 2 rumour each),
-   appended to each file under "// Writer 4, batch 2".
+Head writer 2 went inactive before Writer 4 started. **Head writer 3 is session_01FopKMT2ZKxuWcNDcmF7565**: send it
+each batch hash. Batches 1-11 merged (to 0.48.31); batch 12 pushed, awaiting review.
 
-Gotchas found: "love you" is banned even in family calls in overheard banks (use "love to all", "big hug");
-"apple" is banned (brand): use pear; "Geralds" and sentence-start words like "Gardening" warn as names.
+| Batch | What | Files |
+| --- | --- | --- |
+| 1 | one-sided booth calls home (101, speaker A only, `place:booths`) | `overheard/booths.lines` (head writer added `!who:torres-zeke\|vance\|calder\|marrow\|holt` to the generic ones: keep it on new ones) |
+| 2 | everyday non-work chatter for the Commons 19 (~15 smalltalk + 2 rumour each) | their own `lines/` |
+| 3 | Deck 4 juniors: 154 bubbles, 36 convos | `banks/juniors.lines` (`@bank rank:junior`), `overheard/deck4.lines` |
+| 4 | Tiles talk (`tiles.start/dock/miss/win/lose`), 30 Deck 3 named pairs | `banks/tiles.lines`, own files (Rina, Pell, Tomas + 7), `overheard/pairs.lines` |
+| 5 | 16 visitors Tamura to Marsh: card + 12 lines | `voices/v-*.voice`, `lines/v-*.lines` |
+| 6 | Zeke Torres's ordinary weeks (50) + 10 intro callbacks | `lines/torres-zeke.lines` |
+| 7, 11, 12 | goodbyes (`leaving:you`), packing (`feel` `leaving:soon`), letters, for the Commons 19, 25 Works/Watch, 20 Survey/officers/seniors | own files |
+| 8 | the mess at dinner: 40 convos, 20 crowd bubbles | `overheard/dinner.lines`, `banks/mess.lines` |
+| 9, 10 | reactions: Commons repairs, favours, gifts, harvest, late meals; Works repairs; Brennan's and Pell's `cue:repair.you` | `reactions/repairs-commons.lines`, `reactions/repairs-works.lines` + appends |
+
+Gotchas found: "love you" and "thinking about you" are on the romance list even in family calls or as jokes; no poems,
+dedications or "thought of you" to the player (letters say "thought of the Wren"); "apple" is banned (brand); words
+like "Gardening", "Retirement", "Power" at a sentence start warn as names; `trait:` can't reach "dry humour" (space);
+goodbye lines also go into the engine's "Sorry I missed you at the shuttle" Mail; `place:crew_store`,
+`place:infirmary`, `place:gym`, `place:laundry`, `place:port_washroom|starboard_washroom`, `place:bunk_1..8` match
+room names; head writer 3's style note: don't end many lines on "Lovely".
+
+Still open: everyone not story crew now has goodbyes/letters (check story crew with the head writer); a dry-humour
+Tiles variant waits on `_` support in `trait:`.
 
 ## Formats and hooks that bite
 
@@ -83,7 +99,6 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 
 - Batch 10 awaiting notes. After it the seat is handed over: head writer 2 asks the lead to retire it and hire
   fresh when needed. A fresh writer starts from this note.
-- Booth overheard: done (batch 1). More could go to the generated crew's families via `{family}` once the roster has it.
 - Theme fill-in `{since}` still not live (lines using it are skipped).
 - Favour jobs `pellPractice`, `brennanSage` depend on others.
 - Candidates: goodbyes and letters for my people, newcomer lines, more about/invite for my 19.
