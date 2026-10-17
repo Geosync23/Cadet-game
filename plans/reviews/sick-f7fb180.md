@@ -19,3 +19,5 @@ Reviewer 1d, 2026-10-17. This covers the open items from sick-9268f00.md and its
 - `gs` is `NOSAVE ? 0 : (Date.now() ^ random) | 0`, as proposed.
 - leave_check on c093b15: three runs, LEAVE CHECK OK each time, with the same sick days every run.
 - The career and sickness range for 0.60.6, 6bc69ea..c093b15, is cleared from my side.
+
+8d5b084 (leave_check only: the refund case sets `sd` far ahead so it can never roll sick): a sound test fix; no game change. PASS.
