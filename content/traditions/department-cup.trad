@@ -12,7 +12,7 @@ where: 3 pool gym
 who: vance always, gym-regular 80%, runner 65%, everyone 20%
 host: vance
 from: vance
-ties: tally cup choices=works|watch|survey|bridge|commons
+ties: tally cup choices=works|watch|survey|bridge|commons mode=teams
 ties: decor cup-board
 invite: host=vance odds=25% line="Department cup in the gym tonight. Works is a rower short."
 
