@@ -22090,12 +22090,13 @@ function eventsOn(d) {
   if (arr !== EV_ARR) {                                  // section 21 set the day you came aboard, or a tradition's flag was set
     if (EV_ARR !== null && typeof SHIP_DAYS !== 'undefined') { const today = Math.floor(shipNow() / 1440) + 1; for (const x of [...SHIP_DAYS.keys()]) if (x > today) SHIP_DAYS.delete(x); }   // later plans are made again
     EV_ARR = arr; EV_DAYS.clear(); EV_DROPPED.clear();
+    try { TALLY_MEMO.clear(); } catch (e) { /* not made yet at load */ }   // who went, and so the votes, change with a flag
   }
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], yd = shipYearDay(d);
   for (const ev of evTable()) {
     const w = ev.when; let honorees = [];
-    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && guestStay(p, d) !== 'leave'))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
+    if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
     else if (!evDue(w, d)) continue;
@@ -22162,6 +22163,10 @@ function tallyVote(id, choice, t = shipNow()) {
   SHIP.events.votes[id + '@' + d] = choice; return true;
 }
 const tradTies = (kind, d) => eventsOn(d).filter(e => e.ev.ties && e.ev.ties[kind] != null).map(e => ({ id: e.id, name: e.name, from: e.from, to: e.to, tie: e.ev.ties[kind] }));
+// tradOn(id, t) -> { id, name, day, from, to } (absolute ship minutes) while that tradition is on at minute t, else null
+// (pure). For social B's live calls home on letters evening (tradOn('letters')): the relay's best window
+const tradOn = (id, t = shipNow()) => { const d = Math.floor(t / 1440) + 1, B = (d - 1) * 1440, e = eventsOn(d).find(x => x.id === id);
+  return e && t >= B + e.from && t < B + e.to ? { id: e.id, name: e.name, day: d, from: B + e.from, to: B + e.to } : null; };
 // the pools: for each `where` with a room, the shared places of those types in that room (not in a locked room; with
 // `free`, not anyone's work station), as 'deck|ev:<id>:<n>'; places tagged event: '<id>' as 'deck|ev:<id>'
 function eventPools(shared, desks) {
