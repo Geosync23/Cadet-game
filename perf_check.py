@@ -98,7 +98,7 @@ def problems(new, old):
                 y = old['scenes'][i]['views'][k]
                 if x['calls'] > y['calls'] * 1.1 and x['calls'] > y['calls'] + 25: bad.append(f"{s['name']} {k}: draw calls {y['calls']} -> {x['calls']}")
                 if x['js'] > y['js'] * 1.3 and x['js'] > y['js'] + 1: bad.append(f"{s['name']} {k}: js {y['js']} -> {x['js']} ms a frame")
-    if old and new['size'] > old['size'] * 1.25: bad.append(f"file size {old['size'] / 1e6:.2f} -> {new['size'] / 1e6:.2f} MB (a note, not a failure)")
+    if old and new['size'] > old['size'] * 1.25: print(f"NOTE file size {old['size'] / 1e6:.2f} -> {new['size'] / 1e6:.2f} MB (more to download on a phone; not a failure)")
     t = new['trip']
     if t[-1]['geo'] != t[1]['geo'] or t[-1]['tex'] != t[1]['tex']: bad.append(f"memory grows across deck round trips: {t}")
     if new['errors']: bad.append(f"errors: {new['errors'][:4]}")
