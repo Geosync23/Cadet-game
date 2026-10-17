@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.46
+   STARSHIP CADET: CSV Wren                           build 0.27.47
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7571,7 +7571,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.46';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.47';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -31598,6 +31598,9 @@ class CrewAgent {
       if (m.tray && m.next && BUSY.has(m.next) && !this.elsewhere(m.next)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }   // the mess hall's full: no tray till they sit (seated diners show none; 0.26.32)
       return m.next;
     }
+    // 0.27.47: the same after the queue: their seat still taken and no free one beside it (the Sunday table, day 35's
+    // quist-ilse at 17:59), so they'd wait nearby holding a tray; no tray till they sit
+    if (m.tray && !lineSeg(w) && w.placeId && BUSY.has(w.placeId) && !(this.settled && this.spot && this.spot.id === w.placeId) && !this.elsewhere(w.placeId)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }
     if (m.trayLate && this.settled && this.spot && trayTo(this.spot.id)) { m.tray = true; m.trayLate = false; LINE_LOG.trays++; }
     if (m.seat && !w.placeId) return m.seat;             // no seat planned: the one picked at the counter
     return undefined;
