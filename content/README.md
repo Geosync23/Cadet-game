@@ -99,7 +99,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `rep:` | your standing with their department: `new`, `known`, `well`, `theirs` | `rep:well` |
 | `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you: `low`, `ok`, `high` | `ship.kindness:high` |
 | `you:<tag>` | you're known for it | `you:reliable` |
-| `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it) | `cue:repair.oven`, `cue:repair.oven.you` |
+| `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it; `@me`: and it was about the speaker, e.g. their gift or favour; `@dept`: a repair in the speaker's department) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:gift.you@me`, `cue:repair.you@dept` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
 | `week1:` | `true` during your first week (from the arrival evening until the week is done) | `week1:true` |
 | `leaving:` | `soon`: the speaker is transferring off within 10 days; `you`: this is a goodbye | `leaving:soon` |
