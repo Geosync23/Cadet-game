@@ -49,7 +49,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 - **Birthday versus Tiles night:** on day 100 the voice budget dropped Tiles night for Founding Day (right). Birthdays on Tuesdays happened alongside it (day 9); if the rule ever drops Tiles night for a birthday, Rina's streak skips a week, which is fine.
 
 ### The deck architect (decor at most 6 draw calls, only on its deck, only during its window)
-- **`tiles-boards`** (Tiles night, Deck 3 bow lounge, Tuesday 20:00-21:30): a board on every lounge table, one instanced mesh, at most 3 draw calls (Part 5). The always-there Tiles station is separate dressing.
+- **`tilesNight`** (already built by the deck architect; Tiles night, Deck 3 bow lounge, Tuesday 20:00-21:30): a board on every lounge table, one instanced mesh, at most 3 draw calls (Part 5). The always-there Tiles station is separate dressing.
 - **`long-tables`** (Sunday long table, Deck 3 mess, Sunday 18:00-19:00): a table runner and a few jugs along the joined tables; at most 2 draw calls (one instanced runner, one instanced jug). The tables themselves don't move.
 - **`postbox`** (Letters evening, Deck 3 call-home booths, Sunday 19:15-20:15): the postbox is permanent dressing already in the deck architect's brief; during the window, a small stack of envelopes and a lamp on the waiting-room table (1-2 draw calls).
 - **Event tags, if you like:** the piano bench (`4-music-1`) as `event: 'late-piano'` so the Captain always gets it; the servery end of the mess for the tasting table.
@@ -58,7 +58,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 
 | Id (k) | When, where | Who, host | Ties |
 | --- | --- | --- | --- |
-| `tiles-night` (435) | Tue 20:00-21:30, Bow lounge lounge seats | Rina always, lounge regulars, bar regulars, juniors; host Rina; invite 40% | decor `tiles-boards`, tally `tiles-night` |
+| `tiles-night` (435) | Tue 20:00-21:30, Bow lounge lounge seats | Rina always, lounge regulars, bar regulars, juniors; host Rina; invite 40% | decor `tilesNight`, tally `tiles-night` |
 | `tasting-table` (436) | Wed 18:15-19:15, Mess hall, hold none | Brennan always, galley crew, lingerers, everyone 35%; invite 25% | galley extra=tasting, tally `tasting` |
 | `garden-hour` (437) | Mon 17:30-18:30, garden-tend then garden | Tove Cruz always, gardeners, garden-lovers; invite 25% | garden tend |
 | `late-piano` (438) | Thu 21:45-22:30, music room | the Captain always (plays), music listeners, musicians, night owls; invite 10% | none |

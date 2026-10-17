@@ -14,7 +14,7 @@ who: rina always, lounge-regular 60%, bar-regular 45%, juniors 35%, everyone 12%
 anim: play
 host: rina
 from: rina
-ties: decor tiles-boards
+ties: decor tilesNight
 ties: tally tiles-night
 invite: host=rina odds=40% line="Tiles tonight in the lounge. Come and lose to me. It's educational."
 
