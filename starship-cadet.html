@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.42
+   STARSHIP CADET: CSV Wren                           build 0.27.43
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3463,6 +3463,7 @@ function unloadDeck() {
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
   LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = []; SHADOW_PROXY = []; SHADOW_JOB = null;
+  if (typeof deckUnloaded === 'function') deckUnloaded();   // 0.27.43: section 8b's per-deck caches let go of the old deck
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -7570,7 +7571,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.42';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.43';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -29915,14 +29916,20 @@ const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
 // 0.27.40: the height of the cushion under a seated person's knees (world), or 0 when there's none (a bench or chair
 // edge, the floor). One ray down, 0.3 m in front of the seat spot, against the deck's own furniture; kept on the person
 // until they move or the deck changes. Only a surface near the seat's own height counts (not a table above, not the floor)
-const SEAT_RC = { root: null, list: [], rc: new THREE.Raycaster(), o: new THREE.Vector3(), d: new THREE.Vector3(0, -1, 0) };
+// 0.27.43 (reviewer 1e: the JS heap stayed 40 MB up): the caches are keyed by a deck-load number, never the deck itself,
+// and emptied when a deck unloads (deckUnloaded, from unloadDeck), so nothing here keeps an old deck's meshes alive
+const SEAT_RC = { gen: 1, list: null, rc: new THREE.Raycaster(), o: new THREE.Vector3(), d: new THREE.Vector3(0, -1, 0) };
+function deckUnloaded() {
+  SEAT_RC.gen++; SEAT_RC.list = null;
+  if (typeof tableTrays !== 'undefined') { for (const h of tableTrays.eaters) h.eating = false; tableTrays.eaters.length = 0; tableTrays.ownOf = 0; tableTrays.own = null; tableTrays.n = -1; }
+}
 function seatCushion(o, sy) {
-  const p = o.pos, c = o.cush || (o.cush = { x: NaN, z: NaN, r: NaN, root: null, v: 0 });
-  if (c.x === p.x && c.z === p.z && c.r === o.face && c.root === deckRoot) return c.v;
-  c.x = p.x; c.z = p.z; c.r = o.face; c.root = deckRoot; c.v = 0;
+  const p = o.pos, c = o.cush || (o.cush = { x: NaN, z: NaN, r: NaN, gen: 0, v: 0 });
+  if (c.x === p.x && c.z === p.z && c.r === o.face && c.gen === SEAT_RC.gen) return c.v;
+  c.x = p.x; c.z = p.z; c.r = o.face; c.gen = SEAT_RC.gen; c.v = 0;
   if (!deckRoot) return 0;
   const S = SEAT_RC;
-  if (S.root !== deckRoot) { S.root = deckRoot; S.list = []; deckRoot.traverse(m => { if (m.isMesh && !m.isInstancedMesh && !m.isSkinnedMesh && m.material !== SHADOW_PROXY_MAT[0] && m.material !== SHADOW_PROXY_MAT[1] && m.material !== SHADOW_PROXY_MAT[2]) S.list.push(m); }); }
+  if (!S.list) { S.list = []; deckRoot.traverse(m => { if (m.isMesh && !m.isInstancedMesh && !m.isSkinnedMesh && m.material !== SHADOW_PROXY_MAT[0] && m.material !== SHADOW_PROXY_MAT[1] && m.material !== SHADOW_PROXY_MAT[2]) S.list.push(m); }); }
   const f = o.face || 0, k = .3 * (o.h || 1);
   S.rc.set(S.o.set(p.x + Math.sin(f) * k, sy + .2, p.z + Math.cos(f) * k), S.d); S.rc.far = .5;
   for (const hit of S.rc.intersectObjects(S.list, false)) { const y = hit.point.y; if (y > .1 && y > sy - .2 && y < sy + .05) { c.v = y; break; } }
@@ -30614,8 +30621,8 @@ const tableTrays = {
       if (m && m.served && m.tray && a.settled && sp && sp.pose === 'sit' && sp.room === 'M') { a.h.eating = true; this.eaters.push(a.h); }
     }
     if (!this.tray) { if (!n) return; this.make(); }
-    if (this.ownOf !== deckRoot) {                       // the long tables' own trays, where they are on this deck (as longTable puts them)
-      this.ownOf = deckRoot; this.own = []; const b = ROOM_BOX.M;
+    if (this.ownOf !== SEAT_RC.gen) {                    // the long tables' own trays, where they are on this deck (as longTable puts them)
+      this.ownOf = SEAT_RC.gen; this.own = []; const b = ROOM_BOX.M;
       if (b) for (const [x, z] of [[2.6, 1.0], [7.4, 1.0], [2.6, 4.0], [7.4, 4.0]]) { const d = this.d; d.position.set(X0(b.i0) + x, 0, Z0(b.j0) + z); d.rotation.set(0, FACING.n || 0, 0); d.updateMatrixWorld(); this.own.push(d.localToWorld(new THREE.Vector3(.4, 0, .22))); }
     }
     let i = 0;
