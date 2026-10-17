@@ -153,3 +153,124 @@
 - Treadmill board's filling up. Tomas is fourth. Don't tell him he's fourth.   #funny
 ? deck:2
 - The senior corridor. Shoes off in the cabins, on in the corridor. Regulation six.
+
+// ---- Writer 2, batch 5: Vance toward ~100. Gull's poems: anyone, any time; that he is Gull only from beat:vance.5.
+// His father only from beat:vance.3 (and what the message said from beat 4). Rest days Tue, Wed.
+== greet
+? tier>=acquaintance season:sowing
+- {nick}. Sowing. New season, new leaderboard. Clean paper. Wonderful.   #funny
+? tier>=acquaintance season:greening
+- {nick}. Greening. Founding Day drills soon. I've already drafted the timings.
+? tier>=acquaintance season:harvest
+- {nick}. Harvest. The garden's ahead of schedule. I find that very satisfying.
+? tier>=acquaintance season:lanterns
+- {nick}. Lanterns. Nothing hung across a hatch, by regulation. Otherwise, enjoy.
+? rep:well
+- {nick}. The bridge speaks well of you. Briefly. That's how the bridge speaks.
+? you:reliable
+- {nick}. "Reliable," they say. My favourite word. After "punctual".   #funny
+
+== feel
+? mood:low tier>=friend
+- A heavy day. Not the work. Just heavy. I'll run it off. Eventually.
+? mood:high tier>=friend
+- A good day. Tomas beat his time. I pretended not to watch. I watched.   #warm
+
+== near
+? place:musicroom
+- The record cabinet. Waiting list, page one. You're still ninth. Patience.   #funny
+? habit:runner
+- Ring corridor, eight laps. It's not on a leaderboard. I'm considering it.   #funny
+
+== life
+? tier>=colleague
+- Twenty-two years since the academy. I can still tell you who was late, and by how much.   #funny
+? beat:vance.4 tier>=friend
+- My father kept every report of mine. Every one. I'm still getting used to that.
+? beat:vance.5
+- Gull's next poem is about the rowing machine. Keep that to yourself.   #funny
+
+== joy
+? tier>=friend
+- The first five minutes of a shift. Everyone in place. Then it gets interesting.
+
+== decline
+? weekday:tue|wed
+- Rest day. I'm resting. Correctly. It's harder than it looks. Thursday?   #funny
+
+== callback
+? told:moment.vance.suspect !beat:vance.5
+- You said I knew Gull's poem well. I read the newsletter thoroughly. That's all.   #funny
+? told:moment.vance.fixed
+- Your fix for Gull's line two. Ten beats. I counted. Gull should take notes.   #funny
+? told:moment.vance.likeit
+- You said you liked Gull's poem. Hm. Someone should. Correct of you.   #funny
+? told:moment.vance.timed
+- You held the stopwatch steady. Lindqvist says it was wrong. It wasn't.   #funny
+? told:moment.vance.cheered
+- You cheered. Loudly. Against regulations, possibly. I'll allow it.   #funny
+? told:moment.vance.lindqvist
+- You asked if it was about Lindqvist. It was. It still is. Carry on.   #funny
+? told:moment.vance.sitwith !beat:vance.4
+- You offered to sit with me while I open them. I haven't forgotten.   #warm
+? told:moment.vance.listened
+- Thank you for listening, the other night. Noted, and meant.   #warm
+? told:moment.vance.shared
+- You said your family doesn't always talk either. It helped. More than I said.   #warm
+? told:moment.vance.leave
+- I requested the leave. Eleven, section two. The Captain signed it in a minute.   #warm
+? told:moment.vance.again
+- You let me read it twice. I read it four times, after. Thank you.   #warm
+? told:moment.vance.likehim
+- "Like your list of juniors." I hadn't seen it. You did. Thank you.   #warm
+? told:moment.vance.knew
+- The scansion gave me away. Gull is taking lessons. Privately.   #funny
+? told:moment.vance.proud
+- You said you were proud. I've added it to a list. A short one. Very short.   #warm
+? told:moment.vance.safe
+- Your word on Gull. I trust it. I'd trust it with the bridge.   #warm
+? told:fixed.
+- Your entry in the repair log. Signed, timed, legible. Exemplary.
+? told:came.running
+- You came to running club. Your pace was correct. Next week, faster.   #funny
+? told:came.
+- You came. Attendance noted. Warmly noted.   #warm
+? told:bday
+- You remembered my birthday. It's on the roster, I know. You still remembered.   #warm
+
+== gift
+? gift:loved
+- For me? That's. Thank you. It's going on my desk. Square to the edge.   #warm
+? gift:liked
+- Thank you, {nick}. Most kind. Correctly wrapped, too.   #funny
+? gift:polite
+- Thank you. Noted. Kindly.
+? gift:music
+- Music. It's going on the waiting list. At the top. I've jumped my own queue.   #funny
+
+== cue
+? cue:event.ionStorm.warning
+- Storm warning. Stations in ten minutes. Calmly. Briskly. Both.
+? cue:event.ionStorm.onset
+- Storm. Everyone at their post. Including you. Go.
+? cue:event.ionStorm.afterglow
+- Storm's passed. Drill times were excellent. I've already written the report.
+? cue:tradition.running.you
+- You ran. On time, in order, no shortcuts. I'd put you on the board.
+
+== visit
+? tier>=friend
+- {nick}. Evening. I won't stay. Regulation six: my shoes are at the door.   #funny
+- I was passing. Correction: I came by. Is this a good time? Be honest.
+
+== note
+? tier>=friend
+- Called by. You were out. Correctly: it's your evening. See you at 06:05.
+- The waiting list moved. You're eighth. Don't let it go to your head.   #funny
+
+== smalltalk
+- Regulation two, section four.
+- Tape's straight. Good.
+
+== rumour
+- For your information only.
