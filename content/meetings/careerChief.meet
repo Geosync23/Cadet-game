@@ -1,0 +1,19 @@
+@meeting careerChief
+// PLACEHOLDER (the career engineer, 0.61.0): head writer 4 writes the real one. The Chief's talking-to: your work
+// standing has fallen low (missed shifts without leave). An appointment in the Chief's office, Deck 5, the next
+// workday morning. Plays when you're in the room; missed, the gist comes by Mail.
+title: A word with the Chief
+from: Chief Ines Calder
+gist: You didn't come to the Chief's office. Calder says the talk will keep, and so will the record.
+== lines
+calder > you: Shut the door. Sit.   [gesture]
+calder: You've missed shifts. No leave booked, no word to anyone. The board noticed before I did.
+calder: Everyone has bad weeks. If you need a day, book it on your device. That's what leave is for.
+? choice
+* It won't happen again, Chief.   rel:calder+1
+  calder: Good. Eight o'clock, Works bay. I'll see you there.
+* I've been struggling a bit.   rel:calder+2
+  calder: Then say so. Talk to Rina, or to me. But turn up.   [nod]
+* (Say nothing)
+  calder: Silence I can work with. Absence I can't.
+calder: Turn up, do the jobs, and this goes away. That's all.

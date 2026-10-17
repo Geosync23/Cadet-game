@@ -40,7 +40,7 @@ VALUES = {
     'act': {'work', 'breakfast', 'dinner', 'meal', 'gym', 'wash', 'sleep', 'leisure', 'off', 'free', 'event', 'shop', 'call'},
 }
 BUBBLE_KINDS = {'smalltalk', 'rumour', 'overheard'}        # spoken over heads: 60 characters (90 at most)
-LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad')    # chat lines, moments, Mail: 140
+LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad', 'career')    # chat lines, moments, Mail: 140
 CARD = 90
 HOME_IDS = {'mum', 'gran', 'jo', 'sam'}                  # your people back home (content/home/<id>.call)
 NAME_W = 9                                                 # a filled-in name counts as this many characters

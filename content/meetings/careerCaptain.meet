@@ -1,0 +1,17 @@
+@meeting careerCaptain
+// PLACEHOLDER (the career engineer, 0.61.0): head writer 4 writes the real one. The Captain's reprimand: your work
+// standing is very low after the Chief's talk. An appointment in the ready room, Deck 1. Missed: the gist by Mail.
+title: The Captain's ready room
+from: Commander Teo Vance
+gist: The Captain sent for you and you didn't come. Commander Vance says she has noted it.
+== lines
+marrow > you: Stand there, please. This isn't a social call.
+marrow: Chief Calder spoke to you. Since then you've missed more shifts. Every one of them lands on someone else.
+marrow: I don't send people home lightly. But I will, if this goes on.
+? choice
+* I understand, Captain.   rel:marrow+1
+  marrow: I hope so. Show me, not Calder. The board will tell me.
+* I'll put it right.   rel:marrow+1
+  marrow: Then start tomorrow at eight.   [nod]
+* (Say nothing)
+  marrow: Very well. Dismissed.
