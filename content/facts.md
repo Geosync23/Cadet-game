@@ -452,3 +452,9 @@ introduces them), unless noted.
 | You're ninth on Vance's waiting list for the good records | Vance | writer-command, batch 1 |
 | Vance rowed in a six-person boat at the academy | Vance | writer-command, batch 1 |
 | Sato's thread is the `notgood` theme (her tier-4 secret: the survey she's proudest of was mostly luck); she may get her own arc later | Sato | writer-command, batch 0 |
+| Veyli has many words for "quiet" | Ferreira (learning Veyli; practises on the Envoy) | writer-command, batch 2 |
+| Uma Vasquez joined last Sowing; her mum feeds her fish back home and reports their moods | Vasquez | writer-command, batch 2 |
+| A paper letter from Valo takes six weeks | Ueda, Varga (the post bag) | writer-command, batch 2 |
+| Sato's tea: smoked leaf, dried kelp, a pinch of pepper | Sato | writer-command, batch 2 |
+| Nandakumar's chillies grow from the same seeds her mother grew | Nandakumar | writer-command, batch 2 |
+| Each step of Torres's Day 0 walk is a `week1` line gated by `flag:walk.<step>` (not a story fact: a hook) | Torres | head writer |
