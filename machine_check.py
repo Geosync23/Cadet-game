@@ -304,7 +304,12 @@ with sync_playwright() as pw:
                setShipNow(shipNow() + 13 * 60); machinesNow(); const back = SHIP.jobs.find(x => x.id === k.id); lapse = !back || back.claimedBy !== 'you'; }
       // progress keeps it yours: touched 10 hours in, it's still yours 13 hours after the claim
       let kept = null;
-      const k3 = takeable();
+      // none waiting (with the crew's rota, they may have claimed them all): make one, as the oven above
+      const breakOne = () => { for (const m of machineList()) { const s = SHIP.machines[m.id];
+          if (ENGINE_KINDS.has(m.kind) || m.id === '3-oven-1' || !s || s.cond < 60) continue;
+          s.cond = 40; s.state = machineState(40); setShipNow(shipNow() + 60); machinesNow();
+          const x = jobsBoard().find(x => x.machine === m.id && !x.claimedBy && jobTier(x) <= PLAYER_TIER); if (x) return x; } return null; };
+      const k3 = takeable() || breakOne();
       if (k3 && claimJob(k3.id)) { setShipNow(shipNow() + 600); touchJob(k3.id); setShipNow(shipNow() + 180); machinesNow(); const b = SHIP.jobs.find(x => x.id === k3.id); kept = !!b && b.claimedBy === 'you'; dropJob(k3.id); }
       const s0 = SHIP.stores.relay || 0, ret = returnPart('relay') && SHIP.stores.relay === s0 + 1;
       return { id, claimed, mine, fin, before, after, took, stock, oneAtATime, lapse, kept, ret };
