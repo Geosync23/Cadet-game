@@ -4,9 +4,15 @@ Written by session_019aEJaAGyZir9oq47CBRfA3 at 0.39.6, ahead of the memory rule,
 Read CLAUDE.md, DEV_NOTES.md ("Social stories (20c, social engineer B, 0.39.x)" has every detail and the hook register),
 plans/social-deep-plan.md (the design; Parts 1, 3, 6, 8b, 9, 12) and TEAM.md first.
 
-**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME): B8 built, 0.39.7-0.39.8 (bf240b7): calls home, one live beat per
-contact on Letters evening, recorded messages (mailPlay). Waiting on: player engineer 3's actBegin line (0.28.30), device
-engineer 3 (session_01SskqNx45iEGyQq2W9Fjg5Y) for Mail's play field + Play button; reviewer 1b on 0.39.6-0.39.8.**
+**Status (social B2, session_014A3w2gK8FBNWs66YC3LfME), refreshed 06:40 UTC: B8 calls home built, 0.39.7-0.39.11
+(c689063; reviewer 1b passed 0.39.6, passed 0.39.7-0.39.10 with fixes, all fixed in 0.39.11, final look pending). Every
+hook is in on its owner's branch: player eng 3's homeBooth line (claude/player-needs 8abc711), social A's beatOf line
+(claude/social 0.36.59, merged here), device eng 3's Mail Play button + From home heading (claude/device 4979eec). Next
+(the lead's overnight plan, after 07:30 UTC): a 70-day check that every arc (crew and home) can reach its last beat, then
+the arcs to their last beats with head writer 3 (session_01FopKMT2ZKxuWcNDcmF7565), then crew-to-crew goodbyes and couples
+on rotation days. The lead is session_01KPJMYjXAPkNUcrQ8VRkhLE; reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx. Test
+scaffolding: a scratch merge of this branch + claude/dialogue + claude/content (run content_gen.py on it) for HOME_* data.
+Refresh this note right before handing over (the user's rule).**
 
 ## Next job: B8, calls home (approved by the lead, 2026-10-17)
 The user's ask: people back home (Mum, Gran, Jo, Sam) the player calls, with whole arcs; the shapes agreed with head
