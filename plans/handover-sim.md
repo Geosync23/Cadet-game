@@ -2,6 +2,68 @@
 
 Written at build 0.40.8 and brought up to date at 0.26.18 (Pillar 3, 16 October, by the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU), so a fresh session can take over. **Start with the Pillar 3 section at the end:** it has the work in progress. The detailed notes are in DEV_NOTES.md, in four sections: "Ship time and saving", "Schedules", "Crew on the deck" and "Every room in use". This page is the short version, plus the things that only live in my head.
 
+
+## Start here: 0.26.19 to 0.26.29 (the second sim engineer, session_01R6RBwwBM9aorpsqDCrztDU, 17 October)
+
+The rest of this note (below) was written at 0.26.18 and still holds. This part is what changed since, for **sim engineer 3** (session_01517opwS4UAxYZKNwJytaEK). The last build is **0.26.29 (a7673e0)**. I'm on call for questions until I'm archived.
+
+**You now own section 17 as well** (machines, jobs, parts, washers): the systems engineer retired; read `plans/handover-systems.md`. So: sections 10, 13, 14, 17, plus `day_check.py` and `machine_check.py`.
+
+### What I built (all in DEV_NOTES' build table, 0.26.19 to 0.26.29)
+- **The notes bus and flags (section 13, Pillar 4).**
+  - Functions: `simNote(kind, data)`, `onSim(kind, fn)` (returns an unsubscribe function), `simNotes(kind, since)`, `flag(key)`, `flagSet(key, v)` (null clears).
+  - Saved as `save.notes` and `save.flags`.
+  - A note's data is deep-copied through JSON; a note that can't be copied is dropped.
+  - **Contract:** a payload never has its own `kind` (the note's kind wins). A number `t` is when it happened, and the ring is kept in time order.
+  - Section 17 queues its notes with `simLater` and flushes them with `simFlush`. During the hour loop `SIM_AT = MACH_HOUR * 60` stamps each note with its hour.
+  - The repair note is `{ who, machine, state, job (service | repair | overhaul), deck, id, t }`; the job note carries `job` too.
+  - `skipTo` runs `machinesNow()` before the SIM_ADVANCE listeners, so section 17's notes are queued before social A's `socialTo` catches up.
+- **Day 0 and the arrival (sections 13, 10, 14; with onboarding, section 21).**
+  - `SHIP_START_ARRIVAL` and `newGameStart(arrival)`. The New game button offers Monday or the arrival.
+  - Section 21 boots the first launch from its own first frame (the lead's decision: the TDZ at load).
+  - `introPlan` / `introLay` lay section 21's `introBeats` over the plans:
+    - a named seat (`where.placeId`) starts `INTRO_EARLY` = 5 minutes early (Calder at 3-mess-9 at 18:25);
+    - a beat given by room or tile takes the first place nobody has then (`alts`, picked in introLay against occ).
+  - The escort's lead / follow / wait is walker mode `escortPlan` (CrewAgent.escortStep, ESC_WAIT/GO/NEAR). Visits are `crewComeTo(p, placeId, onArrive, { until })`.
+  - `shiftTick` sends `simNote('shiftStart', { late })` once a day (flag 'shiftSent'). Also `apptKept` / `apptMissed`.
+- **Crew coming and going.**
+  - `crewStay` / `crewLeaving` / `crewArriving` / `crewState` come from the crew designer's `aboard: [from, to]`. ROSTER_RESERVE entries carry `replaces`.
+  - Leavers are off at `ROTA_OFF` 15:00 and wait in the shuttle bay from 14:30 (`ROTA_WAIT`). They stay at social A's 14:00 farewell spot when they were there.
+  - Arrivals come on at `ROTA_ON` 17:40 and take the leaver's bunk and desk.
+  - Guests keep their own 10 minutes (`guestTrim`).
+- **Seating by friendship:** `seatMates` / `affinityPlan`. **Event routines** (storms): `evDay` / `evRule`.
+- **Gatherings:**
+  - Hosts are planned first, 5 minutes early.
+  - `clear(70)` keeps errands off a gathering, and dinner moves before or after one.
+  - **Meal traditions** (section 18's `meal: 'dinner' | 'breakfast'`) *are* the meal:
+    - an act 'dinner'/'breakfast' block at its seat, tag `ev-<id>` (the galley's portion rule needs no change);
+    - shipDay holds as many of its seats as are coming (`occ.res`);
+    - latecomers join while `min` minutes are left.
+- **Small fixes:**
+  - nobody lingers at a desk past their shift while the desk's other shift is on (`deskTwin`);
+  - the bed check counts doubles by time on transfer days;
+  - cadet_test hides `.nf` floats.
+
+### Loose ends and asks waiting
+- **Social B's idea (optional, not started):** couples share leisure places.
+- **Galley 3** (session_018cicfPQZQXbxmtn6ygmL84) has my answers on meal-tradition segments and the long breakfast. MEALS stays 06:00-08:00 except for the tradition's diners.
+- Onboarding: jobs reserved right after `newGameStart` are wiped when the machines restart on the clock rewind. Onboarding works round it by reserving at Monday 05:00. Worth a proper fix in section 17 someday.
+- **social_check's time-jump test fails on this branch alone** (my branch has an older section 20). It passes on a full merge (social A, the build master).
+
+### Gotchas
+- `pgrep` / `pkill` match their own command line: use `ps` with `grep`.
+- Run at most two browser checks at once. Give each copy of the build its own filename (copies collide as `_run_<name>.html`).
+- When you resolve a trial merge, resolve hunk by hunk. `git checkout --theirs` takes the *whole file* and throws away the other side.
+- Most other branches carry an older copy of sections 13/14/17. To test against a peer's data, trial-merge their branch into yours in a scratch worktree, not the other way round.
+- On days off the crew take every job (`playerShiftOn`): a job test that lands on a weekend finds nothing for you.
+
+### How to test
+From a scratch folder, set `CADET_CHROME=/opt/pw-browsers/chromium`, then run:
+- `cadet_test.py OLD.html NEW.html` (must be identical);
+- `day_check.py B.html 1` and `day_check.py B.html 35` (day 35 is a crew-change Sunday; there's an arrival-on case for days 0 and 1);
+- `machine_check.py`, `player_check.py`, `social_check.py` and `events_check.py`.
+A plan-diff helper (load two builds and compare `JSON.stringify(planDay(p, d))` per person and day) shows exactly whose day changed.
+
 ## Role, branch, builds
 
 - **Role:** the ship's clock, saving, the crew's daily plans, and the crew walking about on the deck you're on.
