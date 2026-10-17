@@ -4,7 +4,8 @@
 #   the home screen shows the time and a tile for every app, with badges (unread mail on the Mail tile and the button)
 #   tapping a tile opens the app; Back goes home; Close and the button close it; deviceOn('open' / 'close') fire once each
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
-#   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
+#   heads-ups (0.35.29, were the calendar reminders): traditions, appointments, meals; a queue, busy, Go there, tap, off;
+#   Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
 #   Play on a message from home (0.35.27); the Needs page's icons, colours and short effect lines (0.35.28)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
@@ -102,26 +103,55 @@ def run(path):
               const toast = document.getElementById('tx').textContent; deviceShow('wallet'); deviceShow('home');
               return [t, toast, !!document.querySelector('#devBody .app[data-app="wallet"] b')]; })()""")
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
-            # calendar reminders: about 30 ship minutes before a tradition; a toast off shift, a quiet badge on shift,
-            # none for one marked Don't; Remind me chirps even on shift
-            rm = g.ev("""(() => { const t0 = shipNow(), d = SHIP.time.day, R = SHIP.device.calendarRemind, out = {};
+            # heads-ups (0.35.29, built on the calendar reminders): R.ahead (15) ship minutes before a tradition, the strip off
+            # shift and a quiet Calendar badge on shift; nothing earlier; none for Don't; Remind me shows even on shift
+            rm = g.ev("""(() => { const t0 = shipNow(), R = SHIP.device.calendarRemind, out = {}; R.ahead = 15;
               const tr = devTraditions(t0, t0 + 14 * 1440); if (!tr.length) return 'no traditions in two weeks';
-              const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min };
-              const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; DEV_REMINDED.clear(); delete DEV.notes.calendar;
-                document.getElementById('tx').textContent = ''; devTickMin = -1; f && f(); deviceTick(); return [DEV.notes.calendar || 0, document.getElementById('tx').textContent]; };
-              out.kind = x.kind; out.when = devWhen(x.at);
-              out.before = at(x.at - 25); out.early = at(x.at - 45);
-              R.per[x.kind] = false; out.dont = at(x.at - 25);
-              const onShift = (x.at % 1440) - 25 >= DEV_SHIFT.from && (x.at % 1440) - 25 < DEV_SHIFT.to;
-              R.per[x.kind] = true; out.remind = at(x.at - 25); delete R.per[x.kind];
+              const x = tr[0], save = { day: SHIP.time.day, min: SHIP.time.min }, hu = () => document.getElementById('devHu');
+              const at = (m, f) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; devHeadsReset(); delete DEV.notes.calendar;
+                devTickMin = -1; f && f(); deviceTick(); const h = hu(), shown = !!h && !h.hidden && HU_Q.some(q => q.title === x.title); return [DEV.notes.calendar || 0, shown ? h.textContent : '']; };
+              out.kind = x.kind; out.title = x.title;
+              out.before = at(x.at - 10); out.early = at(x.at - 25);
+              R.per[x.kind] = false; out.dont = at(x.at - 10);
+              const onShift = (x.at % 1440) - 10 >= DEV_SHIFT.from && (x.at % 1440) - 10 < DEV_SHIFT.to && devShiftOn(Math.floor(x.at / 1440) + 1);
+              R.per[x.kind] = true; out.remind = at(x.at - 10); delete R.per[x.kind];
               out.onShift = onShift;
-              SHIP.time.day = save.day; SHIP.time.min = save.min; DEV_REMINDED.clear(); delete DEV.notes.calendar; devTickMin = -1; return out; })()""")
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); delete DEV.notes.calendar; devTickMin = -1; return out; })()""")
             print('  reminders:', rm)
             if check(isinstance(rm, dict), f'reminders: {rm}'):
-                check(rm['before'][0] == 1 and (rm['onShift'] or rm['when'] in rm['before'][1]), f'a reminder 25 minutes before (a toast unless on shift): {rm["before"]}')
-                check(rm['early'][0] == 0, f'nothing 45 minutes before: {rm["early"]}')
-                check(rm['dont'][0] == 0, f"nothing for one marked Don't: {rm['dont']}")
-                check(rm['remind'][0] == 1 and rm['when'] in rm['remind'][1], f'Remind me always chirps: {rm["remind"]}')
+                check((rm['before'][0] == 1 and not rm['before'][1]) if rm['onShift'] else ('starts in 10 min' in rm['before'][1] and rm['title'] in rm['before'][1]), f'a heads-up 10 minutes before (the strip, or a badge on shift): {rm["before"]}')
+                check(rm['early'] == [0, ''], f'nothing 25 minutes before (15 ahead): {rm["early"]}')
+                check(rm['dont'] == [0, ''], f"nothing for one marked Don't: {rm['dont']}")
+                check('starts in 10 min' in rm['remind'][1], f'Remind me always shows: {rm["remind"]}')
+            # heads-ups for everything in the Schedule (0.35.29): an appointment 15 and 0 minutes before, with Go there; a meal;
+            # Meals and your shift off; one at a time (a queue); waits behind a meeting; no repeat (saved); a tap opens the
+            # Schedule; off with the switch; inside the screen on a phone
+            hu = g.ev("""(() => { const ev0 = __ev.slice(), wasOpen = DEV.open, D = SHIP.device, R = D.calendarRemind, save = { day: SHIP.time.day, min: SHIP.time.min }, keepAppts = D.appts; R.ahead = 15;
+              const el = () => document.getElementById('devHu'), txt = () => { const h = el(); return h && !h.hidden ? h.textContent : ''; };
+              const go = (m, keep) => { SHIP.time.day = Math.floor(m / 1440) + 1; SHIP.time.min = ((m % 1440) + 1440) % 1440; if (!keep) devHeadsReset(); devTickMin = -1; deviceTick(); return txt(); };
+              const d = SHIP.time.day + 2, T = (d - 1) * 1440 + 1290, pl = apptPlaces().find(x => /mess|lounge/i.test(x.name)) || apptPlaces()[0], who = apptPeople().slice(0, 2).map(p => p.id);
+              D.appts = [{ id: 901, with: [who[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }]; const nm = apptName(who[0]);
+              const out = { soon: go(T - 15) };
+              out.go = [...el().querySelectorAll('button')].map(b => b.textContent).join();
+              el().querySelector('button').click(); out.goal = typeof IX_GOAL !== 'undefined' && !!IX_GOAL && IX_GOAL.place === pl.id; out.hidden = el().hidden;
+              if (typeof clearGoal === 'function') clearGoal();
+              out.start = go(T); out.again = go(T + 1, true) === out.start && HU_Q.length === 1;
+              out.saved = deviceLoad(JSON.parse(JSON.stringify({ device: D }))).calendarRemind.heard.some(k => k.endsWith('|start'));
+              const bf = (d - 1) * 1440 + MEALS.breakfast[0]; D.appts = []; out.meal = go(bf - 15); R.everyday = false; out.mealOff = go(bf - 15); R.everyday = true;
+              D.appts = [{ id: 902, with: [who[0]], at: T, len: 30, where: pl.id, kind: 'social', status: 'yes' }, { id: 903, with: [who[1] || who[0]], at: T + 5, len: 30, where: pl.id, kind: 'social', status: 'yes' }];
+              go(T - 10); out.queue = [HU_Q.length, txt().includes('starts in 10 min')]; devHeadsDo('done'); out.next = txt().includes('starts in 15 min');
+              devHeadsReset(); document.body.classList.add('dlgon'); go(T - 10, true); out.busy = [txt(), HU_Q.length];
+              document.body.classList.remove('dlgon'); devTickMin = -1; SHIP.time.min += 1; deviceTick(); out.after = txt().includes('starts in');
+              const r = el().getBoundingClientRect(); out.inside = r.left >= 0 && r.right <= innerWidth && r.height <= 120;
+              el().click(); out.tap = [DEV.open, DEV.app]; if (!wasOpen) deviceClose();
+              R.on = false; out.off = go(T - 15); R.on = true;
+              D.appts = keepAppts; SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; delete DEV.notes.calendar; __ev.length = 0; __ev.push(...ev0); out.nm = nm; return out; })()""")
+            print('  heads-ups:', hu)
+            check(hu['soon'].startswith('With ' + hu['nm'] + ' starts in 15 min') and hu['go'] == 'Go there' and hu['goal'] and hu['hidden'], f'heads-up: an appointment 15 min before, Go there sets the arrow: {hu}')
+            check(hu['start'].startswith('With ' + hu['nm'] + ' is starting') and hu['again'] and hu['saved'], f'heads-up: as it starts, once, remembered in the save: {hu}')
+            check(hu['meal'].startswith('Breakfast starts in 15 min') and hu['mealOff'] == '', f'heads-up: meals, and the switch for meals and shift: {hu}')
+            check(hu['queue'] == [2, True] and hu['next'] and hu['busy'] == ['', 2] and hu['after'], f'heads-up: one at a time, waits behind a meeting: {hu}')
+            check(hu['inside'] and hu['tap'] == [True, 'schedule'] and hu['off'] == '', f'heads-up: on screen, a tap opens the Schedule, off with the switch: {hu}')
             # Jobs tracks only: no Take it on the device; Track switches the arrow off and on
             jb = g.ev("""(() => { deviceShow('jobs'); const t = document.getElementById('devBody').textContent; deviceShow('home'); return [t.includes('Take it'), t.includes('job board')]; })()""")
             check(jb == [False, True], f'Jobs: no taking on the device, points to the board: {jb}')
@@ -238,7 +268,7 @@ def run(path):
               const t = document.getElementById('devBody').textContent; out.push(t.includes(apptName(ps[0].id) + ', ' + apptName(ps[1].id)));
               const save = { day: SHIP.time.day, min: SHIP.time.min }; SHIP.time.day = Math.floor(at / 1440) + 1; SHIP.time.min = at % 1440 + 3;
               A[0].status = 'kept'; devTickMin = -1; deviceTick(); out.push(A[1].status);
-              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear();
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; devHeadsReset();
               A[0].status = A[1].status = 'yes'; deviceDo({ app: 'appointments', do: 'drop', arg: A[0].id }); out.push(A.map(a => a.status).join());
               D.appts = []; deviceShow('home'); return out; })()""")
             print('  group meeting:', gm)
@@ -443,7 +473,7 @@ def run(path):
               deviceAddress({ from: 'Captain', text: 'All hands.' }); deviceAddress(null);
               deviceDialogue({ title: 'Briefing', name: 'Chief', text: 'Gather round.', choices: null, i: 0, n: 1 }, () => {}); deviceDialogue(null);
               while (TIP_Q.length) tipDone(); D.appts = D.appts.filter(a => a.id < 900); D.tipsSeen = {};
-              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; DEV_REMINDED.clear(); for (const k in DEV.notes) delete DEV.notes[k]; })()""")
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devTickMin = -1; devHeadsReset(); for (const k in DEV.notes) delete DEV.notes[k]; })()""")
             g.page.mouse.move(w / 2, h - 10); g.page.mouse.down(); g.page.mouse.move(w / 2, h - 200, steps=8); g.page.mouse.up(); g.step(2)
             self_open = g.ev("[window.__opens, DEV.open, document.getElementById('device').hidden]")
             check(self_open == [0, False, True], f'the device never opens by itself (a day of reminders, tips, notices, an address, a dialogue, an invitation; a drag up from the bottom): {self_open}')

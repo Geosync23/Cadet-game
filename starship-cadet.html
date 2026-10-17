@@ -42,9 +42,9 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
 /* 19. the device's skin (0.35.1): an old-school phosphor screen in a bezel. CSS and DOM only: no canvas, blur or backdrop-filter. */
-.device,.devtip,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
-html[data-ph="amber"] body #seek,.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
-html[data-ph="green"] body #seek,.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
+.device,.devtip,.devhu,.devdlg,.devaddr,#chat.devchat,body #seek{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-radius:18px;--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:17px;--bezel:#1b1f24}
+html[data-ph="amber"] body #seek,.devhu[data-ph="amber"],.devaddr[data-ph="amber"],.devdlg[data-ph="amber"],#chat.devchat[data-ph="amber"],.devtip[data-ph="amber"],.device[data-ph="amber"]{--crt-ink:#ffb347;--crt-dim:#d09142;--crt-bg:#140c03;--crt-hot:#fff1d6;--crt-glow:rgba(255,170,60,.5)}
+html[data-ph="green"] body #seek,.devhu[data-ph="green"],.devaddr[data-ph="green"],.devdlg[data-ph="green"],#chat.devchat[data-ph="green"],.devtip[data-ph="green"],.device[data-ph="green"]{--crt-ink:#5dff8a;--crt-dim:#42b567;--crt-bg:#041309;--crt-hot:#e6ffe9;--crt-glow:rgba(80,255,130,.45)}
 .device{position:fixed;z-index:3;display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;box-shadow:0 -6px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.07);
   left:0;right:0;bottom:0;height:66vh;border-radius:24px 24px 0 0;padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
 .device[hidden]{display:none}
@@ -158,6 +158,16 @@ body.dlgon .devtip{display:none}
 .devaddr[hidden]{display:none}
 .devaddr small{display:block;margin-bottom:4px;font-size:15px;letter-spacing:.1em;color:var(--crt-ink)}
 .devaddr p{margin:0}
+.devhu{position:fixed;right:12px;top:128px;z-index:4;width:min(380px,calc(100% - 24px));display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;min-height:44px;cursor:pointer;
+  border-radius:14px;border:3px solid var(--bezel);font-family:var(--crt-font);font-size:15px;line-height:1.3;color:var(--crt-ink);background:var(--crt-bg);text-shadow:0 0 4px var(--crt-glow);
+  box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 0 18px rgba(0,0,0,.8)}
+.devhu[hidden]{display:none}
+.devhu span{flex:1;min-width:0}
+.devhu b{display:block;color:var(--crt-hot);font-weight:700}
+.devhu small{display:block;color:var(--crt-dim);font-size:15px}
+.devhu.soft b{color:var(--crt-ink);font-weight:400}
+.devhu button{flex:none;font-family:var(--crt-font);font-size:15px;color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 10px;text-transform:uppercase;letter-spacing:.06em;text-shadow:inherit}
+body.dlgon .devhu{display:none}
 .devtip b{flex:none;padding:0 6px;border-radius:3px;background:var(--crt-ink);color:var(--crt-bg);text-shadow:none;letter-spacing:.1em}
 #fade{position:fixed;inset:0;background:#05080d;opacity:0;pointer-events:none;z-index:4}
 </style>
@@ -8852,7 +8862,8 @@ function deviceLoad(s) {
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
   return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
-    calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
+    calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
+      heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
 }
 SHIP.device = deviceLoad(SAVED);
 // the page knows the phosphor (html data-ph) for screens drawn by other sections, like section 20's #seek chip
@@ -8883,7 +8894,8 @@ const devDeckOf = ev => { const w = ev && ev.where && ev.where[0]; return w ? 'D
 // the ship traditions between two absolute ship minutes: section 18's upcomingTraditions when it's there, else eventsOn
 function devTraditions(a, b) {
   if (typeof upcomingTraditions === 'function') {
-    try { return upcomingTraditions(a, b).map(x => ({ id: x.id + '@' + x.at, kind: x.kind || String(x.id).replace(/@.*$/, ''), title: x.title, at: x.at, where: x.where || 'aboard' })); }
+    try { return upcomingTraditions(a, b).map(x => ({ id: x.id + '@' + x.at, kind: x.kind || String(x.id).replace(/@.*$/, ''), title: x.title, at: x.at, where: x.where || 'aboard',
+      ...(Number.isInteger(x.deck) ? { deck: x.deck, room: typeof x.room === 'string' ? x.room : null } : {}) })); }
     catch (e) { DEV.errors.push('upcomingTraditions: ' + (e && e.message || e)); }
   }
   if (typeof eventsOn !== 'function') return [];
@@ -8905,9 +8917,9 @@ function devDay(d) {
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
-    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt' });
+    out.push({ from: g.a.at - B, to: g.a.at - B + (g.a.len || 30), title: 'With ' + g.names, where: apptWhereName(g.a.where), kind: 'appt', place: g.a.where });
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
-  for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind });
+  for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   return out.sort((x, y) => x.from - y.from);
 }
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
@@ -8921,7 +8933,6 @@ function devNow() {                                      // the strip: where you
 // ---- reminders (the user's addition): about 30 ship minutes before each tradition, a chirp (a toast) or, during your
 // shift, a quiet badge unless you marked it "Remind me". Each morning the Calendar gets a badge and Home a "Today
 // aboard" line. SHIP.device.calendarRemind = { on, ahead, morning, per: { <kind>: true | false } }, saved. ----
-const DEV_REMINDED = new Set();                          // id@day keys already reminded (this session)
 let devTickMin = -1, devMorning = SHIP.time.day;
 function deviceTick() {
   if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
@@ -8933,18 +8944,73 @@ function deviceTick() {
     devMorning = SHIP.time.day;
     if (R.on && R.morning && devTraditions(t, (SHIP.time.day) * 1440 - 1).length) DEV.notes.calendar = (DEV.notes.calendar || 0) + 1;
   }
-  for (const g of apptGroups(SHIP.device.appts.filter(a => a.status === 'yes' && a.at > t && a.at <= t + 10))) if (!DEV_REMINDED.has('appt' + (g.a.grp || g.a.id))) {
-    DEV_REMINDED.add('appt' + (g.a.grp || g.a.id)); deviceNotify({ app: 'appointments', text: 'With ' + g.names + ' at ' + devWhen(g.a.at) + ', ' + apptWhereName(g.a.where) + '.', urgent: true });
-  }
   for (const a of SHIP.device.appts) if (a.grp && a.status === 'kept')   // a group meeting: meeting one of them (section 14's apptTick) keeps them all
     for (const o of SHIP.device.appts) if (o.grp === a.grp && (o.status === 'yes' && t >= o.at - 2 || o.status === 'missed')) { o.status = 'kept'; o.keptAt = t; }
-  if (!R.on) return;
-  for (const x of devTraditions(t + 1, t + R.ahead)) {
-    if (DEV_REMINDED.has(x.id) || R.per[x.kind] === false) continue;
-    DEV_REMINDED.add(x.id);
-    const m = SHIP.time.min, onShift = devShiftOn(SHIP.time.day) && m >= DEV_SHIFT.from && m < DEV_SHIFT.to;
-    deviceNotify({ app: 'calendar', text: x.title + ' at ' + devWhen(x.at) + ', ' + x.where + '.', urgent: !onShift || R.per[x.kind] === true });
+  devHeadsTick(t);
+}
+
+// ---- heads-ups (0.35.29, the user's): before anything in your Schedule starts (traditions, ship items, appointments and
+// the meetings section 18 books as appointments, meals and your shift), a short strip at the screen's edge, R.ahead ship
+// minutes before ("Tiles night starts in 15 min · Bow lounge, Deck 3") and a gentler one as it starts. Only the Schedule's
+// own items (devDay), never two at once, never over a meeting, a question, a tip, the Captain's address, a chat card or
+// sleep (they wait; stale ones drop), never while the device is locked, each once (R.heard, saved). Tap: the Schedule;
+// Go there: the goal arrow. Traditions keep their rules: Don't (R.per) skips them, and on shift they're a quiet Calendar
+// badge unless you chose Remind me. Meals and your shift can be switched off (R.everyday); all of it with R.on. ----
+const HU_Q = [];                                         // waiting heads-ups, oldest first; HU_Q[0] is on screen when DEV.hu
+const devHeard = k => SHIP.device.calendarRemind.heard.includes(k);
+function devHear(k) { const h = SHIP.device.calendarRemind.heard; h.push(k); if (h.length > 80) h.splice(0, h.length - 80); }
+function devPlaceGoal(id) {                              // a place id (an appointment's) -> setGoal's { deck, place, label }
+  for (const n of Object.keys(DECKS)) if ((DECKS[n].places || []).some(x => x.id === id)) return { deck: +n, place: id, label: apptWhereName(id) };
+  return null;
+}
+function devItemGoal(x) {
+  if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
+  if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
+  if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
+  if (x.kind === 'tradition' && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  return null;
+}
+const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
+function devHuBusy() {
+  if (typeof sleeping !== 'undefined' && sleeping) return true;
+  if (document.body.classList.contains('dlgon') || TIP_Q.length || DEV.choose) return true;
+  const a = document.getElementById('devAddr'), c = document.getElementById('chat');
+  return !!(a && !a.hidden) || !!(c && !c.hidden && c.classList.contains('devchat'));
+}
+function devHeadsTick(t) {
+  const R = SHIP.device.calendarRemind;
+  if (!R.on || devLocked()) { HU_Q.length = 0; if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } return; }
+  for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
+    const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + x.title;
+    if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
+    if ((x.kind === 'meal' || x.kind === 'shift') && !R.everyday) continue;
+    if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
+    const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
+    if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;   // a 'soon' with under 3 minutes left waits for the start
+    devHear(k);
+    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
+    for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
+    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x) });
   }
+  for (let i = HU_Q.length - 1; i >= 0; i--) { const h = HU_Q[i]; if (h.stage === 'soon' ? t >= h.at : t >= h.at + 10) { if (i === 0 && DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } HU_Q.splice(i, 1); } }
+  if (HU_Q.length > 4) HU_Q.splice(DEV.hu ? 1 : 0, HU_Q.length - 4);   // never a backlog: the newest four
+  devHeadsShow(t);
+}
+function devHeadsShow(t = shipNow()) {
+  if (DEV.hu || !HU_Q.length) return;
+  if (devHuBusy()) return;
+  const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
+  DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + ' starts in ' + left + ' min' : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
+    where: h.where, soft: h.stage === 'start', go: !!h.goal });
+}
+function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
+if (typeof onSim === 'function') onSim('newGame', () => devHeadsReset());   // the clock starts again: nothing is heard yet
+function devHeadsBack() { if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); } }   // a tip or the address takes the top: the strip waits (still HU_Q[0])
+function devHeadsDo(verb) {                              // the strip's taps: 'open' (the Schedule), 'go' (the goal arrow), 'done'
+  const h = DEV.hu; if (!h) return; DEV.hu = null; HU_Q.shift(); DEVICE_SKIN.heads(null);
+  if (verb === 'open') deviceShow('schedule');
+  else if (verb === 'go' && h && h.goal && typeof setGoal === 'function') { SHIP.player.track = null; setGoal(h.goal); }
+  if (verb === 'done') devHeadsShow();
 }
 
 function deviceApp(def) {
@@ -9225,7 +9291,7 @@ const DEVICE_SKIN = (() => {
       let c = $('devTip');
       if (!c) { c = mk('div', 'devtip'); c.id = 'devTip'; c.setAttribute('role', 'status'); c.hidden = true; document.body.appendChild(c); c.onclick = () => tipDone(); }
       clearTimeout(c._t); c.hidden = !t; if (!t || document.body.classList.contains('dlgon')) return;   // no tips over a meeting
-      c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
+      devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = ''; c.append(mk('b', '', 'TIP'), mk('span', '', t.text));
       c._t = setTimeout(() => tipDone(), 9000);
     },
     dialogue(v) {                              // the meeting panel: a strip across the bottom, in the screen's style
@@ -9251,7 +9317,7 @@ const DEVICE_SKIN = (() => {
       if (!c) { c = mk('div', 'devaddr'); c.id = 'devAddr'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
         c.addEventListener('pointerdown', e => e.stopPropagation()); c.onclick = () => skin.address(null); }
       clearTimeout(c._t); c.hidden = !a; if (!a) return;
-      c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
+      devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       c.append(mk('small', '', ((a.from || 'The Captain') + ', to all hands').toUpperCase()), mk('p', '', a.text));
       c._t = setTimeout(() => skin.address(null), 20000);
     },
@@ -9262,6 +9328,16 @@ const DEVICE_SKIN = (() => {
       const row = mk('div', 'btns');
       for (const b of v.buttons || []) { const e = mk('button', 'act', b.label); e.type = 'button'; e.disabled = !!b.off; e.onclick = () => chatDo(b.id); row.appendChild(e); }
       el.appendChild(row);
+    },
+    heads(h) {                                 // 0.35.29: the heads-up strip at the screen's right edge; null hides it
+      let c = $('devHu');
+      if (!c) { c = mk('div', 'devhu'); c.id = 'devHu'; c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); c.hidden = true; document.body.appendChild(c);
+        c.addEventListener('pointerdown', e => e.stopPropagation()); c.onclick = () => devHeadsDo('open'); }
+      clearTimeout(c._t); c.hidden = !h; if (!h) return;
+      c.dataset.ph = SHIP.device.settings.phosphor; c.classList.toggle('soft', !!h.soft); c.textContent = '';
+      const tx = mk('span', '', ''); tx.append(mk('b', '', h.text), mk('small', '', h.where || '')); c.appendChild(tx);
+      if (h.go) { const g = mk('button', 'act', 'Go there'); g.type = 'button'; g.onclick = e => { e.stopPropagation(); devHeadsDo('go'); }; c.appendChild(g); }
+      c._t = setTimeout(() => devHeadsDo('done'), h.soft ? 6000 : 9000);
     },
     notify(n) { if (n && n.urgent && n.text) toast(n.app && DEVICE_APPS.has(n.app) ? DEVICE_APPS.get(n.app).title : 'Your device', n.text); },
   };
@@ -9415,7 +9491,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
       }
       if (rows.length) B.push({ kind: 'list', rows });
     }
-    B.push({ kind: 'text', text: 'Reminders', mark: 'head' }, { kind: 'buttons', items: [
+    B.push({ kind: 'text', text: 'Heads-ups before things start (also in Settings)', mark: 'head' }, { kind: 'buttons', items: [
       { label: 'On', on: R.on, action: { app: 'calendar', do: 'on', arg: true } }, { label: 'Off', on: !R.on, action: { app: 'calendar', do: 'on', arg: false } }] });
     if (R.on) B.push({ kind: 'text', text: 'How long before:' }, { kind: 'buttons', items: [15, 30, 60].map(a => ({ label: a + ' min', on: R.ahead === a, action: { app: 'calendar', do: 'ahead', arg: a } })) });
     return { title: 'Calendar', blocks: B };
@@ -9907,15 +9983,20 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
 // Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
 // phone asks for reduced motion), tips on or off
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg; },
+  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
+    else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
+    else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg; },
   view: () => {
-    const st = SHIP.device.settings, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
+    const st = SHIP.device.settings, R = SHIP.device.calendarRemind, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
       { kind: 'text', text: 'Screen colour' },
       { kind: 'buttons', items: Object.entries(PHOSPHORS).map(([k, label]) => ({ label, action: { app: 'settings', do: 'phosphor', arg: k }, on: st.phosphor === k })) },
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
-      { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') }] };
+      { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
+      { kind: 'text', text: 'Heads-ups before things on your Schedule start' }, { kind: 'buttons', items: on(R.on, 'heads') },
+      { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
+      { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }] };
   } });
 
 // Wallet: credits and your locker (0.28.10)
