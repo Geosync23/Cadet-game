@@ -179,10 +179,22 @@ A moment is 4 to 10 lines in the dialogue panel with one or two reply choices (t
 - [ ] Nothing contradicts the roster, `facts.md`, the voice card, or a beat already in the game.
 - [ ] No pronouns for people whose pronouns aren't in `facts.md`; the player is never gendered.
 - [ ] No romance or flirting; no cruelty; no one incompetent for a laugh.
+- [ ] **The no-romance read (the lead's standing rule, from reviewer 2):** every moment and arc beat, and every line
+      said to you at friend or close tier, is read once just for this. Warmth, closeness and deep friendship are fine;
+      anything that could read as romantic toward the player is not (no "I can't stop thinking about you", no lingering
+      looks, no jealousy, no "you mean more to me than...", no compliments on how you look). When in doubt, make it
+      plainly about friendship or the ship ("You're part of why I stay glad."). lines_check bans some phrasings too.
+- [ ] **Voice-card words carry no end punctuation** (`hi: Oh, hi`, not `Oh, hi!`): the line supplies it (`{hi}. Busy?`).
 - [ ] Specific: real machines, dishes, places, traditions (placeholders where they vary).
 - [ ] Every tier has lines; the stranger lines teach something useful (where things are, who to ask).
 - [ ] British spelling; short words; bubbles 60, cards 90, scenes 140.
 
 ## 12. Notes from batches (the head writer adds to this as we go)
 
-- (None yet.)
+- Lines are picked by chance, not in order: never number a sequence ("Tip one... tip two").
+- A line that only makes sense at one moment needs a condition for it ("the Chief's coming over" needs `act:dinner`).
+- Day 0 walking lines are gated by `flag:walk.<step>`, so they're never ordinary chat.
+- Rooms with spaces: `place:junior_common_room`, or the aliases (`mess`, `commons`, `lounge`, `booths`, `overlook`,
+  `teacorner`, `worksbay`, `chartroom`, `musicroom`).
+- The ladder club's secret is the ladder: anyone who avoids the lift "takes the ladder", never "the stairs" (there
+  are no stairs between decks).
