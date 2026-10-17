@@ -222,7 +222,7 @@
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
 // The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
 // elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
-// walk.up.1-6, walk-and-talk across Deck 5 to the
+// walk.up.1-10, walk-and-talk across Deck 5 to the
 // lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
 // reach the lift are skipped). The Deck 5 points (bay, haulway, stores, works) are retired; their job material (the
 // board, the Chief's office, the tool wall, tea) is on Monday's walk.job.take/turnin. From the lift on, unchanged:
@@ -246,14 +246,22 @@
 ? flag:walk.up.1
 - Don't try to learn it all tonight. Nobody does.
 ? flag:walk.up.2
-- Everyone's friendly. Say hello and you've made a mate.
+- Honestly? We've all been looking forward to you.   #warm
 ? flag:walk.up.3
-- Lost? Ask anyone. Every one of us got lost once.
+- Everyone's friendly. Say hello and you've made a mate.
 ? flag:walk.up.4
-- Weekends are yours. Two whole days. Sleep in, if you like.
+- Evenings are easy here. Tea, a game, a natter.
 ? flag:walk.up.5
-- Bunk first, then dinner. Brennan's cooking. You're lucky.
+- After dinner folk drift to the lounge. Come along.
 ? flag:walk.up.6
+- Lost? Ask anyone. Every one of us got lost once.
+? flag:walk.up.7
+- I got lost my first week. In a cupboard. An hour.   #funny
+? flag:walk.up.8
+- Weekends are yours. Two whole days. Sleep in, if you like.
+? flag:walk.up.9
+- Bunk first, then dinner. Brennan's cooking. You're lucky.
+? flag:walk.up.10
 - You'll pick it all up in a week. Promise.   #warm
 // point: lift
 ? flag:walk.lift.1
