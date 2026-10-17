@@ -12,7 +12,7 @@
 #
 # Story crew and the senior names (approved by the user) are written out by hand below; only the other crew are generated.
 
-import json, random, hashlib, html, os
+import json, random, hashlib, html, os, re
 
 R = random.Random(20261015)
 DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -607,9 +607,13 @@ THEME_OF_TRAIT = {'homesick': 'homesick', 'nervous': 'exams', 'ambitious': 'stuc
 KEEPSAKE_OF = {'tea': 'a little tin of their own tea blend', 'sweet': 'a recipe card in their handwriting', 'plant': 'a cutting in a jar', 'garden': 'a packet of seeds from the garden',
                'made': 'something they made: a little gear on a chain', 'book': 'a battered paperback with notes in the margins', 'music': 'a guitar pick, worn smooth',
                'star': 'a hand-drawn star chart', 'game': 'a Tiles piece, chipped at one corner'}
-FAMILY = ['a younger brother', 'two older sisters', 'parents who run a repair shop', 'a grandmother who raised them', 'a big, noisy family', 'a twin',
-          'a mother who writes every week', 'a father who grows apples', 'three cousins they grew up with', 'an aunt who was a pilot', 'a little sister who wants to join up',
-          'parents on a mining station']
+# family: (as the about lines say it, after "Has" or "Writes to"; the field itself, said by them after "my", 0.16.14)
+FAMILY = [('a younger brother', 'younger brother'), ('two older sisters', 'two older sisters'), ('parents who run a repair shop', 'parents, who run a repair shop'),
+          ('a grandmother who raised them', 'grandmother, who raised me'), ('a big, noisy family', 'big, noisy family'), ('a twin', 'twin'),
+          ('a mother who writes every week', 'mother, who writes every week'), ('a father who grows apples', 'father, who grows apples'),
+          ('three cousins they grew up with', 'three cousins, who I grew up with'), ('an aunt who was a pilot', 'aunt, who was a pilot'),
+          ('a little sister who wants to join up', 'little sister, who wants to join up'), ('parents on a mining station', 'parents on a mining station')]
+FAMILY_HAS = {my: has for has, my in FAMILY}
 SHIPS = ['the Kestrel', 'the Halcyon', 'the Osprey', 'the Meridian', 'the Calypso', 'the Heron', 'the Lark', 'the Corvid']
 # the about details for everyone without hand-written ones: { tier, topic, text }, text a sentence with {home}, {family}, {joy}, {work}
 ABOUT_WORK0 = ['Knows {work} better than anyone gives them credit for.', 'Will tell you which corner of {work} is the warmest.', 'Has opinions about how {work} should be run.',
@@ -636,24 +640,24 @@ ABOUT_THEME = {   # tier 3 (past or work, opens up) and tier 4 (secret) per stru
 }
 # hand-written for the hand-written crew: social fields, and about details added to theirs (to six or more each)
 SOCIAL_HAND = {
-    'marrow': dict(tpl='steady', openness='guarded', needs='listen', loves=['music'], likes=['tea', 'book'], joy='the piano on Thursday nights', thread='arc:marrow', keepsake='a page of sheet music she wrote', home='Port Halloran', family='a daughter at the Concord academy'),
-    'vance': dict(tpl='brisk', openness='guarded', needs='practical', loves=['game'], likes=['made', 'tea'], joy='the rowing leaderboard', thread='arc:vance', keepsake='his old academy rowing medal', home='New Aberdeen', family='a brother in the Concord navy'),
-    'sato': dict(tpl='dreamy', openness='normal', needs='share', loves=['tea', 'star'], likes=['book', 'plant'], joy='her terrible tea', thread='arc:sato', keepsake='a tin of the terrible tea', home='Lisk', family='a partner on a research station'),
-    'holt': dict(tpl='gruff', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'game'], joy='walking the decks before breakfast', thread='arc:holt', keepsake='his first Watch badge', home='Marra Station', family='an old border-patrol crew he still writes to'),
-    'calder': dict(tpl='brisk', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'book'], joy='a fan that runs sweetly', thread='arc:calder', keepsake='a spanner from the battered toolbox', home='the Tevan belt shipyards', family='her first chief, as near to family as she had'),
-    'pell': dict(tpl='chatty', openness='open', needs='cheer', loves=['music', 'sweet'], likes=['made', 'game'], joy='his tin of screws from every ship', thread='arc:pell', keepsake='his smallest music box', home='Coriel', family='his mum, who messages every week'),
-    'rina': dict(tpl='dry', openness='guarded', needs='cheer', loves=['game', 'sweet'], likes=['tea', 'garden'], joy='Tiles', thread='arc:rina', keepsake='a Tiles piece, the cheating one', home='Kesh', family='a sister who is a station doctor, and her gran'),
-    'brennan': dict(tpl='warm', openness='normal', needs='share', loves=['garden', 'sweet'], likes=['tea', 'plant'], joy='a full mess hall', thread='arc:brennan', keepsake='a biscuit tin with a recipe taped inside', home='Port Halloran', family='the old restaurant crew'),
-    'tomas': dict(tpl='earnest', openness='open', needs='listen', loves=['star'], likes=['book', 'sweet'], joy='his taped-up star map', thread='arc:tomas', keepsake='his spare star map', home='a farm moon with a grey sky', family='a little brother he writes to every week'),
+    'marrow': dict(tpl='steady', openness='guarded', needs='listen', loves=['music'], likes=['tea', 'book'], joy='the piano on Thursday nights', thread='arc:marrow', keepsake='a page of sheet music she wrote', home='Port Halloran', family='daughter at the Concord academy'),
+    'vance': dict(tpl='brisk', openness='guarded', needs='practical', loves=['game'], likes=['made', 'tea'], joy='the rowing leaderboard', thread='arc:vance', keepsake='his old academy rowing medal', home='New Aberdeen', family='brother in the Concord navy'),
+    'sato': dict(tpl='dreamy', openness='normal', needs='share', loves=['tea', 'star'], likes=['book', 'plant'], joy='her terrible tea', thread='arc:sato', keepsake='a tin of the terrible tea', home='Lisk', family='partner on a research station'),
+    'holt': dict(tpl='gruff', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'game'], joy='walking the decks before breakfast', thread='arc:holt', keepsake='his first Watch badge', home='Marra Station', family='old border-patrol crew, who I still write to'),
+    'calder': dict(tpl='brisk', openness='guarded', needs='practical', loves=['made'], likes=['tea', 'book'], joy='a fan that runs sweetly', thread='arc:calder', keepsake='a spanner from the battered toolbox', home='the Tevan belt shipyards', family='first chief, as near to family as I had'),
+    'pell': dict(tpl='chatty', openness='open', needs='cheer', loves=['music', 'sweet'], likes=['made', 'game'], joy='his tin of screws from every ship', thread='arc:pell', keepsake='his smallest music box', home='Coriel', family='mum, who messages every week'),
+    'rina': dict(tpl='dry', openness='guarded', needs='cheer', loves=['game', 'sweet'], likes=['tea', 'garden'], joy='Tiles', thread='arc:rina', keepsake='a Tiles piece, the cheating one', home='Kesh', family='sister, a station doctor, and my gran'),
+    'brennan': dict(tpl='warm', openness='normal', needs='share', loves=['garden', 'sweet'], likes=['tea', 'plant'], joy='a full mess hall', thread='arc:brennan', keepsake='a biscuit tin with a recipe taped inside', home='Port Halloran', family='old restaurant crew'),
+    'tomas': dict(tpl='earnest', openness='open', needs='listen', loves=['star'], likes=['book', 'sweet'], joy='his taped-up star map', thread='arc:tomas', keepsake='his spare star map', home='a farm moon with a grey sky', family='little brother, who I write to every week'),
     'nandakumar': dict(tpl='brisk', openness='normal', needs='practical', loves=['garden', 'plant'], likes=['tea', 'book'], joy='her chillies in the garden', thread='burnout', keepsake='a dried chilli on a string', home='New Aberdeen', family='two grown sons'),
-    'kowalczyk': dict(tpl='dry', openness='guarded', needs='listen', loves=['book'], likes=['tea', 'star'], joy='old paper novels', thread='lonely', keepsake='a paper novel with her notes in it', home='Marra Station', family='a father who ran a lighthouse beacon'),
-    'raman': dict(tpl='steady', openness='normal', needs='share', loves=['made'], likes=['music', 'star'], joy='his model of the Wren', thread='leaving', keepsake='a tiny model shuttle he carved', home='Lisk', family='a wife and two daughters on Lisk'),
-    'ferreira': dict(tpl='chatty', openness='open', needs='share', loves=['music'], likes=['tea', 'book'], joy='languages, Veyli most of all', thread='family', keepsake='a phrasebook in four languages', home='Coriel', family='a big family who all talk at once'),
-    'oduya': dict(tpl='warm', openness='open', needs='listen', loves=['sweet'], likes=['plant', 'book'], joy='a bowl of sweets on his desk', thread='loss', keepsake='a sweet from the bowl, the last of a kind', home='Kesh', family='a late wife he still talks about'),
-    'mensah': dict(tpl='playful', openness='normal', needs='cheer', loves=['game'], likes=['sweet', 'music'], joy='making Holt laugh', thread='startover', keepsake='a lucky coin from his first patrol', home='Port Halloran', family='a twin brother'),
-    'mori': dict(tpl='shy', openness='guarded', needs='listen', loves=['star'], likes=['book', 'tea'], joy='charting', thread='notgood', keepsake='a corner of her first chart', home='the Tevan belt', family='parents who wanted her to stay home'),
-    'torres-zeke': dict(tpl='warm', openness='open', needs='share', loves=['music', 'made'], likes=['tea', 'sweet'], joy='knitting scarves and every song in the record cabinet', thread='arc:torres', keepsake='a scarf he knitted for you', home='Hesper Dock', family='a grandmother who taught him to knit'),
-    'saruth': dict(tpl='steady', openness='guarded', needs='listen', loves=['tea'], likes=['plant', 'made'], joy='the daily tea', thread='lonely', keepsake='a knot of Veyli cord', home='the Veyli homeworld', family='a teacher of the cord, far away'),
+    'kowalczyk': dict(tpl='dry', openness='guarded', needs='listen', loves=['book'], likes=['tea', 'star'], joy='old paper novels', thread='lonely', keepsake='a paper novel with her notes in it', home='Marra Station', family='father, who ran a lighthouse beacon'),
+    'raman': dict(tpl='steady', openness='normal', needs='share', loves=['made'], likes=['music', 'star'], joy='his model of the Wren', thread='leaving', keepsake='a tiny model shuttle he carved', home='Lisk', family='wife and two daughters on Lisk'),
+    'ferreira': dict(tpl='chatty', openness='open', needs='share', loves=['music'], likes=['tea', 'book'], joy='languages, Veyli most of all', thread='family', keepsake='a phrasebook in four languages', home='Coriel', family='big family, who all talk at once'),
+    'oduya': dict(tpl='warm', openness='open', needs='listen', loves=['sweet'], likes=['plant', 'book'], joy='a bowl of sweets on his desk', thread='loss', keepsake='a sweet from the bowl, the last of a kind', home='Kesh', family='late wife, who I still talk about'),
+    'mensah': dict(tpl='playful', openness='normal', needs='cheer', loves=['game'], likes=['sweet', 'music'], joy='making Holt laugh', thread='startover', keepsake='a lucky coin from his first patrol', home='Port Halloran', family='twin brother'),
+    'mori': dict(tpl='shy', openness='guarded', needs='listen', loves=['star'], likes=['book', 'tea'], joy='charting', thread='notgood', keepsake='a corner of her first chart', home='the Tevan belt', family='parents, who wanted me to stay home'),
+    'torres-zeke': dict(tpl='warm', openness='open', needs='share', loves=['music', 'made'], likes=['tea', 'sweet'], joy='knitting scarves and every song in the record cabinet', thread='arc:torres', keepsake='a scarf he knitted for you', home='Hesper Dock', family='grandmother, who taught me to knit'),
+    'saruth': dict(tpl='steady', openness='guarded', needs='listen', loves=['tea'], likes=['plant', 'made'], joy='the daily tea', thread='lonely', keepsake='a knot of Veyli cord', home='the Veyli homeworld', family='teacher of the cord, far away'),
 }
 ABOUT_HAND_MORE = {
     'marrow': [(2, 'past', 'Commanded a freighter before the Wren, and hated every day of it.'), (3, 'hobby', 'Plays the piano best when she thinks the music room is empty.')],
@@ -714,13 +718,13 @@ def social_fields(out):
             e['thread'] = P4_R.choice(cand) if cand and P4_R.random() < .7 else P4_R.choice(THEMES)
             e['keepsake'] = KEEPSAKE_OF[e['loves'][0]]
             hm = next((pl for pl in PLACES if pl.lower() in life), None)
-            e['home'] = hm or P4_R.choice(PLACES); e['family'] = P4_R.choice(FAMILY)
+            e['home'] = hm or P4_R.choice(PLACES); e['family'] = P4_R.choice(FAMILY)[1]
         # about: hand-written where there are some; everyone ends with six or more, tiers 0-4, one tier-4 secret
         if e['id'] in ABOUT_HAND_NEW: e['about'] = [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT_HAND_NEW[e['id']]]
         elif e['id'] in ABOUT_HAND_MORE: e['about'] = e['about'] + [dict(tier=t, topic=k, text=x) for t, k, x in ABOUT_HAND_MORE[e['id']]]
         elif not e.get('about'):
             work = WORK_WORDS[e['work']['place']] if e.get('work') else 'the ship'
-            f = lambda s: s.format(home=e['home'], family=e['family'], joy=e['joy'], work=work)
+            f = lambda s: s.format(home=e['home'], family=FAMILY_HAS[e['family']], joy=e['joy'], work=work)
             t3k, t3, t4k, t4 = ABOUT_THEME[e['thread']]
             e['about'] = [dict(tier=0, topic='work', text=f(P4_R.choice(ABOUT_CADET0 if e.get('cadet') else ABOUT_WORK0))), dict(tier=1, topic='hobby', text=f(P4_R.choice(ABOUT_HOBBY1))),
                           dict(tier=1, topic='home', text=f(P4_R.choice(ABOUT_HOME1))), dict(tier=2, topic='home', text=f(P4_R.choice(ABOUT_FAMILY2))),
@@ -824,6 +828,52 @@ def reserve(out):
         rot.append(dict(day=day, out=[e['replaces'] for e in arr], **{'in': [e['id'] for e in arr]}))
     assert k == len(res) and res[0]['cadet'] and all(d % 7 == 0 for d in ROTATION_DAYS)
     return res, rot
+
+# ---- hobby and since (0.16.14, for social A's moments: "{hobby}", "{since}"). Both are plain rules on what each person
+# already has (joy, loves, life and bio lines, rank), with no random draws, so nobody moves. hobby: an -ing phrase;
+# since: how long they've been aboard the Wren, a duration phrase (the reserve: from the day they arrive)
+HOBBY_HAND = {'marrow': 'playing the piano', 'vance': 'rowing', 'sato': 'brewing terrible tea', 'holt': 'writing letters by hand',
+              'calder': 'fixing broken things', 'pell': 'collecting music boxes', 'rina': 'playing Tiles', 'brennan': 'growing herbs',
+              'tomas': 'mapping the stars', 'nandakumar': 'growing chillies', 'kowalczyk': 'reading old paper novels', 'raman': 'building a model of the Wren',
+              'ferreira': 'learning languages', 'oduya': 'trying sweets from every port', 'mensah': 'practising card tricks', 'mori': 'drawing charts',
+              'torres-zeke': 'knitting', 'saruth': 'tying cord knots'}
+SINCE_HAND = {'marrow': 'six years', 'vance': 'four years', 'sato': 'seven years', 'holt': 'eight years', 'calder': 'eleven years', 'pell': 'two years',
+              'rina': 'eighteen months', 'brennan': 'five years', 'tomas': 'one week', 'nandakumar': 'three years', 'kowalczyk': 'nine years',
+              'raman': 'four years', 'ferreira': 'six years', 'oduya': 'three years', 'mensah': 'five years', 'mori': 'six years',
+              'torres-zeke': 'twelve years', 'saruth': 'five months'}
+HOBBY_OF_LINE = [('comics', 'drawing comics'), ('harmonica', 'playing the harmonica'), ('patches', 'collecting mission patches'), ('playlist', 'making playlists')]
+HOBBY_OF_JOY = {'learning the guitar, badly': 'learning the guitar, badly', 'knitting scarves': 'knitting scarves', 'looking after a cactus called Gerald': 'looking after a cactus called Gerald',
+                'pressing flowers from the garden': 'pressing flowers', 'baking on rest days': 'baking', 'painting tiny portraits of the crew': 'painting tiny portraits of the crew',
+                'keeping a journal': 'keeping a journal', 'mystery novels': 'reading mystery novels', 'growing herbs': 'growing herbs', 'trying recipes from home': 'cooking recipes from home',
+                'knowing every song in the record cabinet': 'collecting old records', 'telling terrible jokes': 'telling terrible jokes', 'watching the stars': 'stargazing',
+                'writing letters home': 'writing letters home', 'talking about their cat': 'drawing pictures of the cat back home', 'chess': 'playing chess',
+                'running on the treadmill': 'running', 'the gym after shift': 'lifting weights', 'evenings in the music room': 'listening to old records',
+                'tending the garden': 'gardening', 'the garden benches': 'sketching in the garden', 'observatory nights': 'stargazing', 'a drink at the lounge bar': 'playing cards at the bar',
+                'browsing the crew store': 'collecting souvenirs', 'Tiles nights': 'playing Tiles', 'calls home': 'recording messages for home',
+                'a good book in a quiet corner': 'reading', 'a seat by the window': 'watching the stars go by', 'evenings in the bow lounge': 'doing crosswords in the bow lounge',
+                'a proper tea break': 'trying new teas'}
+HOBBY_PLAYS = ['playing the fiddle', 'playing the drums', 'playing the keyboard', 'singing']     # joy 'playing in the music room'
+HOBBY_OF_TAG = {'tea': 'trying new teas', 'sweet': 'baking', 'plant': 'growing cuttings', 'garden': 'gardening', 'made': 'making models', 'book': 'reading',
+                'music': 'listening to old records', 'star': 'stargazing', 'game': 'doing puzzles'}
+SINCE_OF = {'officer': ['eighteen months', 'two years', 'three years', 'four years', 'five years', 'six years', 'seven years'],
+            'junior': ['eight months', 'ten months', 'a year', 'fourteen months', 'eighteen months', 'two years', 'two and a half years', 'three years', 'four years']}
+SINCE_NEW = ['two months', 'three months', 'four months', 'five months']                      # bios that say "New to ..."
+NO_MY = re.compile(r"\b(he|she|him|her|his|hers|they|them|their)\b", re.I)
+def hobby_since(people):
+    for e in people:
+        lines = ' '.join([e.get('bio', '')] + e.get('life', [])).lower()
+        if e['id'] in HOBBY_HAND: e['hobby'] = HOBBY_HAND[e['id']]
+        else:
+            e['hobby'] = next((h for k, h in HOBBY_OF_LINE if k in lines), None) or HOBBY_OF_JOY.get(e['joy']) or \
+                         (HOBBY_PLAYS[stable(e['id']) % 4] if e['joy'] == 'playing in the music room' else HOBBY_OF_TAG[e['loves'][0]])
+        if e['id'] in SINCE_HAND: e['since'] = SINCE_HAND[e['id']]
+        elif e.get('reserve'): e['since'] = 'one week' if e.get('cadet') else 'two weeks'
+        elif 'same job for five years' in ' '.join(a['text'] for a in e.get('about', [])): e['since'] = 'five years'
+        elif e['bio'].startswith('New to'): e['since'] = SINCE_NEW[stable(e['id']) % 4]
+        else: e['since'] = SINCE_OF[e['rank']][stable(e['id']) % len(SINCE_OF[e['rank']])]
+        assert e['hobby'].split()[0].endswith('ing') and e['since'], e['id']
+        f = e['family']        # said after "my": a noun phrase, no article, no third person
+        assert not re.match(r'(a|an|the|my) ', f) and not NO_MY.search(f), (e['id'], f)
 
 DROPPED = []
 COUPLED = []
@@ -1106,8 +1156,9 @@ THEME_WORDS = {'homesick': 'homesick', 'exams': 'exam nerves', 'family': 'family
 def social_words(x, entries):
     if not x.get('tpl'): return 'you'
     th = x['thread']; th = THEME_WORDS.get(th, 'their own story')
-    w = '%s voice, %s; loves %s, likes %s; joy: %s; from %s, with %s; struggle: %s; keepsake: %s' % (
-        x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x['home'], x['family'], th, x['keepsake'])
+    w = '%s voice, %s; loves %s, likes %s; joy: %s; hobby: %s; from %s; family: my %s; aboard %s; struggle: %s; keepsake: %s' % (
+        x['tpl'], x['openness'], ' and '.join(x['loves']), ' and '.join(x['likes']), x['joy'], x.get('hobby', '-'), x['home'], x['family'],
+        x.get('since', '-') if not x.get('reserve') else x.get('since', '-') + ' (from arrival)', th, x['keepsake'])
     if x.get('partner'): w += '. Partner: ' + next(y['name'] for y in entries if y['id'] == x['partner'])
     return w + ('. Stays aboard.' if x.get('stays') else '. Could be posted to %s.' % x['transferTo'] if x.get('transferTo') else '.')
 
@@ -1191,6 +1242,7 @@ if __name__ == '__main__':
     assert sc == {'day': 60, 'night': 15}, sc
     visits = visitors(entries)
     reserve_pool, rotations = reserve(entries + visits)
+    hobby_since(crew + [x for x in guests if x['id'] in SOCIAL_HAND] + reserve_pool)   # 0.16.14
     block = ('// ---- BEGIN ROSTER (generated by plans/crew-roster-gen.py: fixed data; to change the crew, edit the generator and re-run it) ----\n'
              'const HABITS = ' + json.dumps(HABITS, ensure_ascii=False, indent=2) + ';\n'
              'const ROSTER = [\n' + js(crew) + '\n];\n'

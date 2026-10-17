@@ -1,11 +1,11 @@
 # Handover: the crew designer
 
-Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.13, 98df62f), so a fresh session can take over the crew.
+Written at the end of Pillar 2 (combined build 0.40.8) and brought up to date in Pillar 4 (0.16.14), so a fresh session can take over the crew.
 
 ## The role
 
 - **Branch:** `claude/deck-plans-1-2-6`.
-- **Builds:** 0.16.x (0.16.1 to 0.16.13 so far; the next is 0.16.14). The lead merges them onto `claude/ship-integration`.
+- **Builds:** 0.16.x (0.16.1 to 0.16.14 so far; the next is 0.16.15). The lead merges them onto `claude/ship-integration`.
 - **What I own:**
   - section 9 of `starship-cadet.html` (`// 9. CREW DATA`): the generated ROSTER block and the two lines after it;
   - `plans/crew-roster-gen.py`;
@@ -57,7 +57,7 @@ Everything sits between the markers `// ---- BEGIN ROSTER` and `// ---- END ROST
   - Section 16 also still accepts an older `galley: chef|cook|hand` field, but nothing sets it now.
 - **The story crew** (Marrow, Vance, Sato, Holt, Pell, Rina, Brennan, Tomas) have looks and bios copied exactly from `CREW` and must stay identical. Section 14 and the crowd rely on their ids.
 
-### Added since (0.16.6 to 0.16.13)
+### Added since (0.16.6 to 0.16.14)
 
 DEV_NOTES' crew roster section has every detail; in short:
 - **Birthdays and door plates (0.16.6):** `birthday` (a ship day of the year, 1–364) on everyone; `plate: { rank, name }` on everyone with a cabin.
@@ -70,6 +70,10 @@ DEV_NOTES' crew roster section has every detail; in short:
   - four couples (`partner`, sharing a day off and a `transferTo`);
   - `stays` and `transferTo`;
   - `ROSTER_RESERVE` (12, four cadets, each `replaces` a same-role leaver and copies their bed, work, shift and rota) and `ROSTER_ROTATIONS` (six Sundays, `out` and `in` ids). Leavers have `aboard: [null, day]`.
+- **Hobby, since and family "after my" (0.16.14,** for social A and the head writer's moment lines `{hobby}`, `{since}`, `my {family}`):
+  - `hobby`: an -ing phrase; `since`: time aboard the Wren, a duration phrase (Tomas "one week"; the reserve counts from arrival: cadets "one week", others "two weeks"). Both on all crew, Saruth and the reserve, added last by `hobby_since()` with no random draws (hand tables `HOBBY_HAND`, `SINCE_HAND`; the rest by rule and `stable(id)`).
+  - `family` reads after "my" (no article, no he/she/him/her/they); `hobby_since` asserts it. `FAMILY` holds (about form, my form) pairs: the about templates still say "Has a twin", through `FAMILY_HAS`, so no `about` text moved.
+  - A new person needs a `since` that agrees with their bio and about lines; check any "years"/"months"/"New to" wording.
 - **Every later pass runs at the end of the generator,** on its own random stream (`NEW_R`, `BDAY_R`, `SHIFT_R`, `VIS_R`, `P4_R`). Keep it that way, so nobody already written moves.
 
 ## How to regenerate
@@ -124,6 +128,8 @@ Keep doing it that way. To check, compare ROSTER before and after with a short s
 
 ## Gotchas
 
+- **Test setup in a fresh container:** `pip install playwright`, then fetch three.js as DEV_NOTES "Testing" says (`npm pack three@0.128.0` into `/tmp/cadet-work/three`). cadet_test's f_noshadow can differ once by about 1934 px in the "+69 Energy" note (a timing flake); re-run before chasing it. To run two cadet_tests at once give the second its own `CADET_WORK`.
+
 - `ROSTER_PLAYER` is read by the sleep code (`playerBed()`). Moving your bed moves where Sleep works.
 - `uniform` must be a real makeCharacter DEPT key: `store` and `galley` map to `works`.
 - `rank` maps to makeCharacter's 0–4 through `ROSTER_RANK`. A new rank needs a row there.
@@ -144,6 +150,8 @@ CADET_CHROME=/opt/pw-browsers/chromium python3 day_check.py starship-cadet.html 
 - Also run `node --check` on the extracted script after any generator change. A broken block breaks the whole game.
 
 ## Ideas and questions for the user
+
+- Loose end from 0.16.14: one reserve arrival, Priya Kowal, has the generated detail "an old rivalry with someone aboard that goes back years" though she is new aboard (from before the Wren, at a stretch). The reserve's `since` is fixed text from arrival; a reader that wants it to grow could work it out from `aboard[0]` instead.
 
 - The user said no to a store open every day (answers pass, row 19).
 - Birthdays: built in 0.16.6 (`birthday`, ship day of the year 1–364, about one a week). The galley bakes the cake and the sim engineer gathers the mess.
