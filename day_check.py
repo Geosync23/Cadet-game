@@ -121,6 +121,16 @@ with sync_playwright() as pw:
     print('Deck 4 the same twice:', o1['end'] == o2['end'])
     if o1['end'] != o2['end']: fail('Deck 4 came out differently the second time')
 
+    # 5. the arrival on (section 21's intro, off in every test URL): day 0 and Monday's beats laid over the plans never
+    # put two people in one place at once (reviewer 1: Calder and Torres both at 5-stool-1 for Monday's briefing)
+    ia = g.ev(r"""(() => { if (typeof newGameStart !== 'function' || typeof introBeats !== 'function') return null;
+      newGameStart(true); const dbl = [];
+      for (const d of [0, 1]) for (const [id, L] of shipDay(d).occ) if (Array.isArray(L)) for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++)
+        if (L[i][0] < L[j][1] && L[j][0] < L[i][1] && L[i][2] !== L[j][2]) dbl.push(id + ' ' + L[i][2] + '/' + L[j][2] + '@' + (L[j][0] - (d - 1) * 1440));
+      return dbl; })()""")
+    print('Arrival on, days 0 and 1, places booked twice:', 'no arrival here' if ia is None else ia[:6] or 'none')
+    if ia: fail(f'arrival on: places booked twice {ia[:6]}')
+
     print('errors', g.errors[:5])
     if g.errors: ok = False
     print('DAY CHECK OK' if ok else 'DAY CHECK FAILED')

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.26.28
+   STARSHIP CADET: CSV Wren                           build 0.26.29
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7053,15 +7053,16 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.26.28';                           // keep in step with the header's build line
+const GAME_BUILD = '0.26.29';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
 //   ship days as a cue (simNotes(kind, since) -> those notes, newest last), saved with the game (save.notes).
 //   data.t, when given, is when it happened (section 17 runs hours late, in a time jump); otherwise now.
-//   Kinds (pillar4-plan, appendix): repair {who, machine, kind, deck}, favour {who, from}, tradition {id, day, came, you},
+//   A payload never has its own `kind` or a non-number `t` (the note's kind wins; a number t is when it happened).
+//   Kinds (pillar4-plan, appendix): repair {who, machine, job (service | repair | overhaul), deck}, favour {who, from}, tradition {id, day, came, you},
 //   gift {to, item}, apptKept / apptMissed {id, with}, introStep {step, who}, eventPhase {id, phase}, choice {script, k,
-//   who}, jobAbandoned {machine, dept}, harvest, lateMeal, job {id, step}, need {key, low}; social: tierUp, moment, bond, invite.
+//   who}, jobAbandoned {machine, dept}, harvest, lateMeal, job {id, step, job}, need {key, low}; social: tierUp, moment, bond, invite.
 // flag(key) -> its value (undefined when unset); flagSet(key, value = true) sets it; flagSet(key, null) clears it.
 //   Flags are saved with the game (save.flags): 'met.calder', 'escort.torres', 'week1.d2' ... Values are plain JSON.
 // Function declarations and lazily made state, so a section anywhere in the file may call these while it loads.
@@ -7749,7 +7750,7 @@ function gatherings(p, d, F) {
   const U = k => schedU(p.seed, d, k), out = [];
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
-    out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host });
+    out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
   }
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
   // Captain and the Commander on their work days and any bridge crew who work late; and the Captain's evening walk
@@ -8038,6 +8039,10 @@ function schedBuild(p, d, occ, S) {
   const clear = span => !meet.some(e => !e.done && e.at < t + span && e.at + e.dur > t);
   const leisureUntil = (end, k) => {
     for (let n = 0; end - t >= 20 && n < 12; n++) {
+      for (const e of meet) if (!e.done && e.meal && t > e.at && t < e.at + e.dur - (e.min || 20) && end - t >= (e.min || 20)) {   // late for a meal tradition (the handover ran on): join it while there's time to eat
+        e.done = true; take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true });
+      }
+      if (end - t < 20) break;
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
       if (end - to < 20) to = end;
       if (F.shape.drill && t < F.shape.drill && to > F.shape.drill) to = F.shape.drill;
@@ -8094,12 +8099,15 @@ function schedBuild(p, d, occ, S) {
     if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, F.workEnd + 3 + Math.round(10 * U(74)));
     const ho = meet.find(e => e.tag === 'handover'); if (ho && dinnerAt < ho.at + ho.dur && S.shared.has('1|@handover')) dinnerAt = ho.at + ho.dur;   // eat after the handover
     let dinnerBy = 1440;                                 // dinner before a gathering ends when it starts (a grab if that's too soon)
-    for (const e of meet) if (e !== ho && !e.done && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt) {   // dinner clear of a gathering: after it if there's time, else before
+    for (const e of meet) if (e !== ho && !e.done && !e.meal && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt) {   // dinner clear of a gathering: after it if there's time, else before
       if (e.at + e.dur + 25 <= MEALS.dinner[1]) dinnerAt = Math.max(dinnerAt, e.at + e.dur);
       else { dinnerAt = Math.max(t, Math.min(dinnerAt, e.at - 45)); dinnerBy = Math.min(dinnerBy, e.at); }
     }
+    const mt = !ateDinner && meet.find(e => e.meal === 'dinner' && !e.done && e.at + 10 > t && e.at < until - 30);   // a meal tradition: going is their dinner
+    if (mt) { dinnerAt = Math.max(t, mt.at + mt.dur); dinnerBy = 1440; }
     if (sp.length && t + 45 < dinnerAt && clear(70)) sp.shift()();
     leisureUntil(Math.min(dinnerAt, until - 40), 71);
+    if (mt && segs.some(s => s.act === 'dinner' && s.tag === mt.tag)) ateDinner = true;   // they got a seat at it (else the ordinary dinner after)
     if (ateDinner) {}
     else if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0), dinnerBy));
     else grab('dinner', 72);
@@ -8116,6 +8124,8 @@ function schedBuild(p, d, occ, S) {
     if (U(k + 7) < .5) toilet(k + 7);
     wash(k);
     if (F.shape.inspect && /^4-B/.test(p.bed)) { go(bedDeck); seg('off', t + 10, 'bed', p.bed, { tag: 'inspection' }); }
+    const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
+    if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
     if (H.has('skips-breakfast') && U(k + 1) < .7) { linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
     const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(25 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));
     if (want > t + C + 5) linger(want - (deck !== 3 ? C : 0));
@@ -8322,9 +8332,15 @@ function shipDay(d) {
   // (section 18), else its tagged places and rooms and its first pool
   occ.res = new Map();
   if (typeof eventsOn === 'function') for (const e of eventsOn(d)) {
-    const ids = typeof eventPlaces === 'function' ? eventPlaces(e) || []
+    const ids = typeof eventPlaces === 'function' ? (eventPlaces(e) || []).slice()
       : typeof eventOpts === 'function' ? eventOpts(e.ev, { rank: 'officer' })   // its tagged places and rooms, and its first pool (the event's own room)
         .filter(([n, k]) => /^(@|ev:)/.test(k) || (e.ev.where[0] && e.ev.where[0].pool === k && e.ev.where[0].deck === n)).flatMap(([n, k]) => (S.shared.get(n + '|' + k) || []).map(pl => pl.id)) : [];
+    if (!ids.length && e.ev.meal && Array.isArray(e.ev.where)) {   // a meal tradition (the Sunday long table): as many of its seats as are coming, in id order, so the ordinary diners don't fill them
+      const n = S.people.filter(p => aboard(p, d) && (eventPlan(p, d) || []).some(x => x.id === e.id)).length, nat = (a, b) => a.id.localeCompare(b.id, 'en', { numeric: true });
+      for (const w of e.ev.where) { const rx = w.room ? new RegExp(w.room instanceof RegExp ? w.room.source : String(w.room), 'i') : null, rooms = (DECKS[w.deck] || {}).rooms || {};
+        for (const ty of w.types || []) ids.push(...(S.shared.get(w.deck + '|' + ty) || []).filter(pl => !rx || rx.test((rooms[pl.room] || {}).name || '')).sort(nat).map(pl => pl.id)); }
+      ids.splice(n);
+    }
     for (const id of new Set(ids)) { if (!occ.res.has(id)) occ.res.set(id, []); occ.res.get(id).push([(d - 1) * 1440 + e.from - 5, (d - 1) * 1440 + e.to, e.id]); }
   }
   for (const p of order) {
@@ -8347,6 +8363,7 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // table for Calder; the escort's is only a stand-in, since section 10's escort does the walking),
 // { deck, room } (a week beat: the first free place in that room, by id, nobody's own and nobody's desk) or 'seek'
 // (section 20's seek finds you: nothing planned). [] when the intro is off
+const INTRO_EARLY = 5;                                   // minutes early to a named seat (the Chief at your table)
 function introPlan(p, d) {
   if (typeof introBeats !== 'function') return null;
   let beats = null; try { beats = introBeats(p.id, d); } catch (e) { return null; }
@@ -8356,9 +8373,10 @@ function introPlan(p, d) {
     const w = x.where, rooms = (DECKS[w.deck] && DECKS[w.deck].rooms) || {};
     const inRoom = q => q.deck === w.deck && (q.room === w.room || (rooms[q.room] && rooms[q.room].name === w.room)) && q.type !== 'bed' && !S.owner.has(q.id) && !S.deskOf(q.id) && !q.machine;
     const cand = S.places.filter(inRoom).sort(nat), dist = q => w.tile ? Math.hypot(q.at[0] - w.tile[0], q.at[1] - w.tile[1]) : 0;
-    const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId)   // a named place (Calder's seat across from yours)
-      : w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b))[0] : cand[0];   // a tile: the place nearest it
-    return { from: x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, tag: 'intro-' + x.id };
+    const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
+    const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
+    const seat = !!(w.placeId && pl), alts = w.placeId ? null : near.map(q => q.id);   // introLay takes the first of these free then
+    return { from: seat ? x.at - INTRO_EARLY : x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id };   // a named seat: there and sitting when it starts
   });
 }
 function introLay(p, d, occ, segs) {
@@ -8368,7 +8386,8 @@ function introLay(p, d, occ, segs) {
   const B = (d - 1) * 1440, byId = schedData().byId;
   let out = segs.slice();
   for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
-    const a = B + Math.max(0, e.from), b = B + Math.min(1440, e.to), pl = e.placeId ? byId.get(e.placeId) : null, cut = [];
+    const a = B + Math.max(0, e.from), b = B + Math.min(1440, e.to), cut = [];
+    const free = id => !(occ.get(id) || []).some(([x, y]) => x < b && a < y), pid = e.alts && e.alts.length ? e.alts.find(free) || e.placeId : e.placeId, pl = pid ? byId.get(pid) : null;   // never a place someone already has then (Calder and Torres at Monday's briefing)
     for (const x of out) {
       if (x.to <= a || x.from >= b) { cut.push(x); continue; }
       if (x.from < a) cut.push({ ...x, to: a });
@@ -12288,7 +12307,7 @@ function jobEffect(j, t, by) {
   if (j.machine) {
     const s = SHIP.machines[j.machine], was = s && s.state;
     if (s) { s.cond = Math.max(s.cond, JOB_TYPES[j.kind].restore); s.state = machineState(s.cond); s.lastService = t; }
-    if (s && by) simLater('repair', { who: by, machine: j.machine, state: was, kind: j.kind, deck: j.deck, id: j.id });   // the state it was in
+    if (s && by) simLater('repair', { who: by, machine: j.machine, state: was, job: j.kind, deck: j.deck, id: j.id, t });   // the state it was in; job: service, repair or overhaul (a payload never says kind: that's the note's own)
   } else if (j.cargo === 'meals') {
     // the meals left the hold when the run was set (cartClaim) and the galley lands them (section 16): at arriveAt
     // for the crew's runs, and when you unload for yours (0.33.19: cartWaiting held them till now)
@@ -12525,7 +12544,7 @@ function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filt
 // step, reserved, ... }) when you take one ('take'), tick off a stop ('stop', with k and its tag), finish its work ('done'),
 // turn it in ('turnin'), give it up ('drop') or leave it till it lapses ('lapse', sent once the hour has run). reserved:
 // jobReserve's slot, or 0. Inert until section 13's simNote is in
-function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.id, step, reserved: j.reserved || 0, kind: j.chore || j.kind, machine: j.machine || null, ...o }); }
+function jobNote(j, step, o) { if (j.kind !== 'favour') simLater('job', { id: j.id, step, reserved: j.reserved || 0, job: j.chore || j.kind, machine: j.machine || null, ...o }); }
 // for the social side's reputation and memories (social A): a job of yours you gave up or let lapse unfinished
 // (jobAbandoned), and a machine's job left for you that went to the crew because you didn't take it (jobUnclaimed,
 // once a job, only for a job that was really held for you on your shift). dept: null, the social side works it out
