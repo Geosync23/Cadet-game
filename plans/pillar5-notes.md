@@ -69,3 +69,29 @@ From the Pillar 5 planner, for the lead to show the user. Not a plan. Each quest
 
 20. **Staffing.** Pillar 4 runs about 15 helpers in one game file.
     *Suggested:* Pillar 5 starts small, **3 helpers** for the core gameplay now (systems/jobs, the player's progression and activities, and the device's work apps folded into the device engineer's queue), then **2-3 events engineers** after Pillar 4's wave 3, so the total never passes about 18 active sessions. Check-ins with you after the promotion is playable, and after each event (or every two).
+
+## The user's answers (2026-10-17, ~04:10, through the lead's survey)
+
+Overall: "Use this survey to create a detailed plan before starting any work. Be sure to come with new ideas for mechanics too."
+
+**The roadmap changed** (recorded in design-doc.md, "Roadmap after Pillar 4"): **Pillar 5 = expanded core mechanics only.** Pillar 6 = ship-wide events (all of Part B except the small incidents). Pillar 7 = career progression, story and milestones (including being assigned the night shift for a while).
+
+1. **Yes**, and: "That was always the plan, I want new core mechanics other than making parts and replacing them. That's what this pillar is."
+2. More real faults: **yes**.
+3. Diagnosing: **yes, but later**: "this comes later, and is one of SEVERAL new and evolving mechanics, and you work on more of the ship."
+4. First promotion: **yes, about 2 ship weeks** of steady work.
+5. Only delayed, never passed over: **yes**.
+6. Tier 2 traced faults: **yes, "but another mechanic that comes later in career. Gotta start simple."**
+7. Skill in words: **yes**.
+8. Tools: **yes, "but this tool (and more tools still) are unlocked slowly. And you are trained on them."**
+9. Night on-call: **cut.** "Eventually you will be assigned night shift for a while" (Pillar 7).
+10. Off-shift things (tinkering, cabin, star logging): **yes**.
+11. Device work apps: **yes**.
+12. Drill and inspection made real: **yes**.
+13. Other jobs: **cut** (Works only).
+14, 15, 16, 18: **moved to Pillar 6** (events). Q18 (recurrence): "keep this for when we return".
+17. Small incidents: **yes** (kept in Pillar 5 as a mechanic).
+19. Rank parts of events: **yes, with the events in Pillar 6**.
+20. Staffing: **changed**: "Yes tiered but don't be afraid to hire as many as needed. Like some workers focused on keeping the…" (cut off; the lead is asking the user for the rest).
+
+**From the traditions survey:** a **laundry system** belongs in Pillar 5 (uniforms get grubby, the laundry room, inspection ties in).
