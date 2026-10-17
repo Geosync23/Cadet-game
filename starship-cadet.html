@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.8
+   STARSHIP CADET: CSV Wren                           build 0.42.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.8';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.9';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14629,7 +14629,7 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
   { id: 'bunk', day: 0, at: 17 * 60 + 53, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, flags: ['intro.device'],
-    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you, so I left your bag in your locker in Bunk 1. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
+    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your locker when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
   { id: 'toMess', day: 0, at: 18 * 60 + 5, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
   { id: 'servery', day: 0, at: 18 * 60 + 12, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
@@ -14910,7 +14910,6 @@ function introManifest() {
     el.remove(); INTRO_UI.manifest = null;
     introDone('manifest', introAbs(INTRO_START.day, INTRO_START.min));
     if (typeof eventFeel === 'function') eventFeel(['jolt'], 1);   // the Tern settles
-    if (typeof bagGive === 'function') bagGive();          // section 15: your kit bag, in one hand until your locker
     if (typeof tipShow === 'function') tipShow('walk', 'Tap where you want to go, or press and hold to walk.');
     saveGame();
   };

@@ -358,6 +358,7 @@ Two decks, joined by a working lift. Deck 4 (Quarters) plays as before. Deck 5 (
 | 0.42.6 | Skip-intro means "I know the ship": the evening's points and steps, every social gate open at once (all of `INTRO_FLAGS` but `mug` and `seedling`), no scripted week (`ended`, so no beats, no escort, no reserved jobs); the Settling-in list stays (design-doc.md, "Arriving by shuttle", updated). Turning in reserved slot 1 or 2 sends `introStep` `d1-shadow` / `d1-lead` (`introJobNote`, listening to section 17's job notes), the core memory social keeps. intro_check OK; cadet_test vs 0.42.5 identical apart from the known `g_nocrew` flake. |
 | 0.42.7 | Reviewer 1's re-review: a step's wait also counts from the last minute you got nearer to it on its deck (`SHIP.intro.near`, saved), so one slow moment no longer costs the steps after it; intro_check's new "one slow step, then a steady pace" cases miss nothing. The days-off line FAILs from combined builds 0.60 on. Sowing morning's beat moved to 11:45-12:40 (the traditions engineer's 0.34.23: it follows harvest morning). intro_check OK; cadet_test vs 0.42.6 identical apart from the known `g_nocrew` flake. |
 | 0.42.8 | Signing the manifest hands you your kit bag (player engineer 3's `bagGive`, typeof-guarded; not on skip). Section 15 stows it at the bunk and locks the device until `intro.device` (`deviceLocked`). intro_check OK. |
+| 0.42.9 | The kit bag is section 15's alone now (`bagTick` gives it on the ramp), so 0.42.8's `bagGive` call is gone; Torres's missed-bunk Mail asks you to drop your bag in your locker (it's still in your hands). intro_check OK. |
 
 Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The only Deck 4 changes are the spine and lobbies (not in the harness views), and crew routes that shifted when Pell left and when the car and benches changed which tiles are walkable.
 
@@ -1053,7 +1054,7 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 12 main loop, after `socialTick()` | `introTick()` (21) | onboarding | in 0.42.5 |
 | section 13 `newGameStart(arrival)` | `introWanted()`, `introNewGame(arriving)` (21) | sim engineer | 0.26.23 / 0.42.4 |
 | section 14 plan cache | `introSig()` (21): plans again when the intro starts, ends or is skipped | sim engineer | 0.26.23 / 0.42.4 |
-| section 21 manifest signed (A1) | `bagGive()` (15): the kit bag in hand; section 15's `bagTick` stows it when `SHIP.intro.done.bunk` is set (quiet if `missed` has 'bunk') | onboarding / player engineer 3 | 0.42.8 / 0.28.26 |
+| section 15 `bagTick` (every frame) | reads `introOn()`, `SHIP.intro.step` ('ramp': the kit bag in hand), `SHIP.intro.done.bunk` and `SHIP.intro.missed` (stowed at the bunk, or by tapping Bunk 1 if you missed it) (21) | player engineer 3 | 0.28.26 |
 | section 18 "after arrival" rhythms | `introArrival()` (21): the day you came aboard, Day 0 | traditions engineer | in 0.42.2 |
 | section 21 `introAdvance` | `socialInvite(...)` (20) | onboarding | in 0.42.0, waits for social A |
 | section 21 at load: `onSim(kind, d => settleNote(kind, d))` for each of `SETTLE_KINDS`, and `onSim('job', introJobNote)` | `onSim` (13) | onboarding | in 0.42.0 / 0.42.6, live when 13 has it |
