@@ -320,7 +320,7 @@ with sync_playwright() as pw:
       out.stub = stub; return out; })()''')
     print(' ', gf)
     check(gf['bought'] == [['postcard'], 0, 37], f"a gift from the store goes into your hands, not the locker ({gf['bought']})")
-    check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book'} and len(gf['gifts']) == 5, f"the store's gifts are section 20's names ({gf['gifts']})")
+    check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book', 'bar of chocolate', 'paper novel', 'music chip', 'pocket puzzle', 'spare tiles set'} and len(gf['gifts']) == 10, f"the store's gifts are section 20's names ({gf['gifts']})")
     check(gf['made'] == ['keyring'], f"a gift made in the machine shop goes into your hands ({gf['made']})")
     if 'garden' in gf: check(gf['garden'] == ['herbs', 'tomato'] and gf['again'] == [], f"a garden run's herbs and tomato into your hands, once ({gf.get('garden')}, {gf.get('again')})")
     if gf.get('notToday') is not None: check(gf['notToday'] == [], f"no garden gift on a day that isn't a harvest day ({gf['notToday']})")
@@ -730,9 +730,10 @@ with sync_playwright() as pw:
       out.push([!!pt, pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null, bagLockerTap(new THREE.Vector3(999, 0, 999))]);
       return JSON.stringify(out);
     })()"""))
-    try:
-        page.wait_for_function('!bagHeld()', timeout=30000); walked = True
-    except Exception: walked = False
+    for _ in range(60):                                  # frames are stepped by hand here (window.__step)
+        page.evaluate('window.__step(30, 1000 / 30)')
+        if ev('!bagHeld()'): break
+    walked = ev('!bagHeld()')
     kb2 = json.loads(ev("""(() => {
       const P = SHIP.player, b = document.getElementById('devBtn'), out = [P.locker.slice()];
       P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // the bunk step done: it goes in by itself
