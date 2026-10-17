@@ -48,3 +48,6 @@ Raw input for the Pillar 4 planner and the social system designer. Not a plan.
 - **Tiles:** a simple playable game we design (later in the pillar). Tile boards at a little station in the lounge; on tiles night, every table in the lounge has one.
 
 Then: time to execute Pillar 4.
+
+## Tiles direction (the user, 2026-10-17 ~02:50)
+"We should get a new hire to design the tiles game. A checkers like / block matching mix that is quick and fun to play with 2 people. It needs to look visually appealing, be original, be balanced, be tight, easy to get into, accessible, quick and different. ... If so, hit it!" → Tiles engineer hired now (seat 10, brought forward from wave 3); design page first, the user approves before building.
