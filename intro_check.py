@@ -305,7 +305,35 @@ with sync_playwright() as pw:
         if after['step'] != before['step'] or after['day'] != 0 or after['form']: fail('a Day 0 save did not load at its step')
         if after['name'] != 'Sam': print('  (the name comes back once section 15 saves SHIP.player.name: player engineer 3)')
         g.page.evaluate('localStorage.clear()')
-    print('Not yet (wave 3 and later): the reserved jobs, the week in play, reload mid-walk in the real game')
+    print('10. Monday in the real game: the three jobs held at 05:00, the briefing at 07:50, the shadow shift with Torres')
+    if not g.ev("typeof jobReserve === 'function' && typeof newGameStart === 'function'"):
+        print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
+    else:
+        g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        g.ev('skipTo(introAbs(1, 7 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
+        res = g.ev("[1, 2, 3].map(k => SHIP.jobs.find(x => x.reserved === k)).map(j => j && j.machine)")
+        print('  held for you:', res)
+        if not all(res): fail('the week\'s three jobs are not all held')
+        met = None
+        for i in range(40):
+            g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
+            if met: break
+        print('  07:50 in the Works bay:', met)
+        if met != 'introBriefing': fail('the Monday briefing did not play')
+        g.ev('(() => { while (DIALOGUE) dialogueNext(); })()')
+        for i in range(40):
+            g.step(30)
+            if g.ev('shipNow() >= introAbs(1, 486)'): break
+        took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
+        g.step(60)
+        esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
+        fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
+        print(f"  took it: {took}; Torres {esc['mode']}, {esc['d']} tiles from you; turned in: {fin['t']}; 'Shadow a job' ticked: {fin['shadow']}; d1-shadow note: {fin['mem']}")
+        if not took: fail('could not take the shadow job at 08:06')
+        if esc['mode'] != 'follow' or esc['d'] is None or esc['d'] > 4: fail(f'Torres is not with you on the shadow shift: {esc}')
+        if not (fin['t'] and fin['shadow'] and fin['mem']): fail(f'the shadow job did not complete the intro\'s side: {fin}')
+    print('Not yet: Tuesday and the rest of the week in play, reload mid-walk in the real game')
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 

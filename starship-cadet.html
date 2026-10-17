@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.15
+   STARSHIP CADET: CSV Wren                           build 0.42.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.15';                           // keep in step with the header's build line
+const GAME_BUILD = '0.42.16';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14771,6 +14771,10 @@ const introFlag = k => typeof flag === 'function' ? !!flag(k) : !!(SHIP.intro.fl
 const introFlagSet = (k, v = true) => { if (typeof flagSet === 'function') flagSet(k, v); else { const f = SHIP.intro.flags || (SHIP.intro.flags = {}); if (v === null) delete f[k]; else f[k] = v; } };
 // every flag this section sets: a new arrival clears them all (section 13's store outlives SHIP.intro), and the end of
 // the intro, however it comes, leaves all but 'mug' and 'seedling' set (the device, Calder met, every week's gate open)
+// the week's three jobs (section 17's jobReserve(kind, day, at, slot), agreed with the systems engineer): Monday's shadow
+// shift and the one you lead in the afternoon, and Tuesday's first solo job from Calder. Reserved at Monday 05:00
+// (INTRO_WEEK 'd1-jobs'); not on skip.
+const INTRO_JOBS = [['lights', 1, 8 * 60, 1], ['washer', 1, 13 * 60, 2], ['lights', 2, 7 * 60 + 45, 3]];
 const INTRO_FLAGS = ['escort.' + INTRO_ESCORT, 'week1', 'intro.device', 'met.calder', 'week1.d2', 'week1.d3', 'week1.d4', 'week1.d5', 'week1.d6', 'week1.d7', 'week1.done', 'mug', 'seedling'];
 const introRel = (id, step, pts) => { if (pts && typeof relAdd === 'function') relAdd(id, 'intro:' + step, pts); };
 const introMail = (m, at) => { if (m && typeof mailSend === 'function') mailSend({ at, from: m.from, subject: m.subject, body: m.body }); };
@@ -14825,10 +14829,12 @@ const INTRO_MEETINGS = {
 // beats of one person on one day (introPlan), so they are in the schedules, seeded and testable; nobody is teleported.
 // action: what this section does at `at` (flags, the invitation); settle: the Settling-in item it teaches.
 const INTRO_WEEK = [
+  { id: 'd1-jobs', day: 1, at: 5 * 60, who: null, reserve: true },   // section 17: the week's three jobs, held for you (not at
+  // the arrival itself: a new game's clock jumps back to Day 0 and the machines start afresh after it)
   { id: 'd1-wash', day: 1, at: 6 * 60, until: 6 * 60 + 30, who: 'tomas', where: { deck: 4, room: 'Bunk 1' }, settle: 'washed' },
   { id: 'd1-briefing', day: 1, at: 7 * 60 + 50, until: 8 * 60 + 5, who: 'calder', also: [INTRO_ESCORT], where: { deck: 5, room: 'Works bay' }, meeting: 'introBriefing', settle: 'team',
     flags: ['intro.device', 'met.calder'] },   // if you missed them on Sunday, Torres hands you the device here
-  { id: 'd1-shadow', day: 1, at: 8 * 60 + 5, until: 12 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'lead', job: 'reserved:1', settle: 'shadow' },
+  { id: 'd1-shadow', day: 1, at: 8 * 60 + 5, until: 12 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd2-solo', day: 2, at: 7 * 60 + 45, until: 8 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office' }, meeting: 'introSoloJob', settle: 'solo' },
@@ -14877,10 +14883,26 @@ const SETTLE = [
 // the list listens on section 13's bus once it's there (onSim(kind, fn), fn called with the note's data)
 let INTRO_HEARD = false;
 if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); }
+// what Torres says as you work (stand-ins until the writers' lines): slot 1, the shadow shift, step by step; slot 2,
+// the one you lead, only at the end
+const INTRO_JOB_LINES = {
+  1: { take: ['That one\'s ours. Lamp junction on Four. Your device has it under Jobs.', 'Arrow\'s yours to follow. I\'m right behind you.'],
+    'stop.fetch': ['Storage. Relay off the shelf, top left. She\'s fussy about the left.'],
+    'stop.make': ['The bracket we make. Lathe, slow and steady. Thirty minutes, mind your fingers.'],
+    'stop.job': ['Panel open, old relay out, new one in. Hold it till it clicks.'],
+    done: ['Listen to that. Nothing. That\'s the sound of it working.', 'Not done till it\'s turned in, though. Board.'],
+    turnin: ['Your first one in the Record. Right: lunch, then you lead.'] },
+  2: { take: ['Your lead. I\'m just the tall shadow.'], turnin: ['That one was all you. Good.'] },
+  3: { turnin: ['Heard you did the Chief\'s job. Clean. Told you.'] },
+};
 // the shadow shift and the job you lead on Monday end when you turn in reserved slots 1 and 2 (section 17's job notes):
 // their introStep notes are the core memories social keeps (intro.shadowShift)
 function introJobNote(n) {
-  if (!introOn() || !n || n.step !== 'turnin' || !(n.reserved === 1 || n.reserved === 2)) return;
+  if (!introOn() || !n) return;
+  const say = INTRO_JOB_LINES[n.reserved] && INTRO_JOB_LINES[n.reserved][n.step === 'stop' ? 'stop.' + n.tag : n.step];
+  if (say && typeof introSay === 'function') introSay(say);
+  if (n.reserved === 1 && n.step === 'take' && SHIP.device && SHIP.device.tipsSeen) for (const k of ['board', 'machine', 'turnin']) SHIP.device.tipsSeen[k] = true;   // Torres teaches these
+  if (n.step !== 'turnin' || !(n.reserved === 1 || n.reserved === 2)) return;
   const id = n.reserved === 1 ? 'd1-shadow' : 'd1-lead';
   if (SHIP.intro.done[id + ':job'] === undefined) { SHIP.intro.done[id + ':job'] = Math.floor(shipNow()); introNote('introStep', { step: id, who: SHIP.intro.escort }); }
 }
@@ -14985,6 +15007,7 @@ function introAdvance(t, here) {
     I.done[b.id] = at; I.day = b.day;
     for (const f of b.flags || []) introFlagSet(f);
     if (b.mail) introMail(b.mail, at);
+    if (b.reserve && typeof jobReserve === 'function') for (const r of INTRO_JOBS) jobReserve(...r);
     if (b.invite && typeof socialInvite === 'function') socialInvite(b.invite);   // section 20: Tomas asks you to Sowing morning
     if (b.id === 'd1-briefing' || b.id === 'd6-sowing') introNote('introStep', { step: b.id, who: b.who });
     if (b.end) introEnd(true);
@@ -14995,6 +15018,7 @@ function introEnd(finished) {
   const I = SHIP.intro; if (!I.on || I.ended) return;
   I.ended = true; I.step = null;
   for (const k of INTRO_FLAGS) if (k !== 'mug' && k !== 'seedling') introFlagSet(k);
+  if (typeof jobRelease === 'function') jobRelease();   // section 17: any of the week's jobs you haven't taken go to the crew
   introMarkArrived();
   introNote('introStep', { step: finished ? 'done' : 'ended', who: null });
 }
@@ -15073,6 +15097,16 @@ const INTRO_STUB_SCRIPTS = {
     { who: 'calder', text: 'Eat something. That\'s an order, and I\'m not even here.' }] },
 };
 for (const id in INTRO_STUB_SCRIPTS) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
+INTRO_STUB_SCRIPTS.introBriefing = { title: 'Monday briefing', from: 'I. Calder', lines: [
+  { who: 'calder', text: 'Morning. Board\'s light, ship\'s quiet. Keep it that way.' },
+  { who: 'calder', text: 'New hand shadows Torres today. Torres: one job, start to finish, properly.' },
+  { who: INTRO_ESCORT, text: 'Properly. Always.' },
+  { who: 'calder', text: 'Good. Go.' }] };
+INTRO_STUB_SCRIPTS.introSoloJob = { title: 'Your first solo job', from: 'I. Calder', lines: [
+  { who: 'calder', text: 'Sit. This one\'s yours: the other lamp junction on Four. It\'s on your device.' },
+  { who: 'calder', text: 'Every job goes in your Record. I read the Record, not the talk.' },
+  { who: 'calder', text: 'Progress talks: any time. Book it. Now go and fix my lamp.' }] };
+for (const id of ['introBriefing', 'introSoloJob']) if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...INTRO_STUB_SCRIPTS[id], gist: INTRO_MEETINGS[id].gist };
 const INTRO_UI = { min: null, step: undefined, said: [], callAt: 0, goal: false, goalKey: '', manifest: null, meet: [] };
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
 function introSay(lines) {                                // his lines, one now and the rest a few seconds apart
@@ -15103,6 +15137,22 @@ function introManifest() {
   };
   document.body.appendChild(el); setTimeout(() => input.focus(), 50);
 }
+// the week's meetings (Monday's briefing, Tuesday's first solo job): while one is on, being in its room plays it; if
+// you never came, its gist comes by Mail when it ends. Tuesday's job is yours either way: Calder hands it over in
+// person, or it's simply in your Jobs (section 17's reserved slot 3, claimed for you).
+function introWeekMeetings(now) {
+  const I = SHIP.intro;
+  for (const b of INTRO_WEEK) {
+    if (!b.meeting || I.done[b.id + ':met'] !== undefined) continue;
+    const at = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < at) continue;
+    const room = new RegExp('^' + b.where.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
+    const m = { id: 'intro-' + b.id, who: INTRO_MEETINGS[b.meeting].cast.filter(w => !/:/.test(w)), where: { deck: b.where.deck, room }, at };
+    if (now < until && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(b.meeting, m); }
+    else if (now >= until) { I.done[b.id + ':met'] = -1; if (typeof meetingGist === 'function') meetingGist(b.meeting); }
+    else continue;
+    if (b.id === 'd2-solo' && typeof jobReserved === 'function' && typeof claimJob === 'function') { const id = jobReserved(3); if (id) claimJob(id); }
+  }
+}
 function introTick() {
   if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
   if (!introOn() || typeof player === 'undefined') return;
@@ -15114,7 +15164,7 @@ function introTick() {
     const done = Object.keys(I.done).length;
     introAdvance(now, { deck: deckDef.num, tile: player.here() });
     // a meeting step you've just reached plays its script (walking out of the room closes it; its gist comes by Mail)
-    for (const id of Object.keys(I.done).slice(done)) { const st = introStepById(id); if (st && st.meeting && !I.missed.includes(id)) INTRO_UI.meet.push(st); }
+    for (const id of Object.keys(I.done).slice(done)) { const st = introStepById(id); if (st && st.meeting && st.checkpoint && !I.missed.includes(id)) INTRO_UI.meet.push(st); }   // the evening's (the week's are introWeekMeetings')
     // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
@@ -15124,6 +15174,7 @@ function introTick() {
       INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); dialogueShow(st.meeting, m);
     }
   }
+  if (now === INTRO_UI.min) introWeekMeetings(now);
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; introSay(INTRO_LINES[I.step]); }
