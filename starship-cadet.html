@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.8
+   STARSHIP CADET: CSV Wren                           build 0.38.9
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -4021,6 +4021,8 @@ DECKS[4] = {
     place('t', 'radio', .5, 3.5, 'w', { y: .56, turn: .3 });
     place('k', 'mug', .68, 3.6, 's', { y: 1.995, tall: true });
     placeWall('s', 'calendar', 'w', 3.2, { upTo: 16, ring: 20 });
+    // Pillar 4 (seat 8, 0.38.9): the keepsake shelf above berth 4's bunk (yours), last so nothing above moves
+    placeWall('a', 'keepsakeShelf', 'n', 2.5, { hitW: .9, it: IT('Your shelf', 'A plank above your bunk, just within reach from the top berth. Empty for now. People on the Wren tend to fill theirs.') });
   },
 };
 'abcdefgh'.split('').forEach((k, n) => { DECKS[4].rooms[k] = { name: 'Bunk ' + (n + 1) + (k === 'h' ? ', night shift' : ''), floor: 'plate' }; });
@@ -4326,10 +4328,25 @@ DECKS[5] = {
     placeWall('a', 'plate', 'w', 1.0, { text: 'No naked flames' });
     placeWall('m', 'calendar', 'w', .5, { upTo: 9, ring: 12 });
     place('u', 'mug', 1.7, 1.3, 'e', { y: 1.995, tall: true });
+    placeWall('t', 'mugRack', 's', 1.1, { hitW: .8, it: IT('Mug rack', 'Six hooks over the hot water, a Works mug on five of them. The sixth hook is empty. Nobody says whose it is.') });   // Pillar 4 (seat 8, 0.38.9)
   },
 };
 for (const [key, r] of Object.entries(DECKS[5].sealed)) DECKS[5].closedDoors[key] = { t: DECKS[5].rooms[r].name, x: DECKS[5].rooms[r].tap };
 
+// ---- Wall kit for Pillar 4's arrival evening (seat 8, 0.38.9, the deck architect; made at load, no R(), existing materials) ----
+Object.assign(WALL_KIT, {
+  keepsakeShelf(g) {                                     // a plank above your bunk's head, for the keepsakes friends give you (8b draws them)
+    box(.92, .04, .2, M.wood, 0, 2.15, .1, g);
+    for (const x of [-.38, .38]) box(.03, .12, .16, M.slateDark, x, 2.07, .09, g);
+  },
+  mugRack(g) {                                           // six hooks over the hot water, five Works mugs and one free hook (yours, one day)
+    box(.72, .1, .03, M.wood, 0, 1.55, .015, g);
+    [KM.red, KM.teal, KM.gold, M.cream, KM.teal, null].forEach((m, k) => {
+      const x = -.3 + k * .12; cyl(.008, .008, .05, M.metal, x, 1.52, .045, g, 6).rotation.x = Math.PI / 2;
+      if (m) { cyl(.036, .032, .08, m, x, 1.44, .075, g, 12); box(.012, .04, .02, m, x + .042, 1.44, .075, g); }
+    });
+  },
+});
 // ---- Gym kit (Pillar 3, C9, 0.38.2, the deck architect; made at load, no R()): a punch bag on its stand and a single stretching mat ----
 Object.assign(KIT, {
   punchBag(g, o = {}) {                                  // a stand with an arm, and a bag that swings while someone's punching (MOVERS)
@@ -6837,6 +6854,16 @@ DECKS[1].visits = { 'ready-room': { name: 'the Captain\'s ready room', room: 'R'
   // you at the far end. The room has open glass doors, so there's nothing to unlock (door: null)
   conference: { name: 'the conference table', room: 'O', door: null, host: '1-observation-lead-1', places: ['1-conf-10', '1-conf-1', '1-conf-2', '1-conf-3', '1-conf-4', '1-conf-5', '1-conf-6', '1-conf-7', '1-conf-8', '1-conf-9'] } };
 DECKS[2].visits = { 'captain-table': { name: 'the Captain\'s table', room: 'C', door: 'v,7,10', host: '2-captable-5', places: ['2-captable-6', '2-captable-1', '2-captable-2', '2-captable-4', '2-captable-3'] } };
+// ---- Pillar 4, seat 8 (0.38.9; plans/pillar4-plan.md, Part 6 and the social plan's interfaces): the arrival evening ----
+// keepsakes: the shelf above your bunk (Bunk 1, berth 4's bunk); `slots` are where section 8b's one instanced keepsake mesh
+// puts each gift (tile units for x and z, metres for y); `place` is where you stand to look at it (yours: its id starts
+// with your bed's). mugRack: the Works tea corner's rack; `yours` is the free hook's mug spot. CALM_TYPES / placeCalm(p):
+// where people sit and talk (the social plan's where: ['calm']): seats of those types, unless a place says calm: false.
+DECKS[4].places.push({ id: '4-B1-4-keepsake', type: 'event', at: [9, 0], xy: [9.25, .8], face: -127, pose: 'stand', room: 'a' });
+DECKS[4].keepsakes = { room: 'a', bed: '4-B1-4', place: '4-B1-4-keepsake', slots: [8.14, 8.28, 8.43, 8.57, 8.72, 8.86].map(x => [x, 2.17, .2]) };
+DECKS[5].mugRack = { room: 't', yours: [21.8, 1.44, 2.83] };
+const CALM_TYPES = ['lounge-seat', 'common-room', 'garden', 'bench', 'mess-seat', 'music'];
+const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.includes(p.type) && p.pose === 'sit' && !p.machine);
 function visitSpots(id) {
   for (const n of Object.keys(DECKS)) {
     const v = (DECKS[n].visits || {})[id]; if (!v) continue;
@@ -7053,7 +7080,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.8';                           // keep in step with the header's build line
+const GAME_BUILD = '0.38.9';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
