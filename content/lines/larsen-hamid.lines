@@ -115,3 +115,14 @@
 - Your music's on every evening. I've named the boat after a song. This week.   #funny
 ? told:bday
 - You remembered my birthday! Drink some water to celebrate. I am.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Infirmary likes you! Your water intake's improved. I've been watching. Kindly.   #funny
+? rep:theirs
+- You're infirmary family now. That means we nag. Kindly. Mostly about water.   #funny
+? you:chatty
+- They say you chat to everyone. Brilliant. Good for the heart, talking. Proven.

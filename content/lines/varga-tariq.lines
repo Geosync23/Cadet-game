@@ -117,3 +117,14 @@
 - Your card is on my shelf, beside the letters from Valo. Good company.   #warm
 ? told:bday
 - You marked my birthday. It went into my letter home. You're in it now.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The galley speaks well of you. I wrote it in my letter. Valo will know in six weeks.   #funny
+? rep:theirs
+- You are counted as galley now. That is not a small thing. I hope you know.   #warm
+? you:reliable
+- They say you are reliable. I had already decided so. I'm pleased to be agreed with.

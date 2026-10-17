@@ -311,3 +311,16 @@
 - Late, love? Here. I kept it warm. Don't make a habit of it. Do, if you must.   #warm
 ? cue:harvest
 - The harvest's in, love! Everything's going in a pie. Everything.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The galley likes you, love. Lukas says you stack your tray right. High praise.   #funny
+? rep:theirs
+- You're galley family now, love. That means you eat first and argue never.   #warm
+? you:kind
+- Everyone says you're a kind one, love. I could've told them. I watch who clears plates.   #warm
+? you:chatty
+- You talk to everyone in my mess, love. Good. Nobody should eat alone.   #warm

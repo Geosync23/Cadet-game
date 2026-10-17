@@ -115,3 +115,12 @@
 - Your tea's my night tea now. Two in the morning. It helps.   #warm
 ? told:bday
 - You remembered my birthday. Oh dear. Thank you. I've no joke ready.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Nights speak well of you. Quietly. Nights speak quietly about everything.
+? you:kind
+- They say you're kind. Oh, good. I'd hoped. Sorry. I mean, good.   #warm

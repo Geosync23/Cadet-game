@@ -182,3 +182,14 @@
 - From the garden. Smells like rain. Nearly. Thanks, {nick}.   #warm
 ? told:bday
 - My birthday. You noticed. One less day. In a good way.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Galley rates you. Brennan, Walsh, me. Three votes. That's all of them that count.   #funny
+? rep:theirs
+- You're galley. Officially. Don't let it go to your head. Let it go to your stomach.   #funny
+? you:reliable
+- Reliable. That's the word about you. Good word. Rare word.

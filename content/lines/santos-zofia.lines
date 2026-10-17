@@ -176,3 +176,14 @@
 - That game you gave me? I've won it eleven times. Rina's asked for a go. No.   #funny
 ? told:bday
 - You remembered my birthday, {nick}. Best deal I've had all year.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Comms rates you, {nick}. I've been talking you up. No charge.   #funny
+? rep:theirs
+- You're one of Comms now. Best deal on the ship. Lifetime membership.   #warm
+? you:chatty
+- They say you're chatty. Takes one to know one. I'm the one.   #funny

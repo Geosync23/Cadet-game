@@ -315,3 +315,16 @@
 - Harvest! The garden smells like home. A nicer home. With more plants.
 ? cue:repair.lift.you
 - Was that you on the lift? I rode it twice to check. For the Watch.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Holt said your name today. In a normal voice. That's very good, from Holt.   #funny
+? rep:theirs
+- The whole Watch office knows you now. You're on our side of the lift.   #warm
+? you:kind
+- People keep saying you're kind. I knew first. I'm just saying. I knew first.   #funny
+? you:chatty
+- Everyone says you talk to everyone. Good. Someone has to. I get nervous.   #funny

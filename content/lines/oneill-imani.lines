@@ -115,3 +115,12 @@
 - Your music's on this week's playlist. Top spot. Teague's furious.   #funny
 ? told:bday
 - You remembered my birthday. Good news. Delivered flat. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Good news: the garden rates you. Delivered flat. But it's good.   #funny
+? you:chatty
+- You chat to everyone. You'd be a whole playlist. A long one.   #funny

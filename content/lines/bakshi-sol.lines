@@ -113,3 +113,12 @@
 - Your present's beside my charts. I keep looking at it. Ah, well. Thank you.   #warm
 ? told:bday
 - My birthday. You remembered. I'll paint you something. Hold still. Later.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The night shift likes you. I'd paint you, if you held still. Ah, well.   #funny
+? you:kind
+- They say you're kind. I've been meaning to paint that. It's a hard thing to paint.

@@ -116,3 +116,12 @@
 - Your card's on the comics wall. Pride of place. Nobody's allowed to cover it.   #warm
 ? told:bday
 - My birthday. You remembered. That's decided: you're a good one.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Garden thinks you're all right. That's decided. Not moving on it.
+? you:reliable
+- They say you're reliable. Good. Mornings need reliable people. I'm not one.

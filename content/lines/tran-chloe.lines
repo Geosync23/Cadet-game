@@ -177,3 +177,12 @@
 - Your sweets. Gone. I'll say they were for the bunk. They weren't.   #funny
 ? told:bday
 - You remembered my birthday. Honestly. Thank you. Lights out's at ten, still.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Comms speaks well of you. I checked. Reliable source. Me.   #funny
+? you:reliable
+- You're known for being reliable. Good. Bunk 1 needs at least two of us.   #funny

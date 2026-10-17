@@ -319,3 +319,16 @@
 - You were brilliant at quiz! The engine round. I nearly cried.   #warm
 ? cue:repair.you@dept
 - Saw your job on the board. Clean. Calder'll say "Fine." That's a medal.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Calder put your name on the good jobs list. Don't tell her I peeked. I peeked.   #funny
+? rep:theirs
+- You're Works now, {nick}. Properly. The tea corner's got your mug on the good hook.   #warm
+? you:reliable
+- Word in the bay is you finish what you start. Rarest thing aboard. After biscuits.   #funny
+? you:chatty
+- Everyone knows you. You chat more than me. I'm not jealous. I'm a bit impressed.   #funny

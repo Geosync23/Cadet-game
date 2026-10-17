@@ -117,3 +117,14 @@
 - The sweets! Gone. Sorry. I shared them. Mostly. Thank you.   #funny
 ? told:bday
 - You remembered my birthday! Oh, dear. I'm going to sing. Sorry.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Brennan said something nice about you! I wasn't listening. I was. Sorry.   #funny
+? rep:theirs
+- You're galley now! It'll be fine. It's lovely, actually. No "won't it". It is.   #warm
+? you:kind
+- Everyone says you're kind. Oh, good. I thought so too. I'd hoped so.   #warm

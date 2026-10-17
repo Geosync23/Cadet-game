@@ -117,3 +117,14 @@
 - Your plant's doing well. I've given it its own sowing week. Thank you.   #warm
 ? told:bday
 - My birthday. You remembered. Oh, bother. That's lovely. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The garden likes you. The plants, I mean. And us. Mostly the plants.   #funny
+? rep:theirs
+- You're garden now. Here. A Gerald. Every gardener has one. Oh, bother, soil.   #warm
+? you:kind
+- People say you're gentle. With people. Plants notice that too.

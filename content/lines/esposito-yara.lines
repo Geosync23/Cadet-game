@@ -115,3 +115,14 @@
 - That's going in my star journal. Page of its own. Thank you.   #warm
 ? told:bday
 - You remembered my birthday. I'll pretend I didn't notice. I noticed.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Store's heard good things. People buy you biscuits. I notice. I never say who.   #funny
+? you:kind
+- You're known for being kind. I can tell by what you buy. Mostly for other people.   #warm
+? you:chatty
+- You chat to everyone at my counter. The queue's longer. I don't mind.

@@ -315,3 +315,16 @@
 - You did the steriliser? Clean work. Cleaner than Pell's. Don't tell him.   #funny
 ? cue:tradition.quiz.you beat:rina.5
 - You got the bones question at quiz. I taught you that. You're welcome.   #funny
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- Nandakumar asked after you. By name. She doesn't do that. Drink some water.   #funny
+? rep:theirs
+- The infirmary's decided you're one of ours. Don't get hurt to celebrate.   #warm
+? you:kind
+- Half the ship says you're kind. The other half hasn't met you yet.
+? you:reliable
+- You turn up when you say. You'd be surprised how rare that is. I wouldn't be.   #funny

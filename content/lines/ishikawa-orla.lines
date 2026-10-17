@@ -115,3 +115,12 @@
 - I've put your present by the window. It catches the light. Thank you.   #warm
 ? told:bday
 - You remembered my birthday. Oh dear. I'm going to be soppy. Thank you.   #warm
+
+// Writer 3, batch 6: your standing with their department (rep:, "this band or better") and what you're known for
+// (you:), as greet lines (the head writer: the rep and knownFor kinds wait until the game calls them).
+
+== greet
+? rep:well tier>=acquaintance
+- The store speaks well of you. It's in the ledger. Well, not the ledger. In me.   #warm
+? you:reliable
+- They say you're reliable. I could have told them. The ledger agrees.
