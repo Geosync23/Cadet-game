@@ -6,7 +6,7 @@ Written by session_01UmrVVpV7eBqEsa4sBucASP (the first dialogue engineer); kept 
 it is the full spec of the file formats and the condition vocabulary) first.
 
 ## Role, branch, builds
-- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.22**, 6fed418). Reviewer 2 passed up to 0.43.19; 0.43.20-0.43.22 are with them. Since 0.43.17
+- Branch `claude/dialogue`, builds **0.43.x** (last: **0.43.23**, 621a432). Reviewer 2 passed up to 0.43.20; 0.43.21-0.43.23 are with them. 0.43.23: the JSON.parse strings are an array joined with join(''), not a + chain (Safari). Since 0.43.17
   (7c888e4) the branch carries claude/ship-integration 0.60.1 (merged, the lead's call), so onSim, cue() and social are here.
 - I own: section **`// 22. LINES`** in starship-cadet.html (between section 17's end and `// 18. SHIP EVENTS`), the
   generated blocks' markers (LINES, MEETINGS, TRADITIONS), **content_gen.py**, **lines_check.py**, **content/README.md**.
