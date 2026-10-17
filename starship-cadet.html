@@ -7804,7 +7804,7 @@ function newGameStart(arrival) {
 }
 // Going to sleep: tap your own bunk (playerBed(), ROSTER_PLAYER's bed, by its place on Deck 4) from 20:00 to 05:30 (0.28.9: no dialog).
 // The view fades out, time skips to 06:00 (sleepUntil), and it fades back in.
-const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60;   // read when used: ROSTER_PLAYER comes later in the file
+const playerBed = () => ROSTER_PLAYER.bed, WAKE_AT = 6 * 60, CLOCK_EARLY = 7;   // CLOCK_EARLY: minutes the Works crew arrive early to clock in (the clock's queue wait, 6, and the clocking, 1)   // read when used: ROSTER_PLAYER comes later in the file
 const sleepEl = document.getElementById('sleepAsk'); let sleeping = false;
 const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
@@ -8564,8 +8564,9 @@ function schedBuild(p, d, occ, S) {
   };
   // the shift from now to `to`, with its breaks: tea (the habit, or about one day in three for anyone) on a seat
   // or bench on the work deck, and a toilet break most days
+  const clocks = p.dept === 'works' && wd === 5 && p.shift !== 'night' && (S.shared.get('5|timeclock') || []).length > 0;   // the Works crew clock in and out (the career engineer, 0.61.13)
   const shiftWithBreaks = to => {
-    const br = [], clocks = p.dept === 'works' && wd === 5 && p.shift !== 'night' && (S.shared.get('5|timeclock') || []).length > 0;   // the Works crew clock in and out (the career engineer, 0.61.13)
+    const br = [];
     if (clocks) take('work', [[5, 'timeclock']], 1, { wait: 6, min: 1, tag: 'clock' });   // a short queue at the clock
     if (H.has('tea-break') || U(31) < .35) br.push([600 + Math.round(240 * U(30)), 'tea']);
     if (U(32) < .6) br.push([540 + Math.round(400 * U(33)), 'toilet']);
@@ -8774,7 +8775,7 @@ function schedBuild(p, d, occ, S) {
     seg('sleep', Math.max(F.wake, P.bed + 410 - 1440), 'bed', p.bed);
     if (F.works) {
       const ws = F.workStart, we = F.workEnd;
-      morning(20, ws - (wd !== 3 ? C : 0) - 1);          // a minute in hand for the wait by the lift
+      morning(20, ws - (wd !== 3 ? C : 0) - 1 - (clocks ? CLOCK_EARLY : 0));   // a minute in hand for the wait by the lift; the Works crew come early enough to clock in before the shift starts (0.27.48: they queued at the clock past 08:00, so worked 535-539 of 540)
       go(wd);
       shiftWithBreaks(we);
       evening(specials(50, false), F.bed, false, F.double);
