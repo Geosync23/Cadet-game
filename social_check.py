@@ -154,7 +154,7 @@ with sync_playwright() as pw:
       out.rep = [repBand('works'), repBand('galley'), repShip('work'), knownFor().length];
       out.warm = warmth('tomas');
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
-      out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival'), fam: socialFill({ ...tomas, family: 'a brother in the Concord navy' }, 'family'), hob: socialFill({ ...tomas, hobby: undefined, habits: ['gardener'] }, 'hobby'), since: socialFill({ ...tomas, since: undefined, aboard: null }, 'since') };
+      out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival'), fam: socialFill({ ...tomas, family: 'a brother in the Concord navy' }, 'family'), hob: socialFill({ ...tomas, hobby: undefined, habits: ['gardener'] }, 'hobby'), since: socialFill({ ...tomas, since: undefined, aboard: null }, 'since'), grow: socialFill({ ...tomas, since: 'six years', aboard: null }, 'since'), growWant: socDuration(6 * 365 + SHIP.time.day - 1) };
       out.calm = memClass('readyroom.lights') === 'big' && memThing('fixed.oven') === 'the oven' && memThing('nothing') === null && memThing('came.quiz') === 'the quiz night' && memThing('show.pell-show') === 'the music boxes';
       const tz = SOC.crew.find(p => p.thread && /^arc:/.test(p.thread) && p.thread.slice(4) !== p.id); if (tz) { const had = SHIP.rel[tz.id] ? { ...SHIP.rel[tz.id] } : null; relGet(tz.id).arc = 2; out.beatMap = beatOf(tz.thread.slice(4)) === 2; if (had) SHIP.rel[tz.id] = had; else delete SHIP.rel[tz.id]; } else out.beatMap = true;
       out.memNone = mem('tomas', 'fav') === null && bondOf('tomas', 'best') === null;
@@ -176,7 +176,7 @@ with sync_playwright() as pw:
     if not q['bandsOk'] or not q['mood'] or not q['pure']: fail('affBand, moodOf or purity wrong')
     if q['rep'][:3] != ['new', 'new', 'ok'] : fail(f"repBand/repShip defaults wrong: {q['rep']}")
     if q['news'] and q['news'] != [True, True]: fail(f"knowsNews wrong: {q['news']}")
-    if q['fill'].get('fam') != 'my brother in the Concord navy' or q['fill'].get('hob') != 'gardening' or q['fill'].get('since') is not None: fail(f"theme fill-ins wrong: {q['fill']}")
+    if q['fill'].get('fam') != 'a brother in the Concord navy' or q['fill'].get('grow') != q['fill'].get('growWant') or q['fill'].get('hob') != 'gardening' or q['fill'].get('since') is not None: fail(f"theme fill-ins wrong: {q['fill']}")
     if q['fill']['boss'] is None or q['fill']['none'] is not None or q['fill']['thing'] is None: fail(f"socialFill wrong: {q['fill']}")
     if q['cue'] != [True, True, True, False, True, True] or not q['cueSaved'] or not q['cueGone']: fail(f"cues wrong: {q['cue']} saved {q['cueSaved']} gone {q['cueGone']}")
 
@@ -394,7 +394,30 @@ with sync_playwright() as pw:
       let fav = null; if (p && typeof favourPost === 'function') { socialSeekAsk(p.id, { from: t, until: t + 90, why: 'intro:d4-favour' }); fav = !!favourOf(p); }
       socLoad(JSON.parse(keep)); return { ok, win, saved, fav }; })()""")
     print('Asked-for waves:', sk)
+    walk = g.ev(r"""(() => { const keep = JSON.stringify(socSave()), t0 = shipNow(), tomas = SOC.crew[SOC.idx.get('tomas')];
+      let t = null; for (let k = 0; k < 7 * 1440 && t === null; k += 30) { const w = whereIs(tomas, t0 + k); if (w && !w.moving && (w.act === 'leisure' || w.act === 'off')) t = t0 + k; }
+      if (t === null) return { skip: true };
+      setShipNow(t); seekEnd(); chatClose(); SHIP.social.seekAsks = []; socialSeekAsk('tomas', { from: t - 5, until: t + 120, why: 'intro:tomas' });
+      const real = typeof crewComeTo === 'function' ? crewComeTo : undefined; let walked = 0;
+      crewComeTo = (p, id, cb) => { walked++; cb(); return () => {}; };   // section 10's walk, arriving at once
+      const P0 = player.obj.position.clone(), lift = DECKS[deckDef.num].lift; player.obj.position.copy(cellPos(...lift));
+      socialSeek(Math.floor(t)); const o = { walked, chip: !!(SEEK && SEEK.p === tomas), done: SHIP.social.seekAsks[0].done };
+      socialSeek(Math.floor(t) + 1); o.once = walked === 1;
+      crewComeTo = real; seekEnd(); player.obj.position.copy(P0); setShipNow(t0); socLoad(JSON.parse(keep)); return o; })()""")
+    print('An asked-for wave walks to you:', walk)
+    if not walk.get('skip') and (walk['walked'] != 1 or not walk['chip'] or not walk['done'] or not walk['once']): fail(f'the asked-for wave does not happen: {walk}')
     if sk['ok'] != [True, False] or sk['win'] != [False, True, False] or not sk['saved'] or sk['fav'] is False: fail(f'socialSeekAsk wrong: {sk}')
+
+    # 15. a favour handed in on the card (0.36.62): the memory and the reputation it gives
+    fv = g.ev(r"""(() => { if (typeof favourPost !== 'function') return null;
+      const keep = JSON.stringify(socSave()), p = SOC.crew.find(q => !STORY_ARCS[q.id] && q.dept !== 'works');
+      SHIP.mem = {}; SHIP.rep = null;
+      const id = favourPost({ from: p.id, title: 'Test favour', kind: 'lamp', stops: [] }); favourAccept(id);
+      chatClose(); CHAT = { p, line: { text: '', say: true }, ask: false, fav: null, at: shipNow(), reach: 99 };
+      chatDo('help'); const o = { mem: !!mem(p.id, 'fav.lamp'), kind: SHIP.rep ? SHIP.rep.ship.kindness : null, dept: SHIP.rep ? SHIP.rep.dept[p.dept] : null };
+      chatClose(); socLoad(JSON.parse(keep)); return o; })()""")
+    print('A favour handed in:', fv)
+    if fv is not None and (not fv['mem'] or not fv['kind'] or fv['kind'] <= 50): fail(f'handing in a favour gives no memory or reputation: {fv}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
