@@ -241,6 +241,16 @@ with sync_playwright() as pw:
     check(r['back'], 'the first clock-in after leave is not "back"')
     check(r['place'] and r['crew'] and min(r['crew']) >= 1 and sum(1 for n in r['crew'] if n >= 2) >= len(r['crew']) * 3 // 4, f"the Works crew don't use the clock: {r['crew']}")
 
+    print('Reputation you can see (0.61.15): a chip on turning a job in, one at a time, and a small gain:')
+    r = ev("""(() => { SHIP.rep = null; const w0 = careerWork(), d0 = repInit().dept.works, n0 = FLOATS.length; REP_CHIP_AT = -1e9; if (DEV.notes) delete DEV.notes.record;
+      simNote('job', { id: 'x1', step: 'turnin', job: 'restock', machine: null }); const n1 = FLOATS.length, text = n1 > n0 ? FLOATS[n1 - 1][0].textContent : null;
+      simNote('job', { id: 'x2', step: 'turnin', job: 'restock', machine: null }); const n2 = FLOATS.length;
+      return { text, once: n1 === n0 + 1 && n2 === n1, work: careerWork() > w0, dept: repInit().dept.works > d0, badge: DEV.notes && DEV.notes.record === 1 }; })()""")
+    print('  ', r)
+    check(r['text'] == '+ Works reputation' and r['once'], f"the reputation chip: {r['text']}, once: {r['once']}")
+    check(r['work'] and r['dept'], 'turning in a job without a machine gave no reputation')
+    check(r['badge'], 'the Record app got no mark')
+
     print('A new game on day 0 is not sick (player engineer 5\'s bug in 0.60.5):')
     r = ev("""(() => { const el0 = document.getElementById('sickCard'); if (el0) el0.hidden = true;   // left open by the sickness case
       SHIP.career = null; SHIP.time.day = 0; SHIP.time.min = 1060; careerTick(); const c = SHIP.career;

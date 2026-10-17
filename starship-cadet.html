@@ -223,7 +223,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.61.14
+   STARSHIP CADET: CSV Wren                           build 0.61.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7577,7 +7577,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.61.14';                           // keep in step with the header's build line
+const GAME_BUILD = '0.61.15';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27634,6 +27634,24 @@ function careerClockTap(it, at) {                        // section 15's PLAYER_
   approach(at.clone(), it.front, it.depth, () => careerClock()); return true;
 }
 if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift(careerClockTap);
+// ---- reputation you can see (0.61.15, the user's: "when you complete a job, rep goes up a little; we need a visual
+// indication"): when you turn a job in, a small chip floats up from you, "+ Works reputation" in the department's
+// colour (section 15's needFloat; words only, never numbers), and the Record app gets a quiet mark once until you look.
+// One at a time (REP_CHIP_GAP real seconds apart), and none while a conversation or a meeting is on screen. A repair is
+// scored by section 20 (repNote 'repair'); any other job you turn in (a restock, a chore, a run) now counts a little too
+const REP_CHIP_GAP = 8, REP_DEPT_COL = { works: '#f0b24a', galley: '#e98b5a', garden: '#8fd08a', infirmary: '#8fd3e8', store: '#d9b3f0', command: '#e9e2c8',
+  helm: '#9bb8ff', comms: '#9be0c8', watch: '#c8c0ff', survey: '#ffd27f' };
+let REP_CHIP_AT = -1e9;
+function careerJobIn(n) {
+  if (!n || n.step !== 'turnin') return;
+  const m = n.machine && typeof machineById === 'function' ? machineById(n.machine) : null, dept = m && typeof repDeptOf === 'function' ? repDeptOf(m) : 'works';
+  if (!n.machine && typeof repAdd === 'function') repAdd(dept, 1, { work: 1 }, 'jobs');   // a job with no machine: section 20 has no repair for it
+  const now = performance.now(); if (now - REP_CHIP_AT < REP_CHIP_GAP * 1000 || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || CHAT || typeof needFloat !== 'function') return;
+  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' reputation');
+  const f = typeof FLOATS !== 'undefined' && FLOATS[FLOATS.length - 1]; if (f && f[0]) { f[0].style.color = REP_DEPT_COL[dept] || ''; f[0].style.borderColor = REP_DEPT_COL[dept] || ''; }
+  if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
+}
+onSim('job', careerJobIn);
 const CLOCK_SAID = {};                                   // what -> the day a remark was last said (one each way a day)
 function careerBack(d) {                                 // your last workday before d was leave or sick
   const c = SHIP.career; for (let k = d - 1; k >= d - 10 && k > 0; k--) if (careerRota(k)) return c.b.includes(k) || c.s.includes(k); return false;
