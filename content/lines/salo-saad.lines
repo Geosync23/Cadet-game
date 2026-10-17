@@ -64,7 +64,7 @@
 
 == decline
 - Not tonight. It's nearly ten. You know me. Tomorrow?
-? weekday:wed|thu
+? weekday:thu|fri
 - Rest day. I'm writing to the Halcyon. Next episode's due. Another time?
 
 == missed

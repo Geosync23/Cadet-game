@@ -41,7 +41,7 @@
 ? tier>=colleague
 - {hi}, {me}. Scrubber on Deck 6 if you want it. I'll time you. Quietly.
 ? tier>=acquaintance warmth:cold
-- Oh. You're back. Um. Good. I noticed. Not in a strange way.   #warm
+- Oh. You're back. Um. Good. Your hook's been empty. I kept it clear.   #warm
 
 == bye
 - {bye}. Um. Spanner back on its hook? The right hook. Thanks.
