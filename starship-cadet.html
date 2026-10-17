@@ -7702,7 +7702,10 @@ function birthdaysOn(d) {                                // everyone (not the pl
 function gatherings(p, d, F) {
   if (F.night && F.works) return [];                     // on the night shift tonight
   const U = k => schedU(p.seed, d, k), out = [];
-  if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) out.push({ at: e.from, dur: e.to - e.from, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20 });
+  if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
+    const early = e.host ? 5 : 0;
+    out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host });
+  }
   // answer 24, Deck 1: the evening handover at the command ring (places with `event: 'handover'`) at 18:00, for the
   // Captain and the Commander on their work days and any bridge crew who work late; and the Captain's evening walk
   // through the observation room (places with `event: 'walk'`, visited in id order), most evenings
@@ -7981,6 +7984,9 @@ function schedBuild(p, d, occ, S) {
   // leisure until `end`: blocks of 30-100 minutes; the Wednesday drill musters anyone off duty by the lift, and a
   // block stops for a gathering (a birthday, observatory night) when one is due
   const meet = gatherings(p, d, F);
+  // nothing else starts across a gathering: the gym, a call home and the other errands wait (or are dropped) when one
+  // begins within `span` minutes, and dinner moves before or after it (Pillar 4: a host always gets to their own event)
+  const clear = span => !meet.some(e => !e.done && e.at < t + span && e.at + e.dur > t);
   const leisureUntil = (end, k) => {
     for (let n = 0; end - t >= 20 && n < 12; n++) {
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
@@ -8000,7 +8006,7 @@ function schedBuild(p, d, occ, S) {
         if (deck !== bedDeck && to - t < C + 15) linger(to); else { go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }
       }
       if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
-      for (const e of meet) if (!e.done && t >= e.at && t < e.at + 10 && end - t >= Math.min(25, e.dur)) {
+      for (const e of meet) if (!e.done && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {
         e.done = true;
         if (e.walk) { for (const pl of S.shared.get(e.where[0].join('|')) || []) if (isFree(pl.id, t + (deck !== pl.deck ? C : 0), t + (deck !== pl.deck ? C : 0) + e.dur) && end - t > e.dur + C) { go(pl.deck); hold(pl.id, t, t + e.dur); seg('leisure', t + e.dur, pl.type, pl.id, { tag: e.tag }); } }
         else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
@@ -8038,12 +8044,14 @@ function schedBuild(p, d, occ, S) {
     // answer 11: some days (about 2 in 5) half the day shift heads straight for dinner when the shift ends: a rush at the servery
     if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, F.workEnd + 3 + Math.round(10 * U(74)));
     const ho = meet.find(e => e.tag === 'handover'); if (ho && dinnerAt < ho.at + ho.dur && S.shared.has('1|@handover')) dinnerAt = ho.at + ho.dur;   // eat after the handover
-    if (sp.length && t + 45 < dinnerAt) sp.shift()();
+    for (const e of meet) if (e !== ho && !e.done && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt)   // dinner clear of a gathering: after it if there's time, else before
+      dinnerAt = e.at + e.dur + 25 <= MEALS.dinner[1] ? Math.max(dinnerAt, e.at + e.dur) : Math.max(t, Math.min(dinnerAt, e.at - 45));
+    if (sp.length && t + 45 < dinnerAt && clear(70)) sp.shift()();
     leisureUntil(Math.min(dinnerAt, until - 40), 71);
     if (ateDinner) {}
     else if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0)));
     else grab('dinner', 72);
-    while (sp.length && t < until - 60) sp.shift()();
+    while (sp.length && t < until - 60 && clear(70)) sp.shift()();
     if (toWork) { leisureUntil(until - C, 80); go(wd); work(1440); return; }
     const showerT = eveShower ? 22 : 0;
     leisureUntil(until - showerT - C, 80);
@@ -8106,7 +8114,7 @@ function schedBuild(p, d, occ, S) {
       morning(20, MEALS.breakfast[1]);
       const sp = specials(50, true);
       leisureUntil(t + 30 + Math.round(60 * U(55)), 56);
-      while (sp.length > 1) { sp.shift()(); leisureUntil(t + 40 + Math.round(80 * U(57 + sp.length)), 58 + sp.length * 4); }
+      while (sp.length > 1) { const f = sp.shift(); if (clear(70)) f(); leisureUntil(t + 40 + Math.round(80 * U(57 + sp.length)), 58 + sp.length * 4); }
       evening(sp, F.bed, false);
     }
   } else {
@@ -8131,7 +8139,7 @@ function schedBuild(p, d, occ, S) {
         evening(sp, F.workStart, true);
       } else {
         leisureUntil(t + 30 + Math.round(60 * U(55)), 56);
-        while (sp.length > 1) { sp.shift()(); leisureUntil(t + 40 + Math.round(80 * U(57)), 58); }
+        while (sp.length > 1) { const f = sp.shift(); if (clear(70)) f(); leisureUntil(t + 40 + Math.round(80 * U(57)), 58); }
         evening(sp, F.bed, false);
       }
     }
