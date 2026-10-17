@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.20
+   STARSHIP CADET: CSV Wren                           build 0.48.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.20';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.21';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -20877,7 +20877,69 @@ const LINES = {
     {"text": "I think I like it here. Is that too quick to say?", "id": "1xqnf5f", "tone": "warm", "guide": "true", "time": "evening"},
     {"text": "{thanks}. For today. I'd have walked into the cargo hold twice without you.", "id": "rl7c6g", "tone": "warm", "guide": "true", "time": "evening"},
   ],
+  "rumour": [
+    {"text": "Heard Brennan's trying a new pudding.", "id": "1c3yspy", "act": "meal"},
+    {"text": "Word is there's cake on Friday. Don't spread it.", "id": "wg3xgn", "tone": "funny", "act": "meal"},
+    {"text": "Heard the post bag's due. Fingers crossed.", "id": "1wra4bh", "act": "off"},
+    {"text": "Someone's got a new Gerald. Very small.", "id": "pb2bxc", "act": "off"},
+    {"text": "Heard the hot water's lasting longer. Lies.", "id": "j01vcc", "tone": "funny"},
+    {"text": "They say the knitters are on scarf number nine.", "id": "1oeuvas"},
+    {"text": "Heard someone's planning a surprise. Shh.", "id": "x2862f"},
+    {"text": "Word is the music room's got a new record.", "id": "1etpuh6"},
+    {"text": "Heard someone beat Rina at Tiles. I don't believe it.", "id": "1m5jp0l", "tone": "funny", "not": {"who": "rina"}},
+  ],
   "smalltalk": [
+    {"text": "{dish} again? Good. I like {dish}.", "id": "135b4t2", "act": "meal"},
+    {"text": "Is there pudding? There's always pudding.", "id": "jv3z1c", "act": "meal"},
+    {"text": "Brennan's humming. That means seconds.", "id": "1rt2lv7", "act": "meal"},
+    {"text": "Save me a seat by the window.", "id": "h0l87", "act": "meal"},
+    {"text": "The grab shelf's full. For now.", "id": "1lpro5x", "tone": "funny", "act": "meal"},
+    {"text": "Toast first. Then thinking.", "id": "1bh8hc8", "act": "breakfast"},
+    {"text": "Has anyone seen the good jam?", "id": "1ncbkc2", "act": "breakfast"},
+    {"text": "Porridge or toast? Both. Obviously.", "id": "1iqfyxy", "tone": "funny", "act": "breakfast"},
+    {"text": "Smells like {dish}. Smells like a good day.", "id": "1n0iipk", "act": "dinner"},
+    {"text": "Who's taking the last roll? Go on, then.", "id": "hgmf59", "act": "dinner"},
+    {"text": "Is it morning already? It feels early.", "id": "1xxl5rb", "time": "morning"},
+    {"text": "Slept like a stone. A happy stone.", "id": "1rzk2zp", "time": "morning"},
+    {"text": "The washroom choir's on again.", "id": "19i0szv", "tone": "funny", "time": "morning"},
+    {"text": "Long day. Good day. Both.", "id": "1fxb6ww", "time": "evening"},
+    {"text": "Tea, a chair, and nothing to fix. Lovely.", "id": "1loth5p", "time": "evening"},
+    {"text": "Can't sleep. The vents sound like rain.", "id": "lkh9d", "time": "night"},
+    {"text": "Hot water's gone. Character-building time.", "id": "1wcd382", "tone": "funny", "time": "night"},
+    {"text": "Day off. I've done nothing. Perfect.", "id": "15ubbr4", "act": "off"},
+    {"text": "Lie-in, then laundry. Living the dream.", "id": "43sn3h", "tone": "funny", "act": "off"},
+    {"text": "Writing letters home. Three pages so far.", "id": "1gwu6cr", "act": "off"},
+    {"text": "I'm going to read till dinner. Don't stop me.", "id": "4a4wk9", "act": "off"},
+    {"text": "Weekend at last. I'm not getting up till ten.", "id": "18vz6zz", "act": "off", "weekday": "sat|sun"},
+    {"text": "Sunday bread smells. Brennan's at it.", "id": "5i630s", "act": "off", "weekday": "sat|sun"},
+    {"text": "Hot water's still on! Quick!", "id": "ebgrms", "act": "wash"},
+    {"text": "Who's singing? Lovely. Mostly.", "id": "tdku7j", "tone": "funny", "act": "wash"},
+    {"text": "One more lap. Then biscuits.", "id": "yqwm19", "tone": "funny", "act": "gym"},
+    {"text": "Vance's name is still top of the board.", "id": "g9otxl", "act": "gym"},
+    {"text": "Someone's Gerald has a new spine. Big news.", "id": "b6jgsu", "tone": "funny", "act": "leisure"},
+    {"text": "Letter from home came. Read it twice.", "id": "1as2dmm", "act": "leisure"},
+    {"text": "The misters are on. Smells like a garden.", "id": "13niyo4", "act": "leisure"},
+    {"text": "Quiz tonight. I know nothing. Count me in.", "id": "18w5k9x", "tone": "funny", "trad": "quiz"},
+    {"text": "Film night! Not the seat by the speaker.", "id": "tdwy0f", "trad": "film"},
+    {"text": "Jam tonight. Someone'll sing the wrong words.", "id": "1e78xna", "tone": "funny", "trad": "jam"},
+    {"text": "Observatory's open tonight. Wrap up warm.", "id": "156f0mt", "trad": "observatory-night"},
+    {"text": "Running club tonight. I'm walking it.", "id": "18js2pl", "tone": "funny", "trad": "running"},
+    {"text": "Swap meet's on. I've brought my old socks.", "id": "1yiwe0d", "tone": "funny", "trad": "market"},
+    {"text": "Sowing. Everything in the garden's tiny.", "id": "1kdoty7", "season": "sowing"},
+    {"text": "New season. New seedling on my sill.", "id": "1i4eppv", "season": "sowing"},
+    {"text": "Greening. The garden smells amazing.", "id": "embdva", "season": "greening"},
+    {"text": "Everything's green. Even the soup.", "id": "qqm52w", "tone": "funny", "season": "greening"},
+    {"text": "Harvest's coming. Brennan's sharpening knives.", "id": "nugurp", "season": "harvest"},
+    {"text": "Tomatoes everywhere. I'm not complaining.", "id": "1qkg6nb", "season": "harvest"},
+    {"text": "Lanterns up. The corridors look cosy.", "id": "1lz3rph", "season": "lanterns"},
+    {"text": "Lanterns season. Soup season. Same thing.", "id": "o6vm3c", "tone": "funny", "season": "lanterns"},
+    {"text": "Tiles later? Not against Rina, mind.", "id": "11agynq", "tone": "funny", "act": "leisure", "not": {"who": "rina"}},
+    {"text": "Afternoon slump. Is it tea time? It's tea time.", "id": "hqzonk", "time": "afternoon"},
+    {"text": "Biscuit o'clock. Nearly.", "id": "jx13vs", "tone": "funny", "time": "afternoon"},
+    {"text": "Booked a booth for later. Calling home.", "id": "1llrrjx", "act": "off"},
+    {"text": "Sat in the garden for an hour. Bliss.", "id": "1ff1qlu", "act": "off"},
+    {"text": "Look at those stars through the bow windows.", "id": "i9jodd", "place": "lounge"},
+    {"text": "New comic on the wall. Someone's in it.", "id": "1p0h0el", "tone": "funny", "place": "commons"},
     {"text": "Which deck is this again?", "id": "1v5khrn", "dept": "guest"},
     {"text": "Lovely view from here.", "id": "13xfyeo", "dept": "guest"},
     {"text": "Is the lift always this slow?", "id": "gv7j1h", "tone": "funny", "dept": "guest"},
