@@ -20,6 +20,9 @@ voice `thread:` only arc:<id> (roster 0.16.16 matches); 0.48.47 week-1 scripts f
 **Build master 2:** session_01F8ph7FKqViF3heRn94YgBr: send them each content hash directly (and the lead the MERGE line). Latest
 for the combine: 5e2605e (0.48.48: days off follow roster 0.16.17; facts column regenerated). Crew designer 3:
 session_01TDCn9auvCBML52hyjWGY6x (roster 0.16.19, claude/deck-plans-1-2-6). Social B2: session_014A3w2gK8FBNWs66YC3LfME.
+Reviewer 2b (content): session_01F93LiFWtciyCLNV34qPsjP. Reviewer 1c (roster): session_01YcSJkhhJ2MnCjsJs7QV8ud. Onboarding
+engineer 2: session_0163dcLt17oTCdR8po9HRo2p (tour pacing A: core = walk.<place>.1..N). Latest content: 92866aa (0.48.51).
+**Rule: the writing follows the game** (no crew takes the ladder; nobody skips breakfast; days off from the roster).
 **Lead's ruling (07:32):** never merge claude/dialogue into claude/content (it carries the 0.60.1 engine base; real code
 conflicts). Keep claude/content on its base, merge writers' content/ only; build master 2 takes content/ from here. For newer
 tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (lines_check.py + README at dialogue 0.43.22: checks trad:/came: ids too).
