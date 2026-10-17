@@ -79,8 +79,9 @@ Still open after Writer 4: done by Writer 5 (below), except the dry-humour Tiles
 ## Writer 5 (session_01HW7UxnuNvRXoEjn8tK4sQq): batches 1-7, reviewed by head writer 3
 
 Reports to **head writer 3** (session_01FopKMT2ZKxuWcNDcmF7565). All merged or being merged by head writer 3 (to
-0.48.41). Last head on `claude/writer-commons`: 4721c26 + this note. **Standing by** (2026-10-17 ~07:40): the planned
-content list is done; head writer 3 is asking the lead what's next (newcomer replies wait on onboarding's wave 4).
+0.48.41). Last head on `claude/writer-commons`: 4721c26 + this note. After batch 9 (2026-10-17 ~08:25) the planned
+list is done. Onboarding seat 1 (session_01KaHzfqSqF8B4bkNFrH1tsx) is inactive: its successor wires batch 9 from
+`plans/handover-onboarding.md` and the key list above.
 
 | Batch | What | Files | Hash |
 | --- | --- | --- | --- |
@@ -88,6 +89,8 @@ content list is done; head writer 3 is asking the lead what's next (newcomer rep
 | 4-5 | goodbyes (`leaving:you`), packing (`feel leaving:soon`), letters for all ten story crew | the ten story crew's `lines/` | 91ded9b, 41424a7, 838136b, acf14ef; six in e81ea03 |
 | 6 | seasons and traditions gaps for the ten (exact trad ids) + `trad:today` | the ten | cd488f8, 78d55a4, 7335bee, be0bd77 |
 | 7 | 39 overheard conversations, off duty in work places | `overheard/deck2`, `deck5`, `deck6.lines` | 4721c26 |
+| 8 | 17 crew-to-crew goodbyes for rotation days (A is `leaving:soon`; pair:friend/best/mentor/couple + 8 named leavers) | `overheard/goodbyes.lines` | 4a3879d |
+| 9 | week 1 for onboarding's hook: `beat.<beatId>.<n>` bubbles (tomas d1-wash, d5-invite, d6-sowing; brennan d1-dinner; eklund-leila d2-booths; ishikawa-orla d3-store; torres-zeke d3-pick; pell d4-quiz), Mail `mail.d4-mail` (Torres), `mail.d7-calder` + `mail.settled` (Calder), `mail.d5-mug` (Halloran) as one line "Subject \| body", unsigned; `meetings/introHealth.meet` (Rina, Tue 14:00) | those files' `== week1` | b4a86bf |
 
 Head writer 3's edits and rulings this seat: story crew never leave, so their goodbyes only play if that ever changes
 (kept anyway, harmless); **the scarf exists only after Torres's beat 1**: any scarf line needs `mem:moment.torres.scarf`;
@@ -130,6 +133,9 @@ missed; no "nervous to ask / glad I asked"; no "best part of my day, this"; no l
 
 ## Loose ends / next
 
+- **On hold:** ~15 "missing them" lines (`bond:missed`, `{missed}`) for social B2 (session_014A3w2gK8FBNWs66YC3LfME):
+  wait for dialogue engineer 2 (session_01S26bs4oMahyGJkuVaCKQGT) to add `{missed}`, `bond:missed` and `pair:best|mentor`
+  to lines_check/content_gen in claude/content; social B2 or head writer 3 will say. Warm, a little wistful, light.
 - Standing by for head writer 3's next job. Candidates: newcomer lines (wait on onboarding's wave 4), more overheard
   for other quiet places (the cart bay, machine shop, Deck 1 observation room), about/invite for the 19.
 - Theme fill-in `{since}` still not live (lines using it are skipped).
