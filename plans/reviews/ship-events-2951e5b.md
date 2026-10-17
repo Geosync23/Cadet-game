@@ -26,3 +26,12 @@ Low:
 - Fix 1 is done: the occasion toast is off when `deviceApp` exists (section 19 is in), so there's one notice, the device's.
 - Fix 2 is done: the Mail is "Sunday's shuttle takes {names} away from the Wren"; toasts and thanks use {names}. With several honorees, `{first}` names one of the *others* per speaker, through `schedU(p.seed + 104729, c.day, t.k)` (pure; the event record carries `day`). With a single honoree, or no speaker (Mail), it falls back to `c.first`. Self-naming is still filtered.
 - The DRAFT comments are cleared (774eeb7). The night-shift honorees wait on sim 4's section 14; I'll recheck after the combine.
+
+## Addendum: 0.34.48 (4631a97): the long-table seats, PASS
+Trial combine with decks a71ac47 (the only conflicts are the build numbers). In the browser, by planned seats:
+- Sunday day 7: 32 at the Sunday table, **9 on long-table seats**. Day 14: 33, 7 on long-table seats. No place is used twice.
+- Harvest supper day 231: 45, all 13 long-table seats used. It replaces that Sunday's table, as before.
+- Farewell supper day 76: 11, none on long-table seats.
+- trad_parse accepts `pool @tag`. The game's `@<event>` sub-pools already exist (sched, `sub('@' + ev, …)`), so nothing else is needed. Without decks a71ac47 the pool is empty and it falls back.
+
+For the lead or the deck architect (a design call, not a bug): on an ordinary Sunday about 7 to 9 people take the end chairs or the **trestle outside on the promenade**, even with only 32 coming against a mess of 44 seats (other diners are also in the mess at 18:00, so it may be full). If the extras are meant only as overflow, the room's seats should fill first. And while the decor is up, crew walk through the trestle (see the decks addendum).
