@@ -265,6 +265,9 @@ with sync_playwright() as pw:
     for x in t['bad']: fail(x)
     if not t['all']: fail('ticking everything did not finish the list')
 
+    tl = g.ev("typeof introTourLines === 'function' ? INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, introWriterLine('walk.' + x.id + '.1') ? 'writers' : 'stand-ins']) : null")
+    if tl: print('  Torres\'s tour (lines per place):', ', '.join(f'{i} {n} ({w})' for i, n, w in tl))
+    if tl and g.ev("typeof LINES !== 'undefined' && !!LINES.crew && !!LINES.crew['torres-zeke']") and any(w != 'writers' for i, n, w in tl): fail('the writers\' tour lines are in this build but a place has none: ' + str([i for i, n, w in tl if w != 'writers']))
     print('8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)')
     if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
@@ -341,7 +344,7 @@ with sync_playwright() as pw:
         print('  its speakers:', who)
         if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
         elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 480)'): fail('Calder speaks the briefing from ' + str(who['cal']))
-        g.ev('(() => { while (DIALOGUE) dialogueNext(); })()')
+        g.ev('(() => { for (let k = 0; DIALOGUE && k < 60; k++) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(0); else dialogueNext(); } })()')
         for i in range(40):
             g.step(30)
             if g.ev('shipNow() >= introAbs(1, 486)'): break
