@@ -114,3 +114,9 @@
 - Being retired is very still. I've put the model Wren by my window. I check it before every long walk.
 ? tier>=friend
 - Heard the Wren made a long turn this week. Smoothly, they said. I was very proud. Hello.
+
+// ---- Day 0: the Tern's pilot as the ramp opens (head writer 3, 0.48.40; the onboarding engineer's hook, flag:pilot.ramp).
+// Raman flies the Tern in on Sunday (his days off are Fri-Sat). One bubble, 60 characters or fewer.
+== week1
+? flag:pilot.ramp
+- Down gently. Ramp's opening. Welcome to the Wren.
