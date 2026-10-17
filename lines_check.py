@@ -22,6 +22,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
 PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other'}
+TRAD_PLACEHOLDERS = {'host', 'names', 'season', 'time'}   # tradition texts only (plans/trad-format.md)
 VALUES = {
     'warmth': {'cold', 'warm'},
     'bond': {'best', 'rival', 'mentor', 'mentee', 'drifting', 'couple', 'friend'}, 'mood': {'low', 'ok', 'high'},
@@ -125,9 +126,9 @@ def main(argv):
     for c in out['CONVOS']:
         for l in c['lines']:
             allx.append((f'overheard {c["topic"]}', 'overheard', dict(c, text=l['text']), None, 'convo'))
-    for tid, tr in out['TRADITIONS'].items():
+    for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
         for sec, es in tr.get('text', {}).items():
-            allx += [(f'tradition {tid}', 'trad.' + sec, e, None, 'trad') for e in es]
+            allx += [(f'tradition {tr["id"]}', 'trad.' + sec, {'text': e['t'], 'tone': e.get('tone', 'light'), 'id': tr['id']}, None, 'trad') for e in es]
     for mid, sc in out['MEETINGS_BAKED'].items():
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
@@ -137,7 +138,7 @@ def main(argv):
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
         for tok in re.findall(r'\{([^}]*)\}', t):
-            if tok not in TOKENS | PLACEHOLDERS:
+            if tok not in TOKENS | PLACEHOLDERS and not (kind.startswith('trad.') and tok in TRAD_PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')
         if t.count('{') != t.count('}'):
             errors.append(f'{tag}: unbalanced braces')
@@ -165,7 +166,7 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 60 if kind in BUBBLE_KINDS or kind == 'trad.chatter' else 400 if kind in ('trad.mail', 'letter') else 140 if kind.startswith(LONG_KINDS) else CARD
+        lim = 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') else 400 if kind == 'letter' else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')

@@ -8,7 +8,7 @@ starship-cadet.html), everything between these markers, which sit in section 22 
 
     // ---- BEGIN LINES ...       // ---- END LINES ----        VOICE_TEMPLATES, VOICE, LINES, CONVOS
     // ---- BEGIN MEETINGS ...    // ---- END MEETINGS ----     MEETINGS_BAKED (merged into MEETING_SCRIPTS)
-    // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS (read by section 18's loader)
+    // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
 --check changes nothing and exits 1 if the game file is out of date. The shapes are the social plan's Part 9
@@ -19,7 +19,7 @@ import json, os, re, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plans'))
 try:
     import trad_parse    # the traditions engineer's .trad field grammar (plans/trad_parse.py, plans/trad-format.md)
-except ImportError:      # before their branch is merged: fields stay raw strings, and section 18's loader reports them
+except ImportError:      # before their branch is merged: no .trad files can be baked (an empty TRADITIONS)
     trad_parse = None
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -379,56 +379,8 @@ def parse_meeting(path, rel, out):
     out['MEETINGS_BAKED'][hd[1]] = sc
 
 
-def parse_tradition(path, rel, out):
-    """@tradition <id>; 'key: value' fields (the traditions engineer reads them: when, len, where, who, anim, host,
-    ties, mail, thanks, ...); then '== section' and '- text  #tone' lines (tap, chatter, ...)."""
-    lines = read_lines(path)
-    hd = header(lines, path)
-    if hd[0] != 'tradition' or len(hd) != 2:
-        raise GenError(f'{path}: a .trad file starts with "@tradition <id>"')
-    tr, sec, conds = {}, None, {}
-    for i, l in lines:
-        where = f'{path}:{i}'
-        if l.startswith('@'):
-            continue
-        s = l.strip()
-        if not s:
-            continue
-        if s.startswith('=='):
-            sec, conds = s[2:].strip(), {}
-            tr.setdefault('text', {}).setdefault(sec, [])
-            continue
-        if sec is None:
-            m = re.fullmatch(r'([a-z][a-zA-Z0-9]*):\s*(.+)', s)
-            if not m:
-                raise GenError(f'{where}: tradition fields are "key: value"')
-            if trad_parse:
-                try:
-                    trad_parse.parse_field(tr, m.group(1), m.group(2), where)   # the field grammar: plans/trad-format.md
-                except trad_parse.TradError as e:
-                    raise GenError(str(e))
-            else:
-                tr[m.group(1)] = m.group(2)
-            continue
-        if s.startswith('?'):
-            conds = parse_conds(s[1:], where)
-            continue
-        if not s.startswith('- '):
-            raise GenError(f'{where}: lines start with "- "')
-        text, tone = split_tone(s[2:], where)
-        tr['text'][sec].append(entry(rel, 'trad.' + hd[1] + '.' + sec, text, tone, conds))
-    if trad_parse:
-        try:
-            out['TRADITIONS'][hd[1]] = trad_parse.finish(tr, hd[1], path)
-            trad_parse.check_all(list(out['TRADITIONS'].values()))
-        except trad_parse.TradError as e:
-            raise GenError(str(e))
-    else:
-        out['TRADITIONS'][hd[1]] = tr
-
-
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MEETINGS_BAKED': {}, 'TRADITIONS': {}}
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'TRAD_JS': 'const TRADITIONS = [\n];'}
     files = []
     for d, _, fs in os.walk(CONTENT):
         for f in fs:
@@ -442,8 +394,20 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
-        elif ext == 'trad':
-            parse_tradition(path, rel, out)
+    # traditions: the traditions engineer's grammar and baked shape (plans/trad-format.md), made by their trad_parse.py
+    # byte for byte: const TRADITIONS = [ one tradition a line ];
+    tdir = os.path.join(CONTENT, 'traditions')
+    if os.path.isdir(tdir) and any(f.endswith('.trad') for f in os.listdir(tdir)):
+        if not trad_parse:
+            raise GenError('content/traditions has .trad files but plans/trad_parse.py (the traditions engineer\'s) is missing')
+        try:
+            js_block = trad_parse.bake_traditions(tdir)
+            for f in sorted(os.listdir(tdir)):
+                if f.endswith('.trad'):
+                    out['TRADITIONS'] += trad_parse.parse_trad(open(os.path.join(tdir, f), encoding='utf-8').read(), f)
+        except trad_parse.TradError as e:
+            raise GenError('content/traditions/' + str(e))
+        out['TRAD_JS'] = js_block[js_block.index('const TRADITIONS'):js_block.index('// ---- END TRADITIONS')].rstrip('\n')
     ids = {}
     for kind, es in out['LINES'].items():
         for e in es:
@@ -491,7 +455,7 @@ def blocks(out):
     lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + js_cards('VOICE', out['VOICE']) \
         + js_obj_of_lists('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];']
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
-    trad = ['const TRADITIONS = {'] + [f'  {js(k)}: {js(out["TRADITIONS"][k])},' for k in sorted(out['TRADITIONS'])] + ['};']
+    trad = out['TRAD_JS'].split('\n')
     return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad}
 
 

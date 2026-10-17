@@ -17,7 +17,7 @@ Read this with the voice bible and `content/facts.md` (the head writer's), and t
 | `overheard/<topic>.lines` | two or three crew talking as you pass | topic |
 | `reactions/<cue>.lines` | lines about something that really happened (a repair, a tradition, the storm) | kind of happening |
 | `meetings/<id>.meet` | meeting scripts with replies to choose | meeting |
-| `traditions/<id>.trad` | a tradition's data and words: fields in the traditions engineer's grammar (`plans/trad-format.md`), texts in `== mail`, `== ask`, `== here`, `== thanks`, `== chatter` sections | tradition |
+| `traditions/<id>.trad` | a tradition's data and words, in the traditions engineer's format (`plans/trad-format.md`) | tradition |
 | `themes/`, `arcs/`, `gifts.list` | coming in wave 2 with social engineer B | |
 
 Crew ids are the roster's (`tomas`, `pell`, `rina`, `torres-zeke`, `calder`, ...): see `plans/crew-roster.html`.
@@ -209,9 +209,11 @@ A: No promises.
 
 ## Traditions (.trad)
 
-The fields (`when:`, `where:`, `who:`, `ties:`, ...) follow the traditions engineer's grammar in `plans/trad-format.md`;
-content_gen.py checks them with `plans/trad_parse.py`. The words go in sections, as `- text   #tone` lines:
-`== mail`, `== ask`, `== here`, `== thanks`, `== chatter`. lines_check checks those texts like any other line.
+A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` (it differs a little from `.lines`:
+comments start with `#`, and there are no `?` conditions). content_gen.py bakes it with their `plans/trad_parse.py`
+into `const TRADITIONS = [ ... ]`. The words go in `== mail`, `== ask`, `== here`, `== thanks` and `== chatter`;
+besides the usual placeholders they can use `{host}`, `{names}`, `{season}` and `{time}`. lines_check checks the words
+(chatter, ask and here 90 characters, mail and thanks 200) but not the fields: content_gen.py does.
 
 ## Meetings (.meet)
 
@@ -263,6 +265,7 @@ their job. Never contradict the roster: bio, life lines, habits and birthdays ar
   likes, invites, joy, thread, keepsake, avoid, lines: { kind: [...] } }`, `VOICE_TEMPLATES[name] = { words, lines }`,
   `LINES[kind] = [{ text, id, tone, w, odds, ...conditions, not: { ... } }]` (a condition's value is a string, `'a|b'`
   for either, an array when all must hold; `tier: [lo, hi]`), `CONVOS = [{ id, topic, pair, ..., lines: [{ who, text }] }]`,
-  `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS[id] = { field: 'text', ..., text: { section: [...] } }`.
+  `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS = [ ... ]` exactly as `plans/trad_parse.py` makes it
+  (the traditions engineer's shape, `plans/trad-format.md`).
 - A line's id is a short hash of its file, kind and text: rewording a line gives it a new id.
 - Section 22 (`lineFor`, `overheardFor`, `linesOk`, `linesFill`) is the engine; see DEV_NOTES, "Lines (section 22)".
