@@ -144,3 +144,33 @@
 == greet
 ? flag:home.gran.won tier>=colleague
 - A prize marrow. What did it weigh? Your gran will know to the gram. Ask her.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- This is the good jam. Don't tell Ivo.   #funny
+- Soup, bread, a pear. That's a meal.
+- Seconds? One ladle. Not a big ladle.   #funny
+? act:breakfast
+- Toast. Two minutes a side. Then it's toast.
+? act:off
+- Rest day. Laps, then a book. Then laps.
+- Wrote to my brother. One page. Enough.
+- Fed Gerald. One drop. He's a cactus.   #funny
+? time:evening
+- My brother says the fish are fat. Too fat.   #funny
+- Forty laps. Same pace. Good.
+? time:morning
+- Up at five. The laps are quiet then.
+? season:lanterns
+- My lantern's square. It's tidier.   #funny
+? season:sowing
+- Planted mine in a straight line. Obviously.   #funny
+? trad:quiz
+- Quiz tonight. I'll take the numbers ones.
+? time:night
+- Rain on Port Halloran sounds like frying. I miss it.
+
+== rumour
+- Ivo told me. So it was long. Short version: yes.   #funny
+- I heard one thing. I'll say it once.

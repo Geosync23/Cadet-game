@@ -207,3 +207,32 @@
 - Your Jo launched a boat? Hesper Dock would've bought it on the spot. Tell them that.   #funny
 ? flag:home.gran.won tier>=colleague
 - First prize for a marrow? Your gran's a born trader. I'd sell those seeds by the packet.   #funny
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Two puddings, one smile. Fair trade.   #funny
+- I'll swap you my roll for your pear. Deal?
+? act:off
+- Rest day. Rowing. Vance's name is mine soon.
+- Five-year plan, week thirty. On track.
+- My cousin wrote. The stall's still standing. Just.   #funny
+? time:evening
+- Hesper Dock does fish on a Friday. I miss that.
+- What's the news? Anything good? Spill.
+? trad:market
+- Swap meet! Best day of the week. I'm in my element.
+? trad:quiz
+- Quiz tonight. Let's make it interesting. Puddings?   #funny
+? act:gym
+- Rowing board. One more second. Then Vance.
+? season:harvest
+- Harvest market, back home. Best prices of the year.
+? place:commons
+- Gossip corner's open. Public stuff only.   #funny
+? act:breakfast
+- Skipped breakfast. Coffee's breakfast. Don't tell.
+
+== rumour
+- Okay. Public news. Free of charge.   #funny
+- You'll want this. I'll throw it in for nothing.

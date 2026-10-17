@@ -134,3 +134,34 @@
 - Thank you. That's very kind. I'll remember it.
 ? gift:polite
 - Oh dear, you didn't have to. Thank you. Really.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- The basil in this is mine. From the windowsill.
+- Is that seat taken? I like the window side.
+? act:off
+- Rest day. I'm watering the herbs. Very slowly.
+- I sat at the window an hour. Forgot to read.
+? act:wash
+- Was that loud? I thought I was humming.   #funny
+? time:evening
+- Lovely out the window tonight. Lots of stars.
+- Yara and I are having tea. Come if you like.
+? time:night
+- Counted stars. Lost count. Started again.   #funny
+? season:greening
+- Greening. My mint's gone wild. Brennan's pleased.
+? season:lanterns
+- I hung my lantern in the window. Like at home.
+? trad:observatory
+- Observatory night. I'll find the bright one again.
+? place:lounge
+- The windows here are best. Don't tell the garden.
+? time:morning
+- The washroom choir was in fine voice today.   #funny
+- Good morning. The herbs say good morning too.
+
+== rumour
+- I wasn't listening. I just heard. Sorry.
+- Have you heard? I think it's true. It sounded true.

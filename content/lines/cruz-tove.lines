@@ -140,3 +140,33 @@
 - Thank you. That's kind. Very kind.
 ? gift:polite
 - Oh. Thank you. I'll... thank you. Yes.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Mm. Tomatoes. Week nine. Good week.
+- Soil on my sleeve. Sorry. Always.
+? act:off
+- Rest day. Mm. I'm at the garden anyway.
+- New Gerald. Small one. Needs a windowsill.
+? time:evening
+- The beans are asleep. Shh.   #funny
+- Mm. Dinner. Then the ladder. For the exercise.
+? time:night
+- The garden's nice at night. The plants talk less.   #funny
+? season:sowing
+- Sowing. Week one. Everything's a maybe.
+? season:greening
+- Greening. Mm. Everyone's showing off.   #funny
+? season:harvest
+- Harvest. They grew. They always do. Still.
+? season:lanterns
+- Lanterns. The garden rests. So do I. Bit.
+? place:hydroponics_garden
+- Mm. Hello. No, not you. The lettuces.   #funny
+? trad:market
+- Swap meet. I'm taking five little Gerald cuttings.
+
+== rumour
+- Mm. Heard it from the tomatoes. No. From Imani.   #funny
+- Something... mm. It's nice. I'll tell you.

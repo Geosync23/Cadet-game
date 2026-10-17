@@ -136,3 +136,31 @@
 - Thanks! Good for morale, presents. Proven. Very good for morale.
 ? gift:polite
 - Oh! Thanks. Very kind. I'll find a use for it. I've a plan for everything.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Did you know soup counts as water? Partly. Have soup.
+- I skipped breakfast. Don't copy me. Seriously.   #funny
+- Greens! Eat the greens. Your eyes will thank you.
+? act:off
+- Rest day. Guitar, then boat plans, then guitar.
+- The boat's called the Evening Star this week.   #funny
+- I've drawn the boat again. With a bigger sail.
+? time:evening
+- Practised with Tamsin. We're getting worse. Together.   #funny
+- Saved twelve more credits. The boat's nearer. Bit.
+? time:night
+- Night owl. Not great for sleep. Do as I say.   #funny
+? season:harvest
+- Harvest! Pears are good for you. I'll stop.   #funny
+? trad:jam
+- Music night. I'll play the G. The one G.   #funny
+? place:lounge
+- If I had a boat here, I'd park it by that window.
+? act:gym
+- Stretch first! Everyone stretch! Thank you.
+
+== rumour
+- I heard something. Health-wise, it's fine. News-wise...
+- Right, so. This is good news, mostly.

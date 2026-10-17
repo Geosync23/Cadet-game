@@ -138,3 +138,31 @@
 - Oh, thank you! That's lovely. It'll be fine. It's better than fine.
 ? gift:polite
 - Oh, thank you! Sorry. I mean, thank you. It's lovely of you to think of me.   #funny
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Pudding's good today. It is, isn't it?
+- Sorry, is this seat free? Sorry. Thanks.
+- I'll stay for tea. I always stay for tea.
+? act:off
+- Rest day. The chord's coming today. It will. Won't it?
+- Guitar, then a long shower, then guitar.
+- I'm learning the words to side two. Again.   #funny
+? act:wash
+- Oh, was I singing? Sorry. Was it nice, though?
+? time:evening
+- That song's on my mind. You know the one. La la.
+- Hamid and I had a practice. It went... it went.   #funny
+? trad:jam
+- Music night! I'll just sing quietly. Very quietly.
+? trad:quiz
+- If there's a song round, I'm ready. Am I ready?
+? season:lanterns
+- Lanterns is my favourite. It'll be fine. It's lovely.
+? time:night
+- Sorry, still humming. I'll stop. I've stopped.   #funny
+
+== rumour
+- Oh, I shouldn't. Should I? I'll say a little.
+- Have you heard? It's nice news. I think it's nice.

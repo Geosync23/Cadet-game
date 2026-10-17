@@ -135,3 +135,32 @@
 - Thanks. Good one. Going in the comic.
 ? gift:polite
 - Ah, well. Thanks. Kind of you. Really.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:breakfast
+- Morning. Hate it. Love the toast.   #funny
+- Mornings are a mistake. ...Nice tea, though.
+? act:meal
+- Second bowl. All that digging. Hungry work.   #funny
+? act:off
+- Rest day. Sleeping till ten. Then till eleven.   #funny
+- Drew a comic. You're not in it. This week.   #funny
+- Nan drew the fish again. One's got a hat.
+? time:evening
+- Garden after dinner. Just sitting.
+- Comics wall needs a new one. Thinking.
+? time:night
+- Bed. Late again. My own fault. Every night.
+? season:sowing
+- Sowing. Early mornings. Grumble. Worth it.
+? season:harvest
+- Harvest. Everything we grew. ...Pretty good.
+? place:hydroponics_garden
+- First light in here is the only good morning.
+? place:commons
+- Someone added a moustache to my comic. Rude. Good.   #funny
+
+== rumour
+- Heard something. ...Yeah. It's true.
+- Slow news. Good news. Here.
