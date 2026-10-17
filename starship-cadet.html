@@ -12,14 +12,22 @@ html,body{margin:0;height:100%;overflow:hidden;background:#121a27;font-family:"A
 body.night #bg{opacity:.4}
 canvas{position:fixed;inset:0;display:block;z-index:1}
 .hud,.controls,.toast{z-index:2}
-.hud{position:fixed;left:14px;top:12px;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.hud{position:fixed;left:14px;top:10px;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.5);padding:5px 11px 6px;border-radius:12px;border:1px solid var(--line);background:var(--glass);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .hud .room{font-size:17px;font-weight:600}
 .hud .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
-.hud .clock{font-size:12.5px;color:#cfe9e4;margin-top:6px;font-variant-numeric:tabular-nums}
+.hud .clock{font-size:12.5px;color:#cfe9e4;margin-top:3px;font-variant-numeric:tabular-nums}
 .controls{position:fixed;right:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:70vw}
 button{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:600px){                                 /* 0.35.34: narrow phones: the six buttons as two rows of 44px icons beside the place and clock */
+  .controls{display:grid;grid-template-columns:repeat(3,44px);gap:8px;top:10px;max-width:none}
+  .controls button{width:44px;height:44px;padding:0;justify-content:center;font-size:0;gap:0}
+  .controls button svg{width:19px;height:19px}
+  .controls #newgame.ask{background:var(--teal);color:#08201d}
+  .hud{max-width:calc(100vw - 14px - 148px - 12px - 12px)}
+  .hud .room,.hud .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
 .toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,10px);width:min(440px,calc(100% - 24px));background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast b{display:block;font-size:14.5px;margin-bottom:3px;color:#bdeee6;font-weight:600}
@@ -210,7 +218,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.33
+   STARSHIP CADET: CSV Wren                           build 0.35.34
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7239,7 +7247,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.33';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.34';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -7390,8 +7398,10 @@ const welcomeBack = () => 'Welcome back. ' + clockText() + '.';
 const newBtn = document.getElementById('newgame'); let newAsk = 0;
 newBtn.onclick = () => {
   const span = newBtn.querySelector('span');
-  if (!newAsk) { span.textContent = 'Tap again'; newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; }, 4000); return; }
-  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game';
+  if (!newAsk) { span.textContent = 'Tap again'; newBtn.classList.add('ask'); newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask'); }, 4000);
+    if (matchMedia('(max-width:600px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
+    return; }
+  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask');
   if (ride) return;                                      // not mid-ride
   // how to start (agreed with section 21 and the device): the tests and anyone without section 21 wake on Monday; a
   // device that has never arrived arrives by shuttle; one that has gets the choice (arrive, or skip to Monday)
