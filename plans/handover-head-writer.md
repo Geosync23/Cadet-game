@@ -16,6 +16,8 @@ conflicts). Keep claude/content on its base, merge writers' content/ only; build
 tools copy only lines_check.py / content_gen.py / content/README.md from claude/dialogue (lines_check.py + README at dialogue 0.43.22: checks trad:/came: ids too).
 DON'T copy content_gen.py past 0.43.19: from 0.43.20 it bakes VOICE etc. as JSON.parse (the performance pass), which
 rewrites the game file; that belongs with the engine merge at build master 2, not here.
+**No .trad files here** (0.48.45, build master 2): traditions live only on claude/ship-events; tone checks of .trad texts are
+read there, not merged here.
 My recurring edits: callbacks mustn't assume when a beat happened; nothing that pre-empts a beat; no poems or
 "thinking about you" to the player; Day 0 callbacks must match introChief/introDinner as written. A meeting choice takes ONE reply line (a second indented
 line overwrites the first). The notes below are head writer 2's, still accurate unless the lines above say otherwise.
