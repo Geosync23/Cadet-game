@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Head-scratcher Screens</title>
+<style>
+:root{--cy:#7fe8f0;--cyd:#3fa7b2;--cyf:rgba(127,232,240,.12);--amb:#f1c96a;--bg:#06121a;--bez:#1b2430;--page:#0e1520;--ink:#e8eef0;--muted:#93a6ae}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+header{max-width:1180px;margin:0 auto;padding:18px 16px 4px}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{font-size:13.5px;color:var(--muted);margin:4px 0 0;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:1180px;margin:10px auto 30px;padding:0 16px}
+.cap{width:360px;max-width:100%}
+.cap h2{font-size:14.5px;margin:10px 0 2px;color:#bdeee6;font-weight:600}
+.cap p{font-size:12.5px;color:var(--muted);margin:0 0 8px;line-height:1.45}
+/* phone with ship behind and the device sheet over two thirds */
+.phone{width:360px;max-width:100%;height:740px;border-radius:34px;background:#000;padding:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.scr{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:linear-gradient(#2a3a52,#3a4a5a 30%,#55606a 31%,#4a545e)}
+.ship{position:absolute;inset:0 0 auto 0;height:34%;background:
+  radial-gradient(ellipse at 50% 120%,rgba(255,220,160,.35),transparent 60%),
+  linear-gradient(180deg,#1d2a3e 0%,#2c3c52 60%,#3e4b58 100%)}
+.ship .hud{position:absolute;left:12px;top:12px;font-size:11px;color:#dfe9ec;background:rgba(10,16,24,.6);padding:3px 8px;border-radius:999px}
+.ship .you{position:absolute;left:50%;top:58%;width:16px;height:30px;margin-left:-8px;border-radius:8px 8px 4px 4px;background:#3b8f8a;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
+.ship .glow{position:absolute;left:50%;top:62%;width:8px;height:6px;margin-left:4px;background:var(--cy);border-radius:2px;box-shadow:0 0 8px var(--cy)}
+.ship .wall{position:absolute;bottom:0;left:0;right:0;height:38%;background:repeating-linear-gradient(90deg,#46525e 0 38px,#3f4a55 38px 40px)}
+.dev{position:absolute;left:6px;right:6px;bottom:6px;top:28%;border-radius:20px;background:var(--bez);padding:8px;box-shadow:0 -6px 20px rgba(0,0,0,.45)}
+.crt{position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#0b2230 0%,var(--bg) 75%);font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:var(--cy);text-shadow:0 0 6px rgba(127,232,240,.45)}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);box-shadow:inset 0 0 40px rgba(0,0,0,.75);border-radius:14px}
+.in{position:absolute;inset:0;padding:10px 12px;overflow:hidden;display:flex;flex-direction:column;gap:7px}
+.bar{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cyd)}
+.bar b{color:var(--cy);font-weight:600;font-size:12.5px;letter-spacing:.04em}
+.case{border:1px solid var(--cyd);border-radius:8px;padding:6px 8px;font-size:12px;line-height:1.35}
+.case .k{display:block;font-size:10px;color:var(--amb);text-shadow:0 0 6px rgba(241,201,106,.4);letter-spacing:.06em}
+.lbl{font-size:10px;color:var(--cyd);letter-spacing:.08em;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{min-height:34px;display:flex;align-items:center;padding:0 10px;border:1px solid var(--cyd);border-radius:999px;font-size:11.5px;background:var(--cyf)}
+.chip.x{opacity:.45;text-decoration:line-through;background:none;border-style:dashed}
+.clues{display:flex;flex-direction:column;gap:4px}
+.clue{display:flex;gap:7px;align-items:flex-start;font-size:11px;line-height:1.3;border-bottom:1px dashed rgba(127,232,240,.18);padding-bottom:4px}
+.clue i{flex:none;width:18px;height:18px;border:1px solid var(--cyd);border-radius:4px;font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center}
+.clue em{font-style:normal;color:var(--amb)}
+.btns{margin-top:auto;display:flex;gap:6px}
+.btn{flex:1;min-height:44px;border:1px solid var(--cy);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12.5px;background:rgba(127,232,240,.16);letter-spacing:.04em}
+.btn.ghost{background:none;border-color:var(--cyd);color:var(--cyd);flex:.8}
+/* day strip */
+.strip{display:grid;grid-template-columns:repeat(24,1fr);gap:1px;align-items:end;height:58px;border-bottom:1px solid var(--cyd);position:relative}
+.strip span{background:rgba(127,232,240,.55);border-radius:1px 1px 0 0}
+.strip span.lo{background:var(--amb);box-shadow:0 0 6px rgba(241,201,106,.6)}
+.hrs{display:flex;justify-content:space-between;font-size:9px;color:var(--cyd)}
+.pins{position:relative;height:16px}
+.pin{position:absolute;top:0;font-size:9px;color:var(--amb);transform:translateX(-50%)}
+/* line map */
+svg.map{width:100%;height:100px;flex:none;display:block}
+svg.map text{font-family:ui-monospace,Menlo,Consolas,monospace}
+/* rig */
+.carts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cart{min-height:52px;border:1px solid var(--cyd);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px}
+.cart small{font-size:9px;color:var(--cyd)}
+.cart.on{background:rgba(127,232,240,.22);border-color:var(--cy)}
+.cart.ok{opacity:.45;border-style:dashed}
+.runs{font-size:11px;display:flex;flex-direction:column;gap:3px}
+.run{display:flex;justify-content:space-between;border:1px solid rgba(127,232,240,.25);border-radius:6px;padding:4px 7px}
+.run b{font-weight:400;color:var(--amb)}
+.left{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--cyd)}
+.left .d{width:10px;height:10px;border-radius:50%;border:1px solid var(--cy)}
+.left .d.f{background:var(--cy)}
+.toast{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-size:11px;background:rgba(10,20,28,.85);border:1px solid rgba(127,232,240,.5);color:var(--cy);padding:4px 10px;border-radius:999px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+.note{max-width:1180px;margin:0 auto 24px;padding:0 16px;font-size:12.5px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>Head-scratcher screens (mock-ups)</h1>
+  <p class="sub">Three sketches of the <b>Fault notes</b> page on a phone, for Pillar 5's added deductive repair puzzles (plans/pillar5-plan.md, Part 6). The device slides up over two thirds of the screen in its cyan old-screen style; the ship stays visible and keeps running above it. Everything is tap only, with targets of at least 44 px. Not built: for review.</p>
+</header>
+
+<div class="row">
+
+<!-- 1. P1 When does it happen? -->
+<div class="cap" id="m1">
+  <h2>1 · When does it happen? (Tier 1)</h2>
+  <p>Brennan's oven runs cool, but only at dinner. The day strip is the oven's log, read at its panel. You've crossed out two suspects yourself.</p>
+  <div class="phone"><div class="scr">
+    <div class="ship"><span class="hud">Day 14 · Thu 17:42 · Deck 3, galley</span><div class="wall"></div><div class="you"></div><div class="glow"></div></div>
+    <div class="toast">+ clue: Brennan</div>
+    <div class="dev"><div class="crt"><div class="in">
+      <div class="bar"><span>JOBS ›</span><b>FAULT NOTES</b><span>1 open</span></div>
+      <div class="case"><span class="k">HEAD-SCRATCHER · OVEN 3-OVEN-2</span>Runs cool, but only at dinner.</div>
+      <div class="lbl">SUSPECTS · TAP TO CROSS OUT</div>
+      <div class="chips"><span class="chip x">Element</span><span class="chip x">Door seal</span><span class="chip">Thermostat</span><span class="chip">Power junction</span></div>
+      <div class="lbl">OVEN HEAT BY HOUR · FROM ITS PANEL</div>
+      <div>
+        <div class="pins"><span class="pin" style="left:31%">▼ ok</span><span class="pin" style="left:75%">▼ cool ×2</span></div>
+        <div class="strip">
+          <span style="height:8%"></span><span style="height:8%"></span><span style="height:8%"></span><span style="height:8%"></span><span style="height:30%"></span><span style="height:82%"></span><span style="height:90%"></span><span style="height:88%"></span><span style="height:60%"></span><span style="height:40%"></span><span style="height:35%"></span><span style="height:70%"></span><span style="height:72%"></span><span style="height:40%"></span><span style="height:52%"></span><span style="height:70%"></span><span style="height:78%"></span><span class="lo" style="height:52%"></span><span class="lo" style="height:48%"></span><span style="height:62%"></span><span style="height:30%"></span><span style="height:10%"></span><span style="height:8%"></span><span style="height:8%"></span>
+        </div>
+        <div class="hrs"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+      </div>
+      <div class="lbl">CLUES · 3</div>
+      <div class="clues">
+        <div class="clue"><i>◷</i><span>Oven log: full heat at breakfast; <em>sags 17:00-18:30.</em></span></div>
+        <div class="clue"><i>☺</i><span>Brennan: "It's when the big range and the extractor are both going."</span></div>
+        <div class="clue"><i>◉</i><span>Chief's notes: <em>cool all day</em> is the element or the seal.</span></div>
+      </div>
+      <div class="btns"><span class="btn ghost">Where next?</span><span class="btn">Call it ›</span></div>
+    </div></div></div>
+  </div></div>
+</div>
+
+<!-- 2. P5 Follow the line -->
+<div class="cap" id="m2">
+  <h2>2 · Follow the line (Tier 2)</h2>
+  <p>Deck 4's showers are weak all day. Each gauge is on a panel you walk to with the pipe kit. Two read, one to go: the manifold on Deck 5 halves the line.</p>
+  <div class="phone"><div class="scr">
+    <div class="ship"><span class="hud">Day 31 · Tue 10:15 · Deck 5, manifold room</span><div class="wall"></div><div class="you"></div><div class="glow"></div></div>
+    <div class="dev"><div class="crt"><div class="in">
+      <div class="bar"><span>JOBS ›</span><b>FAULT NOTES</b><span>2 open</span></div>
+      <div class="case"><span class="k">HEAD-SCRATCHER · WATER, DECK 4</span>Showers weak all day, all six stalls.</div>
+      <div class="lbl">SUSPECTS</div>
+      <div class="chips"><span class="chip x">Pump</span><span class="chip x">Spine joint</span><span class="chip">D4 valve</span><span class="chip">D4 branch</span><span class="chip x">Heads</span></div>
+      <div class="lbl">THE LINE · TAP A STRETCH TO MARK IT FINE</div>
+      <svg class="map" viewBox="0 0 320 150" role="img" aria-label="The water line from the recycler to the showers">
+        <g fill="none" stroke="#3fa7b2" stroke-width="3">
+          <path d="M30 40 H120" stroke="#7fe8f0"/>
+          <path d="M120 40 H200 V100"/>
+          <path d="M200 100 H290"/>
+          <path d="M200 100 V140" stroke-dasharray="4 4"/>
+        </g>
+        <g font-size="10" fill="#7fe8f0">
+          <rect x="12" y="24" width="36" height="32" rx="6" fill="#0b2230" stroke="#7fe8f0"/>
+          <text x="30" y="38" text-anchor="middle">REC</text><text x="30" y="50" text-anchor="middle">15 ✓</text>
+          <rect x="98" y="24" width="44" height="32" rx="6" fill="#0b2230" stroke="#7fe8f0"/>
+          <text x="120" y="38" text-anchor="middle">SPINE</text><text x="120" y="50" text-anchor="middle">15 ✓</text>
+          <rect x="178" y="84" width="44" height="32" rx="6" fill="#0b2230" stroke="#f1c96a" stroke-width="2"/>
+          <text x="200" y="98" text-anchor="middle" fill="#f1c96a">MANI</text><text x="200" y="110" text-anchor="middle" fill="#f1c96a">read ›</text>
+          <rect x="268" y="84" width="40" height="32" rx="6" fill="#0b2230" stroke="#7fe8f0"/>
+          <text x="288" y="98" text-anchor="middle">D4</text><text x="288" y="110" text-anchor="middle" fill="#f1c96a">9 ✗</text>
+          <text x="210" y="146" fill="#3fa7b2">garden ?</text>
+          <text x="75" y="32" text-anchor="middle" fill="#3fa7b2">fine</text>
+          <text x="160" y="32" fill="#3fa7b2">D3 › D5</text>
+        </g>
+      </svg>
+      <div class="lbl">CLUES · 4</div>
+      <div class="clues">
+        <div class="clue"><i>◉</i><span>Recycler (D3): sends <em>15</em>, as it should.</span></div>
+        <div class="clue"><i>◉</i><span>Spine joint: <em>15</em>. Lost after here.</span></div>
+        <div class="clue"><i>◉</i><span>Deck 4 showers: <em>9</em>. Everyone's, all day.</span></div>
+        <div class="clue"><i>☺</i><span>Rina: "Garden's fine today."</span></div>
+      </div>
+      <div class="btns"><span class="btn ghost">Where next?</span><span class="btn">Call it ›</span></div>
+    </div></div></div>
+  </div></div>
+</div>
+
+<!-- 3. P8 Swap testing -->
+<div class="cap" id="m3">
+  <h2>3 · Swap testing at the bench (Tier 2)</h2>
+  <p>One of five membrane cartridges leaks. The test rig in the machine shop says how many in a group leak, not which. One test run left today.</p>
+  <div class="phone"><div class="scr">
+    <div class="ship"><span class="hud">Day 36 · Mon 14:05 · Deck 5, machine shop</span><div class="wall"></div><div class="you"></div><div class="glow"></div></div>
+    <div class="dev"><div class="crt"><div class="in">
+      <div class="bar"><span>JOBS ›</span><b>FAULT NOTES</b><span>1 open</span></div>
+      <div class="case"><span class="k">HEAD-SCRATCHER · RECYCLER MEMBRANES</span>Pressure creeps down overnight. One cartridge is leaking.</div>
+      <div class="lbl">ON THE RIG · TAP TO ADD OR TAKE OFF</div>
+      <div class="carts">
+        <div class="cart ok">1<small>fine</small></div>
+        <div class="cart ok">2<small>fine</small></div>
+        <div class="cart on">3<small>on rig</small></div>
+        <div class="cart">4<small>—</small></div>
+        <div class="cart">5<small>—</small></div>
+      </div>
+      <div class="left"><span>Runs left today</span><span class="d f"></span><span class="d"></span><span class="d"></span><span>· 10 ship min each</span></div>
+      <div class="lbl">RUNS SO FAR</div>
+      <div class="runs">
+        <div class="run"><span>Run 1 · cartridges 1 2</span><b>none leak</b></div>
+        <div class="run"><span>Run 2 · cartridges 3 4</span><b>one leaks</b></div>
+      </div>
+      <div class="lbl">CLUES · 2</div>
+      <div class="clues">
+        <div class="clue"><i>◉</i><span>So it's 3 or 4. Five is fine (only one leaks).</span></div>
+        <div class="clue"><i>✎</i><span>Torres's note: "Fitted 3 and 4 in spring. Same batch."</span></div>
+      </div>
+      <div class="btns"><span class="btn ghost">Ask a hand</span><span class="btn">Run test ›</span></div>
+    </div></div></div>
+  </div></div>
+</div>
+
+</div>
+<p class="note">What each screen shares: the case at the top, the suspects you cross out yourself (the game never does), the type's own view, the clues you collected by walking and asking, and two buttons: "Where next?" (points the one goal arrow at a clue place you haven't visited) and "Call it" (pick a suspect; the job's part is set and the arrow points to storage). Running out of test runs is not a fail: Calder says "fit new ones all round", which costs parts.</p>
+</body>
+</html>

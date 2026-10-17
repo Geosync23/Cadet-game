@@ -6,6 +6,8 @@ Read with `design-doc.md` ("The clockwork", "The player", "Works progression", "
 
 A plain-language version for the user is `plans/pillar5-plan.html`.
 
+**Added 2026-10-17 (the Pillar 5 designer): Part 6, deductive repair puzzles ("head-scratchers").** The user: keep the whole plan and add about 30-50% more progression with deduction puzzles tied to some repairs. Part 6 adds a track beside the ladder; nothing in Parts 1-5 is removed or shrunk.
+
 ---
 
 ## The pitch (one page)
@@ -28,6 +30,8 @@ Today the Works job is one verb: **fetch a part and replace it** (or hold to wor
 | 8 | **Team jobs** | one pair of hands on a big job with others | a Works officer | after promotion |
 | 9 | **Tracing connected faults** (Tier 2) | follow a symptom back along pipes and ducts | Calder | after promotion |
 | 10 | **The workshop** | crew order small things; you make them | the machine shop tech | after promotion |
+
+**Added (Part 6):** beside the ladder, a **puzzle track**: some real faults become **head-scratchers** you solve by deduction from clues gathered around the ship (nine types, Day 13 to about Day 56, fault-finder grades, two new tools, crew asking you for help).
 
 Around the ladder: **more real faults reach you**; **repairs get quicker with practice** (in words); **tools arrive one at a time, each with training**; **off-shift tinkering, cabin touches and star logging**; **the device's work pages** (your training record, work log, tools). Still Works only.
 
@@ -56,7 +60,7 @@ Around the ladder: **more real faults reach you**; **repairs get quicker with pr
 
 1. **Start simple, add one at a time.** A new mechanic opens only when the one before has been used a few times (about 3), and never two on the same day. If you're slow, the ladder waits; nothing is missed.
 2. **Taught by a person, on a real job.** Each opening is a **training moment**: a crew member finds you (or Mail asks you to meet them), shows you once on a real job (they lead, you watch; then you do one while they watch, like Pillar 4's shadow shift), and hands you anything new (a tool, a key, a clipboard). Then the mechanic is yours. Short lines, no pop-ups (one control tip at most, in the tips style).
-3. **Physical, not a mini-game.** Every verb happens in the world with your character's hands: walking, looking, carrying, holding, turning. Where a choice is needed (which part, which valve), it's a choice you make with what you've seen on the deck. No timing games, no puzzles that stand in for the work. *(Tuning, M5, is the closest to a panel; it's an open question for the user.)*
+3. **Physical, not a mini-game.** Every verb happens in the world with your character's hands: walking, looking, carrying, holding, turning. Where a choice is needed (which part, which valve), it's a choice you make with what you've seen on the deck. No timing games, no puzzles that stand in for the work. *(Tuning, M5, is the closest to a panel; it's an open question for the user.)* *(Added: head-scratchers, Part 6, are the "Diagnose" step done for real, with clues gathered in the world and a physical fix; see 6.2.)*
 4. **It evolves.** Each mechanic has 2-3 stages that open as you use it (rounds: a set route on a clipboard → you plan your own route → the scanner reads from across the room).
 5. **No fail state.** Doing it badly costs time, a remark, or a slower ship; never a fail screen.
 6. **Words, not numbers.** The Record says "Trained: rounds, laundry, hauling" and "Ovens: you know these well"; no points or bars (the user's rule).
@@ -399,6 +403,242 @@ X2's watch list: two seats designing the same thing (as when two seats both buil
 
 ---
 
+## Part 6: Added: deductive repair puzzles ("head-scratchers")
+
+**Added 2026-10-17 by the Pillar 5 designer, from the user's ask:** "I love our plan and want to keep it all. But we also need to add about 30-50% into the progression: deductive reasoning puzzles tied to repair. This is only some repairs, not all. And these go alongside all other stuff." **Everything in Parts 1-5 stays exactly as it is.** This part adds a second track beside the ladder. Mock-up screens: `plans/pillar5-puzzles-mockup.html` and `plans/shots/p5-puzzle-*.png`.
+
+### 6.1 The idea in one paragraph
+
+Some faults don't tell you their cause. The crew call them **head-scratchers**. The job card names a symptom ("the oven runs cool, but only at dinner"); a short list of **suspects** (the parts or causes it could be) goes into a new device page, **Fault notes**; and you collect **clues** by walking the ship: reading a machine's log at its panel, asking the crew who were there, finding the last shift's handover note, checking a gauge on Deck 5, looking at the week's calendar. Each clue lets you cross a suspect out. When you're sure, you **call it**: the job's part is set, and the rest is the ordinary loop (fetch, fit, turn in). It is the job loop's "Diagnose" step done for real, not a game laid over the job. A wrong call costs time and a walk, never a fail, and there's always "the long way" (fit each suspect in turn) so no case can ever leave you stuck.
+
+### 6.2 How it fits the rules (an addition to Part 1's rule 3, nothing removed)
+
+Rule 3 says "physical, not a mini-game … no puzzles that stand in for the work". Head-scratchers keep to its spirit:
+- **The clues are in the world.** Every clue comes from a place you walk to or a person you find (by Roster, as now). Nothing is solved by tapping in a menu alone; the device only holds your notes.
+- **The fix stays physical.** Calling it only names the part; you still fetch it, carry it and fit it with your hands.
+- **No timers, no scores, no fail.** The ship keeps running (the device never pauses), but nothing counts down on a case.
+- **Words, not numbers** for you: "Right first time", "A clever fix", "Fault-finder". Machine readings on a gauge are numbers, as the scanner's already are; your own progress never is.
+
+*If the user approves, design-doc.md's "Work is physical" ground rule and the job loop's "Diagnose" step get a line each saying this (open question 8).*
+
+### 6.3 Which repairs get a puzzle (only some)
+
+Only **real faults** (Part 1's "more real faults") can be head-scratchers, and only those with one of these shapes. Servicing, restocking, chores, laundry, hauling, the drill, incidents' make-it-safe step and team jobs never are. A plain fault stays plain: inspect, fetch, fit.
+
+| Shape | What makes it a puzzle | From |
+| --- | --- | --- |
+| **Comes and goes** (intermittent) | It only happens at some times, or under some load | Tier 1, Day 14 |
+| **Somebody tried already** | The last shift left notes on what didn't work | Tier 1, Day 13 |
+| **Seen by others** | The crew saw it; you didn't | Tier 1, Day 17 |
+| **The gauge is lying** | A sensor reads wrong, so the machine "looks fine" | Tier 1 with the scanner, Day 19 |
+| **Starts somewhere else** (traced) | The symptom and the cause are on different machines | Tier 2 (M9's harder stages) |
+| **Two parts, one symptom** | Several identical parts, one or two bad | Tier 2 |
+| **A clash** | Fine on its own; trips when two things happen together | Tier 2, late |
+
+**How often** (a share of the real faults left for you; the 3-6 jobs a day don't grow, head-scratchers come out of them):
+
+| When | Share of your real faults | At most |
+| --- | --- | --- |
+| Days 1-12 (Pillar 4's week, the first ladder steps) | none | — |
+| Days 13-19 (first types taught) | about 1 in 8 (one every other shift day) | 1 open at a time, 1 new a day |
+| Day 19 to promotion | about 1 in 6 | 1 open, 1 new a day |
+| Tier 2, weeks 4-5 | about 1 in 5 (Tier 2 machines 1 in 3) | 2 open, 1 new a day |
+| Tier 2, week 6 on (fault-finder grades) | about 1 in 4 (Tier 2 machines 1 in 3) | 2 open, 2 new a day |
+
+None are posted on days off or event days (Pillar 6); crew favour cases (6.6) can come off shift. If a case isn't taken by the end of your shift, the crew solve it the slow way (the long way, over a day) so the ship never waits on you. A Settings line, **Head-scratchers: fewer · normal · more**, scales the share (open question 10).
+
+### 6.4 The nine puzzle types
+
+Every type has the same frame: **symptom → suspects (3-6) → clues at places → cross out → call it → fetch and fit.** Each is **taught** like a ladder step (the teacher works the first case with you, thinking aloud, then watches you do one, then it's yours) and adds a page of rules of thumb to **the Chief's notes** (6.5). Each grows in three bands: **T1** (Tier 1: 2-3 suspects, 2-3 clues, one deck), **T1+** (late Tier 1: 4 suspects, one clue that doesn't help, two decks), **T2** (Tier 2: 5-6 suspects, clues across decks and needing tools, one honest mistake among the witnesses), and the fault-finder band **T2+** (two causes at once, or a cause hiding a second one: "fixed it; now the real one shows").
+
+**P1. When does it happen?** (Day 14, Torres)
+- *Example (T1):* "Brennan's oven runs cool, but only at dinner." Suspects: the element, the door seal, the thermostat (a tuning job, M5), the Deck 3 power junction. Clues: the oven's log at its panel (fine at breakfast, sags 17:00-18:30), Brennan ("it's when the big range and the extractor are both going"), the junction's panel (its load peaks at dinner). A bad element or seal would be cool all day; a drifted thermostat wouldn't follow the range. **It's the junction, sagging under load.**
+- *Grows:* T1+ two machines share the time; T2 "Deck 4 showers weak after 18:00" (the recycler's pump can't keep up at the evening peak, but a clogged filter would be weak all day); T2+ with **the logger** (a tool, 6.6): clip it on, come back tomorrow (the `wait` step) for a full day's trace.
+- *Screen:* a day strip (00-24) with the machine's output as a bar per hour and your clues pinned at their times.
+
+**P2. Who saw what?** (Day 17, Calder sets it, Tomas shows you how to ask)
+- *Example (T1):* "The mess door on Deck 3 sticks now and then." Ask the crew (a new **Ask about the fault** button on the chat card): Brennan ("stuck when the hand pushed the food trolley through, just before lunch"), Pell ("fine at breakfast, I walked through"), Rina ("stuck at 17:10, the trolley again"), Tomas ("it stuck on me at 13:00!"; his schedule had him at the gym then: he means the gym door, an honest mix-up, never a lie). Suspects: the motor, the track, the safety sensor, the control relay. **Only when something wide goes through: the safety sensor misreads.**
+- *Grows:* T1+ a witness who only saw part of it; T2 witnesses on two decks and one on a different shift you have to find (Roster); T2+ two stories that both are true and point to two faults.
+- *Screen:* a card per person (portrait initial, where and when, what they said), with a tap to mark "doesn't fit".
+
+**P3. What's been tried?** (Day 13, Torres; the first head-scratcher, the gentlest)
+- *Example (T1):* "The lamp in Bunk 2 flickers." Taped to the job: Torres's note ("Swapped the bulb. Still flickers. Z."), and Pell's ("Reset the breaker last night: fine for an hour, then back"). Suspects: bulb, switch, the junction's relay, the wiring. The bulb is out; a switch or wiring fault wouldn't care about a reset; **fine for an hour then back is a relay warming up.**
+- *Grows:* T1+ a note that rules out less than it seems ("changed the filter", but the wrong size was fitted); T2 a night-shift handover log with five entries; T2+ the cold-case board (6.6).
+- *Screen:* the notes as paper slips, each crossing out what it proves.
+
+**P4. Which gauge is lying?** (Day 19, Torres, with the scanner, M7)
+- *Example (T1):* "The cold store's display says 3°, but the milk's going off." Clues: the chiller's own reading (3°), the scanner on the back shelf (9°), the door log (closed most of the night), Brennan's spoiled crate in Mail. Suspects: the compressor, the door seal, the fan, the temperature sensor. A bad compressor or seal would also show warm on the display; **the sensor is lying, so the chiller never works harder.**
+- *Grows:* T1+ a table of three identical machines' readings, one out of step; T2 the scrubbers: 4-2 reads "air clean" while the junior wing is stuffy and 4-1 is working twice as hard; T2+ two sensors that disagree, both a little wrong.
+- *Screen:* a small table (machines down, readings across); tap a cell to flag "doesn't match what I saw".
+
+**P5. Follow the line** (Tier 2, with M9; Calder) *M9 as written is its first stage; this is how it gets harder.*
+- *Example (T2):* "Showers on Deck 4 weak all day." The water line: recycler (Deck 3) → spine junction → manifold (Deck 5) → Deck 4 branch → showers. Each gauge is on a panel you have to walk to (the pipe kit reads it). Recycler fine, showers low: read the middle first (the manifold) and halve the line each time. **The low reading starts after the manifold's Deck 4 valve: it's sticking.**
+- *Grows:* T2 one line, 4-5 gauges; T2+ a branch (two lines share a pipe), ducts for air, and the lights' circuits at Tier 2's junctions. Fewer walks is "a clever fix".
+- *Screen:* the line as a simple map, gauges filled in as you visit; tap a stretch to mark it "fine".
+
+**P6. Does it add up?** (Tier 2, with the pipe kit's second stage; Calder)
+- *Example (T2):* "The garden's beds are dry at the far end." Water in must equal water out at each junction: the recycler sends 15, the branches read garden 6, Deck 4 5, galley 2: **2 are going missing**. The gallery has three joints between; read one, then the next, until the sum stops matching: **a leaking joint in the pipe gallery.**
+- *Grows:* T2 one junction; T2+ two junctions and a gauge that's lying (P4 inside P6).
+- *Screen:* the junction diagram with in and out sums, and a "missing" box that shrinks as you narrow it.
+
+**P7. Faded labels** (Tier 2, Calder; a logic grid)
+- *Example (T2):* The officers' corridor junction (4-junction-1) has four relays, A-D, whose labels have worn off, feeding the corridor, the closet, cabins 4-20 to 4-22, and cabins 4-23 to 4-25; one relay chatters. Clues: Pell's old sketch ("A isn't the corridor"), the Wednesday **power drill** (M3: the drill switches relay D off first, and you saw cabins 4-23 to 4-25 go dark), flipping a test switch and walking to see which lights blink (each flip is a walk), and the cabin where the lights flicker. **Work out which relay feeds what, then which one chatters.** Solving it lets you **relabel the panel** (it stays labelled in the save, and the next case there is quicker).
+- *Grows:* T2 4×4; T2+ 5×5 with two clues from the night shift's log. Never larger than 5×5 on a phone.
+- *Screen:* a tick-and-cross grid with big cells (at least 44 px); each clue sits under the grid.
+
+**P8. Swap testing at the bench** (Tier 2, the machine shop tech; the **test rig**)
+- *Example (T2):* The recycler's membrane bank has five cartridges; one is leaking. Taking them all is wasteful (stores run low, M4). At the machine shop's **test rig** you put any group of them on the rig, it runs for 10 ship minutes, and it says how many in the group leak, not which. You have 3 test runs before the shift's end. Test {1, 2} → none; test {3} → one: **cartridge 3.**
+- *Grows:* T2 five cartridges, one bad, three runs; T2+ six cartridges, two bad, four runs. Running out of runs isn't a fail: Calder says "fit new ones all round", which costs the parts.
+- *Screen:* the cartridges as five big toggles, "Run test", and a list of past runs with their answers.
+
+**P9. The clash** (Tier 2, late; Calder; a taste of Tier 3's "planning around people")
+- *Example (T2):* "The recycler trips on Tuesdays and Fridays at 06:40." Clues: the device's Calendar and the crew's real week (Roster), the recycler's log: Tuesday is the laundry's big wash, both days have the gym's morning class showering, Friday the galley's bread bake fills the dish pit. Only the morning class falls on both days and nothing else does; but the class alone is fine on Wednesday (the log). **Class plus a second big draw trips it: the relief valve is fine, the load is the problem.** The fix: service the recycler and **ask the laundry hand to move Tuesday's wash to 08:00** (a short talk; it goes into their schedule).
+- *Grows:* T2 two things clash; T2+ three, and the fix you pick has a cost someone feels (Brennan grumbles if bread moves).
+- *Screen:* a week grid (days across, the morning hours down) with the trips marked; tap a calendar item to lay it over.
+
+### 6.5 Hints, mistakes and teaching
+
+- **Hints, gentlest first:**
+  1. **The Chief's notes** (a device page and a binder on Calder's shelf): rules of thumb per type and per kind of machine, a page added with each training ("Weak only at peak: the pump. Weak all day: the filter."). More rules appear for kinds you know well (the plan's skill in words). Free, always.
+  2. **Ask a Works hand on shift** (at the board or the tea corner): they tell you what kind of clue you're missing ("Have you checked when it happens?"). Free.
+  3. **Talk it through** with Torres or Calder (at the board, or an appointment): they cross one suspect out with you. The case can still be "right first time", but not "a clever fix".
+  4. **The long way:** fit each suspect in turn. Always works.
+- **What a wrong call costs:** the walk to storage and back, and the fitting time; the part you took goes back on the shelf unused (Tier 1). At Tier 2, a used seal or cartridge is spent (stock falls, restocked as usual). After two wrong calls on one case, Torres or Calder comes by to talk it through (hint 3, offered). Never a fail, never a remark worse than "Tricky one, that."
+- **Teaching:** each type's first case is a training moment (Part 1's `train` slot): the teacher reads the first clue with you and thinks aloud, you finish it; the second you do while they watch. Opening rules as the ladder: never two openings on one day (a puzzle type counts as an opening), and each type waits until the one before has been solved about twice.
+
+### 6.6 Progression: about 40% more
+
+Today's plan opens new things from Day 8 to about Day 42 (five ship weeks). Head-scratchers add **nine taught types, three fault-finder grades, two new tools, the cold-case board and crew favour cases**, stretching Pillar 5's progression to about **Day 56** and thickening the weeks before it: about **40% more**.
+
+**The puzzle track, beside the ladder** (fitted into the free days; never two openings a day):
+
+| Around | Opens | Taught by | Next to the ladder's |
+| --- | --- | --- | --- |
+| Day 13 | **P3 What's been tried?** and the Fault notes page, the Chief's notes | Torres | after hauling (Day 12) |
+| Day 14 | **P1 When does it happen?** | Torres | before tuning (Day 15) |
+| Day 17 | **P2 Who saw what?** (the Ask button) | Calder, Tomas | after incidents (Day 16) |
+| Day 19 | **P4 Which gauge is lying?** | Torres | the day after the scanner (Day 18) |
+| Day 20 | the certification job gains one easy head-scratcher step | Calder | certification |
+| Week 4 | **P5 Follow the line** (M9's harder stages) | Calder | with M9 |
+| Week 5 | **P8 Swap testing** and **the test rig** | the machine shop tech | after the workshop (M10) |
+| Week 6 | **P6 Does it add up?**; **Fault-finder** (grade 1) | Calder | |
+| Week 7 | **P7 Faded labels**; **P9 The clash**; **Trusted fault-finder** (grade 2) | Calder | |
+| Week 8 | **the cold-case board**; crew favour cases; **the ship's fault-finder** (grade 3) | Calder, the crew | |
+
+**What's new to earn:**
+- **Fault-finder grades** (words, a small pin on your uniform): Calder sets a **ticket case** for each, a harder case on a Tier 2 machine, supervised like certification and, like it, **only ever delayed**. Fault-finder → Trusted fault-finder → the ship's fault-finder. They sit inside Tier 2; they're not a promotion (Pillar 7's career story can build on them).
+- **Tools that open new clue types** (each with its training, on the Tools page): the scanner (exists, M7: part readings, sensor tables), **the logger** (new, week 4: a day's trace for P1 T2+), the pipe kit (exists, M9: gauges along a line; stage 2: sums at junctions for P6), **the test rig** (new, a fixed bench in the machine shop: P8).
+- **A name for clever fixes:** "right first time" (no wrong call) and "a clever fix" (right first time, no talk-it-through, few walks) go in the work log, lift Work reputation a little (`simNote('cleverFix')`, which Pillar 4's lines can react to: "Heard you sorted the mess door. The sensor! Who knew?"), and count toward experience (+1, like a found-by-you job).
+- **Crew asking you for help:**
+  - **Favour cases** (after Trusted fault-finder): crew bring you their own little mysteries off shift, as favours (the existing favours system): "My lamp flickers only when Pell plays guitar next door" (a shared circuit). Solved in their cabin; a friendship moment.
+  - **Juniors stuck on a case** ask you at the board: you tell them which clue they're missing (pick one of three). The first taste of mentoring, which design-doc's Tier 2 "a junior tech to mentor" points to.
+- **The cold-case board** (week 8): a board in Calder's office of old faults the crew never got to the bottom of, generated from the ship's own past weeks. Optional, for keen players; one at a time; solving one is a line in the Record.
+
+**How it sits beside every Pillar 5 mechanic** (nothing in them changes; these are extra links):
+
+| Mechanic | The link |
+| --- | --- |
+| Experience, skill in words | A head-scratcher counts like a repair, +1 if right first time; "Ovens: you know these well" also adds rules to the Chief's notes for ovens |
+| More real faults | Head-scratchers are a share of the real faults, not extra jobs |
+| M1 Rounds | A "something's off" mark can open a head-scratcher; stage 3 rounds read your loggers |
+| M2 Laundry | Washer cases ("the whites come out grey on Tuesdays"); the laundry hand is a witness, and the one asked to move the wash in P9 |
+| M3 Drill and inspection | The Wednesday power drill is a free P7 clue (which lights go dark first); no puzzles at the inspection |
+| M4 Hauling and stores | Wrong calls at Tier 2 draw on stock (a stocktake shows it); "more filters taken than the log says" is a P3 clue |
+| M5 Tuning | Some cases end "it's a setting, not a part": the answer is a tuning job |
+| M6 Incidents | Never a puzzle while making it safe; afterwards an optional "why did it burst?" case for a clever fix |
+| M7 Scanner | Its readings are one clue type; P4 opens the day after it |
+| Certification, promotion | One easy head-scratcher step in the test job; the rest unchanged; still only delayed |
+| M8 Team jobs | A case's answer can be "needs a team job"; never a puzzle during one |
+| M9 Tracing | M9 is P5's first stage; P5 and P6 are how it grows |
+| M10 Workshop | The test rig lives in the machine shop; a test jig can be a workshop order |
+| Off shift | Favour cases come to you; tinkering, cabin touches, star logging unchanged |
+| Device work pages | Fault notes (open cases) and the Chief's notes join Training, Work log and Tools |
+
+### 6.7 How it shows on a phone
+
+- **Fault notes** is a page in the device (registered from section 24 with `deviceApp`, like the other work pages), in the device's cyan old-screen style. One case per screen, top to bottom: the symptom; the **suspects** as big chips (tap to cross out, tap again to bring back; you cross them out, the game never does it for you); the type's own view (the day strip, the line map, the grid, the rig); the **clues** list (each with a small mark: clock, person, gauge, note, calendar); and a **Call it** button that asks which suspect, then sets the job's part and points the arrow at storage.
+- **Clues arrive by doing:** reading a panel, asking someone (the Ask button on the chat card), finding a note at the board, a gauge on your rounds. Each brings a quiet "+ clue: Pell" toast and a badge on Fault notes; the tracked job's arrow can point at the next unvisited clue place (a "Where next?" button: the goal pointer, one arrow as now).
+- **Touch first:** cells and chips at least 44 px, everything reachable with a thumb in the two-thirds sheet, no dragging needed (tap only), grids at most 5×5, maps at most 6 gauges on screen (scrolls sideways beyond). On the TriFold unfolded, Fault notes can stay docked beside the ship while you walk.
+- **Nothing new in the 3D scene:** loggers are a tiny shared prop clipped to a machine (1 draw call each, at most 3); everything else is device screens. No draw-call cost on the decks.
+- Mock-ups: `plans/pillar5-puzzles-mockup.html` (P1 the day strip, P5 the line, P8 the test rig), shots in `plans/shots/p5-puzzle-*.png`.
+
+### 6.8 Built from the real ship, the same every time
+
+**Fault tables** (section 17, data): for each machine kind, its **causes**: which part (or setting, or load), what the symptom looks like, when it shows (always, at load peaks, after use, at a time), what each reading says, and what each kind of clue would show. Kinds are added a few at a time (Tier 1 kinds first: oven, range, extractor, chiller, washer, lights, junction, doorgear; then Tier 2: scrubber, recycler, heater, airplant, fan, manifold, pump, filter).
+
+**Making a case** (section 24k, when a real fault of a puzzle shape is posted for you):
+1. **The seed:** `hash(machine id, day, 'case', k)` with Pillar 5's keys (puzzles: 880-894). Never `R()`.
+2. **The true cause:** from the kind's causes, weighted by the machine's real wear (its worn parts likelier).
+3. **The suspects:** the true cause plus 2-5 decoys from the same table, by band.
+4. **The clues, from the simulation:**
+   - logs and day strips from the machine's real load by hour (the schedules' use counters, `machNorm`): the oven really is busiest at dinner;
+   - witnesses are crew who really were (or weren't) at that place at those times (the schedules, `schedWants`); a mixed-up witness is one whose schedule had them elsewhere, so the mix-up can be checked;
+   - handover notes come from the real job history on that machine (who worked on it, what they fitted);
+   - lines and sums from the pipe and duct graph (M9's `MACHINE_LINKS`) and a simple flow sum;
+   - clashes from the real week (the calendar, rotas, traditions).
+5. **Frozen:** the case (seed, cause, suspects, clue list) goes into the save when it's posted, so it doesn't change as the ship moves on; clue texts are built from it when you collect them.
+
+**The solvability check, every case, at posting** (a small solver in the game, a few milliseconds):
+- **Exactly one answer:** apply every reachable clue's eliminations; exactly one suspect must survive.
+- **Needs thinking:** no single clue solves it alone; at least 2 clues at T1, 3 at T2.
+- **Reachable:** every clue's place is open to your key and tier, the person is aboard and findable during the case, the tool is one you have.
+- **In its band:** suspects, clues and decks within the band's limits.
+- If any check fails, try the next sub-seed (`k + 1`), up to 8 times; if none passes, **it's a plain fault** (no puzzle). So a bad case can never reach you.
+
+**`puzzle_check.py`** (new, the head-scratcher engineer's; outline):
+```
+load the build headless (like machine_check); new game; skip the intro
+for seed in [two fixed saves]:
+  step 8 ship weeks of days on paper, the player at Tier 1 then Tier 2 from day 22
+  for each case posted:
+    solver: brute force every suspect against every reachable clue -> exactly 1 left
+    no single clue solves it; clue count within the band
+    every clue reachable: place exists on its deck, person aboard and on the Roster
+      in the case's window, tool owned at that tier, key opens the room
+    the long way: fit each suspect in turn -> the case always ends
+    a wrong call: time and a walk (T1 no stock used; T2 one consumable), never a fail
+  shares: head-scratchers per tier within 6.3's table; never on a day off or event day;
+    never more open than the limit; none before Day 13
+  fallbacks: count cases that fell back to plain faults (warn above 10%)
+  determinism: run it twice -> identical case lists (seed, cause, suspects, clues)
+  save mid-case, load -> the same case, the same clues collected
+  in a browser: making a case takes under 5 ms on the phone profile
+cadet_test: with head-scratchers off, ALL IDENTICAL
+```
+
+### 6.9 What it adds to the build plan (seats, order, risks)
+
+**New seats** (joining Part 4's tiers; nothing in Part 4 changes):
+
+| # | Seat | New? | Branch | Builds | Owns |
+| --- | --- | --- | --- | --- | --- |
+| F1b | **Puzzle designer** (this role, no code) | new (now) | `claude/pillar5-plan`, then `claude/p5-design` with F1 | — | a spec page per puzzle type and for the case engine, the Chief's notes' rules, the fault tables' causes in plain words; plays generated cases for fairness |
+| M-F | **Head-scratcher engineer 1** | new | `claude/mech-cases` | to be confirmed free by the build master (suggest 0.55.x) | 24k: the case engine, the solver, Fault notes, the Chief's notes, hints, P1-P4, `puzzle_check.py` |
+| M-G | **Head-scratcher engineer 2** (from Step 5) | new | `claude/mech-cases-2` | suggest 0.56.x | 24l: P5-P9 (P5 with M-E), the logger, the test rig, grades, favour cases, the cold-case board |
+
+**On call:** F2 systems (fault tables, machine load by hour, the job history, the logger's reading); F3 player (the Ask button, the `choose` step reused for Call it); the device engineer (three small screen pieces: a day strip, a line map, a grid; after Pillar 4's wave 3); sim (who was where, read-only; the moved laundry wash in P9); S2 the Works writer (witness lines as templates, the handover notes, the Chief's notes, ~9 training scripts); S1 deck architect 2 (the test rig's bench and the cold-case board as places; panel places for every gauge in P5/P6).
+
+**Order (fits Part 4's steps, adds one):**
+- **Step 1:** F1b writes the case-engine page and the P3/P1 pages (pages only).
+- **Step 3** (hauling and tuning): M-F builds the case engine inert, then P3 and P1 (Days 13-14 sit between hauling and tuning). **Check-in 3** includes a first head-scratcher.
+- **Step 4** (incidents, scanner, promotion): M-F adds P2 and P4 and the certification step. **Check-in 4** includes the mess door and the lying chiller.
+- **Step 5** (after promotion): M-G joins; P5 with M-E's M9, P8 with M-C's workshop, P6.
+- **New Step 6:** P7, P9, the grades, favour cases, the cold-case board. **Check-in 6:** play weeks 6-8 from a save. Then Pillar 5 final and the pull request.
+- **Head count:** +1 now (the designer), +1 from Step 3, +1 from Step 5: about 18-21 Pillar 5 sessions at the busiest instead of 16-19. Lean still works: M-F alone covers P1-P4.
+- **Hash keys:** 880-894 from Pillar 5's 850-899. **Save:** `save.career.cases` (open cases, solved count by type, grades, relabelled panels, cold cases done), read defensively; `SAVE_V` stays 2.
+- **Section:** 24k and 24l, one owner each; removing them turns every head-scratcher back into a plain fault.
+
+**Risks:**
+- **Unfair or unsolvable cases.** *Answer:* the solver at posting, the fallback to a plain fault, `puzzle_check`, the long way, and F1b playing generated cases each check-in.
+- **Feeling like a mini-game.** *Answer:* clues only in the world, the fix physical, no timers or scores, real ship data so the answers make sense on the deck.
+- **Too much reading on a small screen.** *Answer:* short clue lines (one sentence), grids at most 5×5, one case per screen, tap only.
+- **Words to write.** *Answer:* witness lines and notes as templates filled from the case (who, where, when, what); the writer writes per type and per kind, not per case.
+- **Too hard for some players, too easy for others.** *Answer:* bands by tier, hints gentlest first, the fewer/normal/more setting, grades and cold cases for the keen.
+- **The device engineer's queue.** *Answer:* three small screen pieces, asked for after Pillar 4's wave 3; until then Fault notes uses plain lists (still playable).
+- **Section 17's load.** *Answer:* fault tables are data rows per kind, added a few kinds at a time; machine logs are worked out from the schedules when you look, not stored.
+
+---
+
 ## Risks
 
 - **Too much at once for a new player.** *Answer:* the ladder: one mechanic at a time, taught by a person, never two on a day, waiting for you to use the last one; everything earlier keeps working the simple way.
@@ -410,6 +650,7 @@ X2's watch list: two seats designing the same thing (as when two seats both buil
 - **The crew still do everything.** *Answer:* each mechanic's crew side is measured in `mech_check` (they do it when you don't, but slower) so the ship never depends on you, and there's still work for you.
 - **Two ideas of reliability.** *Answer:* trust reads Pillar 4's Work reputation.
 - **Beds.** *Answer:* the cabin move waits for Pillar 4's wave 3; 4-23 is a spare (checked against the crew designer's reserve pool).
+- **Head-scratchers (Part 6):** unfair cases, mini-game feel, small screens, writing load, difficulty, the device queue, section 17's load. *Answer:* Part 6.9.
 - **Usage limits and memory.** *Answer:* tiered hiring, the lead's hourly check-in, the 70% handover rule; each mechanic is small enough for one session.
 
 ---
@@ -423,3 +664,15 @@ X2's watch list: two seats designing the same thing (as when two seats both buil
 5. **Which "more ideas"** (leak hunting, tool upkeep, the lift roof, irrigation, coolant rounds, the logbook, rewiring) should join the ladder? *Default:* none yet; the designer brings the user's picks as spec pages after Step 2.
 6. **Your own cabin:** Spare 4-23 (no window)? *Default:* yes.
 7. **The coordinator in Step 1:** should X1 (the code coordinator) start in Step 1 to watch the career engineer's branch and draft the shared table early, or wait for Step 2 with the rest of the crew? *Default:* wait for Step 2; in Step 1 there's only one small new-section branch, which Pillar 4's build master and reviewers already cover.
+
+**Added with Part 6 (head-scratchers):**
+
+8. **The ground rule:** may design-doc.md's "No mini-games standing in for the job" gain a line: "Deduction puzzles are the Diagnose step done for real: clues gathered in the world, the fix physical, no timers or scores"? *Default:* yes.
+9. **The share:** about 1 in 8 of your real faults from Day 13, rising to about 1 in 4 at Tier 2 (1 in 3 on Tier 2 machines)? *Default:* yes.
+10. **A setting** for fewer / normal / more head-scratchers? *Default:* yes, normal by default.
+11. **The nine types:** keep all nine, or drop any (P8 swap testing and P7 faded labels are the most "puzzle-like")? *Default:* keep all nine.
+12. **Fault-finder grades** (three, in words, with a uniform pin, only delayed): yes? *Default:* yes.
+13. **Wrong calls at Tier 2 spend a consumable part** (a seal, a cartridge), while Tier 1 wrong calls only cost time? *Default:* yes.
+14. **Crew favour cases and the cold-case board** (optional, for keen players)? *Default:* yes, from week 8.
+15. **The name:** "head-scratchers" (the crew's word), "Fault notes" (the device page), "the Chief's notes" (the hint binder)? *Default:* yes.
+16. **The P9 fix moves a crew member's routine** (the laundry wash to 08:00): fine for a Tier 2 case, or keep moving routines for Tier 3 (Pillar 7)? *Default:* allowed, one small move per case.

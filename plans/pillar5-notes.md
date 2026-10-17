@@ -95,3 +95,9 @@ Overall: "Use this survey to create a detailed plan before starting any work. Be
 20. Staffing: **changed**: "Yes tiered but don't be afraid to hire as many as needed. Like some workers focused on keeping the…" (cut off; the lead is asking the user for the rest).
 
 **From the traditions survey:** a **laundry system** belongs in Pillar 5 (uniforms get grubby, the laundry room, inspection ties in).
+
+## The user's ask: deductive repair puzzles (2026-10-17, through the lead)
+
+"I love our plan and want to keep it all. But we also need to add about 30-50% into the progression: deductive reasoning puzzles tied to repair. Have him work out how it could work. This is only some repairs, not all. And these go alongside all other stuff he developed."
+
+Worked out by the Pillar 5 designer as `plans/pillar5-plan.md` Part 6 ("head-scratchers": nine puzzle types, a track from Day 13 to about Day 56, fault-finder grades, the logger and the test rig, favour cases, the cold-case board, `puzzle_check.py`, three new seats and a Step 6), the "Added: puzzles" section of `plans/pillar5-plan.html`, and mock-ups in `plans/pillar5-puzzles-mockup.html` and `plans/shots/p5-puzzle-*.png`. Nothing removed from the plan. Questions 8-16 in the plan are for the user. design-doc.md is not changed until the user approves (question 8 asks about its "no mini-games" line).
