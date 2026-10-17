@@ -20,3 +20,9 @@ token are all rejected with file:line; an unknown `who` is caught by lines_check
    gesture; check against that list, so the crowd or panel never gets a pose it can't play.
 - Fine: `ctx.flags` only answers for keys it was given (other flag: words still read section 13); linesWho finds GUESTS
   for guest voice cards; the `place:` aliases and `_` for spaces; no hash keys outside 750-799; no R() or Math.random.
+
+## Addendum: 8e38f76 (tools only): PASS
+Re-tested with the same inputs: "falling in love with you" and "fallen for you" are errors, 4 replies is an error,
+`[dance]` is an error. Note the trade-off: the wider list also stops innocent lines ("Brennan's in love with that new
+oven", "my heart can't take it") and background couples' lines ("those two are in love"). That's the safe side, but
+writers will hit it, so the README should say to reword, or have the head writer approve a specific line id.
