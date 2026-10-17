@@ -215,6 +215,17 @@ taken from what's already written about them; **for everyone else, use their nam
 | Envoy Saruth | they / them | the head writer's call: the Veyli are not described in human terms; "the Envoy" is always safe |
 | You (the player) | never gendered | the crew say "you", your name, "cadet", "the new hand" |
 
+### 4c. Command, Survey, Watch and the senior officers (writer-command, 2026-10-17)
+
+Set by the writer for command, Survey and Watch, a mix, for the people the roster's text doesn't settle (Raman, Oduya,
+Mori, Ferreira, Sato and Nandakumar were already set from the roster's own words).
+
+| Who | Pronouns |
+| --- | --- |
+| Dev Raman, Matthias Oduya, Kofi Mensah, Lars Achterberg, Rafael Ibarra, Bilal Nakamura, Nils Lemaire, Arjun Fonseca, Yusuf Kim, Luca Alvarez, Bo Mbeki, Isak Lindqvist | he / him |
+| Hana Mori, Lucia Ferreira, Anja Kowalczyk, Oona Zielinski, Mira Dahl, Greta Garcia, Noor Park, Uma Vasquez, Carmen Chen, Vera Ueda, Karin Yilmaz, Rosa Abara | she / her |
+| Quinn Zamora, Dara Shah, Olu Farouk | they / them |
+
 ## 5. Shared quirks: details the roster gives to several people
 
 The roster's generator gave some life details to more than one person. They are all canon, so they're **ship things**,

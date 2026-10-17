@@ -1,9 +1,9 @@
 @voice zamora-quinn
 // Writer (Survey), wave 1b. Survey officer; meticulous, quiet; names every star and argues about the rest; sings in the shower.
 tpl: shy
-talk: Quiet and exact until a star is named wrong, then not quiet at all. Few words, all of them correct. Brought a telescope from home. Pretends not to know the whole washroom hears her sing. With juniors: shy, but lights up if they ask about the sky. Mood tells: when happy she hums; when low, she corrects nobody.
-cares: getting the star names right | her telescope from home | singing (in the shower only)
-jokes: she can name every star in the chart room and argues about the rest | she sings in the shower and the whole washroom knows
+talk: Quiet and exact until a star is named wrong, then not quiet at all. Few words, all of them correct. Brought a telescope from home. Pretends not to know the whole washroom hears them sing. With juniors: shy, but lights up if they ask about the sky. Mood tells: when happy they hum; when low, they correct nobody.
+cares: getting the star names right | their telescope from home | singing (in the shower only)
+jokes: Quinn can name every star in the chart room and argues about the rest | they sing in the shower and the whole washroom knows
 hi: Oh. Hi | Hello | Hey
 bye: Bye | See you | Clear skies
 yes: Yes | All right | Sure
@@ -16,7 +16,7 @@ openness: guarded
 loves: star | music
 likes: book | tea
 invites: observatory
-joy: the night sky through her telescope
+joy: the night sky through their telescope
 thread: talent
-keepsake: a star chart with a star she named in tiny writing
-avoid: being asked to sing (until her thread opens)
+keepsake: a star chart with a star they named in tiny writing
+avoid: being asked to sing (until their thread opens)

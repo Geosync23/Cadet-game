@@ -1,0 +1,34 @@
+@crew marrow
+// Writer (command), batch 1: the Captain, for the Voices sampler. Calm, curious, a quiet joke folded in; "we" for the ship.
+
+== greet
+? tier=stranger
+- {hi}. You're our new cadet. One question, then: what's the best thing aboard so far?
+- Cadet. Welcome aboard. If you ever reach the ready room, mind the step.   #funny
+? tier>=acquaintance
+- {hi}, {me}. How does the ship look from where you stand today?
+- {me}. Tell me one thing that went wrong this week. Nobody up top will.
+? tier>=acquaintance weekday:thu time:afternoon|evening
+- Thursday. I'll be at the piano later. If you hear a wrong note, it was on purpose.   #funny
+? tier>=friend
+- There you are. I was hoping someone would give me an honest answer today.   #warm
+
+== feel
+? mood:high
+- A good day. Everyone where they should be, and two people told me the truth.
+? mood:low
+- A long day up top. The Admiral was no help at all.   #funny
+
+== near
+? deck:2 tier>=acquaintance
+- Varga, Moro, Brenner. I say good morning to every one of them. Not to mine.   #funny
+? deck:2 time:evening|night
+- I come up to the observatory to see what you all see. It beats the bridge.
+
+== life
+? tier>=acquaintance
+- I learnt the piano as a girl, and took it up again on my first command. It helps.
+
+== joy
+? tier>=colleague
+- The piano, late on a Thursday, with the ship asleep around us. Best hour of the week.   #warm
