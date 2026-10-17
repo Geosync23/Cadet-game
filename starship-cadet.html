@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.46.3
+   STARSHIP CADET: CSV Wren                           build 0.46.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.46.3';                           // keep in step with the header's build line
+const GAME_BUILD = '0.46.4';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -16690,7 +16690,7 @@ function tilesStyle(p) {
 // ---- the board on your device (0.46.1): the Tiles app. A game in play draws as a 6 x 6 board in the device's
 // phosphor screen; tap a tile, then where it goes (legal squares glow, a square that docks shows a spark); tap your
 // hold to launch. The crew member answers a moment later. No timers on you, no drag, words for every move.
-SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
+SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, first: {}, relDay: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
 let TL_GAME = null;   // { s, opp, name, style, rng, where, teach, hint, sel, log: [lines], fx, timer }
 const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<kind>')) arrive
   start: { rina: ['Best of one. Try to keep up.'], chatty: ['Oh good, a game. Did I tell you about the hydroponics leak?', 'Go easy on me. Or don\'t, I\'ll learn more.'], any: ['Your move.', 'Let\'s see what you\'ve got.'] },
@@ -16704,7 +16704,7 @@ function tilesTalk(kind) {
   if (typeof lineFor === 'function') { try { const l = lineFor(G.opp, 'tiles.' + kind, {}); if (l && l.text) return l.text; } catch (e) { /* no line yet */ } }
   const bank = TL_TALK[kind] || {}, l = bank[G.opp] || (G.style.chatty && bank.chatty) || bank.any || [];
   if (!l.length) return null;
-  return l[Math.floor(G.rng() * l.length)];
+  return l[Math.floor(G.talk() * l.length)];
 }
 const tlName = (t, mine) => (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)];
 function tilesSay(text) { const G = TL_GAME; if (!G || !text) return; G.log.push(text); if (G.log.length > 3) G.log.shift(); }
@@ -16714,8 +16714,9 @@ function tilesPlay(opponentId, where, mode) {
   const T = SHIP.tiles, p = (typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === opponentId)) || { id: opponentId || 'tomas', name: 'Tomas Lind', seed: 7 };
   const teach = !T.played, style = teach ? Object.assign({}, tilesStyle(p), { level: 'easy' }) : tilesStyle(p);
   const seed = Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 800) * 4294967296);
-  const rng = tilesRng(seed), first = teach ? 0 : T.played % 2;   // you go first in your first game, then turn about
-  TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, where: where || null,
+  const rng = tilesRng(seed), first = teach ? 0 : (T.first[p.id] | 0);   // you go first in your first game, then turn about with each opponent (saved)
+  const talk = tilesRng(Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 807) * 4294967296));   // its own stream: lines never shift the moves
+  TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, talk, where: where || null,
               teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false };
   tilesSay(TL_GAME.name + ': ' + (tilesTalk('start') || 'Your move.'));
   if (first) tilesCrewSoon();
@@ -16760,6 +16761,7 @@ function tilesOver() {   // the end of a game: the words, the tally, what it giv
   const G = TL_GAME; if (!G || G.done) return; G.done = true;
   const s = G.s, you = s.win === 0, T = SHIP.tiles;
   T.played++; if (you) T.won++; else if (s.win === 1) T.lost++;
+  T.first[G.opp] = 1 - (s.first | 0);   // the other one starts next time
   const v = T.vs[G.opp] || (T.vs[G.opp] = [0, 0]); if (you) v[0]++; else if (s.win === 1) v[1]++;
   const how = s.why.indexOf('tie') >= 0 ? ' (level on points: ' + (s.why.indexOf('target') >= 0 || TL_MODES[s.mode].finish ? 'decided by tiles left' : 'whoever docked last wins') + ')' : '';
   tilesSay((you ? 'You win, ' : s.win === 1 ? G.name + ' wins, ' : 'A draw, ') + s.sc[0] + ' to ' + s.sc[1] + '.' + how);
@@ -16845,8 +16847,9 @@ function tilesDraw() {   // draw the game into its persistent element (the devic
   const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '’s turn';
   const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
   pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
+  const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // the ship keeps time while you play (a game is about 1.5 ship hours)
   sc.append(pts,
-            Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }));
+            Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }), clk);
   for (const b of root.querySelectorAll('.tl-c')) {
     const c = +b.dataset.c, t = s.b[c], ghost = fx && fx.ghosts[c], to = tos.find(m => m.to === c);
     b.classList.toggle('sel', !!(sel && sel.c === c)); b.classList.toggle('to', !!to); b.classList.toggle('dock', !!(to && tilesApply(s, to).pts));
@@ -16918,8 +16921,14 @@ function tilesLeft() {   // you walked away mid-game: the game is left as it was
   TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
   return true;
 }
+// the Tiles station is always open; tables and boards are for Tiles night (the lead, 0.46.4), and are plain seats otherwise
+function tilesNightNow() {
+  if (typeof eventsOn !== 'function') return false;
+  const m = SHIP.time.min; try { return eventsOn(SHIP.time.day).some(e => /^tiles/i.test(e.id) && m >= e.from && m < e.to); } catch (e) { return false; }
+}
 function tilesWorldTap(it, at, point) {
   if (!it || !TL_ITEM.test(it.t || '')) return false;
+  if (!/^Tiles station\b/i.test(it.t) && !tilesNightNow()) return false;
   if (TL_GAME && tilesSeated()) { deviceShow('tiles'); return true; }
   const room = roomAt(...cellAt(at.x, at.z));
   const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
@@ -16939,8 +16948,11 @@ PLAYER_TAPS.unshift(tilesWorldTap);   // ahead of section 15b's ixTap, which wou
 // Tiles record; beating Rina is news ("Rina lost! To the new hand!"), a big memory for her, and the day is kept
 function tilesReward(G, you) {
   const T = SHIP.tiles, day = SHIP.time.day, first = G.name;
-  if (typeof relAdd === 'function') relAdd(G.opp, 'tiles', you ? 3 : 2);
-  if (typeof memAdd === 'function') memAdd(G.opp, 'came.tiles');
+  if (T.relDay[G.opp] !== day) {   // friendship and the memory once a ship day per opponent, like a chat; later games still count
+    T.relDay[G.opp] = day;
+    if (typeof relAdd === 'function') relAdd(G.opp, 'tiles', typeof REL_PTS !== 'undefined' && REL_PTS.chat || 2);
+    if (typeof memAdd === 'function') memAdd(G.opp, 'came.tiles');
+  }
   if (you && T.firstWin === null) { T.firstWin = day; toast('Tiles', 'Your first win at Tiles, against ' + first + '.'); }
   if (you && G.opp === 'rina' && T.beatRina === null) {
     T.beatRina = day;
@@ -16955,7 +16967,10 @@ function tilesLoad(s) {   // save.tiles, read defensively
   const day = k => Number.isFinite(d[k]) ? Math.floor(d[k]) : null;
   const nt = d.night && typeof d.night === 'object' ? d.night : {}, games = Array.isArray(nt.games) ? nt.games.filter(g => Array.isArray(g) && g.length === 3 && g.every(x => typeof x === 'string' && x.length < 40)).slice(0, 20) : [];
   const night = { last: Number.isFinite(nt.last) ? Math.floor(nt.last) : null, rina: Number.isFinite(nt.rina) && nt.rina >= 0 ? Math.floor(nt.rina) : 0, games };
-  return { played: n('played'), won: n('won'), lost: n('lost'), vs, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
+  const first = {}, relDay = {};
+  if (d.first && typeof d.first === 'object') for (const k in d.first) if (k.length < 40 && (d.first[k] === 0 || d.first[k] === 1)) first[k] = d.first[k];
+  if (d.relDay && typeof d.relDay === 'object') for (const k in d.relDay) if (k.length < 40 && Number.isFinite(d.relDay[k])) relDay[k] = Math.floor(d.relDay[k]);
+  return { played: n('played'), won: n('won'), lost: n('lost'), vs, first, relDay, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
 }
 SHIP.tiles = tilesLoad(SAVED);
 SAVE_EXTRA.push(s => { s.tiles = JSON.parse(JSON.stringify(SHIP.tiles)); });

@@ -12,9 +12,11 @@
 #   390px one, no text under 15px, no sideways scroll; tap a tile and its squares glow, tap one to move; the crew
 #   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
 #   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
-#   sitting down (0.46.2): tapping the Tiles table with nobody about gives a tip and sits you as before (15b); with a crew member at it, you walk to a
+#   sitting down (0.46.2, 0.46.4): the Tiles station always, tables and boards only on Tiles night (else a plain seat);
+#   tapping the Tiles table with nobody about gives a tip and sits you as before (15b); with a crew member at it, you walk to a
 #   free seat and sit (the 'tiles' activity, sit:play) and the game opens against them; Done stands you up; walking
-#   away leaves a game uncounted; a win adds friendship and a memory; beating Rina is news, once; save.tiles round-trips
+#   away leaves a game uncounted; a game adds friendship and a memory once a day per opponent; who goes first turns
+#   about with each opponent (saved); beating Rina is news, once; save.tiles round-trips
 #   Tiles night (0.46.3): tilesNight(day, came) pairs everyone (one watches when odd), the same every time; Rina always
 #   has a game and wins it until you beat her; 2000 nights of rolls match the levels' odds; the end of the tradition
 #   (simNote('tradition', { id: 'tilesNight' })) posts the news once and counts Rina's Tuesdays; the Tiles app shows it
@@ -175,8 +177,10 @@ SEAT = r"""((stage) => {
 
 def seat(pw, path):
     gg = Game(pw, path, 900, 760); gg.step(3)
-    r = gg.ev(SEAT + "(null)")
+    r = gg.ev(SEAT + "('rina')")
     if r.get('none'): check(False, 'the Deck 4 Tiles table is there'); gg.close(); return
+    check(not r['act'] or r['act'][0] != 'tiles', f'outside Tiles night the Deck 4 table is a plain seat (15b): {r}')
+    gg.ev("actEnd(true); tilesNightNow = () => true")   # Tiles night from here on (stand-in for section 18's tradition)
     gg.ev("for (const a of DECK_CREW) { a.settled = false; }")
     r = gg.ev(SEAT + "(null)")
     check(r['act'] and r['act'][0] != 'tiles' and gg.ev("SHIP.device.tipsSeen['tiles-nobody'] === true"), f'nobody about: a tip, and the stools are a plain seat as before: {r}')
@@ -196,6 +200,13 @@ def seat(pw, path):
     print(f'  seated game against {gg.ev("window.__opp")}: win {res[0]}, tally {res[1:4]}, friendship {res[4]}, memories {res[5]}')
     check(res[1] == 1 and (res[0] != 0 or (res[2] == 1 and res[3])), f'the tally counts the game: {res}')
     check(res[4] > 0 and 'came.tiles' in res[5], f'a game adds friendship and a memory: {res}')
+    again = gg.ev("""(() => { const id = window.__opp, p0 = (SHIP.rel[id] || {}).pts, f0 = SHIP.tiles.first[id];
+      tilesPlay(id, null, 'quick'); const G = TL_GAME, first = G.s.first; let n = 0;
+      while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'medium', G.rng)); else tilesCrewMove(); }
+      if (G.timer) clearTimeout(G.timer); TL_GAME = null;
+      return [p0, (SHIP.rel[id] || {}).pts, f0, first, SHIP.tiles.first[id]]; })()""")
+    check(again[1] == again[0], f'a second game the same day adds no more friendship: {again[:2]}')
+    check(again[2] == 1 and again[3] == 1 and again[4] == 0, f'who goes first turns about with each opponent, saved: {again[2:]}')
     gg.page.click('#devBody .tl-end button[data-end="done"]'); gg.step(30)
     st = gg.ev("[!!TL_GAME, ACT && ACT.kind]")
     check(not st[0] and st[1] != 'tiles', f'Done stands you up: {st}')
@@ -206,7 +217,7 @@ def seat(pw, path):
         if gg.ev("!!(ACT && ACT.phase === 'do' && TL_GAME)"): break
     gg.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } actEnd(true); deviceRefresh()")
     st = gg.ev("[!!TL_GAME, SHIP.tiles.played]")
-    check(not st[0] and st[1] == 1, f'walking away leaves the game uncounted: {st}')
+    check(not st[0] and st[1] == 2, f'walking away leaves the game uncounted (two played before): {st}')
     # beating Rina: news once, her memory, the day kept
     gg.ev("tilesPlay('rina', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; } TL_GAME.s.sc = [6, 0]; TL_GAME.s.p = 0")
     gg.ev("""(() => { const G = TL_GAME; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()""")
@@ -214,7 +225,7 @@ def seat(pw, path):
     check(b == [0, True, 1, True], f'beating Rina: news once, her memory, the day kept: {b}')
     sv = gg.ev("(() => { const s = { ship: {} }; for (const f of SAVE_EXTRA) f(s); const back = tilesLoad(JSON.parse(JSON.stringify(s))); return [JSON.stringify(back) === JSON.stringify(SHIP.tiles), JSON.stringify(tilesLoad({ tiles: { played: -3, vs: { x: 'no' }, beatRina: 'x' } }))]; })()")
     check(sv[0], f'save.tiles round-trips: {sv}')
-    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
+    check(sv[1] == '{"played":0,"won":0,"lost":0,"vs":{},"first":{},"relDay":{},"firstWin":null,"beatRina":null,"night":{"last":null,"rina":0,"games":[]}}', f'a bad save.tiles reads safely: {sv[1]}')
     check(not gg.errors and not gg.ev("DEV.errors.length"), f'seating: no errors: {gg.errors[:3]}')
     gg.close()
 
@@ -269,6 +280,8 @@ def run(path, games):
     check('Math.random' not in code, 'section 23 never calls Math.random')
     check(not re.search(r'(?<![\w.])R\(\)', code), 'section 23 never calls R()')
     check(not re.search(r'^(const|let|var|function)\s+TILES\b', src, re.M), 'no top-level TILES')
+    talk = sec[sec.find('function tilesTalk'):sec.find('const tlName')]
+    check('G.rng' not in talk and 'G.talk()' in talk, 'crew lines draw from their own stream, never the moves\' (key 807)')
     with sync_playwright() as pw:
         g = Game(pw, path)
         g.step(2)
@@ -285,6 +298,8 @@ def run(path, games):
         check(q['mid'] == {'sc': [5, 2], 'over': False, 'p': 1} and q['end']['over'] and q['end']['win'] == 0, f'quick game: reaching 5 first gives the other player one last turn: {q}')
         check(q['full']['over'] and q['full']['win'] == 0 and q['full']['sc'] == [7, 2], f'full game: reaching 7 ends it at once: {q["full"]}')
         print('  the rules: deal, teaching layout, worked turn, steps', 'ok' if ok else '')
+        judge = games >= 4000   # balance is only judged at the default count or more (fewer games would make the band too easy)
+        if not judge: print(f'  ({games} games a level: balance shown, not judged; the default is 4000)')
         for mode, p1max, plmax in (('full', .52, 24), ('quick', .53, 16)):
             b = g.ev(BAL + f"('{mode}', {games}, 12345)")
             print(f'  {mode} game:')
@@ -292,11 +307,11 @@ def run(path, games):
                 x = b[lv]
                 print(f'    {lv:6s} {x["n"]:5d} games: first player {x["p1"]*100:.1f}%, draws {x["draw"]*100:.2f}%, {x["plies"]:.1f} turns, tie-break wins by seat {x["tie"]}')
                 e = 1.96 * (x['p1'] * (1 - x['p1']) / x['n']) ** .5   # sampling noise: the 95% band must reach the target
-                check(x['p1'] + e >= .48 and x['p1'] - e <= p1max, f'{mode} {lv}: first player within 48-{round(p1max*100)}% (give or take {e*100:.1f} for sampling): {x["p1"]:.3f}')
-                check(x['draw'] < .01, f'{mode} {lv}: draws under 1%: {x["draw"]:.4f}')
+                check(not judge or (x['p1'] + e >= .48 and x['p1'] - e <= p1max), f'{mode} {lv}: first player within 48-{round(p1max*100)}% (give or take {e*100:.1f} for sampling): {x["p1"]:.3f}')
+                check(not judge or x['draw'] < .01, f'{mode} {lv}: draws under 1%: {x["draw"]:.4f}')
                 check(x['plies'] < plmax, f'{mode} {lv}: games under {plmax} turns: {x["plies"]:.1f}')
             for k in ('hard>medium', 'medium>easy'):
-                print(f'    {k}: {b[k]*100:.0f}%'); check(b[k] > .6, f'{mode} {k} over 60%: {b[k]:.3f}')
+                print(f'    {k}: {b[k]*100:.0f}%'); check(not judge or b[k] > .6, f'{mode} {k} over 60%: {b[k]:.3f}')
         same = g.ev("(() => { const a = tilesSimGame('full', 'hard', 'easy', 4242), c = tilesSimGame('full', 'hard', 'easy', 4242); return JSON.stringify(a) === JSON.stringify(c); })()")
         check(same, 'the same seed plays the same game twice')
         sty = g.ev("[tilesStyle({ id: 'rina' }).level, tilesStyle({ id: 'tomas' }).level, JSON.stringify(tilesStyle({ id: 'x', seed: 99, traits: [] })) === JSON.stringify(tilesStyle({ id: 'x', seed: 99, traits: [] }))]")
