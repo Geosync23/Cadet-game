@@ -22,7 +22,7 @@
 
 == life
 ? tier>=acquaintance
-- I don't take the lift much. The ladder's good exercise. Very good exercise.   #funny
+- The lift's fine. It's fine. I hold the rail. It's a good rail.   #funny
 ? tier>=colleague
 - Torres's scarves are very long. He's very keen. I don't say anything.   #funny
 
@@ -84,7 +84,7 @@
 
 == life
 ? beat:kovac.2
-- The ladder club met again. Cruz, Keane, me. Nobody said a word. We just climbed.   #funny
+- The lift club met again. Cruz, Keane, me. Nobody said a word. We held the rail.   #funny
 ? beat:kovac.4
 - Four, please. I said it in the lift today. Out loud. Just the once.   #warm
 
@@ -113,7 +113,7 @@
 ? you:reliable
 - You always finish the job. I like that. Sorry. I'll go.
 ? tier>=friend time:morning
-- Morning, {me}. I skipped breakfast. I brought you a tea instead. That counts.   #warm
+- Morning, {me}. I bolted breakfast. Garden. I brought you a tea, though.   #warm
 ? tier>=close
 - {me}. Oh, good. Sit. I've a scrubber story. It's very short. Nine and a half minutes.   #warm
 
@@ -138,9 +138,9 @@
 ? act:breakfast
 - Just tea. I don't really do breakfast. Sorry. I know. Halloran's told me.   #funny
 ? !beat:kovac.2 tier>=acquaintance
-- I'll take the ladder down. Exercise. Very good for the legs. Yes.   #funny
+- I'll take the lift down. It's fine. I'll hold the rail. Yes.   #funny
 ? beat:kovac.2 !beat:kovac.4 tier>=acquaintance
-- Ladder again. Not exercise. Well. Also exercise. You know.   #funny
+- Lift again. Eyes shut. Not because. Well. You know.   #funny
 ? beat:kovac.4
 - Lift's here. Four, please. Sorry. I like saying it now.   #warm
 
@@ -192,13 +192,13 @@
 
 == callback
 ? told:moment.kovac.verygood
-- The ladder. Very good exercise. You said so. You were very kind about it.   #funny
+- The lift. "Lifts can be a lot," you said. You were very kind about it.   #funny
 ? told:moment.kovac.askedlift !beat:kovac.2
 - You asked about the lift. I didn't answer. I will. Not yet. Soon, maybe.
 ? told:moment.kovac.keptsecret
 - You didn't tell anyone. I didn't check. I just know.   #warm
 ? told:moment.kovac.badges
-- I knitted the badges. Three. Ladder-shaped. Cruz wears theirs. Keane lost his.   #funny
+- I knitted the badges. Three. A little lift, frowning. Cruz wears theirs. Keane lost his.   #funny
 ? told:moment.kovac.listened
 - Telling you made it smaller. It's stayed smaller. I wanted you to know.   #warm
 ? told:moment.kovac.shared
@@ -236,7 +236,7 @@
 ? cue:event.ionStorm.afterglow
 - It's over. Every scrubber held. I checked them all. Twice.
 ? cue:repair.lift.you !beat:kovac.4
-- You fixed the lift? Oh. Good. I'll. Um. Take the ladder anyway. Exercise.   #funny
+- You fixed the lift? Oh. Good. Very good. I'll still hold the rail. Um. Thank you.   #funny
 ? cue:repair.lift.you beat:kovac.4
 - You fixed the lift. Thank you. Four, please. I'll go now.   #warm
 ? cue:tradition.harvest
@@ -247,7 +247,7 @@
 - Um. Hi. I'm knitting you something. It's not finished. I only came to check the length.   #funny
 - I was in the junior wing anyway. I wasn't. I brought tea. Sorry.
 ? tier>=friend !beat:kovac.4
-- Oh. Hi. I took the ladder up. Exercise. Can I sit a minute?
+- Oh. Hi. I took the lift up. Can I sit a minute? Just a minute.
 
 == note
 ? tier>=friend
@@ -296,7 +296,7 @@
 - I've counted the tiles in the tea corner. Two hundred and eight. Sorry. It's a habit.   #funny
 - I like the garden after shift. The misters come on and nobody talks. It's perfect.
 - Cruz showed me a new Gerald. Tiny. I'm not allowed one yet. I'm on a list.   #funny
-- I took the ladder to Deck 3. Exercise. Very good for you. Thirty-one rungs.   #funny
+- I took the lift to Deck 3. Counted the floors. It's two. I counted them twice.   #funny
 - My scarves are perfect. I know. I'm not proud. I'm a bit proud.   #funny
 - Brennan let me shell peas once. Two hundred and twelve. She said "tidy". I glowed.   #warm
 - Quiz night. I knew the bolt question. I didn't say. Somebody else did. That's fine.
@@ -393,7 +393,7 @@
 - New ship. Their scrubbers are a different model. Eleven minutes. I'll get it down. Hello to the bay.
 - I found their garden. It's small. I've planted beans. Tell Cruz they're coming up. Mind the seals.
 ? tier>=friend beat:kovac.2
-- The lift here is very quiet. I still take the ladder. Mostly. Some days I don't. I thought you'd like to know.   #warm
+- The lift here is very quiet. I still hold the rail. Some days I don't. I thought you'd like to know.   #warm
 
 // Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
 // observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
@@ -411,7 +411,7 @@
 ? trad:observatory-night
 - Observatory night. It's very quiet up there. I like quiet. And the stars. Mostly quiet.   #funny
 ? trad:running
-- Running club. I don't run. I take the ladder. All of it. That's plenty.   #funny
+- Running club. I don't run. I walk the bay twice. That's plenty.   #funny
 ? trad:harvest
 - Harvest morning! My beans are ready. I'm... I'm very proud of the beans.   #warm
 ? trad:hull-lights

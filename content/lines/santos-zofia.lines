@@ -57,7 +57,7 @@
 
 == bye
 ? tier>=acquaintance
-- Laters. Mind the ladder. You always miss the bottom rung.   #funny
+- Laters. Mind the lift doors. They're quicker than you.   #funny
 - {bye}. Got to row. The board doesn't climb itself.
 ? tier>=colleague time:night
 - Night, upstairs. Don't kick.   #funny
@@ -78,7 +78,7 @@
 ? act:work
 - Messages in, messages out. The private ones stay sealed. That's the rule. I like it.
 ? act:dinner
-- I skip breakfast, so dinner's my big meal. Don't stand between me and the servery.   #funny
+- Two-bite breakfast, so dinner's my big meal. Don't stand between me and the servery.   #funny
 ? deck:4 act:leisure
 - Bunk 1's the best bunk. Don't tell Bunk 2. They think it's them.
 
@@ -231,7 +231,7 @@
 ? place:commons
 - Gossip corner's open. Public stuff only.   #funny
 ? act:breakfast
-- Skipped breakfast. Coffee's breakfast. Don't tell.
+- Breakfast in two bites. Coffee did the rest. Don't tell.
 
 == rumour
 - Okay. Public news. Free of charge.   #funny

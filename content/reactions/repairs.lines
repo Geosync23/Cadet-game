@@ -42,7 +42,7 @@
 
 ? cue:repair.lift !cue:repair.lift.you
 - The lift's running smooth again. No more clunk on Deck 3.
-- The lift's fixed. I'll still take the ladder. For the exercise.   #funny
+- The lift's fixed. Lovely lift. I'll still hold the rail.   #funny
 ? cue:repair.lift.you tier>=acquaintance
 - You fixed the lift? It didn't clunk once today. {thanks}.
 

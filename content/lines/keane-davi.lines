@@ -9,7 +9,7 @@
 ? tier>=acquaintance time:night
 - Hiya, {me}! Three in the morning and the floor's spotless. Life's good.
 ? tier>=acquaintance
-- Hello! Took the ladder down. Great for the legs. You should try it. Or not.   #funny
+- Hello! Lovely lift this morning. Lovely. Held the rail. Great rail.   #funny
 ? tier>=colleague
 - {me}! Come and see the panels. I polished them. You can see your face. Look.
 ? tier>=friend
@@ -45,11 +45,11 @@
 // "exercise" is the whole cover story; after beat 4 he's in the lift club. He never says "afraid" himself.
 == near
 ? !beat:kovac.1 tier>=acquaintance
-- Lift? No, I'll take the ladder. Leg day. Every day's leg day.   #funny
+- Lift? Course. Lovely lift. I'll just hold this rail. Leg day.   #funny
 ? beat:kovac.1
-- Saw you by the ladder. Exercise, was it? Same. Just exercise.   #funny
+- Saw you in the lift. Lovely lift, isn't it? Lovely. Same.   #funny
 ? beat:kovac.2 !beat:kovac.4
-- Kovac and Cruz were on the ladder again. We nodded. Very fit, the three of us.   #funny
+- Kovac and Cruz were in the lift again. We all held the rail. Very calm, the three of us.   #funny
 
 == life
 ? beat:kovac.4
@@ -105,7 +105,7 @@
 // ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
 == smalltalk
 - Gran sent a song. Possibly Eklund's gran.   #funny
-- Ladder? Leg day. Every day's leg day.   #funny
+- Lift? Lovely. Rail's right here.   #funny
 ? act:work
 - Floor's spotless. Life's good.
 ? time:night
@@ -132,4 +132,4 @@
 == letter
 - New engine room. Not as clean. Yet. Give me a week. Sent Gran a message. She says I sound happy.
 ? tier>=friend
-- Took the stairs today. For the exercise. Thought of the ladder. Don't tell anyone. Cheers, mate.
+- New ship's lift is very quiet. I still hold the rail. Don't tell anyone. Cheers, mate.
