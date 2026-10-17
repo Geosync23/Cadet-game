@@ -5,7 +5,7 @@
 # beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and one call home a day at 20:00 (the user's rule, 0.62.0: whoever the booth says has news, else the next of Mum, Gran, Jo and Sam in turn; a second call that day must be refused). Then lists every arc
 # that didn't finish, with its next beat and how often (in the last 7 days) its when and its where held.
 # The crew arcs need the writers' baked MOMENTS (a build with claude/dialogue and claude/content, content_gen run).
-# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes]   (themes: one crew
+# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes|calls]   (themes: one crew
 #   member per struggle theme, in a game of their own: one serious moment a day is shared, and nobody's close to 20 people)   (a few minutes)
 import sys, os, json, types
 os.environ.setdefault('CADET_CHROME', '/opt/pw-browsers/chromium')
@@ -79,8 +79,58 @@ JS = r"""
   return out;
 }
 """
+# 'calls' mode (0.62.2, one-sided calls home): (1) for each of Mum, Gran, Jo and Sam alone, a fresh start and a call to
+# them every day for 70 days (evening, morning or night in turn), with the news a player makes (the solo job on day 2, a tradition joined on day 5, a
+# friend aboard by day 8, the ion storm's afterglow on day 20): all six beats told, and the first 30 calls counted for
+# repeats (a scene heard before); (2) a fresh start and one call a day in turn for 120 days: every beat told. Every
+# scene must be heard in some run, else it's listed with its when. A day the relay is down (a ship-wide event's
+# onset) is skipped, as the booth would.
+CALLS = r"""
+(() => {
+  socInit();
+  const play = () => { let n = 0; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); } };
+  const fresh = () => { SHIP.social.stories.home = { day: null, f: {}, learn: [], c: {} }; SHIP.social.cues = []; SHIP.events.joined = []; };
+  const down = t => { try { const e = eventNow(t); return !!e && e.phase === 'onset'; } catch (x) { return false; } };
+  const at = d => [1200, 450, 1350][d % 3];             // evening, morning (07:30), night (22:30): calls any hour
+  const trad = (SHIP_TRADITIONS.find(x => x.id === 'sunday-table') || SHIP_TRADITIONS[0]).id;
+  const news = (d, t) => { if (d === 2) flagSet('intro.soloJob');
+    if (d === 5) SHIP.events.joined.push(trad + '@' + d);
+    if (d === 8) for (const id of ['tomas', 'pell', 'rina']) { if (!SHIP.rel[id]) relAdd(id, 'chat', 0); SHIP.rel[id].tier = Math.max(SHIP.rel[id].tier || 0, 3); SHIP.rel[id].pts = Math.max(SHIP.rel[id].pts || 0, 70); }
+    if (d === 20) socNote('eventPhase', { id: 'ionStorm', phase: 'afterglow' }); };
+  const [HC, HM, , HCH] = homeBaked(), out = { solo: {}, unheard: {}, beats: {}, lines: {}, down: [] }, heard = {};
+  for (const k in HCH) heard[k] = new Set();
+  const call = (k, t) => { const L = homeLines(k, t); if (!homeCall(k, t)) return null; play(); if (L && L.e) heard[k].add(homeTag(L.e)); return L; };
+  for (const k of HOME_ORDER) {
+    fresh(); const seen = new Set(); let rep = 0, beats = 0, fail = 0;
+    for (let d = 1; d <= 70; d++) { const t = (d - 1) * 1440 + at(d); setShipNow(t); news(d, t);
+      if (down(t)) { if (!out.down.includes(d)) out.down.push(d); continue; }
+      const b0 = homePeekC(k).b, L = call(k, t); if (!L) { fail++; continue; }
+      if (homePeekC(k).b > b0) beats++; else if (L.e && d <= 30) { const g = homeTag(L.e); if (seen.has(g)) rep++; seen.add(g); } }
+    out.solo[k] = { beats, repeatsIn30: rep, end: homePeekC(k).b, failed: fail };
+  }
+  fresh();
+  for (let d = 1; d <= 120; d++) { const t = (d - 1) * 1440 + at(d); setShipNow(t); news(d, t); if (down(t)) continue;
+    const can = homeCallable(t), pick = can.find(x => x.due && !x.first) || can.find(x => x.contact === HOME_ORDER[d % 4]) || can[0]; if (pick) call(pick.contact, t); }
+  for (const k of HOME_ORDER) { out.beats[k] = homePeekC(k).b;
+    out.unheard[k] = HCH[k].map((e, i) => heard[k].has(homeTag(e)) ? null : { i: i + 1, when: e.when || null, first: (e.lines.find(l => l.text) || {}).text }).filter(Boolean); }
+  for (const id in HM) out.lines[id] = HM[id].lines.filter(l => l.text).length;
+  out.scenes = Object.fromEntries(Object.entries(HCH).map(([k, a]) => [k, a.map(e => e.lines.filter(l => l.text).length)]));
+  return out;
+})()
+"""
 with sync_playwright() as pw:
     g = ct.Game(pw, sys.argv[1]); g.step(3)
+    if MODE == 'calls':
+        r = g.ev(CALLS); g.close()
+        print('One person called every day, 70 days:', json.dumps(r['solo']))
+        print('Relay down (skipped) on days', r['down']); print('Lines per beat:', json.dumps(r['lines'])); print('Lines per scene:', json.dumps(r['scenes']))
+        print('In turn, 120 days, beats told:', json.dumps(r['beats']))
+        for k, v in r['unheard'].items():
+            for x in v: print('NEVER HEARD', k, json.dumps(x))
+        bad = [k for k, v in r['solo'].items() if v['end'] != 6 or v['failed']] + [k + ' in turn' for k, v in r['beats'].items() if v != 6]
+        print('errors', g.errors[:5])
+        print('CALLS CHECK OK' if not bad and not g.errors and not any(r['unheard'].values()) else 'CALLS CHECK: ' + (', '.join(bad) or 'scenes never heard'))
+        sys.exit(0)
     r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [JS, [DAYS, MODE]])
     g.close()
     print('Finished:', ', '.join(f"{k} {v}/{r['last'][k]}" for k, v in r['done'].items()))

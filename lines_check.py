@@ -230,8 +230,8 @@ def main(argv):
         for n, c in enumerate(cs, 1):
             if c.get('when'):
                 allx.append((f'call home.{cid} chat {n}', 'moment', dict(c['when'], text='', id=f'{cid}.chat{n}'), None, 'home'))
-            if not any(x.get('send') for x in c['lines']):
-                warns.append(f'call home.{cid} chat {n}: no "? send" (you never get to tell them anything)')
+            if any(x.get('send') for x in c['lines']):     # calls are one-sided since 0.62.0 (the user): you never tell them anything
+                warns.append(f'call home.{cid} chat {n}: a "? send" line (calls are one-sided now; it is left out)')
             for x in c['lines']:
                 if 'text' in x:
                     allx.append((f'call home.{cid} chat {n}', 'moment', {'text': x['text'], 'id': f'{cid}.chat{n}'}, None, 'home'))
