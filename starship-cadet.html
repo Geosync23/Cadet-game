@@ -27289,7 +27289,7 @@ function voiceOf(id) {
     openness: pickV('openness', has(VOICE_GUARDED) ? 'guarded' : has(VOICE_OPEN) ? 'open' : 'normal'),
     loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
     invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
-    thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),
+    thread: /^arc:/.test(W.thread || '') ? W.thread : p && p.thread ? p.thread : arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null),   // the writers' VOICE decides story arcs only; the roster decides themes (the lead, 0.39.17)
     keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {},
     opennessSet: W.openness !== undefined || !!(p && p.openness !== undefined) };   // written, not guessed: only then does it change points
   if (!OPENNESS[card.openness]) card.openness = 'normal';
@@ -27357,6 +27357,11 @@ function knowBlocks(id) {                                // for the Crew app (se
 // bus: simNote('bond', { a, b, kind, was })
 const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 15, driftOff: 20, mentor: 40, mentorOff: 25 };
 const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'], COUPLE_AFF = 90;
+// hard bounds by design (0.39.21, the lead's long-play rule): no new bond for someone with BOND_MAX already (9 is the most
+// anyone had in 280 days; a frozen bond that wakes when its pair are both aboard again can take them one or two over) and at
+// most BOND_GONE_MAX frozen with people who moved on (the oldest let go first): about n * (BOND_MAX + BOND_GONE_MAX) / 2 bonds
+// in all. STORY_CAP (not saved; cleared when the clock goes back, a new game) counts refused tries an hour and when each first bound
+const BOND_MAX = 10, BOND_GONE_MAX = 4, STORY_CAP = { full: 0, gone: 0, firstFull: null, firstGone: null, h: -Infinity };
 const STORY_BONDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'];   // section 20's frozen BOND_KINDS
 // how many friends (60+) someone makes room for: section 20's hourly drift stops new friendships climbing past 60
 // once either of the pair has this many (the designer's numbers)
@@ -27364,25 +27369,42 @@ const FRIEND_CAP_OPEN = ['chatty', 'sociable', 'warm', 'cheerful'], FRIEND_CAP_S
 const friendCap = p => { const t = p && p.traits || []; return t.some(x => FRIEND_CAP_OPEN.includes(x)) ? 5 : t.some(x => FRIEND_CAP_SHY.includes(x)) ? 3 : 4; };
 function storyHour(h, pairs) {
   const { crew, n } = SOC, t = h * 60 + 30, aff = SHIP.aff, B = SHIP.social.bonds || (SHIP.social.bonds = {}), rank = p => RANK_ORDER.indexOf(p.rank);
-  const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return; B[k] = Object.assign({ kind, since: t }, extra);
+  const cnt = new Map(), cntAdd = (k, d) => { for (const x of k.split(':')) cnt.set(x, (cnt.get(x) || 0) + d); };
+  const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return;
+    if (!b && k.split(':').some(x => (cnt.get(x) || 0) >= BOND_MAX)) { STORY_CAP.full++; if (STORY_CAP.firstFull === null) STORY_CAP.firstFull = Math.floor(h / 24) + 1; return; }   // full: a new bond waits
+    if (!b) cntAdd(k, 1); B[k] = Object.assign({ kind, since: t }, extra);
     if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind, was }); } };
-  const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
+  const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (!b.gone) cntAdd(k, -1); if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
+  if (h < STORY_CAP.h) Object.assign(STORY_CAP, { full: 0, gone: 0, firstFull: null, firstGone: null }); STORY_CAP.h = h;   // a new game
   affWeekTake(h);
   homeMsgHour(h);
   for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
+  // crew come and go (0.39.14): a bond with someone not aboard (transferred off, or not arrived) is frozen as it was,
+  // marked gone (the day it froze) and skipped below: no fading, drifting, best friends or mentors across the hull;
+  // it wakes again if they're both aboard. socBondOf(id, 'missed') is their closest friend who moved on
+  const day = Math.floor(h / 24) + 1, on = crew.map(p => socAboard(p, day)), both = (i, j) => on[i] && on[j];
+  for (const k in B) { const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
+    if (!both(i, j)) { if (!B[k].gone) B[k].gone = day; } else if (B[k].gone) delete B[k].gone; }
+  const goneOf = new Map();
+  for (const k in B) { if (!B[k].gone) { cntAdd(k, 1); continue; } for (const x of k.split(':')) { const i = SOC.idx.get(x); if (i !== undefined && on[i]) (goneOf.get(x) || goneOf.set(x, []).get(x)).push(k); } }
+  for (const [, ks] of goneOf) if (ks.length > BOND_GONE_MAX) {   // the oldest frozen bonds of someone still aboard are let go
+    ks.sort((a, b) => B[a].gone - B[b].gone || (a < b ? -1 : 1));
+    for (const k of ks.slice(0, ks.length - BOND_GONE_MAX)) if (B[k]) { delete B[k]; STORY_CAP.gone++; if (STORY_CAP.firstGone === null) STORY_CAP.firstGone = day; } }
   // couples (B6): the roster's partners are a couple from the start and stay one, at COUPLE_AFF or more; no story of
   // their own, never involving you. Their bond outranks the others, so they're never best friends, rivals or mentor
-  for (let i = 0; i < n; i++) { const q = crew[i].partner, j = q !== undefined ? SOC.idx.get(q) : undefined; if (j === undefined || j <= i) continue;
+  for (let i = 0; i < n; i++) { const q = crew[i].partner, j = q !== undefined ? SOC.idx.get(q) : undefined; if (j === undefined || j <= i || !both(i, j)) continue;
     const k = crew[i].id + ':' + crew[j].id; delete B[crew[j].id + ':' + crew[i].id]; if (!B[k] || B[k].kind !== 'couple') set(k, 'couple');
     if (aff[pairIdx(i, j)] < COUPLE_AFF) aff[pairIdx(i, j)] = COUPLE_AFF; }
   // friends long apart fade a little, once a day at 04:00
-  if (h % 24 === 4) for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best' && b.kind !== 'drifting') continue;
+  if (h % 24 === 4) for (const k in B) { const b = B[k]; if ((b.kind !== 'friends' && b.kind !== 'best' && b.kind !== 'drifting') || b.gone) continue;
     const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
     if (h - (b.seen ?? Math.floor(b.since / 60)) > BOND_APART * 24) aff[pairIdx(i, j)] = Math.max(-100, aff[pairIdx(i, j)] - 1); }
   // friends, rivals and drifting, pair by pair
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+    if (!both(i, j)) continue;
     const k = crew[i].id + ':' + crew[j].id, b = B[k], v = aff[pairIdx(i, j)], cur = b ? b.kind : null;
     if (cur === 'mentor' || cur === 'couple' || B[crew[j].id + ':' + crew[i].id]) continue;   // a mentor's key, the other way round
+    if (b && b.spar && v < BOND_AT.friends) continue;     // a sparring partner stays one until they're friends
     if (v <= BOND_AT.rivals || (cur === 'rivals' && v <= BOND_AT.rivalsOff)) set(k, 'rivals');
     else if (cur === 'friends' || cur === 'best') { if (v > b.peak) b.peak = v; if (v <= b.peak - BOND_AT.drift) set(k, 'drifting', { seen: b.seen }); }
     else if (v >= BOND_AT.friends) set(k, 'friends', { peak: v, seen: b ? b.seen : h });
@@ -27391,39 +27413,58 @@ function storyHour(h, pairs) {
   }
   // best friends: each person's closest friend, when it's mutual
   const top = new Map();
-  for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best') continue;
+  for (const k in B) { const b = B[k]; if ((b.kind !== 'friends' && b.kind !== 'best') || b.gone) continue;
     const [a, c] = k.split(':'), v = affinity(a, c);
     for (const [x, y] of [[a, c], [c, a]]) { const o = top.get(x); if (!o || v > o[1] || (v === o[1] && y < o[0])) top.set(x, [y, v]); } }
-  for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best') continue;
+  for (const k in B) { const b = B[k]; if ((b.kind !== 'friends' && b.kind !== 'best') || b.gone) continue;
     const [a, c] = k.split(':'), best = top.get(a)[0] === c && top.get(c)[0] === a && affinity(a, c) >= BOND_AT.best;
     if (best && b.kind !== 'best') set(k, 'best', { peak: b.peak, seen: b.seen }); else if (!best && b.kind === 'best') set(k, 'friends', { peak: b.peak, seen: b.seen }); }
+  // sparring partners (0.39.14, the rivalry theme; the lead and head writer 3): someone whose thread is rivalry and who
+  // has no rival gets one once a day, friendly-competitive: the aboard crewmate they get on with least (their
+  // department first), not a partner, mentor or friend. Kept until they're friends (the theme's happy end)
+  if (h % 24 === 4) for (let i = 0; i < n; i++) {
+    const p = crew[i]; if (!on[i] || (voiceOf(p.id).thread || '') !== 'rivalry' || socBondOf(p.id, 'rivals')) continue;
+    let pick = null, pv = 1e9;
+    for (let j = 0; j < n; j++) { if (j === i || !on[j] || crew[j].rank === 'guest') continue; const q = crew[j], sk = i < j ? p.id + ':' + q.id : q.id + ':' + p.id, sb = B[sk] || B[i < j ? q.id + ':' + p.id : p.id + ':' + q.id];
+      if (sb && !sb.gone && sb.kind !== 'drifting') continue;
+      const v = aff[pairIdx(i, j)] - (q.dept === p.dept ? 1000 : 0); if (v < pv || (v === pv && q.id < pick[0].id)) { pick = [q, sk]; pv = v; } }
+    if (pick) set(pick[1], 'rivals', { spar: true });
+  }
   // mentors: kept while they get on; new ones once a day, the warmest senior first
-  for (const k in B) { if (B[k].kind !== 'mentor') continue; const [a, c] = k.split(':'); if (affinity(a, c) < BOND_AT.mentorOff) drop(k); }
+  for (const k in B) { if (B[k].kind !== 'mentor' || B[k].gone) continue; const [a, c] = k.split(':'); if (affinity(a, c) < BOND_AT.mentorOff) drop(k); }
   if (h % 24 === 4) {
     const has = new Set(), count = new Map();
-    for (const k in B) if (B[k].kind === 'mentor') { const [a, c] = k.split(':'); has.add(c); count.set(a, (count.get(a) || 0) + 1); }
+    for (const k in B) if (B[k].kind === 'mentor' && !B[k].gone) { const [a, c] = k.split(':'); has.add(c); count.set(a, (count.get(a) || 0) + 1); }
     for (let j = 0; j < n; j++) {
-      const q = crew[j]; if (has.has(q.id) || !BOND_MENTEE_RANKS.includes(q.rank)) continue;
+      const q = crew[j]; if (!on[j] || has.has(q.id) || !BOND_MENTEE_RANKS.includes(q.rank)) continue;
       let pick = null, pv = BOND_AT.mentor - 1;
       for (let i = 0; i < n; i++) { const p = crew[i];
-        if (p.dept !== q.dept || p.rank === 'guest' || rank(p) < 0 || rank(q) - rank(p) < 1 || (count.get(p.id) || 0) >= BOND_MENTEES || !voiceOf(p.id).mentors) continue;
+        if (!on[i] || p.dept !== q.dept || p.rank === 'guest' || rank(p) < 0 || rank(q) - rank(p) < 1 || (count.get(p.id) || 0) >= BOND_MENTEES || !voiceOf(p.id).mentors) continue;
         const v = aff[pairIdx(i, j)], sk = (i < j ? p.id + ':' + q.id : q.id + ':' + p.id), sb = B[sk];
         if (v > pv && !(sb && (sb.kind === 'best' || sb.kind === 'rivals' || sb.kind === 'couple'))) { pick = [p, sk]; pv = v; } }
-      if (pick) { delete B[pick[1]]; set(pick[0].id + ':' + q.id, 'mentor', { seen: h }); has.add(q.id); count.set(pick[0].id, (count.get(pick[0].id) || 0) + 1); }
+      if (pick) { if (B[pick[1]] && !B[pick[1]].gone) cntAdd(pick[1], -1); delete B[pick[1]]; set(pick[0].id + ':' + q.id, 'mentor', { seen: h }); has.add(q.id); count.set(pick[0].id, (count.get(pick[0].id) || 0) + 1); }
     }
   }
 }
 function socBondOf(id, kind) {                           // for section 20's bondOf: a crewmate, null for none, undefined for "not mine"; friends includes best
+  if (kind === 'missed') return socMissed(id);
   if (!STORY_BONDS.includes(kind)) return undefined;
   socInit(); id = id && id.id || id; const B = SHIP.social.bonds || {};
   let pick = null, pv = -1e9;
   for (const k in B) {
-    const b = B[k], [a, c] = k.split(':'); if (a !== id && c !== id) continue;
+    const b = B[k], [a, c] = k.split(':'); if ((a !== id && c !== id) || b.gone) continue;   // someone who moved on isn't a bond today ('missed' is)
     const ok = kind === 'friends' ? b.kind === 'friends' || b.kind === 'best' : kind === 'mentor' ? b.kind === 'mentor' && c === id : kind === 'mentee' ? b.kind === 'mentor' && a === id : b.kind === kind;
     if (!ok) continue;
     const o = a === id ? c : a, v = affinity(id, o); if (v > pv || (v === pv && o < pick)) { pick = o; pv = v; }
   }
   if (!pick && (kind === 'mentee' || kind === 'couple')) return undefined;   // section 20's own: you as the escort's mentee, and a partner from the roster before the first hour
+  return pick;
+}
+function socMissed(id) {                                   // their closest friend, best friend, partner or mentor who moved on (0.39.14), else null
+  socInit(); id = id && id.id || id; const B = SHIP.social.bonds || {}; let pick = null, pv = -1e9;
+  for (const k in B) { const b = B[k], [a, c] = k.split(':'); if ((a !== id && c !== id) || !b.gone || !['friends', 'best', 'couple', 'mentor'].includes(b.kind)) continue;
+    const o = a === id ? c : a; if (socAboard(socP(o))) continue;   // the one who's still here misses the one who left
+    const v = affinity(id, o); if (v > pv || (v === pv && o < pick)) { pick = o; pv = v; } }
   return pick;
 }
 // the weekly snapshot for planning (0.39.1, sparse since 0.39.3): section 14 seats people by affinityPlan(a, b, d),
@@ -27435,22 +27476,34 @@ function socBondOf(id, kind) {                           // for section 20's bon
 // week before any day that might be planned ahead. A pair not in it reads 0 (between the lines). No snapshot for
 // that week (a new game's first two, a save from before, a crew list of another size) gives undefined, so
 // affinityPlan keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
-const AFF_SNAP = 30;
+const AFF_SNAP = 30, AFF_SNAP_MAX = 600;                 // pairs at |affinity| 30+ (the rule); the strongest 600 only as a safety net for the save (0.39.20, the lead: about 4.8 KB for both weeks; with 86 crew it never binds before day 140)
 const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots: week -> Map(pairIdx -> v)
+const affCrewTag = () => (socHash(SOC.crew.map(p => p.id).join(',')) >>> 0).toString(36);   // which crew list (and order) a snapshot's pairs index (0.39.22)
 function affWeeks() {
   const s = SHIP.social.affWeek || null;
   if (AFF_WEEK.src !== s) { AFF_WEEK.src = s; AFF_WEEK.map = new Map();
-    for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(.*)$/.exec(part); if (!m || +m[2] !== SOC.n) continue;
-      try { const bin = atob(m[3]), P = new Map(); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); AFF_WEEK.map.set(+m[1], { P, raw: part }); }
+    for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(?:([0-9a-z]+)\/(?=~))?(.*)$/.exec(part); if (!m || +m[2] !== SOC.n || (m[3] && m[3] !== affCrewTag())) continue;   // another crew list (same size, other order): not this crew's
+      try { const P = new Map();
+        if (m[4][0] === '~') {                                // 0.39.21: a bit per pair (in i < j order), then the values of those set
+          const bin = atob(m[4].slice(1)), n = SOC.n, nb = Math.ceil(n * (n - 1) / 2 / 8); let q = 0, v = nb;
+          for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++, q++) if (bin.charCodeAt(q >> 3) >> (q & 7) & 1) P.set(pairIdx(i, j), bin.charCodeAt(v++) << 24 >> 24);
+        } else { const bin = atob(m[4]); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); }   // the older form: [i, j, v] triples
+        AFF_WEEK.map.set(+m[1], { P, raw: part }); }
       catch (e) { /* a bad snapshot is ignored */ } } }
   return AFF_WEEK.map;
 }
 function affWeekTake(h) {                                // storyHour: the first hour of a new ship week
   const w = Math.floor(Math.floor(h / 24) / 7), M = affWeeks(); if (M.has(w) || [...M.keys()].some(k => k > w)) return;
   const { n } = SOC, aff = SHIP.aff; let bin = '';
-  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const v = aff[pairIdx(i, j)]; if (v >= AFF_SNAP || v <= -AFF_SNAP) bin += String.fromCharCode(i, j, v & 255); }
+  let L = [];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const v = aff[pairIdx(i, j)]; if (v >= AFF_SNAP || v <= -AFF_SNAP) L.push([i, j, v]); }
+  if (L.length > AFF_SNAP_MAX) L = L.sort((a, b) => Math.abs(b[2]) - Math.abs(a[2]) || a[0] - b[0] || a[1] - b[1]).slice(0, AFF_SNAP_MAX).sort((a, b) => a[0] - b[0] || a[1] - b[1]);   // the strongest, back in pair order
+  const bits = new Uint8Array(Math.ceil(n * (n - 1) / 2 / 8)), on = new Set(L.map(([i, j]) => i * n + j)); let q = 0, vals = '';   // a bit per pair, then the values in pair order (0.39.21: about 40% smaller)
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++, q++) if (on.has(i * n + j)) bits[q >> 3] |= 1 << (q & 7);
+  for (const [, , v] of L) vals += String.fromCharCode(v & 255);
+  for (const b of bits) bin += String.fromCharCode(b);
   const keep = [...M.keys()].filter(k => k === w - 1).map(k => M.get(k).raw);
-  SHIP.social.affWeek = keep.concat(w + ':' + n + ':' + btoa(bin)).join(';');
+  SHIP.social.affWeek = keep.concat(w + ':' + n + ':' + affCrewTag() + '/~' + btoa(bin + vals)).join(';');
 }
 function affPlanWeek(i, j, d) {
   if (!Number.isFinite(d)) return undefined;              // no day: the starting affinity, as before
@@ -27564,13 +27617,16 @@ function momentDef(id) {                                 // '<crewId>:<beat>' ->
   let d = MO && MO[id] || MOMENTS_BUILTIN[id] || null;
   if (!d && !thread.startsWith('arc:') && TH && Array.isArray(TH[thread])) d = TH[thread].find(x => x && x.beat === beat) || null;
   if (!d || !Array.isArray(d.lines)) return null;
-  const p = socP(who); if (Array.isArray(d.needs) && (!p || d.needs.some(f => p[f] == null || p[f] === ''))) return null;   // a theme beat needs roster details they have
+  const p = socP(who), has = f => { if (p[f] != null && p[f] !== '') return true; try { return typeof socialFill === 'function' && socialFill(p, f, {}) != null; } catch (e) { return false; } };
+  if (Array.isArray(d.needs) && (!p || !d.needs.every(has))) return null;   // a theme beat needs details they have: the roster's, or what section 20's socialFill can say ({hobby} from their habits, {since} from their arrival)
   return Object.assign({ who, beat, thread, tone: thread.startsWith('arc:') ? 'heartfelt' : MOMENT_TONE[beat - 1] || 'heartfelt' }, d, { who, beat });
 }
+const STORY_M0 = Object.freeze({ b: 0, at: null, hf: null });
+const storyPeek = id => { const S = SHIP.social && SHIP.social.stories, M = S && S.m; return (M && M[id]) || STORY_M0; };   // read-only (queries never write the save; reviewer 1b, 0.39.19)
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
 function momentNextId(p) {                               // the next beat's id that has a script, ready or not (writers' beats may have gaps)
   const v = voiceOf(p.id), th = v.thread || '', r = SHIP.rel[p.id];
-  const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyM(p.id).b;   // beats told so far (rel.arc for arcs)
+  const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyPeek(p.id).b;   // beats told so far (rel.arc for arcs)
   if (th.startsWith('arc:') && n < 1 && STORY_ARCS[p.id]) return null;   // an arc with card lines tells beat 1 on the card
   for (let b = n + 1; b <= n + 6; b++) if (momentDef(p.id + ':' + b)) return p.id + ':' + b;
   return null;
@@ -27603,10 +27659,22 @@ function momentWhere(p, t, d) {                          // the script's where: 
     return !!rm && String(rm.name || '').toLowerCase().includes(String(x).toLowerCase());
   });
 }
+const momentTrad = t => { const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(d) : []; } catch (e) { es = []; } const e = es.find(x => m >= x.from && m < x.to); return e ? e.id : null; };   // the tradition on now (trad: conditions)
+function momentCtx(p, t, id) {                             // the scene's ctx for a beat's when: the tradition on now, and the deck you're on (theirs: you're with them)
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && w.placeId && schedData().byId.get(w.placeId);
+  return { t, moment: id, trad: momentTrad(t), deck: pl ? pl.deck : w && w.deck != null ? w.deck : undefined };   // walking: the deck they're on
+}
+// momentWantsVisit(p, t) -> their next beat wants a bunk visit (where: visit) and its when holds now: section 20's
+// evening visits pick them first (Tomas's Wednesday exam night)
+function momentWantsVisit(p, t = shipNow()) {
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id)) return false;
+  const id = momentNextId(p), d = id && momentDef(id); if (!d || ![].concat(d.where || []).includes('visit')) return false;
+  return momentReady(p, t, { anywhere: true }) === id;   // every gate but the place (they'd be visiting): a beat that can't open tonight doesn't take the evening's visit
+}
 function momentReady(p, t = shipNow(), ctx = {}) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
   const id = momentNextId(p), d = id && momentDef(id); if (!d) return null;
-  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyM(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories;
+  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyPeek(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories || {};
   if (relTier(p.id) < (d.tier ?? g.tier) || metDays(p.id, t) < (d.metDays ?? g.met)) return null;
   const last = d.tone === 'resolution' ? st.hf : st.at; if (last !== null && (t - last) / 1440 < (d.gapDays ?? g.gap)) return null;
   if (st.at !== null && Math.floor(st.at / 1440) + 1 === day) return null;   // one moment a day each
@@ -27614,7 +27682,7 @@ function momentReady(p, t = shipNow(), ctx = {}) {
   if (ab && ((ab.afterShow && r.showDay && day <= r.showDay) || (r.arcDay || 0) >= day)) return null;   // Pell's last beat waits for his show; one beat a day
   if (MOMENT_SERIOUS.has(d.tone) && S.serious === day) return null;          // one serious moment a day for you
   if (!d.crisis) { let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return null; }
-  if (d.when) { let ok = false; try { ok = typeof linesOk === 'function' ? !!linesOk(d.when, p, { t, moment: id }) : false; } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions, judged by section 22 as for lines
+  if (d.when) { let ok = false; try { ok = typeof linesOk === 'function' ? !!linesOk(d.when, p, momentCtx(p, t, id)) : false; } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions, judged by section 22 as for lines
   if (!ctx.anywhere && !momentWhere(p, t, d)) return null;
   return id;
 }
@@ -27684,7 +27752,7 @@ function momentDone(p, d, c) {                           // the reply was picked
 const GOODBYE_PTS = 3;
 const GOODBYE_WHEN = ['today', 'tomorrow', 'the day after tomorrow'];
 function goodbyeMoment(p, t = shipNow()) {
-  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyM(p.id).bye) return null;
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyPeek(p.id).bye) return null;
   const left = typeof leavingSoon === 'function' ? leavingSoon(p, Math.floor(t / 1440) + 1) : null; if (left === null || left > 2) return null;
   const d = goodbyeDef(p.id); if (!d) return null;
   return { id: p.id + ':bye', hint: voiceFill(p.id, d.hint, t) };
@@ -27717,6 +27785,53 @@ function goodbyeDone(p, d, c) {
   memAdd(p.id, 'moment.bye.' + flavour, { cls: 'core' });
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':bye', who: p.id, beat: 'bye', flavour, tone: 'goodbye', fit: !!c.fit });
   if (relTier(p.id) >= 4 && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
+}
+// ---- bonds in the save, compact (0.39.21, the lead's headroom job) ----
+// section 20's socSave asks storyBondsPack(B) for SHIP.social.bonds and bondsUnpack hands { v: 2 } back to
+// storyBondsUnpack(o, ids): 12 bytes a bond in base64 (i, j: crew indexes in the save's id list; kind; since, 3 bytes,
+// 0xFFFFFF for none; peak, a signed byte, -128 for none; seen, 2 bytes, 0xFFFF for none; flags: 1 spar; gone, 2 bytes,
+// 0 for none), and any other field a bond carries in x: [[row, { ... }]]. Every value is a whole number (affinity is an
+// Int8Array, times are ship minutes and hours), so a load gives back exactly what was saved
+const BOND_T0 = 20160, BOND_H0 = 336;                    // since (minutes) and seen (hours) are stored with this added: a game that starts with the day-0 arrival makes its couples before minute 0 (two weeks of room)
+function storyBondsPack(B) {
+  if (SOC.n > 255) return null;                         // a crew index is one byte: a bigger crew saves in section 20's own form
+  let bin = ''; const x = [], b3 = v => String.fromCharCode(v >> 16 & 255, v >> 8 & 255, v & 255), b2 = v => String.fromCharCode(v >> 8 & 255, v & 255);
+  for (const k in B || {}) { const [a, c] = k.split(':'), o = B[k], i = SOC.idx.get(a), j = SOC.idx.get(c), ki = SOC_BOND_KINDS.indexOf(o.kind);
+    if (i === undefined || j === undefined || ki < 0) continue;
+    const { kind, since, peak, seen, spar, gone, ...rest } = o, ok = (v, z, top) => v == null || (Number.isInteger(v) && v + z >= 0 && v + z < top);
+    if (!ok(since, BOND_T0, 0xFFFFFF) || !ok(seen, BOND_H0, 0xFFFF) || (gone != null && (!Number.isInteger(gone) || gone < 1 || gone > 0xFFFF)) || (peak != null && (!Number.isInteger(peak) || peak < -127 || peak > 127)) || (spar != null && spar !== true)) return null;   // not a shape this form holds: section 20's own form
+    if (Object.keys(rest).length) x.push([bin.length / 12, rest]);
+    bin += String.fromCharCode(i, j, ki) + b3(since == null ? 0xFFFFFF : since + BOND_T0) + String.fromCharCode((peak ?? -128) & 255) + b2(seen == null ? 0xFFFF : seen + BOND_H0) + String.fromCharCode(spar ? 1 : 0) + b2(gone ?? 0); }
+  return x.length ? { v: 2, z: 1, b: btoa(bin), x } : { v: 2, z: 1, b: btoa(bin) };   // z: the offsets above (0.39.22)
+}
+function storyBondsUnpack(o, ids) {
+  const B = {}, z = o.z === 1, T0 = z ? BOND_T0 : 0, H0 = z ? BOND_H0 : 0; let bin = ''; try { bin = atob(o.b || ''); } catch (e) { return B; }
+  const X = new Map((Array.isArray(o.x) ? o.x : []).filter(r => Array.isArray(r) && r[1] && typeof r[1] === 'object').map(r => [r[0], r[1]]));
+  for (let r = 0, k = 0; k + 11 < bin.length; r++, k += 12) {
+    const u = q => bin.charCodeAt(k + q), a = ids[u(0)], c = ids[u(1)], kind = SOC_BOND_KINDS[u(2)];
+    if (!a || !c || !kind || !SOC.idx.has(a) || !SOC.idx.has(c)) continue;
+    const since = u(3) << 16 | u(4) << 8 | u(5), peak = u(6) << 24 >> 24, seen = u(7) << 8 | u(8), gone = u(10) << 8 | u(11), b = { kind };
+    if (since !== 0xFFFFFF) b.since = since - T0; if (peak !== -128) b.peak = peak; if (seen !== 0xFFFF) b.seen = seen - H0; if (u(9) & 1) b.spar = true; if (gone) b.gone = gone;
+    if (X.has(r)) Object.assign(b, X.get(r));
+    B[a + ':' + c] = b;
+  }
+  return B;
+}
+// ---- farewells (0.39.16, the overnight plan; social-deep-plan Part 8b "On the day") ----
+// Who comes to the shuttle bay to see a leaver off on their last day (rotation days: crewLeaving), for section 14's
+// plans: their closest friends aboard by the weekly snapshot (affinityPlan, so a day planned twice agrees; never live
+// bonds), FAREWELL_AT or more, up to FAREWELL_MAX, closest first; each one's partner beside them and the leaver's own
+// partner (couples stand together). Not the player (you choose to come), nobody leaving that day themselves.
+//   farewellCrew(leaver, d) -> [crewId]
+const FAREWELL_AT = 60, FAREWELL_MAX = 4;
+function farewellCrew(leaver, d) {
+  socInit(); const p = socP(leaver); if (!p) return [];
+  const here = q => !!q && q !== p && q.rank !== 'guest' && socAboard(q, d) && leaveDay(q) !== d;
+  const near = SOC.crew.filter(here).map(q => [q, affinityPlan(p, q, d)]).filter(x => x[1] >= FAREWELL_AT)
+    .sort((a, b) => b[1] - a[1] || (a[0].id < b[0].id ? -1 : 1)).slice(0, FAREWELL_MAX).map(x => x[0]);
+  const out = new Set(near.map(q => q.id)), mate = q => q.partner && SOC.idx.has(q.partner) ? socP(q.partner) : null;
+  for (const q of [...near, p]) { const m = mate(q); if (here(m)) out.add(m.id); }
+  return [...out];
 }
 // ---- calls home (0.39.7, B8; the user's design, head writer 2's call files, the dialogue engineer's baked shapes) ----
 // Your people back home: Mum, Gran, Jo and Sam (HOME_CONTACTS, baked from content/home/<contact>.call; Jo and Sam are
