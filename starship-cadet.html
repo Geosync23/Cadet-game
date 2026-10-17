@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.2 
+   STARSHIP CADET: CSV Wren                           build 0.39.3 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.2';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.3';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13551,6 +13551,7 @@ function dialogueStep(k) {
   const l = D.queue[D.i];
   if (l && l.choice) {
     const c = l.choice[k]; if (!c) return;
+    { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onPick === 'function') sc.onPick(k, c); }   // a moment's reply (20c)
     eventMine('choice:' + D.id, k + 1);
     for (const [who, pts] of Object.entries(c.rel || {})) { const p = D.cast[who] || schedPeople().find(q => q.id === who); if (p && typeof relAdd === 'function') relAdd(p.id, 'meeting:' + D.m.id, pts); }
     if (c.job) eventTakeJob(c.job);
@@ -13573,6 +13574,7 @@ function eventTakeJob(job) {
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
+  { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') sc.onEnd(finished); }   // a moment ending (20c)
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
   if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
 }
@@ -15005,11 +15007,12 @@ const showJoined = (p, id) => { const d = SHIP.rel[p.id] && SHIP.rel[p.id].showD
 function arcBeat(p, t = shipNow()) {
   const arc = STORY_ARCS[p.id], r = SHIP.rel[p.id]; if (!arc || !r) return null;
   const n = r.arc || 0, day = Math.floor(t / 1440) + 1;
+  if (typeof momentOwnsBeat === 'function' && momentOwnsBeat(p.id, n)) return null;   // a moment tells it (20c)
   if (arc[n] && arc[n].afterShow && r.showDay && day <= r.showDay) return null;   // Pell's last beat waits for his show
   return n < arc.length && r.tier >= n + 1 && (r.arcDay || 0) < day ? arc[n] : null;
 }
-function arcTold(p) {                                    // the card showed their next beat
-  const beat = arcBeat(p); if (!beat) return;
+function arcTold(p, beat = arcBeat(p)) {                 // the card showed their next beat (or a moment told it, 20c)
+  if (!beat) return;
   const r = SHIP.rel[p.id]; r.arc = (r.arc || 0) + 1; r.arcDay = SHIP.time.day;
   if (beat.afterShow && showJoined(p, 'pell-show')) memAdd(p.id, 'show.pell-show');   // you came to their show
   // a beat with a show: a real one-off gathering the next evening (section 18's eventOneOff), which sends its own Mail
@@ -15242,8 +15245,8 @@ function chatTick() {
 
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
-// Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1); later moments,
-// goodbyes and the story arcs. Lazy like the rest
+// Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1), moments
+// (0.39.3); later goodbyes, couples and the story arcs. Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -15493,6 +15496,152 @@ function introDo(p, otherId) {
     lines: [shortName(p) + ' and ' + n + ' got talking. Turns out they get on.', 'Have you seen ' + shortName(p) + ' and ' + n + '? New friends, by the look of it.', shortName(p) + ' and ' + n + ' were chatting for ages at dinner.'] });
   if (typeof simNote === 'function') simNote('introduced', { a: p.id, b: q.id, you: true });
   return voiceFill(p.id, ['{wow}. I\'ll say hello to ' + n + ' next time.', n + '? I\'ve seen them about. I\'ll go and say hi.', 'Oh, ' + n + '! {thanks}, I will.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 681) * 3)]);
+}
+// ---- moments (0.39.3, B3; plans/social-deep-plan.md Part 1 "Moments" and Part 6 "Moment scripts") ----
+// A moment is a short scene in section 18's dialogue panel: a few lines, one choice of replies (flavours listen,
+// cheer, practical, share), then a closing line. Each person's thread (voiceOf(id).thread) has beats: a story arc
+// ('arc:<id>') uses section 20's STORY_ARCS beats, the first a card line and beats 2 on moments; a theme (homesick,
+// ...) has three, light at colleague, heartfelt at friend, resolution at close friend. Scripts come from the writers'
+// baked MOMENTS['<crewId>:<beat>'] or MOMENT_THEMES[theme][beat - 1], else MOMENTS_BUILTIN here (Tomas, Pell and Rina,
+// from their Pillar 3 arcs), never declared here. momentReady(p, t, ctx) -> id when the next beat may open: the tier
+// and time gates (STEP_GATES, or the script's tier / metDays / gapDays), they're off duty somewhere calm (a seat in
+// SIT_TYPES, or visiting you), not the same day as their last moment, at most one serious moment a ship day for you
+// (tone heartfelt, serious or resolution), and no ship crisis's onset (unless the script says crisis: true). Section 20
+// shows its hint and the "Sit with them" button. momentShow(id) plays it; the reply picked counts once it's picked:
+// relAdd(id, 'moment', points by tone, +MOMENT_FIT when the flavour is the one they need, times OPENNESS.moment once
+// openness is written), memAdd 'moment.<thread>.<beat>.<flavour>' (core for a resolution), simNote('moment'), what
+// you learnt ('@story:' in rel.known), a resolution's keepsake (giftKeepsake), the script's after (a Mail) and, for a
+// story arc, section 20's arcTold (its Mail, Pell's show). State: SHIP.social.stories (section 20 saves it):
+// { serious: day of the last serious moment, m: { crewId: { b: theme beats told, at, hf: minute of the last moment and
+// of the last heartfelt one } } }
+const MOMENT_PTS = { light: 3, heartfelt: 5, serious: 5, resolution: 6 }, MOMENT_FIT = 4;
+const MOMENT_TONE = ['light', 'heartfelt', 'resolution'];   // a theme's beats 1-3
+// the story crew's Pillar 3 arcs as moments (beats 2-4; beat 1 stays section 20's card line). `say: n` opens with
+// STORY_ARCS[who][n].say. Placeholder words for the head writer to replace through content/arcs
+const MOMENTS_BUILTIN = {
+  'tomas:2': { tone: 'light', hint: 'Got a minute? I need to rehearse something.', lines: [{ say: 1 },
+    { who: 'tomas', text: 'I keep writing down what to say. Like he won\'t recognise me otherwise.' },
+    { choice: [{ text: 'What\'s he like, your brother?', flavour: 'listen', reply: 'Loud. Funny. Eats cereal for dinner. I miss the noise, honestly.' },
+               { text: 'Open with a terrible joke. Works on me.', flavour: 'cheer', reply: 'Ha! Okay. I\'ve got one about a scrubber. He\'ll hate it.' },
+               { text: 'I rehearse calls home too. Every time.', flavour: 'share', reply: 'Really? That helps, actually. It\'s not just me.' }] },
+    { who: 'tomas', text: 'Thanks, {me}. Thursday, then. Wish me luck.' }], learn: 'His brother\'s birthday is on a Thursday, and he called him from the booths.' },
+  'tomas:3': { tone: 'heartfelt', hint: 'Got a minute? Properly, I mean.', lines: [{ say: 2 },
+    { who: 'tomas', text: 'I sat in the booth for an hour after. Just in case he called back.', pose: 'sigh' },
+    { choice: [{ text: 'I\'m here. How was it, before it dropped?', flavour: 'listen', reply: 'Good. Really good. He laughed at the scrubber joke. Then nothing.' },
+               { text: 'Let\'s ask Comms when the relay\'s clearest. Try again.', flavour: 'practical', reply: 'You\'d do that? ...Yeah. Yeah, let\'s.' },
+               { text: 'He\'ll come round. Brothers always do.', flavour: 'cheer', reply: 'You think? I hope so. He\'s stubborn. Like me.' }] },
+    { who: 'tomas', text: 'Sorry. I didn\'t mean to unload all that. Thanks for sitting with me.' }], learn: 'A call home to his brother dropped halfway, and it hurt.' },
+  'tomas:4': { tone: 'resolution', hint: 'You have to hear this.', keepsake: 'his spare star map', lines: [{ say: 3 },
+    { who: 'tomas', text: 'I wanted you to be the first to know. You were there when it went wrong.' },
+    { choice: [{ text: 'Show me where home is on the map.', flavour: 'share', reply: 'Here. That faint one. Not much to look at, but it\'s ours.' },
+               { text: 'Same sky. That\'s brilliant.', flavour: 'cheer', reply: 'Isn\'t it? He\'s named a star after me. The dim one, obviously.' },
+               { text: 'Tell me everything he said.', flavour: 'listen', reply: 'He said he\'s proud of me. He\'s never said that before.' }] },
+    { who: 'tomas', text: 'Here. My spare star map. I want you to have it.' }], learn: 'He and his brother look at the same star map now.' },
+  'pell:2': { tone: 'light', hint: 'Come and look at this. Carefully.', lines: [{ say: 1 },
+    { who: 'pell', text: 'The chime\'s the tricky bit. One wrong tooth and it plays a funeral march.' },
+    { choice: [{ text: 'A funeral march could be a hit.', flavour: 'cheer', reply: 'Ha! The Pell Okafor Sad Hour. Front row seats.' },
+               { text: 'Want a hand with the tiny screws?', flavour: 'practical', reply: 'Your hands are steadier than mine. Go on, hold this.' },
+               { text: 'Where did you learn to fix these?', flavour: 'listen', reply: 'My grandad\'s shed. He fixed clocks. I mostly broke them.' }] },
+    { who: 'pell', text: 'Right. Back to it, before the chime notices I\'ve stopped.' }], learn: 'He mends old music boxes, the way his grandad mended clocks.' },
+  'pell:3': { tone: 'heartfelt', hint: 'Can I ask you something? Don\'t laugh.', lines: [{ say: 2 },
+    { who: 'pell', text: 'Honestly? I\'m terrified nobody turns up.', pose: 'sigh' },
+    { choice: [{ text: 'What are you really worried about?', flavour: 'listen', reply: 'That they\'ll think it\'s daft. That I\'m daft. Grown man, tin boxes.' },
+               { text: 'I\'ll bring the whole Watch shift.', flavour: 'cheer', reply: 'Ha! Don\'t threaten me with a good time.' },
+               { text: 'I\'ll be there. Front row.', flavour: 'share', reply: 'Promise? Okay. Okay, I can do this.' }] },
+    { who: 'pell', text: '{thanks}, {nick}. I mean it.' }], learn: 'He was nervous about showing his music boxes to the ship.' },
+  'pell:4': { tone: 'resolution', hint: 'Got a sec? I owe you one.', keepsake: 'his smallest music box', lines: [{ say: 3 },
+    { who: 'pell', text: 'I couldn\'t have done it without you nagging me.' },
+    { choice: [{ text: 'Encore next month?', flavour: 'cheer', reply: 'Don\'t tempt me. I\'ve got three more boxes rusting.' },
+               { text: 'Best night I\'ve had aboard.', flavour: 'share', reply: 'Yeah? ...Me too, actually.' },
+               { text: 'How did it feel, up there?', flavour: 'listen', reply: 'Like everyone was listening to my grandad\'s shed. In a good way.' }] },
+    { who: 'pell', text: 'Here. The smallest one. It plays the waltz. Mostly.' }], learn: 'His music boxes had their night in the music room.' },
+  'rina:2': { tone: 'light', hint: 'Got a minute? Don\'t make a fuss.', lines: [{ say: 1 },
+    { who: 'rina', text: 'Don\'t look at me like that. I\'m fine. Mostly.' },
+    { choice: [{ text: 'Tiles. Now. You need beating.', flavour: 'cheer', reply: 'You? Beat me? Ha. Go on, then.' },
+               { text: 'Tell me about her.', flavour: 'listen', reply: 'She cheats at Tiles. Tells me to drink water. Sound familiar?' },
+               { text: 'Want me to cover your evening jobs?', flavour: 'practical', reply: 'That\'s... actually kind. No. But thanks.' }] },
+    { who: 'rina', text: '{bye}. And thanks.' }], learn: 'Her gran went into hospital, and her sister keeps her posted.' },
+  'rina:3': { tone: 'heartfelt', hint: 'Got a minute? Properly, I mean.', lines: [{ say: 2 },
+    { who: 'rina', text: 'Gran used to say worrying is just praying with your hands tied.', pose: 'sigh' },
+    { choice: [{ text: 'I\'m here. Tell me about her.', flavour: 'listen', reply: 'She taught me to cheat at Tiles before she taught me to play. Let me tell you...' },
+               { text: 'Want to lose to me at Tiles? Distraction.', flavour: 'cheer', reply: 'You? Beat me? Ha. Go on, then.' },
+               { text: 'I can ask Comms to watch for station traffic.', flavour: 'practical', reply: 'Would you? That would really help.' }] },
+    { who: 'rina', text: 'Thanks, {me}. Really.' }], learn: 'Two days without news of her gran, she didn\'t sleep.' },
+  'rina:4': { tone: 'resolution', hint: 'Guess what. No, guess.', keepsake: 'a Tiles piece, the cheating one', lines: [{ say: 3 },
+    { who: 'rina', text: 'She asked about you. I may have mentioned you. Once or twice.' },
+    { choice: [{ text: 'Tell her I want a rematch.', flavour: 'cheer', reply: 'She\'ll destroy you. I can\'t wait.' },
+               { text: 'I\'m so glad. I was worried too.', flavour: 'share', reply: 'I know. I could tell. ...Thanks for that.' },
+               { text: 'How is she, really?', flavour: 'listen', reply: 'Tired. Cheeky. Herself. That\'s all I wanted.' }] },
+    { who: 'rina', text: 'Here. Gran\'s cheating piece. She says you\'ll need it.' }], learn: 'Her gran came home, and beat her sister at Tiles.' },
+};
+const momentBaked = () => { try { return [typeof MOMENTS !== 'undefined' && MOMENTS || (typeof LINES !== 'undefined' && LINES && LINES.arcs) || null, typeof MOMENT_THEMES !== 'undefined' && MOMENT_THEMES || null]; } catch (e) { return [null, null]; } };
+function momentDef(id) {                                 // '<crewId>:<beat>' -> { who, beat, thread, tone, ... , lines } | null
+  const m = /^(.+):(\d+)$/.exec(String(id)); if (!m) return null;
+  const who = m[1], beat = +m[2], [MO, TH] = momentBaked(), thread = voiceOf(who).thread || '';
+  let d = MO && MO[id] || MOMENTS_BUILTIN[id] || null;
+  if (!d && !thread.startsWith('arc:') && TH && Array.isArray(TH[thread])) d = TH[thread][beat - 1] || null;
+  if (!d || !Array.isArray(d.lines)) return null;
+  return Object.assign({ who, beat, thread, tone: thread.startsWith('arc:') ? 'heartfelt' : MOMENT_TONE[beat - 1] || 'heartfelt' }, d, { who, beat });
+}
+const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
+function momentNextId(p) {                               // the next beat's id, ready or not
+  const v = voiceOf(p.id), th = v.thread || '';
+  if (th.startsWith('arc:')) { const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0; return n >= 1 ? p.id + ':' + (n + 1) : null; }
+  return p.id + ':' + (storyM(p.id).b + 1);
+}
+const momentOwnsBeat = (id, n) => n >= 1 && (voiceOf(id).thread || '').startsWith('arc:') && !!momentDef(id + ':' + (n + 1));   // section 20's arcBeat leaves it to a moment
+const momentHint = id => { const d = momentDef(id); return d && d.hint ? voiceFill(d.who, d.hint) : null; };
+const MOMENT_SERIOUS = new Set(['heartfelt', 'serious', 'resolution']);
+function momentCalm(p, t) {                              // off duty somewhere you could sit and talk, or visiting you
+  if (typeof VISIT !== 'undefined' && VISIT && VISIT.inside && VISIT.p === p) return true;
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null; if (!w || w.moving || !(w.act === 'leisure' || w.act === 'off')) return false;
+  const pl = w.placeId && schedData().byId.get(w.placeId);
+  return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type));
+}
+function momentReady(p, t = shipNow(), ctx = {}) {
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
+  const id = momentNextId(p), d = id && momentDef(id); if (!d) return null;
+  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyM(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories;
+  if (relTier(p.id) < (d.tier ?? g.tier) || metDays(p.id, t) < (d.metDays ?? g.met)) return null;
+  const last = d.tone === 'resolution' ? st.hf : st.at; if (last !== null && (t - last) / 1440 < (d.gapDays ?? g.gap)) return null;
+  if (st.at !== null && Math.floor(st.at / 1440) + 1 === day) return null;   // one moment a day each
+  const ab = (d.thread || '').startsWith('arc:') && STORY_ARCS[p.id] && STORY_ARCS[p.id][d.beat - 1], r = SHIP.rel[p.id];
+  if (ab && ((ab.afterShow && r.showDay && day <= r.showDay) || (r.arcDay || 0) >= day)) return null;   // Pell's last beat waits for his show; one beat a day
+  if (MOMENT_SERIOUS.has(d.tone) && S.serious === day) return null;          // one serious moment a day for you
+  if (!d.crisis) { let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return null; }
+  if (!ctx.anywhere && !momentCalm(p, t)) return null;
+  return id;
+}
+function momentShow(id) {
+  socInit(); const d = momentDef(id), p = d && socP(d.who); if (!d || !p || typeof MEETING_SCRIPTS === 'undefined' || typeof dialogueShow !== 'function') return false;
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  const t = shipNow(), arc = STORY_ARCS[p.id], fill = s => voiceFill(p.id, typeof s === 'function' ? s(p) : s, t);
+  const lines = d.lines.map(l => l.choice ? { choice: l.choice.map(c => ({ text: fill(c.text), flavour: c.flavour, fit: c.flavour === voiceOf(p.id).needs, c,
+      reply: c.reply ? { who: c.reply.who || p.id, text: fill(c.reply.text || c.reply) } : null })) }
+    : { who: l.who || p.id, text: fill(l.say !== undefined && arc && arc[l.say] ? arc[l.say].say : l.text), pose: l.pose });
+  let picked = null;
+  MEETING_SCRIPTS['moment:' + id] = { title: shortName(p), lines,
+    onPick: (k, c) => { picked = c; if (c.fit && c.c.warm) c.reply = { who: p.id, text: fill(c.c.warm) }; },   // the reply that fits them best can have a warmer answer
+    onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); } };
+  return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t });
+}
+function momentDone(p, d, c) {                           // the reply was picked: the moment counts
+  const t = Math.floor(shipNow()), day = Math.floor(t / 1440) + 1, st = storyM(p.id), S = SHIP.social.stories, v = voiceOf(p.id), r = relGet(p.id);
+  const th = (d.thread || '').replace(/^arc:/, ''), flavour = c.flavour || 'listen';
+  st.at = t; if (MOMENT_SERIOUS.has(d.tone)) { S.serious = day; if (d.tone !== 'resolution') st.hf = t; }
+  if (!(d.thread || '').startsWith('arc:')) st.b = Math.max(st.b, d.beat);
+  const pts = ((MOMENT_PTS[d.tone] || 5) + (c.fit ? MOMENT_FIT : 0)) * (v.opennessSet ? OPENNESS[v.openness].moment : 1);
+  relAdd(p.id, 'moment', pts);
+  memAdd(p.id, 'moment.' + th + '.' + d.beat + '.' + flavour, d.tone === 'resolution' ? { cls: 'core' } : {});
+  if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
+  if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
+  if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
+  if (d.after && d.after.mail) SHIP.social.mail.push({ at: t + (d.after.mail.after || 60), from: p.name, subject: d.after.mail.subject, body: voiceFill(p.id, d.after.mail.body) });
+  const arc = (d.thread || '').startsWith('arc:') && STORY_ARCS[p.id], n = d.beat - 1;
+  if (arc && arc[n] && (r.arc || 0) === n) {             // section 20's arc goes on: its count, Mail and Pell's show
+    if (typeof arcTold === 'function') arcTold(p, arc[n]);
+    if ((r.arc || 0) === n) { r.arc = n + 1; r.arcDay = SHIP.time.day; if (arc[n].mail) SHIP.social.mail.push({ at: t + arc[n].mail.after, from: p.name, subject: arc[n].mail.subject, body: arc[n].mail.body }); }   // an older arcTold that takes no beat
+  }
 }
 // ---- end of 20c ----
 
