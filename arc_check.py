@@ -5,25 +5,27 @@
 # beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and a call home to each of Mum, Gran, Jo and Sam at 20:00. Then lists every arc
 # that didn't finish, with its next beat and how often (in the last 7 days) its when and its where held.
 # The crew arcs need the writers' baked MOMENTS (a build with claude/dialogue and claude/content, content_gen run).
-# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS]   (a few minutes)
+# Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes]   (themes: one crew
+#   member per struggle theme, in a game of their own: one serious moment a day is shared, and nobody's close to 20 people)   (a few minutes)
 import sys, os, json, types
 os.environ.setdefault('CADET_CHROME', '/opt/pw-browsers/chromium')
 from playwright.sync_api import sync_playwright
 src=open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cadet_test.py')).read(); src=src[:src.index('import sys, json, hashlib')]
 ct=types.ModuleType('ct'); exec(src, ct.__dict__)
 DAYS=int(sys.argv[2]) if len(sys.argv)>2 else 70
+MODE=sys.argv[3] if len(sys.argv)>3 else 'arcs'   # 'arcs': the story crew and calls home; 'themes': one crew member per struggle theme (a separate game: one serious moment a day is shared)
 JS = r"""
-(DAYS) => {
+([DAYS, MODE]) => {
   socInit();
   const play = () => { let n = 0; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.choices) dialogueStep(0); else dialogueStep(); } };
   const at = (d, m) => { SHIP.time.day = d; SHIP.time.min = m; return (d - 1) * 1440 + m; };
   const live = (d, m) => { const t = (d - 1) * 1440 + m; if (typeof setShipNow === 'function') setShipNow(t); else at(d, m); if (typeof socialTo === 'function') socialTo(t); return t; };   // the crew's own social hours (bonds, rivals) run too
   const [MO] = momentBaked();
-  const ppl = [...new Set(Object.values(MO || {}).map(m => m.who).concat(Object.keys(STORY_ARCS)))].map(id => socP(id)).filter(Boolean);
+  const ppl = MODE === 'themes' ? [] : [...new Set(Object.values(MO || {}).map(m => m.who).concat(Object.keys(STORY_ARCS)))].map(id => socP(id)).filter(Boolean);
   const last = {}; for (const p of ppl) { let n = 0; for (const k in MO || {}) if (MO[k].who === p.id) n = Math.max(n, MO[k].beat); n = Math.max(n, (STORY_ARCS[p.id] || []).length); last[p.id] = n; }
   const out0 = { appts: 0, visits: 0, partial: {} };
   const TH = momentBaked()[1] || {};                    // the struggle themes: the first crew member with each theme whose beats all apply to them
-  for (const th of Object.keys(TH).sort()) { const ok = q => !ppl.includes(q) && voiceOf(q.id).thread === th && [1, 2, 3].some(b => momentDef(q.id + ':' + b)), all = q => [1, 2, 3].every(b => momentDef(q.id + ':' + b));
+  if (MODE === 'themes') for (const th of Object.keys(TH).sort()) { const ok = q => !ppl.includes(q) && voiceOf(q.id).thread === th && [1, 2, 3].some(b => momentDef(q.id + ':' + b)), all = q => [1, 2, 3].every(b => momentDef(q.id + ':' + b));
     const p = SOC.crew.find(q => ok(q) && all(q)) || SOC.crew.find(ok);   // all three beats if anyone has them, else whoever has some
     if (p) { ppl.push(p); last[p.id] = 3; out0.partial[th] = [1, 2, 3].filter(b => !momentDef(p.id + ':' + b)); } }
   const told = {}, log = [];
@@ -33,7 +35,8 @@ JS = r"""
       const t = live(d, m);
       if (m === 720) for (const p of ppl) { relAdd(p.id, 'chat', 2); relAdd(p.id, 'meal', 3); }
       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
-      for (const p of ppl) {
+      const wantsMe = p => { const x = momentNextId(p), dd = x && momentDef(x); return dd && [].concat(dd.where || []).some(w => w === 'appt' || w === 'visit') ? 0 : 1; };
+      for (const p of ppl.slice().sort((a, b) => wantsMe(a) - wantsMe(b))) {   // a beat you made time for (an appointment, a visit) goes first, as you'd play it
         const b0 = beatNow(p);
         if (STORY_ARCS[p.id] && arcBeat(p, t)) arcTold(p);
         const nx = momentNextId(p), nd = nx && momentDef(nx), wh = nd ? [].concat(nd.where || []) : [];
@@ -43,7 +46,7 @@ JS = r"""
         if (vis) VISIT = null;
         const b1 = beatNow(p); if (b1 !== b0) log.push(d + ' ' + p.id + ' ' + b1);
       }
-      if (m === 1200) for (const k of HOME_ORDER) if (homeCall(k, t)) play();
+      if (m === 1200 && MODE !== 'themes') for (const k of HOME_ORDER) if (homeCall(k, t)) play();
     }
   }
   // why a stalled arc is stuck: the next beat's gates, tried every half hour of the last 7 days
@@ -59,6 +62,7 @@ JS = r"""
         let w = true; if (dd.when) { try { w = !!linesOk(dd.when, p, typeof momentCtx === 'function' ? momentCtx(p, t, id) : { t, moment: id }); } catch (e) { w = false; } }
         const wh = momentWhere(p, t, dd); whenOk += w; whereOk += wh; both += w && wh; }
       Object.assign(info, { whenOk, whereOk, both, of: 7 * 36 });
+      const st = storyM(p.id), g = STEP_GATES[dd.tone] || STEP_GATES.heartfelt; info.gate = { tierNeed: dd.tier ?? g.tier, metNeed: dd.metDays ?? g.met, gapNeed: dd.gapDays ?? g.gap, lastAt: st.at, lastHf: st.hf, serious: SHIP.social.stories.serious, appts: SHIP.device.appts.filter(a => a.with.includes(p.id)).slice(-3).map(a => [Math.floor(a.at / 1440) + 1, a.at % 1440, a.status]) };
     }
     out.stalled[p.id] = info;
   }
@@ -71,7 +75,7 @@ JS = r"""
 """
 with sync_playwright() as pw:
     g = ct.Game(pw, sys.argv[1]); g.step(3)
-    r = g.page.evaluate('([s, d]) => window.__sc("(" + s + ")(" + d + ")")', [JS, DAYS])
+    r = g.page.evaluate('([s, a]) => window.__sc("(" + s + ")(" + JSON.stringify(a) + ")")', [JS, [DAYS, MODE]])
     g.close()
     print('Finished:', ', '.join(f"{k} {v}/{r['last'][k]}" for k, v in r['done'].items()))
     print('Home:', ', '.join(r['home']), '| booked appointments', r['sim']['appts'], '| visits', r['sim']['visits'])

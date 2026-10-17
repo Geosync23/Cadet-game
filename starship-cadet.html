@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.14
+   STARSHIP CADET: CSV Wren                           build 0.39.15
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.14';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.15';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -15538,6 +15538,7 @@ function storyHour(h, pairs) {
     if (!both(i, j)) continue;
     const k = crew[i].id + ':' + crew[j].id, b = B[k], v = aff[pairIdx(i, j)], cur = b ? b.kind : null;
     if (cur === 'mentor' || cur === 'couple' || B[crew[j].id + ':' + crew[i].id]) continue;   // a mentor's key, the other way round
+    if (b && b.spar && v < BOND_AT.friends) continue;     // a sparring partner stays one until they're friends
     if (v <= BOND_AT.rivals || (cur === 'rivals' && v <= BOND_AT.rivalsOff)) set(k, 'rivals');
     else if (cur === 'friends' || cur === 'best') { if (v > b.peak) b.peak = v; if (v <= b.peak - BOND_AT.drift) set(k, 'drifting', { seen: b.seen }); }
     else if (v >= BOND_AT.friends) set(k, 'friends', { peak: v, seen: b ? b.seen : h });
@@ -15552,6 +15553,17 @@ function storyHour(h, pairs) {
   for (const k in B) { const b = B[k]; if ((b.kind !== 'friends' && b.kind !== 'best') || b.gone) continue;
     const [a, c] = k.split(':'), best = top.get(a)[0] === c && top.get(c)[0] === a && affinity(a, c) >= BOND_AT.best;
     if (best && b.kind !== 'best') set(k, 'best', { peak: b.peak, seen: b.seen }); else if (!best && b.kind === 'best') set(k, 'friends', { peak: b.peak, seen: b.seen }); }
+  // sparring partners (0.39.14, the rivalry theme; the lead and head writer 3): someone whose thread is rivalry and who
+  // has no rival gets one once a day, friendly-competitive: the aboard crewmate they get on with least (their
+  // department first), not a partner, mentor or friend. Kept until they're friends (the theme's happy end)
+  if (h % 24 === 4) for (let i = 0; i < n; i++) {
+    const p = crew[i]; if (!on[i] || (voiceOf(p.id).thread || '') !== 'rivalry' || socBondOf(p.id, 'rivals')) continue;
+    let pick = null, pv = 1e9;
+    for (let j = 0; j < n; j++) { if (j === i || !on[j] || crew[j].rank === 'guest') continue; const q = crew[j], sk = i < j ? p.id + ':' + q.id : q.id + ':' + p.id, sb = B[sk] || B[i < j ? q.id + ':' + p.id : p.id + ':' + q.id];
+      if (sb && !sb.gone && sb.kind !== 'drifting') continue;
+      const v = aff[pairIdx(i, j)] - (q.dept === p.dept ? 1000 : 0); if (v < pv || (v === pv && q.id < pick[0].id)) { pick = [q, sk]; pv = v; } }
+    if (pick) set(pick[1], 'rivals', { spar: true });
+  }
   // mentors: kept while they get on; new ones once a day, the warmest senior first
   for (const k in B) { if (B[k].kind !== 'mentor' || B[k].gone) continue; const [a, c] = k.split(':'); if (affinity(a, c) < BOND_AT.mentorOff) drop(k); }
   if (h % 24 === 4) {
