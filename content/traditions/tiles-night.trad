@@ -15,7 +15,6 @@ anim: play
 host: rina
 from: rina
 ties: decor tilesNight
-ties: tally tiles-night
 invite: host=rina odds=40% line="Tiles tonight in the lounge. Come and lose to me. It's educational."
 
 == mail
