@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.52
+   STARSHIP CADET: CSV Wren                           build 0.48.53
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.52';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.53';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -24972,6 +24972,8 @@ const CONVOS = [
   {"id": "18hy4sc", "tone": "warm", "leaving": "soon", "pair": "best", "topic": "goodbyes", "lines": [{"who": "A", "text": "You've been the best bit of this ship."}, {"who": "B", "text": "Don't. I'll cry at breakfast."}, {"who": "A", "text": "Cry at lunch. Breakfast's busy."}]},
   {"id": "rmw1gv", "tone": "warm", "leaving": "soon", "pair": "mentor", "topic": "goodbyes", "lines": [{"who": "A", "text": "Anything I should know, out there?"}, {"who": "B", "text": "Ask. Listen. Write it down."}, {"who": "A", "text": "That's what you said on day one."}, {"who": "B", "text": "Still true."}]},
   {"id": "1aaiumu", "tone": "warm", "leaving": "soon", "pair": "mentor", "topic": "goodbyes", "lines": [{"who": "A", "text": "Thank you. For all of it."}, {"who": "B", "text": "You did the work. I just watched."}]},
+  {"id": "2gsot2", "tone": "warm", "leaving": "soon", "pair": "mentee", "topic": "goodbyes", "lines": [{"who": "A", "text": "You don't need me now. You haven't for a while."}, {"who": "B", "text": "I'll still ask you things."}, {"who": "A", "text": "Write them down. I'll answer every one."}]},
+  {"id": "xh1r8v", "tone": "warm", "leaving": "soon", "pair": "mentee", "topic": "goodbyes", "lines": [{"who": "A", "text": "Your first job on your own. I still think about it."}, {"who": "B", "text": "I dropped the part. Twice."}, {"who": "A", "text": "Then you didn't. That's the whole story."}]},
   {"id": "j6vgus", "tone": "warm", "leaving": "soon", "pair": "couple", "topic": "goodbyes", "lines": [{"who": "A", "text": "Two ships. That's all it is."}, {"who": "B", "text": "Two ships and a lot of letters."}, {"who": "A", "text": "I'll number them."}]},
   {"id": "1lckmnj", "tone": "warm", "leaving": "soon", "pair": "couple", "topic": "goodbyes", "lines": [{"who": "A", "text": "I've packed your jumper by mistake."}, {"who": "B", "text": "Keep it. It's a good mistake."}]},
   {"id": "1w16sfj", "tone": "funny", "leaving": "soon", "pair": "any+any", "topic": "goodbyes", "who": "teague-theo", "with": "hart-ravi", "lines": [{"who": "A", "text": "One last comic. You're the duck."}, {"who": "B", "text": "I'm always the duck."}, {"who": "A", "text": "You're a very good duck."}]},
