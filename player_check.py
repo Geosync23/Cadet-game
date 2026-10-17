@@ -89,6 +89,18 @@ STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.
 def state(g): return json.loads(g.ev(STATE))
 UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
 
+def servery_seat(g, label):
+    """the servery's line (0.28.31): served, you hold your tray and get control back; then you tap a mess table yourself"""
+    tp, b, seen, e, pk = run_activity(g, 'Servery', label=label)
+    tray = g.ev("[SHIP.player.tray, player.holding, !!ACT]")
+    print('  served, tray in hand, control back:', tray)
+    if g.ev("typeof galleyJoin === 'function'") and any(a[0] == 'queue' for a in seen):
+        check(isinstance(tray[0], str) and tray[1] == 'tray' and tray[2] is False, f'served: your tray in hand and control back ({tray})')
+        tp2, b2, seen2, e, pk2 = run_activity(g, 'Mess table', label=label)
+        check(tp2 is True and g.ev("SHIP.player.tray") is None, f'a tap on a mess table with your tray: sit and eat ({tp2})')
+        seen, pk = seen + seen2, max(pk, pk2)
+    return tp, b, seen, e, pk
+
 def run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
     before = state(g)
@@ -276,7 +288,7 @@ with sync_playwright() as pw:
     if b['basket']['kind'] == 'comfort': check(g.ev("SHIP.player.locker.includes(%s)" % json.dumps(b['basket']['name'])), 'a comfort goes in your locker')
     else: check(e['needs']['hunger'] > hu0, 'a snack should feed you a little')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 17 * 60 + 40); needsT = null"); g.step(5)   # dinner
-    tp, b, seen, e, pk = run_activity(g, 'Servery', label='Servery, then a seat'); peak = max(peak, pk)
+    tp, b, seen, e, pk = servery_seat(g, 'Servery, then a seat'); peak = max(peak, pk)
     kinds = [a[0] for a in seen]
     joins = g.ev("typeof galleyJoin === 'function'")    # with the galley's queue (0.29.6) the servery is the queue; without it, a tray at a queue spot
     check(tp is True and ('queue' if joins else 'tray') in kinds and 'eat' in kinds, f'servery: {sorted(set(kinds))}')
@@ -300,13 +312,23 @@ with sync_playwright() as pw:
           window.galleyJoin = () => (window.joined = { at: [33, 2], xy: [33.55, 2.5], face: 's', ahead: 3, turnAt: shipNow() + 3.25 });
           window.galleyTurn = () => !!window.joined && shipNow() >= window.joined.turnAt && window.portions > 0; })()""")
     g.ev("SHIP.player.needs.hunger = 20")
-    tp, b, seen, e, pk = run_activity(g, 'Servery', label='The queue, then a seat')
+    tp, b, seen, e, pk = servery_seat(g, 'The queue, then a seat')
     kinds = [a[0] for a in seen]
     check(tp is True and 'queue' in kinds and 'eat' in kinds and 'tray' not in kinds, f'queue: {sorted(set(kinds))}')
     waited = sum(1 for a in seen if a[0] == 'queue' and a[1] is None and a[2] == 'do')
     check(waited >= (1 if real[1] else 3), f'queue: should wait at the back of the line for the turn ({waited} checks)')
     check(any(a[0] == 'eat' and a[1] and a[1].startswith('3-mess') and a[3] == 'sit' for a in seen), 'queue: then sit at a mess seat to eat')
     body_check('queue and eat', 'hunger', 55, b, e, seen, None)
+    # in the line a tap doesn't walk you off: it asks "Leave the queue?" (0.28.31)
+    g.ev("SHIP.player.needs.hunger = 30"); g.ev(f"({TAP})({json.dumps({'title': 'Servery', 'near': None})})")
+    for j in range(60):
+        g.step(10)
+        if g.ev("!!ACT && ACT.kind === 'queue' && ACT.phase === 'do'"): break
+    lq = g.ev("(() => { const inq = !!ACT && ACT.kind === 'queue' && ACT.phase === 'do'; const p = player.obj.position; const r = playerFloorTap(new THREE.Vector3(p.x + 2, 0, p.z + 2)); return [inq, r, !document.getElementById('qAsk').hidden, !!ACT && ACT.kind]; })()")
+    g.step(5); still = g.ev("!!ACT && ACT.kind")
+    g.ev("document.getElementById('qLeave').click()"); g.step(5); left = g.ev("[!!ACT, document.getElementById('qAsk').hidden]")
+    print('  the line holds you (in it, tap held, asked, still queueing):', lq, still, '| after Leave:', left)
+    if lq[0]: check(lq[1:] == [True, True, 'queue'] and still == 'queue' and left == [False, True], f'a tap in the line asks first; Leave takes you out: {lq} {still} {left}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:

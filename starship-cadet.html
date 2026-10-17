@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.30
+   STARSHIP CADET: CSV Wren                           build 0.28.31
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.30';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.31';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9547,6 +9547,8 @@ function bunkSleep(A) {                                  // once you're lying in
 const PLAYER_TAPS = [];                                  // other sections' taps (15b): f(item, itemPos, tapPoint) -> true if handled
 // an item was tapped (section 11): start its activity, or return false to let the tap do what it always did
 function playerTap(it, at, point) {
+  if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
+  if (SHIP.player.tray && /^servery$/i.test(it.t)) { toast(it.t, 'You already have your tray. Find a seat and tap it to eat.'); return true; }
   if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
@@ -9564,7 +9566,7 @@ function playerTap(it, at, point) {
     approach(at.clone(), it.front, it.depth, () => actStart('pay', null, { title: it.t, after: clerk ? clerk.p.name + ' rings it up.' : 'Nobody\'s on the till, so you scan your badge yourself.' }));
     return true;
   }
-  if ((kind === 'tray' || kind === 'eat') && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
+  if ((kind === 'tray' || kind === 'eat' && !SHIP.player.tray) && !foodFrom('servery', true).ok) { toast(it.t, foodFrom('servery', true).why); return true; }
   if (kind === 'tray' && typeof galleyJoin === 'function' && typeof galleyTurn === 'function') {   // join the galley's queue at its back
     const j = galleyJoin('player');
     actStart('queue', null, { title: it.t, ahead: j.ahead, turnAt: j.turnAt,
@@ -9611,6 +9613,7 @@ function sitTap(it, at, point) {
 const FLOOR_NEAR = .5;
 const FLOOR_ACTS = { gym: pl => pl.anim === 'run' ? 'Treadmill' : pl.anim === 'row' ? 'Rowing machine' : pl.pose === 'lie' ? 'Mats' : 'Weights', callhome: () => 'Booth', shop: () => 'Shelves', toilet: () => 'Toilet' };
 function playerFloorTap(point) {
+  if (queueHeld()) return true;                          // in the line: ask first (0.28.31)
   if (bagLockerTap(point)) return true;                  // the kit bag into your locker (0.28.26)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
@@ -9657,6 +9660,9 @@ function stubTap(it, at) {
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
+  if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && (PLACE_OF.get(placeId) || {}).type === 'mess-seat') {   // your tray: eat it at the seat you chose (0.28.31)
+    kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
+  }
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
@@ -9681,6 +9687,7 @@ function actBegin() {
     A.o.dish = f.dish;
   }
   if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt; }   // your place in line from when you reach it
+  if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
@@ -9724,14 +9731,39 @@ function actEnd(abort) {
   }
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
-  if (A.kind === 'queue') toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '.');
-  if (A.kind === 'tray' || A.kind === 'queue') {         // tray in hand: the nearest free mess seat
+  if (A.kind === 'queue') { SHIP.player.tray = A.o.dish; toast('Servery', 'Your turn. You take a tray: ' + A.o.dish + '. Find a seat and tap it to eat.'); return; }   // 0.28.31: control back, tray in hand
+  if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
     const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
       .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
     const o = { title: 'Mess hall', fed: true, dish: A.o.dish };
     if (seat) actStart('eat', seat[0].id, { ...o, pose: seat[1].pose });
     else { actStart('eat', null, o); toast('Mess hall', 'Every seat\'s taken, so you eat standing up.'); }
   }
+}
+// the food line (0.28.31, the user's "you move with the line until it's your turn and get control back"): while you
+// queue, a tap or a drag doesn't walk you off; it asks "Leave the queue?" (Leave / Stay). Served, you hold your tray
+// (SHIP.player.tray, the dish; not saved) and choose a mess seat yourself: tap it and you sit and eat.
+const queueHeld = () => !!(ACT && ACT.kind === 'queue' && ACT.phase !== 'walk' && ACT.phase !== 'out') && (queueAsk(), true);
+SHIP.player.tray = null;
+function queueAsk() {
+  let el = document.getElementById('qAsk');
+  if (!el) {
+    const st = document.createElement('style');
+    st.textContent = '#qAsk{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}#qAsk[hidden]{display:none}#qAsk span{flex:1;white-space:nowrap}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'qAsk'; el.setAttribute('role', 'dialog');
+    el.innerHTML = '<span>Leave the queue?</span><button id="qLeave">Leave</button><button id="qStay">Stay</button>';
+    document.body.appendChild(el);
+    document.getElementById('qLeave').onclick = () => { el.hidden = true; queueLeave(); };
+    document.getElementById('qStay').onclick = () => { el.hidden = true; };
+  }
+  if (typeof toastEl !== 'undefined') toastEl.classList.remove('show');
+  el.hidden = false;
+}
+function queueLeave() {
+  if (!ACT || ACT.kind !== 'queue') return;
+  if (typeof lineLeave === 'function') try { lineLeave('player'); } catch (e) { /* not ours to mend */ }
+  actEnd(true); toast('Servery', 'You step out of the line.');
 }
 // company (0.28.10): crew settled at mess seats within COMPANY_NEAR m of where you eat. A 20-minute meal with three
 // at the table gives about +12 social (times needEffects' socialGain); eating alone, nothing.
@@ -9775,7 +9807,8 @@ function actUpdate(dt, t) {
   const A = ACT;
   if (A.deck !== deckDef) { actEnd(true); return; }
   if (A.phase === 'walk') { if (player.onArrive !== A.cb) ACT = null; return; }   // you went somewhere else
-  if (player.path.length || player.steer) { actEnd(true); return; }               // walked away: stop
+  if ((player.path.length || player.steer) && A.kind === 'queue' && A.phase !== 'out') { player.stop(); if (typeof endSteer === 'function') endSteer(); queueAsk(); }   // the line holds you (0.28.31)
+  else if (player.path.length || player.steer) { actEnd(true); return; }          // walked away: stop
   const go = (x, z) => {                                 // glide toward x, z; true when there
     const dx = x - A.x, dz = z - A.z, d = Math.hypot(dx, dz), st = CREW_SPEED * .8 * dt;
     if (d <= st) { A.x = x; A.z = z; return true; }
@@ -9937,7 +9970,7 @@ function playerUpdate(dt, t) {
   bagTick();                                             // the kit bag into your locker after the bunk step (0.28.26)
   dinnerTick();                                          // sit down at your table for the arrival dinner (0.28.28)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -9999,7 +10032,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.tray = null; needsT = null; slowWas = {};
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
