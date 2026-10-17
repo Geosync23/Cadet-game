@@ -29,4 +29,4 @@ Reviewer 1f, 2026-10-17. Builder: player engineer 7 (session_01CrRKCZzVtM68JrPqJ
 **Fix:** use the job route only when the tapped thing has nothing of its own to do. Either move the `playerTap` hook to the end (a fallback), or limit it to floor taps, `see` items and things with no action. That keeps the user's lamp cases.
 
 ## player_check on 18eedb8
-RESULT_PLACEHOLDER
+PLAYER CHECK OK on 18eedb8 (reviewer 1f), no page errors. It doesn't cover the softlock or the tap takeover; see the probes.
