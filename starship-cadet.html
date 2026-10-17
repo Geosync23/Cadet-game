@@ -15339,7 +15339,10 @@ function voiceWord(id, token, t = shipNow()) {
   const a = v.words[token]; if (!Array.isArray(a) || !a.length) return null;
   return a[Math.floor(U(673 + VOICE_TOKENS.indexOf(token)) * a.length)];
 }
-const voiceFill = (id, text, t = shipNow()) => String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
+function voiceFill(id, text, t = shipNow()) {          // section 22's linesFill when it's there (one filler for every line), else the tokens here
+  if (typeof linesFill === 'function') { try { const p = socP(id && id.id || id), r = p && linesFill(String(text), p, { t }); if (typeof r === 'string') return r; } catch (e) { /* fall back */ } }
+  return String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
+}
 function relGain(id, why, pts) {                         // openness, for section 20's relAdd; onboarding's numbers and moments stay as given
   const v = voiceOf(id); if (!(pts > 0) || !v.opennessSet || /^(intro:|moment)/.test(String(why))) return pts;   // a guessed openness changes nothing
   return pts * OPENNESS[v.openness].pts;
@@ -15574,7 +15577,7 @@ const MOMENTS_BUILTIN = {
                { text: 'How is she, really?', flavour: 'listen', reply: 'Tired. Cheeky. Herself. That\'s all I wanted.' }] },
     { who: 'rina', text: 'Here. Gran\'s cheating piece. She says you\'ll need it.' }], learn: 'Her gran came home, and beat her sister at Tiles.' },
 };
-const momentBaked = () => { try { return [typeof MOMENTS !== 'undefined' && MOMENTS || (typeof LINES !== 'undefined' && LINES && LINES.arcs) || null, typeof MOMENT_THEMES !== 'undefined' && MOMENT_THEMES || null]; } catch (e) { return [null, null]; } };
+const momentBaked = () => { try { return [typeof MOMENTS !== 'undefined' && MOMENTS || null, typeof MOMENT_THEMES !== 'undefined' && MOMENT_THEMES || null]; } catch (e) { return [null, null]; } };   // section 22's baked blocks
 function momentDef(id) {                                 // '<crewId>:<beat>' -> { who, beat, thread, tone, ... , lines } | null
   const m = /^(.+):(\d+)$/.exec(String(id)); if (!m) return null;
   const who = m[1], beat = +m[2], [MO, TH] = momentBaked(), thread = voiceOf(who).thread || '';
