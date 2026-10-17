@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.71
+   STARSHIP CADET: CSV Wren                           build 0.36.72
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.71';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.72';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -25754,7 +25754,7 @@ function socNote(kind, d) {
   const m = kind === 'repair' && typeof machineById === 'function' && d.machine ? machineById(d.machine) : null;   // who it's about (the dialogue engineer's cue:...@me)
   const who = kind === 'gift' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || (m && m.deck) || null, who, dept: m ? repDeptOf(m) : null, room: m ? m.room || null : null });
-  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)).slice(-30);   // in time order, whatever order they came in
+  SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0) || (String(a.who) < String(b.who) ? -1 : String(a.who) > String(b.who) ? 1 : 0) || (a.you === b.you ? 0 : a.you ? -1 : 1)).slice(-30);   // in time order, whatever order they came in
 }
 // notes are queued and applied when the social hour they happened in runs (socialHour), at their own time (SOC_T), so one
 // big time jump and the same hours played one by one come out the same (0.36.49)
@@ -25797,7 +25797,7 @@ function socDays(phrase) {                               // 'six years' / 'eight
 }
 function socDuration(n) {                                // days -> words: 'a day or two', 'three days', 'a week', 'five weeks', 'eighteen months', 'twelve years'
   const W = x => SOC_NUM[x] || String(x), wk = Math.floor(n / 7), mo = Math.round(n / 30), yr = Math.round(n / 365);
-  return n < 2 ? 'a day or two' : n < 7 ? W(n) + ' days' : wk < 9 ? (wk === 1 ? 'a week' : W(wk) + ' weeks') : n < 730 ? (mo <= 1 ? 'a month' : W(mo) + ' months') : W(yr) + ' years';
+  return n < 2 ? 'a day or two' : n < 7 ? W(n) + ' days' : wk < 9 ? (wk === 1 ? 'a week' : W(wk) + ' weeks') : n < 610 ? (mo <= 1 ? 'a month' : W(mo) + ' months') : n < 730 ? 'nearly two years' : W(yr) + ' years';   // SOC_NUM goes to twenty
 }
 const SOC_HOBBY = { musician: 'playing music', music: 'listening to records', gardener: 'gardening', 'garden-lover': 'pottering in the garden', runner: 'running', stargazer: 'stargazing',
   'gym-regular': 'training in the gym', shopper: 'browsing the store', 'quiet-corner': 'reading in quiet corners', 'lounge-regular': 'playing Tiles in the lounge', 'common-room': 'playing games in the common room', 'window-seat': 'watching the stars go by' };
@@ -26686,6 +26686,7 @@ const seekAskFor = (id, t) => (SHIP.social.seekAsks || []).find(a => a.id === id
 const SEEK_WALK = 30, SEEK_RETRY = 20;
 function socialSeekAsks(m) {
   const A = SHIP.social.seekAsks; if (!A || !A.length || typeof DECK_CREW === 'undefined' || typeof deckDef === 'undefined') return false;
+  if (sleeping) return false;                           // not while you sleep (reviewer 1b)
   const t = shipNow(), P = player.obj.position;
   for (const ask of A) {
     if (ask.done || t < ask.from || t >= ask.until || !SOC.idx.has(ask.id)) continue;
@@ -26711,11 +26712,11 @@ function socialSeekAsks(m) {
 }
 function seekSpot() {                                    // somewhere by you for someone to walk to: a free seat (section 10's seatsBeside), else the nearest sitting place nobody's using
   const P = player.obj.position, L = (DECKS[deckDef.num] && DECKS[deckDef.num].places || []).filter(q => Array.isArray(q.at));
-  const SEAT = ['mess-seat', 'lounge-seat', 'bench', 'common-room', 'garden', 'music'], used = new Set(DECK_CREW.map(a => a.goalId || (a.spot && a.spot.id)).filter(Boolean));
+  const SEAT = ['mess-seat', 'lounge-seat', 'bench', 'common-room', 'garden', 'music'], used = new Set(DECK_CREW.map(a => a.goalId || (a.spot && a.spot.id)).concat([PLAYER_PLACE]).filter(Boolean));   // never your own seat
   let near = null, bd = 1e9; for (const q of L) { const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d < bd) { bd = d; near = q; } }
-  if (near && typeof seatsBeside === 'function') { try { const id = seatsBeside(near.id, 1)[0], q = id && L.find(x => x.id === id); if (q && Math.hypot(cellPos(...q.at).x - P.x, cellPos(...q.at).z - P.z) <= SEEK_NEAR) return q; } catch (e) { } }
+  if (near && typeof seatsBeside === 'function') { try { const id = seatsBeside(near.id, 1)[0], q = id && L.find(x => x.id === id); if (q && !used.has(q.id) && Math.hypot(cellPos(...q.at).x - P.x, cellPos(...q.at).z - P.z) <= SEEK_NEAR && Math.hypot(cellPos(...q.at).x - P.x, cellPos(...q.at).z - P.z) > .5) return q; } catch (e) { } }
   let best = null; bd = 1e9;                             // never a bed, a work station or a spot someone holds
-  for (const q of L) { if (!SEAT.includes(q.type) || used.has(q.id)) continue; const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d < bd) { bd = d; best = q; } }
+  for (const q of L) { if (!SEAT.includes(q.type) || used.has(q.id)) continue; const c = cellPos(...q.at), d = Math.hypot(c.x - P.x, c.z - P.z); if (d > .5 && d < bd) { bd = d; best = q; } }   // not right on top of you
   return best && bd <= SEEK_NEAR ? best : null;
 }
 function socialSeek(m) {

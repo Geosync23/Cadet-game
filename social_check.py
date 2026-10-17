@@ -482,9 +482,10 @@ with sync_playwright() as pw:
       const keep = JSON.stringify(socSave()), t0 = shipNow(); SHIP.rep = null; const g0 = repInit().dept.galley;   // unclaimed jobs: one dip a department a week (0.36.71)
       setShipNow(7 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); setShipNow(9 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g1 = repInit().dept.galley;
       setShipNow(15 * 1440 + 600); repNote('jobUnclaimed', { dept: 'galley' }); const g2 = repInit().dept.galley; setShipNow(t0); socLoad(JSON.parse(keep));
-      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2]; })()""")
+      const q = seekSpot(), kp = PLAYER_PLACE; let mine = true; if (q) { PLAYER_PLACE = q.id; const q2 = seekSpot(); mine = !q2 || q2.id !== q.id; PLAYER_PLACE = kp; }   // never your own seat (0.36.72)
+      return [socialFill(p, 'kin'), socialFill(p, 'lost'), socialFill(p, 'hobbyNoun'), socHr(-5), socHr(31), g0 - g1, g0 - g2, socDuration(600), socDuration(650), mine]; })()""")
     print('Small seams:', sm)
-    if sm != ['my gran', None, 'chess', 19, 7, 1, 2]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
+    if sm != ['my gran', None, 'chess', 19, 7, 1, 2, 'twenty months', 'nearly two years', True]: fail(f'kin / lost / hobbyNoun, socHr or the weekly unclaimed dip wrong: {sm}')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
