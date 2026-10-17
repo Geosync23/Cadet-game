@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.0 
+   STARSHIP CADET: CSV Wren                           build 0.39.1 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.1';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13977,6 +13977,7 @@ const AFF_PLAN = new Map();
 function affinityPlan(a, b, d) {
   socInit(); const i = SOC.idx.get(a && a.id || a), j = SOC.idx.get(b && b.id || b);
   if (i === undefined || j === undefined || i === j) return 0;
+  if (typeof affPlanWeek === 'function') { const v = affPlanWeek(i, j, d); if (v !== undefined) return v; }   // the weekly snapshot (20c)
   const k = pairIdx(i, j); if (!AFF_PLAN.has(k)) AFF_PLAN.set(k, affStart(SOC.crew[Math.min(i, j)], SOC.crew[Math.max(i, j)]));
   return AFF_PLAN.get(k);
 }
@@ -14569,7 +14570,8 @@ function chatTick() {
 
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
-// Voice cards and steps (0.39.0); later crew-to-crew bonds, moments, goodbyes and the story arcs. Lazy like the rest
+// Voice cards and steps (0.39.0), crew-to-crew bonds, introductions and the weekly snapshot (0.39.1); later moments,
+// goodbyes and the story arcs. Lazy like the rest
 // of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
@@ -14579,7 +14581,8 @@ function chatTick() {
 //     call you: 'cadet' as strangers, your name, then their nickname for you as friends)
 //   voiceFill(id, text, t) -> the text with their voice tokens and {me} filled (picked per person and ship hour)
 //   relGain(id, why, pts) -> pts after openness (section 20's relAdd asks): guarded people warm 20% slower, open
-//     ones 20% faster; their moments the other way round (OPENNESS.moment, used by the moments engine)
+//     ones 20% faster, once their card's openness is written (roster or VOICE), not guessed; their moments the other
+//     way round (OPENNESS.moment, used by the moments engine)
 //   metDays(id, t), stepGate(id, tone, t, last) -> whether a light / heartfelt / resolution moment may open yet
 //     (STEP_GATES: tier, days known, days since their last moment)
 //   knowSections(id) -> [{ title, items }] what you know about them, by section (Work, Home, Hobby, Past, Their
@@ -14622,11 +14625,14 @@ const VOICE_THEME_BY = [['homesick', 'homesick'], ['calls-home', 'homesick'], ['
 const VOICE_THEMES = ['homesick', 'exams', 'family', 'stuck', 'notEnough', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry', 'starting'];
 const OPENNESS = { guarded: { pts: .8, moment: 1.5 }, normal: { pts: 1, moment: 1 }, open: { pts: 1.2, moment: .75 } };
 const VOICE_CARD = new Map();
+let VOICE_SRC = null;                                     // the writers' data the cached cards were made from
+const voiceData = () => { try { return [typeof VOICE !== 'undefined' && VOICE || null, typeof VOICE_TEMPLATES !== 'undefined' && VOICE_TEMPLATES || null]; } catch (e) { return [null, null]; } };   // not yet declared: none
 function voiceOf(id) {
   id = id && id.id || id;
+  const D = voiceData(); if (!VOICE_SRC || VOICE_SRC[0] !== D[0] || VOICE_SRC[1] !== D[1]) { VOICE_SRC = D; VOICE_CARD.clear(); }   // new data baked in: cards again
   if (VOICE_CARD.has(id)) return VOICE_CARD.get(id);
   socInit(); const p = SOC.idx.has(id) ? SOC.crew[SOC.idx.get(id)] : null;
-  const W = typeof VOICE !== 'undefined' && VOICE && VOICE[id] || {}, T = typeof VOICE_TEMPLATES !== 'undefined' && VOICE_TEMPLATES || {};
+  const W = D[0] && D[0][id] || {}, T = D[1] || {};
   const traits = p && p.traits || [], habits = p && p.habits || [], has = l => traits.some(x => l.includes(x));
   const tpl = [W.tpl, p && p.tpl].find(x => x && (T[x] || VOICE_FALLBACK[x])) || (traits.map(x => VOICE_BY_TRAIT[x]).find(Boolean)) || 'steady';
   const base = T[tpl] || VOICE_FALLBACK[tpl], fb = VOICE_FALLBACK[tpl] || VOICE_FALLBACK.steady;
@@ -14641,7 +14647,8 @@ function voiceOf(id) {
     loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
     invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
     thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),
-    keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {} };
+    keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {},
+    opennessSet: W.openness !== undefined || !!(p && p.openness !== undefined) };   // written, not guessed: only then does it change points
   if (!OPENNESS[card.openness]) card.openness = 'normal';
   if (p) VOICE_CARD.set(id, card);                       // the data is fixed for a game, so once is enough
   return card;
@@ -14657,8 +14664,8 @@ function voiceWord(id, token, t = shipNow()) {
 }
 const voiceFill = (id, text, t = shipNow()) => String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
 function relGain(id, why, pts) {                         // openness, for section 20's relAdd; onboarding's numbers and moments stay as given
-  if (!(pts > 0) || /^(intro:|moment)/.test(String(why))) return pts;
-  return pts * OPENNESS[voiceOf(id).openness].pts;
+  const v = voiceOf(id); if (!(pts > 0) || !v.opennessSet || /^(intro:|moment)/.test(String(why))) return pts;   // a guessed openness changes nothing
+  return pts * OPENNESS[v.openness].pts;
 }
 // steps: what each tier lets happen also needs time known (social-deep-plan Part 1, starting numbers to tune). gap:
 // days since their last moment (for resolution, the last heartfelt one), passed in by the moments engine
@@ -14679,7 +14686,7 @@ function knowSections(id) {
   for (const k of r.known) {
     if (k === 'news' || k === 'work') continue;
     const m = /^@(\w+):(.+)$/.exec(k), a = !m && (p.about || []).find(x => x.text === k);
-    const sec = m ? m[1] : a ? a.topic || 'home' : 'home', text = m ? m[2] : k;
+    const sec0 = m ? m[1] : a ? a.topic || 'home' : 'home', sec = KNOW_SECTIONS.some(([x]) => x === sec0) ? sec0 : 'home', text = m ? m[2] : k;   // a topic we've no section for: Home
     (by[sec] || (by[sec] = [])).push(text);
   }
   const out = [];
@@ -14697,14 +14704,18 @@ function knowBlocks(id) {                                // for the Crew app (se
 // person's mutual closest friend, BOND_AT.best+; at most one each), rivals (BOND_AT.rivals or less, until it climbs
 // past rivalsOff), drifting (friends whose affinity fell BOND_AT.drift below its peak; ends at driftOff, or friends
 // again), mentor (same department, a rank or more apart, the senior's voice card mentors, BOND_AT.mentor+; at most
-// BOND_MENTEES each, one mentor each; until mentorOff). One bond a pair (best > mentor > the rest). Friends who
-// haven't spent time together for BOND_APART days drift down a point a day (key 680), which is how friendships
-// fade when shifts or bunks move people apart. storyHour(h, pairs) runs it each ship hour (section 20's socialHour
+// BOND_MENTEES each, one mentor each, mentees juniors or officers; until mentorOff). One bond a pair (best > mentor >
+// the rest). Friends who haven't spent time together for BOND_APART days drift down a point a day, which is how
+// friendships fade when shifts or bunks move people apart. storyHour(h, pairs) runs it each ship hour (section 20's socialHour
 // hands over who spent time together). socBondOf(id, kind) answers section 20's bondOf. Changes go on the ship notes
 // bus: simNote('bond', { a, b, kind, was })
-const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 20, driftOff: 20, mentor: 40, mentorOff: 25 };
-const BOND_MENTEES = 2, BOND_APART = 5;
-const BOND_KINDS = ['friends', 'best', 'rivals', 'drifting', 'mentor', 'mentee', 'couple', 'friend'];
+const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 15, driftOff: 20, mentor: 40, mentorOff: 25 };
+const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'];
+const STORY_BONDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'];   // section 20's frozen BOND_KINDS
+// how many friends (60+) someone makes room for: section 20's hourly drift stops new friendships climbing past 60
+// once either of the pair has this many (the designer's numbers)
+const FRIEND_CAP_OPEN = ['chatty', 'sociable', 'warm', 'cheerful'], FRIEND_CAP_SHY = ['shy', 'private', 'quiet'];
+const friendCap = p => { const t = p && p.traits || []; return t.some(x => FRIEND_CAP_OPEN.includes(x)) ? 5 : t.some(x => FRIEND_CAP_SHY.includes(x)) ? 3 : 4; };
 function storyHour(h, pairs) {
   const { crew, n } = SOC, t = h * 60 + 30, aff = SHIP.aff, B = SHIP.social.bonds || (SHIP.social.bonds = {}), rank = p => RANK_ORDER.indexOf(p.rank);
   const set = (k, kind, extra) => { const b = B[k], was = b ? b.kind : null; if (was === kind) return; B[k] = Object.assign({ kind, since: t }, extra);
@@ -14715,7 +14726,7 @@ function storyHour(h, pairs) {
   // friends long apart fade a little, once a day at 04:00
   if (h % 24 === 4) for (const k in B) { const b = B[k]; if (b.kind !== 'friends' && b.kind !== 'best' && b.kind !== 'drifting') continue;
     const [a, c] = k.split(':'), i = SOC.idx.get(a), j = SOC.idx.get(c); if (i === undefined || j === undefined) continue;
-    if (h - (b.seen ?? Math.floor(b.since / 60)) > BOND_APART * 24 && schedU(pairSeed(Math.min(i, j), Math.max(i, j)), h, 680) < .5) aff[pairIdx(i, j)] = Math.max(-100, aff[pairIdx(i, j)] - 1); }
+    if (h - (b.seen ?? Math.floor(b.since / 60)) > BOND_APART * 24) aff[pairIdx(i, j)] = Math.max(-100, aff[pairIdx(i, j)] - 1); }
   // friends, rivals and drifting, pair by pair
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
     const k = crew[i].id + ':' + crew[j].id, b = B[k], v = aff[pairIdx(i, j)], cur = b ? b.kind : null;
@@ -14740,7 +14751,7 @@ function storyHour(h, pairs) {
     const has = new Set(), count = new Map();
     for (const k in B) if (B[k].kind === 'mentor') { const [a, c] = k.split(':'); has.add(c); count.set(a, (count.get(a) || 0) + 1); }
     for (let j = 0; j < n; j++) {
-      const q = crew[j]; if (has.has(q.id) || q.rank === 'guest') continue;
+      const q = crew[j]; if (has.has(q.id) || !BOND_MENTEE_RANKS.includes(q.rank)) continue;
       let pick = null, pv = BOND_AT.mentor - 1;
       for (let i = 0; i < n; i++) { const p = crew[i];
         if (p.dept !== q.dept || p.rank === 'guest' || rank(p) < 0 || rank(q) - rank(p) < 1 || (count.get(p.id) || 0) >= BOND_MENTEES || !voiceOf(p.id).mentors) continue;
@@ -14750,13 +14761,13 @@ function storyHour(h, pairs) {
     }
   }
 }
-function socBondOf(id, kind) {                           // for section 20's bondOf: a crewmate, null for none, undefined for "not mine"
-  if (!BOND_KINDS.includes(kind)) return undefined;
+function socBondOf(id, kind) {                           // for section 20's bondOf: a crewmate, null for none, undefined for "not mine"; friends includes best
+  if (!STORY_BONDS.includes(kind)) return undefined;
   socInit(); id = id && id.id || id; const B = SHIP.social.bonds || {};
   let pick = null, pv = -1e9;
   for (const k in B) {
     const b = B[k], [a, c] = k.split(':'); if (a !== id && c !== id) continue;
-    const ok = kind === 'friend' ? b.kind === 'friends' || b.kind === 'best' : kind === 'mentor' ? b.kind === 'mentor' && c === id : kind === 'mentee' ? b.kind === 'mentor' && a === id : b.kind === kind;
+    const ok = kind === 'friends' ? b.kind === 'friends' || b.kind === 'best' : kind === 'mentor' ? b.kind === 'mentor' && c === id : kind === 'mentee' ? b.kind === 'mentor' && a === id : b.kind === kind;
     if (!ok) continue;
     const o = a === id ? c : a, v = affinity(id, o); if (v > pv || (v === pv && o < pick)) { pick = o; pv = v; }
   }
