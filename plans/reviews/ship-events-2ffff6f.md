@@ -16,6 +16,7 @@ build-label conflicts only, `node --check` OK)
   later), and none of the earlier ones books occasions or meetings, so nothing a fresh game adds is wiped.
 
 ## FYI for the build master (not this build)
-On the 0.60.3 candidate, device_check fails "Mail: From home, Play on a recorded message" (play False) with its own
-device_check and with 24f1920's; it fails the same without 2ffff6f, so it predates this review. 0.60.3's own
-device_check also fails four heads-up cases, which 0.35.39's device_check fixes.
+On the 0.60.3 candidate (eb75e1a) alone, its own device_check fails "Mail: From home, Play on a recorded message"
+(play False) and "heads-up: as it starts, once" (the Late piano window, fixed in the check by 24f1920). With device
+24f1920 merged, and with or without 2ffff6f, "From home, Play" still fails, so it predates this review: worth a look
+in the 0.60.4 combine.
