@@ -2779,6 +2779,92 @@ function tallCombine() {
   }
   tallSync();
 }
+// 0.27.25: shadow stand-ins. The shadow pass drew every furniture mesh, wall piece and hull piece again, one draw per
+// material, more draws than the picture itself. A shadow only needs the shape, so after the build their triangles are
+// copied, positions only, into a few plain meshes, and the originals stop casting:
+//   - things that never move (the merged furniture, the tall pieces): one stand-in per 10 x 10 tile block;
+//   - wall pieces: one per wall run, shown only while that run's pieces are up (they drop with the cutaway together);
+//   - hull pieces, their decor and the curved walls: one per piece, following its height as the cutaway lowers it.
+// One per face side as well, since the shadow pass follows each material's side. The stand-ins are hidden except while
+// the shadow pass runs (the main pass has already picked what it draws), so they never reach the picture. Same depth
+// from the same triangles, so the same shadows. Left alone: instanced things (walls, door leaves, plants, the crowd),
+// anything marked noMerge (it moves), and materials with alphaTest or their own shadowSide.
+let SHADOW_PROXY = [];
+const SHADOW_PROXY_MAT = [THREE.FrontSide, THREE.BackSide, THREE.DoubleSide].map(side => new THREE.MeshBasicMaterial({ side }));
+function shadowStandIns() {
+  SHADOW_PROXY = [];
+  deckRoot.updateMatrixWorld(true);
+  const buckets = new Map(), v = new THREE.Vector3(), inv = new THREE.Matrix4(), m4 = new THREE.Matrix4(), CELL = 10;
+  // a mesh's triangles into a bucket, in frame's own space (world when frame is null); key(x, z) names the bucket.
+  // Two passes: the first counts each bucket's triangles, the second fills one Float32Array each (no big JS arrays)
+  let fill = false;
+  const take = (m, frame, key, follow, vis) => {
+    if (!m.isMesh || m.isInstancedMesh || m.isSkinnedMesh || !(fill ? m.userData.shadowProxy : m.castShadow) || m.userData.noMerge) return;
+    const mats = Array.isArray(m.material) ? m.material : [m.material], side = mats[0].side;
+    if (mats.some(x => x.alphaTest > 0 || x.shadowSide != null || !x.visible || x.side !== side)) return;
+    for (let p = m.parent; p && p !== frame && p !== deckRoot; p = p.parent) if (p.userData.noMerge) return;
+    const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry, P = geo.attributes.position;
+    m4.multiplyMatrices(frame ? inv.copy(frame.matrixWorld).invert() : inv.identity(), m.matrixWorld);
+    for (let t = 0; t + 2 < P.count; t += 3) {
+      let cx = 0, cz = 0;
+      for (let k = 0; k < 3; k++) { v.fromBufferAttribute(P, t + k).applyMatrix4(m4); tri[k * 3] = v.x; tri[k * 3 + 1] = v.y; tri[k * 3 + 2] = v.z; cx += v.x; cz += v.z; }
+      const id = side + '|' + key(cx / 3, cz / 3); let b = buckets.get(id);
+      if (!b) buckets.set(id, b = { side, n: 0, P: null, at: 0, follow, vis });
+      if (!fill) b.n += 9; else { b.P.set(tri, b.at); b.at += 9; }
+    }
+    if (geo !== m.geometry) geo.dispose();
+    m.castShadow = false; m.userData.shadowProxy = true;
+  };
+  const cell = (x, z) => 'c' + Math.floor(x / CELL) + ',' + Math.floor(z / CELL), tri = new Float32Array(9);
+  for (fill of [false, true]) {
+  if (fill) for (const b of buckets.values()) b.P = new Float32Array(b.n);
+  for (const m of staticRoot.children) take(m, null, cell);
+  for (const b of TALL_ALL) take(b.mesh, null, cell);
+  for (const t of TALL) for (const o of t.own || []) o.castShadow = false;   // a fading room's own meshes: the stand-ins cast for them
+  const runs = new Map();
+  for (const d of WALL_DECOR) {
+    const run = d.e && (d.e.type === 'hull' ? d.e.hrun : d.e.run);
+    if (!run) { d.g.traverse(m => take(m, null, cell)); continue; }
+    if (!runs.has(run)) runs.set(run, { id: 'w' + runs.size, vis: d.g });
+    const r = runs.get(run); d.g.traverse(m => take(m, null, () => r.id, null, r.vis));
+  }
+  HULL_RUNS.forEach((hr, k) => {
+    hr.g.traverse(m => take(m, hr.g, () => 'h' + k, hr.g, hr.g));
+    hr.decor.traverse(m => take(m, hr.decor, () => 'hd' + k, hr.decor, hr.decor));
+  });
+  CURVES.forEach((c, k) => c.g.traverse(m => take(m, c.g, () => 'cv' + k, c.g, c.g)));
+  }
+  for (const b of buckets.values()) {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(b.P, 3).onUpload(function () { this.array = null; })); geo.computeBoundingSphere();   // once on the GPU the copy here isn't needed
+    const mesh = new THREE.Mesh(geo, SHADOW_PROXY_MAT[b.side]); mesh.castShadow = true; mesh.receiveShadow = false; mesh.visible = false;
+    mesh.matrixAutoUpdate = false; mesh.raycast = () => {}; deckRoot.add(mesh); SHADOW_PROXY.push({ mesh, follow: b.follow, vis: b.vis });
+  }
+}
+// 0.27.26: three.js recomputes every object's place in the world every frame unless told it doesn't move. After the
+// build, the furniture (staticRoot), the tall pieces (TALL) and the wall pieces (WALL_DECOR) are marked so
+// (matrixAutoUpdate off, their matrix computed once), except anything that moves: noMerge parts and everything under
+// them (gym seats, the punch bag, rotors), SPINS targets, STEAM puffs, and the groups that hold any of those. Hull, doors, curved
+// walls and void blocks change size with the cutaway and are left alone. Children added later keep updating themselves.
+function freezeStill() {
+  const keep = new Set();
+  const mark = o => { for (let p = o; p && p !== deckRoot; p = p.parent) keep.add(p); };
+  for (const sp of SPINS) if (sp.o && sp.o.isObject3D) mark(sp.o);
+  for (const st of STEAM) mark(st.s);                   // steam puffs rise every frame
+  const roots = [staticRoot, ...TALL.map(t => t.g), ...WALL_DECOR.map(d => d.g)];
+  for (const r of roots) r.traverse(o => { if (o.userData.noMerge) mark(o); });
+  const freeze = o => {
+    if (o.userData.noMerge) return;                     // it, and all under it, keep moving
+    if (!keep.has(o)) { o.updateMatrix(); o.matrixAutoUpdate = false; }
+    for (const c of o.children) freeze(c);
+  };
+  for (const r of roots) freeze(r);
+}
+const shownChain = o => { for (let p = o; p; p = p.parent) if (!p.visible) return false; return true; };
+{ const sm = renderer.shadowMap, draw = sm.render.bind(sm);   // the stand-ins show only to the shadow pass, each where its original is
+  sm.render = (...a) => {
+    for (const p of SHADOW_PROXY) { p.mesh.visible = !p.vis || shownChain(p.vis); if (p.follow) p.mesh.matrixWorld.copy(p.follow.matrixWorld); }
+    try { draw(...a); } finally { for (const p of SHADOW_PROXY) p.mesh.visible = false; }
+  }; }
 function tallSync() {
   let key = ''; TALL.forEach((t, i) => { if (t.o !== 1) key += i + ','; });
   if (key === TALL_KEY) return;
@@ -3250,6 +3336,8 @@ function buildDeck(def) {
   tallCombine();
   for (const d of WALL_DECOR) mergeMeshes(d.g);
   for (const hr of HULL_RUNS) mergeMeshes(hr.decor);
+  shadowStandIns();                                      // 0.27.25: shadows drawn from a few stand-ins, not every piece
+  freezeStill();                                         // 0.27.26: furniture and wall pieces stop recomputing their place every frame
   for (const it of ITEMS) it.hit.userData.item = it;
 }
 // Working-deck floor markings: gold-and-charcoal bands across every doorway onto a steel floor,
@@ -3319,7 +3407,7 @@ function unloadDeck() {
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
-  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = [];
+  LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = []; SHADOW_PROXY = [];
   RUNS = []; POSTS = []; edgeList = []; wallEdges = []; frameEdges = []; fullPosts = []; hdrPosts = []; glows.length = 0;
   CURVES = []; CURVE_SEGS = [];
 }
@@ -28601,7 +28689,60 @@ function indexRoomTiles() {
   ROOM_TILES = {};
   for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (free(i, j)) (ROOM_TILES[roomAt(i, j)] || (ROOM_TILES[roomAt(i, j)] = [])).push([i, j]);
 }
+// 0.27.29 (the performance engineer): findPath is the same search as findPathScan below, made fast. The open tiles sit
+// in a binary heap ordered by (f, the order each tile was first added), which is exactly the tile the scan picks (the
+// lowest f, the earliest in its list on a tie), so every path is the same tile for tile. Tiles are numbers (i * D + j) in
+// typed arrays kept between calls (a stamp says which call wrote them), and free() and edgeOpen() are asked at most once
+// per tile or edge in a call. A start or goal off the grid goes to findPathScan.
+const FP_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]], _fp = { n: 0, gen: 0 };
+const onGrid = c => Number.isInteger(c[0]) && Number.isInteger(c[1]) && c[0] >= 0 && c[1] >= 0 && c[0] < W && c[1] < D;
 function findPath(s, g, avoid, who) {
+  if (!onGrid(s) || !onGrid(g)) return findPathScan(s, g, avoid, who);
+  const N = W * D, F = _fp;
+  if (F.n !== N) Object.assign(F, { n: N, gen: 0, st: new Int32Array(N), cl: new Int32Array(N), dist: new Float64Array(N), f: new Float64Array(N),
+    seq: new Int32Array(N), prev: new Int32Array(N), hp: new Int32Array(N), heap: new Int32Array(N), fs: new Int32Array(N), fv: new Uint8Array(N),
+    es: new Int32Array(N * 2), ev: new Uint8Array(N * 2) });
+  const gen = ++F.gen, { st, cl, dist, f, seq, prev, hp, heap, fs, fv, es, ev } = F, g0 = g[0], g1 = g[1], gi = g0 * D + g1;
+  const hx = (i, j) => Math.hypot(i - g0, j - g1);
+  const isFree = (i, j) => { if (i < 0 || j < 0 || i >= W || j >= D) return false; const k = i * D + j; if (fs[k] !== gen) { fs[k] = gen; fv[k] = free(i, j) ? 1 : 0; } return fv[k] === 1; };
+  const edge = (i, j, i2, j2) => {                      // edgeOpen, keyed as it keys EDGES: a vertical edge by (max i, j), a horizontal one by (i, max j)
+    const k = i2 !== i ? (Math.max(i, i2) * D + j) * 2 : (i * D + Math.max(j, j2)) * 2 + 1;
+    if (es[k] !== gen) { es[k] = gen; ev[k] = edgeOpen(i, j, i2, j2, who) ? 1 : 0; } return ev[k] === 1;
+  };
+  let av = null;
+  if (avoid && avoid.size) { av = new Set(); for (const k of avoid) { const [a, b] = String(k).split(',').map(Number); if (onGrid([a, b])) av.add(a * D + b); } }
+  let hn = 0, sq = 0;
+  const less = (a, b) => f[a] < f[b] || f[a] === f[b] && seq[a] < seq[b];
+  const up = k => { const x = heap[k]; while (k > 0) { const q = (k - 1) >> 1, y = heap[q]; if (!less(x, y)) break; heap[k] = y; hp[y] = k; k = q; } heap[k] = x; hp[x] = k; };
+  const down = k => { const x = heap[k]; for (;;) { let c = 2 * k + 1; if (c >= hn) break; if (c + 1 < hn && less(heap[c + 1], heap[c])) c++; if (!less(heap[c], x)) break; heap[k] = heap[c]; hp[heap[k]] = k; k = c; } heap[k] = x; hp[x] = k; };
+  const si = s[0] * D + s[1];
+  st[si] = gen; dist[si] = 0; f[si] = 0 + hx(s[0], s[1]); seq[si] = sq++; prev[si] = -1; heap[hn++] = si; hp[si] = 0;
+  while (hn) {
+    const c = heap[0], last = heap[--hn]; if (hn) { heap[0] = last; hp[last] = 0; down(0); }
+    cl[c] = gen;
+    if (c === gi) break;
+    const c0 = (c / D) | 0, c1 = c - c0 * D;
+    for (const [di, dj] of FP_DIRS) {
+      const n0 = c0 + di, n1 = c1 + dj;
+      if (!isFree(n0, n1)) continue;
+      const n = n0 * D + n1;
+      if (av && av.has(n) || cl[n] === gen) continue;
+      if (di && dj) {
+        if (!isFree(c0 + di, c1) || !isFree(c0, c1 + dj)) continue;
+        if (!edge(c0, c1, c0 + di, c1) || !edge(c0 + di, c1, n0, n1) || !edge(c0, c1, c0, c1 + dj) || !edge(c0, c1 + dj, n0, n1)) continue;
+      } else if (!edge(c0, c1, n0, n1)) continue;
+      const nd = dist[c] + (di && dj ? 1.414 : 1);
+      if (st[n] !== gen) { st[n] = gen; dist[n] = nd; f[n] = nd + hx(n0, n1); seq[n] = sq++; prev[n] = c; heap[hn] = n; hp[n] = hn++; up(hn - 1); }
+      else if (nd < dist[n]) { dist[n] = nd; f[n] = nd + hx(n0, n1); prev[n] = c; up(hp[n]); }
+    }
+  }
+  if (st[gi] !== gen) return null;
+  const path = []; for (let k = gi; prev[k] >= 0;) { k = prev[k]; path.push([(k / D) | 0, k % D]); }
+  path.reverse(); path.push(g);
+  return path.slice(1);
+}
+// the search before 0.27.29: the open list scanned for the lowest f each step
+function findPathScan(s, g, avoid, who) {
   const key = (i, j) => i + ',' + j, dist = new Map([[key(...s), 0]]), prev = new Map(), open = [s], closed = new Set();
   const hx = (a) => Math.hypot(a[0] - g[0], a[1] - g[1]);
   while (open.length) {
@@ -28972,6 +29113,11 @@ const CROWD_DETAIL = [{ sph: [10, 7], cap: [10, 5], cyl: 8, tor: [4, 10] }, { sp
 const CROWD_FAR = 9, CROWD_FAR_ZOOM = .75;
 const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD_MANY people, those further than CROWD_FAR2 (or all, zoomed out) go coarse
 const CROWD_GATHER = 40, CROWD_GATHER2 = 12;             // at an event's gathering: more than 40 on the deck, coarse from 12 tiles (0.27.19)
+const CROWD_POSE_EVERY = 10, CROWD_POSE_MARGIN = 4;      // 0.27.27: off-screen people are posed every 10th frame; 'on screen' has a 4 m margin
+const _poseFr = new THREE.Frustum(), _poseM = new THREE.Matrix4(), _poseS = new THREE.Sphere(), _poseV = new THREE.Vector3(), _poseKeep = new Set();
+// 0.27.30: the packed bodies of the last CROWD_KEEP people to leave the deck, by their look (the spec as JSON), so someone
+// coming back skips crowdPack (about 1.6 ms each); the same look always packs to the same body
+const CROWD_KEPT = new Map(), CROWD_KEEP = 40;
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -29039,16 +29185,16 @@ function poseOf(pl) {
   if (base === 'lie' && act === 'lift') return 'lie:lift';
   return base;
 }
-const _parsed = new Map();
+const _parsed = new Map(), _parsedHi = new Map();          // 0.27.30: seated-height poses in their own map (no key string to build)
 function parsePose(pose = 'stand', y = 0) {
-  const k = pose + (y >= .3 ? '^' : ''); let r = _parsed.get(k); if (r) return r;
+  const pm = y >= .3 ? _parsedHi : _parsed; let r = pm.get(pose); if (r) return r;
   const plus = pose.indexOf('+'), mod = plus < 0 ? '' : pose.slice(plus + 1), bare = plus < 0 ? pose : pose.slice(0, plus);
   const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts), '+tray', '+toolbox', '+datapad'
   const i = bare.indexOf(':'); let base = i < 0 ? bare : bare.slice(0, i), act = i < 0 ? null : bare.slice(i + 1);
   if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
   if (!BASES.has(base)) base = 'stand';
   if (act && !ACTS[act]) act = null;
-  _parsed.set(k, r = { base, act, cart }); return r;
+  pm.set(pose, r = { base, act, cart }); return r;
 }
 // an arm toward a target: shoulder forward (x, negative is forward), elbow bend, shoulder out (z, toward its own side)
 const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
@@ -29240,9 +29386,11 @@ function propGeo(kind) {                                 // for full rigs: a pla
   return (_propGeos[kind] = geo);
 }
 // the props someone holds now: a key like 'R:dumbbell L:dumbbell', or ''
+const _propKeys = {}, _holdKeys = {}, _cartKeys = {};     // 0.27.30: made once, not every frame
 function propKeyOf(act, base) {
+  const m = _propKeys[base] || (_propKeys[base] = {}); if (m[act] !== undefined) return m[act];
   const A = act && ACTS[act], P = A && (base === 'sit' && A.seatedProps || A.props);
-  return P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '';
+  return (m[act] = P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '');
 }
 const _propList = new Map();
 const propList = key => _propList.get(key) || (_propList.set(key, key ? key.split(' ').map(s => { const [b, k] = s.split(':'); return [PROP_BONE[b], k]; }) : []), _propList.get(key));
@@ -29273,8 +29421,8 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
   }
   g.crouch = k.crouch ? ss(k.crouch) : 0;
   animateRig(rig, g, dt, t, sk, o.rnd || R);
-  const cartKey = cart ? '+' + cart : null;
-  for (const key of [base, act, cartKey]) if (key && k[key] === undefined) k[key] = 0;
+  const cartKey = cart ? _cartKeys[cart] || (_cartKeys[cart] = '+' + cart) : null;
+  if (k[base] === undefined) k[base] = 0; if (act && k[act] === undefined) k[act] = 0; if (cartKey && k[cartKey] === undefined) k[cartKey] = 0;
   for (const key in k) { const on = +(key === base || key === act || key === cartKey); k[key] = o.fresh ? on : k[key] + (on - k[key]) * Math.min(1, dt * 5); }
   const seat = base === 'sit' || base === 'lie' ? (y > 0 ? y : CROWD_SEAT[base]) : 0;
   if (k.sit > .001) {                                    // on a bench or chair: feet on the floor, forearms on the table, eating now and then
@@ -29326,7 +29474,8 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
     if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
   }
-  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
+  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
+  const key = pk && hk ? pk + ' ' + hk : pk || hk;     // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
     o.propKey = key;
     if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
@@ -29340,8 +29489,12 @@ class CrowdPerson {
     this.rig = makeCharacter(spec, r => { root = r; }); this.spec = this.rig.spec; this.h = this.spec.height;
     this.rig.root.rotation.order = 'YXZ';                // turn to face, after lying down
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
-    this.geo = [0, 1].map(l => crowdPack(this.joints, l));
-    this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
+    this.look = JSON.stringify(this.rig.spec); const kept = CROWD_KEPT.get(this.look);   // 0.27.30: back on the deck: the body packed last time
+    if (kept) { CROWD_KEPT.delete(this.look); this.geo = kept.geo; this.jparts = kept.jparts; }
+    else {
+      this.geo = [0, 1].map(l => crowdPack(this.joints, l));
+      this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
+    }
     for (const j of this.joints) delete j.userData.parts;
     const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
     this.propBones = [hand(-1), hand(1), this.rig.chest, this.rig.root].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
@@ -29399,30 +29552,48 @@ class CrowdChunk {
     p.chunk = null; p.slot = -1;
   }
   rebuild() {                                            // only when someone joins, leaves, changes detail or picks up a prop
+    // 0.27.28: the arrays and GPU buffers are kept and reused (half as big again when they grow), the skin weights
+    // written once, and only the slots from the first one that changed are written and uploaded (from the lowest change
+    // since the mesh was last drawn: pv, pi, reset by onBeforeRender, which comes after the upload). Same triangles, same order.
     this.dirty = false;
-    const old = this.mesh.geometry; let nv = 0, ni = 0;
     const packs = p => [p.packOf(p.lod), ...propList(p.propKey).map(([b, kind]) => propPack(kind, p.lod, b))];
-    for (const p of this.slots) if (p) for (const q of packs(p)) { nv += q.nv; ni += q.ni; }
-    if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (old !== CROWD_EMPTY) old.dispose(); return; }
-    const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), C = new Float32Array(nv * 3);
-    const SI = new Uint16Array(nv * 4), SW = new Uint8Array(nv * 4), I = nv > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
-    let o = 0, oi = 0;
-    this.slots.forEach((p, s) => {
-      if (!p) return;
+    const lay = this.slots.map(p => p ? packs(p) : null); let nv = 0, ni = 0;
+    for (const qs of lay) if (qs) for (const q of qs) { nv += q.nv; ni += q.ni; }
+    this.nv = nv; this.ni = ni;
+    if (!nv) { this.mesh.geometry = CROWD_EMPTY; if (this.geo) this.geo.dispose(); this.geo = this.buf = this.lay = null; return; }
+    let A = this.buf;
+    if (!A || nv > A.cv || ni > A.ci) {
+      const cv = Math.ceil(nv * 1.5), ci = Math.ceil(ni * 1.5);
+      A = this.buf = { cv, ci, P: new Float32Array(cv * 3), N: new Float32Array(cv * 3), C: new Float32Array(cv * 3),
+        SI: new Uint16Array(cv * 4), SW: new Uint8Array(cv * 4), I: cv > 65535 ? new Uint32Array(ci) : new Uint16Array(ci) };
+      for (let i = 0; i < cv; i++) A.SW[i * 4] = 255;
+      if (this.geo) this.geo.dispose();
+      const geo = this.geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(A.P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(A.N, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(A.C, 3));
+      geo.setAttribute('skinIndex', new THREE.BufferAttribute(A.SI, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(A.SW, 4, true));
+      geo.setIndex(new THREE.BufferAttribute(A.I, 1)); geo.boundingSphere = this.sphere;
+      this.lay = null; this.mesh.onBeforeRender = () => { this.pv = this.pi = Infinity; };
+    }
+    const old = this.lay, same = (x, y) => x === y || !!x && !!y && x.length === y.length && x.every((q, k) => q === y[k]);
+    let s0 = 0, o = 0, oi = 0;
+    if (old) for (; s0 < lay.length && same(old[s0], lay[s0]); s0++) if (lay[s0]) for (const q of lay[s0]) { o += q.nv; oi += q.ni; }
+    const o0 = o, oi0 = oi;
+    for (let s = s0; s < lay.length; s++) {
+      if (!lay[s]) continue;
       const b0 = s * CROWD_BONES;
-      for (const q of packs(p)) {
-        P.set(q.P, o * 3); N.set(q.N, o * 3); C.set(q.C, o * 3);
-        for (let i = 0; i < q.nv; i++) { SI[(o + i) * 4] = b0 + q.B[i]; SW[(o + i) * 4] = 255; }
-        for (let i = 0; i < q.ni; i++) I[oi++] = q.I[i] + o;
+      for (const q of lay[s]) {
+        A.P.set(q.P, o * 3); A.N.set(q.N, o * 3); A.C.set(q.C, o * 3);
+        for (let i = 0; i < q.nv; i++) A.SI[(o + i) * 4] = b0 + q.B[i];
+        for (let i = 0; i < q.ni; i++) A.I[oi++] = q.I[i] + o;
         o += q.nv;
       }
-    });
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(C, 3));
-    geo.setAttribute('skinIndex', new THREE.BufferAttribute(SI, 4)); geo.setAttribute('skinWeight', new THREE.BufferAttribute(SW, 4, true));
-    geo.setIndex(new THREE.BufferAttribute(I, 1)); geo.boundingSphere = this.sphere;
-    this.mesh.geometry = geo; if (old !== CROWD_EMPTY) old.dispose();
+    }
+    this.lay = lay; const pv = this.pv = Math.min(this.pv === undefined ? Infinity : this.pv, o0), pi = this.pi = Math.min(this.pi === undefined ? Infinity : this.pi, oi0);
+    const at = this.geo.attributes;
+    for (const [x, n] of [[at.position, 3], [at.normal, 3], [at.color, 3], [at.skinIndex, 4]]) { x.updateRange.offset = pv * n; x.updateRange.count = (nv - pv) * n; x.needsUpdate = true; }
+    const ix = this.geo.index; ix.updateRange.offset = pi; ix.updateRange.count = ni - pi; ix.needsUpdate = true;
+    this.geo.setDrawRange(0, ni); this.mesh.geometry = this.geo;
   }
 }
 const crowd = {
@@ -29442,6 +29613,8 @@ const crowd = {
   remove(p) {
     if (!p || !p.chunk) return;
     p.chunk.take(p); this.people.splice(this.people.indexOf(p), 1);
+    CROWD_KEPT.delete(p.look); CROWD_KEPT.set(p.look, { geo: p.geo, jparts: p.jparts });   // the newest last; the oldest go past CROWD_KEEP
+    for (const k of CROWD_KEPT.keys()) { if (CROWD_KEPT.size <= CROWD_KEEP) break; CROWD_KEPT.delete(k); }
   },
   clear() { for (const p of this.people.slice()) this.remove(p); },
   near(x, z, r = .45) {                                  // who's standing (or sitting) at a spot, for taps
@@ -29461,25 +29634,37 @@ const crowd = {
     // level of detail starts nearer (CROWD_GATHER2 tiles) once the deck holds more than CROWD_GATHER people
     const gather = FEEL_S.gather && this.people.length > CROWD_GATHER, many = this.people.length > CROWD_MANY || gather;
     const allFar = camera.zoom < CROWD_FAR_ZOOM, far2 = gather ? CROWD_GATHER2 : CROWD_FAR2;
-    for (const p of this.people) {
+    // 0.27.27: posing (the body's place and its limbs) is the crowd's main cost, and in a busy room at the usual zoom most people are off
+    // screen. Each frame only those in view, with a CROWD_POSE_MARGIN margin that covers shadows thrown on screen from
+    // just outside, are posed; the rest every CROWD_POSE_EVERY frames with the time they missed. Anyone the player is
+    // talking to or following (a crew agent's talking or esc), a new person, and everyone after the camera turns or
+    // zooms are posed at once, so an off-screen body waits at most 9 frames. Posing uses each person's own random stream and writes only their rig (root and limbs): nothing the sim reads.
+    const az0 = this.poseAz, zm0 = this.poseZoom; this.poseAz = az; this.poseZoom = camera.zoom; this.poseN = (this.poseN || 0) + 1;
+    const all = az0 === undefined || Math.abs(az - az0) > .002 || zm0 !== camera.zoom;
+    if (!all) { _poseFr.setFromProjectionMatrix(_poseM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)); _poseKeep.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h && (a.talking > 0 || a.esc)) _poseKeep.add(a.h); } }
+    this.people.forEach((p, i) => {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
       let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
       if (many && lod && (allFar || d > far2 + (p.lod === 2 ? -.5 : .5))) lod = 2;   // only in a big crowd: normal play never gets here
       if (lod !== p.lod) { p.lod = lod; p.chunk.dirty = true; }
-      p.update(dt, t);
-    }
+      p.poseDt = (p.poseDt || 0) + dt;
+      if (all || p.fresh || p.chunk.dirty || (this.poseN + i) % CROWD_POSE_EVERY === 0 || _poseKeep.has(p) || _poseFr.intersectsSphere(_poseS.set(_poseV.set(p.pos.x, 1, p.pos.z), CROWD_POSE_MARGIN))) {
+        p.update(Math.min(p.poseDt, .5), t); p.poseDt = 0;
+      }
+    });
     for (const c of this.chunks) {
       if (c.dirty) c.rebuild();
-      const ps = c.slots.filter(Boolean); c.mesh.visible = this.visible && ps.length > 0;
-      if (!ps.length) continue;
-      const s = c.sphere.center.set(0, 0, 0); for (const p of ps) s.add(p.rig.root.position); s.divideScalar(ps.length);
-      let r = 0; for (const p of ps) r = Math.max(r, p.rig.root.position.distanceTo(s) + 1.9 * p.h);
+      const sl = c.slots; let n = 0; for (let i = 0; i < sl.length; i++) if (sl[i]) n++;   // 0.27.30: counted, not filtered into a new array each frame
+      c.mesh.visible = this.visible && n > 0;
+      if (!n) continue;
+      const s = c.sphere.center.set(0, 0, 0); for (let i = 0; i < sl.length; i++) if (sl[i]) s.add(sl[i].rig.root.position); s.divideScalar(n);
+      let r = 0; for (let i = 0; i < sl.length; i++) { const p = sl[i]; if (p) r = Math.max(r, p.rig.root.position.distanceTo(s) + 1.9 * p.h); }
       c.sphere.radius = r;
     }
   },
   stats() {
     let verts = 0, tris = 0;
-    for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.mesh.geometry.attributes.position.count; tris += c.mesh.geometry.index.count / 3; }
+    for (const c of this.chunks) if (c.mesh.geometry !== CROWD_EMPTY) { verts += c.nv; tris += c.ni / 3; }
     return { people: this.people.length, chunks: this.chunks.length, perChunk: CROWD_PER, verts, tris, far: this.people.filter(p => p.lod).length, coarse: this.people.filter(p => p.lod === 2).length };
   },
 };
@@ -31072,11 +31257,13 @@ function updateRide(dt) {
 // =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
+const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the wall cut below
 const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   updateSteer();
-  for (const w of walkers) if (w.active) w.update(dt, t);
+  // 0.27.32: the per-frame loops here count through their arrays (a for...of here made an iterator result every step, about 600 a frame)
+  for (let k = 0; k < walkers.length; k++) if (walkers[k].active) walkers[k].update(dt, t);
   playerUpdate(dt, t);                                   // section 15: needs, walking speed, activities
   updateDeckCrew(dt);                                    // section 10: the scheduled crew
   crowd.update(dt, t);
@@ -31093,42 +31280,46 @@ function loop() {
   const rx = Math.cos(az), rz = -Math.sin(az);
   const hides = e => (e.cx - pp.x) * cx + (e.cz - pp.z) * cz > .25 && Math.abs((e.cx - pp.x) * rx + (e.cz - pp.z) * rz) < 3.5;
   // the hull: pieces facing the camera (lower and right on screen) stay low, the far ones (upper and left) stay up
-  for (const r of RUNS) r.cut = r.face ? r.face[0] * cx + r.face[1] * cz > 0
-    : wallsMode === 'up' ? false : wallsLow || (r.out && r.out[0] * cx + r.out[1] * cz > .3) || r.edges.some(hides);
-  for (const e of edgeList) e.s += ((e.run.cut ? .12 : 1) - e.s) * k7;
-  for (const c of CURVES) if (c.run) { c.s += ((c.run.cut ? .12 : 1) - c.s) * k7; c.g.scale.y = c.s; }
-  for (const p of POSTS) p.s = Math.max(...p.touch.map(e => e.s));
+  for (let k = 0; k < RUNS.length; k++) { const r = RUNS[k]; r.cut = r.face ? r.face[0] * cx + r.face[1] * cz > 0
+    : wallsMode === 'up' ? false : wallsLow || (r.out && r.out[0] * cx + r.out[1] * cz > .3) || r.edges.some(hides); }
+  for (let k = 0; k < edgeList.length; k++) { const e = edgeList[k]; e.s += ((e.run.cut ? .12 : 1) - e.s) * k7; }
+  for (let k = 0; k < CURVES.length; k++) { const c = CURVES[k]; if (c.run) { c.s += ((c.run.cut ? .12 : 1) - c.s) * k7; c.g.scale.y = c.s; } }
+  for (let k = 0; k < POSTS.length; k++) { const p = POSTS[k]; let m = -Infinity; for (let i = 0; i < p.touch.length; i++) m = Math.max(m, p.touch[i].s); p.s = m; }   // 0.27.31: no array each frame
   writeWalls();
-  for (const hr of HULL_RUNS) { hr.s += ((hr.cut ? .12 : 1) - hr.s) * k7; hr.g.scale.y = hr.s; hr.decor.visible = hr.s > .9; }
-  for (const e of EDGES.values()) if (e.hrun) e.s = e.hrun.s;
-  for (const d of DOOR_OBJS) d.g.scale.y = d.e.s;
-  for (const t of TALL) {                              // tall furniture fades when it would hide you
-    const hides = t.pts.some(p => { const dep = (p.x - pp.x) * cx + (p.z - pp.z) * cz; return dep > .3 && dep < 4.5 && Math.abs((p.x - pp.x) * rx + (p.z - pp.z) * rz) < .5 + p.w / 2; });
+  for (let k = 0; k < HULL_RUNS.length; k++) { const hr = HULL_RUNS[k]; hr.s += ((hr.cut ? .12 : 1) - hr.s) * k7; hr.g.scale.y = hr.s; hr.decor.visible = hr.s > .9; }
+  if (HRUN_EDGES.of !== EDGES || HRUN_EDGES.n !== EDGES.size) { HRUN_EDGES.of = EDGES; HRUN_EDGES.n = EDGES.size; HRUN_EDGES.list = [...EDGES.values()].filter(e => e.hrun); }
+  for (let k = 0, L = HRUN_EDGES.list; k < L.length; k++) L[k].s = L[k].hrun.s;       // 0.27.31: the edges that follow a hull run, listed once per deck (was a Map walk each frame)
+  for (let k = 0; k < DOOR_OBJS.length; k++) DOOR_OBJS[k].g.scale.y = DOOR_OBJS[k].e.s;
+  for (let k = 0; k < TALL.length; k++) {               // tall furniture fades when it would hide you
+    const t = TALL[k]; let hides = false;
+    for (let j = 0; j < t.pts.length && !hides; j++) { const p = t.pts[j], dep = (p.x - pp.x) * cx + (p.z - pp.z) * cz; hides = dep > .3 && dep < 4.5 && Math.abs((p.x - pp.x) * rx + (p.z - pp.z) * rz) < .5 + p.w / 2; }
     const goal = !wallsLow && hides ? .22 : 1;
     if (Math.abs(t.o - goal) < .002) continue;
     t.o += (goal - t.o) * k7; if (Math.abs(t.o - goal) < .01) t.o = goal;
     const fade = t.o < .99;
-    for (const m of t.mats) {
-      m.opacity = m.userData.base.op * t.o; m.depthWrite = !fade;
+    for (let j = 0; j < t.mats.length; j++) {
+      const m = t.mats[j]; m.opacity = m.userData.base.op * t.o; m.depthWrite = !fade;
       const tr = fade || m.userData.base.tr; if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
     }
   }
-  for (const d of WALL_DECOR) d.g.visible = d.e ? d.e.s > .9 : true;
-  for (const v of VOID_BLOCKS) {
+  for (let k = 0; k < WALL_DECOR.length; k++) { const d = WALL_DECOR[k]; d.g.visible = d.e ? d.e.s > .9 : true; }
+  for (let k = 0; k < VOID_BLOCKS.length; k++) {
+    const v = VOID_BLOCKS[k];
     const b = v.m.geometry.boundingBox || (v.m.geometry.computeBoundingBox(), v.m.geometry.boundingBox);
-    const near = Math.max(...[[b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z]].map(([x, z]) => (v.cx + x - pp.x) * cx + (v.cz + z - pp.z) * cz));
+    const dep = (x, z) => (v.cx + x - pp.x) * cx + (v.cz + z - pp.z) * cz, near = Math.max(dep(b.min.x, b.min.z), dep(b.max.x, b.min.z), dep(b.min.x, b.max.z), dep(b.max.x, b.max.z));
     v.s += ((wallsLow || (wallsMode === 'auto' && near > .25) ? .12 : 1) - v.s) * k7; v.m.scale.y = v.s;
   }
 
   if (ride) updateRide(dt);
   // doors slide open for anyone nearby (lift doors only when a ride opens them, and they drop into the floor)
-  for (const d of DOOR_OBJS) {
-    const crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
+  for (let k = 0; k < DOOR_OBJS.length; k++) {
+    const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
     if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    const near = d.force !== undefined ? d.force > 0 : crewAt || (d.passable || d.svc) && walkers.some(w => w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2);
+    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
+    const near = d.force !== undefined ? d.force > 0 : crewAt || walk;
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
-    if (d.e.type === 'lift') d.leaves.forEach(l => { l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; });   // lift doors sink into the floor
-    else d.leaves.forEach((l, k) => { l.position.x = (k ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92); });
+    if (d.e.type === 'lift') for (let j = 0; j < d.leaves.length; j++) { const l = d.leaves[j]; l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; }   // lift doors sink into the floor
+    else for (let j = 0; j < d.leaves.length; j++) d.leaves[j].position.x = (j ? 1 : -1) * (d.span / 4 + d.open * d.span / 2 * .92);
   }
 
   nightT += (nightAt() - nightT) * Math.min(1, dt * 1.8); applyLight(nightT);
@@ -31151,10 +31342,10 @@ function loop() {
     for (let i = 0; i < D_.n; i++) { a[i * 3 + 1] += Math.sin(t * .3 + D_.seeds[i]) * .0015; a[i * 3] += Math.cos(t * .2 + D_.seeds[i]) * .001; }
     D_.geo.attributes.position.needsUpdate = true;
   }
-  for (const sp of SPINS) sp.o.rotation[sp.ax] += sp.w * dt;
-  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (const b of MOVERS) b.tick(dt, !!(pb && pb(b.place))); }   // section 10's placeBusy
+  for (let k = 0; k < SPINS.length; k++) { const sp = SPINS[k]; sp.o.rotation[sp.ax] += sp.w * dt; }
+  if (MOVERS.length) { const pb = typeof placeBusy === 'function' ? placeBusy : null; for (let k = 0; k < MOVERS.length; k++) MOVERS[k].tick(dt, !!(pb && pb(MOVERS[k].place))); }   // section 10's placeBusy
   for (const p of PULSES) p.m[p.key] = p.base + p.amp * (.5 + .5 * Math.sin(t * p.w + p.ph));
-  for (const s of STEAM) { const k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
+  for (let q = 0; q < STEAM.length; q++) { const s = STEAM[q], k = (t * .35 + s.i / 3) % 1; s.s.position.y = s.y + k * .45; s.s.position.x = s.x + Math.sin(t + s.i * 2) * .03; s.s.material.opacity = Math.sin(k * Math.PI) * .22; s.s.scale.setScalar(.1 + k * .18); }
   marker.material.opacity *= 1 - dt * 2.2; marker.scale.setScalar(1 + (1 - marker.material.opacity) * .3);
   scrT += dt; if (scrT > .1) { scrT = 0; drawScreen(t); }
   tickShip(dt);                                          // section 13: the ship's clock

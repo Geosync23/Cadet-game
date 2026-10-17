@@ -1,14 +1,14 @@
 # Handover: performance engineer (crowd rendering and activity poses)
 
-Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render, on ship-integration 7dd0aa4 / 0.41.8). Plain notes for whoever picks this area up.
+Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22, 0.27.27 and 0.27.31 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render f0898c3, on ship-integration 0.60.2 / 142b503). Plain notes for whoever picks this area up.
 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.24; next is 0.27.25). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
-- **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`. Plus the one NOSAVE line in section 13 (see the demos below).
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.31; next is 0.27.32). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`, plus `// 7. GRID` (findPath) since 0.27.29 and `// 12. MAIN LOOP` since 0.27.31, both by the lead's decision (the picture must stay identical). Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
-- **Test scripts:** I don't own any. I use `cadet_test.py`, `deck_check.py`, `day_check.py` and `player_check.py`.
+- **Test scripts:** I own `perf_check.py` (the phone-speed watchdog, below) and `path_check.py` (findPath against findPathScan). I also use `cadet_test.py`, `deck_check.py`, `day_check.py`, `events_check.py` and `player_check.py`.
 
 ## What I built, and what other sections rely on
 **Crowd (8b).** Each crew member is a `makeCharacter` rig built at lower detail (`CROWD_DETAIL`). Each joint's parts are packed into one piece of geometry (`crowdPack`). Up to `CROWD_PER` people (12, or fewer on GPUs without float vertex textures) share one `THREE.SkinnedMesh` (`CrowdChunk`), with each joint as a bone. So 40 crew cost about 3 draw calls, and 70 cost about 6. The real cost is triangles. There are two levels of detail: people further than `CROWD_FAR` (9 m, scaled by `CROWD_FAR_ZOOM`) use the coarser mesh.
@@ -56,6 +56,42 @@ All in sections 8 and 8b unless named. The DEV_NOTES rows have the detail.
 - **Draw calls, the same picture (0.27.20-0.27.22, section 4c, at the lead's request for the zoomed-out job):** `packGroups(geo, mats)` (neighbouring faces with one material become one group: door leaves, walls, headers, sills, void blocks); each hull piece merged (`mergeMeshes(p.g)`); `DOOR_LEAVES` (one InstancedMesh per leaf material, `doorLeavesSync()` each frame; the leaves are invisible boxes for taps); `tallCombine()` / `tallSync()` (tall furniture drawn per material for the whole deck; a fading room shows its own meshes and is skipped by the deck-wide one).
 - **Numbers now:** desktop 1280×760, widest 0.55: D2 325, D3 356, D4 470, D5 299; zoom 1.0: 179-241. Phone portrait 390×844: D4 383 at the widest 0.7 (871 at 0.27.18), 210 at 1.5. day_check day 1 peaks about 170-250.
 - **Gotchas found:** `renderer.info.render.calls` (the budget's number) counts the main pass only, not the shadow pass. The window glass is merged into the hull decor bucket and so casts a faint shadow although its `castShadow` is false; marking it noMerge changes the picture, so it's left alone. Big `push(...array)` spreads overflow the stack on Deck 5: use loops. My `until pgrep -f` wait loops matched their own command line and never ended: wait on a background command instead.
+
+## The end-of-Pillar-4 optimization pass (0.27.25 to 0.27.27; plan: plans/perf-p4-plan.md)
+Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was done by the dialogue owner; I measured 621a432 (the join('') follow-up): no change in size or load time. Items 5 (does the host gzip), 6 (cache painted textures) and 7 (smaller shadow map on phones; the user decides) are not started.
+- **0.27.25, shadow stand-ins** (`shadowStandIns()`, section 4c, called after the hull decor merge in `buildDeck`). Still things that cast shadows (staticRoot children and TALL_ALL meshes per 10×10 cell, WALL_DECOR per wall run, hull pieces and CURVES per piece) are copied, position only, into a few meshes (`SHADOW_PROXY`, one per bucket and face side, material `SHADOW_PROXY_MAT[side]`). The originals get `castShadow = false` and `userData.shadowProxy`. The proxies are shown only during the shadow pass: `renderer.shadowMap.render` is wrapped, and a proxy with `vis` shows only when that object's chain is shown (fading rooms, dropped walls); `follow` copies a moving piece's matrix. Why not layers: r128's shadow pass tests layers against the main camera. The proxies' arrays are released after upload (`onUpload`). Reset in `unloadDeck`. GPU draws (every pass), portrait usual / zoomed: Sunday dinner 478/818 → 312/490, junior common room 657/1,076 → 338/613. The main-pass number (the budget's) is unchanged. JS heap +9 MB, accepted.
+- **0.27.26, freezeStill()** (4c, after shadowStandIns): the staticRoot, TALL and WALL_DECOR subtrees stop recomputing their matrices (`matrixAutoUpdate = false`). Kept moving: noMerge subtrees, SPINS targets and their ancestors, STEAM puffs (freezing them changed 8 shots on Decks 3 and 6). Gain was small (scene matrix update 0.35 → 0.33 ms), which is why 2b followed.
+- **0.27.27, posing only who's on screen** (8b, `crowd.update`): see the DEV_NOTES row. `CROWD_POSE_EVERY` (10) and `CROWD_POSE_MARGIN` (4 m). Always posed: talking/esc agents, `fresh`, dirty chunks, and everyone after the camera turns (`az` moves) or zooms. Crowd posing at Sunday dinner 1.07 → 0.41 ms (desktop). The sim can't tell: a fingerprint of crew positions, poses and `R()` matches across builds (scratchpad probe simeq.py: skipTo Sunday 18:20, Deck 3, six zooms × 150 frames, md5 of `[R(), DECK_CREW.map(a => [pos, pose])]`).
+- **How I measure:** `perf_check.py` (js = game code per frame, the best of 3 batches, counted after one drawn frame so the ship time doesn't drift). Chrome's CPU throttle gave no steady numbers headless, so phone times are desktop × 4 to 5. Don't run perf_check at the same time as other checks: load times jump (6.8 → 9.7 s seen) and js gets noisy. For a crowd micro-benchmark, time `crowd.update(1/30, 10)` 100 times in the page.
+- **Reviews (reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP):** 0.27.25, 0.27.26 and 0.27.27 PASS (notes on claude/reviews-2). 0.27.28 PASS (it mirrored the GPU buffers: 0 mismatches). 0.27.29 and 0.27.30 were sent; 0.27.31 is still to send.
+
+## Slow frames (0.27.28 to 0.27.30, the lead's "find the spike source")
+- **Method:** a scratch combine (a local worktree, never pushed: 0.60.2 + sim + galley + my builds; build lines resolved to mine). A CPU profile of only the frames over 4 ms: CDP Profiler at 100 µs, aligned to the page by a named busy marker function (`MARKFN`), 3,000 frames with drawing skipped (one ship hour), in the mess at Sunday dinner (6*1440+18*60+25) and Tuesday breakfast (1440+7*60+5). Garbage: `HeapProfiler.startSampling` over 1,500 frames, by function. The scripts are in the scratchpad (pspike.py, spike.py, alloc.py, fpstat.py, rbwhy.py, arrive.py) and are not committed: re-create them from this description if needed.
+- **Found (dinner / breakfast, share of slow-frame time):**
+  - crowd group rebuilds 21% / 31% (fixed in 0.27.28);
+  - findPath 35% / 13% (fixed in 0.27.29);
+  - garbage collection 2–20%;
+  - arrivals (crowdPack) 2–9% (halved in 0.27.30);
+  - section 22's linesTick is never more than 0.2 ms.
+  - Not the once-a-minute planner: only 5 of 105 slow frames fell on a ship-minute change.
+- **0.27.28** `CrowdChunk.rebuild` reuses its arrays and buffers and uploads from the first changed slot. The `pv`/`pi` pending range is reset in `onBeforeRender`. Gotcha: in r128, vertex attributes upload in projectObject before onBeforeRender, and the index uploads after it in renderBufferDirect. Without pv/pi, two rebuilds between draws lost the first one's upload (cadet_test showed it).
+- **0.27.29** findPath is a heap ordered by (f, first-push order), which is exactly the old scan's pick. The old search is kept as `findPathScan`. `path_check.py` must pass after any change to section 7, free, edgeOpen or edgeBlocks.
+- **0.27.30** `CROWD_KEPT` (packed bodies by look, the last 40 to leave) and fewer per-frame allocations in 8b. Garbage at dinner: 196 → 183 KB a frame.
+- **Result (0.27.27 → 0.27.29, combine with sim bfcd864):** frames over 4 ms dinner 36/31 → 17/19, breakfast 53/32 → 17/7; 99th percentile 4.1–4.8 → 2.4–3.2 ms. Worst frames now mostly follow garbage collection, which makes them noisy.
+- **0.27.31** the main loop's wall cut: posts, `HRUN_EDGES` and the void blocks no longer allocate. Garbage at dinner: 183 → 168 KB a frame. The loop still has small closures (`hides`, `t.pts.some`, `walkers.some`, `d.leaves.forEach`) and for…of iterators, worth about 15 KB more if wanted.
+- **Left (2026-10-17):**
+  - Section 10's `crewNearDoor`, about 40 KB/frame (a closure per crew member per door per frame), and section 14's `whereIs`/`shipDay`, about 15 KB. Sent to sim engineer 4 (session_01EJUGywZv9BpcUezjXES9AC, near handover) for after 0.60.4. Don't touch sections 10 or 14 yourself: they're changing for 0.60.3.
+  - What's left in 8b is number boxing in `animateActivity` (about 15 KB/frame); it would need restructuring.
+
+## Standing role: phone-speed watchdog (Pillar 4, from 2026-10-17)
+- For each combined attempt the build master (now build master 2, session_01F8ph7FKqViF3heRn94YgBr; first was session_012K7RZ3oSX2vpBb1rR66MBh, claude/integration-test) sends, run `perf_check.py NEW.html OLD.html` (mine, ~5 minutes) and tell the lead PASS or the regressions with the commit that caused them.
+- Its SCENES are stand-ins until Pillar 4's moments exist: switch them to the arrival steps (Deck 5 ramp 17:40 on Day 0, Works door, Bunk 1, dinner with Calder), Sowing morning (day 6 garden), Sunday roast, Tiles night (Tuesday 20:00 bow lounge), talent night and the lantern walk (promenade) as each lands.
+- Baseline 0.41.10: all under 450 on phones; the junior common room zoomed out (portrait 0.7) is the tightest at 428.
+- On call for Pillar 4's performance rows: two-person bubbles, the device hand-over and bag props, sigh/laugh/listen/play poses, lantern instancing (plans/pillar4-plan.md on ship-integration, Parts 4-6).
+
+## Waiting (at 0.27.27)
+- **Trays:** done. Sim 0.26.34 (236810f, sim engineer 4) passes my probe: 0 person-frames with a tray outside the mess in all 14 breakfast samples.
+- The rest of the optimization plan (items 5 to 7) waits for the lead and the user.
 
 ## Waiting (at 0.27.22)
 - Desktop widest Deck 4 is 470, a little over 450; everything else, and every phone view, is under. The next cuts, if wanted: hide the smallest wall pieces (light switches, small plates) below about zoom 0.65, or merge wall decor that never drops. Wall decor batching per wall run was tried and saved only 7 calls (most pieces are alone on their wall stretch).
