@@ -522,4 +522,5 @@ introduces them), unless noted.
 | Kovac knitted the ladder-club badges (ladder-shaped; Cruz wears theirs, Keane lost his); her knitted tea-urn cover at Lanterns; her beans in the garden; Torres made the whole bay sing on her birthday | Kovac | Writer 2, batch 4 |
 | Marrow underlined one word on page forty; her quiz team came third; Mensah bought Holt a cup with a knot on it; Vance's waiting list can move you to eighth | command | Writer 2, batch 5 |
 | Torres came aboard as a junior; his first month, Calder had him on scrubbers; the arrival tour is `week1` lines gated by `flag:walk.<point>.<n>` (shuttle, bay, haulway, stores, works, lift, wing, officers, deck3, servery, call) and `walk.more.<n>`; meetings `introDinner` (`mem:intro.dinner.stars|fixing|unsure`) and `introAsk` | Torres | head writer 3, 0.48.22 |
+| Eklund's and Keane's grans both sent "the one about the goat" (a song); Hart's comic had a duck in it | Works, garden | Writer 2, batch 7 |
 | `weekday:` on a rest-day line must match the roster's `rota.offDays` (0 = Monday): check the game's ROSTER, not memory | everyone | head writer, 0.48.11 |
