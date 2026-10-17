@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.18
+   STARSHIP CADET: CSV Wren                           build 0.39.19
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.18';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.19';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27502,10 +27502,12 @@ function momentDef(id) {                                 // '<crewId>:<beat>' ->
   if (Array.isArray(d.needs) && (!p || !d.needs.every(has))) return null;   // a theme beat needs details they have: the roster's, or what section 20's socialFill can say ({hobby} from their habits, {since} from their arrival)
   return Object.assign({ who, beat, thread, tone: thread.startsWith('arc:') ? 'heartfelt' : MOMENT_TONE[beat - 1] || 'heartfelt' }, d, { who, beat });
 }
+const STORY_M0 = Object.freeze({ b: 0, at: null, hf: null });
+const storyPeek = id => { const S = SHIP.social && SHIP.social.stories, M = S && S.m; return (M && M[id]) || STORY_M0; };   // read-only (queries never write the save; reviewer 1b, 0.39.19)
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
 function momentNextId(p) {                               // the next beat's id that has a script, ready or not (writers' beats may have gaps)
   const v = voiceOf(p.id), th = v.thread || '', r = SHIP.rel[p.id];
-  const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyM(p.id).b;   // beats told so far (rel.arc for arcs)
+  const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyPeek(p.id).b;   // beats told so far (rel.arc for arcs)
   if (th.startsWith('arc:') && n < 1 && STORY_ARCS[p.id]) return null;   // an arc with card lines tells beat 1 on the card
   for (let b = n + 1; b <= n + 6; b++) if (momentDef(p.id + ':' + b)) return p.id + ':' + b;
   return null;
@@ -27541,20 +27543,19 @@ function momentWhere(p, t, d) {                          // the script's where: 
 const momentTrad = t => { const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440; let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(d) : []; } catch (e) { es = []; } const e = es.find(x => m >= x.from && m < x.to); return e ? e.id : null; };   // the tradition on now (trad: conditions)
 function momentCtx(p, t, id) {                             // the scene's ctx for a beat's when: the tradition on now, and the deck you're on (theirs: you're with them)
   const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && w.placeId && schedData().byId.get(w.placeId);
-  return { t, moment: id, trad: momentTrad(t), deck: pl ? pl.deck : undefined };
+  return { t, moment: id, trad: momentTrad(t), deck: pl ? pl.deck : w && w.deck != null ? w.deck : undefined };   // walking: the deck they're on
 }
 // momentWantsVisit(p, t) -> their next beat wants a bunk visit (where: visit) and its when holds now: section 20's
 // evening visits pick them first (Tomas's Wednesday exam night)
 function momentWantsVisit(p, t = shipNow()) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id)) return false;
   const id = momentNextId(p), d = id && momentDef(id); if (!d || ![].concat(d.where || []).includes('visit')) return false;
-  if (!d.when) return true;
-  try { return typeof linesOk === 'function' && !!linesOk(d.when, p, momentCtx(p, t, id)); } catch (e) { return false; }
+  return momentReady(p, t, { anywhere: true }) === id;   // every gate but the place (they'd be visiting): a beat that can't open tonight doesn't take the evening's visit
 }
 function momentReady(p, t = shipNow(), ctx = {}) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
   const id = momentNextId(p), d = id && momentDef(id); if (!d) return null;
-  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyM(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories;
+  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyPeek(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories || {};
   if (relTier(p.id) < (d.tier ?? g.tier) || metDays(p.id, t) < (d.metDays ?? g.met)) return null;
   const last = d.tone === 'resolution' ? st.hf : st.at; if (last !== null && (t - last) / 1440 < (d.gapDays ?? g.gap)) return null;
   if (st.at !== null && Math.floor(st.at / 1440) + 1 === day) return null;   // one moment a day each
@@ -27632,7 +27633,7 @@ function momentDone(p, d, c) {                           // the reply was picked
 const GOODBYE_PTS = 3;
 const GOODBYE_WHEN = ['today', 'tomorrow', 'the day after tomorrow'];
 function goodbyeMoment(p, t = shipNow()) {
-  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyM(p.id).bye) return null;
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyPeek(p.id).bye) return null;
   const left = typeof leavingSoon === 'function' ? leavingSoon(p, Math.floor(t / 1440) + 1) : null; if (left === null || left > 2) return null;
   const d = goodbyeDef(p.id); if (!d) return null;
   return { id: p.id + ':bye', hint: voiceFill(p.id, d.hint, t) };
