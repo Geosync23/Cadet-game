@@ -23727,9 +23727,16 @@ function lineQ(name, ...a) {
       case 'eventNow': f = typeof eventNow === 'function' && eventNow; break;
       case 'habitsOn': f = typeof habitsOn === 'function' && habitsOn; break;
     }
+    if (f && name === 'cue') {                            // the same answer while the clock and the cue list stand still (0.43.26): one line pick asks it hundreds of times
+      const now = shipNow(), arr = typeof SHIP !== 'undefined' && SHIP.social ? SHIP.social.cues : null;   // the list itself: section 20 replaces it on every new cue (0.43.28)
+      if (LINE_CUE.now !== now || LINE_CUE.arr !== arr) { LINE_CUE.now = now; LINE_CUE.arr = arr; LINE_CUE.m.clear(); }
+      if (!LINE_CUE.m.has(a[0])) LINE_CUE.m.set(a[0], f(...a));
+      return LINE_CUE.m.get(a[0]);
+    }
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
 }
+const LINE_CUE = { now: null, arr: null, m: new Map() };   // in practice the answers last a frame (the clock moves every frame)
 function linesWho(who) {
   if (who && typeof who === 'object') return who;
   if (typeof ROSTER === 'undefined') return null;
@@ -23740,7 +23747,7 @@ const linesName = p => p ? (typeof shortName === 'function' ? shortName(p) : p.n
 const linesMe = () => (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet';
 // one condition: key, wanted value (a string, 'a|b' for either), the speaker, ctx -> true / false
 function lineCond(k, v, p, ctx) {
-  const t = ctx.t, any = (x, f) => String(x).split('|').some(f), id = p.id;
+  const t = ctx.t, any = (x, f) => { const s = String(x); return s.indexOf('|') < 0 ? f(s) : s.split('|').some(f); }, id = p.id;
   switch (k) {
     case 'mem': return any(v, x => lineQ('mem', id, x) != null);
     case 'told': return any(v, x => { const m = lineQ('mem', id, x); return m != null && !m.told; });
@@ -23785,7 +23792,7 @@ function lineCond(k, v, p, ctx) {
   }
   return false;
 }
-// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple
+// pair:x+y (x for speaker A, y for B: a department, a rank, a crew id, or 'any') or pair:same|bunk|friend|rival|senior|couple|best|mentor|mentee
 function linePair(v, a, b) {
   if (!b) return false;
   return String(v).split('|').some(x => {
@@ -23793,12 +23800,23 @@ function linePair(v, a, b) {
     if (x === 'bunk') return !!a.bed && !!b.bed && a.bed.split('-').slice(0, 2).join('-') === b.bed.split('-').slice(0, 2).join('-');
     if (x === 'friend' || x === 'rival') return lineQ('affBand', a.id, b.id) === x;
     if (x === 'couple') return lineQ('bondOf', a.id, 'couple') === b.id;   // a couple living quietly in the background
+    if (x === 'best') return lineQ('bondOf', a.id, 'best') === b.id;       // best friends (0.43.27, social B2's goodbyes)
+    if (x === 'mentor') return lineQ('bondOf', a.id, 'mentor') === b.id;   // B is A's mentor (0.43.29: one way, as the writers' goodbyes read)
+    if (x === 'mentee') return lineQ('bondOf', a.id, 'mentee') === b.id;   // B is A's mentee
     if (x === 'senior') return LINE_RANKS.indexOf(a.rank) > LINE_RANKS.indexOf(b.rank);
     const [s, o] = x.split('+'), side = (q, w) => !w || w === 'any' || q.dept === w || q.rank === w || q.id === w;   // a department, a rank or a crew id
     return side(a, s) && side(b, o);
   });
 }
 const LINE_META = new Set(['text', 'id', 'tone', 'w', 'odds', 'not', 'old', 'lines', 'flavour', 'reply', 'sets', 'memo']);   // data, not conditions
+// the cheap conditions first (0.43.26, the performance pass): who, with, act, time, deck, weekday and place need no
+// social query (and cue's answers are kept while the clock and the cue list stand still), so a line failing one is dropped before linesOk asks section 20 anything. The same answer as linesOk
+// alone (all conditions must hold either way), only sooner
+const LINE_FAST = new Set(['who', 'with', 'act', 'time', 'deck', 'weekday', 'place', 'cue']);   // cue: lineQ keeps its answers while the clock stands still
+function lineQuick(e, p, ctx) {
+  for (const k in e) if (LINE_FAST.has(k)) { const v = e[k]; if (Array.isArray(v) ? !v.every(x => lineCond(k, x, p, ctx)) : !lineCond(k, v, p, ctx)) return false; }
+  return true;
+}
 function linesOk(e, p, ctx) {
   for (const k in e) {
     if (LINE_META.has(k)) continue;
@@ -23830,25 +23848,29 @@ function linesFill(text, p, ctx = {}) {
   let i = 0, s = text.replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k, off, str) => { const f = k === 'nick' && lineQ('socialFill', p, 'nick', ctx); const x = f || lineWord(p, k, h, i++); return x === '{me}' ? x : cap(x, off, str); });
   const bond = k => { const id = lineQ('bondOf', p.id, k); return id ? linesName(linesWho(id)) : null; };
   const chief = () => typeof ROSTER !== 'undefined' && ROSTER.find(q => q.dept === p.dept && q.rank === 'chief' && q !== p);
+  const LINE_ROSTER_FILL = ['kin', 'lost', 'hobbyNoun'];   // ready to drop into a line, from the roster (crew designer 3)
   const SOCIAL_FILL = ['me', 'partner', 'friend', 'best', 'rival', 'mentor', 'mentee', 'boss', 'thing', 'trad', 'home', 'family', 'hobby', 'since'];   // section 20's socialFill fills these when it's there ({since} grows with the game: social 0.36.60)
   const val = k => {
     if (ctx[k] != null && typeof ctx[k] !== 'object') return String(ctx[k]);
     if (SOCIAL_FILL.includes(k) && typeof socialFill === 'function') { const x = lineQ('socialFill', p, k, ctx); return x == null ? null : String(x); }
+    if (LINE_ROSTER_FILL.includes(k) && typeof socialFill === 'function') { const x = lineQ('socialFill', p, k, ctx); if (x != null) return String(x); }   // social's answer if it has one, else the roster's own
     switch (k) {
       case 'me': return linesMe();
       case 'name': return linesName(p);
       case 'first': { const w = p.name.split(' '); return /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(w[0]) && w.length > 2 ? w[1] : w[0]; }
       case 'friend': case 'best': case 'rival': case 'partner': case 'mentor': case 'mentee': return bond(k === 'partner' ? 'couple' : k);
       case 'boss': { const c = chief(); return c ? linesName(c) : null; }
+      case 'missed': return bond('missed');                // the close friend, partner or mentor who moved on (section 20c's bondOf, 0.39.14)
       case 'other': return ctx.other ? linesName(linesWho(ctx.other)) : null;
       case 'weekday': return WEEKDAYS[weekday(Math.floor(t / 1440) + 1)];
       case 'home': case 'family': case 'hobby': case 'since': return p[k] ? String(p[k]) : null;
+      case 'kin': case 'lost': case 'hobbyNoun': return typeof p[k] === 'string' && p[k] ? p[k] : null;   // the roster's line-ready forms (0.43.24: "my gran", "my wife", "the piano")
       case 'thing': { const k = ctx.mem; return k ? lineQ('memThing', k) || null : null; }   // from the memory the line matched (mem: or told:)
     }
     return null;
   };
   let ok = true;
-  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-z]+)\}/g, (m, k, off, str) => { const x = val(k); if (x == null) ok = false; return x == null ? m : cap(x, off, str); });   // twice: {nick} can give {me}
+  for (let n = 0; n < 2 && ok; n++) s = s.replace(/\{([a-zA-Z]+)\}/g, (m, k, off, str) => { const x = val(k); if (x == null) ok = false; return x == null ? m : cap(x, off, str); });   // twice: {nick} can give {me}
   return ok ? s : null;
 }
 function lineFor(who, kind, ctx = {}) {
@@ -23857,17 +23879,24 @@ function lineFor(who, kind, ctx = {}) {
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
   const pool = [];
   for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', tp && tp.lines && tp.lines[kind]], ['bank', LINES[kind]]])
-    for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
+    for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
   if (!pool.length) return null;
+  const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
   for (const x of pool) {
-    const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
     if (mine.some(r => r.id === x.e.id && r.h !== h)) x.sc -= 15;
     if (all.some(r => r.id === x.e.id && r.who !== p.id)) x.sc -= 8;
-    const mk = [].concat(x.e.told || x.e.mem || [])[0];
-    x.text = linesFill(x.e.text, p, mk && !c.mem ? { ...c, mem: mk } : c);
   }
-  const ok = pool.filter(x => x.text != null); if (!ok.length) return null;
-  const top = Math.max(...ok.map(x => x.sc)), best = ok.filter(x => x.sc === top);
+  pool.sort((x, y) => y.sc - x.sc);                       // stable: the pool's order within a score
+  let best = [];
+  for (let i = 0; i < pool.length && !best.length;) {     // fill only the top-scoring lines, the next score down if none of them fill (0.43.26)
+    const top = pool[i].sc;
+    for (; i < pool.length && pool[i].sc === top; i++) {
+      const x = pool[i], mk = [].concat(x.e.told || x.e.mem || [])[0];
+      x.text = linesFill(x.e.text, p, mk && !c.mem ? { ...c, mem: mk } : c);
+      if (x.text != null) best.push(x);
+    }
+  }
+  if (!best.length) return null;
   const sum = best.reduce((s, x) => s + (x.e.w || 1), 0);
   let r = schedU(p.seed || 0, h, 750) * sum, pick = best[best.length - 1];
   for (const x of best) { r -= x.e.w || 1; if (r < 0) { pick = x; break; } }
@@ -23885,7 +23914,7 @@ function overheardFor(a, b, ctx = {}) {
   a = linesWho(a); if (b) { b = linesWho(b); if (!b) return null; } if (!a || typeof CONVOS === 'undefined') return null;   // no b: one speaker's lines (only A:, a call home)
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60), ca = { ...ctx, t, other: b }, cb = { ...ctx, t, other: a };
   const skip = new Set(ctx.skip || []);
-  const pool = CONVOS.filter(e => !skip.has(e.id) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && linesOk(e, a, ca))
+  const pool = CONVOS.filter(e => !skip.has(e.id) && (!ctx.keep || ctx.keep(e)) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && lineQuick(e, a, ca) && linesOk(e, a, ca))
     .map(e => ({ e, sc: lineSpec(e) })).sort((x, y) => y.sc - x.sc);   // stable: file order within a score
   let best = [];
   for (let i = 0; i < pool.length && !best.length;) {     // fill only the most specific ones, the next score down if none of them fill
@@ -23917,7 +23946,9 @@ function linesState() {                                   // SHIP.lines = { ring
   if (!SHIP.lines) {
     const s = typeof SAVED !== 'undefined' && SAVED && SAVED.lines;
     const ok = s && Array.isArray(s.ring) && s.ring.every(r => Array.isArray(r) && typeof r[0] === 'string' && Number.isInteger(r[1]));
-    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0, reacted: {} };
+    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0, reacted: {}, bye: {} };
+    const by = ok && s.bye && typeof s.bye === 'object' ? s.bye : {};   // { 'a:b': day }: goodbyes said
+    for (const k in by) if (Number.isInteger(by[k])) SHIP.lines.bye[k] = by[k];
     const r = ok && s.reacted && typeof s.reacted === 'object' ? s.reacted : {};   // { crewId: { day, kinds: [...] } }
     for (const id in r) if (r[id] && Number.isInteger(r[id].day) && Array.isArray(r[id].kinds)) SHIP.lines.reacted[id] = { day: r[id].day, kinds: r[id].kinds.filter(k => typeof k === 'string') };
   }
@@ -23927,9 +23958,9 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
   const L = SHIP.lines; if (!L) return;
   const day = Math.floor(shipNow() / 1440) + 1, reacted = {};
   for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
-  s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted };
+  s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted, bye: L.bye || {} };
 });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {}, bye: {} }; OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -23938,34 +23969,67 @@ function linesHeard(id, day, tone) {
   if (tone === 'serious') L.serious = day;
 }
 const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
+// the minute's tries (goodbyes, reactions, then conversations) are worked in the minute's own frame, before section 20's
+// chatter rolls (0.43.28, reviewer 2b: 0.43.26 spread them over frames, so the chatter could speak in between and a
+// conversation was lost). Each try is about half the cost it was (0.43.26), and performance engineer 2 found section 22
+// in none of the slow frames. OVH_SCAN stays the queue's shape; OVH_PER_FRAME = Infinity works it all at once
+const OVH_PER_FRAME = Infinity;
+let OVH_SCAN = null;                                      // { t, day, tries: [{ x, y, ctx } | { x, react: true }], i }
 function linesTick() {
   if (OVH) { linesTalk(); return; }
+  if (OVH_SCAN) { linesScan(); return; }
   const m = Math.floor(shipNow()); if (m === OVH_MIN) return; OVH_MIN = m;
   if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined') return;
   const t = shipNow(), ovh = typeof CONVOS !== 'undefined' && CONVOS.length > 0 && schedU(m, 0, 752) < OVH_ODDS;
   const react = typeof LINES !== 'undefined' && !!LINES.cue && LINES.cue.length > 0 && (t - REACT_AT < REACT_FRESH || schedU(m, 0, 754) < REACT_ODDS);
   const now = performance.now(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
-  if (!(ovh || react) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
+  const byes = typeof CONVOS !== 'undefined' && CONVOS.some(e => e.leaving);   // goodbye conversations exist (leaving:soon)
+  if (!(ovh || react || byes) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
   const day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
   const onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // as section 20's chatter
-  const near = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
+  const around = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
     .map(a => ({ a, w: whereIs(a.p, t) })).filter(x => x.w && !x.w.moving && x.w.act !== 'sleep' && x.w.act !== 'wash')
-    .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753)).slice(0, OVH_NEAR);
-  if (react && linesReact(near, t, day)) return;
-  if (!ovh) return;
-  const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day;
-  let tries = OVH_TRIES;
-  for (const x of near) {
+    .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753));
+  const near = around.slice(0, OVH_NEAR);                 // the first OVH_NEAR in the seeded order; goodbyes look at everyone around
+  // goodbyes first (0.43.27, social B2): someone leaving soon (section 20's leavingSoon) with someone close by gets their
+  // goodbye conversation (one with leaving:), whatever the odds, once per pair (SHIP.lines.bye, saved)
+  const tries = [], Lb = linesState(), bye = Lb && (Lb.bye || (Lb.bye = {}));
+  if (byes && bye) for (const x of around) {
+    if (lineQ('leavingSoon', x.a.p.id) == null) continue;
     const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
-    const ctx = { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, skip, noSerious };
-    const call = w => w.act === 'callhome';               // someone on a call home talks to home, not to the next booth
-    for (const y of near.filter(y => y !== x && !call(x.w) && !call(y.w) && Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) <= OVH_PAIR).concat(null)) {   // with each one close by, then alone
-      if (tries-- <= 0) return;
-      const lines = overheardFor(x.a.p, y && y.a.p, ctx); if (!lines) continue;
-      linesHeard(lines.id, day, lines.tone);
-      OVH = { a: x.a, b: y && y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
+    for (const y of around) {
+      if (y === x || x.w.act === 'callhome' || y.w.act === 'callhome' || Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) > OVH_PAIR || bye[linesPairKey(x.a.p, y.a.p)]) continue;
+      tries.push({ x, y, bye: true, ctx: { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, keep: e => !!e.leaving, skip: linesRing(day), noSerious: Lb.serious === day } });
     }
   }
+  if (react) tries.push(...near.map(x => ({ x, react: true })));
+  if (ovh) {
+    const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day, call = w => w.act === 'callhome';   // someone on a call home talks to home, not to the next booth
+    let n = OVH_TRIES;
+    for (const x of near) {
+      if (n <= 0) break;
+      const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
+      const ctx = { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, skip, noSerious };
+      for (const y of near.filter(y => y !== x && !call(x.w) && !call(y.w) && Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) <= OVH_PAIR).concat(null)) {   // with each one close by, then alone
+        if (n-- <= 0) break;
+        tries.push({ x, y, ctx });
+      }
+    }
+  }
+  if (tries.length) { OVH_SCAN = { t, day, tries, i: 0 }; linesScan(); }
+}
+const linesPairKey = (a, b) => [a.id, b.id].sort().join(':');   // one goodbye a pair, whoever starts it
+function linesScan() {
+  const S = OVH_SCAN;
+  if (linesHush() || bubbles.list.length) { OVH_SCAN = null; return; }   // the budget says no (someone else spoke meanwhile)
+  for (let k = 0; k < OVH_PER_FRAME && S.i < S.tries.length; k++) {
+    const q = S.tries[S.i++];
+    if (q.react) { if (linesReact([q.x], S.t, S.day)) { OVH_SCAN = null; return; } continue; }
+    const lines = overheardFor(q.x.a.p, q.y && q.y.a.p, q.ctx); if (!lines) continue;
+    OVH_SCAN = null; linesHeard(lines.id, S.day, lines.tone);
+    OVH = { a: q.x.a, b: q.y && q.y.a, lines, i: 0, next: 0, bub: [], bye: q.bye ? linesPairKey(q.x.a.p, q.y.a.p) : null, day: S.day }; linesTalk(); return;
+  }
+  if (S.i >= S.tries.length) OVH_SCAN = null;
 }
 // the conversation playing: the next line when it's due; it ends after the last, or stops when the budget says hush
 function linesTalk() {
@@ -23973,7 +24037,10 @@ function linesTalk() {
   const gone = s => !DECK_CREW.includes(s) || !s.h, apart = !!o.b && Math.hypot(o.a.x - o.b.x, o.a.z - o.b.z) > OVH_PAIR + 1.5;
   if (linesHush() || gone(o.a) || (o.b && gone(o.b)) || apart) { for (const b of o.bub) { b.el.remove(); const k = bubbles.list.indexOf(b); if (k >= 0) bubbles.list.splice(k, 1); } OVH = null; OVH_AT = now; return; }
   if (now < o.next) return;
-  if (o.i >= o.lines.length) { OVH = null; OVH_AT = now; return; }
+  if (o.i >= o.lines.length) {                            // said to the end: a goodbye is marked only now (0.43.29), so one cut short can come again
+    if (o.bye) { const L = linesState(); if (L) (L.bye || (L.bye = {}))[o.bye] = o.day; }
+    OVH = null; OVH_AT = now; return;
+  }
   const l = o.lines[o.i++], s = o.b && l.who === o.b.p.id ? o.b : o.a;
   const b = bubbleSay(s.h, l.text, OVH_STEP + .8); if (b) o.bub.push(b);
   o.next = now + OVH_STEP * 1000;
