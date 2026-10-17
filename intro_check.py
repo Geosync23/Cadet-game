@@ -11,8 +11,10 @@
 #   5. skip-intro: the same points, flags and steps as after the arrival evening
 #   6. determinism: the happy path twice, the same
 #   7. the Settling-in list: one note of each kind ticks every item, and nothing else ticks any
-#   Later waves (shown as "not yet"): walking it in the real game, the escort never stuck, crossing decks by lift,
-#   meetings with their cast, the reserved jobs, draw calls under 450 at the bay, the Works door, dinner and Sowing.
+#   8. the evening in the real game (once section 13 has the Day 0 start): New game arriving, the manifest, a player
+#      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
+#      draw calls under 450, no page errors
+#   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
 import sys, json
@@ -52,6 +54,32 @@ RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
   const flags = {}; for (const f of FLAGS) flags[f] = introFlag(f);
   return { intro: JSON.stringify(SHIP.intro), I: SHIP.intro, rel, flags, flagAt, order,
            mail: SHIP.mail.map(m => [m.at, m.from, m.subject]).reverse(), steps: k };
+})"""
+
+# one look at the real game for part 8: the player follows Torres (or walks to a step that isn't his), rides the lift
+# when he does, and taps through meetings, choosing the second reply
+WALK_TICK = r"""((mode) => {
+  const I = SHIP.intro, st = introStepById(I.step), pp = player.obj.position, here = cellAt(pp.x, pp.z);
+  const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
+  let act = '';
+  if (DIALOGUE) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); act = 'talk'; }
+  else if (mode === 'follow' && st && st.checkpoint) {
+    const cp = st.checkpoint;
+    if (cp.deck !== deckDef.num) {                      // ride the lift to the checkpoint's deck
+      if (!a || Math.hypot(a.x - pp.x, a.z - pp.z) < 3 || !a) { goToDeck(cp.deck); act = 'lift ' + cp.deck; }
+      else { const c = cellAt(a.x, a.z), n = nearestOpen(cellPos(...c).x, cellPos(...c).z, player); if (n) player.obj.position.copy(cellPos(...n)); act = 'to him'; }
+    } else {
+      // keep 2 tiles behind him; once he's near the checkpoint, step onto it
+      const tgt = a && st.who === INTRO_ESCORT && Math.max(Math.abs(cellAt(a.x, a.z)[0] - cp.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - cp.tile[1])) > 2 ? cellAt(a.x, a.z) : cp.tile;
+      const dx = Math.sign(tgt[0] - here[0]), dz = Math.sign(tgt[1] - here[1]);
+      const nx = here[0] + dx, nz = here[1] + dz;
+      if (free(nx, nz) && !(a && Math.max(Math.abs(nx - cellAt(a.x, a.z)[0]), Math.abs(nz - cellAt(a.x, a.z)[1])) < 1)) player.obj.position.copy(cellPos(nx, nz));
+      else { const p = cellPos(...tgt), n = nearestOpen(p.x, p.z, player); if (n) player.obj.position.copy(cellPos(...n)); }
+      act = 'walk';
+    }
+  }
+  return { t: clockText(), step: I.step, deck: deckDef.num, me: cellAt(player.obj.position.x, player.obj.position.z),
+           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, dlg: DIALOGUE && DIALOGUE.id };
 })"""
 
 DATA = r"""(() => {
@@ -236,7 +264,29 @@ with sync_playwright() as pw:
     for x in t['bad']: fail(x)
     if not t['all']: fail('ticking everything did not finish the list')
 
-    print('Not yet (wave 2 and later): the real walk, the escort never stuck, the lift, meetings with their cast, the reserved jobs, draw calls')
+    print('8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)')
+    if not g.ev("typeof newGameStart === 'function' && typeof escortPlanOf === 'function'"):
+        print('  not yet: this build has no Day 0 start or escort walker (section 13/10, the sim engineer)')
+    else:
+        g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        order, peak, led = [], {}, 0
+        for k in range(420):
+            g.step(20)
+            r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+            peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
+            if r['esc'] and r['esc'][2] == 'escort': led += 1
+            if not order or order[-1] != r['step']: order.append(r['step']); print(f"  {r['t']}  {r['step']}  (you: Deck {r['deck']} {r['me']}; Torres {r['esc'][0] if r['esc'] else 'not here'})")
+            if r['step'] is None: break
+        w = g.ev("({ missed: SHIP.intro.missed, done: Object.keys(SHIP.intro.done), device: introFlag('intro.device'), calder: introFlag('met.calder') })")
+        print(f'  draw-call peaks by deck {peak}; Torres led you for {led} looks')
+        if w['missed']: fail('the real walk missed ' + ', '.join(w['missed']))
+        if [s for s in steps if s not in w['done']]: fail('the real walk never reached ' + ', '.join(s for s in steps if s not in w['done']))
+        if order[-1] is not None: fail('the evening did not end in the real walk')
+        if not (w['device'] and w['calder']): fail('no device or no Calder after the real walk')
+        if max(peak.values()) >= 450: fail(f'draw calls {max(peak.values())} at the arrival (budget 450)')
+        if led < 20: fail('Torres hardly led you')
+    print('Not yet (wave 3 and later): the reserved jobs, the week in play, reload mid-walk in the real game')
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 

@@ -48,7 +48,7 @@ class Game:
         self.page.goto('file://' + str(tmp) + '?nosave&debug')
         # toasts fade on real-time timers and CSS transitions, not the virtual clock: keep them out of screenshots
         # (their text is still read from the DOM) so shots don't depend on how fast the machine runs
-        self.page.add_style_tag(content='#toast{opacity:0!important} *,*::before,*::after{transition:none!important;animation:none!important}')
+        self.page.add_style_tag(content='#toast,.nf{opacity:0!important} *,*::before,*::after{transition:none!important;animation:none!important}')   # .nf: the needs' floating notes, gone on a real-time timer too
         try:
             self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         except Exception:
