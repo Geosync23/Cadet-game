@@ -330,3 +330,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - Team: build master 2 (session_01F8ph7FKqViF3heRn94YgBr), reviewer 1e, player eng 5 (~42%), perf 3 (~48%), sim 5 (~63%), career eng (~44%), head writer 4 (~32%), social & traditions eng (idle), Pillar 5 designer (idle). Hourly check-in trig_01JouW3XuKjT3nkZaqjXJjZZ.
 - ~18:58 user testing 0.60.5: slow walk at game start (PE5 investigating); Zeke stops too much + lines should be welcoming/general, job stuff -> Monday (HW4 rewrite + sim 5 cut stops to bunk + mess). More notes coming.
 - ~19:00 sim 5 handed over (plans/handover-sim.md 596d9ab9, idle). Onboarding eng 3 hired for the pre-lift tour (user: everything from the lift on is great, keep it).
+- 19:08 0.60.5a HOTFIX released (sickToday sd>0): ship-integration -> 348b1d8, published version 4. player_check + intro_check (incl part 12) still running at BM2.
