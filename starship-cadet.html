@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.49
+   STARSHIP CADET: CSV Wren                           build 0.34.50
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.49';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.50';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -15125,6 +15125,18 @@ SHIP.occasions = []; SHIP.commendations = [];
 })();
 function OCC_OK(o) { return typeof o.id === 'string' && typeof o.key === 'string' && Number.isFinite(o.at); }
 SAVE_EXTRA.push(s => { s.ship.occasions = SHIP.occasions.slice(-40); s.ship.commendations = SHIP.commendations; });
+// a New game (section 13's simNote('newGame')): everything section 18 keeps for a game starts again: occasions and
+// commendations, the ship-wide event and its log, traces, the traditions' sent/joined/noted, one-offs and your votes,
+// meetings, and the caches (reviewer 1b, via device engineer 3: a new game kept the last one's Captain's table)
+if (typeof onSim === 'function') onSim('newGame', () => {
+  if (DIALOGUE) dialogueEnd(true);
+  SHIP.occasions.length = 0; SHIP.commendations.length = 0;
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0;
+  const oo = SHIP.events.oneOffs.length; for (const k of ['sent', 'joined', 'noted', 'oneOffs']) SHIP.events[k].length = 0; SHIP.events.votes = {};
+  MEETINGS.length = 0; FEEL_DONE.clear(); EV_MAILBOX.length = 0; WEEK_MAILS.length = 0; for (const k in EV_BUNDLE) delete EV_BUNDLE[k];
+  EV_LAST = null; EV_MIN = -1; EV_ARR = null; EV_DAYS.clear(); EV_DROPPED.clear(); TALLY_MEMO.clear();
+  if (oo && typeof SHIP_DAYS !== 'undefined') { SCHED_DATA = null; SHIP_DAYS.clear(); }   // as eventOneOff: the one-offs leave the plans
+});
 const occRel = id => typeof relTier === 'function' ? relTier(id) || 0 : 0;
 const occOnShift = (id, d) => { const p = schedPeople().find(q => q.id === id); return !!p && isWorkDay(p, d); };
 const yourJobsDone = () => (SHIP.jobs || []).filter(j => j.status === 'done' && j.doneBy === 'you').length;

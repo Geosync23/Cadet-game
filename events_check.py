@@ -707,6 +707,18 @@ with sync_playwright() as pw:
     if any('An invitation (notes)' in x for x in I['mails1']) or not any(x.startswith('22 18:00') and 'Bridge hour' in x for x in I['mails1']): fail(f"the Mail around a played invite: {I['mails1']}")
     if I['slept'] != ['bridgeInvite@50 missed'] or not I['sleptFlag'] or not any('An invitation (notes)' in x for x in I['mails2']): fail(f"a slept-through invite: {I['slept']} flag {I['sleptFlag']} {I['mails2']}")
 
+    # 11. a New game (0.34.50; reviewer 1b): section 18's per-game state starts again (last: it restarts the game)
+    NG = g.ev("""(() => {
+      SHIP.commendations.push({ event: 'ionStorm', day: 16 }); skipTo(18 * 1440 + 900);   // books the Captain's table (day 20)
+      SHIP.traces.push('framedMenu'); SHIP.events.sent.push('quiz@4'); SHIP.events.votes['tasting-table@3'] = 'x'; flagSet('bridge.invited');
+      const before = { occ: SHIP.occasions.length, com: SHIP.commendations.length, tr: SHIP.traces.length };
+      newGameStart(false); skipTo(3 * 1440 + 600);
+      return { before, occ: SHIP.occasions.map(o => o.key), com: SHIP.commendations.length, ev: SHIP.event, log: SHIP.eventLog.length, tr: SHIP.traces.slice(),
+        sent: SHIP.events.sent.filter(k => !/@[1-5]$/.test(k)), votes: Object.keys(SHIP.events.votes), meet: MEETINGS.filter(m => m.event === 'occasion').map(m => m.id), flag: !!flag('bridge.invited'), day: Math.floor(shipNow() / 1440) + 1 };
+    })()""")
+    print('New game: before', NG['before'], '| after: occasions', NG['occ'], 'commendations', NG['com'], 'traces', NG['tr'], 'old Mail keys', NG['sent'], 'votes', NG['votes'], 'occasion meetings', NG['meet'], 'flag', NG['flag'], 'day', NG['day'])
+    if not NG['before']['occ'] or NG['occ'] or NG['com'] or NG['ev'] or NG['log'] or NG['tr'] or NG['sent'] or NG['votes'] or NG['meet'] or NG['flag']: fail(f"a New game kept section 18's state: {NG}")
+
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
