@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.10
+   STARSHIP CADET: CSV Wren                           build 0.38.11
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1222,6 +1222,13 @@ const KIT = {
     box(.16, .05, .08, LNG.wood, .26, .747, -.28, g);    // the tray of spare tiles
     for (const sd of [-1, 1]) { cyl(.17, .17, .06, LNG.rust, sd * .6, .46, 0, g, 16); cyl(.025, .025, .43, LNG.brass, sd * .6, .215, 0, g, 8); cyl(.14, .16, .02, M.slateDark, sd * .6, .01, 0, g, 16); }
     return { w: .72, d: .72 };
+  },
+  postbox(g) {                                           // a pillar box for paper letters, by the call-home booths (Pillar 4, seat 8: Letters evening)
+    cyl(.21, .22, .06, M.slateDark, 0, .03, 0, g, 18); cyl(.19, .19, .89, LNG.rust, 0, .505, 0, g, 18);
+    soft(LNG.rust, 0, .95, 0, .2, .1, .2, g); cyl(.205, .205, .05, LNG.brass, 0, .88, 0, g, 18);   // the domed cap and a brass band
+    box(.2, .025, .03, M.slateDark, 0, .78, .185, g); box(.24, .015, .04, LNG.brass, 0, .802, .19, g);   // the slot, and its lip
+    box(.16, .1, .012, LNG.cream, 0, .6, .19, g);        // the collection plate
+    return { w: .44, d: .44 };
   },
   cardTable(g) {
     box(.9, .05, .9, std('#2f5e4f', .9), 0, .72, 0, g);
@@ -4863,8 +4870,8 @@ DECKS[3] = {
     { id: '3-toilet-4', type: 'toilet', at: [17, 21], xy: [17.83, 21.5], walk: [17, 20], face: 'n', pose: 'sit', y: .4, room: 'w' },
     { id: '3-basin-1', type: 'basin', at: [21, 16], xy: [21.93, 16.7], walk: [21, 16], face: 'e', pose: 'stand', room: 'w' },
     { id: '3-basin-2', type: 'basin', at: [21, 17], xy: [21.93, 17.7], walk: [21, 17], face: 'e', pose: 'stand', room: 'w' },
-    { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', room: 'w' },
-    { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', room: 'w' },
+    { id: '3-wbench-1', type: 'bench', at: [17, 17], xy: [17.3, 17.55], walk: [17, 18], face: 'e', pose: 'sit', calm: false, room: 'w' },
+    { id: '3-wbench-2', type: 'bench', at: [17, 16], xy: [17.3, 16.85], walk: [18, 16], face: 'e', pose: 'sit', calm: false, room: 'w' },
     { id: '3-gym-1', type: 'gym', at: [24, 20], xy: [24.5, 20.5], walk: [24, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-2', type: 'gym', at: [26, 20], xy: [26.5, 20.5], walk: [26, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
     { id: '3-gym-3', type: 'gym', at: [28, 20], xy: [28.5, 20.5], walk: [28, 19], face: 's', pose: 'stand', anim: 'run', y: 0.16, room: 'F' },
@@ -5134,6 +5141,7 @@ DECKS[3] = {
     // ---- Pillar 4, seat 8 (0.38.10): the seedling stand in the garden's north-east corner (Sowing morning) and the bow lounge's Tiles station ----
     place('G', 'seedlingStand', 9.63, .42, 'n', { yours: DECKS[3].seedlings.yours, it: IT('Seedlings', 'A little stepped stand of pots by the grow racks: one seedling for everyone who came to the last Sowing morning. One pot is only soil, waiting.') });
     place('L', 'tilesTable', 3.5, 18.5, 'n', { it: IT('Tiles', 'A Tiles board, always set up, a tray of spare tiles and two stools. Sit down and someone usually sits down opposite.') });
+    place('B', 'postbox', .4, 4.5, 'w', { it: IT('Postbox', 'For paper letters. They go home in a sealed bag with the next shuttle, weeks behind any call. Some people say that is the point.') });   // 0.38.11
   },
 
 };
@@ -6008,13 +6016,13 @@ DECKS[2] = {
     // observatory night (0.32.3, answer 25): one evening a week off-duty crew gather here (the sim engineer schedules it).
     // Everything tagged event 'observatory-night' is the gathering: the bench and beanbag seats above, and these, which are
     // type 'event' so the everyday habits leave them alone. window: by the bow glass.
-    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.6, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night' },
+    { id: '2-obsnight-1', type: 'event', at: [42, 1], face: 's', pose: 'sit', room: 'J', xy: [42.6, 1.2], y: 0.52, anim: 'talk', window: true, event: 'observatory-night', calm: true },
     { id: '2-obsnight-2', type: 'event', at: [44, 1], face: 'n', pose: 'stand', room: 'J', window: true, event: 'observatory-night' },
     { id: '2-obsnight-3', type: 'event', at: [41, 2], face: 'n', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
     { id: '2-obsnight-4', type: 'event', at: [41, 3], face: 'e', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
     { id: '2-obsnight-5', type: 'event', at: [43, 3], face: 'w', pose: 'stand', room: 'J', anim: 'talk', event: 'observatory-night' },
-    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night' },
-    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night' },
+    { id: '2-obsnight-6', type: 'event', at: [44, 5], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night', calm: true },
+    { id: '2-obsnight-7', type: 'event', at: [44, 6], face: 'w', pose: 'sit', room: 'J', y: 0.18, anim: 'talk', event: 'observatory-night', calm: true },
     // the comms room
     { id: '2-comms-1', type: 'work:comms', at: [29, 20], face: 'n', pose: 'work', room: 'Q' }, { id: '2-comms-2', type: 'work:comms', at: [26, 20], face: 'n', pose: 'work', room: 'Q' },
     { id: '2-comms-3', type: 'work:comms', at: [26, 15], face: 's', pose: 'sit', room: 'Q', xy: [26.84, 15.79], y: 0.5, anim: 'talk' },
@@ -6919,8 +6927,15 @@ const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.incl
 // The new places are type 'event' with an event tag ('sowing', 'tiles'), so nobody uses them day to day (crew plans unchanged).
 DECKS[3].places.push(
   { id: '3-seedlings-1', type: 'event', event: 'sowing', at: [11, 1], xy: [11.6, 1.2], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // in front of the stand
-  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, room: 'L' },   // the station's stools
-  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, room: 'L' },
+  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },   // the station's stools
+  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },
+);
+// 0.38.11: the postbox's place (Letters evening: posting a letter) and twelve lantern places on the promenade's two
+// outer lanes (Lantern walk: crew stand under the lanterns, facing the middle), all event-tagged like the rest.
+DECKS[3].places.push(
+  { id: '3-postbox-1', type: 'event', event: 'letters', at: [37, 17], xy: [37.15, 17.5], face: 'w', pose: 'stand', anim: 'pay', room: 'B' },   // at the postbox's slot
+  ...[26, 28, 30, 32, 34, 36, 38].map(c => [c, 9]).concat([28, 30, 34, 36, 38].map(c => [c, 12])).map(([c, r], k) =>
+    ({ id: '3-lantern-' + (k + 1), type: 'event', event: 'lanterns', at: [c, r], xy: [c + .5, r === 9 ? 9.45 : 12.55], face: r === 9 ? 's' : 'n', pose: 'stand', anim: 'talk', room: '=' })),
 );
 DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
 DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
@@ -7063,6 +7078,38 @@ const DECK_DRESS = {
     const [cx, cy, cz] = B[5];                           // the tap: the coffee table's board
     return { t: 'Tiles night', x: 'A Tiles board on every table tonight, and a game going on most of them. Rina is defending her title, and saying so.', floor: ['L', cx - r.i0, cz - r.j0], y: cy + .05, w: .3, h: .1, d: .3 };
   } },
+  // 0.38.11. tastingTable: Brennan's tasting table on Wednesday's dinner (o.title: the dish; o.lines: up to five lines in
+  // chalk, the votes so far): the chalkboard by the mess door and a tray of tasting cups and a bowl of vote tokens on the
+  // end of a long table. 5 draw calls.
+  tastingTable: { deck: 3, what: 'Brennan\'s tasting table: a chalkboard, a tray of tasting cups and a bowl of vote tokens', make(g, o) {
+    const b = dressAt(g, 'M', 'w', 2.9), dish = o.title || 'Something new from the galley';
+    dressBox(b, .62, .5, .03, '#5a3b26', 0, 1.5, .015); dressBox(b, .62, .03, .06, '#5a3b26', 0, 1.235, .045);   // the frame, and the chalk ledge
+    const t = tex(256, 200, (c, w, h) => {
+      c.fillStyle = '#1f2b26'; c.fillRect(0, 0, w, h); c.fillStyle = '#efe9dc'; c.font = '700 22px system-ui,sans-serif'; c.fillText('TASTING TABLE', 16, 32);
+      c.font = 'italic 600 17px Georgia,serif'; String(dish).split('\n').slice(0, 2).forEach((l, k) => c.fillText(l, 16, 62 + k * 21));
+      c.font = '500 15px system-ui,sans-serif'; (o.lines || ['Try a cup, then vote:', 'gold token: on the menu', 'white token: back to the galley']).slice(0, 5).forEach((l, k) => c.fillText(l, 16, 112 + k * 19));
+    });
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(.56, .44), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); pl.position.set(0, 1.5, .032); b.add(pl);
+    const s = dressAt(g, 'M', 'floor', 1.3, 4.0);        // the west end of the third long table (its top at .77)
+    dressBox(s, .5, .02, .3, '#5a3b26', 0, .781, 0);
+    for (let k = 0; k < 8; k++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.022, .018, .035, 8), dressMat('#f4f1e8')); c.position.set(-.2 + (k % 4) * .085, .809, k < 4 ? -.07 : .07); s.add(c); }
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.06, .045, .04, 12), dressMat('#f4f1e8')); bowl.position.set(.16, .811, 0); s.add(bowl);
+    [[-.02, -.015], [.015, .02], [.025, -.02], [-.025, .02], [0, 0]].forEach(([x, z]) => { const k = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .006, 8), dressMat('#e9c46a')); k.position.set(.16 + x, .832, z); s.add(k); });
+    return { t: 'Tasting table', x: 'Brennan\'s tasting table. ' + String(dish).replace(/\n/g, ' ') + '. Take a cup, then drop a token in the bowl: gold if it should go on the menu.', wall: ['M', 'w', 2.9], y: 1.5 };
+  } },
+  // lanternWalk: the Lantern walk at dusk: paper lanterns on strings down both sides of the promenade, one InstancedMesh of
+  // lanterns (unlit, so they glow) and the strings merged: 2 draw calls, no shadows.
+  lanternWalk: { deck: 3, what: 'paper lanterns strung down both sides of the promenade', make(g) {
+    const r = ROOM_BOX['='], s = dressAt(g, '=', 'floor', 0, 0), pts = [], C = ['#ffb35c', '#ff8a5c', '#ffd27a', '#f2c94c'];
+    for (const [x0, x1] of [[12.5, 16.6], [23.5, 39.7]]) for (const z of [9.35, 12.65]) {
+      dressBox(s, x1 - x0 + .4, .01, .01, '#3a3a3a', (x0 + x1) / 2 - r.i0, 2.34, z - r.j0);   // the string
+      for (let x = x0; x <= x1; x += 1.15) { const y = 2.12 + .06 * Math.sin(x * 2.1); pts.push([x - r.i0, y, z - r.j0]); dressBox(s, .006, 2.34 - y - .16, .006, '#3a3a3a', x - r.i0, (2.34 + y + .16) / 2, z - r.j0); }
+    }
+    const im = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ toneMapped: false }), pts.length), m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(.13, .17, .13);
+    pts.forEach(([x, y, z], k) => { im.setMatrixAt(k, m.compose(new THREE.Vector3(x, y, z), q, sc)); im.setColorAt(k, col(C[k % 4])); });
+    im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
+    return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
+  } },
   partyLounge: { deck: 3, what: 'party decorations in the bow lounge: bunting, balloons and a banner', make(g, o) {
     const s = dressAt(g, 'L', 'floor', 0, 0), C = ['#c45a3f', '#e8c06a', '#5fd6c6'], y = 2.2;
     const pts = [[41.4, 9.0], [46.44, 8.27], [46.44, 13.73], [41.4, 13.0]].map(([x, z]) => [x - ROOM_BOX.L.i0, z - ROOM_BOX.L.j0]);
@@ -7177,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.10';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.11';                          // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
