@@ -274,3 +274,109 @@
 
 == rumour
 - You didn't hear this from the Watch.
+
+// Writer 4, batch 13: Holt's ordinary weeks, after week one. Mostly not work: breakfast after the rounds, a sweet
+// tooth he denies, books, the gym (not discussed), Mensah, his juniors, rest days, tea he "doesn't care for".
+// Gates kept: no bad day, no Rook, nothing of the six hours before beat:holt.3; nothing against the Captain.
+
+== greet
+? tier>=acquaintance !week1:true
+- Cadet. Eaten? Hm. Eat. Then talk.
+- Hm. You. Sleep well? Good. Somebody should.   #funny
+? tier>=acquaintance !week1:true time:evening
+- Evening, cadet. Off shift. Both of us. Act like it.   #funny
+? tier>=colleague !week1:true
+- Hm. {nick}. Sit, if you're sitting. Don't hover.
+- {nick}. Mensah says I'm to ask how your week was. How was your week?   #funny
+? tier>=friend !week1:true
+- {nick}. Good. There's a seat with a view of the door. Take the other one.   #funny
+- There you are. I've a biscuit going spare. Don't tell anyone I had two.   #funny
+? tier>=close !week1:true
+- Kid. Sit down. Tell me something ordinary. I like ordinary.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- Breakfast after the rounds. Eggs. Toast. Same table. Never changes. Good.
+- Vance runs on the treadmill like it owes him money. I lift. Quietly. Not discussing it.   #funny
+- Mensah told me a joke at breakfast. I didn't laugh. Inside, I laughed a little.   #funny
+- The juniors think I don't know about "one lecture at a time". I named it.   #funny
+- I don't care for tea. I drink it because it's there. That's all.
+- Rest day tomorrow. I'll walk the decks anyway. Slower. With a book after.
+? tier>=colleague !week1:true
+- I read on rest days. Old stories. Ships, storms, people getting home. Simple stuff.
+- Brennan's pudding is adequate. I've had it four times this week. Adequate.   #funny
+- Tomas asked me about my first posting. I told him. Took an hour. He took notes.   #funny
+- Vasquez quoted me back at me. Correctly. I've never been so proud and so annoyed.   #funny
+- The Captain asked my opinion at breakfast. Then took it. Good Captain.
+- Nakamura grows herbs on his windowsill. Brought me some mint. For the tea I don't drink.   #funny
+- Quiz night. I'm on Mensah's team. I know the answers. I don't shout them. Vance shouts.   #funny
+? tier>=friend !week1:true
+- I like a quiet corner and a full plate. Most of what I want, that is.
+- All these years of watches. I still check under my bunk. Old habit. Hm. Don't laugh.   #funny
+- The Envoy keeps the same hour every day. So do I. We've that in common. Not much else.
+? tier>=close !week1:true
+- You know what I worry about? Nothing, most days. You lot made that true. Hm.   #warm
+- If I ever retire, I'll want a window and a door I can see. And a biscuit tin.   #funny
+
+== near
+? act:breakfast !week1:true
+- Rounds done. Now breakfast. Same seat. Back to the wall.
+? act:dinner !week1:true
+- Late dinner. Quieter. Pudding's still on. Good.
+? act:gym
+- I'm here for the weights. We've discussed this. We have not discussed this.   #funny
+? act:off
+- Rest day. Book, walk, book. No drills. Don't tempt me.   #funny
+? place:lounge
+- Lounge. Hm. Mensah dragged me. I'm sitting by the door. Naturally.   #funny
+? place:mess !week1:true
+- Mess. Every seat's taken but one. It faces the door. Mine.   #funny
+? trad:quiz
+- Quiz night. Team's called something Mensah chose. I won't say it.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Mensah made me laugh twice. I'll deny the second.   #funny
+? mood:ok !week1:true
+- Fine. Doors shut. People fed. Fine is a good day.
+? mood:low tier>=friend !week1:true
+- Tired. Long night. Walked an extra deck. Helps. Usually.
+
+== life
+? tier>=acquaintance !week1:true
+- I keep a tin of mints in my desk. For the juniors. Mostly for the juniors.   #funny
+? tier>=colleague !week1:true
+- Still got my first patrol boots. Resoled twice. They'll see me out.
+- Mensah and I've worked together years. He talks, I listen. It's a fair split.
+? tier>=friend !week1:true
+- I've a book I read every Lanterns. Same one. A ship gets home in the end.
+
+== joy
+? tier>=acquaintance !week1:true
+- The first cup of something hot after rounds. Whatever it is. Not tea. Hm. Tea.   #funny
+? tier>=colleague !week1:true
+- A junior doing the right thing without being told. I don't say it. I notice it.   #warm
+
+== bye
+? !week1:true
+- Right. Go and eat something. That's an order. Not really. Mostly.   #funny
+- As you were, {nick}. Get some sleep.
+- Off with you. Mind the hatch. And yourself.   #warm
+
+== callback
+? told:intro.arrival tier>=acquaintance !week1:true
+- First night you came aboard, I clocked you at the lift. Lost. Took the right turn anyway.
+? told:intro.arrival tier>=friend
+- Your first night, I watched the Tern land. Always do. A good one got off. Hm.   #warm
+? told:came.quiz tier>=acquaintance
+- Quiz night. You knew the airlock question. I saw. Adequate.   #funny
+? told:came.running tier>=acquaintance
+- Running club. You kept pace with Vance. Don't tell him. He'll start a board.   #funny
+? told:moment.holt.walk tier>=colleague
+- You came on the long walk. Five in the morning. Most don't. Hm. Again sometime.   #warm
+? told:fixed. tier>=acquaintance
+- Saw your name on a job sheet. {thing}. Done properly. Noted.
+? told:bday tier>=colleague
+- Your birthday. Mensah reminded me. I'd remembered. Hm. Mostly.   #funny
+? told:came.observatory tier>=acquaintance
+- Observatory night. You stood by the door. Good habit. Look up, too, though.   #funny
