@@ -7,9 +7,9 @@
 (session_0142TQw4ke8caPSyAC93VT98) reviews you. Tradition designers may ask you for a tone check.
 
 **Branch:** `claude/content` (push only there). Builds **0.48.x** (header line ~198 and `GAME_BUILD` ~7047 in
-`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.13** (Head writer 2, 027c0da):
-2,502 lines, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
-12 struggle themes, 4 intro meetings. Next build number: 0.48.14.
+`starship-cadet.html`; keep both in step; a row in DEV_NOTES's build table for each). Last build: **0.48.14** (Head writer 2, f965f40):
+2,936 lines, 128 conversations, 5 meetings (bridgeInvite added), 83 voice cards (all 74 crew, Saruth, 8 event guests), 10 templates, 87 overheard conversations, 45 arc moments,
+12 struggle themes, 4 intro meetings. Next build number: 0.48.15.
 
 ## What you own
 
@@ -43,6 +43,8 @@
 - **cadet_test** can time out loading the page once in this container; re-run it alone.
 - **social_check**'s gift test picks the first tea-lover (fixed by social A in 0.36.46 to skip guarded people).
 - **Rest-day lines:** `weekday:` must match the game ROSTER's `rota.offDays` (0 = Monday); writers have got it a day early. Torres's and Calder's day-off lines deliberately use the *planned* Pillar 4 days.
+- **No-romance read, recurring catches:** "thinking about you", "likes you", "just us", a place for two in hints, anyone in
+  or on your bed, night "with me", "kept looking at the door", romantic idioms ("hung the stars"), pet-name-like words.
 - Card words (`hi`, `bye`...) carry no end punctuation; lines supply it.
 - Day 0 walking lines: `== week1` under `? flag:walk.<step>`; shadow job: `flag:walk.job.<step>` (onboarding maps
   its keys: take, stop.fetch, stop.make, stop.job=panel, done, turnin).
@@ -60,10 +62,10 @@
 | Writer | Session | Branch | State |
 | --- | --- | --- | --- |
 | writer-works | session_01DbudMKaYgwjL8yDQpe3DFo | claude/writer-works | retired (`plans/handover-writer-works.md`) |
-| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batch 1 and 1b merged in 0.48.11; on batch 2 (command, Watch, Survey people to ~30 each) |
+| **Writer 2** (Works + command) | session_01Cf6D2dFZaKspr9mwUnCrBm | claude/writer-works | batches 1, 1b, 2 merged (0.48.11, 0.48.14); on batch 3 (Zielinski, day officers, Survey assistants, Nandakumar, Sato) |
 | writer-command | session_01HdsVyhcPUgWse8qpaYqKex | claude/writer-command | retired (`plans/handover-writer-command.md`) |
 | writer-commons | session_01DfadYjSP8skcVF72f6JxBw | claude/writer-commons | retired |
-| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | hired 2026-10-17 ~04:16; order: story-crew callbacks + visit/note, newlyweds and who: overheard, rep/knownFor, story crew to ~120 |
+| **Writer 3** (Commons) | session_01AS3Tzju3TuFbM9XAEYdvPX | claude/writer-commons | batches 1-2 merged (0.48.14); on batch 3 (story crew to ~120), then Gran, Jo, Sam call-home arcs from mum.call. rep/knownFor: as greet/near lines with rep:/you: until the kinds are called; gift thanks held (asked the dialogue engineer for `gift:loved|liked|polite`) |
 
 Writer 2 is on batch 1 (Works 1-8 and Kovac to ~30, Torres's job-2/job-3 bubbles under `flag:walk.job2.<step>` and
 `flag:walk.job3.tea|turnin`, telling onboarding when they're in). Newcomer replies are on hold (they wait for the guide
@@ -83,11 +85,12 @@ overheard can now be written.
 
 ## In flight (Head writer 2)
 
-- **Call home / Letters evening:** agreed proposal with social B sent to the lead (0.48.13 time): Mum, Gran, Jo, Sam;
-  `content/home/<contact>.arc`; shapes HOME_CONTACTS / HOME_MOMENTS (via reply|live) / HOME_SEND / HOME_REPLY; social B's B8.
-  Waiting on the lead's OK and the user's answers (fixed cast? named home?). Then: head writer writes Mum as the model.
+- **Call home:** APPROVED (fixed cast Mum, Gran, Jo, Sam; home unnamed; live calls any day, once per person per day;
+  Letters evening = the clear-line window where `via: live` beats land). Model: `content/home/mum.call` (5a07b86; `.call`
+  so content_gen doesn't read it as a crew arc). Waiting on the dialogue engineer's baker and social B's B8 (send-condition
+  names marked (?) in the file). Writer 3 writes Gran, Jo, Sam from it.
 - **Bridge invite:** `meetings/bridgeInvite.meet` (Vance, day 22, `flag:bridge.invited`); trigger not wired yet.
-- **Holt beat 1** `where: meal` (social B's suggestion): waiting on social B for the exact where: word.
+- **Holt beat 1** has `where: meal` (social B's 0.39.6 word; plays once their engine is in the integration build).
 - Dialogue engineer: session_01UmrVVpV7eBqEsa4sBucASP (claude/dialogue; tool requests go direct).
 
 ## Open questions with others
