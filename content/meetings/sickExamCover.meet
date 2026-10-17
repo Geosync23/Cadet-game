@@ -1,0 +1,13 @@
+@meeting sickExamCover
+// Head writer 4: being ill, when Rina is off shift: another medic on duty (the game casts tech1 from the infirmary
+// crew on shift). Kind, plain, no personal jokes (it could be anyone on the infirmary staff).
+title: The infirmary
+from: The infirmary
+gist: The medic on duty: a ship cold, some medicine, and the rest of the day to rest.
+== lines
+tech1: Come in. Sit down. You look done in.   [gesture]
+tech1 > you: Let's have a look. Open wide. Good. And breathe in. And out.
+tech1: A ship cold. Recycled air does it to all of us sooner or later.
+tech1: Two of these with a full cup of water. Then rest.   [nod]
+tech1 > you: You're excused today. Sick days don't use your leave.
+tech1: Come back if it's no better by tonight. We're always here.
