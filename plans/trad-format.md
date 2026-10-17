@@ -98,7 +98,7 @@ Add any of these after the rhythm: `season greening` (or `season harvest,lantern
 
 - `3 pool garden`: a deck and one of the shared pools the schedules know (`gym`, `music`, `garden`, `garden-tend`, `mess-seat`, `lounge-seat`, `bench`, `common-room`...).
 - `3 room Bow lounge: lounge-seat, bench`: the shared places of those types in the room with that name. Extra words after the types: `free` (nobody's work station), `officers` (officers and up only), `ids <regexp>` (only those place ids).
-- Places the deck architect tags for your tradition (`event: '<id>'`) are always used first.
+- Places the deck architect tags for your tradition (`event: '<id>'`) are always used first. Places tagged for several traditions are a pool too: `3 pool @long-table` (the long-table seats: chairs at the mess tables' ends and a trestle table outside the mess, drawn by the longTables and harvestTables decor).
 
 ## `who:` and `anim:` rules
 

@@ -113,7 +113,7 @@ def parse_when(v, where):
 
 
 def parse_where(v, where):
-    m = re.fullmatch(r'(\d)\s+pool\s+([\w-]+)', v.strip())
+    m = re.fullmatch(r'(\d)\s+pool\s+(@?[\w-]+)', v.strip())   # @<tag>: the deck architect's places tagged event: '<tag>'
     if m:
         return {'deck': int(m.group(1)), 'pool': m.group(2)}
     m = re.fullmatch(r'(\d)\s+room\s+([^:]+):\s*(.+)', v.strip())
