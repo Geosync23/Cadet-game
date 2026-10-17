@@ -676,10 +676,11 @@ def js_str(s):
 def js_parsed(name, pieces):
     """const NAME = JSON.parse('...'): plain data, which phones parse much faster than the same object written as code
     (0.43.20, the performance pass). pieces: compact JSON text in the order it's written, one piece a line, so a change
-    to one entry changes one line of the file"""
-    o = [f'const {name} = JSON.parse(']
-    o += [f"  '{js_str(x)}'" + (' +' if i < len(pieces) - 1 else '') for i, x in enumerate(pieces)]
-    o.append(');')
+    to one entry changes one line of the file; joined by an array's join('') (0.43.23), not a long chain of +, which
+    some engines (Safari) handle less well"""
+    o = [f'const {name} = JSON.parse([']
+    o += [f"  '{js_str(x)}'," for x in pieces]
+    o.append("].join(''));")
     return o
 
 
