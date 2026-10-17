@@ -320,7 +320,7 @@ with sync_playwright() as pw:
       out.stub = stub; return out; })()''')
     print(' ', gf)
     check(gf['bought'] == [['postcard'], 0, 37], f"a gift from the store goes into your hands, not the locker ({gf['bought']})")
-    check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book', 'deck of cards', 'harmonica'} and len(gf['gifts']) == 7, f"the store's gifts are section 20's names ({gf['gifts']})")
+    check(set(gf['gifts']) <= {'tin of tea', 'biscuits', 'postcard', 'little plant', 'puzzle book', 'bar of chocolate', 'paper novel', 'music chip', 'pocket puzzle', 'spare tiles set'} and len(gf['gifts']) == 10, f"the store's gifts are section 20's names ({gf['gifts']})")
     check(gf['made'] == ['keyring'], f"a gift made in the machine shop goes into your hands ({gf['made']})")
     if 'garden' in gf: check(gf['garden'] == ['herbs', 'tomato'] and gf['again'] == [], f"a garden run's herbs and tomato into your hands, once ({gf.get('garden')}, {gf.get('again')})")
 
