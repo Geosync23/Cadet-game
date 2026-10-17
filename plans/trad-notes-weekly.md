@@ -8,19 +8,19 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 
 | Day | Morning | Evening (deck) | Count |
 | --- | --- | --- | --- |
-| Mon | | **Garden hour** 17:30-18:30 (3), running club 19:15-20:00 (3) | 2 |
+| Mon | | running club 19:15-20:00 (3), plus the monthly designer's Monday evening (book circle, talent night, department cup) | 2 |
 | Tue | | **Tiles night** 20:00-21:30 (3) | 1 |
 | Wed | | **Brennan's tasting table** 18:15-19:15 (3); hull-lights every 4th Wednesday 21:00 (3) | 1-2 |
 | Thu | | quiz 20:00-21:30 (3), **Late piano** 21:45-22:30 (4) | 2 |
 | Fri | | Works tea (5), music jam (4) | 2 (unchanged) |
-| Sat | **Long breakfast** 08:00-09:30 (3); harvest morning 09:30 every other week | film (4), observatory (2) | 2 (unchanged) |
+| Sat | **Long breakfast** 08:00-09:30 (3); harvest morning 09:30 every other week; **Garden hour** 14:00-15:00 (3) | film (4), observatory (2) | 2 (unchanged) |
 | Sun | swap meet 10:30 | **Sunday long table** 18:00-19:00 (3), **Letters evening** 19:15-20:15 (3) | 2 |
 
 **Tuesday is the only evening with room** for an every-few-weeks tradition (after Tiles, or off Deck 3). Wednesdays are full one week in four (hull-lights, day 24, 52...).
 
 ## Cut, merged, moved, added (with reasons)
 
-- **Garden hour moved** from Wednesday 18:00 to **Monday 17:30**: on Wednesday it would sit on Deck 3 at the same time as the tasting table, and it would make three on hull-lights Wednesdays. Monday also starts the week with the beds tended.
+- **Garden hour moved** from Wednesday 18:00 (it would sit on Deck 3 at the same time as the tasting table, and make three on hull-lights Wednesdays), first to Monday 17:30, then, once the monthly designer filled every Monday evening, to **Saturday 14:00-15:00**: the garden is free after harvest morning and Sowing, and daytime doesn't count toward the evening cap. Sunday afternoon was the other choice, but day 7's one-week-aboard (15:30, Deck 3) would clash.
 - **"Sunday roast" renamed Sunday long table**: Sunday dinner is already the dish the crew voted for (section 17's `galleyMenu`), which isn't always a roast. The tradition is the long tables and sitting with friends, not the dish.
 - **Tasting table and Wednesday's favourite kept together**: the favourite stays the main; the tasting table is two small extra plates at the servery end.
 - **Long breakfast** ends its gathering at 09:30 so it never overlaps the fortnightly harvest morning on Deck 3; the galley keeps serving until 10:00.
@@ -52,7 +52,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 - **`tilesNight`** (already built by the deck architect; Tiles night, Deck 3 bow lounge, Tuesday 20:00-21:30): a board on every lounge table, one instanced mesh, at most 3 draw calls (Part 5). The always-there Tiles station is separate dressing.
 - **`long-tables`** (Sunday long table, Deck 3 mess, Sunday 18:00-19:00): a table runner and a few jugs along the joined tables; at most 2 draw calls (one instanced runner, one instanced jug). The tables themselves don't move.
 - **Letters evening: no decor.** The postbox (place `3-postbox-1`, event `letters`) is permanent scenery; the tradition's id is `letters` so that place is used first (Reyes posting his paper letters). **The user's ruling (via the lead, 2026-10-17):** all the player's mail, sending and receiving, goes through the device's Mail app; the player never posts or collects letters at the postbox.
-- **Event tags, if you like:** the piano bench (`4-music-1`) as `event: 'late-piano'` so the Captain always gets it; the servery end of the mess for the tasting table.
+- **Event tags, if you like:** the piano bench (`4-music-1`) as `event: 'late-piano'` so the Captain always gets it; the servery end of the mess for the tasting table. **`tastingTable`** is built (chalkboard, cups, token bowl in the mess, 5 draw calls): `tasting-table.trad` has `ties: decor tastingTable`; the tally will feed it the dishes and vote counts.
 
 ## Each tradition in a line
 
@@ -60,7 +60,7 @@ Two at most an evening, never two on one deck at once (the voice budget). Birthd
 | --- | --- | --- | --- |
 | `tiles-night` (435) | Tue 20:00-21:30, Bow lounge lounge seats | Rina always, lounge regulars, bar regulars, juniors; host Rina; invite 40% | decor `tilesNight`, tally `tiles-night` |
 | `tasting-table` (436) | Wed 18:15-19:15, Mess hall, hold none | Brennan always, galley crew, lingerers, everyone 35%; invite 25% | galley extra=tasting, tally `tasting` |
-| `garden-hour` (437) | Mon 17:30-18:30, garden-tend then garden | Tove Cruz always, gardeners, garden-lovers; invite 25% | garden tend |
+| `garden-hour` (437) | Sat 14:00-15:00, garden-tend then garden | Tove Cruz always, gardeners, garden-lovers; invite 25% | garden tend |
 | `late-piano` (438) | Thu 21:45-22:30, music room | the Captain always (plays), music listeners, musicians, night owls; invite 10% | none |
 | `long-breakfast` (439) | Sat 08:00-09:30, Mess hall, hold none | late sleepers, lingerers, juniors, everyone 40% | galley breakfast, pancakes, until 10:00 |
 | `sunday-table` (440) | Sun 18:00-19:00, Mess hall, hold none | Brennan always, lingerers, everyone 60% | galley seating=friends side=tasting, decor `long-tables` |
