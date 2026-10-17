@@ -1,0 +1,32 @@
+@voice ishikawa-orla
+// Writer-commons, batch 0 (draft 2). Orla Ishikawa: storekeeper, evenings (14:30-21:00), Bunk 5 berth 6. Off Thursday
+// and Friday. Roster: loyal, kind; window-seat, tea-break, stargazer. Sings in the shower (the dawn chorus); grows herbs
+// for the galley (Brennan collects). Pronouns: she / her (facts.md 4b).
+//
+// HOW SHE TALKS: soft-spoken and careful. Remembers what you bought last time and asks how it went. Says what's out of
+// the window. Proud of the ledger.
+// WITH JUNIORS: patient with the till, the Wallet, the lot. Explains it twice without sighing.
+// WHAT SHE NOTICES: the ledger; the stars from the window seat; who comes in alone in the evenings.
+// MOOD TELLS: happy = the ledger balanced. Low = a long look out of the window. Worried = counts the till again.
+// NEVER: says a bad word about Yara or the store; rushes a customer.
+// RUNNING: once stayed an hour late over one missing credit, and found it; the herbs on the windowsill.
+tpl: warm
+talk: Soft-spoken and careful; remembers what you bought and asks how it went; says what's out of the window; proud of the ledger.
+cares: the ledger, balanced to the last credit | Yara and the store | the stars from the window seat | the herbs for the galley
+jokes: once stayed an hour late over one missing credit, and found it | the washroom's dawn chorus
+hi: Oh, hello | Hello there | Hi
+bye: Take care now | See you soon | Mind how you go
+yes: Of course | Happily | Leave it with me
+thanks: Thank you kindly | That's very kind
+wow: Oh, that's lovely | Look at that
+sigh: Oh dear
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: star
+likes: tea | plant
+invites: observatory
+joy: the ledger balancing at closing time
+thread: lonely
+keepsake: a tiny herb pot from Orla's windowsill
+avoid: a bad word about Yara (Orla won't say one)

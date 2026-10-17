@@ -1,0 +1,44 @@
+@tradition first-fruits
+// First-fruit supper: Greening, week 7, Monday dinner (day 134 in the first year). The seedlings from Greening's
+// Sowing morning (day 97) give their first crop, and a bowl of it goes on every table in the mess at dinner. Lighter
+// than the plan's full supper: an ordinary dinner with the first fruits on the tables, so the galley's day is the same.
+// A meal tradition: those going eat dinner here (ties galley meal=dinner). Monday, so it never meets the weekend's
+// traditions; it ends before running club (19:15, the gym). Design note: plans/trad-notes-seasons.md.
+k: 475
+title: First-fruit supper
+when: quarter week 7 monday season greening
+at: 18:15-19:05
+min: 25
+prio: 1
+jitter: 10
+where: 3 room Mess hall: mess-seat
+hold: none
+who: cruz-tove always, garden always, gardener 90%, garden-lover 80%, galley 60%, everyone 45%
+anim: talk
+host: cruz-tove
+from: cruz-tove
+ties: galley meal=dinner dish=first-fruits
+ties: garden harvest
+invite: host=oneill-imani odds=30% line="The first fruits are in. There's a bowl on every table at dinner. Come and try one?"
+
+meal: dinner
+== mail
+- The new beds have their first crop. First-fruit supper tomorrow at dinner, {time}: a bowl on every table in the mess. One each, please. The garden counted.
+
+== ask
+- First fruits at dinner tonight. I've been watching those plants for weeks.
+- Dinner in the mess tonight. The first strawberries are out.
+- Don't be late to dinner. The first fruits go fast.   #funny
+
+== here
+- Try one. Go on. We grew those.   #warm
+- Sweeter than last year. Don't tell the old beds.   #funny
+- Six weeks from seed to this. Not bad for a ship.
+
+== thanks
+- You take one of the first fruits from the bowl. It tastes of summer, somewhere far away.   #warm
+
+== chatter
+- Did you get a first fruit? I got two. Nobody saw.   #funny
+- The first crop of {season} is always the best. Ask anyone in the garden.
+- Tove checks every plant twice before the first-fruit supper.

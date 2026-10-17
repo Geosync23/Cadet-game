@@ -1,0 +1,26 @@
+@reactions favour
+// Writer-commons, reactions (reworked). A favour you did (social's cue favour.lamp | favour.fetch | favour.job; every
+// favour is .you). @me: the person you helped, the next day. Without @me: someone who heard about it.
+
+? cue:favour.lamp.you@me
+- My lamp's still going. Every night I switch it on and think, that was {me}.   #warm
+- I can read in bed again. You've no idea. {thanks}.
+? cue:favour.fetch.you@me
+- {thanks} for fetching that yesterday. Saved my legs and my temper.
+- You went all that way for me. I owe you a tea. Two teas.   #warm
+? cue:favour.job.you@me
+- That little job you did for me? Still perfect. {thanks}. Really.
+- I keep telling people you helped me out. They're sick of hearing it.   #funny
+? cue:favour.you@me tier>=friend
+- You didn't have to help yesterday. You just did. That's you, isn't it.   #warm
+
+? cue:favour.you !cue:favour.you@me
+- I hear you helped someone out yesterday. That's the Wren way.   #warm
+- Word gets round on a ship this size. Good word, about you.
+- I hear you did someone a favour. It comes back round. It always does.
+? cue:favour.you !cue:favour.you@me tier>=friend
+- Heard what you did. Typical you. Don't let them take advantage, mind.   #warm
+? cue:favour.you !cue:favour.you@me dept:galley
+- Heard you've been helping people. Come and get a biscuit. That's how it works here.   #warm
+? cue:favour.you !cue:favour.you@me dept:store
+- Heard you've been doing favours. I've seen your ledger. You've earned a cheap tea.   #funny

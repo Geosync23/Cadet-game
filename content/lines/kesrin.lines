@@ -1,0 +1,22 @@
+@crew kesrin
+// Writer (command: guests), batch 3b. Kesrin: quick, polite, breathless; writes everything down.
+
+== greet
+? tier=stranger
+- Good day! Forgive me, the Speaker is due in four minutes. Kesrin. Aide. Hello.
+- Hello. May I write down what you just said? I write everything down.   #funny
+? tier>=acquaintance
+- {me}! Good day. I have your joke from yesterday. I am still studying it.   #funny
+== feel
+? mood:high
+- The Speaker was on time all day. I may rest for one minute.   #funny
+? mood:low
+- So many meetings. My notebook is nearly full. So am I.
+== near
+? deck:3
+- The machine on Deck 3 gives you a sweet for a credit. Every time. It is wonderful.   #funny
+? act:meal
+- I carry the Speaker's tea set. Just in case. Your mess tea is also very good.
+== life
+? tier>=acquaintance
+- I keep the Speaker's day in my head. All of it. Ask me the time of anything.

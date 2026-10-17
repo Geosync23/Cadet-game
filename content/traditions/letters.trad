@@ -1,0 +1,40 @@
+@tradition letters
+// Letters evening (weekly, seat 15). Sunday after the long table: a quiet hour for writing home. The id is "letters"
+// so the deck architect's postbox place (3-postbox-1, event 'letters') is used first: that's Alejandro Reyes posting
+// his paper letters, crew flavour only. The user's ruling (via the lead, 2026-10-17): all the player's mail, sending
+// and receiving, goes through the device's Mail app; the player never posts or collects at the postbox, which is
+// scenery. Others record messages in the booths or write at the bow lounge's tables. Notes: plans/trad-notes-weekly.md.
+k: 441
+title: Letters evening
+when: weekly sunday
+at: 19:15-20:15
+min: 20
+jitter: 15
+where: 3 room Call-home booths: callhome, bench
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: reyes-alejandro always, calls-home 75%, quiet-corner 30%, everyone 10%
+anim: calls-home none, everyone read
+host: reyes-alejandro
+from: ferreira
+
+== mail
+- Letters evening tomorrow from {time}: the call-home booths are kept for messages home, and the bow lounge is quiet for writing. Your device's Mail goes out with the next relay.   #warm
+
+== ask
+- Letters evening tonight. I owe my sister about six pages.   #funny
+- I'm writing home later. It's been a while. Too long, probably.   #warm
+- Letters evening after dinner. I never know how to start them.
+
+== here
+- How do you spell "hydroponics"? Never mind. "The garden".   #funny
+- Dear everyone. The food is good. I miss you. That's most of it.   #warm
+- Shh. I'm on the hard bit.
+
+== thanks
+- You sit down with the letter writers and write home on your device. For a while there's only the tap of screens and someone's voice, low, in a booth.   #warm
+
+== chatter
+- I wrote home on Sunday. It'll take weeks to get there. I hope they like the drawing.   #warm
+- Reyes still writes real letters, on paper, in ink. Takes him all evening.
+- That postbox by the booths is older than the ship, I swear. Only Reyes uses it.   #funny

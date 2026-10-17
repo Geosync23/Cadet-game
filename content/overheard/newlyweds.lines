@@ -1,0 +1,63 @@
+@overheard newlyweds
+// Writer 3, batch 2. The newlyweds (facts.md 5): Bea Silva, Marta Soto, Petra Jovanovic and Lukas Dlamini, married
+// just before the tour to people back home (they / them, unnamed). They compare their day counts at breakfast. Silva,
+// Soto and Jovanovic count up from the wedding; Lukas counts down, the days until home (his card). Nothing beyond
+// "I miss them" and the count. Speakers by who: (A) and with: (B), dialogue 0.43.8.
+
+== overheard
+? pair:any+any who:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas with:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas act:breakfast
+A: What's your count today?
+B: Same as yesterday. Plus one.
+A: Mine too. Funny how that works.   #funny
+
+? pair:any+any who:dlamini-lukas with:silva-bea|soto-marta|jovanovic-petra
+A: You count up? From the wedding?
+B: Course. Don't you?
+A: Down. Days till home.
+B: That's bleak. That's also quite clever.   #funny
+
+? pair:any+any who:soto-marta with:silva-bea|jovanovic-petra|dlamini-lukas
+A: It's not a contest.
+B: Then why's your count on the tea corner board?
+A: Accuracy.   #funny
+
+? pair:any+any who:silva-bea with:soto-marta|jovanovic-petra|dlamini-lukas
+A: Mm. I dreamt my count was a round number.
+B: Was it?
+A: Not yet. Thursday, maybe. Mm. Thursday.
+
+? pair:any+any who:jovanovic-petra with:silva-bea|soto-marta|dlamini-lukas
+A: Do we count the wedding day itself? I think yes.
+B: Marta says yes.
+A: Then I think it's definitely yes.   #funny
+
+? pair:any+any who:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas with:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas
+A: Did yours write this week?
+B: Two pages. All about the weather.
+A: Mine sent a list. I read it four times.   #warm
+
+? pair:any+any who:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas with:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas time:evening
+A: I miss them today. More than usual.
+B: I know. Me too.
+A: Tea?
+B: Tea.   #warm
+
+? pair:any+any who:soto-marta with:silva-bea|jovanovic-petra|dlamini-lukas act:breakfast
+A: Pass the toast.
+B: Count first.
+A: Toast first. Then the count. Typical.   #funny
+
+? pair:any+any who:dlamini-lukas with:silva-bea|soto-marta|jovanovic-petra act:breakfast
+A: Fewer.
+B: Fewer what?
+A: Days. Fewer than yesterday.
+B: Lukas, that's how days work.   #funny
+
+? pair:any+any who:jovanovic-petra|silva-bea with:silva-bea|soto-marta|jovanovic-petra|dlamini-lukas
+A: When the tour's done, what'll you say first?
+B: "Hello." Then "Sit down. I've a lot to tell you."   #warm
+
+? pair:any+any who:silva-bea|soto-marta|jovanovic-petra with:dlamini-lukas
+A: Lukas, what's yours down to?
+B: Don't make me say it. It's still a big number.
+A: Big numbers get small. That's what numbers do.   #warm

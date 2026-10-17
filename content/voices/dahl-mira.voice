@@ -1,0 +1,26 @@
+@voice dahl-mira
+// Writer (Watch), wave 1b. Watch officer, days; practical, thoughtful; knits; plays music; a parent who served on the Wren.
+//
+// HOW THEY TALK: Practical and gentle; says the useful thing first. Thinks before she speaks and often answers a question with a better question. Knits while she talks, if she can.
+// WITH JUNIORS: patient, shows rather than tells.
+// MOOD TELLS: knitting faster means worried; humming means fine.
+tpl: steady
+talk: Practical and gentle; says the useful thing first. Thinks before she speaks and often answers a question with a better question.
+cares: the Watch running smoothly | knitting | the Wren, which her parent served on
+jokes: she knits for anyone who stands still long enough, so people keep moving | she measures time in rows, not minutes
+hi: Hello | Hey there | Oh, hello
+bye: Take care | See you round | Off you go
+yes: Sure | Of course | That works
+thanks: Thanks | That's kind
+wow: Oh, nice
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: listen
+openness: normal
+loves: made | music
+likes: tea | garden
+invites: jam
+joy: knitting
+thread: loss
+keepsake: a pair of mittens in Watch colours
+avoid: her parent (until her thread opens)

@@ -1,0 +1,100 @@
+@crew achterberg-lars
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Evening, cadet. Achterberg, night Watch. If something's on fire, there's a form.   #funny
+? tier>=acquaintance
+- {hi}, {me}. All quiet. Suspiciously quiet. Chapter two of a mystery quiet.   #funny
+- {me}. Form filled in? Good. You'll go far.
+? tier>=friend
+- {hi}, {me}. Good to see a face I'd trust with the paperwork.   #warm
+== feel
+? mood:high
+- Quiet night, tidy forms, and I guessed the ending by page ten.
+? mood:low
+- Long night. A form went missing. I found it. In the wrong drawer. Mine.
+== near
+? habit:bar-regular
+- One drink, one chapter, and bed. That's a good evening.
+? act:meal
+- Take your time. Meals are the only thing on this ship that isn't urgent.
+== life
+? tier>=acquaintance
+- I know every song in the record cabinet. Ask four others. They disagree.   #funny
+== joy
+? tier>=colleague
+- A good mystery. I guess the ending early. Then I enjoy being right for two hundred pages.   #funny
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. My shift's done. Nothing happened. I've filed a form saying so.   #funny
+? tier>=acquaintance warmth:cold
+- {me}. You've been missing. I was about to open a case. With a form.   #funny
+
+== near
+? habit:stargazer
+- The observatory. A mystery with no last page. I find that very restful.
+? deck:2 time:night
+- Night patrol, Deck 2. Every door shut. I check twice. Then once more, for luck.
+
+== invite
+- Tiles tonight? I'll explain the rules slowly. Then lose quickly.   #funny
+? tier>=colleague
+- Friday jam. I'll sing the right words. Torres will sing other ones. Come and judge.   #funny
+
+== accept
+- {yes}. I'll be there at the time on the form.
+- Good. Yes. I'll bring a chapter in case it's slow.
+
+== decline
+- Not tonight. Night Watch. Somebody has to be calm at three in the morning.
+? weekday:sun|mon
+- Rest day. A call home and a mystery. Probably in that order. Tuesday?
+
+== missed
+- You missed it. I've made a note. Not a form. I'm not a monster.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'd guess your present, but I'd ruin it. I always do.   #funny
+? birthday:me
+- My birthday. Moreau gave me a mystery with the ending circled. I've been had.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Stay calm, stay put. There's a form for afterwards. There always is.   #funny
+
+== hint
+- {me}. Have you a minute later? I'd like to talk. No form needed.
+
+== about
+? aff:moreau-signe:friend
+- Moreau and I swap mysteries and spoil them. Best friendship I have aboard.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Lock your locker. Not for any reason. Habit.
+== greet
+? tier>=acquaintance time:night
+- {me}. It's late. You look like a suspect in chapter one. Go to bed.   #funny
+== life
+? tier>=friend
+- I call home on rest days. Dad reads me the ending of whatever he's reading. On purpose.   #funny
+- Calm's not a gift. It's practice. I practise on forms.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Chapter two. I know who did it.   #funny
+- There's a form for that.   #funny
+- Every song in the cabinet. Right words.
+? act:meal
+- Take your time. Meals aren't urgent.
+? act:off
+- Mystery, call home, bed. In that order.
+?
+
+== rumour
+- Calmly: this happened.
+- Spoiler. Sorry. Here it is.   #funny

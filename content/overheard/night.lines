@@ -1,0 +1,30 @@
+@overheard night
+// Writer-commons, overheard batch 1. The night shift, and the hand-over at either end of it.
+
+== overheard
+? pair:any+any time:night act:work
+A: Quiet one.
+B: Don't say that.
+A: Why not?
+B: It hears you.   #funny
+
+? pair:any+any time:morning
+A: Anything happen overnight?
+B: The tea ran out at three.
+A: A crisis, then.
+B: We coped.   #funny
+
+? pair:any+any time:night
+A: Stars are good tonight.
+B: Stars are always good. It's space.
+A: Still. Look at them.   #warm
+
+? pair:any+any time:night act:meal
+A: Is this breakfast or dinner?
+B: Yes.   #funny
+
+? pair:any+any time:evening
+A: Off to bed?
+B: Off to work.
+A: Night shift? Sorry.
+B: Don't be. It's the best view on the ship.

@@ -1,0 +1,22 @@
+@crew taavek
+// Writer (command: guests), batch 3b. Taavek: few common words; points, sketches, laughs at the gaps.
+
+== greet
+? tier=stranger
+- Hello! Taavek. Engineer. Yes. The round one, there. Mine. From the crate.
+- Good day! Coffee? I have sweets. We trade. Good trade.   #funny
+? tier>=acquaintance
+- {me}! Good. You know the word for this? No? Then it is "the round one".   #funny
+== feel
+? mood:high
+- Good day! Your machine and my machine, they talk now. Good.
+? mood:low
+- Hard day. Too many words. Not enough words. Both.
+== near
+? deck:5
+- Your bay. I draw everything. The wall of tools, I draw twice. Beautiful.
+? act:meal
+- Your coffee. Very bitter. Very good. I take three.   #funny
+== life
+? tier>=acquaintance
+- I sketch every machine. When I go home, I show them your ship. On paper.   #warm

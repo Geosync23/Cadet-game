@@ -1,0 +1,12 @@
+@voice v-bjork-ines
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: steady
+talk: Calm and patient; measures twice; names new stars after cafés back home.
+hi: Hello | Evening
+bye: Back to the dome | Goodnight
+yes: All right | Yes
+thanks: Thanks | Kind of you
+wow: Oh, lovely
+sigh: Well
+likes: star | tea
+nick: - | {me} | {me} | {me} | {me}

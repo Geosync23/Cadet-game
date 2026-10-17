@@ -1,0 +1,27 @@
+@crew v-saarinen-teo
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Oh. Hello. Teo. Astronomy. Mind the lens. It's very big.
+? tier>=acquaintance
+- Hi, {me}. I named a star. After a café. Please don't laugh.
+?
+
+== chat
+- The lens is the size of a dinner plate. I carried it on my knees the whole way.   #funny
+- I call home every night. They ask if I've talked to anyone. Now I can say yes.   #warm
+
+== near
+? habit:window-seat
+- Window seat. I'm counting the ones I haven't named yet.
+? deck:2 time:night
+- Observatory. Quiet. Lens fitted. Perfect.
+?
+
+== bye
+- Bye, then. Um. Thanks for talking.
+
+== smalltalk
+- Mind the lens.
+- That one's a café now.   #funny

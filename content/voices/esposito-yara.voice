@@ -1,0 +1,32 @@
+@voice esposito-yara
+// Writer-commons, batch 0 (draft 2). Yara Esposito: storekeeper, mornings (08:00-14:30), Bunk 5 berth 4. Off Monday
+// and Tuesday. Roster: dry humour, kind; tea-break, common-room, gym-regular, shopper. A Gerald on the windowsill; a
+// journal of every star they've seen (compared with Wen Takahashi's and Farah Rahman's at observatory night). Pronouns: they / them (facts.md 4b).
+//
+// HOW THEY TALK: dry and warm underneath. Reads people by what they buy, and is usually right. Tells you what you need
+// before you ask. Short, pleased-with-itself sentences.
+// WITH JUNIORS: slips you the thing you forgot (soap, a spare sock) and charges you for it, kindly.
+// WHAT THEY NOTICE: who's run out of what; who's buying biscuits at 08:01 (a bad night).
+// MOOD TELLS: happy = guesses your order out loud. Low = restocks shelves that are full.
+// NEVER: tells anyone what someone else bought.
+// RUNNING: shops at their own store on the tea break; guesses what you came in for before you reach the counter.
+tpl: dry
+talk: Dry and warm underneath; reads people by what they buy; tells you what you need before you ask; never tells what others bought.
+cares: knowing who's run out of what | the shelves full by eight | the gym after shift | the star journal | Gerald
+jokes: shops at their own store on the tea break | guesses what you came in for before you reach the counter
+hi: Oh, hello | Hey | There you are
+bye: Mind how you go | Come back when you run out | See you
+yes: Can do | Sure | Easily
+thanks: Thanks, you | Ta very much
+wow: Ooh, fancy | Well, look at you
+sigh: Ah, well
+nick: - | - | {me} | {me} | {me}
+needs: cheer
+openness: normal
+loves: star
+likes: tea | sweet
+invites: gym
+joy: guessing what people came in for
+thread: stuck
+keepsake: the first receipt with your name on it, which Yara kept
+avoid: anyone's purchases in front of others

@@ -1,0 +1,98 @@
+@crew mori
+// Writer (command), batch 2: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hello. Mori, Survey. The labs are Deck 2. Please don't touch the labels.
+? tier>=acquaintance
+- Oh, hi, {me}. Sorry, I was counting. I'm always counting.
+- Hello, {me}. The charts are up to date. That never happens. I'm very pleased.
+? tier>=friend
+- {hi}, {me}. I made a note to ask how you were. So: how are you?   #warm
+== feel
+? mood:high
+- Every sample labelled, every chart right. Even Dr. Sato said "good". Once.
+? mood:low
+- Long day in the lab. I relabelled a shelf that didn't need it.
+== near
+? deck:2 act:free
+- The chart room's quiet now. You can hear the old charts curling.
+? deck:2 time:evening|night
+- Look, there. That one's on my chart. I drew it myself.
+== life
+? tier>=acquaintance
+- I taped a chart over my nameplate. People know where I am. They needn't know who.   #funny
+== joy
+? tier>=colleague
+- The chart room, late. One more survey on the map. One more bit of nowhere, named.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Oh. Morning, {me}. Four samples in, three to go. Sorry. Hello.
+? tier>=acquaintance warmth:cold
+- Oh, {me}. You've been busy. I made a note to ask. So. How are you?
+
+== near
+? place:chartroom
+- The chart room. Every line on that wall is somewhere we've been.
+? place:calm
+- Lists. Tea. More lists. I'm off duty. This is what off duty looks like.   #funny
+
+== invite
+- Observatory night? I'll show you a star on my chart. Then in the sky. They match.
+
+== accept
+- Oh. Yes. Good. I'll write it down.
+- Yes, please. I'll be there at eight. Eight exactly. Sorry. Eight-ish.   #funny
+
+== decline
+- Oh, I can't. Lab inventory. Two hundred samples. Another night?
+? weekday:wed|thu
+- It's my rest day. I'm going to try to rest. I've made a list for it.   #funny
+
+== missed
+- You weren't there. That's all right. Your name's still on my list.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I've marked it on my chart. In pencil. I'll ink it later.   #warm
+? birthday:me
+- My birthday. Dr. Sato remembered. Then forgot. Then remembered again. Lovely.   #funny
+
+== cue
+? cue:tradition.observatory
+- Did you see the bright one last night? Low, on the left? That's on my chart.
+
+== hint
+- {me}, have you a minute later? I've something to say. I've written it down.
+
+== about
+? aff:sato:friend
+- Dr. Sato finds the stars. I find Dr. Sato's notes. It's a good partnership.   #funny
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- Oh. Bye, {me}. I'll put it on the list. That we talked. Sorry. Habit.   #funny
+- Bye. Please don't move anything on my desk. Thank you.
+== greet
+? tier>=acquaintance time:afternoon
+- Afternoon, {me}. Charts are all up to date. I'm almost worried.   #funny
+== life
+? tier>=friend
+- Every survey I chart, I name one tiny rock after someone aboard. Nobody knows. Now you do.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Four samples in. Sorry. Hello.
+- Lists. More lists. Lovely.
+- Dr. Sato's lost her mug. Again.   #funny
+? act:off
+- Off duty. I made a list for it.   #funny
+? time:evening
+- Observatory soon. My star's up.
+?
+
+== rumour
+- Sorry. I made a note of this.
+- I've written it down, so it's true.   #funny

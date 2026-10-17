@@ -1,3 +1,61 @@
+# Handover: the traditions engineer (seat 5, Pillar 4): START HERE
+
+Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by session_018WZccmSvEfz2LC7DCfxdii, handing over at about 70% memory. The older notes further down (Pillars 2-3, the storm, the diplomatic visit) still hold.
+
+## Update at 0.34.37 (traditions engineer 2, session_01WEEoe5DyRegEqVMZgKRHWB)
+- **Lead now session_01KPJMYjXAPkNUcrQ8VRkhLE** (from ~04:35). Items 1-2 below are done:
+  - 0.34.35: the bridge invite. `OCCASIONS.bridgeInvite` is a `chance` occasion (no appointment, notice or Mail first). Its `slot(d)` is Vance's mess breakfast (`occMealSlot`), and it's due on the day before a bridge hour (`occBridgeEve`). The occasion's `flag` is set when it closes (kept or missed). Meeting replies now set their `flag:`. The .meet file is copied unchanged from claude/content.
+  - 0.34.36: weekly e9a88ff and monthly a93bf36 collected.
+  - 0.34.37: `tradOn(id, t)` for social B's calls home.
+  - 0.34.38: reviewer 2's LOW notes: TALLY_MEMO cleared on a flag change; guestStay guarded.
+- **People:** social B2 = session_014A3w2gK8FBNWs66YC3LfME (owns the calls home; offered tradOn plus start/end hooks, waiting for their shape). Head writer 2 = session_01HNrh3xCtczeZM5NVFrE6pa (told about the invite).
+- **Open:**
+  - EV_MAILBOX's cap is 40, not 20 as its comment says. events_check part 3 passes with it (days 2-8). Fix the comment in the next build; raise the cap if part 3 ever says "no Mail for".
+  - The cut decor (mendingTable, rummageCrates) appears nowhere here.
+- **Gotcha:** events_check's later parts leave the clock past day 30, so a part that needs an earlier day must set the clock (`setShipNow` + `eventsTick`), not `skipTo` backwards.
+
+## FIRST, for the fresh session (open items after 0.34.34)
+1. **Play the bridge invite** (the lead, 04:20): the head writer's `content/meetings/bridgeInvite.meet` (claude/content aa50647) bakes into `MEETINGS_BAKED` and reaches `MEETING_SCRIPTS` through section 22's `linesMeetings` (hook already in section 18). Schedule it as a section 18 meeting: Vance at breakfast in the mess on day 22 (the Monday before the first possible bridge hour, day 23), or the first meeting with Vance from day 15; every reply sets `flag:bridge.invited`. Bridge hour is already gated on that flag (0.34.34). Pattern: `meeting({ id, where, at, who, script })` as the storm's briefing does, or an occasion in `OCCASIONS` (kind 'meeting'); test in events_check like the briefing (the flag set after a reply; bridge hour then due on day 23 if it's a week-4 Tuesday: check).
+2. **Collect** claude/trad-weekly e9a88ff (late piano's texts for two nights) and claude/trad-monthly a93bf36 (notes only); re-bake.
+3. **The deck architect's tally props:** cupBoard takes `{ id, lines }` like tastingTable (decks-p3 021a553); `tradDecor` already sends title and lines for any decor with a tally.
+4. **The galley** (944f520) relies on `tradTies`' `{ id, from, to }` and the tally choices' dashed ids: keep both. It reads the crossover dish too, but crossover supper is cut.
+
+## Role, branch, builds, people
+- **Role:** section 18 SHIP EVENTS: the ship traditions (hand-written `SHIP_TRADITIONS` + the designers' baked ones), ship-wide events, meetings, occasions; `events_check.py`; the `.trad` grammar (`plans/trad-format.md`, `plans/trad_parse.py`); collecting the three tradition designers' files; the Traditions calendar page.
+- **Branch:** `claude/ship-events` only (never push elsewhere without the user's explicit permission: the lead once asked for a side branch; I sent the build master a diff instead). Builds 0.34.19-0.34.34; next **0.34.35**. Combined builds are the build master's (session_012K7RZ3oSX2vpBb1rR66MBh): 0.60.0 had up to 0.34.24; 0.60.1 = ca8c040 + the birthday diff; 0.60.2 should take a597a37.
+- **Chain of command:** the user -> the lead (session_01PJtmxWgAPLebXSZKP6ZRpG) -> everyone. Never contact the user. Talk sideways to owners directly; copy the lead on decisions only.
+- **Reports to you:** the designers: weekly session_01Wr9Jcc4nRUHHWdfJDUwb3X (claude/trad-weekly, k 435-454), every few weeks session_015dAEQhLUgkxejuzQF5CsV9 (claude/trad-monthly, 455-474), seasons/year/life session_01GnWSW6a2D1XdABqpCpVjaY (claude/trad-seasons, 475-499). Head writer (tone): session_016i7YYgZd6puKxfBSkLggRF.
+- **Peers:** dialogue session_01UmrVVpV7eBqEsa4sBucASP (content_gen.py bakes TRADITIONS by calling trad_parse.read_all; tell them before changing trad_parse's functions or output), sim session_01R6RBwwBM9aorpsqDCrztDU, galley session_018cicfPQZQXbxmtn6ygmL84, deck architect session_01ToE6RJFCw9deB3HcJRLKxS, social A session_012pK2XVi5UhqEd28fakYk68, social B session_019aEJaAGyZir9oq47CBRfA3, onboarding session_01KaHzfqSqF8B4bkNFrH1tsx, Tiles session_01DG3in6CvFFta6NrLpoVCJV, reviewer 2 session_0142TQw4ke8caPSyAC93VT98.
+
+## What section 18 has for Pillar 4 (see the DEV_NOTES rows 0.34.19-0.34.34)
+- **Rhythms** (`evDue`): weekday (one or a list), every week/2/4 weeks with a week index, quarter, year, after arrival (`introArrival()`), season/from/until filters. **Seasons:** `season(d)`, `seasonOf(d)`. **Flag gate:** `ev.flag` (bridge hour: 'bridge.invited').
+- **Loader:** section 22's generated `TRADITIONS` (array) -> `tradLoad` -> `SHIP_TRADITIONS`. Rules as data (`tradIs` words incl. night-shift/day-shift), texts with placeholders, nobody names themselves, `TRAD_ERRORS`.
+- **Voice budget** (`evBudget`, `EV_DROPPED`): two an evening, never two at once on a deck; prio, rarity, earlier start, order. Birthdays exempt, and only for crew aboard that evening (not their leaving day).
+- **Ties:** `tradTies(kind, d)`; decor via the deck architect's `dressShow` (`tradDecor`); traces (`traceAdd`, `{ id, day }`: seedlingYours, mugYours); `meal` on eventPlan entries (the sim builds it); tallies (`tallyOf`, `tallyVote`, `tallyLast`; per, mode=teams).
+- **Mail:** evening-before Mail, one per evening (bundled); the Sunday "This week aboard" (`WEEK_MAIL`: a copy of content/traditions/this-week-aboard.mail; events_check fails if they differ).
+- **Notes on the bus:** `simNote('tradition', { id, day, at, came, you, host, src, tally })`, `simNote('choice', {...})`. Hooks for 20c: `onPick`/`onEnd` on moment scripts (moments don't count as meetings).
+- **The storm** stays on day 10 (`spread`). The ready room's replies carry `mem`.
+
+## How to collect a designer's batch
+`git fetch origin claude/trad-<x> && git merge origin/claude/trad-<x>` -> fix leftovers -> `python3 plans/trad_parse.py` -> `python3 content_gen.py` -> `python3 lines_check.py` -> bump the build -> events_check (it plans each tradition's first day of the year, a whole year on paper, the budget, flags, tallies, decor/trace ids against DECK_DRESS + its ANNOUNCED list, the Sunday Mail) -> cadet_test against the last build (label matched) -> a day_check on a busy day -> DEV_NOTES row -> commit, push -> the lead (summary), the build master (commit), the designers and owners. Regenerate the calendar: `python3 plans/traditions-calendar-gen.py`.
+
+## Loose ends (as of a597a37)
+1. **Pre-existing:** events_check fails on day 231's dayReport double booking (3-store-1, esposito-yara/ishikawa-orla at 14:30), in 0.60.0 too. The sim engineer has it.
+2. **Meal traditions** are thinly attended until the sim engineer makes `meal` BE dinner/breakfast (asked).
+3. **The galley** (asked: pancakes, the tasting batch, Sunday's side via tallyLast, the suppers, cakes): their plan is in their messages; they read tradTies and tallyLast.
+4. **The deck architect** is building the decor (longTables, harvestTables, cupBoard, talentStage, yearsEnd, openLab), and has built places (rummage places now unused since rummage day was cut: tell them), mugYours. If they rename an id, update the files and events_check's ANNOUNCED.
+5. **The designers' next steps:** the head writer's tone pass; the weekly designer to check late piano's texts for two nights; the monthly designer to check talent night's texts for once a year; the seasons drafts (farewell supper, crew welcome tea) wait for crew rotation triggers (`when: rotation -1`, honorees from ROSTER_ROTATIONS, words friends-of-honoree etc.): build them when the lead says.
+6. **Tiles night's results:** asked the Tiles engineer whether they live in section 23 (suggested) and what function to read for the note.
+7. **Your vote:** `tallyVote` is ready; the device will call it later (the lead's ruling).
+8. **This week aboard:** copy WEEK_MAIL again whenever the monthly designer changes the .mail file.
+
+## Gotchas
+- cadet_test's g_nocrew shot sometimes catches section 15's "+N Energy" label (about 1921 px): re-run; compare a build with itself to prove it.
+- Run browser checks one at a time. events_check takes 6-10 minutes now; run it in the background and wait for the notice.
+- Merging ship-integration: only the HUD line (198) and GAME_BUILD clash; take theirs, then set your build.
+- `typeof X` is safe for function declarations anywhere and for consts defined earlier in the file; section 22 sits before 18.
+- Don't put a `// comment` inside a one-line object literal.
+
 # Handover: the events engineer (ship traditions)
 
 Written at build 0.34.6 and updated at **0.34.7** (Pillar 3, C6 step 1, on top of combined 0.41.4) so a fresh session can take over. **The next events engineer starts here.** The full notes are in DEV_NOTES.md, "Ship events (section 18)". This page is the short version.
@@ -140,3 +198,6 @@ Read plans/pillar4-plan.md (Part 4, Part 5's Tiles night, Part 6 seat 5) and pla
 - **Hash keys I give out:** 434 sowing. Blocks for the designers: weekly 435-454, every few weeks 455-474, seasons/year/life 475-499 (each designer numbers within their block; I check they're unique). The three designers report to me; I summarise for the lead.
 - **0.34.24-0.34.26:** simNote('choice') on meeting replies; events_check fails on an unloaded .trad; the storm pinned to day 10 (`spread`); tradition props (`ties.decor` -> the deck architect's DECK_DRESS via dressShow) and `trace` (Sowing: seedlingYours { id, day }).
 - **Agreed with the sim engineer (0.26.24):** hosts are planned first (5 minutes early, may join half late); errands don't start within 70 minutes of a gathering; dinner moves around one. For meal traditions (Sunday roast, harvest supper, long breakfast, the 06:00 crossover) put `meal: 'dinner' | 'breakfast'` on the eventPlan entry (from the tradition) and section 14 eats there instead of the servery: send the sim engineer the concrete asks when the designers deliver.
+- **0.34.28-0.34.30 and the calendar:** on top of 0.60.0; TRAD_STANDIN gone (the loader reads section 22's TRADITIONS; re-bake with `python3 content_gen.py` after merging designers). The `meal` field. Designers collected: weekly (claude/trad-weekly, session_01Wr9Jcc4nRUHHWdfJDUwb3X, k 435-454), monthly (claude/trad-monthly, session_015dAEQhLUgkxejuzQF5CsV9, 455-474), seasons (claude/trad-seasons, session_01GnWSW6a2D1XdABqpCpVjaY, 475-499): 24 baked. How I collect: `git merge origin/claude/trad-<x>`, fix `// meal:` style leftovers, `python3 plans/trad_parse.py`, `python3 content_gen.py`, `python3 lines_check.py`, bump the build, events_check (it also plans each tradition's first day of the year), cadet_test, a day_check on a busy day; DEV_NOTES row; tell the lead (summary), the designers (notes) and owners (asks). The Traditions calendar: `python3 plans/traditions-calendar-gen.py` -> plans/traditions-calendar.html (the lead publishes).
+- **Open (0.34.30):** garden hour loses Mondays (weekly to move it); the sim's `meal` work; props asked of the deck architect (events_check's ASKED list); the tallies (tasting, tiles-night, cup, harvest-best); the Sunday "This week aboard" Mail (content/traditions/this-week-aboard.mail, monthly's words); crew rotation triggers for the seasons drafts (farewell supper, crew welcome tea); day 231's pre-existing store double (sim).
+- **0.34.31-0.34.32:** the Sunday "This week aboard" Mail (`WEEK_MAIL` is a copy of content/traditions/this-week-aboard.mail: events_check fails if they differ, so copy again when monthly changes it); tallies (`tallyOf`, `tallyVote`, `tallyLast`, `per`, `mode=teams`; on the ship note and on a tally decor's chalkboard). Waiting: the Tiles engineer (session_01DG3in6CvFFta6NrLpoVCJV) on Tiles night's results; a way for you to vote (device or interactions engineer, `tallyVote`); the lead's answer on passing the galley's asks directly.

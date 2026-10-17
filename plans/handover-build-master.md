@@ -2,7 +2,7 @@
 
 **Role.** Merge the helpers' named commits into combined builds 0.60.x, run every check (with the six check-runner sessions), explain every difference, keep DEV_NOTES' 0.60.x rows and hook register current, and send the lead a green hash. The lead pushes `claude/ship-integration` and publishes; the build master never does. Reports go to the lead only (chain of command: the user → the lead → everyone; TEAM.md "Chain of command" on `claude/lead-pillar1`).
 
-**Lead:** session_01PJtmxWgAPLebXSZKP6ZRpG (from 2026-10-17 ~02:40; handing over to a fresh lead after 0.60.1: check TEAM.md). **Reviewers:** reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx (took over from reviewer 1, session_01HK4m33sUiLuVim8VWaCPMs); reviewer 2 via the lead. **This note:** the first build master, 2026-10-17 ~01:00-04:40.
+**Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (from 2026-10-17 ~04:35; before it session_01PJtmxWgAPLebXSZKP6ZRpG, who released 0.60.1). **Reviewers:** reviewer 1b session_018XY1NbMBxo2SLDPxooe5yx (took over from reviewer 1, session_01HK4m33sUiLuVim8VWaCPMs); reviewer 2 via the lead. **This note:** the first build master, 2026-10-17 ~01:00-04:40.
 
 ## Branches and builds
 

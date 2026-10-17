@@ -1,0 +1,12 @@
+@voice v-lindahl-milo
+// Writer 2, batch 8: a short card for a short-stay visitor (GUESTS in section 9). No pronouns (not in facts.md).
+tpl: playful
+talk: Cheeky and hopeful; learning the trade by talking; sees a better kettle in everyone's future.
+hi: Hiya | Oh, hey
+bye: Must dash | See you
+yes: Deal | Go on
+thanks: Cheers | Ta very much
+wow: Ooh, nice
+sigh: Ah, well
+likes: sweet | plant
+nick: - | {me} | {me} | {me} | {me}

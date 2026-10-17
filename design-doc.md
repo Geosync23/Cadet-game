@@ -420,7 +420,7 @@ What higher tiers unlock:
 - **Joining in:** be in the room while it's on. It gives a little social, and the organiser thanks you. Afterwards the crew who were there remember it (a ship note for the social system, Pillar 4).
 - **The ship's year and its seasons** (the user, 2026-10-17): 364 days in four seasons of 13 weeks, named for the garden: **Sowing** (days 1-91), **Greening** (92-182), **Harvest** (183-273) and **Lanterns** (274-364). You arrive on day 0, the last evening of Lanterns. Traditions can come every week, every two or four weeks, once a season, once a year, or counted from your arrival (your first week, your first four weeks).
 - **Sowing morning** (built in 0.34.20, the first of Pillar 4's new traditions): the first Saturday of each season, late morning in the garden straight after the harvest; everyone plants a seedling. Day 6 is your first weekend.
-- **Not too much at once** (Pillar 4's voice budget): at most two traditions on an evening, and never two at once on the same deck. The rarer one wins (on day 300 the quiet watch replaces observatory night). Birthdays are never moved.
+- **Not too much at once** (Pillar 4's voice budget): at most two traditions on an evening (one that starts from 17:00 and runs past 18:00; a tea straight after shift doesn't count), and never two at once on the same deck. The rarer one wins (on day 300 the quiet watch replaces observatory night). Birthdays are never moved.
 - **Many more to come in Pillar 4** (about 35 in all): tradition designers write them as plain text files (`content/traditions/`), with no code needed.
 
 Daily routines belong to the crew's ordinary day instead: the bridge watch hands over at the command ring at 06:00 and 18:00, and the Captain takes an evening walk through the observation room.
@@ -551,6 +551,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - **A commendation** comes when an event ends and you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record.
 - **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons at 11:00 on the next day the Captain is on shift. She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
+- **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour (day 22, a Monday), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
 - **Progress talks** with Chief Calder are appointments you ask for. They take place in her office on any day she's on shift.
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 

@@ -1,0 +1,49 @@
+@overheard bunkpairs
+// Writer-commons, overheard batch 2. Bunkmates (pair:bunk) at the junior wing's doors, washrooms and lockers.
+
+== overheard
+? pair:bunk time:morning
+A: Have you seen my other boot?
+B: Lost property.
+A: It's been gone ten minutes.
+B: They're very efficient.   #funny
+
+? pair:bunk time:night
+A: Are you writing home?
+B: Trying. I've got "Dear Mum".
+A: Good start.
+B: It's the middle that's hard.   #warm
+
+? pair:bunk time:evening
+A: Whose turn is it for the laundry?
+B: Yours.
+A: It's always mine.
+B: Then you're very good at it.   #funny
+
+? pair:bunk deck:4
+A: Someone ate my biscuits.
+B: Not me.
+A: You've got crumbs on your chin.
+B: Those are old crumbs.   #funny
+
+? pair:bunk time:night
+A: The star map's fallen down again.
+B: I'll tape it tomorrow.
+A: Tonight. I like falling asleep under it.
+
+? pair:bunk time:morning
+A: Your alarm went off at five.
+B: That's the galley lot. Not me.
+A: Then whose alarm sings?
+B: That's not an alarm. That's Madsen.   #funny
+
+? pair:bunk
+A: Do you ever miss having your own room?
+B: Sometimes. Then someone snores and I don't.
+A: You snore too.
+B: Lies.   #funny
+
+? pair:bunk time:evening
+A: Coming to the common room?
+B: In a bit. Saving my seat?
+A: Always.   #warm

@@ -1,0 +1,27 @@
+@crew v-xu-yuki
+// Writer 2, batch 8: a short-stay visitor. Mostly not about work.
+
+== greet
+? tier=stranger
+- Hello. Xu. Charts. Is that corridor eleven doors or twelve?
+? tier>=acquaintance
+- {hi}, {me}. Twelve. It was twelve. I've added it to the map.
+?
+
+== chat
+- I'm mapping the Wren from memory. Deck 4's a maze. A nice one.
+- Up early, up late. Charts don't draw themselves. Mostly.   #funny
+
+== near
+? deck:2
+- The chart room here is better than ours. Don't tell the office.   #funny
+? place:mess
+- Mess, then the chart room. Same route both ways. Efficient.
+?
+
+== bye
+- {bye}. If you find a thirteenth door, tell me.   #funny
+
+== smalltalk
+- Eleven. Twelve. Twelve.
+- That's not on the map. Yet.   #funny

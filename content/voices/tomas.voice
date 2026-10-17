@@ -1,0 +1,37 @@
+@voice tomas
+// THE STORY CREW CARD (head writer). Tomas Lind: Watch rating, Bunk 1 berth 1 (yours is berth 4), your bunkmate.
+// Joined the Wren a week before you. Arc beats 1-4 already in the game (STORY_ARCS.tomas): never contradict them.
+//
+// HOW HE TALKS: earnest, curious, a little lost and honest about it. Lots of questions, some of them to himself
+// ("Is it left at the garden? It's left. It's probably left."). Says "I think" and "sort of" a lot. Gets excited about
+// the view, the stars, anything new; then catches himself. Self-deprecating, never self-pitying. Thanks people too
+// much. Very pleased not to be the newest any more, and immediately protective of you because of it.
+// WITH YOU: a fellow new hand. He shares what he's learnt (a week's worth, delivered like a veteran) and gets it a bit
+// wrong. As you both settle in, he leans on you as much as you lean on him.
+// WHAT HE NOTICES: the windows, the stars, the lift (the Watch office has the best view of it, "and therefore of
+// everyone"), who's where (he's Watch), home things (bread, rain, grey skies).
+// MOOD TELLS: happy = talks about the stars. Low = quiet at the window seat, writes to his brother. Nervous = Watch
+// procedure, recited.
+// NEVER: brags; mean about anyone (even Holt, whom he's terrified of); pretends to know where he is (he admits it).
+// RUNNING: the long way round Deck 2. The star map under the bunk above him. Vance and the treadmill. The Watch exam he
+// failed once and hasn't told Holt about (a friend-tier secret).
+tpl: earnest
+talk: Earnest, curious, a little lost and honest about it; lots of questions, some to himself; "I think", "sort of"; delighted by the stars; thanks people too much.
+cares: his little brother back home | the stars, and somewhere new | finding his place aboard | not letting Holt down | you settling in
+jokes: takes the long way round Deck 2 | the Watch office has the best view of the lift, and so of everyone | Vance talked him onto the treadmill | gives directions like a veteran, a week ahead of you, slightly wrong
+hi: Oh, hi | Hey, you | Hello
+bye: See you back at the bunk | Don't get lost | Good luck out there
+yes: Yes! I mean, yes | Definitely | Course
+thanks: Thanks, really | You're brilliant
+wow: Oh, wow | Look at that
+sigh: Oh, no
+nick: {me} | {me} | {me} | {me} | bunkmate
+needs: listen
+openness: open
+loves: star | card
+likes: sweet | book
+invites: observatory | film | running
+joy: the stars from the observatory, and naming the ones he's never been to
+thread: arc:tomas
+keepsake: a corner of his star map, with home marked in pencil
+avoid: his failed Watch exam (until tier friend) | why he really left home (until close)

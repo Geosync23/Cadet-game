@@ -67,6 +67,7 @@ One tradition per file, the file named after its id.
 | `ties:` | no, one per kind | what it asks of other parts of the ship (below) | `ties: garden harvest` |
 | `invite:` | no | crew may invite you (social reads it) | `invite: host=rina odds=40% line="Tiles tonight. I need a victim."` |
 | `trace:` | no | a lasting mark the first time you join it (the deck architect's DECK_DRESS id), saved with the day: Sowing morning's `seedlingYours` plants your seedling | `trace: seedlingYours` |
+| `flag:` | no | waits for a story beat: it happens only once that flag is set (`flag(name)`, section 13), e.g. bridge hour after your first invitation to the bridge | `flag: bridge.invited` |
 | `meal:` | no | `dinner` or `breakfast`: going to it IS that meal for those who go (the sim engineer plans them there instead of the servery); the galley's dish goes in `ties: galley ...` | `meal: dinner` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).
@@ -76,6 +77,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | Write | Means |
 | --- | --- |
 | `weekly tuesday` | every Tuesday |
+| `weekly wednesday,thursday` | two evenings a week |
 | `every 2 weeks tuesday` / `every 2 weeks tuesday week 2` | every other Tuesday (week 1 = days 1-7, the default; week 2 = days 8-14) |
 | `every 4 weeks saturday week 3` | the Saturday of every fourth week, starting with week 3 (days 20, 48, 76...) |
 | `quarter week 1 saturday` | the first Saturday of each season (days 6, 97, 188, 279) |
@@ -102,7 +104,7 @@ A comma-separated list of `<who> <chance>`; the first that fits a person decides
 
 `<who>` is one word, or several joined with `+` (all must fit, e.g. `works+juniors 60%`):
 
-- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`;
+- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`, `night-shift`, `day-shift` (or `shift:<x>`);
 - a crew id (`rina`), a department (`works`, `galley`, `garden`, `survey`, `watch`, `infirmary`, `command`, `helm`, `comms`, `store`, `civilian`), or a habit (`gardener`, `musician`, `runner`, `stargazer`, `bar-regular`, `shopper`...: the roster's HABITS);
 - to be exact: `id:<x>`, `dept:<x>`, `habit:<x>`, `rank:<x>`.
 
@@ -117,7 +119,7 @@ Each is read by its owner with `tradTies(kind, day)`; ask the traditions enginee
 | `ties: galley dish=<dishId> meal=dinner batch=10` | the galley engineer | a dish or a special meal that day |
 | `ties: garden sow` / `tend` / `harvest` | the galley engineer (the garden) | the garden's part |
 | `ties: decor <id>` | the deck architect | props on its deck (a DECK_DRESS id, e.g. `tilesNight`), shown from 30 minutes before to 15 after; at most 6 draw calls |
-| `ties: tally <kind> choices=a\|b\|c` | the traditions engineer | a simple vote or score kept for a week |
+| `ties: tally <kind> choices=a\|b\|c [per=2] [mode=teams]` | the traditions engineer | a vote or score kept for a week: crew who go vote (seeded), you can vote too; `per=2` puts two of the list up each week in turn; `mode=teams` scores each goer for their department's team (bridge = command, helm, comms; commons = galley, infirmary, store, garden, civilian). The galley reads the winner with `tallyLast(id, day)`; a decor with a tally shows the choices and the votes coming in |
 
 ## Texts
 
