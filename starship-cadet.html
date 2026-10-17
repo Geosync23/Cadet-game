@@ -8267,11 +8267,16 @@ function birthdaysOn(d) {                                // everyone (not the pl
   if (!BDAY_CACHE.has(d)) BDAY_CACHE.set(d, schedPeople().filter(p => isBirthday(p, (d - 1) * 1440)));
   return BDAY_CACHE.get(d);
 }
+// a meal tradition (the Sunday long table, the harvest supper...) goes through the servery line like any meal, a tray
+// and all (the user, after 0.60.4): each diner sets off between TRAD_LINE[1] and [0] minutes before its table time, so
+// the line opens about half an hour early and the table fills as they're served (two served at once, LINE_COUNTER)
+const TRAD_LINE = [8, 30];
 function gatherings(p, d, F) {
   const U = k => schedU(p.seed, d, k), out = [];
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
-    out.push({ at: e.from - early, dur: e.to - e.from + early, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
+    const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
+    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0 });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
   }
   // social B2's farewell friends (20c's farewellCrew(leaver, d) -> ids, pure per day): on a crew member's last day, each
   // of their friends who is free stands with them in the shuttle bay while they wait to board, 14:30-15:00 (0.26.38)
@@ -8582,10 +8587,19 @@ function schedBuild(p, d, occ, S) {
   // nothing else starts across a gathering: the gym, a call home and the other errands wait (or are dropped) when one
   // begins within `span` minutes, and dinner moves before or after it (Pillar 4: a host always gets to their own event)
   const clear = span => !meet.some(e => !e.done && e.at < t + span && e.at + e.dur > t);
+  // a meal tradition's meal (0.26.41): the walk to the servery line and its queue stop, as meal() plans them, then the
+  // tradition's seat (tag ev-<id>) for the rest of it, so section 10 hands a tray at the counter as at any meal
+  const tradMeal = (e, end) => {
+    const l = segs[segs.length - 1], from = deck === 3 && l && l.placeId && S.byId.get(l.placeId), at = from ? from.at : DECKS[3].lift;
+    const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);
+    go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
+    take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
+    if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })) seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+  };
   const leisureUntil = (end, k) => {
     for (let n = 0; end - t >= 20 && n < 12; n++) {
       for (const e of meet) if (!e.done && e.meal && t > e.at && t < e.at + e.dur - (e.min || 20) && end - t >= (e.min || 20)) {   // late for a meal tradition (the handover ran on): join it while there's time to eat
-        e.done = true; take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true });
+        e.done = true; tradMeal(e, end);                 // through the line too (reviewer 1d, 0.26.42)
       }
       if (end - t < 20) break;
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
@@ -8608,6 +8622,7 @@ function schedBuild(p, d, occ, S) {
       for (const e of meet) if (!e.done && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {
         e.done = true;
         if (e.walk) { for (const pl of S.shared.get(e.where[0].join('|')) || []) if (isFree(pl.id, t + (deck !== pl.deck ? C : 0), t + (deck !== pl.deck ? C : 0) + e.dur) && end - t > e.dur + C) { go(pl.deck); hold(pl.id, t, t + e.dur); seg('leisure', t + e.dur, pl.type, pl.id, { tag: e.tag }); } }
+        else if (e.meal && e.q) tradMeal(e, end);       // a meal tradition: the line first (0.26.41), then its table with the tray
         else take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
       }
     }
@@ -32707,7 +32722,15 @@ function crewPath(s, g, rooms, who, avoid) {
 // face } to stand at, null past the spots), lineFront(id) (at the servery). LINE_LOG counts for day_check.
 const LINE_AT = [[33, 6], [33, 5], [33, 4], [33, 3], [32, 3], [32, 2], [31, 2], [30, 2], [29, 2], [28, 2], [27, 2], [26, 2], [25, 2], [24, 2], [23, 2]];
 const LINE_Q = ['3-queue-4', '3-queue-3', '3-queue-2', '3-queue-1'], TRAY_AT = [[33, 2], [33, 1]];   // the queue places, front first; at the tray return
-const LINE_SERVE = .6, LINE_LATE = 12, LINE_COUNTER = 1;                   // ship minutes: serving one at the counter, still heading for the line after the meal's time; how many are served at once
+const LINE_SERVE = .6, LINE_LATE = 12;
+// how many are served at once: one, or two while a meal tradition is on (the galley's second server: 0.26.41)
+let LINE_COUNTER = 1, LINE_CMIN = -1;
+function lineCounter(now) {
+  const m = Math.floor(now); if (m === LINE_CMIN) return LINE_COUNTER; LINE_CMIN = m;
+  const d = Math.floor(m / 1440) + 1, t = m - (d - 1) * 1440;
+  LINE_COUNTER = typeof eventsOn === 'function' && eventsOn(d).some(e => e.ev.meal && t >= e.from - TRAD_LINE[1] - 5 && t < e.to) ? 2 : 1;
+  return LINE_COUNTER;
+}                   // ship minutes: serving one at the counter, still heading for the line after the meal's time; how many are served at once
 const LINE = [], LINE_LOG = { joined: 0, served: 0, trays: 0, left: 0, returned: 0, back: 0, long: 0, wait: 0, who: [] };
 const lineSpotId = k => k < LINE_Q.length ? LINE_Q[k] : k < LINE_AT.length ? '@line-' + k : null;
 const ALT_SEAT = new Set(['mess-seat', 'lounge-seat', 'bench']);   // places where someone sitting in yours sends you to the next one
@@ -32730,6 +32753,7 @@ function lineSpot(id) {                                 // where to stand now: w
 // once a frame: the first LINE_COUNTER in the line stand along the servery and are served there, each after their
 // own serving time (timed from reaching it; stepping up between those spots keeps the clock), when there's food
 function lineTick(dt, now) {
+  lineCounter(now);
   const mins = typeof galleyServeMins === 'function' ? galleyServeMins(now) : LINE_SERVE;
   for (let k = 0; k < Math.min(LINE_COUNTER, LINE.length); k++) {
     const f = LINE[k]; if (f === 'player') continue;    // you're served by section 15
