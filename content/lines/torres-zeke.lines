@@ -221,7 +221,8 @@
 
 // ---- Day 0: the arrival tour (head writer 3, 0.48.22; the pre-lift part rewritten by head writer 4, 0.48.70).
 // The user (0.60.5): Zeke stopped too much on Deck 5 and said next-day things there; "all his dialogue once in the
-// elevator is great". So: walk.shuttle.1-3 at the Tern's ramp, then walk.up.1-6, walk-and-talk across Deck 5 to the
+// elevator is great"; "Zeke should stop and welcome you"). So: a stop at the Tern's ramp, walk.shuttle.1-5 as shipped, then
+// walk.up.1-6, walk-and-talk across Deck 5 to the
 // lift (IN ORDER, a line every few seconds while you walk with him, not tied to places; any left unsaid when you
 // reach the lift are skipped). The Deck 5 points (bay, haulway, stores, works) are retired; their job material (the
 // board, the Chief's office, the tool wall, tea) is on Monday's walk.job.take/turnin. From the lift on, unchanged:
@@ -230,13 +231,17 @@
 // himself, in order, never repeated. No scarf (beat 1), no father, no list. introDinner and introAsk are meetings.
 // Bubbles: 60 characters or fewer.
 == week1
-// at the ramp
+// at the ramp: a stop (the user: "Zeke should stop and welcome you"); the 0.60.5 lines as shipped
 ? flag:walk.shuttle.1
-- {me}? There you are. Zeke Torres. Welcome aboard!
+- {me}? There you are. Zeke Torres. Works, engines.
 ? flag:walk.shuttle.2
 - Welcome to the Wren. She's glad you're here. So am I.   #warm
 ? flag:walk.shuttle.3
 - That's the Tern behind you. She brought you the whole way.
+? flag:walk.shuttle.4
+- Long trip? I bet. Tell me all about it at dinner.
+? flag:walk.shuttle.5
+- Bag all right? Right, onward. Stay close. She's big.
 // walking across Deck 5 to the lift
 ? flag:walk.up.1
 - Don't try to learn it all tonight. Nobody does.

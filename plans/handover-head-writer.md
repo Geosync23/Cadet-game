@@ -10,7 +10,7 @@ only they speak; Letters night scratched): content/home/*.call, 6 beats each (no
 (session_01RvxnkWWPF4SF5ygWT4CvQE, claude/social-fixes) plays them (beats 7+ days apart; news reactions once; recorded
 Mail messages reuse chats). New canon (facts 11): Rolf, Mrs Ellery, Mr Pask (Mum). 0.48.68 sickness (content/banks/sick.lines,
 sickExam1-3 + sickExamCover; always "a ship cold"). 0.48.69 Zeke's arrival tour rewritten (the user: fewer stops, welcoming
-and general): 0.48.70 (the user: "from the lift on is great"): only pre-lift changed, walk.shuttle.1-3 + walk.up.1-6 across Deck 5; bay/haulway/stores/works retired; lift onward as shipped; job bits
+and general): 0.48.70 (the user: "from the lift on is great"): 0.48.71: ramp stop walk.shuttle.1-5 as shipped, then walk.up.1-6 walk-and-talk across Deck 5; bay/haulway/stores/works retired; lift onward as shipped; job bits
 moved to walk.job.take/turnin. Onboarding engineer 3 (session_016TRcnsFqFB1q5zZp6vjGBn, claude/arrival) wires it. Calder and Marrow are she/her (briefs sometimes say "his").
 Tip polish: t:rep and three tip notes sent to player engineer 5 (their file). Local git note: this container's first
 claude/content had unrelated history; kept as claude/content-stale-local, ignore it. Gotchas: lines_check bans "apple",
