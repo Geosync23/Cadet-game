@@ -88,3 +88,19 @@
 == about
 ? aff:soto-marta:friend
 - Marta and I compare day counts at breakfast. She pretends it's a contest. It isn't.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The vents are drizzly today.
+- Day count's up one. It always is.
+? act:meal
+- Second tea. Now I'm awake.
+? season:sowing
+- Sprinklers ran. Nearly rain.
+? act:work
+- Filter's singing. Good filter.
+?
+
+== rumour
+- Mm. I heard something. Let me find it.
+- Don't quote me. I was half asleep.   #funny

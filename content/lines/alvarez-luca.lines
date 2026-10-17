@@ -79,3 +79,18 @@
 == life
 ? tier>=friend
 - My sister and I cook the same recipe on the same day. Far apart. Same smell, I bet.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Gerald says hi. He doesn't.   #funny
+- Morning, beans. Morning, tomatoes.
+- The recipe needs a lemon. Again.   #funny
+? act:off
+- Watering with Gerald. Big plans.
+? time:evening
+- Cheerful star names. Gerald's top.   #funny
+?
+
+== rumour
+- Gerald heard this first.   #funny
+- Cheerful news. Mostly.

@@ -87,3 +87,18 @@
 == about
 ? aff:hart-ravi:friend
 - Hart draws better comics than me. I tell Hart so. Then I go and draw harder.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- That's a comic. That, right there.   #funny
+- Playlist's at fourteen songs. Fifteen.   #funny
+- O'Neill's playlist is wrong. Again.   #funny
+? act:off
+- Rest day. Pencil, paper, bar. Bliss.
+? act:work
+- Grease to the elbows. Standard.
+?
+
+== rumour
+- Right. This'll be a comic by Friday.   #funny
+- Blunt version? Here's the blunt version.

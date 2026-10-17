@@ -87,3 +87,18 @@
 == about
 ? aff:kovac-zainab:friend
 - Kovac says our scrubber races don't matter. She times every one. I love that.   #warm
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Coffee machine's purring. That's me.   #funny
+- Pressed a flower. Cruz didn't see.   #funny
+- Two laps. Bet I win.
+? time:evening
+- Late dinner. Empty mess. Lovely.
+? act:work
+- Nine fifty on a scrubber. Ooh.
+?
+
+== rumour
+- Ooh, wait till you hear this.
+- Bet you didn't know this. Bet you.   #funny
