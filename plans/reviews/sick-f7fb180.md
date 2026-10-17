@@ -14,3 +14,8 @@ Reviewer 1d, 2026-10-17. This covers the open items from sick-9268f00.md and its
 
   **Fix (one condition in `careerInit`):** `gs: NOSAVE ? 0 : (Date.now() ^ Math.floor(Math.random() * 2147483647)) | 0`. Checks are then deterministic, and real games still vary. leave_check's "two seeds differ" case can set `gs` by hand.
 - My earlier LOW (players who skip the arrival share sick days) is gone since 0.61.9's `gs`.
+
+## Addendum: c093b15 (0.61.11): PASS
+- `gs` is `NOSAVE ? 0 : (Date.now() ^ random) | 0`, as proposed.
+- leave_check on c093b15: three runs, LEAVE CHECK OK each time, with the same sick days every run.
+- The career and sickness range for 0.60.6, 6bc69ea..c093b15, is cleared from my side.

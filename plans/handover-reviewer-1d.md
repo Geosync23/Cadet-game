@@ -12,7 +12,7 @@
 **Done:** the fixes, 8f1f88a (0.61.3), PASS (leave-8f1f88a.md); the user's chiefRun rule, 90272ef (0.61.4), PASS (leave-90272ef.md). **Pending (the lead, 17:35):**
 1. Career 0.61.5 (a second route to the Chief's talk) first.
 2. Light reviews of perf engineer 3's claude/poses f9c6faa8 (0.27.36, seated hands and busy-work animation) and the speech bubbles (dialogue 0.43.30): check the sim and timing are unchanged and the draw calls and perf steady.
-3. Rare sickness: DONE, b0c0f37 PASS with lows (sick-b0c0f37.md). 0.61.6 b097097 PASS (leave-b097097.md). 0.61.7 words + 6bc69ea PASS (sick-6bc69ea.md). Next: the perf/poses and bubble reviews.
+3. Rare sickness: DONE, b0c0f37 PASS with lows (sick-b0c0f37.md). 0.61.6 b097097 PASS (leave-b097097.md). 0.61.7 words + 6bc69ea PASS (sick-6bc69ea.md). 0.61.8-0.61.11 re-checks: sick-9268f00.md, sick-f7fb180.md; c093b15 PASS (6bc69ea..c093b15 cleared for 0.60.6). Next: the perf/poses and bubble reviews.
 
 ## How I test
 - `pip install playwright`; three r128 in /tmp/cadet-work/three (DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
