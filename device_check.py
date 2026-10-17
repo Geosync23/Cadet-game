@@ -6,6 +6,7 @@
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
+#   Play on a message from home (0.35.27)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
@@ -170,6 +171,27 @@ def run(path):
               const sv = JSON.parse(JSON.stringify({ device: SHIP.device })); out.push(sv.device.memos.length, deviceLoad(sv).memos.length, deviceLoad({ device: { memos: [7, null, { title: 3 }] } }).memos.length);
               SHIP.device.memos = []; return out; })()""")
             check(mm == [['Ask Pell'], True, 'Cake tonight', 2, 2, 0], f'memos: the form, pin to Home, Remember this, saved and read back, junk refused: {mm}')
+            # calls home (0.35.27, social B2): Mail from homeFolks() first under "From home"; Play while mailPlayable(m), a tap
+            # calls mailPlay(m) and closes the device on true (stays open on false); no button without them. Stand-ins
+            # when this build has no section 20c, else only the grouping and the button are checked
+            pl = g.ev("""(() => { const own = typeof mailPlay === 'function' && typeof homeFolks === 'function', got = [], ev0 = __ev.slice(), wasOpen = DEV.open;
+              const done = new Set(); if (!own) { window.homeFolks = () => ['Gran', 'Mum']; window.mailPlayable = m => m.from === 'Gran' && m.subject === 'A recorded message' && !done.has(m.id);
+                window.mailPlay = m => { got.push(m.id); if (got.length > 1) return false; done.add(m.id); return true; }; }
+              const btns = () => [...document.querySelectorAll('#devBody button')].map(b => b.textContent);
+              mailSend({ from: 'Gran', subject: 'A recorded message', body: 'Hello, love.', quiet: true }); const m = SHIP.mail[0];
+              mailSend({ from: 'Galley', subject: 'Plain', body: 'No play.', quiet: true }); const p = SHIP.mail[0];
+              deviceShow('mail'); const t = document.getElementById('devBody').textContent; const out = { order: t.indexOf('From home') >= 0 && t.indexOf('From home') < t.indexOf('A recorded message') && t.indexOf('A recorded message') < t.indexOf('Ship mail') && t.indexOf('Ship mail') < t.indexOf('Plain') };
+              deviceDo({ app: 'mail', do: 'read', arg: p.id }); out.plain = !btns().includes('Play');
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); out.play = btns().includes('Play') && btns().indexOf('Play') < btns().indexOf('Remember this');
+              if (!own) { deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.closed = !DEV.open;
+                deviceShow('mail'); out.gone = !btns().includes('Play');
+                done.clear(); deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.stays = DEV.open; out.got = got.slice();
+                for (const n of ['homeFolks', 'mailPlayable', 'mailPlay']) delete window[n]; deviceRefresh(); const t2 = document.getElementById('devBody').textContent; out.none = !btns().includes('Play') && !t2.includes('From home'); }
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); SHIP.mail = SHIP.mail.filter(x => x !== m && x !== p); if (!wasOpen) deviceClose();
+              __ev.length = 0; __ev.push(...ev0); out.own = own; return out; })()   // the open / close count is checked later""")
+            check(all(pl.get(k) for k in ['order', 'plain', 'play']) and (pl['own'] or (all(pl.get(k) for k in ['closed', 'gone', 'stays', 'none']) and len(pl.get('got', [])) == 2)), f'Mail: From home, Play on a recorded message: {pl}')
+            # the servery queue line says no made-up wait (0.35.27, the user: no invented numbers)
+            check('In the queue for the servery: about' not in open(sys.argv[1]).read(), 'the servery queue line has no guessed wait')
             # tips: once each, saved, off in Settings; the card closes on a tap
             tp = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const out = [tipShow('t1', 'First tip'), tipShow('t1', 'Again')];
               const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);

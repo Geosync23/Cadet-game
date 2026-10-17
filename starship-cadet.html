@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.35.26
+   STARSHIP CADET: CSV Wren                           build 0.35.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.35.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.35.27';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9213,7 +9213,7 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
   B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
   if (today.length) say('Today aboard: ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');
-  say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery: about ' + Math.max(1, Math.ceil(ACT.o.turnAt - shipNow())) + ' min.'
+  say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery.'   // 0.35.27: no guessed wait (the user: no invented numbers)
     : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
   if (P.carry.length) say('Carrying: ' + P.carry.join(', ') + '.');
@@ -9713,19 +9713,29 @@ deviceApp({ id: 'needs', title: 'Needs', icon: 'needs', order: 20, view: () => {
 
 // Mail: newest first; tap one to read it (and mark it read)
 let mailOpen = null;                                     // the message shown in full
+// calls home (0.35.27, social B2): Mail from section 20's homeFolks() (Mum, Gran, Jo, Sam) comes first under "From home";
+// an open one that section 20's mailPlayable(m) says can be played gets a Play button. Both guarded.
+const devHomeFolks = () => { try { const h = typeof homeFolks === 'function' ? homeFolks() : null; return Array.isArray(h) ? h : []; } catch (e) { return []; } };
+const devPlayable = m => { try { return typeof mailPlay === 'function' && typeof mailPlayable === 'function' && !!mailPlayable(m); } catch (e) { return false; } };
 deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mailUnread() || null,
   act(verb, id) {
     const m = SHIP.mail.find(x => x.id === id);
     if (verb === 'read') { mailOpen = mailOpen === id ? null : id; if (m) m.read = true; }
+    // 0.35.27 (social B2's calls home): Play hands a recorded message to section 20's mailPlay(m) (synchronous: true when
+    // its dialogue opened, false when there's nothing to play or a dialogue is up); on true the device closes for the panel
+    else if (verb === 'play' && m && typeof mailPlay === 'function') { let r = false; try { r = mailPlay(m); } catch (e) { DEV.errors.push('mailPlay: ' + (e && e.message || e)); } if (r === true) deviceClose(); }
     else if (verb === 'remember' && m) { memoAdd(m.subject, m.from + ': ' + m.body); deviceNotify({ app: 'memos', text: 'Saved to your memos.', urgent: true }); delete DEV.notes.memos; }
   },
   view: () => {
     if (!SHIP.mail.length) return { title: 'Mail', blocks: [{ kind: 'text', text: 'No mail.' }] };
-    const B = [];
-    for (const m of SHIP.mail) {
+    const B = [], home = devHomeFolks(), fromHome = SHIP.mail.filter(m => home.includes(m.from)), rest = SHIP.mail.filter(m => !home.includes(m.from));
+    for (const m of fromHome.concat(rest)) {
+      if (fromHome.length && (m === fromHome[0] || m === rest[0])) B.push({ kind: 'text', text: m === fromHome[0] ? 'From home' : 'Ship mail', mark: 'head' });
       B.push({ kind: 'list', rows: [{ text: (m.read ? '' : '● ') + m.subject, sub: m.from + ', Day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(((m.at % 1440) + 1440) % 1440),
         mark: m.read ? null : 'new', action: { app: 'mail', do: 'read', arg: m.id } }] });
-      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body }, { kind: 'buttons', items: [{ label: 'Remember this', action: { app: 'mail', do: 'remember', arg: m.id } }] });
+      if (mailOpen === m.id) B.push({ kind: 'text', text: m.body }, { kind: 'buttons', items: [
+        ...(devPlayable(m) ? [{ label: 'Play', action: { app: 'mail', do: 'play', arg: m.id } }] : []),
+        { label: 'Remember this', action: { app: 'mail', do: 'remember', arg: m.id } }] });
     }
     return { title: 'Mail', blocks: B };
   } });
