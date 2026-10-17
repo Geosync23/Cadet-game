@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.46
+   STARSHIP CADET: CSV Wren                           build 0.36.47
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.46';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.47';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14293,9 +14293,10 @@ const GIFT_NOTES = [['a biscuit, wrapped in a napkin', 'Saved you one. Don\'t te
   ['a cutting from the garden', 'It\'ll root if you keep it wet. Put it by your bunk.'], ['a cup of tea, gone cold', 'Made you a tea and you weren\'t here. It\'s the thought that counts.'], ['a folded paper star', 'Found the instructions in an old book. Took me six tries.']];
 const giftOf = item => { const k = item && (item.name || item); return typeof k === 'string' && SOC_GIFTS[k.toLowerCase()] ? { item: k.toLowerCase(), ...SOC_GIFTS[k.toLowerCase()] } : null; };
 const socWeek = (d = SHIP.time.day) => Math.floor((d - 1) / 7);
+const GIFT_TAG_ALIAS = { card: 'star', postcard: 'star', books: 'book', games: 'game', plants: 'plant', sweets: 'sweet' };   // writers' words -> SOC_GIFTS tags
 function giftTaste(p) {                                  // { loves: [tags], likes: [tags] }
-  const v = typeof VOICE !== 'undefined' && VOICE[p.id];
-  if (v && (Array.isArray(v.loves) || Array.isArray(v.likes))) return { loves: (v.loves || []).slice(), likes: (v.likes || []).slice() };
+  const v = typeof VOICE !== 'undefined' && VOICE[p.id], tag = x => GIFT_TAG_ALIAS[x] || x;
+  if (v && (Array.isArray(v.loves) || Array.isArray(v.likes))) return { loves: (v.loves || []).map(tag), likes: (v.likes || []).map(tag) };
   const tags = [...new Set((p.habits || []).map(h => GIFT_HABIT[h]).filter(Boolean).concat(p.dept === 'works' ? ['made'] : p.dept === 'galley' ? ['garden'] : p.dept === 'survey' ? ['star'] : []))];
   return { loves: tags.slice(0, 1), likes: tags.slice(1).concat(tags.includes('sweet') ? [] : ['sweet']) };
 }
@@ -14449,7 +14450,7 @@ function repWeek(h) {                                    // Sunday 04:00 (social
 const INVITE_MAX = 2, INVITE_ODDS = .5, INVITE_PERSONAL = .12, INVITE_GAP = 4;
 const INVITE_HABIT = { stargazer: 'observatory', 'lounge-regular': 'lounge', 'garden-lover': 'garden', gardener: 'garden', 'common-room': 'game', music: 'music', 'lingers-at-meals': 'dinner' };
 const INVITE_WHERE = { dinner: s => s.act === 'dinner', observatory: s => /observ/i.test(s.room || ''), lounge: s => /lounge/i.test(s.room || ''), garden: s => /garden/i.test(s.room || ''),
-  game: s => /common|lounge/i.test(s.room || ''), music: s => /music/i.test(s.room || ''), tiles: s => /common|lounge/i.test(s.room || ''), running: s => /gym/i.test(s.room || '') };
+  game: s => /common|lounge/i.test(s.room || ''), music: s => /music/i.test(s.room || ''), tiles: s => /common|lounge/i.test(s.room || ''), running: s => /gym/i.test(s.room || ''), gym: s => /gym/i.test(s.room || '') };
 const INVITE_ASK = { dinner: 'Eat with me tonight? I\'ll save you a seat.', observatory: 'Come up to the observatory after dark? The view\'s worth it.', lounge: 'Drink in the lounge later? My shout.',
   garden: 'I\'m in the garden this evening. Come and get your hands dirty?', game: 'Fancy a game this evening?', music: 'I\'ll be in the music room tonight. Come and listen?', tiles: 'Tiles tonight? I\'ll go easy on you. Probably.', running: 'Run with me later?', quarters: 'Come round to my quarters tonight, about eight? There\'s something I want to show you.' };
 function socInvites(h) {
@@ -14472,6 +14473,8 @@ function socInvites(h) {
     const r = SHIP.rel[p.id]; if ((r.inviteDay || 0) > d - INVITE_GAP || schedU(p.seed, d, 656) >= INVITE_PERSONAL * (warmth(p.id, t) === 'warm' ? 1.5 : 1)) continue;
     const v = typeof VOICE !== 'undefined' && VOICE[p.id], kinds = (v && Array.isArray(v.invites) && v.invites.length ? v.invites : [...new Set((p.habits || []).map(x => INVITE_HABIT[x]).filter(Boolean))]).concat(['dinner']);
     let hit = null;
+    const trad = kinds.map(k => (typeof eventsOn === 'function' ? eventsOn(d) : []).find(e => e.id === k && going(p, e.id))).find(Boolean);   // a voice card's invites may name a tradition: they ask you along when they're going
+    if (trad && !I.some(x => x.day === d && x.trad === trad.id)) { const appt = socialInvite({ trad: trad.id, day: d, from: p.id }); if (appt) { r.inviteDay = d; I.push({ day: d, from: p.id, trad: trad.id, kind: 'trad', appt, said: false, line: (trad.ev && trad.ev.invite && trad.ev.invite.line) || (trad.ev && trad.ev.ask) || null }); n++; continue; } }
     const bed = S.byId.get(p.bed), at8 = (d - 1) * 1440 + 1200, w8 = planWhere(p, at8);   // close friends ask you round to their quarters (doorOpenFor lets you in)
     if (relTier(p.id) >= 4 && bed && w8 && !w8.moving && (w8.act === 'leisure' || w8.act === 'off') && schedU(p.seed, d, 662) < .3) hit = { k: 'quarters', seg: { from: at8, to: at8 + 45, placeId: bed.id } };
     if (!hit) for (const k of kinds) {
