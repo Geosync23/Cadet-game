@@ -44,7 +44,7 @@ them: And this one's for you. I made it for you. Don't make a fuss. Make a small
 ? choice
 * I'll keep it forever.   flavour:listen mem:keep
   them: Good. That's what it's for.
-  + them: Good. Then a bit of me's always with you. That's the nicest place for it.
+  + them: Good. Then it's in good hands. That's the nicest place for it.
 * Told you they'd love it.   flavour:cheer
   them: You did. You were right. Don't let it go to your head.   [laugh]
 them: Who knew. All that time, just for me. Now it's for everyone. Bit of both.

@@ -40,3 +40,19 @@
 == joy
 ? tier>=acquaintance
 - Fresh polish on the coil rails. Under the lights it glows. I could stand there all night.
+
+// ---- the ladder club (Kovac's arc, content/arcs/kovac.arc): before beat 1 he only avoids the lift; after it,
+// "exercise" is the whole cover story; after beat 4 he's in the lift club. He never says "afraid" himself.
+== near
+? !beat:kovac.1 tier>=acquaintance
+- Lift? No, I'll take the ladder. Leg day. Every day's leg day.   #funny
+? beat:kovac.1
+- Saw you by the ladder. Exercise, was it? Same. Just exercise.   #funny
+? beat:kovac.2 !beat:kovac.4
+- Kovac and Cruz were on the ladder again. We nodded. Very fit, the three of us.   #funny
+
+== life
+? beat:kovac.4
+- Rode the lift today with Kovac and Cruz. Deck 4 to 6. We held the rail. Very brave.   #funny
+? beat:kovac.4 tier>=colleague
+- Kovac says you sat with her about the lift. Thanks, {nick}. From the whole club.   #warm
