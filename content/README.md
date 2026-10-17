@@ -99,7 +99,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `news:<id>` | they know that piece of news | `news:storm` |
 | `rep:` | your standing with their department is at least this: `new` < `known` < `well` < `theirs` (`!rep:well`: below well) | `rep:well` |
 | `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you is at least this: `low` < `ok` < `high` | `ship.kindness:high` |
-| `you:<tag>` | you're known for it | `you:reliable` |
+| `you:<tag>` | you're known for it (`_` for a space): `reliable`, `kind`, `chatty`, `quiz_regular`, `gym_rat`, `always_at_the_garden`, `the_one_who_fixes_ovens`, `good_with_newcomers`, `night_owl` | `you:night_owl` |
 | `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it; `@me`: and it was about the speaker, e.g. their gift or favour; `@dept`: a repair in the speaker's department) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:gift.you@me`, `cue:repair.you@dept` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
 | `week1:` | `true` during your first week (from the arrival evening until the week is done) | `week1:true` |
@@ -119,8 +119,8 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `deck:` | the deck where it happens (where you are) | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
-| `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
-| `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
+| `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait (one of the roster's, `_` for a space) or habit | `dept:galley`, `rank:junior`, `trait:dry_humour`, `habit:gardener` |
+| `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either), `call` (on a call home) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
 | `came:` | calls home: you went to a tradition lately (`any`, or its id); the call passes it, and `{trad}` fills from it | `came:any` |
 | `friend:` | calls home: you have a friend aboard (`any`); `{friend}` fills from it | `friend:any` |
@@ -200,12 +200,22 @@ A: No promises.
 ```
 
 - `A:`, `B:` (and `C:`) are the speakers; a blank line or `---` ends a conversation. Two to four lines.
+- **One speaker** (0.43.13): a conversation with only `A:` lines is one person talking with nobody else in it, such as
+  someone on a call home (`@overheard booths` with `? place:booths`), one to four lines. It plays when that person has
+  no conversation with someone close by; people on a call home only ever say these. No `pair:`, `with:` or `{other}`
+  in it, and it needs a `place:` or an `act:` (`act:call` for a call home), so it isn't said just anywhere (lines_check
+  says so).
 - `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
   `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
   separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
   (A outranks B), `couple` (one of the established crew couples).
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
+- In the game (0.43.12): two crew standing or sitting together near you talk now and then, one bubble every 3 seconds
+  or so, A and B taking turns. `act:`, `place:` and `deck:` are where speaker A is and what they're doing. Once you've
+  heard a conversation it isn't played again for 7 ship days, and only one `#serious` conversation plays a day, so
+  a place you visit often needs plenty of them. Give a conversation that only makes sense somewhere its `place:` (a
+  plants talk without `place:garden` can turn up in the mess).
 
 ## Reactions
 
@@ -216,6 +226,11 @@ A: No promises.
 ?
 - Someone fixed the lamp at last.
 ```
+
+In the game (0.43.16): soon after something happens (a repair, a gift, a tradition, a storm's phase...), and now and
+then while it's still talked about (a day or two), someone near you says one of these as a bubble. Each person reacts
+to a kind (the file's `@reactions` kind) once a day at most, and you won't hear the same line again for 7 ship days,
+so give each cue several lines and spread them over who'd notice (`dept:`, `who:`).
 
 ## Traditions (.trad)
 
@@ -307,8 +322,9 @@ three differences:
   - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
     the lines, and `? send` where your choice of news goes.
 
-Family warmth ("I love you", "love to you") is fine in call files; the head writer reads them for tone. Jo, Sam and the
-contacts' names count as known names.
+Family warmth ("I love you", "love to you") is fine in call files, and only that: any other romance word ("in love",
+"my love", "my heart"...) is an error there as everywhere; the head writer reads them for tone. The contacts are `mum`,
+`gran`, `jo` and `sam` (a file for anyone else is an error). Jo, Sam and the contacts' names count as known names.
 
 ## Meetings (.meet)
 

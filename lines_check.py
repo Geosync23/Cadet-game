@@ -2,6 +2,7 @@
 """lines_check.py: checks the writers' files under content/ before they're baked (writers run it before every push).
 
     python3 lines_check.py [GAME.html] [--strict] [--quiet]
+    python3 lines_check.py --day [GAME.html]     the voice budget in the game itself (a browser; a few minutes)
 
 Errors (exit 1): a file content_gen.py can't read; an unknown {token} or condition value; a line too long; an
 unknown crew id; the banned list (romance and flirting, swearing beyond the ship's mild "blast", real-world brands
@@ -38,12 +39,13 @@ VALUES = {
 BUBBLE_KINDS = {'smalltalk', 'rumour', 'overheard'}        # spoken over heads: 60 characters (90 at most)
 LONG_KINDS = ('story', 'arc', 'moment', 'note', 'trad')    # chat lines, moments, Mail: 140
 CARD = 90
+HOME_IDS = {'mum', 'gran', 'jo', 'sam'}                  # your people back home (content/home/<id>.call)
 NAME_W = 9                                                 # a filled-in name counts as this many characters
 
 BANNED = [
     # romance and flirting with anyone (the user: no romance with the player; couples live quietly in the background)
     r'\bkiss\w*', r'\bflirt\w*', r'\bdarling\b', r'\bsweetheart\b', r'\bbabe\b', r'\bsexy\b', r'\bgorgeous\b', r'\bcrush\b',
-    r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
+    r'\bromanc\w*', r'\bdate night\b', r'\bon a date\b', r'\blove you\b', r'\bmy love\b', r'\bhandsome\b', r'\bcutie\b', r'\bsnog\w*',
     # swearing (the ship's "blast" is fine)
     r'\bdamn\w*', r'\bhell\b', r'\bbloody\b', r'\bcrap\w*', r'\bshit\w*', r'\bfuck\w*', r'\bbastard\w*', r'\bpiss\w*',
     r'\barse\w*', r'\bass\b', r'\bbollocks\b', r'\bgod\b', r'\bjesus\b', r'\bchrist\b',
@@ -125,6 +127,13 @@ def main(argv):
         print('lines_check: FAIL (content_gen.py can\'t read content/)')
         return 1
     people, html = roster(game)
+    # trait: and you: values, with _ for a space (trait:dry_humour, you:night_owl): the roster's traits, section 20's REP_TAGS
+    m = re.search(r'^const REP_TAGS = \[(.*?)\];', html, re.M | re.S)
+    VALUES['you'] = {t.replace(' ', '_') for t in re.findall(r"\['([^']+)'", m.group(1))} if m else None
+    VALUES['trait'] = {t.replace(' ', '_') for p in people.values() for t in p.get('traits', [])} or None
+    for k in ('you', 'trait'):
+        if not VALUES[k]:
+            del VALUES[k]                                  # an older build without them: not checked
     names = set()
     for p in people.values():
         names.update(w.strip('.') for w in p['name'].split())
@@ -146,6 +155,12 @@ def main(argv):
     for kind, es in out['LINES'].items():
         allx += [('bank', kind, e, None, 'bank') for e in es]
     for c in out['CONVOS']:
+        if all(l['who'] == 'A' for l in c['lines']):       # one speaker (a call home, a mutter): nobody else is in it
+            bad = [k for k in ('pair', 'with') if c.get(k)] + (['{other}'] if any('{other}' in l['text'] for l in c['lines']) else [])
+            if not (c.get('place') or c.get('act')):
+                errors.append(f'overheard {c["topic"]} "{c["lines"][0]["text"]}": a one-speaker conversation needs place: or act: (where, or what they are doing)')
+            if bad:
+                errors.append(f'overheard {c["topic"]} "{c["lines"][0]["text"]}": a one-speaker conversation has no other person ({", ".join(bad)})')
         for l in c['lines']:
             allx.append((f'overheard {c["topic"]}', 'overheard', dict(c, text=l['text']), None, 'convo'))
     for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
@@ -161,6 +176,9 @@ def main(argv):
         for mid, b in out['HOME_MOMENTS'].items():
             yield f'call {b["thread"][4:]} beat {b["beat"]}', b, b['who']
     home_ids = {c['id'] for c in out['HOME_CONTACTS'].values()}   # the player's people back home: home:mum, ...
+    for k, c in out['HOME_CONTACTS'].items():
+        if k not in HOME_IDS:                              # content_gen makes sure its who: is home:<k>
+            errors.append(f'call home.{k}: no such person back home (the contacts are {", ".join(sorted(HOME_IDS))})')
     known_words |= {w for c in out['HOME_CONTACTS'].values() for w in c.get('name', '').split()}
     for where, b, who in moment_beats():
         src = 'home' if where.startswith('call ') else 'moment'
@@ -234,7 +252,7 @@ def main(argv):
                 if k in VALUES:
                     for x in (v if isinstance(v, list) else [v]):
                         for alt in str(x).split('|'):
-                            if alt not in VALUES[k]:
+                            if (alt.replace(' ', '_') if k in ('you', 'trait') else alt) not in VALUES[k]:
                                 errors.append(f'{tag}: {k}:{alt} is not one of {", ".join(sorted(VALUES[k]))}')
                 if k == 'aff':
                     for x in (v if isinstance(v, list) else [v]):
@@ -284,8 +302,11 @@ def main(argv):
         couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
         at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadets?\b|\bnewcomer\b|\byou(?:r|rs|rself)?\b", low)
         about_crew = couple and not at_you
-        romance = [] if e.get('id') in allowed or src == 'home' else BANNED_AT_YOU if about_crew else BANNED_PLAYER
-        for b in (BANNED if src != 'home' else [x for x in BANNED if x != r'\blove you\b']) + romance:   # family warmth from home
+        # calls home: only family warmth is exempt (a plain "love you", "I love you"); every other romance word stays an
+        # error ("I'm still in love with you" fails on "in love")
+        family = [x for x in BANNED_PLAYER + BANNED_AT_YOU if x != r'\blove you\b']
+        romance = [] if e.get('id') in allowed else family if src == 'home' else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in (BANNED if src != 'home' else [x for x in BANNED if x != r'\blove you\b']) + romance:
             m = re.search(b, low)
             if m:
                 errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))
@@ -390,5 +411,93 @@ def main(argv):
     return 1 if errors else 0
 
 
+# ---- the voice budget, played (0.43.19): --day runs the real game in a browser (cadet_test.py's Game: a virtual
+# clock, frames stepped by hand) through a ship day's busy places with the player standing among the crew, logs every
+# speech bubble (section 8b's bubbleSay, wrapped), and checks the budget's rules: at most two bubbles on screen, one
+# conversation at a time and no other talk while it plays, nothing new while a chat card or meeting is open, at most one
+# #serious conversation or reaction a day, nobody reacting to a kind twice a day, nothing from the ring said twice.
+DAY_VISITS = [   # deck, ship minute of Day 1, what to stand by (a crowd, or someone doing this), real seconds
+    (3, 7 * 60 + 10, 'crowd', 90), (5, 10 * 60, 'work', 60), (4, 13 * 60, 'crowd', 60), (3, 18 * 60 + 10, 'crowd', 120),
+    (3, 19 * 60 + 30, 'callhome', 60), (3, 20 * 60 + 40, 'crowd', 90)]
+DAY_WRAP = r"""(() => {
+  window.__B = []; window.__R = 0;
+  const say = bubbleSay; bubbleSay = (who, text, secs) => { const b = say(who, text, secs);
+    const a = DECK_CREW.find(x => x.h === who);
+    if (b) __B.push({ t: Math.floor(shipNow()), who: a ? a.p.id : '?', text, ovh: OVH ? OVH.lines.id : null, react: __R, chat: !!CHAT,
+      dlg: typeof DIALOGUE !== 'undefined' && !!DIALOGUE, on: bubbles.list.length }); return b; };
+  const lr = linesReact; linesReact = (...a) => { __R = 1; try { return lr(...a); } finally { __R = 0; } };
+})()"""
+DAY_STAND = r"""(F => { const c = DECK_CREW.filter(a => a.h); let best = F === 'crowd' ? null : c.find(a => (whereIs(a.p, shipNow()) || {}).act === F), n = -1;
+  if (!best) for (const a of c) { const k = c.filter(b => Math.hypot(a.x - b.x, a.z - b.z) < 3).length; if (k > n) { n = k; best = a; } }
+  if (best) { player.obj.position.set(best.x + 1, 0, best.z + 1); target.copy(player.obj.position).setY(.7); }
+  return best ? best.p.id : null; })"""
+
+
+def voice_day(game):
+    import pathlib
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = open(os.path.join(here, 'cadet_test.py'), encoding='utf-8').read().split('a, shots = run(')[0]
+    env = {'__name__': 'cadet_day'}
+    exec(src, env)
+    errors, notes = [], []
+    with env['sync_playwright']() as pw:
+        g = env['Game'](pw, game)
+        if not g.ev("typeof linesTick === 'function' && typeof CONVOS !== 'undefined'"):
+            print('lines_check --day: this build has no overheard conversations (section 22 before 0.43.12)'); g.close(); return 1
+        g.ev(DAY_WRAP)
+        peak, overlap = 0, 0
+        for n, (deck, at, focus, secs) in enumerate(DAY_VISITS):
+            g.ev(f'goToDeck({deck}); skipTo({at});'); g.step(30)
+            who = g.ev(DAY_STAND + f"('{focus}')")
+            for k in range(secs):
+                if n == 3 and k == secs // 2:      # a chat card mid-dinner: nothing new while it's open, and a conversation stops
+                    g.ev("(() => { const a = DECK_CREW.find(a => a.h); if (a) chatOpen(a.p); })()")
+                if n == 3 and k == secs // 2 + 10:
+                    g.ev('chatClose()')
+                g.step(30)
+                r = g.ev("[bubbles.list.length, OVH ? OVH.lines.id : null, bubbles.list.filter(b => OVH && !OVH.bub.includes(b)).length]")
+                peak = max(peak, r[0])
+                if r[1] and r[2]:
+                    overlap += 1
+            notes.append(f'visit {n + 1}: Deck {deck} {at // 60:02d}:{at % 60:02d} by {who or "nobody"}')
+        B = g.ev('__B')
+        L = g.ev('SHIP.lines')
+        serious = g.ev("(SHIP.lines.ring || []).filter(([id]) => (CONVOS.find(c => c.id === id) || (LINES.cue || []).find(e => e.id === id) || {}).tone === 'serious').length")
+        errs = g.errors
+        g.close()
+    convs = sorted({b['ovh'] for b in B if b['ovh']})
+    reacts = [b for b in B if b['react']]
+    other = [b for b in B if not b['ovh'] and not b['react']]
+    if peak > 2:
+        errors.append(f'{peak} bubbles on screen at once (at most two)')
+    if serious > 1:
+        errors.append(f'{serious} #serious conversations or reactions in a day (at most one)')
+    if overlap:
+        errors.append(f'other talk on screen during a conversation ({overlap} seconds)')
+    for b in B:
+        if b['chat'] or b['dlg']:
+            errors.append(f'a bubble while a chat card or meeting was open: {b["who"]}: {b["text"]}')
+    ids = [r[0] for r in L.get('ring', [])]
+    if len(ids) != len(set(ids)):
+        errors.append('a conversation or reaction was heard twice in a day: ' + ', '.join(sorted({i for i in ids if ids.count(i) > 1})))
+    for pid, r in (L.get('reacted') or {}).items():
+        if len(r['kinds']) != len(set(r['kinds'])):
+            errors.append(f'{pid} reacted to the same kind twice in a day')
+    if errs:
+        errors += ['game: ' + e for e in errs[:5]]
+    for x in notes:
+        print('  ' + x)
+    print(f'  {len(convs)} conversations, {len(reacts)} reactions, {len(other)} other bubbles (section 20\'s chatter); peak {peak} bubbles')
+    for b in B[:400]:
+        print(f'    {b["t"] // 60 % 24:02d}:{b["t"] % 60:02d} {"conv " if b["ovh"] else "react" if b["react"] else "other"} {b["who"]}: {b["text"]}')
+    for e in errors:
+        print('ERROR ' + e)
+    print(f'lines_check --day: {"FAIL" if errors else "PASS"} ({len(errors)} errors)')
+    return 1 if errors else 0
+
+
 if __name__ == '__main__':
+    if '--day' in sys.argv:
+        a = [x for x in sys.argv[1:] if not x.startswith('--')]
+        sys.exit(voice_day(os.path.abspath(a[0]) if a else os.path.join(ROOT, 'starship-cadet.html')))
     sys.exit(main(sys.argv[1:]))
