@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.27.29
+   STARSHIP CADET: CSV Wren                           build 0.27.30
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7410,7 +7410,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.27.29';                           // keep in step with the header's build line
+const GAME_BUILD = '0.27.30';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -28328,6 +28328,9 @@ const CROWD_MANY = 70, CROWD_FAR2 = 16;                  // with more than CROWD
 const CROWD_GATHER = 40, CROWD_GATHER2 = 12;             // at an event's gathering: more than 40 on the deck, coarse from 12 tiles (0.27.19)
 const CROWD_POSE_EVERY = 10, CROWD_POSE_MARGIN = 4;      // 0.27.27: off-screen people are posed every 10th frame; 'on screen' has a 4 m margin
 const _poseFr = new THREE.Frustum(), _poseM = new THREE.Matrix4(), _poseS = new THREE.Sphere(), _poseV = new THREE.Vector3(), _poseKeep = new Set();
+// 0.27.30: the packed bodies of the last CROWD_KEEP people to leave the deck, by their look (the spec as JSON), so someone
+// coming back skips crowdPack (about 1.6 ms each); the same look always packs to the same body
+const CROWD_KEPT = new Map(), CROWD_KEEP = 40;
 const CROWD_SEAT = { sit: .475, lie: .5 };               // default seat and mattress heights
 let CROWD_PER = 0, CROWD_MAT = null, CROWD_EMPTY = null; // made on first use, so a game without a crowd has none of it
 const CROWD_REST = new THREE.Object3D();                 // stands in for empty bone slots
@@ -28395,16 +28398,16 @@ function poseOf(pl) {
   if (base === 'lie' && act === 'lift') return 'lie:lift';
   return base;
 }
-const _parsed = new Map();
+const _parsed = new Map(), _parsedHi = new Map();          // 0.27.30: seated-height poses in their own map (no key string to build)
 function parsePose(pose = 'stand', y = 0) {
-  const k = pose + (y >= .3 ? '^' : ''); let r = _parsed.get(k); if (r) return r;
+  const pm = y >= .3 ? _parsedHi : _parsed; let r = pm.get(pose); if (r) return r;
   const plus = pose.indexOf('+'), mod = plus < 0 ? '' : pose.slice(plus + 1), bare = plus < 0 ? pose : pose.slice(0, plus);
   const cart = HOLDS[mod] ? mod : null;                  // something held: '+cart' (a hover cart, empty), '+cartfull' (loaded), '+carry' (a box of parts), '+tray', '+toolbox', '+datapad'
   const i = bare.indexOf(':'); let base = i < 0 ? bare : bare.slice(0, i), act = i < 0 ? null : bare.slice(i + 1);
   if (i < 0 && ACTS[base]) { act = base; base = act === 'row' || y >= .3 && ACT_SEATED.has(act) ? 'sit' : 'stand'; }
   if (!BASES.has(base)) base = 'stand';
   if (act && !ACTS[act]) act = null;
-  _parsed.set(k, r = { base, act, cart }); return r;
+  pm.set(pose, r = { base, act, cart }); return r;
 }
 // an arm toward a target: shoulder forward (x, negative is forward), elbow bend, shoulder out (z, toward its own side)
 const armTo = (a, s, sx, ex, sz = .1, hx = 0) => {
@@ -28596,9 +28599,11 @@ function propGeo(kind) {                                 // for full rigs: a pla
   return (_propGeos[kind] = geo);
 }
 // the props someone holds now: a key like 'R:dumbbell L:dumbbell', or ''
+const _propKeys = {}, _holdKeys = {}, _cartKeys = {};     // 0.27.30: made once, not every frame
 function propKeyOf(act, base) {
+  const m = _propKeys[base] || (_propKeys[base] = {}); if (m[act] !== undefined) return m[act];
   const A = act && ACTS[act], P = A && (base === 'sit' && A.seatedProps || A.props);
-  return P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '';
+  return (m[act] = P ? Object.entries(P).map(([b, k]) => b + ':' + k).join(' ') : '');
 }
 const _propList = new Map();
 const propList = key => _propList.get(key) || (_propList.set(key, key ? key.split(' ').map(s => { const [b, k] = s.split(':'); return [PROP_BONE[b], k]; }) : []), _propList.get(key));
@@ -28629,8 +28634,8 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
   }
   g.crouch = k.crouch ? ss(k.crouch) : 0;
   animateRig(rig, g, dt, t, sk, o.rnd || R);
-  const cartKey = cart ? '+' + cart : null;
-  for (const key of [base, act, cartKey]) if (key && k[key] === undefined) k[key] = 0;
+  const cartKey = cart ? _cartKeys[cart] || (_cartKeys[cart] = '+' + cart) : null;
+  if (k[base] === undefined) k[base] = 0; if (act && k[act] === undefined) k[act] = 0; if (cartKey && k[cartKey] === undefined) k[cartKey] = 0;
   for (const key in k) { const on = +(key === base || key === act || key === cartKey); k[key] = o.fresh ? on : k[key] + (on - k[key]) * Math.min(1, dt * 5); }
   const seat = base === 'sit' || base === 'lie' ? (y > 0 ? y : CROWD_SEAT[base]) : 0;
   if (k.sit > .001) {                                    // on a bench or chair: feet on the floor, forearms on the table, eating now and then
@@ -28682,7 +28687,8 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     if (H.lean !== undefined) rig.torso.rotation.x = L(rig.torso.rotation.x, H.lean, s);
     if (H.look) rig.head.rotation.x = L(rig.head.rotation.x, H.look, w);
   }
-  const key = [act && k[act] > .5 ? propKeyOf(act, base) : '', cart && base !== 'sit' && base !== 'lie' ? (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop : ''].filter(Boolean).join(' ');   // activity props appear halfway in; a cart at once
+  const pk = act && k[act] > .5 ? propKeyOf(act, base) : '', hk = cart && base !== 'sit' && base !== 'lie' ? _holdKeys[cart] || (_holdKeys[cart] = (HOLDS[cart].bone || 'B') + ':' + HOLDS[cart].prop) : '';
+  const key = pk && hk ? pk + ' ' + hk : pk || hk;     // activity props appear halfway in; a cart at once
   if (key !== (o.propKey || '')) {
     o.propKey = key;
     if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
@@ -28696,8 +28702,12 @@ class CrowdPerson {
     this.rig = makeCharacter(spec, r => { root = r; }); this.spec = this.rig.spec; this.h = this.spec.height;
     this.rig.root.rotation.order = 'YXZ';                // turn to face, after lying down
     this.joints = []; root.traverse(o => { if (o.userData.parts) this.joints.push(o); });
-    this.geo = [0, 1].map(l => crowdPack(this.joints, l));
-    this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
+    this.look = JSON.stringify(this.rig.spec); const kept = CROWD_KEPT.get(this.look);   // 0.27.30: back on the deck: the body packed last time
+    if (kept) { CROWD_KEPT.delete(this.look); this.geo = kept.geo; this.jparts = kept.jparts; }
+    else {
+      this.geo = [0, 1].map(l => crowdPack(this.joints, l));
+      this.jparts = this.joints.map(j => j.userData.parts);  // kept for the coarse detail, packed only if a big crowd needs it
+    }
     for (const j of this.joints) delete j.userData.parts;
     const hand = side => this.rig.arms.find(a => a.side === side).hand;   // prop bones: right hand, left hand, chest
     this.propBones = [hand(-1), hand(1), this.rig.chest, this.rig.root].map(j => { const b = new THREE.Object3D(); j.add(b); return b; }); this.propKey = '';
@@ -28816,6 +28826,8 @@ const crowd = {
   remove(p) {
     if (!p || !p.chunk) return;
     p.chunk.take(p); this.people.splice(this.people.indexOf(p), 1);
+    CROWD_KEPT.delete(p.look); CROWD_KEPT.set(p.look, { geo: p.geo, jparts: p.jparts });   // the newest last; the oldest go past CROWD_KEEP
+    for (const k of CROWD_KEPT.keys()) { if (CROWD_KEPT.size <= CROWD_KEEP) break; CROWD_KEPT.delete(k); }
   },
   clear() { for (const p of this.people.slice()) this.remove(p); },
   near(x, z, r = .45) {                                  // who's standing (or sitting) at a spot, for taps
@@ -28842,7 +28854,7 @@ const crowd = {
     // zooms are posed at once, so an off-screen body waits at most 9 frames. Posing uses each person's own random stream and writes only their rig (root and limbs): nothing the sim reads.
     const az0 = this.poseAz, zm0 = this.poseZoom; this.poseAz = az; this.poseZoom = camera.zoom; this.poseN = (this.poseN || 0) + 1;
     const all = az0 === undefined || Math.abs(az - az0) > .002 || zm0 !== camera.zoom;
-    if (!all) { _poseFr.setFromProjectionMatrix(_poseM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)); _poseKeep.clear(); for (const a of DECK_CREW) if (a.h && (a.talking > 0 || a.esc)) _poseKeep.add(a.h); }
+    if (!all) { _poseFr.setFromProjectionMatrix(_poseM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)); _poseKeep.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h && (a.talking > 0 || a.esc)) _poseKeep.add(a.h); } }
     this.people.forEach((p, i) => {
       const d = Math.hypot(p.pos.x - target.x, p.pos.z - target.z);
       let lod = allFar || d > CROWD_FAR + (p.lod ? -.5 : .5) ? 1 : 0;
@@ -28855,10 +28867,11 @@ const crowd = {
     });
     for (const c of this.chunks) {
       if (c.dirty) c.rebuild();
-      const ps = c.slots.filter(Boolean); c.mesh.visible = this.visible && ps.length > 0;
-      if (!ps.length) continue;
-      const s = c.sphere.center.set(0, 0, 0); for (const p of ps) s.add(p.rig.root.position); s.divideScalar(ps.length);
-      let r = 0; for (const p of ps) r = Math.max(r, p.rig.root.position.distanceTo(s) + 1.9 * p.h);
+      const sl = c.slots; let n = 0; for (let i = 0; i < sl.length; i++) if (sl[i]) n++;   // 0.27.30: counted, not filtered into a new array each frame
+      c.mesh.visible = this.visible && n > 0;
+      if (!n) continue;
+      const s = c.sphere.center.set(0, 0, 0); for (let i = 0; i < sl.length; i++) if (sl[i]) s.add(sl[i].rig.root.position); s.divideScalar(n);
+      let r = 0; for (let i = 0; i < sl.length; i++) { const p = sl[i]; if (p) r = Math.max(r, p.rig.root.position.distanceTo(s) + 1.9 * p.h); }
       c.sphere.radius = r;
     }
   },
