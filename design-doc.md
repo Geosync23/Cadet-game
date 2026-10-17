@@ -289,6 +289,8 @@ One list for the whole ship, shown on the big job board in the Works bay and on 
 
 **Enough work, not overwhelming** (agreed 2026-10-16). About 3 to 6 jobs a day are left for the player on day shift. The Works crew take urgent and big jobs straight away; small Tier 1 jobs left for the player are held until the end of your shift that day (at least 3 hours, so one found late carries into the next morning), at most 6 held at once (extras go to the crew as usual), and on day 1 a couple of chores are ready at 08:00 (changed 2026-10-16: at the real clock, 3 ship hours was only about 5 real minutes, so the crew swept the board before you got there). On your days off nothing is held for you; the crew take them, and the board stays open. The food cart run is a player job too: take it from the job board, and it waits an hour for you before the crew take it.
 
+**Clocking in (the user, 2026-10-17).** A time clock on the Works bay wall. You clock in when your shift starts and out when it ends; late and missed shifts are judged by the clock after your first week; forget to clock out and it signs you out at 17:00. Leave and sick days need none. The Works crew clock in and out too, and co-workers chat at the clock (the weekend on Mondays, plans on Fridays, back from leave). Turning in a job shows a small "+ reputation" chip in the department's colour.
+
 ### Consequences
 
 Consequences come in stages, and you can see them:
