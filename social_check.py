@@ -28,6 +28,7 @@ RUN = r"""(({ days, player, jump }) => {
     if (player && h === h0 + 3 * 24 + 6) { memAdd('rina', 'moment.test.1'); memAdd('pell', 'missed.test'); memAdd('pell', 'intro.arrival'); }
     if (player && h % 24 === 12) { relAdd('tomas', 'chat', REL_PTS.chat); memAdd('tomas', 'chat'); if ((h / 24 | 0) % 2) relAdd('pell', 'chat', REL_PTS.chat); for (const x of newsKnownBy('rina')) playerHeard(x.id, 'rina'); }
     if (player && h % 24 === 18) relAdd('tomas', 'meal', REL_PTS.meal);
+    if (player && h % 24 === 10 && (h / 24 | 0) % 2 && typeof machineList === 'function') { const m = machineList().find(x => x.kind === 'oven'); if (m) repNote('repair', { who: 'you', machine: m.id }); }   // fixes a galley oven every other day
   }
   const s = socSave(), a = Array.from(SHIP.aff), n = SOC.n, start = [];
   for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) start.push(affStart(SOC.crew[i], SOC.crew[j]));
@@ -38,7 +39,7 @@ RUN = r"""(({ days, player, jump }) => {
            up: moved.filter(v => v > 0).length, down: moved.filter(v => v < 0).length },
     born: stats.born, spread: stats.spread, news: NEWS.length, heard: SHIP.heard.length,
     rel: Object.fromEntries(Object.entries(SHIP.rel).map(([k, r]) => [k, [r.pts, REL_NAMES[r.tier]]])),
-    sample: NEWS.slice(-6).map(x => x.lines[0]), mem: Object.fromEntries(Object.entries(SHIP.mem).map(([k, l]) => [k, l.map(m => m[0] + ' ' + Math.round(m[2]))])) };
+    sample: NEWS.slice(-6).map(x => x.lines[0]), mem: Object.fromEntries(Object.entries(SHIP.mem).map(([k, l]) => [k, l.map(m => m[0] + ' ' + Math.round(m[2]))])), rep: SHIP.rep && { dept: SHIP.rep.dept, ship: SHIP.rep.ship, view: repView() } };
 })"""
 
 ok = True
@@ -87,6 +88,10 @@ with sync_playwright() as pw:
     if any(x.startswith('missed.test') for x in m.get('pell', [])): fail("Pell's sour memory should have faded")
     if 'intro.arrival 100' not in m.get('pell', []): fail('a core memory should stay at 100')
     if not any(k != 'rina' and any(x.startswith('heard.moment.test.1') for x in l) for k, l in m.items()): print('  (nobody heard of the big memory: Rina has no friends at 40+)')
+
+    rp = a['rep']
+    print('Reputation after the run:', json.dumps(rp and {'dept': rp['dept'], 'ship': rp['ship'], 'knownFor': rp['view']['knownFor']}))
+    if not rp or rp['dept']['galley'] < 20 or max(v for k, v in rp['dept'].items() if k not in ('galley', 'works')) >= 20: fail('a stand-in who fixes galley ovens should be known in the galley, and only there')
 
     # 3. the save: size, and back again
     print(f"Save: social part {a['size']} bytes (limit {SAVE_MAX})")
@@ -232,6 +237,36 @@ with sync_playwright() as pw:
     if gf['polite'] != 'polite' or not gf['known']: fail('a polite gift, or "Loves ..." in what you know, wrong')
     if gf['keep'] != [True, False, 1, True]: fail(f"keepsakes wrong: {gf['keep']}")
     if not (1 <= gf['given'] <= 4) or gf['mail'] != gf['given'] or not gf['saved']: fail(f"crew gifts wrong: {gf['given']} in 4 weeks, mail {gf['mail']}")
+
+    # 10. reputation (0.36.25): sources, floors and recovery, bands and their consequences, the weekly pass
+    rq = g.ev(r"""(() => {
+      const o = {}, keepRel = JSON.stringify(socSave()); SHIP.rep = null;
+      o.start = repView().depts.filter(x => x.band !== 'new').map(x => x.dept);
+      const oven = machineList().find(x => x.kind === 'oven'); o.ovenDept = repDeptOf(oven);
+      repNote('repair', { who: 'you', machine: oven.id }); o.afterFix = SHIP.rep.dept[o.ovenDept];
+      repNote('repair', { who: 'pell', machine: oven.id }); o.notMine = SHIP.rep.dept[o.ovenDept];
+      for (let i = 0; i < 12; i++) repNote('jobAbandoned', { machine: oven.id }); o.floor0 = SHIP.rep.dept[o.ovenDept];
+      const g1 = SOC.crew.find(p => p.dept === o.ovenDept); relGet(g1.id).pts = 100; relGet(g1.id).tier = 4;
+      repNote('jobAbandoned', { machine: oven.id }); o.floorFriend = [repFloor(o.ovenDept), SHIP.rep.dept[o.ovenDept]];
+      SHIP.rep.dept[o.ovenDept] = 2; repWeek(6 * 24 + 4); o.recover = SHIP.rep.dept[o.ovenDept];
+      for (let i = 0; i < 12; i++) repNote('repair', { who: 'you', machine: oven.id, state: 'failing' });
+      o.band = repBand(o.ovenDept); o.asked = repAskedFor(o.ovenDept);
+      const fresh = SOC.crew.find(p => p.dept === o.ovenDept && !SHIP.rel[p.id]); o.warmStart = fresh ? relGet(fresh.id).pts : null;
+      o.knownFor = knownFor();
+      o.mail = SHIP.social.mail.some(m => m.subject === 'From all of us');
+      repNote('shiftStart', { late: 40 }); repNote('shiftStart', { late: 35 }); const w0 = SHIP.rep.ship.work; repWeek(13 * 24 + 4);
+      o.pull = [w0, SHIP.rep.ship.work]; o.calder = repNotes().map(n => n.text);
+      o.view = repView();
+      const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
+      socLoad(JSON.parse(keepRel)); return o;
+    })()""")
+    print('Reputation:', json.dumps(rq))
+    if rq['start'] != ['works']: fail(f"only Works should know you at the start: {rq['start']}")
+    if rq['ovenDept'] != 'galley' or rq['afterFix'] != 13 or rq['notMine'] != 13 or rq['floor0'] != 0: fail('repairs and dips wrong')
+    if rq['floorFriend'] != [5, 5] or rq['recover'] != 3: fail(f"floors and recovery wrong: {rq['floorFriend']} {rq['recover']}")
+    if rq['band'] not in ('well', 'theirs') or not rq['asked'] or rq['warmStart'] != 8: fail('bands and their consequences wrong')
+    if 'reliable' not in rq['knownFor'] or not rq['calder'] or not any('late' in t for t in rq['calder']): fail('known for, or Calder\'s note, wrong')
+    if not rq['saved'] or any(c.isdigit() for c in json.dumps(rq['view']['ship'])): fail('the reputation view shows numbers, or the save differs')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
