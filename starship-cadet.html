@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.38.20
+   STARSHIP CADET: CSV Wren                           build 0.38.21
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -6999,12 +6999,14 @@ const ternAt = () => { if (typeof player === 'undefined' || !player || !player.o
 function ternInside() { const t = DECKS[5].tern, c = ternAt(); return !!c && deckDef && deckDef.num === 5 && (t.aisle.concat([t.well])).some(([i, j]) => i === c[0] && j === c[1]); }
 function ternClear() {
   const t = DECKS[5].tern, tiles = new Set([t.well].concat(t.ramp).map(c => c.join(',')));
-  return typeof walkers === 'undefined' || !walkers.some(w => w && w.active && w.obj && tiles.has(Math.floor(w.obj.position.x + OX) + ',' + Math.floor(w.obj.position.z + OZ)));
+  const on = (x, z) => tiles.has(Math.floor(x + OX) + ',' + Math.floor(z + OZ));
+  if (typeof walkers !== 'undefined' && walkers.some(w => w && w.active && w.obj && on(w.obj.position.x, w.obj.position.z))) return false;   // you (and any old walker)
+  return !(typeof DECK_CREW !== 'undefined' && deckDef && deckDef.num === 5 && DECK_CREW.some(a => a && isFinite(a.x) && on(a.x, a.z)));   // the scheduled crew and the escort (0.38.21)
 }
 const ternRoof = R => { TERN.roof = R; };
 function ternHinge(P) {                                  // the kit hands over the ramp's hinge: snap to where it should be, then animate it once a frame
   TERN.hinge = P; TERN.root = deckRoot; TERN.open = TERN.target;
-  const well = DECKS[5].tern.well.join(','), pose = () => { const k = TERN.open, e = k * k * (3 - 2 * k); P.rotation.z = -1.52 * e; if (k < .5) BLOCKED.add(well); else BLOCKED.delete(well); };   // the well shuts once it's half closed, so nobody gets caught in it
+  const well = DECKS[5].tern.well.join(','), pose = () => { const k = TERN.open, e = k * k * (3 - 2 * k); P.rotation.z = -1.62 * e; if (k < .5) BLOCKED.add(well); else BLOCKED.delete(well); };   // the well shuts once it's half closed, so nobody gets caught in it
   pose();
   MOVERS.push({ place: null, tick(dt) {
     if (TERN.open !== TERN.target && (TERN.target > TERN.open || ternClear())) { const d = dt / TERN.secs; TERN.open = TERN.target > TERN.open ? Math.min(1, TERN.open + d) : Math.max(0, TERN.open - d); pose(); }   // closing waits while anyone steps on it
@@ -7419,7 +7421,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.38.20';                          // keep in step with the header's build line
+const GAME_BUILD = '0.38.21';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
