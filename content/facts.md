@@ -225,6 +225,9 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 
 | Who | Pronouns |
 | --- | --- |
+| Mateo Navarro, Emeka Halloran, Alejandro Reyes, Theo Teague, Femi Rossi, Davi Keane, Saad Salo | he / him |
+| Bea Silva, Leila Eklund, Signe Moreau, Marta Soto, Maeve Volkov, Petra Jovanovic, Asha Amadi | she / her |
+| Farah Rahman, Ilse Quist | they / them |
 
 ### 4b. Commons, galley, infirmary, store, garden, night shift, helm and comms juniors (writer-commons fills this in)
 
@@ -235,16 +238,6 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 
 | Who | Pronouns |
 | --- | --- |
-
-### 4a. Works crew (writer-works, batch 1)
-
-Chosen by the Works writer on the head writer's ruling (a natural mix); Halloran and Rahman were already set.
-
-| Who | Pronouns |
-| --- | --- |
-| Mateo Navarro, Emeka Halloran, Alejandro Reyes, Theo Teague, Femi Rossi, Davi Keane, Saad Salo | he / him |
-| Bea Silva, Leila Eklund, Signe Moreau, Marta Soto, Maeve Volkov, Petra Jovanovic, Asha Amadi | she / her |
-| Farah Rahman, Ilse Quist | they / them |
 
 ## 5. Shared quirks: details the roster gives to several people
 
