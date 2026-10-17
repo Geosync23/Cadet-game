@@ -248,3 +248,4 @@ Supersedes the 04:03 summary where they differ.
 - 05:55 Writer 4 archived; Writer 5 hired: session_01HW7UxnuNvRXoEjn8tK4sQq. Needs strip after-shots (claude/player-needs 6e8e126 plans/needs-after/) sent to the user. Player 3 hands over after its suite → hire player 4 (moving food line hook with sim 3).
 - 05:58 The user: the needs window should be collapsible → player 3 (0.28.33 if memory allows, else first job for player 4). design-doc updated.
 - 06:10 Account usage WARNING (5-hour limit, resets 07:30 UTC). Paused until 07:30: head writer 3, Writer 5, dialogue 2 (non-critical). Critical path kept running: build master 2 + runners, reviewers, sim 3 (trays/line), onboarding (tour), player 3 (collapse), galley done (6abd36b → 1b). Content at a830d6f (0.48.37).
+- 06:15 The user chose tour pacing A (Zeke keeps walking; linger to hear a place out). Onboarding told; design-doc updated. Tour + bed arrow push expected ~06:35.
