@@ -108,8 +108,9 @@ with sync_playwright() as pw:
     if a['size'] > SAVE_MAX: fail('the save is too big')
     rt = g.ev("(() => { const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); return s === JSON.stringify(socSave()); })()")
     print('Save and load give back the same:', rt)
-    xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel);
-      const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R;
+    xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel), Bd = JSON.stringify(SHIP.social.bonds || {});
+      const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R && JSON.stringify(SHIP.social.bonds) === Bd;
+      const s3 = JSON.parse(JSON.stringify(s0)); s3.bonds = JSON.parse(Bd); socLoad(s3); if (JSON.stringify(SHIP.social.bonds) !== Bd) return ['old bond form', Bd.length];
       const s2 = JSON.parse(JSON.stringify(s0)); s2.ids = 12345; delete s2.idl; socLoad(s2); const kept = JSON.stringify(SHIP.rel) === R && NEWS.length === 0;
       socLoad(s0); return [moved, kept]; })()""")
     print('A save from a different crew list: affinity moved across by id, rest kept:', xl)
@@ -119,7 +120,7 @@ with sync_playwright() as pw:
       const own = typeof ROSTER_RESERVE !== 'undefined' && Array.isArray(ROSTER_RESERVE), RR = own ? ROSTER_RESERVE : (window.ROSTER_RESERVE = []);   // the game's own reserve when it has one
       RR.push({ ...JSON.parse(JSON.stringify(t)), id: 'reserve-test', name: 'Testy Reserve', seed: 4242, aboard: [400, null] });
       SOC = null; socInit(); const n = SOC.n; socLoad(s0);
-      const o = [n === s0.idl.split(',').length + 1, JSON.stringify(SHIP.rel) === R, JSON.stringify(SHIP.mem) === M, JSON.stringify(SHIP.rep) === P, affinity('tomas', 'pell') === A, affinity('tomas', 'reserve-test') === affStart(t, SOC.crew[SOC.idx.get('reserve-test')])];
+      const o = [n === s0.idl.split(',').length + 1 && JSON.stringify(SHIP.social.bonds) === JSON.stringify(bondsUnpack(s0.bonds, s0.idl.split(','))), JSON.stringify(SHIP.rel) === R, JSON.stringify(SHIP.mem) === M, JSON.stringify(SHIP.rep) === P, affinity('tomas', 'pell') === A, affinity('tomas', 'reserve-test') === affStart(t, SOC.crew[SOC.idx.get('reserve-test')])];
       RR.pop(); if (!own) delete window.ROSTER_RESERVE; SOC = null; socInit(); socLoad(s0); return o; })()""")
     print('A reserve person added between save and load (bigger crew, rel, mem, rep, affinity kept, new pair from its start):', rv)
     if rv != [True] * 6: fail('adding a reserve person loses what the save had')
