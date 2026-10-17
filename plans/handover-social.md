@@ -3,7 +3,7 @@
 Written by session_012pK2XVi5UhqEd28fakYk68 (took over from session_01DzZ669spGpdSdVMYzUog2N, whose Pillar 3 note this replaces; its content is in DEV_NOTES "Social life"). Read CLAUDE.md, DEV_NOTES.md ("Social life (section 20)", all of it), plans/pillar4-plan.md (Part 6, seat 3) and plans/social-deep-plan.md on claude/social-design (the A steps, Parts 2, 4, 5, 6, 7, 8, 8b) first.
 
 ## Role, branch and builds
-- Branch `claude/social`, builds 0.36.20+. Last: **0.36.78** (a033f17). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
+- Branch `claude/social`, builds 0.36.20+. Last: **0.36.81** (752d964). Ship integration 0.60.2 merged in at 0.36.64 (84e992e).
 - 0.36.41 passed the full set; later builds ran social_check (17 parts), plus intro_check and cadet_test where they touched anything visible (0.36.65/0.36.66 ALL IDENTICAL). Reviewer 1b (session_018XY1NbMBxo2SLDPxooe5yx) reviews; 0.36.52-0.36.59 PASS WITH FIXES, fixed in 0.36.60-0.36.62.
 - I own section `// 20. SOCIAL` (except the sub-block `// 20c. SOCIAL STORIES` at its end, social B's) and `social_check.py`.
 - Report to the lead (now session_01KPJMYjXAPkNUcrQ8VRkhLE) after each push. Onboarding engineer: session_01KaHzfqSqF8B4bkNFrH1tsx.
@@ -26,7 +26,8 @@ A1 0.36.20 query API; A2 0.36.21 memories; A3 0.36.22 lines through `lineFor`; A
 - When social B's bonds merge, turn social_check's bond NOTE into a FAIL (friends 15-40, rivals 2-6, a mentor at day 14).
 - A10's other half is onboarding's: `introGuide(id)` (you lead, the newcomer follows) and `introGuideEnd(id)`; I asked them to keep `introOn()` about your own intro while you guide (else week-1 gates close again). `simNote('guideAssigned', { id, day })` goes out at assignment.
 - A12 done on paper; the rest waits for the user's play. The month runner is a scratch script (month.py: social_check's harness plus a stand-in player; easy to rebuild from social_check's RUN).
-- The save (the lead's rule): at most 30 KB at day 140, under 40 KB at any length; every saved part hard-bounded, worst cases in DEV_NOTES "Social life", Save bounds. `social_check.py BUILD --long` (280 days, ~30 min) checks it; measure on a build merged with social B's latest. 0.36.74: occasions' appointments (`a.occ`) skipped. 0.36.75-0.36.78: heard/cues/pairs/known packed (known by a 4-char text hash), NEWS_MAX 20, CUE_MAX 24, pairs 300, moved 24, `--long` measures daily (worst day to 140 at most 30 KB, every day to 280 under 40 KB). 0.36.77: storyBondsPack/Unpack hooks for 20c.
+- The save (the lead's rule): at most 30 KB at day 140, under 40 KB at any length; every saved part hard-bounded, worst cases in DEV_NOTES "Social life", Save bounds. `social_check.py BUILD --long` (280 days, ~30 min) checks it; measure on a build merged with social B's latest. 0.36.74: occasions' appointments (`a.occ`) skipped. 0.36.75-0.36.78: heard/cues/pairs/known packed (known by a 4-char text hash), NEWS_MAX 20, CUE_MAX 24, pairs 300, moved 24, `--long` measures daily (worst day to 140 at most 30 KB, every day to 280 under 40 KB). 0.36.77: storyBondsPack/Unpack hooks for 20c. 0.36.79: affWeek only with the same crew list. 0.36.80: NEWS_MAX 16. 0.36.81: aff saved as deltas from affStart, rel/news/cues as rows (older saves load); --long runs from the arrival with event news; worst day to 140 was 26.6 KB on the 3-branch merge.
+- Open: section 17 sends 4 extra notes in an arrival jump (--long's arrival-jump line FAILs on them; raised with the lead for the sim engineer).
 - Open: sim engineer 4's 'purity wrong' report on ship-events + 69876a7 never reproduced here; social_check now names the changed save part.
 
 ## Gotchas
