@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.38
+   STARSHIP CADET: CSV Wren                           build 0.36.39
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.38';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.39';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14276,10 +14276,11 @@ function socialInvite(o = {}) {
 const SOC_GIFTS = {
   'tin of tea': { tag: 'tea', from: 'store' }, 'biscuits': { tag: 'sweet', from: 'store' }, 'postcard': { tag: 'star', from: 'store' }, 'little plant': { tag: 'plant', from: 'store' },
   'puzzle book': { tag: 'book', from: 'store' }, 'herbs': { tag: 'garden', from: 'garden' }, 'tomato': { tag: 'garden', from: 'garden' }, 'flower': { tag: 'plant', from: 'garden' },
-  'deck of cards': { tag: 'game', from: 'store' }, 'harmonica': { tag: 'music', from: 'store' },
+  'bar of chocolate': { tag: 'sweet', from: 'store' }, 'paper novel': { tag: 'book', from: 'store' }, 'music chip': { tag: 'music', from: 'store' }, 'pocket puzzle': { tag: 'game', from: 'store' },
+  'spare tiles set': { tag: 'game', from: 'store' }, 'tin whistle': { tag: 'music', from: 'made' }, 'metal puzzle': { tag: 'game', from: 'made' },
   'keyring': { tag: 'made', from: 'made' }, 'bookend': { tag: 'made', from: 'made' }, 'gear pendant': { tag: 'made', from: 'made' },
 };
-const GIFT_MAKES = [{ item: 'keyring', mins: 10, needs: 'scrap' }, { item: 'bookend', mins: 20, needs: 'scrap' }, { item: 'gear pendant', mins: 15, needs: 'scrap' }];   // the machine shop's (section 15/17 build the making)
+const GIFT_MAKES = [{ item: 'keyring', mins: 10, needs: 'scrap' }, { item: 'bookend', mins: 20, needs: 'scrap' }, { item: 'gear pendant', mins: 15, needs: 'scrap' }, { item: 'tin whistle', mins: 15, needs: 'scrap' }, { item: 'metal puzzle', mins: 20, needs: 'scrap' }];   // the machine shop's (section 15/17 build the making)
 const GIFT_PTS = { loved: 10, liked: 6, polite: 2 }, GIFT_MEM = { loved: 'big', liked: 'medium', polite: 'small' };
 const GIFT_HABIT = { 'tea-break': 'tea', 'garden-lover': 'garden', gardener: 'plant', stargazer: 'star', 'window-seat': 'star', music: 'music', musician: 'music', shopper: 'sweet',
   'lingers-at-meals': 'sweet', 'quiet-corner': 'book', 'lounge-regular': 'game', 'common-room': 'game', workaholic: 'made', 'bar-regular': 'sweet', runner: 'tea', 'gym-regular': 'tea' };
@@ -14569,9 +14570,9 @@ function socTransfers(h) {                               // 07:00 each ship day 
   for (const p of SOC.crew) {
     const L = leaveDay(p), A = arriveDay(p); if (L == null && A == null) continue;
     const n = shortName(p), to = p.transferTo ? 'the ' + p.transferTo.replace(/^the /i, '') : 'another ship', near = SOC.crew.filter(q => q !== p && socAboard(q, d) && (q.dept === p.dept || socRoom(q) === socRoom(p)));
-    if (L != null && d === L - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 15:00 on a Sunday (rotation day), else 18:30 when the day shift can come
-      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: L, at: weekday(L) === 6 ? [900, 930] : [1110, 1140], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
-        ask: weekday(L) === 6 ? 'Coming to see me off at the shuttle? Three o\'clock.' : 'Coming to see me off at the shuttle? Half six, before dinner.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
+    if (L != null && d === L - 10 && typeof eventOneOff === 'function') {   // their farewell at the shuttle bay on the day (section 18 plans it like a tradition, host first): 15:00 on a Sunday (rotation day), else 19:45 when the day shift can come (the best turnout on paper)
+      try { eventOneOff({ id: 'farewell-' + p.id, name: 'Farewell for ' + shortName(p), day: L, at: weekday(L) === 6 ? [900, 930] : [1185, 1230], venue: 'shuttle-bay', where: [{ deck: 5, room: 'Shuttle bay', types: ['event'] }], host: p.id, hostAnim: 'talk', chance: .2, anim: 'talk',
+        ask: weekday(L) === 6 ? 'Coming to see me off at the shuttle? Three o\'clock.' : 'Coming to see me off at the shuttle tonight? Quarter to eight.', here: 'I\'ll miss this old ship.', thanks: 'You see ' + shortName(p) + ' off at the shuttle bay. Hugs, a few tears, a joke about the coffee.' }); } catch (e) { }
     }
     if (L != null && d === L - 10) newsAdd({ id: 'leaving:' + p.id, about: p.id, kind: 'transfer', weight: .8, life: 10, born: t, seed: socPick(near, 4, p.seed, d, 663).map(q => q.id),
       lines: ['Did you hear? ' + n + '\'s transferring to ' + to + '.', n + ' is leaving us. ' + to[0].toUpperCase() + to.slice(1) + ', in ten days.', 'Ten days and ' + n + '\'s off to ' + to + '. Can you believe it?'] });
