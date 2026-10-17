@@ -404,3 +404,33 @@
 - Please tell whoever is next on the record list that it moves up one. Fairly. In order. Thank you.
 ? tier>=friend
 - There was no rowing board here. I have taped one up. Tell Lindqvist the Wren's is his to chase. Tell him I said so. Carry on.
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Nothing of the messages from home, his father, the rule, or Gull being his.
+
+== near
+? trad:quiz
+- Quiz night. I take the regulations round. There is no regulations round. There should be.   #funny
+? trad:jam
+- Music jam. I keep the list of who plays when. In order. It helps. Mostly.
+? trad:film
+- Film night. Two hours and four minutes. I have checked. Bring a cushion.   #funny
+? trad:market
+- Swap meet. I am not trading. I am observing. And possibly acquiring a stopwatch.   #funny
+? trad:observatory-night
+- Observatory night. Regulation nine says rest. Looking up counts. I've checked.   #funny
+? trad:harvest
+- Harvest morning. Three crates, two trolleys, one queue. I have drawn a diagram.   #funny
+? trad:hull-lights
+- Hull lights. Twenty-one hundred, every four weeks. Never late. A fine tradition.
+? trad:founding
+- Founding Day. The Captain speaks first. Then cake. In that order. Always.
+? trad:quiet-watch tier>=friend
+- The quiet watch. I will be at a window. Not on the bridge. On advice.
+
+== smalltalk
+? trad:today
+- Something on tonight. Be punctual.
+? trad:hull-lights
+- Twenty-one hundred. On time. Good.

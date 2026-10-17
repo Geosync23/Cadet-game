@@ -403,3 +403,33 @@
 - I read page forty again tonight. The word I underlined still fits. I hope the Wren's well. Mind the step.
 ? tier>=friend
 - Someone here asked me what the Admiral is. I told them he outranks us all. Some things travel. Hello to everyone.   #funny
+
+// Writer 5, batch 6: seasons and traditions (the game's ids: running Mon, quiz Thu, works-tea and jam Fri, film and
+// observatory-night Sat, market (the swap meet) Sun, harvest (harvest morning), hull-lights, founding (day 100),
+// quiet-watch (day 300)), plus trad:today. Gaps filled only; arc gates kept. Nothing of retiring, the academy post or her daughter; the Admiral unexplained.
+
+== near
+? trad:quiz
+- Quiz night. My team came third last time. I've been reading. Quietly.   #funny
+? trad:jam
+- The jam. I come to listen. Now and then I'm asked to play. Now and then I say yes.
+? trad:film
+- Film night. I sit at the back. Captains shouldn't block the view.   #funny
+? trad:market
+- Swap meet. Everyone haggles with the Captain. Nobody wins. It's a good game.   #funny
+? trad:running
+- Running club. I come to watch. The Commander runs as if the board is watching him.   #funny
+? trad:harvest
+- Harvest morning. I like the garden on a picking day. Everyone's hands are busy.
+? trad:hull-lights
+- Hull lights. Every four weeks the Wren shows herself off. I think she's earned it.   #warm
+? trad:founding
+- Founding Day. I say a few words. Not many. Then cake, which is why everyone came.   #funny
+? trad:quiet-watch tier>=friend
+- The quiet watch. I'll be in the observation room. Thinking of all who've served on her.   #warm
+
+== smalltalk
+? trad:today
+- Something on tonight. Good.
+? trad:founding
+- A few words, then cake.   #funny
