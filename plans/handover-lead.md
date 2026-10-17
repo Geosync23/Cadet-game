@@ -317,3 +317,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - ~17:30 user: Chief's talk after 3 missed shifts in a row (career eng); player's auto tray at mess seat with no food -> must queue, then eat (PE5).
 - 17:35 check-in: tour 0.42.28 (2c4aaee2) to 1c; leave 0.61.5 (2nd route) pending -> 1d; poses f9c6faa8 + bubbles 0.43.30 -> 1d light; trays question still open with perf 3; sickness lines 86e071b. Lead memory ~36%.
 - 17:43 arrival 0.42.27-28 PASS (1c) -> 0.60.5; 1c archived. 0.60.5 waits only for claude/leave 0.61.5-0.61.7 (1d).
+- ~18:02 user: meal traditions (Sunday long table, harvest, etc.) -> everyone queues with trays as usual (option B). Sim 5 building for 0.60.6 (earlier serving, maybe a second point).
