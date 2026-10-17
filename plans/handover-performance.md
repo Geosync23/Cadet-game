@@ -1,11 +1,25 @@
 # Handover: performance engineer (crowd rendering and activity poses)
 
-Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22, 0.27.27 and 0.27.31 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render f0898c3, on ship-integration 0.60.2 / 142b503). Plain notes for whoever picks this area up.
+Written at 0.40.8 (merged up to claude/ship-integration 980e6a9), brought up to date at 0.27.18 (on ship-integration d89a3f5 / 0.41.7) and again at 0.27.22, 0.27.27 and 0.27.32 by the second performance engineer (session_01XAkY9U3mmstHQT2yAMTocA; claude/crowd-render abe6d2b, on ship-integration 0.60.2 / 142b503). Plain notes for whoever picks this area up.
+
+## Read first: state at handover (2026-10-17 ~13:40, the second performance engineer)
+- **Branch:** `claude/crowd-render`. The last build is 0.27.32 (abe6d2b); handover notes are on top of it. All of 0.27.25–0.27.32 passed review by reviewer 2b (session_01F93LiFWtciyCLNV34qPsjP; notes in plans/reviews/ on claude/reviews-2). None of them are in the 0.60.3 candidate (claude/cand-0603 f0f8a7c). I recommended merging abe6d2b into 0.60.4; the only conflicts are the two build lines.
+- **First job for the next performance session: 0.27.33, stand-ins built over a few frames on a deck change** (the plan is below, under Slow frames, "Next job"). The lead approved it on 2026-10-17. The picture must be identical at every moment.
+- **0.60.3 candidate 2, measured** (CPU slowed 4×, an hour in the mess, game code only, two runs). Figures are 0.60.2 → 0.60.3 → 0.60.3 + crowd-render:
+  - Sunday dinner, average frame: 6.5–6.8 → 6.8–7.2 → 4.5–4.9 ms.
+  - Sunday dinner, frames over 16.7 ms an hour: 51–62 → 44–60 → 10–12.
+  - Sunday dinner, frames over 33 ms an hour: 6–13 → 9 → 1–2.
+  - Breakfast, average frame: 4.1 → 5.2–5.4 (45 crew, against 26) → 3.0–3.2 ms.
+  - Breakfast, frames over 16.7 ms an hour: 18–20 → 43–48 → 4–6.
+  - Load at 4×: about 11.5–12 s for all three. perf_check: PASS; the file grows 2.96 → 3.29 MB.
+  - Sent to the lead and to build master 2 (session_01F8ph7FKqViF3heRn94YgBr).
+- **Waiting on others:** section 10/14 garbage (`crewNearDoor`, `whereIs`/`shipDay`) is with sim engineer 4, now handing over, for after 0.60.4. Re-measure it with alloc.py's method (below) when their successor asks.
+- **Watchdog role:** continue it. For each combined build, run perf_check NEW OLD, plus the phone-like runs if the lead wants numbers for the user.
 
 ## Role, branch, builds
 - **Role:** making many crew cheap to draw (Pillar 1, workstream 5) and giving them activity poses and props (Pillar 2, A2). I also cut Deck 6's draw calls.
 - **Branch:** `claude/crowd-render`. Lead merges it into `claude/ship-integration`.
-- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.31; next is 0.27.32). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
+- **Build numbers:** 0.20.x (crowd), 0.27.x (activities and Pillar 3 pieces, last was 0.27.32; next is 0.27.33). Bump the header build line and `GAME_BUILD` together, and add a row to the DEV_NOTES build table.
 - **Owned in `starship-cadet.html`:** `// 8. CHARACTER KIT` and `// 8b. CROWD`, plus `// 7. GRID` (findPath) since 0.27.29 and `// 12. MAIN LOOP` since 0.27.31, both by the lead's decision (the picture must stay identical). Plus the one NOSAVE line in section 13 (see the demos below).
 - **Owned in DEV_NOTES:** the rows for 0.20.x and 0.27.x, and the sections "Crowd rendering (0.20.x)" and "Activities (0.27.x)". Those sections give the detail. This page is the short version.
 - **Test scripts:** I own `perf_check.py` (the phone-speed watchdog, below) and `path_check.py` (findPath against findPathScan). I also use `cadet_test.py`, `deck_check.py`, `day_check.py`, `events_check.py` and `player_check.py`.
@@ -63,7 +77,7 @@ Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was d
 - **0.27.26, freezeStill()** (4c, after shadowStandIns): the staticRoot, TALL and WALL_DECOR subtrees stop recomputing their matrices (`matrixAutoUpdate = false`). Kept moving: noMerge subtrees, SPINS targets and their ancestors, STEAM puffs (freezing them changed 8 shots on Decks 3 and 6). Gain was small (scene matrix update 0.35 → 0.33 ms), which is why 2b followed.
 - **0.27.27, posing only who's on screen** (8b, `crowd.update`): see the DEV_NOTES row. `CROWD_POSE_EVERY` (10) and `CROWD_POSE_MARGIN` (4 m). Always posed: talking/esc agents, `fresh`, dirty chunks, and everyone after the camera turns (`az` moves) or zooms. Crowd posing at Sunday dinner 1.07 → 0.41 ms (desktop). The sim can't tell: a fingerprint of crew positions, poses and `R()` matches across builds (scratchpad probe simeq.py: skipTo Sunday 18:20, Deck 3, six zooms × 150 frames, md5 of `[R(), DECK_CREW.map(a => [pos, pose])]`).
 - **How I measure:** `perf_check.py` (js = game code per frame, the best of 3 batches, counted after one drawn frame so the ship time doesn't drift). Chrome's CPU throttle gave no steady numbers headless, so phone times are desktop × 4 to 5. Don't run perf_check at the same time as other checks: load times jump (6.8 → 9.7 s seen) and js gets noisy. For a crowd micro-benchmark, time `crowd.update(1/30, 10)` 100 times in the page.
-- **Reviews (reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP):** 0.27.25, 0.27.26 and 0.27.27 PASS (notes on claude/reviews-2). 0.27.28 PASS (it mirrored the GPU buffers: 0 mismatches). 0.27.29 and 0.27.30 were sent; 0.27.31 is still to send.
+- **Reviews (reviewer 2b, session_01F93LiFWtciyCLNV34qPsjP):** 0.27.25, 0.27.26 and 0.27.27 PASS (notes on claude/reviews-2). 0.27.28 PASS (it mirrored the GPU buffers: 0 mismatches). 0.27.29 to 0.27.32 PASS.
 
 ## Slow frames (0.27.28 to 0.27.30, the lead's "find the spike source")
 - **Method:** a scratch combine (a local worktree, never pushed: 0.60.2 + sim + galley + my builds; build lines resolved to mine). A CPU profile of only the frames over 4 ms: CDP Profiler at 100 µs, aligned to the page by a named busy marker function (`MARKFN`), 3,000 frames with drawing skipped (one ship hour), in the mess at Sunday dinner (6*1440+18*60+25) and Tuesday breakfast (1440+7*60+5). Garbage: `HeapProfiler.startSampling` over 1,500 frames, by function. The scripts are in the scratchpad (pspike.py, spike.py, alloc.py, fpstat.py, rbwhy.py, arrive.py) and are not committed: re-create them from this description if needed.
@@ -78,10 +92,19 @@ Items 3, 1, 2 and 2b of the plan are done. Item 4 (dialogue as JSON.parse) was d
 - **0.27.29** findPath is a heap ordered by (f, first-push order), which is exactly the old scan's pick. The old search is kept as `findPathScan`. `path_check.py` must pass after any change to section 7, free, edgeOpen or edgeBlocks.
 - **0.27.30** `CROWD_KEPT` (packed bodies by look, the last 40 to leave) and fewer per-frame allocations in 8b. Garbage at dinner: 196 → 183 KB a frame.
 - **Result (0.27.27 → 0.27.29, combine with sim bfcd864):** frames over 4 ms dinner 36/31 → 17/19, breakfast 53/32 → 17/7; 99th percentile 4.1–4.8 → 2.4–3.2 ms. Worst frames now mostly follow garbage collection, which makes them noisy.
-- **0.27.31** the main loop's wall cut: posts, `HRUN_EDGES` and the void blocks no longer allocate. Garbage at dinner: 183 → 168 KB a frame. The loop still has small closures (`hides`, `t.pts.some`, `walkers.some`, `d.leaves.forEach`) and for…of iterators, worth about 15 KB more if wanted.
+- **0.27.31** the main loop's wall cut: posts, `HRUN_EDGES` and the void blocks no longer allocate. Garbage at dinner: 183 → 168 KB a frame. **0.27.32** `loop()` uses index loops (its for…of made about 600 iterator results a frame) and no per-item closures. Garbage at dinner: 168 → 151 KB a frame.
+- **Phone-like measuring (works):** `Emulation.setCPUThrottlingRate` at 4 is steady on hour-long runs (3,000 frames with drawing skipped; two runs agree within 2%). It wasn't steady on perf_check's short batches. At 4×, report frames over 16.7 ms and over 33 ms (not over 4 ms), the 99th percentile and the worst frame. For load time, set the throttle before `goto` by patching playwright's `Page.goto`, and time cadet_test's `Game()`. 0.60.2 → my 0.27.32 at 4×: dinner 6.85 → 3.3 ms a frame, frames over 33 ms 9–12 → 2 an hour; breakfast 4.25 → 2.05 ms; load 11.5 → 12.3 s (the shadow stand-ins). The scripts (phone.py, phoneload.py) are in the scratchpad; re-create them from this.
 - **Left (2026-10-17):**
   - Section 10's `crewNearDoor`, about 40 KB/frame (a closure per crew member per door per frame), and section 14's `whereIs`/`shipDay`, about 15 KB. Sent to sim engineer 4 (session_01EJUGywZv9BpcUezjXES9AC, near handover) for after 0.60.4. Don't touch sections 10 or 14 yourself: they're changing for 0.60.3.
   - What's left in 8b is number boxing in `animateActivity` (about 15 KB/frame); it would need restructuring.
+
+- **Load time:** unchanged by 0.27.25–0.27.32: about 12 s at 4× slower CPU and about 7 s at normal speed, alternating 0.60.2, 0.27.25 and 0.27.32 over 6 runs each. An earlier "+0.8 s" was one low run of 0.60.2. Always alternate builds when measuring load.
+- **Next job, proposed to the lead (0.27.33): stand-ins built over a few frames.** `shadowStandIns()` (4c, called in `buildDeck`) costs, on a desktop, D1 20 ms, D2 95, D3 175, D4 63, D5 28, D6 9: about 15–20% of a deck change (130–850 ms), so perhaps 0.7 s on a phone for Deck 3. Plan:
+  - Keep the two passes, but fill a few buckets per frame after the deck appears.
+  - A bucket's originals keep `castShadow = true` until its proxy mesh exists, then switch: the same depth, so the shadows are the same at every moment.
+  - Keep the `onUpload` array release.
+  - Check: cadet_test identical, the 48-shot all-deck comparison, deck_check memory flat over round trips, and that `unloadDeck` mid-build leaves nothing behind.
+  - Measure with scratchpad ssi.py (wrap `shadowStandIns`/`freezeStill`, time each `goToDeck`).
 
 ## Standing role: phone-speed watchdog (Pillar 4, from 2026-10-17)
 - For each combined attempt the build master (now build master 2, session_01F8ph7FKqViF3heRn94YgBr; first was session_012K7RZ3oSX2vpBb1rR66MBh, claude/integration-test) sends, run `perf_check.py NEW.html OLD.html` (mine, ~5 minutes) and tell the lead PASS or the regressions with the commit that caused them.
