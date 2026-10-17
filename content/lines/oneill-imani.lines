@@ -1,0 +1,33 @@
+@crew oneill-imani
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. O'Neill, garden, late shift. I pick tomorrow's herbs. You're welcome.
+? tier>=acquaintance
+- {hi}, {me}. This is a week-thirty song. You'll see why.
+- {hi}. Teague's playlist is on in the bay. I'm so sorry for your ears.   #funny
+? tier>=friend
+- {hi}, {me}. Track six is called "New Hand". Not about you. A bit about you.   #warm
+
+== feel
+? mood:high
+- Good day. Great playlist. Teague's was worse. That's two good things.   #funny
+? mood:low
+- Same song on repeat today. Don't read into it. Do, a bit.
+
+== near
+? act:work
+- Basil, thyme, a little mint. Brennan's tomorrow, on a tray. Very satisfying.
+? act:leisure
+- Quiet corner, good song. That's the whole evening sorted.
+
+== life
+? tier>=acquaintance
+- I make a playlist for every week of the tour. Sixty-something so far. All excellent.
+? tier>=colleague
+- I paint tiny portraits. So do Strand and Bakshi. Nobody owns up to theirs. Tradition.
+
+== joy
+? tier>=acquaintance
+- Want to hear this week's playlist? Track four's the one. Trust me.

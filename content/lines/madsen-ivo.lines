@@ -1,0 +1,33 @@
+@crew madsen-ivo
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! You're new. I'm Ivo. Galley. I carry trays. Six at once. Ask anyone.
+? tier>=acquaintance
+- {hi}, {me}! Right, listen. Brennan and me had a disagreement about bowls.
+- {hi}! Seven trays tomorrow. I can feel it. Possibly six.   #funny
+? tier>=friend
+- {nick}! Sit, sit. I'll bring yours over. On a tray. Just the one, for you.   #warm
+
+== feel
+? mood:high
+- Six trays, no wobble, all the way to table four. A personal best.   #funny
+? mood:low
+- Quiet today. I know. Me, quiet. Don't make a thing of it.
+
+== near
+? act:work
+- Bowls go rim up. Brennan says rim down. Brennan is wrong. I'm doing it her way.   #funny
+? habit:garden-lover act:leisure
+- The flowers by the misters are out. Don't tell Cruz I've been looking. Looking's allowed.
+
+== life
+? tier>=acquaintance
+- I press flowers from the garden. In a big book. The book's about engines. Sorry, engines.   #funny
+? tier>=colleague
+- One day I'd like to run the pass. Call the orders. Just once. Brennan says "one day".
+
+== joy
+? tier>=acquaintance
+- Want to see my flower book? Every page a different week. That one's from your first week.

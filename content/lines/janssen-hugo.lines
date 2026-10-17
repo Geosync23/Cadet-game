@@ -1,0 +1,33 @@
+@crew janssen-hugo
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Janssen, helm, nights. Steady at three in the morning? That's me and my tea.
+? tier>=acquaintance
+- {hi}, {me}. Tea? I've always got tea. It's the one thing I always have.
+- {hi}. Gerald says hello. Gerald's my cactus. He's a good listener.   #funny
+? tier>=friend
+- {hi}, {me}. Sit a minute. It's nice to talk to someone who's awake.   #warm
+
+== feel
+? mood:high
+- Steady night. Not a wobble. Gerald and I are very pleased with ourselves.   #funny
+? mood:low
+- Long watch. I'll call home after breakfast. That always sets me right.
+
+== near
+? act:work
+- Steady as she goes. One hand on the helm, one on the tea. Don't tell the Commander.   #funny
+? act:gym
+- I run before bed. Which is your breakfast. The gym's lovely and empty.
+
+== life
+? tier>=acquaintance
+- I grow herbs for the galley. Brennan comes round with a little basket. Very formal.
+? tier>=colleague
+- Gerald's seen more stars than most captains. I've done the sums. Roughly.   #funny
+
+== joy
+? tier>=acquaintance
+- What do you like out there? The stars? I like the dark between them. Restful.

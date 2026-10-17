@@ -1,0 +1,34 @@
+@crew hart-ravi
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}. Hart, garden, early team. Up since five. Don't ask how I feel about it.
+? tier>=acquaintance time:morning
+- {hi}, {me}. First light's the only bad thing about the best job.   #funny
+? tier>=acquaintance
+- {hi}. You're in the new comic on the wall. Kindly. You'll like it.
+? tier>=friend
+- {hi}, {me}. Drew you a little one. Just for you. Not for the wall.   #warm
+
+== feel
+? mood:high
+- Good morning, for once. Everything watered before six. The garden glowed.
+? mood:low
+- Tired. I drew the fish from home all evening. That's how you know.
+
+== near
+? act:work
+- Watering at first light. The plants like it before the misters. So do I. Quietly.
+? act:leisure
+- Comics wall needs a new one. Something happened at breakfast. I'm drawing it.
+
+== life
+? tier>=acquaintance
+- I keep fish back home on Valo. My nan sends drawings of them. Hers are better.
+? tier>=colleague
+- Once I've decided, I've decided. My mum says it's my best and worst thing.
+
+== joy
+? tier>=acquaintance
+- The comics wall in the common room. Teague, Abara and me. Have a look. You might be in it.

@@ -1,0 +1,33 @@
+@crew larsen-hamid
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- {hi}! Larsen, infirmary. Drink some water. That's my whole introduction.
+? tier>=acquaintance
+- {hi}, {me}! Did you know most people aboard drink too little water? Most people!
+- {hi}! The boat's called the Morning Tide now. Last week it was something else.   #funny
+? tier>=friend
+- {hi}, {me}! I'll give you a ride on the boat. First passenger. It's yours.   #warm
+
+== feel
+? mood:high
+- Good day. Saved forty credits for the boat. That's one oar. Nearly.
+? mood:low
+- Long day. I'll play the guitar tonight. Quietly. For everyone's sake.
+
+== near
+? act:work
+- Sit up straight. No, straighter. Good. Your back will thank you in twenty years.
+? act:leisure
+- Music room's free. Tamsin and I are practising. Earplugs are by the door.   #funny
+
+== life
+? tier>=acquaintance
+- I'm saving for a boat on the Ostrander colonies. Small. Blue. Named. Renamed.
+? tier>=colleague
+- I tell everyone to eat breakfast. I skip breakfast. I'm aware. I'm working on it.   #funny
+
+== joy
+? tier>=acquaintance
+- Want to hear the boat fund? To the credit? I'll tell you anyway. It's going up.

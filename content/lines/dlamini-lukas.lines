@@ -1,0 +1,33 @@
+@crew dlamini-lukas
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hm. Dlamini. Galley. Bottom bunk by the wall. I'm up at five. Sorry in advance.
+? tier>=acquaintance
+- {hi}. Two hundred and three.
+- {hi}, {me}. Breakfast's done. You missed nothing. You missed porridge.   #funny
+? tier>=friend
+- {hi}, {nick}. Saved you the last of the toast. Don't tell Tran.   #warm
+
+== feel
+? mood:high
+- Good day. One hundred and ninety. Under two hundred. Feels different, somehow.
+? mood:low
+- Typical day. Long one. The number's still the number.
+
+== near
+? act:work weekday:fri|sat
+- Brennan's off. The galley runs itself. That's me, running.   #funny
+? habit:garden-lover act:leisure
+- Misting hour. Stand here. Breathe in. That's rain. Near enough.
+
+== life
+? tier>=acquaintance
+- Got married just before the tour. I count the days. Out loud, apparently.
+? tier>=colleague
+- Port Halloran rains three days in four. I moaned the whole time. I'd love a wet coat now.
+
+== joy
+? tier>=acquaintance
+- The garden at misting hour. Best smell aboard. Don't tell Brennan it beats her bread.

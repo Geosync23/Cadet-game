@@ -1,0 +1,33 @@
+@crew yoon-elif
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Oh, hello. Dr. Yoon. Nights. If you come in at three, I'll be the one awake.
+? tier>=acquaintance
+- Hello, {me}. Want a joke? It's a bad one. Sorry. They're all bad ones.   #funny
+- Oh, hello. Is it morning? For you? I'm just having my dinner. Or breakfast.
+? tier>=friend
+- Oh, it's you, {me}. Sit down. You look like you could use a cup of tea.   #warm
+
+== feel
+? mood:high
+- A quiet night. Everyone slept. That's my favourite kind of night.
+? mood:low
+- Long night. I'm all right. A cup of tea, and I'll be all right.
+
+== near
+? act:work
+- Breathe in. And out. Good. Nothing to worry about. Really. I'd tell you.
+? act:breakfast
+- What do you call a doctor with no patience? Me, before tea. Sorry.   #funny
+
+== life
+? tier>=acquaintance
+- The coffee machine works for me. Volkov and Shah say it works for them. We disagree.   #funny
+? tier>=colleague
+- I call home after my shift. It's afternoon there. They're always eating something.
+
+== joy
+? tier>=acquaintance
+- I collect terrible jokes. Halloran's are worse than mine. Say mine are better.   #funny

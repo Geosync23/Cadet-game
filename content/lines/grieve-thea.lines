@@ -1,0 +1,33 @@
+@crew grieve-thea
+// Writer-commons, batch 3: everyday lines (greet, feel, near, life, joy) from the card and the roster.
+
+== greet
+? tier=stranger
+- Hello. Grieve, infirmary. If you're bleeding, it's Deck 3. If not, sit down anyway.
+? tier>=acquaintance
+- Hello, {me}. Have you lost anything? Only, I've a box. Of found things.
+- Hello. O positive. Sorry. That's yours. I say it instead of hello sometimes.   #funny
+? tier>=friend
+- Oh. Hello, {me}. I'm glad it's you. You make the infirmary less quiet.   #warm
+
+== feel
+? mood:high
+- Good day. I gave a glove back. Its owner had given up hope. So had I.
+? mood:low
+- Long shift. I worried all morning. Then I fixed it. Then I worried I hadn't.
+
+== near
+? act:work
+- Corners tucked. Sheets straight. Every bed. It matters if you're the one in it.
+? place:infirmary
+- Sit there. Don't touch anything blue. That's a rule, I didn't make it.
+
+== life
+? tier>=acquaintance
+- I keep fish back home on New Aberdeen. My sister sends me how they're doing. All well.
+? tier>=colleague
+- I'm studying for my nursing exams. In the evenings. Mostly worrying, some studying.
+
+== joy
+? tier>=acquaintance
+- The lost-property box. One odd sock's been there for months. I live in hope.
