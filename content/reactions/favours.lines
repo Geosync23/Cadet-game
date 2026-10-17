@@ -1,0 +1,16 @@
+@reactions favour
+// Writer-commons, reactions batch 2. A favour done (social's cue favour, one day); .you when you did it.
+
+? !cue:favour.you
+- Someone did someone a good turn yesterday. Word gets round on a ship this size.
+- Did you hear? Someone helped someone out. Nice to hear, that.
+? cue:favour.you tier>=acquaintance
+- I heard you helped someone out. That's the Wren way.   #warm
+- I hear you did someone a favour. Good. It comes back round.
+- You did a favour for someone yesterday? People notice. In a good way.
+? cue:favour.you tier>=friend
+- I heard what you did. Typical you. Don't let them take advantage, mind.   #warm
+? cue:favour.you dept:galley
+- Heard you've been helping people. Come and get a biscuit. That's how it works here.   #warm
+? cue:favour.you dept:store
+- Heard you've been doing favours. I've seen your ledger. You've earned a cheap tea.   #funny

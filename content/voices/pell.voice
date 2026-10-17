@@ -22,7 +22,7 @@ hi: Oi oi | Look who it is | Right, so
 bye: Laters | Don't do anything I'd do | Off you pop
 yes: Go on, then | You bet | Easy. Well. Probably
 thanks: Cheers | You're a legend
-wow: Get in! | No way
+wow: Get in | No way
 sigh: Ah, nuts
 nick: - | {me} | spanner | spanner | spanner
 needs: cheer
