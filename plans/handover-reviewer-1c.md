@@ -20,6 +20,7 @@
 | Arrival 7cca991 (0.42.22-0.42.24, for 0.60.4) | arrival-7cca991.md | PASS: Tern start, ramp, tap-to-ask; low: the pilot on setTimeout |
 | Sim 8f4d49f (0.26.40, garbage only) | sim-8f4d49f.md | PASS, light look: same behaviour |
 | Arrival 9de4291 (0.42.25-0.42.26: the week in play, health rebook, seek Mail, the pilot on the frame clock) | arrival-9de4291.md | PASS WITH FIXES: everything new works; with the Tern + sim head the evening has ~1 min of slack before 19:00 (intro_check part 8 FAIL, servery 2/3). A design call sent to the lead; onboarding 2's session was inactive |
+| Ghost tap claude/fix-ghost-tap 1eeda5d (0.27.34-0.27.35) | ghost-tap-1eeda5d.md | PASS, light: no real tap lost, crew access and job tiers unchanged; low: 3 stale "Tier N access" texts |
 | Arrival claude/arrival-0603 046a019 (0.42.21b, for 0.60.3) | arrival-0603-046a019.md | PASS: 27/27 core tour lines in order; reviewer 1's three fixes. Test on arrival-0603 + sim + content 910e88e baked with content_gen (archive content/ + content_gen.py, run it on the merged html) |
 
 **Pending (as of 16:15):** one combined re-check of **arrival 0.42.27+** (sim engineer 5, session_01Do3HU5Rh96tgUsPTUbsF8a, builds it on claude/arrival and sends one hash). The lead's design call on my 9de4291 finding was all three:
@@ -34,7 +35,7 @@ Check on arrival + decks-p3 Tern + the sim head + content (text 29e52c9, 89a496b
 - the goodnight, then the bed arrow;
 - dinner seats 3-mess-10/12/9;
 - the ramp and pilot.
-Otherwise the lead says stay idle; a fresh reviewer is started only for real new work.
+Also coming for 0.60.5: the career system (claude/leave). Otherwise the lead says stay idle; a fresh reviewer is started only for real new work.
 
 **Open loose ends:**
 - Arrival is mine now (the lead's split); onboarding engineer 2 is session_0163dcLt17oTCdR8po9HRo2p. Reviewer 1's remaining arrival lows (health kind, missed health check, seek-ask Mail fallback, standing at Dinner with Torres, double health booking) will come later on claude/arrival (0.42.23+).
