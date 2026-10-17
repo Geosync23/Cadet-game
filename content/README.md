@@ -18,7 +18,9 @@ Read this with the voice bible and `content/facts.md` (the head writer's), and t
 | `reactions/<cue>.lines` | lines about something that really happened (a repair, a tradition, the storm) | kind of happening |
 | `meetings/<id>.meet` | meeting scripts with replies to choose | meeting |
 | `traditions/<id>.trad` | a tradition's data and words, in the traditions engineer's format (`plans/trad-format.md`) | tradition |
-| `themes/`, `arcs/`, `gifts.list` | coming in wave 2 with social engineer B | |
+| `arcs/<arcId>.arc` | a story crew member's arc: their moments, beat by beat (from the head writer's outlines) | arc |
+| `themes/<theme>.arc` | a struggle theme for generated crew, three beats with roster fill-ins | theme |
+| `gifts.list` | coming with social engineer A | |
 
 Crew ids are the roster's (`tomas`, `pell`, `rina`, `torres-zeke`, `calder`, ...): see `plans/crew-roster.html`.
 `banks/old.lines` holds the lines the game had before the kit. Leave it alone; it's kept exactly as it was.
@@ -94,10 +96,10 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `beat:<arc>.<n>` | at least n beats of that story arc have been told | `beat:tomas.3` |
 | `beat=<arc>.<n>` | exactly n beats told (a line that belongs between two beats) | `beat=tomas.2` |
 | `news:<id>` | they know that piece of news | `news:storm` |
-| `rep:` | your standing with their department: `new`, `known`, `well`, `theirs` | `rep:well` |
-| `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you: `low`, `ok`, `high` | `ship.kindness:high` |
+| `rep:` | your standing with their department is at least this: `new` < `known` < `well` < `theirs` (`!rep:well`: below well) | `rep:well` |
+| `ship.work:`, `ship.kindness:`, `ship.spirit:` | the ship's view of you is at least this: `low` < `ok` < `high` | `ship.kindness:high` |
 | `you:<tag>` | you're known for it | `you:reliable` |
-| `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it) | `cue:repair.oven`, `cue:repair.oven.you` |
+| `cue:<what>` | it happened in the last day or two (`.you` on the end: and you did it; `@me`: and it was about the speaker, e.g. their gift or favour; `@dept`: a repair in the speaker's department) | `cue:repair.oven`, `cue:repair.oven.you`, `cue:gift.you@me`, `cue:repair.you@dept` |
 | `flag:<key>` | a story flag is set | `flag:met.calder`, `flag:mug` |
 | `week1:` | `true` during your first week (from the arrival evening until the week is done) | `week1:true` |
 | `leaving:` | `soon`: the speaker is transferring off within 10 days; `you`: this is a goodbye | `leaving:soon` |
@@ -112,13 +114,15 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `time:` | the time of day | `morning` (6-12), `afternoon` (12-17), `evening` (17-22), `night` (22-6) |
 | `weekday:` | the day | `mon` `tue` `wed` `thu` `fri` `sat` `sun` |
 | `season:` | the ship's season | `sowing` `greening` `harvest` `lanterns` |
-| `place:` | where they are: a room's name or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
-| `deck:` | the deck | `deck:3` |
+| `place:` | where they are: a room's name with `_` for spaces (`place:junior_common_room`), a short alias (`mess`, `commons`, `lounge`, `booths`, `overlook`, `teacorner`, `worksbay`, `chartroom`, `musicroom`), or a place type (`calm`: somewhere people sit and talk) | `place:mess`, `place:calm` |
+| `deck:` | the deck where it happens (where you are) | `deck:3` |
 | `event:<id>[.<phase>]` | a ship-wide event is on | `event:ionStorm`, `event:ionStorm.onset` |
 | `trad:` | a tradition (`today`: any tradition today) | `trad:quiz`, `trad:today` |
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait or habit | `dept:galley`, `rank:junior`, `trait:shy`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
+| `who:` | the speaker is one of these crew (overheard: speaker A) | `who:torres-zeke\|dahl-mira\|kovac-zainab` |
+| `with:` | the other crew member in the scene is one of these (overheard: speaker B) | `with:kovac-zainab` |
 | `pair:` `topic:` | overheard only (below) | |
 
 **Not conditions:** `w:2` makes a line twice as likely as its neighbours; `odds:0.3` lets it come up only 30% of
@@ -192,9 +196,11 @@ A: No promises.
 ```
 
 - `A:`, `B:` (and `C:`) are the speakers; a blank line or `---` ends a conversation. Two to four lines.
-- `pair:x+y`: speaker A is x and B is y, each a department, a rank or `any` (`pair:junior+chief`, `pair:galley+any`);
+- `pair:x+y`: speaker A is x and B is y, each a department, a rank, a crew id or `any` (`pair:junior+chief`,
+  `pair:galley+any`, `pair:dlamini-lukas+silva-bea`); for a group (the knitting circle) use `who:` and `with:` with ids
+  separated by `|`;
   or one word for how they relate: `same` (department), `bunk` (share a bunk room), `friend`, `rival`, `senior`
-  (A outranks B).
+  (A outranks B), `couple` (one of the established crew couples).
 - The conditions are read for speaker A; `{other}` is the other one. The topic is the file's name.
 
 ## Reactions
@@ -213,6 +219,72 @@ A `.trad` file follows the traditions engineer's format, `plans/trad-format.md` 
 into `const TRADITIONS = [ ... ]`. The words go in `== mail`, `== ask`, `== here`, `== thanks` and `== chatter`;
 besides the usual placeholders they can use `{host}`, `{names}`, `{season}` and `{time}`. lines_check checks the words
 (chatter, ask and here 90 characters, mail and thanks 200) but not the fields: content_gen.py does.
+
+## Moments: story arcs and themes (.arc)
+
+A moment is a short scene with someone you've got to know: a few lines, one or two choices, a reply. Story crew have
+arcs (`content/arcs/<arcId>.arc`, written from `content/arcs/outlines.md`); generated crew share struggle themes
+(`content/themes/<theme>.arc`). Social engineer B's engine decides when a moment is ready and plays it.
+
+```
+@arc torres
+who: torres-zeke
+
+== beat 1
+tone: light
+where: calm
+when: !week1:true
+hint: Don't look. It's a surprise.
+mem: scarf
+them: Don't look. It's a surprise. It's orange.   [laugh]
+them: Every new hand should have something that's theirs.
+? choice
+* It's lovely. Honestly.   flavour:cheer mem:lovely
+  them: Liar. Thank you.
+* Who taught you?   flavour:listen
+  them: Kovac. She despairs of me.
+  + them: Kovac. Sit down, I'll show you the dropped stitch. Every single one.
+
+== beat 3
+tone: heartfelt
+when: rep:known beat:torres.2
+mail: 240 | Thanks | Thanks for tonight. Zeke
+them: Was I any good, as your trainer?   [sigh]
+? choice
+* Ask Calder what she meant.   flavour:practical flag:torres.askCalder
+  them: Maybe I will.
+```
+
+- **The header:** `@arc <arcId>` and `who: <crewId>` (the arc ids are the outline's: `torres`, `calder`, `tomas`, ...),
+  or `@theme <name>` for a theme: `homesick`, `exams`, `family`, `stuck`, `notgood`, `lonely`, `loss`, `talent`,
+  `burnout`, `leaving`, `rivalry`, `startover`.
+- **`== beat <n>`**, in rising order (a gap is fine while beats are still being written). Its **fields** come first, one per line; only `tone:` is needed:
+
+| Field | What it says |
+| --- | --- |
+| `tone:` | `light`, `heartfelt`, `serious` or `resolution`. It sets the default gate (light: colleague, met 3+ days; heartfelt and serious: friend, 7+ days, 2+ days since their last moment; resolution: close friend, 3+ days after the last heartfelt one) |
+| `tier:` `metDays:` `gapDays:` | only where a beat differs from its tone's gate (`tier: close` for the Captain's arc; `metDays: 10`) |
+| `when:` | extra conditions, in the same words as `?` lines: `when: rep:known flag:torres.askCalder beat:torres.2` |
+| `where:` | `calm` (the default: off duty somewhere to sit, or visiting you), `visit` (your bunk), `appt` (an appointment), or a room name, only if their own free time takes them there |
+| `duty: true` | it may open while they're on shift (light beats at work places only) |
+| `crisis: true` | it may open during a ship-wide event's onset |
+| `hint:` | their tap line while the moment is ready ("Got a minute? Properly, I mean.") |
+| `mem:` | the memory word for the beat (stored as `moment.<arc>.<word>`) |
+| `flag:` | a story flag set when the beat is told (`flag: torres.applied`) |
+| `keepsake:` | what they give you to keep (resolution beats) |
+| `learn:` | one line for the Crew app's "What you know" (their story) |
+| `mail:` | a Mail from them afterwards: `<minutes later> \| <subject> \| <body>` |
+| `needs:` | themes only: the roster details a beat uses (`needs: home, family`); people without them skip it |
+
+- **The script** follows: `them: text [pose]` (`them` is the arc's person; a crew id or `you` also work;
+  `them > you: ...` for a line said to you). Poses: `sigh`, `laugh`, `listen`, `nod`, `gesture`.
+- **Choices:** `? choice`, then up to three `* reply` lines. Each can carry `flavour:` (`listen`, `cheer`, `practical`,
+  `share`), `mem:<word>`, `flag:<key>` (set when chosen) and `favour:<job>` (a practical reply that starts a favour).
+  Indent the answer under it (`  them: ...`), and if you like a warmer answer for the person this flavour suits,
+  `  + them: ...` below it. There's never a wrong reply.
+- **Placeholders and voice tokens** work as in lines (`{me}`, `{hi}`, `{home}`...). Lines are 140 characters at most;
+  the hint 90; a Mail body 400.
+- Beats 1-4 of Tomas, Pell and Rina are already in the game; their files start at `== beat 5`.
 
 ## Meetings (.meet)
 
@@ -240,11 +312,19 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
 
 - **Length:** a chat card line 90 characters at most; a bubble (`smalltalk`, `rumour`, overheard) 60 (90 is an error);
   arc beats, moments, notes and meeting lines 140. A placeholder counts as about 9 characters.
-- **No romance or flirting** with anyone, **no swearing** beyond "blast", **no real-world brands or politics**, and
+- **No romance or flirting** with the player (the checker catches the obvious words in every line said to you; crew
+  couples may talk in overheard conversations between a couple (`pair:couple`) and in lines with a `bond:couple`
+  condition, but never in a line that mentions the player in any way: `{me}`, `{nick}`, "the new hand", "cadet",
+  "newcomer", "you", "your". `about`, `rumour` and `smalltalk` are said to the player, so the full rule applies there). A false alarm ("Brennan's in love with that new oven"):
+  reword it, or the head writer adds the line's id (shown in the error) to `content/allow.list`, one id a line, `#` for
+  a note; the head writer also reads every
+  moment and arc beat for the no-romance-with-the-player rule, which no word list can fully catch), **no swearing** beyond "blast", **no real-world brands or politics**, and
   nothing the game doesn't have (no photos, cameras, phones, weapons).
 - **`#serious` lines are earned:** only behind `tier>=friend`, a `beat:`, `mem:moment...` or `leaving:soon`.
-- **Names:** only roster crew and guests. A name it doesn't know is a warning.
+- **Names:** only roster crew, guests and canon names (every capitalised word in `content/facts.md` counts). A name it
+  doesn't know is a warning.
 - **British spelling** (colour, favourite, mum, biscuit).
+- **Moments and meetings:** at most three replies in a choice; poses only `sigh`, `laugh`, `listen`, `nod`, `gesture`, `play`.
 - **Easy to read:** short words, short sentences. A file under 60 on the reading-ease score is a warning.
 - **Habits:** a `habit:` condition in someone's own file must be a habit they have.
 - The baked blocks must be up to date (the head writer re-runs `content_gen.py`).
@@ -263,8 +343,9 @@ their job. Never contradict the roster: bio, life lines, habits and birthdays ar
 - Baked shapes (the social plan's Part 9): `VOICE[id] = { tpl, talk, cares, jokes, words, needs, openness, loves,
   likes, invites, joy, thread, keepsake, avoid, lines: { kind: [...] } }`, `VOICE_TEMPLATES[name] = { words, lines }`,
   `LINES[kind] = [{ text, id, tone, w, odds, ...conditions, not: { ... } }]` (a condition's value is a string, `'a|b'`
-  for either, an array when all must hold; `tier: [lo, hi]`), `CONVOS = [{ id, topic, pair, ..., lines: [{ who, text }] }]`,
+  for either, an array when all must hold; `tier: [lo, hi]`), `CONVOS = [{ id, topic, pair, ..., lines: [{ who, text }] }]`, `MOMENTS['<crewId>:<n>'] = { who, thread: 'arc:<arcId>', beat, tone, where, when, tier, metDays, gapDays, duty, crisis, hint, mem, flag, keepsake, learn, after: { mail }, lines }` and `MOMENT_THEMES[theme] = [{ beat, ..., needs, lines }]` (social B's shapes; `when` is a condition object for `linesOk`),
   `MEETINGS_BAKED[id]` in `MEETING_SCRIPTS`' shape, `TRADITIONS = [ ... ]`, one tradition a line, as `plans/trad_parse.py` reads it
   (the traditions engineer's shape, `plans/trad-format.md`).
 - A line's id is a short hash of its file, kind and text: rewording a line gives it a new id.
+- Lines gated on a flag nobody sets (Torres's walk, `? flag:walk.hello`) are fetched with `lineFor(who, kind, { flags: { 'walk.hello': true } })`: `ctx.flags` answers `flag:` for its keys.
 - Section 22 (`lineFor`, `overheardFor`, `linesOk`, `linesFill`) is the engine; see DEV_NOTES, "Lines (section 22)".

@@ -55,6 +55,16 @@ BANNED = [
     r'\bphotos?\b', r'\bphotograph\w*', r'\bcamera\b', r'\bselfie\w*', r'\bguns?\b', r'\bweapons?\b', r'\bblaster\w*',
     r'\bphone\b', r'\binternet\b',
 ]
+# romance said to you (the user: none with the player). Crew couples may speak of each other in overheard conversations,
+# so these are errors in every player-facing line (chat, moments, replies, meetings, Mail) but not in overheard banks
+BANNED_PLAYER = [r'\bin love\b', r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bmarry me\b', r'\bwill you marry\b', r'\bmy heart\b',
+                 r'\bsoulmate\w*', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b', r'\bsweet on\b', r'\bhold my hand\b',
+                 r'\bboyfriend\b', r'\bgirlfriend\b', r'\bpropos(?:e|al) to you\b', r'\bdating\b', r'\bgoing out\b',
+                 r'\bseeing (?:each other|anyone|someone|somebody)\b',
+                 r'\b(?:fancy|want|like) a date\b', r'\bask(?:ed)? (?:you|me) out\b']   # "married", "wedding": family lines need them
+# aimed at you: banned even in lines about crew couples
+BANNED_AT_YOU = [r'\bfall(?:ing|en)? for you\b', r'\bfell for you\b', r'\bbe mine\b', r'\bdate me\b', r'\bgo out with me\b',
+                 r'\bhold my hand\b', r'\bmarry me\b', r'\bin love with you\b', r'\blove you\b']
 US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': 'centre', 'realize': 'realise',
       'organize': 'organise', 'gray': 'grey', 'mom': 'mum', 'honor': 'honour', 'neighbor': 'neighbour', 'theater': 'theatre',
       'apologize': 'apologise', 'recognize': 'recognise', 'traveled': 'travelled', 'cozy': 'cosy', 'defense': 'defence',
@@ -63,14 +73,23 @@ US = {'color': 'colour', 'favorite': 'favourite', 'favor': 'favour', 'center': '
 SHIP_WORDS = set('''I I'm I'll I've I'd OK Wren CSV Works Watch Survey Comms Helm Command Galley Infirmary Store Garden Deck Decks
 Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ensign Veyli Tiles Hesper Dock Mail Monday Tuesday
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
-Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well'''.split())
+Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
+Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh Marra Station Ostrander Tevan Port Halloran
+New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook Midtour Year Lantern'''.split())
+
+
+POSES = {'sigh', 'laugh', 'listen', 'nod', 'gesture', 'play'}   # the talk poses (section 8b) a meeting or moment line may ask for
+MAX_REPLIES = 3
+COMMON = set('''scanner patrol relay sweep telescope treadmill coffee ship odd somebody whose fridays mondays tuesdays wednesdays
+thursdays saturdays sundays someone anybody everybody nobody nothing everything morning tonight tomorrow yesterday today
+lunch dinner breakfast tea supper week weekend station deck dock rumour word news'''.split())   # ordinary words a line may start with
 
 
 def roster(game):
     with open(game, encoding='utf-8') as f:
         html = f.read()
     people = {}
-    for name in ('ROSTER', 'ROSTER_GUESTS'):
+    for name in ('ROSTER', 'ROSTER_GUESTS', 'GUESTS'):     # crew, guests living aboard, and event guests and visitors
         m = re.search(r'^const ' + name + r' = \[\n(.*?)^\];', html, re.M | re.S)
         for l in (m.group(1).split('\n') if m else []):
             l = l.strip().rstrip(',')
@@ -110,6 +129,9 @@ def main(argv):
     for p in people.values():
         names.update(w.strip('.') for w in p['name'].split())
     known_words = SHIP_WORDS | names
+    facts = os.path.join(cg.CONTENT, 'facts.md')       # the head writer's canon sheet: every capitalised word in it is known
+    if os.path.exists(facts):
+        known_words |= set(re.findall(r"\b[A-Z][a-z]+\b", open(facts, encoding='utf-8').read()))
 
     # every line, with where it came from: (where, kind, entry, speaker id or None, source)
     allx = []
@@ -129,14 +151,58 @@ def main(argv):
     for tr in out['TRADITIONS']:                           # the traditions engineer's shape: text: { kind: [{ t, tone }] }
         for sec, es in tr.get('text', {}).items():
             allx += [(f'tradition {tr["id"]}', 'trad.' + sec, {'text': e.get('text', e.get('t')), 'tone': e.get('tone', 'light'), 'id': tr['id']}, None, 'trad') for e in es]
+    # moments (story arcs and themes): every script line, the hint, keepsake, learn and Mail; when: values like a line's
+    def moment_beats():
+        for mid, b in out['MOMENTS'].items():
+            yield f'arc {b["thread"][4:]} beat {b["beat"]}', b, b['who']
+        for th, bs in out['MOMENT_THEMES'].items():
+            for b in bs:
+                yield f'theme {th} beat {b["beat"]}', b, 'them'
+    for where, b, who in moment_beats():
+        if who not in people and who != 'them':
+            errors.append(f'{where}: who "{who}" is not a crew member or guest')
+        allx.append((where, 'hint', {'text': b['hint'], 'id': where}, None, 'moment')) if b.get('hint') else None
+        for k in ('keepsake', 'learn'):
+            if b.get(k):
+                allx.append((where, 'moment', {'text': b[k], 'id': where}, None, 'moment'))
+        if b.get('after', {}).get('mail'):
+            allx.append((where, 'letter', {'text': b['after']['mail']['body'], 'id': where}, None, 'moment'))
+        if b.get('when'):
+            allx.append((where, 'moment', dict(b['when'], text='', id=where), None, 'moment'))
+        for l in b['lines']:
+            for x in ([l] if 'text' in l else [c for c in l['choice']] + [c[r] for c in l['choice'] for r in ('reply', 'warm') if r in c]):
+                if x.get('who') and x['who'] not in people and x['who'] not in ('you', 'them'):
+                    errors.append(f'{where}: speaker "{x["who"]}" is not a crew member, guest, them or you')
+                allx.append((where, 'moment', {'text': x['text'], 'id': where}, None, 'moment'))
+    # poses and the number of replies, in moments and meetings
+    scripts = [(w, b['lines']) for w, b, _ in moment_beats()] + [(f'meeting {k}', v['lines']) for k, v in out['MEETINGS_BAKED'].items()]
+    for where, ls in scripts:
+        for l in ls:
+            if 'choice' in l and len(l['choice']) > MAX_REPLIES:
+                errors.append(f'{where}: {len(l["choice"])} replies in one choice (at most {MAX_REPLIES})')
+            for x in ([l] if 'text' in l else [c[r] for c in l.get('choice', []) for r in ('reply', 'warm') if r in c]):
+                if x.get('pose') and x['pose'] not in POSES:
+                    errors.append(f'{where}: pose [{x["pose"]}] is not one of {", ".join(sorted(POSES))}')
     for mid, sc in out['MEETINGS_BAKED'].items():
         for l in sc['lines']:
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
                 allx.append((f'meeting {mid}', 'moment', {'text': x['text'], 'id': mid}, None, 'meet'))
 
+    allowed = set()                                    # line ids the head writer has approved past the romance check
+    al = os.path.join(cg.CONTENT, 'allow.list')
+    if os.path.exists(al):
+        for l in open(al, encoding='utf-8'):
+            l = l.split('#')[0].strip()
+            if l:
+                allowed.add(l.split()[0])
+    vocab = set()
+    for x in allx:
+        vocab.update(re.findall(r"\b[a-z][a-z']+\b", x[2]['text']))
     seen = {}
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
+        if not t and src != 'moment':
+            continue
         for tok in re.findall(r'\{([^}]*)\}', t):
             if (tok not in TRAD_PLACEHOLDERS) if kind.startswith('trad.') else (tok not in TOKENS | PLACEHOLDERS):
                 errors.append(f'{tag}: unknown token {{{tok}}}')
@@ -156,6 +222,24 @@ def main(argv):
                             band = alt.rsplit(':', 1)
                             if band[-1] not in {'rival', 'neutral', 'friend'} or (len(band) == 2 and band[0] not in people):
                                 errors.append(f'{tag}: aff is aff:rival|neutral|friend or aff:<crewId>:<band>')
+                if scope is e and (k, v) in (('rep', 'new'), ('ship.work', 'low'), ('ship.kindness', 'low'), ('ship.spirit', 'low')):
+                    warns.append(f'{tag}: {k}:{v} is always true ("at least {v}"); for "only {v}" write !{k}:{"known" if k == "rep" else "ok"}')
+                if k == 'cue':
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            if '@' in alt and alt.split('@', 1)[1] not in ('me', 'dept'):
+                                errors.append(f'{tag}: cue:{alt}: after @ only "me" or "dept"')
+                if k in ('who', 'with'):
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            if alt not in people:
+                                errors.append(f'{tag}: {k}:{alt} is not a crew id')
+                if k == 'pair':
+                    for x in (v if isinstance(v, list) else [v]):
+                        for alt in str(x).split('|'):
+                            for side in (alt.split('+') if '+' in alt else []):
+                                if side not in people and side not in VALUES['dept'] and side not in VALUES['rank'] and side != 'any':
+                                    errors.append(f'{tag}: pair:{alt}: "{side}" is not a department, rank, crew id or any')
                 if k == 'moved':
                     for x in (v if isinstance(v, list) else [v]):
                         if x not in people:
@@ -173,10 +257,18 @@ def main(argv):
             elif n > lim:
                 warns.append(f'{tag}: {n} characters (a bubble wants {lim} or fewer)')
         low = t.lower()
-        for b in BANNED:
+        bonds = ' '.join(str(x) for x in (e.get('bond') if isinstance(e.get('bond'), list) else [e.get('bond', '')]))
+        # couple words are allowed only in an overheard conversation between a couple (pair:couple or bond:couple) or a line
+        # gated on bond:couple, and never in a line with any reference to the player ({me}, {nick}, the new hand, cadet,
+        # newcomer, you, your), whatever the kind
+        couple = 'couple' in bonds or 'partner' in bonds or 'couple' in str(e.get('pair', ''))
+        at_you = re.search(r"\{me\}|\{nick\}|\bnew (?:hand|cadet)\b|\bcadets?\b|\bnewcomer\b|\byou(?:r|rs|rself)?\b", low)
+        about_crew = couple and not at_you
+        romance = [] if e.get('id') in allowed else BANNED_AT_YOU if about_crew else BANNED_PLAYER
+        for b in BANNED + romance:
             m = re.search(b, low)
             if m:
-                errors.append(f'{tag}: "{m.group(0)}" is on the banned list')
+                errors.append(f'{tag}: "{m.group(0)}" is on the banned list' + (' (no romance with the player: reword, or ask the head writer to add the line id ' + str(e.get('id')) + ' to content/allow.list)' if b in BANNED_PLAYER + BANNED_AT_YOU else ''))
         for us, uk in US.items():
             if re.search(r'\b' + us + r's?\b', low):
                 warns.append(f'{tag}: American spelling "{us}" (British: "{uk}")')
@@ -185,22 +277,22 @@ def main(argv):
                                                or 'soon' in str(e.get('leaving', '')) or kind.startswith(('story', 'arc', 'moment'))):
             errors.append(f'{tag}: #serious needs tier>=friend, a beat:, mem:moment or leaving:soon (serious moments are earned)')
         if cid and e.get('habit'):
-            have = set(people.get(cid, {}).get('habits', [])) | {h['add'] for h in people.get(cid, {}).get('habitShifts', [])}
+            have = set(people.get(cid, {}).get('habits', [])) | {h.get('add') for h in people.get(cid, {}).get('habitShifts', []) if h.get('add')}
             for h in (e['habit'] if isinstance(e['habit'], list) else [e['habit']]):
                 if not set(h.split('|')) & have:
                     warns.append(f'{tag}: {cid} doesn\'t have the habit "{h}"')
         # names: capitalised words mid-sentence that aren't crew, guests or ship words
         for m in re.finditer(r'(?<![.!?]\s)(?<!^)(?<!["(])\b([A-Z][a-z]+)\b', t):
             w = m.group(1)
-            if w not in known_words and m.start() > 0 and not re.search(r'[.!?:]\s*$', t[:m.start()]):
+            if w not in known_words and w.lower() not in vocab and w.lower() not in COMMON and m.start() > 0 and not re.search(r'[.!?:]\s*$', t[:m.start()]):
                 warns.append(f'{tag}: "{w}" isn\'t a crew member, guest or ship word (a name only from the roster)')
         for m in re.finditer(r"\b([A-Z][a-z]+)(?:'s\b| says\b| said\b| told\b| thinks\b| wants\b| is\b| was\b| and I\b)", t):
-            if m.group(1) not in known_words and m.group(1) not in ('It', 'That', 'This', 'There', 'What', 'Who', 'Everyone', 'Nobody', 'Someone', 'Here', 'He', 'She', 'Today', 'Tomorrow', 'Dinner', 'Breakfast', 'Lunch', 'Food', 'Nothing', 'Something', 'Life', 'Home', 'Work',
+            if m.group(1) not in known_words and m.group(1).lower() not in vocab and m.group(1).lower() not in COMMON and m.group(1) not in ('It', 'That', 'This', 'There', 'What', 'Who', 'Everyone', 'Nobody', 'Someone', 'Here', 'He', 'She', 'Today', 'Tomorrow', 'Dinner', 'Breakfast', 'Lunch', 'Food', 'Nothing', 'Something', 'Life', 'Home', 'Work',
                                                                        'Or', 'How', 'Why', 'When', 'Where', 'Which', 'Everything', 'Anyone', 'Anything', 'Mine', 'Yours',
                                                                        'His', 'Her', 'Their', 'Our', 'Your', 'My', 'One', 'Each', 'Now', 'Then', 'So', 'Yes', 'No', 'Yesterday'):
                 warns.append(f'{tag}: "{m.group(1)}" looks like a name that isn\'t crew or a guest')
         key = (kind, t)
-        if key in seen and src != 'convo':
+        if key in seen and src not in ('convo', 'moment') and t:
             warns.append(f'{tag}: the same line is also in {seen[key]}')
         seen.setdefault(key, where)
 
@@ -259,7 +351,7 @@ def main(argv):
 
     print(f'lines_check: {len(allx)} lines in {len(byfile)} places; {len(out["VOICE"])} voice cards '
           f'({with_card} with words) for {len(crew)} crew; {len(out["CONVOS"])} conversations; '
-          f'{len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions')
+          f'{len(out["MOMENTS"])} moments; {len(out["MOMENT_THEMES"])} themes; {len(out["MEETINGS_BAKED"])} meetings; {len(out["TRADITIONS"])} traditions')
     if not quiet:
         print('coverage (own lines / target), people with any:')
         for c in cov:
