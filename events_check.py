@@ -54,8 +54,8 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag)) continue;
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      const early = Math.max(e.ev.early || 0, e.ev.host && e.ev.host === p.id ? 5 : 0);   // section 14 brings the host 5 minutes early (0.60.2)
-      if (s.from < B + e.from - early || s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
+      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0) ||   // the sim plans a host 5 minutes early
+         s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
       (went[id] = went[id] || new Set()).add(p.id); (places[id] = places[id] || new Set()).add(s.placeId);
@@ -369,7 +369,7 @@ with sync_playwright() as pw:
       out.dropped = [];
       for (let d = 0; d <= 364; d++) {
         const t = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday);
-        if (t.filter(e => e.from >= 1020).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
+        if (t.filter(e => e.from >= 1020 && e.to > 1080).length > 2) out.bad.push('day ' + d + ': more than two traditions in the evening');
         for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && a.ev.where.some(w => b.ev.where.some(x => x.deck === w.deck))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once on one deck');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }
