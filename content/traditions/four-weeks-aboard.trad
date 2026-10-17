@@ -1,0 +1,42 @@
+@tradition four-weeks-aboard
+// Four weeks aboard: your fourth Friday (day 26). At Works Friday tea (same deck and time as the weekly works-tea,
+// which it replaces that Friday) the Works team has a cake for you, and Calder says a few words. The galley bakes it
+// (cake: yes) and sends it to the Works tea corner, not the mess: plans/trad-notes-seasons.md.
+k: 482
+title: Four weeks aboard
+when: arrival friday 4
+at: 18:40-19:30
+min: 20
+prio: 2
+early: 5
+where: 5 room Tea corner: lounge-seat
+where: 5 room Works bay: work:works, free
+where: 5 room Machine shop: work:works, free
+where: 5 room Main storage: work:works, free
+hold: 1
+who: calder always, torres-zeke always, pell always, works 90%, friends-of-host 40%
+anim: calder talk, everyone drink
+host: calder
+from: The Works team
+cake: yes
+ties: decor cake
+
+== mail
+- Friday tea tomorrow, {time}, is a special one: four weeks aboard. Someone in Works has asked the galley for a cake. We're not saying who.
+
+== ask
+- Friday tea tonight. Don't eat too much at dinner.   #funny
+- Four weeks! That calls for cake. Works tea corner, after dinner.
+- You've been here a month. I can't believe it.   #warm
+
+== here
+- Four weeks, and the board's never been cleaner.
+- Cut it yourself. The new hand cuts the four-week cake. It's the rule.   #funny
+- You're one of us now. You were before, but now there's cake.   #warm
+
+== thanks
+- The Works team has a cake for your four weeks aboard. Calder says a few words, and they're kind ones.   #warm
+
+== chatter
+- Four weeks for the new hand. They had a cake at Friday tea.
+- The four-week cake is a Works thing. The Chief started it, years ago.
