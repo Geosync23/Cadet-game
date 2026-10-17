@@ -14,6 +14,7 @@ The button, parts, tray, crate, pointer, drop guard, tap to pick up, overnight r
 | New game with a crate down | no crate afterwards: ok (the jobs reset, so `putFrame` clears it) |
 | Mid lift ride with a crate or a part in hand | **button shown** (LOW 1) |
 | cadet_test vs 0.28.48 (2e69a13) | ALL IDENTICAL (0 differing px in every shot; no errors) |
+| The lead's judgement calls (`putdown-40c1f76-made-probe.py`, a reserved 'lights' job: a relay off the shelf, a bracket you make) | **The job toolbox only:** no button. **Relay + bracket in hand, Put down:** the relay goes back on the shelf (+1), the bracket isn't stocked (stores unchanged) and waits at the lathe (`P.work.make` with its minutes done, 30/30), and the job stays yours. A tap at the lathe hands the bracket back at once ("You make a bracket. Now a relay from main storage next door."), and the relay can be fetched again: ok. **Gifts and the kit bag:** no button (kit bag in PE8's probe; gifts are filtered by `giftOf` in `putParts`): ok |
 | Console errors | none |
 
 ## LOW 1: Put down works in the middle of a lift ride
@@ -21,6 +22,7 @@ The button, parts, tray, crate, pointer, drop guard, tap to pick up, overnight r
 **Fix:** add `|| (typeof ride !== 'undefined' && ride)` to `busy` in `putFrame`, and `if (typeof ride !== 'undefined' && ride) return false;` at the top of `putDown()`, for a keyboard or assistive-tech click.
 
 ## Notes (no change asked)
+- **A machine job's stops stay marked done:** after Put down, the reserved job's `stepsDone` is still `[0, 1]` (fetch, make) with empty hands. The pointer and the taps go by what you carry and `P.work.make`, so play isn't affected. Only a job card that counts stops would over-count until you fetch again (`jobStopMark` re-marks idempotently). For chores, `stepUndo(…'fetch')` already handles it. If wanted, the same `stepUndo` for a machine job's 'fetch' and 'make' would fix it.
 - **Midnight, not overnight:** `night` compares calendar days, so a crate set down at 23:55 goes back to the pickup at 00:00. That matches DEV_NOTES ("left past midnight"). If the user expects "overnight" to mean while you sleep, a 06:00 cut-off would read better. That's the lead's call.
 - `playerNew()` doesn't clear `SHIP.player.crate`. It's harmless today, because the New game's jobs reset and the first frame clears it, but a `SHIP.player.crate = null` there would be tidier.
 - `putFrame` runs on its own `requestAnimationFrame`, not the main loop. It only changes the ship (`crate = null`, `stepUndo`, a toast) while a crate is down, so it doesn't touch the cadet_test run. While paused it still runs, but `shipNow()` stands still, so nothing happens.
