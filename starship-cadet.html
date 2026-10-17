@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.42.5
+   STARSHIP CADET: CSV Wren                           build 0.42.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.42.5';                            // keep in step with the header's build line
+const GAME_BUILD = '0.42.6';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -14704,7 +14704,14 @@ const SETTLE = [
 ];
 // the list listens on section 13's bus once it's there (onSim(kind, fn), fn called with the note's data)
 let INTRO_HEARD = false;
-if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); }
+if (typeof onSim === 'function') { INTRO_HEARD = true; for (const k of SETTLE_KINDS) onSim(k, d => settleNote(k, d)); onSim('job', introJobNote); }
+// the shadow shift and the job you lead on Monday end when you turn in reserved slots 1 and 2 (section 17's job notes):
+// their introStep notes are the core memories social keeps (intro.shadowShift)
+function introJobNote(n) {
+  if (!introOn() || !n || n.step !== 'turnin' || !(n.reserved === 1 || n.reserved === 2)) return;
+  const id = n.reserved === 1 ? 'd1-shadow' : 'd1-lead';
+  if (SHIP.intro.done[id + ':job'] === undefined) { SHIP.intro.done[id + ':job'] = Math.floor(shipNow()); introNote('introStep', { step: id, who: SHIP.intro.escort }); }
+}
 function settleNote(kind, data) {
   const I = SHIP.intro; if (!I || !I.on && !I.skipped) return;
   for (const s of SETTLE) if (!I.settle[s.id] && s.done(kind, data || {})) I.settle[s.id] = Math.floor(shipNow());
@@ -14808,7 +14815,9 @@ function introEnd(finished) {
   introMarkArrived();
   introNote('introStep', { step: finished ? 'done' : 'ended', who: null });
 }
-// skip to Monday morning: the same state as after the arrival evening (points, flags, the device), Bunk 1 at 06:00
+// skip to Monday morning (0.42.6, for a player who knows the ship): the same points as after the arrival evening, no
+// scripted week (no beats, no reserved jobs, the tips teach instead), every social gate open at once (all of
+// INTRO_FLAGS but 'mug' and 'seedling', as when an intro ends); the Settling-in list stays as a checklist
 function introSkip() {
   introBegin();
   const I = SHIP.intro;
@@ -14817,7 +14826,8 @@ function introSkip() {
     for (const who in st.rel || {}) introRel(who, st.id, st.rel[who]);
     for (const f of st.flags || []) introFlagSet(f);
   }
-  I.step = null; I.skipped = true; I.day = 1; introMarkArrived();
+  for (const k of INTRO_FLAGS) if (k !== 'mug' && k !== 'seedling') introFlagSet(k);
+  I.step = null; I.skipped = true; I.ended = true; I.day = 1; introMarkArrived();
 }
 // the escort's walker mode at minute t (section 10 drives him with it): lead to the checkpoint, wait there, follow
 // you (Monday afternoon), or null (his own plan)

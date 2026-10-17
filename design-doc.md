@@ -52,7 +52,7 @@ V4 redesigns the ship around a daily loop across three decks and folds in everyt
 - Six decks, not five, numbered from the top. The bridge gets its own small deck, and living is split into a Commons deck and a Quarters deck. Sleep on Deck 4, eat on Deck 3, work from Deck 5.
 - Crew and rooms worked out. All 75 crew have a rank and a bed: senior suites on Deck 2, officer cabins and junior bunk rooms on Deck 4.
 - Promotion means moving. Tier 2 brings Officer rank and your own cabin across the deck. The tier table now carries rank and room.
-- You arrive by shuttle in the Deck 5 shuttle bay and find your own way up to your bunk.
+- You arrive by shuttle in the Deck 5 shuttle bay on a Sunday evening, and Zeke Torres from Works walks you to your bunk and to dinner.
 - Deck 5 brief added: the ship's garage, built first so the Works bay can anchor the job list.
 - Decks as data. The build now loads one deck at a time from a definition, with a ship-wide state that outlives it.
 - The old living deck (build 0.3.x) is retired as a layout and kept as the style reference.
@@ -429,7 +429,7 @@ Daily routines belong to the crew's ordinary day instead: the bridge watch hands
 
 You work the day shift as a Works maintenance tech, taking jobs from the same list as the rest of the crew and doing them with your own hands.
 
-**Arriving by shuttle.** The game opens with your shuttle landing in the Deck 5 shuttle bay. You step off onto the pad, walk the haulway to the lift lobby, glimpse the Works bay that will be your workplace, and find your own way up to your bunk on Deck 4. The shuttle Tern is already in the bay with its ramp down, ready for it. Until the arrival is built, the game starts with you waking in Bunk 1. Still to decide: which milestone builds it, and who meets you off the shuttle.
+**Arriving by shuttle** (Pillar 4, agreed 2026-10-17; plans/pillar4-plan.md, Part 1). A new game opens on **Day 0, Sunday, 17:40**: you sign the Tern's manifest with your name, step onto the ramp in the Deck 5 shuttle bay, and **Zeke Torres** (a Works engine officer, one rank above you, a future friend) meets you. He walks ahead talking (the haulway, the Works bay door, the lift, the junior wing), hands you your device at your bunk, and takes you to dinner in the mess, where Chief Calder stops by the table. You always walk yourself; if you wander off he waits, then moves on, and anything you miss arrives by Mail. Bed ends the evening and Monday is your first shift. The first week is taught by people (Torres's shadow shift on Monday, Calder's first solo job on Tuesday, Sowing morning with Tomas on Saturday), with an optional Settling-in list on the device and an "I know my way around" button to end it. **Skipping** (offered on later new games): you start Monday 06:00 in Bunk 1 with the same friendships as after the evening, but no scripted week (the tips teach instead) and every social feature open at once (decided 2026-10-17, the onboarding engineer).
 
 **The job loop.** Every job follows the same physical steps:
 
@@ -698,7 +698,6 @@ Done so far:
 **The game:**
 
 - The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Who meets you off the shuttle, and which milestone builds the arrival?
 - Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
 - Can the player be passed over for certification, or only delayed?
