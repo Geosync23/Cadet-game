@@ -102,6 +102,12 @@ with sync_playwright() as pw:
     if a['size'] > SAVE_MAX: fail('the save is too big')
     rt = g.ev("(() => { const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); return s === JSON.stringify(socSave()); })()")
     print('Save and load give back the same:', rt)
+    xl = g.ev(r"""(() => { const s0 = socSave(), A = JSON.stringify(Array.from(SHIP.aff)), R = JSON.stringify(SHIP.rel);
+      const s1 = JSON.parse(JSON.stringify(s0)); s1.ids = 12345; socLoad(s1); const moved = JSON.stringify(Array.from(SHIP.aff)) === A && JSON.stringify(SHIP.rel) === R;
+      const s2 = JSON.parse(JSON.stringify(s0)); s2.ids = 12345; delete s2.idl; socLoad(s2); const kept = JSON.stringify(SHIP.rel) === R && NEWS.length === 0;
+      socLoad(s0); return [moved, kept]; })()""")
+    print('A save from a different crew list: affinity moved across by id, rest kept:', xl)
+    if xl != [True, True]: fail('a save with a different crew list loses what it should keep')
     if not rt: fail('save and load differ')
 
     # 4. one jump over two days against the same two days hour by hour (no player)
@@ -113,6 +119,7 @@ with sync_playwright() as pw:
     # 5. the query API (0.36.20): what the dialogue engine's line conditions read; pure, and right on a known state
     q = g.ev(r"""(() => {
       const out = {}, works = SOC.crew.find(p => p.dept === 'works' && p.rank !== 'chief'), tomas = SOC.crew[SOC.idx.get('tomas')];
+      newsAdd({ id: 'test:one', lines: ['A test.'], seed: ['tomas'], born: Math.floor(shipNow()) - 1 });
       const before = JSON.stringify(socSave());
       out.missing = ['mem', 'warmth', 'affBand', 'bondOf', 'moodOf', 'beatOf', 'knowsNews', 'repBand', 'repShip', 'knownFor', 'cue', 'socialFill', 'memTold', 'inWeek1', 'leavingSoon', 'newHere', 'movedOff', 'memThing'].filter(f => { try { return typeof eval(f) !== 'function'; } catch (e) { return true; } });
       out.band = [affBand('tomas', 'pell'), affinity('tomas', 'pell')];
@@ -120,7 +127,6 @@ with sync_playwright() as pw:
       out.mood = ['low', 'ok', 'high'].includes(moodOf(tomas)) && moodOf('nobody') === 'ok';
       out.rep = [repBand('works'), repBand('galley'), repShip('work'), knownFor().length];
       out.warm = warmth('tomas');
-      newsAdd({ id: 'test:one', lines: ['A test.'], seed: ['tomas'], born: Math.floor(shipNow()) - 1 });
       const n = NEWS.find(x => SHIP.knows[x.id].size); out.news = n ? [knowsNews([...SHIP.knows[n.id]][0], n.id), knowsNews([...SHIP.knows[n.id]][0], n.id.split(':')[0])] : null;
       out.fill = { me: socialFill(tomas, 'me'), nick: socialFill(tomas, 'nick'), boss: socialFill(works, 'boss'), thing: socialFill(tomas, 'thing', { mem: 'fixed.oven' }), none: socialFill(tomas, 'rival') };
       out.calm = CALM_TYPES.has('lounge-seat') && memThing('fixed.oven') === 'the oven' && memThing('nothing') === null;
@@ -196,12 +202,12 @@ with sync_playwright() as pw:
       o.open = ['d2', 'd3', 'd5', 'done'].every(socGate);
       SHIP.intro = { step: 'arrival', escort: 'torres-zeke' }; window.flag = k => F.has(k);
       o.shut = ['d2', 'd3', 'd5', 'done'].map(socGate); F.add('week1.d2'); F.add('week1.d3'); o.tue = ['d2', 'd3', 'd5', 'done'].map(socGate);
-      introNote({ step: 'arrival', who: ['torres-zeke'] }); introNote({ step: 'dinner', who: [] }); introNote({ step: 'look', who: ['pell'] });
-      o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro')];
+      socIntroNote({ step: 'arrival', who: ['torres-zeke'] }); socIntroNote({ step: 'dinner', who: [] }); socIntroNote({ step: 'look', who: ['pell'] }); socIntroNote({ step: 'bunk', who: ['rina'], missed: true });
+      o.mem = [mem('torres-zeke', 'intro.arrival') && mem('torres-zeke', 'intro.arrival').w, !!mem('calder', 'intro.dinner'), !!mem('pell', 'intro') || !!mem('rina', 'intro')];
       o.mentor = [SHIP.social.mentor, bondOf('torres-zeke', 'mentee'), socialFill(SOC.crew[SOC.idx.get('torres-zeke')], 'mentee')];
       window.lineFor = (p, kind) => kind === 'week1' ? { text: 'w1', id: 'w1', kind } : null;
       o.week1 = chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind;
-      F.add('week1.done'); o.done = [introOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
+      F.add('week1.done'); o.done = [socIntroOn(), socGate('done'), chatLine(SOC.crew[SOC.idx.get('torres-zeke')]).kind !== 'week1'];
       delete window.lineFor; SHIP.intro = null; if (had) window.flag = had; else delete window.flag;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = SHIP.social.mentor === 'torres-zeke';
       SHIP.social.mentor = null; SHIP.mem = {};

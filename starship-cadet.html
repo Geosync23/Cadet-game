@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.33
+   STARSHIP CADET: CSV Wren                           build 0.36.34
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.33';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.34';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13912,21 +13912,31 @@ function socReset(hour) {
 }
 // the save: social = { ids, hour, aff (base64), news: [{ ...item, k: hex bits of who knows }], heard, fault, pairs,
 // rel: { id: [pts, met, lastTalk, known, chatDay, mealDay, workDay, favDay, seekDay, arc, arcDay, showDay, giftWeek] } }, mail (story Mail to come), cues, mentor,
-// given, keepsakes, memKeys and mem (Pillar 4). A save made with a different crew list starts the crew's side afresh
+// given, keepsakes, memKeys and mem (Pillar 4). A save made with a different crew list keeps everything keyed by id and moves affinity across by id (idl)
 const bitsOf = set => { const b = new Uint8Array(Math.ceil(SOC.n / 8)); for (const id of set) { const i = SOC.idx.get(id); if (i !== undefined) b[i >> 3] |= 1 << (i & 7); } return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
 const setOf = hex => { const s = new Set(); for (let i = 0; i < SOC.n; i++) if (parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(SOC.crew[i].id); return s; };
+const setOfIds = (hex, ids) => { const s = new Set(); ids.forEach((id, i) => { if (SOC.idx.has(id) && parseInt(hex.substr((i >> 3) * 2, 2), 16) >> (i & 7) & 1) s.add(id); }); return s; };
 function socSave() {
   socInit();
   const rel = {}; for (const id in SHIP.rel) { const r = SHIP.rel[id]; rel[id] = [r.pts, r.met, r.lastTalk, r.known.slice(), r.chatDay || 0, r.mealDay || 0, r.workDay || 0, r.favDay || 0, r.seekDay || 0, r.arc || 0, r.arcDay || 0, r.showDay || 0, r.giftWeek || 0, r.inviteDay || 0, r.visitDay || 0, r.bye || 0]; }
   let bin = ''; for (const x of new Uint8Array(SHIP.aff.buffer)) bin += String.fromCharCode(x);
-  return { ids: socHash(SOC.ids), hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
+  return { ids: socHash(SOC.ids), idl: SOC.ids, hour: SHIP.social.hour, aff: btoa(bin), news: NEWS.map(x => ({ ...x, k: bitsOf(SHIP.knows[x.id] || []) })),
            heard: SHIP.heard.slice(-60), fault: { ...SHIP.social.fault }, pairs: { ...SHIP.social.pairs }, mail: SHIP.social.mail.map(x => ({ ...x })), feuds: JSON.parse(JSON.stringify(SHIP.social.feuds)), courtesy: { ...SHIP.social.courtesy }, cues: SHIP.social.cues.map(x => ({ ...x })), mentor: SHIP.social.mentor || null, given: (SHIP.social.given || []).map(x => ({ ...x })), keepsakes: (SHIP.social.keepsakes || []).map(x => ({ ...x })), rep: SHIP.rep ? JSON.parse(JSON.stringify(SHIP.rep)) : null, invites: (SHIP.social.invites || []).map(x => ({ ...x })), notes: (SHIP.social.notes || []).map(x => ({ ...x })), visitDay: SHIP.social.visitDay || 0, moved: (SHIP.social.moved || []).map(x => ({ ...x, mem: x.mem.slice() })), bonds: JSON.parse(JSON.stringify(SHIP.social.bonds || {})), affWeek: typeof SHIP.social.affWeek === 'string' ? SHIP.social.affWeek : null, rel, ...memSave() };
 }
 function socLoad(s) {
   try {
-    if (!s || s.ids !== socHash(SOC.ids) || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
-    const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2); if (bin.length !== a.length) return false;
-    for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24;
+    if (!s || !Number.isInteger(s.hour) || typeof s.aff !== 'string') return false;
+    // a save made with a different crew list (the reserve arriving, the roster changing): everything keyed by id is kept;
+    // pair affinity and who knows what are moved across by id when the save has its id list (idl), else start afresh
+    const same = s.ids === socHash(SOC.ids), old = !same && typeof s.idl === 'string' ? s.idl.split(',') : null;
+    const bin = atob(s.aff), a = new Int8Array(SOC.n * (SOC.n - 1) / 2);
+    if (same) { if (bin.length !== a.length) return false; for (let i = 0; i < a.length; i++) a[i] = bin.charCodeAt(i) << 24 >> 24; }
+    else {
+      for (let i = 0; i < SOC.n; i++) for (let j = i + 1; j < SOC.n; j++) a[pairIdx(i, j)] = affStart(SOC.crew[i], SOC.crew[j]);
+      if (old && bin.length === old.length * (old.length - 1) / 2) for (let i = 0, k = 0; i < old.length; i++) for (let j = i + 1; j < old.length; j++, k++) {
+        const x = SOC.idx.get(old[i]), y = SOC.idx.get(old[j]); if (x !== undefined && y !== undefined) a[pairIdx(x, y)] = bin.charCodeAt(k) << 24 >> 24;
+      }
+    }
     SHIP.aff = a; SHIP.social = { hour: s.hour, fault: { ...(s.fault || {}) }, pairs: { ...(s.pairs || {}) }, mail: Array.isArray(s.mail) ? s.mail.filter(x => x && isFinite(x.at) && typeof x.body === 'string') : [], feuds: s.feuds && typeof s.feuds === 'object' ? JSON.parse(JSON.stringify(s.feuds)) : {}, courtesy: s.courtesy && typeof s.courtesy === 'object' ? { ...s.courtesy } : {}, cues: Array.isArray(s.cues) ? s.cues.filter(x => x && typeof x.key === 'string' && isFinite(x.until)).map(x => ({ ...x })) : [], mentor: typeof s.mentor === 'string' && SOC.idx.has(s.mentor) ? s.mentor : null,
       given: Array.isArray(s.given) ? s.given.filter(x => x && typeof x.from === 'string').map(x => ({ ...x })) : [], keepsakes: Array.isArray(s.keepsakes) ? s.keepsakes.filter(x => x && typeof x.from === 'string').slice(0, 8).map(x => ({ ...x })) : [],
       invites: Array.isArray(s.invites) ? s.invites.filter(x => x && typeof x.from === 'string' && isFinite(x.day)).map(x => ({ ...x })) : [],
@@ -13934,8 +13944,8 @@ function socLoad(s) {
       moved: Array.isArray(s.moved) ? s.moved.filter(x => x && typeof x.id === 'string' && Array.isArray(x.mem)).map(x => ({ ...x, mem: x.mem.slice() })) : [],
       bonds: s.bonds && typeof s.bonds === 'object' ? JSON.parse(JSON.stringify(s.bonds)) : {}, affWeek: typeof s.affWeek === 'string' ? s.affWeek : null };   // 20c's bonds and weekly snapshot ride here
     NEWS.length = 0; SHIP.knows = {};
-    for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string') {
-      const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = setOf(k);
+    for (const x of Array.isArray(s.news) ? s.news : []) if (x && typeof x.id === 'string' && Array.isArray(x.lines) && typeof x.k === 'string' && (same || old)) {
+      const { k, ...it } = x; NEWS.push(it); SHIP.knows[it.id] = same ? setOf(k) : setOfIds(k, old);
     }
     SHIP.heard = Array.isArray(s.heard) ? s.heard.filter(h => h && typeof h.id === 'string').slice(-60) : [];
     SHIP.rel = {};
@@ -14036,7 +14046,7 @@ function warmth(id, now = shipNow()) {
 }
 const affBand = (a, b) => { const v = affinity(a, b); return v <= -40 ? 'rival' : v >= 60 ? 'friend' : 'neutral'; };
 // the bond kinds, spelt once (shared with 20c and the line conditions bond:<kind>); BOND_FILL: placeholder -> kind
-const BOND_KINDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'], BOND_ALIAS = { friend: 'friends', rival: 'rivals', partner: 'couple' };
+const SOC_BOND_KINDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'], BOND_ALIAS = { friend: 'friends', rival: 'rivals', partner: 'couple' };
 const BOND_FILL = { partner: 'couple', friend: 'friends', best: 'best', rival: 'rivals', mentor: 'mentor', mentee: 'mentee' };
 function bondOf(id, kind) {
   socInit(); id = socId(id); kind = BOND_ALIAS[kind] || kind;
@@ -14214,21 +14224,26 @@ if (typeof onSim === 'function') for (const k of ['repair', 'tradition', 'choice
 // decline on the device (Appointments, status 'asked', kind 'invite'). For a tradition, it's where and when the host's
 // plan has them there that day (their 'ev-<trad>' block), so the host keeps their own day; else at / where as given.
 const INTRO_MEM = { hello: 'intro.arrival', bunk: 'intro.arrival', arrival: 'intro.arrival', chief: 'intro.dinner', dinner: 'intro.dinner', shadow: 'intro.shadowShift', shadowShift: 'intro.shadowShift', 'd1-shadow': 'intro.shadowShift' };   // section 21's step ids
-const introOn = () => !(typeof flag === 'function' && flag('week1.done')) && (SHIP.intro && typeof SHIP.intro === 'object' ? SHIP.intro.on !== false && !SHIP.intro.ended && !SHIP.intro.skipped : !!escortId());   // section 21: done is a map of steps, ended the end
-const inWeek1 = () => introOn();                        // the line condition week1:true (the frozen vocabulary)
-const socGate = stage => !introOn() || (typeof flag === 'function' && !!flag(stage === 'done' ? 'week1.done' : 'week1.' + stage));
+function socIntroOn() {                                 // the first week is running: section 21's introOn() when it's there (it stays on after skip-intro: the week still runs), else SHIP.intro or an escort flag; never after week1.done
+  if (typeof flag === 'function' && flag('week1.done')) return false;
+  if (typeof introOn === 'function') { try { return !!introOn(); } catch (e) { return false; } }
+  return SHIP.intro && typeof SHIP.intro === 'object' ? SHIP.intro.on !== false && !SHIP.intro.ended : !!escortId();
+}
+const inWeek1 = () => socIntroOn();                        // the line condition week1:true (the frozen vocabulary)
+const socGate = stage => !socIntroOn() || (typeof flag === 'function' && !!flag(stage === 'done' ? 'week1.done' : 'week1.' + stage));
 function escortId() {                                   // SHIP.intro.escort, else the flag escort.<roster id> (section 21 sets escort.torres-zeke)
   socInit(); const e = SHIP.intro && SHIP.intro.escort; if (e && SOC.idx.has(e)) return e;
   if (SHIP.social.mentor) return SHIP.social.mentor;
   if (typeof flag === 'function') for (const p of SOC.crew) if (flag('escort.' + p.id)) return p.id;
   return null;
 }
-function introNote(d) {                                  // the bus's introStep { step, who }
+function socIntroNote(d) {                                  // the bus's introStep { step, who, missed }
   socInit(); const e = escortId(); if (e && !SHIP.social.mentor) SHIP.social.mentor = e;
+  if (d.missed) return;                                  // a step you missed leaves no memory
   const key = INTRO_MEM[d.step]; if (!key) return;
   for (const id of [].concat(d.who || [], INTRO_MEM[d.step] === 'intro.dinner' && SOC.idx.has('calder') ? ['calder'] : [], e ? [e] : [])) memAdd(id, key, { cls: 'core' });
 }
-if (typeof onSim === 'function') onSim('introStep', d => introNote(d || {}));
+if (typeof onSim === 'function') onSim('introStep', d => socIntroNote(d || {}));
 function socialInvite(o = {}) {
   socInit(); const from = o.from, p = SOC.idx.has(from) ? SOC.crew[SOC.idx.get(from)] : null;
   if (!p || !SHIP.device || !Array.isArray(SHIP.device.appts)) return null;
@@ -14821,7 +14836,7 @@ function socialSeek(m) {
   if (CHAT || sleeping) return;
   const day = SHIP.time.day;
   for (const a of DECK_CREW) {
-    const p = a.p, mentor = introOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
+    const p = a.p, mentor = socIntroOn() && p.id === SHIP.social.mentor && SHIP.time.min >= 1080 && SHIP.time.min < 1290;   // week 1: the escort checks in each evening
     const bye = relTier(p.id) >= 1 && (leavingSoon(p) ?? 99) <= 2 && !(SHIP.rel[p.id] && SHIP.rel[p.id].bye >= day - 1);   // leaving soon: they come to say goodbye
     if (!SOC.idx.has(p.id) || !near(a) || !(mentor || bye || (relTier(p.id) >= 3 && socGate('d3')))) continue;
     const r = relGet(p.id); if (r.seekDay === day || schedU(p.seed, m, 633) >= (mentor || bye ? .25 : SEEK_ODDS)) continue;
@@ -15032,7 +15047,7 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
     return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
   const lv = ctx.leaving, rb = SHIP.rel[p.id]; if (lv !== null && lv <= 2 && tier >= 1 && !(rb && rb.bye >= Math.floor(t / 1440) - 1)) {   // leaving in a day or two: their goodbye
     const gm = typeof goodbyeMoment === 'function' ? goodbyeMoment(p, t) : null; return { text: gm ? (gm.hint || byeLine(p)) : byeLine(p), kind: 'goodbye', moment: gm ? gm.id : undefined, say: true }; }
-  if (introOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
+  if (socIntroOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
   const mo = typeof momentReady === 'function' && socGate('done') ? momentReady(p, t) : null;   // a moment is ready (20c): its hint, and Sit with them
   if (mo) { const hint = typeof MOMENTS !== 'undefined' && MOMENTS[mo] && MOMENTS[mo].hint, l = hint ? null : eng('hint');
     return { text: hint || (l ? l.text : 'Got a minute? Properly, I mean.'), kind: 'hint', moment: mo, say: true, line: l ? l.line : undefined }; }
