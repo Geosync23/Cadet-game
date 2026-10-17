@@ -50,6 +50,12 @@ def _pct(s, where):
     return int(m.group(1)) / 100
 
 
+def _int(s, where, lo, hi, what):
+    if not re.fullmatch(r'\d+', str(s)) or not lo <= int(s) <= hi:
+        raise TradError(f'{where}: {what} should be a whole number from {lo} to {hi}, not "{s}"')
+    return int(s)
+
+
 def parse_when(v, where):
     t = v.split()
     low = [x.lower() for x in t]
@@ -59,26 +65,26 @@ def parse_when(v, where):
     elif low[:1] == ['every'] and len(t) >= 4 and low[2] == 'weeks' and t[1] in ('2', '4'):
         w, i = {'every': t[1] + 'weeks', 'weekday': _wd(t[3], where)}, 4
         if low[4:5] == ['week']:
-            w['week'], i = int(t[5]), 6
-            if not 1 <= w['week'] <= int(t[1]):
-                raise TradError(f'{where}: week {w["week"]} of every {t[1]} weeks')
+            if len(t) < 6:
+                raise TradError(f'{where}: "week" needs a number')
+            w['week'], i = _int(t[5], where, 1, int(t[1]), f'the week of every {t[1]} weeks'), 6
     elif low[:1] == ['quarter'] and len(t) >= 3:
         if low[1] == 'day':
-            w, i = {'every': 'quarter', 'quarterDay': int(t[2])}, 3
+            w, i = {'every': 'quarter', 'quarterDay': _int(t[2], where, 1, 91, 'a day of the season')}, 3
         elif low[1] == 'week' and len(t) >= 4:
-            w, i = {'every': 'quarter', 'week': int(t[2]), 'weekday': _wd(t[3], where)}, 4
+            w, i = {'every': 'quarter', 'week': _int(t[2], where, 1, 13, 'a week of the season'), 'weekday': _wd(t[3], where)}, 4
     elif low[:1] == ['year'] and len(t) >= 3:
         if low[1] == 'day':
-            w, i = {'every': 'year', 'dayOfYear': int(t[2])}, 3
+            w, i = {'every': 'year', 'dayOfYear': _int(t[2], where, 1, 364, 'a day of the year')}, 3
         elif low[1] == 'week' and len(t) >= 4:
-            w, i = {'every': 'year', 'week': int(t[2]), 'weekday': _wd(t[3], where)}, 4
+            w, i = {'every': 'year', 'week': _int(t[2], where, 1, 52, 'a week of the year'), 'weekday': _wd(t[3], where)}, 4
     elif low[:1] == ['arrival'] and len(t) >= 2:
         if re.fullmatch(r'\+\d+', t[1]):
-            w, i = {'after': 'arrival', 'days': int(t[1][1:])}, 2
+            w, i = {'after': 'arrival', 'days': _int(t[1][1:], where, 0, 364, 'days after arrival')}, 2
         else:
             w, i = {'after': 'arrival', 'weekday': _wd(t[1], where)}, 2
             if len(t) > 2 and t[2].isdigit():
-                w['nth'], i = int(t[2]), 3
+                w['nth'], i = _int(t[2], where, 1, 52, 'which one after arrival'), 3
     elif low[:1] == ['birthday']:
         w, i = {'birthday': True}, 1
     if not w:
@@ -91,7 +97,7 @@ def parse_when(v, where):
                 raise TradError(f'{where}: unknown season {bad}')
             w['season'], i = s[0] if len(s) == 1 else s, i + 2
         elif low[i] in ('from', 'until') and low[i + 1:i + 2] == ['day'] and i + 2 < len(t):
-            w[low[i]], i = int(t[i + 2]), i + 3
+            w[low[i]], i = _int(t[i + 2], where, 0, 100000, 'a day'), i + 3
         else:
             raise TradError(f'{where}: can\'t read "{" ".join(t[i:])}" in when')
     return w
@@ -181,7 +187,7 @@ def parse_field(tr, key, v, where):
     elif key == 'where':
         tr.setdefault('where', []).append(parse_where(v, where))
     elif key == 'hold':
-        tr['hold'] = [] if v.lower() == 'none' else [int(x) - 1 for x in v.split(',')]
+        tr['hold'] = [] if v.lower() == 'none' else [_int(x.strip(), where, 1, 9, 'a where line (1 = the first)') - 1 for x in v.split(',')]
     elif key == 'who':
         tr['who'] = parse_rules(v, where, _pct)
     elif key == 'anim':
@@ -208,6 +214,8 @@ def finish(tr, tid, where):
             raise TradError(f'{where}: tradition {tid} has no {need}' + (' (ask the traditions engineer for one)' if need == 'k' else ''))
     if not 434 <= tr['k'] <= 499:
         raise TradError(f'{where}: k {tr["k"]} is outside 434-499')
+    if any(h >= len(tr['where']) for h in tr.get('hold', [])):
+        raise TradError(f'{where}: hold names a where line that is not there')
     bad = [x for x in tr.get('text', {}) if x not in TEXT_KINDS]
     if bad:
         raise TradError(f'{where}: unknown section(s) {bad} ({", ".join(TEXT_KINDS)})')
@@ -229,13 +237,13 @@ def check_all(trads):
 
 
 def parse_trad(src, name='?'):
-    """Stand-alone reading of one .trad file (one tradition), for the checks and section 18's stand-in. Conditions on
-    lines (? ...) are content_gen.py's business: here they are only skipped."""
+    """One .trad file (one tradition) -> [tradition] in the baked shape (a list, so callers can add lists together).
+    Comments start with // or #. Conditions on lines (? ...) are skipped here."""
     tr, tid, sect = {}, None, None
     for n, raw in enumerate(src.splitlines(), 1):
         where = f'{name}:{n}'
         line = raw.strip()
-        if not line or line.startswith('//') or line.startswith('?'):
+        if not line or line.startswith('//') or line.startswith('#') or line.startswith('?'):
             continue
         if tid is None:
             bits = line.split()
@@ -256,10 +264,7 @@ def parse_trad(src, name='?'):
                 tone, text = m.group(1), text[:m.start()].rstrip()
                 if tone not in TONES:
                     raise TradError(f'{where}: unknown tone #{tone}')
-            e = {'text': text}
-            if tone != 'light':
-                e['tone'] = tone
-            tr['text'][sect].append(e)
+            tr['text'][sect].append({'t': text, 'tone': tone})
             continue
         if ':' not in line:
             raise TradError(f'{where}: tradition fields are "key: value"')
@@ -267,11 +272,11 @@ def parse_trad(src, name='?'):
         parse_field(tr, k, v, where)
     if tid is None:
         raise TradError(f'{name}: empty file')
-    return finish(tr, tid, name)
+    return [finish(tr, tid, name)]
 
 
 def read_all(folder):
-    trads = [parse_trad(open(os.path.join(folder, f), encoding='utf-8').read(), f) for f in sorted(os.listdir(folder)) if f.endswith('.trad')]
+    trads = [t for f in sorted(os.listdir(folder)) if f.endswith('.trad') for t in parse_trad(open(os.path.join(folder, f), encoding='utf-8').read(), f)]
     check_all(trads)
     return trads
 
@@ -280,6 +285,15 @@ def standin(trads):
     body = ''.join(f'  {json.dumps(t["id"])}: {json.dumps(t, ensure_ascii=False, separators=(", ", ": "))},\n' for t in sorted(trads, key=lambda t: t['id']))
     return ('// ---- the stand-in (plans/trad_parse.py --standin): until content_gen.py\'s TRADITIONS block is merged; then delete it\n'
             'var TRAD_STANDIN = {\n' + body + '};\n')
+
+
+def bake_traditions(folder):
+    """Every .trad file in the folder (name order) -> the baked block, markers included, byte-identical on re-runs:
+    content_gen.py puts its const TRADITIONS = [ ... ]; (one tradition a line) in section 22's markers."""
+    trads = read_all(folder)
+    body = ''.join('  ' + json.dumps(t, ensure_ascii=False, separators=(', ', ': ')) + ',\n' for t in trads)
+    return ('// ---- BEGIN TRADITIONS (generated from content/traditions/*.trad: never edit by hand; plans/trad-format.md) ----\n'
+            'const TRADITIONS = [\n' + body + '];\n// ---- END TRADITIONS ----\n')
 
 
 if __name__ == '__main__':

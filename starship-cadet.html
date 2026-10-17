@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.34.22
+   STARSHIP CADET: CSV Wren                           build 0.34.23
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.34.22';                           // keep in step with the header's build line
+const GAME_BUILD = '0.34.23';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12844,7 +12844,7 @@ function evDue(w, d) {
 }
 // ---- the stand-in (plans/trad_parse.py --standin): until content_gen.py's TRADITIONS block is merged; then delete it
 var TRAD_STANDIN = {
-  "sowing": {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"text": "A new season starts in the garden: Sowing morning tomorrow, 11:45, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard."}], "ask": [{"text": "Sowing morning today. Bring clean hands."}, {"text": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"text": "Two seeds a pot. One for luck."}, {"text": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"text": "You press a seedling into its pot and write your name on the tag. {season} has begun."}], "chatter": [{"text": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
+  "sowing": {"id": "sowing", "k": 434, "name": "Sowing morning", "when": {"every": "quarter", "week": 1, "weekday": 5}, "at": [705, 760], "min": 20, "prio": 1, "where": [{"deck": 3, "pool": "garden"}], "hold": [], "who": [["tomas", 1], ["gardener", 0.9], ["garden-lover", 0.75], ["everyone", 0.3]], "anim": "water", "from": "brennan", "ties": {"garden": "sow"}, "text": {"mail": [{"t": "A new season starts in the garden: Sowing morning tomorrow, {time}, after the harvest. Everyone plants a seedling. Yours grows as long as you're aboard.", "tone": "light"}], "ask": [{"t": "Sowing morning today. Bring clean hands.", "tone": "light"}, {"t": "I'm planting basil this time. Don't tell Brennan, she'll want it.", "tone": "funny"}], "here": [{"t": "Two seeds a pot. One for luck.", "tone": "light"}, {"t": "Gently. They're only small.", "tone": "warm"}], "thanks": [{"t": "You press a seedling into its pot and write your name on the tag. {season} has begun.", "tone": "light"}], "chatter": [{"t": "Whose seedling is that, already leaning towards the lamps?", "tone": "funny"}]}},
 };
 // The loader (Pillar 4): each baked tradition becomes a SHIP_TRADITIONS entry (one with the same id is replaced), so the
 // tradition designers' .trad files (content/traditions) need no code. content_gen.py (the dialogue engineer's) bakes
@@ -12874,7 +12874,7 @@ function tradIs(cond, p, d, c, host) {
     if (w === 'honoree') return !!(c && c.honorees && c.honorees.includes(p));
     if (w === 'juniors') return p.rank === 'junior';
     if (w === 'officers') return p.rank !== 'junior' && p.rank !== 'guest';
-    if (w === 'friends-of-host') return !!host && host !== p.id && typeof affinity === 'function' && affinity(host, p.id) >= 40;
+    if (w === 'friends-of-host') return !!host && host !== p.id && typeof affinityPlan === 'function' && affinityPlan(host, p.id, d) >= 40;   // pure: plans never read live state
     const r = tradWord(w); if (!r) return false;
     return r[0] === 'id' ? p.id === r[1] : r[0] === 'dept' ? p.dept === r[1] : r[0] === 'rank' ? p.rank === r[1] : evHas(p, d, r[1]);
   });
@@ -12892,7 +12892,8 @@ function tradFill(text, t, c) {
   return ok ? out : null;
 }
 function tradText(t, kind, c, p) {
-  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.text || x.t || '', t, c)).filter(Boolean);
+  const self = p ? p.name.split(' ').slice(-2).map(w => new RegExp('\\b' + w + '\\b')) : [];   // nobody talks about themselves by name
+  const l = ((t.text || {})[kind] || []).map(x => tradFill(typeof x === 'string' ? x : x.text || x.t || '', t, c)).filter(x => x && !self.some(r => r.test(x)));
   return l.length ? l[Math.floor(schedU((p ? p.seed : 0) + 7919, c ? c.day : 0, t.k) * l.length)] : null;   // per person and day
 }
 function tradLoad(t) {
@@ -12900,11 +12901,13 @@ function tradLoad(t) {
     TRAD_ERRORS.push('tradition ' + (t && t.id) + ' is missing id, k, when, at, where or who'); return null;
   }
   const has = kind => !!((t.text || {})[kind] || []).length;
+  let checked = false;
+  const words = () => { if (checked) return; checked = true; for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const w of c.split('+')) if (!/^(everyone|host|honoree|juniors|officers|friends-of-host)$/.test(w)) tradWord(w); };
   return {
     id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
     hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, text: t.text || {}, baked: true,
     where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
-    who: (p, d, c) => tradRule(t.who, p, d, c, t.host, 0),
+    who: (p, d, c) => { words(); return tradRule(t.who, p, d, c, t.host, 0); },
     anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
     get from() { const p = t.from && schedPeople().find(q => q.id === t.from); return p ? p.name : t.from || 'The Wren'; },
     mail: has('mail') ? c => tradText(t, 'mail', c) : null, ask: has('ask') ? (c, p) => tradText(t, 'ask', c, p) : null,
@@ -12941,14 +12944,16 @@ function evOneOffDefs() {
   return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
     id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
     where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
-    who: p => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinity === 'function' ? Math.max(0, affinity(r.host, p.id)) / 100 * .6 : 0)),
+    who: (p, d) => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinityPlan === 'function' ? Math.max(0, affinityPlan(r.host, p.id, d)) / 100 * .6 : 0)),   // pure
     anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
     from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
 }
 const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 // the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
 const EV_DAYS = new Map();
+let EV_ARR = null;
 function eventsOn(d) {
+  const arr = evArrival(); if (arr !== EV_ARR) { EV_ARR = arr; EV_DAYS.clear(); EV_DROPPED.clear(); }   // section 21 set the day you came aboard
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], yd = shipYearDay(d);
   for (const ev of evTable()) {
@@ -13639,6 +13644,7 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
 // the panel; until section 19 provides deviceDialogue(view, onTap), a plain strip at the bottom stands in.
 // MEETING_SCRIPTS.<id> = { title, gist, lines: [{ who, text, pose? } | { choice: [{ text, rel?, job? }, ...] }] }
 const MEETING_SCRIPTS = {};
+if (typeof linesMeetings === 'function') linesMeetings(MEETING_SCRIPTS);   // section 22: the baked meetings in, {me} texts made functions
 const MEETINGS = [];                                     // meetings registered by events: { id, where, at, who, script }
 function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at === m.at)) MEETINGS.push(m); return m; }
 // At run time (0.34.9): you're there when you're in the meeting's room on its deck while it's on; then its script plays,
