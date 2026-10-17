@@ -128,3 +128,15 @@
 - You're garden now. Here. A Gerald. Every gardener has one. Oh, bother, soil.   #warm
 ? you:kind
 - People say you're gentle. With people. Plants notice that too.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:plant
+- Oh. A little one. I'll give it a sowing week. And a good sill. Thank you.   #warm
+? gift:loved
+- Oh, bother, that's lovely. Thank you. Sorry about the soil on my hands.   #warm
+? gift:liked
+- Thank you. That's kind. Very kind.
+? gift:polite
+- Oh. Thank you. I'll... thank you. Yes.

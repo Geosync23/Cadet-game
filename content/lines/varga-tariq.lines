@@ -128,3 +128,15 @@
 - You are counted as galley now. That is not a small thing. I hope you know.   #warm
 ? you:reliable
 - They say you are reliable. I had already decided so. I'm pleased to be agreed with.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:card
+- A card. Thank you. It will go beside the letters from Valo. In good company.   #warm
+? gift:loved
+- I'm very touched. Truly. I'll write about it in my next letter home.   #warm
+? gift:liked
+- Thank you. That is kind of you. I'm grateful.
+? gift:polite
+- Thank you. Ah, well. I shall find it a home. I'm sure I shall.

@@ -126,3 +126,15 @@
 - The infirmary thinks of you as one of us. Please don't need us. But we're here.   #warm
 ? you:kind
 - People say you're kind. I've found that to be true. I wrote it down.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:book
+- A book. Thank you. I'll read it carefully. Every page. Twice, probably.   #warm
+? gift:loved
+- Oh, no. I'm going to cry. In a good way. Thank you. Sorry.   #warm
+? gift:liked
+- Thank you. That was thoughtful. I'll look after it.
+? gift:polite
+- Thank you. I'm not sure what it is. I'm sure it's lovely. I'll find out.

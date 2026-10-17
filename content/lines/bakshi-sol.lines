@@ -122,3 +122,13 @@
 - The night shift likes you. I'd paint you, if you held still. Ah, well.   #funny
 ? you:kind
 - They say you're kind. I've been meaning to paint that. It's a hard thing to paint.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Oh, lovely. I'll paint it. Tiny. Then I'll paint you holding it. Hold still.   #warm
+? gift:liked
+- Thank you. That's nice. Where was I? Oh, yes. Thank you.
+? gift:polite
+- Ah, well. Thank you. I'll keep it near the charts. It'll find its course.

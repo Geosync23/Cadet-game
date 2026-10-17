@@ -193,3 +193,15 @@
 - You're galley. Officially. Don't let it go to your head. Let it go to your stomach.   #funny
 ? you:reliable
 - Reliable. That's the word about you. Good word. Rare word.
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:garden
+- From the garden. Smells green. Thanks, {nick}. That's a good one.   #warm
+? gift:loved
+- That's a good one. Really good. Thanks. I mean it.   #warm
+? gift:liked
+- Thanks. Nice. Kind.
+? gift:polite
+- Huh. Thanks. Typical you. Kind about it.

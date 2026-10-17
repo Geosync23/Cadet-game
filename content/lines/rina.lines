@@ -328,3 +328,15 @@
 - Half the ship says you're kind. The other half hasn't met you yet.
 ? you:reliable
 - You turn up when you say. You'd be surprised how rare that is. I wouldn't be.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:game
+- A game. For me. You realise I'll beat you at it. You've armed the enemy.   #funny
+? gift:loved
+- Oh. Well, look at that. That's... very good. Ta. Don't make it a thing.   #warm
+? gift:liked
+- Ta. That's nice of you. I'll use it. I'll tell you if I did.
+? gift:polite
+- Thanks. Honestly. It's the thought. The thought was good.   #funny

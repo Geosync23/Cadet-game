@@ -124,3 +124,15 @@
 - Good news: the garden rates you. Delivered flat. But it's good.   #funny
 ? you:chatty
 - You chat to everyone. You'd be a whole playlist. A long one.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:music
+- Music. Track one of next week's playlist. Teague won't know what hit him.   #funny
+? gift:loved
+- Good news: I love it. Delivered flat, but I mean it. I really do.   #warm
+? gift:liked
+- Nice. Thanks. That's a good-week song, this.
+? gift:polite
+- Oh, well. Thank you. It's going on a playlist somewhere. A quiet one.

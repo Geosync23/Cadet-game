@@ -124,3 +124,13 @@
 - Comms hears good things about you. Clear signal. No static.
 ? you:chatty
 - You talk to everyone. Lot of signal. Some static. Mostly signal.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:loved
+- Good signal. Thanks. Really.   #warm
+? gift:liked
+- Thanks. Useful.
+? gift:polite
+- Thanks. Bit of static. Kind of you, though.

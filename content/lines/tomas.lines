@@ -328,3 +328,15 @@
 - People keep saying you're kind. I knew first. I'm just saying. I knew first.   #funny
 ? you:chatty
 - Everyone says you talk to everyone. Good. Someone has to. I get nervous.   #funny
+
+// Writer 3, batch 8: thanks for a gift (gift: loved | liked | polite, or the gift's tag; dialogue 0.43.10).
+
+== gift
+? gift:star
+- Oh, wow. For me? This is going right by the star map. Right by it. Thank you, really.   #warm
+? gift:loved
+- Oh, wow. This is perfect. How did you know? Did someone tell you? Nobody knew.   #warm
+? gift:liked
+- For me? Thanks, really. I'll put it somewhere I can see it. Somewhere safe-ish.
+? gift:polite
+- Oh! Thank you. I don't know what it is. I'll find out. That's half the fun, isn't it?   #funny
