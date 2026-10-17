@@ -6,6 +6,7 @@
 #   deviceDo runs an app's action (Mail: reading marks it read); deviceNotify badges an app until it's opened
 #   calendar reminders (0.35.2): 25 minutes before a tradition, not 45; Don't and Remind me; Jobs only tracks
 #   Maps (0.35.3): every deck draws; picking a room and Go there sets the goal arrow (setGoal)
+#   Play on a message from home (0.35.27); the Needs page's icons, colours and short effect lines (0.35.28)
 #   Memos (0.35.4): the form, pin to Home, Remember this on Mail, saved; tips once each with a switch; the phone's
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
@@ -170,11 +171,38 @@ def run(path):
               const sv = JSON.parse(JSON.stringify({ device: SHIP.device })); out.push(sv.device.memos.length, deviceLoad(sv).memos.length, deviceLoad({ device: { memos: [7, null, { title: 3 }] } }).memos.length);
               SHIP.device.memos = []; return out; })()""")
             check(mm == [['Ask Pell'], True, 'Cake tonight', 2, 2, 0], f'memos: the form, pin to Home, Remember this, saved and read back, junk refused: {mm}')
+            # calls home (0.35.27, social B2): Mail from homeFolks() first under "From home"; Play while mailPlayable(m), a tap
+            # calls mailPlay(m) and closes the device on true (stays open on false); no button without them. Stand-ins
+            # when this build has no section 20c, else only the grouping and the button are checked
+            pl = g.ev("""(() => { const own = typeof mailPlay === 'function' && typeof homeFolks === 'function', got = [], ev0 = __ev.slice(), wasOpen = DEV.open;
+              const done = new Set(); if (!own) { window.homeFolks = () => ['Gran', 'Mum']; window.mailPlayable = m => m.from === 'Gran' && m.subject === 'A recorded message' && !done.has(m.id);
+                window.mailPlay = m => { got.push(m.id); if (got.length > 1) return false; done.add(m.id); return true; }; }
+              const btns = () => [...document.querySelectorAll('#devBody button')].map(b => b.textContent);
+              mailSend({ from: 'Gran', subject: 'A recorded message', body: 'Hello, love.', quiet: true }); const m = SHIP.mail[0];
+              mailSend({ from: 'Galley', subject: 'Plain', body: 'No play.', quiet: true }); const p = SHIP.mail[0];
+              deviceShow('mail'); const t = document.getElementById('devBody').textContent; const out = { order: t.indexOf('From home') >= 0 && t.indexOf('From home') < t.indexOf('A recorded message') && t.indexOf('A recorded message') < t.indexOf('Ship mail') && t.indexOf('Ship mail') < t.indexOf('Plain') };
+              deviceDo({ app: 'mail', do: 'read', arg: p.id }); out.plain = !btns().includes('Play');
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); out.play = btns().includes('Play') && btns().indexOf('Play') < btns().indexOf('Remember this');
+              if (!own) { deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.closed = !DEV.open;
+                deviceShow('mail'); out.gone = !btns().includes('Play');
+                done.clear(); deviceDo({ app: 'mail', do: 'play', arg: m.id }); out.stays = DEV.open; out.got = got.slice();
+                for (const n of ['homeFolks', 'mailPlayable', 'mailPlay']) delete window[n]; deviceRefresh(); const t2 = document.getElementById('devBody').textContent; out.none = !btns().includes('Play') && !t2.includes('From home'); }
+              deviceDo({ app: 'mail', do: 'read', arg: m.id }); SHIP.mail = SHIP.mail.filter(x => x !== m && x !== p); if (!wasOpen) deviceClose();
+              __ev.length = 0; __ev.push(...ev0); out.own = own; return out; })()   // the open / close count is checked later""")
+            check(all(pl.get(k) for k in ['order', 'plain', 'play']) and (pl['own'] or (all(pl.get(k) for k in ['closed', 'gone', 'stays', 'none']) and len(pl.get('got', [])) == 2)), f'Mail: From home, Play on a recorded message: {pl}')
+            # the servery queue line says no made-up wait (0.35.27, the user: no invented numbers)
+            check('In the queue for the servery: about' not in open(sys.argv[1]).read(), 'the servery queue line has no guessed wait')
             # tips: once each, saved, off in Settings; the card closes on a tap
             tp = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const out = [tipShow('t1', 'First tip'), tipShow('t1', 'Again')];
               const c = document.getElementById('devTip'); out.push(!c.hidden && c.textContent.includes('First tip')); c.click(); out.push(c.hidden);
               D.settings.tips = false; out.push(tipShow('t2', 'Off')); D.settings.tips = true; out.push(!!D.tipsSeen.t1); D.tipsSeen = {}; return out; })()""")
             check(tp == [True, False, True, True, False, True], f'tips: once each, a tap closes, the switch: {tp}')
+            # tipSeen (0.35.26, for section 21): seen without showing; a waiting tip is dropped, the one on screen stays
+            ts = g.ev("""(() => { const D = SHIP.device; while (TIP_Q.length) tipDone(); D.tipsSeen = {}; const c = document.getElementById('devTip');
+              const out = [tipSeen('s1'), tipSeen('s1'), c.hidden, tipShow('s1', 'Never')];
+              tipShow('s2', 'On screen'); tipShow('s3', 'Waiting'); out.push(tipSeen('s3'), TIP_Q.length, tipSeen('s2'), TIP_Q.length, c.textContent.includes('On screen'), tipSeen(''), tipSeen(7));
+              c.click(); out.push(c.hidden, TIP_Q.length); D.tipsSeen = {}; return out; })()""")
+            check(ts == [True, False, True, False, False, 1, False, 1, True, False, False, True, 0], f'tipSeen: marks without showing, drops a waiting tip, leaves the one on screen: {ts}')
             # Ship news (0.35.8): section 20's shipNews, newest first (a stand-in when this build has none)
             sn = g.ev("""(() => { const own = typeof shipNews === 'function'; if (!own) window.shipNews = n => [{ text: 'The scrubber on Deck 4 is rattling.', from: 'Pell Varga', at: shipNow() - 30 }].slice(0, n);
               const out = [own, devNews().length]; deviceShow('ship'); const t = document.getElementById('devBody').textContent;
@@ -226,6 +254,19 @@ def run(path):
             p2 = g.ev("document.querySelectorAll('#devBody .need.pulse').length")
             g.ev("if (!window.__ownPulse) delete window.needPulse; deviceShow('home')")   # (0.35.20: works with the real needPulse too)
             check(p1 == [g.ev("NEED_LABEL.energy")] and p2 == 0, f'Needs: the bar pulses while it has just risen, then stops: {p1} {p2}')
+            # the needs-display redesign (0.35.28): section 15's icons and colours (amber under NEED_LOW) when it has them,
+            # short effect lines from NEED_FX's numbers, what holds you back first; nothing wider than the screen
+            nd = g.ev("""(() => { const N = SHIP.player.needs, keep = { ...N }; Object.assign(N, { hunger: 10, energy: 90, fitness: 90, hygiene: 60, social: 60, bathroom: 60 });
+              deviceShow('needs'); const body = document.getElementById('devBody'), T = [...body.querySelectorAll('p, div')].map(e => e.textContent);
+              const has = t => T.some(x => x === t), rows = [...body.querySelectorAll('.need')], own = typeof NEED_COL !== 'undefined' && typeof NEED_ICON !== 'undefined';
+              const out = { hungry: has('▼ Hungry: tasks −15%'), rested: has('▲ Well rested: tasks +15%'), fit: has('▲ Fit: walking +5%, tiring −6%'),
+                order: T.findIndex(x => x.startsWith('▼ Hungry')) < T.findIndex(x => x.startsWith('▲ ')), wide: body.scrollWidth <= body.clientWidth + 1, own };
+              if (own) { const nc = k => rows[NEED_KEYS.indexOf(k)].style.getPropertyValue('--nc');
+                out.icons = body.querySelectorAll('.need svg path').length === NEED_KEYS.length; out.amber = nc('hunger') === NEED_AMBER && nc('energy') === NEED_COL.energy; }
+              else out.plain = !body.querySelector('.need svg') && !rows.some(r => r.style.getPropertyValue('--nc'));
+              Object.assign(N, keep); deviceShow('home'); return out; })()""")
+            print('  needs page:', nd)
+            check(all(nd.get(k) for k in ['hungry', 'rested', 'fit', 'order', 'wide']) and (nd['icons'] and nd['amber'] if nd['own'] else nd['plain']), f'Needs: icons and colours, short effect lines: {nd}')
             # the Schedule only lists what really happens (0.35.18, the user: "the schedule says there is a Works meeting but
             # nothing happened"): for a week, every ship item and tradition has at least two people there doing it (an
             # event's tag, the drill, the bunk tidy) within its first half hour, on its deck
@@ -380,10 +421,10 @@ def run(path):
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               // 0.35.24 (reviewer 2): rows with missing fields don't break the pages
-              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas' }); else window.keepsakes = () => [{ from: 'tomas' }, null];
-              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell' }); else window.movedOn = () => [{ id: 'pell' }, null];
-              deviceShow('wallet'); out.keepBad = !document.getElementById('devBody').textContent.includes('failed to draw');
-              deviceShow('roster'); out.movedBad = !document.getElementById('devBody').textContent.includes('failed to draw');
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas', day: null }); else window.keepsakes = () => [{ from: 'tomas', day: null }, null];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell', day: null }); else window.movedOn = () => [{ id: 'pell', day: null }, null];
+              deviceShow('wallet'); out.keepBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);   // 0.35.26: a null day isn't 'Day null'
+              deviceShow('roster'); out.movedBad = !/failed to draw|Day null/.test(document.getElementById('devBody').textContent);
               if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
               for (const n of ['keepsakes', 'movedOn']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
               deviceShow('home'); out.own = own; return out; })()""")

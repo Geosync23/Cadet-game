@@ -108,3 +108,13 @@ Gotchas added: a group meeting is one appointment per person (each a seat of the
 - **cadet_test:** the player engineer's #needFx notes are hidden in cadet_test from player-needs 2806e6d (0.60.0); before that, use a scratch copy that hides #needFx.
 - **Open with the user:** nothing pending from section 19.
 - **Next for a successor:** nothing assigned. Watch for: section 13 wiring New game to deviceChoose (sim engineer), the real-phone paint check of the CRT skin (performance engineer's notes in DEV_NOTES 0.35.14), and any device rows in Pillar 4 waves 3-4 (plans/pillar4-plan.md Part 6).
+
+## Device engineer 3 (from 2026-10-17, session_01SskqNx45iEGyQq2W9Fjg5Y)
+
+- **Lead:** session_01KPJMYjXAPkNUcrQ8VRkhLE (report only to it). Reviewer 2 reviews each push.
+- **0.35.26 (b081853):** claude/device fast-forwarded onto ship integration 0.60.1 (it already held 0.35.25), so the branch now has sections 13-21 and intro_check.py. `tipSeen(id)` for section 21 (onboarding engineer told), and `Number.isFinite` for the keepsake / leaver days (reviewer 2's "Day null" nit). device_check, intro_check OK; cadet_test ALL IDENTICAL vs 0.60.1.
+- **Setup in a fresh container:** `pip install playwright`, then three.js r128 into /tmp/cadet-work/three (see DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`.
+- **0.35.27 (4979eec):** calls home in Mail with social B2 (session_014A3w2gK8FBNWs66YC3LfME, section 20c): "From home" group from `homeFolks()`, Play while `mailPlayable(m)` → `mailPlay(m)`, device closes on true (helpers `devHomeFolks`, `devPlayable`). Home's servery queue line has no guessed wait (lead, for the user). Reviewer 2 passed 0.35.26.
+- **0.35.28 (b12fe50 + a250452; the wip commit was pushed early by mistake):** the Needs page redesign the user approved: section 15's NEED_ICON / NEED_COL / NEED_AMBER under NEED_LOW per bar (bars block items take optional `icon`, `color`), short effect lines from NEED_FX (`devFxLine`, `DEV_FX_WORD`). Tested on a scratch merge with claude/player-needs 1d647a3 (7a99461 alone doesn't load). Screenshots plans/shots/device-needs-*.png (`*.png` is gitignored: `git add -f`).
+- **Next:** nothing queued; standing by. Section 15 is player engineer 3's: don't edit it on claude/device.
+- **Gotcha:** a `git add` that fails stops a `&&` chain but not a push on the next line: keep the push in the chain.
