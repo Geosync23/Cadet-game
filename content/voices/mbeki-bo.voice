@@ -1,7 +1,11 @@
 @voice mbeki-bo
 // Writer (Survey), wave 1b. Survey assistant, evenings in the music room; cheerful, meticulous; a telescope; a sister on Kesh.
+//
+// HOW THEY TALK: Cheerful and careful: smiles first, then checks the sum twice. Brought a telescope from home and keeps it spotless. Plays in the music room and practises exactly. A sister on Kesh sends recipes, which Bo follows to the gram.
+// WITH JUNIORS: friendly, organised, keeps the list.
+// MOOD TELLS: when worried, the sums get checked three times.
 tpl: steady
-talk: Cheerful and careful: smiles first, then checks the sum twice. Brought a telescope from home and keeps it spotless. Plays in the music room and practises exactly. A sister on Kesh sends recipes, which Bo follows to the gram. With other juniors: friendly, organised, keeps the list. Mood tells: when worried, the sums get checked three times.
+talk: Cheerful and careful: smiles first, then checks the sum twice. Brought a telescope from home and keeps it spotless.
 cares: the telescope from home | the music room | his sister's recipes, followed exactly
 jokes: he follows his sister's recipes to the gram, even the ones that say "a handful" | his telescope is cleaner than the observatory's
 hi: Hey | Hello | Hi there

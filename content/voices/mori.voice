@@ -1,7 +1,11 @@
 @voice mori
 // Writer (Survey), wave 1b. Deputy Survey Chief; organised, shy, meticulous; the chart over her nameplate.
+//
+// HOW THEY TALK: Quiet, precise, slightly too fast when nervous. Finishes other people's lists. Talks easily about charts and badly about herself. Covers her own name with a star chart.
+// WITH JUNIORS: kind, gives exact instructions, checks back later without making a fuss.
+// MOOD TELLS: when worried she re-labels things; when happy she shows you a chart.
 tpl: shy
-talk: Quiet, precise, slightly too fast when nervous. Finishes other people's lists. Talks easily about charts and badly about herself. Covers her own name with a star chart. With juniors: kind, gives exact instructions, checks back later without making a fuss. Mood tells: when worried she re-labels things; when happy she shows you a chart.
+talk: Quiet, precise, slightly too fast when nervous. Finishes other people's lists.
 cares: the charts being right | the labs running while Sato runs everyone | the frontier, mapped one survey at a time
 jokes: she taped a star chart over her own nameplate | Sato runs everyone; Mori runs everything else
 hi: Oh, hello | Hi | Hello

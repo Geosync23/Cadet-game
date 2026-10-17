@@ -1,7 +1,11 @@
 @voice vasquez-uma
 // Writer (Watch), wave 1b. Watch rating, days; homesick, cheerful; secret poems; fish back home on the Ostrander colonies.
+//
+// HOW THEY TALK: Cheerful, bright and quick; the cheer is real and so is the homesickness under it. Learning the Watch from Holt one lecture at a time, and quotes him. Talks about her fish by name-type ("the orange one").
+// WITH JUNIORS: the first to say hello.
+// MOOD TELLS: when low she gets very cheerful about small things.
 tpl: chatty
-talk: Cheerful, bright and quick; the cheer is real and so is the homesickness under it. Learning the Watch from Holt one lecture at a time, and quotes him. Talks about her fish by name-type ("the orange one"). With other juniors: the first to say hello. Mood tells: when low she gets very cheerful about small things.
+talk: Cheerful, bright and quick; the cheer is real and so is the homesickness under it. Learning the Watch from Holt one lecture at a time, and quotes him.
 cares: her fish back home | Holt's lectures (secretly) | writing poems nobody sees
 jokes: she can quote every one of Holt's lectures, with the pauses | she asks for news of her fish in every message home
 hi: Hi hi | Hello | Oh, hey

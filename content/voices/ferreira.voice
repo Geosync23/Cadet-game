@@ -1,7 +1,11 @@
 @voice ferreira
 // Writer (command: senior officers), wave 1b. Comms Chief; sociable, discreet, quick; four languages and some Veyli.
+//
+// HOW THEY TALK: Quick and bright, a born host. Asks after everyone and remembers the answers. Never repeats a message or a secret. Drops a word of another language when English won't do.
+// WITH JUNIORS: chatty and welcoming, always knows who you should meet.
+// MOOD TELLS: when low she gets more cheerful, not less; listen for the gaps.
 tpl: chatty
-talk: Quick and bright, a born host. Asks after everyone and remembers the answers. Never repeats a message or a secret. Drops a word of another language when English won't do. With juniors: chatty and welcoming, always knows who you should meet. Mood tells: when low she gets more cheerful, not less; listen for the gaps.
+talk: Quick and bright, a born host. Asks after everyone and remembers the answers.
 cares: messages home getting through | languages, Veyli most of all | the lounge being a friendly place
 jokes: every message home passes through her hands and she never reads them | the headset on her door handle, just in case
 hi: Hello, hello | There you are | Hi
