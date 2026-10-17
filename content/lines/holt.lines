@@ -154,3 +154,123 @@
 - Junior wing, lights out. Quiet. Except Pell. Pell talks in his sleep.   #funny
 ? deck:2 tier>=colleague
 - The Envoy's door. New knot this month. Hm. I counted. Don't ask why.
+
+// ---- Writer 2, batch 5: Holt toward ~100. His distrust is his own, argued with, never about the Veyli as a people.
+// Rook and the bad day only from beat:holt.3; tea with the Envoy only from beat:holt.5. Rest days Thu, Fri.
+== greet
+? tier>=acquaintance season:sowing
+- Sowing. New season, same doors. Shut them.
+? tier>=acquaintance season:greening
+- Greening. Founding Day's coming. Drills first. Bunting after.
+? tier>=acquaintance season:harvest
+- Harvest. The garden's open late. More doors to check. Fine.
+? tier>=acquaintance season:lanterns
+- Lanterns. Somebody always hangs one on a hatch wheel. Not you. Good.
+? rep:well
+- Cadet. Watch speaks well of you. Vasquez quoted you. To me. Hm.   #funny
+? you:reliable
+- Hm. Reliable, they say. I don't say things like that. I'm nodding.   #funny
+
+== feel
+? mood:low tier>=friend beat:holt.3
+- Bad night. Old dreams. Gone by breakfast. Usually.
+? mood:high tier>=friend
+- Good day. Mensah made me laugh. Once. He's insufferable.   #funny
+
+== near
+? habit:gym-regular
+- Weights. After shift. That's all you need to know.   #funny
+? place:mess time:morning
+- Breakfast after the rounds. Every deck. Long way. Earned it.
+
+== life
+? tier>=friend
+- Border patrol taught me to count exits. I still do it. In the mess. In the gym. Here.
+? tier>=colleague !beat:holt.3
+- I don't trust easily. The Veyli least of all. Mensah says that's my problem. He's right.
+? beat:holt.3
+- I wrote to Rook. About the Wren. Short letter. She'll laugh at it.
+? beat:holt.5
+- Tea with the Envoy, every tenth day. Don't make a thing of it. Mensah has.   #funny
+
+== joy
+? tier>=friend
+- Rounds done before anyone's up. Every door, every deck. Then tea. Hm.
+
+== decline
+? weekday:thu|fri
+- Rest day. I'll walk the decks anyway. Slower. Saturday?   #funny
+
+== callback
+? told:moment.holt.locker
+- Behind the second door, on the left. You knew. Good. Now learn the rest.
+? told:moment.holt.noidea
+- "No idea, Chief." Honest. Now you know. Second door. Left.
+? told:moment.holt.test
+- Yes. It was a test. You passed. Don't tell Mensah.   #funny
+? told:moment.holt.learnt
+- Under, over, through, and back. You saw I'd learnt it. Keep seeing things.
+? told:moment.holt.fetch
+- You offered to fetch the Envoy. I'd have had to explain myself. Thank you for not.   #funny
+? told:moment.holt.secret
+- The knot. Our secret. Mensah suspects. He suspects everything. My fault.   #funny
+? told:moment.holt.listened
+- The other night. You listened. That's rarer than courage. Thank you.   #warm
+? told:moment.holt.help
+- You asked what would help. Asking helped. I didn't say so. Saying now.   #warm
+? told:moment.holt.knowing
+- A rite. Six hours. Knowing helps. A bit. More than I thought.
+? told:moment.holt.carried
+- You carried the invitation. I went in. I'll not forget that.   #warm
+? told:moment.holt.onlytea
+- "It's only tea." You were right. It was only tea. It was very good tea.   #funny
+? told:moment.holt.stood
+- You stood at that door with me. Some time, it was. Thank you.   #warm
+? told:moment.holt.glad
+- You said you were glad. So am I. Hm. Don't spread it about.   #warm
+? told:moment.holt.knot
+- Three knots. You've learnt one. Badly. Practise.   #funny
+? told:moment.holt.mensah
+- Mensah is unbearable. You were right. He's bought me a cup with a knot on it.   #funny
+? told:fixed.
+- Saw your repair. That hatch shuts properly now. Hm. Good.
+? told:came.
+- You came. I saw you. I see everyone. Still. Good.
+? told:bday
+- Someone remembered my birthday. You. Mensah's doing, I expect. Hm. Thank you.   #warm
+
+== gift
+? gift:loved
+- For me. Hm. That's. Hm. Thank you, {nick}. Really.   #warm
+? gift:liked
+- Hm. Useful. Thank you.
+? gift:polite
+- Thank you. I'll find a shelf.
+? gift:tea beat:holt.5
+- Tea. Hm. I know someone who'll want to try that. Don't ask who.   #funny
+
+== cue
+? cue:event.ionStorm.warning
+- Storm coming. Everyone to their post. Don't run. Walk fast.
+? cue:event.ionStorm.onset
+- It's here. Count your exits. I've counted mine.
+? cue:event.ionStorm.afterglow
+- Storm's done. Every door held. Every person accounted for. Good.
+? cue:event.diplomatic.onset
+- Veyli delegation aboard. I'll be at the door. Being polite. Watch me.   #funny
+
+== visit
+? tier>=friend
+- Rounds. Your door's on them. Everything all right in here? Hm. Good.
+
+== note
+? tier>=friend
+- Your door didn't shut properly. It does now. That's all.
+- Long way round tomorrow, before breakfast. If you're up.
+
+== smalltalk
+- Count your exits.
+- Shut that.   #funny
+
+== rumour
+- You didn't hear this from the Watch.
