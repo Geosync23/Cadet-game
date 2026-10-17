@@ -15603,17 +15603,29 @@ function momentDef(id) {                                 // '<crewId>:<beat>' ->
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
 function momentNextId(p) {                               // the next beat's id, ready or not
   const v = voiceOf(p.id), th = v.thread || '';
-  if (th.startsWith('arc:')) { const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0; return n >= 1 ? p.id + ':' + (n + 1) : null; }
+  if (th.startsWith('arc:')) { const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0; return n >= 1 || !STORY_ARCS[p.id] ? p.id + ':' + (n + 1) : null; }   // beats told so far (rel.arc); an arc with card lines tells beat 1 on the card
   return p.id + ':' + (storyM(p.id).b + 1);
 }
 const momentOwnsBeat = (id, n) => n >= 1 && (voiceOf(id).thread || '').startsWith('arc:') && !!momentDef(id + ':' + (n + 1));   // section 20's arcBeat leaves it to a moment
 const momentHint = id => { const d = momentDef(id); return d && d.hint ? voiceFill(d.who, d.hint) : null; };
 const MOMENT_SERIOUS = new Set(['heartfelt', 'serious', 'resolution']);
-function momentCalm(p, t) {                              // off duty somewhere you could sit and talk, or visiting you
-  if (typeof VISIT !== 'undefined' && VISIT && VISIT.inside && VISIT.p === p) return true;
-  const w = typeof whereIs === 'function' ? whereIs(p, t) : null; if (!w || w.moving || !(w.act === 'leisure' || w.act === 'off')) return false;
+const momentVisit = p => typeof VISIT !== 'undefined' && !!VISIT && VISIT.inside && VISIT.p === p;   // section 20's bunk visit, they're in
+const momentAppt = (p, t) => apptList().some(a => (typeof apptOn !== 'function' || apptOn(a)) && Array.isArray(a.with) && a.with.includes(p.id) && t >= a.at && t < a.at + (a.len || 30));
+function momentCalm(p, t, duty) {                        // off duty (or on, for a script with duty) somewhere you could sit and talk, visiting you, or your appointment
+  if (momentVisit(p) || momentAppt(p, t)) return true;
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null; if (!w || w.moving || !(w.act === 'leisure' || w.act === 'off' || (duty && w.act === 'work'))) return false;
   const pl = w.placeId && schedData().byId.get(w.placeId);
-  return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type));
+  return !!pl && (typeof SIT_TYPES === 'undefined' || SIT_TYPES.has(pl.type) || (duty && w.act === 'work'));
+}
+function momentWhere(p, t, d) {                          // the script's where: 'calm' (default), 'visit', 'appt', or a room's name
+  return (Array.isArray(d.where) ? d.where : [d.where || 'calm']).some(x => {
+    if (x === 'calm') return momentCalm(p, t, d.duty);
+    if (x === 'visit') return momentVisit(p);
+    if (x === 'appt') return momentAppt(p, t);
+    const w = typeof whereIs === 'function' ? whereIs(p, t) : null; if (!w || w.moving || !(w.act === 'leisure' || w.act === 'off' || (d.duty && w.act === 'work'))) return false;
+    const pl = w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
+    return !!rm && String(rm.name || '').toLowerCase().includes(String(x).toLowerCase());
+  });
 }
 function momentReady(p, t = shipNow(), ctx = {}) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
@@ -15626,7 +15638,8 @@ function momentReady(p, t = shipNow(), ctx = {}) {
   if (ab && ((ab.afterShow && r.showDay && day <= r.showDay) || (r.arcDay || 0) >= day)) return null;   // Pell's last beat waits for his show; one beat a day
   if (MOMENT_SERIOUS.has(d.tone) && S.serious === day) return null;          // one serious moment a day for you
   if (!d.crisis) { let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return null; }
-  if (!ctx.anywhere && !momentCalm(p, t)) return null;
+  if (Array.isArray(d.when) && d.when.length) { let ok = false; try { ok = typeof linesCond === 'function' && !!linesCond(d.when, p, { t, moment: id }); } catch (e) { ok = false; } if (!ok) return null; }   // the writers' conditions (section 22 judges them)
+  if (!ctx.anywhere && !momentWhere(p, t, d)) return null;
   return id;
 }
 function momentShow(id) {
@@ -15650,7 +15663,9 @@ function momentDone(p, d, c) {                           // the reply was picked
   if (!(d.thread || '').startsWith('arc:')) st.b = Math.max(st.b, d.beat);
   const pts = ((MOMENT_PTS[d.tone] || 5) + (c.fit ? MOMENT_FIT : 0)) * (v.opennessSet ? OPENNESS[v.openness].moment : 1);
   relAdd(p.id, 'moment', pts);
-  memAdd(p.id, 'moment.' + th + '.' + d.beat + '.' + flavour, d.tone === 'resolution' ? { cls: 'core' } : {});
+  const word = c.c && c.c.mem || d.mem;                 // the writers' memory word (moment.<arc>.<word>), else one made from the beat
+  memAdd(p.id, 'moment.' + th + '.' + (word || d.beat + '.' + flavour), d.tone === 'resolution' ? { cls: 'core' } : {});
+  if (c.c && c.c.flag && typeof flagSet === 'function') flagSet(c.c.flag);   // a reply that sets a flag for later beats
   if (d.learn && !r.known.includes('@story:' + d.learn)) r.known.push('@story:' + d.learn);
   if (typeof simNote === 'function') simNote('moment', { id: p.id + ':' + d.beat, who: p.id, beat: d.beat, flavour, tone: d.tone, fit: !!c.fit });
   if (d.tone === 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake || v.keepsake);
@@ -15659,7 +15674,7 @@ function momentDone(p, d, c) {                           // the reply was picked
   if (arc && arc[n] && (r.arc || 0) === n) {             // section 20's arc goes on: its count, Mail and Pell's show
     if (typeof arcTold === 'function') arcTold(p, arc[n]);
     if ((r.arc || 0) === n) { r.arc = n + 1; r.arcDay = SHIP.time.day; if (arc[n].mail) SHIP.social.mail.push({ at: t + arc[n].mail.after, from: p.name, subject: arc[n].mail.subject, body: arc[n].mail.body }); }   // an older arcTold that takes no beat
-  }
+  } else if ((d.thread || '').startsWith('arc:') && (r.arc || 0) < d.beat) { r.arc = d.beat; r.arcDay = SHIP.time.day; }   // beats past section 20's card lines, and the new story crew's
 }
 // ---- goodbyes (0.39.4, B5; plans/social-deep-plan.md Part 8b "Goodbyes") ----
 // A day or two before someone is transferred off, section 20's card leads with their goodbye (anyone at acquaintance
