@@ -9820,6 +9820,7 @@ function actUpdate(dt, t) {
   };
   let pose = A.pose;
   if (A.phase === 'in') {
+    if (A.kind === 'queue' && typeof lineSpot === 'function') { const ln = lineAt(lineSpot('player')); if (ln) A.to = ln; player.obj.position.set(A.x, 0, A.z); }   // to the line's back as it is now, the camera with you (0.28.36)
     if (go(A.to.x, A.to.z)) { A.phase = 'do'; A.face = A.to.face; A.y = A.to.y || 0; } else pose = A.kind === 'eat' && A.o.fed ? 'walk+tray' : 'walk';
   } else if (A.phase === 'do') {
     if (A.kind === 'queue' && typeof lineSpot === 'function') {   // the line moves: walk up with it, a tile at a time (0.28.34)
