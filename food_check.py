@@ -385,7 +385,7 @@ with sync_playwright() as pw:
     print(f"   18:20: {ts['text'][-110:]} | plates {ts['plates']}, left {ts['left']} | 19:40 gone {ts['gone']}, plates {ts['plates3']}")
     r = ts['rep']
     if ts['choices'] != [c.replace('-', ' ') for c in ['herb-flatbread', 'pickled-beans', 'tomato-jam-oatcakes', 'root-crisps', 'miso-greens', 'bean-fritters', 'carrot-ginger-soup', 'chilli-lime-corn'][(2 * ((ts['wed'] - 1) // 7)) % 8:][:2]]: fail(f"tasting choices: {ts['choices']}")
-    if r['tastes'] != 20 or r['tasted'] != min(20, 2 * ts['voters']) or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
+    if r['tastes'] != max(20, 2 * ts['voters']) or r['tasted'] != 2 * ts['voters'] or r['missed'] or r['ate'] != r['got']: fail(f"tasting report: {r}")
     if 'tasting table' not in ts['note'] or ts['plates'] != 4 or ts['plates3'] != 0 or ts['gone'] is not None or ts['winner0'] is not None: fail(f"tasting table: {ts}")
     R = ts.get('real')
     if R:
@@ -463,16 +463,25 @@ with sync_playwright() as pw:
     # take the spot it gives, your turn comes GALLEY_SERVE.you after you reach the counter (never before), takePortion
     # leaves the line; galleyServeMins / galleyCanServe for section 10's serving
     ln = g.ev(f"""(() => {{ const real = typeof lineJoin === 'function', line = ['cook-a', 'cook-b']; window.__line = line;
-      if (!real) window.__sc("lineJoin = id => {{ if (!window.__line.includes(id)) window.__line.push(id); }}; lineSpot = id => ({{ at: [33, 6 - window.__line.indexOf(id)], xy: [33.5, 6.5 - window.__line.indexOf(id)], face: 's' }}); lineFront = id => window.__line[0] === id; lineLeave = id => {{ const k = window.__line.indexOf(id); if (k >= 0) window.__line.splice(k, 1); }}");
+      if (!real) window.__sc("lineJoin = id => {{ if (!window.__line.includes(id)) window.__line.push(id); }}; servLine = () => window.__line.slice(); lineSpot = id => ({{ at: [33, 6 - window.__line.indexOf(id)], xy: [33.5, 6.5 - window.__line.indexOf(id)], face: 's' }}); lineFront = id => window.__line[0] === id; lineLeave = id => {{ const k = window.__line.indexOf(id); if (k >= 0) window.__line.splice(k, 1); }}");
       SHIP.galley = null; const B = {B} + 1440 * 2; setShipNow(B + 17 * 60 + 30); galleyAdvance(shipNow()); SHIP.galley.servery.portions = Math.max(5, SHIP.galley.servery.portions);
-      const j = galleyJoin('player'), out = {{ real, line: j.line, at: j.at, notYet: galleyTurn('player') }};
+      const pk = galleyJoin('player', {{ peek: true }}), peekHeld = window.__line.includes('player') || (typeof servLine === 'function' && servLine().includes('player'));
+      const j = galleyJoin('player'), out = {{ real, peek: [pk.at, pk.peek, peekHeld], line: j.line, at: j.at, notYet: galleyTurn('player') }};
       line.shift(); line.shift(); out.front = lineFront('player'); out.atFront = galleyTurn('player'); setShipNow(shipNow() + .6); out.soon = galleyTurn('player'); setShipNow(shipNow() + .45); out.served = galleyTurn('player');
       out.ate = takePortion('player'); out.left = line.slice(); out.mins = galleyServeMins(); out.can = galleyCanServe();
       SHIP.galley.servery.portions = 0; SHIP.galley.grab.items = 0; out.cannot = galleyCanServe();
-      if (!real) window.__sc("lineJoin = lineSpot = lineFront = lineLeave = undefined");
+      if (!real) window.__sc("lineJoin = lineSpot = lineFront = lineLeave = servLine = undefined");
       SHIP.galley = null; return out; }})()""")
     print('Live line (stand-in for section 10' + ('; section 10 has its own' if ln['real'] else '') + '):', ln)
-    if not ln['real'] and (not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.6, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
+    if not ln['real'] and (ln['peek'][2] or ln['peek'][0] != [33, 4] or not ln['line'] or ln['at'] != [33, 4] or ln['notYet'] or not ln['front'] or ln['atFront'] or ln['soon'] or not ln['served'] or not ln['ate'] or ln['left'] or ln['mins'] not in (0.6, 1) or not ln['can'] or ln['cannot']): fail(f"live line: {ln}")
+
+    # 4r. a cake for a gathering in the mess before 19:30 (0.29.33: the crew welcome tea, 18:40) is out from its start
+    ec = g.ev(f"""(() => {{ const d = [...Array(120)].map((_, k) => {DAY} + k).find(d => {{ const c = galleyCake(d); return c && c.out < CAKE.out; }}); if (!d) return null;
+      const c = galleyCake(d), B = (d - 1) * 1440; SHIP.galley = null; setShipNow(B + c.out - 1); galleyAdvance(shipNow()); const before = !!(SHIP.galley.cake && SHIP.galley.cake.out);
+      setShipNow(B + c.out + 1); galleyAdvance(shipNow()); const after = !!(SHIP.galley.cake && SHIP.galley.cake.out), text = galleyText('servery'); SHIP.galley = null;
+      return {{ d, name: c.name, out: hhmm(c.out), before, after, text: text.slice(-90) }}; }})()""")
+    print('An early cake (a mess gathering before 19:30):', ec if ec else 'none in these days (the welcome tea comes with section 18\'s rotations)')
+    if ec and (ec['before'] or not ec['after']): fail(f"early cake: {ec}")
 
     # 4g. your cart run (0.29.13): while section 17's cartWaiting(hour) says the run is yours and not unloaded, its
     # meals wait past arriveAt; galleyCartLand(hour) lands them when you unload. A stand-in cartWaiting until it's there
