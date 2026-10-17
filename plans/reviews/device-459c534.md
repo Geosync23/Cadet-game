@@ -16,3 +16,16 @@ and light are off while the device is locked.
    happens inside `view`, so deviceView shows "(this app failed to draw)" in place of your credits and locker too.
    Use `String(k.what || 'a keepsake')`. The same goes for `movedOn()` rows (`x.name`, `x.day` unguarded: you'd
    get "undefined"). Agree both shapes with social A.
+
+## Addendum: 89ab0ca (0.35.23, deviceChoose): PASS WITH FIXES (low-medium)
+deviceChoose shares the meeting panel (deviceDialogue / devDlgTap) with section 18's meetings, and nothing stops the
+two overlapping:
+- **A meeting starts while a question is open:** section 18's dialogueDraw calls `deviceDialogue(v)` with no onTap.
+  That replaces the question and sets devDlgTap to null, but `DEV.choose` stays set. The question's onPick then never
+  fires, and the meeting's × now takes the `DEV.choose` branch (`devChosen(-1)`). That hides the panel without
+  calling `dialogueClose()`, so the meeting stays active with no panel.
+- **A question opens during a meeting:** it replaces the meeting's panel. Answering it calls
+  `DEVICE_SKIN.dialogue(null)`, so the meeting carries on invisibly until its next draw.
+- Fix: deviceChoose returns false (or waits) while DIALOGUE / a panel is up, and deviceDialogue(v) with a new view
+  cancels a pending question first (`if (DEV.choose) devChosen(-1)`). The New game choice at game start is the likely
+  first caller, and the arrival evening's scripted meetings are the likely overlap.
