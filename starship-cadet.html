@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.15
+   STARSHIP CADET: CSV Wren                           build 0.43.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.15';                            // keep in step with the header's build line
+const GAME_BUILD = '0.43.16';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -13092,7 +13092,7 @@ function lineFor(who, kind, ctx = {}) {
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
   const pool = [];
   for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', tp && tp.lines && tp.lines[kind]], ['bank', LINES[kind]]])
-    for (const e of list || []) if (linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
+    for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
   if (!pool.length) return null;
   for (const x of pool) {
     const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
@@ -13111,7 +13111,8 @@ function lineFor(who, kind, ctx = {}) {
     if (!LINE_RECENT.some(x => x.id === e.id && x.who === p.id && x.h === h)) { LINE_RECENT.push({ id: e.id, who: p.id, h }); if (LINE_RECENT.length > 40) LINE_RECENT.shift(); }
     for (const k of [].concat(e.told || [])) lineQ('memTold', p.id, k);
   }
-  return { text: pick.text, id: e.id, kind, tone: e.tone || 'light' };
+  const out = { text: pick.text, id: e.id, kind, tone: e.tone || 'light' }; if (e.cue) out.cue = e.cue;   // a reaction's cue: [its kind, ...]
+  return out;
 }
 // a conversation between two crew: CONVOS whose pair and conditions hold (read for speaker A, with B as ctx.other),
 // picked by the pair and hour (schedU k 751). Wave 2 plays them as alternating bubbles and keeps the saved ring.
@@ -13144,19 +13145,26 @@ function overheardFor(a, b, ctx = {}) {
 // conversation (only A: lines, e.g. on a call home in the booths). Kept cheap: odds first, at most OVH_NEAR people
 // (in the seeded order) and OVH_TRIES pairs or singles a ship minute; overheardFor fills only its top-scoring group. The saved ring (SHIP.lines, in the save as save.lines): a
 // conversation you've heard isn't played again within LINES_RING_DAYS ship days.
-const OVH_ODDS = .3, OVH_GAP = 20, OVH_STEP = 3.2, OVH_PAIR = 2.5, OVH_NEAR = 6, OVH_TRIES = 8, LINES_RING_DAYS = 7, LINES_RING_MAX = 80;
+const OVH_ODDS = .3, OVH_GAP = 20, OVH_STEP = 3.2, OVH_PAIR = 2.5, OVH_NEAR = 6, OVH_TRIES = 8, LINES_RING_DAYS = 7, LINES_RING_MAX = 300;
 let OVH = null, OVH_MIN = -1, OVH_AT = -1e9;              // OVH: the conversation playing { a, b, lines, i, next, bub }
 function linesState() {                                   // SHIP.lines = { ring: [[id, day], ...], serious: the day of the last #serious }
   if (typeof SHIP === 'undefined') return null;
   if (!SHIP.lines) {
     const s = typeof SAVED !== 'undefined' && SAVED && SAVED.lines;
     const ok = s && Array.isArray(s.ring) && s.ring.every(r => Array.isArray(r) && typeof r[0] === 'string' && Number.isInteger(r[1]));
-    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0 };
+    SHIP.lines = { ring: ok ? s.ring.slice(-LINES_RING_MAX) : [], serious: ok && Number.isInteger(s.serious) ? s.serious : 0, reacted: {} };
+    const r = ok && s.reacted && typeof s.reacted === 'object' ? s.reacted : {};   // { crewId: { day, kinds: [...] } }
+    for (const id in r) if (r[id] && Number.isInteger(r[id].day) && Array.isArray(r[id].kinds)) SHIP.lines.reacted[id] = { day: r[id].day, kinds: r[id].kinds.filter(k => typeof k === 'string') };
   }
   return SHIP.lines;
 }
-if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => { if (SHIP.lines) s.lines = { ring: SHIP.lines.ring.slice(-LINES_RING_MAX), serious: SHIP.lines.serious }; });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0 }; OVH = null; OVH_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13 calls it)
+if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
+  const L = SHIP.lines; if (!L) return;
+  const day = Math.floor(shipNow() / 1440) + 1, reacted = {};
+  for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
+  s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted };
+});
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13 calls it)
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -13168,14 +13176,18 @@ const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALO
 function linesTick() {
   if (OVH) { linesTalk(); return; }
   const m = Math.floor(shipNow()); if (m === OVH_MIN) return; OVH_MIN = m;
-  if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined' || typeof CONVOS === 'undefined' || !CONVOS.length) return;
+  if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined') return;
+  const t = shipNow(), ovh = typeof CONVOS !== 'undefined' && CONVOS.length > 0 && schedU(m, 0, 752) < OVH_ODDS;
+  const react = typeof LINES !== 'undefined' && !!LINES.cue && LINES.cue.length > 0 && (t - REACT_AT < REACT_FRESH || schedU(m, 0, 754) < REACT_ODDS);
   const now = performance.now(), gap = typeof CHATTER_AT !== 'undefined' ? now - CHATTER_AT < CHATTER_GAP * 1000 : false;
-  if (schedU(m, 0, 752) >= OVH_ODDS || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
-  const t = shipNow(), day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
+  if (!(ovh || react) || now - OVH_AT < OVH_GAP * 1000 || gap || bubbles.list.length || linesHush()) return;
+  const day = Math.floor(t / 1440) + 1, P = player.obj.position, v = new THREE.Vector3();
   const onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // as section 20's chatter
   const near = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
     .map(a => ({ a, w: whereIs(a.p, t) })).filter(x => x.w && !x.w.moving && x.w.act !== 'sleep' && x.w.act !== 'wash')
     .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753)).slice(0, OVH_NEAR);
+  if (react && linesReact(near, t, day)) return;
+  if (!ovh) return;
   const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day;
   let tries = OVH_TRIES;
   for (const x of near) {
@@ -13201,6 +13213,34 @@ function linesTalk() {
   const b = bubbleSay(s.h, l.text, OVH_STEP + .8); if (b) o.bub.push(b);
   o.next = now + OVH_STEP * 1000;
   if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = now;   // section 20's chatter waits while two are talking
+}
+// ---- reactions (0.43.16): someone near you says a line about something that really happened: the reaction bank
+// (LINES.cue, content/reactions/*.lines), whose cue: conditions read section 20's cues, which social makes from section
+// 13's ship notes. linesTick tries one before an overheard conversation: within REACT_FRESH ship minutes of a note
+// (onSim('*'): a kind social makes a cue of, SOC_CUE_OF), else now and then while the cue lasts (REACT_ODDS a ship
+// minute, schedU k 754); someone awake and in place near you and on screen, in linesTick's seeded order; one bubble,
+// under the same voice budget. Each person reacts to a kind (a reaction line's first cue: repair, gift,
+// event.ionStorm...) at most once a ship day (SHIP.lines.reacted, saved with today's only), and a line you've heard
+// goes in the ring like a conversation (not again within 7 ship days); #serious ones count towards the day's one.
+const REACT_ODDS = .2, REACT_FRESH = 30, REACT_SECS = 4.5;
+let REACT_AT = -1e9;                                      // the ship minute of the last note worth reacting to
+if (typeof onSim === 'function') onSim('*', n => { if (n && isFinite(n.t) && (typeof SOC_CUE_OF === 'undefined' || SOC_CUE_OF[n.kind])) REACT_AT = Math.max(REACT_AT, n.t); });
+const reactKind = e => [].concat(e.cue || [])[0] || null;
+function linesReact(near, t, day) {
+  const L = linesState(); if (!L) return false;
+  const ring = new Set(linesRing(day)), done = L.reacted || (L.reacted = {});
+  for (const x of near) {
+    const p = x.a.p, mine = done[p.id] && done[p.id].day === day ? done[p.id].kinds : [];
+    const keep = e => !ring.has(e.id) && !mine.includes(reactKind(e)) && !(L.serious === day && e.tone === 'serious');
+    const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
+    const l = lineFor(p, 'cue', { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, keep });
+    if (!l || !bubbleSay(x.a.h, l.text, REACT_SECS)) continue;
+    const k = reactKind(l); done[p.id] = { day, kinds: k ? mine.concat(k) : mine };
+    linesHeard(l.id, day, l.tone);
+    const now = performance.now(); OVH_AT = now; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = now;
+    return true;
+  }
+  return false;
 }
 // the baked meetings into MEETING_SCRIPTS (section 18 calls this once, right after declaring it): a text with {me} becomes
 // c => text with c.you, the shape section 18's dialogue already plays
