@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.36.68
+   STARSHIP CADET: CSV Wren                           build 0.36.69
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.36.68';                           // keep in step with the header's build line
+const GAME_BUILD = '0.36.69';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -26072,7 +26072,8 @@ const repFloor = d => Math.min(25, 5 * SOC.crew.filter(p => p.dept === d && relT
 function repAdd(dept, n, ship, why) {                    // n to the department (if any), ship: { work, kindness, spirit } deltas
   socInit(); const R = repInit();
   if (dept && isFinite(R.dept[dept]) && n) R.dept[dept] = Math.round(Math.max(repFloor(dept), Math.min(100, R.dept[dept] + n)) * 100) / 100;
-  for (const k in ship || {}) if (isFinite(R.ship[k])) R.ship[k] = Math.round(Math.max(0, Math.min(100, R.ship[k] + ship[k])) * 100) / 100;
+  for (const k in ship || {}) if (isFinite(R.ship[k]) && ship[k]) { const x = R.ship[k], n = ship[k] * (ship[k] > 0 ? (x > 50 ? (100 - x) / 50 : 1) : (x < 50 ? x / 50 : 1));   // A12: harder to climb near the top (and to fall near the bottom)
+    R.ship[k] = Math.round(Math.max(0, Math.min(100, x + n)) * 100) / 100; }
   if (why) R.cnt[why] = (R.cnt[why] || 0) + 1;
   if (dept) repBandCheck(dept);
 }
