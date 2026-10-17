@@ -24,6 +24,7 @@
 #   activity (keeping what you'd gained); someone's private wash pod isn't offered; draw calls stay under BUDGET
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
+#   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
 #   saving: a v 2 save keeps needs; a v 1 save loads with needs at 80; ?nosave neither reads nor writes
 # Setup and environment as for cadet_test.py.
 # Run:  python3 player_check.py BUILD.html
@@ -309,6 +310,17 @@ with sync_playwright() as pw:
         check(all(abs(gn - 2 * min(c, 3)) < .15 for c, gn in cp[1]) and cp[1][1][0] - cp[1][0][0] == 2 and cp[1][2][0] - cp[1][0][0] == 4,
               f'company at the table: +0.2 a minute for each of up to three ({cp[1]}; the first is whoever was already eating)')
 
+    print('The note bus (0.28.22: simNote acts, inert until section 13 has simNote):')
+    sn = g.ev(r'''(() => { const log = [], real = typeof simNote === 'function';
+      if (!real) window.simNote = (k, o) => log.push([k, o]); else return 'real';
+      const fake = (kind, o = {}, phase = 'do', done = 5) => { ACT = { kind, def: { ...PLAYER_ACTS[kind] }, phase, done, o, face: player.face, deck: deckDef }; actEnd(true); };
+      fake('shower'); fake('eat', { company: 2 }); fake('grab'); fake('call'); fake('toilet'); fake('shower', {}, 'walk', 0);
+      const P = SHIP.player, c0 = P.credits; P.credits = 50; basket = storePick('snack'); ACT = { kind: 'pay', def: PLAYER_ACTS.pay, o: {}, face: 0 }; actEnd(false); P.credits = c0;
+      delete window.simNote; return log; })()''')
+    print(' ', sn)
+    if sn != 'real':
+        check([x[1]['act'] for x in sn] == ['wash', 'eat', 'eat', 'call', 'buy'] and sn[1][1]['with'] == 2 and sn[2][1]['with'] == 0 and all(x[0] == 'act' for x in sn),
+              f'simNote acts: wash, eat (with 2), eat (with 0), call, buy; nothing for the toilet or an activity never started: {sn}')
     print('Mail:')
     ml = g.ev(r"""(() => { SHIP.mail = []; device.refresh(); const b = document.getElementById('devMail'), out = [b.hidden];
       mailSend({ from: 'Stores', subject: 'Filters low', body: 'Two left.' }); mailSend({ at: shipNow() - 5, from: 'Galley', subject: 'Cake tonight', body: 'Tomas turns 24.' });
@@ -615,10 +627,10 @@ with sync_playwright() as pw:
     check(raw['v'] == 2 and raw['player']['needs'] == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'v 2 save should hold the needs')
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
-    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; saveGame()")
+    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); saveGame()")
     ev = load()
-    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats)])")); print('  mail, credits, locker, chats kept:', kept)
-    check(kept == [['Kept'], 77, ['a deck of cards'], ['x']], f'the save should keep mail, credits, locker and chats: {kept}')
+    kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name])")); print('  mail, credits, locker, chats, name kept:', kept)
+    check(kept == [['Kept'], 77, ['a deck of cards'], ['x'], 'Ada'], f'the save should keep mail, credits, locker, chats and your name: {kept}')
     check(v2 == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, 'a v 2 save should load its needs')
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, build: 'x', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0, needs: { hunger: 'x', energy: 500 } }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
@@ -632,6 +644,9 @@ with sync_playwright() as pw:
     wl = json.loads(ev("JSON.stringify([SHIP.mail.map(m => [m.from, m.subject, m.read]), SHIP.player.credits])")); print('  a fresh start: mail', wl[0], 'credits', wl[1])
     check(len(wl[0]) == 1 and wl[0][0][1].startswith('Welcome') and wl[0][0][2] is False and wl[1] == 40, f'a fresh start should have the welcome mail and 40 credits: {wl}')
     check(ns[1] == raw0, '?nosave should not write the save')
+    nm = json.loads(ev("JSON.stringify([SHIP.player.name, playerNameSet('  Ada   Okafor '), playerNameSet(''), playerNameSet(42), playerNameSet('x'.repeat(40)).length])"))
+    print('  your name (0.28.22): fresh, set, empty, junk, long:', nm)
+    check(nm == [None, 'Ada Okafor', None, None, 24], f'playerNameSet cleans names: {nm}')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()
 

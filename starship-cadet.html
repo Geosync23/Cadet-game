@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.41.10
+   STARSHIP CADET: CSV Wren                           build 0.28.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.41.10';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.22';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9330,6 +9330,16 @@ function walletLoad(s) {
     locker: Array.isArray(lk) ? lk.filter(x => typeof x === 'string').slice(0, LOCKER_MAX) : [], chats };
 }
 Object.assign(SHIP.player, walletLoad(SAVED));
+// your name (0.28.22, Pillar 4): typed in the shuttle (section 21, the onboarding engineer, calls playerNameSet); saved
+// here as save.player.name. null until then: lines say 'Cadet'. At most NAME_MAX characters, trimmed.
+const NAME_MAX = 24;
+const nameClean = v => typeof v === 'string' && v.trim() ? v.trim().replace(/\s+/g, ' ').slice(0, NAME_MAX) : null;
+SHIP.player.name = nameClean(SAVED && SAVED.player && SAVED.player.name);
+function playerNameSet(v) { SHIP.player.name = nameClean(v); return SHIP.player.name; }
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).name = SHIP.player.name; });
+// what you did, for the sim's note bus (Pillar 4: section 13's simNote, when it's there; section 21's Settling-in list
+// and the dialogue engineer's reactions read it): wash, eat (with: crew at your table), laundry, buy, call
+const simAct = (act, o) => { if (typeof simNote === 'function') try { simNote('act', { act, ...o }); } catch (e) { /* a listener's problem, not the player's */ } };
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.credits = SHIP.player.credits; p.locker = SHIP.player.locker.slice(); p.chats = { ...SHIP.player.chats }; });
 SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.needs = { ...SHIP.player.needs }; p.carry = SHIP.player.carry.slice(); p.work = SHIP.player.work && { ...SHIP.player.work, fitted: SHIP.player.work.fitted.slice(), make: SHIP.player.work.make && { ...SHIP.player.work.make } }; });   // into the save (section 13)
 // the ship's state (section 17, the systems engineer): shipEffects(deck) gives { restore, drain, walk, notes, ... };
@@ -9587,6 +9597,7 @@ function machineTap(it, at) {
   approach(at.clone(), it.front, it.depth, () => {
     let r = null; try { r = machineUse(m[0].id, 'player'); } catch (e) { r = null; }
     toast(it.t, r && r.text ? r.text : it.x);
+    if (r && r.ran && /wash/i.test(m[0].kind)) simAct('laundry');   // the note bus (0.28.22)
   });
   return true;
 }
@@ -9638,6 +9649,10 @@ function actBegin() {
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
+  if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
+    const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
+    if (act) simAct(act, act === 'eat' ? { with: A.o.company || 0 } : {});
+  }
   if (abort) return;
   player.face = player.obj.rotation.y = A.face;
   if (A.def.done) toast(A.def.title, A.def.done + (A.kind === 'eat' && A.o.company ? ' Good company, too.' : '') + (A.def.need ? ' ' + NEED_LABEL[A.def.need] + ' ' + Math.round(SHIP.player.needs[A.def.need]) + '.' : ''));
@@ -9646,7 +9661,7 @@ function actEnd(abort) {
     toast(A.def.title, 'You pick out ' + basket.name + ' (' + basket.price + ' credits; you have ' + SHIP.player.credits + '). Pay at the counter.');
   }
   if (A.kind === 'pay' && basket) {
-    const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1;
+    const b = basket, P = SHIP.player; P.credits -= b.price; P.bought = (P.bought || 0) + 1; simAct('buy', { item: b.name });
     if (b.kind === 'comfort') { P.locker.push(b.name); P.locker.length = Math.min(P.locker.length, LOCKER_MAX); P.needs.social = needClamp(P.needs.social + b.gain); }
     else P.needs.hunger = needClamp(P.needs.hunger + b.gain);
     toast('Paid', 'You pay ' + b.price + ' credits for ' + b.name + (b.kind === 'comfort' ? '. It goes in your locker; it\'s nice to have something of your own.' : ' and have it on the way out.')
@@ -9906,7 +9921,7 @@ SIM_ADVANCE.push((from, to) => {
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
   actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; needsT = null; slowWas = {};
-  Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.mail = []; mailWelcome(); device.refresh();
+  Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
 }
 
 // ---- your job (Pillar 2, B2): the player's side of section 17's job list. Take a job on the device (17's jobs
