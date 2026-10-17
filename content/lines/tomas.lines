@@ -569,7 +569,7 @@
 == week1
 // beat d1-wash: Monday 06:00, Bunk 1
 ? flag:beat.d1-wash.1
-- Morning! Washroom first. Hot water runs out at ten.
+- Morning! Washroom first, before the queue. Hot's best early.
 ? flag:beat.d1-wash.2
 - Breakfast's till eight. Then Works. Then everything.
 ? flag:beat.d1-wash.3

@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.46
+   STARSHIP CADET: CSV Wren                           build 0.48.47
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.46';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.47';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13790,6 +13790,11 @@ const VOICE = {
       "week1": [
         {"text": "Dinner's six till eight, love. Tray, then the servery, then sit with someone. Anyone.", "id": "1ut8pra", "act": "dinner", "week1": "true", "weekday": "mon"},
         {"text": "See that shelf? The grab shelf. For emergencies. And Pell.", "id": "1fkq92j", "tone": "funny", "act": "dinner", "tier": [0, 1], "week1": "true", "weekday": "mon"},
+        {"text": "Dinner's on, love. Grab a tray, then a plate.", "id": "47mdk7", "flag": "beat.d1-dinner.1"},
+        {"text": "Sit with someone. Food's better with company.", "id": "nbznfo", "flag": "beat.d1-dinner.2"},
+        {"text": "Miss dinner? Covered plates on the grab shelf.", "id": "8r4suh", "flag": "beat.d1-dinner.3"},
+        {"text": "The grab shelf's for emergencies. And Pell.", "id": "13ni1oc", "tone": "funny", "flag": "beat.d1-dinner.4"},
+        {"text": "Eat properly, love. I'll know if you don't.", "id": "1vtwcfl", "flag": "beat.d1-dinner.5"},
       ],
     },
   },
@@ -14044,6 +14049,8 @@ const VOICE = {
         {"text": "Pick your own job today. Read the whole card. Then pick.", "id": "ctv3zu", "week1": "true", "weekday": "wed"},
         {"text": "Torres is off. Board's yours. Questions come to me.", "id": "1d4hnts", "week1": "true", "weekday": "thu"},
         {"text": "Works tea at half ten. Bring your hands. There's a mug for you.", "id": "1wmhu", "week1": "true", "weekday": "fri"},
+        {"text": "One week | One week. You'll do. The board's there on Monday.", "id": "cakggb", "flag": "mail.d7-calder"},
+        {"text": "Settled | Everything on your list, done. Good. Carry on.", "id": "dgahh3", "flag": "mail.settled"},
       ],
     },
   },
@@ -14611,6 +14618,12 @@ const VOICE = {
         {"text": "Six in the queue. Eleven minutes.", "id": "by1dw9", "place": "booths"},
         {"text": "Window seat, one map. Don't.", "id": "1idcl1v", "tone": "funny", "act": "off"},
         {"text": "Someone's toolbelt is on backwards.", "id": "hr3mw0", "tone": "funny", "act": "work"},
+      ],
+      "week1": [
+        {"text": "Call-home booths. Sit, tap, wait. There's a lag.", "id": "1k08ka0", "flag": "beat.d2-booths.1"},
+        {"text": "Queue's long after a storm. Tonight it's short. Lucky.", "id": "je3mjr", "flag": "beat.d2-booths.2"},
+        {"text": "Calls drop sometimes. It isn't you. It's space.", "id": "nekehu", "tone": "funny", "flag": "beat.d2-booths.3"},
+        {"text": "Mail's slower. It always gets there, though.", "id": "1ylrg5j", "flag": "beat.d2-booths.4"},
       ],
     },
   },
@@ -15489,6 +15502,7 @@ const VOICE = {
         {"text": "Every new hand gets a mug on their first Friday. It's the law. Well, it's me.", "id": "1th2zww", "tone": "funny", "week1": "true", "weekday": "fri"},
         {"text": "Hook's the one on the end of the rack. Yours from now on. Nobody else touches it.", "id": "1gvqln", "week1": "true", "weekday": "fri"},
         {"text": "Your mug's still on the rack. I gave it a rinse. Don't tell anyone I'm soft.", "id": "13zhvsi", "tone": "funny", "flag": "mug"},
+        {"text": "Your mug | Missed you at tea. Your mug's on the end hook. It's the law. Well, it's me.", "id": "og9bw6", "flag": "mail.d5-mug"},
       ],
     },
   },
@@ -16070,6 +16084,13 @@ const VOICE = {
         {"text": "The windows here are best. Don't tell the garden.", "id": "1qeshoa", "place": "lounge"},
         {"text": "The washroom choir was in fine voice today.", "id": "1uvhzum", "tone": "funny", "time": "morning"},
         {"text": "Good morning. The herbs say good morning too.", "id": "pgln4d", "time": "morning"},
+      ],
+      "week1": [
+        {"text": "Oh, hello. First visit? Have a look round.", "id": "cjxnyy", "flag": "beat.d3-store.1"},
+        {"text": "It's all credits. Your wallet's on your device.", "id": "ajszxz", "flag": "beat.d3-store.2"},
+        {"text": "What you buy goes in your locker. Safe and sound.", "id": "169rln", "flag": "beat.d3-store.3"},
+        {"text": "Snacks for a little hunger. Small comforts too.", "id": "1x06t2b", "flag": "beat.d3-store.4"},
+        {"text": "I'll remember what you bought. Tell me how it went.", "id": "1iw3oay", "flag": "beat.d3-store.5"},
       ],
     },
   },
@@ -18938,6 +18959,11 @@ const VOICE = {
         {"text": "Morning, new hand! Tea break's ten-thirty. That's the important bit. The rest is work.", "id": "ydyl0", "time": "morning", "week1": "true", "weekday": "mon"},
         {"text": "There you are. Settling in? Come and chat. Quiz is tomorrow. You're on my team now.", "id": "cvbtpj", "tier": [0, 1], "week1": "true", "weekday": "wed"},
         {"text": "Quiz night! Sit there. Know anything about engines? Good. Food? Even better.", "id": "mo6dds", "time": "evening", "week1": "true", "weekday": "thu"},
+        {"text": "Oi oi! Quiz night. You're on my team. No arguments.", "id": "t5zq1y", "flag": "beat.d4-quiz.1"},
+        {"text": "Teams of four. We need a sensible one. That's you.", "id": "h2oqzf", "tone": "funny", "flag": "beat.d4-quiz.2"},
+        {"text": "There's no food round. There should be.", "id": "1crmk7j", "tone": "funny", "flag": "beat.d4-quiz.3"},
+        {"text": "Grab a seat. Snacks are mine. Mostly.", "id": "1vptfbw", "tone": "funny", "flag": "beat.d4-quiz.4"},
+        {"text": "Win or lose, there's biscuits after. I made sure.", "id": "71goqp", "flag": "beat.d4-quiz.5"},
       ],
     },
   },
@@ -21223,6 +21249,19 @@ const VOICE = {
         {"text": "Inspection today. I've folded everything. I've folded my socks. Is that normal?", "id": "u1foh", "tone": "funny", "week1": "true", "weekday": "thu"},
         {"text": "Sowing morning's tomorrow! You plant your own seedling. Come with me? Film night after.", "id": "ir7ptp", "tier": [1, 4], "week1": "true", "weekday": "fri"},
         {"text": "Ready? Garden. Seedling. Bring your hands. That's all you need. And maybe a towel.", "id": "10k39gg", "time": "morning", "week1": "true", "weekday": "sat"},
+        {"text": "Morning! Washroom first, before the queue. Hot's best early.", "id": "1el5hch", "flag": "beat.d1-wash.1"},
+        {"text": "Breakfast's till eight. Then Works. Then everything.", "id": "4rjg09", "flag": "beat.d1-wash.2"},
+        {"text": "Towel's in your locker. Top shelf. I think.", "id": "1p0422", "flag": "beat.d1-wash.3"},
+        {"text": "Out the door, then left. Probably left.", "id": "179ofgq", "tone": "funny", "flag": "beat.d1-wash.4"},
+        {"text": "Sowing morning's tomorrow! You plant your own seedling.", "id": "1w3byfi", "flag": "beat.d5-invite.1"},
+        {"text": "Garden, before lunch. Bring your hands. That's all.", "id": "1li8ixq", "flag": "beat.d5-invite.2"},
+        {"text": "Film night after dinner, too. Come? I'll save a seat.", "id": "1406m01", "flag": "beat.d5-invite.3"},
+        {"text": "It's your first day off. Sleep in. A bit.", "id": "8v9fqa", "flag": "beat.d5-invite.4"},
+        {"text": "Here! Pick a pot. Any pot. That one's yours.", "id": "qv7sll", "flag": "beat.d6-sowing.1"},
+        {"text": "Seed in, soil on, a little water. Not too much.", "id": "nhd6kj", "flag": "beat.d6-sowing.2"},
+        {"text": "Day off. Nobody's working. Well, the garden is.", "id": "1lx6b9a", "tone": "funny", "flag": "beat.d6-sowing.3"},
+        {"text": "It'll grow all year. So will you, I think.", "id": "1jamgua", "tone": "warm", "flag": "beat.d6-sowing.4"},
+        {"text": "Film night later! You're coming. I've decided.", "id": "16idzcf", "tone": "funny", "flag": "beat.d6-sowing.5"},
       ],
     },
   },
@@ -21540,6 +21579,12 @@ const VOICE = {
         {"text": "I knit. Badly. Ask Kovac. She's honest about it.", "id": "1bdl69x", "tone": "funny", "flag": "walk.more.9"},
         {"text": "Where are you from, then? Tell me at dinner. Properly.", "id": "t55hbx", "flag": "walk.more.10"},
         {"text": "Bit of a talker, me. Say if I'm too much. Nobody has yet.", "id": "1olx92n", "tone": "funny", "flag": "walk.more.11"},
+        {"text": "Your pick today. Board's there. Choose one you like.", "id": "oc8a92", "flag": "beat.d3-pick.1"},
+        {"text": "Start small. A scrubber, a fan. Nothing that hisses.", "id": "10dnwxj", "tone": "funny", "flag": "beat.d3-pick.2"},
+        {"text": "I'm on Deck 6 all morning. Find me on the Roster.", "id": "1gb4wye", "flag": "beat.d3-pick.3"},
+        {"text": "Stuck? Tap my name on the Roster. I'll come up.", "id": "722uon", "flag": "beat.d3-pick.4"},
+        {"text": "Right, onward. You've got this.", "id": "1wqashy", "flag": "beat.d3-pick.5"},
+        {"text": "On your own today | My day off. The board's yours. You're ready. Don't break anything big.", "id": "171xfna", "flag": "mail.d4-mail"},
       ],
     },
   },
@@ -25156,6 +25201,7 @@ const MEETINGS_BAKED = {
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your locker, and handed you your device.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. Home. Top bunk at the back is yours.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Your locker's under it. Bag in there. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours too. Your device. Mail, your schedule, maps, the lot.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "It'll want to say hello. They always do. Let it."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
   "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to eight in the Works bay. Your first job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to eight, the Works bay. Not eight. Ten to."}, {"who": "calder", "text": "Tuesday, your first job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
   "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, how a ship day runs, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "How a day runs, then. Breakfast from six. Shift at eight. Tea at half ten, in the corner.", "to": "you"}, {"who": "torres-zeke", "text": "Off at half four. Dinner from six. Then the evening's yours. Gym, lounge, Tiles, bed."}, {"who": "torres-zeke", "text": "Two days off in a row each week. Yours are the weekend, like most of Works."}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
+  "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Hunger, energy, hygiene, social, fitness. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
   "introSoloJob": {"title": "Your first solo job", "from": "Chief Ines Calder", "gist": "Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.", "lines": [{"who": "calder", "text": "Come in. Don't sit. This won't take long.", "pose": "gesture"}, {"who": "calder", "text": "Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.", "to": "you"}, {"who": "calder", "text": "You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once."}, {"who": "calder", "text": "Every job you finish goes in your Record. So does every job you leave half done. I read the Record."}, {"who": "calder", "text": "Progress talks: any time. Book one on your device. I'll keep it."}, {"choice": [{"text": "What if I need help?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Ask. Asking isn't failing. Hiding it is.", "pose": "nod"}}, {"text": "I won't let you down, Chief.", "rel": {"calder": 1}, "flavour": "cheer", "reply": {"who": "calder", "text": "Don't let the machine down. I'll be fine."}}, {"text": "(Take the job and go)", "reply": {"who": "calder", "text": "Good. That's an answer too."}}]}, {"who": "calder", "text": "One more thing. Finish what you start. Off you go."}]},
 };
 // ---- END MEETINGS ----
