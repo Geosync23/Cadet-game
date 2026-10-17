@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.25
+   STARSHIP CADET: CSV Wren                           build 0.43.26
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.25';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.26';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13638,9 +13638,16 @@ function lineQ(name, ...a) {
       case 'eventNow': f = typeof eventNow === 'function' && eventNow; break;
       case 'habitsOn': f = typeof habitsOn === 'function' && habitsOn; break;
     }
+    if (f && name === 'cue') {                            // the same answer while the clock and the cue list stand still (0.43.26): one line pick asks it hundreds of times
+      const now = shipNow(), n = typeof SHIP !== 'undefined' && SHIP.social && Array.isArray(SHIP.social.cues) ? SHIP.social.cues.length : -1;
+      if (LINE_CUE.now !== now || LINE_CUE.n !== n) { LINE_CUE.now = now; LINE_CUE.n = n; LINE_CUE.m.clear(); }
+      if (!LINE_CUE.m.has(a[0])) LINE_CUE.m.set(a[0], f(...a));
+      return LINE_CUE.m.get(a[0]);
+    }
     return f ? f(...a) : undefined;
   } catch (e) { return undefined; }
 }
+const LINE_CUE = { now: null, n: -1, m: new Map() };
 function linesWho(who) {
   if (who && typeof who === 'object') return who;
   if (typeof ROSTER === 'undefined') return null;
@@ -13651,7 +13658,7 @@ const linesName = p => p ? (typeof shortName === 'function' ? shortName(p) : p.n
 const linesMe = () => (typeof ROSTER_PLAYER !== 'undefined' && ROSTER_PLAYER.first) || 'cadet';
 // one condition: key, wanted value (a string, 'a|b' for either), the speaker, ctx -> true / false
 function lineCond(k, v, p, ctx) {
-  const t = ctx.t, any = (x, f) => String(x).split('|').some(f), id = p.id;
+  const t = ctx.t, any = (x, f) => { const s = String(x); return s.indexOf('|') < 0 ? f(s) : s.split('|').some(f); }, id = p.id;
   switch (k) {
     case 'mem': return any(v, x => lineQ('mem', id, x) != null);
     case 'told': return any(v, x => { const m = lineQ('mem', id, x); return m != null && !m.told; });
@@ -13710,6 +13717,14 @@ function linePair(v, a, b) {
   });
 }
 const LINE_META = new Set(['text', 'id', 'tone', 'w', 'odds', 'not', 'old', 'lines', 'flavour', 'reply', 'sets', 'memo']);   // data, not conditions
+// the cheap conditions first (0.43.26, the performance pass): who, with, act, time, deck, weekday and place need no
+// social query (and cue's answers are kept for the minute), so a line failing one is dropped before linesOk asks section 20 anything. The same answer as linesOk
+// alone (all conditions must hold either way), only sooner
+const LINE_FAST = new Set(['who', 'with', 'act', 'time', 'deck', 'weekday', 'place', 'cue']);   // cue: lineQ keeps its answers for the minute
+function lineQuick(e, p, ctx) {
+  for (const k in e) if (LINE_FAST.has(k)) { const v = e[k]; if (Array.isArray(v) ? !v.every(x => lineCond(k, x, p, ctx)) : !lineCond(k, v, p, ctx)) return false; }
+  return true;
+}
 function linesOk(e, p, ctx) {
   for (const k in e) {
     if (LINE_META.has(k)) continue;
@@ -13771,17 +13786,24 @@ function lineFor(who, kind, ctx = {}) {
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
   const pool = [];
   for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', tp && tp.lines && tp.lines[kind]], ['bank', LINES[kind]]])
-    for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
+    for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
   if (!pool.length) return null;
+  const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
   for (const x of pool) {
-    const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
     if (mine.some(r => r.id === x.e.id && r.h !== h)) x.sc -= 15;
     if (all.some(r => r.id === x.e.id && r.who !== p.id)) x.sc -= 8;
-    const mk = [].concat(x.e.told || x.e.mem || [])[0];
-    x.text = linesFill(x.e.text, p, mk && !c.mem ? { ...c, mem: mk } : c);
   }
-  const ok = pool.filter(x => x.text != null); if (!ok.length) return null;
-  const top = Math.max(...ok.map(x => x.sc)), best = ok.filter(x => x.sc === top);
+  pool.sort((x, y) => y.sc - x.sc);                       // stable: the pool's order within a score
+  let best = [];
+  for (let i = 0; i < pool.length && !best.length;) {     // fill only the top-scoring lines, the next score down if none of them fill (0.43.26)
+    const top = pool[i].sc;
+    for (; i < pool.length && pool[i].sc === top; i++) {
+      const x = pool[i], mk = [].concat(x.e.told || x.e.mem || [])[0];
+      x.text = linesFill(x.e.text, p, mk && !c.mem ? { ...c, mem: mk } : c);
+      if (x.text != null) best.push(x);
+    }
+  }
+  if (!best.length) return null;
   const sum = best.reduce((s, x) => s + (x.e.w || 1), 0);
   let r = schedU(p.seed || 0, h, 750) * sum, pick = best[best.length - 1];
   for (const x of best) { r -= x.e.w || 1; if (r < 0) { pick = x; break; } }
@@ -13799,7 +13821,7 @@ function overheardFor(a, b, ctx = {}) {
   a = linesWho(a); if (b) { b = linesWho(b); if (!b) return null; } if (!a || typeof CONVOS === 'undefined') return null;   // no b: one speaker's lines (only A:, a call home)
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60), ca = { ...ctx, t, other: b }, cb = { ...ctx, t, other: a };
   const skip = new Set(ctx.skip || []);
-  const pool = CONVOS.filter(e => !skip.has(e.id) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && linesOk(e, a, ca))
+  const pool = CONVOS.filter(e => !skip.has(e.id) && !(ctx.noSerious && e.tone === 'serious') && !b === e.lines.every(l => l.who === 'A') && lineQuick(e, a, ca) && linesOk(e, a, ca))
     .map(e => ({ e, sc: lineSpec(e) })).sort((x, y) => y.sc - x.sc);   // stable: file order within a score
   let best = [];
   for (let i = 0; i < pool.length && !best.length;) {     // fill only the most specific ones, the next score down if none of them fill
@@ -13843,7 +13865,7 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
   for (const id in L.reacted || {}) if (L.reacted[id].day === day) reacted[id] = L.reacted[id];   // only today's count
   s.lines = { ring: L.ring.slice(-LINES_RING_MAX), serious: L.serious, reacted };
 });
-function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
+function linesNew() { if (typeof SHIP !== 'undefined') SHIP.lines = { ring: [], serious: 0, reacted: {} }; OVH = null; OVH_SCAN = null; OVH_AT = -1e9; REACT_AT = -1e9; LINE_RECENT.length = 0; }   // a new game (section 13's simNote('newGame'))
 // the ids heard within the ring's days (an entry from a later day than today is from an earlier game: it doesn't count)
 function linesRing(day) { const L = linesState(); return L ? L.ring.filter(r => r[1] <= day && day - r[1] < LINES_RING_DAYS).map(r => r[0]) : []; }
 function linesHeard(id, day, tone) {
@@ -13852,8 +13874,13 @@ function linesHeard(id, day, tone) {
   if (tone === 'serious') L.serious = day;
 }
 const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
+// the minute's tries are queued and worked OVH_PER_FRAME a frame (0.43.26), so a ship minute's scan never lands in one
+// frame on a phone: the same tries in the same order, read at the minute's time, so the same picks
+const OVH_PER_FRAME = 1;
+let OVH_SCAN = null;                                      // { t, day, tries: [{ x, y, ctx } | { x, react: true }], i }
 function linesTick() {
   if (OVH) { linesTalk(); return; }
+  if (OVH_SCAN) { linesScan(); return; }
   const m = Math.floor(shipNow()); if (m === OVH_MIN) return; OVH_MIN = m;
   if (typeof bubbleSay !== 'function' || typeof bubbles === 'undefined' || typeof DECK_CREW === 'undefined') return;
   const t = shipNow(), ovh = typeof CONVOS !== 'undefined' && CONVOS.length > 0 && schedU(m, 0, 752) < OVH_ODDS;
@@ -13865,21 +13892,33 @@ function linesTick() {
   const near = DECK_CREW.filter(a => a.h && a.p && !a.p.player && Math.hypot(a.x - P.x, a.z - P.z) <= (typeof CHATTER_NEAR !== 'undefined' ? CHATTER_NEAR : 7) && onScreen(a))
     .map(a => ({ a, w: whereIs(a.p, t) })).filter(x => x.w && !x.w.moving && x.w.act !== 'sleep' && x.w.act !== 'wash')
     .sort((x, y) => schedU(x.a.p.seed, m, 753) - schedU(y.a.p.seed, m, 753)).slice(0, OVH_NEAR);
-  if (react && linesReact(near, t, day)) return;
-  if (!ovh) return;
-  const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day;
-  let tries = OVH_TRIES;
-  for (const x of near) {
-    const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
-    const ctx = { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, skip, noSerious };
-    const call = w => w.act === 'callhome';               // someone on a call home talks to home, not to the next booth
-    for (const y of near.filter(y => y !== x && !call(x.w) && !call(y.w) && Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) <= OVH_PAIR).concat(null)) {   // with each one close by, then alone
-      if (tries-- <= 0) return;
-      const lines = overheardFor(x.a.p, y && y.a.p, ctx); if (!lines) continue;
-      linesHeard(lines.id, day, lines.tone);
-      OVH = { a: x.a, b: y && y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
+  const tries = react ? near.map(x => ({ x, react: true })) : [];
+  if (ovh) {
+    const L = linesState(), skip = linesRing(day), noSerious = L && L.serious === day, call = w => w.act === 'callhome';   // someone on a call home talks to home, not to the next booth
+    let n = OVH_TRIES;
+    for (const x of near) {
+      if (n <= 0) break;
+      const r = typeof roomAt === 'function' ? roomAt(...x.a.here()) : null;
+      const ctx = { t, act: x.w.act, place: x.w.type, room: r && ROOMS[r] ? ROOMS[r].name : '', deck: deckDef.num, skip, noSerious };
+      for (const y of near.filter(y => y !== x && !call(x.w) && !call(y.w) && Math.hypot(x.a.x - y.a.x, x.a.z - y.a.z) <= OVH_PAIR).concat(null)) {   // with each one close by, then alone
+        if (n-- <= 0) break;
+        tries.push({ x, y, ctx });
+      }
     }
   }
+  if (tries.length) { OVH_SCAN = { t, day, tries, i: 0 }; linesScan(); }
+}
+function linesScan() {
+  const S = OVH_SCAN;
+  if (linesHush() || bubbles.list.length) { OVH_SCAN = null; return; }   // the budget says no (someone else spoke meanwhile)
+  for (let k = 0; k < OVH_PER_FRAME && S.i < S.tries.length; k++) {
+    const q = S.tries[S.i++];
+    if (q.react) { if (linesReact([q.x], S.t, S.day)) { OVH_SCAN = null; return; } continue; }
+    const lines = overheardFor(q.x.a.p, q.y && q.y.a.p, q.ctx); if (!lines) continue;
+    OVH_SCAN = null; linesHeard(lines.id, S.day, lines.tone);
+    OVH = { a: q.x.a, b: q.y && q.y.a, lines, i: 0, next: 0, bub: [] }; linesTalk(); return;
+  }
+  if (S.i >= S.tries.length) OVH_SCAN = null;
 }
 // the conversation playing: the next line when it's due; it ends after the last, or stops when the budget says hush
 function linesTalk() {
