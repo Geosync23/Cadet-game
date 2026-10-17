@@ -33715,6 +33715,9 @@ class CrewAgent {
       if (m.tray && m.next && BUSY.has(m.next) && !this.elsewhere(m.next)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }   // the mess hall's full: no tray till they sit (seated diners show none; 0.26.32)
       return m.next;
     }
+    // 0.27.47: the same after the queue: their seat still taken and no free one beside it (the Sunday table, day 35's
+    // quist-ilse at 17:59), so they'd wait nearby holding a tray; no tray till they sit
+    if (m.tray && !lineSeg(w) && w.placeId && BUSY.has(w.placeId) && !(this.settled && this.spot && this.spot.id === w.placeId) && !this.elsewhere(w.placeId)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }
     if (m.trayLate && this.settled && this.spot && trayTo(this.spot.id)) { m.tray = true; m.trayLate = false; LINE_LOG.trays++; }
     if (m.seat && !w.placeId) return m.seat;             // no seat planned: the one picked at the counter
     return undefined;
