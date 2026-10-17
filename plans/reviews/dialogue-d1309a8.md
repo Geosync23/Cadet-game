@@ -37,3 +37,20 @@ writers will hit it, so the README should say to reword, or have the head writer
 - LOW (false positives): "married" and "wedding" now stop ordinary family lines in moments ("My parents have been
   married forty years."), which the family and homesick themes will want. Consider keeping those two for overheard
   and you-directed checks only, or allow them when they don't sit next to you/me.
+
+## Addendum: 09b8c33: BLOCK for writers on overheard, about, rumour and smalltalk until fixed
+The relaxed kinds now let romance *about the player* through, because BANNED_AT_YOU only matches second-person
+phrasings. All of these pass lines_check as overheard lines:
+- "I think I am in love with the new hand."
+- "Torres is sweet on the cadet, you know."
+- "Rumour is {me} and Pell are dating."  ("dating" isn't on any list)
+
+`rumour` and `about` are lines a crew member says *to you* on the chat card, so they are player-facing, not
+background. Fix:
+1. In every relaxed kind, any romance word plus a player reference is an error. Player references: `{me}`, `{nick}`,
+   "the new hand", "the cadet", "new cadet", "the newcomer", "you", "your".
+2. Put `rumour` and `about` back under the full ban (keep the relaxation for overheard, smalltalk between two crew,
+   and bond:couple lines).
+3. Add `\bdating\b`, `\bgoing out\b` and `\bseeing each other\b` to the couple-words list (so they're judged by the
+   same rules).
+The allow list by line id is a good way out.
