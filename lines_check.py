@@ -126,6 +126,13 @@ def main(argv):
         print('lines_check: FAIL (content_gen.py can\'t read content/)')
         return 1
     people, html = roster(game)
+    # trait: and you: values, with _ for a space (trait:dry_humour, you:night_owl): the roster's traits, section 20's REP_TAGS
+    m = re.search(r'^const REP_TAGS = \[(.*?)\];', html, re.M | re.S)
+    VALUES['you'] = {t.replace(' ', '_') for t in re.findall(r"\['([^']+)'", m.group(1))} if m else None
+    VALUES['trait'] = {t.replace(' ', '_') for p in people.values() for t in p.get('traits', [])} or None
+    for k in ('you', 'trait'):
+        if not VALUES[k]:
+            del VALUES[k]                                  # an older build without them: not checked
     names = set()
     for p in people.values():
         names.update(w.strip('.') for w in p['name'].split())
@@ -244,7 +251,7 @@ def main(argv):
                 if k in VALUES:
                     for x in (v if isinstance(v, list) else [v]):
                         for alt in str(x).split('|'):
-                            if alt not in VALUES[k]:
+                            if (alt.replace(' ', '_') if k in ('you', 'trait') else alt) not in VALUES[k]:
                                 errors.append(f'{tag}: {k}:{alt} is not one of {", ".join(sorted(VALUES[k]))}')
                 if k == 'aff':
                     for x in (v if isinstance(v, list) else [v]):

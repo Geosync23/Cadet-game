@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.17
+   STARSHIP CADET: CSV Wren                           build 0.43.18
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7224,7 +7224,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.17';                          // keep in step with the header's build line
+const GAME_BUILD = '0.43.18';                          // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13682,7 +13682,7 @@ function lineCond(k, v, p, ctx) {
     case 'news': return any(v, x => !!lineQ('knowsNews', p, x));
     case 'rep': return any(v, x => LINE_REP.indexOf(lineQ('repBand', p.dept)) >= LINE_REP.indexOf(x));   // this band or better (!rep:well = below well)
     case 'ship.work': case 'ship.kindness': case 'ship.spirit': return any(v, x => LINE_SHIP.indexOf(lineQ('repShip', k.slice(5))) >= LINE_SHIP.indexOf(x));   // this or better
-    case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x));
+    case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x.replace(/_/g, ' ')));   // you:night_owl: _ for a space
     case 'cue': return any(v, x => { const [k, at] = x.split('@'), c = lineQ('cue', k); return !!c && (!at || (at === 'me' ? c.who === id : at === 'dept' ? c.dept === p.dept : false)); });   // cue:gift.you@me: about the speaker; @dept: their department's
     case 'flag': return any(v, x => ctx.flags && x in ctx.flags ? !!ctx.flags[x] : !!lineQ('flag', x));   // ctx.flags: { key: true } answers for those keys (onboarding asks for a step's lines)
     case 'week1': { const on = !!lineQ('inWeek1'); return any(v, x => (x === 'true') === on); }
@@ -13705,7 +13705,7 @@ function lineCond(k, v, p, ctx) {
     case 'with': { const o = ctx.other && (ctx.other.id || ctx.other); return !!o && any(v, x => o === x); }   // the other person in the scene
     case 'dept': return any(v, x => p.dept === x);
     case 'rank': return any(v, x => p.rank === x);
-    case 'trait': return any(v, x => (p.traits || []).includes(x));
+    case 'trait': return any(v, x => (p.traits || []).includes(x.replace(/_/g, ' ')));   // trait:dry_humour
     case 'habit': { const hs = lineQ('habitsOn', p, Math.floor(t / 1440) + 1) || p.habits || []; return any(v, x => hs.includes(x)); }   // today's habits (habit shifts too)
     case 'act': return any(v, x => (LINE_ACTS[x] || [x]).includes(ctx.act));
     case 'birthday': return any(v, x => x === 'me' ? !!(typeof isBirthday === 'function' && isBirthday(p, t)) : x === 'you' ? !!(typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && isBirthday(ROSTER_PLAYER, t)) : false);
