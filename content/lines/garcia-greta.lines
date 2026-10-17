@@ -25,3 +25,60 @@
 == joy
 ? tier>=colleague
 - Taking something broken and handing it back working. Best feeling there is.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- Morning, {me}. I'm off to bed. Ship's all yours. Try not to break it.   #funny
+? tier>=acquaintance warmth:cold
+- Oh, look. It's you. I'd started to think you'd fallen off the ship. Good. You hadn't.   #funny
+
+== near
+? habit:lounge-regular
+- Bow lounge before shift. Big windows. No rain. Not that I'm checking.
+? act:work
+- Airlock seals checked. Firm at the airlock. Friendly everywhere else.
+
+== invite
+- Garden after shift? I'll show you the misting. It's practically weather.
+
+== accept
+- Fine. Yes. I'll come. Don't make it a whole thing.   #funny
+- Yes. Bring your headphones. I know they're broken.   #funny
+
+== decline
+- Can't. Patrol. Someone has to be friendly at the airlock. Next time.
+? weekday:tue|wed
+- Rest day. I'm doing nothing, loudly. Thursday?   #funny
+
+== missed
+- You didn't come. That's fine. I fixed someone's headphones instead. Riveting.   #funny
+
+== birthday
+? birthday:you
+- Happy birthday. I fixed your headphones. You didn't know they were broken. They were.   #warm
+? birthday:me
+- My birthday. Kim made me a card that plays a tune. Badly. I'll fix it later.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's on. Finally, some weather. Don't tell anyone I said that.   #funny
+
+== hint
+- Hey. {me}. Got a minute later? I've something to say. No jokes in it.
+
+== about
+? aff:kim-yusuf:friend
+- Kim does the day shift's headphones, I do the night's. Nobody aboard goes without.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Try not to break anything I'll have to fix.   #funny
+- Off you go. Mind the airlock. It's firmer than me.
+== greet
+? tier>=acquaintance time:evening
+- Evening, {me}. Ship's weather: dry, with a chance of more dry.   #funny
+== life
+? tier>=friend
+- On Hesper Dock the rain had a smell. I'd know it anywhere. That's all. Nothing sad.
+- Fixing things is easy. People are harder. You're one of the easy ones.

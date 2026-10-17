@@ -25,3 +25,61 @@
 == joy
 ? tier>=colleague
 - My model of the Wren. Every hull plate. I'll show you the bridge one day. Gently.
+
+// ---- Writer 2, batch 2: to ~30 (greet by time and warmth, near, invite, accept, decline, missed, birthday, cue, hint, about)
+== greet
+? tier>=acquaintance time:morning
+- {hi}, {me}. Window table again. The view's slow out there. I like slow.
+? tier>=acquaintance warmth:cold
+- {me}. I haven't seen you in a while. I hope it's been a smooth stretch.
+
+== near
+? habit:musician
+- I play a little in the music room now. Gently. Like a docking.
+? deck:1
+- Bridge is calm. Hands light on the helm. That's the whole secret.
+
+== invite
+- Observatory night? I'll point out where we're going. Slowly. It's a long way.
+? tier>=colleague
+- Friday jam? I play a little now. Very quietly. Come and drown out the wrong notes.   #funny
+
+== accept
+- {yes}. I'll be there early, at the window end.
+- That's kind. Yes. I'll come.
+
+== decline
+- Not tonight. A long turn tomorrow. I like to sleep before a long turn.
+? weekday:fri|sat
+- Rest day. The model ship needs a new mast. Ask me Sunday?
+
+== missed
+- You didn't come. No matter. I kept the window seat. It was very peaceful.
+
+== birthday
+? birthday:you
+- Happy birthday, {me}. I'll fly extra gently today. Not a cup spilt. My present.   #warm
+? birthday:me
+- My birthday. Brennan made a cake shaped like the Wren. I flew it straight to my plate.   #funny
+
+== cue
+? cue:event.ionStorm.onset
+- Storm's in. Hold on to your mug. I'll hold on to the rest.
+
+== hint
+- Have you a minute later, {me}? There's something I'd like to tell you.
+
+== about
+? aff:marrow:friend
+- Six years with the Captain. She's never once grabbed the rail. Highest praise.   #warm
+
+// ---- Writer 2, batch 2: top-up (bye, greet by time, life at friend tier)
+== bye
+- {bye}. Walk gently. I'm flying gently, so it's only fair.   #funny
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}, {me}. Afternoon watch. She's flying like a cup of tea on a tray.
+== life
+? tier>=friend
+- I learnt to fly on a cargo hauler. Noisy old thing. I still miss her a little.
+- Twenty years, and I still check the model before every long turn. For luck.   #funny
