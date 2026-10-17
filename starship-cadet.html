@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.39.21
+   STARSHIP CADET: CSV Wren                           build 0.39.22
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7322,7 +7322,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.39.21';                            // keep in step with the header's build line
+const GAME_BUILD = '0.39.22';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -27285,10 +27285,11 @@ function knowBlocks(id) {                                // for the Crew app (se
 // bus: simNote('bond', { a, b, kind, was })
 const BOND_AT = { friends: 60, best: 65, rivals: -40, rivalsOff: -25, drift: 15, driftOff: 20, mentor: 40, mentorOff: 25 };
 const BOND_MENTEES = 2, BOND_APART = 4, BOND_MENTEE_RANKS = ['junior', 'officer'], COUPLE_AFF = 90;
-// hard bounds by design (0.39.21, the lead's long-play rule): at most BOND_MAX bonds a person aboard (a new one waits while
-// either is full; 9 is the most anyone had in 280 days) and BOND_GONE_MAX frozen with people who moved on (the oldest let go
-// first), so SHIP.social.bonds is at most n * (BOND_MAX + BOND_GONE_MAX) / 2 bonds. STORY_CAP counts when they bind (not saved)
-const BOND_MAX = 10, BOND_GONE_MAX = 4, STORY_CAP = { full: 0, gone: 0, firstFull: null, firstGone: null };
+// hard bounds by design (0.39.21, the lead's long-play rule): no new bond for someone with BOND_MAX already (9 is the most
+// anyone had in 280 days; a frozen bond that wakes when its pair are both aboard again can take them one or two over) and at
+// most BOND_GONE_MAX frozen with people who moved on (the oldest let go first): about n * (BOND_MAX + BOND_GONE_MAX) / 2 bonds
+// in all. STORY_CAP (not saved; cleared when the clock goes back, a new game) counts refused tries an hour and when each first bound
+const BOND_MAX = 10, BOND_GONE_MAX = 4, STORY_CAP = { full: 0, gone: 0, firstFull: null, firstGone: null, h: -Infinity };
 const STORY_BONDS = ['friends', 'best', 'rivals', 'mentor', 'mentee', 'drifting', 'couple'];   // section 20's frozen BOND_KINDS
 // how many friends (60+) someone makes room for: section 20's hourly drift stops new friendships climbing past 60
 // once either of the pair has this many (the designer's numbers)
@@ -27302,6 +27303,7 @@ function storyHour(h, pairs) {
     if (!b) cntAdd(k, 1); B[k] = Object.assign({ kind, since: t }, extra);
     if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind, was }); } };
   const drop = k => { const b = B[k]; if (!b) return; delete B[k]; if (!b.gone) cntAdd(k, -1); if (typeof simNote === 'function') { const [a, c] = k.split(':'); simNote('bond', { a, b: c, kind: null, was: b.kind }); } };
+  if (h < STORY_CAP.h) Object.assign(STORY_CAP, { full: 0, gone: 0, firstFull: null, firstGone: null }); STORY_CAP.h = h;   // a new game
   affWeekTake(h);
   homeMsgHour(h);
   for (const [i, j] of pairs || []) { const b = B[crew[i].id + ':' + crew[j].id]; if (b) b.seen = h; }
@@ -27404,15 +27406,16 @@ function socMissed(id) {                                   // their closest frie
 // affinityPlan keeps its pure starting affinity. affPlanWeek(i, j, d) -> affinity or undefined (i, j: ROSTER indexes)
 const AFF_SNAP = 30, AFF_SNAP_MAX = 600;                 // pairs at |affinity| 30+ (the rule); the strongest 600 only as a safety net for the save (0.39.20, the lead: about 4.8 KB for both weeks; with 86 crew it never binds before day 140)
 const AFF_WEEK = { src: null, map: new Map() };           // decoded snapshots: week -> Map(pairIdx -> v)
+const affCrewTag = () => (socHash(SOC.crew.map(p => p.id).join(',')) >>> 0).toString(36);   // which crew list (and order) a snapshot's pairs index (0.39.22)
 function affWeeks() {
   const s = SHIP.social.affWeek || null;
   if (AFF_WEEK.src !== s) { AFF_WEEK.src = s; AFF_WEEK.map = new Map();
-    for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(.*)$/.exec(part); if (!m || +m[2] !== SOC.n) continue;
+    for (const part of (s || '').split(';')) { const m = /^(-?\d+):(\d+):(?:([0-9a-z]+)\/(?=~))?(.*)$/.exec(part); if (!m || +m[2] !== SOC.n || (m[3] && m[3] !== affCrewTag())) continue;   // another crew list (same size, other order): not this crew's
       try { const P = new Map();
-        if (m[3][0] === '~') {                                // 0.39.21: a bit per pair (in i < j order), then the values of those set
-          const bin = atob(m[3].slice(1)), n = SOC.n, nb = Math.ceil(n * (n - 1) / 2 / 8); let q = 0, v = nb;
+        if (m[4][0] === '~') {                                // 0.39.21: a bit per pair (in i < j order), then the values of those set
+          const bin = atob(m[4].slice(1)), n = SOC.n, nb = Math.ceil(n * (n - 1) / 2 / 8); let q = 0, v = nb;
           for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++, q++) if (bin.charCodeAt(q >> 3) >> (q & 7) & 1) P.set(pairIdx(i, j), bin.charCodeAt(v++) << 24 >> 24);
-        } else { const bin = atob(m[3]); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); }   // the older form: [i, j, v] triples
+        } else { const bin = atob(m[4]); for (let k = 0; k + 2 < bin.length; k += 3) P.set(pairIdx(bin.charCodeAt(k), bin.charCodeAt(k + 1)), bin.charCodeAt(k + 2) << 24 >> 24); }   // the older form: [i, j, v] triples
         AFF_WEEK.map.set(+m[1], { P, raw: part }); }
       catch (e) { /* a bad snapshot is ignored */ } } }
   return AFF_WEEK.map;
@@ -27428,7 +27431,7 @@ function affWeekTake(h) {                                // storyHour: the first
   for (const [, , v] of L) vals += String.fromCharCode(v & 255);
   for (const b of bits) bin += String.fromCharCode(b);
   const keep = [...M.keys()].filter(k => k === w - 1).map(k => M.get(k).raw);
-  SHIP.social.affWeek = keep.concat(w + ':' + n + ':~' + btoa(bin + vals)).join(';');
+  SHIP.social.affWeek = keep.concat(w + ':' + n + ':' + affCrewTag() + '/~' + btoa(bin + vals)).join(';');
 }
 function affPlanWeek(i, j, d) {
   if (!Number.isFinite(d)) return undefined;              // no day: the starting affinity, as before
@@ -27717,24 +27720,26 @@ function goodbyeDone(p, d, c) {
 // 0xFFFFFF for none; peak, a signed byte, -128 for none; seen, 2 bytes, 0xFFFF for none; flags: 1 spar; gone, 2 bytes,
 // 0 for none), and any other field a bond carries in x: [[row, { ... }]]. Every value is a whole number (affinity is an
 // Int8Array, times are ship minutes and hours), so a load gives back exactly what was saved
+const BOND_T0 = 20160, BOND_H0 = 336;                    // since (minutes) and seen (hours) are stored with this added: a game that starts with the day-0 arrival makes its couples before minute 0 (two weeks of room)
 function storyBondsPack(B) {
+  if (SOC.n > 255) return null;                         // a crew index is one byte: a bigger crew saves in section 20's own form
   let bin = ''; const x = [], b3 = v => String.fromCharCode(v >> 16 & 255, v >> 8 & 255, v & 255), b2 = v => String.fromCharCode(v >> 8 & 255, v & 255);
   for (const k in B || {}) { const [a, c] = k.split(':'), o = B[k], i = SOC.idx.get(a), j = SOC.idx.get(c), ki = SOC_BOND_KINDS.indexOf(o.kind);
     if (i === undefined || j === undefined || ki < 0) continue;
-    const { kind, since, peak, seen, spar, gone, ...rest } = o, ok = v => v == null || (Number.isInteger(v) && v >= 0);
-    if (!ok(since) || since >= 0xFFFFFF || !ok(seen) || seen >= 0xFFFF || (gone != null && (!Number.isInteger(gone) || gone < 1 || gone > 0xFFFF)) || (peak != null && (!Number.isInteger(peak) || peak < -127 || peak > 127)) || (spar != null && spar !== true)) return null;   // not a shape this form holds: section 20's own form
+    const { kind, since, peak, seen, spar, gone, ...rest } = o, ok = (v, z, top) => v == null || (Number.isInteger(v) && v + z >= 0 && v + z < top);
+    if (!ok(since, BOND_T0, 0xFFFFFF) || !ok(seen, BOND_H0, 0xFFFF) || (gone != null && (!Number.isInteger(gone) || gone < 1 || gone > 0xFFFF)) || (peak != null && (!Number.isInteger(peak) || peak < -127 || peak > 127)) || (spar != null && spar !== true)) return null;   // not a shape this form holds: section 20's own form
     if (Object.keys(rest).length) x.push([bin.length / 12, rest]);
-    bin += String.fromCharCode(i, j, ki) + b3(since ?? 0xFFFFFF) + String.fromCharCode((peak ?? -128) & 255) + b2(seen ?? 0xFFFF) + String.fromCharCode(spar ? 1 : 0) + b2(gone ?? 0); }
-  return x.length ? { v: 2, b: btoa(bin), x } : { v: 2, b: btoa(bin) };
+    bin += String.fromCharCode(i, j, ki) + b3(since == null ? 0xFFFFFF : since + BOND_T0) + String.fromCharCode((peak ?? -128) & 255) + b2(seen == null ? 0xFFFF : seen + BOND_H0) + String.fromCharCode(spar ? 1 : 0) + b2(gone ?? 0); }
+  return x.length ? { v: 2, z: 1, b: btoa(bin), x } : { v: 2, z: 1, b: btoa(bin) };   // z: the offsets above (0.39.22)
 }
 function storyBondsUnpack(o, ids) {
-  const B = {}; let bin = ''; try { bin = atob(o.b || ''); } catch (e) { return B; }
+  const B = {}, z = o.z === 1, T0 = z ? BOND_T0 : 0, H0 = z ? BOND_H0 : 0; let bin = ''; try { bin = atob(o.b || ''); } catch (e) { return B; }
   const X = new Map((Array.isArray(o.x) ? o.x : []).filter(r => Array.isArray(r) && r[1] && typeof r[1] === 'object').map(r => [r[0], r[1]]));
   for (let r = 0, k = 0; k + 11 < bin.length; r++, k += 12) {
     const u = q => bin.charCodeAt(k + q), a = ids[u(0)], c = ids[u(1)], kind = SOC_BOND_KINDS[u(2)];
     if (!a || !c || !kind || !SOC.idx.has(a) || !SOC.idx.has(c)) continue;
     const since = u(3) << 16 | u(4) << 8 | u(5), peak = u(6) << 24 >> 24, seen = u(7) << 8 | u(8), gone = u(10) << 8 | u(11), b = { kind };
-    if (since !== 0xFFFFFF) b.since = since; if (peak !== -128) b.peak = peak; if (seen !== 0xFFFF) b.seen = seen; if (u(9) & 1) b.spar = true; if (gone) b.gone = gone;
+    if (since !== 0xFFFFFF) b.since = since - T0; if (peak !== -128) b.peak = peak; if (seen !== 0xFFFF) b.seen = seen - H0; if (u(9) & 1) b.spar = true; if (gone) b.gone = gone;
     if (X.has(r)) Object.assign(b, X.get(r));
     B[a + ':' + c] = b;
   }
