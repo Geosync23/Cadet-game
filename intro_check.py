@@ -337,7 +337,10 @@ with sync_playwright() as pw:
             g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
             if met: break
         print('  07:50 in the Works bay:', met)
-        if met != 'introBriefing': fail('the Monday briefing did not play')
+        who = g.ev("DIALOGUE ? { lines: DIALOGUE.queue.filter(l => l.who).map(l => l.who), cal: (() => { const a = DECK_CREW.find(x => x.p.id === 'calder'); return a ? (ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name : null; })() } : null")
+        print('  its speakers:', who)
+        if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
+        elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 480)'): fail('Calder speaks the briefing from ' + str(who['cal']))
         g.ev('(() => { while (DIALOGUE) dialogueNext(); })()')
         for i in range(40):
             g.step(30)
