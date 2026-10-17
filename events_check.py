@@ -382,6 +382,16 @@ with sync_playwright() as pw:
     print(f"Tradition files: {len(files)} ({', '.join(want_ids)}); loaded from the baked block or stand-in: {', '.join(loaded) or 'none'}")
     for i in want_ids:
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
+    # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
+    # a designer has asked for (it shows nothing until built); anything else is a typo
+    ANNOUNCED = {'tilesNight', 'seedlingYours', 'tastingTable', 'lanternWalk'}            # the deck architect, 0.38.10-0.38.11
+    ASKED = {'long-tables', 'cup-board', 'harvestTables', 'mending-table', 'mugRack', 'open-lab', 'rummage-crates', 'talent-stage', 'yearsEnd'}   # plans/trad-notes-*.md
+    ids = g.ev("SHIP_TRADITIONS.flatMap(e => [e.ties && e.ties.decor, e.trace].filter(Boolean).map(x => [e.id, x]))")
+    built = set(g.ev("typeof DECK_DRESS === 'undefined' ? [] : Object.keys(DECK_DRESS)"))
+    waiting = sorted({x for _, x in ids if x not in built})
+    print(f"Props and traces: {len(ids)} named; not in this build yet: {', '.join(waiting) or 'none'}")
+    for t, x in ids:
+        if x not in built and x not in ANNOUNCED and x not in ASKED: fail(f"{t}: decor or trace '{x}' isn't in DECK_DRESS, announced or asked for (a typo?)")
     for x in yr['errors']: fail('TRAD_ERRORS: ' + x)
     for b in yr['bad'][:20]: fail(b)
 

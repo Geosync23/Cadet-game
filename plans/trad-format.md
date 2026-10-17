@@ -102,7 +102,7 @@ A comma-separated list of `<who> <chance>`; the first that fits a person decides
 
 `<who>` is one word, or several joined with `+` (all must fit, e.g. `works+juniors 60%`):
 
-- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`;
+- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`, `night-shift`, `day-shift` (or `shift:<x>`);
 - a crew id (`rina`), a department (`works`, `galley`, `garden`, `survey`, `watch`, `infirmary`, `command`, `helm`, `comms`, `store`, `civilian`), or a habit (`gardener`, `musician`, `runner`, `stargazer`, `bar-regular`, `shopper`...: the roster's HABITS);
 - to be exact: `id:<x>`, `dept:<x>`, `habit:<x>`, `rank:<x>`.
 
