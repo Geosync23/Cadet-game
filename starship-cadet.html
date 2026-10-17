@@ -14069,6 +14069,7 @@ function bondOf(id, kind) {
 }
 const moodOf = p => { socInit(); const q = p && p.id ? p : SOC.crew[SOC.idx.get(p)]; if (!q) return 'ok'; const m = crewMood(q, shipNow()); return m < 40 ? 'low' : m >= 70 ? 'high' : 'ok'; };
 function beatOf(arcId) {                                // beats told of an arc; an arc id isn't always a crew id ('torres' is torres-zeke's): 20c's arcCrew, else the roster's thread 'arc:<id>'
+  if (typeof homeBeatOf === 'function' && /^home\./.test(arcId)) return homeBeatOf(arcId);   // calls home (20c): home arcs aren't crew
   socInit(); let id = typeof arcCrew === 'function' ? arcCrew(arcId) : null;
   if (!id || !SOC.idx.has(id)) { const p = SOC.crew.find(q => q.thread === 'arc:' + arcId); id = p ? p.id : arcId; }
   return SHIP.rel[id] ? SHIP.rel[id].arc || 0 : 0;
