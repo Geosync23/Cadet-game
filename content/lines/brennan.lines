@@ -169,3 +169,79 @@
 - Priya grows me chillies. Far too hot. I'd be lost without her.   #warm
 ? bond:friends
 - {friend}? Lovely. Eats everything I put down and says thank you. Treasure.   #warm
+
+// Writer 3, batch 1: callbacks, visits and notes (the game adds her name to a note). Moment memories are
+// moment.brennan.<word> from beats 1-5. The fire only behind beat 3's memories.
+
+== callback
+? told:moment.brennan.home
+- I've found out how they make your home dish, love. Don't ask how. I have ways.   #funny
+? told:moment.brennan.tonight
+- "Whatever you're cooking tonight." You flatterer. Here, have a bigger spoon.   #funny
+? told:moment.brennan.why
+- A plate's the quickest way home, love. I'm still right. Eat up.   #warm
+? told:moment.brennan.askedcruz !beat:brennan.5
+- Tove's got a pot on the go! For the sage. Won't let me near it. Quite right.   #funny
+? told:moment.brennan.mother
+- I sang to a pan today, love. Don't laugh. It came out lovely. The pan, not the singing.   #funny
+? told:moment.brennan.counted
+- Seventy-five, every dinner. I counted you twice tonight, love. Habit.   #warm
+? told:moment.brennan.restaurant
+- My restaurant with trays. Best one I've had, love. Don't tell the harbour.   #funny
+? told:moment.brennan.shared
+- Thanks for your story the other night, love. I keep thinking about it. Kettle's on.   #warm
+? told:moment.brennan.goodbye
+- "Tastes a bit like goodbye." You were right, love. I think of it every time I taste it.   #warm
+? told:moment.brennan.seconds
+- Seconds again? Course. Still the only verdict I want.   #funny
+? told:moment.brennan.family
+- I made your family's dish. Badly. Next week, better. Cooks are thieves, love.   #funny
+? mem:moment.brennan.staying
+- Still here, love. Still at the pans. Where else would I be?   #warm
+? told:moment.brennan.teach
+- Lesson one tonight, love. By ear. Bring your ears. And an apron.   #funny
+? told:came.harvest
+- You came to the harvest supper! Did you have the pie? Course you did. I watched.   #funny
+? told:came.market
+- Saw you at the market, love. Did you buy anything to eat? That's all I need to know.   #funny
+? told:fav.fetch
+- Bless you for fetching that, love. My legs have done three dinners today.   #warm
+? told:fav.lamp
+- You fixed my lamp, love. I can read my book at night now. Every dish, lit up.   #warm
+? told:fav.job
+- You did my job, love. There's a plate by for you. Don't argue.   #warm
+? told:fixed.oven
+- You fixed my oven! It's singing again. Come here, there's bread in it for you.   #warm
+? told:fixed.range
+- The range lights first time now. Was that you, love? There's pudding in it for you.   #warm
+? told:fixed.chiller
+- You fixed the chiller? The cold store's behaving. First time all month. Bless you.   #funny
+? told:fixed.extractor
+- Extractor's pulling again, love. I can see my own pans. Thank you.
+? told:gift.plant
+- Your plant's on my windowsill, love. I talk to it. It's a good listener.   #warm
+? told:gift.garden
+- Fresh from the garden! You know me too well, love. It's going in tonight's soup.   #warm
+? told:gift.tea
+- Your tea's in my good tin, love. Only for the quiet hour. Thank you.   #warm
+? told:bday
+- You came to see me on my birthday, love. That's the best present. That and cake.   #warm
+? told:grubby
+- You were in a state yesterday, love. Wash before you eat. I'll check.   #funny
+? told:heard.moment.pell
+- Pell says you've been a good friend to him. Best thing anyone's said in my mess.   #warm
+
+== visit
+- Brought you a plate, love. You weren't at dinner. Don't argue. Eat.   #warm
+- Hello, love. I was bringing biscuits down anyway. These ones are yours. Just yours.   #warm
+- Five minutes, love. My feet need a sit, and your bunk's on the way.   #funny
+- I've a new dish in my head, love. Tell me if it sounds good. Then tell me honestly.
+- Look at this bunk. Do you eat in here? Don't. Crumbs. I'll know.   #funny
+
+== note
+- You weren't in, love. There's a biscuit under the cloth. Eat it today, not tomorrow.
+- Missed you at dinner. There's a plate on the grab shelf with your name on it.   #warm
+- Popped down with biscuits. You were out. Tomas has been told they're yours. Firmly.   #funny
+- Called by to see if you'd eaten. You weren't here to ask. Eat something, love.
+? weekday:sat
+- Sunday bread in the morning, love. Come and knead. Bring your arms.
