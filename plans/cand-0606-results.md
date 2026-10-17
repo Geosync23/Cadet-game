@@ -21,3 +21,4 @@ One line per finished check (check, game commit, OK/FAIL, key numbers). A new bu
 - d571db4 day_check (R2): day 0 FAIL only shift short 2 (clock fix pending), tray line gone; day 1 OK; peaks D3 277; servery 125/125, 128/128. R3: player cart-run fail repeats on 0d8072c (player_check alone); debug run on d571db4 in flight.
 - faa2562 (+ clock-fix 83beaf6): events_check OK (no shift short, no film overrun)
 - faa2562 day_check (R2) days 0/6/7/35 all OK: shift short 0, tray gone, stuck 0.0, peak D3 279
+- d571db4 (R3): interactions OK · path OK (3093/3093) · player FAIL cart-run c2 = one-frame lag (holding follows stage next frame); test-only fix in player_check (step 1 before c2/c3) being verified on faa2562
