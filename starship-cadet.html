@@ -7759,7 +7759,7 @@ const bedtime = () => SHIP.time.min >= 20 * 60 || SHIP.time.min < 5 * 60 + 30;
 function offerSleep(at) {                                // at: where the tapped item is. True if it was your bunk
   const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id);
   if (!bed || deckDef.num !== deckOf(id) || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
-  if (!bedtime()) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
+  if (!bedtime() && !(typeof sickNow === 'function' && sickNow())) { toast('Your bunk', 'Too early to turn in. You can sleep here from 20:00.'); return true; }
   toastEl.classList.remove('show'); document.getElementById('sleepYes').onclick();   // 0.28.9, the user's rule: no dialog, you just sleep
   return true;
 }
@@ -7767,10 +7767,11 @@ document.getElementById('sleepNo').onclick = () => { sleepEl.hidden = true; };
 document.getElementById('sleepYes').onclick = () => {
   sleepEl.hidden = true; if (sleeping || ride) return;
   sleeping = true; fadeEl.style.transition = 'opacity .8s'; fadeEl.style.opacity = 1;
+  const nap = !bedtime() && typeof sickNow === 'function' && sickNow();   // unwell by day: sleep it off for a few hours (0.61.5)
   setTimeout(() => {
-    sleepUntil(WAKE_AT); nightT = nightAt();
+    if (nap) { skipTo(shipNow() + SICK.nap); sickCure(3); } else sleepUntil(WAKE_AT); nightT = nightAt();
     fadeEl.style.opacity = 0;
-    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; toast('Good morning', clockText() + '. You slept until ' + hhmm(WAKE_AT) + '.'); }, 850);
+    setTimeout(() => { fadeEl.style.transition = ''; sleeping = false; if (!nap) toast('Good morning', clockText() + '. You slept until ' + hhmm(WAKE_AT) + '.'); }, 850);
   }, 900);
 };
 addEventListener('keydown', e => { if (e.key === 'Escape' && !sleepEl.hidden) sleepEl.hidden = true; });
@@ -9772,7 +9773,7 @@ deviceApp({ id: 'schedule', title: 'Schedule', icon: 'schedule', order: 10,
   if (n.next) B.push({ kind: 'text', text: n.next });
   if (schedDay) B.push({ kind: 'buttons', items: [{ label: 'Back to today', action: { app: 'schedule', do: 'today' } }] });
   for (const day of schedDay ? [schedDay] : [d, d + 1]) {
-    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (typeof careerOn === 'function' && careerOn(day) ? ' · Leave' : devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
+    B.push({ kind: 'text', text: devDayName(day) + ' · ' + WEEKDAYS[weekday(day)] + (typeof careerOn === 'function' && careerOn(day) ? ' · Leave' : typeof sickToday === 'function' && sickToday(day) ? ' · Sick' + (SHIP.career.sh === 1 ? ', seen by Rina' : SHIP.career.sh === 2 ? ', seen in the infirmary' : '') : devShiftOn(day) ? '' : ' · Day off'), mark: 'head' });
     B.push({ kind: 'list', rows: devDay(day).map(x => ({ text: hhmm(x.from) + (x.kind === 'tradition' ? '' : '–' + hhmm(x.to)) + '  ' + x.title, sub: x.where,
       mark: day === d && x.from <= m && m < x.to ? 'hot' : day === d && x.to <= m ? 'past' : null })) });
     const lv = typeof careerCanBook === 'function' ? careerCanBook(day) : null;   // leave (0.61.0): a workday you can still book, or cancel, until 07:30 that day
@@ -10412,6 +10413,8 @@ function needEffects(n = SHIP.player.needs) {             // -> { walk, task, dr
     for (const f in fx[0]) e[f] *= fx[0][f];
     e.marks[k] = [side === 'hi' ? 'up' : 'down', fx[1]]; e.notes.push(fx[1]);
   }
+  const sk = n === SHIP.player.needs && typeof sickFx === 'function' ? sickFx() : null;   // being sick (the career engineer, 0.61.5): slower, more tired
+  if (sk) { e.walk *= sk.walk; e.drain *= sk.drain; e.notes.push(sk.note); }
   return e;
 }
 function needsLoad(s) {                                  // from the save (section 13): v 2 has needs; v 1, none
@@ -10636,8 +10639,8 @@ function bunkTap(it, at) {
 // and wake still lying in it. Before 0.28.29 a tap only slept you at night (standing) or said "Too early".
 const LIE_GAIN = .05;                                    // energy a ship minute lying down: 3 an hour
 function bunkLie(id) {
-  const night = typeof bedtime === 'function' && bedtime();
-  actStart('lie', id, { title: 'Your bunk', sleep: night, after: night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
+  const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick;   // unwell: you sleep it off, by day too (0.61.5)
+  actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
 }
 function bunkSleep(A) {                                  // once you're lying in it at night: sleep (section 13's fade and skip)
   if (A.kind !== 'lie' || A.o.slept || A.phase !== 'do') return;
@@ -11183,7 +11186,8 @@ function playerUpdate(dt, t) {
   if (crouch) player.maxV *= CRAWL_SPEED;
   if (squeezeStep()) player.maxV *= SQUEEZE_SPEED;      // squeezing past someone (0.28.12)
   if (crouch && !player.crouch) toast('Crawlway', 'You duck down and crouch-walk through.');
-  if (crouch || player.crouch) player.crouch = crouch;
+  const bent = typeof sickBent === 'function' && sickBent();   // doubled over when you're very unwell (0.61.5)
+  if (crouch || bent || player.crouch) player.crouch = crouch || bent;
   for (const k of ['energy', 'fitness']) {               // say so once, when one starts to slow you
     const slow = n[k] < SLOW_BELOW;
     if (slow && slowWas[k] === false) toast('Your device', NEED_SAY[k][0]);
@@ -27052,7 +27056,8 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // late stays section 20's small dip. Started: in a Works room on Deck 5 (shiftTick's test), or a repair of yours. Your
 // first week aboard is a grace (days up to CAREER.grace never count as missed).
 // The ladder: CAREER.chiefRun workday shifts missed in a row (days off, leave and sick days neither count nor break
-// the run; the user's rule, 0.61.4) bring the Chief's talk, again after each worked shift; then, once it's been held,
+// the run; the user's rule, 0.61.4), or SHIP.rep.ship.work under CAREER.chiefLow (0.61.6), bring the Chief's talk, the
+// run again after each worked shift; then, once it's been held,
 // SHIP.rep.ship.work under CAREER.captain brings the Captain's reprimand. Each is an occasion (appointment, Mail, meeting), booked at 07:00 on a day its person is on shift (or
 // after CAREER.wait days anyway), the Captain's only once the Chief's has been held, so the Mail can say "today". The
 // Captain's comes again only once you recover (CAREER.rearm; back to rearm.chief clears both steps). When it's booked, a tip (a warning: shown even with tips off) and up to
@@ -27073,14 +27078,14 @@ const movedOff = id => (socInit(), (SHIP.social.moved || []).some(x => x.id === 
 // content/banks/career.lines and each voice's content/career/*.lines).
 // Nothing here calls R().
 const CAREER = { leave: 3, every: 28, max: 5, bookBy: 450, missBy: 750, grace: 7, hitDept: 6, hitWork: 15,
-  chiefRun: 3, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
+  chiefRun: 3, chiefLow: 15, captain: 12, bottom: 5, rearm: { chief: 40, captain: 25 }, days: 3, worried: 3, sendOff: 4, wait: 3,
   chiefAt: 930, captainAt: 660, letGoAt: 600, sendOffAt: 870, seeOff: ['torres-zeke', 'pell', 'calder'] };
 SHIP.career = null;
 (() => { const s = SAVED && SAVED.ship && SAVED.ship.career; if (s && typeof s === 'object' && Number.isInteger(s.l)) SHIP.career = careerClean(s); })();
 function careerClean(s) {
   const days = a => Array.isArray(a) ? a.filter(Number.isInteger).slice(-8) : [], int = (v, x) => Number.isInteger(v) ? v : x;
   return { l: int(s.l, CAREER.leave), w: int(s.w, 0), b: days(s.b), s: days(s.s), st: int(s.st, 0), n: int(s.n, 0), on: int(s.on, 0), e: int(s.e, 0), z: int(s.z, 0),
-    k: int(s.k, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
+    k: int(s.k, 0), md: int(s.md, 0), sd: int(s.sd, 0), sh: int(s.sh, 0), ss: int(s.ss, -1), sc: int(s.sc, 0), ms: int(s.ms, 0), ca: int(s.ca, 0), q: int(s.q, 0), qd: int(s.qd, 0), fl: int(s.fl, 0), go: int(s.go, null), f: Array.isArray(s.f) ? s.f.filter(x => typeof x === 'string').slice(0, 8) : [], end: !!s.end };
 }
 SAVE_EXTRA.push(s => { if (SHIP.career) s.ship.career = SHIP.career; });
 onSim('newGame', () => { SHIP.career = null; careerCard(false); });
@@ -27088,12 +27093,16 @@ function careerInit(now = shipNow()) {
   if (SHIP.career) return SHIP.career;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;   // an older save starts here: no back pay of leave, no misses before today
   const sent = simNotes('shiftStart').filter(n => Math.floor(n.t / 1440) + 1 === d), on = (sent.length ? sent.some(n => !n.missed) : flag('shiftSent') === d) ? d : 0;   // already started today (reviewer 1d)
-  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
+  return SHIP.career = { l: CAREER.leave, w: Math.max(0, Math.floor((d - 1) / CAREER.every)), b: [], s: [], st: 0, n: 0, on, e: m >= CAREER.missBy ? d : d - 1, z: d - 1, k: 0, md: 0, sd: 0, sh: 0, ss: -1, sc: 0, ms: 0, ca: 0, q: 0, qd: 0, fl: 0, go: null, f: [], end: false };
 }
 const careerWork = () => SHIP.rep && SHIP.rep.ship && isFinite(SHIP.rep.ship.work) ? SHIP.rep.ship.work : 50;
 const careerRota = d => { try { return isWorkDay(ROSTER_PLAYER, d); } catch (e) { return weekday(d) < 5; } };   // your rota alone (playerShiftOn without leave)
 const careerOn = d => !!SHIP.career && SHIP.career.b.includes(d);   // a booked leave day
-function careerSick(d, on = true) { const c = careerInit(); c.s = c.s.filter(x => x !== d); if (on) c.s.push(d); c.s = c.s.slice(-8); }
+function careerSick(d, on = true) {                      // a sick day: excused (a booked leave day comes back; a miss already counted is undone)
+  const c = careerInit(); c.s = c.s.filter(x => x !== d); if (!on) return; c.s.push(d); c.s = c.s.slice(-8);
+  if (c.b.includes(d)) { c.b = c.b.filter(x => x !== d); c.l++; }
+  if (c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, { work: CAREER.hitWork }, 'sickNote'); }
+}
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
   const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go));
 }
@@ -27124,7 +27133,7 @@ function careerFriends(n) {                              // your friends aboard 
 function careerSeek(why, from, until, n) { for (const p of careerFriends(n)) socialSeekAsk(p.id, { from, until, why: 'career:' + why }); }
 function careerSeekLine(p, why) {                        // the chip's line when a career ask finds you (section 20's seekShow)
   const k = /^career:(\w+)$/.exec(why || ''); if (!k) return null;
-  const kind = k[1] === 'eve' || k[1] === 'day' ? 'farewell.' + k[1] : 'worried.' + k[1], l = socLine(p, kind, { t: shipNow(), tier: relTier(p.id) });
+  const kind = k[1] === 'eve' || k[1] === 'day' ? 'farewell.' + k[1] : k[1] === 'nudge' ? 'sick.nudge' : 'worried.' + k[1], l = socLine(p, kind, { t: shipNow(), tier: relTier(p.id) });
   return l ? { text: l.text, kind, say: true } : null;
 }
 const careerHeld = (id, now) => { const r = SHIP.occasions.filter(x => x.id === id).pop(); return !!r && now >= r.at + r.len; };   // its latest one is over (kept or missed)
@@ -27152,7 +27161,7 @@ function careerAtWork() {
 }
 function careerMissed(d) {
   repAdd('works', -CAREER.hitDept, { work: -CAREER.hitWork }, 'missed');
-  const c = careerInit(); if (!(c.k & 2)) { c.k |= 2; careerTip('missed'); }
+  const c = careerInit(); c.md = d; if (!(c.k & 2)) { c.k |= 2; careerTip('missed'); }
   simNote('shiftMissed', { day: d });
 }
 function careerDayEnd(d, now) {                          // a workday ends: at the bottom (after the Captain) or not
@@ -27167,7 +27176,7 @@ function careerLadder(now) {
   if (c.st < st) { if (c.q > c.st) c.q = 0; careerTip('up'); }
   if (c.go != null || c.q) return;                       // a step waiting is booked by careerDue
   const d = Math.floor(now / 1440) + 1;
-  if (c.st <= 1 && !c.ca && c.ms >= CAREER.chiefRun) { c.ca = 1; c.st = 1; c.q = 1; c.qd = d; }   // the Chief: missed shifts in a row (the user's rule, 0.61.4)
+  if (c.st <= 1 && !c.ca && (c.ms >= CAREER.chiefRun || (c.st === 0 && w < CAREER.chiefLow))) { c.ca = 1; c.st = 1; c.q = 1; c.qd = d; }   // the Chief: missed shifts in a row (0.61.4), or work under chiefLow (0.61.6; the user's rules)
   else if (c.st === 1 && w < CAREER.captain && careerHeld('careerChief', now)) { c.st = 2; c.q = 2; c.qd = d; }   // the Captain: very low standing, after the Chief's talk
 }
 function careerLetGo(d, now) {                           // notice on day d, the last day d + 1
@@ -27204,9 +27213,96 @@ function careerTick(now = shipNow()) {
     careerLadder(now);
     if (c.z < k && k < d) { c.z = k; careerDayEnd(k, now); }
   }
-  careerDue(now); careerGoTick(now);
+  careerDue(now); careerGoTick(now); sickTick(now);
 }
 SIM_ADVANCE.push((from, to) => careerTick(to));
+// ---- being sick (0.61.5, the career engineer; the user's design via the lead) ----
+// Rarely you wake up unwell: a seeded roll at 05:00 (schedU(SICK.seed, day, 901) under SICK.odds), never in your first
+// week (day > CAREER.grace) and never within SICK.gap days of the last time: about once every 7 ship weeks. That day
+// is a sick day (careerSick): excused, a day off to playerShiftOn, no hit for lateness or a missed shift, and a booked
+// leave day comes back. When you're up, a card says so (Infirmary or My bunk set the goal arrow) and, the first time,
+// a tip (a warning, shown even with tips off). Untreated it gets worse through the day (SICK.stages: slower and slower,
+// then doubled over, section 15's crouch; energy drains faster), with a toast at each step and a friend who may come
+// and find you to nudge you. Two cures: the infirmary (in the Infirmary or the Exam room on Deck 3, an exam plays:
+// Rina's when she's on shift, else a medic on duty's; it ends with the medicine) or your bunk (lying down sleeps it off
+// by day, SICK.nap minutes). Crew who see you say a get-well line, and the next day or two they're glad you're better.
+//   SHIP.career (saved) adds sd: the last sick day, sh: how it ended (0 not yet, 1 Rina, 2 a medic on duty, 3 slept it
+//   off), ss: the last stage told, sc: the day the card was shown
+// The words are head writer 4's (career.sick.*, career.tip.sick, sick.getwell / sick.nudge / sick.better, the meetings
+// sickExam1-3 and sickExamCover). Nothing here calls R().
+const SICK = { seed: 7919, odds: 1 / 28, gap: 21, rollAt: 300, nap: 180, stages: [[0, .85], [150, .7], [300, .55], [450, .4]], drain: 1.5 };
+const sickToday = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.sd === d;
+const sickNow = () => sickToday() && !SHIP.career.sh;    // unwell and untreated, right now
+function sickDue(d) { const c = SHIP.career; return d > CAREER.grace && (!c || !c.sd || d - c.sd >= SICK.gap) && schedU(SICK.seed, d, 901) < SICK.odds; }
+function sickStage(now = shipNow()) {                    // 0-3 while unwell (by minutes since 06:00), else -1
+  if (!sickNow()) return -1; const m = now - (SHIP.time.day - 1) * 1440 - WAKE_AT; let k = 0;
+  for (let i = 0; i < SICK.stages.length; i++) if (m >= SICK.stages[i][0]) k = i; return k;
+}
+function sickFx() {                                      // section 15's needEffects asks: { walk, drain, note } or null
+  const k = sickStage(); return k < 0 ? null : { walk: SICK.stages[k][1], drain: SICK.drain, note: 'unwell: see the infirmary, or rest in your bunk' };
+}
+const sickBent = () => sickStage() >= SICK.stages.length - 1;   // doubled over (section 15's crouch)
+function sickStart(d, now) {
+  const c = careerInit(); c.sd = d; c.sh = 0; c.ss = -1; careerSick(d);
+  simNote('sick', { day: d });
+}
+function sickCure(how) {                                 // 1 Rina, 2 a medic on duty, 3 slept it off
+  const c = SHIP.career; if (!c || !sickNow()) return false;
+  c.sh = how; const t = careerText(how === 3 ? 'career.sick.well' : 'career.sick.cured');
+  if (t) toast(how === 3 ? 'Your bunk' : 'Infirmary', t);
+  if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && IX_GOAL && /infirmary|bunk/i.test(IX_GOAL.label || '')) setGoal(null);
+  simNote('sickCured', { how }); return true;
+}
+function sickExamTick(now) {                             // in the infirmary while unwell: the exam plays (once a ship minute)
+  if (!sickNow() || sleeping || typeof DIALOGUE === 'undefined' || DIALOGUE || typeof dialogueShow !== 'function') return;
+  const where = { deck: 3, room: /^(Infirmary|Exam room)$/ };
+  try { if (deckDef.num !== 3 || !where.room.test((ROOMS[roomAt(...player.here())] || {}).name || '')) return; } catch (e) { return; }
+  const d = SHIP.time.day, rina = socP('rina'), w = rina && typeof whereIs === 'function' ? whereIs(rina, now) : null, hers = !!(w && w.act === 'work' && w.deck === 3);
+  const base = hers ? MEETING_SCRIPTS['sickExam' + (1 + d % 3)] || MEETING_SCRIPTS.sickExam1 : MEETING_SCRIPTS.sickExamCover; if (!base) { sickCure(hers ? 1 : 2); return; }
+  const id = 'moment:sick:' + d;                         // 'moment:': an exam never counts toward a commendation (section 18's dialogueShow)
+  MEETING_SCRIPTS[id] = { ...base, onEnd: done => { delete MEETING_SCRIPTS[id]; if (done) sickCure(hers ? 1 : 2); } };
+  dialogueShow(id, { id, who: hers ? ['rina'] : ['infirmary:1'], where, at: now });
+}
+function sickNote(title, body, buttons) {                // the waking card: a panel with buttons, closed by any of them
+  let el = document.getElementById('sickCard');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'sickCard';
+    el.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:55;width:min(380px,calc(100vw - 32px));padding:18px;border-radius:14px;background:rgba(8,20,26,.96);border:1px solid #6fa8b0;color:#e6f0f1;text-align:center';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<h3 style="margin:0 0 8px;font-weight:600"></h3><p style="margin:0 0 14px;line-height:1.45"></p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"></div>';
+  el.querySelector('h3').textContent = title; el.querySelector('p').textContent = body;
+  for (const [label, fn] of buttons) { const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+    b.style.cssText = 'font:inherit;padding:8px 16px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1';
+    b.onclick = () => { el.hidden = true; try { fn(); } catch (e) { } }; el.querySelector('div').appendChild(b); }
+  el.hidden = false;
+}
+onSim('newGame', () => { const el = document.getElementById('sickCard'); if (el) el.hidden = true; });
+function sickTick(now) {                                 // from careerTick: the roll, the card, worse, the nudge, the exam
+  const c = SHIP.career, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (c.go == null && c.sd !== d && m >= SICK.rollAt && sickDue(d)) sickStart(d, now);
+  if (!sickToday(d)) return;
+  const awake = typeof sleeping === 'undefined' || !sleeping;
+  if (c.sc !== d && awake && m >= WAKE_AT && typeof document !== 'undefined') {
+    c.sc = d; const t = careerText('career.sick.card', d) || 'Not feeling well | You wake up unwell. See the infirmary on Deck 3, or rest in your bunk.', i = t.indexOf(' | ');
+    const bed = (DECKS[deckOf(playerBed())].places || []).find(p => p.id === playerBed());
+    sickNote(i < 0 ? 'Not feeling well' : t.slice(0, i), i < 0 ? t : t.slice(i + 3), [
+      ['Infirmary, Deck 3', () => setGoal({ deck: 3, room: 'I', label: 'The infirmary, Deck 3' })],
+      ['My bunk', () => bed && setGoal({ deck: deckOf(bed.id), room: bed.room, label: 'Your bunk' })]]);
+    if (!(c.k & 4)) { c.k |= 4; careerTip('sick'); }
+  }
+  const k = sickStage(now);
+  if (k > 0 && k > c.ss) { c.ss = k; const t = careerText('career.sick.worse', k - 1); if (t && awake) toast('Unwell', t); if (k === 2) careerSeek('nudge', now, now + 240, 1); }
+  sickExamTick(now);
+}
+// what crew say when you chat: get well while you're unwell; glad you're better the day or two after (section 20's chatLine asks)
+const SICK_SAID = new Set();
+function sickChatLine(p, t, peek) {
+  const c = SHIP.career, d = Math.floor(t / 1440) + 1; if (!c || !c.sd || d - c.sd > 2 || SICK_SAID.has(p.id + '@' + d)) return null;
+  const kind = sickNow() ? 'sick.getwell' : c.sh || d > c.sd ? 'sick.better' : null; if (!kind) return null;
+  const l = socLine(p, kind, { t, tier: relTier(p.id) }); if (!l) return null;
+  if (!peek) SICK_SAID.add(p.id + '@' + d); return { text: l.text, kind };
+}
 // the closing card: your time on the Wren is over. New game is the only way on (as the HUD's button: arrive or skip)
 function careerCard(on) {
   let el = document.getElementById('careerEnd');
@@ -27793,6 +27889,7 @@ function socialMail(now) {                               // story Mail that's du
 }
 function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahead (Chat's next thing), so the dialogue engine notes nothing
   socInit();
+  { const sl = typeof sickChatLine === 'function' ? sickChatLine(p, t, peek) : null; if (sl) return sl; }   // get well / glad you're better (0.61.5)
   const h = Math.floor(t / 60), U = k => schedU(p.seed, h, k), pick = (a, k) => a[Math.floor(U(k) * a.length)], tier = relTier(p.id);
   const ctx = { t, tier, peek, newHere: newHere(p, Math.floor(t / 1440) + 1), leaving: leavingSoon(p, Math.floor(t / 1440) + 1) }, eng = (kind, x) => { const l = socLine(p, kind, x ? { ...ctx, ...x } : ctx); return l ? { text: l.text, kind, say: true, line: l } : null; };
   const fill = s => s.replace('{me}', chatName());
