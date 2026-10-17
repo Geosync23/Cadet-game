@@ -1,6 +1,7 @@
 # Handover: adversarial reviewer 1c
 
 - **Role:** adversarial reviewer for Pillar 4, added to share reviewer 1b's queue (session_018XY1NbMBxo2SLDPxooe5yx). Report to the lead (session_01KPJMYjXAPkNUcrQ8VRkhLE) with send_message; send each verdict to build master 2 (session_01F8ph7FKqViF3heRn94YgBr) too, and fixes to the owning seat (ids in TEAM.md on claude/lead-pillar1). Never contact the user. Never change game code.
+- **Since 14:00 (the user's cost call): the only reviewer.** Review in depth only changes that alter game behaviour or saves; wording, content-only and test-only changes get a quick skim (does it break a check?) or none.
 - **Branch:** `claude/reviews-3`, notes only, under `plans/reviews/`. Style: verdict PASS / PASS WITH FIXES / FAIL, a severity per finding, a concrete fix, proven on a merge where it matters (1b's notes on claude/reviews are the model).
 
 ## Done (2026-10-17)
