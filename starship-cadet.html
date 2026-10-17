@@ -14569,7 +14569,7 @@ function chatTick() {
 // ---------------------------------------------------------------------
 // 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
 // Voice cards and steps (0.39.0); later crew-to-crew bonds, moments, goodbyes and the story arcs. Lazy like the rest
-// of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 670-699.
+// of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
 //   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
 //     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
 //     their template (VOICE_TEMPLATES, else VOICE_FALLBACK here), over a guess from their traits and habits.
@@ -14639,7 +14639,7 @@ function voiceOf(id) {
     openness: pickV('openness', has(VOICE_GUARDED) ? 'guarded' : has(VOICE_OPEN) ? 'open' : 'normal'),
     loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
     invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
-    thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 670) * VOICE_THEMES.length)] : null)),
+    thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),
     keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {} };
   if (!OPENNESS[card.openness]) card.openness = 'normal';
   if (p) VOICE_CARD.set(id, card);                       // the data is fixed for a game, so once is enough
@@ -14652,7 +14652,7 @@ function voiceWord(id, token, t = shipNow()) {
     return n ? n.replace('{me}', chatName()) : tier ? chatName() : 'cadet';
   }
   const a = v.words[token]; if (!Array.isArray(a) || !a.length) return null;
-  return a[Math.floor(U(671 + VOICE_TOKENS.indexOf(token)) * a.length)];
+  return a[Math.floor(U(673 + VOICE_TOKENS.indexOf(token)) * a.length)];
 }
 const voiceFill = (id, text, t = shipNow()) => String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
 function relGain(id, why, pts) {                         // openness, for section 20's relAdd; onboarding's numbers and moments stay as given
