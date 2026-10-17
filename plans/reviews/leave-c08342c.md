@@ -64,3 +64,24 @@ DEV_NOTES 0.61.13 says "missed if not clocked in by 12:30", which is what player
   - Repairs are still scored only by section 20, so nothing is counted twice.
 - **The save:** `ci`, `co` and `rm` go through `int()` like the rest. Old saves load with 0s, which means "not clocked in".
 - **The first week:** `careerAtWork` still accepts being in a Works room until `CAREER.grace` (day 7), so a new player isn't punished while they learn the clock. The tip and reminder only start from 07:00 on a shift day. That answers the engineer's question about first-week players: fine.
+
+## Re-check: 0.61.17 (da6abc6): PASS
+- **The fix:**
+  - `shiftTick` waits until `CAREER.missBy`, and takes `late` from `ci`.
+  - Repairs start your day only in the first week.
+  - The clock refuses before 07:00.
+- **The probe again** (every ship minute):
+
+| The player | Reputation note | Career miss |
+| --- | --- | --- |
+| in 07:55 | late 0 | no |
+| in 09:30 | late 90 | no |
+| in 10:30 | **late 150** | no |
+| in 12:00 | **late 240** | no |
+| in 03:00 | refused, so missed | yes |
+| in 07:01, out 07:02 | late 0 | no (a design question, with lead 8) |
+| a repair, no clock | missed | yes |
+| nothing | missed | yes |
+
+  Reputation and the career agree in every case. **MEDIUM 1 and LOWs 1-2 are fixed.** `CLOCK_SAID` is left as it is.
+- leave_check: LEAVE CHECK OK.
