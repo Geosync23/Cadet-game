@@ -356,9 +356,9 @@ with sync_playwright() as pw:
         for j in range(20): g.step(5)
         mv = g.ev("ACT ? [ACT.kind, +(ACT.z - window.__ls.z).toFixed(2), +(player.obj.position.z - window.__ls.z).toFixed(2)] : [null]")
         g.ev("queueAsk(); document.getElementById('qLeave').click()"); g.step(3)
-        lv = g.ev("[!!ACT, window.__left]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null")   # nothing left in hand for the later checks
+        lv = g.ev("[!!ACT, window.__left, typeof galleyLeave === 'function' && !GALLEY_JOINED.has('player')]"); g.ev("delete window.lineJoin; delete window.lineSpot; delete window.lineLeave; galleyTurn = window.__gt; actEnd(true); SHIP.player.tray = null; if (typeof GALLEY_JOINED !== 'undefined') GALLEY_JOINED.delete('player')")   # nothing left in hand for the later checks
         print('  moving with the line (stand-in): from z', z0, '->', mv, '| left:', lv)
-        check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and lv[1] == 1, f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
+        check(z0 is not None and mv == ['queue', 0, 0] and lv[0] is False and (lv[1] == 1 or lv[2]), f'the line moves you up a tile, and Leave takes you out of it: {z0} {mv} {lv}')
     qn = g.ev("[actProgress({ kind: 'queue', phase: 'do', body: {}, def: { title: 'In the queue' }, o: { turnAt: shipNow() + 5 } })]")
     check(qn[0] is None, f'the queue shows no countdown over your head (0.28.30): {qn}')
     if real[1]:
