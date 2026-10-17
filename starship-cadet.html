@@ -10668,7 +10668,7 @@ function newsLine(src, at, ctx = {}) {
 }
 function newsPost(src, at, ctx, fallback) {
   const L = newsLine(src, at, ctx);
-  if (L) return feedAdd(at, src, L.text, L.id);
+  if (L) return feedAdd(at, src, L.text.charAt(0).toUpperCase() + L.text.slice(1), L.id);   // a post never starts lower case ({trad} first, 0.28.60)
   return fallback ? feedAdd(at, src, fallback, '') : false;
 }
 function newsSlot(at) {                                  // a slot: the source by weight, at most NEWS_PER_SRC each a day
@@ -10680,11 +10680,22 @@ function newsSlot(at) {                                  // a slot: the source b
   for (const k of [first, ...order.filter(x => x !== first)]) if (newsPost(k, at, {})) return true;   // the first source with a line
   return false;
 }
+// a tradition's name mid-sentence (0.28.60, reviewer 1f's LOW on 0.28.49): "the quiet watch", "quiz night", but
+// "Brennan's tasting table", "Founding Day", "Sunday swap meet" and "Works Friday tea" keep their capitals (a crew
+// name, a weekday or a proper word first, possessive or not). Only the first letter ever changes. A post that starts
+// with it gets its capital back (newsPost).
+const TRAD_PROPER = new Set(['Works', 'Founding', 'Captain', 'Veyli', 'Wren', 'Envoy', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+function tradName(n) {
+  n = String(n || ''); const w = n.split(/[\s-]/)[0];
+  const k = w.replace(/'s$/, '');                        // "Brennan's" is a name; "Year's end" isn't
+  if (!k || TRAD_PROPER.has(k) || typeof ROSTER !== 'undefined' && ROSTER.some(p => String(p.name || '').split(' ').includes(k))) return n;
+  return n.charAt(0).toLowerCase() + n.slice(1);
+}
 function newsTrad(at, d, when) {                         // today's traditions (06:00) or tomorrow's (18:00)
   if (typeof eventsOn !== 'function') return;
   let es = []; try { es = eventsOn(d) || []; } catch (e) { es = []; }
   for (const e of es.slice(0, 2)) {
-    const ctx = when === 'today' ? { trad: String(e.name || e.id).toLowerCase(), tradId: e.id } : { flags: { ['trad.tomorrow.' + e.id]: true } };   // {trad} fills with the name (0.28.49, reviewer 1e)
+    const ctx = when === 'today' ? { trad: tradName(e.name || e.id), tradId: e.id } : { flags: { ['trad.tomorrow.' + e.id]: true } };   // {trad} fills with the name (0.28.49, reviewer 1e)
     newsPost('trad', at, ctx, when === 'today' ? 'Today aboard: ' + e.name + ' at ' + hhmm(e.from) + '.' : null);
   }
 }
@@ -10702,7 +10713,7 @@ function newsRows(at) {                                  // a ship system gettin
 if (typeof onSim === 'function') {
   onSim('tradition', x => { if (!x || !x.id) return; const at = isFinite(x.at) ? x.at : shipNow(), d = Number.isInteger(x.day) ? x.day : Math.floor(at / 1440) + 1;
     let e = null; try { e = typeof eventsOn === 'function' ? (eventsOn(d) || []).find(q => q.id === x.id) : null; } catch (err) { e = null; }
-    newsPost('trad', at, { trad: String(e && e.name || x.id.replace(/-/g, ' ')).toLowerCase(), tradId: x.id, flags: { ['trad.done.' + x.id]: true } }); });
+    newsPost('trad', at, { trad: tradName(e && e.name || x.id.replace(/-/g, ' ')), tradId: x.id, flags: { ['trad.done.' + x.id]: true } }); });
   onSim('repair', x => { if (x && x.who === 'you') newsPost('works', isFinite(x.t) ? x.t : shipNow(), { machine: typeof machineLabel === 'function' && typeof machineById === 'function' && machineById(x.machine) ? machineLabel(machineById(x.machine)) : undefined }); });
 }
 function newsTick(now) {                                 // once a ship minute (playerUpdate)
