@@ -25,3 +25,55 @@ A: If you named a star, what would you call it?
 B: Something cheerful.
 A: Not Gerald.
 B: Why not Gerald?   #funny
+
+// ---- Writer 2, batch 7: named pairs (who: is A, with: is B), placed where the talk belongs. Mostly not about work.
+? pair:any+any who:lemaire-nils with:yilmaz-karin place:mess time:morning
+A: What's a comet's favourite meal?
+B: Not now, Nils.
+A: Launch.
+B: That's mine. You stole that.   #funny
+
+? pair:any+any who:yilmaz-karin with:lemaire-nils place:mess
+A: I made bread.
+B: Is it a joke?
+A: It's a loaf.
+B: Then it's better than my jokes.   #funny
+
+? pair:any+any who:sato with:mori deck:2
+A: Mori. My mug.
+B: Second shelf. Behind the kelp.
+A: Who put it there?
+B: You did.   #funny
+
+? pair:any+any who:ibarra-rafael with:mori deck:2 time:night
+A: Have you seen my stylus?
+B: Behind your left ear.
+A: Oh. Thank you.   #funny
+
+? pair:any+any who:rossi-femi with:zamora-quinn deck:2 time:night
+A: It's twinkling.
+B: Then it's a star. You're right.
+A: I'm always right about twinkling.   #funny
+
+? pair:any+any who:mbeki-bo with:zamora-quinn deck:2 time:night
+A: Your lens is smudged.
+B: It isn't.
+A: Left side. Tiny.
+B: Thank you.
+
+? pair:any+any who:alvarez-luca with:cruz-tove deck:3
+A: Gerald's grown.
+B: Gerald's a cactus.
+A: A whole millimetre.
+B: Then he's a tall cactus.   #funny
+
+? pair:any+any who:fonseca-arjun with:kim-yusuf deck:2
+A: You labelled that twice.
+B: You told me to.
+A: I've never been prouder.   #funny
+
+? pair:any+any who:abara-rosa with:teague-theo place:junior_common_room
+A: You moved my comic.
+B: I straightened it.
+A: Upside down?
+B: It's funnier that way.   #funny
