@@ -46,7 +46,7 @@ PLANS = r"""(days => {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
     for (const ev of SHIP_TRADITIONS) {
-      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
+      const w = ev.when, due = !(ev.flag && !(typeof flag === 'function' && flag(ev.flag))) && (w.birthday ? schedPeople().some(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))) : w.rotation != null ? ROSTER_ROTATIONS.some(r => (w.rotation === 'after' ? d > r.day && d <= r.day + 7 && weekday(d) === w.weekday : d === r.day + w.rotation) && (w.rotation !== 'after' && w.rotation < 0 ? r.out : r.in).some(id => { const p = schedPeople().find(q => q.id === id); return p && (typeof aboard !== 'function' || aboard(p, d)); })) : DUE.has(ev.id) ? DUE.get(ev.id).has(d) : (w.weekday === wd || (w.every && d % w.every === w.on) || w.yearDay === yd)) && !eventPauses(ev, d) && !(EV_DROPPED.get(d) || []).includes(ev.id);   // a ship-wide event's quiet days; the voice budget
       if (due !== on.some(e => e.id === ev.id)) out.bad.push(d + ' ' + ev.id + (due ? ' due but not on' : ' on but not due'));
     }
     const S = schedData(), went = {}, places = {};
@@ -382,7 +382,7 @@ with sync_playwright() as pw:
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
-        const d = [...(out.count[t.id] || [])].find(x => x >= 1) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
+        const d = [...(out.count[t.id] || [])].find(x => x >= 1) || [...Array(365).keys()].find(x => x >= 1 && eventsOn(x).some(e => e.id === t.id)) || 1, e = eventsOn(d).find(x => x.id === t.id) || { ev, day: d, names: '', first: '', from: ev.at[0], honorees: [] };
         for (const k of ['mail', 'ask', 'here']) if ((t.text || {})[k] && !evText(ev[k], e, schedPeople()[0])) out.bad.push(t.id + ': no ' + k + ' line could be filled');
         for (const [c] of t.who.concat(Array.isArray(t.anim) ? t.anim : [])) for (const p of schedPeople()) tradIs(c, p, d, e, t.host);   // every word resolves (TRAD_ERRORS)
         out.baked.push({ id: t.id, from: ev.from, mail: evText(ev.mail, e), ties: t.ties || null });
@@ -679,6 +679,21 @@ with sync_playwright() as pw:
     U = g.ev("upcomingTraditions(0, 8 * 1440).map(x => [x.id, x.deck, x.room, Number.isInteger(x.deck) && (x.room === null || !!(DECKS[x.deck].rooms || {})[x.room])])")
     print('upcomingTraditions, days 1-8:', len(U), 'with a room key:', sum(1 for u in U if u[2]))
     if not U or not all(u[3] for u in U) or not any(u[2] for u in U): fail(f"upcomingTraditions' deck/room: {[u for u in U if not u[3]][:5]}")
+
+    # 9d. crew rotation traditions (0.34.43): the farewell supper the day before each rotation day (its leavers), the
+    # crew welcome tea the first Friday after (its arrivals); {names} filled; the honorees' friends, department, cabin
+    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day };
+      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (4 - weekday(r.day + 1) + 7) % 7, r.in]]) {
+        const e = eventsOn(d).find(x => x.id === id), go = e ? schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-' + id))) : [];
+        row[id] = e ? { d, hon: e.honorees.map(p => p.id).sort().join(',') === ids.slice().sort().join(','), names: e.names, mail: !!(e.ev.mail && e.ev.mail(e)), went: go.length,
+          honWent: go.filter(p => e.honorees.includes(p)).map(p => p.id + (p.shift === 'night' ? '(night)' : '')), others: go.filter(p => !e.honorees.includes(p)).length } : { d, missing: true, dropped: (EV_DROPPED.get(d) || []).includes(id) };
+      }
+      return row; }))()""")
+    for r in RT:
+        print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k != 'day'))
+        for k, v in r.items():
+            if k == 'day': continue
+            if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
 
     # 10. the bridge invite (0.34.35), last: it skips on to day 50
     I = g.ev(INVITE)

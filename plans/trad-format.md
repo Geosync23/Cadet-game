@@ -87,6 +87,8 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `arrival +7` | seven days after you came aboard (you arrive on day 0, a Sunday evening) |
 | `arrival friday` / `arrival friday 4` | the first (or fourth) Friday after you came aboard |
 | `birthday` | each crew member's birthday (birthdays are never moved) |
+| `rotation -1` | the day before each crew rotation day (the crew designer's `ROSTER_ROTATIONS`; the Sunday shuttle): its honorees are that rotation's leavers. `rotation +N` from 0 on: the arrivals. |
+| `rotation friday` | the first Friday after a rotation day: its honorees are that rotation's arrivals |
 
 Add any of these after the rhythm: `season greening` (or `season harvest,lanterns`), `from day 30`, `until day 200`. Example: `when: weekly wednesday season greening`.
 
@@ -104,7 +106,7 @@ A comma-separated list of `<who> <chance>`; the first that fits a person decides
 
 `<who>` is one word, or several joined with `+` (all must fit, e.g. `works+juniors 60%`):
 
-- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`, `night-shift`, `day-shift` (or `shift:<x>`);
+- `everyone`, `host`, `honoree`, `juniors`, `officers`, `friends-of-host`, `night-shift`, `day-shift` (or `shift:<x>`); for a birthday's or a rotation's honorees: `friends-of-honoree` (affinity 40 or more with any of them), `dept-of-honoree` (their department), `bunk-of-honoree` (their cabin);
 - a crew id (`rina`), a department (`works`, `galley`, `garden`, `survey`, `watch`, `infirmary`, `command`, `helm`, `comms`, `store`, `civilian`), or a habit (`gardener`, `musician`, `runner`, `stargazer`, `bar-regular`, `shopper`...: the roster's HABITS);
 - to be exact: `id:<x>`, `dept:<x>`, `habit:<x>`, `rank:<x>`.
 
@@ -134,7 +136,7 @@ Texts go in sections, one variant per line starting with `- ` (a line may have `
 | `== chatter` | lines crew may say about it (the dialogue engine) | a few |
 
 - **Tone tags** at the end of a line: `#funny`, `#warm`, `#serious` (default light). A bubble is at most 90 characters, a Mail at most about 200.
-- **Placeholders:** `{trad}` (its title), `{host}` (the host's first name), `{names}` and `{first}` (a birthday's people), `{season}`, `{weekday}`, `{time}`. A line whose placeholder can't be filled is skipped.
+- **Placeholders:** `{trad}` (its title), `{host}` (the host's first name), `{names}` and `{first}` (a birthday's or a rotation's people), `{season}`, `{weekday}`, `{time}`. A line whose placeholder can't be filled is skipped.
 - The head writer checks the texts for tone.
 
 ## The baked shape (for content_gen.py)

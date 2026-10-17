@@ -88,6 +88,14 @@ def parse_when(v, where):
                 w['nth'], i = _int(t[2], where, 1, 52, 'which one after arrival'), 3
     elif low[:1] == ['birthday']:
         w, i = {'birthday': True}, 1
+    elif low[:1] == ['rotation'] and len(t) >= 2:          # crew rotation days: rotation -1 (the leavers), rotation friday (the arrivals)
+        if re.fullmatch(r'[+-]\d+', t[1]):
+            n = int(t[1])
+            if not -7 <= n <= 7:
+                raise TradError(f'{where}: rotation days are -7 to +7')
+            w, i = {'rotation': n}, 2
+        else:
+            w, i = {'rotation': 'after', 'weekday': _wd(t[1], where)}, 2
     if not w:
         raise TradError(f'{where}: can\'t read when "{v}" (see plans/trad-format.md)')
     while i < len(t):                                      # optional: season <name>[,<name>], from day N, until day N
