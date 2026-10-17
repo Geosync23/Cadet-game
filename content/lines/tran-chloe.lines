@@ -206,3 +206,32 @@
 - Your Sunday story. Read it to Bunk 1 sometime. Before lights out. Not after.   #funny
 ? flag:home.mum.mug tier>=colleague
 - A mug from your mum. That's the good kind of present. The kind that leans a bit.   #warm
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Stay for tea. Pudding's worth waiting for.
+- I'm still eating. I'm a slow, careful eater.
+? act:off
+- Baking day. Brennan's inspecting at four.
+- Scones. My gran's way. Smells like her kitchen.   #warm
+- Lost-property box: one glove. Again.
+? time:evening
+- Bed at ten. I'm setting a good example.   #funny
+- No gossip. ...All right. How does it end?   #funny
+? time:night
+- Lights out. Yes, you too. Night.
+? trad:quiz
+- Quiz. I'll keep score. Someone has to.
+? season:lanterns
+- Lanterns. Ginger biscuits. That's the rule.
+? season:sowing
+- Sowing. My seedling's on the sill. It's behaving.
+? place:commons
+- Somebody left a mug. Two mugs. The box is full.   #funny
+? act:breakfast
+- Up early. Slept well. That's the secret.
+
+== rumour
+- I don't gossip. Zofia told me. So, technically...   #funny
+- I'm only passing it on. Accurately.

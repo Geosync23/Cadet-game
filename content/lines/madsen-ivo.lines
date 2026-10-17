@@ -144,3 +144,33 @@
 - Right, listen, your Jo built a boat. A real one. I've told the galley. Twice.   #funny
 ? flag:home.gran.hip !flag:home.gran.won tier>=colleague
 - How's your gran? The hip? Tell her a galley hand from Bunk 2 says get well soon. Loudly.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Right, listen. This pudding. Listen to it.   #funny
+- Three bowls of soup. Training.   #funny
+- Bowls are better than plates. I'll never budge.   #funny
+? act:off
+- Pressed flower number ninety. A daisy. Look.
+- Rest day! I'm going to sit in the garden all of it.
+- Went to the store for socks. Came back with a book.   #funny
+? act:wash
+- That was me singing. You're welcome.   #funny
+? time:morning
+- Dawn chorus! Who's on harmony? Me. Always me.   #funny
+? time:evening
+- Right, listen. So it starts in the garden...
+- I've got a story. It's long. It's good, though.   #funny
+? season:greening
+- Everything's flowering. My book's going to burst.
+? season:harvest
+- Harvest! The pumpkins have got names. I named them.   #funny
+? trad:jam
+- Music night. I'm singing. Nobody's stopped me yet.   #funny
+? place:hydroponics_garden
+- Smell that? That's the roses. Well, one rose.
+
+== rumour
+- Right, listen. You'll never guess. Go on, guess.
+- Did you hear? No? Sit down. It's a long one.   #funny

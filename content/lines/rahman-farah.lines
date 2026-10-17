@@ -87,3 +87,19 @@
 == about
 ? aff:takahashi-wen:friend
 - Takahashi's star journal is longer than mine. For now. We count at the observatory.
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- The boat needs a name. Every one's wrong.
+- Not tired. Never tired. Fine, thanks.   #funny
+? time:night
+- Star four hundred and two. Logged.
+? act:meal
+- Toast, standing up. It's faster.
+? act:work
+- Quick way first. Then the right way.
+?
+
+== rumour
+- Argue with this, then.   #funny
+- Heard something. I'll argue it either way.

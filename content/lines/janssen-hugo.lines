@@ -136,3 +136,33 @@
 - Thank you. That's kind. It'll ride the night watch with me.
 ? gift:polite
 - Ah, well. Thank you. I'm curious what it's for. I'll find out.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Steady breakfast. Steady night. That's the way.
+- The parsley in this is mine. Gerald watched it grow.
+? act:off
+- Rest day. Gerald and I are reading. Well, I am.   #funny
+- Called home. All steady there too.
+- Bought new pots at the store. Gerald approves.
+? time:evening
+- Lovely evening. Don't let anyone rush you.
+? time:night
+- Night's steady. The stars don't hurry.
+? act:gym
+- Slow and steady on the treadmill. I'm not racing.
+? season:greening
+- Greening. Gerald's got a new arm. Small one.
+? season:lanterns
+- Gerald's got a lantern by him. He's very festive.   #funny
+? place:lounge
+- Ah. Window seat. Best seat on the ship.
+? trad:observatory
+- Observatory night. Gerald's seen more stars than me.   #funny
+? time:morning
+- Morning. That means bed, for me. Goodnight.   #funny
+
+== rumour
+- Heard something, steady now. It's good.
+- Slowly, now. Here's what I heard.

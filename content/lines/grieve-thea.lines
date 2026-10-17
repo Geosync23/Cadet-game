@@ -138,3 +138,31 @@
 - Thank you. That was thoughtful. I'll look after it.
 ? gift:polite
 - Thank you. I'm not sure what it is. I'm sure it's lovely. I'll find out.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Have you had water today? Have a glass. Please.
+- I'll stay for pudding. Pudding is important.
+- This soup is very good. I'm being serious.
+? act:off
+- My sister wrote. Three's still hiding in the castle.
+- Rest day. I'm revising. Well. I'm on the bed.
+- The lost-property box has a new hat in it.
+? time:evening
+- One, Two and Three are well. My sister checked.
+- I found the other sock. No, a different other sock.   #funny
+? time:night
+- I can't sleep. I'm going to look at the stars.
+? season:sowing
+- Sowing. The garden's careful this time of year. So am I.
+? trad:observatory
+- Observatory night. I'm taking a blanket. Two.
+? place:lounge
+- I like the corner seat. You can see the door.
+? trad:quiz
+- Quiz night. I'll know the body ones. Only those.
+
+== rumour
+- I don't like gossip. But this is nice. I think.
+- I'm not sure I should say. I'll say it carefully.

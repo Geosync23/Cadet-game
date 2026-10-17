@@ -148,3 +148,32 @@
 - A story every Sunday, to an old friend. That's a letter, in a way. I approve. Very much.   #warm
 ? flag:home.gran.hip !flag:home.gran.won tier>=colleague
 - I hope this finds your gran well. I mean it properly. How is her hip?
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- I hope this soup finds you well.   #funny
+- Second helping. For the running, you see.
+? act:breakfast
+- Up at five. Ran a lap before the toast.
+? act:off
+- Writing to Valo. Page two. Dear everyone.
+- A voice message for my grandmother. She likes them long.
+- Rest day. A letter, a run, a letter.
+? time:evening
+- I raced Erik. I won. By a stride. A clear stride.   #funny
+- The lounge is quiet tonight. I like it quiet.
+? trad:running
+- Running club tonight. I'm not competitive. I'm winning.   #funny
+? season:sowing
+- Sowing. At home they'll be ploughing now.
+? season:lanterns
+- My grandmother loves Lanterns. I'll tell her ours.   #warm
+? time:morning
+- Good morning. Sincerely.   #funny
+? place:lounge
+- The view from here would fill a letter. Two.
+
+== rumour
+- I have news. I'll tell it properly. In order.
+- Forgive me. I heard something. Shall I?

@@ -132,3 +132,32 @@
 - Thank you. That's nice. Where was I? Oh, yes. Thank you.
 ? gift:polite
 - Ah, well. Thank you. I'll keep it near the charts. It'll find its course.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Toast. Or... yes. Toast.
+- This soup tastes like rain. Good rain.
+? act:off
+- Rest day. Painting. Hold still. No, not you. Yes, you.   #funny
+- Plotted a course to a planet made of jam.   #funny
+- Went to the store for paint. Bought a tiny brush.
+? time:evening
+- Lisk'll be raining now. Probably. Always.
+- I was going to say something. It'll come back.
+? time:night
+- Night's soft. You can hear the ship think.
+? season:greening
+- The garden's so green. I need more green paint.
+? season:lanterns
+- Painting a tiny lantern on a tiny portrait.
+? place:lounge
+- That window. If you squint, it's rain.
+? place:commons
+- Somebody's left a little portrait. Not mine. Maybe.   #funny
+? trad:observatory
+- Observatory night. I'll paint a star. A small one.
+
+== rumour
+- Oh, did you hear? I've... yes. Here it is.
+- Heard a thing. Drifted off. It's back. Listen.   #funny

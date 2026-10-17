@@ -386,3 +386,21 @@
 - Where are you from, then? Tell me at dinner. Properly.
 ? flag:walk.more.11
 - Bit of a talker, me. Say if I'm too much. Nobody has yet.   #funny
+
+// ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
+== smalltalk
+- Ten more minutes with the coils. Breakfast can wait.
+? mem:moment.torres.scarf
+- Row forty-two of the scarf. It's getting long.   #funny
+?
+? time:evening
+- Hot water's gone. Character-building, that.   #funny
+? trad:jam
+- Friday jam. I know every word. Every one.   #funny
+? act:meal
+- Is that {dish}? Brilliant. Seconds, please.
+?
+
+== rumour
+- Right. You'll want to hear this.
+- Don't tell Calder I told you. Well. Do.   #funny

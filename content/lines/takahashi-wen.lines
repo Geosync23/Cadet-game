@@ -134,3 +134,33 @@
 - Thanks. Useful.
 ? gift:polite
 - Thanks. Bit of static. Kind of you, though.
+
+// Writer 4, batch 2: everyday chatter, not about work (meals, rest days, home, hobbies, seasons, traditions).
+== smalltalk
+? act:meal
+- Soup's fine. Not static. Fine.
+- Pass the salt. Thanks.
+? act:off
+- Rest day. Records. Then more records.
+- Called home. Clear line. Rare.
+? time:evening
+- That's not the words. It's "harbour", not "harder".   #funny
+- Star nine hundred and something. Logged.
+? time:night
+- Quiet. Good. Quiet is a clean signal.
+? trad:jam
+- Music night. Somebody will sing it wrong. Torres.   #funny
+? trad:quiz
+- Song round. I'll win it. Facts.
+? season:lanterns
+- Lanterns. Too many lights. Nice, though.
+? place:musicroom
+- Side two, track three. The real words are mine.   #funny
+? trad:observatory
+- Bring your journal. Don't bring opinions.   #funny
+? act:breakfast
+- Breakfast. Then sleep. Don't talk to me.   #funny
+
+== rumour
+- Heard something. Not static. Real.
+- Short version. You want it?
