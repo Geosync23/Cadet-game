@@ -8,6 +8,8 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Integration branch for Pillar 1:** `claude/ship-integration` (= `main`, 707b696, at the start). Combined builds are numbered 0.23.0, 0.24.0 and so on. Pull requests to `main` only when the user approves a milestone, and merged only with their OK.
 
+**Ship integration 0.60.2** (142b503, 2026-10-17 ~05:52): the writing is in (5,173 lines, 99 voice cards, 336 conversations), overheard conversations and booth calls, dialogue to 0.43.15 with the romance lint, traditions to 0.34.39 (one-week tea moved), decks to 0.38.16, sim 0.26.28, player 0.28.28, crew 0.16.14. All checks pass. Published: https://claude.ai/artifact/V4DydXnczhPGHdGVJLe2nq version 1.
+
 **Ship integration 0.60.1** (f28e48e, 2026-10-17 ~04:33): the arrival evening playable (New game), days off, crew coming and going, social A to 0.36.51, social B 0.39.0-0.39.3 (moments), device to 0.35.25, decks to 0.38.13, traditions to 0.34.28 + the birthday fix, sim to 0.26.27. All checks pass. Published: https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG version 2.
 
 **Ship integration 0.60.0 "the writers' kit"** (e3ee66b, 2026-10-17 ~02:53): Pillar 4 wave 1a: sim bus + flags + Day 0, device 0.35.20, systems 0.33.37, social A to 0.36.43, social B 0.39.0, traditions to 0.34.24 (loader, seasons, Sowing morning), dialogue 0.43.0 (the writers' kit; Torres baked), arrival 0.42.6. All checks pass; cadet_test identical to 0.41.10. Published to a NEW link (the user's choice, 03:02): https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG version 1. Next: 0.60.1; wave 1b hired.
@@ -38,7 +40,7 @@ The project lead session keeps this file current. A new lead session reads it fi
 
 **Test branch (approved by the user 2026-10-16):** `claude/integration-test` holds unfinished, unchecked combined attempts (the lead's lead-wip) so helpers can reproduce and fix failures on their own machines in parallel, and check-runner sessions can run one check each at the same time. Helpers never push to it. Only builds that pass every check go to `claude/ship-integration`.
 
-**Playable build (the one link the user uses), from 0.60.0:** https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG, published by the lead session_01PJtmxWgAPLebXSZKP6ZRpG from its scratchpad file `pub/starship-cadet.html`. Why a new link (2026-10-17 ~03:00): replacing a page from a session that didn't publish it requires reading the whole live page first, and at ~1.5 MB (~770k tokens) that no longer fits in one session. So the LEAD that published the link republishes it itself (same file path = same link, no read needed). A new lead can't update it in place: it publishes a fresh link and tells the user (the user chose "new link" over deleting). The old link https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y stays on 0.41.10 (version 18) for the Pillar 3 check-in.
+**Playable build (the one link the user uses), from 0.60.2:** https://claude.ai/artifact/V4DydXnczhPGHdGVJLe2nq, published by the lead session_01KPJMYjXAPkNUcrQ8VRkhLE from its scratchpad file `pub/starship-cadet.html` (same path = same link). A later lead can't update it in place: it publishes a fresh link and tells the user. Older links: https://claude.ai/artifact/FYGHHcT6kc21Hu6BvFphSG (0.60.0-0.60.1), https://claude.ai/artifact/XCcqMGBhAa149cf7s4Mc8y (0.41.10).
 
 ## Chain of command (the user, 2026-10-17)
 
