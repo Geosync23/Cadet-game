@@ -35,3 +35,53 @@
 == about
 ? aff:larsen-hamid:friend
 - Hamid and I practise guitar together. We're both awful. Best laugh of my week.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- {hi}! Breakfast's out! Nearly on time! That counts, doesn't it? It counts.
+? tier>=acquaintance time:evening
+- {hi}, {me}! Long day? Mine too. It was fine. Mostly fine.
+? tier>=colleague warmth:cold
+- Oh! There you are! I was worried. Not worried. A tiny bit worried.
+
+== bye
+? tier>=acquaintance
+- {bye}! Have a nice evening! Sorry. I always say that.
+? tier>=friend
+- Thanks for this. Really. You always make things feel fine.   #warm
+
+== feel
+? mood:ok
+- I'm fine! Really. Fine-fine. Not "fine". Fine.   #funny
+
+== near
+? act:leisure deck:4
+- Music room's free. I'll practise. You might want to leave. For your own good.   #funny
+? act:meal
+- Sit with me? I always stay a bit after. The mess is nicest half empty.
+
+== life
+? tier>=colleague
+- Takahashi says I sing the wrong words. I sing my words. That's different.   #funny
+? tier>=friend
+- I say "it'll be fine" a lot. Mostly to me. Sometimes I even believe it.
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight! I'm bringing the guitar. Sorry in advance. Come anyway?
+
+== accept
+- Yes! Oh, lovely. I'll be there. Early. Sorry. I'm always early.
+== decline
+- Oh no, I can't. I'm so sorry. Next time? I'll make it up to you.
+== missed
+- You didn't come. That's fine! Totally fine. I hope you're all right?
+== birthday
+? birthday:me
+- It's my birthday! Is it all right to say? I'm saying it. Sorry.   #funny
+? birthday:you
+- Happy birthday! I learnt the birthday song on guitar. Nearly. Here goes.   #funny
+== hint
+- Got a minute? It's nothing. It's a small something.

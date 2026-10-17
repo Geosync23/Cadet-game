@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend}. Knows when to talk. Knows when not to. Rare.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. Bed for me. Talk later. Or don't. Either.
+? tier>=acquaintance time:evening
+- {hi}. Off to the relay room soon. Anything you need sending, say now.
+? tier>=colleague warmth:cold
+- You. Where've you been? Not complaining. Noting.
+
+== bye
+? tier>=acquaintance
+- Later.
+? tier>=friend
+- Good talk. Clean. No static. Thanks.   #warm
+
+== feel
+? mood:ok
+- Fine. Quiet relay. Good.
+
+== near
+? deck:4 act:leisure
+- Music room. Record three. Listen. Those are the right words. Tell Haddad.   #funny
+? act:work
+- Hear that? Nothing. That's a good signal. Nothing's what you want.
+
+== life
+? tier>=colleague
+- I call home. Short calls. We don't waste words. Family trait.
+? tier>=friend
+- I don't say much. Doesn't mean I'm not glad you're here. I am. Said it.   #warm
+
+== invite
+? trad:jam tier>=colleague
+- Jam tonight. Come. I'll sing the right words. Someone has to.   #funny
+
+== accept
+- Yes. There.
+== decline
+- No. On shift. Another time.
+== missed
+- You didn't come. Noted. Not cross. Just noted.
+== birthday
+? birthday:me
+- Birthday. Don't sing. If you sing, sing it right.   #funny
+? birthday:you
+- Happy birthday. Here. A record. The words are right. I checked.   #warm
+== hint
+- Got a minute. Plain talk.

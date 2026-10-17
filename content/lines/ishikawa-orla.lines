@@ -35,3 +35,53 @@
 == about
 ? aff:esposito-yara:friend
 - Yara's the best storekeeper on any ship. I'd say so to anyone. I do say so.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Just opened up. Yara left a note: "be nice to {me}". I always am.   #warm
+? tier>=acquaintance time:evening
+- {hi}, {me}. Quiet in here this late. I like it. Come in out of the corridor.
+? tier>=colleague warmth:cold
+- Oh, hello. I wondered where you'd got to. Your usual's still on the shelf.
+
+== bye
+? tier>=acquaintance
+- Take care now. Mind the step on the way out.
+? tier>=friend
+- Goodnight, {me}. Thank you for coming in. It was nice to talk.   #warm
+
+== feel
+? mood:ok
+- All right, thank you. The till's tidy. The ledger's tidy. I'm tidy.
+
+== near
+? deck:2 time:night
+- The observatory's lovely tonight. The stars don't need anything from you.
+? act:work time:evening
+- Last customer of the day. I'll count you as my favourite. Don't tell the others.   #funny
+
+== life
+? tier>=colleague
+- Yara and I leave each other notes at the changeover. Mine are longer. Hers are funnier.
+? tier>=friend
+- Evenings in the store can be quiet. When you come in, the evening goes quicker.   #warm
+
+== invite
+? trad:observatory-night tier>=acquaintance
+- Observatory night. Come up after I close? I'll point out the ones I know.
+
+== accept
+- Oh, lovely. I'll be there. I'll bring a flask.
+== decline
+- I'm sorry, I'm on till nine. Another night? I'd like that.
+== missed
+- I waited a little while. That's all right. Another time.
+== birthday
+? birthday:me
+- It's my birthday. I'm working, but the ledger balanced. Best present.   #funny
+? birthday:you
+- Happy birthday. I grew you a little basil. It's in the pot by the till.   #warm
+== hint
+- Have you a minute? Sit by the window with me.

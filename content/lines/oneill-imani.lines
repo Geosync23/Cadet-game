@@ -35,3 +35,53 @@
 == about
 ? bond:friends
 - {friend} gets a song on every playlist. That's the highest honour I give.
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:afternoon
+- {hi}. Just started. Herbs to pick, songs to play. Best shift on the ship.
+? tier>=acquaintance time:evening
+- {hi}, {me}. Garden's quiet. Late shift gets the good songs.
+? tier>=colleague warmth:cold
+- Oh, look. You're alive. I put a "missing person" song on the playlist. Took it off now.   #funny
+
+== bye
+? tier>=acquaintance
+- Laters. Stay tuned.
+? tier>=friend
+- Night, {me}. Track two's about the night shift. You'll see why. Sleep well.   #warm
+
+== feel
+? mood:ok
+- Fine. Week twenty-nine. Middling week. Good songs, though.
+
+== near
+? deck:4 act:leisure
+- Quiet corner. Headphones. Me time. You can stay. Quiet you is fine.
+? act:work
+- Basil, chives, mint. Brennan wants a lot of mint. Something's happening with mint.   #funny
+
+== life
+? tier>=colleague
+- Teague and I have rival playlists. Mine's better. Ask anyone. Except Teague.   #funny
+? tier>=friend
+- I call home on my day off. They put me on speaker. Everyone talks at once. It's lovely.   #warm
+
+== invite
+? trad:jam tier>=acquaintance
+- Music jam tonight. I'm doing the playlist between sets. Come and judge it. Kindly.
+
+== accept
+- Yep. I'll be there. With music.
+== decline
+- Can't. Late shift. Next time, sure thing.
+== missed
+- You missed it. The playlist was brilliant. I'll play it you later.
+== birthday
+? birthday:me
+- It's my birthday. This week's playlist is all songs about me. There are three.   #funny
+? birthday:you
+- Happy birthday! I made you a playlist. Track one's the best. Obviously.   #warm
+== hint
+- Got a minute? Turn the music down. I'll talk.

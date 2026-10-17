@@ -35,3 +35,53 @@
 == about
 ? aff:ishikawa-orla:friend
 - Orla does evenings, I do mornings. We leave each other notes. Very proper ones.   #warm
+
+// Writer-commons, batch 6: towards about 30 own lines.
+
+== greet
+? tier>=acquaintance time:morning
+- Morning. Doors open. Socks on the left, soap on the right, gossip at the till.   #funny
+? tier>=acquaintance time:afternoon
+- {hi}. Half an hour till Ishikawa takes over. Buy something now, I'll remember it.
+? tier>=colleague warmth:cold
+- Oh, look who's back. Your soap's been lonely. So's your toothpaste.   #funny
+
+== bye
+? tier>=acquaintance
+- {bye}. Come back when you run out. You will.
+? tier>=friend
+- See you, {me}. Good chat. Better than restocking. Much better.   #warm
+
+== feel
+? mood:ok
+- Fine. Shelves full, till balanced, kettle on. A good morning.
+
+== near
+? act:gym
+- Gym, then the store. It stops me eating the stock. Mostly.   #funny
+? deck:4 act:leisure
+- Common room. Feet up. Don't ask me where anything is. I'm off.
+
+== life
+? tier>=colleague
+- Same counter, a good few years. I love it. I wonder sometimes what else I'd love.
+? tier>=friend
+- I can guess what anyone came in for. Except you. You're a mystery. A small one.   #warm
+
+== invite
+? tier>=colleague time:afternoon
+- Gym after my shift? You lift, I'll tell you who bought what. Not really.   #funny
+
+== accept
+- Can do. I'll be there.
+== decline
+- Can't, sorry. Stock-take. Very thrilling. Another time.
+== missed
+- You didn't come. I'll put it on your tab. Kidding. Mostly.   #funny
+== birthday
+? birthday:me
+- My birthday. I bought myself a present. From me. At staff price.   #funny
+? birthday:you
+- Happy birthday. I've put something by. No charge. Don't tell anyone.   #warm
+== hint
+- Got a minute? Not for shopping. Just a minute.
