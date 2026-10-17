@@ -1,0 +1,17 @@
+@meeting introAsk
+// Tap Zeke Torres on Day 0, before 'free' (head writer 3, 0.48.22; the onboarding engineer's hook, which needs a
+// one-line tap hook in section 10). Replays each time you ask. Three questions (meetings take three replies at most);
+// how a ship day runs is told at dinner (introDinner). No scarf, no father, no Engine Specialist list.
+title: Ask Zeke
+from: Zeke Torres
+gist: You asked Zeke Torres about himself, Works and where the Wren is going.
+== lines
+torres-zeke > you: Go on, ask. Questions are the best bit.   [nod]
+? choice
+* Who are you, then?   flavour:listen
+  torres-zeke: Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.   [laugh]
+* What does Works do?   flavour:practical
+  torres-zeke: Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.   [gesture]
+* Where's the ship going?   flavour:share
+  torres-zeke: Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.   [nod]
+torres-zeke: Anything else, just tap me. Right, onward.
