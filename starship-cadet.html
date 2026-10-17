@@ -14080,6 +14080,7 @@ function relAdd(id, why, pts) {
   const r = relGet(id), now = Math.floor(shipNow());
   // friends of your friends warm to you a little faster
   if (pts > 0 && Object.keys(SHIP.rel).some(f => f !== id && SHIP.rel[f].tier >= 3 && affinity(f, id) >= 40)) pts *= 1.25;
+  if (typeof relGain === 'function') pts = relGain(id, why, pts);   // openness (20c): guarded people warm slower, open ones faster
   r.pts = Math.max(REL_TIERS[r.tier], Math.round((r.pts + pts) * 100) / 100);   // never below the tier you've reached
   if (r.met === null) r.met = now;
   if (why !== 'news') r.lastTalk = now;
@@ -15013,7 +15014,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Crew', icon
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
       { kind: 'text', text: c.role + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
-      { kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] },
+      ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
     return { title: 'Crew', blocks: (cs.length ? [{ kind: 'list', rows: cs.map(x => ({ text: x.name, sub: x.tierName + (x.where ? ' · Deck ' + x.where.deck + (x.where.room ? ', ' + x.where.room : '') : ''), mark: x.tier >= 3 ? 'up' : null, action: { app: 'crew', do: 'show', arg: x.id } })) }]
@@ -15339,6 +15340,132 @@ function chatTick() {
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p === CHAT.p);
   if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > CHAT.reach) chatClose();
 }
+
+// ---------------------------------------------------------------------
+// 20c. SOCIAL STORIES (social engineer B, 0.39.x; plans/social-deep-plan.md, steps B1-B6)
+// Voice cards and steps (0.39.0); later crew-to-crew bonds, moments, goodbyes and the story arcs. Lazy like the rest
+// of section 20 (ROSTER comes later in the file); nothing here draws anything or calls R(). schedU keys 672-699.
+//   voiceOf(id) -> the person's voice card: the writers' VOICE[id] (baked from content/voices), over the crew
+//     designer's generated fields on the roster (tpl, loves, likes, joy, thread, needs, openness, keepsake, mentors), over
+//     their template (VOICE_TEMPLATES, else VOICE_FALLBACK here), over a guess from their traits and habits.
+//     Always complete: { id, tpl, words, needs, openness, loves, likes, invites, joy, thread, keepsake, avoid, mentors, lines }
+//   voiceWord(id, token, t) -> one of their words for {hi} {bye} {yes} {thanks} {wow} {sigh}, or {nick} (what they
+//     call you: 'cadet' as strangers, your name, then their nickname for you as friends)
+//   voiceFill(id, text, t) -> the text with their voice tokens and {me} filled (picked per person and ship hour)
+//   relGain(id, why, pts) -> pts after openness (section 20's relAdd asks): guarded people warm 20% slower, open
+//     ones 20% faster; their moments the other way round (OPENNESS.moment, used by the moments engine)
+//   metDays(id, t), stepGate(id, tone, t, last) -> whether a light / heartfelt / resolution moment may open yet
+//     (STEP_GATES: tier, days known, days since their last moment)
+//   knowSections(id) -> [{ title, items }] what you know about them, by section (Work, Home, Hobby, Past, Their
+//     story), no counts; knowBlocks(id) -> the Crew app's blocks for it
+// ---------------------------------------------------------------------
+const VOICE_TOKENS = ['hi', 'bye', 'yes', 'thanks', 'wow', 'sigh'];
+// the ten templates' words, until the writers' VOICE_TEMPLATES are baked in. nick by tier (stranger .. close
+// friend); null means the usual for that tier: 'cadet', then your name
+const VOICE_FALLBACK = {
+  warm:    { needs: 'share', words: { hi: ['Hello, love', 'Hiya'], bye: ['Take care', 'Look after yourself'], yes: ['Of course', 'Happily'], thanks: ['Thank you, really', 'Bless you'], wow: ['Oh, lovely'], sigh: ['Oh dear'], nick: [null, null, null, 'love', 'love'] } },
+  dry:     { needs: 'cheer', words: { hi: ['Oh, it\'s you', 'Hey'], bye: ['Off you go', 'Don\'t break anything'], yes: ['Fine', 'Go on then'], thanks: ['Ta', 'You\'re all right, you'], wow: ['Well, look at that'], sigh: ['Honestly'], nick: [null, null, null, 'trouble', 'trouble'] } },
+  shy:     { needs: 'listen', words: { hi: ['Oh! Hi', 'Um, hello'], bye: ['See you', 'Bye, then'], yes: ['Okay', 'If you like'], thanks: ['Thanks. Really'], wow: ['Oh, wow'], sigh: ['Oh'], nick: [null, null, null, null, null] } },
+  brisk:   { needs: 'practical', words: { hi: ['Morning', 'Right then'], bye: ['Carry on', 'Right. Back to it'], yes: ['Agreed', 'Very well'], thanks: ['Noted. Thank you', 'Good work'], wow: ['Impressive'], sigh: ['Hm'], nick: [null, 'cadet', null, null, null] } },
+  chatty:  { needs: 'share', words: { hi: ['Hey hey!', 'Oh, hi!'], bye: ['Catch you later!', 'Right, I\'ll let you go'], yes: ['Yes! Totally', 'Oh, go on'], thanks: ['You\'re a star', 'Thanks a million'], wow: ['No way!'], sigh: ['Ugh'], nick: [null, null, null, 'pal', 'pal'] } },
+  earnest: { needs: 'listen', words: { hi: ['Hi!', 'Oh, hello'], bye: ['See you soon', 'Good luck out there'], yes: ['Definitely', 'Yes, of course'], thanks: ['Thank you so much'], wow: ['That\'s amazing'], sigh: ['Oh, no'], nick: [null, null, null, null, null] } },
+  gruff:   { needs: 'practical', words: { hi: ['Hm. You', 'There you are'], bye: ['Off with you', 'Right'], yes: ['Fine', 'If I must'], thanks: ['Hm. Thanks'], wow: ['Huh'], sigh: ['Typical'], nick: [null, 'cadet', 'cadet', 'kid', 'kid'] } },
+  dreamy:  { needs: 'share', words: { hi: ['Oh, hello there', 'Hi'], bye: ['Mind the stars', 'See you around'], yes: ['Mm, why not', 'I suppose so'], thanks: ['That\'s kind'], wow: ['Oh, how lovely'], sigh: ['Ah, well'], nick: [null, null, null, 'friend', 'friend'] } },
+  steady:  { needs: 'practical', words: { hi: ['Hello', 'All right?'], bye: ['See you', 'Take it easy'], yes: ['Sure', 'Sounds good'], thanks: ['Thanks'], wow: ['Not bad at all'], sigh: ['Well'], nick: [null, null, null, null, null] } },
+  playful: { needs: 'cheer', words: { hi: ['Oi oi', 'Look who it is'], bye: ['Don\'t be a stranger', 'Laters'], yes: ['Go on, then', 'You bet'], thanks: ['Cheers'], wow: ['Get in!'], sigh: ['Ah, nuts'], nick: [null, null, null, 'champ', 'champ'] } },
+};
+// a guess from the roster until the crew designer's fields arrive: the first of their traits that names a template
+const VOICE_BY_TRAIT = { gruff: 'gruff', suspicious: 'gruff', blunt: 'gruff', 'dry humour': 'dry', dry: 'dry', sarcastic: 'dry', wry: 'dry', 'quietly funny': 'dry',
+  chatty: 'chatty', sociable: 'chatty', 'easy laugh': 'chatty', playful: 'playful', cheerful: 'playful', optimistic: 'playful', easygoing: 'playful',
+  shy: 'shy', nervous: 'shy', quiet: 'shy', private: 'shy', discreet: 'shy', 'a little lost': 'shy', homesick: 'shy',
+  meticulous: 'brisk', precise: 'brisk', exacting: 'brisk', formal: 'brisk', organised: 'brisk', brisk: 'brisk', serious: 'brisk', ambitious: 'brisk', competitive: 'brisk', proud: 'brisk', 'sharp-eyed': 'brisk',
+  kind: 'warm', warm: 'warm', generous: 'warm', gentle: 'warm', patient: 'warm', dreamy: 'dreamy', 'absent-minded': 'dreamy', thoughtful: 'dreamy', unhurried: 'dreamy', forgetful: 'dreamy', curious: 'dreamy',
+  earnest: 'earnest', loyal: 'earnest', reliable: 'earnest', dependable: 'earnest' };
+const VOICE_GUARDED = ['shy', 'quiet', 'private', 'discreet', 'suspicious', 'nervous', 'serious', 'watchful', 'gruff'];
+const VOICE_OPEN = ['chatty', 'sociable', 'cheerful', 'easy laugh', 'warm', 'playful', 'optimistic', 'generous'];
+const VOICE_MENTOR = ['patient', 'kind', 'steady'];
+// habits -> gift tags they'd love, and the light thing they'd share early (joy)
+const VOICE_HABIT = { stargazer: ['star', 'the observatory at night'], music: ['music', 'music evenings'], musician: ['music', 'playing in the music room'],
+  'garden-lover': ['plant', 'the garden'], gardener: ['garden', 'tending the garden'], 'tea-break': ['tea', 'a proper tea break'], 'common-room': ['game', 'games in the common room'],
+  'quiet-corner': ['book', 'a quiet corner and a book'], 'lounge-regular': ['sweet', 'evenings in the lounge'], 'bar-regular': ['sweet', 'a drink at the bar'],
+  'calls-home': ['card', 'calls home'], shopper: ['made', 'browsing the crew store'], runner: ['sweet', 'a morning run'], 'gym-regular': ['sweet', 'the gym'], 'window-seat': ['star', 'a seat by the window'] };
+// struggle themes for generated crew (social-deep-plan Part 1), guessed from traits and habits until the generator
+// writes `thread`; story crew with an arc keep their own id
+const VOICE_THEME_BY = [['homesick', 'homesick'], ['calls-home', 'homesick'], ['nervous', 'exams'], ['meticulous', 'notEnough'], ['exacting', 'notEnough'], ['restless', 'stuck'],
+  ['workaholic', 'burnout'], ['shy', 'lonely'], ['quiet', 'lonely'], ['musician', 'talent'], ['competitive', 'rivalry'], ['private', 'starting'], ['stubborn', 'rivalry']];
+const VOICE_THEMES = ['homesick', 'exams', 'family', 'stuck', 'notEnough', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry', 'starting'];
+const OPENNESS = { guarded: { pts: .8, moment: 1.5 }, normal: { pts: 1, moment: 1 }, open: { pts: 1.2, moment: .75 } };
+const VOICE_CARD = new Map();
+function voiceOf(id) {
+  id = id && id.id || id;
+  if (VOICE_CARD.has(id)) return VOICE_CARD.get(id);
+  socInit(); const p = SOC.idx.has(id) ? SOC.crew[SOC.idx.get(id)] : null;
+  const W = typeof VOICE !== 'undefined' && VOICE && VOICE[id] || {}, T = typeof VOICE_TEMPLATES !== 'undefined' && VOICE_TEMPLATES || {};
+  const traits = p && p.traits || [], habits = p && p.habits || [], has = l => traits.some(x => l.includes(x));
+  const tpl = [W.tpl, p && p.tpl].find(x => x && (T[x] || VOICE_FALLBACK[x])) || (traits.map(x => VOICE_BY_TRAIT[x]).find(Boolean)) || 'steady';
+  const base = T[tpl] || VOICE_FALLBACK[tpl], fb = VOICE_FALLBACK[tpl] || VOICE_FALLBACK.steady;
+  const words = {}; for (const k of VOICE_TOKENS.concat('nick')) words[k] = (W.words && W.words[k]) || (base.words && base.words[k]) || fb.words[k];
+  const tags = habits.map(h => VOICE_HABIT[h]).filter(Boolean);
+  const pickV = (k, guess) => W[k] !== undefined ? W[k] : p && p[k] !== undefined ? p[k] : guess;
+  const arc = (typeof STORY_ARCS !== 'undefined' && STORY_ARCS[id]) || (p && p.story) ? id : null,   // story crew: their own arc (written or to come)
+    theme = (VOICE_THEME_BY.find(([x]) => traits.includes(x) || habits.includes(x)) || [])[1];
+  const card = { id, tpl, words,
+    needs: pickV('needs', base.needs || fb.needs),
+    openness: pickV('openness', has(VOICE_GUARDED) ? 'guarded' : has(VOICE_OPEN) ? 'open' : 'normal'),
+    loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
+    invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
+    thread: pickV('thread', arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),
+    keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {} };
+  if (!OPENNESS[card.openness]) card.openness = 'normal';
+  if (p) VOICE_CARD.set(id, card);                       // the data is fixed for a game, so once is enough
+  return card;
+}
+function voiceWord(id, token, t = shipNow()) {
+  const v = voiceOf(id), p = SOC.idx.has(v.id) ? SOC.crew[SOC.idx.get(v.id)] : null, U = k => schedU(p ? p.seed : 0, Math.floor(t / 60), k);
+  if (token === 'nick') {
+    const tier = relTier(v.id), n = Array.isArray(v.words.nick) ? v.words.nick[tier] : null;
+    return n ? n.replace('{me}', chatName()) : tier ? chatName() : 'cadet';
+  }
+  const a = v.words[token]; if (!Array.isArray(a) || !a.length) return null;
+  return a[Math.floor(U(673 + VOICE_TOKENS.indexOf(token)) * a.length)];
+}
+const voiceFill = (id, text, t = shipNow()) => String(text).replace(/\{(hi|bye|yes|thanks|wow|sigh|nick)\}/g, (m, k) => voiceWord(id, k, t) || '').replace(/\{me\}/g, chatName());
+function relGain(id, why, pts) {                         // openness, for section 20's relAdd; onboarding's numbers and moments stay as given
+  if (!(pts > 0) || /^(intro:|moment)/.test(String(why))) return pts;
+  return pts * OPENNESS[voiceOf(id).openness].pts;
+}
+// steps: what each tier lets happen also needs time known (social-deep-plan Part 1, starting numbers to tune). gap:
+// days since their last moment (for resolution, the last heartfelt one), passed in by the moments engine
+const STEP_GATES = { light: { tier: 2, met: 3, gap: 0 }, heartfelt: { tier: 3, met: 7, gap: 2 }, serious: { tier: 3, met: 7, gap: 2 }, resolution: { tier: 4, met: 0, gap: 3 } };
+function metDays(id, t = shipNow()) { socInit(); const r = SHIP.rel[id && id.id || id]; return r && r.met !== null ? Math.floor((t - r.met) / 1440) : -1; }
+function stepGate(id, tone, t = shipNow(), last = null) {
+  const g = STEP_GATES[tone]; if (!g) return false;
+  return relTier(id && id.id || id) >= g.tier && metDays(id, t) >= g.met && (last === null || (t - last) / 1440 >= g.gap);
+}
+// what you know about someone, in sections (the Crew app's page; no counts). rel.known holds what they've told you:
+// the roster's `about` texts (their topic gives the section), their `life` lines (Home, as Ask about tells them),
+// and '@<section>:<text>' entries the moments and gifts add later
+const KNOW_SECTIONS = [['work', 'Work'], ['home', 'Home'], ['hobby', 'Hobby'], ['past', 'Past'], ['secret', 'Their story'], ['story', 'Their story'], ['loves', 'Loves']];
+function knowSections(id) {
+  socInit(); id = id && id.id || id; const r = SHIP.rel[id], p = SOC.idx.has(id) ? SOC.crew[SOC.idx.get(id)] : null;
+  if (!r || !p) return [];
+  const by = {};
+  for (const k of r.known) {
+    if (k === 'news' || k === 'work') continue;
+    const m = /^@(\w+):(.+)$/.exec(k), a = !m && (p.about || []).find(x => x.text === k);
+    const sec = m ? m[1] : a ? a.topic || 'home' : 'home', text = m ? m[2] : k;
+    (by[sec] || (by[sec] = [])).push(text);
+  }
+  const out = [];
+  for (const [k, title] of KNOW_SECTIONS) if (by[k]) { const s = out.find(x => x.title === title); if (s) s.items.push(...by[k]); else out.push({ title, items: by[k].slice() }); }
+  return out;
+}
+function knowBlocks(id) {                                // for the Crew app (section 20's view)
+  const s = knowSections(id);
+  if (!s.length) return [{ kind: 'list', rows: [{ text: 'Nothing yet. Ask them about themselves.' }] }];
+  return s.flatMap(x => [{ kind: 'text', text: x.title, mark: 'head' }, { kind: 'list', rows: x.items.map(t => ({ text: t })) }]);
+}
+// ---- end of 20c ----
 
 // =====================================================================
 // 6. CAMERA
