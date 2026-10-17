@@ -1,3 +1,43 @@
+# Handover: the traditions engineer (seat 5, Pillar 4): START HERE
+
+Written at **0.34.34** (claude/ship-events a597a37, 2026-10-17 ~04:40) by session_018WZccmSvEfz2LC7DCfxdii, handing over at about 70% memory. The older notes further down (Pillars 2-3, the storm, the diplomatic visit) still hold.
+
+## Role, branch, builds, people
+- **Role:** section 18 SHIP EVENTS: the ship traditions (hand-written `SHIP_TRADITIONS` + the designers' baked ones), ship-wide events, meetings, occasions; `events_check.py`; the `.trad` grammar (`plans/trad-format.md`, `plans/trad_parse.py`); collecting the three tradition designers' files; the Traditions calendar page.
+- **Branch:** `claude/ship-events` only (never push elsewhere without the user's explicit permission: the lead once asked for a side branch; I sent the build master a diff instead). Builds 0.34.19-0.34.34; next **0.34.35**. Combined builds are the build master's (session_012K7RZ3oSX2vpBb1rR66MBh): 0.60.0 had up to 0.34.24; 0.60.1 = ca8c040 + the birthday diff; 0.60.2 should take a597a37.
+- **Chain of command:** the user -> the lead (session_01PJtmxWgAPLebXSZKP6ZRpG) -> everyone. Never contact the user. Talk sideways to owners directly; copy the lead on decisions only.
+- **Reports to you:** the designers: weekly session_01Wr9Jcc4nRUHHWdfJDUwb3X (claude/trad-weekly, k 435-454), every few weeks session_015dAEQhLUgkxejuzQF5CsV9 (claude/trad-monthly, 455-474), seasons/year/life session_01GnWSW6a2D1XdABqpCpVjaY (claude/trad-seasons, 475-499). Head writer (tone): session_016i7YYgZd6puKxfBSkLggRF.
+- **Peers:** dialogue session_01UmrVVpV7eBqEsa4sBucASP (content_gen.py bakes TRADITIONS by calling trad_parse.read_all; tell them before changing trad_parse's functions or output), sim session_01R6RBwwBM9aorpsqDCrztDU, galley session_018cicfPQZQXbxmtn6ygmL84, deck architect session_01ToE6RJFCw9deB3HcJRLKxS, social A session_012pK2XVi5UhqEd28fakYk68, social B session_019aEJaAGyZir9oq47CBRfA3, onboarding session_01KaHzfqSqF8B4bkNFrH1tsx, Tiles session_01DG3in6CvFFta6NrLpoVCJV, reviewer 2 session_0142TQw4ke8caPSyAC93VT98.
+
+## What section 18 has for Pillar 4 (see the DEV_NOTES rows 0.34.19-0.34.34)
+- **Rhythms** (`evDue`): weekday (one or a list), every week/2/4 weeks with a week index, quarter, year, after arrival (`introArrival()`), season/from/until filters. **Seasons:** `season(d)`, `seasonOf(d)`. **Flag gate:** `ev.flag` (bridge hour: 'bridge.invited').
+- **Loader:** section 22's generated `TRADITIONS` (array) -> `tradLoad` -> `SHIP_TRADITIONS`. Rules as data (`tradIs` words incl. night-shift/day-shift), texts with placeholders, nobody names themselves, `TRAD_ERRORS`.
+- **Voice budget** (`evBudget`, `EV_DROPPED`): two an evening, never two at once on a deck; prio, rarity, earlier start, order. Birthdays exempt, and only for crew aboard that evening (not their leaving day).
+- **Ties:** `tradTies(kind, d)`; decor via the deck architect's `dressShow` (`tradDecor`); traces (`traceAdd`, `{ id, day }`: seedlingYours, mugYours); `meal` on eventPlan entries (the sim builds it); tallies (`tallyOf`, `tallyVote`, `tallyLast`; per, mode=teams).
+- **Mail:** evening-before Mail, one per evening (bundled); the Sunday "This week aboard" (`WEEK_MAIL`: a copy of content/traditions/this-week-aboard.mail; events_check fails if they differ).
+- **Notes on the bus:** `simNote('tradition', { id, day, at, came, you, host, src, tally })`, `simNote('choice', {...})`. Hooks for 20c: `onPick`/`onEnd` on moment scripts (moments don't count as meetings).
+- **The storm** stays on day 10 (`spread`). The ready room's replies carry `mem`.
+
+## How to collect a designer's batch
+`git fetch origin claude/trad-<x> && git merge origin/claude/trad-<x>` -> fix leftovers -> `python3 plans/trad_parse.py` -> `python3 content_gen.py` -> `python3 lines_check.py` -> bump the build -> events_check (it plans each tradition's first day of the year, a whole year on paper, the budget, flags, tallies, decor/trace ids against DECK_DRESS + its ANNOUNCED list, the Sunday Mail) -> cadet_test against the last build (label matched) -> a day_check on a busy day -> DEV_NOTES row -> commit, push -> the lead (summary), the build master (commit), the designers and owners. Regenerate the calendar: `python3 plans/traditions-calendar-gen.py`.
+
+## Loose ends (as of a597a37)
+1. **Pre-existing:** events_check fails on day 231's dayReport double booking (3-store-1, esposito-yara/ishikawa-orla at 14:30), in 0.60.0 too. The sim engineer has it.
+2. **Meal traditions** are thinly attended until the sim engineer makes `meal` BE dinner/breakfast (asked).
+3. **The galley** (asked: pancakes, the tasting batch, Sunday's side via tallyLast, the suppers, cakes): their plan is in their messages; they read tradTies and tallyLast.
+4. **The deck architect** is building the decor (longTables, harvestTables, cupBoard, talentStage, yearsEnd, openLab), and has built places (rummage places now unused since rummage day was cut: tell them), mugYours. If they rename an id, update the files and events_check's ANNOUNCED.
+5. **The designers' next steps:** the head writer's tone pass; the weekly designer to check late piano's texts for two nights; the monthly designer to check talent night's texts for once a year; the seasons drafts (farewell supper, crew welcome tea) wait for crew rotation triggers (`when: rotation -1`, honorees from ROSTER_ROTATIONS, words friends-of-honoree etc.): build them when the lead says.
+6. **Tiles night's results:** asked the Tiles engineer whether they live in section 23 (suggested) and what function to read for the note.
+7. **Your vote:** `tallyVote` is ready; the device will call it later (the lead's ruling).
+8. **This week aboard:** copy WEEK_MAIL again whenever the monthly designer changes the .mail file.
+
+## Gotchas
+- cadet_test's g_nocrew shot sometimes catches section 15's "+N Energy" label (about 1921 px): re-run; compare a build with itself to prove it.
+- Run browser checks one at a time. events_check takes 6-10 minutes now; run it in the background and wait for the notice.
+- Merging ship-integration: only the HUD line (198) and GAME_BUILD clash; take theirs, then set your build.
+- `typeof X` is safe for function declarations anywhere and for consts defined earlier in the file; section 22 sits before 18.
+- Don't put a `// comment` inside a one-line object literal.
+
 # Handover: the events engineer (ship traditions)
 
 Written at build 0.34.6 and updated at **0.34.7** (Pillar 3, C6 step 1, on top of combined 0.41.4) so a fresh session can take over. **The next events engineer starts here.** The full notes are in DEV_NOTES.md, "Ship events (section 18)". This page is the short version.
