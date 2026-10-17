@@ -46,7 +46,7 @@ subject: This week aboard
 
 == dropped
 // a weekly tradition the voice budget left out this week
-- No {trad} this {weekday}: something rarer is on.
+- {trad}: not this {weekday}, as something rarer is on.
 
 == weekly
 - And all the usual weekly ones: the Calendar has them.
