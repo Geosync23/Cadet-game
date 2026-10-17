@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.48.34
+   STARSHIP CADET: CSV Wren                           build 0.48.35
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.48.34';                           // keep in step with the header's build line
+const GAME_BUILD = '0.48.35';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -13553,6 +13553,9 @@ const VOICE = {
         {"text": "Off you go. Mind the floor, it's wet. It's always wet. It's a galley.", "id": "1rbazra", "tone": "funny", "tier": [2, 4]},
         {"text": "Thank you, love. You're good company. Come back soon.", "id": "1doubq6", "tone": "warm", "tier": [3, 4]},
         {"text": "Bed, love. You've an early start. I'll have the porridge on.", "id": "immghu", "tier": [1, 4], "time": "night"},
+        {"text": "Off you go, love. Eat something before bed. A biscuit counts. Two count more.", "id": "17gbvky", "tone": "funny", "not": {"week1": "true"}},
+        {"text": "Take care, love. Bread on Sunday. You're kneading.", "id": "1q854sd", "not": {"week1": "true"}},
+        {"text": "{bye}. Come back hungry. That's an order.", "id": "1p3a0uo", "tone": "warm", "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "I've found out how they make your home dish, love. Don't ask how. I have ways.", "id": "x38632", "tone": "funny", "told": "moment.brennan.home"},
@@ -13583,6 +13586,34 @@ const VOICE = {
         {"text": "You came to see me on my birthday, love. That's the best present. That and cake.", "id": "o7igi1", "tone": "warm", "told": "bday"},
         {"text": "You were in a state yesterday, love. Wash before you eat. I'll check.", "id": "1pq6lhf", "tone": "funny", "told": "grubby"},
         {"text": "Pell says you've been a good friend to him. Best thing anyone's said in my mess.", "id": "16bjut0", "tone": "warm", "told": "heard.moment.pell"},
+        {"text": "Your first night, you finished your plate. Every bit. I noticed. I always notice.", "id": "1k0fjd", "tone": "warm", "tier": [1, 4], "told": "intro.dinner", "not": {"week1": "true"}},
+        {"text": "Your page in my book's filling up. You said a dish. I've tried it three times. Close.", "id": "37ot9e", "tone": "warm", "tier": [2, 4], "told": "moment.brennan.book"},
+        {"text": "You helped with the harvest. Those beans went in the stew. You could taste the care.", "id": "r73dn4", "tone": "warm", "tier": [1, 4], "told": "came.harvest"},
+        {"text": "The sweets you gave me. Shared them with the galley. Ivo ate most. Thank you, love.", "id": "13n58bb", "tone": "funny", "tier": [1, 4], "told": "gift.sweet"},
+        {"text": "Music night. You ate four biscuits. I counted. I'm proud.", "id": "exgql7", "tone": "funny", "tier": [1, 4], "told": "came.jam"},
+        {"text": "Your birthday cake. Did I get it right? I'll get it righter next year.", "id": "1ffc4sn", "tone": "warm", "tier": [1, 4], "told": "bday"},
+        {"text": "My oven still purrs. Every time I light it, I think: that was a good fix.", "id": "1objjhr", "tier": [1, 4], "told": "fixed.oven"},
+        {"text": "Observatory night. I sent a flask up with you. Did you share it? Good.", "id": "1se8r5u", "tone": "warm", "tier": [1, 4], "told": "came.observatory"},
+      ],
+      "chat": [
+        {"text": "My mother posts me recipes. \"Until it sounds right,\" she writes. That's the whole method.", "id": "5qy8a6", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Sunday bread tomorrow. The juniors knead. I talk. The dough listens to both of us.", "id": "goa65h", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Nandakumar's chillies again. I said \"too hot\". She said \"use fewer\". I used them all.", "id": "17kahks", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "The book of favourite dishes has a new page. Somebody's mum's stew. I'll get it right.", "id": "b23uy1", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Days off, I walk the garden. Smell everything. Write down what's ripe. Can't help it.", "id": "qahn2q", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I sing to the pans. Mother did too. They don't mind. Lukas minds.", "id": "1r1tfib", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Esme cuts carrots like a ruler. Ivo cuts them like a story. I love them both.", "id": "1o40v9f", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tamsin hums when she stirs. She stops when I look. I've stopped looking.", "id": "n51tlk", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Tariq leads Lukas at onions. I'm not supposed to know. I keep the tally.", "id": "9y2a2z", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Lukas runs my galley on my days off. \"Runs itself,\" he says. It doesn't. He does.", "id": "1tfl840", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Halloran bakes in my oven on rest days. I inspect. He passed. Once. Don't tell him.", "id": "18bq06", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I had a whole day off and read a book. A cookery book. I know. I know.", "id": "17sxvca", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I made the Captain's favourite on Thursday. She didn't say. She had seconds.", "id": "17wc8cc", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Mother taught me by ear. \"That's done, Auda. Take it off.\" I still hear it. Every pan.", "id": "coo54k", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I keep a tin of good biscuits for whoever looks sad. It's always empty. Says a lot.", "id": "np6tro", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Some days I'm in the galley before anyone's up, just listening. It's my quiet bit.", "id": "1k5kpkr", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "Feeding people's the only thing I've ever been sure of. That, and you lot.", "id": "1kocq73", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
+        {"text": "You've got a page in my book now, love. I'm still working out the dish. Soon.", "id": "3fui4d", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Storm, love. Soup's on. Storms always want soup.", "id": "11y9tbm", "tone": "warm", "cue": "event.ionStorm.onset"},
@@ -13612,6 +13643,9 @@ const VOICE = {
         {"text": "Good day, love. The bread rose, the soup sang, and the cold store behaved. All three!", "id": "qzwds8", "mood": "high", "tier": [2, 4]},
         {"text": "Good day, love. Not one plate came back with anything on it.", "id": "e1q941", "mood": "high", "tier": [2, 4]},
         {"text": "Bit low, love. Thinking of my mother's kitchen. I'll stir something. It helps.", "id": "132esqk", "mood": "low", "tier": [3, 4]},
+        {"text": "Happy, love. Bread rose, soup sang, nobody left hungry. What more is there?", "id": "4gmpzk", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Fine, love. Busy. Fed. Everyone fed. That's fine.", "id": "x4jo9t", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Bit low, love. I've polished every pan. Some twice. It'll pass. Have a scone.", "id": "1mgcxeo", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "Oh, love. Look at it. It's going on my windowsill. I'll talk to it every morning.", "id": "oj4ngz", "tone": "warm", "gift": "plant"},
@@ -13645,6 +13679,13 @@ const VOICE = {
         {"text": "You talk to everyone in my mess, love. Good. Nobody should eat alone.", "id": "ovcwar", "tone": "warm", "you": "chatty"},
         {"text": "A marrow called the Captain, first prize! Tell your gran I want the recipe. And the seeds.", "id": "8c8ybz", "tone": "funny", "flag": "home.gran.won", "tier": [1, 4]},
         {"text": "Your mum made you a mug, love? Bring it to breakfast. I'll fill it first. Every time.", "id": "vq30vj", "tone": "warm", "flag": "home.mum.mug", "tier": [2, 4]},
+        {"text": "{hi}. Eaten? Don't answer. I can see. Sit down, I've a bowl going.", "id": "xfkv0s", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "There you are, love. You look like a person who needs a biscuit.", "id": "ofssb2", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "My day off, love. I'm not cooking. I'm just... watching Lukas cook. Closely.", "id": "agn96z", "tone": "funny", "tier": [1, 4], "weekday": "fri|sat", "not": {"week1": "true"}},
+        {"text": "{me}! Good. Come and tell me what you had for lunch. All of it.", "id": "kpcgsl", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Hello, love. Sit. I'm off for ten minutes. Keep me company.", "id": "hwk4km", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{me}. Good. Kettle's on. I've been saving a scone. Don't tell the juniors.", "id": "10tffzm", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are, love. My favourite kind of evening: pans clean, and company.", "id": "8qqq4r", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Stay a minute, love. Sit. I've got something to ask you.", "id": "hlfwlv"},
@@ -13659,6 +13700,8 @@ const VOICE = {
       "joy": [
         {"text": "Best sound on the ship? A pan telling you it's ready. Listen. There. Hear it?", "id": "ktd7cz", "tier": [1, 4]},
         {"text": "Sunday bread, love. Flour everywhere, juniors kneading, everyone talking. Bliss.", "id": "flxpdd", "tier": [2, 4]},
+        {"text": "A full mess and empty plates coming back. That noise. Best sound there is.", "id": "4yk6ep", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Somebody tasting a dish from home and going quiet. That's the one.", "id": "1qfagsf", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "I keep a book of everyone's favourite dish. Everyone aboard. I'll find out yours.", "id": "17hgtzi", "tier": [1, 4]},
@@ -13672,6 +13715,10 @@ const VOICE = {
         {"text": "The cold store and I have an understanding. It stays cold. I stay calm. It never lasts.", "id": "6hy8cd", "tone": "funny", "tier": [2, 4]},
         {"text": "Lukas runs my galley two days a week. Runs it well. Moves my spoons. I forgive him.", "id": "dm1n28", "tone": "funny", "tier": [2, 4]},
         {"text": "My mother posts me recipes. Half of them say \"until it sounds right\".", "id": "1cfg3x9", "tone": "funny", "tier": [3, 4]},
+        {"text": "I've an apron for every day of the week. Sunday's has flour on it from three years ago.", "id": "et0x25", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I sleep early and rise early. The ovens like the morning. So do I.", "id": "1t01z92", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "My mother still sings to her pans. She's older than the pans. Just.", "id": "14qdvfj", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The galley crew are my lot. Esme, Ivo, Tariq, Tamsin, Lukas. I'd feed them to the end.", "id": "1hqxa4d", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You missed me earlier, love. I kept a plate warm. It's a bit dry now. Eat it anyway.", "id": "8nqzji"},
@@ -13689,6 +13736,13 @@ const VOICE = {
         {"text": "My day off and here I am, in the mess. Don't tell Lukas. He'll shoo me out.", "id": "18le28v", "tone": "funny", "act": "leisure", "deck": "3", "weekday": "fri|sat"},
         {"text": "Come to see what's ready. Don't tell Tove I squeezed the tomatoes.", "id": "83h8gg", "tone": "funny", "place": "hydroponics_garden"},
         {"text": "{dish} tonight, love. Go back for seconds. I'll be hurt if you don't.", "id": "mpqosq", "tone": "funny", "act": "dinner"},
+        {"text": "Porridge. Mine. With a spoon of jam. Chef's privilege.", "id": "1d3n9q5", "tone": "funny", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "I eat last. Always have. Then I know everyone's had theirs.", "id": "e4imme", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Day off. Garden, a long sit, then the mess to check on Lukas. Just to look.", "id": "tf12n7", "tone": "funny", "act": "off"},
+        {"text": "The herbs. Smell that. That's tomorrow's soup, that is.", "id": "sh2513", "place": "hydroponics_garden"},
+        {"text": "The lounge. Feet up. Somebody bring me a cup of tea. Not one I made, for once.", "id": "1hxmmz5", "tone": "funny", "place": "lounge", "not": {"week1": "true"}},
+        {"text": "Music night. I'll bring biscuits. And sing. Loudly. Badly. Happily.", "id": "1hr0av", "tone": "funny", "trad": "jam"},
+        {"text": "Sunday. Bread smells all down the corridor. That's how a ship should smell.", "id": "rf50ww", "tone": "warm", "weekday": "sun"},
       ],
       "note": [
         {"text": "You weren't in, love. There's a biscuit under the cloth. Eat it today, not tomorrow.", "id": "2z15gx"},
@@ -13752,6 +13806,9 @@ const VOICE = {
         {"text": "Carry on. Finish what you started.", "id": "1z0n8xe"},
         {"text": "Board's there. Pick the next one.", "id": "1pdu3em", "act": "work"},
         {"text": "Go and eat. Then sleep. In that order.", "id": "suhbru", "time": "evening"},
+        {"text": "Back to it. Eat something first.", "id": "4nl6fo", "not": {"week1": "true"}},
+        {"text": "Carry on, {me}. Sleep tonight. Properly.", "id": "1w5xp1k", "tone": "warm", "not": {"week1": "true"}},
+        {"text": "Board's there. It'll be there tomorrow too. Go and rest.", "id": "10xqnzs", "not": {"week1": "true"}},
       ],
       "callback": [
         {"text": "You swept left of the lathe. You found the out-of-true bit. Good. Clean work.", "id": "1ewsqoc", "told": "moment.calder.sweep"},
@@ -13769,6 +13826,34 @@ const VOICE = {
         {"text": "You took the job I mentioned. Done properly. Noted. Thank you.", "id": "l3xu5i", "told": "fav."},
         {"text": "You came. Ten minutes, I said. I stayed twenty. Don't tell Works.", "id": "p16wz2", "tone": "funny", "told": "came."},
         {"text": "Someone remembered my birthday. You. I don't know how. I'm not asking.", "id": "1v5rahf", "tone": "warm", "told": "bday"},
+        {"text": "Your first night. I wasn't there. Day off. You remember.", "id": "v00fx7", "tone": "funny", "tier": [1, 4], "told": "intro.dinner", "not": {"week1": "true"}},
+        {"text": "First dinner, you sat up straight when I came over. Torres told you to. I could tell.", "id": "1huscaw", "tone": "funny", "tier": [3, 4], "told": "intro.dinner"},
+        {"text": "Your repairs. The first one, that Tuesday. Clean work. I didn't say. Saying now.", "id": "pcqzy1", "tone": "warm", "tier": [1, 4], "told": "fixed.", "not": {"week1": "true"}},
+        {"text": "{thing}. Your repair. I listened to it after. It sounded right. Good.", "id": "1nwvlv", "tier": [2, 4], "told": "fixed."},
+        {"text": "Quiz night. You got the serial number question. I noticed. Not bad.", "id": "1mqva9d", "tone": "funny", "tier": [1, 4], "told": "came.quiz"},
+        {"text": "Music night. You stayed past the second song. So did I. Neither of us mentions it.", "id": "1yrxldk", "tone": "funny", "tier": [1, 4], "told": "came.jam"},
+        {"text": "Someone told me your birthday. I wrote it down. It's on the list. With the pumps.", "id": "xnpqzv", "tone": "funny", "tier": [1, 4], "told": "bday"},
+        {"text": "Observatory night. You found the array from the window. Most can't. Good eyes.", "id": "gf3rvh", "tier": [1, 4], "told": "came.observatory"},
+      ],
+      "chat": [
+        {"text": "I read on my days off. Shipyard histories. Engines, mostly. Some people. Fewer people.", "id": "btlpzx", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Torres asked what I do for fun. I said \"listen to fans\". He laughed. I wasn't joking.", "id": "1rkcjt2", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Brennan's toast. Three minutes a side. I timed it once. She saw. We don't discuss it.", "id": "s19zov", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Somebody wrote \"Calder is the clock\" on the bay wall. I've left it. It's accurate.", "id": "10nwjym", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I drink my tea standing. It's quicker. Halloran says it's tragic. It's efficient.", "id": "djs90p", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Quiz night. Engine round. I got them all. Nobody was surprised. I was, a little.", "id": "e7bjoi", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I went to the garden. Sat. Twenty minutes. Didn't fix anything. Odd feeling.", "id": "1i5wpc5", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The tea corner's kettle has a whine at the top. I like it. Don't let anyone fix it.", "id": "1oy81ip", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I eat the same thing on Mondays. Soup. Bread. Brennan knows not to ask.", "id": "g27h43", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Kovac knitted a cover for my mug. I use it. It's still just a mug.", "id": "1b52hha", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Mensah told me a joke. I laughed. A day later. In the lift. Alone.", "id": "17p3tk6", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "The Captain asked what I'd change aboard. I said nothing. Then I gave her a list.", "id": "1vd0pbt", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Teague's comic has me as a cloud. A tidy one. It's fair.", "id": "11z0pup", "tone": "funny", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "Off duty I'm told I'm funnier. Don't spread it. I'll deny it. Exactly.", "id": "1k23zsj", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "I used to sweep swarf in a shipyard. I still like a swept floor. Some things stay.", "id": "5kpazz", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "The toolbox on my shelf isn't mine. That's all. I'm not ready for the rest.", "id": "1dp1cub", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "You're good company. I don't say it. I've said it. Noted.", "id": "47dg9a", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
+        {"text": "Some nights I sit in the bay with the lights low. Just listening. It's like the sea.", "id": "fnno3w", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "cue": [
         {"text": "Your job's closed. Numbers right. Card signed. Good.", "id": "nyq44f", "cue": "repair.you@dept"},
@@ -13792,6 +13877,9 @@ const VOICE = {
         {"text": "Long one. I'll sleep on it. Then I'll fix it.", "id": "1sckrin", "mood": "low", "tier": [2, 4]},
         {"text": "Bad day. A seal I passed last week failed today. I'll go over it again. And again.", "id": "16wnls3", "mood": "low", "tier": [3, 4]},
         {"text": "Board's at four. Four. I don't know what to do with my hands.", "id": "csko3m", "tone": "funny", "mood": "high", "tier": [3, 4]},
+        {"text": "Good day. Good. That's twice. Write it down.", "id": "19stgru", "tone": "funny", "mood": "high", "not": {"week1": "true"}},
+        {"text": "Nominal. Like the air. That's a good report.", "id": "8fcoii", "mood": "ok", "not": {"week1": "true"}},
+        {"text": "Tired. I'll listen to the fans for a bit. Then sleep. It works.", "id": "j6vzjq", "mood": "low", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "gift": [
         {"text": "For me. Hm. It's going on the good shelf. Next to the box.", "id": "xdduub", "tone": "warm", "gift": "loved"},
@@ -13819,6 +13907,14 @@ const VOICE = {
         {"text": "Works speaks well of you. Quietly. That's the only way Works speaks.", "id": "1bzw0v0", "rep": "well"},
         {"text": "The board says you finish what you start. The board's rarely wrong.", "id": "f7c7vj", "you": "reliable"},
         {"text": "You're Works now. Not new. Works. Act like it. You already do.", "id": "1tcigzs", "tone": "warm", "rep": "theirs", "tier": [2, 4]},
+        {"text": "Cadet. Eaten. Good. I can tell. You're not looking at the board like it's food.", "id": "7zz2vm", "tone": "funny", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Right. You. Sit if you're sitting. I'm reading.", "id": "y2jow0", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Day off. I'm not here. You didn't see me. Hello.", "id": "1g8stmh", "tone": "funny", "act": "off", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "{me}. Tea's in the pot. It's for whoever. Today that's you.", "id": "sowfxw", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{me}. Good. Tell me something that isn't a fault. One thing.", "id": "882kgf", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "{me}. Sit. I'm off. Officially. Don't tell the board.", "id": "kl6q7s", "tone": "warm", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "There you are. I kept the good chair. By accident. Mostly.", "id": "1r4lryf", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
+        {"text": "{me}. Good. Sit. Tea. Talk if you want. Or don't. Both fine.", "id": "13188hl", "tone": "warm", "tier": [4, 4], "not": {"week1": "true"}},
       ],
       "hint": [
         {"text": "Have you got ten minutes? Off the board. Not about work.", "id": "4gtapf"},
@@ -13831,6 +13927,8 @@ const VOICE = {
       "joy": [
         {"text": "Listen. Nothing. Every fan on this deck running right. Best sound there is.", "id": "7p7b2d", "tier": [1, 4]},
         {"text": "A pump that's coughed for a week. Then doesn't. That's the whole job, really.", "id": "1f876rg", "tier": [2, 4]},
+        {"text": "A whole deck where every fan sounds right. I stand there. Two minutes. Sometimes three.", "id": "gxj2gp", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "Somebody I certified fixing a thing I never taught them. Quietly. That one.", "id": "1rsotb7", "tone": "warm", "tier": [2, 4], "not": {"week1": "true"}},
       ],
       "life": [
         {"text": "People ask what's on my mug. Nothing. It's a mug.", "id": "1dktqzj", "tone": "funny", "tier": [1, 4]},
@@ -13843,6 +13941,10 @@ const VOICE = {
         {"text": "Swarf still tells me things. Left of the lathe means out of true. Every time.", "id": "yl4vlz", "beat": "calder.1", "tier": [2, 4]},
         {"text": "I write one line on every tech I certify. One line. It takes me a week.", "id": "1ry70bw", "tier": [3, 4]},
         {"text": "The box on my shelf isn't mine. I've said that. I'll say more one day. Not today.", "id": "18dqzwb", "beat": "calder.2", "not": {"beat": "calder.3"}},
+        {"text": "My cabin has one chair, one lamp and a lot of manuals. It's enough.", "id": "ld6qa9", "tier": [1, 4], "not": {"week1": "true"}},
+        {"text": "I learnt to cook from a shipyard galley. Badly. Eggs, mostly. I still do the eggs.", "id": "5o1ilp", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I keep my boots by the door, laces in. Never been late once. Not once.", "id": "1xgar1o", "tier": [2, 4], "not": {"week1": "true"}},
+        {"text": "I write letters on my days off. Short ones. Numbers in them, mostly. People like numbers.", "id": "2ad3kp", "tone": "funny", "tier": [3, 4], "not": {"week1": "true"}},
       ],
       "missed": [
         {"text": "You missed our time. Book another. I'll keep it.", "id": "1263zr3"},
@@ -13861,6 +13963,13 @@ const VOICE = {
         {"text": "I don't take a break. I'm standing near the tea. It's different.", "id": "u5ytpx", "tone": "funny", "beat": "calder.1", "place": "teacorner"},
         {"text": "Hold the torch. Lower. There. See the scoring? That's three months of bad air.", "id": "1rpldvq", "act": "work", "tier": [2, 4]},
         {"text": "Torres talks to the coils. I listen to them. We hear the same thing.", "id": "1nm2o5n", "deck": "6"},
+        {"text": "Tea. Toast. Then the board. In that order, every day.", "id": "mvbq9n", "act": "breakfast", "not": {"week1": "true"}},
+        {"text": "Dinner. Ten minutes. Fifteen if it's soup. It's soup.", "id": "sg60i9", "tone": "funny", "act": "dinner", "not": {"week1": "true"}},
+        {"text": "Day off. A book and a fan I can hear from my cabin. It's running right. Good.", "id": "9nk7pq", "act": "off"},
+        {"text": "The garden. Nothing's broken here. I find that restful. Mostly.", "id": "6jv8bn", "place": "hydroponics_garden"},
+        {"text": "Lounge. Hm. Halloran made me come. I'm sitting very still. So nobody notices.", "id": "14sne59", "tone": "funny", "place": "lounge", "not": {"week1": "true"}},
+        {"text": "Tea corner. I don't take a break. I'm standing. Standing isn't a break.", "id": "1ymfq0u", "tone": "funny", "place": "teacorner"},
+        {"text": "Music night. I'll stay for one song. Two if it's in time.", "id": "1yrutcv", "tone": "funny", "trad": "jam"},
       ],
       "note": [
         {"text": "Your bench was untidy. It isn't now. Don't thank me.", "id": "5gk5eg", "tier": [3, 4]},

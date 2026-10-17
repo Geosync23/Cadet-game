@@ -8,7 +8,11 @@ servery; `walk.call.<n>`; linger `walk.more.<n>`; meetings `introDinner`, `intro
 (`banks/tiles.lines`, kinds `tiles.*`; 30 Deck 3 pairs). Next build 0.48.26. Writer 4 (session_01AB5f3VLMh8huiLWbEnqa8U,
 claude/writer-commons) is on batch 5: the other 15 visitors. DE2: one-sided booth convos play for one person (0.43.13; they need place: or act:);
 `tiles.*` kinds need no wiring; `trait:dry_humour` / `you:night_owl` coming in their next build. 0.48.26-31: all 31 visitors voiced,
-Zeke's ordinary weeks, goodbyes/letters (Commons 19, Works 16, Watch 9), dinner convos, repair reactions (Writer 4). A meeting choice takes ONE reply line (a second indented
+Zeke's ordinary weeks, goodbyes/letters (Commons 19, Works 16, Watch 9), dinner convos, repair reactions (Writer 4).
+0.48.32-35: last goodbyes; everyday passes for Holt, Vance, Marrow, Kovac, Calder, Brennan (Writer 4, RETIRED). Writer 5
+(session_01HW7UxnuNvRXoEjn8tK4sQq, claude/writer-commons) now: Tomas, Pell, Rina passes, then story-crew goodbyes. Next build 0.48.36.
+My recurring edits: callbacks mustn't assume when a beat happened; nothing that pre-empts a beat; no poems or
+"thinking about you" to the player; Day 0 callbacks must match introChief/introDinner as written. A meeting choice takes ONE reply line (a second indented
 line overwrites the first). The notes below are head writer 2's, still accurate unless the lines above say otherwise.
 
 **Head writer 2** (session_01HNrh3xCtczeZM5NVFrE6pa) held the seat 0.48.11-0.48.21 and handed over at ~70% memory

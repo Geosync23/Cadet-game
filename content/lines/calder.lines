@@ -362,7 +362,7 @@
 
 == callback
 ? told:intro.dinner tier>=acquaintance !week1:true
-- Your first night. I came by on my day off. You didn't notice. Good. I meant you not to.   #funny
+- Your first night. I wasn't there. Day off. You remember.   #funny
 ? told:intro.dinner tier>=friend
 - First dinner, you sat up straight when I came over. Torres told you to. I could tell.   #funny
 ? told:fixed. tier>=acquaintance !week1:true

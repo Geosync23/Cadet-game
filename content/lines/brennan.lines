@@ -374,7 +374,7 @@
 - My day off, love. I'm not cooking. I'm just... watching Lukas cook. Closely.   #funny
 ? tier>=colleague !week1:true
 - {me}! Good. Come and tell me what you had for lunch. All of it.   #funny
-- Hello, love. Sit. I'm off for ten minutes. I'll spend them on you.   #warm
+- Hello, love. Sit. I'm off for ten minutes. Keep me company.   #warm
 ? tier>=friend !week1:true
 - {me}. Good. Kettle's on. I've been saving a scone. Don't tell the juniors.   #warm
 ? tier>=close !week1:true
