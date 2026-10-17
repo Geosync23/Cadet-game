@@ -1,0 +1,37 @@
+@crew brennan
+// Writer-commons, batch 1 (for the Voices sampler). Brennan's card is the head writer's. Nothing of the fire, Nell
+// Arrowby or blue sage before their beats.
+
+== greet
+? tier=stranger
+- {hi}. You're new. Have you eaten? Mess is through there. Trays on the left.
+? tier>=acquaintance time:morning
+- Morning, {nick}. Breakfast's on till eight, and I'm counting heads.
+? tier>=acquaintance
+- {hi}. Have you eaten? Don't answer. I can see you haven't. Sit.   #funny
+? tier>=colleague
+- There you are, {nick}. Biscuits went down to the junior wing. Did you get one? Good.
+? tier>=friend
+- Oh, there's my favourite. Don't tell the others. I tell them all that, mind.   #warm
+
+== feel
+? mood:high
+- Good day, love. The pans sang all through lunch. Not one of them caught.
+? mood:low
+- Cold store ran warm again. Two degrees. I've been very polite to it all day.   #funny
+
+== near
+? place:galley act:work
+- Hear that? That's three minutes from done. Now two. Now it's done.
+? act:meal
+- Eat your greens, love. Nandakumar's chillies are in the sauce, so go gently.
+
+== life
+? tier>=acquaintance
+- I keep a book of everyone's favourite dish. Everyone aboard. I'll find out yours.
+? tier>=colleague
+- I called the Captain "love" once. By accident. I've never lived it down.   #funny
+
+== joy
+? tier>=acquaintance
+- Best sound on the ship? A pan telling you it's ready. Listen. There. Hear it?

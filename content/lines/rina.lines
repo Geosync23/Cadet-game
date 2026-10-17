@@ -1,0 +1,37 @@
+@crew rina
+// Writer-commons, batch 1 (for the Voices sampler). Rina's card is the head writer's. Gran comes in from beat 1
+// (STORY_ARCS.rina); no exam talk until beat rina.5. Never says how she feels straight out.
+
+== greet
+? tier=stranger
+- {hi}. Infirmary's on Deck 3, if you need it. Try not to need it.
+? tier>=acquaintance time:morning
+- Morning. Breakfast closes at eight. I'm saying so, so you can't say nobody did.
+? tier>=acquaintance
+- {hi}. Have you drunk any water today? Don't lie. I'll know.
+? tier>=colleague
+- Oh, it's you. Tiles later? I'll go easy on you. That's a lie.   #funny
+? tier>=friend
+- There you are, {nick}. I was about to come looking. I wasn't. But I was about to.   #warm
+
+== feel
+? mood:high
+- Good day. Won at Tiles. Twice. Not that I'm counting. I'm counting.   #funny
+? mood:low
+- Long shift. Don't ask. Actually, ask me about anything else.
+
+== near
+? place:infirmary
+- Sit there. Arm out. This won't hurt. It might a bit. You'll live.
+? act:leisure
+- The Tiles table's free. That's not an invitation. It's a warning.
+
+== life
+? tier>=acquaintance
+- I study in the evenings. The journals make a decent pillow too. Two uses.
+? tier>=colleague
+- My sister's a doctor on a station. We argue by message. I'm winning. She'd disagree.   #funny
+
+== joy
+? tier>=acquaintance
+- Undefeated at Tiles, this common room. I keep count. The count is very precise.   #funny
