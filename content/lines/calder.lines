@@ -271,3 +271,109 @@
 == rumour
 - Not gossip. Facts. There's a difference.
 - I don't pass things on. Except this. Just this.   #funny
+
+// Writer 4, batch 17: Calder's ordinary weeks, after week one. Mostly not work: off duty she's warmer and slightly
+// embarrassed about it. Toast, tea she won't take a break for, books, listening to fans for pleasure, the mug.
+// Gates kept: the toolbox only as "not mine" before beat:calder.3; no Fenn; no birthdays known; no exclamation marks.
+
+== greet
+? tier>=acquaintance !week1:true
+- Cadet. Eaten. Good. I can tell. You're not looking at the board like it's food.   #funny
+- Right. You. Sit if you're sitting. I'm reading.
+? tier>=acquaintance !week1:true act:off
+- Day off. I'm not here. You didn't see me. Hello.   #funny
+? tier>=colleague !week1:true
+- {me}. Tea's in the pot. It's for whoever. Today that's you.
+- {me}. Good. Tell me something that isn't a fault. One thing.
+? tier>=friend !week1:true
+- {me}. Sit. I'm off. Officially. Don't tell the board.   #warm
+- There you are. I kept the good chair. By accident. Mostly.   #funny
+? tier>=close !week1:true
+- {me}. Good. Sit. Tea. Talk if you want. Or don't. Both fine.   #warm
+
+== chat
+? tier>=acquaintance !week1:true
+- I read on my days off. Shipyard histories. Engines, mostly. Some people. Fewer people.   #funny
+- Torres asked what I do for fun. I said "listen to fans". He laughed. I wasn't joking.   #funny
+- Brennan's toast. Three minutes a side. I timed it once. She saw. We don't discuss it.   #funny
+- Somebody wrote "Calder is the clock" on the bay wall. I've left it. It's accurate.   #funny
+- I drink my tea standing. It's quicker. Halloran says it's tragic. It's efficient.   #funny
+- Quiz night. Engine round. I got them all. Nobody was surprised. I was, a little.   #funny
+? tier>=colleague !week1:true
+- I went to the garden. Sat. Twenty minutes. Didn't fix anything. Odd feeling.
+- The tea corner's kettle has a whine at the top. I like it. Don't let anyone fix it.   #funny
+- I eat the same thing on Mondays. Soup. Bread. Brennan knows not to ask.   #funny
+- Kovac knitted a cover for my mug. I use it. It's still just a mug.   #funny
+- Mensah told me a joke. I laughed. A day later. In the lift. Alone.   #funny
+- The Captain asked what I'd change aboard. I said nothing. Then I gave her a list.   #funny
+- Teague's comic has me as a cloud. A tidy one. It's fair.   #funny
+? tier>=friend !week1:true
+- Off duty I'm told I'm funnier. Don't spread it. I'll deny it. Exactly.   #funny
+- I used to sweep swarf in a shipyard. I still like a swept floor. Some things stay.
+- The toolbox on my shelf isn't mine. That's all. I'm not ready for the rest.
+? tier>=close !week1:true
+- You're good company. I don't say it. I've said it. Noted.   #warm
+- Some nights I sit in the bay with the lights low. Just listening. It's like the sea.
+
+== near
+? act:breakfast !week1:true
+- Tea. Toast. Then the board. In that order, every day.
+? act:dinner !week1:true
+- Dinner. Ten minutes. Fifteen if it's soup. It's soup.   #funny
+? act:off
+- Day off. A book and a fan I can hear from my cabin. It's running right. Good.
+? place:hydroponics_garden
+- The garden. Nothing's broken here. I find that restful. Mostly.
+? place:lounge !week1:true
+- Lounge. Hm. Halloran made me come. I'm sitting very still. So nobody notices.   #funny
+? place:teacorner
+- Tea corner. I don't take a break. I'm standing. Standing isn't a break.   #funny
+? trad:jam
+- Music night. I'll stay for one song. Two if it's in time.   #funny
+
+== feel
+? mood:high !week1:true
+- Good day. Good. That's twice. Write it down.   #funny
+? mood:ok !week1:true
+- Nominal. Like the air. That's a good report.
+? mood:low tier>=friend !week1:true
+- Tired. I'll listen to the fans for a bit. Then sleep. It works.
+
+== life
+? tier>=acquaintance !week1:true
+- My cabin has one chair, one lamp and a lot of manuals. It's enough.
+? tier>=colleague !week1:true
+- I learnt to cook from a shipyard galley. Badly. Eggs, mostly. I still do the eggs.
+- I keep my boots by the door, laces in. Never been late once. Not once.
+? tier>=friend !week1:true
+- I write letters on my days off. Short ones. Numbers in them, mostly. People like numbers.   #funny
+
+== joy
+? tier>=acquaintance !week1:true
+- A whole deck where every fan sounds right. I stand there. Two minutes. Sometimes three.
+? tier>=colleague !week1:true
+- Somebody I certified fixing a thing I never taught them. Quietly. That one.   #warm
+
+== bye
+? !week1:true
+- Back to it. Eat something first.
+- Carry on, {me}. Sleep tonight. Properly.   #warm
+- Board's there. It'll be there tomorrow too. Go and rest.
+
+== callback
+? told:intro.dinner tier>=acquaintance !week1:true
+- Your first night. I came by on my day off. You didn't notice. Good. I meant you not to.   #funny
+? told:intro.dinner tier>=friend
+- First dinner, you sat up straight when I came over. Torres told you to. I could tell.   #funny
+? told:fixed. tier>=acquaintance !week1:true
+- Your repairs. The first one, that Tuesday. Clean work. I didn't say. Saying now.   #warm
+? told:fixed. tier>=colleague
+- {thing}. Your repair. I listened to it after. It sounded right. Good.
+? told:came.quiz tier>=acquaintance
+- Quiz night. You got the serial number question. I noticed. Not bad.   #funny
+? told:came.jam tier>=acquaintance
+- Music night. You stayed past the second song. So did I. Neither of us mentions it.   #funny
+? told:bday tier>=acquaintance
+- Someone told me your birthday. I wrote it down. It's on the list. With the pumps.   #funny
+? told:came.observatory tier>=acquaintance
+- Observatory night. You found the array from the window. Most can't. Good eyes.
