@@ -319,16 +319,18 @@ three differences:
 
 - **The header:** `@arc home.<contact>`, `who: home:<contact>`, `name: Mum` (what you call them), and `pron: they`
   where it applies.
-- **Beats** take every arc field plus `via: reply` (over the relay, a little lag) or `via: live` (that call comes on a clear
-  line). Since 0.62.0 every beat plays on an ordinary call (one call home a day in all; a beat is due a week after the
-  last), so don't write "tonight" or a weekday unless the beat's `when:` asks for it. Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
-- **After the beats**, two sections:
-  - `== send`: things you can tell them on a call. `? conditions`, then `- text   flavour:share` (optionally `flag:<key>`
-    or `mem:<word>`, set when you choose it) with their reaction indented under it (`  them: text [pose]`). Conditions
-    last until the next `?`, so put a bare `?` before lines anyone can say. `came:any` and `friend:any` (with `{trad}`
-    and `{friend}`) are for "I went to quiz night" and "I've made a friend".
-  - `== chat`: whole everyday calls for days with no beat, separated by `--`. An optional `when: <conditions>` first,
-    the lines, and `? send` where your choice of news goes.
+- **One-sided** (the user, 0.62.0): only they speak; you listen. No `? choice` in beats and no `== send`; one call home
+  a day in all, and you pick who.
+- **Beats** (`== beat N`, 6-10 `them:` lines) take every arc field (tone, when, mem, flag, keepsake, learn, mail, hint);
+  `via: live` is optional and makes that call come on a clear line. A beat plays on your first call to them 7 or more
+  days after their last beat, any day, so don't write "tonight" or a weekday unless its `when:` asks for it. `hint:` is
+  what the booth screen says while that beat is due. Chain them with `when: beat:home.mum.2` or `when: flag:home.mum.called`.
+- **`== chat`**: whole ordinary calls for days with no beat, separated by `--`, 5-8 `them:` lines each, an optional
+  `when: <conditions>` first. `beat=home.mum.2` (exactly two beats told) ties a scene to a stage of the arc; weekday:,
+  season: and time: add colour. A scene whose when uses `cue:`, `came:`, `friend:` or `flag:intro.*` is a news reaction
+  (they heard your news by Mail) and plays once. The game picks a news reaction first, then a scene you haven't heard in
+  your last 16 calls to them (staged ones first), else the one heard longest ago. Recorded messages in Mail use the same
+  scenes (not the news reactions).
 
 Family warmth ("I love you", "love to you") is fine in call files, and only that: any other romance word ("in love",
 "my love", "my heart"...) is an error there as everywhere; the head writer reads them for tone. The contacts are `mum`,
