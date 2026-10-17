@@ -427,3 +427,4 @@ Read: this section, the "STATE AT 19:35" section above, TEAM.md, CLAUDE.md (user
 - ~23:40 USER play-test notes for 0.60.7 (one more Pillar 4 pass before Pillar 5): plans/notes-0607.md (verbatim). Hiring a 0.60.7 planner (plan page for review; no building until approved). 0.60.6 continues.
 - ~23:39 1f: Tiles PASS WITH FIXES (MEDIUM: endless social from repeat games at zero ship time). Lead's call (a): full need gain for the first game per person per ship day, a quarter after -> PE6 0.28.55 with the pause LOWs. Planner 0.60.7 started (session_0165oGATedZqZNCLXnQWytMv). Tiles/Pause shots sent to the user.
 - ~23:40 1f at ~68%, handover plans/handover-reviewer-1f.md; archived. 1g is the sole reviewer now (shuffle, PE8 guard, PE7 0.28.54 BLOCK re-check, PE6 0.28.55). PE6/PE7 told.
+- ~23:45 user: keep going (option A: wait for everything; lead committed to ~02:00 UTC). PE8 lift guard + 05:00 crate done (putdown 1117454) -> 1g/BM3; PE8 idle.
