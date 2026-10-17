@@ -21,3 +21,12 @@ Trial merge (integration, then ship-events beb9fd2, then dialogue 7e9a7aa). Conf
 - `simNote('choice', { script, k, meeting, who, flavour, mem, flag })` in dialogueStep, inside section 18 and
   typeof-guarded. `D.m` is already relied on two lines above, and `who` is de-duplicated ids. No state change, no R(),
   nothing per frame.
+
+## Addendum: 4294df1, 5a547e8 (0.34.25-0.34.26): PASS
+- `trace` on a tradition: `traceAdd(id, day)` stores `{ id, day }` once, when you join. Loading keeps strings or
+  `{ id: string, day: int }`. `traceOn` reads both shapes, and every other SHIP.traces use on every branch only compares
+  strings (`includes`), which is safe with objects mixed in. dressShow hands `{ id, day }` to the decks branch's
+  seedlingYours as `o`, as it expects.
+- `tradDecor`: ties.decor -> a DECK_DRESS id, from 30 minutes before to 15 after; one more dressShow entry (the
+  key-compare stops any rebuild per minute).
+- The storm: `earliest: 10, spread: 1` gives day 10 for every new game. The diplomatic visit follows from it as before.
