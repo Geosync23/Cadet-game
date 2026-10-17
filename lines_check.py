@@ -64,7 +64,13 @@ SHIP_WORDS = set('''I I'm I'll I've I'd OK Wren CSV Works Watch Survey Comms Hel
 Bridge Captain Commander Chief Chef Doctor Dr Envoy Cadet Officer Lieutenant Ensign Veyli Tiles Hesper Dock Mail Monday Tuesday
 Wednesday Thursday Friday Saturday Sunday Sowing Greening Harvest Lanterns Board Mess Lounge Gym Shuttle Tern Coil Oi Ta
 Mum Dad Gran Grandad Grandma Grandpa Nan Uncle Auntie Aunt Morning Evening Afternoon Night Hey Hi Hello Good Right Well
-Admiral Moro Brenner Gull Bunk Engine Specialist Reactor'''.split())
+Admiral Moro Brenner Gull Bunk Engine Specialist Reactor Valo Coriel Lisk Kesh Marra Station Ostrander Tevan Port Halloran
+New Aberdeen Halcyon Gerald Varga Fenn Arrowby Rook'''.split())
+
+
+COMMON = set('''scanner patrol relay sweep telescope treadmill coffee ship odd somebody whose fridays mondays tuesdays wednesdays
+thursdays saturdays sundays someone anybody everybody nobody nothing everything morning tonight tomorrow yesterday today
+lunch dinner breakfast tea supper week weekend station deck dock'''.split())   # ordinary words a line may start with
 
 
 def roster(game):
@@ -111,6 +117,9 @@ def main(argv):
     for p in people.values():
         names.update(w.strip('.') for w in p['name'].split())
     known_words = SHIP_WORDS | names
+    facts = os.path.join(cg.CONTENT, 'facts.md')       # the head writer's canon sheet: every capitalised word in it is known
+    if os.path.exists(facts):
+        known_words |= set(re.findall(r"\b[A-Z][a-z]+\b", open(facts, encoding='utf-8').read()))
 
     # every line, with where it came from: (where, kind, entry, speaker id or None, source)
     allx = []
@@ -158,6 +167,9 @@ def main(argv):
             for x in ([l] if 'text' in l else [c for c in l['choice']] + [c['reply'] for c in l['choice'] if 'reply' in c]):
                 allx.append((f'meeting {mid}', 'moment', {'text': x['text'], 'id': mid}, None, 'meet'))
 
+    vocab = set()
+    for x in allx:
+        vocab.update(re.findall(r"\b[a-z][a-z']+\b", x[2]['text']))
     seen = {}
     for where, kind, e, cid, src in allx:
         t, tag = e['text'], f'{where} [{kind}] "{e["text"][:50]}"'
@@ -211,17 +223,17 @@ def main(argv):
                                                or 'soon' in str(e.get('leaving', '')) or kind.startswith(('story', 'arc', 'moment'))):
             errors.append(f'{tag}: #serious needs tier>=friend, a beat:, mem:moment or leaving:soon (serious moments are earned)')
         if cid and e.get('habit'):
-            have = set(people.get(cid, {}).get('habits', [])) | {h['add'] for h in people.get(cid, {}).get('habitShifts', [])}
+            have = set(people.get(cid, {}).get('habits', [])) | {h.get('add') for h in people.get(cid, {}).get('habitShifts', []) if h.get('add')}
             for h in (e['habit'] if isinstance(e['habit'], list) else [e['habit']]):
                 if not set(h.split('|')) & have:
                     warns.append(f'{tag}: {cid} doesn\'t have the habit "{h}"')
         # names: capitalised words mid-sentence that aren't crew, guests or ship words
         for m in re.finditer(r'(?<![.!?]\s)(?<!^)(?<!["(])\b([A-Z][a-z]+)\b', t):
             w = m.group(1)
-            if w not in known_words and m.start() > 0 and not re.search(r'[.!?:]\s*$', t[:m.start()]):
+            if w not in known_words and w.lower() not in vocab and w.lower() not in COMMON and m.start() > 0 and not re.search(r'[.!?:]\s*$', t[:m.start()]):
                 warns.append(f'{tag}: "{w}" isn\'t a crew member, guest or ship word (a name only from the roster)')
         for m in re.finditer(r"\b([A-Z][a-z]+)(?:'s\b| says\b| said\b| told\b| thinks\b| wants\b| is\b| was\b| and I\b)", t):
-            if m.group(1) not in known_words and m.group(1) not in ('It', 'That', 'This', 'There', 'What', 'Who', 'Everyone', 'Nobody', 'Someone', 'Here', 'He', 'She', 'Today', 'Tomorrow', 'Dinner', 'Breakfast', 'Lunch', 'Food', 'Nothing', 'Something', 'Life', 'Home', 'Work',
+            if m.group(1) not in known_words and m.group(1).lower() not in vocab and m.group(1).lower() not in COMMON and m.group(1) not in ('It', 'That', 'This', 'There', 'What', 'Who', 'Everyone', 'Nobody', 'Someone', 'Here', 'He', 'She', 'Today', 'Tomorrow', 'Dinner', 'Breakfast', 'Lunch', 'Food', 'Nothing', 'Something', 'Life', 'Home', 'Work',
                                                                        'Or', 'How', 'Why', 'When', 'Where', 'Which', 'Everything', 'Anyone', 'Anything', 'Mine', 'Yours',
                                                                        'His', 'Her', 'Their', 'Our', 'Your', 'My', 'One', 'Each', 'Now', 'Then', 'So', 'Yes', 'No', 'Yesterday'):
                 warns.append(f'{tag}: "{m.group(1)}" looks like a name that isn\'t crew or a guest')

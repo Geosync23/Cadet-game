@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.43.2 
+   STARSHIP CADET: CSV Wren                           build 0.43.3 
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.43.2';                            // keep in step with the header's build line
+const GAME_BUILD = '0.43.3';                            // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -12715,7 +12715,7 @@ jobWhere.on = true;                                      // crew go to their job
 //     else); a seeded pick by person and hour (schedU k 750), so a second tap in the same hour says the same; fills
 //     placeholders ({me}, {room}, {best}...; a line that can't be filled is skipped) and voice tokens ({hi}, {nick}...).
 //     A told: line is said once: lineFor calls section 20's memTold. ctx: { t, other, room, thing, trad, machine,
-//     dish, deck, act, place, peek } (peek: don't count it as said).
+//     dish, deck, act, place, flags, peek } (peek: don't count it as said; flags: { key: true } answers flag: for those keys).
 //   overheardFor(a, b, ctx) -> [{ who, text }] | null   a conversation between two crew (CONVOS), A = a, B = b
 //   linesOk(e, p, ctx)   does a line's every condition hold (the frozen vocabulary: content/README.md, "Conditions")
 //   MOMENTS / MOMENT_THEMES (generated) are social B's moments (content/arcs, content/themes); when: is checked with linesOk
@@ -12918,6 +12918,8 @@ const LINE_WORDS = { hi: ['Hi'], bye: ['See you'], yes: ['Sure'], thanks: ['Than
 const LINE_ACTS = { meal: ['breakfast', 'dinner'], free: ['leisure', 'off'] };   // act: groups
 const LINE_TIMES = { morning: [360, 720], afternoon: [720, 1020], evening: [1020, 1320], night: [1320, 360] };
 const LINE_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const LINE_PLACES = { mess: 'mess hall', commons: 'junior common room', lounge: 'bow lounge', booths: 'call-home booths', overlook: 'engine overlook',
+  teacorner: 'tea corner', worksbay: 'works bay', chartroom: 'chart room', musicroom: 'music room' };   // place: aliases for rooms with spaces
 const LINE_RANKS = ['junior', 'officer', 'senior', 'chief', 'xo', 'captain'];
 const LINE_RECENT = [];                                   // [{ id, who, h }] the last lines said (not saved)
 // section 20's and 13's queries by name, each typeof-guarded (they're consts, so not on window; a missing one gives undefined)
@@ -12977,7 +12979,7 @@ function lineCond(k, v, p, ctx) {
     case 'ship.work': case 'ship.kindness': case 'ship.spirit': return any(v, x => lineQ('repShip', k.slice(5)) === x);
     case 'you': return any(v, x => (lineQ('knownFor') || []).includes(x));
     case 'cue': return any(v, x => !!lineQ('cue', x));
-    case 'flag': return any(v, x => !!lineQ('flag', x));
+    case 'flag': return any(v, x => ctx.flags && x in ctx.flags ? !!ctx.flags[x] : !!lineQ('flag', x));   // ctx.flags: { key: true } answers for those keys (onboarding asks for a step's lines)
     case 'week1': { const on = !!lineQ('inWeek1'); return any(v, x => (x === 'true') === on); }
     case 'leaving': return any(v, x => x === 'soon' ? !!lineQ('leavingSoon', id) : x === 'you' ? !!ctx.goodbye : false);
     case 'newhere': return any(v, x => (x === 'true') === !!lineQ('newHere', id));
@@ -12986,7 +12988,8 @@ function lineCond(k, v, p, ctx) {
     case 'time': { const m = ((t % 1440) + 1440) % 1440; return any(v, x => { const r = LINE_TIMES[x]; return !!r && (r[0] < r[1] ? m >= r[0] && m < r[1] : m >= r[0] || m < r[1]); }); }
     case 'weekday': return any(v, x => LINE_DAYS[weekday(Math.floor(t / 1440) + 1)] === x);
     case 'season': return any(v, x => lineQ('season', Math.floor(t / 1440) + 1) === x);
-    case 'place': return any(v, x => x === 'calm' ? !!ctx.place && typeof CALM_TYPES !== 'undefined' && [].concat(CALM_TYPES.has ? [...CALM_TYPES] : CALM_TYPES).includes(ctx.place) : ctx.place === x || (ctx.room || '').toLowerCase() === x.toLowerCase());   // calm: section 20's CALM_TYPES
+    case 'place': return any(v, x => { if (x === 'calm') return !!ctx.place && typeof CALM_TYPES !== 'undefined' && [].concat(CALM_TYPES.has ? [...CALM_TYPES] : CALM_TYPES).includes(ctx.place);   // calm: section 20's CALM_TYPES
+      const r = (LINE_PLACES[x] || x.replace(/_/g, ' ')).toLowerCase(); return ctx.place === x || (ctx.room || '').toLowerCase().replace(/^the /, '') === r; });   // a room: its name with _ for spaces, or a short alias
     case 'deck': return any(v, x => String(ctx.deck) === x);
     case 'event': return any(v, x => { const [ev, ph] = x.split('.'), n = lineQ('eventNow', t); return !!n && n.id === ev && (!ph || n.phase === ph); });
     case 'trad': return any(v, x => ctx.trad === x || (x === 'today' && !!ctx.trad));
