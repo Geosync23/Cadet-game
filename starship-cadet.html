@@ -8494,7 +8494,7 @@ function deviceLoad(s) {
     .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}) }));
-  return { memos, tipsSeen, appts, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
+  return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 30, morning: r.morning !== false, per } };
 }
 SHIP.device = deviceLoad(SAVED);
@@ -8568,6 +8568,7 @@ const DEV_REMINDED = new Set();                          // id@day keys already 
 let devTickMin = -1, devMorning = SHIP.time.day;
 function deviceTick() {
   if (!DEV.live) return;                                 // not while the script is still loading (section 18 comes later)
+  if (devLocked()) { SHIP.device.booted = false; if (DEV.open) deviceClose(); }
   const t = shipNow(); if (t === devTickMin) return; devTickMin = t;
   if (typeof sleeping !== 'undefined' && sleeping) return;
   const R = SHIP.device.calendarRemind;
@@ -8626,8 +8627,18 @@ function deviceView(id) {                      // the app's VIEW, or a stand-in 
   try { const v = a.view({ t: shipNow(), wide: DEVICE_SKIN.wide() }) || {}; return { title: v.title || a.title, blocks: v.blocks || [] }; }
   catch (e) { DEV.errors.push(id + ': ' + String(e && e.message || e)); return { title: a.title, blocks: [{ kind: 'text', text: '(this app failed to draw)' }] }; }
 }
-function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home').sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+function deviceApps() { return [...DEVICE_APPS.values()].filter(a => a.id !== 'home' && !(a.hidden && devTry(a.hidden))).sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : 1)); }
+// the device before it's yours (0.35.21, Pillar 4): section 15's deviceLocked() (true on the arrival evening until Torres
+// hands it over, section 21's flag 'intro.device'); while locked nothing opens it, and deviceLockedTap() says why.
+// The first open after that is the first switch-on (the 'boot' screen, once; SHIP.device.booted, saved)
+const devTry = f => { try { return !!f(); } catch (e) { return false; } };
+// the ship's season (0.35.22, Pillar 4): section 18's seasonOf(d) -> { id, name, day, week }; null without it
+const devSeason = d => { try { return typeof seasonOf === 'function' ? seasonOf(d) : null; } catch (e) { return null; } };
+const devSeasonLine = d => { const s = devSeason(d); return s && s.name ? s.name + ', week ' + s.week + ' of 13' : null; };
+const devLocked = () => { try { return typeof deviceLocked === 'function' && !!deviceLocked(); } catch (e) { return false; } };
 function deviceShow(id) {
+  if (!DEV.open && devLocked()) { try { if (typeof deviceLockedTap === 'function') deviceLockedTap(); } catch (e) { /* section 15's */ } return; }
+  if (!DEV.open && !SHIP.device.booted && devTry(() => SHIP.intro && SHIP.intro.on && !SHIP.intro.skipped)) { SHIP.device.booted = true; id = 'boot'; }
   if (!DEVICE_APPS.has(id)) id = 'home';
   DEV.app = id; delete DEV.notes[id];
   if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
@@ -8676,8 +8687,23 @@ function deviceDialogue(v, onTap) {
   DEVICE_SKIN.dialogue(v || null);
   return true;
 }
+// deviceChoose(view, onPick) (0.35.23, Pillar 4): a question with buttons in the meeting panel's style, e.g. section 13's
+// New game: { title, text, choices: [label, ...], cancel } (cancel: the last button's label, 'Not now' by default, false
+// for none). onPick(k) gets the index of the choice, or -1 for Not now or the ×. One question at a time.
+function deviceChoose(v, onPick) {
+  if (!v || !Array.isArray(v.choices) || !v.choices.length) return false;
+  const n = v.choices.length, choices = v.choices.map(String).concat(v.cancel === false ? [] : [v.cancel || 'Not now']);
+  DEV.choose = typeof onPick === 'function' ? onPick : () => {};
+  deviceDialogue({ title: v.title || 'Choose', name: '', text: v.text || '', choices }, k => devChosen(k < n ? k : -1));
+  return true;
+}
+function devChosen(k) {
+  const f = DEV.choose; DEV.choose = null; devDlgTap = null; DEVICE_SKIN.dialogue(null);
+  if (f) try { f(k); } catch (e) { DEV.errors.push('deviceChoose: ' + (e && e.message || e)); }
+}
 function devDialogueDo(what, k) {
   try {
+    if (what === 'close' && DEV.choose) { devChosen(-1); return; }   // the × on a question: Not now
     if (what === 'close') { DEVICE_SKIN.dialogue(null); devDlgTap = null; if (typeof dialogueClose === 'function') dialogueClose(); return; }
     if (devDlgTap) devDlgTap(what === 'choose' ? k : undefined);
     else if (what === 'choose' && typeof dialogueChoose === 'function') dialogueChoose(k);   // section 18's own flow (0.34.10)
@@ -8793,6 +8819,7 @@ const DEVICE_SKIN = (() => {
       let low = false; try { low = NEED_KEYS.some(k => SHIP.player.needs[k] < SLOW_BELOW); } catch (e) { /* before section 15 */ }
       btn.classList.toggle('low', low);
       let un = 0; try { un = mailUnread(); } catch (e) { /* before section 15 */ }
+      if (devLocked()) un = 0;                          // no mail badge on a device you haven't got yet
       if (badge) { badge.hidden = !un; badge.textContent = un; }
       led.classList.toggle('on', un > 0); led.classList.toggle('blink', un > 0);   // the power light blinks for new mail
     },
@@ -8838,7 +8865,7 @@ const DEVICE_SKIN = (() => {
       if (!v) { if (TIP_Q.length) skin.tip(TIP_Q[0]); return; }   // a tip waiting behind the meeting comes back
       c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Walk away'); x.onclick = e => { e.stopPropagation(); devDialogueDo('close'); };
-      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + ' · ' : '') + (v.name || '') + (v.n ? ' · ' + ((v.i || 0) + 1) + '/' + v.n : '')));
+      c.append(x, mk('small', '', (v.title ? v.title.toUpperCase() + (v.name ? ' · ' : '') : '') + (v.name || '') + (v.n ? ' · ' + ((v.i || 0) + 1) + '/' + v.n : '')));
       if (v.text) { const t = mk('p', '', v.text); c.appendChild(t); }
       if (v.choices && v.choices.length) {
         const box = mk('div', 'btns');
@@ -8908,8 +8935,50 @@ const device = {
 };
 
 // ---- the apps. Home: the time and what you're doing (the old Now section), then the grid. ----
+// the first switch-on (0.35.21): shown once, the first time it opens after Torres hands it over; not on the home grid
+deviceApp({ id: 'boot', title: 'Crew device', order: -1, hidden: () => true, view: () => {
+  const name = (SHIP.player && SHIP.player.name) || 'Cadet';
+  return { title: 'Crew device', blocks: [{ kind: 'text', text: 'CSV WREN CREW DEVICE', mark: 'big' }, { kind: 'text', text: 'Assigned to: ' + name + '.', mark: 'hot' },
+    { kind: 'text', text: 'Works department, Bunk 1, Deck 4.' }, { kind: 'text', text: 'Your day, your mail, the ship and its people, in one place. Settling in lists what to learn this week.' },
+    { kind: 'buttons', items: [{ label: 'Start', action: { app: 'home', do: 'open' } }] }] };
+} });
+// Settling in (0.35.21, Pillar 4): section 21's SETTLE list, each item ticked when you've done it (SHIP.intro.settle[id],
+// a ship minute), naming who can teach it; Go there points the arrow at its place, or at the teacher (where the Roster
+// says they are). "I know my way around" ends the welcome (introEnd, after a second tap). Hidden without section 21,
+// before any intro and once the list is all done (SHIP.intro.settle.all)
+let settleSure = false;
+const settleList = () => { try { return typeof SETTLE !== 'undefined' && Array.isArray(SETTLE) ? SETTLE : null; } catch (e) { return null; } };
+const settleDone = id => !!(SHIP.intro && SHIP.intro.settle && SHIP.intro.settle[id] !== undefined);
+function settleGoal(it) {                                // { deck, room, label } for an item, or null
+  if (it.place && it.place.deck && it.place.room) return { deck: it.place.deck, room: it.place.room, label: it.title + ': ' + it.place.room };
+  const p = it.teacher && apptPerson(it.teacher), w = p && rosterWhere(p);
+  return w && w.room ? { deck: w.deck, room: w.room, label: it.title + ': ' + p.name.split(' ')[0] } : null;
+}
+deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record', order: 5,
+  hidden: () => !settleList() || !SHIP.intro || !(SHIP.intro.on || SHIP.intro.skipped) || !!(SHIP.intro.settle && SHIP.intro.settle.all),
+  badge: () => null,
+  act(verb, arg) {
+    if (verb === 'go' && typeof setGoal === 'function') {
+      const it = (settleList() || []).find(x => x.id === arg), g = it && settleGoal(it); if (!g) return;
+      SHIP.player.track = null; setGoal(g); deviceNotify({ app: 'settle', text: 'Follow the marker: ' + g.label + '.', urgent: true }); delete DEV.notes.settle;
+    }
+    else if (verb === 'end') { if (!settleSure) settleSure = true; else { settleSure = false; if (typeof introEnd === 'function') introEnd(false); } }
+  },
+  view: () => {
+    const L = settleList() || [], done = L.filter(x => settleDone(x.id)).length, B = [];
+    B.push({ kind: 'text', text: done + ' of ' + L.length + ' done. Nothing here is required: people will show you as the week goes on.', mark: 'hot' });
+    const rows = L.map(it => { const d = settleDone(it.id), p = it.teacher && apptPerson(it.teacher), g = !d && settleGoal(it);
+      return { text: (d ? '✓ ' : '') + it.title, sub: d ? 'Done' : (p ? 'Ask ' + p.name : '') + (it.place ? (p ? ' · ' : '') + it.place.room + ', Deck ' + it.place.deck : ''),
+        mark: d ? 'past' : null, button: g ? 'Go there' : null, action: g ? { app: 'settle', do: 'go', arg: it.id } : null }; });
+    B.push({ kind: 'list', rows });
+    if (devTry(() => typeof introOn === 'function' && introOn()))
+      B.push({ kind: 'buttons', items: [{ label: settleSure ? 'Tap again to end the welcome' : 'I know my way around', action: { app: 'settle', do: 'end' } }] });
+    return { title: 'Settling in', blocks: B };
+  } });
+
 deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
-  const B = [{ kind: 'text', text: clockText(), mark: 'big' }];
+  const B = [{ kind: 'text', text: clockText(), mark: 'big' }], sn = devSeasonLine(SHIP.time.day);
+  if (sn) B.push({ kind: 'text', text: 'Season: ' + sn + '.' });
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
   B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
   if (today.length) say('Today aboard: ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');
@@ -8920,6 +8989,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
   for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  const sl = settleList(), sa = DEVICE_APPS.get('settle');
+  if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');
   const pin = SHIP.device.memos.find(x => x.pinned);
   if (pin) say('▪ ' + pin.title + (pin.text ? ': ' + pin.text.slice(0, 120) : ''));
   return { title: 'Home', blocks: B };
@@ -8955,11 +9026,13 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
     else if (verb === 'day') calDay = calDay === arg ? null : arg;
   },
   view: () => {
-    const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [];
+    const R = SHIP.device.calendarRemind, d0 = SHIP.time.day, B = [], sn = devSeasonLine(d0);
+    if (sn) B.push({ kind: 'text', text: 'Season: ' + sn + '.', mark: 'hot' });
     for (let d = d0; d < d0 + 14; d++) {
       const B0 = (d - 1) * 1440, trad = devTraditions(Math.max(B0, d === d0 ? shipNow() : B0), B0 + 1439), ship = DEV_WEEK[weekday(d)].filter(x => !x.tradition);
-      if (!trad.length && !ship.length && d >= d0 + 7) continue;   // the coming week every day, then the days with something on
-      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : ''), sub: (devShiftOn(d) ? '' : 'Day off') + (calDay === d ? '' : (devShiftOn(d) ? '' : ' · ') + 'Tap to plan this day') || null, mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
+      if (!trad.length && !ship.length && d >= d0 + 7 && !(devSeason(d) && devSeason(d).day === 1)) continue;   // the coming week every day, then the days with something on (or a new season)
+      const sd = devSeason(d), turn = d > d0 && sd && sd.day === 1;   // a new season starts that day
+      B.push({ kind: 'list', rows: [{ text: devDayName(d) + (d < d0 + 2 ? ' · ' + WEEKDAYS[weekday(d)] : '') + (turn ? ' · ' + sd.name + ' begins' : ''), sub: (devShiftOn(d) ? '' : 'Day off') + (calDay === d ? '' : (devShiftOn(d) ? '' : ' · ') + 'Tap to plan this day') || null, mark: calDay === d ? 'head hot' : 'head', action: { app: 'calendar', do: 'day', arg: d } }] });
       if (calDay === d) B.push({ kind: 'buttons', items: [{ label: 'See the day', action: { app: 'schedule', day: d } }, { label: 'Make an appointment', action: { app: 'appointments', day: d } }] });
       const rows = ship.map(x => ({ text: hhmm(x.at) + '  ' + x.title, sub: x.where }));
       for (const x of trad) {
@@ -9094,7 +9167,8 @@ function rosterWhere(p, t = shipNow()) {                 // { line, deck, room }
 }
 function rosterPeople() {                                // everyone aboard: [{ p, tier }]; guests only while aboard
   const all = typeof schedPeople === 'function' ? schedPeople() : [], t = shipNow();
-  return all.filter(p => !p.player && (p.rank !== 'guest' && p.dept !== 'guest' || (() => { try { return !!whereIs(p, t); } catch (e) { return false; } })()))
+  const gone = id => { try { return typeof movedOff === 'function' && movedOff(id); } catch (e) { return false; } };
+  return all.filter(p => !p.player && !gone(p.id) && (p.rank !== 'guest' && p.dept !== 'guest' || (() => { try { return !!whereIs(p, t); } catch (e) { return false; } })()))
     .map(p => ({ p, tier: rosterTier(p.id) }));
 }
 deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
@@ -9126,6 +9200,8 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     const rest = ps.filter(x => x.tier < 1), known = new Set(ROSTER_DEPTS.map(d => d[0]));
     for (const [d, title] of ROSTER_DEPTS) group(title, rest.filter(x => x.p.dept === d).sort(byName));
     group('Others aboard', rest.filter(x => !known.has(x.p.dept)).sort(byName));
+    let gone = []; try { gone = typeof movedOn === 'function' ? movedOn() || [] : []; } catch (e) { gone = []; }   // 0.35.22: section 20's movedOn
+    if (gone.length) B.push({ kind: 'text', text: 'Left the Wren', mark: 'head' }, { kind: 'list', rows: gone.map(x => ({ text: x.name, sub: (x.role || '') + ' · left on Day ' + x.day + (x.to ? ', for ' + x.to : ''), mark: 'past' })) });
     if (!ps.length) B.push({ kind: 'text', text: 'No crew list yet.' });
     return { title: 'Roster', blocks: B };
   } });
@@ -9199,7 +9275,17 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
   B.push({ kind: 'text', text: 'Works technician, tier ' + (typeof PLAYER_TIER !== 'undefined' ? PLAYER_TIER : 1) + '.', mark: 'hot' });
   B.push({ kind: 'text', text: mine.length ? 'Jobs on the recent record: ' + mine.length + '.' : 'No jobs on your record yet. Take one at the job board in the Works bay.' });
   if (mine.length) B.push({ kind: 'list', rows: mine.slice(-6).reverse().map(j => { const [title, where] = jobCard(j); return { text: title, sub: where + ', Day ' + (Math.floor(j.doneAt / 1440) + 1) }; }) });
-  B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
+  // reputation (0.35.22, Pillar 4): section 20's repView(), words only, never numbers
+  let rv = null; try { rv = typeof repView === 'function' ? repView() : null; } catch (e) { rv = null; }
+  if (rv) {
+    B.push({ kind: 'text', text: 'Reputation', mark: 'head' });
+    if (rv.ship) B.push({ kind: 'text', text: [rv.ship.work, rv.ship.kindness, rv.ship.spirit].filter(Boolean).join('. ') + '.' });
+    if (rv.knownFor && rv.knownFor.length) B.push({ kind: 'text', text: 'Known for: ' + rv.knownFor.join(', ') + '.', mark: 'hot' });
+    const DN = Object.fromEntries(ROSTER_DEPTS); DN.garden = 'Garden';
+    if (rv.depts && rv.depts.length) B.push({ kind: 'list', rows: rv.depts.filter(x => x.band !== 'new').map(x => ({ text: DN[x.dept] || x.dept, sub: x.name }))
+      .concat(rv.depts.some(x => x.band === 'new') ? [{ text: 'Elsewhere', sub: 'A new face: ' + rv.depts.filter(x => x.band === 'new').map(x => DN[x.dept] || x.dept).join(', '), mark: 'past' }] : []) });
+    if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
+  } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
   return { title: 'Record', blocks: B };
 } });
 
@@ -9428,7 +9514,10 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
 // Wallet: credits and your locker (0.28.10)
 deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () => {
   const P = SHIP.player;
-  return { title: 'Wallet', blocks: [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }] };
+  const B = [{ kind: 'text', text: P.credits + ' credits.' + (P.locker.length ? ' In your locker: ' + P.locker.join(', ') + '.' : ' Your locker is empty.') }];
+  let ks = []; try { ks = typeof keepsakes === 'function' ? keepsakes() || [] : []; } catch (e) { ks = []; }   // gifts from friends (0.35.22, section 20)
+  if (ks.length) B.push({ kind: 'text', text: 'Keepsakes', mark: 'head' }, { kind: 'list', rows: ks.map(k => ({ text: k.what.charAt(0).toUpperCase() + k.what.slice(1), sub: 'From ' + (k.name || k.from) + (k.day ? ', Day ' + k.day : '') })) });
+  return { title: 'Wallet', blocks: B };
 } });
 
 // =====================================================================
