@@ -132,6 +132,15 @@ with sync_playwright() as pw:
     print('Two days in one jump the same as hour by hour (with bus notes):', c['key'] == d['key'])
     if c['key'] != d['key']: fail('a time jump gives a different social life')
     if 'fixed.oven' not in c['key'] or 'came.quiz' not in c['key']: fail('the stand-in bus notes left no memories')
+    # the same through section 13's real bus, when it's there: the note's shape (its kind and t) as the bus sends it
+    bus = g.ev(r"""(() => { if (typeof simNote !== 'function') return null;
+      const oven = machineList().find(x => x.kind === 'oven'), keep = JSON.stringify(socSave()), t = Math.floor(shipNow());
+      SHIP.mem = {}; SHIP.social.cues = []; relAdd('tomas', 'chat', 1);
+      simNote('repair', { who: 'you', machine: oven.id, state: 'failing', kind: 'oven', t }); socialTo(t + 120);
+      const o = { cue: !!cue('repair.oven.you'), wrong: !!cue('repair.repair'), mem: Object.values(SHIP.mem).some(l => l.some(m => m[0] === 'fixed.oven')), queued: (SHIP.social.noteq || []).length };
+      socLoad(JSON.parse(keep)); return o; })()""")
+    print('Through the real bus:', bus)
+    if bus is not None and (not bus['cue'] or bus['wrong'] or not bus['mem'] or bus['queued']): fail(f'a repair sent through the bus is read wrongly: {bus}')
 
     # 5. the query API (0.36.20): what the dialogue engine's line conditions read; pure, and right on a known state
     q = g.ev(r"""(() => {
