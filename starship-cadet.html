@@ -195,7 +195,7 @@ body.dlgon .devtip{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.28.26
+   STARSHIP CADET: CSV Wren                           build 0.28.27
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7044,7 +7044,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.28.26';                           // keep in step with the header's build line
+const GAME_BUILD = '0.28.27';                           // keep in step with the header's build line
 const SHIP_RATE = 1080 / 1800;                           // ship minutes per real second: 18 ship hours in 30 real minutes (0.6)
 const SHIP_START = { day: 1, min: 6 * 60, deck: 4 };     // Monday 06:00, in Bunk 1 (the tile is PLAYER_SPEC.start)
 SHIP.time = { day: SHIP_START.day, min: SHIP_START.min };
@@ -9450,7 +9450,7 @@ const PLAYER_ACTS = {   // need and gain over mins ship minutes; pose: the crowd
 const STORE = {
   snack: [['a bag of dried apple', 2, 6], ['a bar of ship-made chocolate', 3, 8], ['a pot of spiced nuts', 3, 8], ['a honey flapjack', 2, 7], ['a packet of biscuits', 3, 6, 'biscuits']],
   drink: [['a cold fizzy lime', 2, 4], ['a bottle of cold tea', 2, 4], ['a carton of oat milk', 2, 5], ['a tin of tea', 4, 3, 'tin of tea']],
-  comfort: [['a paperback novel', 8, 5], ['a pair of soft socks', 6, 4], ['a postcard of Earth', 3, 3, 'postcard'], ['a little potted succulent', 10, 6, 'little plant'], ['a deck of cards', 5, 4], ['a scented candle (unlit, ship rules)', 7, 4], ['a puzzle book', 6, 4, 'puzzle book']],
+  comfort: [['a paperback novel', 8, 5], ['a pair of soft socks', 6, 4], ['a postcard of Earth', 3, 3, 'postcard'], ['a little potted succulent', 10, 6, 'little plant'], ['a deck of cards', 5, 4, 'deck of cards'], ['a scented candle (unlit, ship rules)', 7, 4], ['a puzzle book', 6, 4, 'puzzle book'], ['a harmonica', 9, 5, 'harmonica']],
 };
 // gifts (0.28.25, Pillar 4: section 20's giftAdd): a store line with a 4th name is a gift (SOC_GIFTS' name). Bought, it
 // goes into your hands to give to someone (giftAdd) instead of your locker or your mouth; hands full, as before.
