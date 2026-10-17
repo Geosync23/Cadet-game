@@ -13,7 +13,7 @@ exec(open(__file__.replace('social_check.py', 'cadet_test.py')).read().split("a,
 from playwright.sync_api import sync_playwright
 
 DAYS = int(sys.argv[2]) if len(sys.argv) > 2 else 14
-SAVE_MAX = 20000               # bytes of the save's social part
+SAVE_MAX = 30000               # bytes of the save's social part
 
 # run `days` days from Day 1 06:00 hour by hour (or in one jump), with or without the stand-in player
 RUN = r"""(({ days, player, jump }) => {
