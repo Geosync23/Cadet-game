@@ -319,3 +319,4 @@ Seat orders sent: onboarding (tour → shuttle start → week Tue-Sun → newcom
 - 17:43 arrival 0.42.27-28 PASS (1c) -> 0.60.5; 1c archived. 0.60.5 waits only for claude/leave 0.61.5-0.61.7 (1d).
 - ~18:02 user: meal traditions (Sunday long table, harvest, etc.) -> everyone queues with trays as usual (option B). Sim 5 building for 0.60.6 (earlier serving, maybe a second point).
 - ~18:04 USER RULE: whenever asking a question, also send a push notification.
+- 18:35 check-in: 0.60.5 = cand-0605 fc7afbf, most checks green (machine_check test updated for open hatches); waiting intro_check + perf 3 phone run. 0.60.6 queue: PE5 0.28.41-44 (+tray bug 0.28.45 in progress), perf 3 poses/trays 257b3ea + bubbles 33b13669 (PASS 1d), career c093b15/8d5b084 (PASS), sim 0.26.41 d59c30b8 (1d reviewing), content 5417aeb news + 86e071b. 1d ~63%: hire fresh reviewer for PE5 range.
