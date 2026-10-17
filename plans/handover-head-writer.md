@@ -1,11 +1,20 @@
 # Handover: head writer (Pillar 4, seat 11)
 
-**Head writer 4** (session_01MWyyMaXv6D7yKtDNy9VbCA) holds the seat from 0.48.61 (2026-10-17 evening). 0.48.61: the career
-lines (leave, missed shifts, being let go) in `content/career/` + `content/banks/career.lines` (0.48.63: on the Career engineer session_01862tURG1qXAVGj2sdUrVCw's keys) and meetings
-careerChief, careerCaptain, careerLetGo, careerSendoff; keys and flags in DEV_NOTES's 0.48.61 row and career.lines' header.
-The Career engineer builds it on claude/leave. Calder and Marrow are she/her (the brief said "his": roster wins).
-Local branch note: the container's claude/content had unrelated history; the stale copy is kept as claude/content-stale-local.
-
+**Head writer 4** (session_01MWyyMaXv6D7yKtDNy9VbCA) holds the seat from 0.48.61 (2026-10-17 evening). Built:
+0.48.61-63 career lines (leave, missed shifts, being let go) on the Career engineer's keys (session_01862tURG1qXAVGj2sdUrVCw,
+claude/leave): content/banks/career.lines (texts career.tip.*, career.mail.*, career.card; worried.chief|captain|last,
+farewell.eve|day), content/career/ (ten tpl-<template>.lines + story crew), meetings careerChief, careerCaptain, careerLetGo,
+careerSendoff. 0.48.62 Zeke's tour restored to caecb7d. 0.48.64-67 CALLS HOME ONE-SIDED (the user: one call a day, you pick;
+only they speak; Letters night scratched): content/home/*.call, 6 beats each (no choices, no via:) + 34-37 ordinary calls
+(`== chat`, 5-7 lines; `when: beat=home.<c>.N` per stage; 4 news reactions each); no `== send`. Social & traditions engineer
+(session_01RvxnkWWPF4SF5ygWT4CvQE, claude/social-fixes) plays them (beats 7+ days apart; news reactions once; recorded
+Mail messages reuse chats). New canon (facts 11): Rolf, Mrs Ellery, Mr Pask (Mum). 0.48.68 sickness (content/banks/sick.lines,
+sickExam1-3 + sickExamCover; always "a ship cold"). 0.48.69 Zeke's arrival tour rewritten (the user: fewer stops, welcoming
+and general): walk.shuttle.1-3, walk.up.1-10, walk.down.1-8, stops only introBunk and the mess; place keys retired; job bits
+moved to walk.job.take/turnin. Sim engineer 5 wires it. Calder and Marrow are she/her (briefs sometimes say "his").
+Tip polish: t:rep and three tip notes sent to player engineer 5 (their file). Local git note: this container's first
+claude/content had unrelated history; kept as claude/content-stale-local, ignore it. Gotchas: lines_check bans "apple",
+"photo", "hoover"-style brands; career texts here still cap at 90 (140 on claude/leave); keep Mails unsigned.
 **Head writer 3** (session_01FopKMT2ZKxuWcNDcmF7565) holds the seat from 0.48.22 (2026-10-17 ~05:10). Built so far:
 0.48.22 Zeke's arrival tour (`walk.<point>.<n>` at shuttle, bay, haulway, stores, works, lift, wing, officers, deck3,
 servery; `walk.call.<n>`; linger `walk.more.<n>`; meetings `introDinner`, `introAsk`; onboarding's keys, arrival 0.42.20+);
