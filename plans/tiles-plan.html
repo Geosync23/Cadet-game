@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tiles Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e58f7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--chip:rgba(76,195,181,.14)}
+*{box-sizing:border-box}
+html,body{margin:0;background:#121a27;color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 20%,#22304a 0%,#141c2b 60%,#0c111b 100%) fixed;line-height:1.5}
+header{padding:18px 16px 4px;max-width:1100px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:17px;font-weight:600;margin:0 0 8px;color:#bdeee6}
+h3{font-size:14.5px;font-weight:600;margin:12px 0 4px;color:#d9eeea}
+.sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.draft{display:inline-block;font-size:11.5px;color:#14202a;background:var(--gold);border-radius:999px;padding:2px 9px;margin-left:6px;vertical-align:2px}
+nav{position:sticky;top:0;z-index:5;background:rgba(14,20,31,.92);border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:1100px;margin:0 auto;-webkit-overflow-scrolling:touch}
+nav a{flex:none;text-decoration:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:13px;padding:6px 11px;border-radius:999px}
+nav a:focus-visible,nav a:hover{border-color:var(--teal);color:#bdeee6;outline:none}
+main{max-width:1100px;margin:0 auto;padding:6px 16px 40px}
+section{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:56px}
+p{margin:6px 0;font-size:14px;color:#d6e0e3}
+ul,ol{margin:6px 0;padding-left:20px;font-size:14px;color:#d6e0e3}
+li{margin:3px 0}
+b{color:#eef6f4}
+.note{font-size:12.5px;color:var(--muted)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.025)}
+.card b{display:block;color:#bdeee6;font-size:14px;margin-bottom:2px}
+.card span{font-size:13px;color:#cfd9dc}
+.card .meta{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.rules{counter-reset:r;list-style:none;padding:0}
+.rules li{position:relative;padding:6px 0 6px 38px}
+.rules li::before{counter-increment:r;content:counter(r);position:absolute;left:0;top:6px;width:26px;height:26px;border-radius:50%;background:#183040;border:1px solid var(--teal);color:#bdeee6;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.verb{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#03141a;background:#6ff0dc;border-radius:6px;padding:1px 7px;margin-right:4px}
+.verb.dock{background:var(--gold)}
+.boards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));align-items:start}
+.boards figure{margin:0;border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(0,0,0,.18)}
+.boards figcaption{font-size:13px;color:#cfd9dc;margin-top:6px}
+.boards figcaption b{color:#ffe08a}
+svg .cl{font-size:12.5px;font-weight:600;fill:#93a6ae;text-anchor:middle;font-family:ui-monospace,Menlo,Consolas,monospace}
+.key{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;color:#cfd9dc}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key span:first-child{flex-wrap:wrap;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:#bdeee6;font-weight:600}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ok{color:#8fe3a8}
+.q li{margin:8px 0}
+.mono{filter:grayscale(1) sepia(1) hue-rotate(130deg) saturate(2.2) brightness(.95)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Tiles <span class="draft">Approved 2026-10-17</span></h1>
+  <div class="sub">Seat 10, the Tiles engineer. A two-player tile game you play at the Tiles station in the bow lounge, or at any lounge table on Tiles night. Checkers-style moves, block-matching scores. Nothing is built yet: this page is the design for you to approve, change or turn down.</div>
+</header>
+<nav><div>
+  <a href="#decided">Decided</a><a href="#rules">The rules</a><a href="#board">The board</a><a href="#example">A worked turn</a><a href="#twist">Why it's different</a><a href="#balance">Balance and tests</a><a href="#teach">Learning it</a><a href="#access">Accessibility</a><a href="#look">The look</a><a href="#crew">Crew opponents</a><a href="#night">Tiles night</a><a href="#rejected">Rejected ideas</a><a href="#questions">Questions for you</a>
+</div></nav>
+<main>
+
+<section id="decided">
+<h2>Decided (the user, 2026-10-17)</h2>
+<ul>
+  <li><b>Rules:</b> build as written below. <b>Name:</b> "Tiles".</li>
+  <li><b>Rina's streak:</b> only you can break it. Her crew games on Tiles night are a story rule, not a dice roll.</li>
+  <li><b>Opponents:</b> crew only (no pass-the-phone mode for two people).</li>
+  <li><b>Prize:</b> friendship, a line of chatter and a Record line, plus a small <b>trophy on your bunk shelf</b> (the keepsake shelf by Bunk 1 berth 4) after you first beat Rina.</li>
+  <li><b>Who goes first</b> (the lead, 2026-10-17): you go first in your very first game; after that it turns about with each opponent, game by game, and is saved. That evens out any seat edge over an evening, in both lengths.</li>
+  <li><b>Ship time</b> (the lead): a game takes its real time on the ship's normal clock, about 1.5 ship hours for a full game and less for a quick one, like any other activity. The board shows the ship's time while you play.</li>
+  <li><b>Where:</b> the Tiles station in the bow lounge is always open; the lounge tables' boards are for Tiles night (outside it they're ordinary seats).</li>
+  <li><b>Length:</b> the full game to 7, and a <b>quick game to 5</b> as well. Simulated, the quick game to 5 gave the first player 53–56%, so it gets one extra rule, <b>equal turns</b>: if the first player reaches 5, the second player gets one last turn; a tie then goes to whoever has more tiles left (board and hold), else to whoever reached 5 first. With that: first player Easy 51.3%, Medium 51.6%, Hard 52.4%; draws 0–0.6%; about 11–15 turns in total (about a minute and a half); 12 turns each at most. The full game stays exactly as written. In the quick game the tie rule leans to whoever went first (Medium: 366 tie wins to 98 in 4,000 games); turning about who goes first evens it out over an evening.</li>
+  <li><b>Measured in the built game</b> (tiles_check, 4,000 games a level, Hard 2,000): full game first player Easy 48.1%, Medium 50.0%, Hard 47.6% (Hard leans very slightly to the second player); quick game 49.8%, 50.5%, 51.1%. The marks are dealt at random for one side and mirrored for the other (not always four of each).</li>
+</ul>
+</section>
+
+<section id="rules">
+<h2>The rules (the whole game)</h2>
+<div class="key"><span><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="3" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="22.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g></svg><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="3" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,10.6 32.5,29.8 11.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="3" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,10.7 25.3,18.5 33.7,19.2 27.3,24.7 29.2,33.0 22.0,28.5 14.8,33.0 16.7,24.7 10.3,19.2 18.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="4.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="22.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g></svg><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="4.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,10.6 32.5,29.8 11.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g></svg><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><g><rect x="4.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,10.7 25.3,18.5 33.7,19.2 27.3,24.7 29.2,33.0 22.0,28.5 14.8,33.0 16.7,24.7 10.3,19.2 18.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g></svg></span><span class="note">The first three are your tiles (light); the last three are your opponent's (dark, with a dashed edge). Each tile carries one of three marks: Planet ●, Ship ▲, Star ★.</span></div>
+<ol class="rules">
+  <li><b>The board</b> is 6 × 6. Each player starts with 12 tiles filling their two home rows. The marks are shuffled every game, but both sides always get the same set, mirrored, and no three matching tiles start touching.</li>
+  <li><b>On your turn, do one thing:</b><br>
+    <span class="verb">STEP</span> move one of your tiles one square diagonally forward, onto an empty square (just like checkers).<br>
+    <span class="verb">JUMP</span> hop diagonally over an opponent's tile right next to yours, forwards or backwards, into the empty square behind it. You take that tile into your <b>hold</b>: it's yours now, keeping its mark.<br>
+    <span class="verb">LAUNCH</span> put a tile from your hold onto any empty square in your two home rows.</li>
+  <li><span class="verb dock">DOCK</span> After every step, jump or launch: if the tile you just moved, landed or launched touches two or more of <b>your</b> tiles with the <b>same mark</b>, edge to edge, in any shape (a line, an L, a block), the whole group docks: it lifts off the board and scores <b>1 point per tile</b>. Three touching scores 3; four scores 4.</li>
+  <li><b>Winning:</b> the first to <b>7 points</b> wins. If neither does in 14 turns each, the higher score wins. A tie goes to whoever docked last (and if nobody docked at all, to whoever has more tiles). If the player whose turn it is can't move, the game ends there and is scored the same way (higher score, then whoever docked last).</li>
+</ol>
+<p class="note">That's all of it. You move like checkers, you score like a matching game, and taking your opponent's tiles is how you get the marks you need.</p>
+</section>
+
+<section id="board">
+<h2>The board at the start</h2>
+<div class="boards">
+<figure><svg viewBox="-18 -6 288 290" role="img" aria-label="The starting board" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah1" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<g><rect x="4.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,10.6 32.5,29.8 11.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,10.7 69.3,18.5 77.7,19.2 71.3,24.7 73.2,33.0 66.0,28.5 58.8,33.0 60.7,24.7 54.3,19.2 62.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="92.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="110.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="136.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="154.0,10.7 157.3,18.5 165.7,19.2 159.3,24.7 161.2,33.0 154.0,28.5 146.8,33.0 148.7,24.7 142.3,19.2 150.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="242.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="4.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,54.7 25.3,62.5 33.7,63.2 27.3,68.7 29.2,77.0 22.0,72.5 14.8,77.0 16.7,68.7 10.3,63.2 18.7,62.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="66.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="92.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="110.0,54.6 120.5,73.8 99.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="180.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="198.0,54.7 201.3,62.5 209.7,63.2 203.3,68.7 205.2,77.0 198.0,72.5 190.8,77.0 192.7,68.7 186.3,63.2 194.7,62.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="224.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,54.6 252.5,73.8 231.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,186.6 32.5,205.8 11.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="47" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,186.7 69.3,194.5 77.7,195.2 71.3,200.7 73.2,209.0 66.0,204.5 58.8,209.0 60.7,200.7 54.3,195.2 62.7,194.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="91" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="110.0" cy="198.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="135" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="154.0,186.6 164.5,205.8 143.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="198.0" cy="198.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="223" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="242.0,186.7 245.3,194.5 253.7,195.2 247.3,200.7 249.2,209.0 242.0,204.5 234.8,209.0 236.7,200.7 230.3,195.2 238.7,194.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="22.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,230.6 76.5,249.8 55.5,249.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="91" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="110.0,230.7 113.3,238.5 121.7,239.2 115.3,244.7 117.2,253.0 110.0,248.5 102.8,253.0 104.7,244.7 98.3,239.2 106.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,230.7 201.3,238.5 209.7,239.2 203.3,244.7 205.2,253.0 198.0,248.5 190.8,253.0 192.7,244.7 186.3,239.2 194.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="223" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="242.0,230.6 252.5,249.8 231.5,249.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+</svg><figcaption>You play from the bottom; your opponent from the top. The dashed boxes are each side's two <b>home rows</b>, where launched tiles land. This is the <b>teaching layout</b> used in your very first game; after that the marks are shuffled (always mirrored, so it's fair).</figcaption></figure>
+<figure><div class="mono"><svg viewBox="-18 -6 288 290" role="img" aria-label="The starting board" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<g><rect x="4.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,10.6 32.5,29.8 11.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,10.7 69.3,18.5 77.7,19.2 71.3,24.7 73.2,33.0 66.0,28.5 58.8,33.0 60.7,24.7 54.3,19.2 62.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="92.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="110.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="136.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="154.0,10.7 157.3,18.5 165.7,19.2 159.3,24.7 161.2,33.0 154.0,28.5 146.8,33.0 148.7,24.7 142.3,19.2 150.7,18.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="242.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="4.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="22.0,54.7 25.3,62.5 33.7,63.2 27.3,68.7 29.2,77.0 22.0,72.5 14.8,77.0 16.7,68.7 10.3,63.2 18.7,62.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="66.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="92.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="110.0,54.6 120.5,73.8 99.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="180.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="198.0,54.7 201.3,62.5 209.7,63.2 203.3,68.7 205.2,77.0 198.0,72.5 190.8,77.0 192.7,68.7 186.3,63.2 194.7,62.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="224.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,54.6 252.5,73.8 231.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,186.6 32.5,205.8 11.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="47" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,186.7 69.3,194.5 77.7,195.2 71.3,200.7 73.2,209.0 66.0,204.5 58.8,209.0 60.7,200.7 54.3,195.2 62.7,194.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="91" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="110.0" cy="198.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="135" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="154.0,186.6 164.5,205.8 143.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="198.0" cy="198.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="223" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="242.0,186.7 245.3,194.5 253.7,195.2 247.3,200.7 249.2,209.0 242.0,204.5 234.8,209.0 236.7,200.7 230.3,195.2 238.7,194.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="22.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,230.6 76.5,249.8 55.5,249.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="91" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="110.0,230.7 113.3,238.5 121.7,239.2 115.3,244.7 117.2,253.0 110.0,248.5 102.8,253.0 104.7,244.7 98.3,239.2 106.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,230.7 201.3,238.5 209.7,239.2 203.3,244.7 205.2,253.0 198.0,248.5 190.8,253.0 192.7,244.7 186.3,239.2 194.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="223" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="242.0,230.6 252.5,249.8 231.5,249.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+</svg></div><figcaption>The same board in the device's one-colour phosphor screen (here the Wren cyan). The colours fade but every tile is still readable: <b>shape</b> tells the mark, <b>solid or hollow</b> tells whose.</figcaption></figure>
+</div>
+</section>
+
+<section id="example">
+<h2>A worked turn</h2>
+<p>Mid-game. You have no tiles in your hold. You'd love a third Star next to your two at a1 and b1, but you don't have one.</p>
+<div class="boards">
+<figure><svg viewBox="-18 -6 288 290" role="img" aria-label="Your turn: jump" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah3" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<g><rect x="92.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="110.0" cy="22.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,10.6 252.5,29.8 231.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,54.6 76.5,73.8 55.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="154.0,54.7 157.3,62.5 165.7,63.2 159.3,68.7 161.2,77.0 154.0,72.5 146.8,77.0 148.7,68.7 142.3,63.2 150.7,62.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="91" y="91" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="110.0,98.6 120.5,117.8 99.5,117.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="92.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="198.0" cy="110.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="135" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="66.0" cy="154.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,186.6 208.5,205.8 187.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,230.7 25.3,238.5 33.7,239.2 27.3,244.7 29.2,253.0 22.0,248.5 14.8,253.0 16.7,244.7 10.3,239.2 18.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="47" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,230.7 69.3,238.5 77.7,239.2 71.3,244.7 73.2,253.0 66.0,248.5 58.8,253.0 60.7,244.7 54.3,239.2 62.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<rect x="133" y="45" width="42" height="42" rx="9" fill="none" stroke="#f2c14e" stroke-width="3"/>
+<path d="M110.0,110.0 Q140.0,52.0 198.0,22.0" fill="none" stroke="#ffe08a" stroke-width="3" marker-end="url(#ah3)" stroke-linecap="round"/>
+</svg><figcaption><b>1. You jump.</b> Your Ship on c4 hops over their Star on d5 and lands on e6. Their Star goes into your hold.</figcaption></figure>
+<figure><svg viewBox="-18 -6 288 290" role="img" aria-label="Their reply, then you launch the Star" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah4" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<rect x="90" y="222" width="40" height="40" rx="8" fill="#4cc3b5" fill-opacity=".18" stroke="#6ff0dc" stroke-width="2"/>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,10.6 252.5,29.8 231.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,54.6 76.5,73.8 55.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="92.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="198.0" cy="110.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="135" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="66.0" cy="154.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,186.6 208.5,205.8 187.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,230.7 25.3,238.5 33.7,239.2 27.3,244.7 29.2,253.0 22.0,248.5 14.8,253.0 16.7,244.7 10.3,239.2 18.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="47" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,230.7 69.3,238.5 77.7,239.2 71.3,244.7 73.2,253.0 66.0,248.5 58.8,253.0 60.7,244.7 54.3,239.2 62.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<line x1="110.0" y1="22.0" x2="154.0" y2="66.0" stroke="#ffe08a" stroke-width="3" marker-end="url(#ah4)" stroke-linecap="round"/>
+</svg><figcaption><b>2. They step</b> c6 to d5. Now you <b>launch</b> the Star from your hold onto c1 (glowing), one of your home squares.</figcaption></figure>
+<figure><svg viewBox="-18 -6 288 290" role="img" aria-label="Three Stars touch: dock" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah5" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,10.6 252.5,29.8 231.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,54.6 76.5,73.8 55.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="92.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="198.0" cy="110.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="135" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="66.0" cy="154.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,186.6 208.5,205.8 187.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="3" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="22.0,230.7 25.3,238.5 33.7,239.2 27.3,244.7 29.2,253.0 22.0,248.5 14.8,253.0 16.7,244.7 10.3,239.2 18.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="47" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="66.0,230.7 69.3,238.5 77.7,239.2 71.3,244.7 73.2,253.0 66.0,248.5 58.8,253.0 60.7,244.7 54.3,239.2 62.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="91" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="110.0,230.7 113.3,238.5 121.7,239.2 115.3,244.7 117.2,253.0 110.0,248.5 102.8,253.0 104.7,244.7 98.3,239.2 106.7,238.5" fill="#f2c14e" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<rect x="1" y="221" width="42" height="42" rx="9" fill="none" stroke="#f2c14e" stroke-width="3"/>
+<rect x="45" y="221" width="42" height="42" rx="9" fill="none" stroke="#f2c14e" stroke-width="3"/>
+<rect x="89" y="221" width="42" height="42" rx="9" fill="none" stroke="#f2c14e" stroke-width="3"/>
+</svg><figcaption><b>3. Dock!</b> The Star on c1 touches b1, which touches a1: three of your Stars in a group. They lift off.</figcaption></figure>
+<figure><svg viewBox="-18 -6 288 290" role="img" aria-label="After the dock" xmlns="http://www.w3.org/2000/svg" style="max-width:288px;width:100%">
+<defs><marker id="ah6" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffe08a"/></marker></defs>
+<rect x="-4" y="-4" width="272" height="272" rx="10" fill="#03141a" stroke="#2f6f68" stroke-width="2"/>
+<rect x="0" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="220" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="220" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="176" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="176" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="132" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="132" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="88" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="88" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="44" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="88" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="132" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="176" y="44" width="44" height="44" fill="#0a2a30"/>
+<rect x="220" y="44" width="44" height="44" fill="#061d22"/>
+<rect x="0" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="44" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="88" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="132" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="176" y="0" width="44" height="44" fill="#061d22"/>
+<rect x="220" y="0" width="44" height="44" fill="#0a2a30"/>
+<rect x="0" y="176" width="264" height="88" fill="none" stroke="#4cc3b5" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 4"/>
+<rect x="0" y="0" width="264" height="88" fill="none" stroke="#9fb4c4" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="3 4"/>
+<text x="22.0" y="277" class="cl">a</text>
+<text x="66.0" y="277" class="cl">b</text>
+<text x="110.0" y="277" class="cl">c</text>
+<text x="154.0" y="277" class="cl">d</text>
+<text x="198.0" y="277" class="cl">e</text>
+<text x="242.0" y="277" class="cl">f</text>
+<text x="-9" y="246.0" class="cl">1</text>
+<text x="-9" y="202.0" class="cl">2</text>
+<text x="-9" y="158.0" class="cl">3</text>
+<text x="-9" y="114.0" class="cl">4</text>
+<text x="-9" y="70.0" class="cl">5</text>
+<text x="-9" y="26.0" class="cl">6</text>
+<g><rect x="224.5" y="4.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="242.0,10.6 252.5,29.8 231.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="48.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><polygon points="66.0,54.6 76.5,73.8 55.5,73.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="180.5" y="92.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="198.0" cy="110.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="47" y="135" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="66.0" cy="154.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="179" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,186.6 208.5,205.8 187.5,205.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="135" y="223" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><circle cx="154.0" cy="242.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+<g><rect x="179" y="3" width="38" height="38" rx="8" fill="#e9f1ee" stroke="#ffffff" stroke-width="1.5"/><polygon points="198.0,10.6 208.5,29.8 187.5,29.8" fill="#f08a6c" stroke="#0b1420" stroke-width="1.6" stroke-linejoin="round"/></g>
+<g><rect x="136.5" y="48.5" width="35" height="35" rx="8" fill="#142233" stroke="#9fb4c4" stroke-width="2.5" stroke-dasharray="5 3"/><circle cx="154.0" cy="66.0" r="9.2" fill="#5fd3c6" stroke="#0b1420" stroke-width="1.6"/></g>
+</svg><figcaption><b>4. You score 3.</b> But your side is thinner now: fewer tiles to fight with, and your Ship on e6 has reached the far row, so from now on it can only move by jumping. Every dock is a choice between points and strength on the board.</figcaption></figure>
+</div>
+</section>
+
+<section id="twist">
+<h2>Why it's different</h2>
+<p><b>The one twist: you capture to collect, and you match to score.</b> In checkers, a capture removes a piece. Here a jump takes the tile into your hold, mark and all, so you jump to collect the mark you need, then launch it to finish a match. In match-3 games, tiles fall from nowhere; here every tile you match was moved, jumped for or launched on purpose, and your opponent can see it coming and break it up.</p>
+<ul>
+  <li><b>Moving and matching pull against each other.</b> You step diagonally, but you match edge to edge, so lining up a group takes a little planning.</li>
+  <li><b>Scoring costs you.</b> Docked tiles leave the board. The leader thins out; the player behind keeps more tiles to jump with. That's the built-in catch-up.</li>
+  <li><b>Every turn is one tap-tap decision</b> from three verbs: step, jump, launch. No chains, no forced moves.</li>
+</ul>
+</section>
+
+<section id="balance">
+<h2>Balance and tests</h2>
+<p>Before writing this page I wrote a small throwaway simulator and played thousands of games between computer players at three strengths (the same three the crew will use; see "Crew opponents"). Results for the rules above:</p>
+<div class="tw"><table>
+<tr><th>Players</th><th>Games</th><th>First player wins</th><th>Draws</th><th>Turns per game (both players)</th><th>Behind at halfway, still won</th></tr>
+<tr><td>Easy vs Easy</td><td class="n">3,000</td><td class="n ok">49.2%</td><td class="n">0.0%</td><td class="n">22.4</td><td class="n">40%</td></tr>
+<tr><td>Medium vs Medium</td><td class="n">3,000</td><td class="n ok">49.6%</td><td class="n">0.03%</td><td class="n">18.6</td><td class="n">39%</td></tr>
+<tr><td>Hard vs Hard</td><td class="n">1,500</td><td class="n ok">50.7%</td><td class="n">0.1%</td><td class="n">21.9</td><td class="n">37%</td></tr>
+<tr><td class="note">Random moves (not a real player)</td><td class="n">3,000</td><td class="n">44.2%</td><td class="n">4.3%</td><td class="n">27.4</td><td class="n">23%</td></tr>
+</table></div>
+<ul>
+  <li><b>First-player advantage:</b> none worth fixing: 49–51% at every real skill level. Moving first means you reach the middle first, which also means you're the first to be jumped, and that evens it out. The mirrored deal means neither side gets better marks. If real play shows a lean, the lever is ready (below).</li>
+  <li><b>The tie rule matters more than it looks:</b> level scores, settled by "whoever docked last", decide 10–24% of games, and the second player wins more of them (Medium: 177 to 107 in 2,000 games), because the 14-turn cap ends on the second player's turn. The first player makes up for it by winning more of the decided games, so the totals stay at 49–51%. <code>tiles_check.py</code> will report tie-break wins by seat so we can watch it.</li>
+  <li><b>No runaway leader:</b> docking removes your own tiles, so the leader gets weaker on the board. The player behind at the halfway mark still wins 37–40% of the time.</li>
+  <li><b>Comeback route:</b> a jump both takes a tile from the leader and gives you a mark to launch; a 4-tile dock scores 4 in one go.</li>
+  <li><b>Draws are rare:</b> 0–0.1% between real players.</li>
+  <li><b>Short:</b> about 9–11 turns each. At around 8 seconds a turn for you and 2 for the crew member, that's <b>about 2–3 real minutes</b>; on the ship's clock that's <b>about 1.5 ship hours</b> (the lead's ruling: no clock changes). 14 turns each is the hard cap (about 4 real minutes), and about half of strong games end on 7 points before that.</li>
+  <li><b>Skill matters, but not too much:</b> Hard beats Medium 68% of the time, Medium beats Easy 70%, Hard beats Easy 83%. A new player can beat a good one now and then.</li>
+  <li><b>No stronger "champion" level:</b> I tried one that looks a move further ahead. It was no better than Hard (50% against Hard, 55% against Medium), so Rina plays at Hard. A Medium-strength player beats her about <b>32%</b> of the time, so a decent player beats her about one game in three.</li>
+  <li><b>All three verbs get used:</b> a typical game has 3–4 docks, 2–4 jumps and 1–3 launches.</li>
+</ul>
+<p class="note">The simulator was a throwaway; when the game is built, <code>tiles_check.py</code> plays the same few thousand games against the real code and checks these numbers stay in range (first player 48–52%, draws under 1%, average game under 24 turns) and reports how many games the tie rule decided, by seat. The simulator is kept next to this page as <code>plans/tiles-sim.py</code>.</p>
+</section>
+
+<section id="teach">
+<h2>Learning it in the first game</h2>
+<ul>
+  <li><b>First game: the teaching layout</b> (the board above) against an Easy opponent. One move is shown: a pointer on your first possible jump, with one line: "Jump their tile to take it. It's yours now." After that, you just play.</li>
+  <li><b>A three-line card</b> sits under the board the whole time: STEP · JUMP · LAUNCH, and "3 of a mark touching = DOCK". Tap it to hide it.</li>
+  <li><b>Tap a tile and its legal squares glow.</b> A square that would make a dock shows a small spark. You never have to work out what's allowed.</li>
+  <li><b>The opponent talks a little:</b> Tomas might say "Ooh, you could've docked there" after a missed dock (once a game at most).</li>
+</ul>
+</section>
+
+<section id="access">
+<h2>Accessibility</h2>
+<div class="grid">
+<div class="card"><b>Colour-blind safe</b><span>Every mark is a shape (circle, triangle, star) and a colour. Whose tile it is shows as solid light versus hollow dark with a dashed edge, a brightness difference, not a colour. It still reads on the one-colour phosphor screen.</span></div>
+<div class="card"><b>Big tap targets</b><span>On a phone the board fills the screen width: each square is about 56 points wide, and never under 44 (the usual minimum): on the smallest 320-point phones the board is 6 × 44 = 264 points, which fits inside the device screen with the a–f and 1–6 labels in a thin margin outside it. Tap a tile, then tap where it goes. No dragging. Tap the tile again to cancel.</span></div>
+<div class="card"><b>No timers, no reflexes</b><span>Take as long as you like. The ship keeps running around you, but the board waits. Your needs keep ticking slowly, as they do when you sit anywhere.</span></div>
+<div class="card"><b>One-handed</b><span>The board sits low on the screen, in thumb reach, with your hold in a row just under it. Everything is a single tap.</span></div>
+<div class="card"><b>Calm motion</b><span>Effects are short and follow the device's existing "reduced motion" setting: with it on, tiles simply appear in place.</span></div>
+<div class="card"><b>Words too</b><span>Each move also writes one short line ("Rina jumped your Ship on c4"), so nothing happens only as a picture.</span></div>
+</div>
+</section>
+
+<section id="look">
+<h2>The look</h2>
+<ul>
+  <li><b>On the device's screen.</b> When you sit at the station or a lounge table (the <code>play</code> pose), the board opens in the device's old-school phosphor screen, with its bezel, scan lines and your chosen phosphor colour. Your opponent sits across the table in the 3D world, and the lounge carries on behind.</li>
+  <li><b>Tiles</b> are rounded squares like little hull plates; the marks are a Planet, a Ship and a Star. In full colour they are teal, coral and gold; on the phosphor screen they take its tint.</li>
+  <li><b>Small, satisfying effects:</b> a jump is a short arc hop and the taken tile slides into your hold; a dock flashes the group, lifts it with a little ring of light, and the score ticks up; a 4-tile dock gets a double ring.</li>
+  <li><b>Phone budget:</b> the board is drawn by the device's screen (plain page elements and simple CSS movement), so it adds <b>no 3D draw calls</b>. The 3D boards on the tables belong to the deck architect (one shared mesh for every lounge table, at most 3 draw calls).</li>
+</ul>
+</section>
+
+<section id="crew">
+<h2>How a crew opponent plays</h2>
+<p>Crew use three strengths, each a simple rule, plus a little personality on top.</p>
+<div class="tw"><table>
+<tr><th>Level</th><th>The rule</th></tr>
+<tr><td><b>Easy</b></td><td>Half the time any legal move; otherwise the Medium choice.</td></tr>
+<tr><td><b>Medium</b></td><td>The best move right now: a dock if there is one (the bigger the better), else a jump, else anything.</td></tr>
+<tr><td><b>Hard</b></td><td>Medium, but it also looks at your best reply and avoids leaving a tile you could jump or a group you could break.</td></tr>
+</table></div>
+<p><b>Personality</b> is a couple of small leanings each person has (seeded from who they are, so the same person always plays the same way): <i>bold</i> (likes jumps), <i>patient</i> (waits to dock four rather than three), <i>chatty</i> (talks during the game), and a line or two at the end.</p>
+<div class="grid">
+<div class="card"><b>Rina: plays to win</b><span>Hard, bold. Quiet during the game; a dry line when she docks ("That's three."). When she wins: "Good game. Again?" She defends her title every Tiles night.</span><span class="meta">Beat her and it's news: "Rina lost! To the new hand!" A big bump in social, and she remembers it.</span></div>
+<div class="card"><b>Tomas: plays to chat</b><span>Easy, patient and very chatty. Talks about his day between moves, points out a dock you missed, cheers your good moves. He's the one who teaches you.</span><span class="meta">Win or lose, a bit of friendship and a line of chatter afterwards.</span></div>
+</div>
+<p class="note">You can't lose anything. A game gives a little social with your opponent (more if you win, a little even if you lose), a line of chatter, and a Record line for your first win and for beating Rina.</p>
+</section>
+
+<section id="night">
+<h2>Tiles night (Tuesday 20:00, the bow lounge)</h2>
+<ul>
+  <li><b>Crew play each other on paper.</b> At the start of the night, the crew who come are paired (seeded by the day, so the same save always gives the same night). Each pairing is decided by a seeded roll using the strengths above (Hard beats Medium about 68% of the time, and so on), so no real games are played in the background and it costs nothing on a phone.</li>
+  <li><b>You can join:</b> sit at any free board and someone sits down to play you; or challenge Rina at the station.</li>
+  <li><b>Results become news</b> the next morning: "Rina won again (her ninth Tuesday running)", "Tomas finally beat Okafor", "The new hand took two games".</li>
+  <li><b>Rina's streak</b> is part of her arc. On the board she plays at Hard; on paper the rolls would break her streak about one Tuesday in three. My suggestion: her Tiles-night results are a story rule, not a roll (she wins her crew games until you beat her, or until her arc says otherwise). See the questions below.</li>
+</ul>
+</section>
+
+<section id="rejected">
+<h2>Rule ideas tried and rejected</h2>
+<p>All tested in the same simulator before settling on the rules above.</p>
+<div class="grid">
+<div class="card"><b>"Shatter": match anyone's tiles</b><span>Three of a mark in a line clear whoever owns them; you score for the opponent's tiles in it.</span><span class="meta">Rejected: matches almost never happened (about 2 a game), so it played like plain checkers, and games ran 45–60 turns.</span></div>
+<div class="card"><b>"Flip": jumped tiles change sides</b><span>Like Othello: a tile you jump turns to your colour where it stands.</span><span class="meta">Rejected: tiles flipped back and forth endlessly (up to 30 flips a game) and 40–80% of games ended in draws.</span></div>
+<div class="card"><b>"Any mark": three of yours in a row</b><span>Marks don't matter; any three of your tiles in a line dock.</span><span class="meta">Rejected: far too easy. Games were over in 9–11 turns, almost nobody jumped, and the first player won 52–55%.</span></div>
+<div class="card"><b>"Head start" for the second player</b><span>The second player begins with one tile in the hold.</span><span class="meta">Not needed for balance, and too strong as a fix: the second player then won 63%. Kept in the pocket as a <b>handicap</b> if you'd like an option to give a new player a boost.</span></div>
+</div>
+</section>
+
+<section id="questions">
+<h2>Questions for you</h2>
+<ol class="q">
+  <li><b>Do these rules feel right?</b> If yes, I build it as written. If anything feels fiddly (launching, the tie rule), say which and I'll simplify and re-test.</li>
+  <li><b>Rina's streak:</b> should only you be able to break it (my suggestion: a story rule, since her real strength is Hard and the dice would break it about one Tuesday in three), or can crew beat her on paper now and then?</li>
+  <li><b>Two people on one phone:</b> the brief says "with 2 people". In the ship it's you against crew. Would you also like a pass-the-phone mode at the station for two real people?</li>
+  <li><b>The prize:</b> social, chatter and a Record line, as above, or something you can keep (a small trophy on your bunk shelf after beating Rina)?</li>
+  <li><b>Length:</b> first to 7 points (about 2–3 real minutes). Or would you like a shorter "quick game" to 5 as well?</li>
+  <li><b>Name:</b> just "Tiles", as the ship calls it, or something with a bit more character ("Dock Tiles", "Wrenstones")?</li>
+</ol>
+</section>
+
+</main>
+</body>
+</html>

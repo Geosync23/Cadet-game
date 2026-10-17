@@ -27840,6 +27840,503 @@ function introTick() {
 }
 
 // =====================================================================
+// 23. TILES
+// The Tiles game (plans/tiles-plan.html, approved by the user 2026-10-17): a two-player tile game you play against
+// crew at the Tiles station in the bow lounge or a lounge table on Tiles night. Checkers-style moves, block-matching
+// scores: STEP diagonally forward, JUMP an opponent's tile into your hold, LAUNCH from your hold onto your home rows;
+// three or more of your tiles of one mark touching edge to edge DOCK for a point each. First to 7 (or the quick game
+// to 5, with equal turns). The rules and the crew's play are pure functions: nothing here draws on the 3D scene,
+// calls R() or Math.random. Crew choices come from schedU keys 800-829:
+//   800 a game's seed (tilesRng)  801 Tiles night pairings  802 Tiles night rolls  803-806 a crew member's style
+//   (bold, patient, chatty, level)  807 chatter picks  (808-829 free)
+// No top-level name TILES here: the deck architect's board kit is TILES_KIT (claude/decks-p3).
+// ---- rules (pure: no DOM, no three.js, no Math.random) ----
+// Board: 36 cells, i = y*6 + x; y 0 is the player's home row (seat 0, bottom), y 5 the opponent's.
+// A tile is o*3 + m + 1 (o: seat 0|1, m: 0 Planet, 1 Ship, 2 Star); 0 is empty.
+const TL_N = 6, TL_MARKS = ['Planet', 'Ship', 'Star'], TL_SYM = ['●', '▲', '★'];
+const TL_MODES = { full: { target: 7, turns: 14, finish: false }, quick: { target: 5, turns: 12, finish: true } };
+const TL_TEACH = [1, 0, 2, 1, 2, 0, 0, 2, 1, 0, 1, 2];   // the teaching layout's marks, rows 1 then 2, a to f
+const tlO = t => (t - 1) / 3 | 0, tlM = t => (t - 1) % 3, tlT = (o, m) => o * 3 + m + 1;
+function tilesRng(seed) {   // mulberry32: one game's stream of decisions, seeded from schedU
+  let a = (seed >>> 0) || 1;
+  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function tilesGroup(b, i) {   // the touching group of same-owner, same-mark tiles round cell i
+  const t = b[i], seen = [i], st = [i];
+  while (st.length) {
+    const c = st.pop(), x = c % TL_N, y = c / TL_N | 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy, n = ny * TL_N + nx;
+      if (nx >= 0 && nx < TL_N && ny >= 0 && ny < TL_N && b[n] === t && seen.indexOf(n) < 0) { seen.push(n); st.push(n); }
+    }
+  }
+  return seen;
+}
+function tilesDeal(rng, teach) {   // 12 tiles a side, mirrored; no three of a mark touching at the start
+  for (;;) {
+    const b = new Array(36).fill(0);
+    for (let k = 0; k < 12; k++) {
+      const m = teach ? TL_TEACH[k] : (rng() * 3) | 0, x = k % 6, y = k / 6 | 0;
+      b[y * 6 + x] = tlT(0, m); b[(5 - y) * 6 + (5 - x)] = tlT(1, m);
+    }
+    if (teach || !b.some((t, i) => t && tilesGroup(b, i).length >= 3)) return b;
+  }
+}
+function tilesNew(mode, rng, teach, first) {   // first: the seat that moves first (0 unless given)
+  const f = first ? 1 : 0;
+  return { b: tilesDeal(rng, teach), hold: [[], []], sc: [0, 0], p: f, first: f, plies: 0, last: -1, mode: TL_MODES[mode] ? mode : 'full',
+           over: false, win: -1, why: '', reached: -1 };
+}
+function tilesMoves(s, p) {   // { k: 's'tep | 'j'ump | 'l'aunch, from, to, over, m }
+  const out = [], b = s.b, f = p ? -1 : 1;
+  for (let i = 0; i < 36; i++) {
+    const t = b[i]; if (!t || tlO(t) !== p) continue;
+    const x = i % 6, y = i / 6 | 0;
+    for (const dx of [-1, 1]) {
+      const nx = x + dx, ny = y + f;
+      if (nx >= 0 && nx < 6 && ny >= 0 && ny < 6 && !b[ny * 6 + nx]) out.push({ k: 's', from: i, to: ny * 6 + nx });
+    }
+    for (const [dx, dy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
+      const mx = x + dx, my = y + dy, nx = x + 2 * dx, ny = y + 2 * dy;
+      if (nx < 0 || nx > 5 || ny < 0 || ny > 5 || b[ny * 6 + nx]) continue;
+      const o = b[my * 6 + mx];
+      if (o && tlO(o) !== p) out.push({ k: 'j', from: i, to: ny * 6 + nx, over: my * 6 + mx });
+    }
+  }
+  const h = s.hold[p];
+  if (h.length) {
+    const rows = p ? [5, 4] : [0, 1], seenM = [];
+    for (const m of h) {
+      if (seenM.indexOf(m) >= 0) continue; seenM.push(m);
+      for (const y of rows) for (let x = 0; x < 6; x++) if (!b[y * 6 + x]) out.push({ k: 'l', m, to: y * 6 + x });
+    }
+  }
+  return out;
+}
+function tilesCount(s, p) { let n = s.hold[p].length; for (const t of s.b) if (t && tlO(t) === p) n++; return n; }
+// apply one move for the side to move; returns { s: new state, take: mark | -1, dock: [cells], pts }
+function tilesApply(s, mv) {
+  const p = s.p, b = s.b.slice(), hold = [s.hold[0].slice(), s.hold[1].slice()];
+  let take = -1;
+  if (mv.k === 'l') { hold[p].splice(hold[p].indexOf(mv.m), 1); b[mv.to] = tlT(p, mv.m); }
+  else {
+    b[mv.to] = b[mv.from]; b[mv.from] = 0;
+    if (mv.k === 'j') { take = tlM(b[mv.over]); hold[p].push(take); b[mv.over] = 0; }
+  }
+  const g = tilesGroup(b, mv.to), dock = g.length >= 3 ? g : [];
+  for (const c of dock) b[c] = 0;
+  const sc = s.sc.slice(); sc[p] += dock.length;
+  return { s: { b, hold, sc, p, first: s.first | 0, plies: s.plies, last: dock.length ? p : s.last, mode: s.mode, over: false, win: -1, why: '', reached: s.reached },
+           take, dock, pts: dock.length };
+}
+// a whole turn: apply, pass the turn, and end the game when it's over
+function tilesStep(s, mv) {
+  const r = tilesApply(s, mv), n = r.s, R = TL_MODES[n.mode], p = n.p;
+  n.plies++; n.p = 1 - p;
+  if (n.reached < 0 && n.sc[p] >= R.target) n.reached = p;
+  let end = '';
+  if (n.reached >= 0) {
+    // equal turns (quick game): if the first player got there, the second has one last turn
+    const second = 1 - (n.first | 0);
+    if (!R.finish || n.reached === second || p === second) end = 'target';
+  }
+  if (!end && n.plies >= R.turns * 2) end = 'turns';
+  if (!end && !tilesMoves(n, n.p).length) end = 'stuck';
+  if (end) tilesFinish(n, end);
+  r.s = n; return r;
+}
+function tilesFinish(n, why) {
+  const R = TL_MODES[n.mode];
+  n.over = true; n.why = why;
+  if (n.sc[0] !== n.sc[1]) { n.win = n.sc[0] > n.sc[1] ? 0 : 1; return; }
+  n.why += '-tie';
+  if (R.finish && n.reached >= 0) {   // quick game: more tiles left, else whoever reached the target first
+    const a = tilesCount(n, 0), c = tilesCount(n, 1);
+    n.win = a === c ? n.reached : (a > c ? 0 : 1); return;
+  }
+  if (n.last >= 0) { n.win = n.last; return; }
+  const a = tilesCount(n, 0), c = tilesCount(n, 1);
+  n.win = a === c ? -1 : (a > c ? 0 : 1);
+}
+// ---- crew play: three levels, plus a little personality (bold likes jumps, patient builds pairs) ----
+function tilesVal(s, p) { return 0.3 * (tilesCount(s, p) - tilesCount(s, 1 - p)); }
+function tilesBest(s, p) {   // the best immediate gain for p (used by Hard to read the reply)
+  let best = -1e9; const q = s.p === p ? s : Object.assign({}, s, { p });
+  for (const o of tilesMoves(q, p)) { const r = tilesApply(q, o), w = r.pts + tilesVal(r.s, p); if (w > best) best = w; }
+  return best;
+}
+function tilesAI(s, level, rng, style) {
+  const p = s.p, ms = tilesMoves(s, p);
+  if (!ms.length) return null;
+  if (level === 'easy' && rng() < 0.5) return ms[(rng() * ms.length) | 0];
+  const st = style || {};
+  let bv = -1e9, best = ms[0];
+  for (const m of ms) {
+    const r = tilesApply(s, m); let v = r.pts + tilesVal(r.s, p);
+    if (level === 'hard') {
+      const w = tilesBest(Object.assign({}, r.s, { p: 1 - p }), 1 - p);
+      if (w > -1e9) v -= 0.9 * (w - tilesVal(r.s, 1 - p));
+    }
+    if (st.bold && m.k === 'j') v += 0.25;
+    if (st.patient && !r.pts) { const t = r.s.b[m.to]; if (t) v += 0.1 * (tilesGroup(r.s.b, m.to).length - 1); }
+    v += rng() * 0.01;
+    if (v > bv) { bv = v; best = m; }
+  }
+  return best;
+}
+// one whole game on paper between two levels (tiles_check and the balance numbers)
+function tilesSimGame(mode, a, c, seed, styles) {
+  const rng = tilesRng(seed); let s = tilesNew(mode, rng, false);
+  while (!s.over) {
+    const mv = tilesAI(s, s.p ? c : a, rng, styles && styles[s.p]);
+    if (!mv) { tilesFinish(s, 'stuck'); break; }
+    s = tilesStep(s, mv).s;
+  }
+  return s;
+}
+// a crew member's way of playing, the same every game: level and leanings seeded from who they are
+const TL_STYLE = { rina: { level: 'hard', bold: true, patient: false, chatty: false }, tomas: { level: 'easy', bold: false, patient: true, chatty: true } };
+function tilesStyle(p) {
+  if (!p) return { level: 'medium', bold: false, patient: false, chatty: false };
+  if (TL_STYLE[p.id]) return TL_STYLE[p.id];
+  const u = k => schedU(p.seed | 0, 0, k), lv = u(806), comp = (p.traits || []).some(t => /competitive/i.test(t));
+  return { level: comp || lv > .8 ? 'hard' : lv > .3 ? 'medium' : 'easy', bold: u(803) < .35, patient: u(804) < .3, chatty: u(805) < .4 };
+}
+// ---- the board on your device (0.46.1): the Tiles app. A game in play draws as a 6 x 6 board in the device's
+// phosphor screen; tap a tile, then where it goes (legal squares glow, a square that docks shows a spark); tap your
+// hold to launch. The crew member answers a moment later. No timers on you, no drag, words for every move.
+SHIP.tiles = { played: 0, won: 0, lost: 0, vs: {}, first: {}, relDay: {}, firstWin: null, beatRina: null, night: { last: null, rina: 0, games: [] } };   // read from save.tiles below
+let TL_GAME = null;   // { s, opp, name, style, rng, where, teach, hint, sel, log: [lines], fx, timer }
+const TL_TALK = {   // stand-ins until the writers' lines (lineFor(who, 'tiles.<kind>')) arrive
+  start: { rina: ['Best of one. Try to keep up.'], chatty: ['Oh good, a game. Did I tell you about the hydroponics leak?', 'Go easy on me. Or don\'t, I\'ll learn more.'], any: ['Your move.', 'Let\'s see what you\'ve got.'] },
+  dock:  { rina: ['That\'s three.', 'Docked.'], chatty: ['Ooh, look at that!', 'Three in a row, well, three in a lump.'], any: ['Docked.', 'There we go.'] },
+  miss:  { chatty: ['Ooh, you could\'ve docked there.'], any: [] },
+  win:   { rina: ['Good game. Again?'], chatty: ['I won? I never win! Well, sometimes.'], any: ['Good game.', 'Close one.'] },
+  lose:  { rina: ['...Again. Now.'], chatty: ['You\'re a natural! I knew it.'], any: ['Well played.', 'You got me.'] },
+};
+function tilesTalk(kind) {
+  const G = TL_GAME; if (!G) return null;
+  if (typeof lineFor === 'function') { try { const l = lineFor(G.opp, 'tiles.' + kind, {}); if (l && l.text) return l.text; } catch (e) { /* no line yet */ } }
+  const bank = TL_TALK[kind] || {}, l = bank[G.opp] || (G.style.chatty && bank.chatty) || bank.any || [];
+  if (!l.length) return null;
+  return l[Math.floor(G.talk() * l.length)];
+}
+const tlName = (t, mine) => (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)];
+function tilesSay(text) { const G = TL_GAME; if (!G || !text) return; G.log.push(text); if (G.log.length > 3) G.log.shift(); }
+// start a game: opponentId (a crew id), where (a place id or null), mode 'full' | 'quick'
+function tilesPlay(opponentId, where, mode) {
+  if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer);
+  const T = SHIP.tiles, p = (typeof ROSTER !== 'undefined' && ROSTER.find(x => x.id === opponentId)) || { id: opponentId || 'tomas', name: 'Tomas Lind', seed: 7 };
+  const teach = !T.played, style = teach ? Object.assign({}, tilesStyle(p), { level: 'easy' }) : tilesStyle(p);
+  const seed = Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 800) * 4294967296);
+  const rng = tilesRng(seed), first = teach ? 0 : (T.first[p.id] | 0);   // you go first in your first game, then turn about with each opponent (saved)
+  const talk = tilesRng(Math.floor(schedU((p.seed | 0) ^ (T.played * 7919), SHIP.time.day, 807) * 4294967296));   // its own stream: lines never shift the moves
+  TL_GAME = { s: tilesNew(mode === 'quick' ? 'quick' : 'full', rng, teach, first), opp: p.id, name: (p.name || p.id).split(' ')[0], style, rng, talk, where: where || null,
+              teach, hint: teach, sel: null, log: [], fx: null, timer: 0, done: false };
+  tilesSay(TL_GAME.name + ': ' + (tilesTalk('start') || 'Your move.'));
+  if (first) tilesCrewSoon();
+  deviceShow('tiles');
+  return TL_GAME;
+}
+function tilesCrewSoon() {
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 1) return;
+  if (G.timer) clearTimeout(G.timer);
+  G.timer = setTimeout(() => { G.timer = 0; tilesCrewMove(); }, 700);
+}
+function tilesCrewMove() {   // the crew member's turn (tiles_check calls it directly)
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 1) return;
+  const mv = tilesAI(G.s, G.style.level, G.rng, G.style);
+  if (!mv) { tilesFinish(G.s, 'stuck'); tilesOver(); return; }
+  tilesDo(mv);
+}
+// one move by whoever's turn it is, with the words and the effects
+function tilesDo(mv) {
+  const G = TL_GAME, s0 = G.s, p = s0.p, who = p ? G.name : 'You', mine = p === 0, t = mv.k === 'l' ? tlT(p, mv.m) : s0.b[mv.from];
+  if (mine && G.style.chatty) {   // Tomas notices a dock you passed up (once a game)
+    const could = tilesMoves(s0, 0).some(m => tilesApply(s0, m).pts);
+    G.missOk = G.missOk === undefined ? true : G.missOk;
+    if (could && G.missOk && !tilesApply(s0, mv).pts) { const l = tilesTalk('miss'); if (l) { G.missLater = l; G.missOk = false; } }
+  }
+  const r = tilesStep(s0, mv); G.s = r.s; G.sel = null;
+  const ghosts = {}; for (const c of r.dock) ghosts[c] = c === mv.to ? t : s0.b[c] || t;
+  if (mv.k === 'j') ghosts[mv.over] = s0.b[mv.over];
+  G.fx = { to: mv.to, from: mv.k === 'l' ? -1 : mv.from, dock: r.dock.slice(), over: mv.k === 'j' ? mv.over : -1, ghosts, big: r.dock.length >= 4 };
+  let line = mv.k === 'l' ? who + ' launched ' + (mine ? 'a ' : 'a ') + TL_MARKS[mv.m] + ' from ' + (mine ? 'your' : 'their') + ' hold.'
+    : mv.k === 'j' ? who + ' jumped ' + tlName(s0.b[mv.over], !mine) + ' and took it.' : who + ' stepped ' + (mine ? 'your ' : 'their ') + TL_MARKS[tlM(t)] + '.';
+  if (r.pts) line += ' Dock! ' + r.pts + ' point' + (r.pts > 1 ? 's' : '') + '.';
+  tilesSay(line);
+  if (!mine && r.pts) { const l = tilesTalk('dock'); if (l) tilesSay(G.name + ': ' + l); }
+  if (mine && G.missLater) { tilesSay(G.name + ': ' + G.missLater); G.missLater = null; }
+  if (G.hint && mv.k === 'j' && mine) G.hint = false;
+  setTimeout(() => { if (TL_GAME === G && G.fx && G.fx.to === mv.to) { G.fx = null; tilesDraw(); } }, 520);
+  if (G.s.over) tilesOver(); else tilesCrewSoon();
+  tilesDraw();
+}
+function tilesOver() {   // the end of a game: the words, the tally, what it gives (tilesReward)
+  const G = TL_GAME; if (!G || G.done) return; G.done = true;
+  const s = G.s, you = s.win === 0, T = SHIP.tiles;
+  T.played++; if (you) T.won++; else if (s.win === 1) T.lost++;
+  T.first[G.opp] = 1 - (s.first | 0);   // the other one starts next time
+  const v = T.vs[G.opp] || (T.vs[G.opp] = [0, 0]); if (you) v[0]++; else if (s.win === 1) v[1]++;
+  const how = s.why.indexOf('tie') >= 0 ? ' (level on points: ' + (s.why.indexOf('target') >= 0 || TL_MODES[s.mode].finish ? 'decided by tiles left' : 'whoever docked last wins') + ')' : '';
+  tilesSay((you ? 'You win, ' : s.win === 1 ? G.name + ' wins, ' : 'A draw, ') + s.sc[0] + ' to ' + s.sc[1] + '.' + how);
+  const l = tilesTalk(you ? 'lose' : 'win'); if (l && s.win >= 0) tilesSay(G.name + ': ' + l);
+  tilesReward(G, you);
+  if (typeof simNote === 'function') simNote('tiles', { opp: G.opp, win: you, sc: s.sc.slice(), mode: s.mode, where: G.where });
+}
+function tilesTap(c) {   // a tap on square c (0-35), or on the hold ('h' + mark)
+  const G = TL_GAME; if (!G || G.s.over || G.s.p !== 0 || tilesLeft()) return;
+  const ms = tilesMoves(G.s, 0);
+  if (typeof c === 'string') { const m = +c.slice(1); G.sel = G.sel && G.sel.h === m ? null : { h: m }; tilesDraw(); return; }
+  if (G.sel) {
+    const mv = ms.find(m => m.to === c && (G.sel.h !== undefined ? m.k === 'l' && m.m === G.sel.h : m.from === G.sel.c));
+    if (mv) { tilesDo(mv); return; }
+  }
+  const t = G.s.b[c];
+  G.sel = t && tlO(t) === 0 && ms.some(m => m.from === c) && !(G.sel && G.sel.c === c) ? { c } : null;
+  tilesDraw();
+}
+const TL_CSS = `
+.tlx{margin:2px 0 8px}
+.tlx .tl-sc{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;margin:2px 0 2px;font-variant-numeric:tabular-nums}
+.tlx .tl-sc b{color:var(--crt-hot);font-weight:700}
+.tlx .tl-bd{display:grid;grid-template-columns:repeat(6,1fr);width:min(100%,336px,max(264px,calc(66vh - 230px)));margin:4px auto 8px;border:2px solid var(--crt-dim);border-radius:10px;overflow:hidden;touch-action:manipulation}
+.tlx .tl-c{position:relative;min-height:44px;aspect-ratio:1;padding:0;margin:0;border:0;border-radius:0;background:transparent}
+.tlx .tl-c.dk{background:rgba(255,255,255,.045)}
+.tlx .tl-c.home{box-shadow:inset 0 -2px 0 rgba(255,255,255,.06)}
+.tlx .tl-t{position:absolute;inset:11%;border-radius:20%;display:flex;align-items:center;justify-content:center;color:var(--crt-bg)}
+.tlx .tl-t.o0{background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.tlx .tl-t.o1{border:2px dashed var(--crt-ink);background:var(--crt-bg);color:var(--crt-ink)}
+.tlx .tl-t.o1.m2{color:var(--crt-hot)}
+.tlx .tl-t::after{content:"";width:56%;height:56%;background:currentColor}
+.tlx .tl-t.m0::after{border-radius:50%;width:48%;height:48%}
+.tlx .tl-t.m1::after{clip-path:polygon(50% 4%,97% 92%,3% 92%)}
+.tlx .tl-t.m2::after{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.tlx .tl-c.sel .tl-t{outline:3px solid var(--crt-hot);outline-offset:1px}
+.tlx .tl-c.to::before{content:"";position:absolute;inset:34%;border-radius:50%;border:2px solid var(--crt-hot)}
+.tlx .tl-c.to.dock::before{background:var(--crt-hot);inset:30%;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);border:0;border-radius:0}
+.tlx .tl-c.last{box-shadow:inset 0 0 0 2px var(--crt-dim)}
+.tlx .tl-c.hint .tl-t{animation:tlhint 1.2s ease-in-out infinite}
+.tlx .tl-t.arrive{animation:tlin .28s ease-out}
+.tlx .tl-t.gone{animation:tldock .5s ease-out forwards}
+.tlx .tl-t.gone.big{animation-name:tldock2}
+.tlx .tl-t.taken{animation:tltake .5s ease-in forwards}
+.tlx .tl-hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:48px;margin:0 0 6px}
+.tlx .tl-hd button{position:relative;width:48px;height:48px;padding:0}
+.tlx .tl-hd button.sel{border-color:var(--crt-hot)}
+.tlx .tl-now{margin:2px 0 4px;min-height:2.7em}
+.tlx .tl-log{margin:4px 0;color:var(--crt-dim)}
+.tlx .tl-log p{margin:2px 0}
+.tlx .tl-card{color:var(--crt-dim);margin:6px 0}
+@keyframes tlin{from{transform:scale(.6);opacity:.4}to{transform:none;opacity:1}}
+@keyframes tldock{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow)}100%{transform:translateY(-30%) scale(1.15);opacity:0;box-shadow:0 0 0 12px transparent}}
+@keyframes tldock2{0%{transform:none;opacity:1;box-shadow:0 0 0 0 var(--crt-glow),0 0 0 0 var(--crt-glow)}100%{transform:translateY(-40%) scale(1.25);opacity:0;box-shadow:0 0 0 10px transparent,0 0 0 20px transparent}}
+@keyframes tltake{to{transform:translateY(60%) scale(.5);opacity:0}}
+@keyframes tlhint{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.tlx .tl-t{animation:none!important}.tlx .tl-t.gone,.tlx .tl-t.taken{display:none}}
+`;
+const TL_UI = { root: null };
+function tilesDraw() {   // draw the game into its persistent element (the device's dom block re-attaches it)
+  const G = TL_GAME; if (!G) return null;
+  if (!TL_UI.root) {
+    const st = document.createElement('style'); st.textContent = TL_CSS; document.head.appendChild(st);
+    const root = document.createElement('div'); root.className = 'tlx';
+    root.innerHTML = '<p class="tl-sc"></p><p class="tl-now hot" aria-live="polite"></p><div class="btns tl-end"></div><div class="tl-bd" role="grid" aria-label="Tiles board"></div><div class="tl-hd"></div><div class="tl-log"></div><p class="tl-card">STEP diagonally forward · JUMP to take a tile · LAUNCH from your hold · 3 of a mark touching = DOCK. First to <span></span>.</p>';
+    const bd = root.querySelector('.tl-bd');
+    for (let y = 5; y >= 0; y--) for (let x = 0; x < 6; x++) {
+      const c = y * 6 + x, b = document.createElement('button'); b.type = 'button'; b.className = 'tl-c' + ((x + y) % 2 ? '' : ' dk') + (y < 2 ? ' home' : '');
+      b.dataset.c = c; bd.appendChild(b);
+    }
+    root.onclick = e => {
+      e.stopPropagation(); const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.c !== undefined) tilesTap(+b.dataset.c);
+      else if (b.dataset.h !== undefined) tilesTap('h' + b.dataset.h);
+      else if (b.dataset.end) tilesEnd(b.dataset.end);
+    };
+    TL_UI.root = root;
+  }
+  const root = TL_UI.root, s = G.s, ms = !s.over && s.p === 0 ? tilesMoves(s, 0) : [], R = TL_MODES[s.mode], fx = G.fx;
+  const sel = G.sel, tos = sel ? ms.filter(m => sel.h !== undefined ? m.k === 'l' && m.m === sel.h : m.from === sel.c) : [];
+  const hintC = G.hint ? (ms.find(m => m.k === 'j') || {}).from : undefined;
+  const sc = root.querySelector('.tl-sc'); sc.textContent = '';
+  const turnTxt = s.over ? 'Game over' : s.p === 0 ? 'Your turn' : G.name + '’s turn';
+  const pts = document.createElement('span'), B = n => Object.assign(document.createElement('b'), { textContent: n });
+  pts.append('You ', B(s.sc[0]), ' · ' + G.name + ' ', B(s.sc[1]));
+  const clk = Object.assign(document.createElement('span'), { textContent: 'Ship time ' + hhmm(SHIP.time.min) });   // the ship keeps time while you play (a game is about 1.5 ship hours)
+  sc.append(pts,
+            Object.assign(document.createElement('span'), { textContent: turnTxt + ' · ' + Math.min(R.turns, Math.floor(s.plies / 2) + 1) + '/' + R.turns }), clk);
+  for (const b of root.querySelectorAll('.tl-c')) {
+    const c = +b.dataset.c, t = s.b[c], ghost = fx && fx.ghosts[c], to = tos.find(m => m.to === c);
+    b.classList.toggle('sel', !!(sel && sel.c === c)); b.classList.toggle('to', !!to); b.classList.toggle('dock', !!(to && tilesApply(s, to).pts));
+    b.classList.toggle('last', !!(fx && (c === fx.to || c === fx.from))); b.classList.toggle('hint', hintC === c);
+    const show = t || ghost;
+    b.textContent = '';
+    if (show) {
+      const i = document.createElement('i'); i.className = 'tl-t o' + tlO(show) + ' m' + tlM(show);
+      if (!t && ghost) i.classList.add(fx.over === c ? 'taken' : 'gone'); if (!t && ghost && fx.big) i.classList.add('big');
+      if (t && fx && c === fx.to) i.classList.add('arrive');
+      b.appendChild(i);
+    }
+    const x = 'abcdef'[c % 6] + (Math.floor(c / 6) + 1);
+    b.setAttribute('aria-label', x + ': ' + (t ? tlName(t, tlO(t) === 0) : 'empty') + (to ? ', move here' + (b.classList.contains('dock') ? ', docks' : '') : ''));
+  }
+  const hd = root.querySelector('.tl-hd'); hd.textContent = '';
+  hd.appendChild(Object.assign(document.createElement('span'), { textContent: s.hold[0].length ? 'Your hold:' : 'Your hold is empty.' }));
+  s.hold[0].forEach(m => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.h = m; b.className = sel && sel.h === m ? 'sel' : '';
+    b.setAttribute('aria-label', 'Launch a ' + TL_MARKS[m] + ' from your hold');
+    const i = document.createElement('i'); i.className = 'tl-t o0 m' + m; b.appendChild(i); hd.appendChild(b);
+  });
+  if (s.hold[1].length) hd.appendChild(Object.assign(document.createElement('span'), { textContent: '· ' + G.name + ' holds ' + s.hold[1].length }));
+  const lg = root.querySelector('.tl-log'); lg.textContent = '';   // the latest line above the board, the two before it below
+  const lines = G.hint && hintC !== undefined ? G.log.concat(['Jump their tile to take it. It’s yours now.']) : G.log;
+  root.querySelector('.tl-now').textContent = lines[lines.length - 1] || '';
+  for (const l of lines.slice(0, -1).reverse()) lg.appendChild(Object.assign(document.createElement('p'), { textContent: l }));
+  root.querySelector('.tl-card').hidden = SHIP.tiles.played >= 3 && !G.teach;
+  root.querySelector('.tl-card span').textContent = R.target;
+  const end = root.querySelector('.tl-end'); end.textContent = '';
+  if (s.over) for (const [k, label] of [['full', 'Again'], ['quick', 'Quick game (to 5)'], ['done', 'Done']]) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'act'; b.dataset.end = k; b.textContent = label; end.appendChild(b);
+  }
+  return root;
+}
+function tilesEnd(k) {
+  const G = TL_GAME; if (!G) return;
+  if (k === 'done') { TL_GAME = null; deviceRefresh(); return; }
+  tilesPlay(G.opp, G.where, k);
+}
+deviceApp({ id: 'tiles', title: 'Tiles', short: 'Tiles', icon: 'dot', order: 75,
+  view: () => {
+    tilesLeft();
+    if (TL_GAME) return { title: 'Tiles with ' + TL_GAME.name, blocks: [{ kind: 'dom', render: box => { const r = tilesDraw(); if (r) box.appendChild(r); } }] };
+    const T = SHIP.tiles, blocks = [{ kind: 'text', text: 'Sit at a Tiles table or the Tiles station in the bow lounge to play whoever’s there.' }];
+    blocks.push({ kind: 'text', text: T.played ? 'Played ' + T.played + ', won ' + T.won + ', lost ' + T.lost + '.' : 'You haven’t played yet.' });
+    const vs = Object.keys(T.vs).filter(k => T.vs[k][0] + T.vs[k][1]).map(k => { let p = null; try { p = ROSTER.find(x => x.id === k); } catch (e) { /* before section 9 loads */ } return (p ? p.name.split(' ')[0] : k) + ' ' + T.vs[k][0] + '-' + T.vs[k][1]; });
+    if (vs.length) blocks.push({ kind: 'text', text: 'Against: ' + vs.join(', ') + '.' });
+    if (T.firstWin !== null) blocks.push({ kind: 'text', text: 'Your first win: day ' + T.firstWin + '.' });
+    if (T.beatRina !== null) blocks.push({ kind: 'text', mark: 'hot', text: 'You beat Rina on day ' + T.beatRina + '.' });
+    if (T.night && T.night.last !== null && T.night.games.length) {   // the last Tiles night (0.46.3)
+      const nm = id => { try { const p = ROSTER.find(x => x.id === id); return p ? p.name.split(' ')[0] : id; } catch (e) { return id; } };
+      blocks.push({ kind: 'text', mark: 'head', text: 'Last Tiles night, day ' + T.night.last });
+      for (const [a, b, w] of T.night.games) blocks.push({ kind: 'text', text: nm(w) + ' beat ' + nm(w === a ? b : a) + '.' });
+      if (T.beatRina === null && T.night.rina > 1) blocks.push({ kind: 'text', text: 'Rina hasn’t lost in ' + T.night.rina + ' Tuesdays.' });
+    }
+    return { title: 'Tiles', blocks };
+  } });
+// ---- sitting down to play (0.46.2): tap a Tiles table, station or board; you take a free seat at it and play whoever
+// is sitting there (or, failing that, anyone settled in the room). The game is the 'tiles' activity (sit:play pose):
+// it begins as you sit, lasts until you press Done, and walking away leaves the game.
+const TL_ITEM = /^Tiles (table|station|board)\b/i, TL_NEAR = 2.4;
+Object.assign(PLAYER_ACTS, { tiles: { need: 'social', gain: 12, mins: 20, pose: 'sit:play', title: 'Playing Tiles', done: 'You get up from the board.',
+  until: A => { if (!A.o.tl) { A.o.tl = true; tilesPlay(A.o.opp, A.placeId, A.o.mode); } return !TL_GAME || TL_GAME.where !== A.placeId; } } });
+const tilesSeated = () => !!(TL_GAME && (!TL_GAME.where || (ACT && ACT.kind === 'tiles' && ACT.placeId === TL_GAME.where)));
+function tilesLeft() {   // you walked away mid-game: the game is left as it was, not counted
+  const G = TL_GAME; if (!G || tilesSeated()) return false;
+  if (G.timer) clearTimeout(G.timer);
+  TL_GAME = null; if (!G.s.over) toast('Tiles', 'You leave the game. ' + G.name + ' tidies the tiles away.');
+  return true;
+}
+// the Tiles station is always open; tables and boards are for Tiles night (the lead, 0.46.4), and are plain seats otherwise
+function tilesNightNow() {
+  if (typeof eventsOn !== 'function') return false;
+  const m = SHIP.time.min; try { return eventsOn(SHIP.time.day).some(e => /^tiles/i.test(e.id) && m >= e.from && m < e.to); } catch (e) { return false; }
+}
+function tilesWorldTap(it, at, point) {
+  if (!it || !TL_ITEM.test(it.t || '')) return false;
+  if (!/^Tiles station\b/i.test(it.t) && !tilesNightNow()) return false;
+  if (TL_GAME && tilesSeated()) { deviceShow('tiles'); return true; }
+  const room = roomAt(...cellAt(at.x, at.z));
+  const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
+    .filter(([pl, s]) => s && (!room || pl.room === room) && (s.pose || pl.pose) === 'sit' && !privatePlace(pl) && ixDist(it, s) < TL_NEAR);
+  if (!seats.length) return false;
+  const here = a => a && a.settled && a.p && a.p.id && ROSTER.some(x => x.id === a.p.id);
+  let opp = seats.map(([pl]) => heldBy(pl.id)).find(here);   // someone sitting at the board
+  if (!opp) opp = DECK_CREW.find(a => here(a) && PLACE_OF.get(a.goalId) && PLACE_OF.get(a.goalId).room === room);   // or anyone settled in the room
+  if (!opp) { tipShow('tiles-nobody', 'Nobody to play Tiles with just now. Someone’s usually at the table of an evening, or ask a friend to meet you there.'); return false; }   // sit as before (15b)
+  const free = seats.filter(([pl]) => !heldBy(pl.id)).sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z))[0];
+  if (!free) { toast(it.t, 'Every seat at the board is taken.'); return true; }
+  actStart('tiles', free[0].id, { pose: 'sit:play', title: 'Tiles', flavour: 'You sit down across from ' + opp.p.name.split(' ')[0] + '.', opp: opp.p.id, mode: 'full' });
+  return true;
+}
+PLAYER_TAPS.unshift(tilesWorldTap);   // ahead of section 15b's ixTap, which would make the table's stools a plain sit
+// what a game gives (0.46.2): a little friendship either way (more for a win), a memory, and a first-time line on your
+// Tiles record; beating Rina is news ("Rina lost! To the new hand!"), a big memory for her, and the day is kept
+function tilesReward(G, you) {
+  const T = SHIP.tiles, day = SHIP.time.day, first = G.name;
+  if (T.relDay[G.opp] !== day) {   // friendship and the memory once a ship day per opponent, like a chat; later games still count
+    T.relDay[G.opp] = day;
+    if (typeof relAdd === 'function') relAdd(G.opp, 'tiles', typeof REL_PTS !== 'undefined' && REL_PTS.chat || 2);
+    if (typeof memAdd === 'function') memAdd(G.opp, 'came.tiles');
+  }
+  if (you && T.firstWin === null) { T.firstWin = day; toast('Tiles', 'Your first win at Tiles, against ' + first + '.'); }
+  if (you && G.opp === 'rina' && T.beatRina === null) {
+    T.beatRina = day;
+    // the trophy on your keepsake shelf: the deck architect's DECK_DRESS 'tilesTrophy', shown from section 18's lasting traces
+    if (typeof traceAdd === 'function') traceAdd('tilesTrophy', day);
+    else if (Array.isArray(SHIP.traces) && !SHIP.traces.some(x => (x && x.id || x) === 'tilesTrophy')) SHIP.traces.push('tilesTrophy');
+    if (typeof memAdd === 'function') memAdd('rina', 'moment.tiles');
+    if (typeof newsAdd === 'function') newsAdd({ id: 'tiles-rina-beaten', about: 'you', lines: ['Rina lost! To the new hand!', 'Somebody finally beat Rina at Tiles.'], seed: ['rina', 'tomas'], weight: .9, life: 6 });
+    toast('Tiles', 'You beat Rina. People are going to hear about this.');
+  }
+}
+function tilesLoad(s) {   // save.tiles, read defensively
+  const d = s && s.tiles && typeof s.tiles === 'object' ? s.tiles : {}, n = k => Number.isFinite(d[k]) && d[k] >= 0 ? Math.floor(d[k]) : 0, vs = {};
+  if (d.vs && typeof d.vs === 'object') for (const k in d.vs) { const v = d.vs[k]; if (Array.isArray(v) && v.length === 2 && k.length < 40) vs[k] = [Math.max(0, v[0] | 0), Math.max(0, v[1] | 0)]; }
+  const day = k => Number.isFinite(d[k]) ? Math.floor(d[k]) : null;
+  const nt = d.night && typeof d.night === 'object' ? d.night : {}, games = Array.isArray(nt.games) ? nt.games.filter(g => Array.isArray(g) && g.length === 3 && g.every(x => typeof x === 'string' && x.length < 40)).slice(0, 20) : [];
+  const night = { last: Number.isFinite(nt.last) ? Math.floor(nt.last) : null, rina: Number.isFinite(nt.rina) && nt.rina >= 0 ? Math.floor(nt.rina) : 0, games };
+  const first = {}, relDay = {};
+  if (d.first && typeof d.first === 'object') for (const k in d.first) if (k.length < 40 && (d.first[k] === 0 || d.first[k] === 1)) first[k] = d.first[k];
+  if (d.relDay && typeof d.relDay === 'object') for (const k in d.relDay) if (k.length < 40 && Number.isFinite(d.relDay[k])) relDay[k] = Math.floor(d.relDay[k]);
+  return { played: n('played'), won: n('won'), lost: n('lost'), vs, first, relDay, firstWin: day('firstWin'), beatRina: day('beatRina'), night };
+}
+SHIP.tiles = tilesLoad(SAVED);
+SAVE_EXTRA.push(s => { s.tiles = JSON.parse(JSON.stringify(SHIP.tiles)); });
+onSim('newGame', () => { SHIP.tiles = tilesLoad(null); if (TL_GAME && TL_GAME.timer) clearTimeout(TL_GAME.timer); TL_GAME = null; });
+// ---- Tiles night on paper (0.46.3): when the tradition ends (section 18's simNote('tradition'), id tilesNight), the
+// crew who came are paired (seeded by the day, key 801) and each pairing is settled by a seeded roll (key 802) from
+// their levels: the same level is even, Hard beats Medium 68%, Medium beats Easy 70%, Hard beats Easy 83% (tiles_check's
+// numbers). Rina's story rule (the user, 2026-10-17): she wins every crew game until you beat her. One odd one out
+// watches. The results are news the next morning, and the Tiles app keeps the last night.
+const TL_ODDS = { easy: { easy: .5, medium: .3, hard: .17 }, medium: { easy: .7, medium: .5, hard: .32 }, hard: { easy: .83, medium: .68, hard: .5 } };
+function tilesNight(d, came) {   // came: crew ids at the night; returns { day, games: [{ a, b, win }], out, rina }
+  const ids = [...new Set((came || []).filter(id => typeof id === 'string' && id !== 'you'))];
+  const P = id => { try { return ROSTER.find(x => x.id === id) || { id, seed: socHash(id) }; } catch (e) { return { id, seed: 0 }; } };
+  const order = ids.map(id => [id, schedU(P(id).seed | 0, d, 801)]).sort((a, b) => a[1] - b[1] || (a[0] < b[0] ? -1 : 1)).map(x => x[0]);
+  if (order.includes('rina') && order.length > 1) { order.splice(order.indexOf('rina'), 1); order.unshift('rina'); }   // the champion always gets a game
+  const games = [];
+  for (let i = 0; i + 1 < order.length; i += 2) {
+    const a = order[i], b = order[i + 1], pa = P(a), pb = P(b), la = tilesStyle(pa).level, lb = tilesStyle(pb).level;
+    let win;
+    if ((a === 'rina' || b === 'rina') && SHIP.tiles.beatRina === null) win = 'rina';
+    else win = schedU((pa.seed | 0) ^ (pb.seed | 0), d, 802) < TL_ODDS[la][lb] ? a : b;
+    games.push({ a, b, win });
+  }
+  return { day: d, games, out: order.length % 2 ? order[order.length - 1] : null };
+}
+function tilesNightNews(r, you) {   // the night's results into the save and the news
+  const T = SHIP.tiles, N = T.night || (T.night = { last: null, rina: 0, games: [] });
+  if (N.last === r.day) return;   // once a night
+  const rg = r.games.find(g => g.a === 'rina' || g.b === 'rina');
+  if (rg) N.rina = rg.win === 'rina' ? N.rina + 1 : 0;
+  N.last = r.day; N.games = r.games.map(g => [g.a, g.b, g.win]);
+  if (typeof newsAdd !== 'function' || !r.games.length) return;
+  const name = id => { try { const p = ROSTER.find(x => x.id === id); return p ? shortName(p) : id; } catch (e) { return id; } };
+  const lines = [];
+  if (rg && rg.win === 'rina') lines.push(N.rina > 1 ? 'Rina won again at Tiles. That’s ' + N.rina + ' Tuesdays running.' : 'Rina won at Tiles night, of course.');
+  else if (rg) lines.push(name(rg.win) + ' beat Rina at Tiles night!');
+  const lvl = id => { let p = null; try { p = ROSTER.find(x => x.id === id); } catch (e) { /* before section 9 */ } return tilesStyle(p || { id, seed: 0 }).level; };
+  const up = r.games.find(g => g !== rg && TL_ODDS[lvl(g.win)][lvl(g.win === g.a ? g.b : g.a)] < .5);   // an upset: the weaker player won
+  if (up) lines.push(name(up.win) + ' beat ' + name(up.win === up.a ? up.b : up.a) + ' at Tiles. Nobody saw that coming.');
+  const other = r.games.find(g => g !== rg && g !== up);
+  if (other && lines.length < 2) lines.push(name(other.win) + ' beat ' + name(other.win === other.a ? other.b : other.a) + ' at Tiles night.');
+  if (you) lines.push('The new hand turned up to Tiles night.');
+  newsAdd({ id: 'tiles-night:' + r.day, kind: 'gossip', weight: .6, life: 3, seed: r.games.flatMap(g => [g.a, g.b]).slice(0, 6), lines });
+}
+onSim('tradition', d => { if (!d || !/^tiles/i.test(d.id || '')) return; tilesNightNews(tilesNight(d.day, d.came || []), !!d.you); });
+const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck architect: the trophy on your bunk shelf once you've beaten Rina
+
+// =====================================================================
 // 6. CAMERA
 // =====================================================================
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 16, 46);
