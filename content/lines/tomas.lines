@@ -350,3 +350,24 @@
 - The Little Wren! I told my brother your Jo built a boat. Now he wants to build boats.   #funny
 ? flag:home.sam.sundays tier>=friend
 - Sunday story day? I've started one with my brother. I copied you. Is that all right?   #warm
+
+// Writer 4, batch 4: Tiles talk (lineFor(who, 'tiles.<kind>')).
+== tiles.start
+- Tiles? Yes. Can I go second? Is that allowed?
+- I'm still learning. Is that all right?
+- Rina says watch the corners. Which corners?   #funny
+== tiles.dock
+- Was that three? It was! Was it?
+- Oh! Docked! I did that!
+- Is that how it works? I think that's how it works.   #funny
+== tiles.miss
+- Was there a three there? I think there was.
+- You could've docked by the edge. I think.
+== tiles.win
+- I won? Really? Can I tell my brother?   #warm
+- Good game. Was it a good game? It felt like one.
+- That was lucky. Wasn't it? Good game.
+== tiles.lose
+- Well played. Will you show me how you did that?
+- You got me. Again sometime? I'll get better.
+- Good game. I'll practise. On my own. With the board.   #funny

@@ -161,3 +161,13 @@
 == rumour
 - Oh, did you hear? I've... yes. Here it is.
 - Heard a thing. Drifted off. It's back. Listen.   #funny
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- Oh, a game. Lovely. Where was I? Your move.
+== tiles.dock
+- Three. I think. Is that three? Yes. Three.
+== tiles.win
+- I won? I was thinking about rain. Good game.   #funny
+== tiles.lose
+- Well played. Hold still. That face. I'm painting it.   #funny

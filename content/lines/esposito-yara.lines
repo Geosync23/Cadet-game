@@ -166,3 +166,15 @@
 == rumour
 - I can't say who. I can say it's lovely.
 - I don't tell what people buy. I'll tell you this.
+
+// Writer 4, batch 4: Tiles talk.
+== tiles.start
+- I knew you'd come in for a game. Your move.   #funny
+== tiles.dock
+- Three. I saw that one coming. Like a shopping list.   #funny
+== tiles.miss
+- You missed a dock. I won't tell. I never tell.   #funny
+== tiles.win
+- Good game. Same time tomorrow? I'll keep the board.
+== tiles.lose
+- Well played. I'll put it in the journal. Next to the stars.   #warm
