@@ -15,6 +15,8 @@ The two adversarial reviewers use this on every branch before it's combined. Whe
 ## 2. Crashes and load order
 - **`typeof` doesn't guard a `const` or `let` that hasn't been declared yet** (the temporal dead zone). If your code can run while the file is loading, every name it reads must be declared above it, or be a function declaration or a `var`. Watch the generated blocks (LINES, VOICE, TRADITIONS, ROSTER: where in the file do they sit?).
 - Every hook into another section is `typeof X === 'function'` guarded and works when that section is missing.
+- **Names:** `python3 name_check.py --branches <your last pushed commit> <your new commit>` before every push, and `python3 name_check.py COMBINED.html` on any combine. It catches two sections declaring the same name (the file won't load) and a helper you deleted but still call (a run-time ReferenceError that `node --check` passes).
+- After a refactor, call each changed function once in the browser (a one-line probe, or your own check). A default argument that calls a deleted helper only fails when the function runs.
 - `find(...)[k]`, `arr[0].x`, `map.get(id).y`: what if nothing matches? Try an id that isn't on the roster, a guest, a crew member who has left.
 - Numbers: NaN from `undefined` maths, negative values (reputation dips, Day 0), dividing by zero counts.
 - **Day 0:** the arrival Sunday has negative absolute minutes (`(0 - 1) * 1440 + min`). Check `if (!t)`, `t >= 0`, `day >= 1`, `weekday(0)` and anything that floors or mods a day.
