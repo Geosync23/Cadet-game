@@ -10,6 +10,7 @@
 #   camera framing while the sheet is open (deviceFrame), none on wide screens
 #   a need's bar pulses while section 15's needPulse says it just rose (0.35.19)
 #   the Schedule lists only what really happens (0.35.18): every ship item and tradition for a week has people there
+#   Pillar 4 pages (0.35.22): the season, reputation in the Record, keepsakes in the Wallet, Left the Wren in the Roster
 #   the arrival (0.35.21): locked until handed over, the first switch-on, Settling in with Go there and the end button
 #   days off (0.35.17): section 14's playerShiftOn shows Day off in Schedule, the strip and the Calendar
 #   never opens by itself (0.35.15): a ship day of reminders, tips, notices, an address, a dialogue, an invitation
@@ -335,6 +336,30 @@ def run(path):
             check(ar.get('locked') == [False, True] and ar.get('bootReset') and ar.get('boot') == [True, 'boot', True] and ar.get('second') == 'home'
                   and ar.get('listed') and ar.get('count') and ar.get('done') and ar.get('go') and ar.get('goal') and ar.get('home')
                   and ar.get('firstTap') and ar.get('ended') and ar.get('hiddenWhenAll'), f'the arrival: locked, the first switch-on once, Settling in, the end button: {ar}')
+            # Pillar 4 pages (0.35.22): the season on Home and the Calendar (section 18's seasonOf), reputation in the Record
+            # (section 20's repView, words only), keepsakes in the Wallet (keepsakes), "Left the Wren" in the Roster
+            # (movedOn; they leave the lists). Stand-ins without them; with them, section 20's own state is set and put back
+            p4 = g.ev("""(() => { const out = {}, has = n => { try { return eval('typeof ' + n) === 'function'; } catch (e) { return false; } };
+              const own = { season: has('seasonOf'), rep: has('repView'), keep: has('keepsakes'), moved: has('movedOn') };
+              if (!own.season) window.seasonOf = d => ({ id: 'sowing', name: 'Sowing', day: d, week: Math.ceil(d / 7) });
+              if (!own.rep) window.repView = () => ({ depts: [{ dept: 'works', band: 'known', name: 'They know your name' }, { dept: 'helm', band: 'new', name: 'New face' }],
+                ship: { work: 'Work: steady', kindness: 'Kindness: kind', spirit: 'Spirit: cheerful' }, knownFor: ['fixing fans'], notes: [{ day: 3, from: 'Chief Calder', text: 'Good work on the scrubber.' }] });
+              const keepSoc = own.keep || own.moved ? JSON.stringify({ k: SHIP.social.keepsakes || null, m: SHIP.social.moved || null }) : null;
+              if (own.keep) (SHIP.social.keepsakes = SHIP.social.keepsakes || []).push({ from: 'tomas', what: 'a brass compass', day: 4 });
+              else window.keepsakes = () => [{ from: 'tomas', what: 'a brass compass', day: 4, name: 'Tomas' }];
+              if (own.moved) (SHIP.social.moved = SHIP.social.moved || []).push({ id: 'pell', day: 9 });
+              else { window.movedOn = () => [{ id: 'pell', name: apptName('pell'), role: 'Works technician', day: 9, to: null }]; window.movedOff = id => id === 'pell'; }
+              const sn = seasonOf(SHIP.time.day).name;
+              deviceShow('home'); out.home = document.getElementById('devBody').textContent.includes('Season: ' + sn);
+              deviceShow('calendar'); out.cal = document.getElementById('devBody').textContent.includes('Season: ' + sn);
+              deviceShow('record'); const r = document.getElementById('devBody').textContent; out.rep = r.includes('Reputation') && (own.rep || r.includes('They know your name') && r.includes('Known for: fixing fans'));
+              deviceShow('wallet'); out.keep = document.getElementById('devBody').textContent.includes('A brass compass');
+              deviceShow('roster'); const ro = document.getElementById('devBody').textContent; out.left = ro.includes('Left the Wren') && !rosterPeople().some(x => x.p.id === 'pell');
+              if (keepSoc) { const k = JSON.parse(keepSoc); if (own.keep) { if (k.k) SHIP.social.keepsakes = k.k; else delete SHIP.social.keepsakes; } if (own.moved) { if (k.m) SHIP.social.moved = k.m; else delete SHIP.social.moved; } }
+              for (const n of ['seasonOf', 'repView', 'keepsakes', 'movedOn', 'movedOff']) if (Object.prototype.hasOwnProperty.call(window, n)) delete window[n];
+              deviceShow('home'); out.own = own; return out; })()""")
+            print('  pillar 4 pages:', p4)
+            check(all(p4.get(k) for k in ['home', 'cal', 'rep', 'keep', 'left']), f'season on Home and Calendar, reputation, keepsakes, Left the Wren: {p4}')
             g.ev("deviceClose(); window.__opens = 0"); g.step(1)
             # never opens by itself (0.35.15, the user: "sometimes it just pops up"): a whole ship day of reminders, tips,
             # notices, an address, the meeting panel and an invitation, and a drag up from the bottom edge (the old swipe)
